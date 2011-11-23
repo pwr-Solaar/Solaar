@@ -3,7 +3,7 @@
 
 import sys
 import time
-import usb.core #, usb.util
+import usb.core, usb.util
 
 """
     Logitech Wireless Solar Keyboard K750 lux and power readings on Linux
@@ -58,6 +58,12 @@ class USB(object):
         except usb.core.USBError as e:
             print "couldn't attach, %s" % e
 
+    def claim(self, i):
+        usb.util.claim_interface(self.device, i)
+
+    def release(self, i):
+        usb.util.release_interface(self.device, i)
+
     def open(self, device_index=0, interface_indices=(0,0,), endpoint_index=0):
         self.configuration      = self.device[device_index]
         if self.configuration   is None: sys.exit("Bad configuration.")
@@ -72,6 +78,8 @@ if __name__ == '__main__':
         # find
         kb = USB( vendor_id=0x046d, product_id=0xc52b)
         kb.open( device_index=0, interface_indices=(2,0,), endpoint_index=0 )
+
+        kb.claim(2)
 
         # fuzz (ymmv here -- I used wireshark, and there is a lot of
         # other noise traffic that I am not including because I don't
@@ -94,6 +102,7 @@ if __name__ == '__main__':
                 data[5],
                 data[6])
 
+        kb.release(2)
         time.sleep(1)
 
 # Python™ ftw!
