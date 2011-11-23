@@ -89,7 +89,10 @@ if __name__ == '__main__':
                     6000))
 
         print "Charge: %s Lux: %s (%s | %s)" % \
-                (data[4], ((255*data[5])+data[6]), data[5], data[6])
+                (data[4],
+                int(round(((255*data[5])+data[6])/538.0, 2)*100),
+                data[5],
+                data[6])
 
         time.sleep(1)
 
