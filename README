@@ -1,16 +1,14 @@
 +++ Logitech Solar k750 Userspace "Driver" for Linux
 
-This python code represents an initial stab at reverse-engineering a
-solar-powered (photovaltic) keyboard.  Predictably, Logitech provides
-Windoze and Crackintosh versions of its software, but no Linux drivers.
+Userspace driver for Logitech solar-powered (photovaltic) keyboard.
+Predictably, Logitech provides Windoze and Crackintosh versions of its
+software, but no Linux drivers.
 
 Alas, I am not a hardware hacker but I spent some time reading the USB
 spec and wireshark usb packet dumps (did you know libpcap is compatible
 with USB? I didn't!) and fuzzing the hardware with hex values using
 pyusb.  To my surprise, it kinda works.
 
-I'm still tweaking the output but I think this is good enough for a
-public domain rev-eng hack.  Cheers,
-
-Noah K. Tilton
-November 23, 2011
+Note:  drop the udev rule in ./rules.d into your distro's custom rules
+directory (presently /etc/udev/rules.d/ on Archlinux).  May require
+editing/rebooting; YMMV.

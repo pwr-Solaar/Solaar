@@ -43,18 +43,18 @@ class USB(object):
                 (self.vendor_id, self.product_id))
 
     def detach(self, n):
-        print "detaching.... ",
+        #print "detaching.... ",
         try:
             self.device.detach_kernel_driver(interface=n)
-            print "Detached %s." % n
+            #print "Detached %s." % n
         except usb.core.USBError as e:
             print "couldn't detach, %s" % e
 
     def attach(self, n):
-        print "attaching....",
+        #print "attaching....",
         try:
             self.device.attach_kernel_driver(interface=n)
-            print "Attached %s." % n
+            #print "Attached %s." % n
         except usb.core.USBError as e:
             print "couldn't attach, %s" % e
 
@@ -74,35 +74,39 @@ class USB(object):
 
 if __name__ == '__main__':
 
-    while True:
-        # find
-        kb = USB( vendor_id=0x046d, product_id=0xc52b)
-        kb.open( device_index=0, interface_indices=(2,0,), endpoint_index=0 )
+    # find
+    kb = USB( vendor_id=0x046d, product_id=0xc52b)
+    kb.open( device_index=0, interface_indices=(2,0,), endpoint_index=0 )
 
-        kb.claim(2)
+    kb.detach(2)
+    kb.claim(2)
 
-        # fuzz (ymmv here -- I used wireshark, and there is a lot of
-        # other noise traffic that I am not including because I don't
-        # think it's required to make this work)
-        #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x81\x00\x00\x00\x00"),
-        #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x83\xb5\x31\x00\x00"),
-        kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2, "\x10\x02\x09\x03\x78\x01\x00"),
-        #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\x02\x02\x02\x00\x00\x00"),
+    # fuzz (ymmv here -- I used wireshark, and there is a lot of
+    # other noise traffic that I am not including because I don't
+    # think it's required to make this work)
+    #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x81\x00\x00\x00\x00"),
+    #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x83\xb5\x31\x00\x00"),
+    kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2, "\x10\x02\x09\x03\x78\x01\x00"),
+    #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\x02\x02\x02\x00\x00\x00"),
 
-        # profit
-        data = list( kb.device.read(
-                    kb.endpoint.bEndpointAddress,
-                    kb.endpoint.wMaxPacketSize,
-                    kb.interface.bInterfaceNumber,
-                    6000))
+    # profit
+    data = list( kb.device.read(
+                kb.endpoint.bEndpointAddress,
+                kb.endpoint.wMaxPacketSize,
+                kb.interface.bInterfaceNumber,
+                6000))
 
-        print "Charge: %s Lux: %s (%s | %s)" % \
-                (data[4],
-                int(round(((255*data[5])+data[6])/538.0, 2)*100),
-                data[5],
-                data[6])
 
-        kb.release(2)
-        time.sleep(1)
+    charge  = data[4]
+    lux     = int(round(((255*data[5])+data[6])/538.0, 2)*100)
+    print "%s,%s" % (charge, lux)
+    #"Charge: %s Lux: %s (%s | %s)" % \
+    #(data[4],
+    #data[5],
+    #data[6])
+
+    kb.release(2)
+    kb.attach(2)
+    time.sleep(1)
 
 # Python™ ftw!
