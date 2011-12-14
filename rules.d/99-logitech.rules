@@ -1,0 +1,7 @@
+# ... ID 046d:c52b Logitech, Inc. Unifying Receiver
+#
+# Creates symlink from /dev/solar_keyboard => /dev/bus... and sets
+# appropriate device node permissions.
+SUBSYSTEM=="usb", ATTR{idProduct}=="c52b", SYMLINK+="solar_keyboard", GROUP="users", OWNER="noah"
+
+# vim: ft=udevrules
