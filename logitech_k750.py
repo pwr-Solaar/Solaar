@@ -37,10 +37,20 @@ class USB(object):
     def __init__(self, vendor_id, product_id):
         self.vendor_id = vendor_id
         self.product_id = product_id
-        self.device = usb.core.find(idVendor=self.vendor_id,
-                idProduct=self.product_id)
+        self.device = usb.core.find(idVendor=self.vendor_id, idProduct=self.product_id)
+
         if self.device is None: sys.exit('No device found: %s, %s' % \
                 (self.vendor_id, self.product_id))
+        self.interface = None
+        for config in self.device:
+            for interface in config:
+                # bInterfaceProtocol 1 is keyboard, per USB spec
+                #                    2 is mouse, per USB spec
+                #                    0 is logitech's special sauce (?)
+                if interface.bInterfaceProtocol == 0:
+                    self.interface = interface
+        if self.interface is None:
+            sys.exit("Couldn't find special sauce interface.")
 
     def detach(self, n):
         #print "detaching.... ",
@@ -67,8 +77,8 @@ class USB(object):
     def open(self, device_index=0, interface_indices=(0,0,), endpoint_index=0):
         self.configuration      = self.device[device_index]
         if self.configuration   is None: sys.exit("Bad configuration.")
-        self.interface          = self.configuration[interface_indices]
-        if self.interface       is None: sys.exit("Bad interface.")
+        #self.interface          = self.configuration[interface_indices]
+        #if self.interface       is None: sys.exit("Bad interface.")
         self.endpoint           = self.interface[endpoint_index]
         if self.endpoint        is None: sys.exit("Bad endpoint.")
 
@@ -76,17 +86,20 @@ if __name__ == '__main__':
 
     # find
     kb = USB( vendor_id=0x046d, product_id=0xc52b)
-    kb.open( device_index=0, interface_indices=(2,0,), endpoint_index=0 )
+    #kb.open( device_index=0, interface_indices=(2,0,), endpoint_index=0 )
+    kb.open( device_index=0,
+            interface_indices=(kb.interface.bInterfaceNumber,0,),
+            endpoint_index=0 )
 
-    kb.detach(2)
-    kb.claim(2)
+    kb.detach(kb.interface.bInterfaceNumber)
+    kb.claim(kb.interface.bInterfaceNumber)
 
     # fuzz (ymmv here -- I used wireshark, and there is a lot of
     # other noise traffic that I am not including because I don't
     # think it's required to make this work)
     #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x81\x00\x00\x00\x00"),
     #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\xff\x83\xb5\x31\x00\x00"),
-    kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2, "\x10\x02\x09\x03\x78\x01\x00"),
+    kb.device.ctrl_transfer(0x21, 0x09, 0x0210, kb.interface.bInterfaceNumber, "\x10\x02\x09\x03\x78\x01\x00"),
     #kb.device.ctrl_transfer(0x21, 0x09, 0x0210, 2,"\x10\x02\x02\x02\x00\x00\x00"),
 
     # profit
@@ -100,13 +113,13 @@ if __name__ == '__main__':
     charge  = data[4]
     lux     = int(round(((255*data[5])+data[6])/538.0, 2)*100)
     print "%s,%s" % (charge, lux)
-    #"Charge: %s Lux: %s (%s | %s)" % \
-    #(data[4],
-    #data[5],
-    #data[6])
+    # "Charge: %s Lux: %s (%s | %s)" % \
+    # (data[4],
+    # data[5],
+    # data[6])
 
-    kb.release(2)
-    kb.attach(2)
-    time.sleep(1)
+    kb.release(kb.interface.bInterfaceNumber)
+    kb.attach(kb.interface.bInterfaceNumber)
+    #time.sleep(1)
 
 # Python™ ftw!
