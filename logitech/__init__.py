@@ -1,3 +1,3 @@
 # pass
 
-__all__ = [ 'unifying_receiver' ]
+__all__ = ['unifying_receiver']

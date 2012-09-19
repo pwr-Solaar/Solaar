@@ -5,10 +5,10 @@ Incomplete. Based on a bit of documentation, trial-and-error, and guesswork.
 
 References:
 http://julien.danjou.info/blog/2012/logitech-k750-linux-support
-http://6xq.net/git/lars/lshidpp.git/plain/doc/logitech_hidpp_2.0_specification_draft_2012-06-04.pdf
+http://6xq.net/git/lars/lshidpp.git/plain/doc
 """
 
-# import logging
+import logging
 from . import hidapi
 
 
@@ -36,7 +36,8 @@ FEATURE_GET_SOLAR_CHARGE = '\x43\x01'
 FEATURE_UNKNOWN_4 = '\x45\x20'
 
 
-DEVICE_TYPES = ( "Keyboard", "Remote Control", "NUMPAD", "Mouse", "Touchpad", "Trackball", "Presenter", "Receiver" )
+DEVICE_TYPES = ("Keyboard", "Remote Control", "NUMPAD", "Mouse",
+				"Touchpad", "Trackball", "Presenter", "Receiver")
 
 _DEVICE_FEATURES = {}
 
@@ -45,7 +46,7 @@ def _write(receiver, device, data):
 	# just in case
 	# hidapi.read(receiver, 128, 0)
 	data = '\x10' + chr(device) + data
-	# print "w[", data.encode("hex"), "]",
+	logging.debug("w[%s]", data.encode("hex"))
 	return hidapi.write(receiver, data)
 
 
@@ -81,7 +82,7 @@ def _read(receiver, device, timeout=_TIMEOUT):
 
 def _get_feature_index(receiver, device, feature_id):
 	if device not in _DEVICE_FEATURES:
-		_DEVICE_FEATURES[device] = [ 0 ] * 0x10
+		_DEVICE_FEATURES[device] = [0] * 0x10
 		pass
 	elif feature_id in _DEVICE_FEATURES[device]:
 		return _DEVICE_FEATURES[device].index(feature_id)
@@ -110,13 +111,15 @@ def _get_feature_index(receiver, device, feature_id):
 		return 0
 
 
-def _request(receiver, device, feature_id, function='\x00', param1='\x00', param2='\x00', param3='\x00', reply_function=None):
+def _req(receiver, device, feature_id, function='\x00',
+					param1='\x00', param2='\x00', param3='\x00', reply_function=None):
 	feature_index = _get_feature_index(receiver, device, feature_id)
-	if not feature_index or feature_index == -1:
+	if not feature_index:
 		return None
 
 	feature_index = chr(feature_index)
-	if not _write(receiver, device, feature_index + function + param1 + param2 + param3):
+	if not _write(receiver, device,
+						feature_index + function + param1 + param2 + param3):
 		# print "write failed, closing receiver"
 		close(receiver)
 		raise NoReceiver()
@@ -143,11 +146,11 @@ def _request(receiver, device, feature_id, function='\x00', param1='\x00', param
 
 
 def _get_feature_set(receiver, device):
-	features = [ 0 ] * 0x10
-	reply = _request(receiver, device, FEATURE_GET_FEATURE_SET)
+	features = [0] * 0x10
+	reply = _req(receiver, device, FEATURE_GET_FEATURE_SET)
 	if reply:
 		for index in range(1, 1 + ord(reply[4])):
-			reply = _request(receiver, device, FEATURE_GET_FEATURE_SET, '\x10', chr(index))
+			reply = _req(receiver, device, FEATURE_GET_FEATURE_SET, '\x10', chr(index))
 			if reply:
 				features[index] = reply[4:6].upper()
 				# print "feature", reply[4:6].encode('hex'), "index", index
@@ -189,7 +192,7 @@ def open():
 				# print "nope"
 				pass
 			elif reply[:4] == "\x10\x00\x8F\x00":
-				# print "found"
+				# print "found", receiver
 				return receiver
 			# print "unknown"
 		else:
@@ -234,13 +237,13 @@ def ping(receiver, device):
 
 
 def get_name(receiver, device):
-	reply = _request(receiver, device, FEATURE_GET_NAME)
+	reply = _req(receiver, device, FEATURE_GET_NAME)
 	if reply:
 		charcount = ord(reply[4])
 		name = ''
 		index = 0
 		while len(name) < charcount:
-			reply = _request(receiver, device, FEATURE_GET_NAME, '\x10', chr(index))
+			reply = _req(receiver, device, FEATURE_GET_NAME, '\x10', chr(index))
 			if reply:
 				name += reply[4:4 + charcount - index]
 				index = len(name)
@@ -250,35 +253,39 @@ def get_name(receiver, device):
 
 
 def get_type(receiver, device):
-	reply = _request(receiver, device, FEATURE_GET_NAME, '\x20')
+	reply = _req(receiver, device, FEATURE_GET_NAME, '\x20')
 	if reply:
 		return DEVICE_TYPES[ord(reply[4])]
 
 
 def get_firmware_version(receiver, device, firmware_type=0):
-	reply = _request(receiver, device, FEATURE_GET_FIRMWARE, '\x10', chr(firmware_type))
+	reply = _req(receiver, device,
+					FEATURE_GET_FIRMWARE, '\x10', chr(firmware_type))
 	if reply:
-		return '%s %s.%s' % (reply[5:8], reply[8:10].encode('hex'), reply[10:12].encode('hex'))
+		return '%s %s.%s' % (
+						reply[5:8], reply[8:10].encode('hex'), reply[10:12].encode('hex'))
 
 
 def get_battery_level(receiver, device):
-	reply = _request(receiver, device, FEATURE_GET_BATTERY)
+	reply = _req(receiver, device, FEATURE_GET_BATTERY)
 	if reply:
-		return ( ord(reply[4]), ord(reply[5]), ord(reply[6]) )
+		return (ord(reply[4]), ord(reply[5]), ord(reply[6]))
 
 
 def get_reprogrammable_keys(receiver, device):
-	count = _request(receiver, device, FEATURE_GET_REPROGRAMMABLE_KEYS)
+	count = _req(receiver, device, FEATURE_GET_REPROGRAMMABLE_KEYS)
 	if count:
 		keys = []
 		for index in range(ord(count[4])):
-			key = _request(receiver, device, FEATURE_GET_REPROGRAMMABLE_KEYS, '\x10', chr(index))
-			keys.append( key[4:6], keys[6:8], ord(key[8]) )
+			key = _req(receiver, device,
+							FEATURE_GET_REPROGRAMMABLE_KEYS, '\x10', chr(index))
+			keys.append(key[4:6], keys[6:8], ord(key[8]))
 		return keys
 
 
 def get_solar_charge(receiver, device):
-	reply = _request(receiver, device, FEATURE_GET_SOLAR_CHARGE, '\x03', '\x78', '\x01', reply_function='\x10')
+	reply = _req(receiver, device,
+					FEATURE_GET_SOLAR_CHARGE, '\x03', '\x78', '\x01', reply_function='\x10')
 	if reply:
 		charge = ord(reply[4])
 		lux = ord(reply[5]) << 8 | ord(reply[6])
@@ -298,7 +305,8 @@ def find_device(receiver, match_device_type=None, match_name=None):
 				_DEVICE_FEATURES[device] = _get_feature_set(receiver, device)
 			# print get_reprogrammable_keys(receiver, device)
 			# d_firmware = get_firmware_version(receiver, device)
-			# print "device", device, "[", d_name, "/", d_type, "] firmware", d_firmware, "features", _DEVICE_FEATURES[device]
+			# print "device", device, "[", d_name, "/", d_type, "]"
+			# print "firmware", d_firmware, "features", _DEVICE_FEATURES[device]
 			if match_device_type:
 				d_type = get_type(receiver, device)
 				if d_type is None or match_device_type.lower() != d_type.lower():

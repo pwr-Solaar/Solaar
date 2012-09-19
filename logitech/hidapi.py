@@ -4,7 +4,8 @@ It is little more than a thin ctypes layer over a native hidapi implementation.
 The docstrings are mostly copied from the hidapi API header, with changes where
 necessary.
 
-The native HID API implemenation is available at https://github.com/signal11/hidapi.
+The native HID API implemenation is available at
+https://github.com/signal11/hidapi.
 
 Using the native hidraw implementation is recommended.
 Currently the native libusb implementation (temporarily) detaches the device's
@@ -19,22 +20,26 @@ from collections import namedtuple
 
 from ctypes import (
 				cdll, create_string_buffer, create_unicode_buffer,
-				c_int, c_ushort, c_size_t, c_char_p, c_wchar_p, c_void_p, POINTER, Structure
+				c_int, c_ushort, c_size_t,
+				c_char_p, c_wchar_p, c_void_p,
+				POINTER, Structure
 )
 
 
-_hidapi = None
+_api = None
 native_path = os.path.dirname(__file__)
 for native_implementation in ('hidraw', 'libusb'):
 	try:
-		native_lib = os.path.join(native_path, 'libhidapi-' + native_implementation + '.so')
-		_hidapi = cdll.LoadLibrary(native_lib)
+		native_name = 'libhidapi-' + native_implementation + '.so'
+		native_libfile = os.path.join(native_path, native_name)
+		_api = cdll.LoadLibrary(native_libfile)
 		break
 	except OSError:
 		pass
-del native_path, native_lib, native_implementation
-if _hidapi is None:
-	raise ImportError(__file__, 'failed to load any HID API native implementation')
+del native_path, native_name, native_libfile, native_implementation
+if _api is None:
+	raise ImportError(__file__,
+						'failed to load any HID API native implementation')
 
 
 # internally used by native hidapi, no need to expose it
@@ -84,59 +89,59 @@ def _DevInfoTuple(hid_device):
 # set-up arguments and return types for each hidapi function
 #
 
-_hidapi.hid_init.argtypes = None
-_hidapi.hid_init.restype = c_int
+_api.hid_init.argtypes = None
+_api.hid_init.restype = c_int
 
-_hidapi.hid_exit.argtypes = None
-_hidapi.hid_exit.restype = c_int
+_api.hid_exit.argtypes = None
+_api.hid_exit.restype = c_int
 
-_hidapi.hid_enumerate.argtypes = [ c_ushort, c_ushort ]
-_hidapi.hid_enumerate.restype = POINTER(_DeviceInfo)
+_api.hid_enumerate.argtypes = [c_ushort, c_ushort]
+_api.hid_enumerate.restype = POINTER(_DeviceInfo)
 
-_hidapi.hid_free_enumeration.argtypes = [ POINTER(_DeviceInfo) ]
-_hidapi.hid_free_enumeration.restype = None
+_api.hid_free_enumeration.argtypes = [POINTER(_DeviceInfo)]
+_api.hid_free_enumeration.restype = None
 
-_hidapi.hid_open.argtypes = [ c_ushort, c_ushort, c_wchar_p ]
-_hidapi.hid_open.restype = c_void_p
+_api.hid_open.argtypes = [c_ushort, c_ushort, c_wchar_p]
+_api.hid_open.restype = c_void_p
 
-_hidapi.hid_open_path.argtypes = [ c_char_p ]
-_hidapi.hid_open_path.restype = c_void_p  # POINTER(_hid_device)
+_api.hid_open_path.argtypes = [c_char_p]
+_api.hid_open_path.restype = c_void_p
 
-_hidapi.hid_close.argtypes = [ c_void_p ]
-_hidapi.hid_close.restype = None
+_api.hid_close.argtypes = [c_void_p]
+_api.hid_close.restype = None
 
-_hidapi.hid_write.argtypes = [ c_void_p, c_char_p, c_size_t ]
-_hidapi.hid_write.restype = c_int
+_api.hid_write.argtypes = [c_void_p, c_char_p, c_size_t]
+_api.hid_write.restype = c_int
 
-# _hidapi.hid_read.argtypes = [ c_void_p, c_char_p, c_size_t ]
-# _hidapi.hid_read.restype = c_int
+_api.hid_read.argtypes = [c_void_p, c_char_p, c_size_t]
+_api.hid_read.restype = c_int
 
-_hidapi.hid_read_timeout.argtypes = [ c_void_p, c_char_p, c_size_t, c_int ]
-_hidapi.hid_read_timeout.restype = c_int
+_api.hid_read_timeout.argtypes = [c_void_p, c_char_p, c_size_t, c_int]
+_api.hid_read_timeout.restype = c_int
 
-# _hidapi.hid_set_nonblocking.argtypes = [ c_void_p, c_int ]
-# _hidapi.hid_set_nonblocking.restype = c_int
+_api.hid_set_nonblocking.argtypes = [c_void_p, c_int]
+_api.hid_set_nonblocking.restype = c_int
 
-_hidapi.hid_send_feature_report.argtypes = [ c_void_p, c_char_p, c_size_t ]
-_hidapi.hid_send_feature_report.restype = c_int
+_api.hid_send_feature_report.argtypes = [c_void_p, c_char_p, c_size_t]
+_api.hid_send_feature_report.restype = c_int
 
-_hidapi.hid_get_feature_report.argtypes = [ c_void_p, c_char_p, c_size_t ]
-_hidapi.hid_get_feature_report.restype = c_int
+_api.hid_get_feature_report.argtypes = [c_void_p, c_char_p, c_size_t]
+_api.hid_get_feature_report.restype = c_int
 
-_hidapi.hid_get_manufacturer_string.argtypes = [ c_void_p, c_wchar_p, c_size_t ]
-_hidapi.hid_get_manufacturer_string.restype = c_int
+_api.hid_get_manufacturer_string.argtypes = [c_void_p, c_wchar_p, c_size_t]
+_api.hid_get_manufacturer_string.restype = c_int
 
-_hidapi.hid_get_product_string.argtypes = [ c_void_p, c_wchar_p, c_size_t ]
-_hidapi.hid_get_product_string.restype = c_int
+_api.hid_get_product_string.argtypes = [c_void_p, c_wchar_p, c_size_t]
+_api.hid_get_product_string.restype = c_int
 
-_hidapi.hid_get_serial_number_string.argtypes = [ c_void_p, c_wchar_p, c_size_t ]
-_hidapi.hid_get_serial_number_string.restype = c_int
+_api.hid_get_serial_number_string.argtypes = [c_void_p, c_wchar_p, c_size_t]
+_api.hid_get_serial_number_string.restype = c_int
 
-# _hidapi.hid_get_indexed_string.argtypes = [ c_void_p, c_int, c_wchar_p, c_size_t ]
-# _hidapi.hid_get_indexed_string.restype = c_int
+_api.hid_get_indexed_string.argtypes = [c_void_p, c_int, c_wchar_p, c_size_t]
+_api.hid_get_indexed_string.restype = c_int
 
-# _hidapi.hid_error.argtypes = [ c_void_p ]
-# _hidapi.hid_error.restype = c_wchar_p
+_api.hid_error.argtypes = [c_void_p]
+_api.hid_error.restype = c_wchar_p
 
 
 #
@@ -157,7 +162,7 @@ def init():
 
 	:returns: True if successful.
 	"""
-	return _hidapi.hid_init() == 0
+	return _api.hid_init() == 0
 
 
 def exit():
@@ -169,7 +174,7 @@ def exit():
 
 	:returns: True if successful.
 	"""
-	return _hidapi.hid_exit() == 0
+	return _api.hid_exit() == 0
 
 
 def enumerate(vendor_id=None, product_id=None, interface_number=None):
@@ -182,7 +187,7 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 	"""
 	results = []
 
-	devices = _hidapi.hid_enumerate(vendor_id, product_id)
+	devices = _api.hid_enumerate(vendor_id, product_id)
 	d = devices
 	while d:
 		if interface_number is None or interface_number == d.contents.interface:
@@ -190,19 +195,21 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 		d = d.contents.next
 
 	if devices:
-		_hidapi.hid_free_enumeration(devices)
+		_api.hid_free_enumeration(devices)
 
 	return results
 
 
 def open(vendor_id, product_id, serial=None):
-	"""Open a HID device using a Vendor ID, Product ID and optionally a serial number.
+	"""Open a HID device using a Vendor ID, Product ID and optionally a serial
+	number.
 
-	If no serial_number is provided, the first device with the specified ids is opened.
+	If no serial_number is provided, the first device with the specified ids
+	is opened.
 
 	:returns: an opaque device handle, or None.
 	"""
-	return _hidapi.hid_open(vendor_id, product_id, serial) or None
+	return _api.hid_open(vendor_id, product_id, serial) or None
 
 
 def open_path(device_path):
@@ -212,7 +219,7 @@ def open_path(device_path):
 
 	:returns: an opaque device handle, or None.
 	"""
-	return _hidapi.hid_open_path(device_path) or None
+	return _api.hid_open_path(device_path) or None
 
 
 def close(device_handle):
@@ -220,14 +227,15 @@ def close(device_handle):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	"""
-	_hidapi.hid_close(device_handle)
+	_api.hid_close(device_handle)
 
 
 def write(device_handle, data):
 	"""Write an Output report to a HID device.
 
 	:param device_handle: a device handle returned by open() or open_path().
-	:param data: the data bytes to send including the report number as the first byte.
+	:param data: the data bytes to send including the report number as the
+	first byte.
 
 	The first byte of data[] must contain the Report ID. For
 	devices which only support a single report, this must be set
@@ -245,7 +253,7 @@ def write(device_handle, data):
 
 	:returns: True if the write was successful.
 	"""
-	bytes_written = _hidapi.hid_write(device_handle, c_char_p(data), len(data))
+	bytes_written = _api.hid_write(device_handle, c_char_p(data), len(data))
 	return bytes_written > -1
 
 
@@ -265,7 +273,8 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	:returns: the bytes read, or None if a timeout was reached.
 	"""
 	out_buffer = create_string_buffer('\x00' * (bytes_count + 1))
-	bytes_read = _hidapi.hid_read_timeout(device_handle, out_buffer, bytes_count, timeout_ms)
+	bytes_read = _api.hid_read_timeout(device_handle,
+		out_buffer, bytes_count, timeout_ms)
 	if bytes_read > -1:
 		return out_buffer[:bytes_read]
 
@@ -274,7 +283,8 @@ def send_feature_report(device_handle, data, report_number=None):
 	"""Send a Feature report to the device.
 
 	:param device_handle: a device handle returned by open() or open_path().
-	:param data: the data bytes to send including the report number as the first byte.
+	:param data: the data bytes to send including the report number as the
+	first byte.
 	:param report_number: if set, it is sent as the first byte with the data.
 
 	Feature reports are sent over the Control endpoint as a
@@ -293,7 +303,8 @@ def send_feature_report(device_handle, data, report_number=None):
 	"""
 	if report_number is not None:
 		data = chr(report_number) + data
-	bytes_written = _hidapi.hid_send_feature_report(device_handle, c_char_p(data), len(data))
+	bytes_written = _api.hid_send_feature_report(
+									device_handle, c_char_p(data), len(data))
 	return bytes_written > -1
 
 
@@ -309,7 +320,8 @@ def get_feature_report(device_handle, bytes_count, report_number=None):
 	out_buffer = create_string_buffer('\x00' * (bytes_count + 2))
 	if report_number is not None:
 		out_buffer[0] = chr(report_number)
-	bytes_read = _hidapi.hid_get_feature_report(device_handle, out_buffer, bytes_count)
+	bytes_read = _api.hid_get_feature_report(
+									device_handle, out_buffer, bytes_count)
 	if bytes_read > -1:
 		return out_buffer[:bytes_read]
 
@@ -330,7 +342,7 @@ def get_manufacturer(device_handle):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	"""
-	return _read_wchar(_hidapi.hid_get_manufacturer_string, device_handle)
+	return _read_wchar(_api.hid_get_manufacturer_string, device_handle)
 
 
 def get_product(device_handle):
@@ -338,7 +350,7 @@ def get_product(device_handle):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	"""
-	return _read_wchar(_hidapi.hid_get_product_string, device_handle)
+	return _read_wchar(_api.hid_get_product_string, device_handle)
 
 
 def get_serial(device_handle):
@@ -346,7 +358,7 @@ def get_serial(device_handle):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	"""
-	serial = _read_wchar(_hidapi.hid_get_serial_number_string, device_handle)
+	serial = _read_wchar(_api.hid_get_serial_number_string, device_handle)
 	if serial is not None:
 		return ''.join(hex(ord(c)) for c in serial)
 
@@ -355,4 +367,4 @@ def get_serial(device_handle):
 #   """
 #   :param device_handle: a device handle returned by open() or open_path().
 #   """
-#   return _read_wchar(_hidapi.hid_get_indexed_string, device_handle, index)
+#   return _read_wchar(_api.hid_get_indexed_string, device_handle, index)
