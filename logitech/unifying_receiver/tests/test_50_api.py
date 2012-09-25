@@ -29,14 +29,20 @@ class Test_UR_API(unittest.TestCase):
 			self.fail("No receiver found")
 
 	def test_05_ping_device_zero(self):
+		if self.handle is None:
+			self.fail("No receiver found")
+
 		ok = api.ping(self.handle, 0)
 		self.assertIsNotNone(ok, "invalid ping reply")
 		self.assertFalse(ok, "device zero replied")
 
 	def test_10_ping_all_devices(self):
+		if self.handle is None:
+			self.fail("No receiver found")
+
 		devices = []
 
-		for device in range(1, 7):
+		for device in range(1, 1 + api.base.MAX_ATTACHED_DEVICES):
 			ok = api.ping(self.handle, device)
 			self.assertIsNotNone(ok, "invalid ping reply")
 			if ok:
@@ -46,6 +52,8 @@ class Test_UR_API(unittest.TestCase):
 			Test_UR_API.device = devices[0]
 
 	def test_30_get_feature_index(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 
@@ -54,6 +62,8 @@ class Test_UR_API(unittest.TestCase):
 		self.assertGreater(fs_index, 0, "invalid FEATURE_SET index: " + str(fs_index))
 
 	def test_31_bad_feature(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 
@@ -62,6 +72,8 @@ class Test_UR_API(unittest.TestCase):
 		self.assertEquals(reply[:5], b'\x00' * 5, "invalid reply")
 
 	def test_40_get_device_features(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 
@@ -72,6 +84,8 @@ class Test_UR_API(unittest.TestCase):
 		Test_UR_API.features_array = features
 
 	def test_50_get_device_firmware(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 		if self.features_array is None:
@@ -82,6 +96,8 @@ class Test_UR_API(unittest.TestCase):
 		self.assertGreater(len(d_firmware), 0, "empty device type")
 
 	def test_52_get_device_type(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 		if self.features_array is None:
@@ -92,6 +108,8 @@ class Test_UR_API(unittest.TestCase):
 		self.assertGreater(len(d_type), 0, "empty device type")
 
 	def test_55_get_device_name(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 		if self.features_array is None:
@@ -102,6 +120,8 @@ class Test_UR_API(unittest.TestCase):
 		self.assertGreater(len(d_name), 0, "empty device name")
 
 	def test_60_get_battery_level(self):
+		if self.handle is None:
+			self.fail("No receiver found")
 		if self.device is None:
 			self.fail("Found no devices attached.")
 		if self.features_array is None:
@@ -112,6 +132,29 @@ class Test_UR_API(unittest.TestCase):
 			self.assertIsNotNone(battery, "failed to read battery level")
 		except FeatureNotSupported:
 			self.fail("BATTERY feature not supported by device " + str(self.device))
+
+	def test_70_list_devices(self):
+		if self.handle is None:
+			self.fail("No receiver found")
+
+		all_devices = api.list_devices(self.handle)
+		if all_devices:
+			self.assertIsNotNone(self.device)
+			for device_info in all_devices:
+				self.assertIsInstance(device_info, api.AttachedDeviceInfo)
+		else:
+			self.assertIsNone(self.device)
+
+	def test_70_find_device_by_name(self):
+		if self.handle is None:
+			self.fail("No receiver found")
+		if self.device is None:
+			self.fail("Found no devices attached.")
+
+		all_devices = api.list_devices(self.handle)
+		for device_info in all_devices:
+			device = api.find_device_by_name(self.handle, device_info.name)
+			self.assertEquals(device, device_info)
 
 if __name__ == '__main__':
 	unittest.main()

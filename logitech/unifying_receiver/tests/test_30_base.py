@@ -79,7 +79,7 @@ class Test_UR_Base(unittest.TestCase):
 
 		devices = []
 
-		for device in range(1, 7):
+		for device in range(1, 1 + base.MAX_ATTACHED_DEVICES):
 			w = base.write(self.handle, device, b'\x00\x10\x00\x00\xAA')
 			self.assertIsNone(w, "write should have returned None")
 			reply = base.read(self.handle, base.DEFAULT_TIMEOUT * 3)

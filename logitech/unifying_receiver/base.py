@@ -41,6 +41,10 @@ _MAX_REPLY_SIZE = _MAX_CALL_SIZE
 DEFAULT_TIMEOUT = 1000
 
 
+"""Maximum number of devices attached to a UR."""
+MAX_ATTACHED_DEVICES = 6
+
+
 #
 #
 #

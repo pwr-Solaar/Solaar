@@ -13,6 +13,24 @@ from . import base
 from .unhandled import _publish as _unhandled_publish
 
 
+#
+#
+#
+
+
+from collections import namedtuple
+"""Tuple returned by list_devices and find_device_by_name."""
+AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
+				'number',
+				'type',
+				'name',
+				'features_array'])
+del namedtuple
+
+#
+#
+#
+
 def open():
 	"""Opens the first Logitech UR found attached to the machine.
 
@@ -117,6 +135,45 @@ def ping(handle, device):
 	base.write(handle, device, b'\x00\x10\x00\x00' + ping_marker)
 	# pings may take a while to reply success
 	return _status(base.read(handle, base.DEFAULT_TIMEOUT * 3))
+
+
+def find_device_by_name(handle, device_name):
+	"""Searches for an attached device by name.
+
+	:returns: an AttachedDeviceInfo tuple, or ``None``.
+	"""
+	_l.log(_LOG_LEVEL, "(%d:,) searching for device '%s'", handle, device_name)
+
+	for device in range(1, 1 + base.MAX_ATTACHED_DEVICES):
+		features_array = get_device_features(handle, device)
+		if features_array:
+			d_name = get_device_name(handle, device, features_array)
+			if d_name == device_name:
+				d_type = get_device_type(handle, device, features_array)
+				device_info = AttachedDeviceInfo(device, d_type, d_name, features_array)
+				_l.log(_LOG_LEVEL, "(%d:,%d) found device %s", handle, device, device_info)
+				return device_info
+
+
+def list_devices(handle):
+	"""List all devices attached to the UR.
+
+	:returns: a list of AttachedDeviceInfo tuples.
+	"""
+	_l.log(_LOG_LEVEL, "(%d:,) listing all devices", handle)
+
+	devices = []
+
+	for device in range(1, 1 + base.MAX_ATTACHED_DEVICES):
+		features_array = get_device_features(handle, device)
+		if features_array:
+			d_type = get_device_type(handle, device, features_array)
+			d_name = get_device_name(handle, device, features_array)
+			device_info = AttachedDeviceInfo(device, d_type, d_name, features_array)
+			_l.log(_LOG_LEVEL, "(%d:,%d) found device %s", handle, device, device_info)
+			devices.append(device_info)
+
+	return devices
 
 
 def get_feature_index(handle, device, feature):
