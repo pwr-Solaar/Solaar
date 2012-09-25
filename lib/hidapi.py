@@ -1,4 +1,4 @@
-"""Human Interface Device API.
+"""Generic Human Interface Device API.
 
 It is little more than a thin ctypes layer over a native hidapi implementation.
 The docstrings are mostly copied from the hidapi API header, with changes where
@@ -6,6 +6,10 @@ necessary.
 
 The native HID API implemenation is available at
 https://github.com/signal11/hidapi.
+
+The native implementation comes in two flavors, hidraw (``libhidapi-hidraw.so``)
+and libusb (``libhidapi-libusb.so``). For this API to work, at least one of them
+must be in ``LD_LIBRARY_PATH``; otherwise an ImportError will be raised.
 
 Using the native hidraw implementation is recommended.
 Currently the native libusb implementation (temporarily) detaches the device's
@@ -27,9 +31,7 @@ _native = None
 
 for native_implementation in ('hidraw', 'libusb'):
 	try:
-		# first look in the default library path
-		native_implementation = 'libhidapi-' + native_implementation + '.so'
-		_native = _C.cdll.LoadLibrary(native_implementation)
+		_native = _C.cdll.LoadLibrary('libhidapi-' + native_implementation + '.so')
 		break
 	except OSError:
 		pass
@@ -271,7 +273,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	The first byte will contain the Report number if the device uses numbered
 	reports.
 
-	:returns: the bytes read, or ``None`` if a timeout was reached.
+	:returns: the data packet read, or ``None`` if a timeout was reached.
 	"""
 	out_buffer = _C.create_string_buffer(b'\x00' * (bytes_count + 1))
 	bytes_read = _native.hid_read_timeout(device_handle, out_buffer, bytes_count, timeout_ms)
@@ -364,7 +366,7 @@ def get_serial(device_handle):
 def get_indexed_string(device_handle, index):
 	"""Get a string from a HID device, based on its string index.
 
-	Note: may not be implemented by the underlying native library.
+	Note: currently not working in the ``hidraw`` native implementation.
 
 	:param device_handle: a device handle returned by open() or open_path().
 	:param string_index: the index of the string to get.
@@ -375,9 +377,10 @@ def get_indexed_string(device_handle, index):
 def last_error(device_handle):
 	"""Get a string describing the last error which occurred.
 
-	Note: currently not implemented by the underlying native library.
+	Note: currently not working in either underlying native implementation.
 
 	:param device_handle: a device handle returned by open() or open_path().
 	:returns: a string containing the last error which occurred, or None.
 	"""
-	return _native.hid_error(device_handle)
+	error = _native.hid_error(device_handle)
+	return error.value
