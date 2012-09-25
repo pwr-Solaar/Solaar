@@ -1,2 +1,4 @@
 *.so
 *.pyc
+*.pyo
+*.log

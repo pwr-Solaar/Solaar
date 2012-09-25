@@ -150,6 +150,7 @@ def write(handle, device, data):
 		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, device, wdata.encode('hex'), len(wdata))
 	if not _hid.write(handle, wdata):
 		_l.warn("(%d,%d) write failed, assuming receiver no longer available", handle, device)
+		close(handle)
 		raise NoReceiver()
 
 
@@ -210,7 +211,7 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 
 		if reply_device != device:
 			# this message not for the device we're interested in
-			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, reply.encode('hex'))
+			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, reply_data.encode('hex'))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			_unhandled._publish(reply_code, reply_device, reply_data)
@@ -229,7 +230,7 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# an error returned from the device
 			error_code = ord(reply_data[3])
-			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error, _ERROR_NAME(error_code), reply_data.encode('hex'))
+			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME(error_code), reply_data.encode('hex'))
 			feature_index = ord(feature_index_function[0])
 			feature_function = feature_index_function[1].encode('hex')
 			feature = None if features_array is None else features_array[feature_index]

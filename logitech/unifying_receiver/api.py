@@ -274,7 +274,7 @@ def get_device_firmware(handle, device, features_array=None):
 								str((ord(fw_info[5]) & 0xF0) >> 4) +
 								str(ord(fw_info[5]) & 0x0F))
 					name = prefix + ' ' + version
-					build = 256 * ord(fw_info[6]) + ord(fw_info[7])
+					build = (ord(fw_info[6]) << 8) + ord(fw_info[7])
 					if build:
 						name += ' b' + str(build)
 					extras = fw_info[9:].rstrip('\x00')
@@ -324,8 +324,11 @@ def get_device_name(handle, device, features_array=None):
 		_l.log(_LOG_LEVEL, "(%d,%d) device name %s", handle, device, d_name)
 		return d_name
 
+
 def get_device_battery_level(handle, device, features_array=None):
 	"""Reads a device's battery level.
+
+	:raises FeatureNotSupported: if the device does not support this feature.
 	"""
 	battery = request(handle, device, FEATURE.BATTERY, features_array=features_array)
 	if battery:
