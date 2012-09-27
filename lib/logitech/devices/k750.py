@@ -14,11 +14,6 @@ from .constants import *
 
 NAME = 'Wireless Solar Keyboard K750'
 
-_STATUS_NAMES = ('excellent', 'good', 'okay', 'poor')
-
-_CHARGE_LIMITS = (75, 40, 20, -1)
-_LIGHTING_LIMITS = (450, 310, 190, -1)
-
 #
 #
 #
@@ -30,25 +25,30 @@ def _trigger_solar_charge_events(receiver, devinfo):
 						features_array=devinfo.features_array)
 
 
+_STATUS_NAMES = ('excellent', 'good', 'okay', 'poor')
+
+_CHARGE_LIMITS = (75, 40, 20, -1)
+_LIGHTING_LIMITS = (450, 310, 190, -1)
+
+
 def _charge_status(data):
 	charge = ord(data[2])
-	lux = (ord(data[3]) << 8) + ord(data[4])
 
 	for i in range(0, len(_CHARGE_LIMITS)):
 		if charge >= _CHARGE_LIMITS[i]:
 			charge_index = i
 			break
+	text = '\n\tCharge %d%% (%s)' % (charge, _STATUS_NAMES[charge_index])
 
-	if lux == 0:
-		return 0x10 << charge_index, '\n\tCharge %d%% (%s)' % (charge, _STATUS_NAMES[charge_index])
+	lux = (ord(data[3]) << 8) + ord(data[4])
+	if lux > 0:
+		for i in range(0, len(_CHARGE_LIMITS)):
+			if lux > _LIGHTING_LIMITS[i]:
+				lighting_index = i
+				break
+		text += ', Lighting %s (%d lux)' % (_STATUS_NAMES[lighting_index], lux)
 
-	for i in range(0, len(_CHARGE_LIMITS)):
-		if lux > _LIGHTING_LIMITS[i]:
-			lighting_index = i
-			break
-
-	return 0x10 << charge_index, '\n\tCharge %d%% (%s), Lighting %s (%d lux)' % (
-					charge, _STATUS_NAMES[charge_index], _STATUS_NAMES[lighting_index], lux)
+	return 0x10 << charge_index, text
 
 
 def request_status(devinfo, listener):
@@ -67,7 +67,7 @@ def process_event(devinfo, listener, data):
 		return _charge_status(data)
 	elif data[:2] == b'\x09\x10' and data[7:11] == b'GOOD':
 		return _charge_status(data)
-	elif data[:2] == b'\x09\x20':
+	elif data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
 		if _trigger_solar_charge_events(listener.receiver, devinfo) is None:
 			return DEVICE_STATUS.UNAVAILABLE

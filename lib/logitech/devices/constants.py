@@ -17,5 +17,6 @@ from collections import defaultdict
 DEVICE_STATUS_NAME = defaultdict(lambda x: None)
 DEVICE_STATUS_NAME[DEVICE_STATUS.UNAVAILABLE] = 'not available'
 DEVICE_STATUS_NAME[DEVICE_STATUS.CONNECTED] = 'connected'
+DEVICE_STATUS_NAME[DEVICE_STATUS.ACTIVE] = 'active'
 
 del defaultdict

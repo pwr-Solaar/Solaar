@@ -20,18 +20,6 @@ http://julien.danjou.info/blog/2012/logitech-k750-linux-support
 http://6xq.net/git/lars/lshidpp.git/plain/doc/
 """
 
-
-#
-# Logging set-up.
-# Add a new logging level for tracing low-level writes and reads.
-#
-
-import logging
-_l = logging.getLogger('unifying_receiver')
-_LOG_LEVEL = 5
-_l.setLevel(_LOG_LEVEL)
-
-
 from .constants import *
 from .exceptions import *
 from .api import *
