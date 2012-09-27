@@ -28,7 +28,7 @@ NO_DEVICES = 'No devices attached.'
 NO_RECEIVER = 'Unifying Receiver not found.'
 FOUND_RECEIVER = 'Unifying Receiver found.'
 
-STATUS_TIMEOUT = 31  # seconds
+STATUS_TIMEOUT = 61  # seconds
 ICON_UPDATE_SLEEP = 7  # seconds
 
 #
@@ -198,7 +198,13 @@ class StatusThread(threading.Thread):
 		device_status[1] = status_code
 		device_status[2] = status_text
 
-		if old_status_code != status_code:
+		if old_status_code == status_code:
+			# the device has been missing twice in a row (1 to 2 minutes), so
+			# forget about it
+			if status_code == DEVICE_STATUS.UNAVAILABLE:
+				del self.devices[devinfo.number]
+				del self.statuses[devinfo.number]
+		else:
 			logging.debug("device status changed from %s => %s: %s", old_status_code, status_code, status_text)
 			notify_desktop(status_code, devinfo.name, status_text)
 

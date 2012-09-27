@@ -14,10 +14,10 @@ from .constants import *
 
 NAME = 'Wireless Solar Keyboard K750'
 
-_STATUS_NAMES = ('excellent', 'good', 'okay', 'poor')
+_STATUS_NAMES = ('excellent', 'good', 'okay', 'poor', 'very low')
 
-_CHARGE_LIMITS = (75, 40, 20, -1)
-_LIGHTING_LIMITS = (450, 310, 190, -1)
+_CHARGE_LIMITS = (75, 40, 20, 10, -1)
+_LIGHTING_LIMITS = (400, 200, 50, 20, -1)
 
 #
 #
