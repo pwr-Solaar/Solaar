@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cd `dirname "$0"`
+
+export LD_LIBRARY_PATH=$PWD/lib
+export PYTHONPATH=$PWD/lib
+
+exec python -OO -m cli.hidconsole "$@"
+
