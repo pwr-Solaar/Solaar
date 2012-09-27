@@ -141,7 +141,7 @@ def write(handle, device, data):
 
 	:raises NoReceiver: if the receiver is no longer available, i.e. has
 	been physically removed from the machine, or the kernel driver has been
-	unloaded.
+	unloaded. The handle will be closed automatically.
 	"""
 	wdata = b'\x10' + chr(device) + data + b'\x00' * (5 - len(data))
 	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, device, wdata.encode('hex'))
@@ -166,8 +166,17 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	(reply_code, device, message data). The reply code should be ``0x11`` for a
 	successful feature call, or ``0x10`` to indicate some error, e.g. the device
 	is no longer available.
+
+	:raises NoReceiver: if the receiver is no longer available, i.e. has
+	been physically removed from the machine, or the kernel driver has been
+	unloaded. The handle will be closed automatically.
 	"""
 	data = _hid.read(handle, _MAX_REPLY_SIZE * 2, timeout)
+	if data is None:
+		_l.warn("(%d,*) read failed, assuming receiver no longer available", handle)
+		close(handle)
+		raise NoReceiver
+
 	if data:
 		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, data.encode('hex'))
 		if len(data) < _MIN_REPLY_SIZE:
@@ -175,8 +184,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		if len(data) > _MAX_REPLY_SIZE:
 			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, data.encode('hex'), len(data))
 		return ord(data[0]), ord(data[1]), data[2:]
-	else:
-		_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
+	_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
 
 
 def request(handle, device, feature_index_function, params=b'', features_array=None):

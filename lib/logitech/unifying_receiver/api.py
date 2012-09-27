@@ -187,7 +187,7 @@ def list_devices(handle):
 
 
 def get_device_info(handle, device, device_name=None, features_array=None):
-	"""Gets the complete info for a device.
+	"""Gets the complete info for a device (type, name, firmwares, and features_array).
 
 	:returns: an AttachedDeviceInfo tuple, or ``None``.
 	"""
