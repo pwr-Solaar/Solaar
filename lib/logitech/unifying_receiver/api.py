@@ -15,11 +15,9 @@ from .unhandled import _publish as _unhandled_publish
 _LOG_LEVEL = 5
 _l = logging.getLogger('logitech.unifying_receiver.api')
 
-
 #
 #
 #
-
 
 from collections import namedtuple
 
@@ -44,7 +42,6 @@ def _makeFirmwareInfo(level, type, name=None, version=None, build=None, extras=N
 	return FirmwareInfo(level, type, name, version, build, extras)
 
 del namedtuple
-
 
 #
 #
@@ -249,8 +246,8 @@ def get_device_features(handle, device):
 	# get the index of the FEATURE_SET
 	# FEATURE.ROOT should always be available for all devices
 	fs_index = base.request(handle, device, FEATURE.ROOT, FEATURE.FEATURE_SET)
-	if not fs_index:
-		_l.warn("(%d,%d) FEATURE_SET not available", handle, device)
+	if fs_index is None:
+		# _l.warn("(%d,%d) FEATURE_SET not available", handle, device)
 		return None
 	fs_index = fs_index[:1]
 

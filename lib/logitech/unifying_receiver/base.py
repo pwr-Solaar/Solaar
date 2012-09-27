@@ -17,12 +17,10 @@ import hidapi as _hid
 _LOG_LEVEL = 4
 _l = logging.getLogger('logitech.unifying_receiver.base')
 
-
 #
 # These values are defined by the Logitech documentation.
 # Overstepping these boundaries will only produce log warnings.
 #
-
 
 """Minimim lenght of a feature call packet."""
 _MIN_CALL_SIZE = 7
@@ -47,11 +45,9 @@ DEFAULT_TIMEOUT = 1000
 """Maximum number of devices attached to a UR."""
 MAX_ATTACHED_DEVICES = 6
 
-
 #
 #
 #
-
 
 def list_receiver_devices():
 	"""List all the Linux devices exposed by the UR attached to the machine."""

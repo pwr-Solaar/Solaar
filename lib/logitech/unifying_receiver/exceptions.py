@@ -2,7 +2,6 @@
 # Exceptions that may be raised by this API.
 #
 
-
 from .constants import FEATURE_NAME as _FEATURE_NAME
 from .constants import ERROR_NAME as _ERROR_NAME
 

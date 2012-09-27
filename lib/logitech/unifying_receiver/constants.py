@@ -2,7 +2,6 @@
 # Constants used by the rest of the API.
 #
 
-
 """Possible features available on a Logitech device.
 
 A particular device might not support all these features, and may support other
