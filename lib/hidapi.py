@@ -20,6 +20,7 @@ __version__ = '0.2-hidapi-0.7.0'
 
 
 import ctypes as _C
+import struct
 
 
 #
@@ -81,13 +82,13 @@ del namedtuple
 # create a DeviceInfo tuple from a hid_device object
 def _makeDeviceInfo(native_device_info):
 	return DeviceInfo(
-				path=str(native_device_info.path),
+				path=native_device_info.path,
 				vendor_id=hex(native_device_info.vendor_id)[2:],
 				product_id=hex(native_device_info.product_id)[2:],
-				serial=str(native_device_info.serial) if native_device_info.serial else None,
+				serial=native_device_info.serial if native_device_info.serial else None,
 				release=hex(native_device_info.release)[2:],
-				manufacturer=str(native_device_info.manufacturer),
-				product=str(native_device_info.product),
+				manufacturer=native_device_info.manufacturer,
+				product=native_device_info.product,
 				interface=native_device_info.interface)
 
 
@@ -307,7 +308,7 @@ def send_feature_report(device_handle, data, report_number=None):
 	:returns: ``True`` if the report was successfully written to the device.
 	"""
 	if report_number is not None:
-		data = chr(report_number) + data
+		data = struct.pack('!B', report_number) + data
 	bytes_written = _native.hid_send_feature_report(device_handle, _C.c_char_p(data), len(data))
 	return bytes_written > -1
 
@@ -323,7 +324,7 @@ def get_feature_report(device_handle, bytes_count, report_number=None):
 	"""
 	out_buffer = _C.create_string_buffer('\x00' * (bytes_count + 2))
 	if report_number is not None:
-		out_buffer[0] = chr(report_number)
+		out_buffer[0] = struct.pack('!B', report_number)
 	bytes_read = _native.hid_get_feature_report(device_handle, out_buffer, bytes_count)
 	if bytes_read > -1:
 		return out_buffer[:bytes_read]

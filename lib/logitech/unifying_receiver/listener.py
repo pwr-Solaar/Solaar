@@ -5,6 +5,7 @@
 import logging
 import threading
 from time import sleep
+from binascii import hexlify
 
 from . import base
 from .exceptions import *
@@ -31,7 +32,7 @@ class EventsListener(threading.Thread):
 	API calls in the events callback.
 	"""
 	def __init__(self, receiver, events_callback):
-		super(EventsListener, self).__init__(name='Unifying_Receiver_Listener_' + str(receiver))
+		super(EventsListener, self).__init__(name='Unifying_Receiver_Listener_' + hex(receiver))
 		self.daemon = True
 
 		self.receiver = receiver
@@ -87,7 +88,7 @@ class EventsListener(threading.Thread):
 		self.task = self.task_reply = None
 		self.task_processing.release()
 
-		# _l.log(_LOG_LEVEL, "(%d) request '%s' => [%s]", self.receiver, api_function.__name__, reply.encode('hex'))
+		# _l.log(_LOG_LEVEL, "(%d) request '%s' => [%s]", self.receiver, api_function.__name__, hexlify(reply))
 		if isinstance(reply, Exception):
 			raise reply
 		return reply

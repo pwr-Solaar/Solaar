@@ -3,6 +3,7 @@
 #
 
 import logging
+import struct
 
 from ..unifying_receiver import api as _api
 from .constants import *
@@ -32,7 +33,7 @@ _LIGHTING_LIMITS = (450, 310, 190, -1)
 
 
 def _charge_status(data):
-	charge = ord(data[2])
+	charge, lux = struct.unpack('!BH', data[2:5])
 
 	for i in range(0, len(_CHARGE_LIMITS)):
 		if charge >= _CHARGE_LIMITS[i]:
@@ -40,7 +41,6 @@ def _charge_status(data):
 			break
 	text = 'Charge %d%% (%s)' % (charge, _STATUS_NAMES[charge_index])
 
-	lux = (ord(data[3]) << 8) + ord(data[4])
 	if lux > 0:
 		for i in range(0, len(_CHARGE_LIMITS)):
 			if lux > _LIGHTING_LIMITS[i]:

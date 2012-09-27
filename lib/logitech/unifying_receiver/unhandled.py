@@ -4,12 +4,14 @@
 #
 
 import logging
+from binascii import hexlify
+
 _l = logging.getLogger('logitech.unifying_receiver.unhandled')
 
 
 def _logging_unhandled_hook(reply_code, device, data):
 	"""Default unhandled hook, logs the reply as DEBUG."""
-	_l.debug("UNHANDLED (,%d) code 0x%02x data [%s]", device, reply_code, data.encode('hex'))
+	_l.debug("UNHANDLED (,%d) code 0x%02x data [%s]", device, reply_code, hexlify(data))
 
 
 _unhandled_hook = _logging_unhandled_hook

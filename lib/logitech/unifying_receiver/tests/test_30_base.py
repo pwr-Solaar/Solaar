@@ -3,6 +3,7 @@
 #
 
 import unittest
+from binascii import hexlify
 
 from logitech.unifying_receiver import base
 from logitech.unifying_receiver.exceptions import *
@@ -63,11 +64,11 @@ class Test_UR_Base(unittest.TestCase):
 		self.assertIsInstance(reply, tuple, "read should have returned a tuple")
 
 		reply_code, reply_device, reply_data = reply
-		self.assertEquals(reply_device, 0, "got ping reply for valid device")
-		self.assertGreater(len(reply_data), 4, "ping reply has wrong length: " + reply_data.encode('hex'))
+		self.assertEqual(reply_device, 0, "got ping reply for valid device")
+		self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % hexlify(reply_data))
 		if reply_code == 0x10:
 			# ping fail
-			self.assertEquals(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: " + reply_data.encode('hex'))
+			self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % hexlify(reply_data))
 		elif reply_code == 0x11:
 			self.fail("Got valid ping from device 0")
 		else:
@@ -87,15 +88,15 @@ class Test_UR_Base(unittest.TestCase):
 			self.assertIsInstance(reply, tuple, "read should have returned a tuple")
 
 			reply_code, reply_device, reply_data = reply
-			self.assertEquals(reply_device, device, "ping reply for wrong device")
-			self.assertGreater(len(reply_data), 4, "ping reply has wrong length: " + reply_data.encode('hex'))
+			self.assertEqual(reply_device, device, "ping reply for wrong device")
+			self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % hexlify(reply_data))
 			if reply_code == 0x10:
 				# ping fail
-				self.assertEquals(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: " + reply_data.encode('hex'))
+				self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % hexlify(reply_data))
 			elif reply_code == 0x11:
 				# ping ok
-				self.assertEquals(reply_data[:2], b'\x00\x10', "0x11 reply with unknown reply data: " + reply_data.encode('hex'))
-				self.assertEquals(reply_data[4], b'\xAA')
+				self.assertEqual(reply_data[:2], b'\x00\x10', "0x11 reply with unknown reply data: %s" % hexlify(reply_data))
+				self.assertEqual(reply_data[4:5], b'\xAA')
 				devices.append(device)
 			else:
 				self.fail("ping got bad reply code: " + reply)
@@ -119,7 +120,7 @@ class Test_UR_Base(unittest.TestCase):
 
 		reply = base.request(self.handle, self.device, FEATURE.ROOT)
 		self.assertIsNotNone(reply, "request returned None reply")
-		self.assertEquals(reply[:2], b'\x00\x00', "request returned for wrong feature id")
+		self.assertEqual(reply[:2], b'\x00\x00', "request returned for wrong feature id")
 
 	def test_55_request_root_feature_set(self):
 		if self.handle is None:
@@ -129,8 +130,8 @@ class Test_UR_Base(unittest.TestCase):
 
 		reply = base.request(self.handle, self.device, FEATURE.ROOT, FEATURE.FEATURE_SET)
 		self.assertIsNotNone(reply, "request returned None reply")
-		index = ord(reply[0])
-		self.assertGreater(index, 0, "FEATURE_SET not available on device " + str(self.device))
+		index = reply[:1]
+		self.assertGreater(index, b'\x00', "FEATURE_SET not available on device " + str(self.device))
 
 	def test_57_request_ignore_undhandled(self):
 		if self.handle is None:
@@ -140,8 +141,8 @@ class Test_UR_Base(unittest.TestCase):
 
 		fs_index = base.request(self.handle, self.device, FEATURE.ROOT, FEATURE.FEATURE_SET)
 		self.assertIsNotNone(fs_index)
-		fs_index = fs_index[0]
-		self.assertGreater(fs_index, 0)
+		fs_index = fs_index[:1]
+		self.assertGreater(fs_index, b'\x00')
 
 		global received_unhandled
 		received_unhandled = None
@@ -160,7 +161,7 @@ class Test_UR_Base(unittest.TestCase):
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")
-		self.assertNotEquals(reply[0], b'\x00')
+		self.assertNotEquals(reply[:1], b'\x00')
 		# self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
 
 		received_unhandled = None
@@ -168,7 +169,7 @@ class Test_UR_Base(unittest.TestCase):
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")
-		self.assertNotEquals(reply[0], b'\x00')
+		self.assertNotEquals(reply[:1], b'\x00')
 		self.assertIsNone(received_unhandled)
 
 		del received_unhandled

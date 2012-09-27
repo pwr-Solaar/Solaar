@@ -71,7 +71,7 @@ class Test_UR_API(unittest.TestCase):
 
 		reply = api.request(self.handle, self.device, FEATURE.ROOT, params=b'\xFF\xFF')
 		self.assertIsNotNone(reply, "invalid reply")
-		self.assertEquals(reply[:5], b'\x00' * 5, "invalid reply")
+		self.assertEqual(reply[:5], b'\x00' * 5, "invalid reply")
 
 	def test_40_get_device_features(self):
 		if self.handle is None:
@@ -171,7 +171,7 @@ class Test_UR_API(unittest.TestCase):
 		all_devices = api.list_devices(self.handle)
 		for device_info in all_devices:
 			device = api.find_device_by_name(self.handle, device_info.name)
-			self.assertEquals(device, device_info)
+			self.assertEqual(device, device_info)
 
 if __name__ == '__main__':
 	unittest.main()

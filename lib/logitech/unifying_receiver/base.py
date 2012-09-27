@@ -4,6 +4,8 @@
 #
 
 import logging
+import struct
+from binascii import hexlify
 
 from .constants import *
 from .exceptions import *
@@ -50,6 +52,7 @@ MAX_ATTACHED_DEVICES = 6
 #
 #
 
+
 def list_receiver_devices():
 	"""List all the Linux devices exposed by the UR attached to the machine."""
 	# (Vendor ID, Product ID) = ('Logitech', 'Unifying Receiver')
@@ -93,9 +96,9 @@ def try_open(path):
 		# any other replies are ignored, and will assume this is the wrong receiver device
 		if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
 			# no idea what this is, but it comes up occasionally
-			_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, reply.encode('hex'))
+			_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, hexlify(reply))
 		else:
-			_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, reply.encode('hex'))
+			_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, hexlify(reply))
 	else:
 		_l.log(_LOG_LEVEL, "[%s] (%d,) no reply", path, receiver_handle)
 
@@ -143,12 +146,16 @@ def write(handle, device, data):
 	been physically removed from the machine, or the kernel driver has been
 	unloaded. The handle will be closed automatically.
 	"""
-	wdata = b'\x10' + chr(device) + data + b'\x00' * (5 - len(data))
-	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, device, wdata.encode('hex'))
+	if len(data) < _MIN_CALL_SIZE - 2:
+		data += b'\x00' * (_MIN_CALL_SIZE - 2 - len(data))
+	elif len(data) > _MIN_CALL_SIZE - 2:
+		data += b'\x00' * (_MAX_CALL_SIZE - 2 - len(data))
+	wdata = struct.pack('!BB', 0x10, device) + data
+	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, device, hexlify(wdata))
 	if len(wdata) < _MIN_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too short: %d bytes", handle, device, wdata.encode('hex'), len(wdata))
+		_l.warn("(%d:%d) <= w[%s] call packet too short: %d bytes", handle, device, hexlify(wdata), len(wdata))
 	if len(wdata) > _MAX_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, device, wdata.encode('hex'), len(wdata))
+		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, device, hexlify(wdata), len(wdata))
 	if not _hid.write(handle, wdata):
 		_l.warn("(%d,%d) write failed, assuming receiver no longer available", handle, device)
 		close(handle)
@@ -178,12 +185,13 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		raise NoReceiver
 
 	if data:
-		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, data.encode('hex'))
+		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, hexlify(data))
 		if len(data) < _MIN_REPLY_SIZE:
-			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, data.encode('hex'), len(data))
+			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, hexlify(data), len(data))
 		if len(data) > _MAX_REPLY_SIZE:
-			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, data.encode('hex'), len(data))
-		return ord(data[0]), ord(data[1]), data[2:]
+			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, hexlify(data), len(data))
+		code, device = struct.unpack('!BB', data[:2])
+		return code, device, data[2:]
 	_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
 
 
@@ -204,9 +212,9 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 	available.
 	:raisees FeatureCallError: if the feature call replied with an error.
 	"""
-	_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, device, feature_index_function.encode('hex'), params.encode('hex'))
+	_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, device, hexlify(feature_index_function), hexlify(params))
 	if len(feature_index_function) != 2:
-		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % feature_index_function.encode('hex'))
+		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % hexlify(feature_index_function))
 
 	write(handle, device, feature_index_function + params)
 	while True:
@@ -220,35 +228,35 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 
 		if reply_device != device:
 			# this message not for the device we're interested in
-			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, reply_data.encode('hex'))
+			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, hexlify(reply_device), hexlify(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			_unhandled._publish(reply_code, reply_device, reply_data)
 			continue
 
-		if reply_code == 0x10 and reply_data[0] == b'\x8F' and reply_data[1:2] == feature_index_function:
+		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:2] == feature_index_function:
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed on {%s} call: [%s]", handle, device, feature_index_function.encode('hex'), reply_data.encode('hex'))
+			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed on {%s} call: [%s]", handle, device, hexlify(feature_index_function), hexlify(reply_data))
 			return None
 
-		if reply_code == 0x10 and reply_data[0] == b'\x8F':
+		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed: [%s]", handle, device, reply_data.encode('hex'))
+			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed: [%s]", handle, device, hexlify(reply_data))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# an error returned from the device
 			error_code = ord(reply_data[3])
-			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME(error_code), reply_data.encode('hex'))
-			feature_index = ord(feature_index_function[0])
-			feature_function = feature_index_function[1].encode('hex')
+			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME(error_code), hexlify(reply_data))
+			feature_index = ord(feature_index_function[:1])
+			feature_function = feature_index_function[1:2]
 			feature = None if features_array is None else features_array[feature_index]
 			raise FeatureCallError(device, feature, feature_index, feature_function, error_code, reply_data)
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			_l.log(_LOG_LEVEL, "(%d,%d) matched reply with data [%s]", handle, device, reply_data[2:].encode('hex'))
+			_l.log(_LOG_LEVEL, "(%d,%d) matched reply with data [%s]", handle, device, hexlify(reply_data[2:]))
 			return reply_data[2:]
 
-		_l.log(_LOG_LEVEL, "(%d,%d) unmatched reply {%s} (expected {%s})", handle, device, reply_data[:2].encode('hex'), feature_index_function.encode('hex'))
+		_l.log(_LOG_LEVEL, "(%d,%d) unmatched reply {%s} (expected {%s})", handle, device, hexlify(reply_data[:2]), hexlify(feature_index_function))
 		_unhandled._publish(reply_code, reply_device, reply_data)

@@ -17,6 +17,7 @@ from logitech.devices import *
 # A few constants
 #
 
+
 APP_TITLE = 'Solaar'
 UNIFYING_RECEIVER = 'Unifying Receiver'
 NO_DEVICES = 'No devices attached.'
@@ -158,15 +159,15 @@ class StatusThread(threading.Thread):
 			else:
 				logging.warn("unknown event code %02x", code)
 		elif device:
-			logging.debug("got event (%d, %d, %s) for new device", code, device, data.encode('hex'))
+			logging.debug("got event (%d, %d, %s) for new device", code, device, data)
 			devinfo = ur.get_device_info(self.listener.receiver, device)
 			if devinfo:
 				self.devices[device] = devinfo
 				self.statuses[device] = [0, None, None]
 			else:
-				logging.warn("got event (%d, %d, %s) for unknown device", code, device, data.encode('hex'))
+				logging.warn("got event (%d, %d, %s) for unknown device", code, device, data)
 		else:
-			logging.warn("don't know how to handle event (%d, %d, %s)", code, device, data.encode('hex'))
+			logging.warn("don't know how to handle event (%d, %d, %s)", code, device, data)
 
 		if updated:
 			GObject.idle_add(self.update_status_icon)
@@ -202,7 +203,7 @@ class StatusThread(threading.Thread):
 				devinfo = self.devices[d]
 				status_text = self.statuses[d][2]
 				if status_text:
-					all_statuses.append(unichr(0x274a) + ' ' + devinfo.name + '\n\t' + status_text)
+					all_statuses.append(devinfo.name + '\n\t' + status_text)
 				else:
 					all_statuses.append(devinfo.name)
 
@@ -218,7 +219,7 @@ class StatusThread(threading.Thread):
 
 
 if __name__ == '__main__':
-	logging.basicConfig(level=logging.DEBUG)
+	logging.basicConfig(level=6)
 	logging.captureWarnings(True)
 
 	status_icon = Gtk.StatusIcon.new_from_file('images/' + UNIFYING_RECEIVER + '.png')
