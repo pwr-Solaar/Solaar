@@ -3,14 +3,15 @@
 #
 
 import logging
-_LOG_LEVEL = 5
-_l = logging.getLogger('logitech.unifying_receiver.api')
-_l.setLevel(_LOG_LEVEL)
 
 from .constants import *
 from .exceptions import *
 from . import base
 from .unhandled import _publish as _unhandled_publish
+
+
+_LOG_LEVEL = 5
+_l = logging.getLogger('logitech.unifying_receiver.api')
 
 
 #
@@ -19,13 +20,29 @@ from .unhandled import _publish as _unhandled_publish
 
 
 from collections import namedtuple
+
 """Tuple returned by list_devices and find_device_by_name."""
 AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
 				'number',
 				'type',
 				'name',
+				'firmware',
 				'features_array'])
+
+"""Firmware information."""
+FirmwareInfo = namedtuple('FirmwareInfo', [
+				'level',
+				'type',
+				'name',
+				'version',
+				'build',
+				'extras'])
+
+def _makeFirmwareInfo(level, type, name=None, version=None, build=None, extras=None):
+	return FirmwareInfo(level, type, name, version, build, extras)
+
 del namedtuple
+
 
 #
 #
@@ -142,17 +159,14 @@ def find_device_by_name(handle, device_name):
 
 	:returns: an AttachedDeviceInfo tuple, or ``None``.
 	"""
-	_l.log(_LOG_LEVEL, "(%d:,) searching for device '%s'", handle, device_name)
+	_l.log(_LOG_LEVEL, "(%d,) searching for device '%s'", handle, device_name)
 
 	for device in range(1, 1 + base.MAX_ATTACHED_DEVICES):
 		features_array = get_device_features(handle, device)
 		if features_array:
 			d_name = get_device_name(handle, device, features_array)
 			if d_name == device_name:
-				d_type = get_device_type(handle, device, features_array)
-				device_info = AttachedDeviceInfo(device, d_type, d_name, features_array)
-				_l.log(_LOG_LEVEL, "(%d:,%d) found device %s", handle, device, device_info)
-				return device_info
+				return get_device_info(handle, device, device_name=d_name, features_array=features_array)
 
 
 def list_devices(handle):
@@ -160,20 +174,34 @@ def list_devices(handle):
 
 	:returns: a list of AttachedDeviceInfo tuples.
 	"""
-	_l.log(_LOG_LEVEL, "(%d:,) listing all devices", handle)
+	_l.log(_LOG_LEVEL, "(%d,) listing all devices", handle)
 
 	devices = []
 
 	for device in range(1, 1 + base.MAX_ATTACHED_DEVICES):
 		features_array = get_device_features(handle, device)
 		if features_array:
-			d_type = get_device_type(handle, device, features_array)
-			d_name = get_device_name(handle, device, features_array)
-			device_info = AttachedDeviceInfo(device, d_type, d_name, features_array)
-			_l.log(_LOG_LEVEL, "(%d:,%d) found device %s", handle, device, device_info)
-			devices.append(device_info)
+			devices.append(get_device_info(handle, device, features_array=features_array))
 
 	return devices
+
+
+def get_device_info(handle, device, device_name=None, features_array=None):
+	"""Gets the complete info for a device.
+
+	:returns: an AttachedDeviceInfo tuple, or ``None``.
+	"""
+	if features_array is None:
+		features_array = get_device_features(handle, device)
+		if features_array is None:
+			return None
+
+	d_type = get_device_type(handle, device, features_array)
+	d_name = get_device_name(handle, device, features_array) if device_name is None else device_name
+	d_firmware = get_device_firmware(handle, device, features_array)
+	devinfo = AttachedDeviceInfo(device, d_type, d_name, d_firmware, features_array)
+	_l.log(_LOG_LEVEL, "(%d,%d) found device %s", handle, device, devinfo)
+	return devinfo
 
 
 def get_feature_index(handle, device, feature):
@@ -265,28 +293,28 @@ def get_device_firmware(handle, device, features_array=None):
 		for index in range(0, fw_count):
 			fw_info = request(handle, device, FEATURE.FIRMWARE, function=b'\x10', params=chr(index), features_array=features_array)
 			if fw_info:
-				fw_type = ord(fw_info[0]) & 0x0F
-				if fw_type == 0 or fw_type == 1:
-					prefix = str(fw_info[1:4])
+				fw_level = ord(fw_info[0]) & 0x0F
+				if fw_level == 0 or fw_level == 1:
+					fw_type = FIRMWARE_TYPES[fw_level]
+					name = str(fw_info[1:4])
 					version = ( str((ord(fw_info[4]) & 0xF0) >> 4) +
 								str(ord(fw_info[4]) & 0x0F) +
 								'.' +
 								str((ord(fw_info[5]) & 0xF0) >> 4) +
 								str(ord(fw_info[5]) & 0x0F))
-					name = prefix + ' ' + version
 					build = (ord(fw_info[6]) << 8) + ord(fw_info[7])
-					if build:
-						name += ' b' + str(build)
 					extras = fw_info[9:].rstrip('\x00')
-					_l.log(_LOG_LEVEL, "(%d:%d) firmware %d = %s %s extras=%s", handle, device, fw_type, FIRMWARE_TYPES[fw_type], name, extras.encode('hex'))
-					fw.append((fw_type, name, build, extras))
-				elif fw_type == 2:
-					version = ord(fw_info[1])
-					_l.log(_LOG_LEVEL, "(%d:%d) firmware 2 = Hardware v%x", handle, device, version)
-					fw.append((2, version))
+					if extras:
+						fw_info = _makeFirmwareInfo(level=fw_level, type=fw_type, name=name, version=version, build=build, extras=extras)
+					else:
+						fw_info = _makeFirmwareInfo(level=fw_level, type=fw_type, name=name, version=version, build=build)
+				elif fw_level == 2:
+					fw_info = _makeFirmwareInfo(level=2, type=FIRMWARE_TYPES[2], version=ord(fw_info[1]))
 				else:
-					_l.log(_LOG_LEVEL, "(%d:%d) firmware other", handle, device)
-					fw.append((fw_type, ))
+					fw_info = _makeFirmwareInfo(level=fw_level, type=FIRMWARE_TYPES[-1])
+
+				fw.append(fw_info)
+				_l.log(_LOG_LEVEL, "(%d:%d) firmware %s", handle, device, fw_info)
 		return fw
 
 

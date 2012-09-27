@@ -4,6 +4,5 @@ cd `dirname "$0"`
 
 export LD_LIBRARY_PATH=$PWD/lib
 export PYTHONPATH=$PWD/lib
-export PYTHONWARNINGS=all
 
-exec python -OO -tt -u -3 solar.py "$@"
+exec python -OO -Qnew solaar.py "$@"

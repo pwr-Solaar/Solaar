@@ -4,15 +4,16 @@
 #
 
 import logging
-_LOG_LEVEL = 4
-_l = logging.getLogger('logitech.unifying_receiver.base')
-_l.setLevel(_LOG_LEVEL)
 
 from .constants import *
 from .exceptions import *
 
 from . import unhandled as _unhandled
 import hidapi as _hid
+
+
+_LOG_LEVEL = 4
+_l = logging.getLogger('logitech.unifying_receiver.base')
 
 
 #

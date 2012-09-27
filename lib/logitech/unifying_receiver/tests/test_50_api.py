@@ -15,6 +15,7 @@ class Test_UR_API(unittest.TestCase):
 		cls.handle = None
 		cls.device = None
 		cls.features_array = None
+		cls.device_info = None
 
 	@classmethod
 	def tearDownClass(cls):
@@ -22,6 +23,7 @@ class Test_UR_API(unittest.TestCase):
 			api.close(cls.handle)
 		cls.device = None
 		cls.features_array = None
+		cls.device_info = None
 
 	def test_00_open_receiver(self):
 		Test_UR_API.handle = api.open()
@@ -92,8 +94,10 @@ class Test_UR_API(unittest.TestCase):
 			self.fail("no feature set available")
 
 		d_firmware = api.get_device_firmware(self.handle, self.device, self.features_array)
-		self.assertIsNotNone(d_firmware, "failed to get device type")
-		self.assertGreater(len(d_firmware), 0, "empty device type")
+		self.assertIsNotNone(d_firmware, "failed to get device firmware")
+		self.assertGreater(len(d_firmware), 0, "device reported no firmware")
+		for fw in d_firmware:
+			self.assertIsInstance(fw, api.FirmwareInfo)
 
 	def test_52_get_device_type(self):
 		if self.handle is None:
@@ -119,6 +123,19 @@ class Test_UR_API(unittest.TestCase):
 		self.assertIsNotNone(d_name, "failed to read device name")
 		self.assertGreater(len(d_name), 0, "empty device name")
 
+	def test_59_get_device_info(self):
+		if self.handle is None:
+			self.fail("No receiver found")
+		if self.device is None:
+			self.fail("Found no devices attached.")
+		if self.features_array is None:
+			self.fail("no feature set available")
+
+		device_info = api.get_device_info(self.handle, self.device, features_array=self.features_array)
+		self.assertIsNotNone(device_info, "failed to read full device info")
+		self.assertIsInstance(device_info, api.AttachedDeviceInfo)
+		Test_UR_API.device_info = device_info
+
 	def test_60_get_battery_level(self):
 		if self.handle is None:
 			self.fail("No receiver found")
@@ -131,7 +148,7 @@ class Test_UR_API(unittest.TestCase):
 			battery = api.get_device_battery_level(self.handle, self.device, self.features_array)
 			self.assertIsNotNone(battery, "failed to read battery level")
 		except FeatureNotSupported:
-			self.fail("BATTERY feature not supported by device " + str(self.device))
+			self.fail("FEATURE.BATTERY not supported by device " + str(self.device) + ": " + str(self.device_info))
 
 	def test_70_list_devices(self):
 		if self.handle is None:
