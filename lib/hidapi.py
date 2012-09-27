@@ -277,8 +277,11 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	"""
 	out_buffer = _C.create_string_buffer(b'\x00' * (bytes_count + 1))
 	bytes_read = _native.hid_read_timeout(device_handle, out_buffer, bytes_count, timeout_ms)
-	if bytes_read > -1:
-		return out_buffer[:bytes_read]
+	if bytes_read == -1:
+		return None
+	if bytes_read == 0:
+		return b''
+	return out_buffer[:bytes_read]
 
 
 def send_feature_report(device_handle, data, report_number=None):
