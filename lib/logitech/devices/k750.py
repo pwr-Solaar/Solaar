@@ -38,7 +38,7 @@ def _charge_status(data):
 		if charge >= _CHARGE_LIMITS[i]:
 			charge_index = i
 			break
-	text = '\n\tCharge %d%% (%s)' % (charge, _STATUS_NAMES[charge_index])
+	text = 'Charge %d%% (%s)' % (charge, _STATUS_NAMES[charge_index])
 
 	lux = (ord(data[3]) << 8) + ord(data[4])
 	if lux > 0:

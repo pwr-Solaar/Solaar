@@ -5,4 +5,4 @@ cd `dirname "$0"`
 export LD_LIBRARY_PATH=$PWD/lib
 export PYTHONPATH=$PWD/lib
 
-exec python -OO -Qnew solaar.py "$@"
+exec python -OO solaar.py "$@"

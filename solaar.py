@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logging.captureWarnings(True)
-
 import time
 import threading
 
@@ -21,12 +18,13 @@ from logitech.devices import *
 #
 
 APP_TITLE = 'Solaar'
-_NO_DEVICES = 'No devices attached.'
-_NO_RECEIVER = 'Unifying Receiver not found.'
-_FOUND_RECEIVER = 'Unifying Receiver detected.'
+UNIFYING_RECEIVER = 'Unifying Receiver'
+NO_DEVICES = 'No devices attached.'
+NO_RECEIVER = 'Unifying Receiver not found.'
+FOUND_RECEIVER = 'Unifying Receiver detected.'
 
-_STATUS_TIMEOUT = 31  # seconds
-_ICON_UPDATE_SLEEP = 7  # seconds
+STATUS_TIMEOUT = 31  # seconds
+ICON_UPDATE_SLEEP = 7  # seconds
 
 
 #
@@ -37,11 +35,40 @@ _ICON_UPDATE_SLEEP = 7  # seconds
 try:
 	import notify2
 	notify2.init(APP_TITLE)
-	def notify_desktop(status_code, text):
-		notification = notify2.Notification(APP_TITLE, text)
+
+	_notifications = {}
+	import os.path
+	_ICONS = {}
+
+	def notify_desktop(status, title, text, icon=None):
+		def _icon_path(name):
+			path = os.path.join(__file__, '..', 'images', name + '.png')
+			path = os.path.normpath(path)
+			path = os.path.abspath(path)
+			return path if os.path.isfile(path) else None
+
+		if icon is None:
+			icon = title
+		if icon not in _ICONS:
+			_ICONS[icon] = _icon_path(icon)
+		icon_path = _ICONS[icon]
+		if icon_path:
+			icon = icon_path
+		if icon is None:
+			icon = 'error' if status < 0 else 'info'
+
+		if title in _notifications:
+			notification = _notifications[title]
+		else:
+			notification = notify2.Notification(title, icon=icon)
+			notification.set_category(APP_TITLE)
+			_notifications[title] = notification
+
+		notification.set_urgency(notify2.URGENCY_CRITICAL if status < 0 else notify2.URGENCY_NORMAL)
+		notification.update(title, text, icon)
 		notification.show()
 except ImportError:
-	def notify_desktop(status_code, text):
+	def notify_desktop(status, title, text, icon=None):
 		pass
 
 
@@ -72,18 +99,18 @@ class StatusThread(threading.Thread):
 					self.listener = EventsListener(receiver, self.events_callback)
 					logging.info("started events listener %s", self.listener)
 					self.listener.start()
-					notify_desktop(1, _FOUND_RECEIVER)
+					notify_desktop(1, UNIFYING_RECEIVER, FOUND_RECEIVER)
 					self.last_receiver_status = 1
 				else:
 					if self.last_receiver_status != -1:
-						notify_desktop(-1, _NO_RECEIVER)
+						notify_desktop(-1, UNIFYING_RECEIVER, NO_RECEIVER)
 						self.last_receiver_status = -1
 			elif not self.listener.active:
 				logging.info("events listener %s stopped", self.listener)
 				self.listener = None
 				self.devices.clear()
 				self.statuses.clear()
-				notify_desktop(-1, _NO_RECEIVER)
+				notify_desktop(-1, UNIFYING_RECEIVER, NO_RECEIVER)
 				self.last_receiver_status = -1
 
 			if self.active:
@@ -95,7 +122,7 @@ class StatusThread(threading.Thread):
 				GObject.idle_add(self.update_status_icon)
 
 			if self.active:
-				time.sleep(_ICON_UPDATE_SLEEP)
+				time.sleep(ICON_UPDATE_SLEEP)
 
 	def stop(self):
 		self.active = False
@@ -111,7 +138,7 @@ class StatusThread(threading.Thread):
 				self.statuses[devinfo.number] = [0, None, None]
 
 			last_status_time = self.statuses[devinfo.number][0]
-			if time.time() - last_status_time > _STATUS_TIMEOUT:
+			if time.time() - last_status_time > STATUS_TIMEOUT:
 				status = request_status(devinfo, self.listener)
 				updated |= self.device_status_changed(devinfo, status)
 
@@ -164,7 +191,7 @@ class StatusThread(threading.Thread):
 
 		if old_status_code != status_code:
 			logging.debug("device status changed from %s => %s: %s", old_status_code, status_code, status_text)
-			notify_desktop(status_code, devinfo.name + ' ' + status_text)
+			notify_desktop(status_code, devinfo.name, status_text)
 
 		return True
 
@@ -175,23 +202,26 @@ class StatusThread(threading.Thread):
 				devinfo = self.devices[d]
 				status_text = self.statuses[d][2]
 				if status_text:
-					all_statuses.append(devinfo.name + ' ' + status_text)
+					all_statuses.append(unichr(0x274a) + ' ' + devinfo.name + '\n\t' + status_text)
 				else:
-					all_statuses.append(devinfo.name + ' found')
+					all_statuses.append(devinfo.name)
 
 			if all_statuses:
 				tooltip = '\n'.join(all_statuses)
 			else:
-				tooltip = _NO_DEVICES
+				tooltip = NO_DEVICES
 		else:
-			tooltip = _NO_RECEIVER
+			tooltip = NO_RECEIVER
 
 		# logging.debug("tooltip %s", tooltip)
 		self.status_icon.set_tooltip_text(tooltip)
 
 
 if __name__ == '__main__':
-	status_icon = Gtk.StatusIcon.new_from_file('images/icon.png')
+	logging.basicConfig(level=logging.DEBUG)
+	logging.captureWarnings(True)
+
+	status_icon = Gtk.StatusIcon.new_from_file('images/' + UNIFYING_RECEIVER + '.png')
 	status_icon.set_title(APP_TITLE)
 	status_icon.set_name(APP_TITLE)
 	status_icon.set_tooltip_text('Initializing...')
