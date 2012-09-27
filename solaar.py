@@ -21,9 +21,12 @@ from logitech.devices import *
 #
 
 APP_TITLE = 'Solaar'
+_NO_DEVICES = 'No devices attached.'
+_NO_RECEIVER = 'Unifying Receiver not found.'
+_FOUND_RECEIVER = 'Unifying Receiver detected.'
 
 _STATUS_TIMEOUT = 31  # seconds
-_ICON_UPDATE_SLEEP = 13  # seconds
+_ICON_UPDATE_SLEEP = 7  # seconds
 
 
 #
@@ -53,12 +56,14 @@ class StatusThread(threading.Thread):
 		self.daemon = True
 		self.status_icon = status_icon
 
-		StatusThread.listener = None
-		StatusThread.devices = {}
-		StatusThread.statuses = {}
+		self.last_receiver_status = None
+		self.listener = None
+		self.devices = {}
+		self.statuses = {}
 
 	def run(self):
-		while True:
+		self.active = True
+		while self.active:
 			if self.listener is None:
 				receiver = ur.open()
 				if receiver:
@@ -67,22 +72,38 @@ class StatusThread(threading.Thread):
 					self.listener = EventsListener(receiver, self.events_callback)
 					logging.info("started events listener %s", self.listener)
 					self.listener.start()
+					notify_desktop(1, _FOUND_RECEIVER)
+					self.last_receiver_status = 1
+				else:
+					if self.last_receiver_status != -1:
+						notify_desktop(-1, _NO_RECEIVER)
+						self.last_receiver_status = -1
 			elif not self.listener.active:
-				logging.info("stopped events listener %s", self.listener)
+				logging.info("events listener %s stopped", self.listener)
 				self.listener = None
 				self.devices.clear()
 				self.statuses.clear()
+				notify_desktop(-1, _NO_RECEIVER)
+				self.last_receiver_status = -1
 
-			update_icon = True
-			if self.listener and self.devices:
-				update_icon &= self.update_statuses()
+			if self.active:
+				update_icon = True
+				if self.listener and self.devices:
+					update_icon &= self.update_old_statuses()
 
-			if update_icon:
+			if self.active and update_icon:
 				GObject.idle_add(self.update_status_icon)
 
-			time.sleep(_ICON_UPDATE_SLEEP)
+			if self.active:
+				time.sleep(_ICON_UPDATE_SLEEP)
 
-	def update_statuses(self):
+	def stop(self):
+		self.active = False
+		if self.listener:
+			self.listener.stop()
+			ur.close(self.listener.receiver)
+
+	def update_old_statuses(self):
 		updated = False
 
 		for devinfo in self.devices.values():
@@ -156,14 +177,14 @@ class StatusThread(threading.Thread):
 				if status_text:
 					all_statuses.append(devinfo.name + ' ' + status_text)
 				else:
-					all_statuses.append(devinfo.name + ' present')
+					all_statuses.append(devinfo.name + ' found')
 
 			if all_statuses:
 				tooltip = '\n'.join(all_statuses)
 			else:
-				tooltip = 'No devices attached.'
+				tooltip = _NO_DEVICES
 		else:
-			tooltip = 'Unifying Receiver not found.'
+			tooltip = _NO_RECEIVER
 
 		# logging.debug("tooltip %s", tooltip)
 		self.status_icon.set_tooltip_text(tooltip)
@@ -177,5 +198,7 @@ if __name__ == '__main__':
 	status_icon.connect('popup_menu', Gtk.main_quit)
 
 	GObject.threads_init()
-	StatusThread(status_icon).start()
+	status_thread = StatusThread(status_icon)
+	status_thread.start()
 	Gtk.main()
+	status_thread.stop()
