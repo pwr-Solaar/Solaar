@@ -1,14 +1,25 @@
-+++ Logitech Solar k750 Userspace "Driver" for Linux
+Solaar
 
-Userspace driver for Logitech solar-powered (photovaltic) keyboard.
-Predictably, Logitech provides Windoze and Crackintosh versions of its
-software, but no Linux drivers.
 
-Alas, I am not a hardware hacker but I spent some time reading the USB
-spec and wireshark usb packet dumps (did you know libpcap is compatible
-with USB? I didn't!) and fuzzing the hardware with hex values using
-pyusb.  To my surprise, it kinda works.
+This application connects to a Logitech Unifying Receiver and puts an icon in
+the systray that watches for events from devices attached to it.
 
-Note:  drop the udev rule in ./rules.d into your distro's custom rules
-directory (presently /etc/udev/rules.d/ on Archlinux).  May require
-editing/rebooting; YMMV.
+Currently the K750 solar keyboard is also queried for its solar charge status.
+Other devices can also be added in the future (the K750 keyboard is the only
+device I have and can test on).
+
+Requirements:
+	- Python 2 or 3
+	- A hidapi native implementation (see lib/hidapi.py for details).
+	- Optional python-notify2 for desktop notifications.
+
+
+This project began as a third-hand clone of Noah K. Tilton's logitech-solar-k750
+project on GitHub (no longer available). It was developed further thanks to the
+diggings in Logitech's HID protocol done by Julien Danjou
+(http://julien.danjou.info/blog/2012/logitech-k750-linux-support) and
+Lars-Dominik Braun (http://6xq.net/git/lars/lshidpp.git).
+
+
+Cheers,
+-pwr
