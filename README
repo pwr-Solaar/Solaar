@@ -8,11 +8,47 @@ Currently the K750 solar keyboard is also queried for its solar charge status.
 Other devices can also be added in the future (the K750 keyboard is the only
 device I have and can test on).
 
-Requirements:
-	- Python 2 or 3
-	- A hidapi native implementation (see lib/hidapi.py for details).
-	- Optional python-notify2 for desktop notifications.
 
+Requirements
+------------
+
+- Python (2.7 or 3).
+- Python GI (GObject Introspection), for Gtk bindings.
+- A hidapi native implementation (see below for details).
+- Optional python-notify2 for desktop notifications.
+
+
+Installation
+------------
+
+1. Make the Logitech Unifying Receiver device available to standard users
+
+Normally USB devices are not accessible for r/w by regular users.
+
+In rules.d/ you'll find a udev rule to be copied in /etc/udev/rules.d/ . In its
+current form it makes the UR device available for r/w by all users belonging to
+the 'plugdev' system group (standard Debian group for pluggable devices). It may
+need changes, specific to your particular system's configuration.
+
+2. Compile the hidapi native library.
+
+Solaar uses a thin ctypes layer on top of a native hidapi library to talk
+directly to the UR device. Its source code is available here:
+https://github.com/signal11/hidapi .
+
+The native library comes in two flavors, `hidraw` and `libusb`. You should
+compile and use the hidraw implementation (in linux/); the libusb version
+disconnects the device from the kernel and may cause your UR-connected devices
+to stop working until you physically remove and re-insert the UR.
+
+Once compiled, you should copy the shared library (libhidapi-hidraw.so) to the
+lib/ directory in the application.
+
+3. Start the application with ./solaar
+
+
+Notes
+-----
 
 This project began as a third-hand clone of Noah K. Tilton's logitech-solar-k750
 project on GitHub (no longer available). It was developed further thanks to the
