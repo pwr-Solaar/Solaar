@@ -78,6 +78,7 @@ try:
 		_ICONS.clear()
 
 except ImportError:
+	logging.warn("python-notify2 not found, desktop notifications are disabled")
 	def notify_desktop(status, title, text, icon=None): pass
 	def clear_notifications(): pass
 
@@ -233,7 +234,7 @@ class StatusThread(threading.Thread):
 
 		self.status_icon.set_tooltip_text(tooltip)
 
-	def activate_icon(self, status_icon):
+	def activate_icon(self, _):
 		if self.listener and self.listener.active:
 			if self.devices:
 				for devinfo in list(self.devices.values()):
@@ -245,6 +246,22 @@ class StatusThread(threading.Thread):
 		else:
 			notify_desktop(-1, UNIFYING_RECEIVER, NO_RECEIVER)
 			self.last_receiver_status = -1
+
+
+
+def show_icon_menu(icon, button, time, status_thread):
+	menu = Gtk.Menu()
+
+	status_item = Gtk.MenuItem('Status')
+	status_item.connect('activate', status_thread.activate_icon)
+	menu.append(status_item)
+
+	quit_item = Gtk.MenuItem('Quit')
+	quit_item.connect('activate', Gtk.main_quit)
+	menu.append(quit_item)
+
+	menu.show_all()
+	menu.popup(None, None, icon.position_menu, icon, button, time)
 
 
 if __name__ == '__main__':
@@ -260,13 +277,14 @@ if __name__ == '__main__':
 	status_icon = Gtk.StatusIcon.new_from_file('images/' + UNIFYING_RECEIVER + '.png')
 	status_icon.set_title(APP_TITLE)
 	status_icon.set_name(APP_TITLE)
-	status_icon.set_tooltip_text('Initializing...')
+	status_icon.set_tooltip_text('Searching...')
+	notify_desktop(0, UNIFYING_RECEIVER, 'Searching...')
 
 	GObject.threads_init()
 	status_thread = StatusThread(status_icon)
 	status_thread.start()
 
-	status_icon.connect('popup_menu', Gtk.main_quit)
+	status_icon.connect('popup_menu', show_icon_menu, status_thread)
 	status_icon.connect('activate', status_thread.activate_icon)
 	Gtk.main()
 
