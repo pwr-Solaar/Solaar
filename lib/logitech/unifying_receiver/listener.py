@@ -78,7 +78,7 @@ class EventsListener(threading.Thread):
 		The api_function will get the receiver handle as a first agument, all
 		other args and kwargs will follow.
 		"""
-		# _l.log(_LOG_LEVEL, "(%d) request '%s' with %s, %s", self.receiver, api_function.__name__, args, kwargs)
+		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
 		self.task_processing.acquire()
 		self.task_done.clear()
 		self.task = (api_function, args, kwargs)
@@ -88,13 +88,13 @@ class EventsListener(threading.Thread):
 		self.task = self.task_reply = None
 		self.task_processing.release()
 
-		# _l.log(_LOG_LEVEL, "(%d) request '%s' => [%s]", self.receiver, api_function.__name__, hexlify(reply))
+		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' => [%s]", self.receiver, api_function.__module__, api_function.__name__, hexlify(reply))
 		if isinstance(reply, Exception):
 			raise reply
 		return reply
 
 	def _make_request(self, api_function, args, kwargs):
-		_l.log(_LOG_LEVEL, "(%d) calling '%s' with %s, %s", self.receiver, api_function.__name__, args, kwargs)
+		_l.log(_LOG_LEVEL, "(%d) calling '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
 		try:
 			return api_function.__call__(self.receiver, *args, **kwargs)
 		except NoReceiver as nr:

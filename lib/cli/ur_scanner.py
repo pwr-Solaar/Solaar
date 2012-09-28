@@ -4,10 +4,10 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-import struct
 from binascii import hexlify
 
 from logitech.unifying_receiver import api
+from logitech.unifying_receiver.constants import *
 
 
 def scan_devices(receiver):
@@ -21,40 +21,35 @@ def scan_devices(receiver):
 		for fw in devinfo.firmware:
 			print "    %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build)
 
-		for index in range(0, len(devinfo.features_array)):
-			feature = devinfo.features_array[index]
+		for index in range(0, len(devinfo.features)):
+			feature = devinfo.features[index]
 			if feature:
-				print "  Feature %s (%s) available at index %d" % (api.FEATURE_NAME(feature), hexlify(feature), index)
+				print "~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index)
 
-		if api.FEATURE.REPROGRAMMABLE_KEYS in devinfo.features_array:
-			keys_count = api.request(receiver, devinfo.number, api.FEATURE.REPROGRAMMABLE_KEYS, features_array=devinfo.features_array)
-			if keys_count:
-				keys_count = ord(keys_count[:1])
-				print "  %d reprogrammable keys available" % keys_count
-				for index in range(0, keys_count):
-					key_info = api.request(receiver, devinfo.number, api.FEATURE.REPROGRAMMABLE_KEYS,
-						function=b'\x10', params=struct.pack('!B', index),
-						features_array=devinfo.features_array)
-					ctrl_id_indexes, ctrl_task_indexes, flags = struct.unpack('!HHB', key_info[:5])
+		if FEATURE.BATTERY in devinfo.features:
+			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features_array=devinfo.features)
+			print "  Battery %d charged (next level %d%), status %s" % (discharge, dischargeNext, status)
 
-					flag = ''
-					if flags & 0x10:
-						flag += ' reprogrammable'
-					if flags & 0x08:
-						flag += ' fn-sensitive'
-					if flags & 0x04:
-						flag += ' nonstandard'
-					if flags & 0x02:
-						flag += ' is-fn'
-					if flags & 0x01:
-						flag += ' mse'
+		if FEATURE.REPROGRAMMABLE_KEYS in devinfo.features:
+			keys = api.get_device_keys(receiver, devinfo.number, features_array=devinfo.features)
+			if keys is not None and keys:
+				print "  %d reprogrammable keys found" % len(keys)
+				for k in keys:
+					flags = ''
+					if k.flags & KEY_FLAG.REPROGRAMMABLE:
+						flags += ' reprogrammable'
+					if k.flags & KEY_FLAG.FN_SENSITIVE:
+						flags += ' fn-sensitive'
+					if k.flags & KEY_FLAG.NONSTANDARD:
+						flags += ' nonstandard'
+					if k.flags & KEY_FLAG.IS_FN:
+						flags += ' is-fn'
+					if k.flags & KEY_FLAG.MSE:
+						flags += ' mse'
 
-					print "  key %d : %04x %04x %s" % (index, ctrl_id_indexes, ctrl_task_indexes, flag)
-
-
+					print "    %2d: %s => %s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags)
 
 		print "--------"
-
 
 
 if __name__ == '__main__':

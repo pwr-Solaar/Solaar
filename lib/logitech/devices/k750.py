@@ -26,7 +26,7 @@ _LIGHTING_LIMITS = (400, 200, 50, 20, -1)
 def _trigger_solar_charge_events(receiver, devinfo):
 	return _api.request(receiver, devinfo.number,
 						feature=_api.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
-						features_array=devinfo.features_array)
+						features_array=devinfo.features)
 
 
 def _charge_status(data):

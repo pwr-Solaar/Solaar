@@ -1,8 +1,8 @@
 #!/bin/sh
 
-cd `dirname "$0"`
+cd `dirname "$0"`/../lib
 
-export LD_LIBRARY_PATH=$PWD/lib
-export PYTHONPATH=$PWD/lib
+export LD_LIBRARY_PATH=$PWD
+export PYTHONPATH=$PWD
 
 exec python -OO -m cli.ur_scanner "$@"

@@ -3,6 +3,7 @@
 #
 
 import unittest
+import warnings
 
 from logitech.unifying_receiver import api
 from logitech.unifying_receiver.exceptions import *
@@ -144,11 +145,12 @@ class Test_UR_API(unittest.TestCase):
 		if self.features_array is None:
 			self.fail("no feature set available")
 
-		try:
+		if FEATURE.BATTERY in self.features_array:
 			battery = api.get_device_battery_level(self.handle, self.device, self.features_array)
 			self.assertIsNotNone(battery, "failed to read battery level")
-		except FeatureNotSupported:
-			self.fail("FEATURE.BATTERY not supported by device " + str(self.device) + ": " + str(self.device_info))
+			self.assertIsInstance(battery, tuple, "result not a tuple")
+		else:
+			warnings.warn("BATTERY feature not supported by device %d" % self.device)
 
 	def test_70_list_devices(self):
 		if self.handle is None:
