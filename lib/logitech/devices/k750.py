@@ -1,5 +1,5 @@
 #
-# Functions that are specific to the K750 solar keyboard.
+# Functions specific to the K750 solar keyboard.
 #
 
 import logging

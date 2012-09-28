@@ -2,6 +2,8 @@
 # Constants used by the rest of the API.
 #
 
+from binascii import hexlify
+
 """Possible features available on a Logitech device.
 
 A particular device might not support all these features, and may support other
@@ -42,7 +44,7 @@ def FEATURE_NAME(feature_code):
 		return None
 	if feature_code in _FEATURE_NAMES:
 		return _FEATURE_NAMES[feature_code]
-	return 'UNKNOWN_%s' % feature_code
+	return 'UNKNOWN_%s' % hexlify(feature_code)
 
 
 """Possible types of devices connected to an UR."""
