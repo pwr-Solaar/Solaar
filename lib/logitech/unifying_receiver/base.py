@@ -186,7 +186,8 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, hexlify(data), len(data))
 		if len(data) > _MAX_REPLY_SIZE:
 			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, hexlify(data), len(data))
-		code, device = struct.unpack('!BB', data[:2])
+		code = ord(data[:1])
+		device = ord(data[1:2])
 		return code, device, data[2:]
 	_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
 
@@ -224,7 +225,7 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 
 		if reply_device != device:
 			# this message not for the device we're interested in
-			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, hexlify(reply_device), hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, hexlify(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			_unhandled._publish(reply_code, reply_device, reply_data)
@@ -243,7 +244,7 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# an error returned from the device
 			error_code = ord(reply_data[3])
-			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME(error_code), hexlify(reply_data))
+			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME[error_code], hexlify(reply_data))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
 			feature = None if features_array is None else features_array[feature_index]

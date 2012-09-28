@@ -297,15 +297,15 @@ def get_device_firmware(handle, device, features_array=None):
 def get_device_type(handle, device, features_array=None):
 	"""Reads a device's type.
 
-	:see DEVICE_TYPES:
+	:see DEVICE_TYPE:
 	:returns: a string describing the device type, or ``None`` if the device is
 	not available or does not support the ``NAME`` feature.
 	"""
 	d_type = request(handle, device, FEATURE.NAME, function=b'\x20', features_array=features_array)
 	if d_type:
 		d_type = ord(d_type[:1])
-		_l.log(_LOG_LEVEL, "(%d,%d) device type %d = %s", handle, device, d_type, DEVICE_TYPES[d_type])
-		return DEVICE_TYPES[d_type]
+		_l.log(_LOG_LEVEL, "(%d,%d) device type %d = %s", handle, device, d_type, DEVICE_TYPE[d_type])
+		return DEVICE_TYPE[d_type]
 
 
 def get_device_name(handle, device, features_array=None):
@@ -339,7 +339,7 @@ def get_device_battery_level(handle, device, features_array=None):
 	if battery:
 		discharge, dischargeNext, status = struct.unpack('!BBB', battery[:3])
 		_l.log(_LOG_LEVEL, "(%d:%d) battery %d%% charged, next level %d%% charge, status %d = %s", discharge, dischargeNext, status, BATTERY_STATUSE[status])
-		return (discharge, dischargeNext, BATTERY_STATUSE[status])
+		return (discharge, dischargeNext, BATTERY_STATUS[status])
 
 
 def get_device_keys(handle, device, features_array=None):

@@ -45,9 +45,11 @@ FEATURE_NAME[FEATURE.WIRELESS_STATUS] = 'WIRELESS_STATUS'
 FEATURE_NAME[FEATURE.SOLAR_CHARGE] = 'SOLAR_CHARGE'
 
 
-"""Possible types of devices connected to an UR."""
-DEVICE_TYPES = ('Keyboard', 'Remote Control', 'NUMPAD', 'Mouse',
+_DEVICE_TYPES = ('Keyboard', 'Remote Control', 'NUMPAD', 'Mouse',
 				'Touchpad', 'Trackball', 'Presenter', 'Receiver')
+
+"""Possible types of devices connected to an UR."""
+DEVICE_TYPE = FallbackDict(lambda x: 'unknown', list2dict(_DEVICE_TYPES))
 
 
 _FIRMWARE_TYPES = ('Main (HID)', 'Bootloader', 'Hardware', 'Other')
