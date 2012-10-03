@@ -5,7 +5,7 @@
 from binascii import hexlify as _hexlify
 from struct import pack as _pack
 
-from .common import *
+from .common import (FallbackDict, list2dict)
 
 
 """Possible features available on a Logitech device.
@@ -21,7 +21,7 @@ FEATURE = type('FEATURE', (),
 					NAME=b'\x00\x05',
 					BATTERY=b'\x10\x00',
 					REPROGRAMMABLE_KEYS=b'\x1B\x00',
-					WIRELESS_STATUS=b'\x1D\x4B',
+					WIRELESS=b'\x1D\x4B',
 					SOLAR_CHARGE=b'\x43\x01',
 				))
 
@@ -41,7 +41,7 @@ FEATURE_NAME[FEATURE.FIRMWARE] = 'FIRMWARE'
 FEATURE_NAME[FEATURE.NAME] = 'NAME'
 FEATURE_NAME[FEATURE.BATTERY] = 'BATTERY'
 FEATURE_NAME[FEATURE.REPROGRAMMABLE_KEYS] = 'REPROGRAMMABLE_KEYS'
-FEATURE_NAME[FEATURE.WIRELESS_STATUS] = 'WIRELESS_STATUS'
+FEATURE_NAME[FEATURE.WIRELESS] = 'WIRELESS'
 FEATURE_NAME[FEATURE.SOLAR_CHARGE] = 'SOLAR_CHARGE'
 
 
@@ -54,7 +54,7 @@ DEVICE_TYPE = FallbackDict(lambda x: 'unknown', list2dict(_DEVICE_TYPES))
 
 _FIRMWARE_TYPES = ('Main (HID)', 'Bootloader', 'Hardware', 'Other')
 
-"""Names of different firmware levels possible, ordered from top to bottom."""
+"""Names of different firmware levels possible, indexed by level."""
 FIRMWARE_TYPE = FallbackDict(lambda x: 'Unknown', list2dict(_FIRMWARE_TYPES))
 
 
@@ -74,7 +74,7 @@ _KEY_NAMES = ( 'unknown_0000', 'Volume up', 'Volume down', 'Mute', 'Play/Pause',
 KEY_NAME = FallbackDict(lambda x: 'unknown_%04x' % x, list2dict(_KEY_NAMES))
 
 """Possible flags on a reprogrammable key."""
-KEY_FLAG = type('REPROGRAMMABLE_KEY_FLAGS', (), dict(
+KEY_FLAG = type('KEY_FLAG', (), dict(
 					REPROGRAMMABLE=0x10,
 					FN_SENSITIVE=0x08,
 					NONSTANDARD=0x04,
@@ -82,9 +82,20 @@ KEY_FLAG = type('REPROGRAMMABLE_KEY_FLAGS', (), dict(
 					MSE=0x01,
 				))
 
+KEY_FLAG_NAME = FallbackDict(lambda x: 'unknown')
+KEY_FLAG_NAME[KEY_FLAG.REPROGRAMMABLE] = 'reprogrammable'
+KEY_FLAG_NAME[KEY_FLAG.FN_SENSITIVE] = 'fn-sensitive'
+KEY_FLAG_NAME[KEY_FLAG.NONSTANDARD] = 'nonstandard'
+KEY_FLAG_NAME[KEY_FLAG.IS_FN] = 'is-fn'
+KEY_FLAG_NAME[KEY_FLAG.MSE] = 'mse'
+
 _ERROR_NAMES = ('Ok', 'Unknown', 'Invalid argument', 'Out of range',
 				'Hardware error', 'Logitech internal', 'Invalid feature index',
 				'Invalid function', 'Busy', 'Unsupported')
 
 """Names for error codes."""
 ERROR_NAME = FallbackDict(lambda x: 'Unknown error', list2dict(_ERROR_NAMES))
+
+
+del FallbackDict
+del list2dict

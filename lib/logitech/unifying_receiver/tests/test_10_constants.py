@@ -5,7 +5,7 @@
 import unittest
 import struct
 
-from logitech.unifying_receiver.constants import *
+from ..constants import *
 
 
 class Test_UR_Constants(unittest.TestCase):

@@ -5,9 +5,9 @@
 import unittest
 import warnings
 
-from logitech.unifying_receiver import api
-from logitech.unifying_receiver.exceptions import *
-from logitech.unifying_receiver.constants import *
+from .. import api
+from ..constants import *
+from ..common import *
 
 
 class Test_UR_API(unittest.TestCase):
@@ -45,7 +45,7 @@ class Test_UR_API(unittest.TestCase):
 
 		devices = []
 
-		for device in range(1, 1 + api.base.MAX_ATTACHED_DEVICES):
+		for device in range(1, 1 + api._base.MAX_ATTACHED_DEVICES):
 			ok = api.ping(self.handle, device)
 			self.assertIsNotNone(ok, "invalid ping reply")
 			if ok:
@@ -98,7 +98,7 @@ class Test_UR_API(unittest.TestCase):
 		self.assertIsNotNone(d_firmware, "failed to get device firmware")
 		self.assertGreater(len(d_firmware), 0, "device reported no firmware")
 		for fw in d_firmware:
-			self.assertIsInstance(fw, api.FirmwareInfo)
+			self.assertIsInstance(fw, FirmwareInfo)
 
 	def test_52_get_device_type(self):
 		if self.handle is None:
@@ -134,7 +134,7 @@ class Test_UR_API(unittest.TestCase):
 
 		device_info = api.get_device_info(self.handle, self.device, features_array=self.features_array)
 		self.assertIsNotNone(device_info, "failed to read full device info")
-		self.assertIsInstance(device_info, api.AttachedDeviceInfo)
+		self.assertIsInstance(device_info, AttachedDeviceInfo)
 		Test_UR_API.device_info = device_info
 
 	def test_60_get_battery_level(self):
@@ -160,7 +160,7 @@ class Test_UR_API(unittest.TestCase):
 		if all_devices:
 			self.assertIsNotNone(self.device)
 			for device_info in all_devices:
-				self.assertIsInstance(device_info, api.AttachedDeviceInfo)
+				self.assertIsInstance(device_info, AttachedDeviceInfo)
 		else:
 			self.assertIsNone(self.device)
 

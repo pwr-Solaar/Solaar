@@ -5,10 +5,10 @@
 import unittest
 from binascii import hexlify
 
-from logitech.unifying_receiver import base
-from logitech.unifying_receiver.exceptions import *
-from logitech.unifying_receiver.constants import *
-from logitech.unifying_receiver.unhandled import *
+from .. import base
+from ..exceptions import *
+from ..constants import *
+from .. import unhandled
 
 
 class Test_UR_Base(unittest.TestCase):
@@ -157,15 +157,15 @@ class Test_UR_Base(unittest.TestCase):
 			global received_unhandled
 			received_unhandled = (code, device, data)
 
-		# set_unhandled_hook(_unhandled)
+		unhandled.hook = _unhandled
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")
 		self.assertNotEquals(reply[:1], b'\x00')
-		# self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
+		self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
 
 		received_unhandled = None
-		# set_unhandled_hook()
+		unhandled.hook = None
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")

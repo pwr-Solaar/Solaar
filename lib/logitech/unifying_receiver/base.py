@@ -4,11 +4,11 @@
 #
 
 import logging
-import struct
-from binascii import hexlify
+from struct import pack as _pack
+from binascii import hexlify as _hexlify
 
-from .constants import *
-from .exceptions import *
+import constants as C
+import exceptions as E
 
 from . import unhandled as _unhandled
 import hidapi as _hid
@@ -92,9 +92,9 @@ def try_open(path):
 		# any other replies are ignored, and will assume this is the wrong receiver device
 		if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
 			# no idea what this is, but it comes up occasionally
-			_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, hexlify(reply))
+			_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, _hexlify(reply))
 		else:
-			_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, hexlify(reply))
+			_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, _hexlify(reply))
 	else:
 		_l.log(_LOG_LEVEL, "[%s] (%d,) no reply", path, receiver_handle)
 
@@ -146,16 +146,18 @@ def write(handle, device, data):
 		data += b'\x00' * (_MIN_CALL_SIZE - 2 - len(data))
 	elif len(data) > _MIN_CALL_SIZE - 2:
 		data += b'\x00' * (_MAX_CALL_SIZE - 2 - len(data))
-	wdata = struct.pack('!BB', 0x10, device) + data
-	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, device, hexlify(wdata))
+	wdata = _pack('!BB', 0x10, device) + data
+
+	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, device, _hexlify(wdata))
 	if len(wdata) < _MIN_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too short: %d bytes", handle, device, hexlify(wdata), len(wdata))
+		_l.warn("(%d:%d) <= w[%s] call packet too short: %d bytes", handle, device, _hexlify(wdata), len(wdata))
 	if len(wdata) > _MAX_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, device, hexlify(wdata), len(wdata))
+		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, device, _hexlify(wdata), len(wdata))
+
 	if not _hid.write(handle, wdata):
 		_l.warn("(%d,%d) write failed, assuming receiver no longer available", handle, device)
 		close(handle)
-		raise NoReceiver()
+		raise E.NoReceiver
 
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
@@ -178,17 +180,18 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	if data is None:
 		_l.warn("(%d,*) read failed, assuming receiver no longer available", handle)
 		close(handle)
-		raise NoReceiver
+		raise E.NoReceiver
 
 	if data:
-		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, hexlify(data))
+		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, _hexlify(data))
 		if len(data) < _MIN_REPLY_SIZE:
-			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, hexlify(data), len(data))
+			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, _hexlify(data), len(data))
 		if len(data) > _MAX_REPLY_SIZE:
-			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, hexlify(data), len(data))
+			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, _hexlify(data), len(data))
 		code = ord(data[:1])
 		device = ord(data[1:2])
 		return code, device, data[2:]
+
 	_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
 
 
@@ -209,13 +212,16 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 	available.
 	:raisees FeatureCallError: if the feature call replied with an error.
 	"""
-	_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, device, hexlify(feature_index_function), hexlify(params))
+	_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, device, _hexlify(feature_index_function), _hexlify(params))
 	if len(feature_index_function) != 2:
-		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % hexlify(feature_index_function))
+		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hexlify(feature_index_function))
+
+	retries = 5
 
 	write(handle, device, feature_index_function + params)
-	while True:
+	while retries > 0:
 		reply = read(handle)
+		retries -= 1
 
 		if not reply:
 			# keep waiting...
@@ -225,7 +231,7 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 
 		if reply_device != device:
 			# this message not for the device we're interested in
-			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d,%d) request got reply for unexpected device %d: [%s]", handle, device, reply_device, _hexlify(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			_unhandled._publish(reply_code, reply_device, reply_data)
@@ -233,27 +239,27 @@ def request(handle, device, feature_index_function, params=b'', features_array=N
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:2] == feature_index_function:
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed on {%s} call: [%s]", handle, device, hexlify(feature_index_function), hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed on {%s} call: [%s]", handle, device, _hexlify(feature_index_function), _hexlify(reply_data))
 			return None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed: [%s]", handle, device, hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed: [%s]", handle, device, _hexlify(reply_data))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# an error returned from the device
 			error_code = ord(reply_data[3])
-			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, ERROR_NAME[error_code], hexlify(reply_data))
+			_l.warn("(%d,%d) request feature call error %d = %s: %s", handle, device, error_code, C.ERROR_NAME[error_code], _hexlify(reply_data))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
 			feature = None if features_array is None else features_array[feature_index]
-			raise FeatureCallError(device, feature, feature_index, feature_function, error_code, reply_data)
+			raise E.FeatureCallError(device, feature, feature_index, feature_function, error_code, reply_data)
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			_l.log(_LOG_LEVEL, "(%d,%d) matched reply with data [%s]", handle, device, hexlify(reply_data[2:]))
+			_l.log(_LOG_LEVEL, "(%d,%d) matched reply with feature-index-function [%s]", handle, device, _hexlify(reply_data[2:]))
 			return reply_data[2:]
 
-		_l.log(_LOG_LEVEL, "(%d,%d) unmatched reply {%s} (expected {%s})", handle, device, hexlify(reply_data[:2]), hexlify(feature_index_function))
+		_l.log(_LOG_LEVEL, "(%d,%d) unmatched reply {%s} (expected {%s})", handle, device, _hexlify(reply_data[:2]), _hexlify(feature_index_function))
 		_unhandled._publish(reply_code, reply_device, reply_data)

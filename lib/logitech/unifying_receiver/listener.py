@@ -4,11 +4,12 @@
 
 import logging
 import threading
-from time import sleep
-from binascii import hexlify
+from time import sleep as _sleep
+# from binascii import hexlify as _hexlify
 
-from . import base
-from .exceptions import *
+from . import base as _base
+from . import exceptions as E
+# from . import unhandled as _unhandled
 
 
 _LOG_LEVEL = 6
@@ -16,7 +17,7 @@ _l = logging.getLogger('logitech.unifying_receiver.listener')
 
 
 _READ_EVENT_TIMEOUT = 90  # ms
-_IDLE_SLEEP = 900  # ms
+_IDLE_SLEEP = 950  # ms
 
 
 class EventsListener(threading.Thread):
@@ -34,6 +35,7 @@ class EventsListener(threading.Thread):
 	def __init__(self, receiver, events_callback):
 		super(EventsListener, self).__init__(name='Unifying_Receiver_Listener_' + hex(receiver))
 		self.daemon = True
+		self.active = False
 
 		self.receiver = receiver
 		self.callback = events_callback
@@ -45,13 +47,17 @@ class EventsListener(threading.Thread):
 		self.task_done = threading.Event()
 
 	def run(self):
-		_l.log(_LOG_LEVEL, "(%d) starting", self.receiver)
 		self.active = True
+		_l.log(_LOG_LEVEL, "(%d) starting", self.receiver)
+
+		# last_hook = _unhandled.hook
+		# _unhandled.hook = self.callback
+
 		while self.active:
 			try:
 				# _l.log(_LOG_LEVEL, "(%d) reading next event", self.receiver)
-				event = base.read(self.receiver, _READ_EVENT_TIMEOUT)
-			except NoReceiver:
+				event = _base.read(self.receiver, _READ_EVENT_TIMEOUT)
+			except E.NoReceiver:
 				_l.warn("(%d) receiver disconnected", self.receiver)
 				self.active = False
 				break
@@ -62,10 +68,12 @@ class EventsListener(threading.Thread):
 					self.callback.__call__(*event)
 				elif self.task is None:
 					# _l.log(_LOG_LEVEL, "(%d) idle sleep", self.receiver)
-					sleep(_IDLE_SLEEP / 1000.0)
+					_sleep(_IDLE_SLEEP / 1000.0)
 				else:
 					self.task_reply = self._make_request(*self.task)
 					self.task_done.set()
+
+		# _unhandled.hook = last_hook
 
 	def stop(self):
 		"""Tells the listener to stop as soon as possible."""
@@ -88,7 +96,7 @@ class EventsListener(threading.Thread):
 		self.task = self.task_reply = None
 		self.task_processing.release()
 
-		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' => [%s]", self.receiver, api_function.__module__, api_function.__name__, hexlify(reply))
+		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' => [%s]", self.receiver, api_function.__module__, api_function.__name__, _hexlify(reply))
 		if isinstance(reply, Exception):
 			raise reply
 		return reply
@@ -97,7 +105,7 @@ class EventsListener(threading.Thread):
 		_l.log(_LOG_LEVEL, "(%d) calling '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
 		try:
 			return api_function.__call__(self.receiver, *args, **kwargs)
-		except NoReceiver as nr:
+		except E.NoReceiver as nr:
 			self.task_reply = nr
 			self.active = False
 		except Exception as e:

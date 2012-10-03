@@ -24,7 +24,7 @@ def scan_devices(receiver):
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
 			if feature:
-				print "~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index)
+				print "  ~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index)
 
 		if FEATURE.BATTERY in devinfo.features:
 			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features_array=devinfo.features)
@@ -35,19 +35,8 @@ def scan_devices(receiver):
 			if keys is not None and keys:
 				print "  %d reprogrammable keys found" % len(keys)
 				for k in keys:
-					flags = ''
-					if k.flags & KEY_FLAG.REPROGRAMMABLE:
-						flags += ' reprogrammable'
-					if k.flags & KEY_FLAG.FN_SENSITIVE:
-						flags += ' fn-sensitive'
-					if k.flags & KEY_FLAG.NONSTANDARD:
-						flags += ' nonstandard'
-					if k.flags & KEY_FLAG.IS_FN:
-						flags += ' is-fn'
-					if k.flags & KEY_FLAG.MSE:
-						flags += ' mse'
-
-					print "    %2d: %s => %s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags)
+					flags = ','.join(KEY_FLAG_NAME[f] for f in KEY_FLAG_NAME if k.flags & f)
+					print "    %2d: %-12s => %-12s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags)
 
 		print "--------"
 

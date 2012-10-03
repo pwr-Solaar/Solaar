@@ -3,7 +3,7 @@
 #
 
 class FallbackDict(dict):
-	def __init__(self, fallback_function, *args, **kwargs):
+	def __init__(self, fallback_function=lambda x: None, *args, **kwargs):
 		super(FallbackDict, self).__init__(*args, **kwargs)
 		self.fallback = fallback_function
 
@@ -16,7 +16,6 @@ class FallbackDict(dict):
 
 def list2dict(values_list):
 	return dict(zip(range(0, len(values_list)), values_list))
-
 
 
 from collections import namedtuple
