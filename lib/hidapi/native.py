@@ -16,18 +16,18 @@ Currently the native libusb implementation (temporarily) detaches the device's
 USB driver from the kernel, and it may cause the device to become unresponsive.
 """
 
-__version__ = '0.2-hidapi-0.7.0'
+__version__ = '0.3-hidapi-0.7.0'
 
 
 import ctypes as _C
-import struct
+from struct import pack as _pack
 
 
 #
 # look for a native implementation in the same directory as this file
 #
 
-"""The CDLL native library object."""
+# The CDLL native library object.
 _native = None
 
 for native_implementation in ('hidraw', 'libusb'):
@@ -36,7 +36,6 @@ for native_implementation in ('hidraw', 'libusb'):
 		break
 	except OSError:
 		pass
-del native_implementation
 
 if _native is None:
 	raise ImportError('hidapi: failed to load any HID API native implementation')
@@ -274,7 +273,8 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	The first byte will contain the Report number if the device uses numbered
 	reports.
 
-	:returns: the data packet read, or ``None`` if a timeout was reached.
+	:returns: the data packet read, an empty bytes string if a timeout was
+	reached, or None if there was an error while reading.
 	"""
 	out_buffer = _C.create_string_buffer(b'\x00' * (bytes_count + 1))
 	bytes_read = _native.hid_read_timeout(device_handle, out_buffer, bytes_count, timeout_ms)
@@ -308,7 +308,7 @@ def send_feature_report(device_handle, data, report_number=None):
 	:returns: ``True`` if the report was successfully written to the device.
 	"""
 	if report_number is not None:
-		data = struct.pack('!B', report_number) + data
+		data = _pack('!B', report_number) + data
 	bytes_written = _native.hid_send_feature_report(device_handle, _C.c_char_p(data), len(data))
 	return bytes_written > -1
 
@@ -324,7 +324,7 @@ def get_feature_report(device_handle, bytes_count, report_number=None):
 	"""
 	out_buffer = _C.create_string_buffer('\x00' * (bytes_count + 2))
 	if report_number is not None:
-		out_buffer[0] = struct.pack('!B', report_number)
+		out_buffer[0] = _pack('!B', report_number)
 	bytes_read = _native.hid_get_feature_report(device_handle, out_buffer, bytes_count)
 	if bytes_read > -1:
 		return out_buffer[:bytes_read]
@@ -373,7 +373,7 @@ def get_indexed_string(device_handle, index):
 	Note: currently not working in the ``hidraw`` native implementation.
 
 	:param device_handle: a device handle returned by open() or open_path().
-	:param string_index: the index of the string to get.
+	:param index: the index of the string to get.
 	"""
 	return _read_wchar(_native.hid_get_indexed_string, device_handle, index)
 
