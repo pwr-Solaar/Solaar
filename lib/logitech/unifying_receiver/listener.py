@@ -23,14 +23,14 @@ _IDLE_SLEEP = 950  # ms
 class EventsListener(threading.Thread):
 	"""Listener thread for events from the Unifying Receiver.
 
-	Incoming events (code, device, data) will be delivered to the callback
-	function. The callback is called in the listener thread, so it should return
-	as fast as possible.
+	Incoming events (reply_code, devnumber, data) will be passed to the callback
+	function. The callback is called in the listener thread, so for best results
+	it should return as fast as possible.
 
 	While this listener is running, you should use the request() method to make
-	regular UR API calls, otherwise the replies will be captured by the listener
-	and delivered as events to the callback. As an exception, you can make UR
-	API calls in the events callback.
+	regular UR API calls, otherwise the replies may be captured by the listener
+	and delivered as events to the callback. As an exception, you can make API
+	calls in the events callback.
 	"""
 	def __init__(self, receiver, events_callback):
 		super(EventsListener, self).__init__(name='Unifying_Receiver_Listener_' + hex(receiver))

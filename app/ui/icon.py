@@ -9,8 +9,8 @@ def _show_icon_menu(icon, button, time, menu):
 	menu.popup(None, None, icon.position_menu, icon, button, time)
 
 
-def create(app_icon, title, menu_actions, click_action=None):
-	icon = Gtk.StatusIcon.new_from_file(app_icon)
+def create(title, menu_actions, click_action=None):
+	icon = Gtk.StatusIcon.new_from_icon_name(title)
 	icon.set_title(title)
 	icon.set_name(title)
 
@@ -28,12 +28,11 @@ def create(app_icon, title, menu_actions, click_action=None):
 			for action in menu_actions:
 				if action:
 					item = Gtk.MenuItem(action[0])
-					function = action[1]
 					args = action[2:] if len(action) > 2 else ()
-					item.connect('activate', function, *args)
-					menu.append(item)
+					item.connect('activate', action[1], *args)
 				else:
-					menu.append(Gtk.SeparatorMenuItem())
+					item = Gtk.SeparatorMenuItem()
+				menu.append(item)
 			menu.show_all()
 			icon.connect('popup_menu', _show_icon_menu, menu)
 		else:

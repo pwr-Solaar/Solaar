@@ -45,7 +45,7 @@ class Test_UR_API(unittest.TestCase):
 
 		devices = []
 
-		for device in range(1, 1 + api._base.MAX_ATTACHED_DEVICES):
+		for device in range(1, 1 + MAX_ATTACHED_DEVICES):
 			ok = api.ping(self.handle, device)
 			self.assertIsNotNone(ok, "invalid ping reply")
 			if ok:

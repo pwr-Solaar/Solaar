@@ -7,7 +7,6 @@ __version__ = '0.4'
 #
 
 import logging
-import os.path
 
 
 if __name__ == '__main__':
@@ -20,8 +19,5 @@ if __name__ == '__main__':
 	log_level = logging.root.level - 10 * args.verbose
 	logging.basicConfig(level=log_level if log_level > 0 else 1)
 
-	images_path = os.path.join(__file__, '..', 'images')
-	images_path = os.path.abspath(os.path.normpath(images_path))
-
 	import app
-	app.run(images_path)
+	app.run()

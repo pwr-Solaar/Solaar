@@ -4,6 +4,7 @@ cd `dirname "$0"`
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib
 export PYTHONPATH=$PWD:$PWD/lib
+export XDG_DATA_DIRS=$PWD/resources:$XDG_DATA_DIRS
 
 exec python -OO solaar.py "$@"
-#exec python -OO -m profile -o $TMPDIR/profile.log solaar.py "$@"
+# exec python -OO -m profile -o $TMPDIR/profile.log solaar.py "$@"

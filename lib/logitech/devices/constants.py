@@ -4,27 +4,21 @@
 
 STATUS = type('STATUS', (),
 				dict(
-					UNKNOWN=None,
+					UNKNOWN=-9999,
 					UNAVAILABLE=-1,
 					CONNECTED=0,
-					# ACTIVE=1,
 				))
+
+STATUS_NAME = {
+					STATUS.UNAVAILABLE: 'disconnected?',
+					STATUS.CONNECTED: 'connected',
+				}
+
 
 PROPS = type('PROPS', (),
 				dict(
 					TEXT='text',
-					BATTERY_LEVEL='battery-level',
-					BATTERY_STATUS='battery-status',
-					LIGHT_LUX='lux',
-					LIGHT_LEVEL='light-level',
+					BATTERY_LEVEL='battery_level',
+					BATTERY_STATUS='battery_status',
+					LIGHT_LEVEL='light_level',
 				))
-
-
-from collections import defaultdict
-
-STATUS_NAME = defaultdict(lambda x: None)
-STATUS_NAME[STATUS.UNAVAILABLE] = 'disconnected'
-STATUS_NAME[STATUS.CONNECTED] = 'connected'
-# STATUS_NAME[STATUS.ACTIVE] = 'active'
-
-del defaultdict

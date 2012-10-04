@@ -14,8 +14,6 @@ from . import constants as C
 
 NAME = 'Wireless Solar Keyboard K750'
 
-_CHARGE_LIMITS = (75, 40, 20, 10, -1)
-
 #
 #
 #
@@ -26,23 +24,24 @@ def _trigger_solar_charge_events(receiver, devinfo):
 						features_array=devinfo.features)
 
 
-def _charge_status(data):
+def _charge_status(data, hasLux=False):
 	charge, lux = _unpack('!BH', data[2:5])
 
 	d = {}
 
-	for i in range(0, len(_CHARGE_LIMITS)):
-		if charge >= _CHARGE_LIMITS[i]:
+	_CHARGE_LEVELS = (10, 25, 256)
+	for i in range(0, len(_CHARGE_LEVELS)):
+		if charge < _CHARGE_LEVELS[i]:
 			charge_index = i
 			break
-	else:
-		charge_index = 0
 	d[C.PROPS.BATTERY_LEVEL] = charge
 	text = 'Battery %d%%' % charge
 
-	if lux > 0:
+	if hasLux:
 		d[C.PROPS.LIGHT_LEVEL] = lux
 		text = 'Light: %d lux' % lux + ', ' + text
+	else:
+		d[C.PROPS.LIGHT_LEVEL] = None
 
 	d[C.PROPS.TEXT] = text
 	return 0x10 << charge_index, d
@@ -61,7 +60,7 @@ def process_event(devinfo, listener, data):
 
 	if data[:2] == b'\x09\x10' and data[7:11] == b'GOOD':
 		# regular solar charge events
-		return _charge_status(data)
+		return _charge_status(data, True)
 
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")

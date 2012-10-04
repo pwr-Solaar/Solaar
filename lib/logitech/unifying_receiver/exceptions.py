@@ -15,18 +15,18 @@ class NoReceiver(Exception):
 
 class FeatureNotSupported(Exception):
 	"""Raised when trying to request a feature not supported by the device."""
-	def __init__(self, device, feature):
-		super(FeatureNotSupported, self).__init__(device, feature, C.FEATURE_NAME[feature])
-		self.device = device
+	def __init__(self, devnumber, feature):
+		super(FeatureNotSupported, self).__init__(devnumber, feature, C.FEATURE_NAME[feature])
+		self.devnumber = devnumber
 		self.feature = feature
 		self.feature_name = C.FEATURE_NAME[feature]
 
 
 class FeatureCallError(Exception):
 	"""Raised if the device replied to a feature call with an error."""
-	def __init__(self, device, feature, feature_index, feature_function, error_code, data=None):
-		super(FeatureCallError, self).__init__(device, feature, feature_index, feature_function, error_code, C.ERROR_NAME[error_code])
-		self.device = device
+	def __init__(self, devnumber, feature, feature_index, feature_function, error_code, data=None):
+		super(FeatureCallError, self).__init__(devnumber, feature, feature_index, feature_function, error_code, C.ERROR_NAME[error_code])
+		self.devnumber = devnumber
 		self.feature = feature
 		self.feature_name = None if feature is None else C.FEATURE_NAME[feature]
 		self.feature_index = feature_index

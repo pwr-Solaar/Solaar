@@ -7,16 +7,16 @@ import logging
 from binascii import hexlify as _hexlify
 
 
-def _logdebug_hook(reply_code, device, data):
+def _logdebug_hook(reply_code, devnumber, data):
 	"""Default unhandled hook, logs the reply as DEBUG."""
 	_l = logging.getLogger('logitech.unifying_receiver.unhandled')
-	_l.debug("UNHANDLED (,%d) code 0x%02x data [%s]", device, reply_code, _hexlify(data))
+	_l.debug("UNHANDLED (,%d) code 0x%02x data [%s]", devnumber, reply_code, _hexlify(data))
 
 
 """The function that will be called on unhandled incoming events.
 
 The hook must be a function with the signature: ``_(int, int, str)``, where
-the parameters are: (reply code, device number, data).
+the parameters are: (reply_code, devnumber, data).
 
 This hook will only be called by the request() function, when it receives
 replies that do not match the requested feature call. As such, it is not
@@ -30,7 +30,7 @@ The default implementation logs the unhandled reply as DEBUG.
 hook = _logdebug_hook
 
 
-def _publish(reply_code, device, data):
+def _publish(reply_code, devnumber, data):
 	"""Delivers a reply to the unhandled hook, if any."""
 	if hook is not None:
-		hook.__call__(reply_code, device, data)
+		hook.__call__(reply_code, devnumber, data)

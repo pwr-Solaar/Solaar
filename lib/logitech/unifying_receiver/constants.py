@@ -97,5 +97,9 @@ _ERROR_NAMES = ('Ok', 'Unknown', 'Invalid argument', 'Out of range',
 ERROR_NAME = FallbackDict(lambda x: 'Unknown error', list2dict(_ERROR_NAMES))
 
 
+"""Maximum number of devices that can be attached to a single receiver."""
+MAX_ATTACHED_DEVICES = 6
+
+
 del FallbackDict
 del list2dict
