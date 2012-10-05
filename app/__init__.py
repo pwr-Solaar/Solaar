@@ -29,15 +29,15 @@ def _status_updated(watcher, icon, window):
 # 	pass
 
 
-def run():
+def run(config):
 	GObject.threads_init()
 
-	ui.notify.start(APP_TITLE)
+	ui.notify.init(APP_TITLE, config.notifications)
 
 	watcher = WatcherThread(ui.notify.show)
 	watcher.start()
 
-	window = ui.window.create(APP_TITLE, watcher.devices[0])
+	window = ui.window.create(APP_TITLE, watcher.devices[0], not config.start_hidden, config.close_to_tray)
 
 	menu_actions = [('Scan all devices', watcher.full_scan),
 					# ('Pair new device', _pair_new_device, watcher),
@@ -53,4 +53,4 @@ def run():
 	Gtk.main()
 
 	watcher.stop()
-	ui.notify.stop()
+	ui.notify.set_active(False)

@@ -2,35 +2,62 @@
 # Optional desktop notifications.
 #
 
+import logging
+
+
 try:
 	import notify2 as _notify
 
-
-	available = True
+	available = True  # assumed to be working since the import succeeded
+	_active = False  # not yet active
+	_app_title = None
 	_notifications = {}
 
 
-	def start(app_title):
+	def init(app_title, active=True):
 		"""Init the notifications system."""
-		_notify.init(app_title)
-		return True
+		global _app_title, _active
+		_app_title = app_title
+		return set_active(active)
 
 
-	def stop():
-		"""Stop the notifications system."""
-		for n in list(_notifications.values()):
-			try:
-				n.close()
-			except Exception:
-				# DBUS
-				pass
-		_notifications.clear()
-		_notify.uninit()
+	def set_active(active=True):
+		global available, _active
+		if available:
+			if active:
+				if not _active:
+					try:
+						_notify.init(_app_title)
+						_active = True
+					except:
+						logging.exception("initializing desktop notifications")
+						available = False
+			else:
+				if _active:
+					for n in list(_notifications.values()):
+						try:
+							n.close()
+						except Exception:
+							logging.exception("closing open notification %s", n)
+							# DBUS
+							pass
+					_notifications.clear()
+					try:
+						_notify.uninit()
+					except:
+						logging.exception("stopping desktop notifications")
+						available = False
+					_active = False
+		return _active
 
 
-	def show(status_code, title, text, icon=None):
+	def active():
+		return _active
+
+
+	def show(status_code, title, text='', icon=None):
 		"""Show a notification with title and text."""
-		if not available:
+		if not available or not _active:
 			return
 
 		if title in _notifications:
@@ -45,17 +72,20 @@ try:
 		icon = icon or title
 		notification.update(title, text, title)
 		try:
-			notification.show()
+			if text:
+				notification.show()
+			else:
+				notification.close()
 		except Exception:
-			# DBUS
-			pass
+			logging.exception("showing notification %s", notification)
 
 
 except ImportError:
-	import logging
 	logging.exception("ouch")
 	logging.warn("python-notify2 not found, desktop notifications are disabled")
 	available = False
-	def start(app_title): pass
-	def stop(): pass
+	active = False
+	def init(app_title, active=True): return False
+	def active(): return False
+	def set_active(active=True): return False
 	def show(status_code, title, text, icon=None): pass

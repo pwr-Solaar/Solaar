@@ -21,7 +21,10 @@ def update(window, devices):
 	first = controls[0].get_child()
 	icon, label = first.get_children()
 	rstatus = devices[0]
-	label.set_markup('<big><b>%s</b></big>\n%s' % (rstatus.name, rstatus.text))
+	if rstatus.text:
+		label.set_markup('<big><b>%s</b></big>\n%s' % (rstatus.name, rstatus.text))
+	else:
+		label.set_markup('<big><b>%s</b></big>' % rstatus.name)
 
 	for index in range(1, 1 + _MAX_DEVICES):
 		devstatus = devices.get(index)
@@ -120,7 +123,7 @@ def _device_box(title):
 	return frame
 
 
-def create(title, rstatus):
+def create(title, rstatus, show=True, close_to_tray=False):
 	vbox = Gtk.VBox(homogeneous=False, spacing=4)
 	vbox.set_border_width(4)
 
@@ -130,6 +133,8 @@ def create(title, rstatus):
 	vbox.set_visible(True)
 
 	window = Gtk.Window()
+	window.add(vbox)
+
 	window.set_title(title)
 	window.set_icon_name(title)
 	window.set_keep_above(True)
@@ -137,16 +142,21 @@ def create(title, rstatus):
 	# window.set_skip_pager_hint(True)
 	window.set_deletable(False)
 	window.set_resizable(False)
+
 	window.set_position(Gtk.WindowPosition.MOUSE)
 	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
+
 	window.set_wmclass(title, 'status-window')
 	window.set_role('status-window')
 
-	window.connect('window-state-event', _state_event)
-	window.connect('delete-event', lambda w, e: toggle(None, window) or True)
+	if close_to_tray:
+		window.connect('window-state-event', _state_event)
+		window.connect('delete-event', lambda w, e: toggle(None, window) or True)
+	else:
+		window.connect('delete-event', Gtk.main_quit)
 
-	window.add(vbox)
-	window.present()
+	if show:
+		window.present()
 	return window
 
 

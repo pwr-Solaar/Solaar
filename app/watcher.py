@@ -17,15 +17,15 @@ _THREAD_SLEEP = 5  # seconds
 
 _UNIFYING_RECEIVER = 'Unifying Receiver'
 _NO_DEVICES = 'No devices attached.'
-_SCANNING = 'Initializing...'
+_INITIALIZING = 'Initializing...'
+_SCANNING = 'Scanning...'
 _NO_RECEIVER = 'not found'
-_FOUND_RECEIVER = 'found'
 
 
 class _DevStatus(api.AttachedDeviceInfo):
 	timestamp = time.time()
 	code = devices.STATUS.UNKNOWN
-	text = ''
+	text = _INITIALIZING
 	refresh = None
 
 
@@ -48,20 +48,23 @@ class WatcherThread(threading.Thread):
 
 	def run(self):
 		self.active = True
-		self._notify(0, _UNIFYING_RECEIVER, _SCANNING)
 
 		while self.active:
 			if self.listener is None:
+				self._device_status_changed(self.rstatus, (devices.STATUS.UNKNOWN, _INITIALIZING))
+				self._update_status_text()
+
 				receiver = api.open()
 				if receiver:
-					self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, _FOUND_RECEIVER))
+					self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, _SCANNING))
+					self._update_status_text()
 
 					for devinfo in api.list_devices(receiver):
 						self._new_device(devinfo)
-
-					if len(self.devices) == 1:
+					if len(self.devices) > 1:
+						self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, ''))
+					else:
 						self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, _NO_DEVICES))
-
 					self._update_status_text()
 
 					self.listener = EventsListener(receiver, self._events_callback)
@@ -163,20 +166,30 @@ class WatcherThread(threading.Thread):
 		devstatus.timestamp = time.time()
 
 		if type(status) == int:
-			devstatus.code = status
-			if devstatus.code in devices.STATUS_NAME:
-				devstatus.text = devices.STATUS_NAME[devstatus.code]
+			status_code = status
+			if status_code in devices.STATUS_NAME:
+				status_text = devices.STATUS_NAME[status_code]
 		else:
-			devstatus.code = status[0]
+			status_code = status[0]
 			if isinstance(status[1], str):
-				devstatus.text = status[1]
+				status_text = status[1]
 			elif isinstance(status[1], dict):
+				status_text = ''
 				for key, value in status[1].items():
-					setattr(devstatus, key, value)
+					if key == 'text':
+						status_text = value
+					else:
+						setattr(devstatus, key, value)
+			else:
+				status_code = devices.STATUS.UNKNOWN
+				status_text = ''
 
-		if old_status_code != devstatus.code:
-			logging.debug("%s: device '%s' status changed %s => %s: %s",  time.asctime(), devstatus.name, old_status_code, devstatus.code, devstatus.text)
-			if devstatus.code // 256 != old_status_code // 256:
+		if not (status_code == 0 and old_status_code > 0):
+			devstatus.code = status_code
+			devstatus.text = status_text
+			logging.debug("%s: device '%s' status update %s => %s: %s",  time.asctime(), devstatus.name, old_status_code, status_code, status_text)
+
+			if status_code == 0 or old_status_code != status_code:
 				self._notify(devstatus.code, devstatus.name, devstatus.text)
 
 		return True
