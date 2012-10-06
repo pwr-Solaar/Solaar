@@ -18,6 +18,8 @@ def scan_devices(receiver):
 
 	for devinfo in devices:
 		print "Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.type)
+		print "  Protocol %s" % devinfo.protocol
+
 		for fw in devinfo.firmware:
 			print "    %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build)
 
@@ -51,11 +53,12 @@ if __name__ == '__main__':
 	log_level = logging.root.level - 10 * args.verbose
 	logging.root.setLevel(log_level if log_level > 0 else 1)
 
-	receiver = api.open()
-	if receiver:
-		print "!! Logitech Unifying Receiver found."
-		scan_devices(receiver)
+	for rawdevice in api._base.list_receiver_devices():
+		receiver = api._base.try_open(rawdevice.path)
+		if receiver:
+			print "!! Logitech Unifying Receiver found (%s)." % rawdevice.path
+			scan_devices(receiver)
+			api.close(receiver)
+			break
 	else:
 		print "!! Logitech Unifying Receiver not found."
-
-	api.close(receiver)

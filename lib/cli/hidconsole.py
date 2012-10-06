@@ -11,7 +11,8 @@ def read_next(handle, timeout=1000, ignore_nodata=False):
 		print "!! Read failed, aborting"
 		raise Exception()
 	if reply:
-		print ">> %s %s" % (hexlify(reply), repr(reply))
+		hexs = hexlify(reply)
+		print ">> [%s %s %s %s] %s" % (hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(reply))
 		return True
 
 	if not ignore_nodata:
@@ -25,7 +26,7 @@ def console_cycle(handle):
 			continue
 
 		line = raw_input('!! Enter packet to send (hex bytes) or ^C to abort: ')
-		line = line.strip()
+		line = line.strip().replace(' ', '').replace('-', '')
 		if not line:
 			continue
 		if len(line) % 2 == 1:
@@ -36,7 +37,8 @@ def console_cycle(handle):
 		except:
 			print "!! Invalid input."
 			continue
-		print "<< %s %s" % (hexlify(data), repr(data))
+		hexs = hexlify(data)
+		print "<< [%s %s %s %s] %s" % (hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 		hidapi.write(handle, data)
 		read_next(handle)
 
