@@ -15,7 +15,7 @@ import hidapi as _hid
 
 
 _LOG_LEVEL = 4
-_l = logging.getLogger('logitech.unifying_receiver.base')
+_l = logging.getLogger('lur.base')
 
 #
 # These values are defined by the Logitech documentation.
@@ -85,16 +85,31 @@ def try_open(path):
 			_l.log(_LOG_LEVEL, "[%s] success: handle (%d,)", path, receiver_handle)
 			return receiver_handle
 
-		# any other replies are ignored, and will assume this is the wrong receiver device
-		if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
-			# no idea what this is, but it comes up occasionally
-			_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, _hexlify(reply))
-		else:
-			_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, _hexlify(reply))
+		# any other replies are ignored, and will assume this is the wrong Linux device
+		if _l.isEnabledFod(_LOG_LEVEL):
+			if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
+				# no idea what this is, but it comes up occasionally
+				_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, _hexlify(reply))
+			else:
+				_l.log(_LOG_LEVEL, "[%s] (%d,) unknown reply [%s]", path, receiver_handle, _hexlify(reply))
 	else:
 		_l.log(_LOG_LEVEL, "[%s] (%d,) no reply", path, receiver_handle)
 
 	close(receiver_handle)
+
+
+def open():
+	"""Opens the first Logitech Unifying Receiver found attached to the machine.
+
+	:returns: An open file handle for the found receiver, or ``None``.
+	"""
+	for rawdevice in list_receiver_devices():
+		_l.log(_LOG_LEVEL, "checking %s", rawdevice)
+
+		receiver = try_open(rawdevice.path)
+		if receiver:
+			return receiver
+
 	return None
 
 
@@ -111,19 +126,6 @@ def close(handle):
 	return False
 
 
-# def write(handle, device, feature_index, function=b'\x00', param1=b'\x00', param2=b'\x00', param3=b'\x00'):
-# 	"""Write a feature call to the receiver.
-#
-# 	:param handle: UR handle obtained with open().
-# 	:param device: attached device number.
-# 	:param feature_index: index in the device's feature array.
-# 	"""
-# 	if type(feature_index) == int:
-# 		feature_index = chr(feature_index)
-# 	data = feature_index + function + param1 + param2 + param3
-# 	return _write(handle, device, data)
-
-
 def write(handle, devnumber, data):
 	"""Writes some data to a certain device.
 
@@ -138,17 +140,14 @@ def write(handle, devnumber, data):
 	been physically removed from the machine, or the kernel driver has been
 	unloaded. The handle will be closed automatically.
 	"""
-	if len(data) < _MIN_CALL_SIZE - 2:
-		data += b'\x00' * (_MIN_CALL_SIZE - 2 - len(data))
-	elif len(data) > _MIN_CALL_SIZE - 2:
-		data += b'\x00' * (_MAX_CALL_SIZE - 2 - len(data))
-	wdata = _pack('!BB', 0x10, devnumber) + data
+	# assert _MIN_CALL_SIZE == 7
+	# assert _MAX_CALL_SIZE == 20
+	# the data is padded to either 5 or 18 bytes
+	wdata = _pack('!BB18s' if len(data) > 5 else '!BB5s', 0x10, devnumber, data)
 
-	_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s]", handle, devnumber, _hexlify(wdata))
-	if len(wdata) < _MIN_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too short: %d bytes", handle, devnumber, _hexlify(wdata), len(wdata))
-	if len(wdata) > _MAX_CALL_SIZE:
-		_l.warn("(%d:%d) <= w[%s] call packet too long: %d bytes", handle, devnumber, _hexlify(wdata), len(wdata))
+	if _l.isEnabledFor(_LOG_LEVEL):
+		hexs = _hexlify(wdata)
+		_l.log(_LOG_LEVEL, "(%d,%d) <= w[%s %s %s %s]", handle, devnumber, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:])
 
 	if not _hid.write(handle, wdata):
 		_l.warn("(%d,%d) write failed, assuming receiver no longer available", handle, devnumber)
@@ -179,11 +178,13 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		raise E.NoReceiver
 
 	if data:
-		_l.log(_LOG_LEVEL, "(%d,*) => r[%s]", handle, _hexlify(data))
 		if len(data) < _MIN_REPLY_SIZE:
 			_l.warn("(%d,*) => r[%s] read packet too short: %d bytes", handle, _hexlify(data), len(data))
 		if len(data) > _MAX_REPLY_SIZE:
 			_l.warn("(%d,*) => r[%s] read packet too long: %d bytes", handle, _hexlify(data), len(data))
+		if _l.isEnabledFor(_LOG_LEVEL):
+			hexs = _hexlify(data)
+			_l.log(_LOG_LEVEL, "(%d,*) => r[%s %s %s %s]", handle, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:])
 		code = ord(data[:1])
 		devnumber = ord(data[1:2])
 		return code, devnumber, data[2:]
@@ -208,7 +209,8 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 	available.
 	:raisees FeatureCallError: if the feature call replied with an error.
 	"""
-	_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, devnumber, _hexlify(feature_index_function), _hexlify(params))
+	if _l.isEnabledFor(_LOG_LEVEL):
+		_l.log(_LOG_LEVEL, "(%d,%d) request {%s} params [%s]", handle, devnumber, _hexlify(feature_index_function), _hexlify(params))
 	if len(feature_index_function) != 2:
 		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hexlify(feature_index_function))
 
@@ -216,7 +218,8 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 
 	write(handle, devnumber, feature_index_function + params)
 	while retries > 0:
-		reply = read(handle)
+		divisor = (6 - retries)
+		reply = read(handle, int(DEFAULT_TIMEOUT * (divisor + 1) / 2 / divisor))
 		retries -= 1
 
 		if not reply:
@@ -233,7 +236,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 			_unhandled._publish(reply_code, reply_devnumber, reply_data)
 			continue
 
-		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:2] == feature_index_function:
+		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == feature_index_function:
 			# device not present
 			_l.log(_LOG_LEVEL, "(%d,%d) request ping failed on {%s} call: [%s]", handle, devnumber, _hexlify(feature_index_function), _hexlify(reply_data))
 			return None
@@ -254,7 +257,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			_l.log(_LOG_LEVEL, "(%d,%d) matched reply with feature-index-function [%s]", handle, devnumber, _hexlify(reply_data[2:]))
+			# _l.log(_LOG_LEVEL, "(%d,%d) matched reply with feature-index-function [%s]", handle, devnumber, _hexlify(reply_data[2:]))
 			return reply_data[2:]
 
 		_l.log(_LOG_LEVEL, "(%d,%d) unmatched reply {%s} (expected {%s})", handle, devnumber, _hexlify(reply_data[:2]), _hexlify(feature_index_function))
