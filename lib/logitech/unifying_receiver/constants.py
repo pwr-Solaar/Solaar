@@ -45,6 +45,9 @@ FEATURE_NAME[FEATURE.WIRELESS] = 'WIRELESS'
 FEATURE_NAME[FEATURE.SOLAR_CHARGE] = 'SOLAR_CHARGE'
 
 
+FEATURE_FLAGS = { 0x20: 'internal', 0x40: 'hidden', 0x80: 'obsolete' }
+
+
 _DEVICE_TYPES = ('Keyboard', 'Remote Control', 'NUMPAD', 'Mouse',
 				'Touchpad', 'Trackball', 'Presenter', 'Receiver')
 

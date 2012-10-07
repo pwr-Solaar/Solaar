@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	arg_parser.add_argument('-H', '--start-hidden', action='store_true', dest='start_hidden',
 							help='hide the application window on start')
 	arg_parser.add_argument('-t', '--close-to-tray', action='store_true',
-							help='closing the application window hides it')
+							help='closing the application window hides it instead of terminating the application')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 

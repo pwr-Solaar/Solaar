@@ -9,7 +9,7 @@ from binascii import hexlify as _hexlify
 
 def _logdebug_hook(reply_code, devnumber, data):
 	"""Default unhandled hook, logs the reply as DEBUG."""
-	_l = logging.getLogger('logitech.unifying_receiver.unhandled')
+	_l = logging.getLogger('lur.unhandled')
 	_l.debug("UNHANDLED (,%d) code 0x%02x data [%s]", devnumber, reply_code, _hexlify(data))
 
 

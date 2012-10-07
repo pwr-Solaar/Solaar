@@ -17,7 +17,7 @@ from . import base as _base
 
 
 _LOG_LEVEL = 5
-_l = logging.getLogger('logitech.unifying_receiver.api')
+_l = logging.getLogger('lur.api')
 
 #
 #
@@ -86,47 +86,8 @@ def ping(handle, devnumber):
 	not attached, None if no conclusive reply is received.
 	"""
 
-	ping_marker = b'\xAA'
-
-	def _status(reply):
-		if not reply:
-			return None
-
-		reply_code, reply_devnumber, reply_data = reply
-
-		if reply_devnumber != devnumber:
-			# oops
-			_l.log(_LOG_LEVEL, "(%d,%d) ping: reply for another device %d: %s", handle, devnumber, reply_devnumber, _hexlify(reply_data))
-			_unhandled._publish(reply_code, reply_devnumber, reply_data)
-			return _status(_base.read(handle))
-
-		if (reply_code == 0x11 and reply_data[:2] == b'\x00\x10' and reply_data[4:5] == ping_marker):
-			# ping ok
-			_l.log(_LOG_LEVEL, "(%d,%d) ping: ok [%s]", handle, devnumber, _hexlify(reply_data))
-			return True
-
-		if (reply_code == 0x10 and reply_data[:2] == b'\x8F\x00'):
-			# ping failed
-			_l.log(_LOG_LEVEL, "(%d,%d) ping: device not present", handle, devnumber)
-			return False
-
-		if (reply_code == 0x11 and reply_data[:2] == b'\x09\x00' and len(reply_data) == 18 and reply_data[7:11] == b'GOOD'):
-			# some devices may reply with a SOLAR_CHARGE event before the
-			# ping_ok reply, especially right after the device connected to the
-			# receiver
-			_l.log(_LOG_LEVEL, "(%d,%d) ping: solar status [%s]", handle, devnumber, _hexlify(reply_data))
-			_unhandled._publish(reply_code, reply_devnumber, reply_data)
-			return _status(_base.read(handle))
-
-		# ugh
-		_l.log(_LOG_LEVEL, "(%d,%d) ping: unknown reply for this device: %d=[%s]", handle, devnumber, reply_code, _hexlify(reply_data))
-		_unhandled._publish(reply_code, reply_devnumber, reply_data)
-		return None
-
-	_l.log(_LOG_LEVEL, "(%d,%d) pinging", handle, devnumber)
-	_base.write(handle, devnumber, b'\x00\x10\x00\x00' + ping_marker)
-	# pings may take a while to reply success
-	return _status(_base.read(handle, _base.DEFAULT_TIMEOUT * 3))
+	reply = _base.request(handle, devnumber, b'\x00\x10', b'\x00\x00\xAA')
+	return reply is not None and reply[2:3] == b'\xAA'
 
 
 def find_device_by_name(handle, device_name):
@@ -195,20 +156,21 @@ def get_feature_index(handle, devnumber, feature):
 		feature_index = ord(reply[0:1])
 		if feature_index:
 			feature_flags = ord(reply[1:2]) & 0xE0
-			_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> has index %d flags %02x", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], feature_index, feature_flags)
-			if feature_flags == 0:
-				return feature_index
+			if _l.isEnabledFor(_LOG_LEVEL):
+				if feature_flags:
+					_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> has index %d: %s",
+							handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], feature_index,
+							','.join([C.FEATURE_FLAGS[k] for k in C.FEATURE_FLAGS if feature_flags & k]))
+				else:
+					_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> has index %d", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], feature_index)
 
-			if feature_flags & 0x80:
-				_l.warn("(%d,%d) feature <%s:%s> not supported: obsolete", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature])
-			if feature_flags & 0x40:
-				_l.warn("(%d,%d) feature <%s:%s> not supported: hidden", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature])
-			if feature_flags & 0x20:
-				_l.warn("(%d,%d) feature <%s:%s> not supported: Logitech internal", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature])
-			raise E.FeatureNotSupported(devnumber, feature)
-		else:
-			_l.warn("(%d,%d) feature <%s:%s> not supported by the device", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature])
-			raise E.FeatureNotSupported(devnumber, feature)
+			# if feature_flags:
+			# 	raise E.FeatureNotSupported(devnumber, feature)
+
+			return feature_index
+
+		_l.warn("(%d,%d) feature <%s:%s> not supported by the device", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature])
+		raise E.FeatureNotSupported(devnumber, feature)
 
 
 def get_device_features(handle, devnumber):
@@ -246,9 +208,17 @@ def get_device_features(handle, devnumber):
 		# for each index, get the feature residing at that index
 		feature = _base.request(handle, devnumber, fs_index + b'\x10', _pack('!B', index))
 		if feature:
+			feature_flags = ord(feature[2:3]) & 0xE0
 			feature = feature[0:2].upper()
 			features[index] = feature
-			_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> at index %d", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], index)
+
+			if _l.isEnabledFor(_LOG_LEVEL):
+				if feature_flags:
+					_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> at index %d: %s",
+							handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], index,
+							','.join([C.FEATURE_FLAGS[k] for k in C.FEATURE_FLAGS if feature_flags & k]))
+				else:
+					_l.log(_LOG_LEVEL, "(%d,%d) feature <%s:%s> at index %d", handle, devnumber, _hexlify(feature), C.FEATURE_NAME[feature], index)
 
 	features[0] = C.FEATURE.ROOT
 	while features[-1] is None:
@@ -278,11 +248,8 @@ def get_device_firmware(handle, devnumber, features_array=None):
 					fw_type = C.FIRMWARE_TYPE[fw_level]
 					name, = _unpack('!3s', fw_info[1:4])
 					name = name.decode('ascii')
-					version = ( chr(0x30 + (ord(fw_info[4:5]) >> 4)) +
-								chr(0x30 + (ord(fw_info[4:5]) & 0x0F)) +
-								'.' +
-								chr(0x30 + (ord(fw_info[5:6]) >> 4)) +
-								chr(0x30 + (ord(fw_info[5:6]) & 0x0F)))
+					version = _hexlify(fw_info[4:6])
+					version = '%s.%s' % (version[0:2], version[2:4])
 					build, = _unpack('!H', fw_info[6:8])
 					extras = fw_info[9:].rstrip(b'\x00')
 					if extras:
@@ -327,8 +294,11 @@ def get_device_name(handle, devnumber, features_array=None):
 		while len(d_name) < name_length:
 			name_index = _pack('!B', len(d_name))
 			name_fragment = request(handle, devnumber, C.FEATURE.NAME, function=b'\x10', params=name_index, features_array=features_array)
-			name_fragment = name_fragment[:name_length - len(d_name)]
-			d_name += name_fragment
+			if name_fragment:
+				name_fragment = name_fragment[:name_length - len(d_name)]
+				d_name += name_fragment
+			else:
+				break
 
 		d_name = d_name.decode('ascii')
 		_l.log(_LOG_LEVEL, "(%d,%d) device name %s", handle, devnumber, d_name)

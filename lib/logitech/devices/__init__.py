@@ -49,11 +49,13 @@ _REQUEST_STATUS_FUNCTIONS = _FDict()
 _REQUEST_STATUS_FUNCTIONS[k750.NAME] = k750.request_status
 
 def request_status(devinfo, listener):
-	return _REQUEST_STATUS_FUNCTIONS[devinfo.name](devinfo, listener) or default_request_status(devinfo, listener) or ping(devinfo, listener)
+	if listener:
+		return _REQUEST_STATUS_FUNCTIONS[devinfo.name](devinfo, listener) or default_request_status(devinfo, listener) or ping(devinfo, listener)
 
 
 _PROCESS_EVENT_FUNCTIONS = _FDict()
 _PROCESS_EVENT_FUNCTIONS[k750.NAME] = k750.process_event
 
 def process_event(devinfo, listener, data):
-	return default_process_event(devinfo, listener, data) or _PROCESS_EVENT_FUNCTIONS[devinfo.name](devinfo, listener, data)
+	if listener:
+		return default_process_event(devinfo, listener, data) or _PROCESS_EVENT_FUNCTIONS[devinfo.name](devinfo, listener, data)

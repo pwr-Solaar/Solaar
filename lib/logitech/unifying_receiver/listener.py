@@ -5,7 +5,7 @@
 import logging
 import threading
 from time import sleep as _sleep
-# from binascii import hexlify as _hexlify
+from binascii import hexlify as _hexlify
 
 from . import base as _base
 from . import exceptions as E
@@ -13,11 +13,11 @@ from . import exceptions as E
 
 
 _LOG_LEVEL = 6
-_l = logging.getLogger('logitech.unifying_receiver.listener')
+_l = logging.getLogger('lur.listener')
 
 
-_READ_EVENT_TIMEOUT = 90  # ms
-_IDLE_SLEEP = 950  # ms
+_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT * 0.1)  # ms
+_IDLE_SLEEP = int(_base.DEFAULT_TIMEOUT * 0.9)  # ms
 
 
 class EventsListener(threading.Thread):
@@ -64,7 +64,8 @@ class EventsListener(threading.Thread):
 
 			if self.active:
 				if event:
-					_l.log(_LOG_LEVEL, "(%d) got event %s", self.receiver, event)
+					if _l.isEnabledFor(_LOG_LEVEL):
+						_l.log(_LOG_LEVEL, "(%d) got event (%02x %02x [%s])", self.receiver, event[0], event[1], _hexlify(event[2]))
 					self.callback.__call__(*event)
 				elif self.task is None:
 					# _l.log(_LOG_LEVEL, "(%d) idle sleep", self.receiver)
@@ -86,7 +87,8 @@ class EventsListener(threading.Thread):
 		The api_function will get the receiver handle as a first agument, all
 		other args and kwargs will follow.
 		"""
-		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
+		# if _l.isEnabledFor(_LOG_LEVEL):
+		# 	 _l.log(_LOG_LEVEL, "(%d) request '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
 		self.task_processing.acquire()
 		self.task_done.clear()
 		self.task = (api_function, args, kwargs)
@@ -96,13 +98,15 @@ class EventsListener(threading.Thread):
 		self.task = self.task_reply = None
 		self.task_processing.release()
 
-		# _l.log(_LOG_LEVEL, "(%d) request '%s.%s' => [%s]", self.receiver, api_function.__module__, api_function.__name__, _hexlify(reply))
+		# if _l.isEnabledFor(_LOG_LEVEL):
+		# 	_l.log(_LOG_LEVEL, "(%d) request '%s.%s' => [%s]", self.receiver, api_function.__module__, api_function.__name__, _hexlify(reply))
 		if isinstance(reply, Exception):
 			raise reply
 		return reply
 
 	def _make_request(self, api_function, args, kwargs):
-		_l.log(_LOG_LEVEL, "(%d) calling '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
+		if _l.isEnabledFor(_LOG_LEVEL):
+			_l.log(_LOG_LEVEL, "(%d) calling '%s.%s' with %s, %s", self.receiver, api_function.__module__, api_function.__name__, args, kwargs)
 		try:
 			return api_function.__call__(self.receiver, *args, **kwargs)
 		except E.NoReceiver as nr:

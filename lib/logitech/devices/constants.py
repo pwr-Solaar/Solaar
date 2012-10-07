@@ -10,7 +10,7 @@ STATUS = type('STATUS', (),
 				))
 
 STATUS_NAME = {
-					STATUS.UNAVAILABLE: 'disconnected?',
+					STATUS.UNAVAILABLE: 'inactive',
 					STATUS.CONNECTED: 'connected',
 				}
 
