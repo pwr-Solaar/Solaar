@@ -5,12 +5,12 @@
 from gi.repository import Gtk
 
 
-def _show_icon_menu(icon, button, time, menu):
-	menu.popup(None, None, icon.position_menu, icon, button, time)
+_ICON_OK = 'Solaar'
+_ICON_FAIL = _ICON_OK + '-fail'
 
 
-def create(title, menu_actions, click_action=None):
-	icon = Gtk.StatusIcon.new_from_icon_name(title)
+def create(title, click_action=None):
+	icon = Gtk.StatusIcon.new_from_icon_name(_ICON_OK)
 	icon.set_title(title)
 	icon.set_name(title)
 
@@ -22,20 +22,23 @@ def create(title, menu_actions, click_action=None):
 		else:
 			icon.connect('activate', click_action)
 
-	if menu_actions:
-		if type(menu_actions) == list:
-			menu = Gtk.Menu()
-			for action in menu_actions:
-				if action:
-					item = Gtk.MenuItem(action[0])
-					args = action[2:] if len(action) > 2 else ()
-					item.connect('activate', action[1], *args)
-				else:
-					item = Gtk.SeparatorMenuItem()
-				menu.append(item)
-			menu.show_all()
-			icon.connect('popup_menu', _show_icon_menu, menu)
-		else:
-			icon.connect('popup_menu', menu_actions)
+	menu = Gtk.Menu()
+	item = Gtk.MenuItem('Quit')
+	item.connect('activate', Gtk.main_quit)
+	menu.append(item)
+	menu.show_all()
+
+	icon.connect('popup_menu',
+					lambda icon, button, time, menu:
+						menu.popup(None, None, icon.position_menu, icon, button, time),
+					menu)
 
 	return icon
+
+
+def update(icon, rstatus, tooltip):
+	icon.set_tooltip_markup(tooltip)
+	if rstatus.code < 0:
+		icon.set_from_icon_name(_ICON_FAIL)
+	else:
+		icon.set_from_icon_name(_ICON_OK)

@@ -12,12 +12,12 @@ from . import exceptions as E
 # from . import unhandled as _unhandled
 
 
-_LOG_LEVEL = 6
+_LOG_LEVEL = 5
 _l = logging.getLogger('lur.listener')
 
 
-_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT * 0.1)  # ms
-_IDLE_SLEEP = int(_base.DEFAULT_TIMEOUT * 0.9)  # ms
+_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 5)  # ms
+_IDLE_SLEEP = _base.DEFAULT_TIMEOUT / 2  # ms
 
 
 class EventsListener(threading.Thread):

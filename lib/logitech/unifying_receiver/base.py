@@ -14,7 +14,7 @@ from . import unhandled as _unhandled
 import hidapi as _hid
 
 
-_LOG_LEVEL = 4
+_LOG_LEVEL = 5
 _l = logging.getLogger('lur.base')
 
 #

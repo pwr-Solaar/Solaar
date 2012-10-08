@@ -16,7 +16,7 @@ try:
 
 	def init(app_title, active=True):
 		"""Init the notifications system."""
-		global _app_title, _active
+		global _app_title
 		_app_title = app_title
 		return set_active(active)
 

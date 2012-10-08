@@ -12,7 +12,6 @@ from .common import AttachedDeviceInfo
 from .common import ReprogrammableKeyInfo
 from . import constants as C
 from . import exceptions as E
-from . import unhandled as _unhandled
 from . import base as _base
 
 
@@ -23,19 +22,11 @@ _l = logging.getLogger('lur.api')
 #
 #
 
-def open():
-	"""Opens the first Logitech UR found attached to the machine.
+"""Opens the first Logitech Unifying Receiver found attached to the machine.
 
-	:returns: An open file handle for the found receiver, or ``None``.
-	"""
-	for rawdevice in _base.list_receiver_devices():
-		_l.log(_LOG_LEVEL, "checking %s", rawdevice)
-
-		receiver = _base.try_open(rawdevice.path)
-		if receiver:
-			return receiver
-
-	return None
+:returns: An open file handle for the found receiver, or ``None``.
+"""
+open = _base.open
 
 
 """Closes a HID device handle."""
@@ -85,9 +76,14 @@ def ping(handle, devnumber):
 	:returns: True if the device is connected to the UR, False if the device is
 	not attached, None if no conclusive reply is received.
 	"""
-
 	reply = _base.request(handle, devnumber, b'\x00\x10', b'\x00\x00\xAA')
 	return reply is not None and reply[2:3] == b'\xAA'
+
+
+def get_device_protocol(handle, devnumber):
+	reply = _base.request(handle, devnumber, b'\x00\x10', b'\x00\x00\xAA')
+	if reply is not None and len(reply) > 2 and reply[2:3] == b'\xAA':
+		return 'HID %d.%d' % (ord(reply[0:1]), ord(reply[1:2]))
 
 
 def find_device_by_name(handle, device_name):

@@ -1,3 +1,3 @@
 # pass
 
-from . import (icon, notify, window)
+from . import (notify, icon, window)
