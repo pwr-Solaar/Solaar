@@ -1,9 +1,10 @@
 #!/bin/sh
 
-cd `dirname "$0"`/../lib
+cd `dirname "$0"`/..
 
-export LD_LIBRARY_PATH=$PWD
-export PYTHONPATH=$PWD
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib
+export PYTHONPATH=$PWD/lib
 
-exec python -OO -m cli.hidconsole "$@"
+cd -
 
+exec python -OO -u -m cli.hidconsole "$@"

@@ -2,74 +2,42 @@
 
 # Python 2 only for now.
 
+import sys
 import time
+import readline
+import threading
 from binascii import hexlify, unhexlify
 
 
-def read_next(handle, timeout=1000, ignore_nodata=False):
-	reply = hidapi.read(handle, 128, timeout)
-	if reply is None:
-		print "!! Read failed, aborting"
-		raise Exception()
-	if reply:
-		hexs = hexlify(reply)
-		print ">> [%s %s %s %s] %s" % (hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(reply))
-		return True
-
-	if not ignore_nodata:
-		print ">> []"
-	return False
+start_time = 0
 
 
-def console_cycle(handle):
-	last_data = None
+def _print(marker, data, scroll=False):
+	hexs = hexlify(data)
+	t = time.time() - start_time
+	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 
+	if scroll:
+		sys.stdout.write(b'\033[s')
+		sys.stdout.write(b'\033[S')  # scroll up
+		sys.stdout.write(b'\033[A\033[L\033[G')   # insert new line above the current one, position on first column
+
+	sys.stdout.write(s)
+
+	if scroll:
+		sys.stdout.write(b'\033[u')
+	else:
+		sys.stdout.write(b'\n')
+
+
+def _continuous_read(handle, timeout=1000):
 	while True:
-		if read_next(handle, timeout=100, ignore_nodata=True):
-			continue
-
-		line = raw_input('!! Command: ')
-		line = line.strip().replace(' ', '').replace('-', '')
-		if not line:
-			continue
-
-		data = None
-
-		if line == 'h':
-			print 'Commands:'
-			print '   <hex bytes>  - send a packet to the device'
-			print '   r            - re-send last packet'
-			print '   w<float>     - listen for events for <float> seconds'
-			print '   h            - this help screen'
-			print '   ^C           - exit'
-		elif line == 'r':
-			data = last_data
-		elif line[0] == 'w':
-			line = line[1:].strip()
-			try:
-				seconds = float(line)
-			except:
-				print "!! Bad number <" + line + ">"
-			else:
-				count = 0
-				start_time = time.time()
-				while time.time() - start_time < seconds:
-					if read_next(handle, timeout=100, ignore_nodata=True):
-						count += 1
-				print "!! Got %d events" % count
-		else:
-			try:
-				data = unhexlify(line)
-			except:
-				print "!! Invalid input."
-				continue
-
-		if data:
-			hexs = hexlify(data)
-			print "<< [%s %s %s %s] %s" % (hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
-			last_data = data
-			hidapi.write(handle, data)
-			read_next(handle)
+		reply = hidapi.read(handle, 128, timeout)
+		if reply is None:
+			print "!! Read failed, aborting"
+			break
+		elif reply:
+			_print('>>', reply, True)
 
 
 if __name__ == '__main__':
@@ -77,22 +45,43 @@ if __name__ == '__main__':
 	arg_parser = argparse.ArgumentParser()
 	arg_parser.add_argument('device', default=None,
 							help='linux device to connect to')
+	arg_parser.add_argument('--history', default='.hidconsole-history',
+							help='history file')
 	args = arg_parser.parse_args()
 
 	import hidapi
-	print "!! Opening device ", args.device
+	print ".. Opening device ", args.device
 	handle = hidapi.open_path(args.device)
 	if handle:
-		print "!! Opened %x" % handle
-		print "!! vendor %s product %s serial %s" % (
+		print ".. Opened handle %x, vendor %s product %s serial %s" % (handle,
 						repr(hidapi.get_manufacturer(handle)),
 						repr(hidapi.get_product(handle)),
 						repr(hidapi.get_serial(handle)))
-		print "!! Type 'h' for help."
+		print ".. Press ^C/^D to exit, or type hex bytes to write to the device."
+
+		readline.read_history_file(args.history)
+
+		start_time = time.time()
+
 		try:
-			console_cycle(handle)
+			t = threading.Thread(target=_continuous_read, args=(handle,))
+			t.daemon = True
+			t.start()
+
+			while t.is_alive():
+				line = raw_input('?? Input: ').strip().replace(' ', '')
+				if line:
+					try:
+						data = unhexlify(line)
+						_print('<<', data)
+						hidapi.write(handle, data)
+					except:
+						print "!! Invalid input."
 		except:
-			print "!! Closing handle %x" % handle
-			hidapi.close(handle)
+			pass
+
+		print ".. Closing handle %x" % handle
+		hidapi.close(handle)
+		readline.write_history_file(args.history)
 	else:
 		print "!! Failed to open %s, aborting" % args.device
