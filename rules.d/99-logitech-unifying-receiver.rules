@@ -1,4 +1,4 @@
-# Copied from https://github.com/signal11/hidapi, and modified
+# Initially copied from signal11/hidapi/udev, with modifications.
 
 # This is a sample udev file for HIDAPI devices which changes the permissions
 # to 0660 and group to plugdev for a specified device on Linux systems.
@@ -14,25 +14,12 @@
 # (one each way) for compatibility with older systems.
 
 # HIDAPI/libusb
-SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
 
 # If you are using the hidraw implementation, then do something like the
-# following, substituting the VID and PID with your device. Busnum 1 is USB.
+# following, substituting the VID and PID with your device.
 
 # HIDAPI/hidraw
-KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
-
-# Once done, optionally rename this file for your device, and drop it into
-# /etc/udev/rules.d and unplug and re-plug your device. This is all that is
-# necessary to see the new permissions. Udev does not have to be restarted.
-
-# Note that the hexadecimal values for VID and PID are case sensitive and
-# must be lower case.
-
-# If you think permissions of 0666 are too loose, then see:
-# http://reactivated.net/writing_udev_rules.html for more information on finer
-# grained permission setting. For example, it might be sufficient to just
-# set the group or user owner for specific devices (for example the plugdev
-# group on some systems).
+ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
 
 # vim: ft=udevrules
