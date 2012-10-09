@@ -4,6 +4,7 @@
 
 from gi.repository import Gtk
 
+from logitech.devices import constants as C
 
 _ICON_OK = 'Solaar'
 _ICON_FAIL = _ICON_OK + '-fail'
@@ -36,9 +37,9 @@ def create(title, click_action=None):
 	return icon
 
 
-def update(icon, rstatus, tooltip):
+def update(icon, receiver, tooltip):
 	icon.set_tooltip_markup(tooltip)
-	if rstatus.code < 0:
+	if receiver.code < C.STATUS.CONNECTED:
 		icon.set_from_icon_name(_ICON_FAIL)
 	else:
 		icon.set_from_icon_name(_ICON_OK)

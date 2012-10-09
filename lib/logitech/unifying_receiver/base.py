@@ -189,7 +189,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		devnumber = ord(data[1:2])
 		return code, devnumber, data[2:]
 
-	_l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
+	# _l.log(_LOG_LEVEL, "(%d,*) => r[]", handle)
 
 
 def request(handle, devnumber, feature_index_function, params=b'', features_array=None):

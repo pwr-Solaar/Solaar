@@ -10,23 +10,23 @@ from binascii import hexlify as _hexlify
 from logitech.unifying_receiver import api
 from logitech.unifying_receiver.listener import EventsListener
 from logitech import devices
+from logitech.devices import constants as C
 
 
 _STATUS_TIMEOUT = 31  # seconds
 _THREAD_SLEEP = 2  # seconds
-
 
 _UNIFYING_RECEIVER = 'Unifying Receiver'
 _NO_RECEIVER = 'Receiver not found.'
 _INITIALIZING = 'Initializing...'
 _SCANNING = 'Scanning...'
 _NO_DEVICES = 'No devices found.'
-_OKAY = 'Status okay.'
+_OKAY = 'Status ok.'
 
 
 class _DevStatus(api.AttachedDeviceInfo):
 	timestamp = time.time()
-	code = devices.STATUS.UNKNOWN
+	code = C.STATUS.UNKNOWN
 	text = _INITIALIZING
 	refresh = None
 
@@ -55,28 +55,30 @@ class WatcherThread(threading.Thread):
 
 		while self.active:
 			if self.listener is None:
-				self._device_status_changed(self.rstatus, (devices.STATUS.UNKNOWN, _INITIALIZING))
+				self._device_status_changed(self.rstatus, (C.STATUS.UNKNOWN, _INITIALIZING))
 				self._update_status_text()
 
 				receiver = api.open()
 				if receiver:
-					self._device_status_changed(self.rstatus, (-10, _SCANNING))
+					self._device_status_changed(self.rstatus, (C.STATUS.BOOTING, _SCANNING))
 					self._update_status_text()
 
 					for devinfo in api.list_devices(receiver):
 						self._new_device(devinfo)
+					logging.debug("initial scan finished: %s", self.devices)
 					if self.devices:
-						self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, _OKAY))
+						self._device_status_changed(self.rstatus, (C.STATUS.CONNECTED, _OKAY))
 					else:
-						self._device_status_changed(self.rstatus, (devices.STATUS.CONNECTED, _NO_DEVICES))
+						self._device_status_changed(self.rstatus, (C.STATUS.CONNECTED, _NO_DEVICES))
+					self._update_status_text()
 
 					self.listener = EventsListener(receiver, self._events_callback)
 					self.listener.start()
 				else:
-					self._device_status_changed(self.rstatus, (devices.STATUS.UNAVAILABLE, _NO_RECEIVER))
+					self._device_status_changed(self.rstatus, (C.STATUS.UNAVAILABLE, _NO_RECEIVER))
 			elif not self.listener.active:
 				self.listener = None
-				self._device_status_changed(self.rstatus, (devices.STATUS.UNAVAILABLE, _NO_RECEIVER))
+				self._device_status_changed(self.rstatus, (C.STATUS.UNAVAILABLE, _NO_RECEIVER))
 				self.devices.clear()
 
 			if self.active:
@@ -134,15 +136,14 @@ class WatcherThread(threading.Thread):
 		if not self.active:
 			return None
 
-		logging.debug("new devstatus from %s", dev)
 		if type(dev) == int:
 			dev = self.listener.request(api.get_device_info, dev)
-		logging.debug("new devstatus from %s", dev)
 		if dev:
 			devstatus = _DevStatus(*dev)
 			devstatus.refresh = self._request_status
 			self.devices[dev.number] = devstatus
-			self._device_status_changed(devstatus, devices.STATUS.CONNECTED)
+			self._device_status_changed(devstatus, C.STATUS.CONNECTED)
+			logging.debug("new devstatus %s", devstatus)
 			return devstatus
 
 	def _events_callback(self, code, devnumber, data):
@@ -154,7 +155,7 @@ class WatcherThread(threading.Thread):
 			devstatus = self.devices[devnumber]
 			if code == 0x10 and data[:1] == b'\x8F':
 				updated = True
-				self._device_status_changed(devstatus, devices.STATUS.UNAVAILABLE)
+				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
 			elif code == 0x11:
 				status = devices.process_event(devstatus, self.listener, data)
 				updated |= self._device_status_changed(devstatus, status)
@@ -178,8 +179,8 @@ class WatcherThread(threading.Thread):
 
 		if type(status) == int:
 			status_code = status
-			if status_code in devices.STATUS_NAME:
-				status_text = devices.STATUS_NAME[status_code]
+			if status_code in C.STATUS_NAME:
+				status_text = C.STATUS_NAME[status_code]
 		else:
 			status_code = status[0]
 			if isinstance(status[1], str):
@@ -192,15 +193,16 @@ class WatcherThread(threading.Thread):
 					else:
 						setattr(devstatus, key, value)
 			else:
-				status_code = devices.STATUS.UNKNOWN
+				status_code = C.STATUS.UNKNOWN
 				status_text = ''
 
-		if not (status_code == 0 and old_status_code > 0):
+		if not (status_code == C.STATUS.CONNECTED and old_status_code > C.STATUS.CONNECTED):
+			# if this is not just a ping for a device with an already known status
 			devstatus.code = status_code
 			devstatus.text = status_text
 			logging.debug("%s: device '%s' status update %s => %s: %s",  time.asctime(), devstatus.name, old_status_code, status_code, status_text)
 
-			if status_code <= 0 or old_status_code <= 0 or status_code < old_status_code:
+			if status_code < C.STATUS.CONNECTED or old_status_code < C.STATUS.CONNECTED or status_code < old_status_code:
 				self._notify(devstatus.code, devstatus.name, devstatus.text)
 
 		return True
@@ -214,7 +216,7 @@ class WatcherThread(threading.Thread):
 
 		if self.devices:
 			lines = []
-			if self.rstatus.code < 0:
+			if self.rstatus.code < C.STATUS.CONNECTED:
 				lines += (self.rstatus.text, '')
 
 			devstatuses = [self.devices[d] for d in range(1, 1 + api.C.MAX_ATTACHED_DEVICES) if d in self.devices]
@@ -224,7 +226,7 @@ class WatcherThread(threading.Thread):
 						lines.append('<b>' + devstatus.name + '</b>')
 						lines.append('      ' + devstatus.text)
 					else:
-						lines.append('<b>' + devstatus.name + '</b>: ' + devstatus.text)
+						lines.append('<b>' + devstatus.name + '</b> ' + devstatus.text)
 				else:
 					lines.append('<b>' + devstatus.name + '</b>')
 				lines.append('')

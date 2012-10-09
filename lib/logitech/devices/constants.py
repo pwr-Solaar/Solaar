@@ -6,11 +6,13 @@ STATUS = type('STATUS', (),
 				dict(
 					UNKNOWN=-9999,
 					UNAVAILABLE=-1,
-					CONNECTED=0,
+					BOOTING=0,
+					CONNECTED=1,
 				))
 
 STATUS_NAME = {
 					STATUS.UNAVAILABLE: 'inactive',
+					STATUS.BOOTING: 'initializing',
 					STATUS.CONNECTED: 'connected',
 				}
 

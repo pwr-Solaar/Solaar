@@ -5,6 +5,8 @@
 from gi.repository import Gtk
 from gi.repository import Gdk
 
+from logitech.devices import constants as C
+
 
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
 _STATUS_ICON_SIZE = Gtk.IconSize.DIALOG
@@ -16,7 +18,7 @@ def _update_receiver_box(box, receiver):
 	icon, vbox = box.get_children()
 	label, buttons_box = vbox.get_children()
 	label.set_text(receiver.text or '')
-	buttons_box.set_visible(receiver.code >= 0)
+	buttons_box.set_visible(receiver.code >= C.STATUS.CONNECTED)
 
 
 def _update_device_box(frame, devstatus):
@@ -30,7 +32,7 @@ def _update_device_box(frame, devstatus):
 			icon.set_name(devstatus.name)
 			icon.set_from_icon_name(devstatus.name, _DEVICE_ICON_SIZE)
 
-		if devstatus.code < 0:
+		if devstatus.code < C.STATUS.CONNECTED:
 			expander.set_sensitive(False)
 			expander.set_expanded(False)
 			expander.set_label('<big><b>%s</b></big>\n%s' % (devstatus.name, devstatus.text))
@@ -41,7 +43,7 @@ def _update_device_box(frame, devstatus):
 			texts = []
 
 			light_icon = ebox.get_children()[-2]
-			light_level = getattr(devstatus, 'light_level', None)
+			light_level = getattr(devstatus, C.PROPS.LIGHT_LEVEL, None)
 			light_icon.set_visible(light_level is not None)
 			if light_level is not None:
 				texts.append('Light: %d lux' % light_level)
@@ -50,7 +52,7 @@ def _update_device_box(frame, devstatus):
 				light_icon.set_tooltip_text(texts[-1])
 
 			battery_icon = ebox.get_children()[-1]
-			battery_level = getattr(devstatus, 'battery_level', None)
+			battery_level = getattr(devstatus, C.PROPS.BATTERY_LEVEL, None)
 			battery_icon.set_sensitive(battery_level is not None)
 			if battery_level is None:
 				battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
@@ -61,7 +63,7 @@ def _update_device_box(frame, devstatus):
 				battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 				battery_icon.set_tooltip_text(texts[-1])
 
-			battery_status = getattr(devstatus, 'battery_status', None)
+			battery_status = getattr(devstatus, C.PROPS.BATTERY_STATUS, None)
 			if battery_status is not None:
 				texts.append(battery_status)
 				battery_icon.set_tooltip_text(battery_icon.get_tooltip_text() + '\n' + battery_status)
@@ -163,16 +165,7 @@ def _device_box():
 
 
 def create(title, rstatus, show=True, close_to_tray=False):
-	vbox = Gtk.VBox(homogeneous=False, spacing=4)
-	vbox.set_border_width(4)
-
-	vbox.add(_receiver_box(rstatus))
-	for i in range(1, 1 + _MAX_DEVICES):
-		vbox.add(_device_box())
-	vbox.set_visible(True)
-
 	window = Gtk.Window()
-	window.add(vbox)
 
 	Gtk.Window.set_default_icon_name('mouse')
 	window.set_icon_name(title)
@@ -181,6 +174,8 @@ def create(title, rstatus, show=True, close_to_tray=False):
 	window.set_keep_above(True)
 	window.set_deletable(False)
 	window.set_resizable(False)
+	window.set_size_request(200, 50)
+	window.set_default_size(200, 50)
 
 	window.set_position(Gtk.WindowPosition.MOUSE)
 	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
@@ -189,6 +184,15 @@ def create(title, rstatus, show=True, close_to_tray=False):
 	# window.set_skip_pager_hint(True)
 	# window.set_wmclass(title, 'status-window')
 	# window.set_role('status-window')
+
+	vbox = Gtk.VBox(homogeneous=False, spacing=4)
+	vbox.set_border_width(4)
+
+	vbox.add(_receiver_box(rstatus))
+	for i in range(1, 1 + _MAX_DEVICES):
+		vbox.add(_device_box())
+	vbox.set_visible(True)
+	window.add(vbox)
 
 	if close_to_tray:
 		def _state_event(window, event):
