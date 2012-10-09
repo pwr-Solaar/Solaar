@@ -30,7 +30,7 @@ def _feature_name(key):
 		return None
 	if type(key) == int:
 		return FEATURE_NAME[_pack('!H', key)]
-	return 'UNKNOWN_' + _hexlify(key)
+	return 'UNKNOWN_' + str(_hexlify(key))
 
 
 """Feature names indexed by feature id."""

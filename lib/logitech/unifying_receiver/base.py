@@ -7,8 +7,8 @@ import logging
 from struct import pack as _pack
 from binascii import hexlify as _hexlify
 
-import constants as C
-import exceptions as E
+from . import constants as C
+from . import exceptions as E
 
 from . import unhandled as _unhandled
 import hidapi as _hid
@@ -86,7 +86,7 @@ def try_open(path):
 			return receiver_handle
 
 		# any other replies are ignored, and will assume this is the wrong Linux device
-		if _l.isEnabledFod(_LOG_LEVEL):
+		if _l.isEnabledFor(_LOG_LEVEL):
 			if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
 				# no idea what this is, but it comes up occasionally
 				_l.log(_LOG_LEVEL, "[%s] (%d,) mistery reply [%s]", path, receiver_handle, _hexlify(reply))

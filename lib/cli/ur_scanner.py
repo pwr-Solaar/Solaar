@@ -13,34 +13,34 @@ from logitech.unifying_receiver.constants import *
 def scan_devices(receiver):
 	devices = api.list_devices(receiver)
 	if not devices:
-		print "!! No attached devices found."
+		print ("!! No attached devices found.")
 		return
 
 	for devinfo in devices:
-		print "Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.type)
-		print "  Protocol %s" % devinfo.protocol
+		print ("Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.type))
+		# print "  Protocol %s" % devinfo.protocol
 
 		for fw in devinfo.firmware:
-			print "    %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build)
+			print ("    %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build))
 
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
 			if feature:
-				print "  ~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index)
+				print ("  ~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index))
 
 		if FEATURE.BATTERY in devinfo.features:
 			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features_array=devinfo.features)
-			print "  Battery %d charged (next level %d%), status %s" % (discharge, dischargeNext, status)
+			print ("  Battery %d charged (next level %d%), status %s" % (discharge, dischargeNext, status))
 
 		if FEATURE.REPROGRAMMABLE_KEYS in devinfo.features:
 			keys = api.get_device_keys(receiver, devinfo.number, features_array=devinfo.features)
 			if keys is not None and keys:
-				print "  %d reprogrammable keys found" % len(keys)
+				print ("  %d reprogrammable keys found" % len(keys))
 				for k in keys:
 					flags = ','.join(KEY_FLAG_NAME[f] for f in KEY_FLAG_NAME if k.flags & f)
-					print "    %2d: %-12s => %-12s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags)
+					print ("    %2d: %-12s => %-12s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags))
 
-		print "--------"
+		print ("--------")
 
 
 if __name__ == '__main__':
@@ -56,9 +56,9 @@ if __name__ == '__main__':
 	for rawdevice in api._base.list_receiver_devices():
 		receiver = api._base.try_open(rawdevice.path)
 		if receiver:
-			print "!! Logitech Unifying Receiver found (%s)." % rawdevice.path
+			print ("!! Logitech Unifying Receiver found (%s)." % rawdevice.path)
 			scan_devices(receiver)
 			api.close(receiver)
 			break
 	else:
-		print "!! Logitech Unifying Receiver not found."
+		print ("!! Logitech Unifying Receiver not found.")
