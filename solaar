@@ -3,10 +3,10 @@
 cd -P `dirname "$0"`
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/lib/native/`uname -m`
-export PYTHONPATH=$PWD:$PWD/lib
+export PYTHONPATH=$PWD/app:$PWD/lib
 export XDG_DATA_DIRS=$PWD/resources:$XDG_DATA_DIRS
 
 cd -
 
-exec python -OO solaar.py "$@"
+exec python -OO -m solaar "$@"
 # exec python -OO -m profile -o $TMPDIR/profile.log solaar.py "$@"

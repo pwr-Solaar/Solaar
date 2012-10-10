@@ -7,8 +7,7 @@ import logging
 from logitech.unifying_receiver import api
 from logitech import devices
 
-from . import ui
-import ui.pair
+import ui
 
 
 def full_scan(button, watcher):

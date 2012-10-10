@@ -104,10 +104,10 @@ class EventsListener(threading.Thread):
 		self._active = False
 
 	def request(self, api_function, *args, **kwargs):
-		"""Make an UR API request.
+		"""Make an UR API request through this listener's receiver.
 
-		The api_function will get the receiver handle as a first agument, all
-		other args and kwargs will follow.
+		The api_function must have a receiver handle as a first agument, all
+		other passed args and kwargs will follow.
 		"""
 		# if _l.isEnabledFor(_LOG_LEVEL):
 		# 	_l.log(_LOG_LEVEL, "%s request '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)

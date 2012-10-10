@@ -11,7 +11,7 @@ from logitech.unifying_receiver.listener import EventsListener
 from logitech import devices
 from logitech.devices import constants as C
 
-from . import actions
+import actions
 
 
 _l = logging.getLogger('watcher')
@@ -38,10 +38,10 @@ class _DevStatus(api.AttachedDeviceInfo):
 		return 'DevStatus(%d,%s,%d)' % (self.number, self.name, self.code)
 
 
-class WatcherThread(threading.Thread):
+class Watcher(threading.Thread):
 	"""Keeps a map of all attached devices and their statuses."""
 	def __init__(self, notify_callback=None):
-		super(WatcherThread, self).__init__(group='Solaar', name='Watcher')
+		super(Watcher, self).__init__(group='Solaar', name='Watcher')
 		self.daemon = True
 		self.active = False
 
@@ -194,7 +194,7 @@ class WatcherThread(threading.Thread):
 
 		devstatus.code = status_code
 		devstatus.text = status_text
-		_l.debug("%s status update %s => %s: %s",  devstatus, old_status_code, status_code, status_text)
+		_l.debug("%s update %s => %s: %s",  devstatus, old_status_code, status_code, status_text)
 
 		if self.notify:
 			if status_code < C.STATUS.CONNECTED or old_status_code < C.STATUS.CONNECTED or status_code < old_status_code:
