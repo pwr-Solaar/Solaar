@@ -22,6 +22,7 @@ from collections import namedtuple
 
 """Tuple returned by list_devices and find_device_by_name."""
 AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
+				'handle',
 				'number',
 				'type',
 				'name',

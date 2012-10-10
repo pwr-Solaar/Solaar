@@ -18,8 +18,8 @@ NAME = 'Wireless Solar Keyboard K750'
 #
 #
 
-def _trigger_solar_charge_events(receiver, devinfo):
-	return _api.request(receiver, devinfo.number,
+def _trigger_solar_charge_events(handle, devinfo):
+	return _api.request(handle, devinfo.number,
 						feature=_api.C.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
 						features_array=devinfo.features)
 

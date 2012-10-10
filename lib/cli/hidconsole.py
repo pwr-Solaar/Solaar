@@ -44,10 +44,10 @@ def _continuous_read(handle, timeout=1000):
 if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument('device', default=None,
-							help='linux device to connect to')
 	arg_parser.add_argument('--history', default='.hidconsole-history',
 							help='history file')
+	arg_parser.add_argument('device', default=None,
+							help='linux device to connect to')
 	args = arg_parser.parse_args()
 
 	import hidapi

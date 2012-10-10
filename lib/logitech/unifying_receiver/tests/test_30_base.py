@@ -8,7 +8,6 @@ from binascii import hexlify
 from .. import base
 from ..exceptions import *
 from ..constants import *
-from .. import unhandled
 
 
 class Test_UR_Base(unittest.TestCase):
@@ -157,7 +156,7 @@ class Test_UR_Base(unittest.TestCase):
 			global received_unhandled
 			received_unhandled = (code, device, data)
 
-		unhandled.hook = _unhandled
+		base.unhandled_hook = _unhandled
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")
@@ -165,7 +164,7 @@ class Test_UR_Base(unittest.TestCase):
 		self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
 
 		received_unhandled = None
-		unhandled.hook = None
+		base.unhandled_hook = None
 		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
 		reply = base.request(self.handle, self.device, fs_index + b'\x00')
 		self.assertIsNotNone(reply, "request returned None reply")

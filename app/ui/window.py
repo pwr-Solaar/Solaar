@@ -77,8 +77,11 @@ def _update_device_box(frame, devstatus):
 		expander.set_label(_PLACEHOLDER)
 
 
-def update(window, receiver, devices):
+def update(window, receiver, devices, icon_name=None):
 	if window and window.get_child():
+		if icon_name is not None:
+			window.set_icon_name(icon_name)
+
 		controls = list(window.get_child().get_children())
 		_update_receiver_box(controls[0], receiver)
 		for index in range(1, 1 + _MAX_DEVICES):
@@ -107,9 +110,9 @@ def _receiver_box(rstatus):
 	buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
 	vbox.pack_start(buttons_box, True, True, 0)
 
-	def _action(button, action):
+	def _action(button, function, params):
 		button.set_sensitive(False)
-		action()
+		function(button, *params)
 		button.set_sensitive(True)
 
 	def _add_button(name, icon, action):
@@ -119,7 +122,9 @@ def _receiver_box(rstatus):
 		button.set_tooltip_text(name)
 		button.set_focus_on_click(False)
 		if action:
-			button.connect('clicked', _action, action)
+			function = action[0]
+			params = action[1:]
+			button.connect('clicked', _action, function, params)
 		else:
 			button.set_sensitive(False)
 		buttons_box.pack_start(button, False, False, 0)
@@ -167,14 +172,12 @@ def _device_box():
 def create(title, rstatus, show=True, close_to_tray=False):
 	window = Gtk.Window()
 
-	Gtk.Window.set_default_icon_name('mouse')
-	window.set_icon_name(title)
-
 	window.set_title(title)
+
 	window.set_keep_above(True)
 	window.set_deletable(False)
 	window.set_resizable(False)
-	window.set_size_request(200, 50)
+	# window.set_size_request(200, 50)
 	window.set_default_size(200, 50)
 
 	window.set_position(Gtk.WindowPosition.MOUSE)

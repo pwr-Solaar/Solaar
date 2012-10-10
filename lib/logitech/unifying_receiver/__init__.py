@@ -23,3 +23,9 @@ http://6xq.net/git/lars/lshidpp.git/plain/doc/
 from .constants import *
 from .exceptions import *
 from .api import *
+
+
+import logging
+logging.addLevelName(4, 'UR_TRACE')
+logging.addLevelName(5, 'UR_DEBUG')
+logging.addLevelName(6, 'UR_INFO')

@@ -22,7 +22,8 @@ if __name__ == '__main__':
 
 	import logging
 	log_level = logging.root.level - 10 * args.verbose
-	logging.basicConfig(level=log_level if log_level > 0 else 1)
+	log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
+	logging.basicConfig(level=log_level if log_level > 0 else 1, format=log_format)
 
 	import app
 	app.run(args)
