@@ -195,7 +195,7 @@ class Watcher(Thread):
 				updated = True
 				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
 			elif code == 0x11:
-				status = devices.process_event(devstatus, self.listener, data)
+				status = devices.process_event(devstatus, data)
 				updated |= self._device_status_changed(devstatus, status)
 			else:
 				_l.warn("unknown event code %02x", code)

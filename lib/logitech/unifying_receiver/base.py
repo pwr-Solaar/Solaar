@@ -216,7 +216,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	# _l.log(_LOG_LEVEL, "(-) => r[]", handle)
 
 
-def request(handle, devnumber, feature_index_function, params=b'', features_array=None):
+def request(handle, devnumber, feature_index_function, params=b'', features=None):
 	"""Makes a feature call to a device and waits for a matching reply.
 
 	This function will skip all incoming messages and events not related to the
@@ -227,8 +227,8 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 	:param devnumber: attached device number.
 	:param feature_index_function: a two-byte string of (feature_index, feature_function).
 	:param params: parameters for the feature call, 3 to 16 bytes.
-	:param features_array: optional features array for the device, only used to
-	fill the FeatureCallError exception if one occurs.
+	:param features: optional features array for the device, only used to fill
+	the FeatureCallError exception if one occurs.
 	:returns: the reply data packet, or ``None`` if the device is no longer
 	available.
 	:raisees FeatureCallError: if the feature call replied with an error.
@@ -272,16 +272,21 @@ def request(handle, devnumber, feature_index_function, params=b'', features_arra
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
-			# an error returned from the device
+			# the feature call returned with an error
 			error_code = ord(reply_data[3])
 			_l.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, C.ERROR_NAME[error_code], _hexlify(reply_data))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
-			feature = None if features_array is None else features_array[feature_index]
+			feature = None if features is None else features[feature_index] if feature_index < len(features) else None
 			raise E.FeatureCallError(devnumber, feature, feature_index, feature_function, error_code, reply_data)
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
+			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]))
+			return reply_data[2:]
+
+		if reply_code == 0x10 and devnumber == 0xFF and reply_data[:2] == feature_index_function:
+			# direct calls to the receiver (device 0xFF) may also return successfully with reply code 0x10
 			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]))
 			return reply_data[2:]
 

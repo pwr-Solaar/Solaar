@@ -50,7 +50,7 @@ if __name__ == '__main__':
 							help='linux device to connect to')
 	args = arg_parser.parse_args()
 
-	import hidapi
+	from . import hidapi
 	print (".. Opening device %s" % args.device)
 	handle = hidapi.open_path(args.device.encode('utf-8'))
 	if handle:

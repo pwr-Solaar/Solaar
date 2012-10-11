@@ -5,7 +5,7 @@ __license__ = "GPL"
 __version__ = "0.3"
 
 #
-# In case a future pure-Python implementation is feasible.
+# This package exists in case a future pure-Python implementation is feasible.
 #
 
 from .native import *

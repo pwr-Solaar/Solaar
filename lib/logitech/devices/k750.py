@@ -21,7 +21,7 @@ NAME = 'Wireless Solar Keyboard K750'
 def _trigger_solar_charge_events(handle, devinfo):
 	return _api.request(handle, devinfo.number,
 						feature=_api.C.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
-						features_array=devinfo.features)
+						features=devinfo.features)
 
 
 def _charge_status(data, hasLux=False):
@@ -54,7 +54,7 @@ def request_status(devinfo, listener):
 			return C.STATUS.UNAVAILABLE
 
 
-def process_event(devinfo, listener, data):
+def process_event(devinfo, data):
 	if data[:2] == b'\x09\x00' and data[7:11] == b'GOOD':
 		# usually sent after the keyboard is turned on
 		return _charge_status(data)
@@ -65,7 +65,7 @@ def process_event(devinfo, listener, data):
 
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
-		if listener and _trigger_solar_charge_events(listener.receiver, devinfo) is None:
+		if _trigger_solar_charge_events(devinfo.handle, devinfo) is None:
 			return C.STATUS.UNAVAILABLE
 		return _charge_status(data)
 
