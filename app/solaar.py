@@ -7,8 +7,7 @@ __version__ = '0.4'
 #
 
 import logging
-from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import (Gtk, GObject)
 
 from logitech.devices import constants as C
 
@@ -19,32 +18,20 @@ from watcher import Watcher
 APP_TITLE = 'Solaar'
 
 
-def _status_updated(watcher, icon, window):
-	while True:
-		watcher.status_changed.wait()
-		text = watcher.status_text
-		watcher.status_changed.clear()
-
-		icon_name = APP_TITLE + '-fail' if watcher.rstatus.code < C.STATUS.CONNECTED else APP_TITLE
-
-		if icon:
-			GObject.idle_add(ui.icon.update, icon, watcher.rstatus, text, icon_name)
-
-		if window:
-			GObject.idle_add(ui.window.update, window, watcher.rstatus, dict(watcher.devices), icon_name)
+def _notify(status_code, title, text=''):
+	if text:
+		ui.notify.show(status_code, title, text)
 
 
 if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=APP_TITLE)
 	arg_parser.add_argument('-v', '--verbose', action='count', default=0,
-							help='increase the logger verbosity')
-	arg_parser.add_argument('-N', '--disable-notifications', action='store_false', dest='notifications',
-							help='disable desktop notifications')
-	arg_parser.add_argument('-H', '--start-hidden', action='store_true', dest='start_hidden',
-							help='hide the application window on start')
-	arg_parser.add_argument('-t', '--close-to-tray', action='store_true',
-							help='closing the application window hides it instead of terminating the application')
+							help='increase the logger verbosity (may be repeated)')
+	arg_parser.add_argument('-s', '--systray', action='store_true',
+							help='embed the application into the systray')
+	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
+							help='disable desktop notifications (if systray is enabled)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 
@@ -54,23 +41,34 @@ if __name__ == '__main__':
 
 	GObject.threads_init()
 
-	ui.notify.init(APP_TITLE, args.notifications)
+	args.notifications = args.notifications and args.systray
+	if args.notifications:
+		ui.notify.init(APP_TITLE)
 
-	watcher = Watcher(ui.notify.show)
+	tray_icon = None
+	window = None
+
+	def _status_changed(text, rstatus, devices):
+		icon_name = APP_TITLE + '-fail' if rstatus.code < C.STATUS.CONNECTED else APP_TITLE
+
+		if tray_icon:
+			GObject.idle_add(ui.icon.update, tray_icon, rstatus, text, icon_name)
+
+		if window:
+			GObject.idle_add(ui.window.update, window, rstatus, devices, icon_name)
+
+	watcher = Watcher(_status_changed, _notify if args.notifications else None)
 	watcher.start()
 
-	window = ui.window.create(APP_TITLE, watcher.rstatus, not args.start_hidden, args.close_to_tray)
+	window = ui.window.create(APP_TITLE, watcher.rstatus, args.systray)
 	window.set_icon_name(APP_TITLE + '-fail')
 
-	tray_icon = ui.icon.create(APP_TITLE, (ui.window.toggle, window))
-	tray_icon.set_from_icon_name(APP_TITLE + '-fail')
-
-	import threading
-	ui_update_thread = threading.Thread(target=_status_updated, name='ui_update', args=(watcher, tray_icon, window))
-	ui_update_thread.daemon = True
-	ui_update_thread.start()
+	if args.systray:
+		tray_icon = ui.icon.create(APP_TITLE, (ui.window.toggle, window))
+		tray_icon.set_from_icon_name(APP_TITLE + '-fail')
 
 	Gtk.main()
 
 	watcher.stop()
-	ui.notify.set_active(False)
+	if args.notifications:
+		ui.notify.set_active(False)

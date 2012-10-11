@@ -3,7 +3,7 @@
 # Unlikely to be used directly unless you're expanding the API.
 #
 
-import logging
+from logging import getLogger as _Logger
 from struct import pack as _pack
 from binascii import hexlify as _hexlify
 
@@ -14,7 +14,7 @@ import hidapi as _hid
 
 
 _LOG_LEVEL = 4
-_l = logging.getLogger('lur.base')
+_l = _Logger('lur.base')
 
 #
 # These values are defined by the Logitech documentation.

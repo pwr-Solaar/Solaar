@@ -11,7 +11,6 @@ try:
 	available = True  # assumed to be working since the import succeeded
 	_active = False  # not yet active
 	_app_title = None
-	_notifications = {}
 
 
 	def init(app_title, active=True):
@@ -34,14 +33,6 @@ try:
 						available = False
 			else:
 				if _active:
-					for n in list(_notifications.values()):
-						try:
-							n.close()
-						except Exception:
-							logging.exception("closing open notification %s", n)
-							# DBUS
-							pass
-					_notifications.clear()
 					try:
 						_notify.uninit()
 					except:
@@ -57,31 +48,15 @@ try:
 
 	def show(status_code, title, text='', icon=None):
 		"""Show a notification with title and text."""
-		if not available or not _active:
-			return
-
-		if title in _notifications:
-			notification = _notifications[title]
-		else:
-			_notifications[title] = notification = _notify.Notification(title)
-
-		if text == notification.message:
-			# there's no need to show the same notification twice in a row
-			return
-
-		icon = icon or title
-		notification.update(title, text, title)
-		try:
-			if text:
+		if available and _active:
+			notification = _notify.Notification(title, text, icon or title)
+			try:
 				notification.show()
-			else:
-				notification.close()
-		except Exception:
-			logging.exception("showing notification %s", notification)
+			except Exception:
+				logging.exception("showing notification %s", notification)
 
 
 except ImportError:
-	logging.exception("ouch")
 	logging.warn("python-notify2 not found, desktop notifications are disabled")
 	available = False
 	active = False

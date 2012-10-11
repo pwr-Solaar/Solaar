@@ -10,8 +10,6 @@ def create(parent_window, title):
 
 	Gtk.Window.set_default_icon_name('add')
 	window.set_resizable(False)
-
-	# window.set_wmclass(title, 'status-window')
-	# window.set_role('pair')
+	# window.set_role('pair-device')
 
 	return window

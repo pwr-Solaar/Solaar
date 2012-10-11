@@ -2,7 +2,7 @@
 # Logitech Unifying Receiver API.
 #
 
-import logging
+from logging import getLogger as _Logger
 from struct import pack as _pack
 from struct import unpack as _unpack
 from binascii import hexlify as _hexlify
@@ -16,7 +16,7 @@ from . import base as _base
 
 
 _LOG_LEVEL = 5
-_l = logging.getLogger('lur.api')
+_l = _Logger('lur.api')
 
 #
 #

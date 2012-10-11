@@ -2,8 +2,8 @@
 #
 #
 
-import logging
-import threading
+from logging import getLogger as _Logger
+from threading import (Thread, Event, Lock)
 from time import sleep as _sleep
 
 from . import base as _base
@@ -11,13 +11,13 @@ from . import exceptions as E
 
 # for both Python 2 and 3
 try:
-	import Queue as queue
+	from Queue import Queue
 except ImportError:
-	import queue
+	from queue import Queue
 
 
-_LOG_LEVEL = 5
-_l = logging.getLogger('lur.listener')
+_LOG_LEVEL = 4
+_l = _Logger('lur.listener')
 
 
 _READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 4)  # ms
@@ -30,11 +30,14 @@ def _callback_caller(listener, callback):
 		event = listener.events.get()
 		if _l.isEnabledFor(_LOG_LEVEL):
 			_l.log(_LOG_LEVEL, "%s delivering event %s", listener, event)
-		callback.__call__(*event)
+		try:
+			callback.__call__(*event)
+		except:
+			_l.exception("callback for %s", event)
 	# _l.log(_LOG_LEVEL, "%s stopped callback caller", listener)
 
 
-class EventsListener(threading.Thread):
+class EventsListener(Thread):
 	"""Listener thread for events from the Unifying Receiver.
 
 	Incoming events (reply_code, devnumber, data) will be passed to the callback
@@ -53,14 +56,14 @@ class EventsListener(threading.Thread):
 		self.receiver = receiver
 
 		self.task = None
-		self.task_processing = threading.Lock()
+		self.task_processing = Lock()
 
 		self.task_reply = None
-		self.task_done = threading.Event()
+		self.task_done = Event()
 
-		self.events = queue.Queue(32)
+		self.events = Queue(16)
 
-		self.event_caller = threading.Thread(group='Unifying Receiver', name='Callback-%x' % receiver, target=_callback_caller, args=(self, events_callback))
+		self.event_caller = Thread(group='Unifying Receiver', name='Callback-%x' % receiver, target=_callback_caller, args=(self, events_callback))
 		self.event_caller.daemon = True
 
 		self.__str_cached = 'Events(%x)' % self.receiver
@@ -102,6 +105,7 @@ class EventsListener(threading.Thread):
 		"""Tells the listener to stop as soon as possible."""
 		_l.log(_LOG_LEVEL, "%s stopping", self)
 		self._active = False
+		self.join()
 
 	def request(self, api_function, *args, **kwargs):
 		"""Make an UR API request through this listener's receiver.
