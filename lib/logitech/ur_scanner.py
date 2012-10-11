@@ -6,33 +6,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 from binascii import hexlify
 
-from .unifying_receiver import (api, base)
+from .unifying_receiver import api
 from .unifying_receiver.constants import *
 
 
 def print_receiver(receiver):
 	print ("Unifying Receiver")
 
-	reply = base.request(receiver, 0xff, b'\x83\xB5', b'\x03')
-	if reply and reply[0:1] == b'\x03':
-		print ("  Serial: %s" % hexlify(reply[1:5]))
+	serial, firmware, bootloader = api.get_receiver_info(receiver)
 
-	reply = base.request(receiver, 0xff, b'\x81\xF1', b'\x01')
-	if reply and reply[0:1] == b'\x01':
-		fw_version = hexlify(reply[1:3])
-		firmware = fw_version[0:2] + '.' + fw_version[2:4]
-	else:
-		firmware = '??.??'
-
-	reply = base.request(receiver, 0xff, b'\x81\xF1', b'\x02')
-	if reply and reply[0:1] == b'\x02':
-		firmware += '.B' + hexlify(reply[1:3])
+	print ("  Serial: %s" % serial)
 	print ("  Firmware version: %s" % firmware)
-
-	reply = base.request(receiver, 0xff, b'\x81\xF1', b'\x04')
-	if reply and reply[0:1] == b'\x04':
-		bl_version = hexlify(reply[1:3])
-		print ("  Bootloader: %s.%s" % (bl_version[0:2], bl_version[2:4]))
+	print ("  Bootloader: %s" % bootloader)
 
 	print ("--------")
 

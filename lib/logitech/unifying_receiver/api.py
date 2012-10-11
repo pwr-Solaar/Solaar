@@ -33,6 +33,31 @@ open = _base.open
 close = _base.close
 
 
+def get_receiver_info(handle):
+	serial = None
+	reply = _base.request(handle, 0xff, b'\x83\xB5', b'\x03')
+	if reply and reply[0:1] == b'\x03':
+		serial = _hexlify(reply[1:5])
+
+	firmware = '??.??'
+	reply = _base.request(handle, 0xff, b'\x81\xF1', b'\x01')
+	if reply and reply[0:1] == b'\x01':
+		fw_version = _hexlify(reply[1:3])
+		firmware = fw_version[0:2] + '.' + fw_version[2:4]
+
+	reply = _base.request(handle, 0xff, b'\x81\xF1', b'\x02')
+	if reply and reply[0:1] == b'\x02':
+		firmware += '.B' + _hexlify(reply[1:3])
+
+	bootloader = None
+	reply = _base.request(handle, 0xff, b'\x81\xF1', b'\x04')
+	if reply and reply[0:1] == b'\x04':
+		bl_version = _hexlify(reply[1:3])
+		bootloader = bl_version[0:2] + '.' + bl_version[2:4]
+
+	return (serial, firmware, bootloader)
+
+
 def request(handle, devnumber, feature, function=b'\x00', params=b'', features=None):
 	"""Makes a feature call to the device, and returns the reply data.
 
