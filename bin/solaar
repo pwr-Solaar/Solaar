@@ -1,0 +1,12 @@
+#!/bin/sh
+
+APP=`dirname "$0"`/../app
+LIB=`dirname "$0"`/../lib
+SHARE=`dirname "$0"`/../share
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`uname -m`
+export PYTHONPATH=$APP:$LIB
+export XDG_DATA_DIRS=$SHARE:$XDG_DATA_DIRS
+
+exec python -OO -m solaar "$@"
+#exec python -OO -m profile -o $TMPDIR/profile.log app/solaar.py "$@"
