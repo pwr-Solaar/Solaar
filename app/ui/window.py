@@ -109,7 +109,8 @@ def update(window, receiver, devices, icon_name=None):
 		if icon_name is not None:
 			window.set_icon_name(icon_name)
 
-		controls = list(window.get_child().get_children())
+		vbox = window.get_child().get_child()
+		controls = list(vbox.get_children())
 		_update_receiver_box(controls[0], receiver)
 		for index in range(1, len(controls)):
 			_update_device_box(controls[index], devices.get(index))
@@ -202,12 +203,17 @@ def create(title, rstatus, systray=False):
 	for i in range(1, 1 + rstatus.max_devices):
 		vbox.add(_device_box())
 	vbox.set_visible(True)
-	window.add(vbox)
+
+	frame = Gtk.Frame()
+	# frame.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
+	frame.set_visible(True)
+	frame.add(vbox)
+	window.add(frame)
 
 	geometry = Gdk.Geometry()
 	geometry.min_width = 300
 	geometry.min_height = 40
-	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
+	window.set_geometry_hints(frame, geometry, Gdk.WindowHints.MIN_SIZE)
 
 	window.set_resizable(False)
 	window.set_default_size(geometry.min_width, geometry.min_height)

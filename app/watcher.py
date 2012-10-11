@@ -179,7 +179,7 @@ class Watcher(Thread):
 		devstatus.text = status_text
 		_l.debug("%s update %s => %s: %s",  devstatus, old_status_code, status_code, status_text)
 
-		if self.notify:
+		if self.notify and (status_code <= C.STATUS.CONNECTED or status_code != old_status_code):
 			self.notify(devstatus.code, devstatus.name, devstatus.text)
 
 		return True
