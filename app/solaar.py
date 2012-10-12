@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	arg_parser = argparse.ArgumentParser(prog=APP_TITLE)
 	arg_parser.add_argument('-v', '--verbose', action='count', default=0,
 							help='increase the logger verbosity (may be repeated)')
-	arg_parser.add_argument('-s', '--systray', action='store_true',
+	arg_parser.add_argument('-S', '--no-systray', action='store_false', dest='systray',
 							help='embed the application into the systray')
 	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
 							help='disable desktop notifications (if systray is enabled)')
@@ -67,5 +67,4 @@ if __name__ == '__main__':
 	Gtk.main()
 
 	watcher.stop()
-	if args.notifications:
-		ui.notify.set_active(False)
+	ui.notify.set_active(False)

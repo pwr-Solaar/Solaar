@@ -2,6 +2,9 @@
 # Some common functions and types.
 #
 
+from binascii import hexlify as _hexlify
+
+
 class FallbackDict(dict):
 	def __init__(self, fallback_function=lambda x: None, *args, **kwargs):
 		super(FallbackDict, self).__init__(*args, **kwargs)
@@ -45,5 +48,9 @@ ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
 				'task',
 				'task_name',
 				'flags'])
+
+class Packet(namedtuple('Packet', ['code', 'devnumber', 'data'])):
+	def __str__(self):
+		return 'Packet(0x%02x,%d,%s)' % (self.code, self.devnumber, _hexlify(self.data))
 
 del namedtuple

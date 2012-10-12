@@ -4,10 +4,11 @@
 
 from logging import getLogger as _Logger
 from threading import (Thread, Event, Lock)
-from time import sleep as _sleep
+# from time import sleep as _sleep
 
 from . import base as _base
 from . import exceptions as E
+from .common import Packet
 
 # for both Python 2 and 3
 try:
@@ -21,16 +22,15 @@ _l = _Logger('lur.listener')
 
 
 _READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 5)  # ms
-_IDLE_SLEEP = _base.DEFAULT_TIMEOUT / 5  # ms
 
 
 def _callback_caller(listener, callback):
 	# _l.log(_LOG_LEVEL, "%s starting callback caller", listener)
-	while listener._active:
+	while listener._active or not listener.events.empty():
 		event = listener.events.get()
 		_l.log(_LOG_LEVEL, "%s delivering event %s", listener, event)
 		try:
-			callback.__call__(*event)
+			callback.__call__(event)
 		except:
 			_l.exception("callback for %s", event)
 	# _l.log(_LOG_LEVEL, "%s stopped callback caller", listener)
@@ -55,11 +55,10 @@ class EventsListener(Thread):
 
 		self.task = None
 		self.task_processing = Lock()
-
 		self.task_reply = None
 		self.task_done = Event()
 
-		self.events = Queue(16)
+		self.events = Queue(32)
 
 		self.event_caller = Thread(group='Unifying Receiver', name='Callback-%x' % receiver, target=_callback_caller, args=(self, events_callback))
 		self.event_caller.daemon = True
@@ -77,23 +76,22 @@ class EventsListener(Thread):
 		_base.unhandled_hook = self._unhandled
 
 		while self._active:
+			event = None
 			try:
 				event = _base.read(self.receiver, _READ_EVENT_TIMEOUT)
 			except E.NoReceiver:
 				_l.warn("%s receiver disconnected", self)
+				self.events.put(Packet(0xFF, 0xFF, None))
 				self._active = False
 
-			if self._active:
-				if event:
-					# _l.log(_LOG_LEVEL, "%s queueing event %s", self, event)
-					self.events.put(event)
+			if event:
+				_l.log(_LOG_LEVEL, "%s queueing event %s", self, event)
+				self.events.put(Packet(*event))
 
-				if self.task is None:
-					# _l.log(_LOG_LEVEL, "%s idle sleep", self)
-					_sleep(_IDLE_SLEEP / 1000.0)
-				else:
-					self.task_reply = self._make_request(*self.task)
-					self.task_done.set()
+			if self.task:
+				task, self.task = self.task, None
+				self.task_reply = self._make_request(*task)
+				self.task_done.set()
 
 		_base.close(self.receiver)
 		self.__str_cached = 'Events(%x)' % self.receiver
@@ -102,9 +100,10 @@ class EventsListener(Thread):
 
 	def stop(self):
 		"""Tells the listener to stop as soon as possible."""
-		_l.log(_LOG_LEVEL, "%s stopping", self)
-		self._active = False
-		self.join()
+		if self._active:
+			_l.log(_LOG_LEVEL, "stopping %s", self)
+			self._active = False
+			self.join()
 
 	def request(self, api_function, *args, **kwargs):
 		"""Make an UR API request through this listener's receiver.
@@ -114,14 +113,14 @@ class EventsListener(Thread):
 		"""
 		# _l.log(_LOG_LEVEL, "%s request '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)
 
-		self.task_processing.acquire()
-		self.task_done.clear()
-		self.task = (api_function, args, kwargs)
+		if not self._active:
+			return None
 
-		self.task_done.wait()
-		reply = self.task_reply
-		self.task = self.task_reply = None
-		self.task_processing.release()
+		with self.task_processing:
+			self.task_done.clear()
+			self.task = (api_function, args, kwargs)
+			self.task_done.wait()
+			reply, self.task_reply = self.task_reply, None
 
 		# _l.log(_LOG_LEVEL, "%s request '%s.%s' => %s", self, api_function.__module__, api_function.__name__, repr(reply))
 		if isinstance(reply, Exception):
@@ -139,8 +138,8 @@ class EventsListener(Thread):
 			self.task_reply = e
 
 	def _unhandled(self, reply_code, devnumber, data):
-		event = (reply_code, devnumber, data)
-		_l.log(_LOG_LEVEL, "%s queueing unhandled event %s", self, event)
+		event = Packet(reply_code, devnumber, data)
+		# _l.log(_LOG_LEVEL, "%s queueing unhandled event %s", self, event)
 		self.events.put(event)
 
 	def __str__(self):

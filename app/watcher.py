@@ -132,7 +132,7 @@ class Watcher(Thread):
 			return None
 
 		if type(dev) == int:
-			# assert self.listener
+			assert self.listener
 			dev = self.listener.request(api.get_device_info, dev)
 
 		if dev:
@@ -177,33 +177,33 @@ class Watcher(Thread):
 
 		devstatus.code = status_code
 		devstatus.text = status_text
-		_l.debug("%s update %s => %s: %s",  devstatus, old_status_code, status_code, status_text)
+		_l.debug("%s update %s => %s: %s", devstatus, old_status_code, status_code, status_text)
 
 		if self.notify and (status_code <= C.STATUS.CONNECTED or status_code != old_status_code):
 			self.notify(devstatus.code, devstatus.name, devstatus.text)
 
 		return True
 
-	def _events_callback(self, code, devnumber, data):
-		# _l.debug("event %s", (code, devnumber, data))
+	def _events_callback(self, event):
+		# _l.debug("event %s", event)
 
 		updated = False
 
-		if devnumber in self.devices:
-			devstatus = self.devices[devnumber]
-			if code == 0x10 and data[:1] == b'\x8F':
+		if event.devnumber in self.devices:
+			devstatus = self.devices[event.devnumber]
+			if event.code == 0x10 and event.data[:1] == b'\x8F':
 				updated = True
 				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
-			elif code == 0x11:
-				status = devices.process_event(devstatus, data, self.listener)
+			elif event.code == 0x11:
+				status = devices.process_event(devstatus, event.data, self.listener)
 				updated |= self._device_status_changed(devstatus, status)
 			else:
-				_l.warn("unknown event code %02x", code)
-		elif devnumber:
-			self._new_device(devnumber)
+				_l.warn("unknown event %s", event)
+		elif event.devnumber:
+			self._new_device(event.devnumber)
 			updated = True
 		else:
-			_l.warn("don't know how to handle event %s", (code, devnumber, data))
+			_l.warn("don't know how to handle event %s", event)
 
 		if updated:
 			self._update_status_text()
