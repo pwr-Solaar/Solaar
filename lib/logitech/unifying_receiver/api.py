@@ -166,8 +166,7 @@ def get_device_info(handle, devnumber, name=None, features=None):
 
 	d_type = get_device_type(handle, devnumber, features)
 	d_name = get_device_name(handle, devnumber, features) if name is None else name
-	d_firmware = get_device_firmware(handle, devnumber, features)
-	devinfo = AttachedDeviceInfo(handle, devnumber, d_type, d_name, d_firmware, features)
+	devinfo = AttachedDeviceInfo(handle, devnumber, d_type, d_name, features)
 	_l.log(_LOG_LEVEL, "(%d) found device %s", devnumber, devinfo)
 	return devinfo
 

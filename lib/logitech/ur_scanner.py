@@ -34,7 +34,8 @@ def scan_devices(receiver):
 		print ("Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.type))
 		# print "  Protocol %s" % devinfo.protocol
 
-		for fw in devinfo.firmware:
+		firmware = api.get_device_firmware(receiver, devinfo.number, features=devinfo.features)
+		for fw in firmware:
 			print ("  %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build))
 
 		for index in range(0, len(devinfo.features)):

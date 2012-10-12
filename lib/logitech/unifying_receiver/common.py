@@ -26,7 +26,6 @@ AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
 				'number',
 				'type',
 				'name',
-				'firmware',
 				'features'])
 
 """Firmware information."""

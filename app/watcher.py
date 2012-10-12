@@ -51,7 +51,7 @@ class Watcher(Thread):
 
 		self.listener = None
 
-		self.rstatus = _DevStatus(0, 0xFF, None, _UNIFYING_RECEIVER, None, None)
+		self.rstatus = _DevStatus(0, 0xFF, None, _UNIFYING_RECEIVER, ())
 		self.rstatus.max_devices = api.C.MAX_ATTACHED_DEVICES
 		self.rstatus.refresh = (actions.full_scan, self)
 		self.rstatus.pair = None  # (actions.pair, self)
@@ -194,7 +194,7 @@ class Watcher(Thread):
 				updated = True
 				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
 			elif code == 0x11:
-				status = devices.process_event(devstatus, data)
+				status = devices.process_event(devstatus, data, self.listener)
 				updated |= self._device_status_changed(devstatus, status)
 			else:
 				_l.warn("unknown event code %02x", code)
