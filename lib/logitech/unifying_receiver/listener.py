@@ -21,7 +21,7 @@ _LOG_LEVEL = 4
 _l = _Logger('lur.listener')
 
 
-_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 5)  # ms
+_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 4)  # ms
 
 
 def _callback_caller(listener, callback):

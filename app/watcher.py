@@ -2,23 +2,17 @@
 #
 #
 
-from threading import Thread
+from threading import (Thread, Event)
 import time
 from logging import getLogger as _Logger
 
-from logitech.unifying_receiver import api
+from logitech.unifying_receiver import (api, base)
 from logitech.unifying_receiver.listener import EventsListener
 from logitech import devices
 from logitech.devices import constants as C
 
-import actions
-
 
 _l = _Logger('watcher')
-
-_STATUS_TIMEOUT = 61  # seconds
-_THREAD_SLEEP = 3  # seconds
-_SLEEP_QUANT = 0.33  # seconds
 
 _UNIFYING_RECEIVER = 'Unifying Receiver'
 _NO_RECEIVER = 'Receiver not found.'
@@ -29,10 +23,8 @@ _OKAY = 'Status ok.'
 
 
 class _DevStatus(api.AttachedDeviceInfo):
-	timestamp = time.time()
 	code = C.STATUS.UNKNOWN
 	text = _INITIALIZING
-	refresh = None
 
 	def __str__(self):
 		return 'DevStatus(%d,%s,%d)' % (self.number, self.name, self.code)
@@ -40,67 +32,64 @@ class _DevStatus(api.AttachedDeviceInfo):
 
 class Watcher(Thread):
 	"""Keeps a map of all attached devices and their statuses."""
-	def __init__(self, status_changed_callback, notify_callback=None):
-		super(Watcher, self).__init__(group='Solaar', name='Watcher')
+	def __init__(self, apptitle, notify=None):
+		super(Watcher, self).__init__(group=apptitle, name='Watcher')
 		self.daemon = True
 		self._active = False
 
-		self.notify = notify_callback
-		self.status_text = None
-		self.status_changed_callback = status_changed_callback
-
 		self.listener = None
+		self.no_receiver = Event()
 
-		self.rstatus = _DevStatus(0, 0xFF, None, _UNIFYING_RECEIVER, ())
+		self.rstatus = _DevStatus(0, 0xFF, 'UR', _UNIFYING_RECEIVER, ())
 		self.rstatus.max_devices = api.C.MAX_ATTACHED_DEVICES
-		self.rstatus.refresh = (actions.full_scan, self)
-		self.rstatus.pair = None  # (actions.pair, self)
 
 		self.devices = {}
+
+		self.notify = notify
+		self.status_changed = Event()
 
 	def run(self):
 		self._active = True
 
 		while self._active:
 			if self.listener is None:
-				self._update_status_text()
-
 				receiver = api.open()
 				if receiver:
-					self._device_status_changed(self.rstatus, (C.STATUS.BOOTING, _SCANNING))
-					self._update_status_text()
+					self._device_status_changed(self.rstatus, C.STATUS.BOOTING, _INITIALIZING)
 
-					for devinfo in api.list_devices(receiver):
-						self._new_device(devinfo)
-					if self.devices:
-						self._update_status_text()
+					init = (base.request(receiver, 0xFF, b'\x81\x00') and
+							base.request(receiver, 0xFF, b'\x80\x00', b'\x00\x01') and
+							base.request(receiver, 0xFF, b'\x81\x02'))
+					if init:
+						_l.debug("receiver initialized ok")
+					else:
+						_l.debug("receiver initialization failed")
+
+					self._device_status_changed(self.rstatus, C.STATUS.BOOTING, _SCANNING)
 
 					self.listener = EventsListener(receiver, self._events_callback)
 					self.listener.start()
 
-					# need to wait for the thread to come alive
-					time.sleep(_SLEEP_QUANT / 2)
+					_l.debug("requesting devices status")
+					self.listener.request(base.request, 0xFF, b'\x80\x02', b'\x02')
+
+					# give it some time to get the devices
+					time.sleep(5)
 			elif not self.listener:
 				self.listener = None
 				self.devices.clear()
 
 			if self.listener:
 				if self.devices:
-					update_icon = self._device_status_changed(self.rstatus, (C.STATUS.CONNECTED, _OKAY))
-					update_icon |= self._check_old_statuses()
+					self._device_status_changed(self.rstatus, C.STATUS.CONNECTED, _OKAY)
 				else:
-					update_icon = self._device_status_changed(self.rstatus, (C.STATUS.CONNECTED, _NO_DEVICES))
+					self._device_status_changed(self.rstatus, C.STATUS.CONNECTED, _NO_DEVICES)
+
+				self.no_receiver.wait()
+				self.no_receiver.clear()
 			else:
-				update_icon = self._device_status_changed(self.rstatus, (C.STATUS.UNAVAILABLE, _NO_RECEIVER))
-
-			if update_icon:
-				self._update_status_text()
-
-			for i in range(0, int(_THREAD_SLEEP / _SLEEP_QUANT)):
-				if self._active:
-					time.sleep(_SLEEP_QUANT)
-				else:
-					break
+				self._device_status_changed(self.rstatus, C.STATUS.OFFLINE, _NO_RECEIVER)
+				time.sleep(5)
 
 		if self.listener:
 			self.listener.stop()
@@ -108,24 +97,27 @@ class Watcher(Thread):
 
 	def stop(self):
 		if self._active:
+			_l.debug("stopping %s", self)
 			self._active = False
+			self.no_receiver.set()
 			self.join()
 
-	def _request_status(self, devstatus):
-		if self.listener and devstatus:
-			status = devices.request_status(devstatus, self.listener)
-			self._device_status_changed(devstatus, status)
+	def request_status(self, devstatus=None, **kwargs):
+		"""Trigger a status update on a device."""
+		if self.listener:
+			if devstatus is None or devstatus == self.rstatus:
+				for devstatus in self.devices.values():
+					self.request_status(devstatus)
+			else:
+				status = devices.request_status(devstatus, self.listener)
+				self._handle_status(devstatus, status)
 
-	def _check_old_statuses(self):
-		updated = False
-
-		for devstatus in self.devices.values():
-			if devstatus != self.rstatus:
-				if time.time() - devstatus.timestamp > _STATUS_TIMEOUT:
-					status = devices.ping(devstatus, self.listener)
-					updated |= self._device_status_changed(devstatus, status)
-
-		return updated
+	def _handle_status(self, devstatus, status):
+		if status is not None:
+			if type(status) == int:
+				self._device_status_changed(devstatus, status)
+			else:
+				self._device_status_changed(devstatus, *status)
 
 	def _new_device(self, dev):
 		if not self._active:
@@ -137,37 +129,36 @@ class Watcher(Thread):
 
 		if dev:
 			devstatus = _DevStatus(*dev)
-			devstatus.refresh = self._request_status
 			self.devices[dev.number] = devstatus
-			_l.debug("new devstatus %s", devstatus)
 			self._device_status_changed(devstatus, C.STATUS.CONNECTED)
-			self._device_status_changed(self.rstatus, (C.STATUS.CONNECTED, _OKAY))
+			_l.debug("new devstatus %s", devstatus)
+			self._device_status_changed(self.rstatus, C.STATUS.CONNECTED, _OKAY)
 			return devstatus
 
-	def _device_status_changed(self, devstatus, status):
-		if status is None:
-			return False
-
+	def _device_status_changed(self, devstatus, status_code, status_data=None):
 		old_status_code = devstatus.code
-		devstatus.timestamp = time.time()
+		status_text = devstatus.text
 
-		if type(status) == int:
-			status_code = status
+		if status_data is None:
 			if status_code in C.STATUS_NAME:
 				status_text = C.STATUS_NAME[status_code]
+		elif isinstance(status_data, str):
+			status_text = status_data
+		elif isinstance(status_data, dict):
+			status_text = ''
+			for key, value in status_data.items():
+				if key == 'text':
+					status_text = value
+				else:
+					setattr(devstatus, key, value)
 		else:
-			status_code = status[0]
-			if isinstance(status[1], str):
-				status_text = status[1]
-			elif isinstance(status[1], dict):
-				status_text = ''
-				for key, value in status[1].items():
-					if key == 'text':
-						status_text = value
-					else:
-						setattr(devstatus, key, value)
-			else:
-				_l.warn("don't know how to handle status %s", status)
+			_l.warn("don't know how to handle status %s", status_data)
+			return False
+
+		if status_code >= C.STATUS.CONNECTED and devstatus.type is None:
+			# ghost device that became active
+			if self._new_device(devstatus.number) is None:
+				_l.warn("could not materialize device from %s", devstatus)
 				return False
 
 		if ((status_code == old_status_code and status_text == devstatus.text) or
@@ -182,54 +173,53 @@ class Watcher(Thread):
 		if self.notify and (status_code <= C.STATUS.CONNECTED or status_code != old_status_code):
 			self.notify(devstatus.code, devstatus.name, devstatus.text)
 
+		self.status_changed.set()
 		return True
 
 	def _events_callback(self, event):
-		# _l.debug("event %s", event)
+		if event.code == 0xFF and event.devnumber == 0xFF and event.data is None:
+			self.no_receiver.set()
+			return
 
-		updated = False
+		if event.code == 0x10 and event.data[0:2] == b'\x41\x04':
+			# 2 = 0010 ping
+			# 6 = 0110 off
+			# a = 1010 on
+			change = ord(event.data[2:3]) & 0xF0
+			status_code = C.STATUS.UNAVAILABLE if change == 0x60 else \
+							C.STATUS.CONNECTED if change == 0xA0 else \
+							C.STATUS.CONNECTED if change == 0x20 else \
+							None
+			if status_code is None:
+				_l.warn("don't know how to handle status %x: %s", change, event)
+				return
+
+			if event.devnumber in self.devices:
+				devstatus = self.devices[event.devnumber]
+				self._device_status_changed(devstatus, status_code)
+				return
+
+			if status_code == C.STATUS.CONNECTED:
+				self._new_device(event.devnumber)
+				return
+
+			# a device the UR knows about, but is not connected at this time
+			dev_id = self.listener.request(base.request, 0xFF, b'\x83\xB5', event.data[4:5])
+			name = str(dev_id[2:].rstrip(b'\x00')) if dev_id else '?'
+			name = devices.C.FULL_NAME[name]
+			ghost = _DevStatus(handle=self.listener.receiver, number=event.devnumber, type=None, name=name, features=[])
+			self.devices[event.devnumber] = ghost
+			self._device_status_changed(ghost, C.STATUS.UNAVAILABLE)
+			return
 
 		if event.devnumber in self.devices:
 			devstatus = self.devices[event.devnumber]
-			if event.code == 0x10 and event.data[:1] == b'\x8F':
-				updated = True
-				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
-			elif event.code == 0x11:
+			if event.code == 0x11:
 				status = devices.process_event(devstatus, event.data, self.listener)
-				updated |= self._device_status_changed(devstatus, status)
-			else:
-				_l.warn("unknown event %s", event)
-		elif event.devnumber:
-			self._new_device(event.devnumber)
-			updated = True
-		else:
-			_l.warn("don't know how to handle event %s", event)
+				self._handle_status(devstatus, status)
+				return
+			if event.code == 0x10 and event.data[:1] == b'\x8F':
+				self._device_status_changed(devstatus, C.STATUS.UNAVAILABLE)
+				return
 
-		if updated:
-			self._update_status_text()
-
-	def _update_status_text(self):
-		last_status_text = self.status_text
-
-		if self.devices:
-			lines = []
-			if self.rstatus.code < C.STATUS.CONNECTED:
-				lines += (self.rstatus.text, '')
-
-			devstatuses = [self.devices[d] for d in range(1, 1 + self.rstatus.max_devices) if d in self.devices]
-			for devstatus in devstatuses:
-				if devstatus.text:
-					if ' ' in devstatus.text:
-						lines += ('<b>' + devstatus.name + '</b>', '      ' + devstatus.text)
-					else:
-						lines.append('<b>' + devstatus.name + '</b> ' + devstatus.text)
-				else:
-					lines.append('<b>' + devstatus.name + '</b>')
-				lines.append('')
-
-			self.status_text = '\n'.join(lines).rstrip('\n')
-		else:
-			self.status_text = self.rstatus.text
-
-		if self.status_text != last_status_text:
-			self.status_changed_callback(self.status_text, self.rstatus, self.devices)
+		_l.warn("don't know how to handle event %s", event)

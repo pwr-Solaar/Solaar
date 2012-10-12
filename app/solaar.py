@@ -12,10 +12,47 @@ from gi.repository import (Gtk, GObject)
 from logitech.devices import constants as C
 
 import ui
-from watcher import Watcher
 
 
 APP_TITLE = 'Solaar'
+
+
+def _status_check(watcher, tray_icon, window):
+	last_text = None
+
+	while True:
+		watcher.status_changed.wait()
+		watcher.status_changed.clear()
+
+		if watcher.devices:
+			lines = []
+			if watcher.rstatus.code < C.STATUS.CONNECTED:
+				lines += (watcher.rstatus.text, '')
+
+			devstatuses = [watcher.devices[d] for d in range(1, 1 + watcher.rstatus.max_devices) if d in watcher.devices]
+			for devstatus in devstatuses:
+				if devstatus.text:
+					if ' ' in devstatus.text:
+						lines += ('<b>' + devstatus.name + '</b>', '      ' + devstatus.text)
+					else:
+						lines.append('<b>' + devstatus.name + '</b> ' + devstatus.text)
+				else:
+					lines.append('<b>' + devstatus.name + '</b>')
+				lines.append('')
+
+			text = '\n'.join(lines).rstrip('\n')
+		else:
+			text = watcher.rstatus.text
+
+		if text != last_text:
+			last_text = text
+			icon_name = APP_TITLE + '-fail' if watcher.rstatus.code < C.STATUS.CONNECTED else APP_TITLE
+
+			if tray_icon:
+				GObject.idle_add(ui.icon.update, tray_icon, watcher.rstatus, text, icon_name)
+
+			if window:
+				GObject.idle_add(ui.window.update, window, watcher.rstatus, watcher.devices, icon_name)
 
 
 if __name__ == '__main__':
@@ -40,19 +77,8 @@ if __name__ == '__main__':
 	if args.notifications:
 		ui.notify.init(APP_TITLE)
 
-	tray_icon = None
-	window = None
-
-	def _status_changed(text, rstatus, devices):
-		icon_name = APP_TITLE + '-fail' if rstatus.code < C.STATUS.CONNECTED else APP_TITLE
-
-		if tray_icon:
-			GObject.idle_add(ui.icon.update, tray_icon, rstatus, text, icon_name)
-
-		if window:
-			GObject.idle_add(ui.window.update, window, rstatus, devices, icon_name)
-
-	watcher = Watcher(_status_changed, ui.notify.show if args.notifications else None)
+	from watcher import Watcher
+	watcher = Watcher(APP_TITLE, ui.notify.show if args.notifications else None)
 	watcher.start()
 
 	window = ui.window.create(APP_TITLE, watcher.rstatus, args.systray)
@@ -62,7 +88,13 @@ if __name__ == '__main__':
 		tray_icon = ui.icon.create(APP_TITLE, (ui.window.toggle, window))
 		tray_icon.set_from_icon_name(APP_TITLE + '-fail')
 	else:
+		tray_icon = None
 		window.present()
+
+	from threading import Thread
+	status_check = Thread(group=APP_TITLE, name='StatusCheck', target=_status_check, args=(watcher, tray_icon, window))
+	status_check.daemon = True
+	status_check.start()
 
 	Gtk.main()
 
