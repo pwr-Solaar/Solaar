@@ -72,7 +72,7 @@ try:
 			n.update(title, text, icon or title)
 			n.timestamp = timestamp()
 			try:
-				logging.debug("showing notification %s", n)
+				# logging.debug("showing notification %s", n)
 				n.show()
 			except Exception:
 				logging.exception("showing notification %s", n)

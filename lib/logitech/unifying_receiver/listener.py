@@ -20,16 +20,15 @@ _LOG_LEVEL = 4
 _l = _Logger('lur.listener')
 
 
-_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 4)  # ms
-_IDLE_SLEEP = _base.DEFAULT_TIMEOUT / 4  # ms
+_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 5)  # ms
+_IDLE_SLEEP = _base.DEFAULT_TIMEOUT / 5  # ms
 
 
 def _callback_caller(listener, callback):
 	# _l.log(_LOG_LEVEL, "%s starting callback caller", listener)
 	while listener._active:
 		event = listener.events.get()
-		if _l.isEnabledFor(_LOG_LEVEL):
-			_l.log(_LOG_LEVEL, "%s delivering event %s", listener, event)
+		_l.log(_LOG_LEVEL, "%s delivering event %s", listener, event)
 		try:
 			callback.__call__(*event)
 		except:
@@ -41,12 +40,11 @@ class EventsListener(Thread):
 	"""Listener thread for events from the Unifying Receiver.
 
 	Incoming events (reply_code, devnumber, data) will be passed to the callback
-	function. The callback is called in a separate thread.
+	function in sequence, by a separate thread.
 
 	While this listener is running, you should use the request() method to make
-	regular UR API calls, otherwise the replies are very likely to be captured
-	by the listener and delivered as events to the callback. As an exception,
-	you can make API calls in the events callback.
+	regular UR API calls, otherwise the expected API replies are most likely to
+	be captured by the listener and delivered as events to the callback.
 	"""
 	def __init__(self, receiver, events_callback):
 		super(EventsListener, self).__init__(group='Unifying Receiver', name='Events-%x' % receiver)
@@ -97,6 +95,7 @@ class EventsListener(Thread):
 					self.task_reply = self._make_request(*self.task)
 					self.task_done.set()
 
+		_base.close(self.receiver)
 		self.__str_cached = 'Events(%x)' % self.receiver
 
 		_base.unhandled_hook = last_hook
@@ -113,8 +112,7 @@ class EventsListener(Thread):
 		The api_function must have a receiver handle as a first agument, all
 		other passed args and kwargs will follow.
 		"""
-		# if _l.isEnabledFor(_LOG_LEVEL):
-		# 	_l.log(_LOG_LEVEL, "%s request '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)
+		# _l.log(_LOG_LEVEL, "%s request '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)
 
 		self.task_processing.acquire()
 		self.task_done.clear()
@@ -125,15 +123,13 @@ class EventsListener(Thread):
 		self.task = self.task_reply = None
 		self.task_processing.release()
 
-		# if _l.isEnabledFor(_LOG_LEVEL):
-		# 	_l.log(_LOG_LEVEL, "%s request '%s.%s' => %s", self, api_function.__module__, api_function.__name__, repr(reply))
+		# _l.log(_LOG_LEVEL, "%s request '%s.%s' => %s", self, api_function.__module__, api_function.__name__, repr(reply))
 		if isinstance(reply, Exception):
 			raise reply
 		return reply
 
 	def _make_request(self, api_function, args, kwargs):
-		if _l.isEnabledFor(_LOG_LEVEL):
-			_l.log(_LOG_LEVEL, "%s calling '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)
+		_l.log(_LOG_LEVEL, "%s calling '%s.%s' with %s, %s", self, api_function.__module__, api_function.__name__, args, kwargs)
 		try:
 			return api_function.__call__(self.receiver, *args, **kwargs)
 		except E.NoReceiver as nr:

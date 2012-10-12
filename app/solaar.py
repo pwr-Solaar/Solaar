@@ -18,11 +18,6 @@ from watcher import Watcher
 APP_TITLE = 'Solaar'
 
 
-def _notify(status_code, title, text=''):
-	if text:
-		ui.notify.show(status_code, title, text)
-
-
 if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=APP_TITLE)
@@ -41,7 +36,7 @@ if __name__ == '__main__':
 
 	GObject.threads_init()
 
-	args.notifications = args.notifications and args.systray
+	args.notifications &= args.systray
 	if args.notifications:
 		ui.notify.init(APP_TITLE)
 
@@ -57,7 +52,7 @@ if __name__ == '__main__':
 		if window:
 			GObject.idle_add(ui.window.update, window, rstatus, devices, icon_name)
 
-	watcher = Watcher(_status_changed, _notify if args.notifications else None)
+	watcher = Watcher(_status_changed, ui.notify.show if args.notifications else None)
 	watcher.start()
 
 	window = ui.window.create(APP_TITLE, watcher.rstatus, args.systray)

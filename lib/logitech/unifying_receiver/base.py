@@ -254,7 +254,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_devnumber != devnumber:
 			# this message not for the device we're interested in
-			_l.log(_LOG_LEVEL, "(%d) request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hexlify(reply_data))
+			# _l.log(_LOG_LEVEL, "(%d) request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hexlify(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			if unhandled_hook:
@@ -290,6 +290,6 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]))
 			return reply_data[2:]
 
-		_l.log(_LOG_LEVEL, "(%d) unmatched reply {%s} (expected {%s})", devnumber, _hexlify(reply_data[:2]), _hexlify(feature_index_function))
+		# _l.log(_LOG_LEVEL, "(%d) unmatched reply {%s} (expected {%s})", devnumber, _hexlify(reply_data[:2]), _hexlify(feature_index_function))
 		if unhandled_hook:
 			unhandled_hook(reply_code, reply_devnumber, reply_data)

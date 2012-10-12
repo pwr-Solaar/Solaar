@@ -104,7 +104,6 @@ class Watcher(Thread):
 
 		if self.listener:
 			self.listener.stop()
-			api.close(self.listener.receiver)
 			self.listener = None
 
 	def stop(self):

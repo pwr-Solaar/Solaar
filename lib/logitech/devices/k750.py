@@ -12,18 +12,6 @@ from . import constants as C
 #
 #
 
-NAME = 'Wireless Solar Keyboard K750'
-
-#
-#
-#
-
-def _trigger_solar_charge_events(handle, devinfo):
-	return _api.request(handle, devinfo.number,
-						feature=_api.C.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
-						features=devinfo.features)
-
-
 def _charge_status(data, hasLux=False):
 	charge, lux = _unpack('!BH', data[2:5])
 
@@ -47,16 +35,25 @@ def _charge_status(data, hasLux=False):
 	return 0x10 << charge_index, d
 
 
-def request_status(devinfo, listener):
-	if listener:
+def request_status(devinfo, listener=None):
+	def _trigger_solar_charge_events(handle, devinfo):
+		return _api.request(handle, devinfo.number,
+							feature=_api.C.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
+							features=devinfo.features)
+	if listener is None:
+		reply = _trigger_solar_charge_events(devinfo.handle, devinfo)
+	elif listener:
 		reply = listener.request(_trigger_solar_charge_events, devinfo)
-		if reply is None:
-			return C.STATUS.UNAVAILABLE
+	else:
+		reply = 0
+
+	if reply is None:
+		return C.STATUS.UNAVAILABLE
 
 
-def process_event(devinfo, data):
+def process_event(devinfo, data, listener=None):
 	if data[:2] == b'\x09\x00' and data[7:11] == b'GOOD':
-		# usually sent after the keyboard is turned on
+		# usually sent after the keyboard is turned on or just connected
 		return _charge_status(data)
 
 	if data[:2] == b'\x09\x10' and data[7:11] == b'GOOD':
@@ -65,9 +62,7 @@ def process_event(devinfo, data):
 
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
-		if _trigger_solar_charge_events(devinfo.handle, devinfo) is None:
-			return C.STATUS.UNAVAILABLE
-		return _charge_status(data)
+		return request_status(devinfo, listener) or _charge_status(data)
 
 	if data[:2] == b'\x05\x00':
 		# wireless device status
