@@ -42,6 +42,7 @@ class Watcher(Thread):
 
 		self.rstatus = _DevStatus(0, 0xFF, 'UR', _UNIFYING_RECEIVER, ())
 		self.rstatus.max_devices = api.C.MAX_ATTACHED_DEVICES
+		self.rstatus.pair = None
 
 		self.devices = {}
 

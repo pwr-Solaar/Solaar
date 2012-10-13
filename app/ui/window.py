@@ -41,9 +41,9 @@ def _find_children(container, *child_names):
 
 
 def _update_receiver_box(box, rstatus):
-	label, buttons_box = _find_children(box, 'label', 'buttons')
+	label, buttons = _find_children(box, 'label', 'buttons')
 	label.set_text(rstatus.text or '')
-	buttons_box.set_visible(rstatus.code >= C.STATUS.CONNECTED)
+	buttons.set_visible(rstatus.code >= C.STATUS.CONNECTED)
 
 
 def _update_device_box(frame, devstatus):
@@ -123,27 +123,51 @@ def update(window, rstatus, devices, icon_name=None):
 			_update_device_box(controls[index], devices.get(index))
 
 
-def _device_box(name=None, has_status_icons=True, has_frame=True):
+def _receiver_box(rstatus):
+	box = _device_box(False, False)
+
+	icon, status_box = _find_children(box, 'icon', 'status')
+	icon.set_from_icon_name(rstatus.name, _SMALL_DEVICE_ICON_SIZE)
+	icon.set_tooltip_text(rstatus.name)
+
+	toolbar = Gtk.Toolbar()
+	toolbar.set_name('buttons')
+	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
+	toolbar.set_icon_size(Gtk.IconSize.MENU)
+	toolbar.set_show_arrow(False)
+
+	pair_button = Gtk.ToolButton()
+	pair_button.set_icon_name('add')
+	pair_button.set_tooltip_text('Pair new device')
+	if rstatus.pair:
+		pair_button.connect('clicked', rstatus.pair)
+	else:
+		pair_button.set_sensitive(False)
+	toolbar.insert(pair_button, 0)
+
+	toolbar.show_all()
+	toolbar.set_visible(False)
+	status_box.pack_end(toolbar, False, False, 0)
+
+	return box
+
+
+def _device_box(has_status_icons=True, has_frame=True):
 	box = Gtk.HBox(homogeneous=False, spacing=10)
 	box.set_border_width(4)
 
 	icon = Gtk.Image()
-	if name:
-		icon.set_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
-		icon.set_tooltip_text(name)
-		icon.set_padding(2, 2)
-	else:
-		icon.set_from_icon_name('image-missing', _DEVICE_ICON_SIZE)
-	icon.set_alignment(0.5, 0)
 	icon.set_name('icon')
+	icon.set_from_icon_name('image-missing', _DEVICE_ICON_SIZE)
+	icon.set_alignment(0.5, 0)
 	box.pack_start(icon, False, False, 0)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=8)
 	box.pack_start(vbox, True, True, 0)
 
 	label = Gtk.Label('Initializing...')
-	label.set_alignment(0, 0.5)
 	label.set_name('label')
+	label.set_alignment(0, 0.5)
 
 	status_box = Gtk.HBox(homogeneous=False, spacing=0)
 	status_box.set_name('status')
@@ -153,6 +177,7 @@ def _device_box(name=None, has_status_icons=True, has_frame=True):
 
 		battery_icon = Gtk.Image.new_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
 		status_box.pack_start(battery_icon, False, True, 0)
+
 		battery_label = Gtk.Label()
 		battery_label.set_width_chars(6)
 		battery_label.set_alignment(0, 0.5)
@@ -160,19 +185,13 @@ def _device_box(name=None, has_status_icons=True, has_frame=True):
 
 		light_icon = Gtk.Image.new_from_icon_name('light_unknown', _STATUS_ICON_SIZE)
 		status_box.pack_start(light_icon, False, True, 0)
+
 		light_label = Gtk.Label()
 		light_label.set_alignment(0, 0.5)
 		light_label.set_width_chars(8)
 		status_box.pack_start(light_label, False, True, 0)
 	else:
 		status_box.pack_start(label, True, True, 0)
-
-		toolbar = Gtk.Toolbar()
-		toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-		toolbar.set_icon_size(Gtk.IconSize.MENU)
-		toolbar.set_name('buttons')
-		toolbar.set_show_arrow(False)
-		status_box.pack_end(toolbar, False, False, 0)
 
 	vbox.pack_start(status_box, True, True, 0)
 
@@ -183,7 +202,6 @@ def _device_box(name=None, has_status_icons=True, has_frame=True):
 		frame.add(box)
 		return frame
 	else:
-		toolbar.set_visible(False)
 		return box
 
 
@@ -195,7 +213,7 @@ def create(title, rstatus, systray=False):
 	vbox = Gtk.VBox(homogeneous=False, spacing=4)
 	vbox.set_border_width(4)
 
-	rbox = _device_box(rstatus.name, False, False)
+	rbox = _receiver_box(rstatus)
 	vbox.add(rbox)
 	for i in range(1, 1 + rstatus.max_devices):
 		dbox = _device_box()
