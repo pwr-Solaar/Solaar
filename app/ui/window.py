@@ -7,9 +7,13 @@ from gi.repository import (Gtk, Gdk)
 from logitech.devices import constants as C
 
 
+_SMALL_DEVICE_ICON_SIZE = Gtk.IconSize.BUTTON
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
 _STATUS_ICON_SIZE = Gtk.IconSize.DND
 _PLACEHOLDER = '~'
+
+
+theme = Gtk.IconTheme.get_default()
 
 
 def _find_children(container, *child_names):
@@ -53,18 +57,23 @@ def _update_device_box(frame, devstatus):
 	frame.set_visible(True)
 	if frame.get_name() != devstatus.name:
 		frame.set_name(devstatus.name)
-		icon.set_from_icon_name(devstatus.name, _DEVICE_ICON_SIZE)
+		if theme.has_icon(devstatus.name):
+			icon.set_from_icon_name(devstatus.name, _DEVICE_ICON_SIZE)
+		else:
+			icon.set_from_icon_name(devstatus.type.lower(), _DEVICE_ICON_SIZE)
 		icon.set_tooltip_text(devstatus.name)
 		label.set_markup('<b>' + devstatus.name + '</b>')
 
 	status = _find_children(frame, 'status')
 	if devstatus.code < C.STATUS.CONNECTED:
 		icon.set_sensitive(False)
+		icon.set_tooltip_text(devstatus.text)
 		label.set_sensitive(False)
 		status.set_visible(False)
 		return
 
 	icon.set_sensitive(True)
+	icon.set_tooltip_text('')
 	label.set_sensitive(True)
 	status.set_visible(True)
 	status_icons = status.get_children()
@@ -78,7 +87,7 @@ def _update_device_box(frame, devstatus):
 		battery_label.set_text('')
 	else:
 		battery_icon.set_sensitive(True)
-		icon_name = 'battery_%02d' % (20 * ((battery_level + 10) // 20))
+		icon_name = 'battery_%03d' % (20 * ((battery_level + 10) // 20))
 		battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 		battery_label.set_sensitive(True)
 		battery_label.set_text('%d%%' % battery_level)
@@ -96,7 +105,7 @@ def _update_device_box(frame, devstatus):
 		light_label.set_visible(False)
 	else:
 		light_icon.set_visible(True)
-		icon_name = 'light_%02d' % (20 * ((light_level + 50) // 100))
+		icon_name = 'light_%03d' % (20 * ((light_level + 50) // 100))
 		light_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 		light_label.set_visible(True)
 		light_label.set_text('%d lux' % light_level)
@@ -120,10 +129,11 @@ def _device_box(name=None, has_status_icons=True, has_frame=True):
 
 	icon = Gtk.Image()
 	if name:
-		icon.set_from_icon_name(name, _DEVICE_ICON_SIZE)
+		icon.set_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
 		icon.set_tooltip_text(name)
+		icon.set_padding(2, 2)
 	else:
-		icon.set_from_icon_name('dialog-question', _DEVICE_ICON_SIZE)
+		icon.set_from_icon_name('image-missing', _DEVICE_ICON_SIZE)
 	icon.set_alignment(0.5, 0)
 	icon.set_name('icon')
 	box.pack_start(icon, False, False, 0)
