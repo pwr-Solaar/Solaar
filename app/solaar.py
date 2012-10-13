@@ -7,6 +7,9 @@ __version__ = '0.4'
 #
 
 import logging
+
+# from gi import pygtkcompat
+# pygtkcompat.enable_gtk()
 from gi.repository import (Gtk, GObject)
 
 from logitech.devices import constants as C
@@ -61,9 +64,9 @@ if __name__ == '__main__':
 	arg_parser.add_argument('-v', '--verbose', action='count', default=0,
 							help='increase the logger verbosity (may be repeated)')
 	arg_parser.add_argument('-S', '--no-systray', action='store_false', dest='systray',
-							help='embed the application into the systray')
+							help='don\'t embed the application window into the systray')
 	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
-							help='disable desktop notifications (if systray is enabled)')
+							help='disable desktop notifications (shown only when in systray)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 

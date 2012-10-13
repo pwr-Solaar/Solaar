@@ -74,7 +74,7 @@ class Watcher(Thread):
 					self.listener.request(base.request, 0xFF, b'\x80\x02', b'\x02')
 
 					# give it some time to get the devices
-					time.sleep(5)
+					time.sleep(3)
 			elif not self.listener:
 				self.listener = None
 				self.devices.clear()
@@ -88,7 +88,7 @@ class Watcher(Thread):
 				self.no_receiver.wait()
 				self.no_receiver.clear()
 			else:
-				self._device_status_changed(self.rstatus, C.STATUS.OFFLINE, _NO_RECEIVER)
+				self._device_status_changed(self.rstatus, C.STATUS.UNAVAILABLE, _NO_RECEIVER)
 				time.sleep(5)
 
 		if self.listener:
