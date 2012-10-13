@@ -1,8 +1,9 @@
 #!/bin/sh
 
-APP=`dirname "$0"`/../app
-LIB=`dirname "$0"`/../lib
-SHARE=`dirname "$0"`/../share
+Z=`readlink -f "$0"`
+APP=`dirname "$Z"`/../app
+LIB=`dirname "$Z"`/../lib
+SHARE=`dirname "$Z"`/../share
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`uname -m`
 export PYTHONPATH=$APP:$LIB

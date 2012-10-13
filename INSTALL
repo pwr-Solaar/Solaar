@@ -1,0 +1,36 @@
+Installation
+------------
+
+
+1. Make the Logitech Unifying Receiver device available to standard users
+
+Normally USB devices are not accessible for r/w by regular users.
+
+In rules.d/ you'll find a udev rule file, to be copied in /etc/udev/rules.d/ (as
+root).
+
+In its current form it makes the UR device available for r/w by all users
+belonging to the 'plugdev' system group (standard Debian group for pluggable
+devices). It may need changes, specific to your particular system's
+configuration.
+
+If in doubt, replacing GROUP="plugdev" with GROUP="<your username>" should just
+work.
+
+
+2. Compile the hidapi native library.
+
+Solaar uses a thin ctypes layer on top of a native hidapi library to talk
+directly to the UR device. Its source code is available here:
+https://github.com/signal11/hidapi .
+
+The native library comes in two flavors, `hidraw` and `libusb`. You should
+compile and use the hidraw implementation (in linux/); the libusb version
+disconnects the device from the kernel and may cause your UR-connected devices
+to stop working until you physically remove and re-insert the UR.
+
+Once compiled, you should copy the shared library (libhidapi-hidraw.so) to the
+lib/native/ directory appropiate for your machine (most likely x86_64).
+
+
+3. Start the application with ./bin/solaar
