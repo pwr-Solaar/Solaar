@@ -80,6 +80,7 @@ class EventsListener(Thread):
 			try:
 				event = _base.read(self.receiver, _READ_EVENT_TIMEOUT)
 			except E.NoReceiver:
+				self.receiver = 0
 				_l.warn("%s receiver disconnected", self)
 				self.events.put(Packet(0xFF, 0xFF, None))
 				self._active = False
@@ -146,4 +147,4 @@ class EventsListener(Thread):
 		return self.__str_cached
 
 	def __nonzero__(self):
-		return self._active
+		return self._active and self.receiver
