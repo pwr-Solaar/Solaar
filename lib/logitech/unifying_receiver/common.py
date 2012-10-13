@@ -51,6 +51,6 @@ ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
 
 class Packet(namedtuple('Packet', ['code', 'devnumber', 'data'])):
 	def __str__(self):
-		return 'Packet(0x%02x,%d,%s)' % (self.code, self.devnumber, _hexlify(self.data))
+		return 'Packet(0x%02x,%d,%s)' % (self.code, self.devnumber, '' if self.data is None else _hexlify(self.data))
 
 del namedtuple
