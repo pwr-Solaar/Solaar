@@ -89,7 +89,7 @@ class Watcher(Thread):
 				self.no_receiver.clear()
 			else:
 				self._device_status_changed(self.rstatus, C.STATUS.UNAVAILABLE, _NO_RECEIVER)
-				time.sleep(5)
+				time.sleep(3)
 
 		if self.listener:
 			self.listener.stop()
@@ -157,6 +157,11 @@ class Watcher(Thread):
 
 		if status_code >= C.STATUS.CONNECTED and devstatus.type is None:
 			# ghost device that became active
+			if devstatus.code != C.STATUS.CONNECTED:
+				# initial update, while we're getting the devinfo
+				devstatus.code = C.STATUS.CONNECTED
+				devstatus.text = C.STATUS_NAME[C.STATUS.CONNECTED]
+				self.status_changed.set()
 			if self._new_device(devstatus.number) is None:
 				_l.warn("could not materialize device from %s", devstatus)
 				return False
@@ -210,6 +215,7 @@ class Watcher(Thread):
 			ghost = _DevStatus(handle=self.listener.receiver, number=event.devnumber, type=None, name=name, features=[])
 			self.devices[event.devnumber] = ghost
 			self._device_status_changed(ghost, C.STATUS.UNAVAILABLE)
+			self._device_status_changed(self.rstatus, C.STATUS.CONNECTED, _OKAY)
 			return
 
 		if event.devnumber in self.devices:
