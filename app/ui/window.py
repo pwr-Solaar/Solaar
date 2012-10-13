@@ -107,7 +107,7 @@ def update(window, rstatus, devices, icon_name=None):
 		if icon_name is not None:
 			window.set_icon_name(icon_name)
 
-		vbox = window.get_child().get_child()
+		vbox = window.get_child()
 		controls = list(vbox.get_children())
 		_update_receiver_box(controls[0], rstatus)
 		for index in range(1, len(controls)):
@@ -131,7 +131,7 @@ def _device_box(name=None, has_status_icons=True, has_frame=True):
 	vbox = Gtk.VBox(homogeneous=False, spacing=8)
 	box.pack_start(vbox, True, True, 0)
 
-	label = Gtk.Label('...')
+	label = Gtk.Label('Initializing...')
 	label.set_alignment(0, 0.5)
 	label.set_name('label')
 
@@ -192,19 +192,13 @@ def create(title, rstatus, systray=False):
 		vbox.add(dbox)
 	vbox.set_visible(True)
 
-	frame = Gtk.Frame()
-	# frame.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
-	frame.set_visible(True)
-	frame.add(vbox)
-	window.add(frame)
+	window.add(vbox)
 
 	geometry = Gdk.Geometry()
 	geometry.min_width = 260
 	geometry.min_height = 40
-	window.set_geometry_hints(frame, geometry, Gdk.WindowHints.MIN_SIZE)
-
+	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 	window.set_resizable(False)
-	window.set_default_size(geometry.min_width, geometry.min_height)
 
 	if systray:
 		def _state_event(window, event):
