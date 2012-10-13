@@ -43,7 +43,7 @@ class Watcher(Thread):
 	def __init__(self, status_changed_callback, notify_callback=None):
 		super(Watcher, self).__init__(group='Solaar', name='Watcher')
 		self.daemon = True
-		self.active = False
+		self._active = False
 
 		self.notify = notify_callback
 		self.status_text = None
@@ -59,9 +59,9 @@ class Watcher(Thread):
 		self.devices = {}
 
 	def run(self):
-		self.active = True
+		self._active = True
 
-		while self.active:
+		while self._active:
 			if self.listener is None:
 				self._update_status_text()
 
@@ -97,7 +97,7 @@ class Watcher(Thread):
 				self._update_status_text()
 
 			for i in range(0, int(_THREAD_SLEEP / _SLEEP_QUANT)):
-				if self.active:
+				if self._active:
 					time.sleep(_SLEEP_QUANT)
 				else:
 					break
@@ -107,8 +107,9 @@ class Watcher(Thread):
 			self.listener = None
 
 	def stop(self):
-		self.active = False
-		self.join()
+		if self._active:
+			self._active = False
+			self.join()
 
 	def _request_status(self, devstatus):
 		if self.listener and devstatus:
@@ -127,7 +128,7 @@ class Watcher(Thread):
 		return updated
 
 	def _new_device(self, dev):
-		if not self.active:
+		if not self._active:
 			return None
 
 		if type(dev) == int:

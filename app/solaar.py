@@ -61,6 +61,8 @@ if __name__ == '__main__':
 	if args.systray:
 		tray_icon = ui.icon.create(APP_TITLE, (ui.window.toggle, window))
 		tray_icon.set_from_icon_name(APP_TITLE + '-fail')
+	else:
+		window.present()
 
 	Gtk.main()
 
