@@ -5,40 +5,33 @@
 import logging
 from struct import unpack as _unpack
 
+from .constants import (STATUS, PROPS)
+from ..unifying_receiver.constants import FEATURE
 from ..unifying_receiver import api as _api
-from . import constants as C
 
 #
 #
 #
 
+_CHARGE_LEVELS = (10, 25, 256)
 def _charge_status(data, hasLux=False):
 	charge, lux = _unpack('!BH', data[2:5])
 
-	d = {}
-
-	_CHARGE_LEVELS = (10, 25, 256)
 	for i in range(0, len(_CHARGE_LEVELS)):
 		if charge < _CHARGE_LEVELS[i]:
 			charge_index = i
 			break
-	d[C.PROPS.BATTERY_LEVEL] = charge
-	text = 'Battery %d%%' % charge
 
-	if hasLux:
-		d[C.PROPS.LIGHT_LEVEL] = lux
-		text = 'Light: %d lux' % lux + ', ' + text
-	else:
-		d[C.PROPS.LIGHT_LEVEL] = None
-
-	d[C.PROPS.TEXT] = text
-	return 0x10 << charge_index, d
+	return 0x10 << charge_index, {
+					PROPS.BATTERY_LEVEL: charge,
+					PROPS.LIGHT_LEVEL: lux if hasLux else None,
+				}
 
 
 def request_status(devinfo, listener=None):
 	def _trigger_solar_charge_events(handle, devinfo):
 		return _api.request(handle, devinfo.number,
-							feature=_api.C.FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
+							feature=FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
 							features=devinfo.features)
 	if listener is None:
 		reply = _trigger_solar_charge_events(devinfo.handle, devinfo)
@@ -48,7 +41,7 @@ def request_status(devinfo, listener=None):
 		reply = 0
 
 	if reply is None:
-		return C.STATUS.UNAVAILABLE
+		return STATUS.UNAVAILABLE
 
 
 def process_event(devinfo, data, listener=None):
@@ -68,4 +61,4 @@ def process_event(devinfo, data, listener=None):
 		# wireless device status
 		if data[2:5] == b'\x01\x01\x01':
 			logging.debug("Keyboard just started")
-			return C.STATUS.CONNECTED
+			return STATUS.CONNECTED

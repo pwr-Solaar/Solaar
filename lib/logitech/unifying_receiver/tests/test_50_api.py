@@ -91,12 +91,12 @@ class Test_UR_API(unittest.TestCase):
 		for fw in d_firmware:
 			self.assertIsInstance(fw, FirmwareInfo)
 
-	def test_52_get_device_type(self):
+	def test_52_get_device_kind(self):
 		self._check(check_features=True)
 
-		d_type = api.get_device_type(self.handle, self.device, self.features)
-		self.assertIsNotNone(d_type, "failed to get device type")
-		self.assertGreater(len(d_type), 0, "empty device type")
+		d_kind = api.get_device_kind(self.handle, self.device, self.features)
+		self.assertIsNotNone(d_kind, "failed to get device kind")
+		self.assertGreater(len(d_kind), 0, "empty device kind")
 
 	def test_55_get_device_name(self):
 		self._check(check_features=True)

@@ -6,83 +6,72 @@ import logging
 
 
 try:
-	import notify2 as _notify
-	from time import time as timestamp
+	from gi.repository import Notify
+	from gi.repository import Gtk
 
-	available = True  # assumed to be working since the import succeeded
-	_active = False  # not yet active
-	_app_title = None
+	from logitech.devices.constants import STATUS
 
-	_TIMEOUT = 5 * 60  # after this many seconds assume the notification object is no longer valid
+	# necessary because the notifications daemon does not know about our XDG_DATA_DIRS
+	theme = Gtk.IconTheme.get_default()
+	_icons = {}
+
+	def _icon(title):
+		if title not in _icons:
+			icon = theme.lookup_icon(title, 0, 0)
+			_icons[title] = icon.get_filename() if icon else None
+
+		return _icons.get(title)
+
+	# assumed to be working since the import succeeded
+	available = True
+
 	_notifications = {}
 
 
-	def init(app_title, active=True):
+	def init(app_title=None):
 		"""Init the notifications system."""
-		global _app_title
-		_app_title = app_title
-		return set_active(active)
-
-
-	def set_active(active=True):
-		global available, _active
+		global available
 		if available:
-			if active:
-				if not _active:
-					try:
-						_notify.init(_app_title)
-						_active = True
-					except:
-						logging.exception("initializing desktop notifications")
-						available = False
-			else:
-				if _active:
-					for n in _notifications.values():
-						try:
-							n.close()
-						except:
-							logging.exception("closing notification %s", n)
-					try:
-						_notify.uninit()
-					except:
-						logging.exception("stopping desktop notifications")
-						available = False
-					_active = False
-		return _active
+			logging.info("starting desktop notifications")
+			if not Notify.is_initted():
+				try:
+					return Notify.init(app_title or Notify.get_app_name())
+				except:
+					logging.exception("initializing desktop notifications")
+					available = False
+		return available and Notify.is_initted()
 
 
-	def active():
-		return _active
+	def uninit():
+		if available and Notify.is_initted():
+			logging.info("stopping desktop notifications")
+			_notifications.clear()
+			Notify.uninit()
 
 
-	def show(status_code, title, text='', icon=None):
+	def show(dev):
 		"""Show a notification with title and text."""
-		if available and _active:
-			n = None
-			if title in _notifications:
-				n = _notifications[title]
-				if timestamp() - n.timestamp > _TIMEOUT:
-					del _notifications[title]
-					n = None
+		if available and Notify.is_initted():
+			summary = dev.device_name
 
+			# if a notification with same name is already visible, reuse it to avoid spamming
+			n = _notifications.get(summary)
 			if n is None:
-				n = _notify.Notification(title)
-				_notifications[title] = n
+				n = _notifications[summary] = Notify.Notification()
 
-			n.update(title, text, icon or title)
-			n.timestamp = timestamp()
+			n.update(summary, dev.status_text, _icon(summary) or dev.kind)
+			urgency = Notify.Urgency.LOW if dev.status > STATUS.CONNECTED else Notify.Urgency.NORMAL
+			n.set_urgency(urgency)
+
 			try:
-				# logging.debug("showing notification %s", n)
+				# logging.debug("showing %s", n)
 				n.show()
 			except Exception:
-				logging.exception("showing notification %s", n)
-
+				logging.exception("showing %s", n)
 
 except ImportError:
-	logging.warn("python-notify2 not found, desktop notifications are disabled")
+	logging.warn("Notify not found in gi.repository, desktop notifications are disabled")
 	available = False
-	active = False
-	def init(app_title, active=True): return False
-	def active(): return False
-	def set_active(active=True): return False
-	def show(status_code, title, text, icon=None): pass
+	init = lambda app_title: False
+	uninit = lambda: None
+	show = lambda status_code, title, text: None

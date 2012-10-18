@@ -31,12 +31,12 @@ def scan_devices(receiver):
 		return
 
 	for devinfo in devices:
-		print ("Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.type))
+		print ("Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.kind))
 		# print "  Protocol %s" % devinfo.protocol
 
 		firmware = api.get_device_firmware(receiver, devinfo.number, features=devinfo.features)
 		for fw in firmware:
-			print ("  %s firmware: %s version %s build %d" % (fw.type, fw.name, fw.version, fw.build))
+			print ("  %s firmware: %s version %s build %d" % (fw.kind, fw.name, fw.version, fw.build))
 
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
@@ -77,3 +77,11 @@ if __name__ == '__main__':
 			break
 	else:
 		print ("!! Logitech Unifying Receiver not found.")
+
+
+	# import pyudev
+	# ctx = pyudev.Context()
+	# m = pyudev.Monitor.from_netlink(ctx)
+	# m.filter_by(subsystem='hid')
+	# for action, device in m:
+	# 	print '%s: %s' % (action, device)

@@ -4,50 +4,49 @@
 
 import logging
 
-from . import k750
-from . import constants as C
-
+from .constants import (STATUS, PROPS)
+from ..unifying_receiver.constants import (FEATURE, BATTERY_STATUS)
 from ..unifying_receiver import api as _api
 
 #
 #
 #
 
-_REQUEST_STATUS_FUNCTIONS = {
-					C.NAME.K750: k750.request_status,
-				}
+_DEVICE_MODULES = {}
 
-_PROCESS_EVENT_FUNCTIONS = {
-					C.NAME.K750: k750.process_event,
-				}
+def _module(device_name):
+	if device_name not in _DEVICE_MODULES:
+		shortname = device_name.split(' ')[-1].lower()
+		try:
+			m = __import__(shortname, globals(), level=1)
+			_DEVICE_MODULES[device_name] = m
+		except:
+			# logging.exception(shortname)
+			_DEVICE_MODULES[device_name] = None
+
+	return _DEVICE_MODULES[device_name]
 
 #
 #
 #
-
-def ping(devinfo, listener=None):
-	if listener is None:
-		reply = _api.ping(devinfo.number)
-	elif listener:
-		reply = listener.request(_api.ping, devinfo.number)
-	else:
-		return None
-
-	return C.STATUS.CONNECTED if reply else C.STATUS.UNAVAILABLE
-
 
 def default_request_status(devinfo, listener=None):
-	if _api.C.FEATURE.BATTERY in devinfo.features:
-		if listener is None:
-			reply = _api.get_device_battery_level(devinfo.handle, devinfo.number, features=devinfo.features)
-		elif listener:
+	if FEATURE.BATTERY in devinfo.features:
+		if listener:
 			reply = listener.request(_api.get_device_battery_level, devinfo.number, features=devinfo.features)
 		else:
-			reply = None
+			reply = _api.get_device_battery_level(devinfo.handle, devinfo.number, features=devinfo.features)
 
 		if reply:
 			discharge, dischargeNext, status = reply
-			return C.STATUS.CONNECTED, {C.PROPS.BATTERY_LEVEL: discharge}
+			return STATUS.CONNECTED, {PROPS.BATTERY_LEVEL: discharge, PROPS.BATTERY_STATUS: status}
+
+	if listener:
+		reply = listener.request(_api.ping, devinfo.number)
+	else:
+		reply = _api.ping(devinfo.handle, devinfo.number)
+
+	return STATUS.CONNECTED if reply else STATUS.UNAVAILABLE
 
 
 def default_process_event(devinfo, data, listener=None):
@@ -59,21 +58,23 @@ def default_process_event(devinfo, data, listener=None):
 	feature = devinfo.features[feature_index]
 	feature_function = ord(data[1:2]) & 0xF0
 
-	if feature == _api.C.FEATURE.BATTERY:
+	if feature == FEATURE.BATTERY:
 		if feature_function == 0:
 			discharge = ord(data[2:3])
-			status = _api.C.BATTERY_STATUS[ord(data[3:4])]
-			return C.STATUS.CONNECTED, {C.PROPS.BATTERY_LEVEL: discharge, C.PROPS.BATTERY_STATUS: status}
+			status = BATTERY_STATUS[ord(data[3:4])]
+			return STATUS.CONNECTED, {PROPS.BATTERY_LEVEL: discharge, PROPS.BATTERY_STATUS: status}
 		# ?
-	elif feature == _api.C.FEATURE.REPROGRAMMABLE_KEYS:
+	elif feature == FEATURE.REPROGRAMMABLE_KEYS:
 		if feature_function == 0:
 			logging.debug('reprogrammable key: %s', repr(data))
 			# TODO
 			pass
 		# ?
-	elif feature == _api.C.FEATURE.WIRELESS:
+	elif feature == FEATURE.WIRELESS:
 		if feature_function == 0:
 			logging.debug("wireless status: %s", repr(data))
+			if data[2:5] == b'\x01\x01\x01':
+				return STATUS.CONNECTED
 			# TODO
 			pass
 		# ?
@@ -86,9 +87,10 @@ def request_status(devinfo, listener=None):
 	:param listener: the EventsListener that will be used to send the request,
 	and which will receive the status events from the device.
 	"""
-	if devinfo.name in _REQUEST_STATUS_FUNCTIONS:
-		return _REQUEST_STATUS_FUNCTIONS[devinfo.name](devinfo, listener)
-	return default_request_status(devinfo, listener) or ping(devinfo, listener)
+	m = _module(devinfo.name)
+	if m and 'request_status' in m.__dict__:
+		return m.request_status(devinfo, listener)
+	return default_request_status(devinfo, listener)
 
 
 def process_event(devinfo, data, listener=None):
@@ -101,5 +103,6 @@ def process_event(devinfo, data, listener=None):
 	if default_result is not None:
 		return default_result
 
-	if devinfo.name in _PROCESS_EVENT_FUNCTIONS:
-		return _PROCESS_EVENT_FUNCTIONS[devinfo.name](devinfo, data, listener)
+	m = _module(devinfo.name)
+	if m and 'process_event' in m.__dict__:
+		return m.process_event(devinfo, data, listener)

@@ -3,6 +3,7 @@
 #
 
 from binascii import hexlify as _hexlify
+from collections import namedtuple
 
 
 class FallbackDict(dict):
@@ -21,20 +22,18 @@ def list2dict(values_list):
 	return dict(zip(range(0, len(values_list)), values_list))
 
 
-from collections import namedtuple
-
 """Tuple returned by list_devices and find_device_by_name."""
 AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
 				'handle',
 				'number',
-				'type',
+				'kind',
 				'name',
 				'features'])
 
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', [
 				'level',
-				'type',
+				'kind',
 				'name',
 				'version',
 				'build',
@@ -48,6 +47,7 @@ ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
 				'task',
 				'task_name',
 				'flags'])
+
 
 class Packet(namedtuple('Packet', ['code', 'devnumber', 'data'])):
 	def __str__(self):

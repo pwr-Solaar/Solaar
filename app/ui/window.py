@@ -4,7 +4,7 @@
 
 from gi.repository import (Gtk, Gdk)
 
-from logitech.devices import constants as C
+from logitech.devices.constants import (STATUS, PROPS)
 
 
 _SMALL_DEVICE_ICON_SIZE = Gtk.IconSize.BUTTON
@@ -40,14 +40,14 @@ def _find_children(container, *child_names):
 	return result if count > 1 else result[0]
 
 
-def _update_receiver_box(box, rstatus):
+def _update_receiver_box(box, receiver):
 	label, buttons = _find_children(box, 'label', 'buttons')
-	label.set_text(rstatus.text or '')
-	buttons.set_visible(rstatus.code >= C.STATUS.CONNECTED)
+	label.set_text(receiver.status_text or '')
+	buttons.set_visible(receiver.status >= STATUS.CONNECTED)
 
 
-def _update_device_box(frame, devstatus):
-	if devstatus is None:
+def _update_device_box(frame, dev):
+	if dev is None:
 		frame.set_visible(False)
 		frame.set_name(_PLACEHOLDER)
 		return
@@ -55,19 +55,19 @@ def _update_device_box(frame, devstatus):
 	icon, label = _find_children(frame, 'icon', 'label')
 
 	frame.set_visible(True)
-	if frame.get_name() != devstatus.name:
-		frame.set_name(devstatus.name)
-		if theme.has_icon(devstatus.name):
-			icon.set_from_icon_name(devstatus.name, _DEVICE_ICON_SIZE)
+	if frame.get_name() != dev.name:
+		frame.set_name(dev.name)
+		if theme.has_icon(dev.name):
+			icon.set_from_icon_name(dev.name, _DEVICE_ICON_SIZE)
 		else:
-			icon.set_from_icon_name(devstatus.type.lower(), _DEVICE_ICON_SIZE)
-		icon.set_tooltip_text(devstatus.name)
-		label.set_markup('<b>' + devstatus.name + '</b>')
+			icon.set_from_icon_name(dev.kind, _DEVICE_ICON_SIZE)
+		icon.set_tooltip_text(dev.name)
+		label.set_markup('<b>' + dev.name + '</b>')
 
 	status = _find_children(frame, 'status')
-	if devstatus.code < C.STATUS.CONNECTED:
+	if dev.status < STATUS.CONNECTED:
 		icon.set_sensitive(False)
-		icon.set_tooltip_text(devstatus.text)
+		icon.set_tooltip_text(dev.status_text)
 		label.set_sensitive(False)
 		status.set_visible(False)
 		return
@@ -79,7 +79,7 @@ def _update_device_box(frame, devstatus):
 	status_icons = status.get_children()
 
 	battery_icon, battery_label = status_icons[0:2]
-	battery_level = getattr(devstatus, C.PROPS.BATTERY_LEVEL, None)
+	battery_level = dev.props.get(PROPS.BATTERY_LEVEL)
 	if battery_level is None:
 		battery_icon.set_sensitive(False)
 		battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
@@ -92,14 +92,14 @@ def _update_device_box(frame, devstatus):
 		battery_label.set_sensitive(True)
 		battery_label.set_text('%d%%' % battery_level)
 
-	battery_status = getattr(devstatus, C.PROPS.BATTERY_STATUS, None)
+	battery_status = dev.props.get(PROPS.BATTERY_STATUS)
 	if battery_status is None:
 		battery_icon.set_tooltip_text('')
 	else:
 		battery_icon.set_tooltip_text(battery_status)
 
 	light_icon, light_label = status_icons[2:4]
-	light_level = getattr(devstatus, C.PROPS.LIGHT_LEVEL, None)
+	light_level = dev.props.get(PROPS.LIGHT_LEVEL)
 	if light_level is None:
 		light_icon.set_visible(False)
 		light_label.set_visible(False)
@@ -111,24 +111,30 @@ def _update_device_box(frame, devstatus):
 		light_label.set_text('%d lux' % light_level)
 
 
-def update(window, rstatus, devices, icon_name=None):
+def update(window, receiver, icon_name=None):
 	if window and window.get_child():
 		if icon_name is not None:
 			window.set_icon_name(icon_name)
 
 		vbox = window.get_child()
 		controls = list(vbox.get_children())
-		_update_receiver_box(controls[0], rstatus)
+
+		_update_receiver_box(controls[0], receiver)
+
 		for index in range(1, len(controls)):
-			_update_device_box(controls[index], devices.get(index))
+			dev = receiver.devices[index] if index in receiver.devices else None
+			_update_device_box(controls[index], dev)
 
+#
+#
+#
 
-def _receiver_box(rstatus):
+def _receiver_box(name):
 	box = _device_box(False, False)
 
 	icon, status_box = _find_children(box, 'icon', 'status')
-	icon.set_from_icon_name(rstatus.name, _SMALL_DEVICE_ICON_SIZE)
-	icon.set_tooltip_text(rstatus.name)
+	icon.set_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
+	icon.set_tooltip_text(name)
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('buttons')
@@ -139,10 +145,7 @@ def _receiver_box(rstatus):
 	pair_button = Gtk.ToolButton()
 	pair_button.set_icon_name('add')
 	pair_button.set_tooltip_text('Pair new device')
-	if rstatus.pair:
-		pair_button.connect('clicked', rstatus.pair)
-	else:
-		pair_button.set_sensitive(False)
+	pair_button.set_sensitive(False)
 	toolbar.insert(pair_button, 0)
 
 	toolbar.show_all()
@@ -205,17 +208,18 @@ def _device_box(has_status_icons=True, has_frame=True):
 		return box
 
 
-def create(title, rstatus, systray=False):
+def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
 	window.set_title(title)
+	# window.set_icon_name(title)
 	window.set_role('status-window')
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=4)
 	vbox.set_border_width(4)
 
-	rbox = _receiver_box(rstatus)
+	rbox = _receiver_box(name)
 	vbox.add(rbox)
-	for i in range(1, 1 + rstatus.max_devices):
+	for i in range(1, 1 + max_devices):
 		dbox = _device_box()
 		vbox.add(dbox)
 	vbox.set_visible(True)
@@ -229,35 +233,40 @@ def create(title, rstatus, systray=False):
 	window.set_resizable(False)
 
 	if systray:
-		def _state_event(window, event):
-			if event.new_window_state & Gdk.WindowState.ICONIFIED:
-				# position = window.get_position()
-				window.hide()
-				window.deiconify()
-				# window.move(*position)
-				return True
+		# def _state_event(w, e):
+		# 	if e.new_window_state & Gdk.WindowState.ICONIFIED:
+		# 		w.hide()
+		# 		w.deiconify()
+		# 		return True
+		# window.connect('window-state-event', _state_event)
 
 		window.set_keep_above(True)
-		# window.set_deletable(False)
+		window.set_deletable(False)
 		# window.set_decorated(False)
-		window.set_position(Gtk.WindowPosition.MOUSE)
-		# window.set_type_hint(Gdk.WindowTypeHint.MENU)
+		# window.set_position(Gtk.WindowPosition.MOUSE)
+		# ulgy, but hides the minimize icon from the window
+		window.set_type_hint(Gdk.WindowTypeHint.MENU)
 		window.set_skip_taskbar_hint(True)
 		window.set_skip_pager_hint(True)
 
-		window.connect('window-state-event', _state_event)
-		window.connect('delete-event', lambda w, e: toggle(None, window) or True)
+		window.connect('delete-event', lambda w, e: toggle(None, w) or True)
 	else:
-		window.set_position(Gtk.WindowPosition.CENTER)
+		# window.set_position(Gtk.WindowPosition.CENTER)
 		window.connect('delete-event', Gtk.main_quit)
 
 	return window
 
 
-def toggle(_, window):
+def toggle(icon, window):
 	if window.get_visible():
-		# position = window.get_position()
+		position = window.get_position()
 		window.hide()
-		# window.move(*position)
+		window.move(*position)
 	else:
+		if icon:
+			x, y = window.get_position()
+			if x == 0 and y == 0:
+				x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), icon)
+				window.move(x, y)
 		window.present()
+	return True

@@ -17,10 +17,10 @@ Requirements
 ------------
 
 - Python (2.7 or 3.2).
-- Gtk 3 (preferred), though Gtk 2 should work with minor problems.
+- Gtk 3; Gtk 2 should partially work with some problems.
 - Python GI (GObject Introspection), for Gtk bindings.
+- Optional libnotify GI bindings, for desktop notifications.
 - A hidapi native implementation (see the INSTALL file for details).
-- Optional python-notify2 for desktop notifications.
 
 
 Thanks

@@ -48,17 +48,17 @@ FEATURE_NAME[FEATURE.SOLAR_CHARGE] = 'SOLAR_CHARGE'
 FEATURE_FLAGS = { 0x20: 'internal', 0x40: 'hidden', 0x80: 'obsolete' }
 
 
-_DEVICE_TYPES = ('Keyboard', 'Remote Control', 'NUMPAD', 'Mouse',
-				'Touchpad', 'Trackball', 'Presenter', 'Receiver')
+_DEVICE_KINDS = ('keyboard', 'remote control', 'numpad', 'mouse',
+				'touchpad', 'trackball', 'presenter', 'receiver')
 
 """Possible types of devices connected to an UR."""
-DEVICE_TYPE = FallbackDict(lambda x: 'unknown', list2dict(_DEVICE_TYPES))
+DEVICE_KIND = FallbackDict(lambda x: 'unknown', list2dict(_DEVICE_KINDS))
 
 
-_FIRMWARE_TYPES = ('Main (HID)', 'Bootloader', 'Hardware', 'Other')
+_FIRMWARE_KINDS = ('Main (HID)', 'Bootloader', 'Hardware', 'Other')
 
 """Names of different firmware levels possible, indexed by level."""
-FIRMWARE_TYPE = FallbackDict(lambda x: 'Unknown', list2dict(_FIRMWARE_TYPES))
+FIRMWARE_KIND = FallbackDict(lambda x: 'Unknown', list2dict(_FIRMWARE_KINDS))
 
 
 _BATTERY_STATUSES = ('Discharging (in use)', 'Recharging', 'Almost full',
