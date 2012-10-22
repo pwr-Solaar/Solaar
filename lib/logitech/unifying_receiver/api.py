@@ -40,7 +40,7 @@ def get_receiver_info(handle):
 	serial = None
 	reply = _base.request(handle, 0xFF, b'\x83\xB5', b'\x03')
 	if reply and reply[0:1] == b'\x03':
-		serial = _hexlify(reply[1:5])
+		serial = _hexlify(reply[1:5]).upper()
 
 	firmware = '??.??'
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x01')
@@ -50,7 +50,7 @@ def get_receiver_info(handle):
 
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x02')
 	if reply and reply[0:1] == b'\x02':
-		firmware += '.B' + _hexlify(reply[1:3])
+		firmware += '.' + _hexlify(reply[1:3])
 
 	bootloader = None
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x04')

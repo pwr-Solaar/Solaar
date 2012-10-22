@@ -15,10 +15,19 @@ _PLACEHOLDER = '~'
 
 
 def _update_receiver_box(box, receiver):
-	label, buttons = ui.find_children(box, 'label', 'buttons')
+	button, label, frame, info = ui.find_children(box,
+					'info-button', 'status-label', 'info-frame', 'info-label')
 	label.set_text(receiver.status_text or '')
-	# buttons.set_visible(receiver.status >= STATUS.CONNECTED)
-
+	if receiver.status < STATUS.CONNECTED:
+		button.set_sensitive(False)
+		button.set_active(False)
+		frame.set_visible(False)
+		info.set_text('')
+	else:
+		button.set_sensitive(True)
+		if not info.get_text():
+			info.set_text('Serial:\t\t%s\nFirmware:   \t%s\nBootloader: \t%s\nMax devices:\t%s' %
+							(receiver.serial, receiver.firmware[0], receiver.firmware[1], receiver.max_devices))
 
 def _update_device_box(frame, dev):
 	if dev is None:
@@ -100,25 +109,51 @@ def update(window, receiver):
 #
 
 def _receiver_box(name):
-	box = _device_box(False, False)
+	info_button = Gtk.ToggleButton()
+	info_button.set_name('info-button')
+	info_button.set_alignment(0.5, 0)
+	info_button.set_image(Gtk.Image.new_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE))
+	info_button.set_relief(Gtk.ReliefStyle.NONE)
+	info_button.set_tooltip_text(name)
+	info_button.set_sensitive(False)
 
-	icon, status_box = ui.find_children(box, 'icon', 'status')
-	icon.set_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
-	icon.set_tooltip_text(name)
+	label = Gtk.Label('Initializing...')
+	label.set_name('status-label')
+	label.set_alignment(0, 0.5)
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('buttons')
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
 	toolbar.set_icon_size(Gtk.IconSize.MENU)
 	toolbar.set_show_arrow(False)
-
 	toolbar.insert(ui.action.pair.create_tool_item(), 0)
 
-	toolbar.show_all()
-	# toolbar.set_visible(False)
-	status_box.pack_end(toolbar, False, False, 0)
+	info_label = Gtk.Label('')
+	info_label.set_name('info-label')
+	info_label.set_alignment(0, 0.5)
+	info_label.set_padding(24, 4)
+	info_label.set_selectable(True)
 
-	return box
+	info_frame = Gtk.Frame()
+	info_frame.set_name('info-frame')
+	info_frame.set_label(name)
+	info_frame.add(info_label)
+
+	info_button.connect('toggled', lambda b: info_frame.set_visible(b.get_active()))
+
+	hbox = Gtk.HBox(homogeneous=False, spacing=8)
+	hbox.pack_start(info_button, False, False, 0)
+	hbox.pack_start(label, True, True, 0)
+	hbox.pack_end(toolbar, False, False, 0)
+
+	vbox = Gtk.VBox(homogeneous=False, spacing=4)
+	vbox.set_border_width(4)
+	vbox.pack_start(hbox, True, True, 0)
+	vbox.pack_start(info_frame, True, True, 0)
+	vbox.show_all()
+
+	info_frame.set_visible(False)
+	return vbox
 
 
 def _device_box(has_status_icons=True, has_frame=True):

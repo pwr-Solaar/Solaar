@@ -29,6 +29,9 @@ class State(object):
 			self._countdown -= 1
 			return True
 
+		if self._countdown < 0:
+			return False
+
 		self._countdown -= 1
 		if self._countdown > 0 and self.success is None:
 			return True
@@ -46,7 +49,6 @@ class State(object):
 	def stop_scan(self):
 		if self._countdown >= 0:
 			self._countdown = -1
-
 			reply = self._watcher.receiver.request(0xFF, b'\x80\xB2', b'\x02')
 			_l.debug("stop scan reply %s", repr(reply))
 			self._watcher.receiver.events_filter = None

@@ -54,7 +54,8 @@ def _prepare(assistant, page, state):
 	assistant.remove_page(0)
 	state.stop_scan()
 
-def _scan_complete(assistant, device):
+
+def _scan_complete_ui(assistant, device):
 	if device is None:
 		page = _create_page(assistant,
 							'No new device detected.\n'
@@ -92,6 +93,9 @@ def _scan_complete(assistant, device):
 		assistant.set_page_complete(page, True)
 
 	assistant.next_page()
+
+def _scan_complete(assistant, device):
+	GObject.idle_add(_scan_complete_ui, assistant, device)
 
 
 def create(action, state):

@@ -154,6 +154,9 @@ class Receiver(_listener.EventsListener):
 		self.LOG = _Logger("Receiver-%s" % path)
 		self.LOG.info("initializing")
 
+		self._serial = None
+		self._firmware = None
+
 		self.devices = {}
 		self.events_filter = None
 		self.events_handler = None
@@ -211,6 +214,20 @@ class Receiver(_listener.EventsListener):
 
 	def count_devices(self):
 		return self.call_api(_api.count_devices)
+
+	@property
+	def serial(self):
+		if self._serial is None:
+			if self:
+				self._serial, firmware, bootloader = self.call_api(_api.get_receiver_info)
+				self._firmware = (firmware, bootloader)
+		return self._serial or '?'
+
+	@property
+	def firmware(self):
+		s = self.serial
+		return self._firmware or ('?', '?')
+
 
 	def _device_changed(self, dev, urgent=False):
 		self.status_changed.reason = dev
