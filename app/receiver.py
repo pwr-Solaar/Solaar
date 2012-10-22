@@ -66,7 +66,7 @@ class DeviceInfo(object):
 	def name(self):
 		if self._name is None:
 			if self._status >= STATUS.CONNECTED:
-				self._name = self.receiver.request(_api.get_device_name, self.number, self.features)
+				self._name = self.receiver.call_api(_api.get_device_name, self.number, self.features)
 		return self._name or '?'
 
 	@property
@@ -77,25 +77,25 @@ class DeviceInfo(object):
 	def kind(self):
 		if self._kind is None:
 			if self._status >= STATUS.CONNECTED:
-				self._kind = self.receiver.request(_api.get_device_kind, self.number, self.features)
+				self._kind = self.receiver.call_api(_api.get_device_kind, self.number, self.features)
 		return self._kind or '?'
 
 	@property
 	def firmware(self):
 		if self._firmware is None:
 			if self._status >= STATUS.CONNECTED:
-				self._firmware = self.receiver.request(_api.get_device_firmware, self.number, self.features)
+				self._firmware = self.receiver.call_api(_api.get_device_firmware, self.number, self.features)
 		return self._firmware or ()
 
 	@property
 	def features(self):
 		if self._features is None:
 			if self._status >= STATUS.CONNECTED:
-				self._features = self.receiver.request(_api.get_device_features, self.number)
+				self._features = self.receiver.call_api(_api.get_device_features, self.number)
 		return self._features or ()
 
 	def ping(self):
-		return self.receiver.request(_api.ping, self.number)
+		return self.receiver.call_api(_api.ping, self.number)
 
 	def process_event(self, code, data):
 		if code == 0x10 and data[:1] == b'\x8F':
@@ -155,12 +155,11 @@ class Receiver(_listener.EventsListener):
 		self.LOG.info("initializing")
 
 		self.devices = {}
+		self.events_filter = None
 		self.events_handler = None
 
-		init = (_base.request(handle, 0xFF, b'\x81\x00') and
-				_base.request(handle, 0xFF, b'\x80\x00', b'\x00\x01') and
-				_base.request(handle, 0xFF, b'\x81\x02'))
-		if init:
+		if (_base.request(handle, 0xFF, b'\x81\x00') and
+			_base.request(handle, 0xFF, b'\x80\x00', b'\x00\x01')):
 			self.LOG.info("initialized")
 		else:
 			self.LOG.warn("initialization failed")
@@ -210,12 +209,18 @@ class Receiver(_listener.EventsListener):
 	def device_name(self):
 		return self.NAME
 
+	def count_devices(self):
+		return self.call_api(_api.count_devices)
+
 	def _device_changed(self, dev, urgent=False):
 		self.status_changed.reason = dev
 		self.status_changed.urgent = urgent
 		self.status_changed.set()
 
 	def _events_handler(self, event):
+		if self.events_filter and self.events_filter(event):
+			return
+
 		if event.code == 0x10 and event.data[0:2] == b'\x41\x04':
 			state_code = ord(event.data[2:3]) & 0xF0
 			state = STATUS.UNAVAILABLE if state_code == 0x60 else \
@@ -239,7 +244,7 @@ class Receiver(_listener.EventsListener):
 				n, k = dev.name, dev.kind
 			else:
 				# we can query the receiver for the device short name
-				dev_id = self.request(_base.request, 0xFF, b'\x83\xB5', event.data[4:5])
+				dev_id = self.request(0xFF, b'\x83\xB5', event.data[4:5])
 				if dev_id:
 					shortname = str(dev_id[2:].rstrip(b'\x00'))
 					if shortname in NAMES:
@@ -258,14 +263,15 @@ class Receiver(_listener.EventsListener):
 				self.devices = {}
 				self.status = STATUS.UNAVAILABLE
 				return
-			self.LOG.warn("don't know how to handle event %s", event)
 		elif event.devnumber in self.devices:
 			dev = self.devices[event.devnumber]
 			if dev.process_event(event.code, event.data):
 				return
 
-		if self.events_handler:
-			self.events_handler(event)
+		if self.events_handler and self.events_handler(event):
+			return
+
+		self.LOG.warn("don't know how to handle event %s", event)
 
 	def __str__(self):
 		return 'Receiver(%s,%x,%d:%d)' % (self.path, self._handle, self._active, self._status)

@@ -36,7 +36,7 @@ def request_status(devinfo, listener=None):
 	if listener is None:
 		reply = _trigger_solar_charge_events(devinfo.handle, devinfo)
 	elif listener:
-		reply = listener.request(_trigger_solar_charge_events, devinfo)
+		reply = listener.call_api(_trigger_solar_charge_events, devinfo)
 	else:
 		reply = 0
 

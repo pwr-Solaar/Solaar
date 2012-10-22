@@ -7,18 +7,16 @@ import logging
 
 try:
 	from gi.repository import Notify
-	from gi.repository import Gtk
 
+	import ui
 	from logitech.devices.constants import STATUS
 
 	# necessary because the notifications daemon does not know about our XDG_DATA_DIRS
-	theme = Gtk.IconTheme.get_default()
 	_icons = {}
 
 	def _icon(title):
 		if title not in _icons:
-			icon = theme.lookup_icon(title, 0, 0)
-			_icons[title] = icon.get_filename() if icon else None
+			_icons[title] = ui.icon_file(title)
 
 		return _icons.get(title)
 
@@ -28,14 +26,14 @@ try:
 	_notifications = {}
 
 
-	def init(app_title=None):
+	def init(app_title):
 		"""Init the notifications system."""
 		global available
 		if available:
-			logging.info("starting desktop notifications")
 			if not Notify.is_initted():
+				logging.info("starting desktop notifications")
 				try:
-					return Notify.init(app_title or Notify.get_app_name())
+					return Notify.init(app_title)
 				except:
 					logging.exception("initializing desktop notifications")
 					available = False
@@ -74,4 +72,4 @@ except ImportError:
 	available = False
 	init = lambda app_title: False
 	uninit = lambda: None
-	show = lambda status_code, title, text: None
+	show = lambda dev: None

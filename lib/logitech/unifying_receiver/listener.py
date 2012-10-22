@@ -42,7 +42,7 @@ class EventsListener(Thread):
 	Incoming packets will be passed to the callback function in sequence, by a
 	separate thread.
 
-	While this listener is running, you must use the request() method to make
+	While this listener is running, you must use the call_api() method to make
 	regular UR API calls; otherwise the expected API replies are most likely to
 	be captured by the listener and delivered to the callback.
 	"""
@@ -107,6 +107,7 @@ class EventsListener(Thread):
 					self._task_done.set()
 
 		_base.close(self._handle)
+		self._handle = 0
 
 	def stop(self):
 		"""Tells the listener to stop as soon as possible."""
@@ -120,7 +121,10 @@ class EventsListener(Thread):
 	def handle(self):
 		return self._handle
 
-	def request(self, api_function, *args, **kwargs):
+	def request(self, device, feature_function_index, params=b''):
+		return self.call_api(_base.request, device, feature_function_index, params)
+
+	def call_api(self, api_function, *args, **kwargs):
 		"""Make an UR API request through this listener's receiver.
 
 		The api_function must have a receiver handle as a first agument, all

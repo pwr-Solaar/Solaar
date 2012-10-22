@@ -33,7 +33,7 @@ def _module(device_name):
 def default_request_status(devinfo, listener=None):
 	if FEATURE.BATTERY in devinfo.features:
 		if listener:
-			reply = listener.request(_api.get_device_battery_level, devinfo.number, features=devinfo.features)
+			reply = listener.call_api(_api.get_device_battery_level, devinfo.number, features=devinfo.features)
 		else:
 			reply = _api.get_device_battery_level(devinfo.handle, devinfo.number, features=devinfo.features)
 
@@ -42,7 +42,7 @@ def default_request_status(devinfo, listener=None):
 			return STATUS.CONNECTED, {PROPS.BATTERY_LEVEL: discharge, PROPS.BATTERY_STATUS: status}
 
 	if listener:
-		reply = listener.request(_api.ping, devinfo.number)
+		reply = listener.call_api(_api.ping, devinfo.number)
 	else:
 		reply = _api.ping(devinfo.handle, devinfo.number)
 
