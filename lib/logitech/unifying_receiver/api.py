@@ -40,23 +40,23 @@ def get_receiver_info(handle):
 	serial = None
 	reply = _base.request(handle, 0xFF, b'\x83\xB5', b'\x03')
 	if reply and reply[0:1] == b'\x03':
-		serial = _hexlify(reply[1:5]).upper()
+		serial = _hexlify(reply[1:5]).decode('ascii').upper()
 
 	firmware = '??.??'
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x01')
 	if reply and reply[0:1] == b'\x01':
-		fw_version = _hexlify(reply[1:3])
-		firmware = fw_version[0:2] + '.' + fw_version[2:4]
+		fw_version = _hexlify(reply[1:3]).decode('ascii')
+		firmware = '%s.%s' % (fw_version[0:2], fw_version[2:4])
 
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x02')
 	if reply and reply[0:1] == b'\x02':
-		firmware += '.' + _hexlify(reply[1:3])
+		firmware += '.' + _hexlify(reply[1:3]).decode('ascii')
 
 	bootloader = None
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x04')
 	if reply and reply[0:1] == b'\x04':
-		bl_version = _hexlify(reply[1:3])
-		bootloader = bl_version[0:2] + '.' + bl_version[2:4]
+		bl_version = _hexlify(reply[1:3]).decode('ascii')
+		bootloader = '%s.%s' % (bl_version[0:2], bl_version[2:4])
 
 	return (serial, firmware, bootloader)
 
