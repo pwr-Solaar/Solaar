@@ -13,11 +13,11 @@ from .unifying_receiver.constants import *
 def print_receiver(receiver):
 	print ("Unifying Receiver")
 
-	serial, firmware, bootloader = api.get_receiver_info(receiver)
+	serial, firmware  = api.get_receiver_info(receiver)
 
-	print ("  Serial: %s" % serial)
-	print ("  Firmware version: %s" % firmware)
-	print ("  Bootloader: %s" % bootloader)
+	print ("  Serial    : %s" % serial)
+	for f in firmware:
+		print ("  %-10s: %s" % (f.kind, f.version))
 
 	print ("--------")
 
@@ -36,7 +36,7 @@ def scan_devices(receiver):
 
 		firmware = api.get_device_firmware(receiver, devinfo.number, features=devinfo.features)
 		for fw in firmware:
-			print ("  %s firmware: %s version %s build %d" % (fw.kind, fw.name, fw.version, fw.build))
+			print ("  %-10s: %s %s" % (fw.kind, fw.name, fw.version))
 
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser()
 	arg_parser.add_argument('-v', '--verbose', action='count', default=0,
-							help='increase the logger verbosity')
+							help='log the HID data traffic with the receiver')
 	args = arg_parser.parse_args()
 
 	log_level = logging.root.level - 10 * args.verbose

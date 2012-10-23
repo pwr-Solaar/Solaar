@@ -56,3 +56,4 @@ def _pair_device(action, window, state):
 	# pair_dialog.set_modal(True)
 	pair_dialog.present()
 pair = _action('add', 'Pair new device', None)
+pair.set_sensitive(False)

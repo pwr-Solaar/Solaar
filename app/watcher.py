@@ -5,16 +5,21 @@
 from threading import Thread
 import time
 from logging import getLogger as _Logger
-from collections import namedtuple
 
 from logitech.devices.constants import STATUS
 from receiver import Receiver
 
 
-_DUMMY_RECEIVER = namedtuple('_DUMMY_RECEIVER', ['NAME', 'kind', 'status', 'status_text', 'max_devices', 'devices'])
-_DUMMY_RECEIVER.__nonzero__ = lambda _: False
-_DUMMY_RECEIVER.device_name = Receiver.NAME
-DUMMY = _DUMMY_RECEIVER(Receiver.NAME, Receiver.NAME, STATUS.UNAVAILABLE, 'Receiver not found.', Receiver.max_devices, {})
+class _DUMMY_RECEIVER:
+	NAME = Receiver.NAME
+	device_name = NAME
+	kind = Receiver.NAME
+	status = STATUS.UNAVAILABLE
+	status_text = 'Receiver not found.'
+	max_devices = Receiver.max_devices
+	devices = {}
+	def __nonzero__(self): return False
+DUMMY = _DUMMY_RECEIVER()
 
 _l = _Logger('watcher')
 

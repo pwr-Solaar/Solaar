@@ -6,6 +6,7 @@ from logging import getLogger as _Logger
 _LOG_LEVEL = 6
 
 from threading import Event as _Event
+from binascii import hexlify as _hexlify
 
 from logitech.unifying_receiver import base as _base
 from logitech.unifying_receiver import api as _api
@@ -26,6 +27,7 @@ class DeviceInfo(object):
 		self.number = number
 		self._name = None
 		self._kind = None
+		self._serial = None
 		self._firmware = None
 		self._features = None
 
@@ -79,6 +81,13 @@ class DeviceInfo(object):
 			if self._status >= STATUS.CONNECTED:
 				self._kind = self.receiver.call_api(_api.get_device_kind, self.number, self.features)
 		return self._kind or '?'
+
+	@property
+	def serial(self):
+		if self._serial is None:
+			if self._status >= STATUS.CONNECTED:
+				pass
+		return self._serial or '?'
 
 	@property
 	def firmware(self):
@@ -219,13 +228,14 @@ class Receiver(_listener.EventsListener):
 	def serial(self):
 		if self._serial is None:
 			if self:
-				self._serial, firmware, bootloader = self.call_api(_api.get_receiver_info)
-				self._firmware = (firmware, bootloader)
+				self._serial, self._firmware = self.call_api(_api.get_receiver_info)
 		return self._serial or '?'
 
 	@property
 	def firmware(self):
-		s = self.serial
+		if self._firmware is None:
+			if self:
+				self._serial, self._firmware = self.call_api(_api.get_receiver_info)
 		return self._firmware or ('?', '?')
 
 
@@ -239,38 +249,25 @@ class Receiver(_listener.EventsListener):
 			return
 
 		if event.code == 0x10 and event.data[0:2] == b'\x41\x04':
-			state_code = ord(event.data[2:3]) & 0xF0
-			state = STATUS.UNAVAILABLE if state_code == 0x60 else \
-					STATUS.CONNECTED if state_code == 0xA0 else \
-					STATUS.CONNECTED if state_code == 0x20 else \
-					None
-			if state is None:
-				self.LOG.warn("don't know how to handle status 0x%02x: %s", state_code, event)
-				return
-
 			if event.devnumber in self.devices:
-				self.devices[event.devnumber].status = state
+				state_code = ord(event.data[2:3]) & 0xF0
+				state = STATUS.UNAVAILABLE if state_code == 0x60 else \
+						STATUS.CONNECTED if state_code == 0xA0 else \
+						STATUS.CONNECTED if state_code == 0x20 else \
+						None
+				if state is None:
+					self.LOG.warn("don't know how to handle status 0x%02x: %s", state_code, event)
+				else:
+					self.devices[event.devnumber].status = state
 				return
 
-			if event.devnumber < 1 or event.devnumber > self.max_devices:
-				self.LOG.warn("got event for invalid device number %d: %s", event.devnumber, event)
-				return
-
-			dev = DeviceInfo(self, event.devnumber, state)
-			if state == STATUS.CONNECTED:
-				n, k = dev.name, dev.kind
+			dev = self.make_device(event)
+			if dev is None:
+				self.LOG.warn("failed to make new device from %s", event)
 			else:
-				# we can query the receiver for the device short name
-				dev_id = self.request(0xFF, b'\x83\xB5', event.data[4:5])
-				if dev_id:
-					shortname = str(dev_id[2:].rstrip(b'\x00'))
-					if shortname in NAMES:
-						dev._name, dev._kind = NAMES[shortname]
-					else:
-						self.LOG.warn("could not properly detect inactive device %d: %s", event.devnumber, shortname)
-			self.devices[event.devnumber] = dev
-			self.LOG.info("new device ready %s", dev)
-			self.status = STATUS.CONNECTED + len(self.devices)
+				self.devices[event.devnumber] = dev
+				self.LOG.info("new device ready %s", dev)
+				self.status = STATUS.CONNECTED + len(self.devices)
 			return
 
 		if event.devnumber == 0xFF:
@@ -289,6 +286,40 @@ class Receiver(_listener.EventsListener):
 			return
 
 		self.LOG.warn("don't know how to handle event %s", event)
+
+	def make_device(self, event):
+		if event.devnumber < 1 or event.devnumber > self.max_devices:
+			self.LOG.warn("got event for invalid device number %d: %s", event.devnumber, event)
+			return None
+
+		state_code = ord(event.data[2:3]) & 0xF0
+		state = STATUS.UNAVAILABLE if state_code == 0x60 else \
+				STATUS.CONNECTED if state_code == 0xA0 else \
+				STATUS.CONNECTED if state_code == 0x20 else \
+				None
+		if state is None:
+			self.LOG.warn("don't know how to handle device status 0x%02x: %s", state_code, event)
+			return None
+
+		dev = DeviceInfo(self, event.devnumber, state)
+		if state == STATUS.CONNECTED:
+			n, k = dev.name, dev.kind
+		else:
+			# we can query the receiver for the device short name
+			dev_id = self.request(0xFF, b'\x83\xB5', event.data[4:5])
+			if dev_id:
+				shortname = dev_id[2:].rstrip(b'\x00').decode('ascii')
+				if shortname in NAMES:
+					dev._name, dev._kind = NAMES[shortname]
+				else:
+					self.LOG.warn("could not identify inactive device %d: %s", event.devnumber, shortname)
+
+		b = bytearray(event.data[4:5])
+		b[0] -= 0x10
+		serial = self.request(0xFF, b'\x83\xB5', bytes(b))
+		if serial:
+			dev._serial = _hexlify(serial[1:5]).decode('ascii').upper()
+		return dev
 
 	def __str__(self):
 		return 'Receiver(%s,%x,%d:%d)' % (self.path, self._handle, self._active, self._status)

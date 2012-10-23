@@ -105,7 +105,7 @@ def try_open(path):
 	# otherwise, the read should produce nothing
 	reply = _hid.read(receiver_handle, _MAX_REPLY_SIZE, DEFAULT_TIMEOUT)
 	if reply:
-		if reply[:4] == b'\x10\x00\x8F\x00':
+		if reply[:5] == b'\x10\x00\x8F\x00\x10':
 			# 'device 0 unreachable' is the expected reply from a valid receiver handle
 			_l.log(_LOG_LEVEL, "[%s] success: handle %x", path, receiver_handle)
 			return receiver_handle
@@ -114,9 +114,9 @@ def try_open(path):
 		if _l.isEnabledFor(_LOG_LEVEL):
 			if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
 				# no idea what this is, but it comes up occasionally
-				_l.log(_LOG_LEVEL, "[%s] %x mistery reply [%s]", path, receiver_handle, _hexlify(reply))
+				_l.log(_LOG_LEVEL, "[%s] %x mistery reply [%s]", path, receiver_handle, _hexlify(reply).decode('ascii'))
 			else:
-				_l.log(_LOG_LEVEL, "[%s] %x unknown reply [%s]", path, receiver_handle, _hexlify(reply))
+				_l.log(_LOG_LEVEL, "[%s] %x unknown reply [%s]", path, receiver_handle, _hexlify(reply).decode('ascii'))
 	else:
 		_l.log(_LOG_LEVEL, "[%s] %x no reply", path, receiver_handle)
 
@@ -171,7 +171,7 @@ def write(handle, devnumber, data):
 	wdata = _pack('!BB18s' if len(data) > 5 else '!BB5s', 0x10, devnumber, data)
 
 	if _l.isEnabledFor(_LOG_LEVEL):
-		hexs = _hexlify(wdata)
+		hexs = _hexlify(wdata).decode('ascii')
 		_l.log(_LOG_LEVEL, "(%d) <= w[%s %s %s %s]", devnumber, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:])
 
 	if not _hid.write(handle, wdata):
@@ -208,7 +208,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		if len(data) > _MAX_REPLY_SIZE:
 			_l.warn("(%d) => r[%s] read packet too long: %d bytes", ord(data[1:2]), _hexlify(data), len(data))
 		if _l.isEnabledFor(_LOG_LEVEL):
-			hexs = _hexlify(data)
+			hexs = _hexlify(data).decode('ascii')
 			_l.log(_LOG_LEVEL, "(%d) => r[%s %s %s %s]", ord(data[1:2]), hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:])
 		code = ord(data[:1])
 		devnumber = ord(data[1:2])
@@ -235,7 +235,9 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 	:raisees FeatureCallError: if the feature call replied with an error.
 	"""
 	if _l.isEnabledFor(_LOG_LEVEL):
-		_l.log(_LOG_LEVEL, "(%d) request {%s} params [%s]", devnumber, _hexlify(feature_index_function), _hexlify(params))
+		_l.log(_LOG_LEVEL, "(%d) request {%s} params [%s]", devnumber,
+				_hexlify(feature_index_function).decode('ascii'),
+				_hexlify(params).decode('ascii'))
 	if len(feature_index_function) != 2:
 		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hexlify(feature_index_function))
 
@@ -264,18 +266,20 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == feature_index_function:
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d) request ping failed on {%s} call: [%s]", devnumber, _hexlify(feature_index_function), _hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d) request ping failed on {%s} call: [%s]", devnumber,
+					_hexlify(feature_index_function).decode('ascii'),
+					_hexlify(reply_data).decode('ascii'))
 			return None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d) request ping failed: [%s]", devnumber, _hexlify(reply_data))
+			_l.log(_LOG_LEVEL, "(%d) request ping failed: [%s]", devnumber, _hexlify(reply_data).decode('ascii'))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# the feature call returned with an error
 			error_code = ord(reply_data[3])
-			_l.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hexlify(reply_data))
+			_l.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hexlify(reply_data).decode('ascii'))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
 			feature = None if features is None else features[feature_index] if feature_index < len(features) else None
@@ -283,14 +287,16 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]))
+			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]).decode('ascii'))
 			return reply_data[2:]
 
 		if reply_code == 0x10 and devnumber == 0xFF and reply_data[:2] == feature_index_function:
 			# direct calls to the receiver (device 0xFF) may also return successfully with reply code 0x10
-			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]))
+			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hexlify(reply_data[2:]).decode('ascii'))
 			return reply_data[2:]
 
-		# _l.log(_LOG_LEVEL, "(%d) unmatched reply {%s} (expected {%s})", devnumber, _hexlify(reply_data[:2]), _hexlify(feature_index_function))
+		# _l.log(_LOG_LEVEL, "(%d) unmatched reply {%s} (expected {%s})", devnumber,
+		# 		_hexlify(reply_data[:2]).decode('ascii'),
+		# 		_hexlify(feature_index_function).decode('ascii'))
 		if unhandled_hook:
 			unhandled_hook(reply_code, reply_devnumber, reply_data)

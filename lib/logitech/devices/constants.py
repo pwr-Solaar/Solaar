@@ -34,9 +34,11 @@ NAMES = {
 			'M325': ('Wireless Mouse M325', 'mouse'),
 			'M510': ('Wireless Mouse M510', 'mouse'),
 			'M515': ('Couch Mouse M515', 'mouse'),
+			'M525': ('Wireless Mouse M525', 'mouse'),
 			'M570': ('Wireless Trackball M570', 'trackball'),
 			'K270': ('Wireless Keyboard K270', 'keyboard'),
 			'K350': ('Wireless Keyboard K350', 'keyboard'),
 			'K750': ('Wireless Solar Keyboard K750', 'keyboard'),
 			'K800': ('Wireless Illuminated Keyboard K800', 'keyboard'),
+			'T650': ('Wireless Rechargeable Touchpad T650', 'touchpad'),
 		}

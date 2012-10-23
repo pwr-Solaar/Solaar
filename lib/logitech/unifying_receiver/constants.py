@@ -55,7 +55,7 @@ _DEVICE_KINDS = ('keyboard', 'remote control', 'numpad', 'mouse',
 DEVICE_KIND = FallbackDict(lambda x: 'unknown', list2dict(_DEVICE_KINDS))
 
 
-_FIRMWARE_KINDS = ('Main (HID)', 'Bootloader', 'Hardware', 'Other')
+_FIRMWARE_KINDS = ('Firmware', 'Bootloader', 'Hardware', 'Other')
 
 """Names of different firmware levels possible, indexed by level."""
 FIRMWARE_KIND = FallbackDict(lambda x: 'Unknown', list2dict(_FIRMWARE_KINDS))

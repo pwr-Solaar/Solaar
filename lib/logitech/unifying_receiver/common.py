@@ -36,7 +36,6 @@ FirmwareInfo = namedtuple('FirmwareInfo', [
 				'kind',
 				'name',
 				'version',
-				'build',
 				'extras'])
 
 """Reprogrammable keys informations."""

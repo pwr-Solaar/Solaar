@@ -42,23 +42,21 @@ def get_receiver_info(handle):
 	if reply and reply[0:1] == b'\x03':
 		serial = _hexlify(reply[1:5]).decode('ascii').upper()
 
-	firmware = '??.??'
-	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x01')
-	if reply and reply[0:1] == b'\x01':
-		fw_version = _hexlify(reply[1:3]).decode('ascii')
-		firmware = '%s.%s' % (fw_version[0:2], fw_version[2:4])
+	firmware = []
 
-	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x02')
+	reply = _base.request(handle, 0xFF, b'\x83\xB5', b'\x02')
 	if reply and reply[0:1] == b'\x02':
-		firmware += '.' + _hexlify(reply[1:3]).decode('ascii')
+		fw_version = _hexlify(reply[1:5]).decode('ascii')
+		fw_version = '%s.%s.%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
+		firmware.append(_FirmwareInfo(0, FIRMWARE_KIND[0], '', fw_version, None))
 
-	bootloader = None
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x04')
 	if reply and reply[0:1] == b'\x04':
 		bl_version = _hexlify(reply[1:3]).decode('ascii')
-		bootloader = '%s.%s' % (bl_version[0:2], bl_version[2:4])
+		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
+		firmware.append(_FirmwareInfo(1, FIRMWARE_KIND[1], '', bl_version, None))
 
-	return (serial, firmware, bootloader)
+	return (serial, tuple(firmware))
 
 
 def count_devices(handle):
@@ -270,8 +268,8 @@ def get_device_firmware(handle, devnumber, features=None):
 
 	:returns: a list of FirmwareInfo tuples, ordered by firmware layer.
 	"""
-	def _makeFirmwareInfo(level, kind, name=None, version=None, build=None, extras=None):
-		return _FirmwareInfo(level, kind, name, version, build, extras)
+	def _makeFirmwareInfo(level, kind, name='', version='', extras=None):
+		return _FirmwareInfo(level, kind, name, version, extras)
 
 	fw_count = request(handle, devnumber, FEATURE.FIRMWARE, features=features)
 	if fw_count:
@@ -286,14 +284,16 @@ def get_device_firmware(handle, devnumber, features=None):
 					kind = FIRMWARE_KIND[level]
 					name, = _unpack('!3s', fw_info[1:4])
 					name = name.decode('ascii')
-					version = _hexlify(fw_info[4:6])
+					version = _hexlify(fw_info[4:6]).decode('ascii')
 					version = '%s.%s' % (version[0:2], version[2:4])
 					build, = _unpack('!H', fw_info[6:8])
+					if build:
+						version += ' b%d' % build
 					extras = fw_info[9:].rstrip(b'\x00')
 					if extras:
-						fw_info = _makeFirmwareInfo(level, kind, name, version, build, extras)
+						fw_info = _makeFirmwareInfo(level, kind, name, version, extras)
 					else:
-						fw_info = _makeFirmwareInfo(level, kind, name, version, build)
+						fw_info = _makeFirmwareInfo(level, kind, name, version)
 				elif level == 2:
 					fw_info = _makeFirmwareInfo(2, FIRMWARE_KIND[2], version=ord(fw_info[1:2]))
 				else:
