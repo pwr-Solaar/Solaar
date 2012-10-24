@@ -5,7 +5,7 @@
 from logging import getLogger as _Logger
 from struct import pack as _pack
 from struct import unpack as _unpack
-from binascii import hexlify as _hexlify
+
 
 from . import base as _base
 from .common import (FirmwareInfo as _FirmwareInfo,
@@ -18,6 +18,7 @@ from .constants import (FEATURE, FEATURE_NAME, FEATURE_FLAGS,
 from .exceptions import FeatureNotSupported as _FeatureNotSupported
 
 
+_hex = _base._hex
 _LOG_LEVEL = 5
 _l = _Logger('lur.api')
 
@@ -40,19 +41,19 @@ def get_receiver_info(handle):
 	serial = None
 	reply = _base.request(handle, 0xFF, b'\x83\xB5', b'\x03')
 	if reply and reply[0:1] == b'\x03':
-		serial = _hexlify(reply[1:5]).decode('ascii').upper()
+		serial = _hex(reply[1:5])
 
 	firmware = []
 
 	reply = _base.request(handle, 0xFF, b'\x83\xB5', b'\x02')
 	if reply and reply[0:1] == b'\x02':
-		fw_version = _hexlify(reply[1:5]).decode('ascii')
+		fw_version = _hex(reply[1:5])
 		fw_version = '%s.%s.%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
 		firmware.append(_FirmwareInfo(0, FIRMWARE_KIND[0], '', fw_version, None))
 
 	reply = _base.request(handle, 0xFF, b'\x81\xF1', b'\x04')
 	if reply and reply[0:1] == b'\x04':
-		bl_version = _hexlify(reply[1:3]).decode('ascii')
+		bl_version = _hex(reply[1:3])
 		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
 		firmware.append(_FirmwareInfo(1, FIRMWARE_KIND[1], '', bl_version, None))
 
@@ -101,7 +102,7 @@ def request(handle, devnumber, feature, function=b'\x00', params=b'', features=N
 			feature_index = _pack('!B', features.index(feature))
 
 	if feature_index is None:
-		_l.warn("(%d) feature <%s:%s> not supported", devnumber, _hexlify(feature), FEATURE_NAME[feature])
+		_l.warn("(%d) feature <%s:%s> not supported", devnumber, _hex(feature), FEATURE_NAME[feature])
 		raise _FeatureNotSupported(devnumber, feature)
 
 	if type(function) == int:
@@ -182,7 +183,7 @@ def get_feature_index(handle, devnumber, feature):
 
 	:returns: An int, or ``None`` if the feature is not available.
 	"""
-	_l.log(_LOG_LEVEL, "(%d) get feature index <%s:%s>", devnumber, _hexlify(feature), FEATURE_NAME[feature])
+	_l.log(_LOG_LEVEL, "(%d) get feature index <%s:%s>", devnumber, _hex(feature), FEATURE_NAME[feature])
 	if len(feature) != 2:
 		raise ValueError("invalid feature <%s>: it must be a two-byte string" % feature)
 
@@ -196,17 +197,17 @@ def get_feature_index(handle, devnumber, feature):
 			if _l.isEnabledFor(_LOG_LEVEL):
 				if feature_flags:
 					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> has index %d: %s",
-							devnumber, _hexlify(feature), FEATURE_NAME[feature], feature_index,
+							devnumber, _hex(feature), FEATURE_NAME[feature], feature_index,
 							','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
 				else:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> has index %d", devnumber, _hexlify(feature), FEATURE_NAME[feature], feature_index)
+					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
 
 			# if feature_flags:
 			# 	raise E.FeatureNotSupported(devnumber, feature)
 
 			return feature_index
 
-		_l.warn("(%d) feature <%s:%s> not supported by the device", devnumber, _hexlify(feature), FEATURE_NAME[feature])
+		_l.warn("(%d) feature <%s:%s> not supported by the device", devnumber, _hex(feature), FEATURE_NAME[feature])
 		raise _FeatureNotSupported(devnumber, feature)
 
 
@@ -252,10 +253,10 @@ def get_device_features(handle, devnumber):
 			if _l.isEnabledFor(_LOG_LEVEL):
 				if feature_flags:
 					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> at index %d: %s",
-							devnumber, _hexlify(feature), FEATURE_NAME[feature], index,
+							devnumber, _hex(feature), FEATURE_NAME[feature], index,
 							','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
 				else:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> at index %d", devnumber, _hexlify(feature), FEATURE_NAME[feature], index)
+					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> at index %d", devnumber, _hex(feature), FEATURE_NAME[feature], index)
 
 	features[0] = FEATURE.ROOT
 	while features[-1] is None:
@@ -284,7 +285,7 @@ def get_device_firmware(handle, devnumber, features=None):
 					kind = FIRMWARE_KIND[level]
 					name, = _unpack('!3s', fw_info[1:4])
 					name = name.decode('ascii')
-					version = _hexlify(fw_info[4:6]).decode('ascii')
+					version = _hex(fw_info[4:6])
 					version = '%s.%s' % (version[0:2], version[2:4])
 					build, = _unpack('!H', fw_info[6:8])
 					if build:

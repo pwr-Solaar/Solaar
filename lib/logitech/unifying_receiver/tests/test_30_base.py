@@ -3,7 +3,6 @@
 #
 
 import unittest
-from binascii import hexlify
 
 from .. import base
 from ..exceptions import *
@@ -64,10 +63,10 @@ class Test_UR_Base(unittest.TestCase):
 
 		reply_code, reply_device, reply_data = reply
 		self.assertEqual(reply_device, 0, "got ping reply for valid device")
-		self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % hexlify(reply_data))
+		self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % base._hex(reply_data))
 		if reply_code == 0x10:
 			# ping fail
-			self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % hexlify(reply_data))
+			self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % base._hex(reply_data))
 		elif reply_code == 0x11:
 			self.fail("Got valid ping from device 0")
 		else:
@@ -88,13 +87,13 @@ class Test_UR_Base(unittest.TestCase):
 
 			reply_code, reply_device, reply_data = reply
 			self.assertEqual(reply_device, device, "ping reply for wrong device")
-			self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % hexlify(reply_data))
+			self.assertGreater(len(reply_data), 4, "ping reply has wrong length: %s" % base._hex(reply_data))
 			if reply_code == 0x10:
 				# ping fail
-				self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % hexlify(reply_data))
+				self.assertEqual(reply_data[:3], b'\x8F\x00\x10', "0x10 reply with unknown reply data: %s" % base._hex(reply_data))
 			elif reply_code == 0x11:
 				# ping ok
-				self.assertEqual(reply_data[:2], b'\x00\x10', "0x11 reply with unknown reply data: %s" % hexlify(reply_data))
+				self.assertEqual(reply_data[:2], b'\x00\x10', "0x11 reply with unknown reply data: %s" % base._hex(reply_data))
 				self.assertEqual(reply_data[4:5], b'\xAA')
 				devices.append(device)
 			else:

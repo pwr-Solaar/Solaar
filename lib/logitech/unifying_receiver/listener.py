@@ -28,7 +28,7 @@ def _event_dispatch(listener, callback):
 	# _l.log(_LOG_LEVEL, "starting dispatch")
 	while listener._active:  # or not listener._events.empty():
 		event = listener._events.get()
-		_l.log(_LOG_LEVEL, "delivering event %s", event)
+		# _l.log(_LOG_LEVEL, "delivering event %s", event)
 		try:
 			callback(event)
 		except:
@@ -47,7 +47,7 @@ class EventsListener(Thread):
 	be captured by the listener and delivered to the callback.
 	"""
 	def __init__(self, receiver_handle, events_callback):
-		super(EventsListener, self).__init__(group='Unifying Receiver', name='%s-%x' % (self.__class__.__name__, receiver_handle))
+		super(EventsListener, self).__init__(group='Unifying Receiver', name='%s-%X' % (self.__class__.__name__, receiver_handle))
 
 		self.daemon = True
 		self._active = False
@@ -63,7 +63,7 @@ class EventsListener(Thread):
 		_base.unhandled_hook = self._unhandled
 
 		self._dispatcher = Thread(group='Unifying Receiver',
-									name='%s-%x-dispatch' % (self.__class__.__name__, receiver_handle),
+									name='%s-%X-dispatch' % (self.__class__.__name__, receiver_handle),
 									target=_event_dispatch, args=(self, events_callback))
 		self._dispatcher.daemon = True
 
@@ -85,8 +85,9 @@ class EventsListener(Thread):
 				break
 
 			if event:
+				event = _Packet(*event)
 				_l.log(_LOG_LEVEL, "queueing event %s", event)
-				self._events.put(_Packet(*event))
+				self._events.put(event)
 
 			if self._task:
 				(api_function, args, kwargs), self._task = self._task, None
@@ -152,4 +153,5 @@ class EventsListener(Thread):
 		self._events.put(event)
 
 	def __nonzero__(self):
-		return self._active and self._handle
+		return bool(self._active and self._handle)
+	__bool__ = __nonzero__

@@ -3,9 +3,10 @@
 #
 
 from logging import getLogger as _Logger
-
 _l = _Logger('pairing')
 
+
+state = None
 
 class State(object):
 	TICK = 300
@@ -14,6 +15,9 @@ class State(object):
 	def __init__(self, watcher):
 		self._watcher = watcher
 		self.reset()
+
+	def device(self, number):
+		return self._watcher.receiver.devices.get(number)
 
 	def reset(self):
 		self.success = None
@@ -72,8 +76,6 @@ class State(object):
 
 		return True
 
-
-def unpair(receiver, devnumber):
-	reply = receiver.request(0xFF, b'\x80\xB2', b'\x03' + chr(devnumber))
-	_l.debug("unpair %d reply %s", devnumber, repr(reply))
-
+	def unpair(self, number):
+		_l.debug("unpair %d", number)
+		self._watcher.receiver.unpair_device(number)

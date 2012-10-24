@@ -19,8 +19,7 @@ def create(window, menu_actions=None):
 		if action:
 			menu.append(action.create_menu_item())
 
-	quit_action = ui.action._action('exit', 'Quit', Gtk.main_quit)
-	menu.append(quit_action.create_menu_item())
+	menu.append(ui.action.quit.create_menu_item())
 	menu.show_all()
 
 	icon.connect('popup_menu',

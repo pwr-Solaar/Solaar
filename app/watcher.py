@@ -10,7 +10,7 @@ from logitech.devices.constants import STATUS
 from receiver import Receiver
 
 
-class _DUMMY_RECEIVER:
+class _DUMMY_RECEIVER(object):
 	NAME = Receiver.NAME
 	device_name = NAME
 	kind = Receiver.NAME
@@ -18,7 +18,7 @@ class _DUMMY_RECEIVER:
 	status_text = 'Receiver not found.'
 	max_devices = Receiver.max_devices
 	devices = {}
-	def __nonzero__(self): return False
+	__bool__ = __nonzero__ = lambda self: False
 DUMMY = _DUMMY_RECEIVER()
 
 _l = _Logger('watcher')
@@ -91,7 +91,8 @@ class Watcher(Thread):
 					sc = self._receiver.status_changed
 					sc.wait()
 					sc.clear()
-					_l.debug("status_changed %s %d", sc.reason, sc.urgent)
+					if sc.urgent:
+						_l.info("status_changed %s", sc.reason)
 					self.update_ui(self._receiver)
 					if sc.reason and sc.urgent:
 						self.notify(sc.reason)

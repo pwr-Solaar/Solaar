@@ -81,7 +81,7 @@ del namedtuple
 # create a DeviceInfo tuple from a hid_device object
 def _makeDeviceInfo(native_device_info):
 	return DeviceInfo(
-				path=native_device_info.path,
+				path=native_device_info.path.decode('ascii'),
 				vendor_id=hex(native_device_info.vendor_id)[2:],
 				product_id=hex(native_device_info.product_id)[2:],
 				serial=native_device_info.serial if native_device_info.serial else None,
@@ -222,6 +222,8 @@ def open_path(device_path):
 
 	:returns: an opaque device handle, or ``None``.
 	"""
+	if type(device_path) == str:
+		device_path = device_path.encode('ascii')
 	return _native.hid_open_path(device_path) or None
 
 

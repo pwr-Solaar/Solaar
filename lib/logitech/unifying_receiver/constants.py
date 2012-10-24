@@ -2,8 +2,9 @@
 # Constants used by the rest of the API.
 #
 
-from binascii import hexlify as _hexlify
 from struct import pack as _pack
+from binascii import hexlify as _hexlify
+_hex = lambda d: _hexlify(d).decode('ascii').upper()
 
 from .common import (FallbackDict, list2dict)
 
@@ -30,7 +31,7 @@ def _feature_name(key):
 		return None
 	if type(key) == int:
 		return FEATURE_NAME[_pack('!H', key)]
-	return 'UNKNOWN_' + str(_hexlify(key))
+	return 'UNKNOWN_' + _hex(key)
 
 
 """Feature names indexed by feature id."""
@@ -70,11 +71,11 @@ BATTERY_STATUS = FallbackDict(lambda x: 'unknown', list2dict(_BATTERY_STATUSES))
 
 _KEY_NAMES = ( 'unknown_0000', 'Volume up', 'Volume down', 'Mute', 'Play/Pause',
 				'Next', 'Previous', 'Stop', 'Application switcher',
-				'unknown_0009', 'Calculator', 'unknown_000b', 'unknown_000c',
-				'unknown_000d', 'Mail')
+				'unknown_0009', 'Calculator', 'unknown_000B', 'unknown_000C',
+				'unknown_000D', 'Mail')
 
 """Standard names for reprogrammable keys."""
-KEY_NAME = FallbackDict(lambda x: 'unknown_%04x' % x, list2dict(_KEY_NAMES))
+KEY_NAME = FallbackDict(lambda x: 'unknown_%04X' % x, list2dict(_KEY_NAMES))
 
 """Possible flags on a reprogrammable key."""
 KEY_FLAG = type('KEY_FLAG', (), dict(

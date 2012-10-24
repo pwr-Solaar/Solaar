@@ -46,14 +46,32 @@ def _show_about_window(action):
 	about.destroy()
 about = _action('help-about', 'About ' + ui.APPNAME, _show_about_window)
 
+quit = _action('exit', 'Quit', Gtk.main_quit)
 
-def _pair_device(action, window, state):
+#
+#
+#
+
+import pairing
+
+def _pair_device(action):
 	action.set_sensitive(False)
-	pair_dialog = ui.pair_window.create(action, state)
-	# window.present()
-	# pair_dialog.set_transient_for(parent_window)
-	# pair_dialog.set_destroy_with_parent(parent_window)
-	# pair_dialog.set_modal(True)
+	pair_dialog = ui.pair_window.create(action, pairing.state)
+	action.window.present()
+	pair_dialog.set_transient_for(action.window)
+	pair_dialog.set_destroy_with_parent(action.window)
+	pair_dialog.set_modal(True)
 	pair_dialog.present()
-pair = _action('add', 'Pair new device', None)
-pair.set_sensitive(False)
+pair = _action('add', 'Pair new device', _pair_device)
+
+
+def _unpair_device(action):
+	dev = pairing.state.device(action.devnumber)
+	action.devnumber = 0
+	if dev:
+		q = Gtk.MessageDialog.new(action.window,
+									Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO,
+									'Unpair device <b>%s</b>?', dev.name)
+		if q.run() == Gtk.ResponseType.YES:
+			pairing.state.unpair(dev.number)
+unpair = _action('remove', 'Unpair', _unpair_device)

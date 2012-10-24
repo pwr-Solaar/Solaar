@@ -3,6 +3,7 @@
 import sys
 import time
 from binascii import hexlify, unhexlify
+_hex = lambda d: hexlify(d).decode('ascii').upper()
 
 
 start_time = 0
@@ -13,7 +14,7 @@ except:
 
 
 def _print(marker, data, scroll=False):
-	hexs = str(hexlify(data))
+	hexs = _hex(data)
 
 	t = time.time() - start_time
 	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
@@ -44,17 +45,15 @@ def _continuous_read(handle, timeout=1000):
 if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument('--history', default='.hidconsole-history',
-							help='history file')
-	arg_parser.add_argument('device', default=None,
-							help='linux device to connect to')
+	arg_parser.add_argument('--history', default='.hidconsole-history', help='history file')
+	arg_parser.add_argument('device', default=None, help='linux device to connect to')
 	args = arg_parser.parse_args()
 
 	import hidapi
 	print (".. Opening device %s" % args.device)
 	handle = hidapi.open_path(args.device.encode('utf-8'))
 	if handle:
-		print (".. Opened handle %x, vendor %s product %s serial %s" % (handle,
+		print (".. Opened handle %X, vendor %s product %s serial %s" % (handle,
 						repr(hidapi.get_manufacturer(handle)),
 						repr(hidapi.get_product(handle)),
 						repr(hidapi.get_serial(handle))))
@@ -84,7 +83,7 @@ if __name__ == '__main__':
 		except Exception as e:
 			pass
 
-		print (".. Closing handle %x" % handle)
+		print (".. Closing handle %X" % handle)
 		hidapi.close(handle)
 		readline.write_history_file(args.history)
 	else:

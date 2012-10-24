@@ -58,6 +58,8 @@ if __name__ == '__main__':
 									watcher.DUMMY.NAME,
 									watcher.DUMMY.max_devices,
 									args.systray)
+	ui.action.pair.window = window
+	ui.action.unpair.window = window
 
 	if args.systray:
 		menu_actions = (ui.action.pair,
@@ -74,8 +76,7 @@ if __name__ == '__main__':
 	w.start()
 
 	import pairing
-	ui.action.pair.connect('activate', ui.action._pair_device,
-							window, pairing.State(w))
+	pairing.state = pairing.State(w)
 
 	from gi.repository import Gtk
 	Gtk.main()

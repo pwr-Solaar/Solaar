@@ -4,8 +4,6 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from binascii import hexlify
-
 from .unifying_receiver import api
 from .unifying_receiver.constants import *
 
@@ -41,7 +39,7 @@ def scan_devices(receiver):
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
 			if feature:
-				print ("  ~ Feature %s (%s) at index %d" % (FEATURE_NAME[feature], hexlify(feature), index))
+				print ("  ~ Feature %-20s (%s) at index %d" % (FEATURE_NAME[feature], api._hex(feature), index))
 
 		if FEATURE.BATTERY in devinfo.features:
 			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features=devinfo.features)

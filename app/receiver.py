@@ -6,7 +6,7 @@ from logging import getLogger as _Logger
 _LOG_LEVEL = 6
 
 from threading import Event as _Event
-from binascii import hexlify as _hexlify
+from struct import pack as _pack
 
 from logitech.unifying_receiver import base as _base
 from logitech.unifying_receiver import api as _api
@@ -22,7 +22,7 @@ class DeviceInfo(object):
 	"""A device attached to the receiver.
 	"""
 	def __init__(self, receiver, number, status=STATUS.UNKNOWN):
-		self.LOG = _Logger("Device-%d" % number)
+		self.LOG = _Logger("Device[%d]" % number)
 		self.receiver = receiver
 		self.number = number
 		self._name = None
@@ -49,6 +49,9 @@ class DeviceInfo(object):
 			urgent = new_status < STATUS.CONNECTED or self._status < STATUS.CONNECTED
 			self._status = new_status
 			self.receiver._device_changed(self, urgent)
+
+		if new_status < STATUS.CONNECTED:
+			self.props.clear()
 
 	@property
 	def status_text(self):
@@ -160,7 +163,7 @@ class Receiver(_listener.EventsListener):
 		self.status_changed.urgent = False
 		self.status_changed.reason = None
 
-		self.LOG = _Logger("Receiver-%s" % path)
+		self.LOG = _Logger("Receiver[%s]" % path)
 		self.LOG.info("initializing")
 
 		self._serial = None
@@ -170,8 +173,7 @@ class Receiver(_listener.EventsListener):
 		self.events_filter = None
 		self.events_handler = None
 
-		if (_base.request(handle, 0xFF, b'\x81\x00') and
-			_base.request(handle, 0xFF, b'\x80\x00', b'\x00\x01')):
+		if _base.request(handle, 0xFF, b'\x80\x00', b'\x00\x01'):
 			self.LOG.info("initialized")
 		else:
 			self.LOG.warn("initialization failed")
@@ -256,7 +258,7 @@ class Receiver(_listener.EventsListener):
 						STATUS.CONNECTED if state_code == 0x20 else \
 						None
 				if state is None:
-					self.LOG.warn("don't know how to handle status 0x%02x: %s", state_code, event)
+					self.LOG.warn("don't know how to handle status 0x%02X: %s", state_code, event)
 				else:
 					self.devices[event.devnumber].status = state
 				return
@@ -298,7 +300,7 @@ class Receiver(_listener.EventsListener):
 				STATUS.CONNECTED if state_code == 0x20 else \
 				None
 		if state is None:
-			self.LOG.warn("don't know how to handle device status 0x%02x: %s", state_code, event)
+			self.LOG.warn("don't know how to handle device status 0x%02X: %s", state_code, event)
 			return None
 
 		dev = DeviceInfo(self, event.devnumber, state)
@@ -318,11 +320,24 @@ class Receiver(_listener.EventsListener):
 		b[0] -= 0x10
 		serial = self.request(0xFF, b'\x83\xB5', bytes(b))
 		if serial:
-			dev._serial = _hexlify(serial[1:5]).decode('ascii').upper()
+			dev._serial = _base._hex(serial[1:5])
 		return dev
 
+	def unpair_device(self, number):
+		if number in self.devices:
+			dev = self.devices[number]
+			reply = self.request(0xFF, b'\x80\xB2', _pack('!BB', 0x03, number))
+			if reply:
+				self.LOG.debug("remove device %s => %s", dev, _base._hex(reply))
+				del self.devices[number]
+				self.LOG.warn("unpaired device %s", dev)
+				self.status = STATUS.CONNECTED + len(self.devices)
+				return True
+			self.LOG.warn("failed to unpair device %s", dev)
+		return False
+
 	def __str__(self):
-		return 'Receiver(%s,%x,%d:%d)' % (self.path, self._handle, self._active, self._status)
+		return 'Receiver(%s,%X,%d)' % (self.path, self._handle, self._status)
 
 	@classmethod
 	def open(self):
@@ -332,7 +347,6 @@ class Receiver(_listener.EventsListener):
 		"""
 		for rawdevice in _base.list_receiver_devices():
 			_Logger("receiver").log(_LOG_LEVEL, "checking %s", rawdevice)
-
 			handle = _base.try_open(rawdevice.path)
 			if handle:
 				receiver = Receiver(rawdevice.path, handle)

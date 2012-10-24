@@ -15,14 +15,14 @@ def appicon(receiver_status):
 			APPNAME)
 
 
-_THEME = Gtk.IconTheme.get_default()
+_ICON_THEME = Gtk.IconTheme.get_default()
 
 def get_icon(name, fallback):
-	return name if name and _THEME.has_icon(name) else fallback
+	return name if name and _ICON_THEME.has_icon(name) else fallback
 
 def icon_file(name):
-	if name and _THEME.has_icon(name):
-		return _THEME.lookup_icon(name, 0, 0).get_filename()
+	if name and _ICON_THEME.has_icon(name):
+		return _ICON_THEME.lookup_icon(name, 0, 0).get_filename()
 	return None
 
 
