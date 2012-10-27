@@ -39,7 +39,7 @@ def scan_devices(receiver):
 		for index in range(0, len(devinfo.features)):
 			feature = devinfo.features[index]
 			if feature:
-				print ("  ~ Feature %-20s (%s) at index %d" % (FEATURE_NAME[feature], api._hex(feature), index))
+				print ("  ~ Feature %-20s (%s) at index %02X" % (FEATURE_NAME[feature], api._hex(feature), index))
 
 		if FEATURE.BATTERY in devinfo.features:
 			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features=devinfo.features)
@@ -75,11 +75,3 @@ if __name__ == '__main__':
 			break
 	else:
 		print ("!! Logitech Unifying Receiver not found.")
-
-
-	# import pyudev
-	# ctx = pyudev.Context()
-	# m = pyudev.Monitor.from_netlink(ctx)
-	# m.filter_by(subsystem='hid')
-	# for action, device in m:
-	# 	print '%s: %s' % (action, device)

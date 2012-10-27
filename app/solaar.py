@@ -32,10 +32,8 @@ def _parse_arguments():
 
 	import logging
 	log_level = logging.root.level - 10 * args.verbose
-	log_format='%(asctime)s.%(msecs)03d %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
-	logging.basicConfig(level=log_level if log_level > 0 else 1,
-						format=log_format,
-						datefmt='%H:%M:%S')
+	log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
+	logging.basicConfig(level=max(log_level, 1), format=log_format)
 
 	return args
 
@@ -83,3 +81,6 @@ if __name__ == '__main__':
 
 	w.stop()
 	ui.notify.uninit()
+
+	import logging
+	logging.shutdown()

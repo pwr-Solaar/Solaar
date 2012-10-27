@@ -2,7 +2,7 @@
 #
 #
 
-from gi.repository import (Gtk, Gdk)
+from gi.repository import (Gtk, Gdk, GObject)
 
 import ui
 from logitech.devices.constants import (STATUS, PROPS)
@@ -21,6 +21,7 @@ def _toggle_info_button(label, widget):
 	toggle = lambda a, w: w.set_visible(a.get_active())
 	action = ui.action._toggle_action('info', label, toggle, widget)
 	return action.create_tool_item()
+
 
 def _receiver_box(name):
 	icon = Gtk.Image.new_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
@@ -65,7 +66,7 @@ def _receiver_box(name):
 	return frame
 
 
-def _device_box():
+def _device_box(index):
 	icon = Gtk.Image.new_from_icon_name('image-missing', _DEVICE_ICON_SIZE)
 	icon.set_name('icon')
 	icon.set_alignment(0.5, 0)
@@ -111,7 +112,10 @@ def _device_box():
 	info_box.add(info_label)
 
 	toolbar.insert(_toggle_info_button('Device info', info_box), 0)
-	toolbar.insert(ui.action.unpair.create_tool_item(), -1)
+	def _set_number(action):
+		action.devnumber = index
+	unpair_action = ui.action.wrap_action(ui.action.unpair, _set_number)
+	toolbar.insert(unpair_action.create_tool_item(), -1)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=4)
 	vbox.pack_start(label, True, True, 0)
@@ -131,7 +135,6 @@ def _device_box():
 
 
 def toggle(window, trigger):
-	# print 'window toggle', window, trigger
 	if window.get_visible():
 		position = window.get_position()
 		window.hide()
@@ -158,7 +161,7 @@ def create(title, name, max_devices, systray=False):
 	rbox = _receiver_box(name)
 	vbox.add(rbox)
 	for i in range(1, 1 + max_devices):
-		dbox = _device_box()
+		dbox = _device_box(i)
 		vbox.add(dbox)
 	vbox.set_visible(True)
 
@@ -209,18 +212,12 @@ def _update_receiver_box(frame, receiver):
 
 
 def _update_device_box(frame, dev):
-	if dev is None:
-		frame.set_visible(False)
-		frame.set_name(_PLACEHOLDER)
-		return
-
 	icon, label, info_label = ui.find_children(frame, 'icon', 'label', 'info-label')
 
 	if frame.get_name() != dev.name:
 		frame.set_name(dev.name)
 		icon.set_from_icon_name(ui.get_icon(dev.name, dev.kind), _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
-	frame.set_visible(True)
 
 	status = ui.find_children(frame, 'status')
 	status_icons = status.get_children()
@@ -271,16 +268,21 @@ def _update_device_box(frame, dev):
 	for b in toolbar.get_children()[:-1]:
 		b.set_sensitive(True)
 
+	frame.set_visible(True)
 
 def update(window, receiver):
-	if window and window.get_child():
-		window.set_icon_name(ui.appicon(receiver.status))
+	window.set_icon_name(ui.appicon(receiver.status))
 
-		vbox = window.get_child()
-		controls = list(vbox.get_children())
+	vbox = window.get_child()
+	controls = list(vbox.get_children())
 
-		_update_receiver_box(controls[0], receiver)
+	GObject.idle_add(_update_receiver_box, controls[0], receiver)
 
-		for index in range(1, len(controls)):
-			dev = receiver.devices[index] if index in receiver.devices else None
-			_update_device_box(controls[index], dev)
+	for index in range(1, len(controls)):
+		dev = receiver.devices[index] if index in receiver.devices else None
+		frame = controls[index]
+		if dev is None:
+			frame.set_visible(False)
+			frame.set_name(_PLACEHOLDER)
+		else:
+			GObject.idle_add(_update_device_box, frame, dev)

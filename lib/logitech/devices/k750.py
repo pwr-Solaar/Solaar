@@ -29,17 +29,9 @@ def _charge_status(data, hasLux=False):
 
 
 def request_status(devinfo, listener=None):
-	def _trigger_solar_charge_events(handle, devinfo):
-		return _api.request(handle, devinfo.number,
-							feature=FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
-							features=devinfo.features)
-	if listener is None:
-		reply = _trigger_solar_charge_events(devinfo.handle, devinfo)
-	elif listener:
-		reply = listener.call_api(_trigger_solar_charge_events, devinfo)
-	else:
-		reply = 0
-
+	reply = _api.request(devinfo.handle, devinfo.number,
+						feature=FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
+						features=devinfo.features)
 	if reply is None:
 		return STATUS.UNAVAILABLE
 
@@ -56,9 +48,3 @@ def process_event(devinfo, data, listener=None):
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
 		return request_status(devinfo, listener) or _charge_status(data)
-
-	if data[:2] == b'\x05\x00':
-		# wireless device status
-		if data[2:5] == b'\x01\x01\x01':
-			logging.debug("Keyboard just started")
-			return STATUS.CONNECTED

@@ -3,7 +3,6 @@
 # Unlikely to be used directly unless you're expanding the API.
 #
 
-from logging import getLogger as _Logger
 from struct import pack as _pack
 from binascii import hexlify as _hexlify
 _hex = lambda d: _hexlify(d).decode('ascii').upper()
@@ -12,11 +11,12 @@ from .constants import ERROR_NAME
 from .exceptions import (NoReceiver as _NoReceiver,
 						FeatureCallError as _FeatureCallError)
 
+from logging import getLogger
+_log = getLogger('LUR').getChild('base')
+del getLogger
+
 import hidapi as _hid
 
-
-_LOG_LEVEL = 4
-_l = _Logger('lur.base')
 
 #
 # These values are defined by the Logitech documentation.
@@ -48,7 +48,7 @@ DEFAULT_TIMEOUT = 1000
 
 def _logdebug_hook(reply_code, devnumber, data):
 	"""Default unhandled hook, logs the reply as DEBUG."""
-	_l.warn("UNHANDLED [%02X %02X %s %s] (%s)", reply_code, devnumber, _hex(data[:2]), _hex(data[2:]), repr(data))
+	_log.warn("UNHANDLED [%02X %02X %s %s] (%s)", reply_code, devnumber, _hex(data[:2]), _hex(data[2:]), repr(data))
 
 
 """The function that will be called on unhandled incoming events.
@@ -78,7 +78,7 @@ def list_receiver_devices():
 	return _hid.enumerate(0x046d, 0xc52b, 2)
 
 
-_PING_RECEIVER = b'\x10\xFF\x81\x00\x00\x00\x00'
+_COUNT_DEVICES_REQUEST = b'\x10\xFF\x81\x00\x00\x00\x00'
 
 def try_open(path):
 	"""Checks if the given Linux device path points to the right UR device.
@@ -97,31 +97,28 @@ def try_open(path):
 	if receiver_handle is None:
 		# could be a file permissions issue (did you add the udev rules?)
 		# in any case, unreachable
-		_l.log(_LOG_LEVEL, "[%s] open failed", path)
+		_log.debug("[%s] open failed", path)
 		return None
 
-	_l.log(_LOG_LEVEL, "[%s] receiver handle %X", path, receiver_handle)
-	# ping on device id 0 (always an error)
-	_hid.write(receiver_handle, _PING_RECEIVER)
+	_hid.write(receiver_handle, _COUNT_DEVICES_REQUEST)
 
 	# if this is the right hidraw device, we'll receive a 'bad device' from the UR
 	# otherwise, the read should produce nothing
 	reply = _hid.read(receiver_handle, _MAX_REPLY_SIZE, DEFAULT_TIMEOUT)
 	if reply:
-		if reply[:5] == _PING_RECEIVER[:5]:
+		if reply[:5] == _COUNT_DEVICES_REQUEST[:5]:
 			# 'device 0 unreachable' is the expected reply from a valid receiver handle
-			_l.log(_LOG_LEVEL, "[%s] success: handle %X", path, receiver_handle)
+			_log.info("[%s] success: handle %X", path, receiver_handle)
 			return receiver_handle
 
 		# any other replies are ignored, and will assume this is the wrong Linux device
-		if _l.isEnabledFor(_LOG_LEVEL):
-			if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
-				# no idea what this is, but it comes up occasionally
-				_l.log(_LOG_LEVEL, "[%s] %X mistery reply [%s]", path, receiver_handle, _hex(reply))
-			else:
-				_l.log(_LOG_LEVEL, "[%s] %X unknown reply [%s]", path, receiver_handle, _hex(reply))
+		if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
+			# no idea what this is, but it comes up occasionally
+			_log.debug("[%s] %X mistery reply [%s]", path, receiver_handle, _hex(reply))
+		else:
+			_log.debug("[%s] %X unknown reply [%s]", path, receiver_handle, _hex(reply))
 	else:
-		_l.log(_LOG_LEVEL, "[%s] %X no reply", path, receiver_handle)
+		_log.debug("[%s] %X no reply", path, receiver_handle)
 
 	close(receiver_handle)
 
@@ -132,7 +129,7 @@ def open():
 	:returns: An open file handle for the found receiver, or ``None``.
 	"""
 	for rawdevice in list_receiver_devices():
-		_l.log(_LOG_LEVEL, "checking %s", rawdevice)
+		_log.info("checking %s", rawdevice)
 
 		receiver = try_open(rawdevice.path)
 		if receiver:
@@ -146,10 +143,10 @@ def close(handle):
 	if handle:
 		try:
 			_hid.close(handle)
-			_l.log(_LOG_LEVEL, "closed receiver handle %X", handle)
+			_log.info("closed receiver handle %X", handle)
 			return True
 		except:
-			_l.exception("closing receiver handle %X", handle)
+			_log.exception("closing receiver handle %X", handle)
 
 	return False
 
@@ -168,15 +165,13 @@ def write(handle, devnumber, data):
 	been physically removed from the machine, or the kernel driver has been
 	unloaded. The handle will be closed automatically.
 	"""
-	if _l.isEnabledFor(_LOG_LEVEL):
-		_l.log(_LOG_LEVEL, "(%d) <= w[10 %02X %s %s]", devnumber, devnumber, _hex(data[:2]), _hex(data[2:]))
-
 	assert _MIN_CALL_SIZE == 7
 	assert _MAX_CALL_SIZE == 20
 	# the data is padded to either 5 or 18 bytes
 	wdata = _pack('!BB18s' if len(data) > 5 else '!BB5s', 0x10, devnumber, data)
+	_log.debug("(%d) <= w[10 %02X %s %s]", devnumber, devnumber, _hex(wdata[2:4]), _hex(wdata[4:]))
 	if not _hid.write(handle, wdata):
-		_l.warn("(%d) write failed, assuming receiver %X no longer available", devnumber, handle)
+		_log.warn("(%d) write failed, assuming receiver %X no longer available", devnumber, handle)
 		close(handle)
 		raise _NoReceiver
 
@@ -197,25 +192,32 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	been physically removed from the machine, or the kernel driver has been
 	unloaded. The handle will be closed automatically.
 	"""
-	data = _hid.read(handle, _MAX_REPLY_SIZE * 2, timeout)
+	data = _hid.read(handle, _MAX_REPLY_SIZE, timeout)
 	if data is None:
-		_l.warn("(-) read failed, assuming receiver %X no longer available", handle)
+		_log.warn("(-) read failed, assuming receiver %X no longer available", handle)
 		close(handle)
 		raise _NoReceiver
 
 	if data:
 		if len(data) < _MIN_REPLY_SIZE:
-			_l.warn("(%d) => r[%s] read packet too short: %d bytes", ord(data[1:2]), _hex(data), len(data))
+			_log.warn("(%d) => r[%s] read packet too short: %d bytes", ord(data[1:2]), _hex(data), len(data))
+			data += b'\x00' * (_MIN_REPLY_SIZE - len(data))
 		if len(data) > _MAX_REPLY_SIZE:
-			_l.warn("(%d) => r[%s] read packet too long: %d bytes", ord(data[1:2]), _hex(data), len(data))
+			_log.warn("(%d) => r[%s] read packet too long: %d bytes", ord(data[1:2]), _hex(data), len(data))
 		code = ord(data[:1])
 		devnumber = ord(data[1:2])
-		if _l.isEnabledFor(_LOG_LEVEL):
-			_l.log(_LOG_LEVEL, "(%d) => r[%02X %02X %s %s]", devnumber, code, devnumber, _hex(data[2:4]), _hex(data[4:]))
+		_log.debug("(%d) => r[%02X %02X %s %s]", devnumber, code, devnumber, _hex(data[2:4]), _hex(data[4:]))
 		return code, devnumber, data[2:]
 
-	# _l.log(_LOG_LEVEL, "(-) => r[]", handle)
+	# _l.log(_LOG_LEVEL, "(-) => r[]")
 
+
+_MAX_READ_TIMES = 3
+request_context = None
+from collections import namedtuple
+_DEFAULT_REQUEST_CONTEXT_CLASS = namedtuple('_DEFAULT_REQUEST_CONTEXT_CLASS', ['write', 'read', 'unhandled_hook'])
+_DEFAULT_REQUEST_CONTEXT = _DEFAULT_REQUEST_CONTEXT_CLASS(write=write, read=read, unhandled_hook=unhandled_hook)
+del namedtuple
 
 def request(handle, devnumber, feature_index_function, params=b'', features=None):
 	"""Makes a feature call to a device and waits for a matching reply.
@@ -234,18 +236,27 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 	available.
 	:raisees FeatureCallError: if the feature call replied with an error.
 	"""
-	if _l.isEnabledFor(_LOG_LEVEL):
-		_l.log(_LOG_LEVEL, "(%d) request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
+	if type(params) == int:
+		params = _pack('!B', params)
+
+	_log.debug("(%d) request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
 	if len(feature_index_function) != 2:
 		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hex(feature_index_function))
 
-	retries = 5
+	if request_context is None or handle != request_context.handle:
+		context = _DEFAULT_REQUEST_CONTEXT
+		_unhandled = unhandled_hook
+	else:
+		context = request_context
+		_unhandled = getattr(context, 'unhandled_hook')
 
-	write(handle, devnumber, feature_index_function + params)
-	while retries > 0:
-		divisor = (6 - retries)
-		reply = read(handle, int(DEFAULT_TIMEOUT * (divisor + 1) / 2 / divisor))
-		retries -= 1
+	context.write(handle, devnumber, feature_index_function + params)
+
+	read_times = _MAX_READ_TIMES
+	while read_times > 0:
+		divisor = (1 + _MAX_READ_TIMES - read_times)
+		reply = context.read(handle, int(DEFAULT_TIMEOUT * (divisor + 1) / 2 / divisor))
+		read_times -= 1
 
 		if not reply:
 			# keep waiting...
@@ -258,24 +269,24 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 			# _l.log(_LOG_LEVEL, "(%d) request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hex(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
-			if unhandled_hook:
-				unhandled_hook(reply_code, reply_devnumber, reply_data)
+			if _unhandled:
+				_unhandled(reply_code, reply_devnumber, reply_data)
 			continue
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == feature_index_function:
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d) request ping failed on {%s} call: [%s]", devnumber, _hex(feature_index_function), _hex(reply_data))
+			_log.debug("(%d) request ping failed on {%s} call: [%s]", devnumber, _hex(feature_index_function), _hex(reply_data))
 			return None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_l.log(_LOG_LEVEL, "(%d) request ping failed: [%s]", devnumber, _hex(reply_data))
+			_log.debug("(%d) request ping failed: [%s]", devnumber, _hex(reply_data))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# the feature call returned with an error
 			error_code = ord(reply_data[3])
-			_l.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hex(reply_data))
+			_log.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hex(reply_data))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
 			feature = None if features is None else features[feature_index] if feature_index < len(features) else None
@@ -283,14 +294,14 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
+			# _log.debug("(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
 			return reply_data[2:]
 
 		if reply_code == 0x10 and devnumber == 0xFF and reply_data[:2] == feature_index_function:
 			# direct calls to the receiver (device 0xFF) may also return successfully with reply code 0x10
-			# _l.log(_LOG_LEVEL, "(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
+			# _log.debug("(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
 			return reply_data[2:]
 
-		# _l.log(_LOG_LEVEL, "(%d) unmatched reply {%s} (expected {%s})", devnumber, _hex(reply_data[:2]), _hex(feature_index_function))
-		if unhandled_hook:
-			unhandled_hook(reply_code, reply_devnumber, reply_data)
+		# _log.debug("(%d) unmatched reply {%s} (expected {%s})", devnumber, _hex(reply_data[:2]), _hex(feature_index_function))
+		if _unhandled:
+			_unhandled(reply_code, reply_devnumber, reply_data)

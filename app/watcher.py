@@ -65,31 +65,19 @@ class Watcher(Thread):
 					continue
 
 				_l.info("receiver %s ", r)
-				self.update_ui(r)
-				self.notify(r)
-
-				if r.count_devices() > 0:
-					# give it some time to read all devices
-					r.status_changed.clear()
-					_sleep(8, 0.4, r.status_changed.is_set)
-
-				if r.devices:
-					_l.info("%d device(s) found", len(r.devices))
-					for d in r.devices.values():
-						self.notify(d)
-				else:
-					# if no devices found so far, assume none at all
-					_l.info("no devices found")
-					r.status = STATUS.CONNECTED
-
 				self._receiver = r
 				notify_missing = True
+
+				self.update_ui(r)
+				self.notify(r)
 
 			if self._active:
 				if self._receiver:
 					_l.debug("waiting for status_changed")
 					sc = self._receiver.status_changed
 					sc.wait()
+					if not self._active:
+						break
 					sc.clear()
 					if sc.urgent:
 						_l.info("status_changed %s", sc.reason)
@@ -103,6 +91,7 @@ class Watcher(Thread):
 
 		if self._receiver:
 			self._receiver.close()
+		self._receiver = _DUMMY_RECEIVER
 
 	def stop(self):
 		if self._active:
@@ -112,3 +101,4 @@ class Watcher(Thread):
 				# break out of an eventual wait()
 				self._receiver.status_changed.reason = None
 				self._receiver.status_changed.set()
+			self.join()

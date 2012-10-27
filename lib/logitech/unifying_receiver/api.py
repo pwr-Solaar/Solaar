@@ -2,7 +2,6 @@
 # Logitech Unifying Receiver API.
 #
 
-from logging import getLogger as _Logger
 from struct import pack as _pack
 from struct import unpack as _unpack
 
@@ -19,8 +18,10 @@ from .exceptions import FeatureNotSupported as _FeatureNotSupported
 
 
 _hex = _base._hex
-_LOG_LEVEL = 5
-_l = _Logger('lur.api')
+
+from logging import getLogger
+_log = getLogger('LUR').getChild('api')
+del getLogger
 
 #
 #
@@ -61,7 +62,7 @@ def get_receiver_info(handle):
 
 
 def count_devices(handle):
-	count = _base.request(handle, 0xFF, b'\x80\x02', b'\x02')
+	count = _base.request(handle, 0xFF, b'\x81\x00')
 	return 0 if count is None else ord(count[1:2])
 
 
@@ -88,22 +89,16 @@ def request(handle, devnumber, feature, function=b'\x00', params=b'', features=N
 
 	:raises FeatureNotSupported: if the device does not support the feature.
 	"""
-
 	feature_index = None
 	if feature == FEATURE.ROOT:
 		feature_index = b'\x00'
 	else:
-		if features is None:
-			features = get_device_features(handle, devnumber)
-			if features is None:
-				_l.log(_LOG_LEVEL, "(%d) no features array available", devnumber)
-				return None
-		if feature in features:
-			feature_index = _pack('!B', features.index(feature))
+		feature_index = _get_feature_index(handle, devnumber, feature, features)
+		if feature_index is None:
+			# i/o read error
+			return None
 
-	if feature_index is None:
-		_l.warn("(%d) feature <%s:%s> not supported", devnumber, _hex(feature), FEATURE_NAME[feature])
-		raise _FeatureNotSupported(devnumber, feature)
+		feature_index = _pack('!B', feature_index)
 
 	if type(function) == int:
 		function = _pack('!B', function)
@@ -132,9 +127,11 @@ def get_device_protocol(handle, devnumber):
 def find_device_by_name(handle, name):
 	"""Searches for an attached device by name.
 
+	This function does it the hard way, querying all possible device numbers.
+
 	:returns: an AttachedDeviceInfo tuple, or ``None``.
 	"""
-	_l.log(_LOG_LEVEL, "searching for device '%s'", name)
+	_log.debug("searching for device '%s'", name)
 
 	for devnumber in range(1, 1 + MAX_ATTACHED_DEVICES):
 		features = get_device_features(handle, devnumber)
@@ -147,9 +144,11 @@ def find_device_by_name(handle, name):
 def list_devices(handle):
 	"""List all devices attached to the UR.
 
+	This function does it the hard way, querying all possible device numbers.
+
 	:returns: a list of AttachedDeviceInfo tuples.
 	"""
-	_l.log(_LOG_LEVEL, "listing all devices")
+	_log.debug("listing all devices")
 
 	devices = []
 
@@ -162,7 +161,7 @@ def list_devices(handle):
 
 
 def get_device_info(handle, devnumber, name=None, features=None):
-	"""Gets the complete info for a device (type, name, firmware versions, features).
+	"""Gets the complete info for a device (type, name, features).
 
 	:returns: an AttachedDeviceInfo tuple, or ``None``.
 	"""
@@ -174,7 +173,7 @@ def get_device_info(handle, devnumber, name=None, features=None):
 	d_kind = get_device_kind(handle, devnumber, features)
 	d_name = get_device_name(handle, devnumber, features) if name is None else name
 	devinfo = _AttachedDeviceInfo(handle, devnumber, d_kind, d_name, features)
-	_l.log(_LOG_LEVEL, "(%d) found device %s", devnumber, devinfo)
+	_log.debug("(%d) found device %s", devnumber, devinfo)
 	return devinfo
 
 
@@ -183,32 +182,44 @@ def get_feature_index(handle, devnumber, feature):
 
 	:returns: An int, or ``None`` if the feature is not available.
 	"""
-	_l.log(_LOG_LEVEL, "(%d) get feature index <%s:%s>", devnumber, _hex(feature), FEATURE_NAME[feature])
+	_log.debug("(%d) get feature index <%s:%s>", devnumber, _hex(feature), FEATURE_NAME[feature])
 	if len(feature) != 2:
 		raise ValueError("invalid feature <%s>: it must be a two-byte string" % feature)
 
 	# FEATURE.ROOT should always be available for any attached devices
 	reply = _base.request(handle, devnumber, FEATURE.ROOT, feature)
 	if reply:
-		# only consider active and supported features
 		feature_index = ord(reply[0:1])
 		if feature_index:
 			feature_flags = ord(reply[1:2]) & 0xE0
-			if _l.isEnabledFor(_LOG_LEVEL):
-				if feature_flags:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> has index %d: %s",
+			if feature_flags:
+				_log.debug("(%d) feature <%s:%s> has index %d: %s",
 							devnumber, _hex(feature), FEATURE_NAME[feature], feature_index,
 							','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
-				else:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
+			else:
+				_log.debug("(%d) feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
 
+			# only consider active and supported features?
 			# if feature_flags:
 			# 	raise E.FeatureNotSupported(devnumber, feature)
 
 			return feature_index
 
-		_l.warn("(%d) feature <%s:%s> not supported by the device", devnumber, _hex(feature), FEATURE_NAME[feature])
+		_log.warn("(%d) feature <%s:%s> not supported by the device", devnumber, _hex(feature), FEATURE_NAME[feature])
 		raise _FeatureNotSupported(devnumber, feature)
+
+
+def _get_feature_index(handle, devnumber, feature, features=None):
+	if features is None:
+		return get_feature_index(handle, devnumber, feature)
+
+	if feature in features:
+		return features.index(feature)
+
+	index = get_feature_index(handle, devnumber, feature)
+	if index is not None:
+		features[index] = feature
+		return index
 
 
 def get_device_features(handle, devnumber):
@@ -217,7 +228,7 @@ def get_device_features(handle, devnumber):
 	Their position in the array is the index to be used when requesting that
 	feature on the device.
 	"""
-	_l.log(_LOG_LEVEL, "(%d) get device features", devnumber)
+	_log.debug("(%d) get device features", devnumber)
 
 	# get the index of the FEATURE_SET
 	# FEATURE.ROOT should always be available for all devices
@@ -235,11 +246,11 @@ def get_device_features(handle, devnumber):
 	if not features_count:
 		# this can happen if the device disappeard since the fs_index request
 		# otherwise we should get at least a count of 1 (the FEATURE_SET we've just used above)
-		_l.log(_LOG_LEVEL, "(%d) no features available?!", devnumber)
+		_log.debug("(%d) no features available?!", devnumber)
 		return None
 
 	features_count = ord(features_count[:1])
-	_l.log(_LOG_LEVEL, "(%d) found %d features", devnumber, features_count)
+	_log.debug("(%d) found %d features", devnumber, features_count)
 
 	features = [None] * 0x20
 	for index in range(1, 1 + features_count):
@@ -250,13 +261,12 @@ def get_device_features(handle, devnumber):
 			feature = feature[0:2].upper()
 			features[index] = feature
 
-			if _l.isEnabledFor(_LOG_LEVEL):
-				if feature_flags:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> at index %d: %s",
+			if feature_flags:
+				_log.debug("(%d) feature <%s:%s> at index %d: %s",
 							devnumber, _hex(feature), FEATURE_NAME[feature], index,
 							','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
-				else:
-					_l.log(_LOG_LEVEL, "(%d) feature <%s:%s> at index %d", devnumber, _hex(feature), FEATURE_NAME[feature], index)
+			else:
+				_log.debug("(%d) feature <%s:%s> at index %d", devnumber, _hex(feature), FEATURE_NAME[feature], index)
 
 	features[0] = FEATURE.ROOT
 	while features[-1] is None:
@@ -269,16 +279,17 @@ def get_device_firmware(handle, devnumber, features=None):
 
 	:returns: a list of FirmwareInfo tuples, ordered by firmware layer.
 	"""
-	def _makeFirmwareInfo(level, kind, name='', version='', extras=None):
-		return _FirmwareInfo(level, kind, name, version, extras)
+	fw_fi = _get_feature_index(handle, devnumber, FEATURE.FIRMWARE, features)
+	if fw_fi is None:
+		return None
 
-	fw_count = request(handle, devnumber, FEATURE.FIRMWARE, features=features)
+	fw_count = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x00))
 	if fw_count:
 		fw_count = ord(fw_count[:1])
 
 		fw = []
 		for index in range(0, fw_count):
-			fw_info = request(handle, devnumber, FEATURE.FIRMWARE, function=b'\x10', params=index, features=features)
+			fw_info = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x10), params=index)
 			if fw_info:
 				level = ord(fw_info[:1]) & 0x0F
 				if level == 0 or level == 1:
@@ -290,18 +301,15 @@ def get_device_firmware(handle, devnumber, features=None):
 					build, = _unpack('!H', fw_info[6:8])
 					if build:
 						version += ' b%d' % build
-					extras = fw_info[9:].rstrip(b'\x00')
-					if extras:
-						fw_info = _makeFirmwareInfo(level, kind, name, version, extras)
-					else:
-						fw_info = _makeFirmwareInfo(level, kind, name, version)
+					extras = fw_info[9:].rstrip(b'\x00') or None
+					fw_info = _FirmwareInfo(level, kind, name, version, extras)
 				elif level == 2:
-					fw_info = _makeFirmwareInfo(2, FIRMWARE_KIND[2], version=ord(fw_info[1:2]))
+					fw_info = _FirmwareInfo(2, FIRMWARE_KIND[2], '', ord(fw_info[1:2]), None)
 				else:
-					fw_info = _makeFirmwareInfo(level, FIRMWARE_KIND[-1])
+					fw_info = _FirmwareInfo(level, FIRMWARE_KIND[-1], '', '', None)
 
 				fw.append(fw_info)
-				_l.log(_LOG_LEVEL, "(%d) firmware %s", devnumber, fw_info)
+				_log.debug("(%d) firmware %s", devnumber, fw_info)
 		return tuple(fw)
 
 
@@ -312,10 +320,14 @@ def get_device_kind(handle, devnumber, features=None):
 	:returns: a string describing the device type, or ``None`` if the device is
 	not available or does not support the ``NAME`` feature.
 	"""
-	d_kind = request(handle, devnumber, FEATURE.NAME, function=b'\x20', features=features)
+	name_fi = _get_feature_index(handle, devnumber, FEATURE.NAME, features)
+	if name_fi is None:
+		return None
+
+	d_kind = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x20))
 	if d_kind:
 		d_kind = ord(d_kind[:1])
-		_l.log(_LOG_LEVEL, "(%d) device type %d = %s", devnumber, d_kind, DEVICE_KIND[d_kind])
+		_log.debug("(%d) device type %d = %s", devnumber, d_kind, DEVICE_KIND[d_kind])
 		return DEVICE_KIND[d_kind]
 
 
@@ -325,13 +337,17 @@ def get_device_name(handle, devnumber, features=None):
 	:returns: a string with the device name, or ``None`` if the device is not
 	available or does not support the ``NAME`` feature.
 	"""
-	name_length = request(handle, devnumber, FEATURE.NAME, features=features)
+	name_fi = _get_feature_index(handle, devnumber, FEATURE.NAME, features)
+	if name_fi is None:
+		return None
+
+	name_length = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x00))
 	if name_length:
 		name_length = ord(name_length[:1])
 
 		d_name = b''
 		while len(d_name) < name_length:
-			name_fragment = request(handle, devnumber, FEATURE.NAME, function=b'\x10', params=len(d_name), features=features)
+			name_fragment = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x10), len(d_name))
 			if name_fragment:
 				name_fragment = name_fragment[:name_length - len(d_name)]
 				d_name += name_fragment
@@ -339,7 +355,7 @@ def get_device_name(handle, devnumber, features=None):
 				break
 
 		d_name = d_name.decode('ascii')
-		_l.log(_LOG_LEVEL, "(%d) device name %s", devnumber, d_name)
+		_log.debug("(%d) device name %s", devnumber, d_name)
 		return d_name
 
 
@@ -348,22 +364,28 @@ def get_device_battery_level(handle, devnumber, features=None):
 
 	:raises FeatureNotSupported: if the device does not support this feature.
 	"""
-	battery = request(handle, devnumber, FEATURE.BATTERY, features=features)
-	if battery:
-		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
-		_l.log(_LOG_LEVEL, "(%d) battery %d%% charged, next level %d%% charge, status %d = %s",
+	bat_fi = _get_feature_index(handle, devnumber, FEATURE.BATTERY, features)
+	if bat_fi is not None:
+		battery = _base.request(handle, devnumber, _pack('!BB', bat_fi, 0))
+		if battery:
+			discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
+			_log.debug("(%d) battery %d%% charged, next level %d%% charge, status %d = %s",
 						devnumber, discharge, dischargeNext, status, BATTERY_STATUS[status])
-		return (discharge, dischargeNext, BATTERY_STATUS[status])
+			return (discharge, dischargeNext, BATTERY_STATUS[status])
 
 
 def get_device_keys(handle, devnumber, features=None):
-	count = request(handle, devnumber, FEATURE.REPROGRAMMABLE_KEYS, features=features)
+	rk_fi = _get_feature_index(handle, devnumber, FEATURE.REPROGRAMMABLE_KEYS, features)
+	if rk_fi is None:
+		return None
+
+	count = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0))
 	if count:
 		keys = []
 
 		count = ord(count[:1])
 		for index in range(0, count):
-			keydata = request(handle, devnumber, FEATURE.REPROGRAMMABLE_KEYS, function=b'\x10', params=index, features=features)
+			keydata = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0x10), index)
 			if keydata:
 				key, key_task, flags = _unpack('!HHB', keydata[:5])
 				rki = _ReprogrammableKeyInfo(index, key, KEY_NAME[key], key_task, KEY_NAME[key_task], flags)

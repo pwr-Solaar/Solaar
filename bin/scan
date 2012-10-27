@@ -4,4 +4,4 @@ LIB=`dirname "$0"`/../lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`uname -m`
 export PYTHONPATH=$LIB
 
-exec python -OO -m logitech.scanner "$@"
+exec python -OOu -m logitech.scanner "$@"

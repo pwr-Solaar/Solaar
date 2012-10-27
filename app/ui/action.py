@@ -19,10 +19,18 @@ def _toggle_action(name, label, function, *args):
 	return action
 
 
-#
-#
-#
+def wrap_action(action, prefire):
+	def _wrap(aw, aa):
+		prefire(aa)
+		aa.activate()
+	wrapper = _action(action.get_name(), action.get_label(), None)
+	wrapper.set_icon_name(action.get_icon_name())
+	wrapper.connect('activate', _wrap, action)
+	return wrapper
 
+#
+#
+#
 
 def _toggle_notifications(action):
 	if action.get_active():
@@ -57,9 +65,6 @@ import pairing
 def _pair_device(action):
 	action.set_sensitive(False)
 	pair_dialog = ui.pair_window.create(action, pairing.state)
-	action.window.present()
-	pair_dialog.set_transient_for(action.window)
-	pair_dialog.set_destroy_with_parent(action.window)
 	pair_dialog.set_modal(True)
 	pair_dialog.present()
 pair = _action('add', 'Pair new device', _pair_device)
@@ -69,9 +74,11 @@ def _unpair_device(action):
 	dev = pairing.state.device(action.devnumber)
 	action.devnumber = 0
 	if dev:
-		q = Gtk.MessageDialog.new(action.window,
+		qdialog = Gtk.MessageDialog(action.window, 0,
 									Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO,
-									'Unpair device <b>%s</b>?', dev.name)
-		if q.run() == Gtk.ResponseType.YES:
+									"Unpair device '%s' ?" % dev.name)
+		choice = qdialog.run()
+		qdialog.destroy()
+		if choice == Gtk.ResponseType.YES:
 			pairing.state.unpair(dev.number)
 unpair = _action('remove', 'Unpair', _unpair_device)

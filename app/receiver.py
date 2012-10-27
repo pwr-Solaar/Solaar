@@ -3,7 +3,6 @@
 #
 
 from logging import getLogger as _Logger
-_LOG_LEVEL = 6
 
 from threading import Event as _Event
 from struct import pack as _pack
@@ -18,21 +17,112 @@ from logitech.devices.constants import (STATUS, STATUS_NAME, PROPS, NAMES)
 #
 #
 
+
+class _FeaturesArray(object):
+	__slots__ = ('device', 'features', 'supported')
+
+	def __init__(self, device):
+		self.device = device
+		self.features = None
+		self.supported = True
+
+	def _check(self):
+		if not self.supported:
+			return False
+
+		if self.features is not None:
+			return True
+
+		if self.device.status >= STATUS.CONNECTED:
+			handle = self.device.receiver.handle
+			try:
+				index = _api.get_feature_index(handle, self.device.number, _api.FEATURE.FEATURE_SET)
+			except _api._FeatureNotSupported:
+				index = None
+
+			if index is None:
+				self.supported = False
+			else:
+				count = _base.request(handle, self.device.number, _pack('!B', index) + b'\x00')
+				if count is None:
+					self.supported = False
+				else:
+					count = ord(count[:1])
+					self.features = [None] * (1 + count)
+					self.features[0] = _api.FEATURE.ROOT
+					self.features[index] = _api.FEATURE.FEATURE_SET
+					return True
+
+		return False
+
+	__bool__ = __nonzero__ = _check
+
+	def __getitem__(self, index):
+		if not self._check():
+			return None
+
+		if index < 0 or index >= len(self.features):
+			raise IndexError
+		if self.features[index] is None:
+			fs_index = self.features.index(_api.FEATURE.FEATURE_SET)
+			feature = _base.request(self.device.receiver.handle, self.device.number, _pack('!BB', fs_index, 0x10), _pack('!B', index))
+			if feature is not None:
+				self.features[index] = feature[:2]
+
+		return self.features[index]
+
+	def __contains__(self, value):
+		if self._check():
+			if value in self.features:
+				return True
+
+			for index in range(0, len(self.features)):
+				f = self.features[index] or self.__getitem__(index)
+				assert f is not None
+				if f == value:
+					return True
+				if f > value:
+					break
+
+		return False
+
+	def index(self, value):
+		if self._check():
+			if self.features is not None and value in self.features:
+				return self.features.index(value)
+		raise ValueError("%s not in list" % repr(value))
+
+	def __iter__(self):
+		if self._check():
+			yield _api.FEATURE.ROOT
+			index = 1
+			last_index = len(self.features)
+			while index < last_index:
+				yield self.__getitem__(index)
+				index += 1
+
+	def __len__(self):
+		return len(self.features) if self._check() else 0
+
+
 class DeviceInfo(object):
 	"""A device attached to the receiver.
 	"""
-	def __init__(self, receiver, number, status=STATUS.UNKNOWN):
+	def __init__(self, receiver, number, pair_code, status=STATUS.UNKNOWN):
 		self.LOG = _Logger("Device[%d]" % number)
 		self.receiver = receiver
 		self.number = number
+		self._pair_code = pair_code
+		self._serial = None
+		self._codename = None
 		self._name = None
 		self._kind = None
-		self._serial = None
 		self._firmware = None
-		self._features = None
 
 		self._status = status
 		self.props = {}
+
+		self.features = _FeaturesArray(self)
 
 	@property
 	def handle(self):
@@ -71,8 +161,8 @@ class DeviceInfo(object):
 	def name(self):
 		if self._name is None:
 			if self._status >= STATUS.CONNECTED:
-				self._name = self.receiver.call_api(_api.get_device_name, self.number, self.features)
-		return self._name or '?'
+				self._name = _api.get_device_name(self.receiver.handle, self.number, self.features)
+		return self._name or self.codename
 
 	@property
 	def device_name(self):
@@ -81,33 +171,42 @@ class DeviceInfo(object):
 	@property
 	def kind(self):
 		if self._kind is None:
-			if self._status >= STATUS.CONNECTED:
-				self._kind = self.receiver.call_api(_api.get_device_kind, self.number, self.features)
+			if self._status < STATUS.CONNECTED:
+				codename = self.codename
+				if codename in NAMES:
+					self._kind = NAMES[codename][-1]
+			else:
+				self._kind = _api.get_device_kind(self.receiver.handle, self.number, self.features)
 		return self._kind or '?'
 
 	@property
 	def serial(self):
 		if self._serial is None:
-			if self._status >= STATUS.CONNECTED:
-				pass
+			# dodgy
+			b = bytearray(self._pair_code)
+			b[0] -= 0x10
+			serial = _base.request(self.receiver.handle, 0xFF, b'\x83\xB5', bytes(b))
+			if serial:
+				self._serial = _base._hex(serial[1:5])
 		return self._serial or '?'
+
+	@property
+	def codename(self):
+		if self._codename is None:
+			codename = _base.request(self.receiver.handle, 0xFF, b'\x83\xB5', self._pair_code)
+			if codename:
+				self._codename = codename[2:].rstrip(b'\x00').decode('ascii')
+		return self._codename or '?'
 
 	@property
 	def firmware(self):
 		if self._firmware is None:
 			if self._status >= STATUS.CONNECTED:
-				self._firmware = self.receiver.call_api(_api.get_device_firmware, self.number, self.features)
+				self._firmware = _api.get_device_firmware(self.receiver.handle, self.number, self.features)
 		return self._firmware or ()
 
-	@property
-	def features(self):
-		if self._features is None:
-			if self._status >= STATUS.CONNECTED:
-				self._features = self.receiver.call_api(_api.get_device_features, self.number)
-		return self._features or ()
-
 	def ping(self):
-		return self.receiver.call_api(_api.ping, self.number)
+		return _api.ping(self.receiver.handle, self.number)
 
 	def process_event(self, code, data):
 		if code == 0x10 and data[:1] == b'\x8F':
@@ -224,20 +323,20 @@ class Receiver(_listener.EventsListener):
 		return self.NAME
 
 	def count_devices(self):
-		return self.call_api(_api.count_devices)
+		return _api.count_devices(self._handle)
 
 	@property
 	def serial(self):
 		if self._serial is None:
 			if self:
-				self._serial, self._firmware = self.call_api(_api.get_receiver_info)
+				self._serial, self._firmware = _api.get_receiver_info(self._handle)
 		return self._serial or '?'
 
 	@property
 	def firmware(self):
 		if self._firmware is None:
 			if self:
-				self._serial, self._firmware = self.call_api(_api.get_receiver_info)
+				self._serial, self._firmware = _api.get_receiver_info(self._handle)
 		return self._firmware or ('?', '?')
 
 
@@ -303,30 +402,12 @@ class Receiver(_listener.EventsListener):
 			self.LOG.warn("don't know how to handle device status 0x%02X: %s", state_code, event)
 			return None
 
-		dev = DeviceInfo(self, event.devnumber, state)
-		if state == STATUS.CONNECTED:
-			n, k = dev.name, dev.kind
-		else:
-			# we can query the receiver for the device short name
-			dev_id = self.request(0xFF, b'\x83\xB5', event.data[4:5])
-			if dev_id:
-				shortname = dev_id[2:].rstrip(b'\x00').decode('ascii')
-				if shortname in NAMES:
-					dev._name, dev._kind = NAMES[shortname]
-				else:
-					self.LOG.warn("could not identify inactive device %d: %s", event.devnumber, shortname)
-
-		b = bytearray(event.data[4:5])
-		b[0] -= 0x10
-		serial = self.request(0xFF, b'\x83\xB5', bytes(b))
-		if serial:
-			dev._serial = _base._hex(serial[1:5])
-		return dev
+		return DeviceInfo(self, event.devnumber, event.data[4:5], state)
 
 	def unpair_device(self, number):
 		if number in self.devices:
 			dev = self.devices[number]
-			reply = self.request(0xFF, b'\x80\xB2', _pack('!BB', 0x03, number))
+			reply = _base.request(self._handle, 0xFF, b'\x80\xB2', _pack('!BB', 0x03, number))
 			if reply:
 				self.LOG.debug("remove device %s => %s", dev, _base._hex(reply))
 				del self.devices[number]
@@ -346,7 +427,7 @@ class Receiver(_listener.EventsListener):
 		:returns: An open file handle for the found receiver, or ``None``.
 		"""
 		for rawdevice in _base.list_receiver_devices():
-			_Logger("receiver").log(_LOG_LEVEL, "checking %s", rawdevice)
+			_Logger("receiver").debug("checking %s", rawdevice)
 			handle = _base.try_open(rawdevice.path)
 			if handle:
 				receiver = Receiver(rawdevice.path, handle)
