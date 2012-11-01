@@ -50,7 +50,7 @@ try:
 	def show(dev):
 		"""Show a notification with title and text."""
 		if available and Notify.is_initted():
-			summary = dev.device_name
+			summary = dev.name
 
 			# if a notification with same name is already visible, reuse it to avoid spamming
 			n = _notifications.get(summary)

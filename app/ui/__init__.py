@@ -1,7 +1,7 @@
 # pass
 
 APPNAME = 'Solaar'
-APPVERSION = '0.5'
+APPVERSION = '0.6'
 
 from . import (notify, status_icon, main_window, pair_window, action)
 
@@ -50,9 +50,10 @@ def find_children(container, *child_names):
 	return tuple(result) if count > 1 else result[0]
 
 
-def update(receiver, icon, window):
-	GObject.idle_add(action.pair.set_sensitive, receiver.status > 0)
+def update(receiver, icon, window, reason):
+	assert receiver is not None
+	assert reason is not None
 	if window:
-		GObject.idle_add(main_window.update, window, receiver)
+		GObject.idle_add(main_window.update, window, receiver, reason)
 	if icon:
 		GObject.idle_add(status_icon.update, icon, receiver)

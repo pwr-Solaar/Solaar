@@ -3,20 +3,18 @@
 #
 
 from logging import getLogger as _Logger
-
-from threading import Event as _Event
 from struct import pack as _pack
 
 from logitech.unifying_receiver import base as _base
 from logitech.unifying_receiver import api as _api
-from logitech.unifying_receiver import listener as _listener
+from logitech.unifying_receiver.listener import EventsListener as _EventsListener
+from logitech.unifying_receiver.common import FallbackDict as _FallbackDict
 from logitech import devices as _devices
 from logitech.devices.constants import (STATUS, STATUS_NAME, PROPS, NAMES)
 
 #
 #
 #
-
 
 class _FeaturesArray(object):
 	__slots__ = ('device', 'features', 'supported')
@@ -27,31 +25,26 @@ class _FeaturesArray(object):
 		self.supported = True
 
 	def _check(self):
-		if not self.supported:
-			return False
+		if self.supported:
+			if self.features is not None:
+				return True
 
-		if self.features is not None:
-			return True
-
-		if self.device.status >= STATUS.CONNECTED:
-			handle = self.device.receiver.handle
-			try:
-				index = _api.get_feature_index(handle, self.device.number, _api.FEATURE.FEATURE_SET)
-			except _api._FeatureNotSupported:
-				index = None
-
-			if index is None:
-				self.supported = False
-			else:
-				count = _base.request(handle, self.device.number, _pack('!B', index) + b'\x00')
-				if count is None:
+			if self.device.status >= STATUS.CONNECTED:
+				handle = self.device.handle
+				try:
+					index = _api.get_feature_index(handle, self.device.number, _api.FEATURE.FEATURE_SET)
+				except _api._FeatureNotSupported:
 					self.supported = False
 				else:
-					count = ord(count[:1])
-					self.features = [None] * (1 + count)
-					self.features[0] = _api.FEATURE.ROOT
-					self.features[index] = _api.FEATURE.FEATURE_SET
-					return True
+					count = _base.request(handle, self.device.number, _pack('!BB', index, 0x00))
+					if count is None:
+						self.supported = False
+					else:
+						count = ord(count[:1])
+						self.features = [None] * (1 + count)
+						self.features[0] = _api.FEATURE.ROOT
+						self.features[index] = _api.FEATURE.FEATURE_SET
+						return True
 
 		return False
 
@@ -65,7 +58,7 @@ class _FeaturesArray(object):
 			raise IndexError
 		if self.features[index] is None:
 			fs_index = self.features.index(_api.FEATURE.FEATURE_SET)
-			feature = _base.request(self.device.receiver.handle, self.device.number, _pack('!BB', fs_index, 0x10), _pack('!B', index))
+			feature = _base.request(self.device.handle, self.device.number, _pack('!BB', fs_index, 0x10), _pack('!B', index))
 			if feature is not None:
 				self.features[index] = feature[:2]
 
@@ -104,29 +97,34 @@ class _FeaturesArray(object):
 	def __len__(self):
 		return len(self.features) if self._check() else 0
 
+#
+#
+#
 
-class DeviceInfo(object):
+class DeviceInfo(_api.PairedDevice):
 	"""A device attached to the receiver.
 	"""
-	def __init__(self, receiver, number, pair_code, status=STATUS.UNKNOWN):
+	def __init__(self, listener, number, pair_code, status=STATUS.UNKNOWN):
+		super(DeviceInfo, self).__init__(listener.handle, number)
+
 		self.LOG = _Logger("Device[%d]" % number)
-		self.receiver = receiver
-		self.number = number
+		self._listener = listener
 		self._pair_code = pair_code
 		self._serial = None
 		self._codename = None
-		self._name = None
-		self._kind = None
-		self._firmware = None
 
 		self._status = status
 		self.props = {}
 
 		self.features = _FeaturesArray(self)
 
+		# read them now, otherwise it it temporarily hang the UI
+		if status >= STATUS.CONNECTED:
+			n, k, s, f = self.name, self.kind, self.serial, self.firmware
+
 	@property
-	def handle(self):
-		return self.receiver.handle
+	def receiver(self):
+		return self._listener.receiver
 
 	@property
 	def status(self):
@@ -138,7 +136,7 @@ class DeviceInfo(object):
 			self.LOG.debug("status %d => %d", self._status, new_status)
 			urgent = new_status < STATUS.CONNECTED or self._status < STATUS.CONNECTED
 			self._status = new_status
-			self.receiver._device_changed(self, urgent)
+			self._listener.status_changed_callback(self, urgent)
 
 		if new_status < STATUS.CONNECTED:
 			self.props.clear()
@@ -161,12 +159,8 @@ class DeviceInfo(object):
 	def name(self):
 		if self._name is None:
 			if self._status >= STATUS.CONNECTED:
-				self._name = _api.get_device_name(self.receiver.handle, self.number, self.features)
+				self._name = _api.get_device_name(self.handle, self.number, self.features)
 		return self._name or self.codename
-
-	@property
-	def device_name(self):
-		return self.name
 
 	@property
 	def kind(self):
@@ -176,7 +170,7 @@ class DeviceInfo(object):
 				if codename in NAMES:
 					self._kind = NAMES[codename][-1]
 			else:
-				self._kind = _api.get_device_kind(self.receiver.handle, self.number, self.features)
+				self._kind = _api.get_device_kind(self.handle, self.number, self.features)
 		return self._kind or '?'
 
 	@property
@@ -185,7 +179,7 @@ class DeviceInfo(object):
 			# dodgy
 			b = bytearray(self._pair_code)
 			b[0] -= 0x10
-			serial = _base.request(self.receiver.handle, 0xFF, b'\x83\xB5', bytes(b))
+			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', bytes(b))
 			if serial:
 				self._serial = _base._hex(serial[1:5])
 		return self._serial or '?'
@@ -193,7 +187,7 @@ class DeviceInfo(object):
 	@property
 	def codename(self):
 		if self._codename is None:
-			codename = _base.request(self.receiver.handle, 0xFF, b'\x83\xB5', self._pair_code)
+			codename = _base.request(self.handle, 0xFF, b'\x83\xB5', self._pair_code)
 			if codename:
 				self._codename = codename[2:].rstrip(b'\x00').decode('ascii')
 		return self._codename or '?'
@@ -202,11 +196,8 @@ class DeviceInfo(object):
 	def firmware(self):
 		if self._firmware is None:
 			if self._status >= STATUS.CONNECTED:
-				self._firmware = _api.get_device_firmware(self.receiver.handle, self.number, self.features)
+				self._firmware = _api.get_device_firmware(self.handle, self.number, self.features)
 		return self._firmware or ()
-
-	def ping(self):
-		return _api.ping(self.receiver.handle, self.number)
 
 	def process_event(self, code, data):
 		if code == 0x10 and data[:1] == b'\x8F':
@@ -214,7 +205,7 @@ class DeviceInfo(object):
 			return True
 
 		if code == 0x11:
-			status = _devices.process_event(self, data, self.receiver)
+			status = _devices.process_event(self, data)
 			if status:
 				if type(status) == int:
 					self.status = status
@@ -225,161 +216,110 @@ class DeviceInfo(object):
 					self.props.update(status[1])
 					if self.status == status[0]:
 						if p != self.props:
-							self.receiver._device_changed(self)
+							self._listener.status_changed_callback(self)
 					else:
 						self.status = status[0]
 					return True
 
-				self.LOG.warn("don't know how to handle status %s", status)
+				self.LOG.warn("don't know how to handle processed event status %s", status)
 
 		return False
 
-	def __hash__(self):
-		return self.number
-
 	def __str__(self):
-		return 'DeviceInfo(%d,%s,%d)' % (self.number, self.name, self._status)
-
-	def __repr__(self):
-		return '<DeviceInfo(number=%d,name=%s,status=%d)>' % (self.number, self.name, self._status)
+		return 'DeviceInfo(%d,%s,%d)' % (self.number, self._name or '?', self._status)
 
 #
 #
 #
 
-class Receiver(_listener.EventsListener):
+_RECEIVER_STATUS_NAME = _FallbackDict(
+							lambda x:
+								'1 device found' if x == STATUS.CONNECTED + 1 else
+								'%d devices found' if x > STATUS.CONNECTED else
+								'?',
+							{
+								STATUS.UNKNOWN: 'Initializing...',
+								STATUS.UNAVAILABLE: 'Receiver not found.',
+								STATUS.BOOTING: 'Scanning...',
+								STATUS.CONNECTED: 'No devices found.',
+							}
+						)
+
+class ReceiverListener(_EventsListener):
 	"""Keeps the status of a Unifying Receiver.
 	"""
-	NAME = kind = 'Unifying Receiver'
-	max_devices = _api.MAX_ATTACHED_DEVICES
 
-	def __init__(self, path, handle):
-		super(Receiver, self).__init__(handle, self._events_handler)
-		self.path = path
+	def __init__(self, receiver, status_changed_callback):
+		super(ReceiverListener, self).__init__(receiver.handle, self._events_handler)
+		self.receiver = receiver
 
-		self._status = STATUS.BOOTING
-		self.status_changed = _Event()
-		self.status_changed.urgent = False
-		self.status_changed.reason = None
+		self.LOG = _Logger("ReceiverListener(%s)" % receiver.path)
 
-		self.LOG = _Logger("Receiver[%s]" % path)
-		self.LOG.info("initializing")
-
-		self._serial = None
-		self._firmware = None
-
-		self.devices = {}
 		self.events_filter = None
 		self.events_handler = None
 
-		if _base.request(handle, 0xFF, b'\x80\x00', b'\x00\x01'):
+		self.status_changed_callback = status_changed_callback or (lambda reason=None, urgent=False: None)
+
+		receiver.kind = receiver.name
+		receiver.devices = {}
+		receiver.status = STATUS.BOOTING
+		receiver.status_text = _RECEIVER_STATUS_NAME[STATUS.BOOTING]
+
+		if _base.request(receiver.handle, 0xFF, b'\x80\x00', b'\x00\x01'):
 			self.LOG.info("initialized")
 		else:
 			self.LOG.warn("initialization failed")
 
-		if _base.request(handle, 0xFF, b'\x80\x02', b'\x02'):
+		if _base.request(receiver.handle, 0xFF, b'\x80\x02', b'\x02'):
 			self.LOG.info("triggered device events")
 		else:
 			self.LOG.warn("failed to trigger device events")
 
-	def close(self):
-		"""Closes the receiver's handle.
+	def change_status(self, new_status):
+		if new_status != self.receiver.status:
+			self.LOG.debug("status %d => %d", self.receiver.status, new_status)
+			self.receiver.status = new_status
+			self.receiver.status_text = _RECEIVER_STATUS_NAME[new_status]
+			self.status_changed_callback(self.receiver, True)
 
-		The receiver can no longer be used in API calls after this.
-		"""
-		self.LOG.info("closing")
-		self.stop()
-
-	@property
-	def status(self):
-		return self._status
-
-	@status.setter
-	def status(self, new_status):
-		if new_status != self._status:
-			self.LOG.debug("status %d => %d", self._status, new_status)
-			self._status = new_status
-			self.status_changed.reason = self
-			self.status_changed.urgent = True
-			self.status_changed.set()
-
-	@property
-	def status_text(self):
-		status = self._status
-		if status == STATUS.UNKNOWN:
-			return 'Initializing...'
-		if status == STATUS.UNAVAILABLE:
-			return 'Receiver not found.'
-		if status == STATUS.BOOTING:
-			return 'Scanning...'
-		if status == STATUS.CONNECTED:
-			return 'No devices found.'
-		if len(self.devices) > 1:
-			return '%d devices found' % len(self.devices)
-		return '1 device found'
-
-	@property
-	def device_name(self):
-		return self.NAME
-
-	def count_devices(self):
-		return _api.count_devices(self._handle)
-
-	@property
-	def serial(self):
-		if self._serial is None:
-			if self:
-				self._serial, self._firmware = _api.get_receiver_info(self._handle)
-		return self._serial or '?'
-
-	@property
-	def firmware(self):
-		if self._firmware is None:
-			if self:
-				self._serial, self._firmware = _api.get_receiver_info(self._handle)
-		return self._firmware or ('?', '?')
-
-
-	def _device_changed(self, dev, urgent=False):
-		self.status_changed.reason = dev
-		self.status_changed.urgent = urgent
-		self.status_changed.set()
+	def _device_status_from(self, event):
+		state_code = ord(event.data[2:3]) & 0xF0
+		state = STATUS.UNAVAILABLE if state_code == 0x60 else \
+				STATUS.CONNECTED if state_code == 0xA0 else \
+				STATUS.CONNECTED if state_code == 0x20 else \
+				STATUS.UNKNOWN
+		if state == STATUS.UNKNOWN:
+			self.LOG.warn("don't know how to handle state code 0x%02X: %s", state_code, event)
+		return state
 
 	def _events_handler(self, event):
 		if self.events_filter and self.events_filter(event):
 			return
 
 		if event.code == 0x10 and event.data[0:2] == b'\x41\x04':
-			if event.devnumber in self.devices:
-				state_code = ord(event.data[2:3]) & 0xF0
-				state = STATUS.UNAVAILABLE if state_code == 0x60 else \
-						STATUS.CONNECTED if state_code == 0xA0 else \
-						STATUS.CONNECTED if state_code == 0x20 else \
-						None
-				if state is None:
-					self.LOG.warn("don't know how to handle status 0x%02X: %s", state_code, event)
-				else:
-					self.devices[event.devnumber].status = state
-				return
 
-			dev = self.make_device(event)
-			if dev is None:
-				self.LOG.warn("failed to make new device from %s", event)
+			if event.devnumber in self.receiver.devices:
+				status = self._device_status_from(event)
+				if status > STATUS.UNKNOWN:
+					self.receiver.devices[event.devnumber].status = status
 			else:
-				self.devices[event.devnumber] = dev
-				self.LOG.info("new device ready %s", dev)
-				self.status = STATUS.CONNECTED + len(self.devices)
+				dev = self.make_device(event)
+				if dev is None:
+					self.LOG.warn("failed to make new device from %s", event)
+				else:
+					self.receiver.devices[event.devnumber] = dev
+					self.change_status(STATUS.CONNECTED + len(self.receiver.devices))
 			return
 
 		if event.devnumber == 0xFF:
 			if event.code == 0xFF and event.data is None:
 				# receiver disconnected
-				self.LOG.info("disconnected")
-				self.devices = {}
-				self.status = STATUS.UNAVAILABLE
+				self.LOG.warn("disconnected")
+				self.receiver.devices = {}
+				self.change_status(STATUS.UNAVAILABLE)
 				return
-		elif event.devnumber in self.devices:
-			dev = self.devices[event.devnumber]
+		elif event.devnumber in self.receiver.devices:
+			dev = self.receiver.devices[event.devnumber]
 			if dev.process_event(event.code, event.data):
 				return
 
@@ -389,49 +329,50 @@ class Receiver(_listener.EventsListener):
 		self.LOG.warn("don't know how to handle event %s", event)
 
 	def make_device(self, event):
-		if event.devnumber < 1 or event.devnumber > self.max_devices:
+		if event.devnumber < 1 or event.devnumber > self.receiver.max_devices:
 			self.LOG.warn("got event for invalid device number %d: %s", event.devnumber, event)
 			return None
 
-		state_code = ord(event.data[2:3]) & 0xF0
-		state = STATUS.UNAVAILABLE if state_code == 0x60 else \
-				STATUS.CONNECTED if state_code == 0xA0 else \
-				STATUS.CONNECTED if state_code == 0x20 else \
-				None
-		if state is None:
-			self.LOG.warn("don't know how to handle device status 0x%02X: %s", state_code, event)
-			return None
+		status = self._device_status_from(event)
 
-		return DeviceInfo(self, event.devnumber, event.data[4:5], state)
+		dev = DeviceInfo(self, event.devnumber, event.data[4:5], status)
+		self.LOG.info("new device %s", dev)
+		self.status_changed_callback(dev, True)
+		return dev
 
-	def unpair_device(self, number):
-		if number in self.devices:
-			dev = self.devices[number]
-			reply = _base.request(self._handle, 0xFF, b'\x80\xB2', _pack('!BB', 0x03, number))
-			if reply:
-				self.LOG.debug("remove device %s => %s", dev, _base._hex(reply))
-				del self.devices[number]
-				self.LOG.warn("unpaired device %s", dev)
-				self.status = STATUS.CONNECTED + len(self.devices)
-				return True
-			self.LOG.warn("failed to unpair device %s", dev)
-		return False
+	def unpair_device(self, device):
+		try:
+			del self.receiver[device.number]
+		except IndexError:
+			self.LOG.error("failed to unpair device %s", device)
+			return False
+
+		del self.receiver.devices[device.number]
+		self.LOG.info("unpaired device %s", device)
+		self.change_status(STATUS.CONNECTED + len(self.receiver.devices))
+		device.status = STATUS.UNPAIRED
+		return True
 
 	def __str__(self):
-		return 'Receiver(%s,%X,%d)' % (self.path, self._handle, self._status)
+		return '<ReceiverListener(%s,%d)>' % (self.path, self.receiver.status)
 
 	@classmethod
-	def open(self):
-		"""Opens the first Logitech Unifying Receiver found attached to the machine.
+	def open(self, status_changed_callback=None):
+		receiver = _api.Receiver.open()
+		if receiver:
+			rl = ReceiverListener(receiver, status_changed_callback)
+			rl.start()
+			return rl
 
-		:returns: An open file handle for the found receiver, or ``None``.
-		"""
-		for rawdevice in _base.list_receiver_devices():
-			_Logger("receiver").debug("checking %s", rawdevice)
-			handle = _base.try_open(rawdevice.path)
-			if handle:
-				receiver = Receiver(rawdevice.path, handle)
-				receiver.start()
-				return receiver
+#
+#
+#
 
-		return None
+class _DUMMY_RECEIVER(object):
+	name = _api.Receiver.name
+	max_devices = _api.Receiver.max_devices
+	status = STATUS.UNAVAILABLE
+	status_text = _RECEIVER_STATUS_NAME[STATUS.UNAVAILABLE]
+	devices = {}
+	__bool__ = __nonzero__ = lambda self: False
+DUMMY = _DUMMY_RECEIVER()

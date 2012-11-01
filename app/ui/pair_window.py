@@ -30,15 +30,14 @@ def _device_confirmed(entry, _2, trigger, assistant, page):
 	return True
 
 
-def _finish(assistant, action):
+def _finish(assistant):
 	logging.debug("finish %s", assistant)
 	assistant.destroy()
-	action.set_sensitive(True)
 
-def _cancel(assistant, action, state):
+def _cancel(assistant, state):
 	logging.debug("cancel %s", assistant)
 	state.stop_scan()
-	_finish(assistant, action)
+	_finish(assistant)
 
 def _prepare(assistant, page, state):
 	index = assistant.get_current_page()
@@ -119,8 +118,8 @@ def create(action, state):
 	assistant.scan_complete = _scan_complete
 
 	assistant.connect('prepare', _prepare, state)
-	assistant.connect('cancel', _cancel, action, state)
-	assistant.connect('close', _finish, action)
-	assistant.connect('apply', _finish, action)
+	assistant.connect('cancel', _cancel, state)
+	assistant.connect('close', _finish)
+	assistant.connect('apply', _finish)
 
 	return assistant

@@ -22,19 +22,11 @@ http://6xq.net/git/lars/lshidpp.git/plain/doc/
 
 import logging
 
-log = logging.getLogger('LUR')
-log.propagate = 0
-log.setLevel(logging.DEBUG)
+if logging.root.level > logging.DEBUG:
+	log = logging.getLogger('LUR')
+	log.addHandler(logging.NullHandler())
+	log.propagate = 0
 
-if logging.root.level < logging.DEBUG:
-	handler = logging.FileHandler('lur.log', mode='w')
-	handler.setFormatter(logging.root.handlers[0].formatter)
-else:
-	handler = logging.NullHandler()
-log.addHandler(handler)
-del handler
-
-del log
 del logging
 
 

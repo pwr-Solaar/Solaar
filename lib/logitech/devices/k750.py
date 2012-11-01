@@ -28,7 +28,7 @@ def _charge_status(data, hasLux=False):
 				}
 
 
-def request_status(devinfo, listener=None):
+def request_status(devinfo):
 	reply = _api.request(devinfo.handle, devinfo.number,
 						feature=FEATURE.SOLAR_CHARGE, function=b'\x03', params=b'\x78\x01',
 						features=devinfo.features)
@@ -36,7 +36,7 @@ def request_status(devinfo, listener=None):
 		return STATUS.UNAVAILABLE
 
 
-def process_event(devinfo, data, listener=None):
+def process_event(devinfo, data):
 	if data[:2] == b'\x09\x00' and data[7:11] == b'GOOD':
 		# usually sent after the keyboard is turned on or just connected
 		return _charge_status(data)
@@ -47,4 +47,4 @@ def process_event(devinfo, data, listener=None):
 
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
-		return request_status(devinfo, listener) or _charge_status(data)
+		return request_status(devinfo) or _charge_status(data)

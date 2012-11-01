@@ -23,14 +23,6 @@ def list2dict(values_list):
 	return dict(zip(range(0, len(values_list)), values_list))
 
 
-"""Tuple returned by list_devices and find_device_by_name."""
-AttachedDeviceInfo = namedtuple('AttachedDeviceInfo', [
-				'handle',
-				'number',
-				'kind',
-				'name',
-				'features'])
-
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', [
 				'level',

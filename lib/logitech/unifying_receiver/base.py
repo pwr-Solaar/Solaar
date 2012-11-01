@@ -130,12 +130,9 @@ def open():
 	"""
 	for rawdevice in list_receiver_devices():
 		_log.info("checking %s", rawdevice)
-
-		receiver = try_open(rawdevice.path)
-		if receiver:
-			return receiver
-
-	return None
+		handle = try_open(rawdevice.path)
+		if handle:
+			return handle
 
 
 def close(handle):
@@ -143,7 +140,7 @@ def close(handle):
 	if handle:
 		try:
 			_hid.close(handle)
-			_log.info("closed receiver handle %X", handle)
+			# _log.info("closed receiver handle %X", handle)
 			return True
 		except:
 			_log.exception("closing receiver handle %X", handle)
@@ -239,7 +236,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 	if type(params) == int:
 		params = _pack('!B', params)
 
-	_log.debug("(%d) request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
+	# _log.debug("(%d) request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
 	if len(feature_index_function) != 2:
 		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hex(feature_index_function))
 

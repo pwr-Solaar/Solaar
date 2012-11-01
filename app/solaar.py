@@ -31,9 +31,9 @@ def _parse_arguments():
 	args = arg_parser.parse_args()
 
 	import logging
-	log_level = logging.root.level - 10 * args.verbose
+	log_level = logging.ERROR - 10 * args.verbose
 	log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
-	logging.basicConfig(level=max(log_level, 1), format=log_format)
+	logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
 
 	return args
 
@@ -43,44 +43,64 @@ if __name__ == '__main__':
 
 	import ui
 
-	# check if the notifications are available
+	# check if the notifications are available and enabled
 	args.notifications &= args.systray
-	if ui.notify.init(APPNAME):
+	if ui.notify.available and ui.notify.init(APPNAME):
 		ui.action.toggle_notifications.set_active(args.notifications)
 	else:
 		ui.action.toggle_notifications = None
 
-	import watcher
+	from receiver import (ReceiverListener, DUMMY)
 
 	window = ui.main_window.create(APPNAME,
-									watcher.DUMMY.NAME,
-									watcher.DUMMY.max_devices,
+									DUMMY.name,
+									DUMMY.max_devices,
 									args.systray)
-	ui.action.pair.window = window
-	ui.action.unpair.window = window
 
 	if args.systray:
-		menu_actions = (ui.action.pair,
-						ui.action.toggle_notifications,
+		menu_actions = (ui.action.toggle_notifications,
 						ui.action.about)
 		icon = ui.status_icon.create(window, menu_actions)
 	else:
 		icon = None
 		window.present()
 
-	w = watcher.Watcher(APPNAME,
-						lambda r: ui.update(r, icon, window),
-						ui.notify.show if ui.notify.available else None)
-	w.start()
-
 	import pairing
-	pairing.state = pairing.State(w)
 
-	from gi.repository import Gtk
+	listener = None
+	notify_missing = True
+
+	def status_changed(reason, urgent=False):
+		global listener
+		receiver = DUMMY if listener is None else listener.receiver
+		ui.update(receiver, icon, window, reason)
+		if ui.notify.available and reason and urgent:
+			ui.notify.show(reason or receiver)
+
+	def check_for_listener():
+		global listener, notify_missing
+		if listener is None:
+			listener = ReceiverListener.open(status_changed)
+			if listener is None:
+				pairing.state = None
+				if notify_missing:
+					status_changed(DUMMY, True)
+					ui.notify.show(DUMMY)
+					notify_missing = False
+			else:
+				# print ("opened receiver", listener, listener.receiver)
+				pairing.state = pairing.State(listener)
+				notify_missing = True
+				status_changed(listener.receiver, True)
+		return True
+
+	from gi.repository import Gtk, GObject
+
+	GObject.timeout_add(5000, check_for_listener)
+	check_for_listener()
 	Gtk.main()
 
-	w.stop()
-	ui.notify.uninit()
+	if listener is not None:
+		listener.stop()
 
-	import logging
-	logging.shutdown()
+	ui.notify.uninit()

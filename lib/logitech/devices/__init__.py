@@ -30,7 +30,7 @@ def _module(device_name):
 #
 #
 
-def default_request_status(devinfo, listener=None):
+def default_request_status(devinfo):
 	if FEATURE.BATTERY in devinfo.features:
 		reply = _api.get_device_battery_level(devinfo.handle, devinfo.number, features=devinfo.features)
 		if reply:
@@ -41,7 +41,7 @@ def default_request_status(devinfo, listener=None):
 	return STATUS.CONNECTED if reply else STATUS.UNAVAILABLE
 
 
-def default_process_event(devinfo, data, listener=None):
+def default_process_event(devinfo, data):
 	feature_index = ord(data[0:1])
 	if feature_index >= len(devinfo.features):
 		logging.warn("mistery event %s for %s", repr(data), devinfo)
@@ -72,7 +72,7 @@ def default_process_event(devinfo, data, listener=None):
 		# ?
 
 
-def request_status(devinfo, listener=None):
+def request_status(devinfo):
 	"""Trigger a status request for a device.
 
 	:param devinfo: the device info tuple.
@@ -81,20 +81,20 @@ def request_status(devinfo, listener=None):
 	"""
 	m = _module(devinfo.name)
 	if m and 'request_status' in m.__dict__:
-		return m.request_status(devinfo, listener)
-	return default_request_status(devinfo, listener)
+		return m.request_status(devinfo)
+	return default_request_status(devinfo)
 
 
-def process_event(devinfo, data, listener=None):
+def process_event(devinfo, data):
 	"""Process an event received for a device.
 
 	:param devinfo: the device info tuple.
 	:param data: the event data (event packet sans the first two bytes: reply code and device number)
 	"""
-	default_result = default_process_event(devinfo, data, listener)
+	default_result = default_process_event(devinfo, data)
 	if default_result is not None:
 		return default_result
 
 	m = _module(devinfo.name)
 	if m and 'process_event' in m.__dict__:
-		return m.process_event(devinfo, data, listener)
+		return m.process_event(devinfo, data)

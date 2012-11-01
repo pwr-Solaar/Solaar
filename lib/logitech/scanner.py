@@ -1,52 +1,38 @@
 #!/usr/bin/env python
 
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-from .unifying_receiver import api
-from .unifying_receiver.constants import *
-
-
 def print_receiver(receiver):
-	print ("Unifying Receiver")
+	print (str(receiver))
 
-	serial, firmware  = api.get_receiver_info(receiver)
-
-	print ("  Serial    : %s" % serial)
-	for f in firmware:
+	print ("  Serial    : %s" % receiver.serial)
+	for f in receiver.firmware:
 		print ("  %-10s: %s" % (f.kind, f.version))
 
 	print ("--------")
 
 
 def scan_devices(receiver):
-	print_receiver(receiver)
+	for dev in receiver:
+		print (str(dev))
+		print ("Name: %s" % dev.name)
+		print ("Kind: %s" % dev.kind)
 
-	devices = api.list_devices(receiver)
-	if not devices:
-		print ("!! No attached devices found.")
-		return
-
-	for devinfo in devices:
-		print ("Device [%d] %s (%s)" % (devinfo.number, devinfo.name, devinfo.kind))
-		# print "  Protocol %s" % devinfo.protocol
-
-		firmware = api.get_device_firmware(receiver, devinfo.number, features=devinfo.features)
+		firmware = dev.firmware
 		for fw in firmware:
 			print ("  %-10s: %s %s" % (fw.kind, fw.name, fw.version))
 
-		for index in range(0, len(devinfo.features)):
-			feature = devinfo.features[index]
+		all_features = api.get_device_features(dev.handle, dev.number)
+		for index in range(0, len(all_features)):
+			feature = all_features[index]
 			if feature:
 				print ("  ~ Feature %-20s (%s) at index %02X" % (FEATURE_NAME[feature], api._hex(feature), index))
 
-		if FEATURE.BATTERY in devinfo.features:
-			discharge, dischargeNext, status = api.get_device_battery_level(receiver, devinfo.number, features=devinfo.features)
+		if FEATURE.BATTERY in all_features:
+			discharge, dischargeNext, status = api.get_device_battery_level(dev.handle, dev.number, features=all_features)
 			print ("  Battery %d charged (next level %d%), status %s" % (discharge, dischargeNext, status))
 
-		if FEATURE.REPROGRAMMABLE_KEYS in devinfo.features:
-			keys = api.get_device_keys(receiver, devinfo.number, features=devinfo.features)
+		if FEATURE.REPROGRAMMABLE_KEYS in all_features:
+			keys = api.get_device_keys(dev.handle, dev.number, features=all_features)
 			if keys is not None and keys:
 				print ("  %d reprogrammable keys found" % len(keys))
 				for k in keys:
@@ -58,20 +44,22 @@ def scan_devices(receiver):
 
 if __name__ == '__main__':
 	import argparse
-	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument('-v', '--verbose', action='count', default=0,
-							help='log the HID data traffic with the receiver')
+	arg_parser = argparse.ArgumentParser(prog='scan')
+	arg_parser.add_argument('-v', '--verbose', action='store_true', default=False,
+							help='log the HID data traffic')
 	args = arg_parser.parse_args()
 
-	log_level = logging.root.level - 10 * args.verbose
-	logging.root.setLevel(log_level if log_level > 0 else 1)
+	import logging
+	logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
 
-	for rawdevice in api._base.list_receiver_devices():
-		receiver = api._base.try_open(rawdevice.path)
-		if receiver:
-			print ("!! Logitech Unifying Receiver found (%s)." % rawdevice.path)
-			scan_devices(receiver)
-			api.close(receiver)
-			break
-	else:
+	from .unifying_receiver import api
+	from .unifying_receiver.constants import *
+
+	receiver = api.Receiver.open()
+	if receiver is None:
 		print ("!! Logitech Unifying Receiver not found.")
+	else:
+		print ("!! Found Logitech Unifying Receiver: %s" % receiver)
+		print_receiver(receiver)
+		scan_devices(receiver)
+		receiver.close()

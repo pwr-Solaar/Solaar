@@ -29,7 +29,7 @@ def _event_dispatch(listener, callback):
 			event = listener._events.get(True, _READ_EVENT_TIMEOUT * 10)
 		except:
 			continue
-		_log.debug("delivering event %s", event)
+		# _log.debug("delivering event %s", event)
 		try:
 			callback(event)
 		except:
@@ -70,7 +70,6 @@ class EventsListener(_Thread):
 		self._dispatcher.start()
 
 		while self._active:
-			event = None
 			try:
 				# _log.debug("read next event")
 				event = _base.read(self._handle, _READ_EVENT_TIMEOUT)
@@ -79,29 +78,28 @@ class EventsListener(_Thread):
 				_log.warn("receiver disconnected")
 				self._events.put(_Packet(0xFF, 0xFF, None))
 				self._active = False
-				break
+			else:
+				if event is not None:
+					matched = False
+					task = None if self._tasks.empty() else self._tasks.queue[0]
+					if task and task[-1] is None:
+						devnumber, data = task[:2]
+						if event[1] == devnumber:
+							# _log.debug("matching %s to %d, %s", event, devnumber, repr(data))
+							if event[0] == 0x11 or (event[0] == 0x10 and devnumber == 0xFF):
+								matched = (event[2][:2] == data[:2]) or (event[2][:1] == b'\xFF' and event[2][1:3] == data[:2])
+							elif event[0] == 0x10:
+								if event[2][:1] == b'\x8F' and event[2][1:3] == data[:2]:
+									matched = True
 
-			if event is not None:
-				matched = False
-				task = None if self._tasks.empty() else self._tasks.queue[0]
-				if task and task[0] and task[-1] is None:
-					devnumber, data = task[1:3]
-					if event[1] == devnumber:
-						# _log.debug("matching %s to %d, %s", event, devnumber, repr(data))
-						if event[0] == 0x11 or (event[0] == 0x10 and devnumber == 0xFF):
-							matched = (event[2][:2] == data[:2]) or (event[2][:1] == b'\xFF' and event[2][1:3] == data[:2])
-						elif event[0] == 0x10:
-							if event[2][:1] == b'\x8F' and event[2][1:3] == data[:2]:
-								matched = True
-
-				if matched:
-					# _log.debug("request reply %s", event)
-					task[-1] = event
-					self._tasks.task_done()
-				else:
-					event = _Packet(*event)
-					_log.info("queueing event %s", event)
-					self._events.put(event)
+					if matched:
+						# _log.debug("request reply %s", event)
+						task[-1] = event
+						self._tasks.task_done()
+					else:
+						event = _Packet(*event)
+						_log.info("queueing event %s", event)
+						self._events.put(event)
 
 		_base.request_context = None
 		_base.close(self._handle)
@@ -123,11 +121,10 @@ class EventsListener(_Thread):
 	def write(self, handle, devnumber, data):
 		assert handle == self._handle
 		# _log.debug("write %02X %s", devnumber, _base._hex(data))
-		task = [False, devnumber, data, None]
+		task = [devnumber, data, None]
 		self._tasks.put(task)
 		_base.write(self._handle, devnumber, data)
-		task[0] = True
-		_log.debug("task queued %s", task)
+		# _log.debug("task queued %s", task)
 
 	def read(self, handle, timeout=_base.DEFAULT_TIMEOUT):
 		assert handle == self._handle
@@ -135,7 +132,7 @@ class EventsListener(_Thread):
 		assert not self._tasks.empty()
 		self._tasks.join()
 		task = self._tasks.get(False)
-		_log.debug("task ready %s", task)
+		# _log.debug("task ready %s", task)
 		return task[-1]
 
 	def unhandled_hook(self, reply_code, devnumber, data):

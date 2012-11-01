@@ -62,23 +62,31 @@ quit = _action('exit', 'Quit', Gtk.main_quit)
 
 import pairing
 
-def _pair_device(action):
-	action.set_sensitive(False)
-	pair_dialog = ui.pair_window.create(action, pairing.state)
+def _pair_device(action, frame):
+	window = frame.get_toplevel()
+
+	pair_dialog = ui.pair_window.create( action, pairing.state)
+	pair_dialog.set_transient_for(window)
 	pair_dialog.set_modal(True)
+
+	window.present()
 	pair_dialog.present()
-pair = _action('add', 'Pair new device', _pair_device)
+
+def pair(frame):
+	return _action('add', 'Pair new device', _pair_device, frame)
 
 
-def _unpair_device(action):
-	dev = pairing.state.device(action.devnumber)
-	action.devnumber = 0
-	if dev:
-		qdialog = Gtk.MessageDialog(action.window, 0,
-									Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO,
-									"Unpair device '%s' ?" % dev.name)
-		choice = qdialog.run()
-		qdialog.destroy()
-		if choice == Gtk.ResponseType.YES:
-			pairing.state.unpair(dev.number)
-unpair = _action('remove', 'Unpair', _unpair_device)
+def _unpair_device(action, frame):
+	window = frame.get_toplevel()
+	window.present()
+	device = frame._device
+	qdialog = Gtk.MessageDialog(window, 0,
+								Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO,
+								"Unpair device\n%s ?" % device.name)
+	choice = qdialog.run()
+	qdialog.destroy()
+	if choice == Gtk.ResponseType.YES:
+		pairing.state.unpair(device)
+
+def unpair(frame):
+	return _action('remove', 'Unpair', _unpair_device, frame)

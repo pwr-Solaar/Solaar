@@ -5,6 +5,7 @@
 STATUS = type('STATUS', (),
 				dict(
 					UNKNOWN=-9999,
+					UNPAIRED=-1000,
 					UNAVAILABLE=-1,
 					BOOTING=0,
 					CONNECTED=1,
@@ -12,6 +13,7 @@ STATUS = type('STATUS', (),
 
 STATUS_NAME = {
 					STATUS.UNKNOWN: '...',
+					STATUS.UNPAIRED: 'unpaired',
 					STATUS.UNAVAILABLE: 'inactive',
 					STATUS.BOOTING: 'initializing',
 					STATUS.CONNECTED: 'connected',
