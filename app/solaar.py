@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
+APPNAME = 'Solaar'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
-__version__ = '0.5'
+__version__ = '0.6'
 __license__ = "GPL"
 
 #
 #
 #
-
-APPNAME = 'Solaar'
-
 
 def _parse_arguments():
 	import argparse
@@ -31,7 +29,7 @@ def _parse_arguments():
 	args = arg_parser.parse_args()
 
 	import logging
-	log_level = logging.ERROR - 10 * args.verbose
+	log_level = logging.WARNING - 10 * args.verbose
 	log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
 	logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
 
@@ -66,6 +64,7 @@ if __name__ == '__main__':
 		window.present()
 
 	import pairing
+	from gi.repository import Gtk, GObject
 
 	listener = None
 	notify_missing = True
@@ -74,8 +73,11 @@ if __name__ == '__main__':
 		global listener
 		receiver = DUMMY if listener is None else listener.receiver
 		ui.update(receiver, icon, window, reason)
-		if ui.notify.available and reason and urgent:
-			ui.notify.show(reason or receiver)
+		if ui.notify.available and urgent:
+			ui.notify.show(reason)
+		if not listener:
+			listener = None
+			GObject.timeout_add(3000, check_for_listener)
 
 	def check_for_listener():
 		global listener, notify_missing
@@ -85,18 +87,14 @@ if __name__ == '__main__':
 				pairing.state = None
 				if notify_missing:
 					status_changed(DUMMY, True)
-					ui.notify.show(DUMMY)
 					notify_missing = False
-			else:
-				# print ("opened receiver", listener, listener.receiver)
-				pairing.state = pairing.State(listener)
-				notify_missing = True
-				status_changed(listener.receiver, True)
-		return True
+				return True
 
-	from gi.repository import Gtk, GObject
+			# print ("opened receiver", listener, listener.receiver)
+			pairing.state = pairing.State(listener)
+			notify_missing = True
+			status_changed(listener.receiver, True)
 
-	GObject.timeout_add(5000, check_for_listener)
 	check_for_listener()
 	Gtk.main()
 

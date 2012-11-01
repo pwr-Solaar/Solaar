@@ -183,7 +183,7 @@ def create(title, name, max_devices, systray=False):
 
 	geometry = Gdk.Geometry()
 	geometry.min_width = 320
-	geometry.min_height = 20
+	geometry.min_height = 32
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 	window.set_resizable(False)
 
@@ -206,10 +206,10 @@ def _update_receiver_box(frame, receiver):
 
 	label.set_text(receiver.status_text or '')
 	if receiver.status < STATUS.CONNECTED:
-		frame._device = None
 		toolbar.set_sensitive(False)
 		toolbar.get_children()[0].set_active(False)
 		info_label.set_text('')
+		frame._device = None
 	else:
 		toolbar.set_sensitive(True)
 		frame._device = receiver
@@ -274,20 +274,25 @@ def _update_device_box(frame, dev):
 	frame.set_visible(True)
 
 
-def update(window, receiver, reason):
-	print ("update", receiver, receiver.status, reason)
+def update(window, receiver, device):
+	print ("update", receiver, receiver.status, device)
 	window.set_icon_name(ui.appicon(receiver.status))
 
 	vbox = window.get_child()
-	controls = list(vbox.get_children())
+	frames = list(vbox.get_children())
 
-	if reason == receiver:
-		_update_receiver_box(controls[0], receiver)
+	if id(device) == id(receiver):
+		_update_receiver_box(frames[0], receiver)
+		if receiver.status < STATUS.CONNECTED:
+			for frame in frames[1:]:
+				frame.set_visible(False)
+				frame.set_name(_PLACEHOLDER)
+				frame._device = None
 	else:
-		frame = controls[reason.number]
-		if reason.status == STATUS.UNPAIRED:
+		frame = frames[device.number]
+		if device.status == STATUS.UNPAIRED:
 			frame.set_visible(False)
 			frame.set_name(_PLACEHOLDER)
 			frame._device = None
 		else:
-			_update_device_box(frame, reason)
+			_update_device_box(frame, device)

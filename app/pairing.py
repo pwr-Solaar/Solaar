@@ -10,7 +10,7 @@ from logitech.unifying_receiver import base as _base
 state = None
 
 class State(object):
-	TICK = 300
+	TICK = 400
 	PAIR_TIMEOUT = 60 * 1000 / TICK
 
 	def __init__(self, listener):

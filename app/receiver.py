@@ -258,7 +258,7 @@ class ReceiverListener(_EventsListener):
 		self.events_filter = None
 		self.events_handler = None
 
-		self.status_changed_callback = status_changed_callback or (lambda reason=None, urgent=False: None)
+		self.status_changed_callback = status_changed_callback or (lambda reason, urgent=False: None)
 
 		receiver.kind = receiver.name
 		receiver.devices = {}
@@ -354,7 +354,7 @@ class ReceiverListener(_EventsListener):
 		return True
 
 	def __str__(self):
-		return '<ReceiverListener(%s,%d)>' % (self.path, self.receiver.status)
+		return '<ReceiverListener(%s,%d)>' % (self.receiver.path, self.receiver.status)
 
 	@classmethod
 	def open(self, status_changed_callback=None):

@@ -231,7 +231,7 @@ def get_device(handle, devnumber, features=None):
 	"""
 	if ping(handle, devnumber):
 		devinfo = PairedDevice(handle, devnumber)
-		# _log.debug("(%d) found device %s", devnumber, devinfo)
+		# _log.debug("found device %s", devinfo)
 		return devinfo
 
 
@@ -240,7 +240,7 @@ def get_feature_index(handle, devnumber, feature):
 
 	:returns: An int, or ``None`` if the feature is not available.
 	"""
-	# _log.debug("(%d) get feature index <%s:%s>", devnumber, _hex(feature), FEATURE_NAME[feature])
+	# _log.debug("device %d get feature index <%s:%s>", devnumber, _hex(feature), FEATURE_NAME[feature])
 	if len(feature) != 2:
 		raise ValueError("invalid feature <%s>: it must be a two-byte string" % feature)
 
@@ -251,11 +251,11 @@ def get_feature_index(handle, devnumber, feature):
 		if feature_index:
 			# feature_flags = ord(reply[1:2]) & 0xE0
 			# if feature_flags:
-			# 	_log.debug("(%d) feature <%s:%s> has index %d: %s",
+			# 	_log.debug("device %d feature <%s:%s> has index %d: %s",
 			# 				devnumber, _hex(feature), FEATURE_NAME[feature], feature_index,
 			# 				','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
 			# else:
-			# 	_log.debug("(%d) feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
+			# 	_log.debug("device %d feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
 
 			# only consider active and supported features?
 			# if feature_flags:
@@ -263,7 +263,7 @@ def get_feature_index(handle, devnumber, feature):
 
 			return feature_index
 
-		_log.warn("(%d) feature <%s:%s> not supported by the device", devnumber, _hex(feature), FEATURE_NAME[feature])
+		_log.warn("device %d feature <%s:%s> not supported by the device", devnumber, _hex(feature), FEATURE_NAME[feature])
 		raise _FeatureNotSupported(devnumber, feature)
 
 
@@ -288,13 +288,13 @@ def get_device_features(handle, devnumber):
 	Their position in the array is the index to be used when requesting that
 	feature on the device.
 	"""
-	# _log.debug("(%d) get device features", devnumber)
+	# _log.debug("device %d get device features", devnumber)
 
 	# get the index of the FEATURE_SET
 	# FEATURE.ROOT should always be available for all devices
 	fs_index = _base.request(handle, devnumber, FEATURE.ROOT, FEATURE.FEATURE_SET)
 	if fs_index is None:
-		# _l.warn("(%d) FEATURE_SET not available", device)
+		_log.warn("device %d FEATURE_SET not available", devnumber)
 		return None
 	fs_index = fs_index[:1]
 
@@ -306,11 +306,11 @@ def get_device_features(handle, devnumber):
 	if not features_count:
 		# this can happen if the device disappeard since the fs_index request
 		# otherwise we should get at least a count of 1 (the FEATURE_SET we've just used above)
-		_log.debug("(%d) no features available?!", devnumber)
+		_log.debug("device %d no features available?!", devnumber)
 		return None
 
 	features_count = ord(features_count[:1])
-	# _log.debug("(%d) found %d features", devnumber, features_count)
+	# _log.debug("device %d found %d features", devnumber, features_count)
 
 	features = [None] * 0x20
 	for index in range(1, 1 + features_count):
@@ -322,11 +322,11 @@ def get_device_features(handle, devnumber):
 			features[index] = feature
 
 			# if feature_flags:
-			# 	_log.debug("(%d) feature <%s:%s> at index %d: %s",
+			# 	_log.debug("device %d feature <%s:%s> at index %d: %s",
 			# 				devnumber, _hex(feature), FEATURE_NAME[feature], index,
 			# 				','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
 			# else:
-			# 	_log.debug("(%d) feature <%s:%s> at index %d", devnumber, _hex(feature), FEATURE_NAME[feature], index)
+			# 	_log.debug("device %d feature <%s:%s> at index %d", devnumber, _hex(feature), FEATURE_NAME[feature], index)
 
 	features[0] = FEATURE.ROOT
 	while features[-1] is None:
@@ -369,7 +369,7 @@ def get_device_firmware(handle, devnumber, features=None):
 					fw_info = _FirmwareInfo(level, FIRMWARE_KIND[-1], '', '', None)
 
 				fw.append(fw_info)
-				# _log.debug("(%d) firmware %s", devnumber, fw_info)
+				# _log.debug("device %d firmware %s", devnumber, fw_info)
 		return tuple(fw)
 
 
@@ -387,7 +387,7 @@ def get_device_kind(handle, devnumber, features=None):
 	d_kind = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x20))
 	if d_kind:
 		d_kind = ord(d_kind[:1])
-		# _log.debug("(%d) device type %d = %s", devnumber, d_kind, DEVICE_KIND[d_kind])
+		# _log.debug("device %d type %d = %s", devnumber, d_kind, DEVICE_KIND[d_kind])
 		return DEVICE_KIND[d_kind]
 
 
@@ -415,7 +415,7 @@ def get_device_name(handle, devnumber, features=None):
 				break
 
 		d_name = d_name.decode('ascii')
-		# _log.debug("(%d) device name %s", devnumber, d_name)
+		# _log.debug("device %d name %s", devnumber, d_name)
 		return d_name
 
 
@@ -429,7 +429,7 @@ def get_device_battery_level(handle, devnumber, features=None):
 		battery = _base.request(handle, devnumber, _pack('!BB', bat_fi, 0))
 		if battery:
 			discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
-			_log.debug("(%d) battery %d%% charged, next level %d%% charge, status %d = %s",
+			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
 						devnumber, discharge, dischargeNext, status, BATTERY_STATUS[status])
 			return (discharge, dischargeNext, BATTERY_STATUS[status])
 

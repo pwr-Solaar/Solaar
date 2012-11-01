@@ -71,7 +71,7 @@ if __name__ == '__main__':
 			t.start()
 
 			while t.is_alive():
-				line = read_packet ('?? Input: ').strip().replace(' ', '')
+				line = read_packet('?? Input: ').strip().replace(' ', '')
 				if line:
 					try:
 						data = unhexlify(line.encode('ascii'))

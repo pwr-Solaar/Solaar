@@ -40,7 +40,7 @@ _MAX_REPLY_SIZE = _MAX_CALL_SIZE
 
 
 """Default timeout on read (in ms)."""
-DEFAULT_TIMEOUT = 1000
+DEFAULT_TIMEOUT = 1500
 
 #
 #
@@ -166,9 +166,9 @@ def write(handle, devnumber, data):
 	assert _MAX_CALL_SIZE == 20
 	# the data is padded to either 5 or 18 bytes
 	wdata = _pack('!BB18s' if len(data) > 5 else '!BB5s', 0x10, devnumber, data)
-	_log.debug("(%d) <= w[10 %02X %s %s]", devnumber, devnumber, _hex(wdata[2:4]), _hex(wdata[4:]))
+	_log.debug("<= w[10 %02X %s %s]", devnumber, _hex(wdata[2:4]), _hex(wdata[4:]))
 	if not _hid.write(handle, wdata):
-		_log.warn("(%d) write failed, assuming receiver %X no longer available", devnumber, handle)
+		_log.warn("write failed, assuming receiver %X no longer available", handle)
 		close(handle)
 		raise _NoReceiver
 
@@ -191,19 +191,19 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	"""
 	data = _hid.read(handle, _MAX_REPLY_SIZE, timeout)
 	if data is None:
-		_log.warn("(-) read failed, assuming receiver %X no longer available", handle)
+		_log.warn("read failed, assuming receiver %X no longer available", handle)
 		close(handle)
 		raise _NoReceiver
 
 	if data:
 		if len(data) < _MIN_REPLY_SIZE:
-			_log.warn("(%d) => r[%s] read packet too short: %d bytes", ord(data[1:2]), _hex(data), len(data))
+			_log.warn("=> r[%s] read packet too short: %d bytes", _hex(data), len(data))
 			data += b'\x00' * (_MIN_REPLY_SIZE - len(data))
 		if len(data) > _MAX_REPLY_SIZE:
-			_log.warn("(%d) => r[%s] read packet too long: %d bytes", ord(data[1:2]), _hex(data), len(data))
+			_log.warn("=> r[%s] read packet too long: %d bytes", _hex(data), len(data))
 		code = ord(data[:1])
 		devnumber = ord(data[1:2])
-		_log.debug("(%d) => r[%02X %02X %s %s]", devnumber, code, devnumber, _hex(data[2:4]), _hex(data[4:]))
+		_log.debug("=> r[%02X %02X %s %s]", code, devnumber, _hex(data[2:4]), _hex(data[4:]))
 		return code, devnumber, data[2:]
 
 	# _l.log(_LOG_LEVEL, "(-) => r[]")
@@ -236,7 +236,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 	if type(params) == int:
 		params = _pack('!B', params)
 
-	# _log.debug("(%d) request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
+	# _log.debug("device %d request {%s} params [%s]", devnumber, _hex(feature_index_function), _hex(params))
 	if len(feature_index_function) != 2:
 		raise ValueError('invalid feature_index_function {%s}: it must be a two-byte string' % _hex(feature_index_function))
 
@@ -263,7 +263,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_devnumber != devnumber:
 			# this message not for the device we're interested in
-			# _l.log(_LOG_LEVEL, "(%d) request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hex(reply_data))
+			# _l.log(_LOG_LEVEL, "device %d request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hex(reply_data))
 			# worst case scenario, this is a reply for a concurrent request
 			# on this receiver
 			if _unhandled:
@@ -272,18 +272,18 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == feature_index_function:
 			# device not present
-			_log.debug("(%d) request ping failed on {%s} call: [%s]", devnumber, _hex(feature_index_function), _hex(reply_data))
+			_log.debug("device %d request ping failed on {%s} call: [%s]", devnumber, _hex(feature_index_function), _hex(reply_data))
 			return None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_log.debug("(%d) request ping failed: [%s]", devnumber, _hex(reply_data))
+			_log.debug("request ping failed: [%s]", devnumber, _hex(reply_data))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
 			# the feature call returned with an error
 			error_code = ord(reply_data[3])
-			_log.warn("(%d) request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hex(reply_data))
+			_log.warn("device %d request feature call error %d = %s: %s", devnumber, error_code, ERROR_NAME[error_code], _hex(reply_data))
 			feature_index = ord(feature_index_function[:1])
 			feature_function = feature_index_function[1:2]
 			feature = None if features is None else features[feature_index] if feature_index < len(features) else None
@@ -291,14 +291,14 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x11 and reply_data[:2] == feature_index_function:
 			# a matching reply
-			# _log.debug("(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
+			# _log.debug("device %d matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
 			return reply_data[2:]
 
 		if reply_code == 0x10 and devnumber == 0xFF and reply_data[:2] == feature_index_function:
 			# direct calls to the receiver (device 0xFF) may also return successfully with reply code 0x10
-			# _log.debug("(%d) matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
+			# _log.debug("device %d matched reply with feature-index-function [%s]", devnumber, _hex(reply_data[2:]))
 			return reply_data[2:]
 
-		# _log.debug("(%d) unmatched reply {%s} (expected {%s})", devnumber, _hex(reply_data[:2]), _hex(feature_index_function))
+		# _log.debug("device %d unmatched reply {%s} (expected {%s})", devnumber, _hex(reply_data[:2]), _hex(feature_index_function))
 		if _unhandled:
 			_unhandled(reply_code, reply_devnumber, reply_data)

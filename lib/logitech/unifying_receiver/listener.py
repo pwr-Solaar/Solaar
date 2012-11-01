@@ -21,7 +21,7 @@ _log = getLogger('LUR').getChild('listener')
 del getLogger
 
 
-_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT)  # ms
+_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 2)  # ms
 
 def _event_dispatch(listener, callback):
 	while listener._active:  # or not listener._events.empty():

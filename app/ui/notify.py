@@ -68,7 +68,7 @@ try:
 				logging.exception("showing %s", n)
 
 except ImportError:
-	logging.warn("Notify not found in gi.repository, desktop notifications are disabled")
+	logging.warn("desktop notifications disabled")
 	available = False
 	init = lambda app_title: False
 	uninit = lambda: None

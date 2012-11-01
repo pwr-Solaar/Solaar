@@ -27,6 +27,8 @@ def icon_file(name):
 
 
 def find_children(container, *child_names):
+	assert container is not None
+
 	def _iterate_children(widget, names, result, count):
 		wname = widget.get_name()
 		if wname in names:

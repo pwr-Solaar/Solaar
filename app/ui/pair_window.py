@@ -2,7 +2,7 @@
 #
 #
 
-import logging
+# import logging
 from gi.repository import (Gtk, GObject)
 
 import ui
@@ -31,17 +31,17 @@ def _device_confirmed(entry, _2, trigger, assistant, page):
 
 
 def _finish(assistant):
-	logging.debug("finish %s", assistant)
+	# logging.debug("finish %s", assistant)
 	assistant.destroy()
 
 def _cancel(assistant, state):
-	logging.debug("cancel %s", assistant)
+	# logging.debug("cancel %s", assistant)
 	state.stop_scan()
 	_finish(assistant)
 
 def _prepare(assistant, page, state):
 	index = assistant.get_current_page()
-	logging.debug("prepare %s %d %s", assistant, index, page)
+	# logging.debug("prepare %s %d %s", assistant, index, page)
 
 	if index == 0:
 		state.reset()
