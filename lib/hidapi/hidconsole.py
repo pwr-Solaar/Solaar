@@ -45,7 +45,7 @@ def _continuous_read(handle, timeout=1000):
 if __name__ == '__main__':
 	import argparse
 	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument('--history', default='.hidconsole-history', help='history file')
+	arg_parser.add_argument('--history', help='history file')
 	arg_parser.add_argument('device', default=None, help='linux device to connect to')
 	args = arg_parser.parse_args()
 
@@ -60,7 +60,14 @@ if __name__ == '__main__':
 		print (".. Press ^C/^D to exit, or type hex bytes to write to the device.")
 
 		import readline
-		readline.read_history_file(args.history)
+		if args.history is None:
+			import os.path
+			args.history = os.path.join(os.path.expanduser("~"), ".hidconsole-history")
+		try:
+			readline.read_history_file(args.history)
+		except:
+			# file may not exist yet
+			pass
 
 		start_time = time.time()
 

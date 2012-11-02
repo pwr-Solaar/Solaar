@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LIB=`dirname "$0"`/../lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`uname -m`
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`arch`
 export PYTHONPATH=$LIB
 
 exec python -OOu -m logitech.scanner "$@"
