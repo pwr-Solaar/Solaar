@@ -96,7 +96,7 @@ class Receiver(object):
 			reply = _base.request(self.handle, 0xFF, b'\x83\xB5', b'\x02')
 			if reply and reply[0:1] == b'\x02':
 				fw_version = _hex(reply[1:5])
-				fw_version = '%s.%s.%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
+				fw_version = '%s.%s.B%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
 				firmware.append(_FirmwareInfo(0, FIRMWARE_KIND[0], '', fw_version, None))
 
 			reply = _base.request(self.handle, 0xFF, b'\x81\xF1', b'\x04')

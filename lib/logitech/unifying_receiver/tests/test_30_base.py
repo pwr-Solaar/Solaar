@@ -27,8 +27,8 @@ class Test_UR_Base(unittest.TestCase):
 	def test_10_list_receiver_devices(self):
 		rawdevices = base.list_receiver_devices()
 		self.assertIsNotNone(rawdevices, "list_receiver_devices returned None")
-		self.assertIsInstance(rawdevices, list, "list_receiver_devices should have returned a list")
-		Test_UR_Base.ur_available = len(rawdevices) > 0
+		# self.assertIsInstance(rawdevices, Iterable, "list_receiver_devices should have returned an iterable")
+		Test_UR_Base.ur_available = len(list(rawdevices)) > 0
 
 	def test_20_try_open(self):
 		if not self.ur_available:

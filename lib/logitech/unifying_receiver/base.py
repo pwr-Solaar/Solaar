@@ -110,13 +110,7 @@ def try_open(path):
 			# 'device 0 unreachable' is the expected reply from a valid receiver handle
 			_log.info("[%s] success: handle %X", path, receiver_handle)
 			return receiver_handle
-
-		# any other replies are ignored, and will assume this is the wrong Linux device
-		if reply == b'\x01\x00\x00\x00\x00\x00\x00\x00':
-			# no idea what this is, but it comes up occasionally
-			_log.debug("[%s] %X mistery reply [%s]", path, receiver_handle, _hex(reply))
-		else:
-			_log.debug("[%s] %X unknown reply [%s]", path, receiver_handle, _hex(reply))
+		_log.debug("[%s] %X ignored reply %s", path, receiver_handle, _hex(reply))
 	else:
 		_log.debug("[%s] %X no reply", path, receiver_handle)
 

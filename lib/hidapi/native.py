@@ -82,8 +82,8 @@ del namedtuple
 def _makeDeviceInfo(native_device_info):
 	return DeviceInfo(
 				path=native_device_info.path.decode('ascii'),
-				vendor_id=hex(native_device_info.vendor_id)[2:],
-				product_id=hex(native_device_info.product_id)[2:],
+				vendor_id=hex(native_device_info.vendor_id)[2:].zfill(4),
+				product_id=hex(native_device_info.product_id)[2:].zfill(4),
 				serial=native_device_info.serial if native_device_info.serial else None,
 				release=hex(native_device_info.release)[2:],
 				manufacturer=native_device_info.manufacturer,
@@ -187,21 +187,18 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 	List all the HID devices attached to the system, optionally filtering by
 	vendor_id, product_id, and/or interface_number.
 
-	:returns: a list of matching ``DeviceInfo`` tuples.
+	:returns: an iterable of matching ``DeviceInfo`` tuples.
 	"""
-	results = []
 
 	devices = _native.hid_enumerate(vendor_id, product_id)
 	d = devices
 	while d:
 		if interface_number is None or interface_number == d.contents.interface:
-			results.append(_makeDeviceInfo(d.contents))
+			yield _makeDeviceInfo(d.contents)
 		d = d.contents.next_device
 
 	if devices:
 		_native.hid_free_enumeration(devices)
-
-	return results
 
 
 def open(vendor_id, product_id, serial=None):
@@ -378,15 +375,3 @@ def get_indexed_string(device_handle, index):
 	:param index: the index of the string to get.
 	"""
 	return _read_wchar(_native.hid_get_indexed_string, device_handle, index)
-
-
-def last_error(device_handle):
-	"""Get a string describing the last error which occurred.
-
-	Note: currently not working in either underlying native implementation.
-
-	:param device_handle: a device handle returned by open() or open_path().
-	:returns: a string containing the last error which occurred, or None.
-	"""
-	error = _native.hid_error(device_handle)
-	return error.value
