@@ -87,7 +87,7 @@ if __name__ == '__main__':
 			if listener is None:
 				pairing.state = None
 				if notify_missing:
-					status_changed(DUMMY, True)
+					status_changed(DUMMY, None, True)
 					notify_missing = False
 				return retry
 

@@ -120,8 +120,8 @@ class DeviceInfo(_api.PairedDevice):
 		self.features = _FeaturesArray(self)
 
 		# read them now, otherwise it it temporarily hang the UI
-		if status >= STATUS.CONNECTED:
-			n, k, s, f = self.name, self.kind, self.serial, self.firmware
+		# if status >= STATUS.CONNECTED:
+		# 	n, k, s, f = self.name, self.kind, self.serial, self.firmware
 
 	@property
 	def receiver(self):
@@ -381,7 +381,7 @@ class ReceiverListener(_EventsListener):
 
 class _DUMMY_RECEIVER(object):
 	__slots__ = ['name', 'max_devices', 'status', 'status_text', 'devices']
-	name = _api.Receiver.name
+	name = kind = _api.Receiver.name
 	max_devices = _api.Receiver.max_devices
 	status = STATUS.UNAVAILABLE
 	status_text = _RECEIVER_STATUS_NAME[STATUS.UNAVAILABLE]
