@@ -102,9 +102,9 @@ class EventsListener(_Thread):
 						self._events.put(event)
 
 		_base.request_context = None
-		_base.close(self._handle)
+		handle, self._handle = self._handle, 0
+		_base.close(handle)
 		_log.debug("stopped")
-		self._handle = 0
 
 	def stop(self):
 		"""Tells the listener to stop as soon as possible."""

@@ -69,18 +69,19 @@ if __name__ == '__main__':
 	listener = None
 	notify_missing = True
 
-	def status_changed(reason, urgent=False):
-		global listener
-		receiver = DUMMY if listener is None else listener.receiver
-		ui.update(receiver, icon, window, reason)
+	def status_changed(receiver, device=None, urgent=False):
+		ui.update(receiver, icon, window, device)
 		if ui.notify.available and urgent:
-			ui.notify.show(reason)
-		if not listener:
-			listener = None
-			GObject.timeout_add(3000, check_for_listener)
+			ui.notify.show(device or receiver)
 
-	def check_for_listener():
+		global listener
+		if not listener:
+			GObject.timeout_add(5000, check_for_listener)
+			listener = None
+
+	def check_for_listener(retry=True):
 		global listener, notify_missing
+
 		if listener is None:
 			listener = ReceiverListener.open(status_changed)
 			if listener is None:
@@ -88,14 +89,14 @@ if __name__ == '__main__':
 				if notify_missing:
 					status_changed(DUMMY, True)
 					notify_missing = False
-				return True
+				return retry
 
 			# print ("opened receiver", listener, listener.receiver)
-			pairing.state = pairing.State(listener)
 			notify_missing = True
-			status_changed(listener.receiver, True)
+			pairing.state = pairing.State(listener)
+			status_changed(listener.receiver, None, True)
 
-	check_for_listener()
+	GObject.timeout_add(100, check_for_listener, False)
 	Gtk.main()
 
 	if listener is not None:

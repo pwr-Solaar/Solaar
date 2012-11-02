@@ -37,10 +37,12 @@ def _toggle_info(action, label_widget, box_widget, frame):
 def _make_receiver_box(name):
 	frame = Gtk.Frame()
 	frame._device = None
+	frame.set_name(name)
 
-	icon = Gtk.Image.new_from_icon_name(name, _SMALL_DEVICE_ICON_SIZE)
+	icon_name = ui.get_icon(name, 'preferences-desktop-peripherals')
+	icon = Gtk.Image.new_from_icon_name(icon_name, _SMALL_DEVICE_ICON_SIZE)
 
-	label = Gtk.Label('Initializing...')
+	label = Gtk.Label('Scanning...')
 	label.set_name('label')
 	label.set_alignment(0, 0.5)
 
@@ -83,8 +85,10 @@ def _make_receiver_box(name):
 def _make_device_box(index):
 	frame = Gtk.Frame()
 	frame._device = None
+	frame.set_name(_PLACEHOLDER)
 
-	icon = Gtk.Image.new_from_icon_name('image-missing', _DEVICE_ICON_SIZE)
+	icon_name = 'preferences-desktop-peripherals'
+	icon = Gtk.Image.new_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 	icon.set_name('icon')
 	icon.set_alignment(0.5, 0)
 
@@ -222,7 +226,8 @@ def _update_device_box(frame, dev):
 
 	if frame.get_name() != dev.name:
 		frame.set_name(dev.name)
-		icon.set_from_icon_name(ui.get_icon(dev.name, dev.kind), _DEVICE_ICON_SIZE)
+		icon_name = ui.get_icon(dev.name, dev.kind)
+		icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
 
 	status = ui.find_children(frame, 'status')
@@ -274,14 +279,14 @@ def _update_device_box(frame, dev):
 	frame.set_visible(True)
 
 
-def update(window, receiver, device):
-	print ("update", receiver, receiver.status, device)
+def update(window, receiver, device=None):
+	# print ("update", receiver, receiver.status, device)
 	window.set_icon_name(ui.appicon(receiver.status))
 
 	vbox = window.get_child()
 	frames = list(vbox.get_children())
 
-	if id(device) == id(receiver):
+	if device is None:
 		_update_receiver_box(frames[0], receiver)
 		if receiver.status < STATUS.CONNECTED:
 			for frame in frames[1:]:

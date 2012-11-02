@@ -4,6 +4,7 @@
 
 from logging import getLogger as _Logger
 from struct import pack as _pack
+from time import sleep as _sleep
 
 from logitech.unifying_receiver import base as _base
 from logitech.unifying_receiver import api as _api
@@ -136,7 +137,7 @@ class DeviceInfo(_api.PairedDevice):
 			self.LOG.debug("status %d => %d", self._status, new_status)
 			urgent = new_status < STATUS.CONNECTED or self._status < STATUS.CONNECTED
 			self._status = new_status
-			self._listener.status_changed_callback(self, urgent)
+			self._listener.status_changed(self, urgent)
 
 		if new_status < STATUS.CONNECTED:
 			self.props.clear()
@@ -158,7 +159,11 @@ class DeviceInfo(_api.PairedDevice):
 	@property
 	def name(self):
 		if self._name is None:
-			if self._status >= STATUS.CONNECTED:
+			if self._status < STATUS.CONNECTED:
+				codename = self.codename
+				if codename in NAMES:
+					self._name, self._kind = NAMES[codename]
+			else:
 				self._name = _api.get_device_name(self.handle, self.number, self.features)
 		return self._name or self.codename
 
@@ -168,7 +173,7 @@ class DeviceInfo(_api.PairedDevice):
 			if self._status < STATUS.CONNECTED:
 				codename = self.codename
 				if codename in NAMES:
-					self._kind = NAMES[codename][-1]
+					self._name, self._kind = NAMES[codename]
 			else:
 				self._kind = _api.get_device_kind(self.handle, self.number, self.features)
 		return self._kind or '?'
@@ -216,7 +221,7 @@ class DeviceInfo(_api.PairedDevice):
 					self.props.update(status[1])
 					if self.status == status[0]:
 						if p != self.props:
-							self._listener.status_changed_callback(self)
+							self._listener.status_changed(self)
 					else:
 						self.status = status[0]
 					return True
@@ -249,7 +254,7 @@ class ReceiverListener(_EventsListener):
 	"""Keeps the status of a Unifying Receiver.
 	"""
 
-	def __init__(self, receiver, status_changed_callback):
+	def __init__(self, receiver, status_changed_callback=None):
 		super(ReceiverListener, self).__init__(receiver.handle, self._events_handler)
 		self.receiver = receiver
 
@@ -258,7 +263,7 @@ class ReceiverListener(_EventsListener):
 		self.events_filter = None
 		self.events_handler = None
 
-		self.status_changed_callback = status_changed_callback or (lambda reason, urgent=False: None)
+		self.status_changed_callback = status_changed_callback
 
 		receiver.kind = receiver.name
 		receiver.devices = {}
@@ -280,7 +285,11 @@ class ReceiverListener(_EventsListener):
 			self.LOG.debug("status %d => %d", self.receiver.status, new_status)
 			self.receiver.status = new_status
 			self.receiver.status_text = _RECEIVER_STATUS_NAME[new_status]
-			self.status_changed_callback(self.receiver, True)
+			self.status_changed(None, True)
+
+	def status_changed(self, device=None, urgent=False):
+		if self.status_changed_callback:
+			self.status_changed_callback(self.receiver, device, urgent)
 
 	def _device_status_from(self, event):
 		state_code = ord(event.data[2:3]) & 0xF0
@@ -337,7 +346,7 @@ class ReceiverListener(_EventsListener):
 
 		dev = DeviceInfo(self, event.devnumber, event.data[4:5], status)
 		self.LOG.info("new device %s", dev)
-		self.status_changed_callback(dev, True)
+		self.status_changed(dev, True)
 		return dev
 
 	def unpair_device(self, device):
@@ -362,6 +371,8 @@ class ReceiverListener(_EventsListener):
 		if receiver:
 			rl = ReceiverListener(receiver, status_changed_callback)
 			rl.start()
+			while not rl._active:
+				_sleep(0.1)
 			return rl
 
 #
@@ -369,6 +380,7 @@ class ReceiverListener(_EventsListener):
 #
 
 class _DUMMY_RECEIVER(object):
+	__slots__ = ['name', 'max_devices', 'status', 'status_text', 'devices']
 	name = _api.Receiver.name
 	max_devices = _api.Receiver.max_devices
 	status = STATUS.UNAVAILABLE

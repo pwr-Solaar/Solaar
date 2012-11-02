@@ -77,8 +77,7 @@ class Receiver(object):
 		self._firmware = None
 
 	def close(self):
-		handle = self.handle
-		self.handle = 0
+		handle, self.handle = self.handle, 0
 		return (handle and _base.close(handle))
 
 	@property
