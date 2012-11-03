@@ -19,8 +19,26 @@ Requirements
 - Python (2.7 or 3.2).
 - Gtk 3; Gtk 2 should partially work with some problems.
 - Python GI (GObject Introspection), for Gtk bindings.
+- pyudev for enumerating udev devices.
 - Optional libnotify GI bindings, for desktop notifications.
-- A hidapi native implementation (see the INSTALL file for details).
+
+
+Installation
+------------
+
+Normally USB devices are not accessible for r/w by regular users, so you will
+need to install a udev rule to allow access to the Logitech Unifying Receiver.
+
+In rules.d/ you'll find a udev rule file, to be copied in /etc/udev/rules.d/ (as
+root).
+
+In its current form it makes the UR device available for r/w by all users
+belonging to the 'plugdev' system group (standard Debian group for pluggable
+devices). It may need changes, specific to your particular system's
+configuration.
+
+If in doubt, replacing GROUP="plugdev" with GROUP="<your username>" should just
+work.
 
 
 Thanks
