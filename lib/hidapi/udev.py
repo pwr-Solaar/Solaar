@@ -4,7 +4,7 @@
 #
 
 import os as _os
-import select as _select
+from select import select as _select
 from pyudev import Context as _Context
 from pyudev import Device as _Device
 
@@ -22,7 +22,9 @@ DeviceInfo = namedtuple('DeviceInfo', [
 				'release',
 				'manufacturer',
 				'product',
-				'interface'])
+				'interface',
+				'driver',
+				])
 del namedtuple
 
 #
@@ -31,26 +33,19 @@ del namedtuple
 #
 
 def init():
-	"""Initialize the HIDAPI library.
+	"""This function is a no-op, and exists only to match the native hidapi
+	implementation.
 
-	This function initializes the HIDAPI library. Calling it is not strictly
-	necessary, as it will be called automatically by enumerate() and any of the
-	open_*() functions if it is needed.  This function should be called at the
-	beginning of execution however, if there is a chance of HIDAPI handles
-	being opened by different threads simultaneously.
-
-	:returns: ``True`` if successful.
+	:returns: ``True``.
 	"""
 	return True
 
 
 def exit():
-	"""Finalize the HIDAPI library.
+	"""This function is a no-op, and exists only to match the native hidapi
+	implementation.
 
-	This function frees all of the static data associated with HIDAPI. It should
-	be called at the end of execution to avoid memory leaks.
-
-	:returns: ``True`` if successful.
+	:returns: ``True``.
 	"""
 	return True
 
@@ -65,9 +60,10 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 	"""
 	for dev in _Context().list_devices(subsystem='hidraw'):
 		hid_dev = dev.find_parent('hid')
-		if not hid_dev or 'HID_ID' not in hid_dev:
+		if not hid_dev:
 			continue
 
+		assert 'HID_ID' in hid_dev
 		bus, vid, pid = hid_dev['HID_ID'].split(':')
 		if vendor_id is not None and vendor_id != int(vid, 16):
 			continue
@@ -79,7 +75,6 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 			if not intf_dev:
 				continue
 
-			# interface = int(intf_dev.attributes['bInterfaceNumber'], 16)
 			interface = intf_dev.attributes.asint('bInterfaceNumber')
 			if interface_number is not None and interface_number != interface:
 				continue
@@ -87,19 +82,20 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 			serial = hid_dev['HID_UNIQ'] if 'HID_UNIQ' in hid_dev else None
 
 			usb_dev = dev.find_parent('usb', 'usb_device')
-			if usb_dev:
-				attrs = usb_dev.attributes
-				devinfo = DeviceInfo(path=dev.device_node,
-									vendor_id=vid[-4:],
-									product_id=pid[-4:],
-									serial=serial,
-									release=attrs['bcdDevice'],
-									manufacturer=attrs['manufacturer'],
-									product=attrs['product'],
-									interface=interface)
-				yield devinfo
+			assert usb_dev
+			attrs = usb_dev.attributes
+			d_info = DeviceInfo(path=dev.device_node,
+								vendor_id=vid[-4:],
+								product_id=pid[-4:],
+								serial=serial,
+								release=attrs['bcdDevice'],
+								manufacturer=attrs['manufacturer'],
+								product=attrs['product'],
+								interface=interface,
+								driver=hid_dev['DRIVER'])
+			yield d_info
 
-		if bus == '0005':  # BLUETOOTH
+		elif bus == '0005':  # BLUETOOTH
 			# TODO
 			pass
 
@@ -186,7 +182,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	"""
 	try:
 		timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
-		rlist, wlist, xlist = _select.select([device_handle], [], [], timeout)
+		rlist, wlist, xlist = _select([device_handle], [], [], timeout)
 		if rlist:
 			assert rlist == [device_handle]
 			return _os.read(device_handle, bytes_count)
@@ -243,13 +239,18 @@ def get_indexed_string(device_handle, index):
 	dev = _Device.from_device_number(_Context(), 'char', stat.st_rdev)
 	if dev:
 		hid_dev = dev.find_parent('hid')
-		if hid_dev and 'HID_ID' in hid_dev:
+		if hid_dev:
+			assert 'HID_ID' in hid_dev
 			bus, _, _ = hid_dev['HID_ID'].split(':')
 
 			if bus == '0003':  # USB
 				usb_dev = dev.find_parent('usb', 'usb_device')
-				if usb_dev:
-					attrs = usb_dev.attributes
-					key = _DEVICE_STRINGS[index]
-					if key in attrs:
-						return attrs[key]
+				assert usb_dev
+				key = _DEVICE_STRINGS[index]
+				attrs = usb_dev.attributes
+				if key in attrs:
+					return attrs[key]
+
+			elif bus == '0005':  # BLUETOOTH
+				# TODO
+				pass

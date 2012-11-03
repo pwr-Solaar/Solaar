@@ -74,7 +74,9 @@ DeviceInfo = namedtuple('DeviceInfo', [
 				'release',
 				'manufacturer',
 				'product',
-				'interface'])
+				'interface',
+				'driver',
+				])
 del namedtuple
 
 
@@ -88,7 +90,8 @@ def _makeDeviceInfo(native_device_info):
 				release=hex(native_device_info.release)[2:],
 				manufacturer=native_device_info.manufacturer,
 				product=native_device_info.product,
-				interface=native_device_info.interface)
+				interface=native_device_info.interface,
+				driver=None)
 
 
 #

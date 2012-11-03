@@ -1,7 +1,7 @@
 # pass
 
 APPNAME = 'Solaar'
-APPVERSION = '0.6'
+APPVERSION = '0.7'
 
 from . import (notify, status_icon, main_window, pair_window, action)
 

@@ -2,7 +2,7 @@
 
 APPNAME = 'Solaar'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
-__version__ = '0.6'
+__version__ = '0.7'
 __license__ = "GPL"
 
 #

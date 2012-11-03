@@ -21,16 +21,6 @@ def _toggle_action(name, label, function, *args):
 	action.connect('activate', function, *args)
 	return action
 
-
-def wrap_action(action, prefire):
-	def _wrap(aw, aa):
-		prefire(aa)
-		aa.activate()
-	wrapper = _action(action.get_name(), action.get_label(), None)
-	wrapper.set_icon_name(action.get_icon_name())
-	wrapper.connect('activate', _wrap, action)
-	return wrapper
-
 #
 #
 #

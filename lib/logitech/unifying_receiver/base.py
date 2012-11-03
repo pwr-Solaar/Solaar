@@ -75,7 +75,9 @@ def list_receiver_devices():
 	"""List all the Linux devices exposed by the UR attached to the machine."""
 	# (Vendor ID, Product ID) = ('Logitech', 'Unifying Receiver')
 	# interface 2 if the actual receiver interface
-	return _hid.enumerate(0x046d, 0xc52b, 2)
+	for d in _hid.enumerate(0x046d, 0xc52b, 2):
+		if d.driver is None or d.driver == 'logitech-djreceiver':
+			yield d
 
 
 _COUNT_DEVICES_REQUEST = b'\x10\xFF\x81\x00\x00\x00\x00'
@@ -104,7 +106,7 @@ def try_open(path):
 
 	# if this is the right hidraw device, we'll receive a 'bad device' from the UR
 	# otherwise, the read should produce nothing
-	reply = _hid.read(receiver_handle, _MAX_REPLY_SIZE, DEFAULT_TIMEOUT)
+	reply = _hid.read(receiver_handle, _MAX_REPLY_SIZE, DEFAULT_TIMEOUT / 2)
 	if reply:
 		if reply[:5] == _COUNT_DEVICES_REQUEST[:5]:
 			# 'device 0 unreachable' is the expected reply from a valid receiver handle
