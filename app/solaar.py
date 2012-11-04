@@ -83,7 +83,11 @@ if __name__ == '__main__':
 		global listener, notify_missing
 
 		if listener is None:
-			listener = ReceiverListener.open(status_changed)
+			try:
+				listener = ReceiverListener.open(status_changed)
+			except OSError:
+				ui.show_permissions_warning(window)
+
 			if listener is None:
 				pairing.state = None
 				if notify_missing:

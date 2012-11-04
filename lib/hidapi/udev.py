@@ -120,10 +120,7 @@ def open_path(device_path):
 
 	:returns: an opaque device handle, or ``None``.
 	"""
-	try:
-		return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
-	except:
-		pass
+	return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
 
 
 def close(device_handle):

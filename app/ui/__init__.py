@@ -26,6 +26,16 @@ def icon_file(name):
 	return None
 
 
+def show_permissions_warning(window):
+	text = ('Found a possible Unifying Receiver device,\n'
+			'but did not have permission to open it.')
+
+	m = Gtk.MessageDialog(window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
+	m.set_title('Permissions error')
+	m.run()
+	m.destroy()
+
+
 def find_children(container, *child_names):
 	assert container is not None
 

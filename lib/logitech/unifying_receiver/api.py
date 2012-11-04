@@ -4,6 +4,7 @@
 
 from struct import pack as _pack
 from struct import unpack as _unpack
+import errno as _errno
 
 
 from . import base as _base
@@ -164,10 +165,22 @@ class Receiver(object):
 
 		:returns: An open file handle for the found receiver, or ``None``.
 		"""
+		exception = None
+
 		for rawdevice in _base.list_receiver_devices():
-			handle = _base.try_open(rawdevice.path)
-			if handle:
-				return Receiver(handle, rawdevice.path)
+			exception = None
+			try:
+				handle = _base.try_open(rawdevice.path)
+				if handle:
+					return Receiver(handle, rawdevice.path)
+			except OSError as e:
+				_log.exception("open %s", rawdevice.path)
+				if e.errno == _errno.EACCES:
+					exception = e
+
+		if exception:
+			# only keep the last exception
+			raise exception
 
 #
 #
