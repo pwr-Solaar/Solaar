@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-APPNAME = 'Solaar'
+NAME = 'Solaar'
+VERSION = '0.7.1'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
-__version__ = '0.7'
+__version__ = VERSION
 __license__ = "GPL"
 
 #
@@ -11,7 +12,7 @@ __license__ = "GPL"
 
 def _parse_arguments():
 	import argparse
-	arg_parser = argparse.ArgumentParser(prog=APPNAME.lower())
+	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-v', '--verbose',
 							action='count', default=0,
 							help='increase the logger verbosity (may be repeated)')
@@ -43,18 +44,13 @@ if __name__ == '__main__':
 
 	# check if the notifications are available and enabled
 	args.notifications &= args.systray
-	if ui.notify.available and ui.notify.init(APPNAME):
+	if ui.notify.available and ui.notify.init(NAME):
 		ui.action.toggle_notifications.set_active(args.notifications)
 	else:
 		ui.action.toggle_notifications = None
 
-	from receiver import (ReceiverListener, DUMMY)
-
-	window = ui.main_window.create(APPNAME,
-									DUMMY.name,
-									DUMMY.max_devices,
-									args.systray)
-
+	from receiver import DUMMY
+	window = ui.main_window.create(NAME, DUMMY.name, DUMMY.max_devices, args.systray)
 	if args.systray:
 		menu_actions = (ui.action.toggle_notifications,
 						ui.action.about)
@@ -79,6 +75,7 @@ if __name__ == '__main__':
 			GObject.timeout_add(5000, check_for_listener)
 			listener = None
 
+	from receiver import ReceiverListener
 	def check_for_listener(retry=True):
 		global listener, notify_missing
 

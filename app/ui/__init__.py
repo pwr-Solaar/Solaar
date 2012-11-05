@@ -1,18 +1,17 @@
 # pass
 
-APPNAME = 'Solaar'
-APPVERSION = '0.7'
-
 from . import (notify, status_icon, main_window, pair_window, action)
 
 from gi.repository import (GObject, Gtk)
 GObject.threads_init()
 
 
+from solaar import NAME as _NAME
+_APP_ICONS = (_NAME + '-fail', _NAME + '-init', _NAME)
 def appicon(receiver_status):
-	return (APPNAME + '-fail' if receiver_status < 0 else
-			APPNAME + '-init' if receiver_status < 1 else
-			APPNAME)
+	return (_APP_ICONS[0] if receiver_status < 0 else
+			_APP_ICONS[1] if receiver_status < 1 else
+			_APP_ICONS[2])
 
 
 _ICON_THEME = Gtk.IconTheme.get_default()

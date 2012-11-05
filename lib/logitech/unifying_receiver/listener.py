@@ -140,6 +140,6 @@ class EventsListener(_Thread):
 		_log.info("queueing unhandled event %s", event)
 		self._events.put(event)
 
-	def __nonzero__(self):
+	def __bool__(self):
 		return bool(self._active and self._handle)
-	__bool__ = __nonzero__
+	__nonzero__ = __bool__

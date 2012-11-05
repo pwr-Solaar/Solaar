@@ -2,9 +2,13 @@
 #
 #
 
+# from sys import version as PYTTHON_VERSION
 from gi.repository import Gtk
 
-import ui
+import ui.notify
+import ui.pair_window
+from solaar import NAME as _NAME
+from solaar import VERSION as _VERSION
 
 
 def _action(name, label, function, *args):
@@ -27,7 +31,7 @@ def _toggle_action(name, label, function, *args):
 
 def _toggle_notifications(action):
 	if action.get_active():
-		ui.notify.init(ui.APPNAME)
+		ui.notify.init(_NAME)
 	else:
 		ui.notify.uninit()
 	action.set_sensitive(ui.notify.available)
@@ -36,16 +40,18 @@ toggle_notifications = _toggle_action('notifications', 'Notifications', _toggle_
 
 def _show_about_window(action):
 	about = Gtk.AboutDialog()
-	about.set_icon_name(ui.APPNAME)
-	about.set_program_name(ui.APPNAME)
-	about.set_logo_icon_name(ui.APPNAME)
-	about.set_version(ui.APPVERSION)
+	about.set_icon_name(_NAME)
+	about.set_program_name(_NAME)
+	about.set_logo_icon_name(_NAME)
+	about.set_version(_VERSION)
 	about.set_license_type(Gtk.License.GPL_2_0)
 	about.set_authors(('Daniel Pavel http://github.com/pwr', ))
 	about.set_website('http://github.com/pwr/Solaar/wiki')
+	about.set_website_label('Solaar Wiki')
+	# about.set_comments('Using Python %s\n' % PYTTHON_VERSION.split(' ')[0])
 	about.run()
 	about.destroy()
-about = _action('help-about', 'About ' + ui.APPNAME, _show_about_window)
+about = _action('help-about', 'About ' + _NAME, _show_about_window)
 
 quit = _action('exit', 'Quit', Gtk.main_quit)
 

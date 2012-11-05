@@ -9,5 +9,5 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`arch`
 export PYTHONPATH=$APP:$LIB
 export XDG_DATA_DIRS=$SHARE:$XDG_DATA_DIRS
 
-exec python -OOu -m solaar "$@"
-#exec python -OOu -m profile -o $TMPDIR/profile.log app/solaar.py "$@"
+PYTHON=`which python python2 python3 | head -n 1`
+exec $PYTHON -OOu -m solaar "$@"
