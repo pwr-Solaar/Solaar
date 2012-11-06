@@ -1,7 +1,8 @@
 #!/bin/sh
 
-LIB=`dirname "$0"`/../lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`arch`
+Z=`readlink -f "$0"`
+LIB=`readlink -f $(dirname "$Z")/../lib`
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LIB/native/`arch`
 export PYTHONPATH=$LIB
 
 PYTHON=`which python python2 python3 | head -n 1`
