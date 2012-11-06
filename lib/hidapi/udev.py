@@ -1,7 +1,11 @@
-#
-# Partial Python implementation of the native hidapi.
-# Requires pyudev
-#
+"""Generic Human Interface Device API.
+
+It is currently a partial pure-Python implementation of the native HID API
+implemented by signal11 (https://github.com/signal11/hidapi), and requires
+``pyudev``.
+The docstrings are mostly copied from the hidapi API header, with changes where
+necessary.
+"""
 
 import os as _os
 from select import select as _select

@@ -6,19 +6,6 @@
 # Make sure the plugdev group exists on your system and your user is a member
 # before applying these rules.
 
-
-# If you are using the libusb implementation of hidapi (hid-libusb.c), then
-# use something like the following line, substituting the VID and PID with
-# those of your device. Note that for kernels before 2.6.24, you will need
-# to substitute "usb" with "usb_device". It shouldn't hurt to use two lines
-# (one each way) for compatibility with older systems.
-
-# HIDAPI/libusb
-ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
-
-# If you are using the hidraw implementation, then do something like the
-# following, substituting the VID and PID with your device.
-
 # HIDAPI/hidraw
 ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
 
