@@ -37,8 +37,29 @@ def _parse_arguments():
 	return args
 
 
+def _check_requirements():
+	try:
+		import pyudev
+	except ImportError:
+		return 'python-pyudev'
+
+	try:
+		import gi.repository
+	except ImportError:
+		return 'python-gi'
+
+	try:
+		from gi.repository import Gtk
+	except ImportError:
+		return 'gir1.2-gtk-3.0'
+
+
 if __name__ == '__main__':
 	args = _parse_arguments()
+
+	req_fail = _check_requirements()
+	if req_fail:
+		raise ImportError('missing required package: %s' % req_fail)
 
 	import ui
 
