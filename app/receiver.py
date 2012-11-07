@@ -105,13 +105,13 @@ class _FeaturesArray(object):
 class DeviceInfo(_api.PairedDevice):
 	"""A device attached to the receiver.
 	"""
-	def __init__(self, listener, number, pair_code, status=STATUS.UNKNOWN):
+	def __init__(self, listener, number, serial_prefix, status=STATUS.UNKNOWN):
 		super(DeviceInfo, self).__init__(listener.handle, number)
 
 		self.LOG = _Logger("Device[%d]" % number)
 		self._listener = listener
-		self._pair_code = pair_code
-		self._serial = None
+		self._pair_code = _pack('!B', 0x40 + number - 1)
+		self._serial = serial_prefix
 		self._codename = None
 
 		self._status = status
@@ -180,13 +180,14 @@ class DeviceInfo(_api.PairedDevice):
 
 	@property
 	def serial(self):
-		if self._serial is None:
+		assert self._serial is not None
+		if len(self._serial) == 2:
 			# dodgy
 			b = bytearray(self._pair_code)
 			b[0] -= 0x10
 			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', bytes(b))
 			if serial:
-				self._serial = _base._hex(serial[1:5])
+				self._serial = _base._hex(self._serial) + '-' + _base._hex(serial[1:5])
 		return self._serial or '?'
 
 	@property
@@ -292,12 +293,12 @@ class ReceiverListener(_EventsListener):
 			self.status_changed_callback(self.receiver, device, urgent)
 
 	def _device_status_from(self, event):
-		state_code = ord(event.data[2:3]) & 0xF0
-		state = STATUS.UNAVAILABLE if state_code == 0x60 else \
-				STATUS.CONNECTED if state_code == 0xA0 else \
-				STATUS.CONNECTED if state_code == 0x20 else \
-				STATUS.UNKNOWN
-		if state == STATUS.UNKNOWN:
+		state_code = ord(event.data[2:3]) & 0xC0
+		state = STATUS.UNAVAILABLE if state_code == 0x40 else \
+				STATUS.CONNECTED if state_code == 0x80 else \
+				STATUS.CONNECTED if state_code == 0x00 else \
+				None
+		if state is None:
 			self.LOG.warn("don't know how to handle state code 0x%02X: %s", state_code, event)
 		return state
 
@@ -309,7 +310,7 @@ class ReceiverListener(_EventsListener):
 
 			if event.devnumber in self.receiver.devices:
 				status = self._device_status_from(event)
-				if status > STATUS.UNKNOWN:
+				if status is not None:
 					self.receiver.devices[event.devnumber].status = status
 			else:
 				dev = self.make_device(event)
@@ -343,11 +344,14 @@ class ReceiverListener(_EventsListener):
 			return None
 
 		status = self._device_status_from(event)
+		if status is not None:
+			serial_prefix = event.data[-1:] + event.data[-2:-1]
+			dev = DeviceInfo(self, event.devnumber, serial_prefix, status)
+			self.LOG.info("new device %s", dev)
+			self.status_changed(dev, True)
+			return dev
 
-		dev = DeviceInfo(self, event.devnumber, event.data[4:5], status)
-		self.LOG.info("new device %s", dev)
-		self.status_changed(dev, True)
-		return dev
+		self.LOG.error("failed to identify status of device %d from %s", event.devnumber, event)
 
 	def unpair_device(self, device):
 		try:
