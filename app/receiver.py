@@ -37,7 +37,7 @@ class _FeaturesArray(object):
 				except _api._FeatureNotSupported:
 					self.supported = False
 				else:
-					count = _base.request(handle, self.device.number, _pack('!BB', index, 0x00))
+					count = None if index is None else _base.request(handle, self.device.number, _pack('!BB', index, 0x00))
 					if count is None:
 						self.supported = False
 					else:
