@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import time
 from binascii import hexlify, unhexlify
 _hex = lambda d: hexlify(d).decode('ascii').upper()
@@ -77,8 +78,10 @@ if __name__ == '__main__':
 			t.daemon = True
 			t.start()
 
+			prompt = '?? Input: ' if os.isatty(0) else ''
+
 			while t.is_alive():
-				line = read_packet('?? Input: ').strip().replace(' ', '')
+				line = read_packet(prompt).strip().replace(' ', '')
 				if line:
 					try:
 						data = unhexlify(line.encode('ascii'))
@@ -87,8 +90,10 @@ if __name__ == '__main__':
 					else:
 						_print('<<', data)
 						hidapi.write(handle, data)
+		except EOFError:
+			time.sleep(0.01 if os.isatty(0) else 2)
 		except Exception as e:
-			pass
+			print ('%s: %s' % (type(e).__name__, e))
 
 		print (".. Closing handle %X" % handle)
 		hidapi.close(handle)
