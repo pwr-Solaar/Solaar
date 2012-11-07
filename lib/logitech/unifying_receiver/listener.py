@@ -83,14 +83,10 @@ class EventsListener(_Thread):
 					matched = False
 					task = None if self._tasks.empty() else self._tasks.queue[0]
 					if task and task[-1] is None:
-						devnumber, data = task[:2]
-						if event[1] == devnumber:
-							# _log.debug("matching %s to %d, %s", event, devnumber, repr(data))
-							if event[0] == 0x11 or (event[0] == 0x10 and devnumber == 0xFF):
-								matched = (event[2][:2] == data[:2]) or (event[2][:1] == b'\xFF' and event[2][1:3] == data[:2])
-							elif event[0] == 0x10:
-								if event[2][:1] == b'\x8F' and event[2][1:3] == data[:2]:
-									matched = True
+						task_dev, task_data = task[:2]
+						if event[1] == task_dev:
+							_log.debug("matching %s to (%d, %s)", event, task_dev, repr(task_data))
+							matched = event[2][:2] == task_data[:2] or (event[2][:1] in b'\x8F\xFF' and event[2][1:3] == task_data[:2])
 
 					if matched:
 						# _log.debug("request reply %s", event)
