@@ -273,7 +273,7 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 
 		if reply_code == 0x10 and reply_data[:1] == b'\x8F':
 			# device not present
-			_log.debug("request ping failed: [%s]", devnumber, _hex(reply_data))
+			_log.debug("device %d request ping failed: [%s]", devnumber, _hex(reply_data))
 			return None
 
 		if reply_code == 0x11 and reply_data[0] == b'\xFF' and reply_data[1:3] == feature_index_function:
