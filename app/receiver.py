@@ -111,7 +111,8 @@ class DeviceInfo(_api.PairedDevice):
 		self.LOG = _Logger("Device[%d]" % number)
 		self._listener = listener
 		self._pair_code = _pack('!B', 0x40 + number - 1)
-		self._serial = serial_prefix
+		self._serial_prefix = _base._hex(serial_prefix)
+		self._serial = None
 		self._codename = None
 
 		self._status = status
@@ -180,15 +181,14 @@ class DeviceInfo(_api.PairedDevice):
 
 	@property
 	def serial(self):
-		assert self._serial is not None
-		if len(self._serial) == 2:
+		if self._serial is None:
 			# dodgy
 			b = bytearray(self._pair_code)
 			b[0] -= 0x10
 			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', bytes(b))
 			if serial:
-				self._serial = _base._hex(self._serial) + '-' + _base._hex(serial[1:5])
-		return self._serial or '?'
+				self._serial = self._serial_prefix + '-' + _base._hex(serial[1:5])
+		return self._serial or self._serial_prefix + '-?'
 
 	@property
 	def codename(self):
