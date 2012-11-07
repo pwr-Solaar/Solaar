@@ -114,7 +114,7 @@ class Receiver(object):
 		if self.handle == 0:
 			return
 
-		for number in range(1, MAX_ATTACHED_DEVICES):
+		for number in range(1, 1 + MAX_ATTACHED_DEVICES):
 			dev = get_device(self.handle, number)
 			if dev is not None:
 				yield dev
