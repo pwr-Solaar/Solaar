@@ -4,6 +4,7 @@
 #
 
 from struct import pack as _pack
+from struct import unpack as _unpack
 from binascii import hexlify as _hexlify
 _hex = lambda d: _hexlify(d).decode('ascii').upper()
 
@@ -298,3 +299,50 @@ def request(handle, devnumber, feature_index_function, params=b'', features=None
 		# _log.debug("device %d unmatched reply {%s} (expected {%s})", devnumber, _hex(reply_data[:2]), _hex(feature_index_function))
 		if _unhandled:
 			_unhandled(reply_code, reply_devnumber, reply_data)
+
+
+def ping(handle, devnumber):
+	"""Check if a device is connected to the UR.
+
+	:returns: The HID protocol supported by the device, as a floating point number, if the device is active.
+	"""
+	if request_context is None or handle != request_context.handle:
+		context = _DEFAULT_REQUEST_CONTEXT
+		_unhandled = unhandled_hook
+	else:
+		context = request_context
+		_unhandled = getattr(context, 'unhandled_hook')
+
+	context.write(handle, devnumber, b'\x00\x10\x00\x00\xAA')
+	read_times = _MAX_READ_TIMES
+	while read_times > 0:
+		divisor = (1 + _MAX_READ_TIMES - read_times)
+		reply = context.read(handle, int(DEFAULT_TIMEOUT * (divisor + 1) / 2 / divisor))
+		read_times -= 1
+
+		if not reply:
+			# keep waiting...
+			continue
+
+		reply_code, reply_devnumber, reply_data = reply
+
+		if reply_devnumber != devnumber:
+			# this message not for the device we're interested in
+			# _l.log(_LOG_LEVEL, "device %d request got reply for unexpected device %d: [%s]", devnumber, reply_devnumber, _hex(reply_data))
+			# worst case scenario, this is a reply for a concurrent request
+			# on this receiver
+			if _unhandled:
+				_unhandled(reply_code, reply_devnumber, reply_data)
+			continue
+
+		if reply_code == 0x11 and reply_data[:2] == b'\x00\x10' and reply_data[4:5] == b'\xAA':
+			major, minor = _unpack('!BB', reply_data[2:4])
+			return major + minor / 10.0
+
+		if reply_code == 0x10 and reply_data == b'\x8F\x00\x10\x01\x00':
+			return 1.0
+
+		if reply_code == 0x10 and reply_data[:3] == b'\x8F\x00\x10':
+			return None
+
+		_log.warn("don't know how to interpret ping reply %s", reply)
