@@ -162,7 +162,7 @@ class DeviceInfo(_api.PairedDevice):
 				codename = self.codename
 				if codename in NAMES:
 					self._name, self._kind = NAMES[codename]
-			else:
+			elif self.features:
 				self._name = _api.get_device_name(self.handle, self.number, self.features)
 		return self._name or self.codename
 
@@ -173,7 +173,7 @@ class DeviceInfo(_api.PairedDevice):
 				codename = self.codename
 				if codename in NAMES:
 					self._name, self._kind = NAMES[codename]
-			else:
+			elif self.features:
 				self._kind = _api.get_device_kind(self.handle, self.number, self.features)
 		return self._kind or '?'
 
@@ -198,7 +198,7 @@ class DeviceInfo(_api.PairedDevice):
 	@property
 	def firmware(self):
 		if self._firmware is None:
-			if self._status >= STATUS.CONNECTED:
+			if self._status >= STATUS.CONNECTED and self.features:
 				self._firmware = _api.get_device_firmware(self.handle, self.number, self.features)
 		return self._firmware or ()
 
