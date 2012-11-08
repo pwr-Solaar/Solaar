@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-import sys
 import os
+import sys
+from select import select as _select
 import time
 from binascii import hexlify, unhexlify
 _hex = lambda d: hexlify(d).decode('ascii').upper()
 
 
+interactive = os.isatty(0)
 start_time = 0
 try:
 	read_packet = raw_input
@@ -15,19 +17,18 @@ except:
 
 
 def _print(marker, data, scroll=False):
-	hexs = _hex(data)
-
 	t = time.time() - start_time
-	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 
-	if scroll:
+	if interactive and scroll:
 		sys.stdout.write('\033[s')
 		sys.stdout.write('\033[S')  # scroll up
 		sys.stdout.write('\033[A\033[L\033[G')   # insert new line above the current one, position on first column
 
+	hexs = _hex(data)
+	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 	sys.stdout.write(s)
 
-	if scroll:
+	if interactive and scroll:
 		sys.stdout.write('\033[u')
 	else:
 		sys.stdout.write('\n')
@@ -58,17 +59,18 @@ if __name__ == '__main__':
 						repr(hidapi.get_manufacturer(handle)),
 						repr(hidapi.get_product(handle)),
 						repr(hidapi.get_serial(handle))))
-		print (".. Press ^C/^D to exit, or type hex bytes to write to the device.")
+		if interactive:
+			print (".. Press ^C/^D to exit, or type hex bytes to write to the device.")
 
-		import readline
-		if args.history is None:
-			import os.path
-			args.history = os.path.join(os.path.expanduser("~"), ".hidconsole-history")
-		try:
-			readline.read_history_file(args.history)
-		except:
-			# file may not exist yet
-			pass
+			import readline
+			if args.history is None:
+				import os.path
+				args.history = os.path.join(os.path.expanduser("~"), ".hidconsole-history")
+			try:
+				readline.read_history_file(args.history)
+			except:
+				# file may not exist yet
+				pass
 
 		start_time = time.time()
 
@@ -78,7 +80,7 @@ if __name__ == '__main__':
 			t.daemon = True
 			t.start()
 
-			prompt = '?? Input: ' if os.isatty(0) else ''
+			prompt = '?? Input: ' if interactive else ''
 
 			while t.is_alive():
 				line = read_packet(prompt).strip().replace(' ', '')
@@ -90,13 +92,18 @@ if __name__ == '__main__':
 					else:
 						_print('<<', data)
 						hidapi.write(handle, data)
+						# wait for some kind of reply
+						if not interactive:
+							rlist, wlist, xlist = _select([handle], [], [], 1)
+						time.sleep(0.1)
 		except EOFError:
-			time.sleep(0.01 if os.isatty(0) else 2)
+			pass
 		except Exception as e:
 			print ('%s: %s' % (type(e).__name__, e))
 
 		print (".. Closing handle %X" % handle)
 		hidapi.close(handle)
-		readline.write_history_file(args.history)
+		if interactive:
+			readline.write_history_file(args.history)
 	else:
 		print ("!! Failed to open %s, aborting" % args.device)
