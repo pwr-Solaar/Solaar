@@ -221,13 +221,15 @@ def _update_receiver_box(frame, receiver):
 def _update_device_box(frame, dev):
 	frame._device = dev
 
-	icon, label, info_label = ui.find_children(frame, 'icon', 'label', 'info-label')
+	icon, label = ui.find_children(frame, 'icon', 'label')
 
 	if frame.get_name() != dev.name:
 		frame.set_name(dev.name)
 		icon_name = ui.get_icon(dev.name, dev.kind)
 		icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
+		info_label = ui.find_children(frame, 'info-label')
+		info_label.set_text('')
 
 	status = ui.find_children(frame, 'status')
 	status_icons = status.get_children()
