@@ -18,13 +18,11 @@ _PLACEHOLDER = '~'
 #
 
 def _info_text(dev):
-	fw_text = '\n'.join(['%-12s\t<tt>%s%s%s</tt>' %
-						(f.kind, f.name, ' ' if f.name else '', f.version) for f in dev.firmware])
-	return ('<small>'
-			'Serial    \t\t<tt>%s</tt>\n'
-			'HID protocol\t<tt>%1.1f</tt>\n'
-			'%s'
-			'</small>' % (dev.serial, dev.protocol, fw_text))
+	items = [('Serial', dev.serial)] + [(f.kind, ((f.name + ' ') if f.name else '') + f.version) for f in dev.firmware]
+	if hasattr(dev, 'number'):
+		items += [('HID version', dev.protocol)]
+
+	return '<small><tt>%s</tt></small>' % '\n'.join('%-11s: %s' % (item[0], str(item[1])) for item in items)
 
 def _toggle_info(action, label_widget, box_widget, frame):
 	if action.get_active():
