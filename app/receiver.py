@@ -188,7 +188,7 @@ class DeviceInfo(_api.PairedDevice):
 _RECEIVER_STATUS_NAME = _FallbackDict(
 							lambda x:
 								'1 device found' if x == STATUS.CONNECTED + 1 else
-								'%d devices found' if x > STATUS.CONNECTED else
+								('%d devices found' % x) if x > STATUS.CONNECTED else
 								'?',
 							{
 								STATUS.UNKNOWN: 'Initializing...',
