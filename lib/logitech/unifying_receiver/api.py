@@ -32,32 +32,74 @@ class PairedDevice(object):
 		self.handle = handle
 		self.number = number
 
+		self._protocol = None
+		self._features = None
+		self._codename = None
 		self._name = None
 		self._kind = None
+		self._serial = None
 		self._firmware = None
-		self.features = [FEATURE.ROOT]
+
+	@property
+	def protocol(self):
+		if self._protocol is None:
+			self._protocol = _base.ping(self.handle, self.number)
+		return 0 if self._protocol is None else self._protocol
+
+	@property
+	def features(self):
+		if self._features is None:
+			if self.protocol >= 2.0:
+				self._features = [FEATURE.ROOT]
+		return self._features
+
+	@property
+	def codename(self):
+		if self._codename is None:
+			codename = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x40 + self.number - 1)
+			if codename:
+				self._codename = codename[2:].rstrip(b'\x00').decode('ascii')
+		return self._codename or '?'
 
 	@property
 	def name(self):
 		if self._name is None:
-			self._name = get_device_name(self.handle, self.number, self.features)
-		return self._name or '?'
+			if self.protocol < 2.0:
+				from ..devices.constants import NAMES as _DEVICE_NAMES
+				if self.codename in _DEVICE_NAMES:
+					self._name, self._kind = _DEVICE_NAMES[self._codename]
+			else:
+				self._name = get_device_name(self.handle, self.number, self.features)
+		return self._name or self.codename
 
 	@property
 	def kind(self):
 		if self._kind is None:
-			self._kind = get_device_kind(self.handle, self.number, self.features)
+			if self.protocol < 2.0:
+				from ..devices.constants import NAMES as _DEVICE_NAMES
+				if self.codename in _DEVICE_NAMES:
+					self._name, self._kind = _DEVICE_NAMES[self._codename]
+			else:
+				self._kind = get_device_kind(self.handle, self.number, self.features)
 		return self._kind or '?'
 
 	@property
 	def firmware(self):
-		if self._firmware is None:
+		if self._firmware is None and self.protocol >= 2.0:
 			self._firmware = get_device_firmware(self.handle, self.number, self.features)
 		return self._firmware or ()
 
+	@property
+	def serial(self):
+		if self._serial is None:
+			prefix = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x20 + self.number - 1)
+			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x30 + self.number - 1)
+			if prefix and serial:
+				self._serial = _base._hex(prefix[3:5]) + '-' + _base._hex(serial[1:5])
+		return self._serial or '?'
+
 	def ping(self):
-		reply = _base.request(self.handle, self.number, b'\x00\x10', b'\x00\x00\xAA')
-		return reply is not None and reply[2:3] == b'\xAA'
+		return _base.ping(self.handle, self.number) is not None
 
 	def __str__(self):
 		return '<PairedDevice(%X,%d,%s)>' % (self.handle, self.number, self._name or '?')
@@ -148,8 +190,8 @@ class Receiver(object):
 		if self.handle == 0:
 			return False
 		if type(dev) == int:
-			return (dev < 1 or dev > MAX_ATTACHED_DEVICES) and ping(self.handle, dev)
-		return ping(self.handle, dev.number)
+			return dev > 0 and dev <= MAX_ATTACHED_DEVICES and _base.ping(self.handle, dev) is not None
+		return dev.ping()
 
 	def __str__(self):
 		return '<Receiver(%X,%s)>' % (self.handle, self.path)
@@ -228,20 +270,12 @@ def request(handle, devnumber, feature, function=b'\x00', params=b'', features=N
 	return _base.request(handle, devnumber, feature_index + function, params)
 
 
-def ping(handle, devnumber):
-	"""
-	:returns: True if the device is connected to the UR.
-	"""
-	reply = _base.request(handle, devnumber, b'\x00\x10', b'\x00\x00\xAA')
-	return reply is not None and reply[2:3] == b'\xAA'
-
-
 def get_device(handle, devnumber, features=None):
 	"""Gets the complete info for a device (type, features).
 
 	:returns: a PairedDevice or ``None``.
 	"""
-	if ping(handle, devnumber):
+	if _base.ping(handle, devnumber):
 		devinfo = PairedDevice(handle, devnumber)
 		# _log.debug("found device %s", devinfo)
 		return devinfo
@@ -291,6 +325,7 @@ def _get_feature_index(handle, devnumber, feature, features=None):
 		if len(features) <= index:
 			features += [None] * (index + 1 - len(features))
 		features[index] = feature
+		# _log.debug("%s: found feature %s at %d", features, _base._hex(feature), index)
 		return index
 
 

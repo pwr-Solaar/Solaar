@@ -11,7 +11,7 @@ from logitech.unifying_receiver import api as _api
 from logitech.unifying_receiver.listener import EventsListener as _EventsListener
 from logitech.unifying_receiver.common import FallbackDict as _FallbackDict
 from logitech import devices as _devices
-from logitech.devices.constants import (STATUS, STATUS_NAME, PROPS, NAMES)
+from logitech.devices.constants import (STATUS, STATUS_NAME, PROPS)
 
 #
 #
@@ -107,16 +107,13 @@ class DeviceInfo(_api.PairedDevice):
 	"""
 	def __init__(self, listener, number, status=STATUS.UNKNOWN):
 		super(DeviceInfo, self).__init__(listener.handle, number)
+		self._features = _FeaturesArray(self)
 
 		self.LOG = _Logger("Device[%d]" % number)
 		self._listener = listener
-		self._serial = None
-		self._codename = None
 
 		self._status = status
 		self.props = {}
-
-		self.features = _FeaturesArray(self)
 
 		# read them now, otherwise it it temporarily hang the UI
 		# if status >= STATUS.CONNECTED:
@@ -155,53 +152,6 @@ class DeviceInfo(_api.PairedDevice):
 			t.append('Light: %d lux' % self.props[PROPS.LIGHT_LEVEL])
 		return ', '.join(t) if t else STATUS_NAME[STATUS.CONNECTED]
 
-	@property
-	def name(self):
-		if self._name is None:
-			if self._status < STATUS.CONNECTED:
-				codename = self.codename
-				if codename in NAMES:
-					self._name, self._kind = NAMES[codename]
-			elif self.features:
-				self._name = _api.get_device_name(self.handle, self.number, self.features)
-		return self._name or self.codename
-
-	@property
-	def kind(self):
-		if self._kind is None:
-			if self._status < STATUS.CONNECTED:
-				codename = self.codename
-				if codename in NAMES:
-					self._name, self._kind = NAMES[codename]
-			elif self.features:
-				self._kind = _api.get_device_kind(self.handle, self.number, self.features)
-		return self._kind or '?'
-
-	@property
-	def serial(self):
-		if self._serial is None:
-			prefix = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x20 + self.number - 1)
-			prefix = (_base._hex(prefix[3:5]) + '-') if prefix else ''
-			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x30 + self.number - 1)
-			serial = _base._hex(serial[1:5]) if serial else '?'
-			self._serial = prefix + serial
-		return self._serial or '?'
-
-	@property
-	def codename(self):
-		if self._codename is None:
-			codename = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x40 + self.number - 1)
-			if codename:
-				self._codename = codename[2:].rstrip(b'\x00').decode('ascii')
-		return self._codename or '?'
-
-	@property
-	def firmware(self):
-		if self._firmware is None:
-			if self._status >= STATUS.CONNECTED and self.features:
-				self._firmware = _api.get_device_firmware(self.handle, self.number, self.features)
-		return self._firmware or ()
-
 	def process_event(self, code, data):
 		if code == 0x10 and data[:1] == b'\x8F':
 			self.status = STATUS.UNAVAILABLE
@@ -229,7 +179,7 @@ class DeviceInfo(_api.PairedDevice):
 		return False
 
 	def __str__(self):
-		return 'DeviceInfo(%d,%s,%d)' % (self.number, self._name or '?', self._status)
+		return '<DeviceInfo(%d,%s,%d)>' % (self.number, self._name or '?', self._status)
 
 #
 #

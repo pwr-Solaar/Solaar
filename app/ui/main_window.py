@@ -22,8 +22,9 @@ def _info_text(dev):
 						(f.kind, f.name, ' ' if f.name else '', f.version) for f in dev.firmware])
 	return ('<small>'
 			'Serial    \t\t<tt>%s</tt>\n'
+			'HID protocol\t<tt>%1.1f</tt>\n'
 			'%s'
-			'</small>' % (dev.serial, fw_text))
+			'</small>' % (dev.serial, dev.protocol, fw_text))
 
 def _toggle_info(action, label_widget, box_widget, frame):
 	if action.get_active():

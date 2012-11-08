@@ -89,7 +89,7 @@ if __name__ == '__main__':
 	def status_changed(receiver, device=None, urgent=False):
 		ui.update(receiver, icon, window, device)
 		if ui.notify.available and urgent:
-			ui.notify.show(device or receiver)
+			GObject.idle_add(ui.notify.show, device or receiver)
 
 		global listener
 		if not listener:

@@ -85,7 +85,7 @@ class EventsListener(_Thread):
 					if task and task[-1] is None:
 						task_dev, task_data = task[:2]
 						if event[1] == task_dev:
-							_log.debug("matching %s to (%d, %s)", event, task_dev, repr(task_data))
+							# _log.debug("matching %s to (%d, %s)", event, task_dev, repr(task_data))
 							matched = event[2][:2] == task_data[:2] or (event[2][:1] in b'\x8F\xFF' and event[2][1:3] == task_data[:2])
 
 					if matched:

@@ -8,18 +8,26 @@ def print_receiver(receiver):
 	for f in receiver.firmware:
 		print ("  %-10s: %s" % (f.kind, f.version))
 
-	print ("--------")
-
 
 def scan_devices(receiver):
 	for dev in receiver:
+		print ("--------")
 		print (str(dev))
-		print ("Name: %s" % dev.name)
-		print ("Kind: %s" % dev.kind)
+		print ("Name         : %s" % dev.name)
+		print ("Kind         : %s" % dev.kind)
+		print ("Serial number: %s" % dev.serial)
+		if not dev.protocol:
+			print ("HID protocol : UNKNOWN")
+			continue
+
+		print ("HID protocol : HID %01.1f" % dev.protocol)
+		if dev.protocol < 2.0:
+			print ("Features query not supported by this device")
+			continue
 
 		firmware = dev.firmware
 		for fw in firmware:
-			print ("  %-10s: %s %s" % (fw.kind, fw.name, fw.version))
+			print ("   %-10s: %s %s" % (fw.kind, fw.name, fw.version))
 
 		all_features = api.get_device_features(dev.handle, dev.number)
 		for index in range(0, len(all_features)):
