@@ -20,9 +20,9 @@ _PLACEHOLDER = '~'
 def _info_text(dev):
 	items = [('Serial', dev.serial)] + [(f.kind, ((f.name + ' ') if f.name else '') + f.version) for f in dev.firmware]
 	if hasattr(dev, 'number'):
-		items += [('HID version', dev.protocol)]
+		items += [('HID', dev.protocol)]
 
-	return '<small><tt>%s</tt></small>' % '\n'.join('%-11s: %s' % (item[0], str(item[1])) for item in items)
+	return '<small><tt>%s</tt></small>' % '\n'.join('%-10s: %s' % (item[0], str(item[1])) for item in items)
 
 def _toggle_info(action, label_widget, box_widget, frame):
 	if action.get_active():

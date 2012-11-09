@@ -228,6 +228,8 @@ class ReceiverListener(_EventsListener):
 		else:
 			self.LOG.warn("failed to trigger device events")
 
+		self.LOG.info("receiver reports %d device(s) paired", len(receiver))
+
 	def change_status(self, new_status):
 		if new_status != self.receiver.status:
 			self.LOG.debug("status %d => %d", self.receiver.status, new_status)
@@ -321,6 +323,7 @@ class ReceiverListener(_EventsListener):
 		if receiver:
 			rl = ReceiverListener(receiver, status_changed_callback)
 			rl.start()
+
 			while not rl._active:
 				_sleep(0.1)
 			return rl
