@@ -228,7 +228,7 @@ class Receiver(object):
 #
 #
 
-def request(handle, devnumber, feature, function=b'\x00', params=b'', features=None):
+def request(handle, devnumber, feature, function=b'\x04', params=b'', features=None):
 	"""Makes a feature call to the device, and returns the reply data.
 
 	Basically a write() followed by (possibly multiple) reads, until a reply
@@ -349,7 +349,7 @@ def get_device_features(handle, devnumber):
 	# even if unknown.
 
 	# get the number of active features the device has
-	features_count = _base.request(handle, devnumber, fs_index + b'\x00')
+	features_count = _base.request(handle, devnumber, fs_index + b'\x05')
 	if not features_count:
 		# this can happen if the device disappeard since the fs_index request
 		# otherwise we should get at least a count of 1 (the FEATURE_SET we've just used above)
@@ -362,7 +362,7 @@ def get_device_features(handle, devnumber):
 	features = [None] * 0x20
 	for index in range(1, 1 + features_count):
 		# for each index, get the feature residing at that index
-		feature = _base.request(handle, devnumber, fs_index + b'\x10', _pack('!B', index))
+		feature = _base.request(handle, devnumber, fs_index + b'\x15', _pack('!B', index))
 		if feature:
 			# feature_flags = ord(feature[2:3]) & 0xE0
 			feature = feature[0:2].upper()
@@ -390,13 +390,13 @@ def get_device_firmware(handle, devnumber, features=None):
 	if fw_fi is None:
 		return None
 
-	fw_count = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x00))
+	fw_count = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x05))
 	if fw_count:
 		fw_count = ord(fw_count[:1])
 
 		fw = []
 		for index in range(0, fw_count):
-			fw_info = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x10), params=index)
+			fw_info = _base.request(handle, devnumber, _pack('!BB', fw_fi, 0x15), params=index)
 			if fw_info:
 				level = ord(fw_info[:1]) & 0x0F
 				if level == 0 or level == 1:
@@ -431,7 +431,7 @@ def get_device_kind(handle, devnumber, features=None):
 	if name_fi is None:
 		return None
 
-	d_kind = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x20))
+	d_kind = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x25))
 	if d_kind:
 		d_kind = ord(d_kind[:1])
 		# _log.debug("device %d type %d = %s", devnumber, d_kind, DEVICE_KIND[d_kind])
@@ -448,13 +448,13 @@ def get_device_name(handle, devnumber, features=None):
 	if name_fi is None:
 		return None
 
-	name_length = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x00))
+	name_length = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x05))
 	if name_length:
 		name_length = ord(name_length[:1])
 
 		d_name = b''
 		while len(d_name) < name_length:
-			name_fragment = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x10), len(d_name))
+			name_fragment = _base.request(handle, devnumber, _pack('!BB', name_fi, 0x15), len(d_name))
 			if name_fragment:
 				name_fragment = name_fragment[:name_length - len(d_name)]
 				d_name += name_fragment
@@ -473,7 +473,7 @@ def get_device_battery_level(handle, devnumber, features=None):
 	"""
 	bat_fi = _get_feature_index(handle, devnumber, FEATURE.BATTERY, features)
 	if bat_fi is not None:
-		battery = _base.request(handle, devnumber, _pack('!BB', bat_fi, 0))
+		battery = _base.request(handle, devnumber, _pack('!BB', bat_fi, 0x05))
 		if battery:
 			discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
 			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
@@ -486,13 +486,13 @@ def get_device_keys(handle, devnumber, features=None):
 	if rk_fi is None:
 		return None
 
-	count = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0))
+	count = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0x05))
 	if count:
 		keys = []
 
 		count = ord(count[:1])
 		for index in range(0, count):
-			keydata = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0x10), index)
+			keydata = _base.request(handle, devnumber, _pack('!BB', rk_fi, 0x15), index)
 			if keydata:
 				key, key_task, flags = _unpack('!HHB', keydata[:5])
 				rki = _ReprogrammableKeyInfo(index, key, KEY_NAME[key], key_task, KEY_NAME[key_task], flags)

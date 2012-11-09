@@ -4,7 +4,6 @@
 #
 
 from struct import pack as _pack
-from struct import unpack as _unpack
 from binascii import hexlify as _hexlify
 _hex = lambda d: _hexlify(d).decode('ascii').upper()
 
@@ -313,7 +312,7 @@ def ping(handle, devnumber):
 		context = request_context
 		_unhandled = getattr(context, 'unhandled_hook')
 
-	context.write(handle, devnumber, b'\x00\x10\x00\x00\xAA')
+	context.write(handle, devnumber, b'\x00\x11\x00\x00\xAA')
 	read_times = _MAX_READ_TIMES
 	while read_times > 0:
 		divisor = (1 + _MAX_READ_TIMES - read_times)
@@ -335,14 +334,16 @@ def ping(handle, devnumber):
 				_unhandled(reply_code, reply_devnumber, reply_data)
 			continue
 
-		if reply_code == 0x11 and reply_data[:2] == b'\x00\x10' and reply_data[4:5] == b'\xAA':
-			major, minor = _unpack('!BB', reply_data[2:4])
-			return major + minor / 10.0
+		if reply_code == 0x11 and reply_data[:2] == b'\x00\x11' and reply_data[4:5] == b'\xAA':
+			# HID 2.0+ device, currently connected
+			return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
-		if reply_code == 0x10 and reply_data == b'\x8F\x00\x10\x01\x00':
+		if reply_code == 0x10 and reply_data == b'\x8F\x00\x11\x01\x00':
+			# HID 1.0 device, currently connected
 			return 1.0
 
-		if reply_code == 0x10 and reply_data[:3] == b'\x8F\x00\x10':
+		if reply_code == 0x10 and reply_data[:3] == b'\x8F\x00\x11':
+			# a disconnected device
 			return None
 
 		_log.warn("don't know how to interpret ping reply %s", reply)
