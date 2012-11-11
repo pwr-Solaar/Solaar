@@ -19,6 +19,9 @@ _ICON_THEME = Gtk.IconTheme.get_default()
 def get_icon(name, fallback):
 	return name if name and _ICON_THEME.has_icon(name) else fallback
 
+def get_battery_icon(level):
+	return 'battery_%03d' % (10 * ((level + 5) // 10))
+
 def icon_file(name):
 	if name and _ICON_THEME.has_icon(name):
 		return _ICON_THEME.lookup_icon(name, 0, 0).get_filename()

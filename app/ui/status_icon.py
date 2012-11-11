@@ -32,17 +32,14 @@ def create(window, menu_actions=None):
 
 
 def update(icon, receiver):
-	icon.set_from_icon_name(ui.appicon(receiver.status))
+	battery_level = None
 
-	# device_with_battery = None
-
-	if receiver.devices:
+	if receiver.status > STATUS.CONNECTED and receiver.devices:
 		lines = []
 		if receiver.status < STATUS.CONNECTED:
 			lines += (receiver.status_text, '')
 
-		devlist = list(receiver.devices.values())
-		devlist.sort(lambda x, y: x.number < y.number)
+		devlist = sorted(receiver.devices.values(), key=lambda x: x.number)
 		for dev in devlist:
 			name = '<b>' + dev.name + '</b>'
 			if dev.status < STATUS.CONNECTED:
@@ -53,10 +50,15 @@ def update(icon, receiver):
 					lines.append('    ' + dev.status_text)
 			lines.append('')
 
-			# if device_with_battery is None and PROPS.BATTERY_LEVEL in dev.props:
-			# 	device_with_battery = dev
+			if battery_level is None and PROPS.BATTERY_LEVEL in dev.props:
+				battery_level = dev.props[PROPS.BATTERY_LEVEL]
 
 		text = '\n'.join(lines).rstrip('\n')
 		icon.set_tooltip_markup(ui.NAME + ':\n' + text)
 	else:
 		icon.set_tooltip_text(ui.NAME + ': ' + receiver.status_text)
+
+	if battery_level is None:
+		icon.set_from_icon_name(ui.appicon(receiver.status))
+	else:
+		icon.set_from_icon_name(ui.get_battery_icon(battery_level))
