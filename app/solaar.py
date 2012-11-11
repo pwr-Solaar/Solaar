@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 NAME = 'Solaar'
-VERSION = '0.7.2'
+VERSION = '0.7.3'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
 __version__ = VERSION
 __license__ = "GPL"
@@ -13,6 +13,9 @@ __license__ = "GPL"
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
+	arg_parser.add_argument('-q', '--quiet',
+							action='store_true',
+							help='disable all logging, takes precedence over --verbose')
 	arg_parser.add_argument('-v', '--verbose',
 							action='count', default=0,
 							help='increase the logger verbosity (may be repeated)')
@@ -30,9 +33,13 @@ def _parse_arguments():
 	args = arg_parser.parse_args()
 
 	import logging
-	log_level = logging.WARNING - 10 * args.verbose
-	log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
-	logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
+	if args.quiet:
+		logging.root.addHandler(logging.NullHandler())
+		logging.root.setLevel(logging.CRITICAL)
+	else:
+		log_level = logging.WARNING - 10 * args.verbose
+		log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
+		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
 
 	return args
 
@@ -81,14 +88,18 @@ if __name__ == '__main__':
 		window.present()
 
 	import pairing
+	from logitech.devices.constants import STATUS
 	from gi.repository import Gtk, GObject
 
 	listener = None
 	notify_missing = True
 
-	def status_changed(receiver, device=None, urgent=False):
+	def status_changed(receiver, device=None, ui_flags=0):
 		ui.update(receiver, icon, window, device)
-		if ui.notify.available and urgent:
+		if ui_flags & STATUS.UI_POPUP:
+			window.present()
+
+		if ui_flags & STATUS.UI_NOTIFY and ui.notify.available:
 			GObject.idle_add(ui.notify.show, device or receiver)
 
 		global listener
@@ -98,27 +109,34 @@ if __name__ == '__main__':
 
 	from receiver import ReceiverListener
 	def check_for_listener(retry=True):
-		global listener, notify_missing
+		def _check_still_scanning(listener):
+			if listener.receiver.status == STATUS.BOOTING:
+				listener.change_status(STATUS.CONNECTED)
 
+		global listener, notify_missing
 		if listener is None:
 			try:
 				listener = ReceiverListener.open(status_changed)
 			except OSError:
-				ui.show_permissions_warning(window)
+				ui.error(window, 'Permissions error',
+						'Found a possible Unifying Receiver device,\n'
+						'but did not have permission to open it.')
 
 			if listener is None:
 				pairing.state = None
 				if notify_missing:
-					status_changed(DUMMY, None, True)
+					status_changed(DUMMY, None, STATUS.UI_NOTIFY)
 					notify_missing = False
 				return retry
 
 			# print ("opened receiver", listener, listener.receiver)
 			notify_missing = True
 			pairing.state = pairing.State(listener)
-			status_changed(listener.receiver, None, True)
+			status_changed(listener.receiver, None, STATUS.UI_NOTIFY)
+			listener.trigger_device_events()
+			GObject.timeout_add(5 * 1000, _check_still_scanning, listener)
 
-	GObject.timeout_add(100, check_for_listener, False)
+	GObject.timeout_add(50, check_for_listener, False)
 	Gtk.main()
 
 	if listener is not None:

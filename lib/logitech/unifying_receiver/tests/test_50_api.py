@@ -41,7 +41,8 @@ class Test_UR_API(unittest.TestCase):
 	def test_05_ping_device_zero(self):
 		self._check(check_device=False)
 
-		ok = api.ping(self.receiver.handle, 0)
+		d = api.PairedDevice(self.receiver.handle, 0)
+		ok = d.ping()
 		self.assertIsNotNone(ok, "invalid ping reply")
 		self.assertFalse(ok, "device zero replied")
 
@@ -51,7 +52,8 @@ class Test_UR_API(unittest.TestCase):
 		devices = []
 
 		for devnumber in range(1, 1 + MAX_ATTACHED_DEVICES):
-			ok = api.ping(self.receiver.handle, devnumber)
+			d = api.PairedDevice(self.receiver.handle, devnumber)
+			ok = d.ping()
 			self.assertIsNotNone(ok, "invalid ping reply")
 			if ok:
 				devices.append(self.receiver[devnumber])

@@ -16,6 +16,10 @@ Currently the native libusb implementation (temporarily) detaches the device's
 USB driver from the kernel, and it may cause the device to become unresponsive.
 """
 
+#
+# LEGACY, no longer supported
+#
+
 __version__ = '0.3-hidapi-0.7.0'
 
 

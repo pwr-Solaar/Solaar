@@ -8,9 +8,10 @@ necessary.
 """
 
 import os as _os
+import errno as _errno
 from select import select as _select
-from pyudev import Context as _Context
-from pyudev import Device as _Device
+from pyudev import (Context as _Context,
+					Device as _Device)
 
 
 native_implementation = 'udev'
@@ -124,6 +125,7 @@ def open_path(device_path):
 
 	:returns: an opaque device handle, or ``None``.
 	"""
+	assert '/dev/hidraw' in device_path
 	return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
 
 
@@ -155,14 +157,11 @@ def write(device_handle, data):
 	write() will send the data on the first OUT endpoint, if
 	one exists. If it does not, it will send the data through
 	the Control Endpoint (Endpoint 0).
-
-	:returns: ``True`` if the write was successful.
 	"""
-	try:
-		bytes_written = _os.write(device_handle, data)
-		return bytes_written == len(data)
-	except:
-		pass
+	bytes_written = _os.write(device_handle, data)
+
+	if bytes_written != len(data):
+		raise OSError(errno=_errno.EIO, strerror='written %d bytes out of expected %d' % (bytes_written, len(data)))
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
@@ -181,15 +180,19 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	:returns: the data packet read, an empty bytes string if a timeout was
 	reached, or None if there was an error while reading.
 	"""
-	try:
-		timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
-		rlist, wlist, xlist = _select([device_handle], [], [], timeout)
-		if rlist:
-			assert rlist == [device_handle]
-			return _os.read(device_handle, bytes_count)
+	timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
+	rlist, wlist, xlist = _select([device_handle], [], [device_handle], timeout)
+
+	if xlist:
+		assert xlist == [device_handle]
+		raise OSError(errno=_errno.EIO, strerror='exception on file descriptor %d' % device_handle)
+
+	if rlist:
+		assert rlist == [device_handle]
+		data = _os.read(device_handle, bytes_count)
+		return data
+	else:
 		return b''
-	except OSError:
-		pass
 
 
 _DEVICE_STRINGS = {

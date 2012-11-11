@@ -2,7 +2,7 @@
 #
 #
 
-from gi.repository import (Gtk, Gdk)
+from gi.repository import (Gtk, Gdk, GObject)
 
 import ui
 from logitech.devices.constants import (STATUS, PROPS)
@@ -16,22 +16,6 @@ _PLACEHOLDER = '~'
 #
 #
 #
-
-def _info_text(dev):
-	items = [('Serial', dev.serial)] + [(f.kind, ((f.name + ' ') if f.name else '') + f.version) for f in dev.firmware]
-	if hasattr(dev, 'number'):
-		items += [('HID', dev.protocol)]
-
-	return '<small><tt>%s</tt></small>' % '\n'.join('%-10s: %s' % (item[0], str(item[1])) for item in items)
-
-def _toggle_info(action, label_widget, box_widget, frame):
-	if action.get_active():
-		box_widget.set_visible(True)
-		if not label_widget.get_text():
-			label_widget.set_markup(_info_text(frame._device))
-	else:
-		box_widget.set_visible(False)
-
 
 def _make_receiver_box(name):
 	frame = Gtk.Frame()
@@ -66,11 +50,12 @@ def _make_receiver_box(name):
 	info_box.add(info_label)
 	info_box.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Receiver info', _toggle_info, info_label, info_box, frame)
+	toggle_info_action = ui.action._toggle_action('info', 'Receiver info', _toggle_info_box, info_label, info_box, frame, _update_receiver_info_label)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(ui.action.pair(frame).create_tool_item(), -1)
+	# toolbar.insert(ui.action.about.create_tool_item(), -1)
 
-	vbox = Gtk.VBox(homogeneous=False, spacing=2)
+	vbox = Gtk.VBox(homogeneous=False, spacing=4)
 	vbox.set_border_width(4)
 	vbox.pack_start(hbox, True, True, 0)
 	vbox.pack_start(info_box, True, True, 0)
@@ -127,11 +112,12 @@ def _make_device_box(index):
 	info_label.set_alignment(0, 0.5)
 	info_label.set_padding(8, 2)
 	info_label.set_selectable(True)
+	info_label.fields = {}
 
 	info_box = Gtk.Frame()
 	info_box.add(info_label)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Device info', _toggle_info, info_label, info_box, frame)
+	toggle_info_action = ui.action._toggle_action('info', 'Device info', _toggle_info_box, info_label, info_box, frame, _update_device_info_label)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(ui.action.unpair(frame).create_tool_item(), -1)
 
@@ -204,6 +190,57 @@ def create(title, name, max_devices, systray=False):
 #
 #
 
+def _update_device_info_label(label, dev):
+	need_update = False
+
+	if 'serial' in label.fields:
+		serial = label.fields['serial']
+	else:
+		serial = label.fields['serial'] = dev.serial
+		need_update = True
+
+	if 'firmware' in label.fields:
+		firmware = label.fields['firmware']
+	else:
+		if dev.status >= STATUS.CONNECTED:
+			firmware = label.fields['firmware'] = dev.firmware
+			need_update = True
+		else:
+			firmware = None
+
+	if 'hid' in label.fields:
+		hid = label.fields['hid']
+	else:
+		if dev.status >= STATUS.CONNECTED:
+			hid = label.fields['hid'] = dev.protocol
+			need_update = True
+		else:
+			hid = None
+
+	if need_update:
+		items = [('Serial', serial)]
+		if firmware:
+			items += [(f.kind, f.name + ' ' + f.version) for f in firmware]
+		if hid:
+			items += [('HID', hid)]
+
+		label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-10s: %s' % (item[0], str(item[1])) for item in items))
+
+
+def _update_receiver_info_label(label, dev):
+	if label.get_visible() and label.get_text() == '':
+		items = [('Serial', dev.serial)] + \
+				[(f.kind, f.version) for f in dev.firmware]
+		label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-10s: %s' % (item[0], str(item[1])) for item in items))
+
+def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
+	if action.get_active():
+		box_widget.set_visible(True)
+		update_function(label_widget, frame._device)
+	else:
+		box_widget.set_visible(False)
+
+
 def _update_receiver_box(frame, receiver):
 	label, toolbar, info_label = ui.find_children(frame, 'label', 'toolbar', 'info-label')
 
@@ -220,44 +257,43 @@ def _update_receiver_box(frame, receiver):
 
 def _update_device_box(frame, dev):
 	frame._device = dev
+	# print dev.name, dev.kind
 
-	icon, label = ui.find_children(frame, 'icon', 'label')
+	icon, label, info_label = ui.find_children(frame, 'icon', 'label', 'info-label')
 
-	if frame.get_name() != dev.name:
+	first_run = frame.get_name() != dev.name
+	if first_run:
 		frame.set_name(dev.name)
 		icon_name = ui.get_icon(dev.name, dev.kind)
 		icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
-		info_label = ui.find_children(frame, 'info-label')
-		info_label.set_text('')
 
 	status = ui.find_children(frame, 'status')
 	status_icons = status.get_children()
-	toolbar = status_icons[-1]
-	if dev.status < STATUS.CONNECTED:
-		icon.set_sensitive(False)
-		label.set_sensitive(False)
-		status.set_sensitive(False)
-		for c in status_icons[1:-1]:
-			c.set_visible(False)
-		toolbar.get_children()[0].set_active(False)
-	else:
-		icon.set_sensitive(True)
-		label.set_sensitive(True)
-		status.set_sensitive(True)
 
+	if dev.status < STATUS.CONNECTED:
+		battery_icon, battery_label = status_icons[0:2]
+		battery_icon.set_sensitive(False)
+		battery_label.set_markup('<small>%s</small>' % dev.status_text)
+		battery_label.set_sensitive(True)
+		for c in status_icons[2:-1]:
+			c.set_visible(False)
+
+	else:
 		battery_icon, battery_label = status_icons[0:2]
 		battery_level = dev.props.get(PROPS.BATTERY_LEVEL)
 		if battery_level is None:
-			battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(False)
-			battery_label.set_visible(False)
+			battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
+			text = 'no status' if dev.protocol < 2.0 else 'waiting for status...'
+			battery_label.set_markup('<small>%s</small>' % text)
+			battery_label.set_sensitive(False)
 		else:
 			icon_name = 'battery_%03d' % (20 * ((battery_level + 10) // 20))
 			battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(True)
 			battery_label.set_text('%d%%' % battery_level)
-			battery_label.set_visible(True)
+			battery_label.set_sensitive(True)
 
 		battery_status = dev.props.get(PROPS.BATTERY_STATUS)
 		battery_icon.set_tooltip_text(battery_status or '')
@@ -274,10 +310,9 @@ def _update_device_box(frame, dev):
 			light_label.set_text('%d lux' % light_level)
 			light_label.set_visible(True)
 
-		for b in toolbar.get_children()[:-1]:
-			b.set_sensitive(True)
-
-	frame.set_visible(True)
+	if first_run:
+		frame.set_visible(True)
+	GObject.timeout_add(2000, _update_device_info_label, info_label, dev)
 
 
 def update(window, receiver, device=None):

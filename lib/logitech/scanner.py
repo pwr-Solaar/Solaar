@@ -7,17 +7,26 @@ def print_receiver(receiver):
 	print ("  Serial    : %s" % receiver.serial)
 	for f in receiver.firmware:
 		print ("  %-10s: %s" % (f.kind, f.version))
+	print ("  Receiver reported %d paired device(s)" % len(receiver))
 
 
 def scan_devices(receiver):
-	for dev in receiver:
+	for number in range(1, 1 + receiver.max_devices):
+		dev = receiver[number]
+		if dev is None:
+			dev = api.PairedDevice(receiver.handle, number)
+			if dev.codename is None:
+				continue
+
 		print ("--------")
 		print (str(dev))
+		print ("Codename     : %s" % dev.codename)
 		print ("Name         : %s" % dev.name)
 		print ("Kind         : %s" % dev.kind)
 		print ("Serial number: %s" % dev.serial)
+
 		if not dev.protocol:
-			print ("HID protocol : UNKNOWN")
+			print ("Device is not connected at this time, no further info available.")
 			continue
 
 		print ("HID protocol : HID %01.1f" % dev.protocol)
@@ -27,7 +36,7 @@ def scan_devices(receiver):
 
 		firmware = dev.firmware
 		for fw in firmware:
-			print ("   %-10s: %s %s" % (fw.kind, fw.name, fw.version))
+			print ("  %-11s: %s %s" % (fw.kind, fw.name, fw.version))
 
 		all_features = api.get_device_features(dev.handle, dev.number)
 		for index in range(0, len(all_features)):
@@ -45,9 +54,7 @@ def scan_devices(receiver):
 				print ("  %d reprogrammable keys found" % len(keys))
 				for k in keys:
 					flags = ','.join(KEY_FLAG_NAME[f] for f in KEY_FLAG_NAME if k.flags & f)
-					print ("    %2d: %-12s => %-12s :%s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags))
-
-		print ("--------")
+					print ("    %2d: %-12s => %-12s : %s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags))
 
 
 if __name__ == '__main__':
@@ -65,9 +72,8 @@ if __name__ == '__main__':
 
 	receiver = api.Receiver.open()
 	if receiver is None:
-		print ("!! Logitech Unifying Receiver not found.")
+		print ("Logitech Unifying Receiver not found.")
 	else:
-		print ("!! Found Logitech Unifying Receiver: %s" % receiver)
 		print_receiver(receiver)
 		scan_devices(receiver)
 		receiver.close()

@@ -3,10 +3,9 @@
 #
 
 # from sys import version as PYTTHON_VERSION
-from gi.repository import Gtk
+from gi.repository import (Gtk, Gdk)
 
-import ui.notify
-import ui.pair_window
+import ui
 from solaar import NAME as _NAME
 from solaar import VERSION as _VERSION
 
@@ -45,7 +44,8 @@ def _show_about_window(action):
 	about.set_logo_icon_name(_NAME)
 	about.set_version(_VERSION)
 	about.set_license_type(Gtk.License.GPL_2_0)
-	about.set_authors(('Daniel Pavel http://github.com/pwr', ))
+	about.set_authors(('Daniel Pavel http://github.com/pwr',))
+	# about.add_credit_section('Testing', 'Douglas Wagner')
 	about.set_website('http://github.com/pwr/Solaar/wiki')
 	about.set_website_label('Solaar Wiki')
 	# about.set_comments('Using Python %s\n' % PYTTHON_VERSION.split(' ')[0])
@@ -64,11 +64,12 @@ import pairing
 def _pair_device(action, frame):
 	window = frame.get_toplevel()
 
-	pair_dialog = ui.pair_window.create( action, pairing.state)
+	pair_dialog = ui.pair_window.create(action, pairing.state)
+	# window.present()
+
 	pair_dialog.set_transient_for(window)
 	pair_dialog.set_modal(True)
-
-	window.present()
+	pair_dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 	pair_dialog.present()
 
 def pair(frame):
@@ -77,15 +78,19 @@ def pair(frame):
 
 def _unpair_device(action, frame):
 	window = frame.get_toplevel()
-	window.present()
+	# window.present()
 	device = frame._device
 	qdialog = Gtk.MessageDialog(window, 0,
-								Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO,
+								Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
 								"Unpair device\n%s ?" % device.name)
+	qdialog.set_icon_name('remove')
+	qdialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+	qdialog.add_button('Unpair', Gtk.ResponseType.ACCEPT)
 	choice = qdialog.run()
 	qdialog.destroy()
-	if choice == Gtk.ResponseType.YES:
-		pairing.state.unpair(device)
+	if choice == Gtk.ResponseType.ACCEPT:
+		if not pairing.state.unpair(device):
+			ui.error(window, 'Unpairing failed', 'Failed to unpair device\n%s .' % device.name)
 
 def unpair(frame):
 	return _action('remove', 'Unpair', _unpair_device, frame)

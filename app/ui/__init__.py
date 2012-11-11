@@ -6,8 +6,8 @@ from gi.repository import (GObject, Gtk)
 GObject.threads_init()
 
 
-from solaar import NAME as _NAME
-_APP_ICONS = (_NAME + '-fail', _NAME + '-init', _NAME)
+from solaar import NAME
+_APP_ICONS = (NAME + '-fail', NAME + '-init', NAME)
 def appicon(receiver_status):
 	return (_APP_ICONS[0] if receiver_status < 0 else
 			_APP_ICONS[1] if receiver_status < 1 else
@@ -25,12 +25,9 @@ def icon_file(name):
 	return None
 
 
-def show_permissions_warning(window):
-	text = ('Found a possible Unifying Receiver device,\n'
-			'but did not have permission to open it.')
-
+def error(window, title, text):
 	m = Gtk.MessageDialog(window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
-	m.set_title('Permissions error')
+	m.set_title(title)
 	m.run()
 	m.destroy()
 

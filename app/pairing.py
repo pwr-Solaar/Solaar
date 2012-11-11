@@ -64,6 +64,8 @@ class State(object):
 				if event.data == b'\x4A\x00\x01\x00\x00':
 					_l.debug("receiver gave up")
 					self.success = False
+					# self.success = True
+					# self.detected_device = self.listener.receiver.devices[1]
 					return True
 			return False
 
@@ -78,5 +80,4 @@ class State(object):
 		return True
 
 	def unpair(self, device):
-		_l.debug("unpair %s", device)
-		self.listener.unpair_device(device)
+		return self.listener.unpair_device(device)

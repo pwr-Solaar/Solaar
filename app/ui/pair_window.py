@@ -8,14 +8,21 @@ from gi.repository import (Gtk, GObject)
 import ui
 
 
-def _create_page(assistant, text, kind):
+def _create_page(assistant, text, kind, icon_name=None):
 	p = Gtk.VBox(False, 12)
 	p.set_border_width(8)
 
 	if text:
+		item = Gtk.HBox(homogeneous=False, spacing=16)
+		p.pack_start(item, False, True, 0)
+
 		label = Gtk.Label(text)
 		label.set_alignment(0, 0)
-		p.pack_start(label, False, True, 0)
+		item.pack_start(label, True, True, 0)
+
+		if icon_name:
+			icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
+			item.pack_start(icon, False, False, 0)
 
 	assistant.append_page(p)
 	assistant.set_page_type(p, kind)
@@ -59,8 +66,9 @@ def _scan_complete_ui(assistant, device):
 		page = _create_page(assistant,
 							'No new device detected.\n'
 							'\n'
-							'Make sure your device is within range of the receiver,\nand it has a decent battery charge.\n',
-							Gtk.AssistantPageType.CONFIRM)
+							'Make sure your device is within the\nreceiver\'s range, and it has\na decent battery charge.\n',
+							Gtk.AssistantPageType.CONFIRM,
+							'dialog-error')
 	else:
 		page = _create_page(assistant,
 							None,
@@ -110,7 +118,8 @@ def create(action, state):
 					'Turn on the device you want to pair.\n'
 					'\n'
 					'If the device is already turned on,\nturn if off and on again.',
-					Gtk.AssistantPageType.INTRO)
+					Gtk.AssistantPageType.INTRO,
+					'preferences-desktop-peripherals')
 	spinner = Gtk.Spinner()
 	spinner.set_visible(True)
 	page_intro.pack_end(spinner, True, True, 16)

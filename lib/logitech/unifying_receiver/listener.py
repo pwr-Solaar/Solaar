@@ -2,12 +2,12 @@
 #
 #
 
-from threading import Thread as _Thread
-# from time import sleep as _sleep
+import threading as _threading
 
 from . import base as _base
 from .exceptions import NoReceiver as _NoReceiver
 from .common import Packet as _Packet
+from .constants import MAX_ATTACHED_DEVICES as _MAX_ATTACHED_DEVICES
 
 # for both Python 2 and 3
 try:
@@ -21,26 +21,10 @@ _log = getLogger('LUR').getChild('listener')
 del getLogger
 
 
-_READ_EVENT_TIMEOUT = int(_base.DEFAULT_TIMEOUT / 2)  # ms
-
-def _event_dispatch(listener, callback):
-	while listener._active:  # or not listener._events.empty():
-		try:
-			event = listener._events.get(True, _READ_EVENT_TIMEOUT * 10)
-		except:
-			continue
-		# _log.debug("delivering event %s", event)
-		try:
-			callback(event)
-		except:
-			_log.exception("callback for %s", event)
-
-
-class EventsListener(_Thread):
+class EventsListener(_threading.Thread):
 	"""Listener thread for events from the Unifying Receiver.
 
-	Incoming packets will be passed to the callback function in sequence, by a
-	separate thread.
+	Incoming packets will be passed to the callback function in sequence.
 	"""
 	def __init__(self, receiver_handle, events_callback):
 		super(EventsListener, self).__init__(group='Unifying Receiver', name=self.__class__.__name__)
@@ -49,92 +33,65 @@ class EventsListener(_Thread):
 		self._active = False
 
 		self._handle = receiver_handle
-
-		self._tasks = _Queue(1)
-		self._backup_unhandled_hook = _base.unhandled_hook
-		_base.unhandled_hook = self.unhandled_hook
-
-		self._events = _Queue(32)
-		self._dispatcher = _Thread(group='Unifying Receiver',
-									name=self.__class__.__name__ + '-dispatch',
-									target=_event_dispatch, args=(self, events_callback))
-		self._dispatcher.daemon = True
+		self._queued_events = _Queue(32)
+		self._events_callback = events_callback
 
 	def run(self):
 		self._active = True
-		_log.debug("started")
-		_base.request_context = self
-		_base.unhandled_hook = self._backup_unhandled_hook
-		del self._backup_unhandled_hook
-
-		self._dispatcher.start()
+		_base.unhandled_hook = self._unhandled_hook
+		ihandle = int(self._handle)
+		_log.info("started with %s (%d)", repr(self._handle), ihandle)
 
 		while self._active:
-			try:
-				# _log.debug("read next event")
-				event = _base.read(self._handle, _READ_EVENT_TIMEOUT)
-			except _NoReceiver:
-				self._handle = 0
-				_log.warn("receiver disconnected")
-				self._events.put(_Packet(0xFF, 0xFF, None))
-				self._active = False
+			if self._queued_events.empty():
+				try:
+					# _log.debug("read next event")
+					event = _base.read(ihandle)
+					# shortcut: we should only be looking at events for proper device numbers
+				except _NoReceiver:
+					self._active = False
+					self._handle = None
+					_log.warning("receiver disconnected")
+					event = (0xFF, 0xFF, None)
 			else:
-				if event is not None:
-					matched = False
-					task = None if self._tasks.empty() else self._tasks.queue[0]
-					if task and task[-1] is None:
-						task_dev, task_data = task[:2]
-						if event[1] == task_dev:
-							# _log.debug("matching %s to (%d, %s)", event, task_dev, repr(task_data))
-							matched = event[2][:2] == task_data[:2] or (event[2][:1] in b'\x8F\xFF' and event[2][1:3] == task_data[:2])
+				# deliver any queued events
+				event = self._queued_events.get()
 
-					if matched:
-						# _log.debug("request reply %s", event)
-						task[-1] = event
-						self._tasks.task_done()
-					else:
-						event = _Packet(*event)
-						_log.info("queueing event %s", event)
-						self._events.put(event)
+			if event:
+				event = _Packet(*event)
+				# _log.debug("processing event %s", event)
+				try:
+					self._events_callback(event)
+				except:
+					_log.exception("processing event %s", event)
 
-		_base.request_context = None
-		handle, self._handle = self._handle, 0
-		_base.close(handle)
-		_log.debug("stopped")
+		_base.unhandled_hook = None
+		handle, self._handle = self._handle, None
+		if handle:
+			_base.close(handle)
+			_log.info("stopped %s", repr(handle))
 
 	def stop(self):
 		"""Tells the listener to stop as soon as possible."""
 		if self._active:
 			_log.debug("stopping")
 			self._active = False
-			# wait for the receiver handle to be closed
-			self.join()
+			handle, self._handle = self._handle, None
+			if handle:
+				_base.close(handle)
+				_log.info("stopped %s", repr(handle))
 
 	@property
 	def handle(self):
 		return self._handle
 
-	def write(self, handle, devnumber, data):
-		assert handle == self._handle
-		# _log.debug("write %02X %s", devnumber, _base._hex(data))
-		task = [devnumber, data, None]
-		self._tasks.put(task)
-		_base.write(self._handle, devnumber, data)
-		# _log.debug("task queued %s", task)
-
-	def read(self, handle, timeout=_base.DEFAULT_TIMEOUT):
-		assert handle == self._handle
-		# _log.debug("read %d", timeout)
-		assert not self._tasks.empty()
-		self._tasks.join()
-		task = self._tasks.get(False)
-		# _log.debug("task ready %s", task)
-		return task[-1]
-
-	def unhandled_hook(self, reply_code, devnumber, data):
-		event = _Packet(reply_code, devnumber, data)
-		_log.info("queueing unhandled event %s", event)
-		self._events.put(event)
+	def _unhandled_hook(self, reply_code, devnumber, data):
+		# only consider unhandled events that were sent from this thread,
+		# i.e. triggered during a callback of a previous event
+		if _threading.current_thread() == self:
+			event = _Packet(reply_code, devnumber, data)
+			_log.info("queueing unhandled event %s", event)
+			self._queued_events.put(event)
 
 	def __bool__(self):
 		return bool(self._active and self._handle)

@@ -55,7 +55,8 @@ if __name__ == '__main__':
 	print (".. Opening device %s" % args.device)
 	handle = hidapi.open_path(args.device.encode('utf-8'))
 	if handle:
-		print (".. Opened handle %X, vendor %s product %s serial %s" % (handle,
+		print (".. Opened handle %s, vendor %s product %s serial %s" % (
+						repr(handle),
 						repr(hidapi.get_manufacturer(handle)),
 						repr(hidapi.get_product(handle)),
 						repr(hidapi.get_serial(handle))))
@@ -101,7 +102,7 @@ if __name__ == '__main__':
 		except Exception as e:
 			print ('%s: %s' % (type(e).__name__, e))
 
-		print (".. Closing handle %X" % handle)
+		print (".. Closing handle %s" % repr(handle))
 		hidapi.close(handle)
 		if interactive:
 			readline.write_history_file(args.history)

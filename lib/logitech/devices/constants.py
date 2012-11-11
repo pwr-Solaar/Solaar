@@ -4,8 +4,10 @@
 
 STATUS = type('STATUS', (),
 				dict(
-					UNKNOWN=-9999,
-					UNPAIRED=-1000,
+					UI_NOTIFY=0x01,
+					UI_POPUP=0x02,
+					UNKNOWN=-0xFFFF,
+					UNPAIRED=-0x1000,
 					UNAVAILABLE=-1,
 					BOOTING=0,
 					CONNECTED=1,
@@ -26,6 +28,7 @@ PROPS = type('PROPS', (),
 					BATTERY_LEVEL='battery_level',
 					BATTERY_STATUS='battery_status',
 					LIGHT_LEVEL='light_level',
+					UI_FLAGS='ui_flags',
 				))
 
 # when the receiver reports a device that is not connected

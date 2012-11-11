@@ -5,6 +5,7 @@
 from struct import pack as _pack
 from struct import unpack as _unpack
 import errno as _errno
+from threading import local as _local
 
 
 from . import base as _base
@@ -27,6 +28,56 @@ del getLogger
 #
 #
 
+class ThreadedHandle(object):
+	__slots__ = ['path', '_local', '_handles']
+
+	def __init__(self, initial_handle, path):
+		if type(initial_handle) != int:
+			raise TypeError('expected int as initial handle, got %s' % repr(initial_handle))
+
+		self.path = path
+		self._local = _local()
+		self._local.handle = initial_handle
+		self._handles = [initial_handle]
+
+	def _open(self):
+		handle = _base.open_path(self.path)
+		if handle is None:
+			_log.error("%s failed to open new handle", repr(self))
+		else:
+			# _log.debug("%s opened new handle %d", repr(self), handle)
+			self._local.handle = handle
+			self._handles.append(handle)
+			return handle
+
+	def close(self):
+		self._local = None
+		handles, self._handles = self._handles, []
+		_log.debug("%s closing %s", repr(self), handles)
+		for h in handles:
+			_base.close(h)
+
+	def __del__(self):
+		self.close()
+
+	def __int__(self):
+		if self._local:
+			try:
+				return self._local.handle
+			except:
+				return self._open()
+
+	def __str__(self):
+		return str(int(self))
+
+	def __repr__(self):
+		return '<LocalHandle[%s]>' % self.path
+
+	def __bool__(self):
+		return bool(self._handles)
+	__nonzero__ = __bool__
+
+
 class PairedDevice(object):
 	def __init__(self, handle, number):
 		self.handle = handle
@@ -40,11 +91,15 @@ class PairedDevice(object):
 		self._serial = None
 		self._firmware = None
 
+	def __del__(self):
+		self.handle = None
+
 	@property
 	def protocol(self):
 		if self._protocol is None:
 			self._protocol = _base.ping(self.handle, self.number)
-		return 0 if self._protocol is None else self._protocol
+			# _log.debug("device %d protocol %s", self.number, self._protocol)
+		return self._protocol or 0
 
 	@property
 	def features(self):
@@ -59,7 +114,8 @@ class PairedDevice(object):
 			codename = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x40 + self.number - 1)
 			if codename:
 				self._codename = codename[2:].rstrip(b'\x00').decode('ascii')
-		return self._codename or '?'
+				# _log.debug("device %d codename %s", self.number, self._codename)
+		return self._codename
 
 	@property
 	def name(self):
@@ -70,7 +126,7 @@ class PairedDevice(object):
 					self._name, self._kind = _DEVICE_NAMES[self._codename]
 			else:
 				self._name = get_device_name(self.handle, self.number, self.features)
-		return self._name or self.codename
+		return self._name or self.codename or '?'
 
 	@property
 	def kind(self):
@@ -87,6 +143,7 @@ class PairedDevice(object):
 	def firmware(self):
 		if self._firmware is None and self.protocol >= 2.0:
 			self._firmware = get_device_firmware(self.handle, self.number, self.features)
+			# _log.debug("device %d firmware %s", self.number, self._firmware)
 		return self._firmware or ()
 
 	@property
@@ -96,16 +153,14 @@ class PairedDevice(object):
 			serial = _base.request(self.handle, 0xFF, b'\x83\xB5', 0x30 + self.number - 1)
 			if prefix and serial:
 				self._serial = _base._hex(prefix[3:5]) + '-' + _base._hex(serial[1:5])
+				# _log.debug("device %d serial %s", self.number, self._serial)
 		return self._serial or '?'
 
 	def ping(self):
 		return _base.ping(self.handle, self.number) is not None
 
 	def __str__(self):
-		return '<PairedDevice(%X,%d,%s)>' % (self.handle, self.number, self._name or '?')
-
-	def __hash__(self):
-		return self.number
+		return '<PairedDevice(%s,%d,%s)>' % (self.handle, self.number, self.codename or '?')
 
 
 class Receiver(object):
@@ -120,8 +175,11 @@ class Receiver(object):
 		self._firmware = None
 
 	def close(self):
-		handle, self.handle = self.handle, 0
+		handle, self.handle = self.handle, None
 		return (handle and _base.close(handle))
+
+	def __del__(self):
+		self.close()
 
 	@property
 	def serial(self):
@@ -153,7 +211,7 @@ class Receiver(object):
 		return self._firmware
 
 	def __iter__(self):
-		if self.handle == 0:
+		if not self.handle:
 			return
 
 		for number in range(1, 1 + MAX_ATTACHED_DEVICES):
@@ -164,14 +222,14 @@ class Receiver(object):
 	def __getitem__(self, key):
 		if type(key) != int:
 			raise TypeError('key must be an integer')
-		if self.handle == 0 or key < 0 or key > MAX_ATTACHED_DEVICES:
+		if not self.handle or key < 0 or key > MAX_ATTACHED_DEVICES:
 			raise IndexError(key)
 		return get_device(self.handle, key) if key > 0 else None
 
 	def __delitem__(self, key):
 		if type(key) != int:
 			raise TypeError('key must be an integer')
-		if self.handle == 0 or key < 0 or key > MAX_ATTACHED_DEVICES:
+		if not self.handle or key < 0 or key > MAX_ATTACHED_DEVICES:
 			raise IndexError(key)
 		if key > 0:
 			_log.debug("unpairing device %d", key)
@@ -180,13 +238,14 @@ class Receiver(object):
 				raise IndexError(key)
 
 	def __len__(self):
-		if self.handle == 0:
+		if not self.handle:
 			return 0
 		# not really sure about this one...
 		count = _base.request(self.handle, 0xFF, b'\x81\x00')
 		return 0 if count is None else ord(count[1:2])
 
 	def __contains__(self, dev):
+		# print self, "contains", dev
 		if self.handle == 0:
 			return False
 		if type(dev) == int:
@@ -194,10 +253,7 @@ class Receiver(object):
 		return dev.ping()
 
 	def __str__(self):
-		return '<Receiver(%X,%s)>' % (self.handle, self.path)
-
-	def __hash__(self):
-		return self.handle
+		return '<Receiver(%s,%s)>' % (self.handle, self.path)
 
 	__bool__ = __nonzero__ = lambda self: self.handle != 0
 
@@ -212,7 +268,7 @@ class Receiver(object):
 		for rawdevice in _base.list_receiver_devices():
 			exception = None
 			try:
-				handle = _base.try_open(rawdevice.path)
+				handle = _base.open_path(rawdevice.path)
 				if handle:
 					return Receiver(handle, rawdevice.path)
 			except OSError as e:
@@ -295,13 +351,13 @@ def get_feature_index(handle, devnumber, feature):
 	if reply:
 		feature_index = ord(reply[0:1])
 		if feature_index:
-			# feature_flags = ord(reply[1:2]) & 0xE0
-			# if feature_flags:
-			# 	_log.debug("device %d feature <%s:%s> has index %d: %s",
-			# 				devnumber, _hex(feature), FEATURE_NAME[feature], feature_index,
-			# 				','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
-			# else:
-			# 	_log.debug("device %d feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
+			feature_flags = ord(reply[1:2]) & 0xE0
+			if feature_flags:
+				_log.debug("device %d feature <%s:%s> has index %d: %s",
+							devnumber, _hex(feature), FEATURE_NAME[feature], feature_index,
+							','.join([FEATURE_FLAGS[k] for k in FEATURE_FLAGS if feature_flags & k]))
+			else:
+				_log.debug("device %d feature <%s:%s> has index %d", devnumber, _hex(feature), FEATURE_NAME[feature], feature_index)
 
 			# only consider active and supported features?
 			# if feature_flags:
@@ -322,9 +378,12 @@ def _get_feature_index(handle, devnumber, feature, features=None):
 
 	index = get_feature_index(handle, devnumber, feature)
 	if index is not None:
-		if len(features) <= index:
-			features += [None] * (index + 1 - len(features))
-		features[index] = feature
+		try:
+			if len(features) <= index:
+				features += [None] * (index + 1 - len(features))
+			features[index] = feature
+		except:
+			pass
 		# _log.debug("%s: found feature %s at %d", features, _base._hex(feature), index)
 		return index
 

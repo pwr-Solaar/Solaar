@@ -30,16 +30,16 @@ class Test_UR_Base(unittest.TestCase):
 		# self.assertIsInstance(rawdevices, Iterable, "list_receiver_devices should have returned an iterable")
 		Test_UR_Base.ur_available = len(list(rawdevices)) > 0
 
-	def test_20_try_open(self):
+	def test_20_open_path(self):
 		if not self.ur_available:
 			self.fail("No receiver found")
 
 		for rawdevice in base.list_receiver_devices():
-			handle = base.try_open(rawdevice.path)
+			handle = base.open_path(rawdevice.path)
 			if handle is None:
 				continue
 
-			self.assertIsInstance(handle, int, "try_open should have returned an int")
+			self.assertIsInstance(handle, int, "open_path should have returned an int")
 
 			if Test_UR_Base.handle is None:
 				Test_UR_Base.handle = handle
@@ -131,46 +131,46 @@ class Test_UR_Base(unittest.TestCase):
 		index = reply[:1]
 		self.assertGreater(index, b'\x00', "FEATURE_SET not available on device " + str(self.device))
 
-	def test_57_request_ignore_undhandled(self):
-		if self.handle is None:
-			self.fail("No receiver found")
-		if self.device is None:
-			self.fail("No devices attached")
+	# def test_57_request_ignore_undhandled(self):
+	# 	if self.handle is None:
+	# 		self.fail("No receiver found")
+	# 	if self.device is None:
+	# 		self.fail("No devices attached")
 
-		fs_index = base.request(self.handle, self.device, FEATURE.ROOT, FEATURE.FEATURE_SET)
-		self.assertIsNotNone(fs_index)
-		fs_index = fs_index[:1]
-		self.assertGreater(fs_index, b'\x00')
+	# 	fs_index = base.request(self.handle, self.device, FEATURE.ROOT, FEATURE.FEATURE_SET)
+	# 	self.assertIsNotNone(fs_index)
+	# 	fs_index = fs_index[:1]
+	# 	self.assertGreater(fs_index, b'\x00')
 
-		global received_unhandled
-		received_unhandled = None
+	# 	global received_unhandled
+	# 	received_unhandled = None
 
-		def _unhandled(code, device, data):
-			self.assertIsNotNone(code)
-			self.assertIsInstance(code, int)
-			self.assertIsNotNone(device)
-			self.assertIsInstance(device, int)
-			self.assertIsNotNone(data)
-			self.assertIsInstance(data, str)
-			global received_unhandled
-			received_unhandled = (code, device, data)
+	# 	def _unhandled(code, device, data):
+	# 		self.assertIsNotNone(code)
+	# 		self.assertIsInstance(code, int)
+	# 		self.assertIsNotNone(device)
+	# 		self.assertIsInstance(device, int)
+	# 		self.assertIsNotNone(data)
+	# 		self.assertIsInstance(data, str)
+	# 		global received_unhandled
+	# 		received_unhandled = (code, device, data)
 
-		base.unhandled_hook = _unhandled
-		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
-		reply = base.request(self.handle, self.device, fs_index + b'\x00')
-		self.assertIsNotNone(reply, "request returned None reply")
-		self.assertNotEquals(reply[:1], b'\x00')
-		self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
+	# 	base.unhandled_hook = _unhandled
+	# 	base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
+	# 	reply = base.request(self.handle, self.device, fs_index + b'\x00')
+	# 	self.assertIsNotNone(reply, "request returned None reply")
+	# 	self.assertNotEquals(reply[:1], b'\x00')
+	# 	self.assertIsNotNone(received_unhandled, "extra message not received by unhandled hook")
 
-		received_unhandled = None
-		base.unhandled_hook = None
-		base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
-		reply = base.request(self.handle, self.device, fs_index + b'\x00')
-		self.assertIsNotNone(reply, "request returned None reply")
-		self.assertNotEquals(reply[:1], b'\x00')
-		self.assertIsNone(received_unhandled)
+	# 	received_unhandled = None
+	# 	base.unhandled_hook = None
+	# 	base.write(self.handle, self.device, FEATURE.ROOT + FEATURE.FEATURE_SET)
+	# 	reply = base.request(self.handle, self.device, fs_index + b'\x00')
+	# 	self.assertIsNotNone(reply, "request returned None reply")
+	# 	self.assertNotEquals(reply[:1], b'\x00')
+	# 	self.assertIsNone(received_unhandled)
 
-		del received_unhandled
+	# 	del received_unhandled
 
 	# def test_90_receiver_missing(self):
 	# 	if self.handle is None:

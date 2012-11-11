@@ -47,4 +47,9 @@ def process_event(devinfo, data):
 
 	if data[:2] == b'\x09\x20' and data[7:11] == b'GOOD':
 		logging.debug("Solar key pressed")
-		return request_status(devinfo) or _charge_status(data)
+		if request_status(devinfo) == STATUS.UNAVAILABLE:
+			return STATUS.UNAVAILABLE, {PROPS.UI_FLAGS: STATUS.UI_POPUP | STATUS.UI_NOTIFY}
+
+		code, props = _charge_status(data)
+		props[PROPS.UI_FLAGS] = STATUS.UI_POPUP
+		return code, props

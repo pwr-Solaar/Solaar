@@ -50,6 +50,6 @@ def update(icon, receiver):
 			lines.append('')
 
 		text = '\n'.join(lines).rstrip('\n')
-		icon.set_tooltip_markup(text)
+		icon.set_tooltip_markup(ui.NAME + ':\n' + text)
 	else:
-		icon.set_tooltip_text(receiver.status_text)
+		icon.set_tooltip_text(ui.NAME + ': ' + receiver.status_text)
