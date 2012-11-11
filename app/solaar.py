@@ -62,11 +62,11 @@ def _check_requirements():
 
 
 if __name__ == '__main__':
-	args = _parse_arguments()
-
 	req_fail = _check_requirements()
 	if req_fail:
 		raise ImportError('missing required package: %s' % req_fail)
+
+	args = _parse_arguments()
 
 	import ui
 

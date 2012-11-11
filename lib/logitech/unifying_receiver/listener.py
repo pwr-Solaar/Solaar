@@ -7,7 +7,6 @@ import threading as _threading
 from . import base as _base
 from .exceptions import NoReceiver as _NoReceiver
 from .common import Packet as _Packet
-from .constants import MAX_ATTACHED_DEVICES as _MAX_ATTACHED_DEVICES
 
 # for both Python 2 and 3
 try:
@@ -27,7 +26,7 @@ class EventsListener(_threading.Thread):
 	Incoming packets will be passed to the callback function in sequence.
 	"""
 	def __init__(self, receiver_handle, events_callback):
-		super(EventsListener, self).__init__(group='Unifying Receiver', name=self.__class__.__name__)
+		super(EventsListener, self).__init__(name=self.__class__.__name__)
 
 		self.daemon = True
 		self._active = False

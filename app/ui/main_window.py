@@ -257,7 +257,7 @@ def _update_receiver_box(frame, receiver):
 
 def _update_device_box(frame, dev):
 	frame._device = dev
-	# print dev.name, dev.kind
+	# print (dev.name, dev.kind)
 
 	icon, label, info_label = ui.find_children(frame, 'icon', 'label', 'info-label')
 

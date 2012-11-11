@@ -245,7 +245,7 @@ class Receiver(object):
 		return 0 if count is None else ord(count[1:2])
 
 	def __contains__(self, dev):
-		# print self, "contains", dev
+		# print (self, "contains", dev)
 		if self.handle == 0:
 			return False
 		if type(dev) == int:

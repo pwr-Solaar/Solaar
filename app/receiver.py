@@ -66,7 +66,7 @@ class _FeaturesArray(object):
 			raise IndexError
 
 		if self.features[index] is None:
-			# print "features getitem at %d" % index
+			# print ("features getitem at %d" % index)
 			fs_index = self.features.index(_api.FEATURE.FEATURE_SET)
 			# technically fs_function is 0x10 for this call, but we add the index to differentiate possibly conflicting requests
 			fs_function = 0x10 | (index & 0x0F)
@@ -81,7 +81,7 @@ class _FeaturesArray(object):
 			if value in self.features:
 				return True
 
-			# print "features contains %s" % repr(value)
+			# print ("features contains %s" % repr(value))
 			for index in range(0, len(self.features)):
 				f = self.features[index] or self.__getitem__(index)
 				assert f is not None
