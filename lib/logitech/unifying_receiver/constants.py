@@ -63,8 +63,7 @@ FIRMWARE_KIND = FallbackDict(lambda x: 'Unknown', list2dict(_FIRMWARE_KINDS))
 
 
 _BATTERY_STATUSES = ('Discharging (in use)', 'Recharging', 'Almost full',
-					'Full', 'Slow recharge', 'Invalid battery', 'Thermal error',
-					'Charging error')
+					'Full', 'Slow recharge', 'Invalid battery', 'Thermal error')
 BATTERY_OK = lambda status: status < 5
 
 """Names for possible battery status values."""

@@ -4,6 +4,7 @@
 
 from gi.repository import Gtk
 import ui
+from logitech.devices.constants import (STATUS, PROPS)
 
 
 def create(window, menu_actions=None):
@@ -33,21 +34,27 @@ def create(window, menu_actions=None):
 def update(icon, receiver):
 	icon.set_from_icon_name(ui.appicon(receiver.status))
 
+	# device_with_battery = None
+
 	if receiver.devices:
 		lines = []
-		if receiver.status < 1:
+		if receiver.status < STATUS.CONNECTED:
 			lines += (receiver.status_text, '')
 
-		devlist = [receiver.devices[d] for d in range(1, 1 + receiver.max_devices) if d in receiver.devices]
+		devlist = list(receiver.devices.values())
+		devlist.sort(lambda x, y: x.number < y.number)
 		for dev in devlist:
 			name = '<b>' + dev.name + '</b>'
-			if dev.status < 1:
+			if dev.status < STATUS.CONNECTED:
 				lines.append(name + ' (' + dev.status_text + ')')
 			else:
 				lines.append(name)
-				if dev.status > 1:
+				if dev.status > STATUS.CONNECTED:
 					lines.append('    ' + dev.status_text)
 			lines.append('')
+
+			# if device_with_battery is None and PROPS.BATTERY_LEVEL in dev.props:
+			# 	device_with_battery = dev
 
 		text = '\n'.join(lines).rstrip('\n')
 		icon.set_tooltip_markup(ui.NAME + ':\n' + text)

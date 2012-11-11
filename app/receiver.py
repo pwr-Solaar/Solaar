@@ -307,12 +307,12 @@ class ReceiverListener(_EventsListener):
 			dev = DeviceInfo(self.handle, event.devnumber, status, self.status_changed)
 			self.LOG.info("new device %s", dev)
 
-			self.receiver.devices[event.devnumber] = dev
-			self.change_status(STATUS.CONNECTED + len(self.receiver.devices))
+			self.change_status(STATUS.CONNECTED + 1 + len(self.receiver.devices))
 
 			if status == STATUS.CONNECTED:
 				dev.protocol, dev.name, dev.kind
 			self.status_changed(dev, STATUS.UI_NOTIFY)
+			self.receiver.devices[event.devnumber] = dev
 			if status == STATUS.CONNECTED:
 				dev.serial, dev.firmware
 			return dev
