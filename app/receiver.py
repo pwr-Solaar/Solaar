@@ -189,10 +189,12 @@ class DeviceInfo(_api.PairedDevice):
 					return True
 
 				if type(status) == tuple:
-					ui_flags = status[1].pop(PROPS.UI_FLAGS, 0)
-					self.props.update(status[1])
-					self.status = status[0]
-					if ui_flags:
+					new_status, new_props = status
+					ui_flags = new_props.pop(PROPS.UI_FLAGS, 0)
+					old_props = dict(self.props)
+					self.props.update(new_props)
+					self.status = new_status
+					if ui_flags or old_props != self.props:
 						self.status_changed_callback(self, ui_flags)
 					return True
 
