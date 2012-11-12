@@ -32,9 +32,11 @@ class ThreadedHandle(object):
 	__slots__ = ['path', '_local', '_handles']
 
 	def __init__(self, initial_handle, path):
+		assert initial_handle
 		if type(initial_handle) != int:
 			raise TypeError('expected int as initial handle, got %s' % repr(initial_handle))
 
+		assert path
 		self.path = path
 		self._local = _local()
 		self._local.handle = initial_handle
@@ -80,7 +82,9 @@ class ThreadedHandle(object):
 
 class PairedDevice(object):
 	def __init__(self, handle, number):
+		assert handle
 		self.handle = handle
+		assert number > 0 and number <= MAX_ATTACHED_DEVICES
 		self.number = number
 
 		self._protocol = None
@@ -168,7 +172,9 @@ class Receiver(object):
 	max_devices = MAX_ATTACHED_DEVICES
 
 	def __init__(self, handle, path=None):
+		assert handle
 		self.handle = handle
+		assert path
 		self.path = path
 
 		self._serial = None

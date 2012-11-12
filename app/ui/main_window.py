@@ -151,6 +151,9 @@ def toggle(window, trigger):
 		window.present()
 	return True
 
+def _popup(window, trigger):
+	if not window.get_visible():
+		toggle(window, trigger)
 
 def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
@@ -177,6 +180,7 @@ def create(title, name, max_devices, systray=False):
 	window.set_resizable(False)
 
 	window.toggle_visible = lambda i: toggle(window, i)
+	window.popup = lambda i: _popup(window, i)
 
 	if systray:
 		window.set_keep_above(True)
@@ -272,12 +276,16 @@ def _update_device_box(frame, dev):
 	status_icons = status.get_children()
 
 	if dev.status < STATUS.CONNECTED:
-		label.set_sensitive(True)
+		label.set_sensitive(False)
 
 		battery_icon, battery_label = status_icons[0:2]
 		battery_icon.set_sensitive(False)
-		battery_label.set_markup('<small>%s</small>' % dev.status_text)
-		battery_label.set_sensitive(True)
+		battery_label.set_sensitive(False)
+		battery_level = dev.props.get(PROPS.BATTERY_LEVEL)
+		if battery_level is None:
+			battery_label.set_markup('<small>(%s)</small>' % dev.status_text)
+		else:
+			battery_label.set_markup('%d%% <small>(%s)</small>' % (battery_level, dev.status_text))
 		for c in status_icons[2:-1]:
 			c.set_visible(False)
 

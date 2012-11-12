@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -u
 
 NAME = 'Solaar'
 VERSION = '0.7.3'
@@ -44,27 +44,18 @@ def _parse_arguments():
 	return args
 
 
-def _check_requirements():
+def _require(module, package):
 	try:
-		import pyudev
+		__import__(module)
 	except ImportError:
-		return 'python-pyudev'
-
-	try:
-		import gi.repository
-	except ImportError:
-		return 'python-gi'
-
-	try:
-		from gi.repository import Gtk
-	except ImportError:
-		return 'gir1.2-gtk-3.0'
+		import sys
+		sys.exit("%s: missing required package '%s'" % (NAME, package))
 
 
 if __name__ == '__main__':
-	req_fail = _check_requirements()
-	if req_fail:
-		raise ImportError('missing required package: %s' % req_fail)
+	_require('pyudev', 'python-pyudev')
+	_require('gi.repository', 'python-gi')
+	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
 
 	args = _parse_arguments()
 
@@ -95,10 +86,17 @@ if __name__ == '__main__':
 	notify_missing = True
 
 	def status_changed(receiver, device=None, ui_flags=0):
-		ui.update(receiver, icon, window, device)
+		assert receiver is not None
+		if window:
+			GObject.idle_add(ui.main_window.update, window, receiver, device)
+		if icon:
+			GObject.idle_add(ui.status_icon.update, icon, receiver)
 		if ui_flags & STATUS.UI_POPUP:
-			window.present()
+			GObject.idle_add(window.popup, icon)
 
+		if device is None:
+			# always notify on receiver updates
+			ui_flags |= STATUS.UI_NOTIFY
 		if ui_flags & STATUS.UI_NOTIFY and ui.notify.available:
 			GObject.idle_add(ui.notify.show, device or receiver)
 
@@ -131,10 +129,10 @@ if __name__ == '__main__':
 
 			# print ("opened receiver", listener, listener.receiver)
 			notify_missing = True
-			pairing.state = pairing.State(listener)
 			status_changed(listener.receiver, None, STATUS.UI_NOTIFY)
-			listener.trigger_device_events()
 			GObject.timeout_add(5 * 1000, _check_still_scanning, listener)
+			pairing.state = pairing.State(listener)
+			listener.trigger_device_events()
 
 	GObject.timeout_add(50, check_for_listener, False)
 	Gtk.main()

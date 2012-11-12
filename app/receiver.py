@@ -20,16 +20,17 @@ class _FeaturesArray(object):
 	__slots__ = ('device', 'features', 'supported')
 
 	def __init__(self, device):
+		assert device is not None
 		self.device = device
 		self.features = None
 		self.supported = True
-		self._check()
 
 	def __del__(self):
 		self.supported = False
 		self.device = None
 
 	def _check(self):
+		# print ("%s check" % self.device)
 		if self.supported:
 			if self.features is not None:
 				return True
@@ -118,10 +119,11 @@ class _FeaturesArray(object):
 class DeviceInfo(_api.PairedDevice):
 	"""A device attached to the receiver.
 	"""
-	def __init__(self, handle, number, status=STATUS.UNKNOWN, status_changed_callback=None):
+	def __init__(self, handle, number, status_changed_callback, status=STATUS.BOOTING):
 		super(DeviceInfo, self).__init__(handle, number)
 		self.LOG = _Logger("Device[%d]" % (number))
 
+		assert status_changed_callback
 		self.status_changed_callback = status_changed_callback
 		self._status = status
 		self.props = {}
@@ -131,6 +133,7 @@ class DeviceInfo(_api.PairedDevice):
 	def __del__(self):
 		super(ReceiverListener, self).__del__()
 		self._features.supported = False
+		self._features.device = None
 
 	@property
 	def status(self):
@@ -139,31 +142,36 @@ class DeviceInfo(_api.PairedDevice):
 	@status.setter
 	def status(self, new_status):
 		if new_status < STATUS.CONNECTED:
-			self.props.clear()
+			for p in list(self.props):
+				if p != PROPS.BATTERY_LEVEL:
+					del self.props[p]
 		else:
 			self._features._check()
-			self.serial, self.codename, self.name, self.kind
+			self.protocol, self.codename, self.name, self.kind
 
-		if new_status != self._status and not (new_status == STATUS.CONNECTED and self._status > new_status):
-			self.LOG.debug("status %d => %d", self._status, new_status)
+		old_status = self._status
+		if new_status != old_status and not (new_status == STATUS.CONNECTED and old_status > new_status):
+			self.LOG.debug("status %d => %d", old_status, new_status)
 			self._status = new_status
-			if self.status_changed_callback:
-				ui_flags = STATUS.UI_NOTIFY if new_status == STATUS.UNPAIRED else 0
-				self.status_changed_callback(self, ui_flags)
+			ui_flags = STATUS.UI_NOTIFY if new_status == STATUS.UNPAIRED else 0
+			self.status_changed_callback(self, ui_flags)
 
 	@property
 	def status_text(self):
 		if self._status < STATUS.CONNECTED:
 			return STATUS_NAME[self._status]
+		return STATUS_NAME[STATUS.CONNECTED]
 
+	@property
+	def properties_text(self):
 		t = []
-		if self.props.get(PROPS.BATTERY_LEVEL):
+		if self.props.get(PROPS.BATTERY_LEVEL) is not None:
 			t.append('Battery: %d%%' % self.props[PROPS.BATTERY_LEVEL])
-		if self.props.get(PROPS.BATTERY_STATUS):
+		if self.props.get(PROPS.BATTERY_STATUS) is not None:
 			t.append(self.props[PROPS.BATTERY_STATUS])
-		if self.props.get(PROPS.LIGHT_LEVEL):
+		if self.props.get(PROPS.LIGHT_LEVEL) is not None:
 			t.append('Light: %d lux' % self.props[PROPS.LIGHT_LEVEL])
-		return ', '.join(t) if t else STATUS_NAME[STATUS.CONNECTED]
+		return ', '.join(t)
 
 	def process_event(self, code, data):
 		if code == 0x10 and data[:1] == b'\x8F':
@@ -179,13 +187,10 @@ class DeviceInfo(_api.PairedDevice):
 
 				if type(status) == tuple:
 					ui_flags = status[1].pop(PROPS.UI_FLAGS, 0)
-					p = dict(self.props)
 					self.props.update(status[1])
-					if self.status == status[0]:
-						if self.status_changed_callback and (ui_flags or p != self.props):
-							self.status_changed_callback(self, ui_flags)
-					else:
-						self.status = status[0]
+					self.status = status[0]
+					if ui_flags:
+						self.status_changed_callback(self, ui_flags)
 					return True
 
 				self.LOG.warn("don't know how to handle processed event status %s", status)
@@ -304,15 +309,12 @@ class ReceiverListener(_EventsListener):
 
 		status = self._device_status_from(event)
 		if status is not None:
-			dev = DeviceInfo(self.handle, event.devnumber, status, self.status_changed)
+			dev = DeviceInfo(self.handle, event.devnumber, self.status_changed, status)
 			self.LOG.info("new device %s", dev)
-
-			self.change_status(STATUS.CONNECTED + 1 + len(self.receiver.devices))
-
-			if status == STATUS.CONNECTED:
-				dev.protocol, dev.name, dev.kind
+			dev.status = status
 			self.status_changed(dev, STATUS.UI_NOTIFY)
 			self.receiver.devices[event.devnumber] = dev
+			self.change_status(STATUS.CONNECTED + len(self.receiver.devices))
 			if status == STATUS.CONNECTED:
 				dev.serial, dev.firmware
 			return dev

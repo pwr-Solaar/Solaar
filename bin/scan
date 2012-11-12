@@ -6,4 +6,4 @@ LIB=`readlink -f $(dirname "$Z")/../lib`
 export PYTHONPATH=$LIB
 
 PYTHON=`which python python2 python3 | head -n 1`
-exec $PYTHON -OOu -m logitech.scanner "$@"
+exec $PYTHON -u -m logitech.scanner "$@"

@@ -7,7 +7,7 @@ def print_receiver(receiver):
 	print ("  Serial    : %s" % receiver.serial)
 	for f in receiver.firmware:
 		print ("  %-10s: %s" % (f.kind, f.version))
-	print ("  Receiver reported %d paired device(s)" % len(receiver))
+	print ("  Reported %d paired device(s)" % len(receiver))
 
 
 def scan_devices(receiver):

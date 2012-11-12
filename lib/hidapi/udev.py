@@ -125,6 +125,7 @@ def open_path(device_path):
 
 	:returns: an opaque device handle, or ``None``.
 	"""
+	assert device_path
 	assert '/dev/hidraw' in device_path
 	return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
 
@@ -134,6 +135,7 @@ def close(device_handle):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	"""
+	assert device_handle
 	_os.close(device_handle)
 
 
@@ -158,8 +160,8 @@ def write(device_handle, data):
 	one exists. If it does not, it will send the data through
 	the Control Endpoint (Endpoint 0).
 	"""
+	assert device_handle
 	bytes_written = _os.write(device_handle, data)
-
 	if bytes_written != len(data):
 		raise OSError(errno=_errno.EIO, strerror='written %d bytes out of expected %d' % (bytes_written, len(data)))
 
@@ -180,6 +182,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	:returns: the data packet read, an empty bytes string if a timeout was
 	reached, or None if there was an error while reading.
 	"""
+	assert device_handle
 	timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
 	rlist, wlist, xlist = _select([device_handle], [], [device_handle], timeout)
 
@@ -239,6 +242,7 @@ def get_indexed_string(device_handle, index):
 	if index not in _DEVICE_STRINGS:
 		return None
 
+	assert device_handle
 	stat = _os.fstat(device_handle)
 	dev = _Device.from_device_number(_Context(), 'char', stat.st_rdev)
 	if dev:

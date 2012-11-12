@@ -20,6 +20,8 @@ def get_icon(name, fallback):
 	return name if name and _ICON_THEME.has_icon(name) else fallback
 
 def get_battery_icon(level):
+	if level < 0:
+		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
 
 def icon_file(name):
@@ -59,12 +61,3 @@ def find_children(container, *child_names):
 	result = [None] * count
 	_iterate_children(container, names, result, count)
 	return tuple(result) if count > 1 else result[0]
-
-
-def update(receiver, icon, window, reason):
-	assert receiver is not None
-	assert reason is not None
-	if window:
-		GObject.idle_add(main_window.update, window, receiver, reason)
-	if icon:
-		GObject.idle_add(status_icon.update, icon, receiver)

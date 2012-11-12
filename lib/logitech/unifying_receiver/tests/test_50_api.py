@@ -38,14 +38,6 @@ class Test_UR_API(unittest.TestCase):
 		Test_UR_API.receiver = api.Receiver.open()
 		self._check(check_device=False)
 
-	def test_05_ping_device_zero(self):
-		self._check(check_device=False)
-
-		d = api.PairedDevice(self.receiver.handle, 0)
-		ok = d.ping()
-		self.assertIsNotNone(ok, "invalid ping reply")
-		self.assertFalse(ok, "device zero replied")
-
 	def test_10_ping_all_devices(self):
 		self._check(check_device=False)
 

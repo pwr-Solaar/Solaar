@@ -34,29 +34,33 @@ def create(window, menu_actions=None):
 def update(icon, receiver):
 	battery_level = None
 
-	if receiver.status > STATUS.CONNECTED and receiver.devices:
-		lines = []
-		if receiver.status < STATUS.CONNECTED:
-			lines += (receiver.status_text, '')
+	lines = [ui.NAME + ': ' + receiver.status_text, '']
 
+	if receiver.status > STATUS.CONNECTED:
 		devlist = sorted(receiver.devices.values(), key=lambda x: x.number)
 		for dev in devlist:
-			name = '<b>' + dev.name + '</b>'
-			if dev.status < STATUS.CONNECTED:
-				lines.append(name + ' (' + dev.status_text + ')')
+			lines.append('<b>' + dev.name + '</b>')
+
+			p = dev.properties_text
+			if p:
+				p = '\t' + p
+				if dev.status < STATUS.CONNECTED:
+					p += ' (<small>' + dev.status_text + '</small>)'
+				lines.append(p)
+			elif dev.status < STATUS.CONNECTED:
+				lines.append('\t(<small>' + dev.status_text + '</small>)')
+			elif dev.protocol < 2.0:
+				lines.append('\t' + '<small>no status</small>')
 			else:
-				lines.append(name)
-				if dev.status > STATUS.CONNECTED:
-					lines.append('    ' + dev.status_text)
+				lines.append('\t' + '<small>waiting for status...</small>')
+
 			lines.append('')
 
-			if battery_level is None and PROPS.BATTERY_LEVEL in dev.props:
-				battery_level = dev.props[PROPS.BATTERY_LEVEL]
+			if battery_level is None:
+				if PROPS.BATTERY_LEVEL in dev.props:
+					battery_level = dev.props[PROPS.BATTERY_LEVEL]
 
-		text = '\n'.join(lines).rstrip('\n')
-		icon.set_tooltip_markup(ui.NAME + ':\n' + text)
-	else:
-		icon.set_tooltip_text(ui.NAME + ': ' + receiver.status_text)
+	icon.set_tooltip_markup('\n'.join(lines).rstrip('\n'))
 
 	if battery_level is None:
 		icon.set_from_icon_name(ui.appicon(receiver.status))

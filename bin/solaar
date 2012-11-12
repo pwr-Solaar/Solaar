@@ -10,4 +10,4 @@ export PYTHONPATH=$APP:$LIB
 export XDG_DATA_DIRS=$SHARE:$XDG_DATA_DIRS
 
 PYTHON=`which python python2 python3 | head -n 1`
-exec $PYTHON -OOu -m solaar "$@"
+exec $PYTHON -u -m solaar "$@"
