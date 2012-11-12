@@ -4,6 +4,7 @@
 
 from logging import getLogger as _Logger
 from struct import pack as _pack
+from time import time as _timestamp
 
 from logitech.unifying_receiver import base as _base
 from logitech.unifying_receiver import api as _api
@@ -126,6 +127,7 @@ class DeviceInfo(_api.PairedDevice):
 		assert status_changed_callback
 		self.status_changed_callback = status_changed_callback
 		self._status = status
+		self.status_updated = _timestamp()
 		self.props = {}
 
 		self._features = _FeaturesArray(self)
@@ -149,6 +151,7 @@ class DeviceInfo(_api.PairedDevice):
 			self._features._check()
 			self.protocol, self.codename, self.name, self.kind
 
+		self.status_updated = _timestamp()
 		old_status = self._status
 		if new_status != old_status and not (new_status == STATUS.CONNECTED and old_status > new_status):
 			self.LOG.debug("status %d => %d", old_status, new_status)

@@ -130,11 +130,26 @@ if __name__ == '__main__':
 			# print ("opened receiver", listener, listener.receiver)
 			notify_missing = True
 			status_changed(listener.receiver, None, STATUS.UI_NOTIFY)
-			GObject.timeout_add(5 * 1000, _check_still_scanning, listener)
+			GObject.timeout_add(3 * 1000, _check_still_scanning, listener)
 			pairing.state = pairing.State(listener)
 			listener.trigger_device_events()
 
+	_DEVICE_TIMEOUT = 3 * 60  # seconds
+	_DEVICE_STATUS_CHECK = 30  # seconds
+	from time import time as _timestamp
+
+	def check_for_inactive_devices():
+		if listener and listener.receiver:
+			for dev in listener.receiver.devices.values():
+				if (dev.status < STATUS.CONNECTED and
+					dev.props and
+					_timestamp() - dev.status_updated > _DEVICE_TIMEOUT):
+					dev.props.clear()
+					status_changed(listener.receiver, dev)
+		return True
+
 	GObject.timeout_add(50, check_for_listener, False)
+	GObject.timeout_add(_DEVICE_STATUS_CHECK * 1000, check_for_inactive_devices)
 	Gtk.main()
 
 	if listener is not None:

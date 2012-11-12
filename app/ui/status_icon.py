@@ -45,10 +45,10 @@ def update(icon, receiver):
 			if p:
 				p = '\t' + p
 				if dev.status < STATUS.CONNECTED:
-					p += ' (<small>' + dev.status_text + '</small>)'
+					p += ' <small>(' + dev.status_text + ')</small>'
 				lines.append(p)
 			elif dev.status < STATUS.CONNECTED:
-				lines.append('\t(<small>' + dev.status_text + '</small>)')
+				lines.append('\t<small>(' + dev.status_text + ')</small>')
 			elif dev.protocol < 2.0:
 				lines.append('\t' + '<small>no status</small>')
 			else:

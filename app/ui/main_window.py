@@ -277,17 +277,17 @@ def _update_device_box(frame, dev):
 
 	if dev.status < STATUS.CONNECTED:
 		label.set_sensitive(False)
+		for c in status_icons[2:-1]:
+			c.set_visible(False)
 
 		battery_icon, battery_label = status_icons[0:2]
 		battery_icon.set_sensitive(False)
 		battery_label.set_sensitive(False)
 		battery_level = dev.props.get(PROPS.BATTERY_LEVEL)
 		if battery_level is None:
-			battery_label.set_markup('<small>(%s)</small>' % dev.status_text)
+			battery_label.set_markup('<small>%s</small>' % dev.status_text)
 		else:
-			battery_label.set_markup('%d%% <small>(%s)</small>' % (battery_level, dev.status_text))
-		for c in status_icons[2:-1]:
-			c.set_visible(False)
+			battery_label.set_markup('%d%%' % battery_level)
 
 	else:
 		label.set_sensitive(True)
@@ -299,7 +299,7 @@ def _update_device_box(frame, dev):
 			battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
 			text = 'no status' if dev.protocol < 2.0 else 'waiting for status...'
 			battery_label.set_markup('<small>%s</small>' % text)
-			battery_label.set_sensitive(False)
+			battery_label.set_sensitive(True)
 		else:
 			battery_icon.set_from_icon_name(ui.get_battery_icon(battery_level), _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(True)
