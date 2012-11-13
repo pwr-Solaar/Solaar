@@ -85,26 +85,7 @@ if __name__ == '__main__':
 	listener = None
 	notify_missing = True
 
-	def status_changed(receiver, device=None, ui_flags=0):
-		assert receiver is not None
-		if window:
-			GObject.idle_add(ui.main_window.update, window, receiver, device)
-		if icon:
-			GObject.idle_add(ui.status_icon.update, icon, receiver)
-		if ui_flags & STATUS.UI_POPUP:
-			GObject.idle_add(window.popup, icon)
-
-		if device is None:
-			# always notify on receiver updates
-			ui_flags |= STATUS.UI_NOTIFY
-		if ui_flags & STATUS.UI_NOTIFY and ui.notify.available:
-			GObject.idle_add(ui.notify.show, device or receiver)
-
-		global listener
-		if not listener:
-			GObject.timeout_add(5000, check_for_listener)
-			listener = None
-
+	# initializes the receiver listener
 	from receiver import ReceiverListener
 	def check_for_listener(retry=True):
 		def _check_still_scanning(listener):
@@ -134,6 +115,28 @@ if __name__ == '__main__':
 			pairing.state = pairing.State(listener)
 			listener.trigger_device_events()
 
+	# callback delivering status events from the receiver/devices to the UI
+	def status_changed(receiver, device=None, ui_flags=0):
+		assert receiver is not None
+		if window:
+			GObject.idle_add(ui.main_window.update, window, receiver, device)
+		if icon:
+			GObject.idle_add(ui.status_icon.update, icon, receiver)
+		if ui_flags & STATUS.UI_POPUP:
+			GObject.idle_add(window.popup, icon)
+
+		if device is None:
+			# always notify on receiver updates
+			ui_flags |= STATUS.UI_NOTIFY
+		if ui_flags & STATUS.UI_NOTIFY and ui.notify.available:
+			GObject.idle_add(ui.notify.show, device or receiver)
+
+		global listener
+		if not listener:
+			GObject.timeout_add(5000, check_for_listener)
+			listener = None
+
+	# clears all properties of devices that have been inactive for too long
 	_DEVICE_TIMEOUT = 3 * 60  # seconds
 	_DEVICE_STATUS_CHECK = 30  # seconds
 	from time import time as _timestamp

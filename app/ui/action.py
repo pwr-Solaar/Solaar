@@ -44,11 +44,12 @@ def _show_about_window(action):
 	about.set_logo_icon_name(_NAME)
 	about.set_version(_VERSION)
 	about.set_license_type(Gtk.License.GPL_2_0)
+	about.set_copyright('\xC2\xA9 2012 Daniel Pavel')
 	about.set_authors(('Daniel Pavel http://github.com/pwr',))
 	# about.add_credit_section('Testing', 'Douglas Wagner')
 	about.set_website('http://github.com/pwr/Solaar/wiki')
 	about.set_website_label('Solaar Wiki')
-	# about.set_comments('Using Python %s\n' % PYTTHON_VERSION.split(' ')[0])
+	about.set_comments('Shows status of devices connected\nto a Logitech Unifying Receiver.')
 	about.run()
 	about.destroy()
 about = _action('help-about', 'About ' + _NAME, _show_about_window)
@@ -65,7 +66,6 @@ def _pair_device(action, frame):
 	window = frame.get_toplevel()
 
 	pair_dialog = ui.pair_window.create(action, pairing.state)
-	# window.present()
 
 	pair_dialog.set_transient_for(window)
 	pair_dialog.set_modal(True)

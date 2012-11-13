@@ -6,8 +6,6 @@ import logging
 from struct import unpack as _unpack
 
 from .constants import (STATUS, PROPS)
-from ..unifying_receiver.constants import FEATURE
-from ..unifying_receiver import api as _api
 
 #
 #
@@ -29,6 +27,8 @@ def _charge_status(data, hasLux=False):
 
 
 def request_status(devinfo):
+	from ..unifying_receiver.constants import FEATURE
+	from ..unifying_receiver import api as _api
 	reply = _api.request(devinfo.handle, devinfo.number,
 						feature=FEATURE.SOLAR_CHARGE, function=b'\x06', params=b'\x78\x01',
 						features=devinfo.features)
