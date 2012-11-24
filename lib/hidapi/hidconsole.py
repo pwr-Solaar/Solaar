@@ -5,7 +5,7 @@ import sys
 from select import select as _select
 import time
 from binascii import hexlify, unhexlify
-_hex = lambda d: hexlify(d).decode('ascii').upper()
+strhex = lambda d: hexlify(d).decode('ascii').upper()
 
 
 interactive = os.isatty(0)
@@ -24,7 +24,7 @@ def _print(marker, data, scroll=False):
 		sys.stdout.write('\033[S')  # scroll up
 		sys.stdout.write('\033[A\033[L\033[G')   # insert new line above the current one, position on first column
 
-	hexs = _hex(data)
+	hexs = strhex(data)
 	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 	sys.stdout.write(s)
 
@@ -34,7 +34,7 @@ def _print(marker, data, scroll=False):
 		sys.stdout.write('\n')
 
 
-def _continuous_read(handle, timeout=1000):
+def _continuous_read(handle, timeout=2000):
 	while True:
 		reply = hidapi.read(handle, 128, timeout)
 		if reply is None:
@@ -95,8 +95,13 @@ if __name__ == '__main__':
 						hidapi.write(handle, data)
 						# wait for some kind of reply
 						if not interactive:
-							rlist, wlist, xlist = _select([handle], [], [], 1)
-						time.sleep(0.1)
+							if data[1:2] == b'\xFF':
+								# the receiver will reply very fast, in a few milliseconds
+								time.sleep(0.010)
+							else:
+								# the devices might reply quite slow
+								rlist, wlist, xlist = _select([handle], [], [], 1)
+								time.sleep(0.050)
 		except EOFError:
 			pass
 		except Exception as e:
