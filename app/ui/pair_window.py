@@ -6,9 +6,9 @@ import logging
 from gi.repository import (Gtk, GObject)
 
 import ui
+from logitech.unifying_receiver import status as _status
 
-
-_PAIRING_TIMEOUT = 30
+_PAIRING_TIMEOUT = 15
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None):
@@ -40,29 +40,31 @@ def _create_page(assistant, kind, header=None, icon_name=None, text=None):
 	return p
 
 
-def _fake_device(receiver):
-	from logitech.unifying_receiver import PairedDevice
-	dev = PairedDevice(receiver, 6)
-	dev._kind = 'touchpad'
-	dev._codename = 'T650'
-	dev._name = 'Wireless Rechargeable Touchpad T650'
-	dev._serial = '0123456789'
-	dev._protocol = 2.0
-	dev.status = {'encrypted': False}
-	return dev
-
+# def _fake_device(receiver):
+# 	from logitech.unifying_receiver import PairedDevice
+# 	dev = PairedDevice(receiver, 6)
+# 	dev._kind = 'touchpad'
+# 	dev._codename = 'T650'
+# 	dev._name = 'Wireless Rechargeable Touchpad T650'
+# 	dev._serial = '0123456789'
+# 	dev._protocol = 2.0
+# 	dev.status = _status.DeviceStatus(dev, lambda *foo: None)
+# 	return dev
 
 def _check_lock_state(assistant, receiver):
 	if not assistant.is_drawable():
 		return False
 
-	if receiver.pairing_result:
-		receiver.pairing_result = _fake_device(receiver)
-		if type(receiver.pairing_result) == str:
-			_pairing_failed(assistant, receiver, receiver.pairing_result)
-		else:
-			assert hasattr(receiver.pairing_result, 'number')
-			_pairing_succeeded(assistant, receiver, receiver.pairing_result)
+	if receiver.status.get(_status.ERROR):
+		# fake = _fake_device(receiver)
+		# receiver._devices[fake.number] = fake
+		# receiver.status.new_device = fake
+		# fake.status._changed()
+		_pairing_failed(assistant, receiver, receiver.status.pop(_status.ERROR))
+		return False
+
+	if receiver.status.new_device:
+		_pairing_succeeded(assistant, receiver)
 		return False
 
 	return receiver.status.lock_open
@@ -73,11 +75,12 @@ def _prepare(assistant, page, receiver):
 	# logging.debug("prepare %s %d %s", assistant, index, page)
 
 	if index == 0:
-		receiver.pairing_result = None
 		if receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
+			assert receiver.status.new_device is None
+			assert receiver.status.get(_status.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GObject.timeout_add(200, _check_lock_state, assistant, receiver)
+			GObject.timeout_add(300, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
 			GObject.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
@@ -88,6 +91,7 @@ def _prepare(assistant, page, receiver):
 def _finish(assistant, receiver):
 	logging.debug("finish %s", assistant)
 	assistant.destroy()
+	receiver.status.new_device = None
 	if receiver.status.lock_open:
 		receiver.set_lock()
 
@@ -95,9 +99,8 @@ def _finish(assistant, receiver):
 def _cancel(assistant, receiver):
 	logging.debug("cancel %s", assistant)
 	assistant.destroy()
-	device, receiver.pairing_result = receiver.pairing_result, None
+	device, receiver.status.new_device = receiver.status.new_device, None
 	if device:
-		assert type(device) != str
 		try:
 			del receiver[device.number]
 		except:
@@ -107,11 +110,10 @@ def _cancel(assistant, receiver):
 
 
 def _pairing_failed(assistant, receiver, error):
-	receiver.pairing_result = None
 	assistant.commit()
 
 	header = 'Pairing failed: %s.' % error
-	if 'timeout' in error:
+	if 'timeout' in str(error):
 		text = 'Make sure your device is within range,\nand it has a decent battery charge.'
 	else:
 		text = None
@@ -121,7 +123,9 @@ def _pairing_failed(assistant, receiver, error):
 	assistant.commit()
 
 
-def _pairing_succeeded(assistant, receiver, device):
+def _pairing_succeeded(assistant, receiver):
+	device = receiver.status.new_device
+	assert device
 	page = _create_page(assistant, Gtk.AssistantPageType.CONFIRM)
 
 	device_icon = Gtk.Image()

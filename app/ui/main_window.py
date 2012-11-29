@@ -24,6 +24,7 @@ def _make_receiver_box(name):
 
 	icon_name = ui.get_icon(name, 'preferences-desktop-peripherals')
 	icon = Gtk.Image.new_from_icon_name(icon_name, _RECEIVER_ICON_SIZE)
+	icon.set_name('icon')
 	icon.set_padding(2, 2)
 
 	label = Gtk.Label('Scanning...')
@@ -272,20 +273,21 @@ def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
 
 
 def _update_receiver_box(frame, receiver):
-	label, pairing_icon, toolbar, info_label = ui.find_children(frame, 'label', 'pairing-icon', 'toolbar', 'info-label')
+	icon, label, pairing_icon, toolbar, info_label = ui.find_children(frame, 'icon', 'label', 'pairing-icon', 'toolbar', 'info-label')
 
-	if receiver.status is None:
+	label.set_text(str(receiver.status))
+	if receiver:
+		frame._device = receiver
+		icon.set_sensitive(True)
+		pairing_icon.set_visible(receiver.status.lock_open)
+		toolbar.set_visible(True)
+	else:
 		frame._device = None
-		label.set_text('No receiver found.')
+		icon.set_sensitive(False)
 		pairing_icon.set_visible(False)
 		toolbar.set_visible(False)
 		toolbar.get_children()[0].set_active(False)
 		info_label.set_text('')
-	else:
-		frame._device = receiver
-		label.set_text(str(receiver.status))
-		pairing_icon.set_visible(receiver.status.lock_open)
-		toolbar.set_visible(True)
 
 
 def _update_device_box(frame, dev):

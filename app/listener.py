@@ -28,7 +28,7 @@ DUMMY = _DUMMY_RECEIVER()
 _DEVICE_TIMEOUT = 3 * 60  # seconds
 _DEVICE_STATUS_POLL = 60  # seconds
 
-# def fake_device(listener):
+# def _fake_device(listener):
 # 	dev = _lur.PairedDevice(listener.receiver, 6)
 # 	dev._wpid = '1234'
 # 	dev._kind = 'touchpad'
@@ -64,7 +64,7 @@ class ReceiverListener(_lur.listener.EventsListener):
 			dev.codename, dev.kind, dev.name
 			# dev.status._changed(dev.protocol > 0)
 
-		# fake = fake_device(self)
+		# fake = _fake_device(self)
 		# self.receiver._devices[fake.number] = fake
 		# self._status_changed(fake, _lur.status.ALERT.LOW)
 
@@ -81,7 +81,7 @@ class ReceiverListener(_lur.listener.EventsListener):
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("tick: polling status")
+			_log.debug("tick: polling status: %s %s", self.receiver, self.receiver._devices)
 
 		# read these in case they haven't been read already
 		self.receiver.serial, self.receiver.firmware
@@ -130,8 +130,7 @@ class ReceiverListener(_lur.listener.EventsListener):
 				if dev.status is not None and dev.status.process_event(event):
 					if self.receiver.status.lock_open and not known_device:
 						assert event.sub_id == 0x41
-						self.receiver.pairing_result = dev
-					return
+						self.receiver.status.new_device = dev
 			else:
 				_log.warn("received event %s for invalid device %d", event, event.devnumber)
 
