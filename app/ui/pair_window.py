@@ -2,133 +2,185 @@
 #
 #
 
-# import logging
+import logging
 from gi.repository import (Gtk, GObject)
 
 import ui
 
 
-def _create_page(assistant, text, kind, icon_name=None):
-	p = Gtk.VBox(False, 12)
-	p.set_border_width(8)
+_PAIRING_TIMEOUT = 30
 
-	if text:
-		item = Gtk.HBox(homogeneous=False, spacing=16)
+
+def _create_page(assistant, kind, header=None, icon_name=None, text=None):
+	p = Gtk.VBox(False, 8)
+	assistant.append_page(p)
+	assistant.set_page_type(p, kind)
+
+	if header:
+		item = Gtk.HBox(False, 16)
 		p.pack_start(item, False, True, 0)
 
-		label = Gtk.Label(text)
+		label = Gtk.Label(header)
 		label.set_alignment(0, 0)
+		label.set_line_wrap(True)
 		item.pack_start(label, True, True, 0)
 
 		if icon_name:
 			icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
+			icon.set_alignment(1, 0)
 			item.pack_start(icon, False, False, 0)
 
-	assistant.append_page(p)
-	assistant.set_page_type(p, kind)
+	if text:
+		label = Gtk.Label(text)
+		label.set_alignment(0, 0)
+		label.set_line_wrap(True)
+		p.pack_start(label, False, False, 0)
 
 	p.show_all()
 	return p
 
 
-def _device_confirmed(entry, _2, trigger, assistant, page):
-	assistant.commit()
-	assistant.set_page_complete(page, True)
-	return True
+def _fake_device(receiver):
+	from logitech.unifying_receiver import PairedDevice
+	dev = PairedDevice(receiver, 6)
+	dev._kind = 'touchpad'
+	dev._codename = 'T650'
+	dev._name = 'Wireless Rechargeable Touchpad T650'
+	dev._serial = '0123456789'
+	dev._protocol = 2.0
+	dev.status = {'encrypted': False}
+	return dev
 
 
-def _finish(assistant):
-	# logging.debug("finish %s", assistant)
-	assistant.destroy()
+def _check_lock_state(assistant, receiver):
+	if not assistant.is_drawable():
+		return False
 
-def _cancel(assistant, state):
-	# logging.debug("cancel %s", assistant)
-	state.stop_scan()
-	_finish(assistant)
+	if receiver.pairing_result:
+		receiver.pairing_result = _fake_device(receiver)
+		if type(receiver.pairing_result) == str:
+			_pairing_failed(assistant, receiver, receiver.pairing_result)
+		else:
+			assert hasattr(receiver.pairing_result, 'number')
+			_pairing_succeeded(assistant, receiver, receiver.pairing_result)
+		return False
 
-def _prepare(assistant, page, state):
+	return receiver.status.lock_open
+
+
+def _prepare(assistant, page, receiver):
 	index = assistant.get_current_page()
 	# logging.debug("prepare %s %d %s", assistant, index, page)
 
 	if index == 0:
-		state.reset()
-		GObject.timeout_add(state.TICK, state.countdown, assistant)
-		spinner = page.get_children()[-1]
-		spinner.start()
-		return
-
-	assistant.remove_page(0)
-	state.stop_scan()
-
-
-def _scan_complete_ui(assistant, device):
-	if device is None:
-		page = _create_page(assistant,
-							'No new device detected.\n'
-							'\n'
-							'Make sure your device is within the\nreceiver\'s range, and it has\na decent battery charge.\n',
-							Gtk.AssistantPageType.CONFIRM,
-							'dialog-error')
+		receiver.pairing_result = None
+		if receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
+			spinner = page.get_children()[-1]
+			spinner.start()
+			GObject.timeout_add(200, _check_lock_state, assistant, receiver)
+			assistant.set_page_complete(page, True)
+		else:
+			GObject.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
 	else:
-		page = _create_page(assistant,
-							None,
-							Gtk.AssistantPageType.CONFIRM)
+		assistant.remove_page(0)
 
-		hbox = Gtk.HBox(False, 16)
-		device_icon = Gtk.Image()
-		device_icon.set_from_icon_name(ui.get_icon(device.name, device.kind), Gtk.IconSize.DIALOG)
-		hbox.pack_start(device_icon, False, False, 0)
-		device_label = Gtk.Label(device.kind + '\n' + device.name)
-		hbox.pack_start(device_label, False, False, 0)
-		halign = Gtk.Alignment.new(0.5, 0.5, 0, 1)
-		halign.add(hbox)
-		page.pack_start(halign, False, True, 0)
 
-		hbox = Gtk.HBox(False, 16)
-		hbox.pack_start(Gtk.Entry(), False, False, 0)
-		hbox.pack_start(Gtk.ToggleButton('Test'), False, False, 0)
-		halign = Gtk.Alignment.new(0.5, 0.5, 0, 1)
+def _finish(assistant, receiver):
+	logging.debug("finish %s", assistant)
+	assistant.destroy()
+	if receiver.status.lock_open:
+		receiver.set_lock()
+
+
+def _cancel(assistant, receiver):
+	logging.debug("cancel %s", assistant)
+	assistant.destroy()
+	device, receiver.pairing_result = receiver.pairing_result, None
+	if device:
+		assert type(device) != str
+		try:
+			del receiver[device.number]
+		except:
+			logging.error("failed to unpair %s", device)
+	if receiver.status.lock_open:
+		receiver.set_lock()
+
+
+def _pairing_failed(assistant, receiver, error):
+	receiver.pairing_result = None
+	assistant.commit()
+
+	header = 'Pairing failed: %s.' % error
+	if 'timeout' in error:
+		text = 'Make sure your device is within range,\nand it has a decent battery charge.'
+	else:
+		text = None
+	_create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
+
+	assistant.next_page()
+	assistant.commit()
+
+
+def _pairing_succeeded(assistant, receiver, device):
+	page = _create_page(assistant, Gtk.AssistantPageType.CONFIRM)
+
+	device_icon = Gtk.Image()
+	device_icon.set_from_icon_name(ui.get_icon(device.name, device.kind), Gtk.IconSize.DIALOG)
+	device_icon.set_pixel_size(128)
+	device_icon.set_alignment(0.5, 1)
+	page.pack_start(device_icon, False, False, 0)
+
+	device_label = Gtk.Label()
+	device_label.set_markup('<b>' + device.name + '</b>')
+	device_label.set_alignment(0.5, 0)
+	page.pack_start(device_label, False, False, 0)
+
+	if device.status.get('encrypted') == False:
+		hbox = Gtk.HBox(False, 8)
+		hbox.pack_start(Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.MENU), False, False, 0)
+		hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
+		halign = Gtk.Alignment.new(0.5, 0, 0, 0)
 		halign.add(hbox)
 		page.pack_start(halign, False, False, 0)
 
-		entry_info = Gtk.Label('Use the controls above to confirm\n'
-								'this is the device you want to pair.')
-		entry_info.set_sensitive(False)
-		page.pack_start(entry_info, False, False, 0)
+	# hbox = Gtk.HBox(False, 8)
+	# hbox.pack_start(Gtk.Entry(), False, False, 0)
+	# hbox.pack_start(Gtk.ToggleButton('  Test  '), False, False, 0)
+	# halign = Gtk.Alignment.new(0.5, 1, 0, 0)
+	# halign.add(hbox)
+	# page.pack_start(halign, True, True, 0)
 
-		page.show_all()
-		assistant.set_page_complete(page, True)
+	# entry_info = Gtk.Label()
+	# entry_info.set_markup('<small>Use the controls above to confirm\n'
+	# 						'this is the device you want to pair.</small>')
+	# entry_info.set_sensitive(False)
+	# entry_info.set_alignment(0.5, 0)
+	# page.pack_start(entry_info, True, True, 0)
+
+	page.show_all()
 
 	assistant.next_page()
-
-def _scan_complete(assistant, device):
-	GObject.idle_add(_scan_complete_ui, assistant, device)
+	assistant.set_page_complete(page, True)
 
 
-def create(action, state):
+def create(action, receiver):
 	assistant = Gtk.Assistant()
 	assistant.set_title(action.get_label())
 	assistant.set_icon_name(action.get_icon_name())
 
-	assistant.set_size_request(440, 240)
+	assistant.set_size_request(420, 260)
 	assistant.set_resizable(False)
 	assistant.set_role('pair-device')
 
-	page_intro = _create_page(assistant,
-					'Turn on the device you want to pair.\n'
-					'\n'
-					'If the device is already turned on,\nturn if off and on again.',
-					Gtk.AssistantPageType.INTRO,
-					'preferences-desktop-peripherals')
+	page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS,
+					'Turn on the device you want to pair.', 'preferences-desktop-peripherals',
+					'If the device is already turned on,\nturn if off and on again.')
 	spinner = Gtk.Spinner()
 	spinner.set_visible(True)
-	page_intro.pack_end(spinner, True, True, 16)
+	page_intro.pack_end(spinner, True, True, 24)
 
-	assistant.scan_complete = _scan_complete
-
-	assistant.connect('prepare', _prepare, state)
-	assistant.connect('cancel', _cancel, state)
-	assistant.connect('close', _finish)
-	assistant.connect('apply', _finish)
+	assistant.connect('prepare', _prepare, receiver)
+	assistant.connect('cancel', _cancel, receiver)
+	assistant.connect('close', _finish, receiver)
 
 	return assistant

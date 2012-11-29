@@ -7,54 +7,59 @@ def print_receiver(receiver):
 	print ("  Serial    : %s" % receiver.serial)
 	for f in receiver.firmware:
 		print ("  %-10s: %s" % (f.kind, f.version))
-	print ("  Reported %d paired device(s)" % len(receiver))
 
+	notifications = receiver.request(0x8100)
+	if notifications:
+		notifications = ord(notifications[0:1]) << 16 | ord(notifications[1:2]) << 8
+		if notifications:
+			print ("  Enabled notifications: %s." % lur.hidpp10.NOTIFICATION_FLAG.flag_names(notifications))
+		else:
+			print ("  All notifications disabled.")
+
+	print ("  Reported %d paired device(s)." % len(receiver))
+	activity = receiver.request(0x83B3)
+	if activity:
+		activity = [(d, ord(activity[d - 1])) for d in range(1, receiver.max_devices)]
+		print("  Device activity counters: %s" % ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
 
 def scan_devices(receiver):
-	for number in range(1, 1 + receiver.max_devices):
-		dev = receiver[number]
-		if dev is None:
-			dev = api.PairedDevice(receiver.handle, number)
-			if dev.codename is None:
-				continue
-
+	for dev in receiver:
 		print ("--------")
 		print (str(dev))
 		print ("Codename     : %s" % dev.codename)
-		print ("Name         : %s" % dev.name)
 		print ("Kind         : %s" % dev.kind)
+		print ("Name         : %s" % dev.name)
+		print ("Device number: %d" % dev.number)
+		print ("Wireless PID : %s" % dev.wpid)
 		print ("Serial number: %s" % dev.serial)
+		print ("Power switch : on the %s" % dev.power_switch_location)
 
-		if not dev.protocol:
+		if not dev.ping():
 			print ("Device is not connected at this time, no further info available.")
 			continue
 
-		print ("HID protocol : HID %01.1f" % dev.protocol)
-		if dev.protocol < 2.0:
-			print ("Features query not supported by this device")
+		print ("HID protocol : HID++ %01.1f" % dev.protocol)
+		if not dev.features:
+			print ("Features query not supported by this device.")
 			continue
 
-		firmware = dev.firmware
-		for fw in firmware:
+		for fw in dev.firmware:
 			print ("  %-11s: %s %s" % (fw.kind, fw.name, fw.version))
 
-		all_features = api.get_device_features(dev.handle, dev.number)
-		for index in range(0, len(all_features)):
-			feature = all_features[index]
+		print ("  %d features:" % len(dev.features))
+		for index, feature in enumerate(dev.features):
+			feature = dev.features[index]
 			if feature:
-				print ("  ~ Feature %-20s (%s) at index %02X" % (FEATURE_NAME[feature], api._hex(feature), index))
+				flags = dev.request(0x0000, feature.bytes(2))
+				flags = 0 if flags is None else ord(flags[1:2])
+				flags = lur.hidpp20.FEATURE_FLAG.flag_names(flags)
+				print ("    %2d: %-20s {%04X}   %s" % (index, feature, feature, flags))
 
-		if FEATURE.BATTERY in all_features:
-			discharge, dischargeNext, status = api.get_device_battery_level(dev.handle, dev.number, features=all_features)
-			print ("  Battery %d charged (next level %d%), status %s" % (discharge, dischargeNext, status))
-
-		if FEATURE.REPROGRAMMABLE_KEYS in all_features:
-			keys = api.get_device_keys(dev.handle, dev.number, features=all_features)
-			if keys is not None and keys:
-				print ("  %d reprogrammable keys found" % len(keys))
-				for k in keys:
-					flags = ','.join(KEY_FLAG_NAME[f] for f in KEY_FLAG_NAME if k.flags & f)
-					print ("    %2d: %-12s => %-12s : %s" % (k.index, KEY_NAME[k.id], KEY_NAME[k.task], flags))
+		if dev.keys:
+			print ("  %d reprogrammable keys:" % len(dev.keys))
+			for k in dev.keys:
+				flags = lur.hidpp20.KEY_FLAG.flag_names(k.flags)
+				print ("    %2d: %-20s => %-20s   %s" % (k.index, lur.hidpp20.KEY[k.key], lur.hidpp20.KEY[k.task], flags))
 
 
 if __name__ == '__main__':
@@ -65,12 +70,12 @@ if __name__ == '__main__':
 	args = arg_parser.parse_args()
 
 	import logging
-	logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
+	log_format='%(asctime)s %(levelname)8s %(name)s: %(message)s'
+	logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING, format=log_format)
 
-	from .unifying_receiver import api
-	from .unifying_receiver.constants import *
+	from . import unifying_receiver as lur
 
-	receiver = api.Receiver.open()
+	receiver = lur.Receiver.open()
 	if receiver is None:
 		print ("Logitech Unifying Receiver not found.")
 	else:

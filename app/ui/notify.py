@@ -9,7 +9,6 @@ try:
 	from gi.repository import Notify
 
 	import ui
-	from logitech.devices.constants import STATUS
 
 	# necessary because the notifications daemon does not know about our XDG_DATA_DIRS
 	_icons = {}
@@ -47,7 +46,7 @@ try:
 			Notify.uninit()
 
 
-	def show(dev):
+	def show(dev, reason=None):
 		"""Show a notification with title and text."""
 		if available and Notify.is_initted():
 			summary = dev.name
@@ -57,8 +56,10 @@ try:
 			if n is None:
 				n = _notifications[summary] = Notify.Notification()
 
-			n.update(summary, dev.status_text, _icon(summary) or dev.kind)
-			urgency = Notify.Urgency.LOW if dev.status > STATUS.CONNECTED else Notify.Urgency.NORMAL
+			message = reason or ('unpaired' if dev.status is None else
+						(str(dev.status) or ('connected' if dev.status else 'inactive')))
+			n.update(summary, message, _icon(summary) or dev.kind)
+			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
 
 			try:
@@ -68,8 +69,7 @@ try:
 				logging.exception("showing %s", n)
 
 except ImportError:
-	logging.warn("desktop notifications disabled")
 	available = False
 	init = lambda app_title: False
 	uninit = lambda: None
-	show = lambda dev: None
+	show = lambda dev, reason: None

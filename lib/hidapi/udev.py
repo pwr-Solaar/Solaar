@@ -32,6 +32,7 @@ DeviceInfo = namedtuple('DeviceInfo', [
 				])
 del namedtuple
 
+
 #
 # exposed API
 # docstrings mostly copied from hidapi.h

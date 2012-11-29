@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 
 NAME = 'Solaar'
-VERSION = '0.7.4'
+VERSION = '0.8'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
 __version__ = VERSION
 __license__ = "GPL"
@@ -9,6 +9,14 @@ __license__ = "GPL"
 #
 #
 #
+
+def _require(module, os_package):
+	try:
+		__import__(module)
+	except ImportError:
+		import sys
+		sys.exit("%s: missing required package '%s'" % (NAME, os_package))
+
 
 def _parse_arguments():
 	import argparse
@@ -44,31 +52,20 @@ def _parse_arguments():
 	return args
 
 
-def _require(module, package):
-	try:
-		__import__(module)
-	except ImportError:
-		import sys
-		sys.exit("%s: missing required package '%s'" % (NAME, package))
-
-
-if __name__ == '__main__':
-	_require('pyudev', 'python-pyudev')
-	_require('gi.repository', 'python-gi')
-	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
-
-	args = _parse_arguments()
-
+def _run(args):
 	import ui
 
-	# check if the notifications are available and enabled
+	# even if --no-notifications is given on the command line, still have to
+	# check they are available
 	args.notifications &= args.systray
-	if ui.notify.available and ui.notify.init(NAME):
+	if ui.notify.init(NAME):
 		ui.action.toggle_notifications.set_active(args.notifications)
+		if not args.notifications:
+			ui.notify.uninit()
 	else:
 		ui.action.toggle_notifications = None
 
-	from receiver import DUMMY
+	from listener import DUMMY
 	window = ui.main_window.create(NAME, DUMMY.name, DUMMY.max_devices, args.systray)
 	if args.systray:
 		menu_actions = (ui.action.toggle_notifications,
@@ -78,84 +75,62 @@ if __name__ == '__main__':
 		icon = None
 		window.present()
 
-	import pairing
-	from logitech.devices.constants import STATUS
 	from gi.repository import Gtk, GObject
 
-	listener = None
-	notify_missing = True
-
 	# initializes the receiver listener
-	from receiver import ReceiverListener
-	def check_for_listener(retry=True):
-		def _check_still_scanning(listener):
-			if listener.receiver.status == STATUS.BOOTING:
-				listener.change_status(STATUS.CONNECTED)
+	def check_for_listener(notify=False):
+		# print ("check_for_listener %s" % notify)
+		global listener
+		listener = None
 
-		global listener, notify_missing
+		from listener import ReceiverListener
+		try:
+			listener = ReceiverListener.open(status_changed)
+		except OSError:
+			ui.error(window, 'Permissions error',
+					'Found a possible Unifying Receiver device,\n'
+					'but did not have permission to open it.')
+
 		if listener is None:
-			try:
-				listener = ReceiverListener.open(status_changed)
-			except OSError:
-				ui.error(window, 'Permissions error',
-						'Found a possible Unifying Receiver device,\n'
-						'but did not have permission to open it.')
+			if notify:
+				status_changed(DUMMY)
+			else:
+				return True
 
-			if listener is None:
-				pairing.state = None
-				if notify_missing:
-					status_changed(DUMMY, None, STATUS.UI_NOTIFY)
-					notify_missing = False
-				return retry
-
-			# print ("opened receiver", listener, listener.receiver)
-			notify_missing = True
-			status_changed(listener.receiver, None, STATUS.UI_NOTIFY)
-			GObject.timeout_add(3 * 1000, _check_still_scanning, listener)
-			pairing.state = pairing.State(listener)
-			listener.trigger_device_events()
+	from logitech.unifying_receiver import status
 
 	# callback delivering status events from the receiver/devices to the UI
-	def status_changed(receiver, device=None, ui_flags=0):
-		assert receiver is not None
+	def status_changed(receiver, device=None, alert=status.ALERT.NONE, reason=None):
 		if window:
 			GObject.idle_add(ui.main_window.update, window, receiver, device)
 		if icon:
-			GObject.idle_add(ui.status_icon.update, icon, receiver)
-		if ui_flags & STATUS.UI_POPUP:
+			GObject.idle_add(ui.status_icon.update, icon, receiver, device)
+		if alert & status.ALERT.MED:
 			GObject.idle_add(window.popup, icon)
 
-		if device is None:
+		if ui.notify.available:
 			# always notify on receiver updates
-			ui_flags |= STATUS.UI_NOTIFY
-		if ui_flags & STATUS.UI_NOTIFY and ui.notify.available:
-			GObject.idle_add(ui.notify.show, device or receiver)
+			if device is None or alert & status.ALERT.LOW:
+				GObject.idle_add(ui.notify.show, device or receiver, reason)
 
-		global listener
-		if not listener:
-			GObject.timeout_add(5000, check_for_listener)
-			listener = None
+		if receiver is DUMMY:
+			GObject.timeout_add(3000, check_for_listener)
 
-	# clears all properties of devices that have been inactive for too long
-	_DEVICE_TIMEOUT = 3 * 60  # seconds
-	_DEVICE_STATUS_CHECK = 30  # seconds
-	from time import time as _timestamp
-
-	def check_for_inactive_devices():
-		if listener and listener.receiver:
-			for dev in listener.receiver.devices.values():
-				if (dev.status < STATUS.CONNECTED and
-					dev.props and
-					_timestamp() - dev.status_updated > _DEVICE_TIMEOUT):
-					dev.props.clear()
-					status_changed(listener.receiver, dev)
-		return True
-
-	GObject.timeout_add(50, check_for_listener, False)
-	GObject.timeout_add(_DEVICE_STATUS_CHECK * 1000, check_for_inactive_devices)
+	GObject.timeout_add(0, check_for_listener, True)
 	Gtk.main()
 
-	if listener is not None:
+	if listener:
 		listener.stop()
+		listener.join()
 
 	ui.notify.uninit()
+
+
+if __name__ == '__main__':
+	_require('pyudev', 'python-pyudev')
+	_require('gi.repository', 'python-gi')
+	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
+
+	args = _parse_arguments()
+	listener = None
+	_run(args)

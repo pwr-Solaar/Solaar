@@ -3,8 +3,9 @@
 #
 
 from gi.repository import Gtk
+
 import ui
-from logitech.devices.constants import (STATUS, PROPS)
+from logitech.unifying_receiver import status as _status
 
 
 def create(window, menu_actions=None):
@@ -31,34 +32,34 @@ def create(window, menu_actions=None):
 	return icon
 
 
-def update(icon, receiver):
+def update(icon, receiver, device=None):
+	# print "icon update", receiver, receiver._devices, device
 	battery_level = None
 
-	lines = [ui.NAME + ': ' + receiver.status_text, '']
-
-	if receiver.status > STATUS.CONNECTED:
-		devlist = sorted(receiver.devices.values(), key=lambda x: x.number)
-		for dev in devlist:
+	lines = [ui.NAME + ': ' + str(receiver.status), '']
+	if receiver and receiver._devices:
+		for dev in receiver:
 			lines.append('<b>' + dev.name + '</b>')
 
-			p = dev.properties_text
+			assert dev.status is not None
+			p = str(dev.status)
 			if p:
-				p = '\t' + p
-				if dev.status < STATUS.CONNECTED:
-					p += ' <small>(' + dev.status_text + ')</small>'
-				lines.append(p)
-			elif dev.status < STATUS.CONNECTED:
-				lines.append('\t<small>(' + dev.status_text + ')</small>')
-			elif dev.protocol < 2.0:
-				lines.append('\t' + '<small>no status</small>')
+				if not dev.status:
+					p += ' <small>(inactive)</small>'
 			else:
-				lines.append('\t' + '<small>waiting for status...</small>')
+				if dev.status:
+					if dev.protocol < 2.0:
+						p = '<small>no status</small>'
+					else:
+						p = '<small>waiting for status...</small>'
+				else:
+					p = '<small>(inactive)</small>'
 
+			lines.append('\t' + p)
 			lines.append('')
 
 			if battery_level is None:
-				if PROPS.BATTERY_LEVEL in dev.props:
-					battery_level = dev.props[PROPS.BATTERY_LEVEL]
+				battery_level = dev.status.get(_status.BATTERY_LEVEL)
 
 	icon.set_tooltip_markup('\n'.join(lines).rstrip('\n'))
 

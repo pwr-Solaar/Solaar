@@ -2,30 +2,79 @@
 # Some common functions and types.
 #
 
-from collections import namedtuple
 from binascii import hexlify as _hexlify
-_hex = lambda d: _hexlify(d).decode('ascii').upper()
+from struct import pack as _pack
 
 
-class FallbackDict(dict):
-	def __init__(self, fallback_function=lambda x: None, *args, **kwargs):
-		super(FallbackDict, self).__init__(*args, **kwargs)
-		self.fallback = fallback_function
+class NamedInt(int):
+	"""An integer with an attached name."""
+	__slots__ = ['name']
 
-	def __getitem__(self, key):
+	def __new__(cls, value, name):
+		obj = int.__new__(cls, value)
+		obj.name = name
+		return obj
+
+	def bytes(self, count=2):
+		value = int(self)
+		if value.bit_length() > count * 8:
+			raise ValueError("cannot fit %X into %d bytes" % (value, count))
+
+		return _pack('!L', value)[-count:]
+
+
+	def __str__(self):
+		return self.name
+
+	def __repr__(self):
+		return 'NamedInt(%d, %s)' % (int(self), repr(self.name))
+
+
+class NamedInts(object):
+	def __init__(self, **kwargs):
+		values = dict((k, NamedInt(v, k if k == k.upper() else k.replace('__', '/').replace('_', ' '))) for (k, v) in kwargs.items())
+		self.__dict__.update(values)
+		self._indexed = dict((int(v), v) for v in values.values())
+		self._fallback = None
+
+	def __getitem__(self, index):
+		if index in self._indexed:
+			return self._indexed[index]
+
+		if self._fallback:
+			value = NamedInt(index, self._fallback(index))
+			self._indexed[index] = value
+			return value
+
+	def __contains__(self, value):
+		return int(value) in self._indexed
+
+	def __len__(self):
+		return len(self.values)
+
+	def flag_names(self, value):
+		return ', '.join(str(self._indexed[k]) for k in self._indexed if k & value == k)
+
+
+def strhex(x):
+	return _hexlify(x).decode('ascii').upper()
+
+
+class KwException(Exception):
+	def __init__(self, **kwargs):
+		super(KwException, self).__init__(kwargs)
+
+	def __getattr__(self, k):
 		try:
-			return super(FallbackDict, self).__getitem__(key)
-		except KeyError:
-			return self.fallback(key)
+			return super(KwException, self).__getattr__(k)
+		except AttributeError:
+			return self.args[0][k]
 
 
-def list2dict(values_list):
-	return dict(zip(range(0, len(values_list)), values_list))
-
+from collections import namedtuple
 
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', [
-				'level',
 				'kind',
 				'name',
 				'version',
@@ -34,15 +83,8 @@ FirmwareInfo = namedtuple('FirmwareInfo', [
 """Reprogrammable keys informations."""
 ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
 				'index',
-				'id',
-				'name',
+				'key',
 				'task',
-				'task_name',
 				'flags'])
-
-
-class Packet(namedtuple('Packet', ['code', 'devnumber', 'data'])):
-	def __str__(self):
-		return 'Packet(%02X,%02X,%s)' % (self.code, self.devnumber, 'None' if self.data is None else _hex(self.data))
 
 del namedtuple
