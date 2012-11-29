@@ -7,11 +7,11 @@ GObject.threads_init()
 
 
 from solaar import NAME
-_APP_ICONS = (NAME + '-fail', NAME + '-init', NAME)
+_APP_ICONS = (NAME + '-init', NAME + '-fail', NAME)
 def appicon(receiver_status):
-	return (_APP_ICONS[0] if receiver_status < 0 else
-			_APP_ICONS[1] if receiver_status < 1 else
-			_APP_ICONS[2])
+	return (_APP_ICONS[1] if type(receiver_status) == str else
+			_APP_ICONS[2] if receiver_status else
+			_APP_ICONS[0])
 
 
 _ICON_THEME = Gtk.IconTheme.get_default()

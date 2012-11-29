@@ -8,7 +8,7 @@ from struct import pack as _pack
 
 class NamedInt(int):
 	"""An integer with an attached name."""
-	__slots__ = ['name']
+	# __slots__ = ['name']
 
 	def __new__(cls, value, name):
 		obj = int.__new__(cls, value)

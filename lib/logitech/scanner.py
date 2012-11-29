@@ -19,7 +19,7 @@ def print_receiver(receiver):
 	print ("  Reported %d paired device(s)." % len(receiver))
 	activity = receiver.request(0x83B3)
 	if activity:
-		activity = [(d, ord(activity[d - 1])) for d in range(1, receiver.max_devices)]
+		activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
 		print("  Device activity counters: %s" % ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
 
 def scan_devices(receiver):

@@ -12,8 +12,8 @@ _log = getLogger('LUR.base')
 del getLogger
 
 from .common import strhex as _strhex, KwException as _KwException
-import hidpp10 as _hidpp10
-import hidpp20 as _hidpp20
+from . import hidpp10 as _hidpp10
+from . import hidpp20 as _hidpp20
 import hidapi as _hid
 
 #
@@ -45,7 +45,7 @@ class NoReceiver(_KwException):
 
 class NoSuchDevice(_KwException):
 	"""Raised when trying to reach a device number not paired to the receiver."""
- 	pass
+	pass
 
 
 class DeviceUnreachable(_KwException):
@@ -135,14 +135,14 @@ def write(handle, devnumber, data):
 	else:
 		wdata = _pack('!BB5s', 0x10, devnumber, data)
 	if _log.isEnabledFor(_DEBUG):
-		_log.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[0]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
+		_log.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
 	try:
 		_hid.write(int(handle), wdata)
 	except Exception as reason:
 		_log.error("write failed, assuming handle %s no longer available", repr(handle))
 		close(handle)
-		raise NoReceiver(reason)
+		raise NoReceiver(reason=reason)
 
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
@@ -167,7 +167,7 @@ def _read(handle, timeout):
 	except Exception as reason:
 		_log.error("read failed, assuming handle %s no longer available", repr(handle))
 		close(handle)
-		raise NoReceiver(reason)
+		raise NoReceiver(reason=reason)
 
 	if data:
 		report_id = ord(data[:1])
@@ -192,7 +192,7 @@ def _skip_incoming(handle):
 		except Exception as reason:
 			_log.error("read failed, assuming receiver %s no longer available", handle)
 			close(handle)
-			raise NoReceiver(reason)
+			raise NoReceiver(reason=reason)
 
 		if data:
 			report_id = ord(data[:1])
@@ -320,7 +320,8 @@ def request(handle, devnumber, request_id, *params):
 
 		if delta >= timeout:
 			_log.warn("timeout on device %d request {%04X} params[%s]", devnumber, request_id, _strhex(params))
-			raise DeviceUnreachable(number=devnumber, request=request_id)
+			break
+			# raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
 def ping(handle, devnumber):
@@ -362,14 +363,15 @@ def ping(handle, devnumber):
 						return 1.0
 
 					if error == _hidpp10.ERROR.resource_error: # device unreachable
-						raise DeviceUnreachable(number=devnumber, request=request_id)
+						# raise DeviceUnreachable(number=devnumber, request=request_id)
+						break
 
 					if error == _hidpp10.ERROR.unknown_device: # no paired device with that number
 						_log.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
-						raise NoSuchDevice(devnumber)
+						raise NoSuchDevice(number=devnumber, request=request_id)
 
 			_unhandled(report_id, number, data)
 
 		if delta >= _PING_TIMEOUT:
 			_log.warn("(%s) timeout on device %d ping", handle, devnumber)
-			raise DeviceUnreachable(number=devnumber, request=request_id)
+			# raise DeviceUnreachable(number=devnumber, request=request_id)

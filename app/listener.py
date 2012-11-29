@@ -16,7 +16,7 @@ class _DUMMY_RECEIVER(object):
 	__slots__ = ['name', 'max_devices', 'status']
 	name = _lur.Receiver.name
 	max_devices = _lur.Receiver.max_devices
-	status = 'Receiver not found'
+	status = 'Receiver not found.'
 	__bool__ = __nonzero__ = lambda self: False
 	__str__ = lambda self: 'DUMMY'
 DUMMY = _DUMMY_RECEIVER()

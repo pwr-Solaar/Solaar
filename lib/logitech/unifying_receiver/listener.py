@@ -110,7 +110,7 @@ class EventsListener(_threading.Thread):
 
 		self.has_started()
 
-		last_tick = _timestamp() if self.tick_period else 0
+		last_tick = 0
 
 		while self._active:
 			if self._queued_events.empty():
