@@ -107,8 +107,8 @@ class DeviceStatus(dict):
 		if self.updated == 0:
 			alert |= ALERT.LOW
 		self.updated = _timestamp()
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
 		self._changed_callback(self._device, alert, reason)
 
 	# @property

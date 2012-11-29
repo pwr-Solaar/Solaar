@@ -77,29 +77,39 @@ class ReceiverListener(_lur.listener.EventsListener):
 			self.receiver.close()
 
 		self.receiver = None
-		self._status_changed(DUMMY, _lur.status.ALERT.LOW)
+		self._status_changed(None, alert=_lur.status.ALERT.LOW)
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("tick: polling status")
+
+		# read these in case they haven't been read already
+		self.receiver.serial, self.receiver.firmware
+
+		if self.receiver.status.lock_open:
+			# don't mess with stuff while pairing
+			return
+
 		for dev in self.receiver:
 			if dev.status:
-				dev.serial, dev.firmware
+				# read these in case they haven't been read already
+				dev.wpid, dev.serial, dev.protocol, dev.firmware
+
 				if dev.status.get(_lur.status.BATTERY_LEVEL) is None:
 					battery = _lur.hidpp20.get_battery(dev) or _lur.hidpp10.get_battery(dev)
 					if battery:
 						dev.status[_lur.status.BATTERY_LEVEL], dev.status[_lur.status.BATTERY_STATUS] = battery
 						self._status_changed(dev)
+
 			elif len(dev.status) > 0 and timestamp - dev.status.updated > _DEVICE_TIMEOUT:
 				dev.status.clear()
 				self._status_changed(dev, _lur.status.ALERT.LOW)
 
 	def _status_changed(self, device, alert=_lur.status.ALERT.NONE, reason=None):
-		assert device is not None
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("status_changed %s: %s (%X) %s", device, device.status, alert, reason or '')
+			_log.debug("status_changed %s: %s (%X) %s", device, None if device is None else device.status, alert, reason or '')
 		if self.status_changed_callback:
-			if device is self.receiver:
+			if device is None or device is self.receiver:
 				self.status_changed_callback(self.receiver or DUMMY, None, alert, reason)
 			else:
 				self.status_changed_callback(self.receiver or DUMMY, device, alert, reason)
@@ -133,6 +143,7 @@ class ReceiverListener(_lur.listener.EventsListener):
 		receiver = _lur.Receiver.open()
 		if receiver:
 			receiver.handle = _lur.listener.ThreadedHandle(receiver.handle, receiver.path)
+			receiver.kind = 'applications-system'
 			rl = ReceiverListener(receiver, status_changed_callback)
 			rl.start()
 			return rl

@@ -89,7 +89,7 @@ def _make_device_box(index):
 	label.set_alignment(0, 0.5)
 	label.set_padding(4, 4)
 
-	battery_icon = Gtk.Image.new_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
+	battery_icon = Gtk.Image.new_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
 
 	battery_label = Gtk.Label()
 	battery_label.set_width_chars(6)
@@ -186,6 +186,7 @@ def create(title, name, max_devices, systray=False):
 	vbox.set_visible(True)
 
 	window.add(vbox)
+	window._vbox = vbox
 
 	geometry = Gdk.Geometry()
 	geometry.min_width = 320
@@ -198,6 +199,10 @@ def create(title, name, max_devices, systray=False):
 
 	if systray:
 		window.set_keep_above(True)
+		# window.set_decorated(False)
+		# window.set_type_hint(Gdk.WindowTypeHint.TOOLTIP)
+		# window.set_skip_taskbar_hint(True)
+		# window.set_skip_pager_hint(True)
 		window.connect('delete-event', toggle)
 	else:
 		window.connect('delete-event', Gtk.main_quit)
@@ -248,14 +253,14 @@ def _update_device_info_label(label, dev):
 		if firmware:
 			items += [(f.kind, f.name + ' ' + f.version) for f in firmware]
 
-		label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-12s: %s' % (item[0], str(item[1])) for item in items))
+		label.set_markup('<small><tt>' + '\n'.join('%-12s: %s' % item for item in items) + '</tt></small>')
 
 
 def _update_receiver_info_label(label, dev):
 	if label.get_visible() and '\n' not in label.get_text():
 		items = [('Serial', dev.serial)] + \
 				[(f.kind, f.version) for f in dev.firmware]
-		label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-10s: %s' % (item[0], str(item[1])) for item in items))
+		label.set_markup('<small><tt>' + '\n'.join('%-10s: %s' % item for item in items) + '</tt></small>')
 
 
 def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
@@ -319,7 +324,7 @@ def _update_device_box(frame, dev):
 
 		if battery_level is None:
 			battery_icon.set_sensitive(False)
-			battery_icon.set_from_icon_name('battery_unknown', _STATUS_ICON_SIZE)
+			battery_icon.set_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
 			text = 'no status' if dev.protocol < 2.0 else 'waiting for status...'
 			battery_label.set_markup('<small>%s</small>' % text)
 			battery_label.set_sensitive(True)
@@ -355,8 +360,9 @@ def update(window, receiver, device=None):
 	assert receiver is not None
 	window.set_icon_name(ui.appicon(receiver.status))
 
-	vbox = window.get_child()
+	vbox = window._vbox
 	frames = list(vbox.get_children())
+	assert len(frames) == 1 + receiver.max_devices, frames
 
 	if device is None:
 		_update_receiver_box(frames[0], receiver)

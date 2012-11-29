@@ -109,7 +109,7 @@ def close(handle):
 			# _log.info("closed receiver handle %s", repr(handle))
 			return True
 		except:
-			_log.exception("closing receiver handle %s", repr(handle))
+			# _log.exception("closing receiver handle %s", repr(handle))
 			pass
 
 	return False

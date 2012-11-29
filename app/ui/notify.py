@@ -58,7 +58,7 @@ try:
 
 			message = reason or ('unpaired' if dev.status is None else
 						(str(dev.status) or ('connected' if dev.status else 'inactive')))
-			n.update(summary, message, _icon(summary) or dev.kind)
+			n.update(summary, message, _icon(summary) or str(dev.kind))
 			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
 

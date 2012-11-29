@@ -129,7 +129,8 @@ class EventsListener(_threading.Thread):
 				event = self._queued_events.get()
 
 			if event:
-				_log.debug("processing event %s", event)
+				# if _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("processing event %s", event)
 				try:
 					self._events_callback(event)
 				except:
@@ -164,7 +165,7 @@ class EventsListener(_threading.Thread):
 	def _events_hook(self, event):
 		# only consider unhandled events that were sent from this thread,
 		# i.e. triggered during a callback of a previous event
-		if _threading.current_thread() == self:
+		if self._active and _threading.current_thread() == self:
 			_log.info("queueing unhandled event %s", event)
 			self._queued_events.put(event)
 
