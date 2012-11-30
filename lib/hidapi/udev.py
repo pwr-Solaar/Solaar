@@ -10,8 +10,7 @@ necessary.
 import os as _os
 import errno as _errno
 from select import select as _select
-from pyudev import (Context as _Context,
-					Device as _Device)
+from pyudev import Context as _Context, Device as _Device
 
 
 native_implementation = 'udev'

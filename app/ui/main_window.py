@@ -2,7 +2,7 @@
 #
 #
 
-from gi.repository import (Gtk, Gdk, GObject)
+from gi.repository import Gtk, Gdk, GObject
 
 import ui
 from logitech.unifying_receiver import status as _status
@@ -12,6 +12,7 @@ _RECEIVER_ICON_SIZE = Gtk.IconSize.BUTTON
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
 _STATUS_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _PLACEHOLDER = '~'
+_FALLBACK_ICON = 'preferences-desktop-peripherals'
 
 #
 #
@@ -22,8 +23,8 @@ def _make_receiver_box(name):
 	frame._device = None
 	frame.set_name(name)
 
-	icon_name = ui.get_icon(name, 'preferences-desktop-peripherals')
-	icon = Gtk.Image.new_from_icon_name(icon_name, _RECEIVER_ICON_SIZE)
+	icon_set = ui.device_icon_set(name)
+	icon = Gtk.Image.new_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
 	icon.set_name('icon')
 	icon.set_padding(2, 2)
 
@@ -34,6 +35,7 @@ def _make_receiver_box(name):
 	pairing_icon = Gtk.Image.new_from_icon_name('network-wireless', Gtk.IconSize.MENU)
 	pairing_icon.set_name('pairing-icon')
 	pairing_icon.set_tooltip_text('The pairing lock is open.')
+	pairing_icon._tick = 0
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('toolbar')
@@ -80,8 +82,7 @@ def _make_device_box(index):
 	frame._device = None
 	frame.set_name(_PLACEHOLDER)
 
-	icon_name = 'preferences-desktop-peripherals'
-	icon = Gtk.Image.new_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
+	icon = Gtk.Image.new_from_icon_name(_FALLBACK_ICON, _DEVICE_ICON_SIZE)
 	icon.set_name('icon')
 	icon.set_alignment(0.5, 0)
 
@@ -279,7 +280,22 @@ def _update_receiver_box(frame, receiver):
 	if receiver:
 		frame._device = receiver
 		icon.set_sensitive(True)
-		pairing_icon.set_visible(receiver.status.lock_open)
+		if receiver.status.lock_open:
+			if pairing_icon._tick == 0:
+				def _tick(i, s):
+					if s and s.lock_open:
+						i.set_sensitive(bool(i._tick % 2))
+						i._tick += 1
+						return True
+					i.set_visible(False)
+					i.set_sensitive(True)
+					i._tick = 0
+				pairing_icon.set_visible(True)
+				GObject.timeout_add(1000, _tick, pairing_icon, receiver.status)
+		else:
+			pairing_icon.set_visible(False)
+			pairing_icon.set_sensitive(True)
+			pairing_icon._tick = 0
 		toolbar.set_visible(True)
 	else:
 		frame._device = None
@@ -299,8 +315,8 @@ def _update_device_box(frame, dev):
 	if first_run:
 		frame._device = dev
 		frame.set_name(dev.name)
-		icon_name = ui.get_icon(dev.name, dev.kind)
-		icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
+		icon_set = ui.device_icon_set(dev.name, dev.kind)
+		icon.set_from_icon_set(icon_set, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
 
 	status_icons = ui.find_children(frame, 'status').get_children()

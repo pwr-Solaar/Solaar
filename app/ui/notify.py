@@ -10,18 +10,8 @@ try:
 
 	import ui
 
-	# necessary because the notifications daemon does not know about our XDG_DATA_DIRS
-	_icons = {}
-
-	def _icon(title):
-		if title not in _icons:
-			_icons[title] = ui.icon_file(title)
-
-		return _icons.get(title)
-
 	# assumed to be working since the import succeeded
 	available = True
-
 	_notifications = {}
 
 
@@ -58,7 +48,10 @@ try:
 
 			message = reason or ('unpaired' if dev.status is None else
 						(str(dev.status) or ('connected' if dev.status else 'inactive')))
-			n.update(summary, message, _icon(summary) or str(dev.kind))
+
+			# we need to use the filename here because the notifications daemon
+			# is an external application that does not know about our icon sets
+			n.update(summary, message, ui.device_icon_file(dev.name, dev.kind))
 			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
 

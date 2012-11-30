@@ -3,7 +3,7 @@
 #
 
 # from sys import version as PYTTHON_VERSION
-from gi.repository import (Gtk, Gdk)
+from gi.repository import Gtk, Gdk
 
 import ui
 from solaar import NAME as _NAME

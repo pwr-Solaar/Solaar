@@ -1,10 +1,15 @@
-# pass
+#
+#
+#
 
-from . import (notify, status_icon, main_window, pair_window, action)
-
-from gi.repository import (GObject, Gtk)
+from gi.repository import GObject, Gtk
 GObject.threads_init()
 
+_LARGE_SIZE = 64
+Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
+# Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
+
+from . import notify, status_icon, main_window, pair_window, action
 
 from solaar import NAME
 _APP_ICONS = (NAME + '-init', NAME + '-fail', NAME)
@@ -14,22 +19,56 @@ def appicon(receiver_status):
 			else _APP_ICONS[0])
 
 
-
-def get_icon(name, *fallback):
-	theme = Gtk.IconTheme.get_default()
-	return (str(name) if name and theme.has_icon(str(name))
-			else get_icon(*fallback) if fallback
-			else None)
-
 def get_battery_icon(level):
 	if level < 0:
 		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
 
-def icon_file(name):
+
+_ICON_SETS = {}
+
+def device_icon_set(name, kind=None):
+	icon_set = _ICON_SETS.get(name)
+	if icon_set is None:
+		icon_set = Gtk.IconSet.new()
+		_ICON_SETS[name] = icon_set
+
+		names = ['preferences-desktop-peripherals']
+		if kind:
+			if str(kind) == 'numpad':
+				names += ('input-dialpad',)
+			elif str(kind) == 'touchpad':
+				names += ('input-tablet',)
+			elif str(kind) == 'trackball':
+				names += ('input-mouse',)
+			names += ('input-' + str(kind),)
+
+		theme = Gtk.IconTheme.get_default()
+		if theme.has_icon(name):
+			names += (name,)
+
+		source = Gtk.IconSource.new()
+		for n in names:
+			source.set_icon_name(n)
+			icon_set.add_source(source)
+		icon_set.names = names
+
+	return icon_set
+
+
+def device_icon_file(name, kind=None):
+	icon_set = device_icon_set(name, kind)
+	assert icon_set
 	theme = Gtk.IconTheme.get_default()
-	return (theme.lookup_icon(str(name), 0, 0).get_filename() if name and theme.has_icon(str(name))
-			else None)
+	for n in reversed(icon_set.names):
+		if theme.has_icon(n):
+			return theme.lookup_icon(n, _LARGE_SIZE, 0).get_filename()
+
+
+def icon_file(name, size=_LARGE_SIZE):
+	theme = Gtk.IconTheme.get_default()
+	if theme.has_icon(name):
+		return theme.lookup_icon(name, size, 0).get_filename()
 
 
 def error(window, title, text):

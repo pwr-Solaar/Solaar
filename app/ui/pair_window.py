@@ -2,13 +2,17 @@
 #
 #
 
-import logging
-from gi.repository import (Gtk, GObject)
+from gi.repository import Gtk, GObject
+
+from logging import getLogger, DEBUG as _DEBUG
+_log = getLogger('pair-window')
+del getLogger
+
 
 import ui
 from logitech.unifying_receiver import status as _status
 
-_PAIRING_TIMEOUT = 15
+_PAIRING_TIMEOUT = 30
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None):
@@ -43,16 +47,20 @@ def _create_page(assistant, kind, header=None, icon_name=None, text=None):
 # def _fake_device(receiver):
 # 	from logitech.unifying_receiver import PairedDevice
 # 	dev = PairedDevice(receiver, 6)
+# 	dev._wpid = '1234'
 # 	dev._kind = 'touchpad'
 # 	dev._codename = 'T650'
 # 	dev._name = 'Wireless Rechargeable Touchpad T650'
 # 	dev._serial = '0123456789'
 # 	dev._protocol = 2.0
 # 	dev.status = _status.DeviceStatus(dev, lambda *foo: None)
+# 	dev.status['encrypted'] = False
 # 	return dev
 
 def _check_lock_state(assistant, receiver):
 	if not assistant.is_drawable():
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("assistant %s destroyed, bailing out", assistant)
 		return False
 
 	if receiver.status.get(_status.ERROR):
@@ -72,7 +80,8 @@ def _check_lock_state(assistant, receiver):
 
 def _prepare(assistant, page, receiver):
 	index = assistant.get_current_page()
-	# logging.debug("prepare %s %d %s", assistant, index, page)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("prepare %s %d %s", assistant, index, page)
 
 	if index == 0:
 		if receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
@@ -89,27 +98,20 @@ def _prepare(assistant, page, receiver):
 
 
 def _finish(assistant, receiver):
-	logging.debug("finish %s", assistant)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("finish %s", assistant)
 	assistant.destroy()
 	receiver.status.new_device = None
 	if receiver.status.lock_open:
 		receiver.set_lock()
-
-
-def _cancel(assistant, receiver):
-	logging.debug("cancel %s", assistant)
-	assistant.destroy()
-	device, receiver.status.new_device = receiver.status.new_device, None
-	if device:
-		try:
-			del receiver[device.number]
-		except:
-			logging.error("failed to unpair %s", device)
-	if receiver.status.lock_open:
-		receiver.set_lock()
+	else:
+		receiver.status[_status.ERROR] = None
 
 
 def _pairing_failed(assistant, receiver, error):
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("%s fail: %s", receiver, error)
+
 	assistant.commit()
 
 	header = 'Pairing failed: %s.' % error
@@ -124,15 +126,22 @@ def _pairing_failed(assistant, receiver, error):
 
 
 def _pairing_succeeded(assistant, receiver):
-	device = receiver.status.new_device
+	device, receiver.status.new_device = receiver.status.new_device, None
 	assert device
-	page = _create_page(assistant, Gtk.AssistantPageType.CONFIRM)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("%s success: %s", receiver, device)
+
+	page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
+
+	header = Gtk.Label('Found a new device:')
+	header.set_alignment(0.5, 0)
+	page.pack_start(header, False, False, 0)
 
 	device_icon = Gtk.Image()
-	device_icon.set_from_icon_name(ui.get_icon(device.name, device.kind), Gtk.IconSize.DIALOG)
-	device_icon.set_pixel_size(128)
+	icon_set = ui.device_icon_set(device.name, device.kind)
+	device_icon.set_from_icon_set(icon_set, Gtk.IconSize.LARGE)
 	device_icon.set_alignment(0.5, 1)
-	page.pack_start(device_icon, False, False, 0)
+	page.pack_start(device_icon, True, True, 0)
 
 	device_label = Gtk.Label()
 	device_label.set_markup('<b>' + device.name + '</b>')
@@ -147,24 +156,12 @@ def _pairing_succeeded(assistant, receiver):
 		halign.add(hbox)
 		page.pack_start(halign, False, False, 0)
 
-	# hbox = Gtk.HBox(False, 8)
-	# hbox.pack_start(Gtk.Entry(), False, False, 0)
-	# hbox.pack_start(Gtk.ToggleButton('  Test  '), False, False, 0)
-	# halign = Gtk.Alignment.new(0.5, 1, 0, 0)
-	# halign.add(hbox)
-	# page.pack_start(halign, True, True, 0)
-
-	# entry_info = Gtk.Label()
-	# entry_info.set_markup('<small>Use the controls above to confirm\n'
-	# 						'this is the device you want to pair.</small>')
-	# entry_info.set_sensitive(False)
-	# entry_info.set_alignment(0.5, 0)
-	# page.pack_start(entry_info, True, True, 0)
+	page.pack_start(Gtk.Label(), True, True, 0)
 
 	page.show_all()
 
 	assistant.next_page()
-	assistant.set_page_complete(page, True)
+	assistant.commit()
 
 
 def create(action, receiver):
@@ -172,7 +169,7 @@ def create(action, receiver):
 	assistant.set_title(action.get_label())
 	assistant.set_icon_name(action.get_icon_name())
 
-	assistant.set_size_request(420, 260)
+	assistant.set_size_request(420, 240)
 	assistant.set_resizable(False)
 	assistant.set_role('pair-device')
 
@@ -184,7 +181,7 @@ def create(action, receiver):
 	page_intro.pack_end(spinner, True, True, 24)
 
 	assistant.connect('prepare', _prepare, receiver)
-	assistant.connect('cancel', _cancel, receiver)
+	assistant.connect('cancel', _finish, receiver)
 	assistant.connect('close', _finish, receiver)
 
 	return assistant
