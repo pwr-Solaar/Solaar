@@ -56,9 +56,10 @@ def _run(args):
 	import ui
 
 	# even if --no-notifications is given on the command line, still have to
-	# check they are available
+	# check they are available, and decide whether to put the option in the
+	# systray icon
 	args.notifications &= args.systray
-	if ui.notify.init(NAME):
+	if args.systray and ui.notify.init(NAME):
 		ui.action.toggle_notifications.set_active(args.notifications)
 		if not args.notifications:
 			ui.notify.uninit()

@@ -22,7 +22,6 @@ class NamedInt(int):
 
 		return _pack('!L', value)[-count:]
 
-
 	def __str__(self):
 		return self.name
 

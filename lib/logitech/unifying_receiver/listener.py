@@ -72,7 +72,7 @@ class ThreadedHandle(object):
 			return str(int(self))
 
 	def __repr__(self):
-		return '<ThreadedHandle[%s]>' % self.path
+		return '<ThreadedHandle(%s)>' % self.path
 
 	def __bool__(self):
 		return bool(self._local)

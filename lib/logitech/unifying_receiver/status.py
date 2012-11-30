@@ -247,4 +247,4 @@ class DeviceStatus(dict):
 				_log.debug("TOUCH MOUSE status: button_down=%s mouse_lifted=%s", button_down, mouse_lifted)
 			return True
 
-		_log.warn("don't know how to handle event %s", event)
+		_log.warn("don't know how to handle event %s for feature %s", event, feature)

@@ -153,7 +153,8 @@ class PairedDevice(object):
 		return self.receiver == other.receiver and self.number == other.number
 
 	def __str__(self):
-		return '<PairedDevice(%s,%d,%s)>' % (self.receiver, self.number, self.codename or '?')
+		return '<PairedDevice(%d,%s)>' % (self.number, self.codename or '?')
+	__repr__ = __str__
 
 #
 #
@@ -301,7 +302,8 @@ class Receiver(object):
 		return self.__contains__(dev.number)
 
 	def __str__(self):
-		return '<Receiver(%s,%s)>' % (self.handle, self.path)
+		return '<Receiver(%s,%s%s)>' % (self.path, '' if type(self.handle) == int else 'T', self.handle)
+	__repr__ = __str__
 
 	__bool__ = __nonzero__ = lambda self: self.handle is not None
 
