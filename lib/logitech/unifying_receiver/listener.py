@@ -166,7 +166,8 @@ class EventsListener(_threading.Thread):
 		# only consider unhandled events that were sent from this thread,
 		# i.e. triggered during a callback of a previous event
 		if self._active and _threading.current_thread() == self:
-			_log.info("queueing unhandled event %s", event)
+			if _log.isEnabledFor(_DEBUG):
+				_log.debug("queueing unhandled event %s", event)
 			self._queued_events.put(event)
 
 	def __bool__(self):

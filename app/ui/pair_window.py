@@ -75,7 +75,11 @@ def _check_lock_state(assistant, receiver):
 		_pairing_succeeded(assistant, receiver)
 		return False
 
-	return receiver.status.lock_open
+	if not receiver.status.lock_open:
+		_pairing_failed(assistant, receiver, 'failed to open pairing lock')
+		return False
+
+	return True
 
 
 def _prepare(assistant, page, receiver):
@@ -89,7 +93,7 @@ def _prepare(assistant, page, receiver):
 			assert receiver.status.get(_status.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GObject.timeout_add(300, _check_lock_state, assistant, receiver)
+			GObject.timeout_add(500, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
 			GObject.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')

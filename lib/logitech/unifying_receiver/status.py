@@ -50,6 +50,13 @@ class ReceiverStatus(dict):
 				'1 device found.' if count == 1 else
 				'%d devices found.' % count)
 
+	def device_paired(self, number):
+		_log.info("new device paired")
+		dev = self._receiver.create_device(self._receiver, number)
+		self._receiver._devices[number] = dev
+		self.new_device = dev
+		return dev
+
 	def _changed(self, alert=ALERT.LOW, reason=None):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)

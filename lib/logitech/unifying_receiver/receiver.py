@@ -166,6 +166,7 @@ class Receiver(object):
 	The paired devices are available through the sequence interface.
 	"""
 	name = 'Unifying Receiver'
+	kind = None
 	max_devices = MAX_PAIRED_DEVICES
 	create_device = PairedDevice
 
@@ -271,7 +272,7 @@ class Receiver(object):
 			raise IndexError(key)
 
 		dev = Receiver.create_device(self, key)
-		if dev.wpid:
+		if dev is not None and dev.wpid:
 			self._devices[key] = dev
 			return dev
 

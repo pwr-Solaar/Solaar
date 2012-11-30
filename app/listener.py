@@ -21,6 +21,7 @@ class _DUMMY_RECEIVER(object):
 	# __slots__ = ['name', 'max_devices', 'status']
 	__slots__ = []
 	name = Receiver.name
+	kind = None
 	max_devices = Receiver.max_devices
 	status = 'Receiver not found.'
 	__bool__ = __nonzero__ = lambda self: False
@@ -31,8 +32,8 @@ DUMMY = _DUMMY_RECEIVER()
 #
 #
 
-_DEVICE_TIMEOUT = 3 * 60  # seconds
-_DEVICE_STATUS_POLL = 60  # seconds
+_DEVICE_STATUS_POLL = 30  # seconds
+_DEVICE_TIMEOUT = 2 * _DEVICE_STATUS_POLL  # seconds
 
 # def _fake_device(listener):
 # 	dev = _lur.PairedDevice(listener.receiver, 6)
@@ -51,6 +52,7 @@ class ReceiverListener(_listener.EventsListener):
 	def __init__(self, receiver, status_changed_callback=None):
 		super(ReceiverListener, self).__init__(receiver, self._events_handler)
 		self.tick_period = _DEVICE_STATUS_POLL
+		self._last_tick = 0
 
 		self.status_changed_callback = status_changed_callback
 
@@ -58,11 +60,15 @@ class ReceiverListener(_listener.EventsListener):
 		Receiver.create_device = self.create_device
 
 	def create_device(self, receiver, number):
-		dev = PairedDevice(receiver, number)
-		dev.status = _status.DeviceStatus(dev, self._status_changed)
-		return dev
+		if bool(self):
+			dev = PairedDevice(receiver, number)
+			if dev.wpid:
+				dev.status = _status.DeviceStatus(dev, self._status_changed)
+				_log.info("new device %s", dev)
+				return dev
 
 	def has_started(self):
+		_log.info("events listener has started")
 		# self._status_changed(self.receiver)
 		self.receiver.enable_notifications()
 
@@ -78,6 +84,7 @@ class ReceiverListener(_listener.EventsListener):
 		self._status_changed(self.receiver, _status.ALERT.LOW)
 
 	def has_stopped(self):
+		_log.info("events listener has stopped")
 		if self.receiver:
 			self.receiver.enable_notifications(False)
 			self.receiver.close()
@@ -88,6 +95,14 @@ class ReceiverListener(_listener.EventsListener):
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("tick: polling status: %s %s", self.receiver, self.receiver._devices)
+
+		if self._last_tick > 0 and timestamp - self._last_tick > _DEVICE_STATUS_POLL * 2:
+			# if we missed a couple of polls, most likely the computer went into
+			# sleep, and we have to reinitialize the receiver again
+			_log.warn("possible sleep detected, closing this listener")
+			self.stop()
+			return
+		self._last_tick = timestamp
 
 		# read these in case they haven't been read already
 		self.receiver.serial, self.receiver.firmware
@@ -137,8 +152,10 @@ class ReceiverListener(_listener.EventsListener):
 					dev.status.process_event(event)
 			else:
 				if self.receiver.status.lock_open:
-					assert event.sub_id == 0x41
-					self.receiver.status.new_device = dev
+					assert event.sub_id == 0x41 and event.address == 0x04
+					_log.info("pairing detected new device")
+					dev = self.receiver.status.device_paired(event.devnumber)
+					dev.status.process_event(event)
 				else:
 					_log.warn("received event %s for invalid device %d", event, event.devnumber)
 

@@ -268,7 +268,7 @@ def _update_receiver_info_label(label, dev):
 def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
 	if action.get_active():
 		box_widget.set_visible(True)
-		GObject.timeout_add(50, update_function, label_widget, frame._device)
+		GObject.timeout_add(60, update_function, label_widget, frame._device)
 	else:
 		box_widget.set_visible(False)
 
@@ -309,7 +309,7 @@ def _update_receiver_box(frame, receiver):
 def _update_device_box(frame, dev):
 	# print (dev.name, dev.kind)
 
-	icon, label, info_label = ui.find_children(frame, 'icon', 'label', 'info-label')
+	icon, label, toolbar, info_label = ui.find_children(frame, 'icon', 'label', 'toolbar', 'info-label')
 
 	first_run = frame.get_name() != dev.name
 	if first_run:
@@ -318,6 +318,7 @@ def _update_device_box(frame, dev):
 		icon_set = ui.device_icon_set(dev.name, dev.kind)
 		icon.set_from_icon_set(icon_set, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
+		toolbar.get_children()[0].set_active(False)
 
 	status_icons = ui.find_children(frame, 'status').get_children()
 	battery_icon, battery_label, light_icon, light_label, not_encrypted_icon = status_icons[0:5]
@@ -384,7 +385,7 @@ def update(window, receiver, device=None):
 
 	if device is None:
 		_update_receiver_box(frames[0], receiver)
-		if not receiver.status:
+		if not receiver:
 			for frame in frames[1:]:
 				frame.set_visible(False)
 				frame.set_name(_PLACEHOLDER)
