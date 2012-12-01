@@ -242,7 +242,10 @@ class Receiver(object):
 
 	def __iter__(self):
 		for number in range(1, 1 + MAX_PAIRED_DEVICES):
-			dev = self._devices.get(number)
+			if number in self._devices:
+				dev = self._devices[number]
+			else:
+				dev = self.__getitem__(number)
 			if dev is not None:
 				yield dev
 
