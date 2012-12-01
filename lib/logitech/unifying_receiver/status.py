@@ -27,6 +27,9 @@ BATTERY_STATUS='battery-status'
 LIGHT_LEVEL='light-level'
 ERROR='error'
 
+# make sure we try to update the device status at least once a minute
+_STATUS_TIMEOUT = 60  # seconds
+
 #
 #
 #
@@ -50,11 +53,6 @@ class ReceiverStatus(dict):
 		return ('No devices found.' if count == 0 else
 				'1 device found.' if count == 1 else
 				'%d devices found.' % count)
-
-	def device_paired(self, number):
-		_log.info("new device paired")
-		dev = self.new_device = self._receiver.register_new_device(number)
-		return dev
 
 	def _changed(self, alert=ALERT.LOW, reason=None):
 		# self.updated = _timestamp()
@@ -110,7 +108,7 @@ class DeviceStatus(dict):
 		return self.updated and self._active
 	__nonzero__ = __bool__
 
-	def _changed(self, active=True, alert=ALERT.NONE, reason=None):
+	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
 		self._active = active
 		if not active:
@@ -120,10 +118,31 @@ class DeviceStatus(dict):
 				self[BATTERY_LEVEL] = battery
 		if self.updated == 0:
 			alert |= ALERT.LOW
-		self.updated = _timestamp()
+		self.updated = timestamp or _timestamp()
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
 		self._changed_callback(self._device, alert, reason)
+
+	def poll(self, timestamp):
+		if self._active:
+			d = self._device
+			# read these in case they haven't been read already
+			d.protocol, d.serial, d.firmware
+
+			if BATTERY_LEVEL not in self:
+				if d.protocol >= 2.0:
+					battery = _hidpp20.get_battery(d)
+				else:
+					battery = _hidpp10.get_battery(d)
+				if battery:
+					self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
+					self._changed(timestamp=timestamp)
+
+		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
+			# if the device has been inactive for too long, clear out any known
+			# properties, they are most likely obsolete anyway
+			self.clear()
+			self._changed(active=False, alert=ALERT.LOW, timestamp=timestamp)
 
 	def process_event(self, event):
 		if event.sub_id == 0x40:
@@ -132,7 +151,6 @@ class DeviceStatus(dict):
 				self.clear()
 				self._device.status = None
 				self._changed(False, ALERT.HIGH, 'unpaired')
-				self._device = None
 			else:
 				_log.warn("device %d disconnection notification %s with unknown type %02X", self._device.number, event, event.address)
 			return True

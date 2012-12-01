@@ -59,7 +59,8 @@ def _make_receiver_box(name):
 	info_box.add(info_label)
 	info_box.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Receiver info', _toggle_info_box, info_label, info_box, frame, _update_receiver_info_label)
+	toggle_info_action = ui.action._toggle_action('info', 'Receiver info',
+					_toggle_info_box, info_box, frame, _update_receiver_info_label)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(ui.action.pair(frame).create_tool_item(), -1)
 	# toolbar.insert(ui.action.about.create_tool_item(), -1)
@@ -132,8 +133,10 @@ def _make_device_box(index):
 
 	info_box = Gtk.Frame()
 	info_box.add(info_label)
+	info_box.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Device info', _toggle_info_box, info_label, info_box, frame, _update_device_info_label)
+	toggle_info_action = ui.action._toggle_action('info', 'Device info',
+					_toggle_info_box, info_box, frame, _update_device_info_label)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(ui.action.unpair(frame).create_tool_item(), -1)
 
@@ -216,46 +219,15 @@ def create(title, name, max_devices, systray=False):
 #
 
 def _update_device_info_label(label, dev):
-	need_update = False
+	items = [('Wireless PID', dev.wpid), ('Serial', dev.serial)]
+	hid = dev.protocol
+	if hid:
+		items += [('Protocol', 'HID++ %1.1f' % dev.protocol)]
+	firmware = dev.firmware
+	if firmware:
+		items += [(f.kind, f.name + ' ' + f.version) for f in firmware]
 
-	if 'wpid' in label._fields:
-		wpid = label._fields['wpid']
-	else:
-		wpid = label._fields['wpid'] = dev.wpid
-		need_update = True
-
-	if 'serial' in label._fields:
-		serial = label._fields['serial']
-	else:
-		serial = label._fields['serial'] = dev.serial
-		need_update = True
-
-	if 'firmware' in label._fields:
-		firmware = label._fields['firmware']
-	else:
-		if dev.status:
-			firmware = label._fields['firmware'] = dev.firmware
-			need_update = True
-		else:
-			firmware = None
-
-	if 'hid' in label._fields:
-		hid = label._fields['hid']
-	else:
-		if dev.status:
-			hid = label._fields['hid'] = 'HID++ %1.1f' % dev.protocol
-			need_update = True
-		else:
-			hid = None
-
-	if need_update:
-		items = [('Wireless PID', wpid), ('Serial', serial)]
-		if hid:
-			items += [('Protocol', hid)]
-		if firmware:
-			items += [(f.kind, f.name + ' ' + f.version) for f in firmware]
-
-		label.set_markup('<small><tt>' + '\n'.join('%-12s: %s' % item for item in items) + '</tt></small>')
+	label.set_markup('<small><tt>' + '\n'.join('%-12s: %s' % item for item in items) + '</tt></small>')
 
 
 def _update_receiver_info_label(label, dev):
@@ -265,12 +237,12 @@ def _update_receiver_info_label(label, dev):
 		label.set_markup('<small><tt>' + '\n'.join('%-10s: %s' % item for item in items) + '</tt></small>')
 
 
-def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
+def _toggle_info_box(action, box, frame, update_function):
 	if action.get_active():
-		box_widget.set_visible(True)
-		GObject.timeout_add(50, update_function, label_widget, frame._device)
+		box.set_visible(True)
+		GObject.timeout_add(50, update_function, box.get_child(), frame._device)
 	else:
-		box_widget.set_visible(False)
+		box.set_visible(False)
 
 
 def _update_receiver_box(frame, receiver):
@@ -282,7 +254,7 @@ def _update_receiver_box(frame, receiver):
 		icon.set_sensitive(True)
 		if receiver.status.lock_open:
 			if pairing_icon._tick == 0:
-				def _tick(i, s):
+				def _pairing_tick(i, s):
 					if s and s.lock_open:
 						i.set_sensitive(bool(i._tick % 2))
 						i._tick += 1
@@ -291,7 +263,7 @@ def _update_receiver_box(frame, receiver):
 					i.set_sensitive(True)
 					i._tick = 0
 				pairing_icon.set_visible(True)
-				GObject.timeout_add(1000, _tick, pairing_icon, receiver.status)
+				GObject.timeout_add(1000, _pairing_tick, pairing_icon, receiver.status)
 		else:
 			pairing_icon.set_visible(False)
 			pairing_icon.set_sensitive(True)
@@ -383,14 +355,7 @@ def update(window, receiver, device=None):
 	frames = list(vbox.get_children())
 	assert len(frames) == 1 + receiver.max_devices, frames
 
-	if device is None:
-		_update_receiver_box(frames[0], receiver)
-		if not receiver:
-			for frame in frames[1:]:
-				frame.set_visible(False)
-				frame.set_name(_PLACEHOLDER)
-				frame._device = None
-	else:
+	if device:
 		frame = frames[device.number]
 		if device.status is None:
 			frame.set_visible(False)
@@ -398,3 +363,10 @@ def update(window, receiver, device=None):
 			frame._device = None
 		else:
 			_update_device_box(frame, device)
+	else:
+		_update_receiver_box(frames[0], receiver)
+		if not receiver:
+			for frame in frames[1:]:
+				frame.set_visible(False)
+				frame.set_name(_PLACEHOLDER)
+				frame._device = None

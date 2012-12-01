@@ -12,7 +12,7 @@ del getLogger
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
-from .common import strhex as _strhex, FirmwareInfo as _FirmwareInfo
+from .common import strhex as _strhex
 from .devices import DEVICES as _DEVICES
 
 #
@@ -221,6 +221,7 @@ class Receiver(object):
 		if self._devices.get(number) is not None:
 			raise IndexError("device number %d already registered" % number)
 		dev = PairedDevice(self, number)
+		# create a device object, but only use it if the receiver knows about it
 		if dev.wpid:
 			_log.info("registered new device %d (%s)", number, dev.wpid)
 			self._devices[number] = dev
@@ -241,7 +242,7 @@ class Receiver(object):
 
 	def __iter__(self):
 		for number in range(1, 1 + MAX_PAIRED_DEVICES):
-			dev = self.__getitem__(number)
+			dev = self._devices.get(number)
 			if dev is not None:
 				yield dev
 
@@ -249,8 +250,9 @@ class Receiver(object):
 		if not self.handle:
 			return None
 
-		if key in self._devices:
-			return self._devices[key]
+		dev = self._devices.get(key)
+		if dev is not None:
+			return dev
 
 		if type(key) != int:
 			raise TypeError('key must be an integer')
@@ -278,7 +280,7 @@ class Receiver(object):
 
 	def __contains__(self, dev):
 		if type(dev) == int:
-			return dev in self._devices
+			return self._devices.get(dev) is not None
 
 		return self.__contains__(dev.number)
 

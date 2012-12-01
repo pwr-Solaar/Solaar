@@ -83,7 +83,7 @@ class ThreadedHandle(object):
 #
 
 _EVENT_READ_TIMEOUT = 500
-_IDLE_READS = 5
+_IDLE_READS = 4
 
 
 class EventsListener(_threading.Thread):

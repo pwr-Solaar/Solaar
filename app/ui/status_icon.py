@@ -45,7 +45,7 @@ def _icon_with_battery(s):
 		assert mask
 		mask = GdkPixbuf.Pixbuf.new_from_file(mask)
 		assert mask.get_width() == 128 and mask.get_height() == 128
-		mask.saturate_and_pixelate(mask, 0.8, False)
+		mask.saturate_and_pixelate(mask, 0.7, False)
 
 		battery = ui.icon_file(battery_icon, 128)
 		assert battery
@@ -64,12 +64,12 @@ def update(icon, receiver, device=None):
 	# print ("icon update", receiver, receiver.status, len(receiver._devices), device)
 	battery_status = None
 
-	if device is not None:
-		icon._devices[device.number] = device
+	if device:
+		icon._devices[device.number] = None if device.status is None else device
 
 	lines = [ui.NAME + ': ' + str(receiver.status), '']
 	if receiver:
-		for k in range(1, 1+ receiver.max_devices):
+		for k in range(1, 1 + receiver.max_devices):
 			dev = icon._devices.get(k)
 			if dev is None:
 				continue
