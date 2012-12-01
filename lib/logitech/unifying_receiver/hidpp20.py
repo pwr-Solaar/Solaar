@@ -3,6 +3,7 @@
 #
 
 from struct import pack as _pack, unpack as _unpack
+from weakref import proxy as _proxy
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR').getChild('hidpp20')
@@ -123,14 +124,12 @@ class FeaturesArray(object):
 
 	def __init__(self, device):
 		assert device is not None
-		self.device = device
+		self.device = _proxy(device)
 		self.supported = True
 		self.features = None
 
 	def __del__(self):
 		self.supported = False
-		self.features = None
-		self.device = None
 
 	def _check(self):
 		# print ("%s check" % self.device)
@@ -251,12 +250,8 @@ class KeysArray(object):
 
 	def __init__(self, device, count):
 		assert device is not None
-		self.device = device
+		self.device = _proxy(device)
 		self.keys = [None] * count
-
-	def __del__(self):
-		self.keys = None
-		self.device = None
 
 	def __getitem__(self, index):
 		assert type(index) == int

@@ -2,7 +2,10 @@
 #
 #
 
-from .common import NamedInts as _NamedInts
+from .common import (strhex as _strhex,
+					NamedInts as _NamedInts,
+					FirmwareInfo as _FirmwareInfo)
+from .hidpp20 import FIRMWARE_KIND
 
 #
 # constants
@@ -64,3 +67,29 @@ def get_battery(device):
 	if reply:
 		charge = ord(reply[:1])
 		return charge, None
+
+
+def get_receiver_serial(receiver):
+	serial = receiver.request(0x83B5, 0x03)
+	if serial:
+		return _strhex(serial[1:5])
+
+
+def get_receiver_firmware(receiver):
+	firmware = []
+
+	reply = receiver.request(0x83B5, 0x02)
+	if reply:
+		fw_version = _strhex(reply[1:5])
+		fw_version = '%s.%s.B%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
+		fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
+		firmware.append(fw)
+
+	reply = receiver.request(0x81F1, 0x04)
+	if reply:
+		bl_version = _strhex(reply[1:3])
+		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
+		bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, '', bl_version, None)
+		firmware.append(bl)
+
+	return tuple(firmware)

@@ -4,6 +4,7 @@
 
 from time import time as _timestamp
 from struct import unpack as _unpack
+from weakref import proxy as _proxy
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.status')
@@ -33,7 +34,7 @@ ERROR='error'
 class ReceiverStatus(dict):
 	def __init__(self, receiver, changed_callback):
 		assert receiver
-		self._receiver = receiver
+		self._receiver = _proxy(receiver)
 
 		assert changed_callback
 		self._changed_callback = changed_callback
@@ -52,9 +53,7 @@ class ReceiverStatus(dict):
 
 	def device_paired(self, number):
 		_log.info("new device paired")
-		dev = self._receiver.create_device(self._receiver, number)
-		self._receiver._devices[number] = dev
-		self.new_device = dev
+		dev = self.new_device = self._receiver.register_new_device(number)
 		return dev
 
 	def _changed(self, alert=ALERT.LOW, reason=None):
@@ -88,7 +87,7 @@ class ReceiverStatus(dict):
 class DeviceStatus(dict):
 	def __init__(self, device, changed_callback):
 		assert device
-		self._device = device
+		self._device = _proxy(device)
 
 		assert changed_callback
 		self._changed_callback = changed_callback
@@ -125,13 +124,6 @@ class DeviceStatus(dict):
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
 		self._changed_callback(self._device, alert, reason)
-
-	# @property
-	# def battery(self):
-	# 	battery = _hidpp10.get_battery_level(self)
-	# 	if battery is None:
-	# 		battery = _hidpp20.get_battery_level(self)
-	# 	return battery
 
 	def process_event(self, event):
 		if event.sub_id == 0x40:
@@ -241,7 +233,7 @@ class DeviceStatus(dict):
 				else:
 					self._changed()
 			else:
-				_log.warn("SOLAR_CHARGE event not GOOD? %s", event)
+				_log.warn("SOLAR CHARGE event not GOOD? %s", event)
 			return True
 
 		if feature == _hidpp20.FEATURE.TOUCH_MOUSE:

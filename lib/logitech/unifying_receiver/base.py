@@ -130,7 +130,7 @@ def write(handle, devnumber, data):
 	unloaded. The handle will be closed automatically.
 	"""
 	# the data is padded to either 5 or 18 bytes
-	if len(data) > _SHORT_MESSAGE_SIZE - 2:
+	if len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
 		wdata = _pack('!BB18s', 0x11, devnumber, data)
 	else:
 		wdata = _pack('!BB5s', 0x10, devnumber, data)
@@ -306,6 +306,13 @@ def request(handle, devnumber, request_id, *params):
 					raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
 				if reply_data[:2] == request_str:
+					if request_id & 0xFF00 == 0x8300:
+						# long registry r/w should return a long reply
+						assert report_id == 0x11
+					elif request_id & 0xF000 == 0x8000:
+						# short registry r/w should return a short reply
+						assert report_id == 0x10
+
 					if devnumber == 0xFF:
 						if request_id == 0x83B5 or request_id == 0x81F1:
 							# these replies have to match the first parameter as well

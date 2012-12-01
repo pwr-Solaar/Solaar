@@ -3,6 +3,7 @@
 #
 
 import errno as _errno
+from weakref import proxy as _proxy
 
 from logging import getLogger
 _log = getLogger('LUR').getChild('receiver')
@@ -25,7 +26,7 @@ MAX_PAIRED_DEVICES = 6
 class PairedDevice(object):
 	def __init__(self, receiver, number):
 		assert receiver
-		self.receiver = receiver
+		self.receiver = _proxy(receiver)
 		assert number > 0 and number <= MAX_PAIRED_DEVICES
 		self.number = number
 
@@ -40,11 +41,6 @@ class PairedDevice(object):
 		self._keys = None
 
 		self.features = _hidpp20.FeaturesArray(self)
-
-	def __del__(self):
-		del self.receiver
-		del self.features
-		del self._keys
 
 	@property
 	def protocol(self):
@@ -82,10 +78,9 @@ class PairedDevice(object):
 	@property
 	def name(self):
 		if self._name is None:
-			if self.protocol < 2.0:
-				if self.codename in _DEVICES:
-					_, self._name, self._kind = _DEVICES[self._codename]
-			else:
+			if self.codename in _DEVICES:
+				_, self._name, self._kind = _DEVICES[self._codename]
+			elif self.protocol >= 2.0:
 				self._name = _hidpp20.get_name(self)
 		return self._name or self.codename or '?'
 
@@ -99,10 +94,9 @@ class PairedDevice(object):
 				if self._wpid is None:
 					self._wpid = _strhex(pair_info[3:5])
 			if self._kind is None:
-				if self.protocol < 2.0:
-					if self.codename in _DEVICES:
-						_, self._name, self._kind = _DEVICES[self._codename]
-				else:
+				if self.codename in _DEVICES:
+					_, self._name, self._kind = _DEVICES[self._codename]
+				elif self.protocol >= 2.0:
 					self._kind = _hidpp20.get_kind(self)
 		return self._kind or '?'
 
@@ -168,7 +162,6 @@ class Receiver(object):
 	name = 'Unifying Receiver'
 	kind = None
 	max_devices = MAX_PAIRED_DEVICES
-	create_device = PairedDevice
 
 	def __init__(self, handle, path=None):
 		assert handle
@@ -192,30 +185,13 @@ class Receiver(object):
 	@property
 	def serial(self):
 		if self._serial is None and self.handle:
-			serial = self.request(0x83B5, 0x03)
-			if serial:
-				self._serial = _strhex(serial[1:5])
+			self._serial = _hidpp10.get_receiver_serial(self)
 		return self._serial
 
 	@property
 	def firmware(self):
 		if self._firmware is None and self.handle:
-			firmware = []
-
-			reply = self.request(0x83B5, 0x02)
-			if reply:
-				fw_version = _strhex(reply[1:5])
-				fw_version = '%s.%s.B%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
-				firmware.append(_FirmwareInfo(_hidpp20.FIRMWARE_KIND.Firmware, '', fw_version, None))
-
-			reply = self.request(0x81F1, 0x04)
-			if reply:
-				bl_version = _strhex(reply[1:3])
-				bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
-				firmware.append(_FirmwareInfo(_hidpp20.FIRMWARE_KIND.Bootloader, '', bl_version, None))
-
-			self._firmware = tuple(firmware)
-
+			self._firmware = _hidpp10.get_receiver_firmware(self)
 		return self._firmware
 
 	def enable_notifications(self, enable=True):
@@ -240,6 +216,16 @@ class Receiver(object):
 		if self.handle:
 			if not self.request(0x8002, 0x02):
 				_log.warn("failed to trigger device events")
+
+	def register_new_device(self, number):
+		if self._devices.get(number) is not None:
+			raise IndexError("device number %d already registered" % number)
+		dev = PairedDevice(self, number)
+		if dev.wpid:
+			_log.info("registered new device %d (%s)", number, dev.wpid)
+			self._devices[number] = dev
+			return dev
+		self._devices[number] = None
 
 	def set_lock(self, lock_closed=True, device=0, timeout=0):
 		if self.handle:
@@ -271,13 +257,7 @@ class Receiver(object):
 		if key < 1 or key > MAX_PAIRED_DEVICES:
 			raise IndexError(key)
 
-		dev = Receiver.create_device(self, key)
-		if dev is not None and dev.wpid:
-			self._devices[key] = dev
-			return dev
-
-		# no paired device at this index
-		self._devices[key] = None
+		return self.register_new_device(key)
 
 	def __delitem__(self, key):
 		if self._devices.get(key) is None:

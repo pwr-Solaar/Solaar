@@ -2,7 +2,7 @@
 #
 #
 
-# from sys import version as PYTTHON_VERSION
+# from sys import version as PYTHON_VERSION
 from gi.repository import Gtk, Gdk
 
 import ui
@@ -46,13 +46,19 @@ def _show_about_window(action):
 	about.set_version(_VERSION)
 	about.set_comments('Shows status of devices connected\nto a Logitech Unifying Receiver.')
 
-	about.set_license_type(Gtk.License.GPL_2_0)
 	about.set_copyright(b'\xC2\xA9'.decode('utf-8') + ' 2012 Daniel Pavel')
+	about.set_license_type(Gtk.License.GPL_2_0)
 
 	about.set_authors(('Daniel Pavel http://github.com/pwr',))
 	try:
 		about.add_credit_section('Testing', ('Douglas Wagner',))
-	except Exception:
+		about.add_credit_section('Technical specifications\nprovided by',
+						('Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',))
+	except TypeError:
+		# gtk3 < 3.6 has incorrect gi bindings
+		pass
+	except:
+		# is the Gtk3 version too old?
 		pass
 
 	about.set_website('http://github.com/pwr/Solaar/wiki')
@@ -73,6 +79,7 @@ def _pair_device(action, frame):
 
 	pair_dialog = ui.pair_window.create(action, frame._device)
 	pair_dialog.set_transient_for(window)
+	pair_dialog.set_destroy_with_parent(True)
 	pair_dialog.set_modal(True)
 	pair_dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 	pair_dialog.set_position(Gtk.WindowPosition.CENTER)

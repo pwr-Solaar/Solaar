@@ -83,6 +83,7 @@ class ThreadedHandle(object):
 #
 
 _EVENT_READ_TIMEOUT = 500
+_IDLE_READS = 5
 
 
 class EventsListener(_threading.Thread):
@@ -111,6 +112,7 @@ class EventsListener(_threading.Thread):
 		self.has_started()
 
 		last_tick = 0
+		idle_reads = 0
 
 		while self._active:
 			if self._queued_events.empty():
@@ -136,10 +138,13 @@ class EventsListener(_threading.Thread):
 				except:
 					_log.exception("processing event %s", event)
 			elif self.tick_period:
-				now = _timestamp()
-				if now - last_tick >= self.tick_period:
-					last_tick = now
-					self.tick(now)
+				idle_reads += 1
+				if idle_reads % _IDLE_READS == 0:
+					idle_reads = 0
+					now = _timestamp()
+					if now - last_tick >= self.tick_period:
+						last_tick = now
+						self.tick(now)
 
 		_base.unhandled_hook = None
 		del self._queued_events

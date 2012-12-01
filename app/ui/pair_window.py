@@ -64,15 +64,13 @@ def _check_lock_state(assistant, receiver):
 		return False
 
 	if receiver.status.get(_status.ERROR):
-		# fake = _fake_device(receiver)
-		# receiver._devices[fake.number] = fake
-		# receiver.status.new_device = fake
-		# fake.status._changed()
+		# receiver.status.new_device = _fake_device(receiver)
 		_pairing_failed(assistant, receiver, receiver.status.pop(_status.ERROR))
 		return False
 
 	if receiver.status.new_device:
-		_pairing_succeeded(assistant, receiver)
+		device, receiver.status.new_device = receiver.status.new_device, None
+		_pairing_succeeded(assistant, receiver, device)
 		return False
 
 	if not receiver.status.lock_open:
@@ -129,8 +127,7 @@ def _pairing_failed(assistant, receiver, error):
 	assistant.commit()
 
 
-def _pairing_succeeded(assistant, receiver):
-	device, receiver.status.new_device = receiver.status.new_device, None
+def _pairing_succeeded(assistant, receiver, device):
 	assert device
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("%s success: %s", receiver, device)
@@ -173,7 +170,7 @@ def create(action, receiver):
 	assistant.set_title(action.get_label())
 	assistant.set_icon_name(action.get_icon_name())
 
-	assistant.set_size_request(420, 240)
+	assistant.set_size_request(400, 240)
 	assistant.set_resizable(False)
 	assistant.set_role('pair-device')
 

@@ -268,7 +268,7 @@ def _update_receiver_info_label(label, dev):
 def _toggle_info_box(action, label_widget, box_widget, frame, update_function):
 	if action.get_active():
 		box_widget.set_visible(True)
-		GObject.timeout_add(60, update_function, label_widget, frame._device)
+		GObject.timeout_add(50, update_function, label_widget, frame._device)
 	else:
 		box_widget.set_visible(False)
 
@@ -375,8 +375,8 @@ def _update_device_box(frame, dev):
 
 
 def update(window, receiver, device=None):
-	# print ("update", receiver, receiver.status, device)
 	assert receiver is not None
+	# print ("update", receiver, receiver.status, device, None if device is None else device.number)
 	window.set_icon_name(ui.appicon(receiver.status))
 
 	vbox = window._vbox
