@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 
 NAME = 'Solaar'
-VERSION = '0.8'
+VERSION = '0.8.0'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
 __version__ = VERSION
 __license__ = "GPL"
