@@ -236,6 +236,10 @@ class Receiver(object):
 				return True
 			_log.warn("failed to %s the receiver lock", 'close' if lock_closed else 'open')
 
+	def count(self):
+		count = self.request(0x8102)
+		return 0 if count is None else ord(count[1:2])
+
 	def request(self, request_id, *params):
 		if self.handle:
 			return _base.request(self.handle, 0xFF, request_id, *params)
@@ -278,8 +282,7 @@ class Receiver(object):
 			raise IndexError(key)
 
 	def __len__(self):
-		count = self.request(0x8102)
-		return 0 if count is None else ord(count[1:2])
+		return reduce(lambda partial, item: partial if item is None else partial  + 1, self._devices.values(), 0)
 
 	def __contains__(self, dev):
 		if type(dev) == int:

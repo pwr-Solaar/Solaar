@@ -49,7 +49,7 @@ class ReceiverStatus(dict):
 		self[ERROR] = None
 
 	def __str__(self):
-		count = len([1 for d in self._receiver if d is not None])
+		count = len(self._receiver)
 		return ('No devices found.' if count == 0 else
 				'1 device found.' if count == 1 else
 				'%d devices found.' % count)

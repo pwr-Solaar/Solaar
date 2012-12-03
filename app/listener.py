@@ -74,7 +74,7 @@ class ReceiverListener(_listener.EventsListener):
 			self.receiver.enable_notifications(False)
 			self.receiver.close()
 		self.receiver = None
-		self._status_changed(None, alert=_status.ALERT.LOW)
+		self._status_changed(None, _status.ALERT.LOW)
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
@@ -137,7 +137,7 @@ class ReceiverListener(_listener.EventsListener):
 				_log.warn("received event %s for invalid device %d", event, event.devnumber)
 
 	def __str__(self):
-		return '<ReceiverListener(%s,%d)>' % (self.receiver.path, self.receiver.status)
+		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
 
 	@classmethod
 	def open(self, status_changed_callback=None):

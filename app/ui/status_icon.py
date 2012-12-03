@@ -61,7 +61,7 @@ def _icon_with_battery(s):
 	return _PIXMAPS[name]
 
 def update(icon, receiver, device=None):
-	# print ("icon update", receiver, receiver.status, len(receiver._devices), device)
+	# print ("icon update", receiver, receiver.status, len(receiver), device)
 	battery_status = None
 
 	if device:

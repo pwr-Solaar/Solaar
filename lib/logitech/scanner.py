@@ -16,7 +16,7 @@ def print_receiver(receiver):
 		else:
 			print ("  All notifications disabled.")
 
-	print ("  Reported %d paired device(s)." % len(receiver))
+	print ("  Reported %d paired device(s)." % receiver.count())
 	activity = receiver.request(0x83B3)
 	if activity:
 		activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
