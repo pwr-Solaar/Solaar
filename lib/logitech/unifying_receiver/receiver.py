@@ -223,7 +223,7 @@ class Receiver(object):
 		dev = PairedDevice(self, number)
 		# create a device object, but only use it if the receiver knows about it
 		if dev.wpid:
-			_log.info("registered new device %d (%s)", number, dev.wpid)
+			_log.info("found device %d (%s)", number, dev.wpid)
 			self._devices[number] = dev
 			return dev
 		self._devices[number] = None

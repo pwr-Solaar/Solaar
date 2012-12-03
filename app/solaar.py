@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 
 NAME = 'Solaar'
-VERSION = '0.8.1'
+VERSION = '0.8.2'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
 __version__ = VERSION
 __license__ = "GPL"
@@ -21,33 +21,28 @@ def _require(module, os_package):
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
-	arg_parser.add_argument('-q', '--quiet',
-							action='store_true',
-							help='disable all logging, takes precedence over --verbose')
+	arg_parser.add_argument('-S', '--no-systray',
+							action='store_false', dest='systray',
+							help='don\'t embed the application window into the systray')
+	arg_parser.add_argument('-N', '--no-notifications',
+							action='store_false', dest='notifications',
+							help='disable desktop notifications (shown only when in systray)')
 	arg_parser.add_argument('-v', '--verbose',
 							action='count', default=0,
 							help='increase the logger verbosity (may be repeated)')
-	arg_parser.add_argument('-S', '--no-systray',
-							action='store_false',
-							dest='systray',
-							help='don\'t embed the application window into the systray')
-	arg_parser.add_argument('-N', '--no-notifications',
-							action='store_false',
-							dest='notifications',
-							help='disable desktop notifications (shown only when in systray)')
 	arg_parser.add_argument('-V', '--version',
 							action='version',
 							version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 
 	import logging
-	if args.quiet:
-		logging.root.addHandler(logging.NullHandler())
-		logging.root.setLevel(logging.CRITICAL)
-	else:
+	if args.verbose > 0:
 		log_level = logging.WARNING - 10 * args.verbose
 		log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
 		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
+	else:
+		logging.root.addHandler(logging.NullHandler())
+		logging.root.setLevel(logging.CRITICAL)
 
 	return args
 

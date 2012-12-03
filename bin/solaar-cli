@@ -1,0 +1,9 @@
+#!/bin/sh
+
+Z=`readlink -f "$0"`
+APP=`readlink -f $(dirname "$Z")/../app`
+LIB=`readlink -f $(dirname "$Z")/../lib`
+export PYTHONPATH=$APP:$LIB
+
+PYTHON=${PYTHON:-`which python python2 python3 | head -n 1`}
+exec $PYTHON -m solaar_cli "$@"
