@@ -184,7 +184,12 @@ def pair_device(receiver, args):
 	from logitech.unifying_receiver import base
 	base.events_hook = _events_handler
 
-	receiver.enable_notifications()
+	# check if it's necessary to set the notification flags
+	notifications = receiver.request(0x8100)
+	if notifications:
+		notifications = ord(notifications[:1]) + ord(notifications[1:2]) + ord(notifications[2:3])
+	if not notifications:
+		receiver.enable_notifications()
 	receiver.set_lock(False, timeout=20)
 	print ("Pairing: turn your new device on (timing out in 20 seconds).")
 
@@ -195,8 +200,8 @@ def pair_device(receiver, args):
 			if event:
 				_events_handler(event)
 
-	receiver.set_lock()
-	receiver.enable_notifications(False)
+	if not notifications:
+		receiver.enable_notifications(False)
 	base.events_hook = None
 
 	if r_status.new_device:
