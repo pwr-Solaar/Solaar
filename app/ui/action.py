@@ -61,7 +61,7 @@ def _show_about_window(action):
 		# is the Gtk3 version too old?
 		pass
 
-	about.set_website('http://github.com/pwr/Solaar/wiki')
+	about.set_website('http://pwr.github.com/Solaar/')
 	about.set_website_label('Solaar Wiki')
 
 	about.run()
