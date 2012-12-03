@@ -348,7 +348,7 @@ def _update_device_box(frame, dev):
 
 def update(window, receiver, device=None):
 	assert receiver is not None
-	# print ("update", receiver, receiver.status, device, None if device is None else device.number)
+	# print ("update %s %s, %s" % (receiver, receiver.status, device))
 	window.set_icon_name(ui.appicon(receiver.status))
 
 	vbox = window._vbox
