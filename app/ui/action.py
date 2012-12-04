@@ -108,4 +108,4 @@ def _unpair_device(action, frame):
 			ui.error(window, 'Unpairing failed', 'Failed to unpair device\n%s .' % device.name)
 
 def unpair(frame):
-	return _action('remove', 'Unpair', _unpair_device, frame)
+	return _action('edit-delete', 'Unpair', _unpair_device, frame)

@@ -8,7 +8,7 @@ import ui
 from logitech.unifying_receiver import status as _status
 
 
-_RECEIVER_ICON_SIZE = Gtk.IconSize.BUTTON
+_RECEIVER_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
 _STATUS_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _PLACEHOLDER = '~'
@@ -32,7 +32,7 @@ def _make_receiver_box(name):
 	label.set_name('label')
 	label.set_alignment(0, 0.5)
 
-	pairing_icon = Gtk.Image.new_from_icon_name('network-wireless', Gtk.IconSize.MENU)
+	pairing_icon = Gtk.Image.new_from_icon_name('network-wireless', _RECEIVER_ICON_SIZE)
 	pairing_icon.set_name('pairing-icon')
 	pairing_icon.set_tooltip_text('The pairing lock is open.')
 	pairing_icon._tick = 0
@@ -40,7 +40,7 @@ def _make_receiver_box(name):
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('toolbar')
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-	toolbar.set_icon_size(Gtk.IconSize.MENU)
+	toolbar.set_icon_size(_RECEIVER_ICON_SIZE - 1)
 	toolbar.set_show_arrow(False)
 
 	hbox = Gtk.HBox(homogeneous=False, spacing=8)

@@ -91,7 +91,7 @@ def _prepare(assistant, page, receiver):
 			assert receiver.status.get(_status.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GObject.timeout_add(500, _check_lock_state, assistant, receiver)
+			GObject.timeout_add(2000, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
 			GObject.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
@@ -147,17 +147,15 @@ def _pairing_succeeded(assistant, receiver, device):
 	device_label = Gtk.Label()
 	device_label.set_markup('<b>' + device.name + '</b>')
 	device_label.set_alignment(0.5, 0)
-	page.pack_start(device_label, False, False, 0)
+	page.pack_start(device_label, True, True, 0)
 
 	if device.status.get('encrypted') == False:
 		hbox = Gtk.HBox(False, 8)
 		hbox.pack_start(Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.MENU), False, False, 0)
 		hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
-		halign = Gtk.Alignment.new(0.5, 0, 0, 0)
-		halign.add(hbox)
-		page.pack_start(halign, False, False, 0)
-
-	page.pack_start(Gtk.Label(), True, True, 0)
+		hbox.set_property('expand', False)
+		hbox.set_property('halign', Gtk.Align.CENTER)
+		page.pack_start(hbox, False, False, 0)
 
 	page.show_all()
 
