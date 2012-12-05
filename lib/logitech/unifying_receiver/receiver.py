@@ -33,6 +33,7 @@ class PairedDevice(object):
 		self._protocol = None
 		self._wpid = None
 		self._power_switch = None
+		self._polling_rate = None
 		self._codename = None
 		self._name = None
 		self._kind = None
@@ -58,7 +59,15 @@ class PairedDevice(object):
 				if self._kind is None:
 					kind = ord(pair_info[7:8]) & 0x0F
 					self._kind = _hidpp10.DEVICE_KIND[kind]
+				if self._polling_rate is None:
+					self._polling_rate = ord(pair_info[2:3])
 		return self._wpid
+
+	@property
+	def polling_rate(self):
+		if self._polling_rate is None:
+			self.wpid, 0
+		return self._polling_rate
 
 	@property
 	def power_switch_location(self):

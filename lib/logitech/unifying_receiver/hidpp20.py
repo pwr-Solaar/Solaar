@@ -31,6 +31,7 @@ FEATURE = _NamedInts(
 				BATTERY=0x1000,
 				REPROGRAMMABLE_KEYS=0x1B00,
 				WIRELESS=0x1D4B,
+				FN_TOGGLE=0x40A0,
 				SOLAR_CHARGE=0x4301,
 				TOUCH_MOUSE=0x6110)
 FEATURE._fallback = lambda x: 'unknown:%04X' % x

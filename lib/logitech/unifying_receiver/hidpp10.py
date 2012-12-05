@@ -71,7 +71,12 @@ def get_battery(device):
 	reply = device.request(0x810D)
 	if reply:
 		charge = ord(reply[:1])
-		return charge, None
+		status = ord(reply[2:3]) & 0xF0
+		status = ('discharging' if status == 0x30
+				else 'charging' if status == 0x50
+				else 'fully charged' if status == 0x90
+				else None)
+		return charge, status
 
 
 def get_serial(device):

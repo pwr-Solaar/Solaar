@@ -318,6 +318,9 @@ def request(handle, devnumber, request_id, *params):
 							# these replies have to match the first parameter as well
 							if reply_data[2:3] == params[:1]:
 								return reply_data[2:]
+							else:
+								# hm, not mathing my request, and certainly not an event
+								continue
 						else:
 							return reply_data[2:]
 					else:

@@ -180,6 +180,14 @@ class DeviceStatus(dict):
 
 			return True
 
+		if event.sub_id == 0x04B:
+			if event.address == 0x01:
+				_log.debug("device came online? %d", event.devnumber)
+				self._changed(alert=ALERT.LOW, reason='powered on')
+			else:
+				_log.warn("unknown event %s", event)
+			return True
+
 		if event.sub_id >= 0x80:
 			# this can't possibly be an event, can it?
 			if _log.isEnabledFor(_DEBUG):
@@ -188,6 +196,7 @@ class DeviceStatus(dict):
 
 		if event.sub_id >= 0x40:
 			_log.warn("don't know how to handle event %s", event)
+			return False
 
 		# this must be a feature event, assuming no device has more than 0x40 features
 		if event.sub_id >= len(self._device.features):

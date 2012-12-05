@@ -216,9 +216,11 @@ def unpair_device(receiver, args):
 	if dev is receiver:
 		_fail("cannot unpair the receiver")
 
+	# query these
+	number, name, codename, serial = dev.number, dev.name, dev.codename, dev.serial
 	try:
-		del receiver[dev.number]
-		print ("Unpaired %d: %s [%s:%s]" % (dev.number, dev.name, dev.codename, dev.serial))
+		del receiver[number]
+		print ("Unpaired %d: %s [%s:%s]" % (number, name, codename, serial))
 	except Exception as e:
 		_fail("failed to unpair device %s: %s" % (dev.name, e))
 

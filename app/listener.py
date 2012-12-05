@@ -95,8 +95,8 @@ class ReceiverListener(_listener.EventsListener):
 			return
 
 		for dev in self.receiver:
-			assert dev.status is not None
-			dev.status.poll(timestamp)
+			if dev.status is not None:
+				dev.status.poll(timestamp)
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		if _log.isEnabledFor(_DEBUG):
@@ -125,8 +125,7 @@ class ReceiverListener(_listener.EventsListener):
 			assert event.devnumber > 0 and event.devnumber <= self.receiver.max_devices
 			already_known = event.devnumber in self.receiver
 			dev = self.receiver[event.devnumber]
-			if dev:
-				assert dev.status is not None
+			if dev and dev.status is not None:
 				dev.status.process_event(event)
 				if self.receiver.status.lock_open and not already_known:
 					# this should be the first event after a device was paired
@@ -134,7 +133,7 @@ class ReceiverListener(_listener.EventsListener):
 					_log.info("pairing detected new device")
 					self.receiver.status.new_device = dev
 			else:
-				_log.warn("received event %s for invalid device %d", event, event.devnumber)
+				_log.warn("received event %s for invalid device %d: %s", event, event.devnumber, dev)
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
