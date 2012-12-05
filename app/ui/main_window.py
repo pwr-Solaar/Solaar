@@ -219,22 +219,23 @@ def create(title, name, max_devices, systray=False):
 #
 
 def _update_device_info_label(label, dev):
-	items = [('Wireless PID', dev.wpid), ('Serial', dev.serial)]
+	items = []
 	hid = dev.protocol
 	if hid:
 		items += [('Protocol', 'HID++ %1.1f' % dev.protocol)]
+	items += [('Wireless PID', dev.wpid), ('Serial', dev.serial)]
 	firmware = dev.firmware
 	if firmware:
-		items += [(f.kind, f.name + ' ' + f.version) for f in firmware]
+		items += [(f.kind, (f.name + ' ' + f.version).strip()) for f in firmware]
 
-	label.set_markup('<small><tt>' + '\n'.join('%-12s: %s' % item for item in items) + '</tt></small>')
+	label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
 
 
 def _update_receiver_info_label(label, dev):
 	if label.get_visible() and '\n' not in label.get_text():
-		items = [('Serial', dev.serial)] + \
+		items = [('Path', dev.path), ('Serial', dev.serial)] + \
 				[(f.kind, f.version) for f in dev.firmware]
-		label.set_markup('<small><tt>' + '\n'.join('%-10s: %s' % item for item in items) + '</tt></small>')
+		label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
 
 
 def _toggle_info_box(action, box, frame, update_function):
@@ -268,18 +269,22 @@ def _update_receiver_box(frame, receiver):
 			pairing_icon.set_visible(False)
 			pairing_icon.set_sensitive(True)
 			pairing_icon._tick = 0
-		toolbar.set_visible(True)
+		toolbar.set_sensitive(True)
 	else:
 		frame._device = None
 		icon.set_sensitive(False)
 		pairing_icon.set_visible(False)
-		toolbar.set_visible(False)
+		toolbar.set_sensitive(False)
 		toolbar.get_children()[0].set_active(False)
 		info_label.set_text('')
 
 
 def _update_device_box(frame, dev):
-	# print (dev.name, dev.kind)
+	if dev is None:
+		frame.set_visible(False)
+		frame.set_name(_PLACEHOLDER)
+		frame._device = None
+		return
 
 	icon, label, toolbar, info_label = ui.find_children(frame, 'icon', 'label', 'toolbar', 'info-label')
 
@@ -356,17 +361,9 @@ def update(window, receiver, device=None):
 	assert len(frames) == 1 + receiver.max_devices, frames
 
 	if device:
-		frame = frames[device.number]
-		if device.status is None:
-			frame.set_visible(False)
-			frame.set_name(_PLACEHOLDER)
-			frame._device = None
-		else:
-			_update_device_box(frame, device)
+		_update_device_box(frames[device.number], None if device.status is None else device)
 	else:
 		_update_receiver_box(frames[0], receiver)
 		if not receiver:
 			for frame in frames[1:]:
-				frame.set_visible(False)
-				frame.set_name(_PLACEHOLDER)
-				frame._device = None
+				_update_device_box(frame, None)

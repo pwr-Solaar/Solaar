@@ -27,8 +27,9 @@ BATTERY_STATUS='battery-status'
 LIGHT_LEVEL='light-level'
 ERROR='error'
 
-# make sure we try to update the device status at least once a minute
-_STATUS_TIMEOUT = 60  # seconds
+# if not updates have been receiver from the device for a while, assume
+# it has gone offline and clear all its know properties.
+_STATUS_TIMEOUT = 180  # seconds
 
 #
 #
@@ -179,11 +180,14 @@ class DeviceStatus(dict):
 
 			return True
 
-		if event.sub_id >= 0x40:
+		if event.sub_id >= 0x80:
 			# this can't possibly be an event, can it?
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("ignoring non-event %s", event)
 			return False
+
+		if event.sub_id >= 0x40:
+			_log.warn("don't know how to handle event %s", event)
 
 		# this must be a feature event, assuming no device has more than 0x40 features
 		if event.sub_id >= len(self._device.features):
@@ -243,8 +247,8 @@ class DeviceStatus(dict):
 					_log.debug("Solar key pressed")
 					# first cancel any reporting
 					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE)
-					reports_count = 10
-					reports_period = 3  # seconds
+					reports_count = 15
+					reports_period = 2  # seconds
 					self._changed(alert=ALERT.MED)
 					# trigger a new report chain
 					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, reports_count, reports_period)

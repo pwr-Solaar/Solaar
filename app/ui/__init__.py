@@ -2,8 +2,6 @@
 #
 #
 
-# from gi import pygtkcompat
-# pygtkcompat.enable_gtk()
 from gi.repository import GObject, Gtk
 GObject.threads_init()
 

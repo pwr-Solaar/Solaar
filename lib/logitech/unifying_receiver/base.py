@@ -239,7 +239,7 @@ def make_event(devnumber, data):
 			return _Event(devnumber, sub_id, ord(data[1:2]), data[2:])
 	else:
 		address = ord(data[1:2])
-		if sub_id > 0x00 and sub_id < 0x80 and (address & 0x01) == 0:
+		if sub_id > 0x00 and (sub_id >= 0x40 or (address & 0x01 == 0)):
 			return _Event(devnumber, sub_id, address, data[2:])
 
 

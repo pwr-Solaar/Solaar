@@ -74,23 +74,33 @@ def get_battery(device):
 		return charge, None
 
 
-def get_receiver_serial(receiver):
-	serial = receiver.request(0x83B5, 0x03)
+def get_serial(device):
+	if device.kind is None:
+		dev_id = 0x03
+		receiver = device
+	else:
+		dev_id = 0x30 + device.number - 1
+		receiver = device.receiver
+
+	serial = receiver.request(0x83B5, dev_id)
 	if serial:
 		return _strhex(serial[1:5])
 
 
-def get_receiver_firmware(receiver):
+def get_firmware(device):
 	firmware = []
 
-	reply = receiver.request(0x83B5, 0x02)
+	reply = device.request(0x81F1, 0x01)
 	if reply:
-		fw_version = _strhex(reply[1:5])
-		fw_version = '%s.%s.B%s' % (fw_version[0:2], fw_version[2:4], fw_version[4:8])
+		fw_version = _strhex(reply[1:3])
+		fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
+		reply = device.request(0x81F1, 0x02)
+		if reply:
+			fw_version += '.B' + _strhex(reply[1:3])
 		fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
 		firmware.append(fw)
 
-	reply = receiver.request(0x81F1, 0x04)
+	reply = device.request(0x81F1, 0x04)
 	if reply:
 		bl_version = _strhex(reply[1:3])
 		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])

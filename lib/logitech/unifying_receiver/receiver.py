@@ -63,7 +63,10 @@ class PairedDevice(object):
 	@property
 	def power_switch_location(self):
 		if self._power_switch is None:
-			self.serial
+			ps = self.receiver.request(0x83B5, 0x30 + self.number - 1)
+			if ps:
+				ps = ord(ps[9:10]) & 0x0F
+				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
 		return self._power_switch
 
 	@property
@@ -79,7 +82,7 @@ class PairedDevice(object):
 	def name(self):
 		if self._name is None:
 			if self.codename in _DEVICES:
-				_, self._name, self._kind = _DEVICES[self._codename]
+				self._name, self._kind = _DEVICES[self._codename][:2]
 			elif self.protocol >= 2.0:
 				self._name = _hidpp20.get_name(self)
 		return self._name or self.codename or '?'
@@ -95,27 +98,25 @@ class PairedDevice(object):
 					self._wpid = _strhex(pair_info[3:5])
 			if self._kind is None:
 				if self.codename in _DEVICES:
-					_, self._name, self._kind = _DEVICES[self._codename]
+					self._name, self._kind = _DEVICES[self._codename][:2]
 				elif self.protocol >= 2.0:
 					self._kind = _hidpp20.get_kind(self)
 		return self._kind or '?'
 
 	@property
 	def firmware(self):
-		if self._firmware is None and self.protocol >= 2.0:
-			self._firmware = _hidpp20.get_firmware(self)
-			# _log.debug("device %d firmware %s", self.number, self._firmware)
+		if self._firmware is None:
+			p = self.protocol
+			if p >= 2.0:
+				self._firmware = _hidpp20.get_firmware(self)
+			elif p >= 1.0:
+				self._firmware = _hidpp10.get_firmware(self)
 		return self._firmware or ()
 
 	@property
 	def serial(self):
 		if self._serial is None:
-			serial = self.receiver.request(0x83B5, 0x30 + self.number - 1)
-			if serial:
-				self._serial = _strhex(serial[1:5])
-				# _log.debug("device %d serial %s", self.number, self._serial)
-				ps_location = ord(serial[9:10]) & 0x0F
-				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps_location]
+			self._serial = _hidpp10.get_serial(self)
 		return self._serial or '?'
 
 	@property
@@ -185,13 +186,13 @@ class Receiver(object):
 	@property
 	def serial(self):
 		if self._serial is None and self.handle:
-			self._serial = _hidpp10.get_receiver_serial(self)
+			self._serial = _hidpp10.get_serial(self)
 		return self._serial
 
 	@property
 	def firmware(self):
 		if self._firmware is None and self.handle:
-			self._firmware = _hidpp10.get_receiver_firmware(self)
+			self._firmware = _hidpp10.get_firmware(self)
 		return self._firmware
 
 	def enable_notifications(self, enable=True):

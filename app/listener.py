@@ -34,7 +34,7 @@ del namedtuple
 #
 #
 
-_POLL_TICK = 30  # seconds
+_POLL_TICK = 60  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
