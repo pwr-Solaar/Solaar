@@ -5,9 +5,7 @@ It comes in two flavours, command-line and GUI.  Both are able to list the
 devices paired to a Unifying Receiver, show detailed info for each device, and
 also pair/unpair supported devices with the receiver.
 
-
-Requirements
-------------
+## Requirements
 
 You should have a reasonably new kernel (3.2+), with the `logitech-djreceiver`
 driver enabled and loaded; also, the `udev` package must be installed and the
@@ -24,32 +22,30 @@ distribution the required packages are most likely named something similar.
 If the desktop notifications bindings are also installed (`gir1.2-notify-0.7`),
 you will also get desktop notifications when devices come online/go offline.
 
-
-Installation
-------------
+## Installation
 
 Normally USB devices are not accessible for r/w by regular users, so you will
 need to do a one-time udev rule installation to allow access to the Logitech
 Unifying Receiver.
 
-In the `rules.d/` folder of Solaar you'll find a udev rule file, to be copied in
-`/etc/udev/rules.d/` (as the root user).
+You can run the `rules.d/install.sh` script from Solaar to do this installation
+(it will switch to root when necessary), or you can do all the required steps by
+hand, as the root user:
 
-In its current form it makes the Unifying Receiver device available for r/w by
-all users belonging to the `plugdev` system group (standard Debian/Ubuntu group
-for pluggable devices). It may need changes, specific to your particular
-system's configuration.
+- copy `rules.d/99-logitech-unfiying-receiver.rules` from Solaar to
+`/etc/udev/rules.d/`
 
-If in doubt, replacing `GROUP="plugdev"` with `GROUP="<your username>"` should just
-work.
+    By default, the rule makes the Unifying Receiver device available for r/w by
+    all users belonging to the `plugdev` system group (standard Debian/Ubuntu
+    group for pluggable devices). It may need changes, specific to your
+    particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
+    with `GROUP="<your username>"` should just work.
 
-After you copy the file to `/etc/udev/rules.d` (and possibly modify it for your
-system), run `udevadm control --reload-rules` as root for it to apply. Then
-physically remove the Unifying Receiver, wait 10 seconds and re-insert it.
+- run `udevadm control --reload-rules` to let the udev daemon know about the new
+rule
+- physically remove the Unifying Receiver, wait 10 seconds and re-insert it
 
-
-Supported Devices
------------------
+## Supported Devices
 
 **Solaar** will detect all devices paired with your Unifying Receiver, and at
 the very least display some basic information about them.  Depending on the
@@ -66,9 +62,7 @@ Extended support for other devices will be added in the future, depending on the
 documentation available, but the K750 keyboard is the only device I have and can
 test on right now.
 
-
-Thanks
-------
+## Thanks
 
 This project began as a third-hand clone of [Noah K. Tilton](https://github.com/noah)'s
 logitech-solar-k750 project on GitHub (no longer available). It was developed
