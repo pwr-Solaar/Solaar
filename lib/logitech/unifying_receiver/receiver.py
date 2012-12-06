@@ -292,7 +292,7 @@ class Receiver(object):
 			raise IndexError(key)
 
 	def __len__(self):
-		return reduce(lambda partial, item: partial if item is None else partial  + 1, self._devices.values(), 0)
+		return len([d for d in self._devices.values() if d is not None])
 
 	def __contains__(self, dev):
 		if type(dev) == int:
