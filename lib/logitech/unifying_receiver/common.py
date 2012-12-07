@@ -83,7 +83,15 @@ class NamedInts(object):
 		self._fallback = None
 
 	def flag_names(self, value):
-		return ', '.join(str(self._indexed[k]) for k in self._indexed if k & value == k)
+		unknown_bits = value
+		for k in self._indexed:
+			assert bin(k).count('1') == 1
+			if k & value == k:
+				unknown_bits &= ~k
+				yield str(self._indexed[k])
+
+		if unknown_bits:
+			yield 'unknown:%06X' % unknown_bits
 
 	def index(self, value):
 		if value in self._values:

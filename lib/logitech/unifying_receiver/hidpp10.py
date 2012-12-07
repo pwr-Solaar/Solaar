@@ -36,9 +36,9 @@ POWER_SWITCH_LOCATION = _NamedInts(
 				bottom_edge=0x0C)
 
 NOTIFICATION_FLAG = _NamedInts(
-				battery_status=0x00100000,
-				wireless=0x00000100,
-				software_present=0x000000800)
+				battery_status=0x100000,
+				wireless=0x000100,
+				software_present=0x0000800)
 
 ERROR = _NamedInts(
 				invalid_SubID__command=0x01,

@@ -74,8 +74,9 @@ def _find_device(receiver, name):
 
 
 def _print_receiver(receiver, verbose=False):
+	paired_count = receiver.count()
 	if not verbose:
-		print ("-: Unifying Receiver [%s:%s] with %d devices" % (receiver.path, receiver.serial, receiver.count()))
+		print ("-: Unifying Receiver [%s:%s] with %d devices" % (receiver.path, receiver.serial, paired_count))
 		return
 
 	print ("-: Unifying Receiver")
@@ -84,21 +85,22 @@ def _print_receiver(receiver, verbose=False):
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))
 
-	print ("   Has %d paired device(s)." % receiver.count())
+	print ("   Has %d paired device(s)." % paired_count)
 
 	notifications = receiver.request(0x8100)
 	if notifications:
 		notifications = ord(notifications[0:1]) << 16 | ord(notifications[1:2]) << 8
 		if notifications:
 			from logitech.unifying_receiver import hidpp10
-			print ("   Enabled notifications: %s." % hidpp10.NOTIFICATION_FLAG.flag_names(notifications))
+			print ("   Enabled notifications: %06X = %s." % (notifications, ', '.join(hidpp10.NOTIFICATION_FLAG.flag_names(notifications))))
 		else:
 			print ("   All notifications disabled.")
 
-	activity = receiver.request(0x83B3)
-	if activity:
-		activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
-		print("   Device activity counters: %s" % ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
+	if paired_count > 0:
+		activity = receiver.request(0x83B3)
+		if activity:
+			activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
+			print("   Device activity counters: %s" % ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
 
 
 def _print_device(dev, verbose=False):
