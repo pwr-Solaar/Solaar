@@ -27,7 +27,6 @@ from .common import strhex
 from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
 from .receiver import Receiver, PairedDevice, MAX_PAIRED_DEVICES
 from .hidpp20 import FeatureNotSupported, FeatureCallError
-from .devices import DEVICES
 
 from . import listener
 from . import status
