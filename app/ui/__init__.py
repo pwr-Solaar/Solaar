@@ -16,7 +16,7 @@ from . import notify, status_icon, main_window, pair_window, action
 from solaar import NAME
 _APP_ICONS = (NAME + '-init', NAME + '-fail', NAME)
 def appicon(receiver_status):
-	return (_APP_ICONS[1] if type(receiver_status) == str
+	return (_APP_ICONS[1] if isinstance(receiver_status, basestring)
 			else _APP_ICONS[2] if receiver_status
 			else _APP_ICONS[0])
 

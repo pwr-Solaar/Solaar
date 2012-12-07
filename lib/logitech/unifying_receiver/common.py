@@ -33,14 +33,14 @@ class NamedInt(int):
 		if isinstance(other, int):
 			return int(self) == int(other)
 
-		if isinstance(other, str):
+		if isinstance(other, basestring):
 			return self.name.lower() == other.lower()
 
 	def __ne__(self, other):
 		if isinstance(other, int):
 			return int(self) != int(other)
 
-		if isinstance(other, str):
+		if isinstance(other, basestring):
 			return self.name.lower() != other.lower()
 
 	def __lt__(self, other):
@@ -91,11 +91,11 @@ class NamedInts(object):
 		raise IndexError('%s not found' % value)
 
 	def __getitem__(self, index):
-		if type(index) == int:
+		if isinstance(index, int):
 			if index in self._indexed:
-				return self._indexed[index]
+				return self._indexed[int(index)]
 
-			if self._fallback:
+			if self._fallback and type(index) == int:
 				value = NamedInt(index, self._fallback(index))
 				self._indexed[index] = value
 				self._values = sorted(self._values + [value])
