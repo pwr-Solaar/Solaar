@@ -1,8 +1,0 @@
-#!/bin/sh
-
-Z=`readlink -f "$0"`
-LIB=`readlink -f $(dirname "$Z")/../lib`
-export PYTHONPATH=$LIB
-
-PYTHON=${PYTHON:-`which python python2 python3 | head -n 1`}
-exec $PYTHON -m logitech.scanner "$@"
