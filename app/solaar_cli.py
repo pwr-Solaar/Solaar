@@ -235,6 +235,73 @@ def unpair_device(receiver, args):
 		_fail("failed to unpair device %s: %s" % (dev.name, e))
 
 
+def config_device(receiver, args):
+	dev = _find_device(receiver, args.device)
+	if dev is receiver:
+		_fail("no settings for the receiver")
+
+	if not dev.settings:
+		_fail("no settings for %s" % dev.name)
+
+	if not args.setting:
+		print ("[%d:%s:%s]" % (dev.number, dev.name, dev.serial))
+		for s in dev.settings:
+			print ("")
+			print ("# %s" % s.label)
+			if s.choices:
+				print ("#   possible values: [%s]" % ', '.join(str(v) for v in s.choices))
+			value = s.read()
+			if value is None:
+				print ("#   !! failed to read '%s'" % s.name)
+			else:
+				print ("%s=%s" % (s.name, value))
+		return
+
+	setting = None
+	for s in dev.settings:
+		if args.setting.lower() == s.name.lower():
+			setting = s
+			break
+	if setting is None:
+		_fail("no setting '%s' for %s" % (args.setting, dev.name))
+
+	if args.value is None:
+		result = setting.read()
+		if result is None:
+			_fail("failed to read '%s'" % setting.name)
+		print ("%s = %s" % (setting.name, setting.read()))
+		return
+
+	from logitech.unifying_receiver import settings as _settings
+
+	if setting.kind == _settings.KIND.toggle:
+		value = args.value
+		try:
+			value = bool(int(value))
+		except:
+			if value.lower() in ['1', 'true', 'yes', 't', 'y']:
+				value = True
+			elif value.lower() in ['0', 'false', 'no', 'f', 'n']:
+				value = False
+			else:
+				_fail("don't know how to interpret '%s' as boolean" % value)
+	elif setting.choices:
+		value = args.value.lower()
+		if value not in setting.choices:
+			_fail("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
+		value = setting.choices[setting.choices.index(value)]
+	else:
+		raise NotImplemented
+
+	result = setting.write(value)
+	if result is None:
+		_fail("failed to set '%s' to '%s'" % (setting.name, value))
+	print ("%s = %s" % (setting.name, result))
+
+#
+#
+#
+
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
@@ -252,6 +319,16 @@ def _parse_arguments():
 					help='print all available information about the inspected device(s)')
 	sp.set_defaults(cmd=show_devices)
 
+	sp = subparsers.add_parser('config', help='read/write device-specific options',
+								epilog='Please note that configuration only works on active devices.')
+	sp.add_argument('device',
+					help='device to configure; may be a device number (1..6), a device serial, '
+							'or at least 3 characters of a device\'s name')
+	sp.add_argument('option', nargs='?',
+					help='device-specific option; leave empty to show available options')
+	sp.add_argument('value', nargs='?',
+					help='new value for the option')
+	sp.set_defaults(cmd=config_device)
 
 	sp = subparsers.add_parser('pair', help='pair a new device',
 								epilog='The Logitech Unifying Receiver supports up to 6 paired devices at the same time.')
