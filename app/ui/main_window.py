@@ -226,9 +226,9 @@ def _make_device_box(index):
 	unpair = Gtk.Button('Unpair')
 	unpair.set_image(Gtk.Image.new_from_icon_name('edit-delete', Gtk.IconSize.BUTTON))
 	unpair.connect('clicked', ui.action._unpair_device, frame)
-	# unpair.set_property('margin-top', 12)
-	unpair.set_property('margin-left', 104)
-	unpair.set_property('margin-right', 104)
+	unpair.set_property('margin-left', 106)
+	unpair.set_property('margin-right', 106)
+	unpair.set_property('can-focus', False)  # exclude from tab-navigation
 	vbox.pack_end(unpair, False, False, 0)
 
 	vbox.show_all()

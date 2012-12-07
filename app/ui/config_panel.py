@@ -29,6 +29,7 @@ def _process_apply_queue():
 
 	while True:
 		task = _apply_queue.get()
+		assert isinstance(task, tuple)
 		if task[0] == 'write':
 			_, setting, value, sbox = task
 			GObject.idle_add(_write_start, sbox)
@@ -106,7 +107,7 @@ def _add_settings(box, device):
 		else:
 			raise NotImplemented
 
-		# control.set_size_request(50, 20)
+		control.set_sensitive(False)  # the first read will enable it
 		sbox.pack_end(control, False, False, 0)
 		sbox.pack_end(spinner, False, False, 0)
 		sbox.pack_end(failed, False, False, 0)
@@ -115,7 +116,7 @@ def _add_settings(box, device):
 			sbox.set_tooltip_text(s.description)
 
 		sbox.show_all()
-		spinner.set_visible(False)
+		spinner.start()  # the first read will stop it
 		failed.set_visible(False)
 		box.pack_start(sbox, False, False, 0)
 		yield sbox
@@ -166,8 +167,8 @@ def update(frame):
 	items = box.get_children()
 	if not items:
 		if device.status:
-			items = _add_settings(box, device)
-			assert len(device.settings) == len(list(items))
+			items = list(_add_settings(box, device))
+			assert len(device.settings) == len(items)
 			force_read = True
 		else:
 			# don't bother adding settings for offline devices,
