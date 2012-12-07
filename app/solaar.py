@@ -24,7 +24,7 @@ def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-S', '--no-systray', action='store_false', dest='systray',
-							help='don\'t embed the application window into the systray')
+							help='do not place an icon in the desktop\'s systray')
 	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
 							help='disable desktop notifications (shown only when in systray)')
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,

@@ -57,12 +57,12 @@ def _find_device(receiver, name):
 		_fail("need at least 3 characters to match a device")
 
 	name = name.lower()
-	if 'receiver'.startswith(name) or name == receiver.serial:
+	if 'receiver'.startswith(name) or name.upper() == receiver.serial:
 		return receiver
 
 	dev = None
 	for d in receiver:
-		if name == d.serial or name in d.name.lower() or name in d.codename.lower():
+		if name.upper() == d.serial or name in d.name.lower() or name in d.codename.lower():
 			if dev is None:
 				dev = d
 			else:
@@ -253,7 +253,7 @@ def config_device(receiver, args):
 				print ("#   possible values: [%s]" % ', '.join(str(v) for v in s.choices))
 			value = s.read()
 			if value is None:
-				print ("#   !! failed to read '%s'" % s.name)
+				print ("# ! failed to read '%s'" % s.name)
 			else:
 				print ("%s=%s" % (s.name, value))
 		return
@@ -286,11 +286,34 @@ def config_device(receiver, args):
 				value = False
 			else:
 				_fail("don't know how to interpret '%s' as boolean" % value)
+
 	elif setting.choices:
 		value = args.value.lower()
-		if value not in setting.choices:
+
+		if value in ['higher', 'lower']:
+			old_value = setting.read()
+			if old_value is None:
+				_fail("could not read current value of '%s'" % setting.name)
+
+			old_index = setting.choices.index(old_value)
+			if value == 'lower':
+				if old_index == 0:
+					sys.stderr.write("'%s' already at the lowest value")
+					return
+				value = setting.choices[old_index - 1:old_index][0]
+			elif value == 'higher':
+				if old_index == len(setting.choices) - 1:
+					sys.stderr.write("'%s' already at the highest value")
+					return
+				value = setting.choices[old_index + 1:old_index + 2][0]
+		elif value in ('highest', 'max'):
+			value = setting.choices[-1:][0]
+		elif value in ('lowest', 'min'):
+			value = setting.choices[:1][0]
+		elif value not in setting.choices:
 			_fail("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
-		value = setting.choices[setting.choices.index(value)]
+			value = setting.choices[value]
+
 	else:
 		raise NotImplemented
 
