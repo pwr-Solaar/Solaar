@@ -10,28 +10,37 @@ strhex = lambda d: hexlify(d).decode('ascii').upper()
 
 interactive = os.isatty(0)
 start_time = 0
-try:
+try:  # python3 support
 	read_packet = raw_input
 except:
 	read_packet = input
 
+from threading import Lock
+print_lock = Lock()
+
 
 def _print(marker, data, scroll=False):
 	t = time.time() - start_time
-
-	if interactive and scroll:
-		sys.stdout.write('\033[s')
-		sys.stdout.write('\033[S')  # scroll up
-		sys.stdout.write('\033[A\033[L\033[G')   # insert new line above the current one, position on first column
-
 	hexs = strhex(data)
 	s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
-	sys.stdout.write(s)
+
+	print_lock.acquire()
 
 	if interactive and scroll:
+		# scroll the entire screen above the current line up by 1 line
+		sys.stdout.write('\033[s'  # save cursor position
+						'\033[S'  # scroll up
+						'\033[A'   # cursor up
+						'\033[L'    # insert 1 line
+						'\033[G')   # move cursor to column 1
+	sys.stdout.write(s)
+	if interactive and scroll:
+		# restore cursor position
 		sys.stdout.write('\033[u')
 	else:
 		sys.stdout.write('\n')
+
+	print_lock.release()
 
 
 def _continuous_read(handle, timeout=2000):
@@ -82,6 +91,9 @@ if __name__ == '__main__':
 			t.start()
 
 			prompt = '?? Input: ' if interactive else ''
+			if interactive:
+				# move the cursor at the bottom of the screen
+				sys.stdout.write('\033[300B')  # move cusor at most 300 lines down, don't scroll
 
 			while t.is_alive():
 				line = read_packet(prompt).strip().replace(' ', '')
