@@ -31,7 +31,7 @@ ERROR='error'
 
 # if not updates have been receiver from the device for a while, assume
 # it has gone offline and clear all its know properties.
-_STATUS_TIMEOUT = 180  # seconds
+_STATUS_TIMEOUT = 120  # seconds
 
 #
 #
@@ -157,6 +157,8 @@ class DeviceStatus(dict):
 			self._changed(active=False, alert=ALERT.LOW, timestamp=timestamp)
 
 	def process_event(self, event):
+		assert event.sub_id < 0x80
+
 		if event.sub_id == 0x40:
 			if event.address == 0x02:
 				# device un-paired
@@ -191,19 +193,13 @@ class DeviceStatus(dict):
 
 			return True
 
-		if event.sub_id == 0x04B:
+		if event.sub_id == 0x4B:
 			if event.address == 0x01:
 				_log.debug("device came online? %d", event.devnumber)
 				self._changed(alert=ALERT.LOW, reason='powered on')
 			else:
 				_log.warn("unknown event %s", event)
 			return True
-
-		if event.sub_id >= 0x80:
-			# this can't possibly be an event, can it?
-			if _log.isEnabledFor(_DEBUG):
-				_log.debug("ignoring %s (not an event)", event)
-			return False
 
 		if event.sub_id >= 0x40:
 			_log.warn("don't know how to handle event %s", event)
@@ -214,7 +210,11 @@ class DeviceStatus(dict):
 			_log.warn("device %d got event from unknown feature index %02X", self._device.number, event.sub_id)
 			return False
 
-		feature = self._device.features[event.sub_id]
+		try:
+			feature = self._device.features[event.sub_id]
+		except IndexError:
+			_log.warn("don't know how to handle event %s for feature with invalid index %02X", event, event.sub_id)
+			return False
 
 		if feature == _hidpp20.FEATURE.BATTERY:
 			if event.address == 0x00:
@@ -288,4 +288,4 @@ class DeviceStatus(dict):
 				_log.debug("TOUCH MOUSE status: button_down=%s mouse_lifted=%s", button_down, mouse_lifted)
 			return True
 
-		_log.warn("don't know how to handle event %s for feature %s", event, feature)
+		_log.warn("don't know how to handle event %s for feature %s (%02X)", event, feature, event.sub_id)

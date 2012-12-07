@@ -85,6 +85,11 @@ class NamedInts(object):
 	def flag_names(self, value):
 		return ', '.join(str(self._indexed[k]) for k in self._indexed if k & value == k)
 
+	def index(self, value):
+		if value in self._values:
+			return self._values.index(value)
+		raise IndexError('%s not found' % value)
+
 	def __getitem__(self, index):
 		if type(index) == int:
 			if index in self._indexed:
