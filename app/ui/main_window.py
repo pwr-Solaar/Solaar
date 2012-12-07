@@ -6,6 +6,7 @@ from gi.repository import Gtk, Gdk, GObject
 
 import ui
 from logitech.unifying_receiver import status as _status
+from . import config_panel as _config_panel
 
 
 _RECEIVER_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
@@ -140,35 +141,99 @@ def _make_device_box(index):
 	status_box.pack_end(toolbar, False, False, 0)
 	status_box.pack_end(not_encrypted_icon, False, False, 0)
 
-	info_label = Gtk.Label('Querying ...')
+	status_vbox = Gtk.VBox(homogeneous=False, spacing=4)
+	status_vbox.pack_start(label, True, True, 0)
+	status_vbox.pack_start(status_box, True, True, 0)
+
+	device_box = Gtk.HBox(homogeneous=False, spacing=4)
+	# device_box.set_border_width(4)
+	device_box.pack_start(icon, False, False, 0)
+	device_box.pack_start(status_vbox, True, True, 0)
+	device_box.show_all()
+
+	info_label = Gtk.Label()
+	info_label.set_markup('<small>reading ...</small>')
 	info_label.set_name('info-label')
-	info_label.set_alignment(0, 0.5)
-	info_label.set_padding(8, 2)
+	info_label.set_property('margin-left', 54)
 	info_label.set_selectable(True)
-	info_label._fields = {}
+	info_label.set_alignment(0, 0)
 
-	info_box = Gtk.Frame()
-	info_box.add(info_label)
-	info_box.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
+	def _update_info_label():
+		if info_label.get_text().count('\n') < 5:
+			device = frame._device
+			assert device
 
-	toggle_info_action = ui.action._toggle_action('info', 'Device info',
-					_toggle_info_box, info_box, frame, _update_device_info_label)
+			items = []
+			hid = device.protocol
+			if hid:
+				items += [('Protocol', 'HID++ %1.1f' % device.protocol)]
+			else:
+				items += [('Protocol', 'unknown')]
+			items += [('Polling rate', '%d ms' % device.polling_rate), ('Wireless PID', device.wpid), ('Serial', device.serial)]
+			firmware = device.firmware
+			if firmware:
+				items += [(f.kind, (f.name + ' ' + f.version).strip()) for f in firmware]
+
+			info_label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
+
+	def _toggle_info_label(action, frame):
+		active = action.get_active()
+		if active:
+			# toggle_config_action.set_active(False)
+			ui.find_children(frame, 'toolbar').get_children()[-1].set_active(False)
+
+		vbox = frame.get_child()
+		children = vbox.get_children()
+		children[1].set_visible(active)  # separator
+		children[2].set_visible(active)  # info label
+
+		if active:
+			GObject.timeout_add(30, _update_info_label)
+
+	def _toggle_config(action, frame):
+		active = action.get_active()
+		if active:
+			# toggle_info_action.set_active(False)
+			ui.find_children(frame, 'toolbar').get_children()[0].set_active(False)
+
+		vbox = frame.get_child()
+		children = vbox.get_children()
+		children[1].set_visible(active)  # separator
+		children[3].set_visible(active)  # config box
+		children[4].set_visible(active)  # unpair button
+
+		if active:
+			GObject.timeout_add(30, _config_panel.update, frame)
+
+	toggle_info_action = ui.action._toggle_action('info', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
-	toolbar.insert(ui.action.unpair(frame).create_tool_item(), -1)
+	toggle_config_action = ui.action._toggle_action('preferences-system', 'Configuration', _toggle_config, frame)
+	toolbar.insert(toggle_config_action.create_tool_item(), -1)
 
-	vbox = Gtk.VBox(homogeneous=False, spacing=4)
-	vbox.pack_start(label, True, True, 0)
-	vbox.pack_start(status_box, True, True, 0)
-	vbox.pack_start(info_box, True, True, 0)
+	vbox = Gtk.VBox(homogeneous=False, spacing=2)
+	vbox.set_border_width(2)
+	vbox.pack_start(device_box, True, True, 0)
+	vbox.pack_start(Gtk.HSeparator(), False, False, 0)
+	vbox.pack_start(info_label, False, False, 0)
 
-	box = Gtk.HBox(homogeneous=False, spacing=4)
-	box.set_border_width(4)
-	box.pack_start(icon, False, False, 0)
-	box.pack_start(vbox, True, True, 0)
-	box.show_all()
+	config_box = Gtk.VBox(homogeneous=False, spacing=4)
+	config_box.set_name('config-box')
+	config_box.set_property('margin', 8)
+	vbox.pack_start(config_box, False, False, 0)
 
-	frame.add(box)
-	info_box.set_visible(False)
+	unpair = Gtk.Button('Unpair')
+	unpair.set_image(Gtk.Image.new_from_icon_name('edit-delete', Gtk.IconSize.BUTTON))
+	unpair.connect('clicked', ui.action._unpair_device, frame)
+	# unpair.set_property('margin-top', 12)
+	unpair.set_property('margin-left', 104)
+	unpair.set_property('margin-right', 104)
+	vbox.pack_end(unpair, False, False, 0)
+
+	vbox.show_all()
+	frame.add(vbox)
+
+	_toggle_info_label(toggle_info_action, frame)
+	_toggle_config(toggle_config_action, frame)
 	return frame
 
 
@@ -190,6 +255,7 @@ def toggle(window, trigger):
 def _popup(window, trigger=None):
 	if not window.get_visible():
 		toggle(window, trigger)
+
 
 def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
@@ -235,36 +301,8 @@ def create(title, name, max_devices, systray=False):
 #
 #
 
-def _update_device_info_label(label, dev):
-	items = []
-	hid = dev.protocol
-	if hid:
-		items += [('Protocol', 'HID++ %1.1f' % dev.protocol)]
-	items += [('Wireless PID', dev.wpid), ('Serial', dev.serial)]
-	firmware = dev.firmware
-	if firmware:
-		items += [(f.kind, (f.name + ' ' + f.version).strip()) for f in firmware]
-
-	label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
-
-
-def _update_receiver_info_label(label, dev):
-	if label.get_visible() and '\n' not in label.get_text():
-		items = [('Path', dev.path), ('Serial', dev.serial)] + \
-				[(f.kind, f.version) for f in dev.firmware]
-		label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
-
-
-def _toggle_info_box(action, box, frame, update_function):
-	if action.get_active():
-		box.set_visible(True)
-		GObject.timeout_add(50, update_function, box.get_child(), frame._device)
-	else:
-		box.set_visible(False)
-
-
 def _update_receiver_box(frame, receiver):
-	icon, label, pairing_icon, toolbar, info_label = ui.find_children(frame, 'icon', 'label', 'pairing-icon', 'toolbar', 'info-label')
+	icon, label, pairing_icon, toolbar = ui.find_children(frame, 'icon', 'label', 'pairing-icon', 'toolbar')
 
 	label.set_text(str(receiver.status))
 	if receiver:
@@ -293,7 +331,7 @@ def _update_receiver_box(frame, receiver):
 		pairing_icon.set_visible(False)
 		toolbar.set_sensitive(False)
 		toolbar.get_children()[0].set_active(False)
-		info_label.set_text('')
+		ui.find_children('info-label').set_text('')
 
 
 def _update_device_box(frame, dev):
@@ -301,9 +339,10 @@ def _update_device_box(frame, dev):
 		frame.set_visible(False)
 		frame.set_name(_PLACEHOLDER)
 		frame._device = None
+		_config_panel.update(frame)
 		return
 
-	icon, label, toolbar, info_label = ui.find_children(frame, 'icon', 'label', 'toolbar', 'info-label')
+	icon, label, status_icons = ui.find_children(frame, 'icon', 'label', 'status')
 
 	first_run = frame.get_name() != dev.name
 	if first_run:
@@ -312,27 +351,14 @@ def _update_device_box(frame, dev):
 		icon_set = ui.device_icon_set(dev.name, dev.kind)
 		icon.set_from_icon_set(icon_set, _DEVICE_ICON_SIZE)
 		label.set_markup('<b>' + dev.name + '</b>')
-		toolbar.get_children()[0].set_active(False)
+		toolbar = ui.find_children(frame, 'toolbar')
+		for i in toolbar.get_children():
+			i.set_active(False)
 
-	status_icons = ui.find_children(frame, 'status').get_children()
-	battery_icon, battery_label, light_icon, light_label, not_encrypted_icon = status_icons[0:5]
-
+	battery_icon, battery_label, light_icon, light_label, not_encrypted_icon, _ = status_icons
 	battery_level = dev.status.get(_status.BATTERY_LEVEL)
 
-	if not dev.status:
-		label.set_sensitive(False)
-
-		battery_icon.set_sensitive(False)
-		battery_label.set_sensitive(False)
-		if battery_level is None:
-			battery_label.set_markup('<small>inactive</small>')
-		else:
-			battery_label.set_markup('%d%%' % battery_level)
-
-		for c in status_icons[2:-1]:
-			c.set_visible(False)
-
-	else:
+	if dev.status:
 		label.set_sensitive(True)
 
 		if battery_level is None:
@@ -361,11 +387,24 @@ def _update_device_box(frame, dev):
 			light_label.set_text('%d lux' % light_level)
 			light_label.set_visible(True)
 
-	not_encrypted_icon.set_visible(dev.status.get(_status.ENCRYPTED) == False)
+		not_encrypted_icon.set_visible(dev.status.get(_status.ENCRYPTED) == False)
 
-	if first_run:
-		frame.set_visible(True)
-		GObject.timeout_add(5000, _update_device_info_label, info_label, dev)
+	else:
+		label.set_sensitive(False)
+
+		battery_icon.set_sensitive(False)
+		battery_label.set_sensitive(False)
+		if battery_level is None:
+			battery_label.set_markup('<small>inactive</small>')
+		else:
+			battery_label.set_markup('%d%%' % battery_level)
+
+		light_icon.set_visible(False)
+		light_label.set_visible(False)
+		not_encrypted_icon.set_visible(False)
+
+	frame.set_visible(True)
+	_config_panel.update(frame)
 
 
 def update(window, receiver, device=None):
