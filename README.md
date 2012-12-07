@@ -9,8 +9,10 @@ also pair/unpair supported devices with the receiver.
 
 **Solaar** will detect all devices paired with your Unifying Receiver, and at
 the very least display some basic information about them.  Depending on the
-device, it may be able to read its battery status.  A few devices I was able to
-test on also have extended support:
+device, it may be able to read its battery status.
+
+A few devices also have extended support, mostly because I was able to directly
+test on them:
 
 * The [K750 Solar Keyboard](http://www.logitech.com/keyboards/keyboard/devices/7454)
   is also queried for its solar charge status. Pressing the Solar key on the
@@ -76,6 +78,8 @@ required steps by hand, as the root user:
   will the application window.  Either run the application with the '-S' option,
   or whitelist "Solaar" into the systray. For details, see
   [How do I access and enable more icons to be in the system tray?](http://askubuntu.com/questions/30742/how-do-i-access-and-enable-more-icons-to-be-in-the-system-tray).
+
+  Support for Unity's indicators is a planned feature.
 
 - Running the command-line application (`bin/solaar-cli`) while the GUI
   application is also running *may* occasionally cause either of them to become
