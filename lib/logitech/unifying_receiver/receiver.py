@@ -118,7 +118,7 @@ class PairedDevice(object):
 			p = self.protocol
 			if p >= 2.0:
 				self._firmware = _hidpp20.get_firmware(self)
-			elif p >= 1.0:
+			if self._firmware is None and p == 1.0:
 				self._firmware = _hidpp10.get_firmware(self)
 		return self._firmware or ()
 

@@ -106,7 +106,7 @@ class DeviceStatus(dict):
 		return ', '.join(t)
 
 	def __bool__(self):
-		return self.updated and self._active
+		return bool(self._active)
 	__nonzero__ = __bool__
 
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
@@ -131,12 +131,19 @@ class DeviceStatus(dict):
 			d.protocol, d.serial, d.firmware
 
 			if BATTERY_LEVEL not in self:
-				if d.protocol >= 2.0:
+				battery = _hidpp10.get_battery(d)
+				if battery is None and d.protocol >= 2.0:
 					battery = _hidpp20.get_battery(d)
-				else:
-					battery = _hidpp10.get_battery(d)
+
+					# if battery is None and _hidpp20.FEATURE.SOLAR_CHARGE in d.features:
+					# 	d.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, 1, 1)
+					# 	return
+
 				if battery:
 					self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
+					self._changed(timestamp=timestamp)
+				elif BATTERY_STATUS in self:
+					self[BATTERY_STATUS] = None
 					self._changed(timestamp=timestamp)
 
 		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
@@ -191,7 +198,7 @@ class DeviceStatus(dict):
 		if event.sub_id >= 0x80:
 			# this can't possibly be an event, can it?
 			if _log.isEnabledFor(_DEBUG):
-				_log.debug("ignoring non-event %s", event)
+				_log.debug("ignoring %s (not an event)", event)
 			return False
 
 		if event.sub_id >= 0x40:

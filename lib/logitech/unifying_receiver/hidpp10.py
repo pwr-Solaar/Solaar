@@ -57,10 +57,6 @@ PAIRING_ERRORS = _NamedInts(
 				too_many_devices=0x03,
 				sequence_timeout=0x06)
 
-REGISTERS = _NamedInts(
-				battery=0x0D,
-				dpi=0x63,
-				leds=0x51)
 
 #
 # functions
