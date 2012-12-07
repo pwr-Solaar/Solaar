@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import threading as _threading
 from time import time as _timestamp
 
@@ -70,6 +72,7 @@ class ThreadedHandle(object):
 	def __str__(self):
 		if self._local:
 			return str(int(self))
+	__unicode__ = __str__
 
 	def __repr__(self):
 		return '<ThreadedHandle(%s)>' % self.path

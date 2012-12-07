@@ -1,5 +1,7 @@
 #!/usr/bin/env python -u
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import sys
 from select import select as _select
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
 	import hidapi
 	print (".. Opening device %s" % args.device)
-	handle = hidapi.open_path(args.device.encode('utf-8'))
+	handle = hidapi.open_path(args.device)
 	if handle:
 		print (".. Opened handle %s, vendor %s product %s serial %s" % (
 						repr(handle),

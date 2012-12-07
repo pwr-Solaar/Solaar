@@ -2,11 +2,16 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from gi.repository import Gtk, GdkPixbuf
 
 import ui
 from logitech.unifying_receiver import status as _status
 
+#
+#
+#
 
 def create(window, menu_actions=None):
 	name = window.get_title()

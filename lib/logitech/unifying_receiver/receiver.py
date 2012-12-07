@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import errno as _errno
 from weakref import proxy as _proxy
 from collections import defaultdict as _defaultdict
@@ -175,18 +177,30 @@ class PairedDevice(object):
 		return self.number
 	__int__ = __index__
 
-	def __hash__(self):
-		return self.number
+	def __lt__(self, other):
+		return self.number < other.number
 
-	def __cmp__(self, other):
-		return self.number - other.number
+	def __le__(self, other):
+		return self.number <= other.number
+
+	def __gt__(self, other):
+		return self.number > other.number
+
+	def __ge__(self, other):
+		return self.number >= other.number
 
 	def __eq__(self, other):
 		return self.receiver == other.receiver and self.number == other.number
 
+	def __ne__(self, other):
+		return self.receiver != other.receiver or self.number != other.number
+
+	def __hash__(self):
+		return self.number
+
 	def __str__(self):
 		return '<PairedDevice(%d,%s)>' % (self.number, self.codename or '?')
-	__repr__ = __str__
+	__unicode__ = __repr__ = __str__
 
 #
 #
@@ -330,7 +344,7 @@ class Receiver(object):
 
 	def __str__(self):
 		return '<Receiver(%s,%s%s)>' % (self.path, '' if type(self.handle) == int else 'T', self.handle)
-	__repr__ = __str__
+	__unicode__ = __repr__ = __str__
 
 	__bool__ = __nonzero__ = lambda self: self.handle is not None
 

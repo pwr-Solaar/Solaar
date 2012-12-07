@@ -2,16 +2,20 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from gi.repository import Gtk, GObject
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('pair-window')
 del getLogger
 
-
 import ui
 from logitech.unifying_receiver import status as _status
 
+#
+#
+#
 _PAIRING_TIMEOUT = 30
 
 

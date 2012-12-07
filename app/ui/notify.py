@@ -2,11 +2,13 @@
 # Optional desktop notifications.
 #
 
-import logging
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 try:
+	# this import is allowed to fail, in which case the entire feature is unavailable
 	from gi.repository import Notify
+	import logging
 
 	import ui
 

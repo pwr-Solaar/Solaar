@@ -3,6 +3,8 @@
 # Unlikely to be used directly unless you're expanding the API.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from time import time as _timestamp
 from struct import pack as _pack
 from random import getrandbits as _random_bits
@@ -131,9 +133,9 @@ def write(handle, devnumber, data):
 	"""
 	# the data is padded to either 5 or 18 bytes
 	if len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
-		wdata = _pack('!BB18s', 0x11, devnumber, data)
+		wdata = _pack(b'!BB18s', 0x11, devnumber, data)
 	else:
-		wdata = _pack('!BB5s', 0x10, devnumber, data)
+		wdata = _pack(b'!BB5s', 0x10, devnumber, data)
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
@@ -230,6 +232,7 @@ def _unhandled(report_id, devnumber, data):
 from collections import namedtuple
 _Event = namedtuple('_Event', ['devnumber', 'sub_id', 'address', 'data'])
 _Event.__str__ = lambda self: 'Event(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address, _strhex(self.data))
+_Event.__unicode__ = _Event.__str__
 del namedtuple
 
 def make_event(devnumber, data):
@@ -265,9 +268,9 @@ def request(handle, devnumber, request_id, *params):
 		request_id = (request_id & 0xFFF0) | _random_bits(4) | 0x01
 	else:
 		timeout = _RECEIVER_REQUEST_TIMEOUT
-	request_str = _pack('!H', request_id)
+	request_str = _pack(b'!H', request_id)
 
-	params = b''.join(_pack('B', p) if type(p) == int else p for p in params)
+	params = b''.join(_pack(b'B', p) if type(p) == int else p for p in params)
 	# if _log.isEnabledFor(_DEBUG):
 	# 	_log.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
 
@@ -349,8 +352,8 @@ def ping(handle, devnumber):
 	# and set the last (0) bit in swid to make it easier to distinguish requests
 	# from events
 	request_id = 0x0010 | _random_bits(4) | 0x01
-	request_str = _pack('!H', request_id)
-	ping_mark = _pack('B', _random_bits(8))
+	request_str = _pack(b'!H', request_id)
+	ping_mark = _pack(b'B', _random_bits(8))
 	write(ihandle, devnumber, request_str + b'\x00\x00' + ping_mark)
 
 	while True:

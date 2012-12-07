@@ -2,6 +2,8 @@
 # Logitech Unifying Receiver API.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from struct import pack as _pack, unpack as _unpack
 from weakref import proxy as _proxy
 
@@ -152,7 +154,7 @@ class FeaturesArray(object):
 				self.device = None
 				return False
 
-			reply = self.device.request(int(FEATURE.ROOT), _pack('!H', FEATURE.FEATURE_SET))
+			reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', FEATURE.FEATURE_SET))
 			if reply is None:
 				self.supported = False
 			else:
@@ -186,7 +188,7 @@ class FeaturesArray(object):
 			if self.features[index] is None:
 				feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
 				if feature:
-					feature, = _unpack('!H', feature[:2])
+					feature, = _unpack(b'!H', feature[:2])
 					self.features[index] = FEATURE[feature]
 
 			return self.features[index]
@@ -203,7 +205,7 @@ class FeaturesArray(object):
 					break
 
 			if may_have:
-				reply = self.device.request(int(FEATURE.ROOT), _pack('!H', value))
+				reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', value))
 				if reply:
 					index = ord(reply[0:1])
 					if index:
@@ -222,7 +224,7 @@ class FeaturesArray(object):
 					raise ValueError("%s not in list" % repr(value))
 
 			if may_have:
-				reply = self.device.request(int(FEATURE.ROOT), _pack('!H', value))
+				reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', value))
 				if reply:
 					index = ord(reply[0:1])
 					self.features[index] = FEATURE[int(value)]
@@ -263,7 +265,7 @@ class KeysArray(object):
 		if self.keys[index] is None:
 			keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
 			if keydata:
-				key, key_task, flags = _unpack('!HHB', keydata[:5])
+				key, key_task, flags = _unpack(b'!HHB', keydata[:5])
 				self.keys[index] = _ReprogrammableKeyInfo(index, KEY[key], KEY[key_task], flags)
 
 		return self.keys[index]
@@ -293,7 +295,7 @@ class KeysArray(object):
 
 class ToggleFN_Setting(_settings.Setting):
 	def __init__(self):
-		super(ToggleFN_Setting, self).__init__('fn-toggle', _settings.KIND.toggle, 'Swap Fx function',
+		super(ToggleFN_Setting, self).__init__('fn-swap', _settings.KIND.toggle, 'Swap Fx function',
 					'When set, the F1..F12 keys will activate their special function,\n'
 					'and you must hold the FN key to activate their standard function.\n'
 					'\n'
@@ -339,7 +341,7 @@ def get_firmware(device):
 			if fw_info:
 				level = ord(fw_info[:1]) & 0x0F
 				if level == 0 or level == 1:
-					name, version_major, version_minor, build = _unpack('!3sBBH', fw_info[1:8])
+					name, version_major, version_minor, build = _unpack(b'!3sBBH', fw_info[1:8])
 					version = '%02X.%02X' % (version_major, version_minor)
 					if build:
 						version += '.B%04X' % build
@@ -398,7 +400,7 @@ def get_battery(device):
 	"""
 	battery = feature_request(device, FEATURE.BATTERY)
 	if battery:
-		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
+		discharge, dischargeNext, status = _unpack(b'!BBB', battery[:3])
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
 						device.number, discharge, dischargeNext, status, BATTERY_STATUS[status])

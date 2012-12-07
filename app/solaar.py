@@ -1,5 +1,7 @@
 #!/usr/bin/env python -u
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 NAME = 'Solaar'
 VERSION = '0.8.2'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"

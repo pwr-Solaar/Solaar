@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from weakref import proxy as _proxy
 from copy import copy as _copy
 
@@ -44,3 +46,4 @@ class Setting(object):
 
 	def __str__(self):
 		return '<%s(%s=%s)>' % (self.__class__.__name__, self.name, self._value)
+	__unicode__ = __repr__ = __str__

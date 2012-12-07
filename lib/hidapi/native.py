@@ -314,7 +314,7 @@ def send_feature_report(device_handle, data, report_number=None):
 	:returns: ``True`` if the report was successfully written to the device.
 	"""
 	if report_number is not None:
-		data = _pack('!B', report_number) + data
+		data = _pack(b'!B', report_number) + data
 	bytes_written = _native.hid_send_feature_report(device_handle, _C.c_char_p(data), len(data))
 	return bytes_written > -1
 
@@ -330,7 +330,7 @@ def get_feature_report(device_handle, bytes_count, report_number=None):
 	"""
 	out_buffer = _C.create_string_buffer('\x00' * (bytes_count + 2))
 	if report_number is not None:
-		out_buffer[0] = _pack('!B', report_number)
+		out_buffer[0] = _pack(b'!B', report_number)
 	bytes_read = _native.hid_get_feature_report(device_handle, out_buffer, bytes_count)
 	if bytes_read > -1:
 		return out_buffer[:bytes_read]

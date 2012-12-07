@@ -7,6 +7,8 @@ The docstrings are mostly copied from the hidapi API header, with changes where
 necessary.
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os as _os
 import errno as _errno
 from select import select as _select
@@ -126,7 +128,7 @@ def open_path(device_path):
 	:returns: an opaque device handle, or ``None``.
 	"""
 	assert device_path
-	assert '/dev/hidraw' in device_path
+	assert device_path.startswith('/dev/hidraw')
 	return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
 
 

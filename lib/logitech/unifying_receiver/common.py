@@ -2,12 +2,17 @@
 # Some common functions and types.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from binascii import hexlify as _hexlify
 from struct import pack as _pack
 
 
 class NamedInt(int):
-	"""An integer with an attached name."""
+	"""An reqular Python integer with an attached name.
+
+	Careful when using this, because
+	"""
 
 	def __new__(cls, value, name):
 		obj = int.__new__(cls, value)
@@ -17,23 +22,50 @@ class NamedInt(int):
 	def bytes(self, count=2):
 		value = int(self)
 		if value.bit_length() > count * 8:
-			raise ValueError("cannot fit %X into %d bytes" % (value, count))
+			raise ValueError('cannot fit %X into %d bytes' % (value, count))
 
-		return _pack('!L', value)[-count:]
+		return _pack(b'!L', value)[-count:]
+
+	def __hash__(self):
+		return int(self)
 
 	def __eq__(self, other):
-		try:
-			if int(self) == int(other):
-				return True
-		except:
-			pass
-		return self.name.lower() == str(other).lower()
+		if isinstance(other, int):
+			return int(self) == int(other)
 
-	def __cmp__(self, other):
-		return int(self) - int(other)
+		if isinstance(other, str):
+			return self.name.lower() == other.lower()
+
+	def __ne__(self, other):
+		if isinstance(other, int):
+			return int(self) != int(other)
+
+		if isinstance(other, str):
+			return self.name.lower() != other.lower()
+
+	def __lt__(self, other):
+		if not isinstance(other, int):
+			raise TypeError('unorderable types: %s < %s' % (type(self), type(other)))
+		return int(self) < int(other)
+
+	def __le__(self, other):
+		if not isinstance(other, int):
+			raise TypeError('unorderable types: %s <= %s' % (type(self), type(other)))
+		return int(self) <= int(other)
+
+	def __gt__(self, other):
+		if not isinstance(other, int):
+			raise TypeError('unorderable types: %s > %s' % (type(self), type(other)))
+		return int(self) > int(other)
+
+	def __ge__(self, other):
+		if not isinstance(other, int):
+			raise TypeError('unorderable types: %s >= %s' % (type(self), type(other)))
+		return int(self) >= int(other)
 
 	def __str__(self):
 		return self.name
+	__unicode__ = __str__
 
 	def __repr__(self):
 		return 'NamedInt(%d, %s)' % (int(self), repr(self.name))

@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from time import time as _timestamp
 from struct import unpack as _unpack
 from weakref import proxy as _proxy
@@ -54,6 +56,7 @@ class ReceiverStatus(dict):
 		return ('No devices found.' if count == 0 else
 				'1 device found.' if count == 1 else
 				'%d devices found.' % count)
+	__unicode__ = __str__
 
 	def _changed(self, alert=ALERT.LOW, reason=None):
 		# self.updated = _timestamp()
@@ -104,6 +107,7 @@ class DeviceStatus(dict):
 		if self.get(LIGHT_LEVEL) is not None:
 			t.append('Light: %d lux' % self[LIGHT_LEVEL])
 		return ', '.join(t)
+	__unicode__ = __str__
 
 	def __bool__(self):
 		return bool(self._active)
@@ -247,7 +251,7 @@ class DeviceStatus(dict):
 
 		if feature == _hidpp20.FEATURE.SOLAR_CHARGE:
 			if event.data[5:9] == b'GOOD':
-				charge, lux, adc = _unpack('!BHH', event.data[:5])
+				charge, lux, adc = _unpack(b'!BHH', event.data[:5])
 				self[BATTERY_LEVEL] = charge
 				# guesstimate the battery voltage, emphasis on 'guess'
 				self[BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)

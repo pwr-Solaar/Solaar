@@ -1,5 +1,7 @@
 #!/usr/bin/env python -u
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 
 import solaar
@@ -179,14 +181,13 @@ def pair_device(receiver, args):
 	from logitech.unifying_receiver import status
 	r_status = status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
-	done = False
+	done = [False]
 
 	def _events_handler(event):
-		global done
 		if event.devnumber == 0xFF:
 			r_status.process_event(event)
 			if not r_status.lock_open:
-				done = True
+				done[0] = True
 		elif event.sub_id == 0x41 and event.address == 0x04:
 			if event.devnumber not in known_devices:
 				r_status.new_device = receiver[event.devnumber]
@@ -203,7 +204,7 @@ def pair_device(receiver, args):
 	receiver.set_lock(False, timeout=20)
 	print ("Pairing: turn your new device on (timing out in 20 seconds).")
 
-	while not done:
+	while not done[0]:
 		event = base.read(receiver.handle, 2000)
 		if event:
 			event = base.make_event(*event)
@@ -319,15 +320,15 @@ def _parse_arguments():
 					help='print all available information about the inspected device(s)')
 	sp.set_defaults(cmd=show_devices)
 
-	sp = subparsers.add_parser('config', help='read/write device-specific options',
+	sp = subparsers.add_parser('config', help='read/write device-specific settings',
 								epilog='Please note that configuration only works on active devices.')
 	sp.add_argument('device',
 					help='device to configure; may be a device number (1..6), a device serial, '
 							'or at least 3 characters of a device\'s name')
-	sp.add_argument('option', nargs='?',
-					help='device-specific option; leave empty to show available options')
+	sp.add_argument('setting', nargs='?',
+					help='device-specific setting; leave empty to list available settings')
 	sp.add_argument('value', nargs='?',
-					help='new value for the option')
+					help='new value for the setting')
 	sp.set_defaults(cmd=config_device)
 
 	sp = subparsers.add_parser('pair', help='pair a new device',

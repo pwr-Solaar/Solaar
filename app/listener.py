@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('listener')
 del getLogger
@@ -23,7 +25,7 @@ class _DUMMY_RECEIVER(object):
 	max_devices = Receiver.max_devices
 	status = 'Receiver not found.'
 	__bool__ = __nonzero__ = lambda self: False
-	__str__ = lambda self: 'DUMMY'
+	__unicode__ = __str__ = __repr__ = lambda self: 'DUMMY'
 DUMMY = _DUMMY_RECEIVER()
 
 from collections import namedtuple
@@ -137,6 +139,7 @@ class ReceiverListener(_listener.EventsListener):
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
+	__unicode__ = __str__
 
 	@classmethod
 	def open(self, status_changed_callback=None):

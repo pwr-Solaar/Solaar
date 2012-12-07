@@ -2,6 +2,8 @@
 #
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from .common import (strhex as _strhex,
 					NamedInts as _NamedInts,
 					FirmwareInfo as _FirmwareInfo)
