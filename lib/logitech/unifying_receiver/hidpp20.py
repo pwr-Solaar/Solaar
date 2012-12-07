@@ -9,6 +9,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR').getChild('hidpp20')
 del getLogger
 
+from . import settings as _settings
 from .common import (FirmwareInfo as _FirmwareInfo,
 					ReprogrammableKeyInfo as _ReprogrammableKeyInfo,
 					KwException as _KwException,
@@ -285,6 +286,32 @@ class KeysArray(object):
 	def __len__(self):
 		return len(self.keys)
 
+
+#
+#
+#
+
+class ToggleFN_Setting(_settings.Setting):
+	def __init__(self):
+		super(ToggleFN_Setting, self).__init__('fn-toggle', _settings.KIND.toggle, 'Swap Fx function',
+					'When set, the F1..F12 keys will activate their special function,\n'
+					'and you must hold the FN key to activate their standard function.\n'
+					'\n'
+					'When unset, the F1..F12 keys will activate their standard function,\n'
+					'and you must hold the FN key to activate their special function.')
+
+	def read(self):
+		if self._value is None and self._device:
+			fn = self._device.feature_request(FEATURE.FN_STATUS)
+			if fn:
+				self._value = (fn[:1] == b'\x01')
+		return self._value
+
+	def write(self, value):
+		if self._device:
+			reply = self._device.feature_request(FEATURE.FN_STATUS, 0x10, 0x01 if value else 0x00)
+			self._value = (reply[:1] == b'\x01') if reply else None
+			return self._value
 
 #
 #

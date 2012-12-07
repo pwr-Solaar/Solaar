@@ -4,6 +4,7 @@
 
 import errno as _errno
 from weakref import proxy as _proxy
+from collections import defaultdict as _defaultdict
 
 from logging import getLogger
 _log = getLogger('LUR').getChild('receiver')
@@ -13,7 +14,7 @@ from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
-from .devices import DEVICES as _DEVICES
+from .descriptors import DEVICES as _DEVICES
 
 #
 #
@@ -42,6 +43,8 @@ class PairedDevice(object):
 		self._keys = None
 
 		self.features = _hidpp20.FeaturesArray(self)
+		self._registers = None
+		self._settings = None
 
 	@property
 	def protocol(self):
@@ -133,6 +136,31 @@ class PairedDevice(object):
 		if self._keys is None:
 			self._keys = _hidpp20.get_keys(self) or ()
 		return self._keys
+
+	@property
+	def registers(self):
+		if self._registers is None:
+			descriptor = _DEVICES.get(self.codename)
+			if descriptor is None or descriptor.registers is None:
+				self._registers = _defaultdict(lambda: None)
+			else:
+				self._registers = descriptor.registers
+		return self._registers
+
+	@property
+	def settings(self):
+		if self._settings is None:
+			descriptor = _DEVICES.get(self.codename)
+			if descriptor is None or descriptor.settings is None:
+				self._settings = []
+			else:
+				self._settings = [s(self) for s in descriptor.settings]
+
+			if _hidpp20.FEATURE.FN_STATUS in self.features:
+				tfn = _hidpp20.ToggleFN_Setting()
+				self._settings.insert(0, tfn(self))
+
+		return self._settings
 
 	def request(self, request_id, *params):
 		return _base.request(self.receiver.handle, self.number, request_id, *params)

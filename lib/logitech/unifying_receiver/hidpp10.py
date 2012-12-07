@@ -5,6 +5,7 @@
 from .common import (strhex as _strhex,
 					NamedInts as _NamedInts,
 					FirmwareInfo as _FirmwareInfo)
+from . import settings as _settings
 from .hidpp20 import FIRMWARE_KIND
 
 #
@@ -57,6 +58,60 @@ PAIRING_ERRORS = _NamedInts(
 				too_many_devices=0x03,
 				sequence_timeout=0x06)
 
+#
+#
+#
+
+
+class SmoothScroll_Setting(_settings.Setting):
+	def __init__(self, register):
+		super(SmoothScroll_Setting, self).__init__('smooth-scroll', _settings.KIND.toggle,
+						'Smooth Scrolling', 'High-sensitivity mode for vertical scroll with the wheel.')
+		assert register is not None
+		self.register = register
+
+	def read(self):
+		if self._value is None and self._device:
+			ss = self.read_register()
+			if ss:
+				self._value = (ss[:1] == b'\x40')
+		return self._value
+
+	def write(self, value):
+		if self._device:
+			reply = self.write_register(0x40 if bool(value) else 0x00)
+			self._value = None
+			if reply:
+				return self.read()
+
+
+class MouseDPI_Setting(_settings.Setting):
+	def __init__(self, register, choices):
+		super(MouseDPI_Setting, self).__init__('dpi', _settings.KIND.choice,
+						'Sensitivity (DPI)', choices=choices)
+		assert choices
+		assert isinstance(choices, _NamedInts)
+		assert register is not None
+		self.register = register
+
+	def read(self):
+		if self._value is None and self._device:
+			dpi = self.read_register()
+			if dpi:
+				value = ord(dpi[:1])
+				self._value = self.choices[value]
+				assert self._value is not None
+		return self._value
+
+	def write(self, value):
+		if self._device:
+			choice = self.choices[value]
+			if choice is None:
+				raise ValueError(repr(value))
+			reply = self.write_register(value)
+			self._value =  None
+			if reply:
+				return self.read()
 
 #
 # functions
@@ -64,15 +119,18 @@ PAIRING_ERRORS = _NamedInts(
 
 def get_battery(device):
 	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
-	reply = device.request(0x810D)
-	if reply:
-		charge = ord(reply[:1])
-		status = ord(reply[2:3]) & 0xF0
-		status = ('discharging' if status == 0x30
-				else 'charging' if status == 0x50
-				else 'fully charged' if status == 0x90
-				else None)
-		return charge, status
+	if 'battery' in device.registers:
+		register = device.registers['battery']
+
+		reply = device.request(0x8100 + (register & 0xFF))
+		if reply:
+			charge = ord(reply[:1])
+			status = ord(reply[2:3]) & 0xF0
+			status = ('discharging' if status == 0x30
+					else 'charging' if status == 0x50
+					else 'fully charged' if status == 0x90
+					else None)
+			return charge, status
 
 
 def get_serial(device):
