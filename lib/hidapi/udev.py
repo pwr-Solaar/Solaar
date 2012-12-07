@@ -195,6 +195,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 	if rlist:
 		assert rlist == [device_handle]
 		data = _os.read(device_handle, bytes_count)
+		assert data is not None
 		return data
 	else:
 		return b''

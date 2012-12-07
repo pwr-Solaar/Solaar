@@ -193,9 +193,15 @@ class DeviceStatus(dict):
 
 			return True
 
+		if event.sub_id == 0x49:
+			# raw input event? just ignore it
+			# if event.address == 0x01, no idea what it is
+			# if event.address == 0x03, it's an actual input event
+			return True
+
 		if event.sub_id == 0x4B:
 			if event.address == 0x01:
-				_log.debug("device came online? %d", event.devnumber)
+				_log.debug("device came online %d", event.devnumber)
 				self._changed(alert=ALERT.LOW, reason='powered on')
 			else:
 				_log.warn("unknown event %s", event)

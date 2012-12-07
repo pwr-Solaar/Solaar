@@ -252,7 +252,7 @@ class Receiver(object):
 			return False
 		if enable:
 			# set all possible flags
-			ok = self.request(0x8000, 0xFF, 0xFF)  # and self.request(0x8002, 0x02)
+			ok = self.request(0x8000, 0xFF, 0xFF, 0xFF)
 		else:
 			# clear out all possible flags
 			ok = self.request(0x8000)
