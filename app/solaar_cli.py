@@ -9,11 +9,11 @@ NAME = 'solaar-cli'
 __author__  = solaar.__author__
 __version__ = solaar.__version__
 __license__ = solaar.__license__
+del solaar
 
 #
 #
 #
-
 
 def _fail(text):
 	sys.exit("%s: error: %s" % (NAME, text))
@@ -127,7 +127,6 @@ def _print_device(dev, verbose=False):
 
 	from logitech.unifying_receiver import hidpp10, hidpp20
 	if p > 0:
-
 		if dev.features:
 			print ("   Supports %d HID++ 2.0 features:" % len(dev.features))
 			for index, feature in enumerate(dev.features):
@@ -250,7 +249,9 @@ def config_device(receiver, args):
 			print ("")
 			print ("# %s" % s.label)
 			if s.choices:
-				print ("#   possible values: [%s]" % ', '.join(str(v) for v in s.choices))
+				print ("#   possible values: one of [%s], or higher/lower/highest/max/lowest/min" % ', '.join(str(v) for v in s.choices))
+			else:
+				print ("#   possible values: true/t/yes/y/1 or false/f/no/n/0")
 			value = s.read()
 			if value is None:
 				print ("# ! failed to read '%s'" % s.name)
