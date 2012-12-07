@@ -239,26 +239,6 @@ def _make_device_box(index):
 	return frame
 
 
-def toggle(window, trigger):
-	if window.get_visible():
-		position = window.get_position()
-		window.hide()
-		window.move(*position)
-	else:
-		if trigger and type(trigger) == Gtk.StatusIcon:
-			x, y = window.get_position()
-			if x == 0 and y == 0:
-				x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
-				window.move(x, y)
-		window.present()
-	return True
-
-
-def _popup(window, trigger=None):
-	if not window.get_visible():
-		toggle(window, trigger)
-
-
 def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
 	window.set_title(title)
@@ -284,16 +264,39 @@ def create(title, name, max_devices, systray=False):
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 	window.set_resizable(False)
 
-	window.toggle_visible = lambda i: toggle(window, i)
-	window.popup = lambda i=None: _popup(window, i)
+	def _toggle_visible(w, trigger):
+		if w.get_visible():
+			# hiding moves the window to 0,0
+			position = w.get_position()
+			w.hide()
+			w.move(*position)
+		else:
+			if isinstance(trigger, Gtk.StatusIcon):
+				x, y = w.get_position()
+				if x == 0 and y == 0:
+					# if the window hasn't been shown yet, position it next to the status icon
+					x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
+					w.move(x, y)
+			w.present()
+			w.deiconify()
+		return True
+
+	def _popup(w, trigger=None):
+		if not w.get_visible():
+			w.toggle_visible(trigger)
+
+	from types import MethodType
+	window.toggle_visible = MethodType(_toggle_visible, window)
+	window.popup = MethodType(_popup, window)
+	del MethodType
 
 	if systray:
 		window.set_keep_above(True)
 		# window.set_decorated(False)
 		# window.set_type_hint(Gdk.WindowTypeHint.TOOLTIP)
-		# window.set_skip_taskbar_hint(True)
-		# window.set_skip_pager_hint(True)
-		window.connect('delete-event', toggle)
+		window.set_skip_taskbar_hint(True)
+		window.set_skip_pager_hint(True)
+		window.connect('delete-event', _toggle_visible)
 	else:
 		window.connect('delete-event', Gtk.main_quit)
 
@@ -333,7 +336,7 @@ def _update_receiver_box(frame, receiver):
 		pairing_icon.set_visible(False)
 		toolbar.set_sensitive(False)
 		toolbar.get_children()[0].set_active(False)
-		ui.find_children('info-label').set_text('')
+		ui.find_children(frame, 'info-label').set_text('')
 
 
 def _update_device_box(frame, dev):

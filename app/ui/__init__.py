@@ -82,8 +82,10 @@ def error(window, title, text):
 
 def find_children(container, *child_names):
 	assert container is not None
+	assert isinstance(container, Gtk.Container)
 
 	def _iterate_children(widget, names, result, count):
+		assert isinstance(widget, Gtk.Widget)
 		wname = widget.get_name()
 		if wname in names:
 			index = names.index(wname)
@@ -93,6 +95,7 @@ def find_children(container, *child_names):
 
 		if count > 0 and isinstance(widget, Gtk.Container):
 			for w in widget:
+				# if isinstance(w, Gtk.Widget):
 				count = _iterate_children(w, names, result, count)
 				if count == 0:
 					break

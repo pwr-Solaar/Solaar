@@ -33,11 +33,10 @@ def _process_apply_queue():
 			_, setting, value, sbox = task
 			GObject.idle_add(_write_start, sbox)
 			value = setting.write(value)
-			GObject.idle_add(_update_setting_item, sbox, value)
 		elif task[0] == 'read':
-			_, setting, sbox, cached = task
+			_, setting, cached, sbox = task
 			value = setting.read(cached)
-			GObject.idle_add(_update_setting_item, sbox, value)
+		GObject.idle_add(_update_setting_item, sbox, value)
 
 from threading import Thread as _Thread
 _queue_processor = _Thread(name='SettingsProcessor', target=_process_apply_queue)
@@ -159,19 +158,25 @@ def update(frame):
 		# nothing to do here
 		return
 
+	if not box.get_visible():
+		# no point in doing this, is there?
+		return
+
+	force_read = False
 	items = box.get_children()
 	if not items:
 		if device.status:
 			items = _add_settings(box, device)
 			assert len(device.settings) == len(list(items))
+			force_read = True
 		else:
 			# don't bother adding settings for offline devices,
 			# they're useless and might not guess all of them anyway
 			return
 
 	device_active = bool(device.status)
-	was_inactive = not box.get_sensitive()
+	force_read |= device_active and not box.get_sensitive()
 	box.set_sensitive(device_active)
 	if device_active:
 		for sbox, s in zip(items, device.settings):
-			_apply_queue.put(('read', s, sbox, was_inactive))
+			_apply_queue.put(('read', s, force_read, sbox))
