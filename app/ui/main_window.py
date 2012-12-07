@@ -40,7 +40,7 @@ def _make_receiver_box(name):
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('toolbar')
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-	toolbar.set_icon_size(_RECEIVER_ICON_SIZE - 1)
+	toolbar.set_icon_size(Gtk.IconSize.SMALL_TOOLBAR)
 	toolbar.set_show_arrow(False)
 
 	hbox = Gtk.HBox(homogeneous=False, spacing=8)
@@ -49,32 +49,44 @@ def _make_receiver_box(name):
 	hbox.pack_start(pairing_icon, False, False, 0)
 	hbox.pack_start(toolbar, False, False, 0)
 
-	info_label = Gtk.Label('Querying ...')
+	info_label = Gtk.Label()
+	info_label.set_markup('<small>reading ...</small>')
 	info_label.set_name('info-label')
-	info_label.set_alignment(0, 0.5)
-	info_label.set_padding(8, 2)
+	info_label.set_property('margin-left', 36)
+	info_label.set_alignment(0, 0)
 	info_label.set_selectable(True)
 
-	info_box = Gtk.Frame()
-	info_box.add(info_label)
-	info_box.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
+	def _update_info_label():
+		device = frame._device
+		if info_label.get_visible() and '\n' not in info_label.get_text():
+			items = [('Path', device.path), ('Serial', device.serial)] + \
+					[(f.kind, f.version) for f in device.firmware]
+			info_label.set_markup('<small><tt>' + '\n'.join('%-13s: %s' % item for item in items) + '</tt></small>')
 
-	toggle_info_action = ui.action._toggle_action('info', 'Receiver info',
-					_toggle_info_box, info_box, frame, _update_receiver_info_label)
+	def _toggle_info_label(action):
+		active = action.get_active()
+		for c in vbox.get_children()[1:]:
+			c.set_visible(active)
+
+		if active:
+			GObject.timeout_add(50, _update_info_label)
+
+	toggle_info_action = ui.action._toggle_action('info', 'Details', _toggle_info_label)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(ui.action.pair(frame).create_tool_item(), -1)
 	# toolbar.insert(ui.action.about.create_tool_item(), -1)
 
-	vbox = Gtk.VBox(homogeneous=False, spacing=4)
-	vbox.set_border_width(4)
+	vbox = Gtk.VBox(homogeneous=False, spacing=2)
+	vbox.set_border_width(2)
 	vbox.pack_start(hbox, True, True, 0)
-	vbox.pack_start(info_box, True, True, 0)
+	vbox.pack_start(Gtk.HSeparator(), False, False, 0)
+	vbox.pack_start(info_label, True, True, 0)
 
 	frame.add(vbox)
 	frame.show_all()
 
-	info_box.set_visible(False)
 	pairing_icon.set_visible(False)
+	_toggle_info_label(toggle_info_action)
 	return frame
 
 
@@ -90,7 +102,7 @@ def _make_device_box(index):
 	label = Gtk.Label('Initializing...')
 	label.set_name('label')
 	label.set_alignment(0, 0.5)
-	label.set_padding(4, 4)
+	label.set_padding(4, 0)
 
 	battery_icon = Gtk.Image.new_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
 
@@ -104,18 +116,22 @@ def _make_device_box(index):
 	light_label.set_alignment(0, 0.5)
 	light_label.set_width_chars(8)
 
-	not_encrypted_icon = Gtk.Image.new_from_icon_name('security-low', _STATUS_ICON_SIZE)
+	not_encrypted_icon = Gtk.Image.new_from_icon_name('security-low', _STATUS_ICON_SIZE - 1)
 	not_encrypted_icon.set_name('not-encrypted')
-	not_encrypted_icon.set_tooltip_text('The link is not encrypted!')
+	not_encrypted_icon.set_tooltip_text('The wireless link between this device and the Unifying Receiver is not encrypted.\n'
+										'\n'
+										'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
+										'\n'
+										'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
+										'because typed text can be sniffed inconspicuously by 3rd parties within range.')
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_name('toolbar')
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-	toolbar.set_icon_size(Gtk.IconSize.MENU)
+	toolbar.set_icon_size(_STATUS_ICON_SIZE - 1)
 	toolbar.set_show_arrow(False)
-	toolbar.set_border_width(0)
 
-	status_box = Gtk.HBox(homogeneous=False, spacing=0)
+	status_box = Gtk.HBox(homogeneous=False, spacing=2)
 	status_box.set_name('status')
 	status_box.pack_start(battery_icon, False, True, 0)
 	status_box.pack_start(battery_label, False, True, 0)
@@ -170,7 +186,8 @@ def toggle(window, trigger):
 		window.present()
 	return True
 
-def _popup(window, trigger):
+
+def _popup(window, trigger=None):
 	if not window.get_visible():
 		toggle(window, trigger)
 
@@ -180,7 +197,7 @@ def create(title, name, max_devices, systray=False):
 	window.set_icon_name(ui.appicon(0))
 	window.set_role('status-window')
 
-	vbox = Gtk.VBox(homogeneous=False, spacing=4)
+	vbox = Gtk.VBox(homogeneous=False, spacing=12)
 	vbox.set_border_width(4)
 
 	rbox = _make_receiver_box(name)
@@ -200,7 +217,7 @@ def create(title, name, max_devices, systray=False):
 	window.set_resizable(False)
 
 	window.toggle_visible = lambda i: toggle(window, i)
-	window.popup = lambda i: _popup(window, i)
+	window.popup = lambda i=None: _popup(window, i)
 
 	if systray:
 		window.set_keep_above(True)

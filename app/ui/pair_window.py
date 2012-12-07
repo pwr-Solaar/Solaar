@@ -149,13 +149,21 @@ def _pairing_succeeded(assistant, receiver, device):
 	device_label.set_alignment(0.5, 0)
 	page.pack_start(device_label, True, True, 0)
 
-	if device.status.get('encrypted') == False:
-		hbox = Gtk.HBox(False, 8)
-		hbox.pack_start(Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.MENU), False, False, 0)
-		hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
-		hbox.set_property('expand', False)
-		hbox.set_property('halign', Gtk.Align.CENTER)
-		page.pack_start(hbox, False, False, 0)
+	hbox = Gtk.HBox(False, 8)
+	hbox.pack_start(Gtk.Label(' '), False, False, 0)
+	hbox.set_property('expand', False)
+	hbox.set_property('halign', Gtk.Align.CENTER)
+	page.pack_start(hbox, False, False, 0)
+
+	def _check_encrypted(dev):
+		if assistant.is_drawable():
+			if device.status.get('encrypted') == False:
+				hbox.pack_start(Gtk.Image.new_from_icon_name('security-low', Gtk.IconSize.MENU), False, False, 0)
+				hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
+				hbox.show_all()
+			else:
+				return True
+	GObject.timeout_add(500, _check_encrypted, device)
 
 	page.show_all()
 
