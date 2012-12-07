@@ -21,23 +21,18 @@ def _require(module, os_package):
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
-	arg_parser.add_argument('-S', '--no-systray',
-							action='store_false', dest='systray',
+	arg_parser.add_argument('-S', '--no-systray', action='store_false', dest='systray',
 							help='don\'t embed the application window into the systray')
-	arg_parser.add_argument('-N', '--no-notifications',
-							action='store_false', dest='notifications',
+	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
 							help='disable desktop notifications (shown only when in systray)')
-	arg_parser.add_argument('-v', '--verbose',
-							action='count', default=0,
-							help='increase the logger verbosity (may be repeated)')
-	arg_parser.add_argument('-V', '--version',
-							action='version',
-							version='%(prog)s ' + __version__)
+	arg_parser.add_argument('-d', '--debug', action='count', default=0,
+							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
+	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 
 	import logging
-	if args.verbose > 0:
-		log_level = logging.WARNING - 10 * args.verbose
+	if args.debug > 0:
+		log_level = logging.WARNING - 10 * args.debug
 		log_format='%(asctime)s %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
 		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
 	else:

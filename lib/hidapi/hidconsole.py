@@ -101,7 +101,7 @@ if __name__ == '__main__':
 							else:
 								# the devices might reply quite slow
 								rlist, wlist, xlist = _select([handle], [], [], 1)
-								time.sleep(0.050)
+								time.sleep(1)
 		except EOFError:
 			pass
 		except Exception as e:
