@@ -302,8 +302,8 @@ class ToggleFN_Setting(_settings.Setting):
 					'When unset, the F1..F12 keys will activate their standard function,\n'
 					'and you must hold the FN key to activate their special function.')
 
-	def read(self):
-		if self._value is None and self._device:
+	def read(self, cached=True):
+		if (self._value is None or not cached) and self._device:
 			fn = self._device.feature_request(FEATURE.FN_STATUS)
 			if fn:
 				self._value = (fn[:1] == b'\x01')

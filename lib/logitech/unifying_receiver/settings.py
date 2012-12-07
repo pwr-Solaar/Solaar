@@ -38,7 +38,7 @@ class Setting(object):
 	def write_register(self, value, value2=0):
 		return self._device.request(0x8000 | (self.register & 0x2FF), int(value) & 0xFF, int(value2) & 0xFF)
 
-	def read(self):
+	def read(self, cached=True):
 		raise NotImplemented
 
 	def write(self, value):

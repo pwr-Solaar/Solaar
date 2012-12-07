@@ -72,8 +72,8 @@ class SmoothScroll_Setting(_settings.Setting):
 		assert register is not None
 		self.register = register
 
-	def read(self):
-		if self._value is None and self._device:
+	def read(self, cached=True):
+		if (self._value is None or not cached) and self._device:
 			ss = self.read_register()
 			if ss:
 				self._value = (ss[:1] == b'\x40')
@@ -96,8 +96,8 @@ class MouseDPI_Setting(_settings.Setting):
 		assert register is not None
 		self.register = register
 
-	def read(self):
-		if self._value is None and self._device:
+	def read(self, cached=True):
+		if (self._value is None or not cached) and self._device:
 			dpi = self.read_register()
 			if dpi:
 				value = ord(dpi[:1])

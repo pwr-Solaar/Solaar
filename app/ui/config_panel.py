@@ -35,8 +35,8 @@ def _process_apply_queue():
 			value = setting.write(value)
 			GObject.idle_add(_update_setting_item, sbox, value)
 		elif task[0] == 'read':
-			_, setting, sbox = task
-			value = setting.read()
+			_, setting, sbox, cached = task
+			value = setting.read(cached)
 			GObject.idle_add(_update_setting_item, sbox, value)
 
 from threading import Thread as _Thread
@@ -155,22 +155,23 @@ def update(frame):
 		box.foreach(lambda x, _: box.remove(x), None)
 		return
 
-	items = box.get_children()
-	if not items and not device.status:
-		# don't bother adding settings for offline devices,
-		# they're useless and might not guess all of them anyway
-		return
-
 	if not device.settings:
+		# nothing to do here
 		return
 
 	items = box.get_children()
 	if not items:
-		items = _add_settings(box, device)
-	assert len(device.settings) == len(list(items))
+		if device.status:
+			items = _add_settings(box, device)
+			assert len(device.settings) == len(list(items))
+		else:
+			# don't bother adding settings for offline devices,
+			# they're useless and might not guess all of them anyway
+			return
 
 	device_active = bool(device.status)
+	was_inactive = not box.get_sensitive()
 	box.set_sensitive(device_active)
 	if device_active:
 		for sbox, s in zip(items, device.settings):
-			_apply_queue.put(('read', s, sbox))
+			_apply_queue.put(('read', s, sbox, was_inactive))
