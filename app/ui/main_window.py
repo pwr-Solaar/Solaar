@@ -366,8 +366,7 @@ def _update_device_box(frame, dev):
 		if battery_level is None:
 			battery_icon.set_sensitive(False)
 			battery_icon.set_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
-			text = 'no status' if dev.protocol < 2.0 else 'waiting for status...'
-			battery_label.set_markup('<small>%s</small>' % text)
+			battery_label.set_markup('<small>no status</small>')
 			battery_label.set_sensitive(True)
 		else:
 			battery_icon.set_from_icon_name(ui.get_battery_icon(battery_level), _STATUS_ICON_SIZE)

@@ -88,10 +88,7 @@ def update(icon, receiver, device=None):
 					p += ' <small>(inactive)</small>'
 			else:
 				if dev.status:
-					if dev.protocol < 2.0:
-						p = '<small>no status</small>'
-					else:
-						p = '<small>waiting for status...</small>'
+					p = '<small>no status</small>'
 				else:
 					p = '<small>(inactive)</small>'
 
