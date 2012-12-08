@@ -1,0 +1,12 @@
+
+short register 0x63: values 0x81 .. 0x8F
+	set DPI as 100 .. 1500
+
+
+short register 0x51: set leds
+	value: ab cd 00
+	where a/b/c/d values are 1=off, 2=on, 3=flash
+		a = lower led
+		b = red led
+		c = upper led
+		d = middle led

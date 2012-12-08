@@ -1,0 +1,278 @@
+ *Read short register command*
+
+10 ix 81 02 00 00 00
+
+ix
+
+Index     0x0n: Device #n
+
+                0xFF: Transceiver
+
+*Response to Read command (success)*
+
+10 ix 81 02 00 r1 r2
+
+ix
+
+Index     (same as command)
+
+
+
+
+
+r1
+
+Number of Connected Devices
+
+                bit 0..7: Number of connected devices (receivers only)
+
+r2
+
+Number of Remaining Pairing Slots
+
+                bit 0..7: Number of remaining pairing slots
+
+
+ *Read long register command*
+
+10 ix 83 B5 nn 00 00
+
+ix
+
+Index     0xFF: Transceiver
+
+nn
+
+0x20        Device 1
+
+0x21        Device 2
+
+0x22        Device 3
+
+0x23        Device 4
+
+0x24        Device 5
+
+0x25        Device 6
+
+0x26..0x2F              Reserved for future extensions
+
+*Response to Read command (success)*
+
+11 ix 83 B5 nn r1 r2 r3 r4 r5 r6 r7 r8 r9 ra rb rc rd 00 00
+
+ix
+
+Index     (same as command)
+
+nn
+
+                (same format as above)
+
+r1
+
+Destination ID
+
+r2
+
+Reserved
+
+r3
+
+Wireless PID MSB
+
+r4
+
+Wireless PID LSB
+
+r5
+
+Reserved
+
+r6
+
+Reserved
+
+r7
+
+Device type
+
+0              undefined
+
+1              keyboard
+
+2              mouse
+
+3              numpad
+
+4              presenter
+
+5              reserved
+
+6              reserved
+
+7              remote control
+
+8              trackball
+
+9              touchpad
+
+a              tablet
+
+b              gamepad
+
+c              joystick
+
+r8
+
+Reserved
+
+r9
+
+Reserved
+
+
+
+
+
+
+
+Alternatively, if enabled, you can also receive a notification when a new
+device is paired:
+
+This message is sent by a receiver to the host SW to report a freshly
+connected device. Enable the HID++ connection reporting by setting the
+corresponding bit in register 0x00 via HID++ Set Register command.
+
+*Notification*
+
+10 ix 41 r0 r1 r2 r3
+
+ix
+
+Index
+
+r0
+
+bits [0..2] Protocol type
+
+                0x03 = eQUAD
+
+                0x04 = eQuad step 4 DJ
+
+bits [3..7] Reserved
+
+r1
+
+Device Info
+
+               bit0..3 = Device Type
+
+                       0x00 = Unknown
+
+                       0x01 = Keyboard
+
+                       0x02 = Mouse
+
+                       0x03 = Numpad
+
+                       0x04 = Presenter
+
+
+  r2
+
+Wireless PID LSB
+
+r3
+
+Wireless PID MSB
+
+To enable the notifications:
+Enable HID++ Notifications:
+
+This register defines a number of flags that allow the SW to turn on or off
+individual spontaneous HID++ reports. Not setting a flag means default
+reporting. See the table below for more details on each flag.
+
+For all bits: *0 = disabled* (default value at power-up), 1 = enabled.
+
+
+
+*Read short register command*
+
+10 ix 81 00 00 00 00
+
+ix
+
+Index     0x0n: Device #n
+
+                0xFF: Transceiver
+
+*Response to Read command (success)*
+
+10 ix 81 00 r0 r1 r2
+
+ix
+
+Index     (same as command)
+
+r0
+
+HID++ Reporting Flags (Devices)
+
+                bit 0..3. reserved
+
+                bit 4: Battery Status
+
+                bit 5..7 reserved
+
+r1
+
+HID++ Reporting Flags (Receiver)
+
+                bit 0: Wireless notifications
+
+                bit 1..7 reserved
+
+r2
+
+
+
+
+*Write short register command*
+
+10 ix 80 00 p0 p1 p2
+
+ix
+
+Index     0x0n: Device #n
+
+                0xFF: Transceiver
+
+p0
+
+HID++ Reporting Flags (Devices)
+
+                (same format as above)
+
+p1
+
+HID++ Reporting Flags (Receiver)
+
+                (same format as above)
+
+p2
+
+
+  *Response to Write command (success)*
+
+10 ix 80 00 zz zz zz
+
+ix
+
+Index     (same as command)
+
+zz
+
+(don't care, recommended to return 0)
+
