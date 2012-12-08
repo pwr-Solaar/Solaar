@@ -45,7 +45,7 @@ _D('Touch Mouse M600')
 _D('Marathon Mouse M705',
 				registers=_NamedInts(battery=0x0D),
 				settings=[hidpp10.SmoothScroll_Setting(0x01)],
-			)
+				)
 _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360')
@@ -55,11 +55,14 @@ _D('Wireless Illuminated Keyboard K800')
 _D('Zone Touch Mouse T400')
 _D('Wireless Rechargeable Touchpad T650')
 _D('Logitech Cube', kind='mouse')
-_D('Anywhere Mouse MX', codename='Anywhere MX')
+_D('Anywhere Mouse MX', codename='Anywhere MX',
+				registers=_NamedInts(battery=0x0D),
+				)
 _D('Performance Mouse MX', codename='Performance MX',
+				registers=_NamedInts(battery=0x0D),
 				settings=[
 						hidpp10.MouseDPI_Setting(0x63, _NamedInts(**dict((str(x * 100), 0x80 + x) for x in range(1, 16)))),
 						],
-			)
+				)
 
 del namedtuple

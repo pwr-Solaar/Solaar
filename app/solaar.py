@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 NAME = 'Solaar'
-VERSION = '0.8.2'
+VERSION = '0.8.3'
 __author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
 __version__ = VERSION
 __license__ = "GPL"
