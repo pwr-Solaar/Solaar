@@ -278,27 +278,36 @@ def create(title, name, max_devices, systray=False):
 					x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
 					w.move(x, y)
 			w.present()
-			w.deiconify()
 		return True
 
-	def _popup(w, trigger=None):
-		if not w.get_visible():
-			w.toggle_visible(trigger)
+	def _set_has_systray(w, systray):
+		if systray != w._has_systray:
+			w._has_systray = systray
+			if systray:
+				if w._delete_event_connection is None or not w.get_skip_taskbar_hint():
+					w.set_skip_taskbar_hint(True)
+					w.set_skip_pager_hint(True)
+					if w._delete_event_connection:
+						w.disconnect(w._delete_event_connection)
+					w._delete_event_connection = w.connect('delete-event', _toggle_visible)
+			else:
+				if w._delete_event_connection is None or w.get_skip_taskbar_hint():
+					w.set_skip_taskbar_hint(False)
+					w.set_skip_pager_hint(False)
+					if w._delete_event_connection:
+						w.disconnect(w._delete_event_connection)
+					w._delete_event_connection = w.connect('delete-event', Gtk.main_quit)
+					w.present()
 
 	from types import MethodType
 	window.toggle_visible = MethodType(_toggle_visible, window)
-	window.popup = MethodType(_popup, window)
+	window.set_has_systray = MethodType(_set_has_systray, window)
 	del MethodType
 
-	if systray:
-		window.set_keep_above(True)
-		# window.set_decorated(False)
-		# window.set_type_hint(Gdk.WindowTypeHint.TOOLTIP)
-		window.set_skip_taskbar_hint(True)
-		window.set_skip_pager_hint(True)
-		window.connect('delete-event', _toggle_visible)
-	else:
-		window.connect('delete-event', Gtk.main_quit)
+	window.set_keep_above(True)
+	window._delete_event_connection = None
+	window._has_systray = None
+	window.set_has_systray(systray)
 
 	return window
 

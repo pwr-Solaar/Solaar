@@ -66,7 +66,6 @@ def _run(args):
 		icon = ui.status_icon.create(window, menu_actions)
 	else:
 		icon = None
-		window.present()
 
 	from gi.repository import Gtk, GObject
 
@@ -94,12 +93,12 @@ def _run(args):
 
 	# callback delivering status events from the receiver/devices to the UI
 	def status_changed(receiver, device=None, alert=status.ALERT.NONE, reason=None):
+		if alert & status.ALERT.MED:
+			GObject.idle_add(window.present)
 		if window:
 			GObject.idle_add(ui.main_window.update, window, receiver, device)
 		if icon:
 			GObject.idle_add(ui.status_icon.update, icon, receiver, device)
-		if alert & status.ALERT.MED:
-			GObject.idle_add(window.popup, icon)
 
 		if ui.notify.available:
 			# always notify on receiver updates
@@ -109,7 +108,7 @@ def _run(args):
 		if receiver is DUMMY:
 			GObject.timeout_add(3000, check_for_listener)
 
-	GObject.timeout_add(0, check_for_listener, True)
+	GObject.timeout_add(10, check_for_listener, True)
 	Gtk.main()
 
 	if listener:

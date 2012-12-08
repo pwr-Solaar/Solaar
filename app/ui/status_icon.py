@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GObject, GdkPixbuf
 
 import ui
 from logitech.unifying_receiver import status as _status
@@ -13,13 +13,15 @@ from logitech.unifying_receiver import status as _status
 #
 #
 
+_NO_DEVICES = [None] * 6
+
 def create(window, menu_actions=None):
 	name = window.get_title()
 	icon = Gtk.StatusIcon()
 	icon.set_title(name)
 	icon.set_name(name)
 	icon.set_from_icon_name(ui.appicon(False))
-	icon._devices = {}
+	icon._devices = list(_NO_DEVICES)
 
 	icon.set_tooltip_text(name)
 	icon.connect('activate', window.toggle_visible)
@@ -36,6 +38,13 @@ def create(window, menu_actions=None):
 					lambda icon, button, time, menu:
 						menu.popup(None, None, icon.position_menu, icon, button, time),
 					menu)
+
+	# use size-changed to detect if the systray is available or not
+	def _size_changed(i, size, w):
+		def _check_systray(i2, w2):
+			w2.set_has_systray(i2.is_embedded() and i2.get_visible())
+		GObject.timeout_add(250, _check_systray, i, w)
+	icon.connect('size-changed', _size_changed, window)
 
 	return icon
 
@@ -71,34 +80,34 @@ def update(icon, receiver, device=None):
 
 	if device:
 		icon._devices[device.number] = None if device.status is None else device
+	if not receiver:
+		icon._devices[:] = _NO_DEVICES
+	if not icon.is_embedded():
+		return
 
 	lines = [ui.NAME + ': ' + str(receiver.status), '']
-	if receiver:
-		for k in range(1, 1 + receiver.max_devices):
-			dev = icon._devices.get(k)
-			if dev is None:
-				continue
+	for dev in icon._devices:
+		if dev is None:
+			continue
 
-			lines.append('<b>' + dev.name + '</b>')
+		lines.append('<b>' + dev.name + '</b>')
 
-			assert hasattr(dev, 'status') and dev.status is not None
-			p = str(dev.status)
-			if p:
-				if not dev.status:
-					p += ' <small>(inactive)</small>'
+		assert hasattr(dev, 'status') and dev.status is not None
+		p = str(dev.status)
+		if p:
+			if not dev.status:
+				p += ' <small>(inactive)</small>'
+		else:
+			if dev.status:
+				p = '<small>no status</small>'
 			else:
-				if dev.status:
-					p = '<small>no status</small>'
-				else:
-					p = '<small>(inactive)</small>'
+				p = '<small>(inactive)</small>'
 
-			lines.append('\t' + p)
-			lines.append('')
+		lines.append('\t' + p)
+		lines.append('')
 
-			if battery_status is None and dev.status.get(_status.BATTERY_LEVEL):
-				battery_status = dev.status
-	else:
-		icon._devices.clear()
+		if battery_status is None and dev.status.get(_status.BATTERY_LEVEL):
+			battery_status = dev.status
 
 	icon.set_tooltip_markup('\n'.join(lines).rstrip('\n'))
 
