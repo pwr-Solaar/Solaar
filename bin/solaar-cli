@@ -5,5 +5,6 @@ APP=`readlink -f $(dirname "$Z")/../app`
 LIB=`readlink -f $(dirname "$Z")/../lib`
 export PYTHONPATH=$APP:$LIB
 
+NICE=`which nice 2>/dev/null`
 PYTHON=${PYTHON:-`which python python2 python3 | head -n 1`}
-exec $PYTHON -m solaar_cli "$@"
+exec $NICE $PYTHON -m solaar_cli "$@"
