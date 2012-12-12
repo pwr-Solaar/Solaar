@@ -14,11 +14,7 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 from . import notify, status_icon, main_window, pair_window, action
 
 from solaar import NAME
-_APP_ICONS = (NAME + '-init', NAME + '-fail', NAME)
-def appicon(receiver_status):
-	return (_APP_ICONS[1] if isinstance(receiver_status, basestring)
-			else _APP_ICONS[2] if receiver_status
-			else _APP_ICONS[0])
+APP_ICON = { 1: NAME, 2: NAME + '-mask', 0: NAME + '-init', -1: NAME + '-fail' }
 
 
 def get_battery_icon(level):

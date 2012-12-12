@@ -243,7 +243,7 @@ def _make_device_box(index):
 def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
 	window.set_title(title)
-	window.set_icon_name(ui.appicon(0))
+	window.set_icon_name(ui.APP_ICON[0])
 	window.set_role('status-window')
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=12)
@@ -417,8 +417,8 @@ def _update_device_box(frame, dev):
 
 def update(window, receiver, device=None):
 	assert receiver is not None
-	# print ("update %s %s, %s" % (receiver, receiver.status, device))
-	window.set_icon_name(ui.appicon(receiver.status))
+	# print ("update", receiver, receiver.status, len(receiver), device)
+	window.set_icon_name(ui.APP_ICON[1 if receiver else -1])
 
 	vbox = window.get_child()
 	frames = list(vbox.get_children())

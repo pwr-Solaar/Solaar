@@ -20,7 +20,7 @@ def create(window, menu_actions=None):
 	icon = Gtk.StatusIcon()
 	icon.set_title(name)
 	icon.set_name(name)
-	icon.set_from_icon_name(ui.appicon(False))
+	icon.set_from_icon_name(ui.APP_ICON[0])
 	icon._devices = list(_NO_DEVICES)
 
 	icon.set_tooltip_text(name)
@@ -55,7 +55,7 @@ def _icon_with_battery(s):
 
 	name = '%s-%s' % (battery_icon, bool(s))
 	if name not in _PIXMAPS:
-		mask = ui.icon_file(ui.appicon(True) + '-mask', 128)
+		mask = ui.icon_file(ui.APP_ICON[2], 128)
 		assert mask
 		mask = GdkPixbuf.Pixbuf.new_from_file(mask)
 		assert mask.get_width() == 128 and mask.get_height() == 128
@@ -112,6 +112,6 @@ def update(icon, receiver, device=None):
 	icon.set_tooltip_markup('\n'.join(lines).rstrip('\n'))
 
 	if battery_status is None:
-		icon.set_from_icon_name(ui.appicon(receiver.status))
+		icon.set_from_icon_name(ui.APP_ICON[1 if receiver else -1])
 	else:
 		icon.set_from_pixbuf(_icon_with_battery(battery_status))
