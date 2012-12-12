@@ -71,7 +71,7 @@ def _run(args):
 
 	# initializes the receiver listener
 	def check_for_listener(notify=False):
-		# print ("check_for_listener %s" % notify)
+		# print ("check_for_listener", notify)
 		global listener
 		listener = None
 

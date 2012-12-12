@@ -50,7 +50,7 @@ def _find_device(receiver, name):
 			if number in range(1, 1 + receiver.max_devices):
 				dev = receiver[number]
 				if dev is None:
-					_fail("no paired device with number %d" % number)
+					_fail("no paired device with number", number)
 				return dev
 
 	if len(name) < 3:
@@ -80,12 +80,12 @@ def _print_receiver(receiver, verbose=False):
 		return
 
 	print ("-: Unifying Receiver")
-	print ("   Device path  : %s" % receiver.path)
-	print ("   Serial       : %s" % receiver.serial)
+	print ("   Device path  :", receiver.path)
+	print ("   Serial       :", receiver.serial)
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))
 
-	print ("   Has %d paired device(s)." % paired_count)
+	print ("   Has", paired_count, "paired device(s).")
 
 	notification_flags = receiver.request(0x8100)
 	if notification_flags:
@@ -101,32 +101,32 @@ def _print_receiver(receiver, verbose=False):
 		activity = receiver.request(0x83B3)
 		if activity:
 			activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
-			print("   Device activity counters: %s" % ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
+			print ("   Device activity counters:", ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
 
 
 def _print_device(dev, verbose=False):
 	p = dev.protocol
-	state = '' if p > 0 else ' inactive'
+	state = '' if p > 0 else 'inactive'
 
 	if not verbose:
-		print ("%d: %s [%s:%s]%s" % (dev.number, dev.name, dev.codename, dev.serial, state))
+		print ("%d: %s [%s:%s]" % (dev.number, dev.name, dev.codename, dev.serial), state)
 		return
 
 	print ("%d: %s" % (dev.number, dev.name))
-	print ("   Codename     : %s" % dev.codename)
-	print ("   Kind         : %s" % dev.kind)
+	print ("   Codename     :", dev.codename)
+	print ("   Kind         :", dev.kind)
 	if p == 0:
 		print ("   Protocol     : unknown (device is inactive)")
 	else:
 		print ("   Protocol     : HID++ %1.1f" % p)
-	print ("   Polling rate : %d ms" % dev.polling_rate)
-	print ("   Wireless PID : %s" % dev.wpid)
-	print ("   Serial number: %s" % dev.serial)
+	print ("   Polling rate :", dev.polling_rate, "ms")
+	print ("   Wireless PID :", dev.wpid)
+	print ("   Serial number:", dev.serial)
 	for fw in dev.firmware:
-		print ("     %-11s: %s" % (fw.kind, (fw.name + ' ' + fw.version).strip()))
+		print ("     %-11s:" % fw.kind, (fw.name + ' ' + fw.version).strip())
 
 	if dev.power_switch_location:
-		print ("   The power switch is located on the %s" % dev.power_switch_location)
+		print ("   The power switch is located on the", dev.power_switch_location)
 
 	from logitech.unifying_receiver import hidpp10, hidpp20
 	if p > 0:
@@ -137,13 +137,13 @@ def _print_device(dev, verbose=False):
 				flags = dev.request(0x0000, feature.bytes(2))
 				flags = 0 if flags is None else ord(flags[1:2])
 				flags = hidpp20.FEATURE_FLAG.flag_names(flags)
-				print ("      %2d: %-20s {%04X}   %s" % (index, feature, feature, flags))
+				print ("      %2d: %-20s {%04X}   %s" % (index, feature, feature, ', '.join(flags)))
 
 		if dev.keys:
 			print ("   Has %d reprogrammable keys:" % len(dev.keys))
 			for k in dev.keys:
 				flags = hidpp20.KEY_FLAG.flag_names(k.flags)
-				print ("      %2d: %-20s => %-20s   %s" % (k.index, k.key, k.task, flags))
+				print ("      %2d: %-20s => %-20s   %s" % (k.index, k.key, k.task, ', '.join(flags)))
 
 	if p > 0:
 		battery = hidpp20.get_battery(dev)
@@ -151,7 +151,7 @@ def _print_device(dev, verbose=False):
 			battery = hidpp10.get_battery(dev)
 		if battery:
 			charge, status = battery
-			print ("   Battery is %d%% charged, %s" % (charge, status))
+			print ("   Battery is %d%% charged," % charge, status)
 		else:
 			print ("   Battery status unavailable.")
 	else:
@@ -327,7 +327,7 @@ def config_device(receiver, args):
 
 	result = setting.write(value)
 	if result is None:
-		_fail("failed to set '%s' to '%s'" % (setting.name, value))
+		_fail("failed to set '%s' = '%s' [%s]" % (setting.name, value, repr(value)))
 	print ("%s = %s" % (setting.name, result))
 
 #

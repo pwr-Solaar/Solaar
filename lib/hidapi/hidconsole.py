@@ -115,7 +115,7 @@ def _open(device, hidpp):
 	if not device:
 		sys.exit("!! Device path required.")
 
-	print (".. Opening device %s" % device)
+	print (".. Opening device", device)
 	handle = hidapi.open_path(device)
 	if not handle:
 		sys.exit("!! Failed to open %s, aborting." % device)
@@ -200,7 +200,7 @@ if __name__ == '__main__':
 	except Exception as e:
 		print ('%s: %s' % (type(e).__name__, e))
 
-	print (".. Closing handle %s" % repr(handle))
+	print (".. Closing handle", repr(handle))
 	hidapi.close(handle)
 	if interactive:
 		readline.write_history_file(args.history)
