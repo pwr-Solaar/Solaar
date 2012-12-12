@@ -43,17 +43,19 @@ def create(window, menu_actions=None):
 	def _size_changed(i, size, w):
 		def _check_systray(i2, w2):
 			w2.set_has_systray(i2.is_embedded() and i2.get_visible())
+		# first guess
 		GObject.timeout_add(250, _check_systray, i, w)
+		# just to make sure...
+		GObject.timeout_add(1000, _check_systray, i, w)
 	icon.connect('size-changed', _size_changed, window)
 
 	return icon
 
 
 _PIXMAPS = {}
-def _icon_with_battery(s):
-	battery_icon = ui.get_battery_icon(s[_status.BATTERY_LEVEL])
-
-	name = '%s-%s' % (battery_icon, bool(s))
+def _icon_with_battery(level, active):
+	battery_icon = ui.get_battery_icon(level)
+	name = '%s-%s' % (battery_icon, active)
 	if name not in _PIXMAPS:
 		mask = ui.icon_file(ui.APP_ICON[2], 128)
 		assert mask
@@ -65,7 +67,7 @@ def _icon_with_battery(s):
 		assert battery
 		battery = GdkPixbuf.Pixbuf.new_from_file(battery)
 		assert battery.get_width() == 128 and battery.get_height() == 128
-		if not s:
+		if not active:
 			battery.saturate_and_pixelate(battery, 0, True)
 
 		# TODO can the masking be done at runtime?
@@ -76,8 +78,6 @@ def _icon_with_battery(s):
 
 def update(icon, receiver, device=None):
 	# print ("icon update", receiver, receiver.status, len(receiver), device)
-	battery_status = None
-
 	if device:
 		icon._devices[device.number] = None if device.status is None else device
 	if not receiver:
@@ -85,33 +85,42 @@ def update(icon, receiver, device=None):
 	if not icon.is_embedded():
 		return
 
-	lines = [ui.NAME + ': ' + str(receiver.status), '']
-	for dev in icon._devices:
-		if dev is None:
-			continue
+	def _lines(r, devices):
+		yield '<b>%s</b>: %s' % (ui.NAME, r.status)
+		yield ''
 
-		lines.append('<b>' + dev.name + '</b>')
+		for dev in devices:
+			if dev is None:
+				continue
 
-		assert hasattr(dev, 'status') and dev.status is not None
-		p = str(dev.status)
-		if p:
-			if not dev.status:
-				p += ' <small>(inactive)</small>'
-		else:
-			if dev.status:
-				p = '<small>no status</small>'
+			yield '<b>%s</b>' % dev.name
+
+			assert hasattr(dev, 'status') and dev.status is not None
+			p = str(dev.status)
+			if p:  # does it have any properties to print?
+				if dev.status:
+					yield '\t%s' % p
+				else:
+					yield '\t%s <small>(inactive)</small>' % p
 			else:
-				p = '<small>(inactive)</small>'
+				if dev.status:
+					yield '\t<small>no status</small>'
+				else:
+					yield '\t<small>(inactive)</small>'
+			yield ''
 
-		lines.append('\t' + p)
-		lines.append('')
+	icon.set_tooltip_markup('\n'.join(_lines(receiver, icon._devices)).rstrip('\n'))
 
-		if battery_status is None and dev.status.get(_status.BATTERY_LEVEL):
-			battery_status = dev.status
-
-	icon.set_tooltip_markup('\n'.join(lines).rstrip('\n'))
+	battery_status = None
+	battery_level = 1000
+	for dev in icon._devices:
+		if dev is not None:
+			level = dev.status.get(_status.BATTERY_LEVEL)
+			if level is not None and level < battery_level:
+				battery_status = dev.status
+				battery_level = level
 
 	if battery_status is None:
 		icon.set_from_icon_name(ui.APP_ICON[1 if receiver else -1])
 	else:
-		icon.set_from_pixbuf(_icon_with_battery(battery_status))
+		icon.set_from_pixbuf(_icon_with_battery(battery_level, bool(battery_status)))
