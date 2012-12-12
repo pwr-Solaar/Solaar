@@ -67,7 +67,7 @@ def receivers():
 		if d.driver == 'logitech-djreceiver':
 			yield d
 
-	# apparently there are TWO product ids possible for the UR
+	# apparently there are TWO product ids possible for the UR?
 	for d in _hid.enumerate(0x046d, 0xc532, 2):
 		if d.driver == 'logitech-djreceiver':
 			yield d
@@ -124,8 +124,7 @@ def write(handle, devnumber, data):
 	:param devnumber: attached device number.
 	:param data: data to send, up to 5 bytes.
 
-	The first two (required) bytes of data must be the feature index for the
-	device, and a function code for that feature.
+	The first two (required) bytes of data must be the SubId and address.
 
 	:raises NoReceiver: if the receiver is no longer available, i.e. has
 	been physically removed from the machine, or the kernel driver has been
@@ -151,8 +150,7 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	"""Read some data from the receiver. Usually called after a write (feature
 	call), to get the reply.
 
-	If any data was read in the given timeout, returns a tuple of
-	(code, devnumber, message data).
+	:returns: a tuple of (devnumber, message data), or `None`
 
 	:raises NoReceiver: if the receiver is no longer available, i.e. has
 	been physically removed from the machine, or the kernel driver has been
@@ -164,6 +162,14 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 
 
 def _read(handle, timeout):
+	"""Read an incoming packet from the receiver.
+
+	:returns: a tuple of (report_id, devnumber, data), or `None`.
+
+	:raises NoReceiver: if the receiver is no longer available, i.e. has
+	been physically removed from the machine, or the kernel driver has been
+	unloaded. The handle will be closed automatically.
+	"""
 	try:
 		data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
 	except Exception as reason:
@@ -185,7 +191,10 @@ def _read(handle, timeout):
 
 
 def _skip_incoming(handle):
-	"""Read anything already in the input buffer."""
+	"""Read anything already in the input buffer.
+
+	Used by request() and ping() before their write.
+	"""
 	ihandle = int(handle)
 
 	while True:
@@ -249,9 +258,7 @@ def make_event(devnumber, data):
 def request(handle, devnumber, request_id, *params):
 	"""Makes a feature call to a device and waits for a matching reply.
 
-	This function will skip all incoming messages and events not related to the
-	device we're  requesting for, or the feature specified in the initial
-	request; it will also wait for a matching reply indefinitely.
+	This function will wait for a matching reply indefinitely.
 
 	:param handle: an open UR handle.
 	:param devnumber: attached device number.
@@ -259,7 +266,7 @@ def request(handle, devnumber, request_id, *params):
 	:param params: parameters for the feature call, 3 to 16 bytes.
 	:returns: the reply data, or ``None`` if some error occured.
 	"""
-	assert type(request_id) == int
+	assert isinstance(request_id, int)
 	if devnumber != 0xFF and request_id < 0x8000:
 		timeout = _DEVICE_REQUEST_TIMEOUT
 		# for HID++ 2.0 feature request, randomize the swid to make it easier to

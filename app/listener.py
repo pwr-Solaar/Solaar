@@ -102,7 +102,10 @@ class ReceiverListener(_listener.EventsListener):
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("status_changed %s: %s (%X) %s", device, None if device is None else device.status, alert, reason or '')
+			_log.debug("status_changed %s: %s %s (%X) %s", device,
+						None if device is None else 'active' if device.status else 'inactive',
+						None if device is None else device.status,
+						alert, reason or '')
 		if self.status_changed_callback:
 			r = self.receiver or DUMMY
 			if device is None or device.kind is None:

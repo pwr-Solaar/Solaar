@@ -53,7 +53,7 @@ def _show_about_window(action):
 
 	about.set_authors(('Daniel Pavel http://github.com/pwr',))
 	try:
-		about.add_credit_section('Testing', ('Douglas Wagner',))
+		about.add_credit_section('Testing', ('Douglas Wagner', 'Julien Gascard'))
 		about.add_credit_section('Technical specifications\nprovided by',
 						('Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',))
 	except TypeError:
@@ -64,7 +64,7 @@ def _show_about_window(action):
 		pass
 
 	about.set_website('http://pwr.github.com/Solaar/')
-	about.set_website_label('Solaar Wiki')
+	about.set_website_label('Solaar')
 
 	about.run()
 	about.destroy()
