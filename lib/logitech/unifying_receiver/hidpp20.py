@@ -125,6 +125,7 @@ class FeatureCallError(_KwException):
 class FeaturesArray(object):
 	"""A sequence of features supported by a HID++ 2.0 device."""
 	__slots__ = ('supported', 'device', 'features')
+	assert int(FEATURE.ROOT) == 0x0000
 
 	def __init__(self, device):
 		assert device is not None
@@ -136,7 +137,7 @@ class FeaturesArray(object):
 		self.supported = False
 
 	def _check(self):
-		# print ("%s check" % self.device)
+		# print (self.device, "check")
 		if self.supported:
 			assert self.device
 			if self.features is not None:
@@ -154,7 +155,7 @@ class FeaturesArray(object):
 				self.device = None
 				return False
 
-			reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', FEATURE.FEATURE_SET))
+			reply = self.device.request(0x0000, _pack(b'!H', FEATURE.FEATURE_SET))
 			if reply is None:
 				self.supported = False
 			else:
@@ -195,39 +196,42 @@ class FeaturesArray(object):
 
 	def __contains__(self, value):
 		if self._check():
+			ivalue = int(value)
+
 			may_have = False
 			for f in self.features:
 				if f is None:
 					may_have = True
-				elif int(value) == int(f):
+				elif ivalue == int(f):
 					return True
-				elif int(value) < int(f):
+				elif ivalue < int(f):
 					break
 
 			if may_have:
-				reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', value))
+				reply = self.device.request(0x0000, _pack(b'!H', ivalue))
 				if reply:
 					index = ord(reply[0:1])
 					if index:
-						self.features[index] = FEATURE[int(value)]
+						self.features[index] = FEATURE[ivalue]
 						return True
 
 	def index(self, value):
 		if self._check():
 			may_have = False
+			ivalue = int(value)
 			for index, f in enumerate(self.features):
 				if f is None:
 					may_have = True
-				elif int(value) == int(f):
+				elif ivalue == int(f):
 					return index
-				elif int(value) < int(f):
+				elif ivalue < int(f):
 					raise ValueError("%s not in list" % repr(value))
 
 			if may_have:
-				reply = self.device.request(int(FEATURE.ROOT), _pack(b'!H', value))
+				reply = self.device.request(0x0000, _pack(b'!H', ivalue))
 				if reply:
 					index = ord(reply[0:1])
-					self.features[index] = FEATURE[int(value)]
+					self.features[index] = FEATURE[ivalue]
 					return index
 
 		raise ValueError("%s not in list" % repr(value))
