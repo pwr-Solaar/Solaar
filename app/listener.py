@@ -80,14 +80,15 @@ class ReceiverListener(_listener.EventsListener):
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("tick: polling status: %s %s", self.receiver, list(iter(self.receiver)))
+			_log.debug("polling status: %s %s", self.receiver, list(iter(self.receiver)))
 
-		if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
+		if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 3:
 			# if we missed a couple of polls, most likely the computer went into
 			# sleep, and we have to reinitialize the receiver again
 			_log.warn("possible sleep detected, closing this listener")
 			self.stop()
 			return
+
 		self._last_tick = timestamp
 
 		# read these in case they haven't been read already
@@ -109,6 +110,7 @@ class ReceiverListener(_listener.EventsListener):
 		if self.status_changed_callback:
 			r = self.receiver or DUMMY
 			if device is None or device.kind is None:
+				# the status of the receiver changed
 				self.status_changed_callback(r, None, alert, reason)
 			else:
 				if device.status is None:
