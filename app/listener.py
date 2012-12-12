@@ -8,8 +8,6 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('listener')
 del getLogger
 
-from types import MethodType as _MethodType
-
 from logitech.unifying_receiver import (Receiver,
 										listener as _listener,
 										status as _status)
@@ -48,21 +46,7 @@ class ReceiverListener(_listener.EventsListener):
 		self._last_tick = 0
 
 		self.status_changed_callback = status_changed_callback
-
 		receiver.status = _status.ReceiverStatus(receiver, self._status_changed)
-
-		# enhance the original register_new_device
-		def _register_with_status(r, number):
-			if bool(self):
-				dev = r.__register_new_device(number)
-				if dev is not None:
-					# read these as soon as possible, they will be used everywhere
-					dev.protocol, dev.codename
-					dev.status = _status.DeviceStatus(dev, self._status_changed)
-					self._status_changed(r)
-					return dev
-		receiver.__register_new_device = receiver.register_new_device
-		receiver.register_new_device = _MethodType(_register_with_status, receiver)
 
 	def has_started(self):
 		_log.info("notifications listener has started")
@@ -132,6 +116,13 @@ class ReceiverListener(_listener.EventsListener):
 			assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
 			already_known = n.devnumber in self.receiver
 			dev = self.receiver[n.devnumber]
+
+			if dev and not already_known:
+				# read these as soon as possible, they will be used everywhere
+				dev.protocol, dev.codename
+				dev.status = _status.DeviceStatus(dev, self._status_changed)
+				self._status_changed(self.receiver)
+
 			if dev and dev.status is not None:
 				dev.status.process_notification(n)
 				if self.receiver.status.lock_open and not already_known:
