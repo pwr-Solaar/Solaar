@@ -80,30 +80,32 @@ def error(window, title, text):
 	m.destroy()
 
 
-def find_children(container, *child_names):
-	assert container is not None
-	assert isinstance(container, Gtk.Container)
-
-	def _iterate_children(widget, names, result, count):
-		assert isinstance(widget, Gtk.Widget)
-		wname = widget.get_name()
-		if wname in names:
-			index = names.index(wname)
-			names[index] = None
-			result[index] = widget
-			count -= 1
-
-		if count > 0 and isinstance(widget, Gtk.Container):
-			for w in widget:
-				# if isinstance(w, Gtk.Widget):
-				count = _iterate_children(w, names, result, count)
-				if count == 0:
-					break
-
-		return count
-
-	names = list(child_names)
-	count = len(names)
-	result = [None] * count
-	_iterate_children(container, names, result, count)
-	return tuple(result) if count > 1 else result[0]
+# def find_children(container, *child_names):
+# 	assert container is not None
+# 	assert isinstance(container, Gtk.Container)
+#
+# 	def _iterate_children(widget, names, result, count):
+# 		assert isinstance(widget, Gtk.Widget)
+# 		wname = widget.get_name()
+# 		if wname in names:
+# 			index = names.index(wname)
+# 			names[index] = None
+# 			result[index] = widget
+# 			count -= 1
+#
+# 		if count > 0 and isinstance(widget, Gtk.Container):
+# 			for w in widget:
+# 				# assert isinstance(w, Gtk.Widget):
+# 				count = _iterate_children(w, names, result, count)
+# 				if count == 0:
+# 					break
+#
+# 		return count
+#
+# 	names = list(child_names)
+# 	count = len(names)
+# 	result = [None] * count
+# 	if _iterate_children(container, names, result, count) > 0:
+# 		# some children could not be found
+# 		pass
+# 	return tuple(result) if count > 1 else result[0]

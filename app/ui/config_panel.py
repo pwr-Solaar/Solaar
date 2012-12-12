@@ -145,7 +145,7 @@ def _update_setting_item(sbox, value):
 
 
 def update(frame):
-	box = ui.find_children(frame, 'config-box')
+	box = frame._config_box
 	assert box
 	device = frame._device
 
