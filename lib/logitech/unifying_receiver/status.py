@@ -62,16 +62,16 @@ class ReceiverStatus(dict):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)
 
-	def process_event(self, event):
-		if event.sub_id == 0x4A:
-			self.lock_open = bool(event.address & 0x01)
+	def process_notification(self, n):
+		if n.sub_id == 0x4A:
+			self.lock_open = bool(n.address & 0x01)
 			reason = 'pairing lock is ' + ('open' if self.lock_open else 'closed')
 			_log.info("%s: %s", self._receiver, reason)
 			if self.lock_open:
 				self[ERROR] = None
 				self.new_device = None
 
-			pair_error = ord(event.data[:1])
+			pair_error = ord(n.data[:1])
 			if pair_error:
 				self[ERROR] = _hidpp10.PAIRING_ERRORS[pair_error]
 				self.new_device = None
@@ -98,15 +98,27 @@ class DeviceStatus(dict):
 		self.updated = 0
 
 	def __str__(self):
-		t = []
-		if self.get(BATTERY_LEVEL) is not None:
-			b = 'Battery: %d%%' % self[BATTERY_LEVEL]
-			if self.get(BATTERY_STATUS):
-				b += ' (' + self[BATTERY_STATUS] + ')'
-			t.append(b)
-		if self.get(LIGHT_LEVEL) is not None:
-			t.append('Light: %d lux' % self[LIGHT_LEVEL])
-		return ', '.join(t)
+		def _item(name, format):
+			value = self.get(name)
+			if value is not None:
+				return format % value
+
+		def _items():
+			battery_level = _item(BATTERY_LEVEL, 'Battery: %d%%')
+			if battery_level:
+				yield battery_level
+				battery_status = _item(BATTERY_STATUS, ' <small>(%s)</small>')
+				if battery_status:
+					yield battery_status
+
+			light_level = _item(LIGHT_LEVEL, 'Light: %d lux')
+			if light_level:
+				if battery_level:
+					yield ', '
+				yield light_level
+
+		return ''.join(i for i in _items())
+
 	__unicode__ = __str__
 
 	def __bool__(self):
@@ -156,25 +168,25 @@ class DeviceStatus(dict):
 			self.clear()
 			self._changed(active=False, alert=ALERT.LOW, timestamp=timestamp)
 
-	def process_event(self, event):
-		assert event.sub_id < 0x80
+	def process_notification(self, n):
+		assert n.sub_id < 0x80
 
-		if event.sub_id == 0x40:
-			if event.address == 0x02:
+		if n.sub_id == 0x40:
+			if n.address == 0x02:
 				# device un-paired
 				self.clear()
 				self._device.status = None
 				self._changed(False, ALERT.HIGH, 'unpaired')
 			else:
-				_log.warn("device %d disconnection notification %s with unknown type %02X", self._device.number, event, event.address)
+				_log.warn("device %d disconnection notification %s with unknown type %02X", self._device.number, n, n.address)
 			return True
 
-		if event.sub_id == 0x41:
-			if event.address == 0x04:  # unifying protocol
-				# wpid = _strhex(event.data[4:5] + event.data[3:4])
+		if n.sub_id == 0x41:
+			if n.address == 0x04:  # unifying protocol
+				# wpid = _strhex(n.data[4:5] + n.data[3:4])
 				# assert wpid == device.wpid
 
-				flags = ord(event.data[:1]) & 0xF0
+				flags = ord(n.data[:1]) & 0xF0
 				link_encrypyed = bool(flags & 0x20)
 				link_established = not (flags & 0x40)
 				if _log.isEnabledFor(_DEBUG):
@@ -185,47 +197,43 @@ class DeviceStatus(dict):
 				self[ENCRYPTED] = link_encrypyed
 				self._changed(link_established)
 
-			elif event.address == 0x03:
-				_log.warn("device %d connection notification %s with eQuad protocol, ignored", self._device.number, event)
+			elif n.address == 0x03:
+				_log.warn("device %d connection notification %s with eQuad protocol, ignored", self._device.number, n)
 
 			else:
-				_log.warn("device %d connection notification %s with unknown protocol %02X", self._device.number, event, event.address)
+				_log.warn("device %d connection notification %s with unknown protocol %02X", self._device.number, n, n.address)
 
 			return True
 
-		if event.sub_id == 0x49:
+		if n.sub_id == 0x49:
 			# raw input event? just ignore it
-			# if event.address == 0x01, no idea what it is
-			# if event.address == 0x03, it's an actual input event
+			# if n.address == 0x01, no idea what it is, but they keep on coming
+			# if n.address == 0x03, it's an actual input event
 			return True
 
-		if event.sub_id == 0x4B:
-			if event.address == 0x01:
-				_log.debug("device came online %d", event.devnumber)
+		if n.sub_id == 0x4B:
+			if n.address == 0x01:
+				_log.debug("device came online %d", n.devnumber)
 				self._changed(alert=ALERT.LOW, reason='powered on')
 			else:
-				_log.warn("unknown event %s", event)
+				_log.warn("unknown notification %s", n)
 			return True
 
-		if event.sub_id >= 0x40:
-			_log.warn("don't know how to handle event %s", event)
-			return False
-
-		# this must be a feature event, assuming no device has more than 0x40 features
-		if event.sub_id >= len(self._device.features):
-			_log.warn("device %d got event from unknown feature index %02X", self._device.number, event.sub_id)
+		# this must be a feature notification, assuming no device has more than 0x40 features
+		if n.sub_id >= len(self._device.features):
+			_log.warn("device %s got notification from invalid feature index %02X", self._device, n.sub_id)
 			return False
 
 		try:
-			feature = self._device.features[event.sub_id]
+			feature = self._device.features[n.sub_id]
 		except IndexError:
-			_log.warn("don't know how to handle event %s for feature with invalid index %02X", event, event.sub_id)
+			_log.warn("device %s got notification from invalid feature index %02X", self._device, n.sub_id)
 			return False
 
 		if feature == _hidpp20.FEATURE.BATTERY:
-			if event.address == 0x00:
-				discharge = ord(event.data[:1])
-				battery_status = ord(event.data[1:2])
+			if n.address == 0x00:
+				discharge = ord(n.data[:1])
+				battery_status = ord(n.data[1:2])
 				self[BATTERY_LEVEL] = discharge
 				self[BATTERY_STATUS] = BATTERY_STATUS[battery_status]
 				if _hidpp20.BATTERY_OK(battery_status):
@@ -236,40 +244,40 @@ class DeviceStatus(dict):
 					reason = self[ERROR] = self[BATTERY_STATUS]
 				self._changed(alert=alert, reason=reason)
 			else:
-				_log.warn("don't know how to handle BATTERY event %s", event)
+				_log.warn("don't know how to handle BATTERY notification %s", n)
 			return True
 
 		if feature == _hidpp20.FEATURE.REPROGRAMMABLE_KEYS:
-			if event.address == 0x00:
-				_log.debug('reprogrammable key: %s', event)
+			if n.address == 0x00:
+				_log.warn('unknown reprogrammable key: %s', n)
 			else:
-				_log.warn("don't know how to handle REPROGRAMMABLE KEYS event %s", event)
+				_log.warn("don't know how to handle REPROGRAMMABLE KEYS notification %s", n)
 			return True
 
 		if feature == _hidpp20.FEATURE.WIRELESS:
-			if event.address == 0x00:
-				_log.debug("wireless status: %s", event)
-				if event.data[0:3] == b'\x01\x01\x01':
+			if n.address == 0x00:
+				_log.debug("wireless status: %s", n)
+				if n.data[0:3] == b'\x01\x01\x01':
 					self._changed(alert=ALERT.LOW, reason='powered on')
 			else:
-				_log.warn("don't know how to handle WIRELESS event %s", event)
+				_log.warn("don't know how to handle WIRELESS notification %s", n)
 			return True
 
 		if feature == _hidpp20.FEATURE.SOLAR_CHARGE:
-			if event.data[5:9] == b'GOOD':
-				charge, lux, adc = _unpack(b'!BHH', event.data[:5])
+			if n.data[5:9] == b'GOOD':
+				charge, lux, adc = _unpack(b'!BHH', n.data[:5])
 				self[BATTERY_LEVEL] = charge
 				# guesstimate the battery voltage, emphasis on 'guess'
 				self[BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
-				if event.address == 0x00:
+				if n.address == 0x00:
 					self[LIGHT_LEVEL] = None
 					self._changed()
-				elif event.address == 0x10:
+				elif n.address == 0x10:
 					self[LIGHT_LEVEL] = lux
 					if lux > 200:  # guesstimate
 						self[BATTERY_STATUS] += ', charging'
 					self._changed()
-				elif event.address == 0x20:
+				elif n.address == 0x20:
 					_log.debug("Solar key pressed")
 					# first cancel any reporting
 					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE)
@@ -281,17 +289,17 @@ class DeviceStatus(dict):
 				else:
 					self._changed()
 			else:
-				_log.warn("SOLAR CHARGE event not GOOD? %s", event)
+				_log.warn("SOLAR CHARGE notification not GOOD? %s", n)
 			return True
 
 		if feature == _hidpp20.FEATURE.TOUCH_MOUSE:
-			if event.address == 0x00:
-				_log.debug("TOUCH MOUSE points event: %s", event)
-			elif event.address == 0x10:
-				touch = ord(event.data[:1])
+			if n.address == 0x00:
+				_log.debug("TOUCH MOUSE points notification: %s", n)
+			elif n.address == 0x10:
+				touch = ord(n.data[:1])
 				button_down = bool(touch & 0x02)
 				mouse_lifted = bool(touch & 0x01)
 				_log.debug("TOUCH MOUSE status: button_down=%s mouse_lifted=%s", button_down, mouse_lifted)
 			return True
 
-		_log.warn("don't know how to handle event %s for feature %s (%02X)", event, feature, event.sub_id)
+		_log.warn("don't know how to handle %s for feature %s (%02X)", n, feature, n.sub_id)

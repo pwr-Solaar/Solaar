@@ -43,7 +43,7 @@ class ReceiverListener(_listener.EventsListener):
 	"""Keeps the status of a Unifying Receiver.
 	"""
 	def __init__(self, receiver, status_changed_callback=None):
-		super(ReceiverListener, self).__init__(receiver, self._events_handler)
+		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
 		self.tick_period = _POLL_TICK
 		self._last_tick = 0
 
@@ -65,13 +65,13 @@ class ReceiverListener(_listener.EventsListener):
 		receiver.register_new_device = _MethodType(_register_with_status, receiver)
 
 	def has_started(self):
-		_log.info("events listener has started")
+		_log.info("notifications listener has started")
 		self.receiver.enable_notifications()
 		self.receiver.notify_devices()
 		self._status_changed(self.receiver, _status.ALERT.LOW)
 
 	def has_stopped(self):
-		_log.info("events listener has stopped")
+		_log.info("notifications listener has stopped")
 		if self.receiver:
 			self.receiver.enable_notifications(False)
 			self.receiver.close()
@@ -119,26 +119,26 @@ class ReceiverListener(_listener.EventsListener):
 				if device.status is None:
 					self.status_changed_callback(r)
 
-	def _events_handler(self, event):
+	def _notifications_handler(self, n):
 		assert self.receiver
-		if event.devnumber == 0xFF:
-			# a receiver event
+		if n.devnumber == 0xFF:
+			# a receiver notification
 			if self.receiver.status is not None:
-				self.receiver.status.process_event(event)
+				self.receiver.status.process_notification(n)
 		else:
-			# a device event
-			assert event.devnumber > 0 and event.devnumber <= self.receiver.max_devices
-			already_known = event.devnumber in self.receiver
-			dev = self.receiver[event.devnumber]
+			# a device notification
+			assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
+			already_known = n.devnumber in self.receiver
+			dev = self.receiver[n.devnumber]
 			if dev and dev.status is not None:
-				dev.status.process_event(event)
+				dev.status.process_notification(n)
 				if self.receiver.status.lock_open and not already_known:
-					# this should be the first event after a device was paired
-					assert event.sub_id == 0x41 and event.address == 0x04
+					# this should be the first notification after a device was paired
+					assert n.sub_id == 0x41 and n.address == 0x04
 					_log.info("pairing detected new device")
 					self.receiver.status.new_device = dev
 			else:
-				_log.warn("received event %s for invalid device %d: %s", event, event.devnumber, dev)
+				_log.warn("received notification %s for invalid device %d: %s", n, n.devnumber, dev)
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)

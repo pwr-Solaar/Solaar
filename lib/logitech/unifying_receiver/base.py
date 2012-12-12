@@ -218,41 +218,41 @@ def _skip_incoming(handle):
 #
 #
 
-"""The function that may be called on incoming events.
+"""The function that may be called on incoming notifications.
 
 The hook must be a callable accepting one tuple parameter, with the format
 ``(<int> devnumber, <bytes[2]> request_id, <bytes> data)``.
 
 This hook will only be called by the request()/ping() functions, when received
 replies do not match the expected request_id. As such, it is not suitable for
-intercepting broadcast events from the device (e.g. special keys being pressed,
-battery charge events, etc), at least not in a timely manner.
+intercepting broadcast notifications from the device (e.g. special keys being
+pressed, battery charge notifications, etc), at least not in a timely manner.
 """
-events_hook = None
+notifications_hook = None
 
 def _unhandled(report_id, devnumber, data):
-	"""Deliver a possible event to the unhandled_hook (if any)."""
-	if events_hook:
-		event = make_event(devnumber, data)
-		if event:
-			events_hook(event)
+	"""Deliver a possible notification to the notifications_hook (if any)."""
+	if notifications_hook:
+		n = make_notification(devnumber, data)
+		if n:
+			notifications_hook(n)
 
+def make_notification(devnumber, data):
+	"""Guess if this is a notification (and not just a request reply), and
+	return a Notification tuple if it is."""
+	sub_id = ord(data[:1])
+	if sub_id & 0x80 != 0x80:
+		# HID++ 1.0 standard notifications are 0x40 - 0x7F
+		# HID++ 2.0 feature notifications have the SoftwareID 0
+		address = ord(data[1:2])
+		if sub_id >= 0x40 or address & 0x0F == 0x00:
+			return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 from collections import namedtuple
-_Event = namedtuple('_Event', ['devnumber', 'sub_id', 'address', 'data'])
-_Event.__str__ = lambda self: 'Event(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address, _strhex(self.data))
-_Event.__unicode__ = _Event.__str__
+_HIDPP_Notification = namedtuple('_HIDPP_Notification', ['devnumber', 'sub_id', 'address', 'data'])
+_HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address, _strhex(self.data))
+_HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple
-
-def make_event(devnumber, data):
-	sub_id = ord(data[:1])
-	if devnumber == 0xFF:
-		if sub_id == 0x4A:  # receiver lock event
-			return _Event(devnumber, sub_id, ord(data[1:2]), data[2:])
-	elif sub_id & 0x80 != 0x80:
-		address = ord(data[1:2])
-		if sub_id >= 0x40 or address & 0x01 == 0:
-			return _Event(devnumber, sub_id, address, data[2:])
 
 
 def request(handle, devnumber, request_id, *params):
@@ -269,21 +269,22 @@ def request(handle, devnumber, request_id, *params):
 	assert isinstance(request_id, int)
 	if devnumber != 0xFF and request_id < 0x8000:
 		timeout = _DEVICE_REQUEST_TIMEOUT
-		# for HID++ 2.0 feature request, randomize the swid to make it easier to
-		# recognize the reply for this request. also, always set the last bit
-		# (0) in swid, to make events easier to identify
-		request_id = (request_id & 0xFFF0) | _random_bits(4) | 0x01
+		# for HID++ 2.0 feature requests, randomize the SoftwareId to make it
+		# easier to recognize the reply for this request. also, always set the
+		# most significant bit (8) in SoftwareId, to make notifications easier
+		# to distinguish from request replies
+		request_id = (request_id & 0xFFF0) | 0x08 | _random_bits(3)
 	else:
 		timeout = _RECEIVER_REQUEST_TIMEOUT
-	request_str = _pack(b'!H', request_id)
 
-	params = b''.join(_pack(b'B', p) if type(p) == int else p for p in params)
+	params = b''.join(_pack(b'B', p) if isinstance(p, int) else p for p in params)
 	# if _log.isEnabledFor(_DEBUG):
 	# 	_log.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
+	request_data = _pack(b'!H', request_id) + params
 
 	_skip_incoming(handle)
 	ihandle = int(handle)
-	write(ihandle, devnumber, request_str + params)
+	write(ihandle, devnumber, request_data)
 
 	while True:
 		now = _timestamp()
@@ -293,7 +294,7 @@ def request(handle, devnumber, request_id, *params):
 		if reply:
 			report_id, reply_devnumber, reply_data = reply
 			if reply_devnumber == devnumber:
-				if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_str:
+				if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2]:
 					error = ord(reply_data[3:4])
 
 					# if error == _hidpp10.ERROR.resource_error: # device unreachable
@@ -304,18 +305,18 @@ def request(handle, devnumber, request_id, *params):
 					# 	_log.error("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
 					# 	raise NoSuchDevice(number=devnumber, request=request_id)
 
-					_log.debug("(%s) device %d error on request {%04X}: %d = %s",
+					_log.debug("(%s) device 0x%02X error on request {%04X}: %d = %s",
 									handle, devnumber, request_id, error, _hidpp10.ERROR[error])
 					break
 
-				if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_str:
+				if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
 					# a HID++ 2.0 feature call returned with an error
 					error = ord(reply_data[3:4])
 					_log.error("(%s) device %d error on feature request {%04X}: %d = %s",
 									handle, devnumber, request_id, error, _hidpp20.ERROR[error])
 					raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
-				if reply_data[:2] == request_str:
+				if reply_data[:2] == request_data[:2]:
 					if request_id & 0xFF00 == 0x8300:
 						# long registry r/w should return a long reply
 						assert report_id == 0x11
@@ -329,7 +330,7 @@ def request(handle, devnumber, request_id, *params):
 							if reply_data[2:3] == params[:1]:
 								return reply_data[2:]
 							else:
-								# hm, not mathing my request, and certainly not an event
+								# hm, not mathing my request, and certainly not a notification
 								continue
 						else:
 							return reply_data[2:]
@@ -352,16 +353,15 @@ def ping(handle, devnumber):
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("(%s) pinging device %d", handle, devnumber)
 
+	# randomize the SoftwareId and mark byte to be able to identify the ping
+	# reply, and set most significant (0x8) bit in SoftwareId so that the reply
+	# is always distinguishable from notifications
+	request_id = 0x0018 | _random_bits(3)
+	request_data = _pack(b'!HBBB', request_id, 0, 0, _random_bits(8))
+
 	_skip_incoming(handle)
 	ihandle = int(handle)
-
-	# randomize the swid and mark byte to positively identify the ping reply,
-	# and set the last (0) bit in swid to make it easier to distinguish requests
-	# from events
-	request_id = 0x0010 | _random_bits(4) | 0x01
-	request_str = _pack(b'!H', request_id)
-	ping_mark = _pack(b'B', _random_bits(8))
-	write(ihandle, devnumber, request_str + b'\x00\x00' + ping_mark)
+	write(ihandle, devnumber, request_data)
 
 	while True:
 		now = _timestamp()
@@ -371,11 +371,11 @@ def ping(handle, devnumber):
 		if reply:
 			report_id, number, data = reply
 			if number == devnumber:
-				if data[:2] == request_str and data[4:5] == ping_mark:
+				if data[:2] == request_data[:2] and data[4:5] == request_data[-1:]:
 					# HID++ 2.0+ device, currently connected
 					return ord(data[2:3]) + ord(data[3:4]) / 10.0
 
-				if report_id == 0x10 and data[:1] == b'\x8F' and data[1:3] == request_str:
+				if report_id == 0x10 and data[:1] == b'\x8F' and data[1:3] == request_data[:2]:
 					assert data[-1:] == b'\x00'
 					error = ord(data[3:4])
 

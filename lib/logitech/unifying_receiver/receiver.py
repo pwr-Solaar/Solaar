@@ -247,7 +247,8 @@ class Receiver(object):
 		return self._firmware
 
 	def enable_notifications(self, enable=True):
-		"""Enable or disable device (dis)connection events on this receiver."""
+		"""Enable or disable device (dis)connection notifications on this
+		receiver."""
 		if not self.handle:
 			return False
 		if enable:
@@ -267,7 +268,7 @@ class Receiver(object):
 		"""Scan all devices."""
 		if self.handle:
 			if not self.request(0x8002, 0x02):
-				_log.warn("failed to trigger device events")
+				_log.warn("failed to trigger device link notifications")
 
 	def register_new_device(self, number):
 		if self._devices.get(number) is not None:

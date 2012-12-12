@@ -87,12 +87,13 @@ def _print_receiver(receiver, verbose=False):
 
 	print ("   Has %d paired device(s)." % paired_count)
 
-	notifications = receiver.request(0x8100)
-	if notifications:
-		notifications = ord(notifications[0:1]) << 16 | ord(notifications[1:2]) << 8
-		if notifications:
+	notification_flags = receiver.request(0x8100)
+	if notification_flags:
+		notification_flags = ord(notification_flags[0:1]) << 16 | ord(notification_flags[1:2]) << 8
+		if notification_flags:
 			from logitech.unifying_receiver import hidpp10
-			print ("   Enabled notifications: %06X = %s." % (notifications, ', '.join(hidpp10.NOTIFICATION_FLAG.flag_names(notifications))))
+			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+			print ("   Enabled notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
 		else:
 			print ("   All notifications disabled.")
 
@@ -184,37 +185,41 @@ def pair_device(receiver, args):
 
 	done = [False]
 
-	def _events_handler(event):
-		if event.devnumber == 0xFF:
-			r_status.process_event(event)
+	def _notification_handler(n):
+		if n.devnumber == 0xFF:
+			r_status.process_notification(n)
 			if not r_status.lock_open:
 				done[0] = True
-		elif event.sub_id == 0x41 and event.address == 0x04:
-			if event.devnumber not in known_devices:
-				r_status.new_device = receiver[event.devnumber]
+		elif n.sub_id == 0x41 and n.address == 0x04:
+			if n.devnumber not in known_devices:
+				r_status.new_device = receiver[n.devnumber]
 
 	from logitech.unifying_receiver import base
-	base.events_hook = _events_handler
+	base.notifications_hook = _notification_handler
 
 	# check if it's necessary to set the notification flags
-	notifications = receiver.request(0x8100)
-	if notifications:
-		notifications = ord(notifications[:1]) + ord(notifications[1:2]) + ord(notifications[2:3])
-	if not notifications:
+	notification_flags = receiver.request(0x8100)
+	if notification_flags:
+		# just to see if any bits are set
+		notification_flags = ord(notification_flags[:1]) + ord(notification_flags[1:2]) + ord(notification_flags[2:3])
+	if not notification_flags:
+		# if there are any notifications set, just assume the one we need is already set
 		receiver.enable_notifications()
 	receiver.set_lock(False, timeout=20)
 	print ("Pairing: turn your new device on (timing out in 20 seconds).")
 
 	while not done[0]:
-		event = base.read(receiver.handle, 2000)
-		if event:
-			event = base.make_event(*event)
-			if event:
-				_events_handler(event)
+		n = base.read(receiver.handle, 2000)
+		if n:
+			n = base.make_notification(*n)
+			if n:
+				_notification_handler(n)
 
-	if not notifications:
+	if not notification_flags:
+		# only clear the flags if they weren't set before, otherwise a
+		# concurrently running Solaar app will stop working properly
 		receiver.enable_notifications(False)
-	base.events_hook = None
+	base.notifications_hook = None
 
 	if r_status.new_device:
 		dev = r_status.new_device

@@ -91,7 +91,7 @@ def _run(args):
 
 	from logitech.unifying_receiver import status
 
-	# callback delivering status events from the receiver/devices to the UI
+	# callback delivering status notifications from the receiver/devices to the UI
 	def status_changed(receiver, device=None, alert=status.ALERT.NONE, reason=None):
 		if alert & status.ALERT.MED:
 			GObject.idle_add(window.present)
