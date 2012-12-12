@@ -4,8 +4,13 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from logging import getLogger, DEBUG as _DEBUG
+_log = getLogger('LUR').getChild('hidpp10')
+del getLogger
+
 from .common import (strhex as _strhex,
 					NamedInts as _NamedInts,
+					NamedInt as _NamedInt,
 					FirmwareInfo as _FirmwareInfo)
 from . import settings as _settings
 from .hidpp20 import FIRMWARE_KIND
@@ -119,20 +124,30 @@ class MouseDPI_Setting(_settings.Setting):
 # functions
 #
 
-def get_battery(device):
-	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
-	if 'battery' in device.registers:
-		register = device.registers['battery']
-
+def get_register(device, name, default_number=-1):
+	known_register = device.registers[name]
+	register = known_register or default_number
+	if register > 0:
 		reply = device.request(0x8100 + (register & 0xFF))
 		if reply:
-			charge = ord(reply[:1])
-			status = ord(reply[2:3]) & 0xF0
-			status = ('discharging' if status == 0x30
-					else 'charging' if status == 0x50
-					else 'fully charged' if status == 0x90
-					else None)
-			return charge, status
+			return reply
+
+		if not known_register and device.ping():
+			_log.warn("%s: failed to read '%s' from default register 0x%02X, blacklisting", device, name, default_number)
+			device.registers[-default_number] = name
+
+
+def get_battery(device):
+	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
+	reply = get_register(device, 'battery', 0x0D)
+	if reply:
+		charge = ord(reply[:1])
+		status = ord(reply[2:3]) & 0xF0
+		status = ('discharging' if status == 0x30
+				else 'charging' if status == 0x50
+				else 'fully charged' if status == 0x90
+				else None)
+		return charge, status
 
 
 def get_serial(device):
