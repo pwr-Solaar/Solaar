@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import errno as _errno
 from weakref import proxy as _proxy
-from collections import defaultdict as _defaultdict
 
 from logging import getLogger
 _log = getLogger('LUR').getChild('receiver')
@@ -15,7 +14,7 @@ del getLogger
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
-from .common import strhex as _strhex
+from .common import strhex as _strhex, NamedInts as _NamedInts
 from .descriptors import DEVICES as _DEVICES
 
 #
@@ -144,7 +143,7 @@ class PairedDevice(object):
 		if self._registers is None:
 			descriptor = _DEVICES.get(self.codename)
 			if descriptor is None or descriptor.registers is None:
-				self._registers = _defaultdict(lambda: None)
+				self._registers = _NamedInts()
 			else:
 				self._registers = descriptor.registers
 		return self._registers
