@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GObject
 
-import ui
 from logitech.unifying_receiver import settings as _settings
 
 #
@@ -17,7 +16,7 @@ try:
 	from Queue import Queue as _Queue
 except ImportError:
 	from queue import Queue as _Queue
-_apply_queue = _Queue(8)
+_apply_queue = _Queue(4)
 
 def _process_apply_queue():
 	def _write_start(sbox):
@@ -30,14 +29,15 @@ def _process_apply_queue():
 	while True:
 		task = _apply_queue.get()
 		assert isinstance(task, tuple)
+		# print ("task", *task)
 		if task[0] == 'write':
 			_, setting, value, sbox = task
-			GObject.idle_add(_write_start, sbox)
+			GObject.idle_add(_write_start, sbox, priority=0)
 			value = setting.write(value)
 		elif task[0] == 'read':
 			_, setting, cached, sbox = task
 			value = setting.read(cached)
-		GObject.idle_add(_update_setting_item, sbox, value)
+		GObject.idle_add(_update_setting_item, sbox, value, priority=99)
 
 from threading import Thread as _Thread
 _queue_processor = _Thread(name='SettingsProcessor', target=_process_apply_queue)
@@ -49,11 +49,17 @@ _queue_processor.start()
 #
 
 def _switch_notify(switch, _, setting, spinner):
-	_apply_queue.put(('write', setting, switch.get_active() == True, switch.get_parent()))
+	# print ("switch notify", switch, switch.get_active(), setting)
+	if switch.get_sensitive():
+		# value = setting.write(switch.get_active() == True)
+		# _update_setting_item(switch.get_parent(), value)
+		_apply_queue.put(('write', setting, switch.get_active() == True, switch.get_parent()))
 
 
 def _combo_notify(cbbox, setting, spinner):
-	_apply_queue.put(('write', setting, cbbox.get_active_id(), cbbox.get_parent()))
+	# print ("combo notify", cbbox, cbbox.get_active_id(), setting)
+	if cbbox.get_sensitive():
+		_apply_queue.put(('write', setting, cbbox.get_active_id(), cbbox.get_parent()))
 
 
 # def _scale_notify(scale, setting, spinner):
@@ -127,13 +133,13 @@ def _update_setting_item(sbox, value):
 	spinner.set_visible(False)
 	spinner.stop()
 
+	# print ("update", control, "with new value", value)
 	if value is None:
 		control.set_sensitive(False)
 		failed.set_visible(True)
 		return
 
 	failed.set_visible(False)
-	control.set_sensitive(True)
 	if isinstance(control, Gtk.Switch):
 		control.set_active(value)
 	elif isinstance(control, Gtk.ComboBoxText):
@@ -142,6 +148,7 @@ def _update_setting_item(sbox, value):
 	# 	control.set_value(int(value))
 	else:
 		raise NotImplemented
+	control.set_sensitive(True)
 
 
 def update(frame):

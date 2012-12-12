@@ -87,9 +87,11 @@ class SmoothScroll_Setting(_settings.Setting):
 	def write(self, value):
 		if self._device:
 			reply = self.write_register(0x40 if bool(value) else 0x00)
-			self._value = None
+			# self._value = None
 			if reply:
-				return self.read()
+				self._value = value
+				return value
+				# return self.read(False)
 
 
 class MouseDPI_Setting(_settings.Setting):
@@ -116,9 +118,11 @@ class MouseDPI_Setting(_settings.Setting):
 			if choice is None:
 				raise ValueError(repr(value))
 			reply = self.write_register(value)
-			self._value =  None
+			# self._value = None
 			if reply:
-				return self.read()
+				self._value = value
+				return value
+				# return self.read(False)
 
 #
 # functions
