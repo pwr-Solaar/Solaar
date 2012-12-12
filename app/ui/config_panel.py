@@ -155,12 +155,12 @@ def update(frame):
 		box.foreach(lambda x, _: box.remove(x), None)
 		return
 
-	if not device.settings:
-		# nothing to do here
+	if not box.get_visible():
+		# no point in doing this right now, is there?
 		return
 
-	if not box.get_visible():
-		# no point in doing this, is there?
+	if not device.settings:
+		# nothing to do here
 		return
 
 	force_read = False
