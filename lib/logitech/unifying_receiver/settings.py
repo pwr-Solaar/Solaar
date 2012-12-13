@@ -45,5 +45,8 @@ class Setting(object):
 		raise NotImplemented
 
 	def __str__(self):
-		return '<%s(%s=%s)>' % (self.__class__.__name__, self.name, self._value)
+		if hasattr(self, '_value'):
+			assert hasattr(self, '_device')
+			return'<%s(%s:%s=%s)>' % (self.__class__.__name__, self._device.codename, self.name, self._value)
+		return '<%s(%s)>' % (self.__class__.__name__, self.name)
 	__unicode__ = __repr__ = __str__
