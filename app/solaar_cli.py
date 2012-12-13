@@ -251,19 +251,20 @@ def config_device(receiver, args):
 		_fail("no settings for %s" % dev.name)
 
 	if not args.setting:
-		print ("[%d:%s:%s]" % (dev.number, dev.name, dev.serial))
+		print ("[%s:%s]" % (dev.serial, dev.kind))
+		print ("#", dev.name)
 		for s in dev.settings:
 			print ("")
 			print ("# %s" % s.label)
 			if s.choices:
-				print ("#   possible values: one of [%s], or higher/lower/highest/max/lowest/min" % ', '.join(str(v) for v in s.choices))
+				print ("#   possible values: one of [", ', '.join(str(v) for v in s.choices), "], or higher/lower/highest/max/lowest/min")
 			else:
 				print ("#   possible values: true/t/yes/y/1 or false/f/no/n/0")
 			value = s.read()
 			if value is None:
-				print ("# ! failed to read '%s'" % s.name)
+				print ("# %s = ? (failed to read from device)" % s.name)
 			else:
-				print ("%s=%s" % (s.name, value))
+				print (s.name, "=", value)
 		return
 
 	setting = None
