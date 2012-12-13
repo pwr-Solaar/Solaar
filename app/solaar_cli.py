@@ -40,7 +40,7 @@ def _receiver():
 	return r
 
 
-def _find_device(receiver, name):
+def _find_device(receiver, name, may_be_receiver=False):
 	if len(name) == 1:
 		try:
 			number = int(name)
@@ -57,20 +57,17 @@ def _find_device(receiver, name):
 		_fail("need at least 3 characters to match a device")
 
 	name = name.lower()
-	if 'receiver'.startswith(name) or name.upper() == receiver.serial:
+	if may_be_receiver and ('receiver'.startswith(name) or name == receiver.serial.lower()):
 		return receiver
 
-	dev = None
-	for d in receiver:
-		if name.upper() == d.serial or name in d.name.lower() or name in d.codename.lower():
-			if dev is None:
-				dev = d
-			else:
-				_fail("'%s' matches multiple devices" % name)
+	for dev in receiver:
+		if (name == dev.serial.lower() or
+			name == dev.codename.lower() or
+			name == str(dev.kind).lower() or
+			name in dev.name.lower()):
+			return dev
 
-	if dev is None:
-		_fail("no device found matching '%s'" % name)
-	return dev
+	_fail("no device found matching '%s'" % name)
 
 
 def _print_receiver(receiver, verbose=False):
@@ -169,7 +166,7 @@ def show_devices(receiver, args):
 				print ("")
 			_print_device(dev, args.verbose)
 	else:
-		dev = _find_device(receiver, args.device)
+		dev = _find_device(receiver, args.device, True)
 		if dev is receiver:
 			_print_receiver(receiver, args.verbose)
 		else:
@@ -230,8 +227,6 @@ def pair_device(receiver, args):
 
 def unpair_device(receiver, args):
 	dev = _find_device(receiver, args.device)
-	if dev is receiver:
-		_fail("cannot unpair the receiver from itself!")
 
 	# query these now, it's last chance to get them
 	number, name, codename, serial = dev.number, dev.name, dev.codename, dev.serial
@@ -244,8 +239,8 @@ def unpair_device(receiver, args):
 
 def config_device(receiver, args):
 	dev = _find_device(receiver, args.device)
-	if dev is receiver:
-		_fail("no settings for the receiver")
+	# if dev is receiver:
+	# 	_fail("no settings for the receiver")
 
 	if not dev.settings:
 		_fail("no settings for %s" % dev.name)

@@ -266,6 +266,10 @@ def request(handle, devnumber, request_id, *params):
 	:param params: parameters for the feature call, 3 to 16 bytes.
 	:returns: the reply data, or ``None`` if some error occured.
 	"""
+
+	# import inspect as _inspect
+	# print ('\n  '.join(str(s) for s in _inspect.stack()))
+
 	assert isinstance(request_id, int)
 	if devnumber != 0xFF and request_id < 0x8000:
 		timeout = _DEVICE_REQUEST_TIMEOUT
@@ -352,6 +356,9 @@ def ping(handle, devnumber):
 	"""
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("(%s) pinging device %d", handle, devnumber)
+
+	# import inspect as _inspect
+	# print ('\n  '.join(str(s) for s in _inspect.stack()))
 
 	# randomize the SoftwareId and mark byte to be able to identify the ping
 	# reply, and set most significant (0x8) bit in SoftwareId so that the reply
