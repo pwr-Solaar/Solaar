@@ -303,21 +303,16 @@ def config_device(receiver, args):
 			if old_value is None:
 				_fail("could not read current value of '%s'" % setting.name)
 
-			old_index = setting.choices.index(old_value)
 			if value == 'lower':
-				if old_index == 0:
-					sys.stderr.write("'%s' already at the lowest value")
-					return
-				value = setting.choices[old_index - 1:old_index][0]
+				lower_values = setting.choices[:old_value]
+				value = lower_values[-1] if lower_values else setting.choices[:][0]
 			elif value == 'higher':
-				if old_index == len(setting.choices) - 1:
-					sys.stderr.write("'%s' already at the highest value")
-					return
-				value = setting.choices[old_index + 1:old_index + 2][0]
+				higher_values = setting.choices[old_value + 1:]
+				value = higher_values[0] if higher_values else setting.choices[:][-1]
 		elif value in ('highest', 'max'):
-			value = setting.choices[-1:][0]
+			value = setting.choices[:][-1]
 		elif value in ('lowest', 'min'):
-			value = setting.choices[:1][0]
+			value = setting.choices[:][0]
 		elif value not in setting.choices:
 			_fail("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
 			value = setting.choices[value]

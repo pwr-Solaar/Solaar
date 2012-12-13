@@ -45,9 +45,17 @@ class NamedInt(int):
 
 
 class NamedInts(object):
-	"""A collection of NamedInt values.
+	"""An ordered set of NamedInt values.
 
-	Behaves partially like a sorted list (by int value), partially like a dict.
+	Indexing can be made by int or string, and will return the corresponding
+	NamedInt if it exists in this set, or `None`.
+
+	Extracting slices will return all present NamedInts in the given interval
+	(extended slices are not supported).
+
+	Assigning a string to an indexed int will create a new NamedInt in this set;
+	if the value already exists in the set (int or string), ValueError will be
+	raised.
 	"""
 	__slots__ = ['__dict__', '_values', '_indexed', '_fallback']
 
@@ -75,10 +83,10 @@ class NamedInts(object):
 		if unknown_bits:
 			yield 'unknown:%06X' % unknown_bits
 
-	def index(self, value):
-		if value in self._values:
-			return self._values.index(value)
-		raise IndexError('%s not found' % value)
+	# def index(self, value):
+	# 	if value in self._values:
+	# 		return self._values.index(value)
+	# 	raise IndexError('%s not found' % value)
 
 	def __getitem__(self, index):
 		if isinstance(index, int):
@@ -90,12 +98,35 @@ class NamedInts(object):
 				self._values = sorted(self._values + [value])
 				return value
 
-		elif isinstance(index, slice):
-			return self._values[index]
-
 		elif isinstance(index, basestring):
 			if index in self.__dict__:
 				return self.__dict__[index]
+
+		elif isinstance(index, slice):
+			if index.start is None and index.stop is None:
+				return self._values[:]
+
+			v_start = int(self._values[0]) if index.start is None else int(index.start)
+			v_stop = (self._values[-1] + 1) if index.stop is None else int(index.stop)
+
+			if v_start > v_stop or v_start > self._values[-1] or v_stop <= self._values[0]:
+				return []
+
+			if v_start <= self._values[0] and v_stop > self._values[-1]:
+				return self._values[:]
+
+			start_index = 0
+			stop_index = len(self._values)
+			for i, value in enumerate(self._values):
+				if value < v_start:
+					start_index = i + 1
+				elif index.stop is None:
+					break
+				if value >= v_stop:
+					stop_index = i
+					break
+
+			return self._values[start_index:stop_index]
 
 	def __setitem__(self, index, name):
 		assert isinstance(index, int)
