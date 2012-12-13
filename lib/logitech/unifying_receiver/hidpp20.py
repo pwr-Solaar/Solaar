@@ -182,17 +182,21 @@ class FeaturesArray(object):
 
 	def __getitem__(self, index):
 		if self._check():
-			assert type(index) == int
-			if index < 0 or index >= len(self.features):
-				raise IndexError(index)
+			if isinstance(index, int):
+				if index < 0 or index >= len(self.features):
+					raise IndexError(index)
 
-			if self.features[index] is None:
-				feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
-				if feature:
-					feature, = _unpack(b'!H', feature[:2])
-					self.features[index] = FEATURE[feature]
+				if self.features[index] is None:
+					feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
+					if feature:
+						feature, = _unpack(b'!H', feature[:2])
+						self.features[index] = FEATURE[feature]
 
-			return self.features[index]
+				return self.features[index]
+
+			elif isinstance(index, slice):
+				indices = index.indices(len(self.features))
+				return [self.__getitem__(i) for i in range(*indices)]
 
 	def __contains__(self, value):
 		if self._check():
@@ -262,17 +266,21 @@ class KeysArray(object):
 		self.keys = [None] * count
 
 	def __getitem__(self, index):
-		assert type(index) == int
-		if index < 0 or index >= len(self.keys):
-			raise IndexError(index)
+		if isinstance(index, int):
+			if index < 0 or index >= len(self.keys):
+				raise IndexError(index)
 
-		if self.keys[index] is None:
-			keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
-			if keydata:
-				key, key_task, flags = _unpack(b'!HHB', keydata[:5])
-				self.keys[index] = _ReprogrammableKeyInfo(index, KEY[key], KEY[key_task], flags)
+			if self.keys[index] is None:
+				keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
+				if keydata:
+					key, key_task, flags = _unpack(b'!HHB', keydata[:5])
+					self.keys[index] = _ReprogrammableKeyInfo(index, KEY[key], KEY[key_task], flags)
 
-		return self.keys[index]
+			return self.keys[index]
+
+		elif isinstance(index, slice):
+			indices = index.indices(len(self.keys))
+			return [self.__getitem__(i) for i in range(*indices)]
 
 	def index(self, value):
 		for index, k in enumerate(self.keys):
