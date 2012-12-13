@@ -148,11 +148,11 @@ class EventsListener(_threading.Thread):
 
 			if n:
 				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("processing notification %s", n)
+				# 	_log.debug("processing %s", n)
 				try:
 					self._notifications_callback(n)
 				except:
-					_log.exception("processing notification %s", n)
+					_log.exception("processing %s", n)
 			elif self.tick_period:
 				idle_reads += 1
 				if idle_reads % _IDLE_READS == 0:
@@ -189,7 +189,7 @@ class EventsListener(_threading.Thread):
 		# i.e. triggered by a callback handling a previous notification.
 		if self._active and _threading.current_thread() == self:
 			if _log.isEnabledFor(_DEBUG):
-				_log.debug("queueing unhandled notification %s", n)
+				_log.debug("queueing unhandled %s", n)
 			self._queued_notifications.put(n)
 
 	def __bool__(self):

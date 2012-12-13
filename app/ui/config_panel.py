@@ -183,6 +183,7 @@ def update(frame):
 			return
 
 	device_active = bool(device.status)
+	# if the device just became active, re-read the settings
 	force_read |= device_active and not box.get_sensitive()
 	box.set_sensitive(device_active)
 	if device_active:

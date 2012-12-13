@@ -176,26 +176,14 @@ class PairedDevice(object):
 		return self.number
 	__int__ = __index__
 
-	def __lt__(self, other):
-		return self.number < other.number
-
-	def __le__(self, other):
-		return self.number <= other.number
-
-	def __gt__(self, other):
-		return self.number > other.number
-
-	def __ge__(self, other):
-		return self.number >= other.number
-
 	def __eq__(self, other):
-		return self.receiver == other.receiver and self.number == other.number
+		return self.serial == other.serial
 
 	def __ne__(self, other):
-		return self.receiver != other.receiver or self.number != other.number
+		return self.serial != other.serial
 
 	def __hash__(self):
-		return self.number
+		return self.serial.__hash__()
 
 	def __str__(self):
 		return '<PairedDevice(%d,%s)>' % (self.number, self.codename or '?')
@@ -210,6 +198,7 @@ class Receiver(object):
 
 	The paired devices are available through the sequence interface.
 	"""
+	number = 0xFF
 	name = 'Unifying Receiver'
 	kind = None
 	max_devices = MAX_PAIRED_DEVICES
@@ -220,7 +209,6 @@ class Receiver(object):
 		assert path
 		self.path = path
 
-		self.number = 0xFF
 		self._serial = None
 		self._firmware = None
 		self._devices = {}

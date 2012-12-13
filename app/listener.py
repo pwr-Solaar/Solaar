@@ -16,24 +16,23 @@ from logitech.unifying_receiver import (Receiver,
 #
 #
 
-class _DUMMY_RECEIVER(object):
-	__slots__ = []
-	name = Receiver.name
-	kind = None
-	max_devices = Receiver.max_devices
-	status = 'Receiver not found.'
-	__bool__ = __nonzero__ = lambda self: False
-	__unicode__ = __str__ = __repr__ = lambda self: 'DUMMY'
-DUMMY = _DUMMY_RECEIVER()
-
 from collections import namedtuple
-_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['number', 'name', 'kind', 'status'])
+_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['number', 'name', 'kind', 'status', 'max_devices'])
+_GHOST_DEVICE.__bool__ = lambda self: False
+_GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple
 
+def _ghost(device):
+	return _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None, max_devices=None)
+
+DUMMY = _GHOST_DEVICE(Receiver.number, Receiver.name, None, 'Receiver not found.', Receiver.max_devices)
+
 #
 #
 #
 
+# how often to poll devices that haven't updated their statuses on their own
+# (through notifications)
 _POLL_TICK = 60  # seconds
 
 
@@ -46,6 +45,11 @@ class ReceiverListener(_listener.EventsListener):
 		self._last_tick = 0
 
 		self.status_changed_callback = status_changed_callback
+
+		# make it a bit similar with the regular devices
+		receiver.kind = None
+		# replace the
+		receiver.handle = _listener.ThreadedHandle(receiver.handle, receiver.path)
 		receiver.status = _status.ReceiverStatus(receiver, self._status_changed)
 
 	def has_started(self):
@@ -100,9 +104,12 @@ class ReceiverListener(_listener.EventsListener):
 				if device.status is None:
 					# device was unpaired, and since the object is weakref'ed
 					# it won't be valid for much longer
-					device = _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None)
+					device = _ghost(device)
+
 				self.status_changed_callback(r, device, alert, reason)
+
 				if device.status is None:
+					# the receiver changed status as well
 					self.status_changed_callback(r)
 
 	def _notifications_handler(self, n):
@@ -117,21 +124,25 @@ class ReceiverListener(_listener.EventsListener):
 			already_known = n.devnumber in self.receiver
 			dev = self.receiver[n.devnumber]
 
-			if dev and not already_known:
+			if not dev:
+				_log.warn("received %s for invalid device %d: %s", n, n.devnumber, repr(dev))
+				return
+
+			if not already_known:
 				# read these as soon as possible, they will be used everywhere
 				dev.protocol, dev.codename
 				dev.status = _status.DeviceStatus(dev, self._status_changed)
+				# the receiver changed status as well
 				self._status_changed(self.receiver)
 
-			if dev and dev.status is not None:
+			# status may be None if the device has just been unpaired
+			if dev.status is not None:
 				dev.status.process_notification(n)
 				if self.receiver.status.lock_open and not already_known:
 					# this should be the first notification after a device was paired
 					assert n.sub_id == 0x41 and n.address == 0x04
 					_log.info("pairing detected new device")
 					self.receiver.status.new_device = dev
-			else:
-				_log.warn("received notification %s for invalid device %d: %s", n, n.devnumber, dev)
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
@@ -141,8 +152,6 @@ class ReceiverListener(_listener.EventsListener):
 	def open(self, status_changed_callback=None):
 		receiver = Receiver.open()
 		if receiver:
-			receiver.handle = _listener.ThreadedHandle(receiver.handle, receiver.path)
-			receiver.kind = None
 			rl = ReceiverListener(receiver, status_changed_callback)
 			rl.start()
 			return rl

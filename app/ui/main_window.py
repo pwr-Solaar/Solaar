@@ -424,10 +424,10 @@ def update(window, receiver, device=None):
 	frames = list(vbox.get_children())
 	assert len(frames) == 1 + receiver.max_devices, frames
 
-	if device:
-		_update_device_box(frames[device.number], None if device.status is None else device)
-	else:
+	if device is None:
 		_update_receiver_box(frames[0], receiver)
 		if not receiver:
 			for frame in frames[1:]:
 				_update_device_box(frame, None)
+	else:
+		_update_device_box(frames[device.number], None if device.status is None else device)

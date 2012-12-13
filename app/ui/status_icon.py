@@ -78,7 +78,7 @@ def _icon_with_battery(level, active):
 
 def update(icon, receiver, device=None):
 	# print ("icon update", receiver, receiver.status, len(receiver), device)
-	if device:
+	if device is not None:
 		icon._devices[device.number] = None if device.status is None else device
 	if not receiver:
 		icon._devices[:] = _NO_DEVICES

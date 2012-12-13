@@ -186,11 +186,7 @@ class DeviceStatus(dict):
 		if n.sub_id >= 0x40:
 			return self._process_hidpp10_notification(n)
 
-		# if n.sub_id >= len(self._device.features):
-		# 	_log.warn("%s: notification from invalid feature index %02X", self._device, n.sub_id)
-		# 	return False
-
-		# assuming 0x00 to 0x3F are device feature (HID++ 2.0) notifications
+		# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
 		try:
 			feature = self._device.features[n.sub_id]
 		except IndexError:
