@@ -35,8 +35,8 @@ def _process_apply_queue():
 			GObject.idle_add(_write_start, sbox, priority=0)
 			value = setting.write(value)
 		elif task[0] == 'read':
-			_, setting, cached, sbox = task
-			value = setting.read(cached)
+			_, setting, force_read, sbox = task
+			value = setting.read(not force_read)
 		GObject.idle_add(_update_setting_item, sbox, value, priority=99)
 
 from threading import Thread as _Thread
