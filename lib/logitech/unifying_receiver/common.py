@@ -72,6 +72,11 @@ class NamedInts(object):
 		self._indexed = {int(v): v for v in self._values}
 		self._fallback = None
 
+	@classmethod
+	def range(cls, from_value, to_value, name_generator=lambda x: '_' + str(x), step=1):
+		values = {name_generator(x): x for x in range(from_value, to_value + 1, step)}
+		return NamedInts(**values)
+
 	def flag_names(self, value):
 		unknown_bits = value
 		for k in self._indexed:

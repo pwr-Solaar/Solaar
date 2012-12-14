@@ -15,7 +15,7 @@ from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex, NamedInts as _NamedInts
-from .descriptors import DEVICES as _DEVICES
+from . import descriptors as _descriptors
 
 #
 #
@@ -94,8 +94,8 @@ class PairedDevice(object):
 	@property
 	def name(self):
 		if self._name is None:
-			if self.codename in _DEVICES:
-				self._name, self._kind = _DEVICES[self._codename][:2]
+			if self.codename in _descriptors.DEVICES:
+				self._name, self._kind = _descriptors.DEVICES[self._codename][:2]
 			elif self.protocol >= 2.0:
 				self._name = _hidpp20.get_name(self)
 		return self._name or self.codename or '?'
@@ -110,8 +110,8 @@ class PairedDevice(object):
 				if self._wpid is None:
 					self._wpid = _strhex(pair_info[3:5])
 			if self._kind is None:
-				if self.codename in _DEVICES:
-					self._name, self._kind = _DEVICES[self._codename][:2]
+				if self.codename in _descriptors.DEVICES:
+					self._name, self._kind = _descriptors.DEVICES[self._codename][:2]
 				elif self.protocol >= 2.0:
 					self._kind = _hidpp20.get_kind(self)
 		return self._kind or '?'
@@ -141,7 +141,7 @@ class PairedDevice(object):
 	@property
 	def registers(self):
 		if self._registers is None:
-			descriptor = _DEVICES.get(self.codename)
+			descriptor = _descriptors.DEVICES.get(self.codename)
 			if descriptor is None or descriptor.registers is None:
 				self._registers = _NamedInts()
 			else:
@@ -151,16 +151,14 @@ class PairedDevice(object):
 	@property
 	def settings(self):
 		if self._settings is None:
-			descriptor = _DEVICES.get(self.codename)
+			descriptor = _descriptors.DEVICES.get(self.codename)
 			if descriptor is None or descriptor.settings is None:
 				self._settings = []
 			else:
 				self._settings = [s(self) for s in descriptor.settings]
 
-			if _hidpp20.FEATURE.FN_STATUS in self.features:
-				tfn = _hidpp20.ToggleFN_Setting()
-				self._settings.insert(0, tfn(self))
-
+		if self.features:
+			_descriptors.check_features(self, self._settings)
 		return self._settings
 
 	def request(self, request_id, *params):
