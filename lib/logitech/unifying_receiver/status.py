@@ -169,7 +169,8 @@ class DeviceStatus(dict):
 					self._changed(timestamp=timestamp)
 
 			# make sure we know all the features of the device
-			# d.features[:]
+			if d.features:
+				d.features[:]
 
 		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
 			# if the device has been inactive for too long, clear out any known
