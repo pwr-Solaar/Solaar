@@ -2,7 +2,7 @@
 
 set -e
 
-Z=$(readlink -f "$0")
+Z=`readlink -f "$0"`
 
 RULES_D=/etc/udev/rules.d
 if ! test -d "$RULES_D"; then
@@ -13,20 +13,20 @@ fi
 RULE=99-logitech-unifying-receiver.rules
 
 if test -n "$1"; then
-	SOURCE=$1
+	SOURCE="$1"
 else
-	SOURCE=$(dirname "$Z")/$RULE
+	SOURCE="`dirname "$Z"`/$RULE"
 	if ! id -G -n | grep -q -F plugdev; then
 		GROUP=$(id -g -n)
 		echo "User '$USER' does not belong to the 'plugdev' group, will use group '$GROUP' in the udev rule."
-		TEMP_RULE=${TMPDIR:-/tmp}/$$-$RULE
+		TEMP_RULE="${TMPDIR:-/tmp}/$$-$RULE"
 		cp -f "$SOURCE" "$TEMP_RULE"
 		SOURCE=$TEMP_RULE
 		sed -i -e "s/GROUP=\"plugdev\"/GROUP=\"$GROUP\"/" "$SOURCE"
 	fi
 fi
 
-if test "$(id -u)" != "0"; then
+if test "`id -u`" != "0"; then
 	echo "Switching to root to install the udev rule."
 	test -x /usr/bin/pkexec && exec /usr/bin/pkexec "$Z" "$SOURCE"
 	test -x /usr/bin/sudo && exec /usr/bin/sudo -- "$Z" "$SOURCE"

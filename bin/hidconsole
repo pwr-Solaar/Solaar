@@ -1,8 +1,9 @@
 #!/bin/sh
 
-Z=`readlink -f "$0"`
-LIB=`readlink -f $(dirname "$Z")/../lib`
-export PYTHONPATH=$LIB
+Z=`dirname "$0"`
+Z=`readlink -f "$Z/.."`
+
+export PYTHONPATH="$Z/lib"
 export PYTHONUNBUFFERED=yes
 
 NICE=`which nice 2>/dev/null`

@@ -1,12 +1,10 @@
 #!/bin/sh
 
-Z=`readlink -f "$0"`
-APP=`readlink -f $(dirname "$Z")/../app`
-LIB=`readlink -f $(dirname "$Z")/../lib`
-SHARE=`readlink -f $(dirname "$Z")/../share`
+Z=`dirname "$0"`
+Z=`readlink -f "$Z/.."`
 
-export PYTHONPATH=$APP:$LIB
-export XDG_DATA_DIRS=${SHARE}_override:$SHARE:$XDG_DATA_DIRS
+export PYTHONPATH="$Z/app:$Z/lib"
+export XDG_DATA_DIRS="$Z/share_override:$Z/share:$XDG_DATA_DIRS"
 
 NICE=`which nice 2>/dev/null`
 PYTHON=${PYTHON:-`which python python2 python3 | head -n 1`}
