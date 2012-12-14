@@ -14,6 +14,7 @@ from . import config_panel as _config_panel
 _RECEIVER_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
 _STATUS_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+_TOOLBAR_ICON_SIZE = Gtk.IconSize.MENU
 _PLACEHOLDER = '~'
 _FALLBACK_ICON = 'preferences-desktop-peripherals'
 
@@ -42,7 +43,7 @@ def _make_receiver_box(name):
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-	toolbar.set_icon_size(Gtk.IconSize.SMALL_TOOLBAR)
+	toolbar.set_icon_size(_TOOLBAR_ICON_SIZE)
 	toolbar.set_show_arrow(False)
 	frame._toolbar = toolbar
 
@@ -120,7 +121,7 @@ def _make_device_box(index):
 	light_label.set_alignment(0, 0.5)
 	light_label.set_width_chars(8)
 
-	not_encrypted_icon = Gtk.Image.new_from_icon_name('security-low', _STATUS_ICON_SIZE - 1)
+	not_encrypted_icon = Gtk.Image.new_from_icon_name('security-low', _STATUS_ICON_SIZE)
 	not_encrypted_icon.set_name('not-encrypted')
 	not_encrypted_icon.set_tooltip_text('The wireless link between this device and the Unifying Receiver is not encrypted.\n'
 										'\n'
@@ -131,7 +132,7 @@ def _make_device_box(index):
 
 	toolbar = Gtk.Toolbar()
 	toolbar.set_style(Gtk.ToolbarStyle.ICONS)
-	toolbar.set_icon_size(_STATUS_ICON_SIZE - 1)
+	toolbar.set_icon_size(_TOOLBAR_ICON_SIZE)
 	toolbar.set_show_arrow(False)
 	frame._toolbar = toolbar
 
