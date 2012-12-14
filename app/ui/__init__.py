@@ -76,6 +76,10 @@ def error(window, title, text):
 	m.destroy()
 
 
+def remove_children(container):
+	container.foreach(lambda x, _: container.remove(x), None)
+
+
 # def find_children(container, *child_names):
 # 	assert container is not None
 # 	assert isinstance(container, Gtk.Container)

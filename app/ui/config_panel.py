@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GObject
 
+import ui
 from logitech.unifying_receiver import settings as _settings
 
 #
@@ -150,6 +151,15 @@ def _update_setting_item(sbox, value):
 		raise NotImplemented
 	control.set_sensitive(True)
 
+#
+#
+#
+
+def create():
+	b = Gtk.VBox(homogeneous=False, spacing=4)
+	b.set_property('margin', 8)
+	return b
+
 
 def update(frame):
 	box = frame._config_box
@@ -159,7 +169,7 @@ def update(frame):
 	if device is None:
 		# remove all settings widgets
 		# if another device gets paired here, it will add its own widgets
-		box.foreach(lambda x, _: box.remove(x), None)
+		ui.remove_children(box)
 		return
 
 	if not box.get_visible():
@@ -172,15 +182,12 @@ def update(frame):
 
 	force_read = False
 	items = box.get_children()
-	if not items:
+	if len(device.settings) != len(items):
+		ui.remove_children(box)
 		if device.status:
 			items = list(_add_settings(box, device))
 			assert len(device.settings) == len(items)
 			force_read = True
-		else:
-			# don't bother adding settings for offline devices,
-			# they're useless and might not guess all of them anyway
-			return
 
 	device_active = bool(device.status)
 	# if the device just became active, re-read the settings

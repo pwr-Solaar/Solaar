@@ -218,10 +218,8 @@ def _make_device_box(index):
 	vbox.pack_start(Gtk.HSeparator(), False, False, 0)
 	vbox.pack_start(info_label, False, False, 0)
 
-	config_box = Gtk.VBox(homogeneous=False, spacing=4)
-	config_box.set_property('margin', 8)
-	vbox.pack_start(config_box, False, False, 0)
-	frame._config_box = config_box
+	frame._config_box = _config_panel.create()
+	vbox.pack_start(frame._config_box, False, False, 0)
 
 	unpair = Gtk.Button('Unpair')
 	unpair.set_image(Gtk.Image.new_from_icon_name('edit-delete', Gtk.IconSize.BUTTON))
