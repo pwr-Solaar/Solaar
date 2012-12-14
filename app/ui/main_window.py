@@ -411,6 +411,8 @@ def _update_device_box(frame, dev):
 		light_label.set_visible(False)
 		not_encrypted_icon.set_visible(False)
 
+		frame._toolbar.get_children()[-1].set_active(False)
+
 	frame.set_visible(True)
 	_config_panel.update(frame)
 
