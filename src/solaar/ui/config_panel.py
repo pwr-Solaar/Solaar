@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GObject
 
-import ui
 from logitech.unifying_receiver import settings as _settings
 
 #
@@ -169,7 +168,7 @@ def update(frame):
 	if device is None:
 		# remove all settings widgets
 		# if another device gets paired here, it will add its own widgets
-		ui.remove_children(box)
+		_remove_children(box)
 		return
 
 	if not box.get_visible():
@@ -183,7 +182,7 @@ def update(frame):
 	force_read = False
 	items = box.get_children()
 	if len(device.settings) != len(items):
-		ui.remove_children(box)
+		_remove_children(box)
 		if device.status:
 			items = list(_add_settings(box, device))
 			assert len(device.settings) == len(items)
@@ -196,3 +195,8 @@ def update(frame):
 	if device_active:
 		for sbox, s in zip(items, device.settings):
 			_apply_queue.put(('read', s, force_read, sbox))
+
+
+def _remove_children(container):
+	container.foreach(lambda x, _: container.remove(x), None)
+

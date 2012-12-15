@@ -1,4 +1,6 @@
-*.so
 *.pyc
 *.pyo
+__pycache__/
 *.log
+
+/src/Solaar.egg-info/

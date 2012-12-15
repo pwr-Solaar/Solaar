@@ -1,0 +1,39 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0
+Upstream-Name: Solaar
+Upstream-Contact: Daniel Pavel <daniel.pavel@gmail.com>
+Upstream-Source: http://github.com/pwr/Solaar
+
+Files: *
+Copyright: Copyright (C) 2012 Daniel Pavel
+License: GPL-2
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License version 2 as
+ published by the Free Software Foundation.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GNU General Public License,
+ version 2, can be found in /usr/share/common-licenses/GPL-2.
+
+Files: share/icons/solaar*.png
+Copyright: Copyright (C) 2012 Daniel Pavel
+License: LGPL
+ .
+
+Files: share/icons/light_*.png
+Copyright: GNOME Project
+License: LGPL
+ These files were copied from the Gnome icon theme (weather-*).
+
+Files: share/icons/battery_*.png
+Copyright: Oxygen Icons
+           Copyright (C) 2012 Daniel Pavel
+License: LGPL
+ Based on icons from the Oxygen icon theme, with some modifications.

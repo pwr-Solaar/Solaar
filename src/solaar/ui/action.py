@@ -4,15 +4,17 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# from sys import version as PYTHON_VERSION
 from gi.repository import Gtk, Gdk
 
-import ui
-from solaar import NAME as _NAME
-from solaar import VERSION as _VERSION
+from . import notify, pair_window
+from ..ui import error_dialog
 
 
-def _action(name, label, function, *args):
+_NAME = 'Solaar'
+from solaar import __version__
+
+
+def make(name, label, function, *args):
 	action = Gtk.Action(name, label, label, None)
 	action.set_icon_name(name)
 	if function:
@@ -20,7 +22,7 @@ def _action(name, label, function, *args):
 	return action
 
 
-def _toggle_action(name, label, function, *args):
+def make_toggle(name, label, function, *args):
 	action = Gtk.ToggleAction(name, label, label, None)
 	action.set_icon_name(name)
 	action.connect('activate', function, *args)
@@ -32,20 +34,20 @@ def _toggle_action(name, label, function, *args):
 
 def _toggle_notifications(action):
 	if action.get_active():
-		ui.notify.init(_NAME)
+		notify.init('Solaar')
 	else:
-		ui.notify.uninit()
-	action.set_sensitive(ui.notify.available)
-toggle_notifications = _toggle_action('notifications', 'Notifications', _toggle_notifications)
+		notify.uninit()
+	action.set_sensitive(notify.available)
+toggle_notifications = make_toggle('notifications', 'Notifications', _toggle_notifications)
 
 
 def _show_about_window(action):
 	about = Gtk.AboutDialog()
 
-	about.set_icon_name(_NAME)
+	about.set_icon_name(_NAME.lower())
 	about.set_program_name(_NAME)
-	about.set_logo_icon_name(_NAME)
-	about.set_version(_VERSION)
+	about.set_logo_icon_name(_NAME.lower())
+	about.set_version(__version__)
 	about.set_comments('Shows status of devices connected\nto a Logitech Unifying Receiver.')
 
 	about.set_copyright(b'\xC2\xA9'.decode('utf-8') + ' 2012 Daniel Pavel')
@@ -68,9 +70,9 @@ def _show_about_window(action):
 
 	about.run()
 	about.destroy()
-about = _action('help-about', 'About ' + _NAME, _show_about_window)
+about = make('help-about', 'About ' + _NAME, _show_about_window)
 
-quit = _action('exit', 'Quit', Gtk.main_quit)
+quit = make('exit', 'Quit', Gtk.main_quit)
 
 #
 #
@@ -79,7 +81,7 @@ quit = _action('exit', 'Quit', Gtk.main_quit)
 def _pair_device(action, frame):
 	window = frame.get_toplevel()
 
-	pair_dialog = ui.pair_window.create(action, frame._device)
+	pair_dialog = pair_window.create(action, frame._device)
 	pair_dialog.set_transient_for(window)
 	pair_dialog.set_destroy_with_parent(True)
 	pair_dialog.set_modal(True)
@@ -88,7 +90,7 @@ def _pair_device(action, frame):
 	pair_dialog.present()
 
 def pair(frame):
-	return _action('add', 'Pair new device', _pair_device, frame)
+	return make('add', 'Pair new device', _pair_device, frame)
 
 
 def _unpair_device(action, frame):
@@ -107,7 +109,7 @@ def _unpair_device(action, frame):
 		try:
 			del device.receiver[device.number]
 		except:
-			ui.error(window, 'Unpairing failed', 'Failed to unpair device\n%s .' % device.name)
+			error_dialog(window, 'Unpairing failed', 'Failed to unpair device\n%s .' % device.name)
 
 def unpair(frame):
-	return _action('edit-delete', 'Unpair', _unpair_device, frame)
+	return make('edit-delete', 'Unpair', _unpair_device, frame)

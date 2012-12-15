@@ -1,12 +1,10 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+
 NAME = 'Solaar'
-VERSION = '0.8.4'
-__author__  = "Daniel Pavel <daniel.pavel@gmail.com>"
-__version__ = VERSION
-__license__ = "GPL"
+from solaar import __version__
 
 #
 #
@@ -45,7 +43,7 @@ def _parse_arguments():
 
 
 def _run(args):
-	import ui
+	import solaar.ui as ui
 
 	# even if --no-notifications is given on the command line, still have to
 	# check they are available, and decide whether to put the option in the
@@ -58,7 +56,7 @@ def _run(args):
 	else:
 		ui.action.toggle_notifications = None
 
-	from listener import DUMMY
+	from solaar.listener import DUMMY, ReceiverListener
 	window = ui.main_window.create(NAME, DUMMY.name, DUMMY.max_devices, args.systray)
 	if args.systray:
 		menu_actions = (ui.action.toggle_notifications,
@@ -67,28 +65,27 @@ def _run(args):
 	else:
 		icon = None
 
-	from gi.repository import Gtk, GObject
+	listener = [None]
 
 	# initializes the receiver listener
 	def check_for_listener(notify=False):
 		# print ("check_for_listener", notify)
-		global listener
-		listener = None
+		listener[0] = None
 
-		from listener import ReceiverListener
 		try:
-			listener = ReceiverListener.open(status_changed)
+			listener[0] = ReceiverListener.open(status_changed)
 		except OSError:
-			ui.error(window, 'Permissions error',
-					'Found a possible Unifying Receiver device,\n'
-					'but did not have permission to open it.')
+			ui.error_dialog(window, 'Permissions error',
+							'Found a possible Unifying Receiver device,\n'
+							'but did not have permission to open it.')
 
-		if listener is None:
+		if listener[0] is None:
 			if notify:
 				status_changed(DUMMY)
 			else:
 				return True
 
+	from gi.repository import Gtk, GObject
 	from logitech.unifying_receiver import status
 
 	# callback delivering status notifications from the receiver/devices to the UI
@@ -111,18 +108,20 @@ def _run(args):
 	GObject.timeout_add(10, check_for_listener, True)
 	Gtk.main()
 
-	if listener:
-		listener.stop()
-		listener.join()
+	if listener[0]:
+		listener[0].stop()
+		listener[0].join()
 
 	ui.notify.uninit()
 
 
-if __name__ == '__main__':
+def main():
 	_require('pyudev', 'python-pyudev')
 	_require('gi.repository', 'python-gi')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
-
 	args = _parse_arguments()
-	listener = None
 	_run(args)
+
+
+if __name__ == '__main__':
+	main()

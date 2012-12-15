@@ -4,20 +4,30 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import GObject, Gtk
-GObject.threads_init()
+from gi.repository import Gtk
+
+#
+#
+#
 
 _LARGE_SIZE = 64
 Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
+# print ("menu", int(Gtk.IconSize.MENU), Gtk.icon_size_lookup(Gtk.IconSize.MENU))
+# print ("small toolbar", int(Gtk.IconSize.SMALL_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.SMALL_TOOLBAR))
+# print ("large toolbar", int(Gtk.IconSize.LARGE_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.LARGE_TOOLBAR))
+# print ("button", int(Gtk.IconSize.BUTTON), Gtk.icon_size_lookup(Gtk.IconSize.BUTTON))
+# print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
+# print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
-from . import notify, status_icon, main_window, pair_window, action
 
-from solaar import NAME
-APP_ICON = { 1: NAME, 2: NAME + '-mask', 0: NAME + '-init', -1: NAME + '-fail' }
+APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' }
 
+#
+#
+#
 
-def get_battery_icon(level):
+def battery(level):
 	if level < 0:
 		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
@@ -67,45 +77,3 @@ def icon_file(name, size=_LARGE_SIZE):
 	theme = Gtk.IconTheme.get_default()
 	if theme.has_icon(name):
 		return theme.lookup_icon(name, size, 0).get_filename()
-
-
-def error(window, title, text):
-	m = Gtk.MessageDialog(window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
-	m.set_title(title)
-	m.run()
-	m.destroy()
-
-
-def remove_children(container):
-	container.foreach(lambda x, _: container.remove(x), None)
-
-
-# def find_children(container, *child_names):
-# 	assert container is not None
-# 	assert isinstance(container, Gtk.Container)
-#
-# 	def _iterate_children(widget, names, result, count):
-# 		assert isinstance(widget, Gtk.Widget)
-# 		wname = widget.get_name()
-# 		if wname in names:
-# 			index = names.index(wname)
-# 			names[index] = None
-# 			result[index] = widget
-# 			count -= 1
-#
-# 		if count > 0 and isinstance(widget, Gtk.Container):
-# 			for w in widget:
-# 				# assert isinstance(w, Gtk.Widget):
-# 				count = _iterate_children(w, names, result, count)
-# 				if count == 0:
-# 					break
-#
-# 		return count
-#
-# 	names = list(child_names)
-# 	count = len(names)
-# 	result = [None] * count
-# 	if _iterate_children(container, names, result, count) > 0:
-# 		# some children could not be found
-# 		pass
-# 	return tuple(result) if count > 1 else result[0]

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GObject, GdkPixbuf
 
-import ui
+from . import action as _action, icons as _icons
 from logitech.unifying_receiver import status as _status
 
 #
@@ -20,18 +20,18 @@ def create(window, menu_actions=None):
 	icon = Gtk.StatusIcon()
 	icon.set_title(name)
 	icon.set_name(name)
-	icon.set_from_icon_name(ui.APP_ICON[0])
+	icon.set_from_icon_name(_icons.APP_ICON[0])
 	icon._devices = list(_NO_DEVICES)
 
 	icon.set_tooltip_text(name)
 	icon.connect('activate', window.toggle_visible)
 
 	menu = Gtk.Menu()
-	for action in menu_actions or ():
-		if action:
-			menu.append(action.create_menu_item())
+	for a in menu_actions or ():
+		if a:
+			menu.append(a.create_menu_item())
 
-	menu.append(ui.action.quit.create_menu_item())
+	menu.append(_action.quit.create_menu_item())
 	menu.show_all()
 
 	icon.connect('popup_menu',
@@ -54,16 +54,16 @@ def create(window, menu_actions=None):
 
 _PIXMAPS = {}
 def _icon_with_battery(level, active):
-	battery_icon = ui.get_battery_icon(level)
+	battery_icon = _icons.battery(level)
 	name = '%s-%s' % (battery_icon, active)
 	if name not in _PIXMAPS:
-		mask = ui.icon_file(ui.APP_ICON[2], 128)
+		mask = _icons.icon_file(_icons.APP_ICON[2], 128)
 		assert mask
 		mask = GdkPixbuf.Pixbuf.new_from_file(mask)
 		assert mask.get_width() == 128 and mask.get_height() == 128
 		mask.saturate_and_pixelate(mask, 0.7, False)
 
-		battery = ui.icon_file(battery_icon, 128)
+		battery = _icons.icon_file(battery_icon, 128)
 		assert battery
 		battery = GdkPixbuf.Pixbuf.new_from_file(battery)
 		assert battery.get_width() == 128 and battery.get_height() == 128
@@ -86,7 +86,7 @@ def update(icon, receiver, device=None):
 		return
 
 	def _lines(r, devices):
-		yield '<b>%s</b>: %s' % (ui.NAME, r.status)
+		yield '<b>Solaar</b>: %s' % r.status
 		yield ''
 
 		for dev in devices:
@@ -121,6 +121,6 @@ def update(icon, receiver, device=None):
 				battery_level = level
 
 	if battery_status is None:
-		icon.set_from_icon_name(ui.APP_ICON[1 if receiver else -1])
+		icon.set_from_icon_name(_icons.APP_ICON[1 if receiver else -1])
 	else:
 		icon.set_from_pixbuf(_icon_with_battery(battery_level, bool(battery_status)))

@@ -1,15 +1,12 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 
-import solaar
+
 NAME = 'solaar-cli'
-__author__  = solaar.__author__
-__version__ = solaar.__version__
-__license__ = solaar.__license__
-del solaar
+from solaar import __version__
 
 #
 #
@@ -377,8 +374,11 @@ def _parse_arguments():
 	return args
 
 
-if __name__ == '__main__':
+def main():
 	_require('pyudev', 'python-pyudev')
 	args = _parse_arguments()
 	receiver = _receiver()
 	args.cmd(receiver, args)
+
+if __name__ == '__main__':
+	main()

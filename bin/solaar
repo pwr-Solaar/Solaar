@@ -1,11 +1,38 @@
-#!/bin/sh
+#!/usr/bin/env python
+# -*- python-mode -*-
+"""Takes care of starting the main function."""
 
-Z=`dirname "$0"`
-Z=`readlink -f "$Z/.."`
+from __future__ import absolute_import
 
-export PYTHONPATH="$Z/app:$Z/lib"
-export XDG_DATA_DIRS="$Z/share_override:$Z/share:$XDG_DATA_DIRS"
 
-NICE=`which nice 2>/dev/null`
-PYTHON=${PYTHON:-`which python python2 python3 | head -n 1`}
-exec $NICE $PYTHON -m solaar "$@"
+def init_paths():
+	import os.path as _path
+
+	prefix = _path.dirname(_path.dirname(_path.realpath(_path.abspath(__file__))))
+
+	dist_lib = _path.join(prefix, 'share', 'solaar', 'lib')
+	src_lib = _path.join(prefix, 'src')
+
+	for location in (dist_lib, src_lib):
+		init_py = _path.join(location, 'solaar', '__init__.py')
+		if _path.exists(init_py):
+			import sys
+			sys.path.insert(1, location)
+			break
+
+	# src_override = _path.join(prefix, 'share_override')
+	dist_share = _path.join(prefix, 'share', 'solaar')
+	src_share = _path.join(prefix, 'share')
+
+	for location in (dist_share, src_share):
+		solaar_png = _path.join(location, 'icons', 'solaar.png')
+		if _path.exists(solaar_png):
+			import os
+			os.environ['XDG_DATA_DIRS'] = location + ':' + os.environ.get('XDG_DATA_DIRS', '')
+			break
+
+
+if __name__ == '__main__':
+	init_paths()
+	import solaar.gtk
+	solaar.gtk.main()

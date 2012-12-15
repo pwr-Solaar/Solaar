@@ -4,8 +4,10 @@
 
 from __future__ import absolute_import
 
+import sys
 
-def init_paths():
+
+def solaar_init():
 	import os.path as _path
 
 	prefix = _path.dirname(_path.dirname(_path.realpath(_path.abspath(__file__))))
@@ -14,14 +16,16 @@ def init_paths():
 	src_lib = _path.join(prefix, 'src')
 
 	for location in (dist_lib, src_lib):
-		init_py = _path.join(location, 'solaar', '__init__.py')
+		init_py = _path.join(location, 'hidapi', '__init__.py')
 		if _path.exists(init_py):
-			import sys
 			sys.path.insert(1, location)
 			break
 
 
 if __name__ == '__main__':
-	init_paths()
-	import solaar.cli
-	solaar.cli.main()
+	if sys.version_info >= (2, 8):
+		sys.exit("Python 3 is not supported by hidconsole.")
+
+	solaar_init()
+	from hidapi import hidconsole
+	hidconsole.main()

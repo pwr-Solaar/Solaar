@@ -10,12 +10,15 @@ try:
 	from gi.repository import Notify
 	import logging
 
-	import ui
+	from . import icons as _icons
+
 
 	# assumed to be working since the import succeeded
 	available = True
-	_notifications = {}
 
+	# cache references to shown notifications here, so if another status comes
+	# while its notification is still visible we don't create another one
+	_notifications = {}
 
 	def init(app_title):
 		"""Init the notifications system."""
@@ -53,7 +56,7 @@ try:
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets
-			n.update(summary, message, ui.device_icon_file(dev.name, dev.kind))
+			n.update(summary, message, _icons.device_icon_file(dev.name, dev.kind))
 			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
 

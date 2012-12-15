@@ -76,12 +76,10 @@ required steps by hand, as the root user:
 
 ## Known Issues
 
-- When running under Ubuntu's Unity, the tray icon will probably not appear, nor
-  will the application window.  Either run the application with the '-S' option,
-  or whitelist "Solaar" into the systray. For details, see
-  [How do I access and enable more icons to be in the system tray?](http://askubuntu.com/questions/30742/how-do-i-access-and-enable-more-icons-to-be-in-the-system-tray).
-
-  Support for Unity's indicators is a planned feature.
+- Ubuntu's Unity indicators are not supported at this time. However, if you
+  whitelist 'Solaar' in the systray, you will get an icon (see
+[How do I access and enable more icons to be in the system tray?](http://askubuntu.com/questions/30742/how-do-i-access-and-enable-more-icons-to-be-in-the-system-tray)
+)
 
 - Running the command-line application (`bin/solaar-cli`) while the GUI
   application is also running *may* occasionally cause either of them to become

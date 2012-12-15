@@ -6,10 +6,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, Gdk, GObject
 
-import ui
 from logitech.unifying_receiver import status as _status
 from . import config_panel as _config_panel
+from . import action as _action, icons as _icons
 
+#
+#
+#
 
 _RECEIVER_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DIALOG
@@ -27,7 +30,7 @@ def _make_receiver_box(name):
 	frame._device = None
 	frame.set_name(name)
 
-	icon_set = ui.device_icon_set(name)
+	icon_set = _icons.device_icon_set(name)
 	icon = Gtk.Image.new_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
 	icon.set_padding(2, 2)
 	frame._icon = icon
@@ -76,9 +79,9 @@ def _make_receiver_box(name):
 		if active:
 			GObject.timeout_add(50, _update_info_label, f)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Details', _toggle_info_label, frame)
+	toggle_info_action = _action.make_toggle('info', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
-	toolbar.insert(ui.action.pair(frame).create_tool_item(), -1)
+	toolbar.insert(_action.pair(frame).create_tool_item(), -1)
 	# toolbar.insert(ui.action.about.create_tool_item(), -1)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=2)
@@ -109,7 +112,7 @@ def _make_device_box(index):
 	label.set_padding(4, 0)
 	frame._label = label
 
-	battery_icon = Gtk.Image.new_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
+	battery_icon = Gtk.Image.new_from_icon_name(_icons.battery(-1), _STATUS_ICON_SIZE)
 
 	battery_label = Gtk.Label()
 	battery_label.set_width_chars(6)
@@ -208,9 +211,9 @@ def _make_device_box(index):
 		if active:
 			GObject.timeout_add(30, _config_panel.update, f)
 
-	toggle_info_action = ui.action._toggle_action('info', 'Details', _toggle_info_label, frame)
+	toggle_info_action = _action.make_toggle('info', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
-	toggle_config_action = ui.action._toggle_action('preferences-system', 'Configuration', _toggle_config, frame)
+	toggle_config_action = _action.make_toggle('preferences-system', 'Configuration', _toggle_config, frame)
 	toolbar.insert(toggle_config_action.create_tool_item(), -1)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=2)
@@ -224,7 +227,7 @@ def _make_device_box(index):
 
 	unpair = Gtk.Button('Unpair')
 	unpair.set_image(Gtk.Image.new_from_icon_name('edit-delete', Gtk.IconSize.BUTTON))
-	unpair.connect('clicked', ui.action._unpair_device, frame)
+	unpair.connect('clicked', _action._unpair_device, frame)
 	unpair.set_relief(Gtk.ReliefStyle.NONE)
 	unpair.set_property('margin-left', 106)
 	unpair.set_property('margin-right', 106)
@@ -242,7 +245,7 @@ def _make_device_box(index):
 def create(title, name, max_devices, systray=False):
 	window = Gtk.Window()
 	window.set_title(title)
-	window.set_icon_name(ui.APP_ICON[0])
+	window.set_icon_name(_icons.APP_ICON[0])
 	window.set_role('status-window')
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=12)
@@ -357,7 +360,7 @@ def _update_device_box(frame, dev):
 	if first_run:
 		frame._device = dev
 		frame.set_name(dev.name)
-		icon_set = ui.device_icon_set(dev.name, dev.kind)
+		icon_set = _icons.device_icon_set(dev.name, dev.kind)
 		frame._icon.set_from_icon_set(icon_set, _DEVICE_ICON_SIZE)
 		frame._label.set_markup('<b>%s</b>' % dev.name)
 		for i in frame._toolbar.get_children():
@@ -371,11 +374,11 @@ def _update_device_box(frame, dev):
 
 		if battery_level is None:
 			battery_icon.set_sensitive(False)
-			battery_icon.set_from_icon_name(ui.get_battery_icon(-1), _STATUS_ICON_SIZE)
+			battery_icon.set_from_icon_name(_icons.battery(-1), _STATUS_ICON_SIZE)
 			battery_label.set_markup('<small>no status</small>')
 			battery_label.set_sensitive(True)
 		else:
-			battery_icon.set_from_icon_name(ui.get_battery_icon(battery_level), _STATUS_ICON_SIZE)
+			battery_icon.set_from_icon_name(_icons.battery(battery_level), _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(True)
 			battery_label.set_text('%d%%' % battery_level)
 			battery_label.set_sensitive(True)
@@ -419,7 +422,7 @@ def _update_device_box(frame, dev):
 def update(window, receiver, device=None):
 	assert receiver is not None
 	# print ("update", receiver, receiver.status, len(receiver), device)
-	window.set_icon_name(ui.APP_ICON[1 if receiver else -1])
+	window.set_icon_name(_icons.APP_ICON[1 if receiver else -1])
 
 	vbox = window.get_child()
 	frames = list(vbox.get_children())

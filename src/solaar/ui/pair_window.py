@@ -10,7 +10,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('pair-window')
 del getLogger
 
-import ui
+from . import icons as _icons
 from logitech.unifying_receiver import status as _status
 
 #
@@ -143,7 +143,7 @@ def _pairing_succeeded(assistant, receiver, device):
 	page.pack_start(header, False, False, 0)
 
 	device_icon = Gtk.Image()
-	icon_set = ui.device_icon_set(device.name, device.kind)
+	icon_set = _icons.device_icon_set(device.name, device.kind)
 	device_icon.set_from_icon_set(icon_set, Gtk.IconSize.LARGE)
 	device_icon.set_alignment(0.5, 1)
 	page.pack_start(device_icon, True, True, 0)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -7,20 +7,19 @@ import sys
 from select import select as _select
 import time
 from binascii import hexlify, unhexlify
+import hidapi
 
 #
 #
 #
 
+# no Python 3 support :(
+read_packet = input
 interactive = os.isatty(0)
-start_time = 0
-try:  # python3 support
-	read_packet = raw_input
-except:
-	read_packet = input
 prompt = '?? Input: ' if interactive else ''
 
 strhex = lambda d: hexlify(d).decode('ascii').upper()
+start_time = time.time()
 
 #
 #
@@ -28,6 +27,7 @@ strhex = lambda d: hexlify(d).decode('ascii').upper()
 
 from threading import Lock
 print_lock = Lock()
+del Lock
 
 def _print(marker, data, scroll=False):
 	t = time.time() - start_time
@@ -104,6 +104,7 @@ def _validate_input(line, hidpp=False):
 
 	return data
 
+
 def _open(device, hidpp):
 	if hidpp and not device:
 		for d in hidapi.enumerate(vendor_id=0x046d):
@@ -125,8 +126,8 @@ def _open(device, hidpp):
 					repr(hidapi.get_manufacturer(handle)),
 					repr(hidapi.get_product(handle)),
 					repr(hidapi.get_serial(handle))))
-	if args.hidpp:
-		if hidapi.get_manufacturer(handle) != 'Logitech':
+	if hidpp:
+		if hidapi.get_manufacturer(handle) != b'Logitech':
 			sys.exit("!! Only Logitech devices support the HID++ protocol.")
 		print (".. HID++ validation enabled.")
 
@@ -136,16 +137,18 @@ def _open(device, hidpp):
 #
 #
 
-if __name__ == '__main__':
+def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser()
 	arg_parser.add_argument('--history', help='history file (default ~/.hidconsole-history)')
 	arg_parser.add_argument('--hidpp', action='store_true', help='ensure input data is a valid HID++ request')
 	arg_parser.add_argument('device', nargs='?', help='linux device to connect to (/dev/hidrawX); '
 							'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver')
-	args = arg_parser.parse_args()
+	return arg_parser.parse_args()
 
-	import hidapi
+
+def main():
+	args = _parse_arguments()
 	handle = _open(args.device, args.hidpp)
 
 	if interactive:
@@ -161,7 +164,12 @@ if __name__ == '__main__':
 			# file may not exist yet
 			pass
 
-	start_time = time.time()
+		# re-open stdout unbuffered
+		try:
+			sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+		except:
+			# will fail in python3
+			pass
 
 	try:
 		from threading import Thread
@@ -204,3 +212,7 @@ if __name__ == '__main__':
 	hidapi.close(handle)
 	if interactive:
 		readline.write_history_file(args.history)
+
+
+if __name__ == '__main__':
+	main()

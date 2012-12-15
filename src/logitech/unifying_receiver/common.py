@@ -36,6 +36,9 @@ class NamedInt(int):
 	def __ne__(self, other):
 		return not self.__eq__(other)
 
+	def __hash__(self):
+		return int(self)
+
 	def __str__(self):
 		return str(self.name)
 	def __unicode__(self):
