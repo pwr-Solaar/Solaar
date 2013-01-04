@@ -14,7 +14,7 @@ import hidapi
 #
 
 # no Python 3 support :(
-read_packet = input
+read_packet = raw_input
 interactive = os.isatty(0)
 prompt = '?? Input: ' if interactive else ''
 
