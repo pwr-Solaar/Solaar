@@ -39,8 +39,8 @@ battery status.
       data_files=[
                   ('share/icons/hicolor/128x128/apps', ['share/icons/solaar.png']),
                   ('share/solaar/icons', glob('share/icons/*.png')),
-                  # ('share/applications', ['share/applications/solaar.desktop']),
-                  # ('share/doc/solaar', glob('share/doc/solaar/*')),
+                  ('share/applications', ['share/applications/solaar.desktop']),
+                  ('share/doc/solaar', glob('share/doc/*')),
                   # ('/etc/udev/rules.d', ['rules.d/99-logitech-unifying-receiver.rules']),
       	],
 
