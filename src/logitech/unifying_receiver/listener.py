@@ -34,7 +34,7 @@ class ThreadedHandle(object):
 	def __init__(self, initial_handle, path):
 		assert initial_handle
 		if type(initial_handle) != int:
-			raise TypeError('expected int as initial handle, got %s' % repr(initial_handle))
+			raise TypeError('expected int as initial handle, got %r' % initial_handle)
 
 		assert path
 		self.path = path

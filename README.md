@@ -1,6 +1,6 @@
 **Solaar** is a Linux device manager for Logitech's
-[Unifying Receiver](http://www.logitech.com/en-us/66/6079) peripherals. It is
-able to pair/unpair devices to the receiver, and for some devices read battery
+[Unifying Receiver](http://logitech.com/en-us/66/6079) peripherals. It is able
+to pair/unpair devices to the receiver, and for some devices read battery
 status.
 
 It comes in two flavors, command-line and GUI.  Both are able to list the
@@ -16,7 +16,7 @@ device, it may be able to read its battery status.
 A few devices also have extended support, mostly because I was able to directly
 test on them:
 
-* The [K750 Solar Keyboard](http://www.logitech.com/keyboards/keyboard/devices/7454)
+* The [K750 Solar Keyboard](http://logitech.com/keyboards/keyboard/devices/7454)
   is also queried for its solar charge status. Pressing the Solar key on the
   keyboard will pop-up the application window and display the current lighting
   value (Lux) as reported by the keyboard, similar to Logitech's *Solar.app* for
@@ -26,9 +26,10 @@ test on them:
   whether holding `FN` while pressing the function keys will generate the
   standard keycodes or the special function (yellow icons) keycodes.
 
-* The [M705 Marathon Mouse](http://www.logitech.com/product/marathon-mouse-m705)
-  supports turning on/off Smooth Scrolling (higher sensitivity on vertical
-  scrolling with the wheel).
+* The [M705 Marathon Mouse](http://logitech.com/product/marathon-mouse-m705)
+  and [Anywhere MX Mouse](http://logitech.com/product/anywhere-mouse-mx) support
+  turning on/off Smooth Scrolling (higher sensitivity on vertical scrolling with
+  the wheel).
 
 Extended support for other devices may be added in the future, depending on the
 documentation available, but the K750 keyboard and M705 mouse are the only
@@ -70,8 +71,9 @@ required steps by hand, as the root user:
   particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
   with `GROUP="<your username>"` should just work.
 
-2. run `udevadm control --reload-rules` to let the udev daemon know about the new
-  rule
+2. run `udevadm control --reload-rules` to let the udev daemon know about the
+  new rule
+
 3. physically remove the Unifying Receiver, wait 10 seconds and re-insert it
 
 ## Known Issues

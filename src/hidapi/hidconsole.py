@@ -14,7 +14,7 @@ import hidapi
 #
 
 # no Python 3 support :(
-read_packet = input
+read_packet = raw_input
 interactive = os.isatty(0)
 prompt = '?? Input: ' if interactive else ''
 
@@ -121,11 +121,11 @@ def _open(device, hidpp):
 	if not handle:
 		sys.exit("!! Failed to open %s, aborting." % device)
 
-	print (".. Opened handle %s, vendor %s product %s serial %s." % (
-					repr(handle),
-					repr(hidapi.get_manufacturer(handle)),
-					repr(hidapi.get_product(handle)),
-					repr(hidapi.get_serial(handle))))
+	print (".. Opened handle %r, vendor %r product %r serial %r." % (
+					handle,
+					hidapi.get_manufacturer(handle),
+					hidapi.get_product(handle),
+					hidapi.get_serial(handle)))
 	if hidpp:
 		if hidapi.get_manufacturer(handle) != b'Logitech':
 			sys.exit("!! Only Logitech devices support the HID++ protocol.")
@@ -208,7 +208,7 @@ def main():
 	except Exception as e:
 		print ('%s: %s' % (type(e).__name__, e))
 
-	print (".. Closing handle", repr(handle))
+	print (".. Closing handle %r" % handle)
 	hidapi.close(handle)
 	if interactive:
 		readline.write_history_file(args.history)

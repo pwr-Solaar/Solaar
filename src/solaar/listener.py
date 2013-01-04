@@ -125,7 +125,7 @@ class ReceiverListener(_listener.EventsListener):
 			dev = self.receiver[n.devnumber]
 
 			if not dev:
-				_log.warn("received %s for invalid device %d: %s", n, n.devnumber, repr(dev))
+				_log.warn("received %s for invalid device %d: %r", n, n.devnumber, dev)
 				return
 
 			if not already_known:
