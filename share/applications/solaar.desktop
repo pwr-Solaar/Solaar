@@ -6,4 +6,5 @@ Icon=solaar.png
 StartupNotify=false
 Terminal=false
 Type=Application
-Categories=Utility;
+Categories=Utility;GTK;
+#Categories=Utility;GTK;Settings;HardwareSettings;
