@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from glob import glob
-# from distutils.core import setup
-from setuptools import setup, find_packages
+from distutils.core import setup
 
 
 setup(name='Solaar',
@@ -33,11 +32,9 @@ battery status.
 
       platforms=['linux'],
       requires=['pyudev (>= 0.13)', 'gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
-      extras_require={'notifications': 'gi.repository.Notify'},
 
       package_dir={'': 'src'},
-      # packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
-      packages=find_packages('src'),
+      packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
 
       data_files=[
                   # ('share/applications', ['share/applications/solaar.desktop']),
@@ -47,8 +44,4 @@ battery status.
       	],
 
       scripts=['bin/solaar', 'bin/solaar-cli'],
-      # entry_points={
-      #             'console_scripts': ['solaar-cli = solaar.cli:main'],
-      #             'gui_scripts': ['solaar = solaar.gtk:main'],
-      #       },
      )

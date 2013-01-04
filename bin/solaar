@@ -6,30 +6,14 @@ from __future__ import absolute_import
 
 
 def init_paths():
+	"""Make the app work in the source tree."""
+	import sys
 	import os.path as _path
 
-	prefix = _path.dirname(_path.dirname(_path.realpath(_path.abspath(__file__))))
-
-	dist_lib = _path.join(prefix, 'share', 'solaar', 'lib')
-	src_lib = _path.join(prefix, 'src')
-
-	for location in (dist_lib, src_lib):
-		init_py = _path.join(location, 'solaar', '__init__.py')
-		if _path.exists(init_py):
-			import sys
-			sys.path.insert(1, location)
-			break
-
-	# src_override = _path.join(prefix, 'share_override')
-	dist_share = _path.join(prefix, 'share', 'solaar')
-	src_share = _path.join(prefix, 'share')
-
-	for location in (dist_share, src_share):
-		solaar_png = _path.join(location, 'icons', 'solaar.png')
-		if _path.exists(solaar_png):
-			import os
-			os.environ['XDG_DATA_DIRS'] = location + ':' + os.environ.get('XDG_DATA_DIRS', '')
-			break
+	src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..', 'src'))
+	init_py = _path.join(src_lib, 'solaar', '__init__.py')
+	if _path.exists(init_py):
+		sys.path[0] = src_lib
 
 
 if __name__ == '__main__':

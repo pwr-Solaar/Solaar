@@ -4,3 +4,8 @@ __pycache__/
 *.log
 
 /src/Solaar.egg-info/
+/build/
+/sdist/
+/dist/
+/deb_dist/
+/MANIFEST
