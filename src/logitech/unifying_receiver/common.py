@@ -17,7 +17,7 @@ class NamedInt(int):
 	def __new__(cls, value, name):
 		assert isinstance(name, str) or isinstance(name, unicode)
 		obj = int.__new__(cls, value)
-		obj.name = name
+		obj.name = unicode(name)
 		return obj
 
 	def bytes(self, count=2):
@@ -40,12 +40,11 @@ class NamedInt(int):
 		return int(self)
 
 	def __str__(self):
-		return str(self.name)
-	def __unicode__(self):
-		return unicode(self.name)
+		return self.name
+	__unicode__ = __str__
 
 	def __repr__(self):
-		return 'NamedInt(%d, %s)' % (int(self), repr(self.name))
+		return 'NamedInt(%d, %r)' % (int(self), self.name)
 
 
 class NamedInts(object):

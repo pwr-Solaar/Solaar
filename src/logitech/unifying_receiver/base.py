@@ -108,10 +108,10 @@ def close(handle):
 				_hid.close(handle)
 			else:
 				handle.close()
-			# _log.info("closed receiver handle %s", repr(handle))
+			# _log.info("closed receiver handle %r", handle)
 			return True
 		except:
-			# _log.exception("closing receiver handle %s", repr(handle))
+			# _log.exception("closing receiver handle %r", handle)
 			pass
 
 	return False
@@ -141,7 +141,7 @@ def write(handle, devnumber, data):
 	try:
 		_hid.write(int(handle), wdata)
 	except Exception as reason:
-		_log.error("write failed, assuming handle %s no longer available", repr(handle))
+		_log.error("write failed, assuming handle %r no longer available", handle)
 		close(handle)
 		raise NoReceiver(reason=reason)
 
@@ -173,7 +173,7 @@ def _read(handle, timeout):
 	try:
 		data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
 	except Exception as reason:
-		_log.error("read failed, assuming handle %s no longer available", repr(handle))
+		_log.error("read failed, assuming handle %r no longer available", handle)
 		close(handle)
 		raise NoReceiver(reason=reason)
 
