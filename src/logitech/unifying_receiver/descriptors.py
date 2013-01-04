@@ -89,7 +89,11 @@ _D('Wireless Illuminated Keyboard K800')
 _D('Zone Touch Mouse T400')
 _D('Wireless Rechargeable Touchpad T650')
 _D('Logitech Cube', kind='mouse')
-_D('Anywhere Mouse MX', codename='Anywhere MX')
+_D('Anywhere Mouse MX', codename='Anywhere MX',
+				settings=[
+							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+						],
+				)
 _D('Performance Mouse MX', codename='Performance MX',
 				settings=[
 							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: '_' + str((x - 0x80) * 100))),
