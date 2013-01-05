@@ -1,0 +1,18 @@
+solaar (0.8.5-2) UNRELEASED; urgency=low
+
+  * Proper debian packaging, dropped stdeb.
+
+ -- Daniel Pavel <daniel.pavel@gmail.com>  Sat, 05 Jan 2013 11:33:00 +0200
+
+solaar (0.8.5-1) UNRELEASED; urgency=low
+
+  * Fixed locating application-specific icons.
+
+ -- Daniel Pavel <daniel.pavel@gmail.com>  Fri, 04 Jan 2013 11:33:00 +0200
+
+
+solaar (0.8.4-1) UNRELEASED; urgency=low
+
+  * Initial debian packaging.
+
+ -- Daniel Pavel <daniel.pavel@gmail.com>  Tue, 18 Dec 2012 00:46:17 +0200

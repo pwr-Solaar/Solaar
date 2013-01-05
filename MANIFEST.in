@@ -1,0 +1,2 @@
+include COPYRIGHT COPYING README.md
+recursive-include rules.d *

@@ -10,10 +10,14 @@ def init_paths():
 	import sys
 	import os.path as _path
 
-	src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..', 'src'))
-	init_py = _path.join(src_lib, 'solaar', '__init__.py')
-	if _path.exists(init_py):
-		sys.path[0] = src_lib
+	prefix = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..'))
+	src_lib = _path.join(prefix, 'lib')
+	share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
+	for location in src_lib, share_lib:
+		init_py = _path.join(location, 'solaar', '__init__.py')
+		if _path.exists(init_py):
+			sys.path[0] = location
+			break
 
 
 if __name__ == '__main__':

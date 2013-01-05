@@ -4,7 +4,7 @@ from glob import glob
 from distutils.core import setup
 
 
-setup(name='Solaar',
+setup(name='solaar',
       version='0.8.5',
       description='Linux devices manager for the Logitech Unifying Receiver.',
       long_description='''
@@ -33,16 +33,15 @@ battery status.
       platforms=['linux'],
       requires=['pyudev (>= 0.13)', 'gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
-      package_dir={'': 'src'},
+      package_dir={'': 'lib'},
       packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
 
       data_files=[
-                  ('share/icons/hicolor/128x128/apps', ['share/icons/solaar.png']),
-                  ('share/solaar/icons', glob('share/icons/*.png')),
+                  ('share/icons/hicolor/128x128/apps', ['share/solaar/icons/solaar.png']),
+                  ('share/solaar/icons', glob('share/solaar/icons/*.png')),
                   ('share/applications', ['share/applications/solaar.desktop']),
                   ('share/doc/solaar', glob('share/doc/*')),
-                  # ('/etc/udev/rules.d', ['rules.d/99-logitech-unifying-receiver.rules']),
       	],
 
-      scripts=['bin/solaar', 'bin/solaar-cli'],
+      scripts=glob('bin/*'),
      )

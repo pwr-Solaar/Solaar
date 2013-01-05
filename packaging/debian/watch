@@ -1,0 +1,2 @@
+version=3
+http://github.com/pwr/solaar/tags .*/v?(\d.*)\.(?:tgz|tar\.(?:gz|bz2|xz))
