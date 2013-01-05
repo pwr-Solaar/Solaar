@@ -1,3 +1,10 @@
+solaar (0.8.5-3) UNRELEASED; urgency=low
+
+  * Fixed desktop file icon.
+  * Fixed X-Python-Version.
+
+ -- Daniel Pavel <daniel.pavel@gmail.com>  Sat, 05 Jan 2013 17:03:00 +0200
+
 solaar (0.8.5-2) UNRELEASED; urgency=low
 
   * Proper debian packaging, dropped stdeb.

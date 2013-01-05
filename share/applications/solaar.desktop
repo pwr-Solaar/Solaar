@@ -2,6 +2,7 @@
 Name=Solaar
 Comment=Logitech Unifying Receiver peripherals manager
 Exec=solaar
+Icon=solaar.png
 StartupNotify=false
 Terminal=false
 Type=Application

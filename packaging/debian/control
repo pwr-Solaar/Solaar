@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
 Build-Depends: debhelper (>= 8)
 Build-Depends-Indep: python
-X-Python-Version: >= 2.7, << 2.8
+X-Python-Version: >= 2.7
 X-Python3-Version: >= 3.2
 Standards-Version: 3.9.4
 Homepage: http://pwr.github.com/Solaar
