@@ -18,4 +18,4 @@ override_dh_auto_install:
 override_dh_auto_build:
 
 override_dh_installudev:
-	dh_installudev -v --priority=99 --name=logitech-unifying-receiver
+	dh_installudev --priority=99 --name=logitech-unifying-receiver
