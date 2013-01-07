@@ -3,19 +3,18 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
+#export DH_OPTIONS=-v
+
+PREFIX = /usr
+-include debian/rules.extra
 
 %:
 	# Adding the required helpers
 	dh $@ --with=python2
 
-# override_dh_auto_clean:
-# 	dh_auto_clean
-# 	rm -rf build/
-
 override_dh_auto_install:
-	python setup.py install --root=debian/solaar --install-layout=deb --install-lib=/usr/share/solaar/lib
-
-override_dh_auto_build:
+	dh_auto_install -- --prefix=$(PREFIX) --install-lib=$(PREFIX)/share/solaar/lib
 
 override_dh_installudev:
+	cp rules.d/??-logitech-unifying-receiver.rules debian/solaar.logitech-unifying-receiver.udev
 	dh_installudev --priority=99 --name=logitech-unifying-receiver

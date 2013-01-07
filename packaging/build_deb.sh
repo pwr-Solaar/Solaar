@@ -1,15 +1,15 @@
 #!/bin/sh
 
-cd `dirname "$0"`/..
-mkdir -p dist
-DIST="$PWD/dist"
-DEBIAN="$PWD/packaging/debian"
-RULES_D="$PWD/rules.d"
+set -e
 
-BUILD_DIR="${TMPDIR:-/tmp}/$PWD"
+cd `dirname "$0"`/..
+DEBIAN_FILES="$PWD/packaging/debian"
+DIST="$PWD/dist/${DISTRIBUTION:=debian}"
+
+BUILD_DIR="${TMPDIR:-/tmp}/$DIST"
+rm -rf "$BUILD_DIR"
 mkdir -m 0700 -p "$BUILD_DIR"
-rm -rf "$BUILD_DIR"/*
-python setup.py sdist --dist-dir="$BUILD_DIR"
+python "setup.py" sdist --dist-dir="$BUILD_DIR" --formats=gztar
 
 cd "$BUILD_DIR"
 S=`ls -1 solaar-*.tar.gz`
@@ -18,13 +18,15 @@ VERSION=${VERSION%.tar.gz}
 tar xfz "$S"
 mv "$S" solaar_$VERSION.orig.tar.gz
 
-cd solaar-*
-cp -a "$DEBIAN" .
-ls -1 "$RULES_D"/*.rules | while read rule; do
-	target=`basename "$rule"`
-	target=${target#??-}
-	target=${target%.rules}
-	cp -av "$rule" ./debian/solaar.$target.udev
-done
-debuild "$@"
-cp -au ../solaar_* "$DIST"
+cd solaar-$VERSION
+cp -a "$DEBIAN_FILES" .
+
+test -n "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
+# test -d debian/patches && ls -1 debian/patches/*.diff | cut -d / -f 3 > debian/patches/series
+
+debuild ${DEBUILD_ARGS:-$@}
+
+rm -rf "$DIST"
+mkdir -p "$DIST"
+cp -a ../solaar_$VERSION* "$DIST"
+cd "$DIST"
