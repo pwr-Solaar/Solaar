@@ -22,7 +22,6 @@ cd solaar-$VERSION
 cp -a "$DEBIAN_FILES" .
 
 test -n "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
-# test -d debian/patches && ls -1 debian/patches/*.diff | cut -d / -f 3 > debian/patches/series
 
 debuild ${DEBUILD_ARGS:-$@}
 

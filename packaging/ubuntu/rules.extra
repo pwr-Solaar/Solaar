@@ -5,5 +5,7 @@ PREFIX = /opt/extras.ubuntu.com/solaar
 # hacky...
 override_dh_link:
 	dh_link
+	sed -i -e 's#Exec=solaar#Exec=/opt/extras.ubuntu.com/solaar/bin/solaar#' \
+		debian/solaar/opt/extras.ubuntu.com/solaar/share/applications/solaar.desktop
 	sed -i -e 's#Icon=solaar.png#Icon=/opt/extras.ubuntu.com/solaar/share/icons/solaar.png#' \
 		debian/solaar/opt/extras.ubuntu.com/solaar/share/applications/solaar.desktop
