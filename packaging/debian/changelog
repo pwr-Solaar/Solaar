@@ -1,4 +1,4 @@
-solaar (0.8.5.1-4) UNRELEASED; urgency=low
+solaar (0.8.5.2-1) UNRELEASED; urgency=low
 
   * Customized debian/rules to support extensions.
 
