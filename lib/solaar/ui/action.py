@@ -90,7 +90,7 @@ def _pair_device(action, frame):
 	pair_dialog.present()
 
 def pair(frame):
-	return make('add', 'Pair new device', _pair_device, frame)
+	return make('list-add', 'Pair new device', _pair_device, frame)
 
 
 def _unpair_device(action, frame):

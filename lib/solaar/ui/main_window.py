@@ -79,7 +79,7 @@ def _make_receiver_box(name):
 		if active:
 			GObject.timeout_add(50, _update_info_label, f)
 
-	toggle_info_action = _action.make_toggle('info', 'Details', _toggle_info_label, frame)
+	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toolbar.insert(_action.pair(frame).create_tool_item(), -1)
 	# toolbar.insert(ui.action.about.create_tool_item(), -1)
@@ -211,7 +211,7 @@ def _make_device_box(index):
 		if active:
 			GObject.timeout_add(30, _config_panel.update, f)
 
-	toggle_info_action = _action.make_toggle('info', 'Details', _toggle_info_label, frame)
+	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	toggle_config_action = _action.make_toggle('preferences-system', 'Configuration', _toggle_config, frame)
 	toolbar.insert(toggle_config_action.create_tool_item(), -1)
