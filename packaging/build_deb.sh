@@ -2,6 +2,10 @@
 
 set -e
 
+if test ! -r "$HOME/.devscripts"; then
+	echo "$HOME/.descripts must exist"
+fi
+
 cd `dirname "$0"`/..
 DEBIAN_FILES="$PWD/packaging/debian"
 DIST="$PWD/dist/${DISTRIBUTION:=debian}"

@@ -22,7 +22,7 @@ $latest
 
 _CHANGELOG
 
-DEBUILD_ARGS="-S"
+DEBUILD_ARGS="-S -sa"
 . packaging/build_deb.sh
 
 rm -f "$PPA_CHANGELOG"
