@@ -1,0 +1,6 @@
+0.8.6:
+
+  * Ensure the Gtk application is single-instance.
+  * Fix identifying available dpi values.
+  * Fixed locating application icons when installed in a custom prefix.
+  * Fixed some icon names for the oxygen theme.

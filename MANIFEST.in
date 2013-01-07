@@ -1,2 +1,2 @@
-include COPYRIGHT COPYING README.md
+include COPYRIGHT COPYING README.md ChangeLog
 recursive-include rules.d *
