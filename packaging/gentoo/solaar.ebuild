@@ -14,9 +14,17 @@ pkg_setup() {
 src_install() {
     distutils_src_install
 
+    #insinto /usr/share
+    #doins -r share/icons
+
     udev_dorules rules.d/*.rules
 
-    dodoc README.md COPYING
+    dodoc README.md COPYING COPYRIGHT
+    #if use doc; then
+    #    dodoc -r docs/*
+    #fi
+
+    dobin ${FILESDIR}/solaar ${FILESDIR}/solaar-cli
 }
 
 pkg_postinst() {
