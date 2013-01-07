@@ -9,3 +9,6 @@ __pycache__/
 /dist/
 /deb_dist/
 /MANIFEST
+
+/docs/captures/
+/share/logitech_icons/
