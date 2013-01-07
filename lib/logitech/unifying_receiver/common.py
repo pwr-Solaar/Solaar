@@ -67,7 +67,7 @@ class NamedInts(object):
 			if not isinstance(n, str) and not isinstance(n, unicode):
 				raise TypeError("expected string, got " + type(n))
 			if n == n.upper():
-				n.lstrip('_')
+				n = n.lstrip('_')
 			return n.replace('__', '/').replace('_', ' ')
 
 		values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
