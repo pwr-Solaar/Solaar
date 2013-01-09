@@ -76,7 +76,7 @@ _D('Touch Mouse M600')
 _D('Marathon Mouse M705',
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-							# _register_dpi(0x63, _NamedInts.range(9, 11, lambda x: '_' + str(x * 100))),
+							# _register_dpi(0x63, _NamedInts.range(9, 11, lambda x: str(x * 100))),
 						],
 				)
 _D('Wireless Keyboard K230')
@@ -96,7 +96,7 @@ _D('Anywhere Mouse MX', codename='Anywhere MX',
 				)
 _D('Performance Mouse MX', codename='Performance MX',
 				settings=[
-							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: '_' + str((x - 0x80) * 100))),
+							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
 						],
 				)
 
