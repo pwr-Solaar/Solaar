@@ -17,7 +17,7 @@ class NamedInt(int):
 	def __new__(cls, value, name):
 		assert isinstance(name, str) or isinstance(name, unicode)
 		obj = int.__new__(cls, value)
-		obj.name = unicode(name)
+		obj.name = str(name)
 		return obj
 
 	def bytes(self, count=2):
@@ -66,13 +66,16 @@ class NamedInts(object):
 		def _readable_name(n):
 			if not isinstance(n, str) and not isinstance(n, unicode):
 				raise TypeError("expected string, got " + type(n))
-			return n.replace('__', '/').replace('_', ' ')
+			n = n.replace('__', '/').replace('_', ' ')
+			return str(n)
 
 		values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
 		self.__dict__ = values
 		self._values = sorted(list(values.values()))
 		self._indexed = {int(v): v for v in self._values}
 		self._fallback = None
+
+		# print ('%r' % self)
 
 	@classmethod
 	def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):

@@ -253,7 +253,7 @@ def config_device(receiver, args):
 			if s.choices:
 				print ("#   possible values: one of [", ', '.join(str(v) for v in s.choices), "], or higher/lower/highest/max/lowest/min")
 			else:
-				print ("#   possible values: true/t/yes/y/1 or false/f/no/n/0")
+				print ("#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0")
 			value = s.read()
 			if value is None:
 				print ("# %s = ? (failed to read from device)" % s.name)
@@ -283,9 +283,9 @@ def config_device(receiver, args):
 		try:
 			value = bool(int(value))
 		except:
-			if value.lower() in ['1', 'true', 'yes', 't', 'y']:
+			if value.lower() in ['1', 'true', 'yes', 'on', 't', 'y']:
 				value = True
-			elif value.lower() in ['0', 'false', 'no', 'f', 'n']:
+			elif value.lower() in ['0', 'false', 'no', 'off', 'f', 'n']:
 				value = False
 			else:
 				_fail("don't know how to interpret '%s' as boolean" % value)

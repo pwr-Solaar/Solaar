@@ -4,3 +4,4 @@
   * Fix identifying available dpi values.
   * Fixed locating application icons when installed in a custom prefix.
   * Fixed some icon names for the oxygen theme.
+  * Python 3 fixes.
