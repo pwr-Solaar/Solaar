@@ -72,7 +72,7 @@ def _show_about_window(action):
 	about.destroy()
 about = make('help-about', 'About ' + _NAME, _show_about_window)
 
-quit = make('exit', 'Quit', Gtk.main_quit)
+quit = make('application-exit', 'Quit', Gtk.main_quit)
 
 #
 #
