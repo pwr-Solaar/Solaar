@@ -283,6 +283,7 @@ def create(title, name, max_devices, systray=False):
 		return True
 
 	def _set_has_systray(w, systray):
+		# print ("set has systray", systray, w._has_systray)
 		if systray != w._has_systray:
 			w._has_systray = systray
 			if systray:

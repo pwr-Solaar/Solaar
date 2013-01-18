@@ -38,18 +38,24 @@ def create(window, menu_actions=None):
 					lambda icon, button, time, menu:
 						menu.popup(None, None, icon.position_menu, icon, button, time),
 					menu)
+	return icon
 
+
+def check_systray(icon, window):
 	# use size-changed to detect if the systray is available or not
 	def _size_changed(i, size, w):
+		import logging
+		logging.info("size-chagend %s %s", size, w)
 		def _check_systray(i2, w2):
+			logging.info("check_systray %s %s", i2.is_embedded(), i2.get_visible())
 			w2.set_has_systray(i2.is_embedded() and i2.get_visible())
 		# first guess
 		GObject.timeout_add(250, _check_systray, i, w)
 		# just to make sure...
-		GObject.timeout_add(1000, _check_systray, i, w)
-	icon.connect('size-changed', _size_changed, window)
+		# GObject.timeout_add(1000, _check_systray, i, w)
 
-	return icon
+	_size_changed(icon, None, window)
+	icon.connect('size-changed', _size_changed, window)
 
 
 _PIXMAPS = {}

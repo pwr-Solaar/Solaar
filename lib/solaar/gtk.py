@@ -108,6 +108,8 @@ def _run(args):
 			GObject.timeout_add(3000, check_for_listener)
 
 	GObject.timeout_add(10, check_for_listener, True)
+	if icon:
+		GObject.timeout_add(1000, ui.status_icon.check_systray, icon, window)
 	Gtk.main()
 
 	if listener[0]:
