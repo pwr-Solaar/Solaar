@@ -92,6 +92,11 @@ def get_battery(device):
 				else None)
 		return charge, status
 
+	reply = get_register(device, 'battery_status', 0x07)
+	if reply:
+		battery_status = ord(reply[:1])
+		_log.info("%s: battery status %02X", device, battery_status)
+
 
 def get_serial(device):
 	if device.kind is None:
