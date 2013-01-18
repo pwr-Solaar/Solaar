@@ -176,7 +176,7 @@ class DeviceStatus(dict):
 			# if the device has been inactive for too long, clear out any known
 			# properties, they are most likely obsolete anyway
 			self.clear()
-			self._changed(active=False, alert=ALERT.LOW, timestamp=timestamp)
+			self._changed(active=False, timestamp=timestamp)
 
 	def process_notification(self, n):
 		# incoming packets with SubId >= 0x80 are supposedly replies from
