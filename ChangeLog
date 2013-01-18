@@ -1,3 +1,9 @@
+0.8.7:
+
+  * Don't show the "device disconnected" notification, it can be annoying and
+    not very useful.
+  * More robust detection of systray icon visibility.
+
 0.8.6:
 
   * Ensure the Gtk application is single-instance.

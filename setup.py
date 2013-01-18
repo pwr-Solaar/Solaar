@@ -5,7 +5,7 @@ from distutils.core import setup
 
 
 setup(name='solaar',
-		version='0.8.6.2',
+		version='0.8.7',
 		description='Linux devices manager for the Logitech Unifying Receiver.',
 		long_description='''
 Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
