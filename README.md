@@ -41,11 +41,12 @@ devices I have and can directly test on right now.
 * Ubuntu 12.04+ packages are available in my PPA: [ppa:daniel.pavel/Solaar][ppa]
 * A downloadable Debian package for sid/unstable: [.deb][debian]
 * A [Gentoo overlay][gentoo] is available courtesy of Carlos Silva
+* An [OpenSUSE rpm][opensuse] is available courtesy of Mathias Homann
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.6.2-1_all.deb
+[debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.7-1_all.deb
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
-
+[opensuse]: http://software.opensuse.org/package/Solaar
 
 ## Manual instalation
 
