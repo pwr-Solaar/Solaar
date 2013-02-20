@@ -1,0 +1,17 @@
+## arg 1:  the new package version
+post_install() {
+  echo "Installing udev rules..."
+  echo "Please make sure the plugdev group exists on your system and your user is a member"
+  touch "/usr/lib/udev/rules.d/99-logitech-unifying-receiver.rules"
+  echo 'ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"' > "/usr/lib/udev/rules.d/99-logitech-unifying-receiver.rules"
+  chmod a+r "/usr/lib/udev/rules.d/99-logitech-unifying-receiver.rules"
+  echo "Reloading udev rules..."
+  udevadm control --reload-rules
+  echo "Done. Now remove the Unfiying Receiver, wait 10 seconds and plug it in again."
+  }
+post_remove() {
+  echo "Removing udev rules"
+  rm "/usr/lib/udev/rules.d/99-logitech-unifying-receiver.rules"
+  udevadm control --reload-rules
+}
+# vim:set ts=2 sw=2 et:
