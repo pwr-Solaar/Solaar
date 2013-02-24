@@ -38,15 +38,19 @@ devices I have and can directly test on right now.
 
 ## Pre-built packages
 
-* Ubuntu 12.04+ packages are available in my PPA: [ppa:daniel.pavel/Solaar][ppa]
-* A downloadable Debian package for sid/unstable: [.deb][debian]
-* A [Gentoo overlay][gentoo] is available courtesy of Carlos Silva
-* An [OpenSUSE rpm][opensuse] is available courtesy of Mathias Homann
+Pre-built packages are available for a few Linux distros:
+
+* Ubuntu 12.04+: [ppa:daniel.pavel/Solaar][ppa]
+* a Debian/sid package: [.deb][debian]
+* a [Gentoo overlay][gentoo], courtesy of Carlos Silva
+* an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
+* an [Arch package][arch], courtesy of Arnaud Taffanel
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
 [debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.7-1_all.deb
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
 [opensuse]: http://software.opensuse.org/package/Solaar
+[arch]: http://aur.archlinux.org/packages/solaar
 
 ## Manual instalation
 
