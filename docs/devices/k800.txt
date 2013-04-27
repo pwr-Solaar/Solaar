@@ -1,0 +1,52 @@
+# 0x00 - Enabled Notifications. rw (see HID++ 1.0 spec)
+<< (   0.055) [10 02 8100 000000] '\x10\x02\x81\x00\x00\x00\x00'
+>> (   0.084) [10 02 8100 000000] '\x10\x02\x81\x00\x00\x00\x00'
+
+# 0x01 -  Keyboard hand detection. rw, last param is 00 when hand detection is
+# enabled, 30 when disabled. (when enabled, keyboard will light up if not
+# already when hovering over the front)
+<< (   1.085) [10 02 8101 000000] '\x10\x02\x81\x01\x00\x00\x00'
+>> (   1.114) [10 02 8101 000000] '\x10\x02\x81\x01\x00\x00\x00'
+
+# 0x07 - Battery status (3 = one bar; 1 = red/critical; 5=two bars; 7=three
+# bars/full. Second returned param is 25 when keyboard is charging )
+<< (   7.327) [10 02 8107 000000] '\x10\x02\x81\x07\x00\x00\x00'
+>> (   7.368) [10 02 8107 030000] '\x10\x02\x81\x07\x03\x00\x00'
+
+# 0x09 - F key function. rw (read: status, set/get: 00 01 00 means swap
+# functions, 00 00 00 means do not swap functions)
+<< (   9.411) [10 02 8109 000000] '\x10\x02\x81\t\x00\x00\x00'
+>> (   9.440) [10 02 8109 000000] '\x10\x02\x81\t\x00\x00\x00'
+
+# 0x17 - Illumination info r/w. Last param: 02 to disable backlight, 01 to
+# enable backlight
+<< (  24.965) [10 02 8117 000000] '\x10\x02\x81\x17\x00\x00\x00'
+>> (  24.988) [10 02 8117 3C0001] '\x10\x02\x81\x17<\x00\x01'
+
+# 0x51 - ?
+<< (  99.294) [10 02 8151 000000] '\x10\x02\x81Q\x00\x00\x00'
+>> (  99.543) [10 02 8151 000000] '\x10\x02\x81Q\x00\x00\x00'
+
+# 0x54 - ?
+<< ( 103.046) [10 02 8154 000000] '\x10\x02\x81T\x00\x00\x00'
+>> ( 103.295) [10 02 8154 FF0000] '\x10\x02\x81T\xff\x00\x00'
+
+# 0xD0 - ?
+<< ( 253.860) [10 02 81D0 000000] '\x10\x02\x81\xd0\x00\x00\x00'
+>> ( 253.883) [10 02 81D0 000000] '\x10\x02\x81\xd0\x00\x00\x00'
+
+# 0xF1 - Version info (params 0n 00 00 where n is 1..4)
+<< ( 289.991) [10 02 81F1 000000] '\x10\x02\x81\xf1\x00\x00\x00'
+>> ( 290.032) [10 02 8F81 F10300] '\x10\x02\x8f\x81\xf1\x03\x00'
+
+# 0xF3 - ?
+<< ( 292.075) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
+>> ( 292.116) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
+
+# 0x0F - This changes, the last commented line was observed in an earlier run
+<< (  17.728) [10 02 830F 000000] '\x10\x02\x83\x0f\x00\x00\x00'
+>> (  17.976) [11 02 830F FFFB00000240025C000000000FF90080] '\x11\x02\x83\x0f\xff\xfb\x00\x00\x02@\x02\\\x00\x00\x00\x00\x0f\xf9\x00\x80'
+#>> ( 17.999) [11 02 830F FFFC007F0243025D000000000FF60080] '\x11\x02\x83\x0f\xff\xfc\x00\x7f\x02C\x02]\x00\x00\x00\x00\x0f\xf6\x00\x80'
+
+# See also https://git.lekensteyn.nl/ltunify/tree/registers.txt for a verbose
+# meaning of registers and params.
