@@ -1,0 +1,2 @@
+No non-error messages received for GET_REG and GET_REG_LONG. Perhaps because
+this is a HID++ 2.0 device?
