@@ -91,6 +91,11 @@ _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360')
 _D('Wireless Touch Keyboard K400')
 _D('Wireless Solar Keyboard K750')
+_D('Wireless Keyboard K710',
+				settings=[
+							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
+						],
+				)
 _D('Wireless Illuminated Keyboard K800',
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
