@@ -13,6 +13,7 @@ try:
 	from . import icons as _icons
 
 
+	_NAMESPACE = 'Solaar'
 	# assumed to be working since the import succeeded
 	available = True
 
@@ -20,14 +21,14 @@ try:
 	# while its notification is still visible we don't create another one
 	_notifications = {}
 
-	def init(app_title):
+	def init():
 		"""Init the notifications system."""
 		global available
 		if available:
 			if not Notify.is_initted():
 				logging.info("starting desktop notifications")
 				try:
-					return Notify.init(app_title)
+					return Notify.init(_NAMESPACE)
 				except:
 					logging.exception("initializing desktop notifications")
 					available = False
@@ -39,6 +40,15 @@ try:
 			logging.info("stopping desktop notifications")
 			_notifications.clear()
 			Notify.uninit()
+
+
+	def toggle(action):
+		if action.get_active():
+			init()
+		else:
+			uninit()
+		action.set_sensitive(available)
+		return action.get_active()
 
 
 	def show(dev, reason=None):
@@ -68,6 +78,7 @@ try:
 
 except ImportError:
 	available = False
-	init = lambda app_title: False
+	init = lambda: False
 	uninit = lambda: None
-	show = lambda dev, reason: None
+	toggle = lambda action: False
+	show = lambda dev, reason=None: None

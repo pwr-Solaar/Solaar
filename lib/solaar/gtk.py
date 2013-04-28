@@ -23,10 +23,6 @@ def _require(module, os_package):
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
-	arg_parser.add_argument('-S', '--no-systray', action='store_false', dest='systray',
-							help='do not place an icon in the desktop\'s systray')
-	arg_parser.add_argument('-N', '--no-notifications', action='store_false', dest='notifications',
-							help='disable desktop notifications (shown only when in systray)')
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
@@ -47,25 +43,15 @@ def _parse_arguments():
 def _run(args):
 	import solaar.ui as ui
 
-	# even if --no-notifications is given on the command line, still have to
-	# check they are available, and decide whether to put the option in the
-	# systray icon
-	args.notifications &= args.systray
-	if args.systray and ui.notify.init(NAME):
-		ui.action.toggle_notifications.set_active(args.notifications)
-		if not args.notifications:
-			ui.notify.uninit()
-	else:
-		ui.action.toggle_notifications = None
+	ui.notify.init()
 
 	from solaar.listener import DUMMY, ReceiverListener
-	window = ui.main_window.create(NAME, DUMMY.name, DUMMY.max_devices, args.systray)
-	if args.systray:
-		menu_actions = (ui.action.toggle_notifications,
-						ui.action.about)
-		icon = ui.status_icon.create(window, menu_actions)
-	else:
-		icon = None
+	window = ui.main_window.create(NAME, DUMMY.name, 6, True)
+	assert window
+	menu_actions = (ui.action.toggle_notifications,
+					ui.action.about)
+	icon = ui.status_icon.create(window, menu_actions)
+	assert icon
 
 	listener = [None]
 
@@ -114,9 +100,12 @@ def _run(args):
 
 	if listener[0]:
 		listener[0].stop()
-		listener[0].join()
 
 	ui.notify.uninit()
+
+	if listener[0]:
+		listener[0].join()
+		listener[0] = None
 
 
 def main():
