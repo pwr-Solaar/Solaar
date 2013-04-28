@@ -95,13 +95,14 @@ def get_battery(device):
 	reply = get_register(device, 'battery_status', 0x07)
 	if reply:
 		level = ord(reply[:1])
-		battery_status = ord(reply[2:3])
+		battery_status = ord(reply[1:2])
 		charge = (90 if level == 7 # full
 			else 50 if level == 5 # good
 			else 20 if level == 3 # low
 			else 5 if level == 1 # critical
 			else 0 ) # wtf?
 		status = ('charging' if battery_status == 0x25
+			else 'fully charged' if battery_status == 0x22
 			else 'discharging')
 		return charge, status
 
