@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os as _os
 import errno as _errno
 from select import select as _select
-from pyudev import Context as _Context, Device as _Device
+from pyudev import Context as _Context, Monitor as _Monitor, Device as _Device
 
 
 native_implementation = 'udev'
@@ -57,7 +57,53 @@ def exit():
 	return True
 
 
-def enumerate(vendor_id=None, product_id=None, interface_number=None):
+def _match(device, hid_dev, vendor_id=None, product_id=None, interface_number=None, driver=None):
+	assert 'HID_ID' in hid_dev
+	bus, vid, pid = hid_dev['HID_ID'].split(':')
+	driver_name = hid_dev['DRIVER']
+
+	if ((vendor_id is None or vendor_id == int(vid, 16)) and
+		(product_id is None or product_id == int(pid, 16)) and
+		(driver is None or driver == driver_name)):
+
+		if bus == '0003':  # USB
+			intf_dev = device.find_parent('usb', 'usb_interface')
+			if intf_dev:
+				interface = intf_dev.attributes.asint('bInterfaceNumber')
+				if interface_number is None or interface_number == interface:
+					usb_dev = device.find_parent('usb', 'usb_device')
+					assert usb_dev
+					attrs = usb_dev.attributes
+					d_info = DeviceInfo(path=device.device_node,
+										vendor_id=vid[-4:],
+										product_id=pid[-4:],
+										serial=hid_dev.get('HID_UNIQ'),
+										release=attrs['bcdDevice'],
+										manufacturer=attrs['manufacturer'],
+										product=attrs['product'],
+										interface=interface,
+										driver=driver_name)
+					return d_info
+
+		elif bus == '0005':  # BLUETOOTH
+			# TODO
+			pass
+
+
+def monitor(callback, *device_filters):
+	m = _Monitor.from_netlink(_Context())
+	m.filter_by(subsystem='hidraw')
+	for action, device in m:
+		hid_dev = device.find_parent('hid')
+		if hid_dev:
+			for filter in device_filters:
+				dev_info = _match(device, hid_dev, *filter)
+				if dev_info:
+					callback(action, dev_info)
+					break
+
+
+def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=None):
 	"""Enumerate the HID Devices.
 
 	List all the HID devices attached to the system, optionally filtering by
@@ -67,44 +113,10 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None):
 	"""
 	for dev in _Context().list_devices(subsystem='hidraw'):
 		hid_dev = dev.find_parent('hid')
-		if not hid_dev:
-			continue
-
-		assert 'HID_ID' in hid_dev
-		bus, vid, pid = hid_dev['HID_ID'].split(':')
-		if vendor_id is not None and vendor_id != int(vid, 16):
-			continue
-		if product_id is not None and product_id != int(pid, 16):
-			continue
-
-		if bus == '0003':  # USB
-			intf_dev = dev.find_parent('usb', 'usb_interface')
-			if not intf_dev:
-				continue
-
-			interface = intf_dev.attributes.asint('bInterfaceNumber')
-			if interface_number is not None and interface_number != interface:
-				continue
-
-			serial = hid_dev['HID_UNIQ'] if 'HID_UNIQ' in hid_dev else None
-
-			usb_dev = dev.find_parent('usb', 'usb_device')
-			assert usb_dev
-			attrs = usb_dev.attributes
-			d_info = DeviceInfo(path=dev.device_node,
-								vendor_id=vid[-4:],
-								product_id=pid[-4:],
-								serial=serial,
-								release=attrs['bcdDevice'],
-								manufacturer=attrs['manufacturer'],
-								product=attrs['product'],
-								interface=interface,
-								driver=hid_dev['DRIVER'])
-			yield d_info
-
-		elif bus == '0005':  # BLUETOOTH
-			# TODO
-			pass
+		if hid_dev:
+			dev_info = _match(dev, hid_dev, vendor_id, product_id, interface_number, driver)
+			if dev_info:
+				yield dev_info
 
 
 def open(vendor_id, product_id, serial=None):
