@@ -125,6 +125,26 @@ class DeviceStatus(dict):
 		return bool(self._active)
 	__nonzero__ = __bool__
 
+	def read_battery(self, timestamp=None):
+		d = self._device
+		if d and self._active:
+			battery = _hidpp10.get_battery(d)
+			if battery is None and d.protocol >= 2.0:
+				battery = _hidpp20.get_battery(d)
+
+				# really unnecessary, if the device has SOLAR_CHARGE it should be
+				# broadcasting it's battery status anyway, it will just take a little while
+				# if battery is None and _hidpp20.FEATURE.SOLAR_CHARGE in d.features:
+				# 	d.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, 1, 1)
+				# 	return
+
+			if battery:
+				self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
+				self._changed(timestamp=timestamp)
+			elif BATTERY_STATUS in self:
+				self[BATTERY_STATUS] = None
+				self._changed(timestamp=timestamp)
+
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
 		self._active = active
@@ -150,23 +170,8 @@ class DeviceStatus(dict):
 			# read these from the device in case they haven't been read already
 			d.protocol, d.serial, d.firmware
 
-			if BATTERY_LEVEL not in self:
-				battery = _hidpp10.get_battery(d)
-				if battery is None and d.protocol >= 2.0:
-					battery = _hidpp20.get_battery(d)
-
-					# really unnecessary, if the device has SOLAR_CHARGE it should be
-					# broadcasting it's battery status anyway, it will just take a little while
-					# if battery is None and _hidpp20.FEATURE.SOLAR_CHARGE in d.features:
-					# 	d.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, 1, 1)
-					# 	return
-
-				if battery:
-					self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
-					self._changed(timestamp=timestamp)
-				elif BATTERY_STATUS in self:
-					self[BATTERY_STATUS] = None
-					self._changed(timestamp=timestamp)
+			# if BATTERY_LEVEL not in self:
+			self.read_battery(timestamp)
 
 			# make sure we know all the features of the device
 			if d.features:
@@ -244,6 +249,9 @@ class DeviceStatus(dict):
 
 			else:
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
+
+			if self._active:  # and BATTERY_LEVEL not in self:
+				self.read_battery()
 
 			return True
 
