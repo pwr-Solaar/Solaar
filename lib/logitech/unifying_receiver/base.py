@@ -209,11 +209,12 @@ def _skip_incoming(handle):
 			raise NoReceiver(reason=reason)
 
 		if data:
-			report_id = ord(data[:1])
-			assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
-					report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE or
-					report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)
 			_unhandled(report_id, ord(data[1:2]), data[2:])
+			if _log.isEnabledFor(_DEBUG):
+				report_id = ord(data[:1])
+				assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
+						report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE or
+						report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)
 		else:
 			return
 

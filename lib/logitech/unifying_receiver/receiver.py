@@ -8,7 +8,7 @@ import errno as _errno
 from weakref import proxy as _proxy
 
 from logging import getLogger
-_log = getLogger('LUR').getChild('receiver')
+_log = getLogger('LUR.receiver')
 del getLogger
 
 from . import base as _base
@@ -190,7 +190,7 @@ class PairedDevice(object):
 		return self.serial.__hash__()
 
 	def __str__(self):
-		return '<PairedDevice(%d,%s)>' % (self.number, self.codename or '?')
+		return '<PairedDevice(%d,%s,%s)>' % (self.number, self.wpid, self.codename or '?')
 	__unicode__ = __repr__ = __str__
 
 #
@@ -260,21 +260,26 @@ class Receiver(object):
 			# clear out all possible flags
 			ok = self.request(0x8000)
 
+		flags = self.request(0x8100)
+		if flags:
+			flags = ord(flags[0:1]) << 16 | ord(flags[1:2]) << 8 | ord(flags[2:3])
+			flags = tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flags))
+
 		if ok:
-			_log.info("device notifications %s", 'enabled' if enable else 'disabled')
+			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flags)
 		else:
-			_log.warn("failed to %s device notifications", 'enable' if enable else 'disable')
+			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flags)
 		return ok
 
 	def notify_devices(self):
 		"""Scan all devices."""
 		if self.handle:
 			if not self.request(0x8002, 0x02):
-				_log.warn("failed to trigger device link notifications")
+				_log.warn("%s: failed to trigger device link notifications", self)
 
 	def register_new_device(self, number):
 		if self._devices.get(number) is not None:
-			raise IndexError("device number %d already registered" % number)
+			raise IndexError("%s: device number %d already registered" % (self, number))
 		dev = PairedDevice(self, number)
 		# create a device object, but only use it if the receiver knows about it
 
@@ -287,7 +292,7 @@ class Receiver(object):
 		#	return dev
 
 		if dev.wpid:
-			_log.info("found device %d (%s)", number, dev.wpid)
+			_log.info("%s: found Unifying device %d (%s)", self, number, dev.wpid)
 			self._devices[number] = dev
 			return dev
 		self._devices[number] = None
@@ -298,7 +303,7 @@ class Receiver(object):
 			reply = self.request(0x80B2, lock, device, timeout)
 			if reply:
 				return True
-			_log.warn("failed to %s the receiver lock", 'close' if lock_closed else 'open')
+			_log.warn("%s: failed to %s the receiver lock", self, 'close' if lock_closed else 'open')
 
 	def count(self):
 		count = self.request(0x8102)

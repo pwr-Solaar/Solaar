@@ -8,7 +8,7 @@ from struct import pack as _pack, unpack as _unpack
 from weakref import proxy as _proxy
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('LUR').getChild('hidpp20')
+_log = getLogger('LUR.hidpp20')
 del getLogger
 
 from .common import (FirmwareInfo as _FirmwareInfo,

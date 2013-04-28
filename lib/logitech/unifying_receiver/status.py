@@ -218,7 +218,7 @@ class DeviceStatus(dict):
 				if _log.isEnabledFor(_DEBUG):
 					sw_present = bool(flags & 0x10)
 					has_payload = bool(flags & 0x80)
-					_log.debug("%s: connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
+					_log.debug("%s: unifying connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
 								self._device, sw_present, link_encrypyed, link_established, has_payload)
 				self[ENCRYPTED] = link_encrypyed
 				self._changed(link_established)

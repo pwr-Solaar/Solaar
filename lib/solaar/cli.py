@@ -5,6 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
+import logging
 
 
 NAME = 'solaar-cli'
@@ -15,6 +16,8 @@ from solaar import __version__
 #
 
 def _fail(text):
+	if sys.exc_info()[0]:
+		logging.exception(text)
 	sys.exit("%s: error: %s" % (NAME, text))
 
 
@@ -364,7 +367,6 @@ def _parse_arguments():
 
 	args = arg_parser.parse_args()
 
-	import logging
 	if args.debug > 0:
 		log_level = logging.WARNING - 10 * args.debug
 		log_format='%(asctime)s %(levelname)8s %(name)s: %(message)s'

@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import getLogger  # , DEBUG as _DEBUG
-_log = getLogger('LUR').getChild('hidpp10')
+_log = getLogger('LUR.hidpp10')
 del getLogger
 
 from .common import (strhex as _strhex,

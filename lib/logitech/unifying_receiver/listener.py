@@ -14,7 +14,7 @@ except ImportError:
 	from queue import Queue as _Queue
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('LUR').getChild('listener')
+_log = getLogger('LUR.listener')
 del getLogger
 
 from . import base as _base
@@ -94,7 +94,7 @@ class ThreadedHandle(object):
 # a while for it to acknowledge it.
 _EVENT_READ_TIMEOUT = 500
 
-# After this many read that did not produce a packet, call the tick() method.
+# After this many reads that did not produce a packet, call the tick() method.
 _IDLE_READS = 4
 
 
@@ -148,11 +148,12 @@ class EventsListener(_threading.Thread):
 
 			if n:
 				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("processing %s", n)
+				# 	_log.debug("%s: processing %s", self.receiver, n)
 				try:
 					self._notifications_callback(n)
 				except:
 					_log.exception("processing %s", n)
+
 			elif self.tick_period:
 				idle_reads += 1
 				if idle_reads % _IDLE_READS == 0:
