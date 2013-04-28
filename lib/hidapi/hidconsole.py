@@ -186,6 +186,7 @@ def main():
 		while t.is_alive():
 			line = read_packet(prompt)
 			line = line.strip().replace(' ', '')
+			# print ("line", line)
 			if not line:
 				continue
 
@@ -197,16 +198,18 @@ def main():
 			hidapi.write(handle, data)
 			# wait for some kind of reply
 			if args.hidpp and not interactive:
+				rlist, wlist, xlist = _select([handle], [], [], 1)
 				if data[1:2] == b'\xFF':
 					# the receiver will reply very fast, in a few milliseconds
-					time.sleep(0.010)
+					time.sleep(0.100)
 				else:
 					# the devices might reply quite slow
-					rlist, wlist, xlist = _select([handle], [], [], 1)
 					time.sleep(1)
 	except EOFError:
 		if interactive:
 			print ("")
+		else:
+			time.sleep(1)
 	except Exception as e:
 		print ('%s: %s' % (type(e).__name__, e))
 
