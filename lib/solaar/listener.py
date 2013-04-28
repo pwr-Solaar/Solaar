@@ -37,19 +37,15 @@ _POLL_TICK = 60  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
-	"""Keeps the status of a Unifying Receiver.
+	"""Keeps the status of a Receiver.
 	"""
-	def __init__(self, receiver, status_changed_callback=None):
+	def __init__(self, receiver, status_changed_callback):
 		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
 		self.tick_period = _POLL_TICK
 		self._last_tick = 0
 
+		assert status_changed_callback
 		self.status_changed_callback = status_changed_callback
-
-		# make it a bit similar with the regular devices
-		receiver.kind = None
-		# replace the
-		receiver.handle = _listener.ThreadedHandle(receiver.handle, receiver.path)
 		receiver.status = _status.ReceiverStatus(receiver, self._status_changed)
 
 	def has_started(self):
@@ -150,7 +146,8 @@ class ReceiverListener(_listener.EventsListener):
 	__unicode__ = __str__
 
 	@classmethod
-	def open(self, status_changed_callback=None):
+	def open(self, status_changed_callback):
+		assert status_changed_callback
 		receiver = Receiver.open()
 		if receiver:
 			rl = ReceiverListener(receiver, status_changed_callback)
