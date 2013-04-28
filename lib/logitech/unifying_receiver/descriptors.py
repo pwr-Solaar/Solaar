@@ -23,6 +23,12 @@ _FN_SWAP = ('fn-swap', 'Swap Fx function', ('When set, the F1..F12 keys will act
 						 					'When unset, the F1..F12 keys will activate their standard function,\n'
 						 					'and you must hold the FN key to activate their special function.'))
 
+# this register is only applicable to HID++ 1.0 devices, it should not exist with HID++ 2.0 devices
+# using Features
+def _register_fn_swap(register, true_value, mask):
+	return _settings.register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
+					label=_FN_SWAP[1], description=_FN_SWAP[2])
+
 
 def _register_smooth_scroll(register, true_value, mask):
 	return _settings.register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
@@ -85,7 +91,16 @@ _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360')
 _D('Wireless Touch Keyboard K400')
 _D('Wireless Solar Keyboard K750')
-_D('Wireless Illuminated Keyboard K800')
+_D('Wireless Keyboard K710',
+				settings=[
+							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
+						],
+				)
+_D('Wireless Illuminated Keyboard K800',
+				settings=[
+							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
+						],
+				)
 _D('Zone Touch Mouse T400')
 _D('Wireless Rechargeable Touchpad T650')
 _D('Logitech Cube', kind='mouse')
