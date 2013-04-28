@@ -58,19 +58,22 @@ class DeviceUnreachable(_KwException):
 #
 #
 
+# vendor_id, product_id, interface number, driver
+DEVICE_UNIFYING_RECEIVER = (0x046d, 0xc52b, 2, 'logitech-djreceiver')
+DEVICE_UNIFYING_RECEIVER_2 = (0x046d, 0xc532, 2, 'logitech-djreceiver')
+#DEVICE_NANO_RECEIVER = (0x046d, 0xc526, 1, 'generic-usb')
+
+
 def receivers():
 	"""List all the Linux devices exposed by the UR attached to the machine."""
-	# (Vendor ID, Product ID) = ('Logitech', 'Unifying Receiver')
-	# interface 2 if the actual receiver interface
+	for d in _hid.enumerate(*DEVICE_UNIFYING_RECEIVER):
+		yield d
+	for d in _hid.enumerate(*DEVICE_UNIFYING_RECEIVER_2):
+		yield d
+	#for d in _hid.enumerate(*DEVICE_NANO_RECEIVER):
+	#	yield d
 
-	for d in _hid.enumerate(0x046d, 0xc52b, 2):
-		if d.driver == 'logitech-djreceiver':
-			yield d
 
-	# apparently there are TWO product ids possible for the UR?
-	for d in _hid.enumerate(0x046d, 0xc532, 2):
-		if d.driver == 'logitech-djreceiver':
-			yield d
 
 
 def open_path(path):

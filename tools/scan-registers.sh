@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if test -z "$1"; then
-	echo "Use: $0 <device number 1..6>"
+	echo "Use: $0 <device number 1..6> [<receiver device>]"
 	exit 2
 fi
 
@@ -14,10 +14,10 @@ for x in $z; do
 	for y in $z; do
 		echo "10 0${1} 81${x}${y} 000000"
 	done
-done | "$HC" --hidpp | grep -v ' 8F.. ..0[12]' | grep -B 1 '^>> '
+done | "$HC" --hidpp $2 | grep -v ' 8F.. ..0[12]' | grep -B 1 '^>> '
 
 for x in $z; do
 	for y in $z; do
 		echo "10 0${1} 83${x}${y} 000000"
 	done
-done | "$HC" --hidpp | grep -v ' 8F.. ..0[12]' | grep -B 1 '^>> '
+done | "$HC" --hidpp $2 | grep -v ' 8F.. ..0[12]' | grep -B 1 '^>> '

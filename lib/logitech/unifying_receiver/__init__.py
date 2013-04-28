@@ -27,7 +27,7 @@ del logging
 
 from .common import strhex
 from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
-from .receiver import Receiver, PairedDevice, MAX_PAIRED_DEVICES
+from .receiver import Receiver, PairedDevice
 from .hidpp20 import FeatureNotSupported, FeatureCallError
 
 from . import listener

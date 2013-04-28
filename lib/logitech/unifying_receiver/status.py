@@ -12,7 +12,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.status')
 del getLogger
 
-from .common import NamedInts as _NamedInts
+from .common import NamedInts as _NamedInts, strhex as _strhex
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 
@@ -223,8 +223,24 @@ class DeviceStatus(dict):
 				self[ENCRYPTED] = link_encrypyed
 				self._changed(link_established)
 
-			elif n.address == 0x03:
-				_log.warn("%s: connection notification with eQuad protocol, ignored: %s", self._device.number, n)
+			elif n.address == 0x03:  # eQuad protocol
+				# Nano devices might not have been initialized fully
+				if self._device._kind is None:
+					kind = ord(n.data[:1]) & 0x0F
+					self._device._kind = _hidpp10.DEVICE_KIND[kind]
+				if self._device._wpid is None:
+					self._device._wpid = _strhex(n.data[2:3] + n.data[1:2])
+
+				flags = ord(n.data[:1]) & 0xF0
+				link_encrypyed = bool(flags & 0x20)
+				link_established = not (flags & 0x40)
+				if _log.isEnabledFor(_DEBUG):
+					sw_present = bool(flags & 0x10)
+					has_payload = bool(flags & 0x80)
+					_log.debug("%s: eQuad connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
+								self._device, sw_present, link_encrypyed, link_established, has_payload)
+				self[ENCRYPTED] = link_encrypyed
+				self._changed(link_established)
 
 			else:
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)

@@ -6,7 +6,10 @@
 # Make sure the plugdev group exists on your system and your user is a member
 # before applying these rules.
 
-# HIDAPI/hidraw
+# HIDAPI/hidraw for Logitech Unifying Receiver
 ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
+
+# HIDAPI/hidraw for Logitech Nano Receiver
+#ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GROUP="plugdev", MODE="0660"
 
 # vim: ft=udevrules

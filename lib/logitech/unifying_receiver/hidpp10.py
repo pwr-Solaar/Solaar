@@ -133,6 +133,13 @@ def get_firmware(device):
 		fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
 		firmware.append(fw)
 
+	if device.kind is None and device.max_devices == 1:
+		# Nano receiver
+		return firmware
+	if device.kind is not None and not device._unifying:
+		# Nano device
+		return firmware
+
 	reply = device.request(0x81F1, 0x04)
 	if reply:
 		bl_version = _strhex(reply[1:3])
