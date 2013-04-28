@@ -25,7 +25,7 @@ del namedtuple
 def _ghost(device):
 	return _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None, max_devices=None)
 
-DUMMY = _GHOST_DEVICE(Receiver.number, Receiver.name, None, 'Receiver not found.', Receiver.max_devices)
+DUMMY = _GHOST_DEVICE(Receiver.number, 'dialog-error', None, 'Receiver not found.', 6)
 
 #
 #

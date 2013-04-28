@@ -82,7 +82,7 @@ _D('Touch Mouse M600')
 _D('Marathon Mouse M705',
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-							# _register_dpi(0x63, _NamedInts.range(9, 11, lambda x: str(x * 100))),
+							# _register_dpi(0x63, _NamedInts(**{'100': 10, '300': 30, '350':35, '500':50})),
 						],
 				)
 _D('Wireless Keyboard K230')

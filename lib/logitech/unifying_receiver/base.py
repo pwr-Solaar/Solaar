@@ -371,15 +371,15 @@ def ping(handle, devnumber):
 		delta = _timestamp() - now
 
 		if reply:
-			report_id, number, data = reply
-			if number == devnumber:
-				if data[:2] == request_data[:2] and data[4:5] == request_data[-1:]:
+			report_id, reply_devnumber, reply_data = reply
+			if reply_devnumber == devnumber:
+				if reply_data[:2] == request_data[:2] and reply_data[4:5] == request_data[-1:]:
 					# HID++ 2.0+ device, currently connected
-					return ord(data[2:3]) + ord(data[3:4]) / 10.0
+					return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
-				if report_id == 0x10 and data[:1] == b'\x8F' and data[1:3] == request_data[:2]:
-					assert data[-1:] == b'\x00'
-					error = ord(data[3:4])
+				if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2]:
+					assert reply_data[-1:] == b'\x00'
+					error = ord(reply_data[3:4])
 
 					if error == _hidpp10.ERROR.invalid_SubID__command: # a valid reply from a HID++ 1.0 device
 						return 1.0
