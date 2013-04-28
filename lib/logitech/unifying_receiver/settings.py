@@ -121,9 +121,18 @@ class _BooleanValidator(object):
 		self.mask = mask
 		self.write_returns_value = write_returns_value
 
+	def _validate_value(self, reply_bytes, expected_value):
+		if isinstance(expected_value, int):
+			return ord(reply_bytes[:1]) & self.mask == expected_value
+		else:
+			for i in range(0, len(self.mask)):
+				masked_value = ord(reply_bytes[i:i+1]) & ord(self.mask[i:i+1])
+				if masked_value != ord(expected_value[i:i+1]):
+					return False
+			return True
+
 	def validate_read(self, reply_bytes):
-		reply_value = ord(reply_bytes[:1]) & self.mask
-		return reply_value == self.true_value
+		return self._validate_value(reply_bytes, self.true_value)
 
 	def prepare_write(self, value):
 		# FIXME: this does not work right when there is more than one flag in
@@ -132,8 +141,7 @@ class _BooleanValidator(object):
 
 	def validate_write(self, value, reply_bytes):
 		if self.write_returns_value:
-			reply_value = ord(reply_bytes[:1]) & self.mask
-			return reply_value == self.true_value
+			return self._validate_value(reply_bytes, self.true_value)
 
 		# just assume the value was written correctly, otherwise there would not
 		# be any reply_bytes to check
