@@ -52,15 +52,15 @@ class ReceiverListener(_listener.EventsListener):
 		_log.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
 		self.receiver.enable_notifications()
 		self.receiver.notify_devices()
-		self._status_changed(self.receiver, _status.ALERT.LOW)
+		self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
 
 	def has_stopped(self):
 		_log.info("%s: notifications listener has stopped", self.receiver)
 		if self.receiver:
 			self.receiver.enable_notifications(False)
 			self.receiver.close()
+		self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
 		self.receiver = None
-		self._status_changed(None, _status.ALERT.LOW)
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):

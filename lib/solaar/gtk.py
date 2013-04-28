@@ -92,7 +92,7 @@ def _run(args):
 
 	# callback delivering status notifications from the receiver/devices to the UI
 	def status_changed(receiver, device=None, alert=status.ALERT.NONE, reason=None):
-		if alert & status.ALERT.MED:
+		if alert & status.ALERT.SHOW_WINDOW:
 			GObject.idle_add(window.present)
 		if window:
 			GObject.idle_add(ui.main_window.update, window, receiver, device)
@@ -101,7 +101,7 @@ def _run(args):
 
 		if ui.notify.available:
 			# always notify on receiver updates
-			if device is None or alert & status.ALERT.LOW:
+			if device is None or alert & status.ALERT.NOTIFICATION:
 				GObject.idle_add(ui.notify.show, device or receiver, reason)
 
 		if receiver is DUMMY:

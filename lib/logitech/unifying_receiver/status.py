@@ -20,7 +20,7 @@ from . import hidpp20 as _hidpp20
 #
 #
 
-ALERT = _NamedInts(NONE=0x00, LOW=0x01, MED=0x02, HIGH=0xFF)
+ALERT = _NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ALL=0xFF)
 
 # device properties that may be reported
 ENCRYPTED='encrypted'
@@ -58,7 +58,7 @@ class ReceiverStatus(dict):
 				'%d devices found.' % count)
 	__unicode__ = __str__
 
-	def _changed(self, alert=ALERT.LOW, reason=None):
+	def _changed(self, alert=ALERT.NOTIFICATION, reason=None):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)
 
@@ -154,7 +154,7 @@ class DeviceStatus(dict):
 			if battery is not None:
 				self[BATTERY_LEVEL] = battery
 		if self.updated == 0:
-			alert |= ALERT.LOW
+			alert |= ALERT.NOTIFICATION
 		self.updated = timestamp or _timestamp()
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
@@ -168,7 +168,7 @@ class DeviceStatus(dict):
 				return
 
 			# read these from the device in case they haven't been read already
-			d.protocol, d.serial, d.firmware
+			# d.protocol, d.serial, d.firmware
 
 			# if BATTERY_LEVEL not in self:
 			self.read_battery(timestamp)
@@ -207,7 +207,7 @@ class DeviceStatus(dict):
 				# device un-paired
 				self.clear()
 				self._device.status = None
-				self._changed(False, ALERT.HIGH, 'unpaired')
+				self._changed(False, ALERT.ALL, 'unpaired')
 			else:
 				_log.warn("%s: disconnection with unknown type %02X: %s", self._device, n.address, n)
 			return True
@@ -265,7 +265,7 @@ class DeviceStatus(dict):
 			if n.address == 0x01:
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("%s: device powered on", self._device)
-				self._changed(alert=ALERT.LOW, reason='powered on')
+				self._changed(alert=ALERT.NOTIFICATION, reason='powered on')
 			else:
 				_log.info("%s: unknown %s", self._device, n)
 			return True
@@ -285,7 +285,7 @@ class DeviceStatus(dict):
 					if _log.isEnabledFor(_DEBUG):
 						_log.debug("%s: battery %d% charged, %s", self._device, discharge, self[BATTERY_STATUS])
 				else:
-					alert = ALERT.MED
+					alert = ALERT.ALL
 					reason = self[ERROR] = self[BATTERY_STATUS]
 					_log.warn("%s: battery %d% charged, ALERT %s", self._device, discharge, reason)
 				self._changed(alert=alert, reason=reason)
@@ -305,7 +305,7 @@ class DeviceStatus(dict):
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("wireless status: %s", n)
 				if n.data[0:3] == b'\x01\x01\x01':
-					self._changed(alert=ALERT.LOW, reason='powered on')
+					self._changed(alert=ALERT.NOTIFICATION, reason='powered on')
 				else:
 					_log.info("%s: unknown WIRELESS %s", self._device, n)
 			else:
@@ -328,7 +328,7 @@ class DeviceStatus(dict):
 					self._changed()
 				elif n.address == 0x20:
 					_log.debug("%s: Solar key pressed", self._device)
-					self._changed(alert=ALERT.MED)
+					self._changed(alert=ALERT.SHOW_WINDOW)
 					# first cancel any reporting
 					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE)
 					# trigger a new report chain
