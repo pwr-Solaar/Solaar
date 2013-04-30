@@ -15,8 +15,8 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
 # print ("menu", int(Gtk.IconSize.MENU), Gtk.icon_size_lookup(Gtk.IconSize.MENU))
 # print ("small toolbar", int(Gtk.IconSize.SMALL_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.SMALL_TOOLBAR))
-# print ("large toolbar", int(Gtk.IconSize.LARGE_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.LARGE_TOOLBAR))
 # print ("button", int(Gtk.IconSize.BUTTON), Gtk.icon_size_lookup(Gtk.IconSize.BUTTON))
+# print ("large toolbar", int(Gtk.IconSize.LARGE_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.LARGE_TOOLBAR))
 # print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
 # print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
@@ -31,6 +31,12 @@ def battery(level):
 	if level < 0:
 		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
+
+
+def lux(level):
+	if level < 0:
+		return 'light_unknown'
+	return 'light_%03d' % (20 * ((level + 50) // 100))
 
 
 _ICON_SETS = {}
@@ -64,13 +70,22 @@ def device_icon_set(name, kind=None):
 	return icon_set
 
 
-def device_icon_file(name, kind=None):
+def device_icon_file(name, kind=None, size=_LARGE_SIZE):
 	icon_set = device_icon_set(name, kind)
 	assert icon_set
 	theme = Gtk.IconTheme.get_default()
 	for n in reversed(icon_set.names):
 		if theme.has_icon(n):
-			return theme.lookup_icon(n, _LARGE_SIZE, 0).get_filename()
+			return theme.lookup_icon(n, size, 0).get_filename()
+
+
+def device_icon_name(name, kind=None):
+	icon_set = device_icon_set(name, kind)
+	assert icon_set
+	theme = Gtk.IconTheme.get_default()
+	for n in reversed(icon_set.names):
+		if theme.has_icon(n):
+			return n
 
 
 def icon_file(name, size=_LARGE_SIZE):
