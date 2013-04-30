@@ -40,7 +40,7 @@ devices I have and can directly test on right now.
 
 Pre-built packages are available for a few Linux distros:
 
-* Ubuntu 12.04+: [ppa:daniel.pavel/Solaar][ppa]
+* Ubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
 * a Debian/sid package: [.deb][debian]
 * a [Gentoo overlay][gentoo], courtesy of Carlos Silva
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
