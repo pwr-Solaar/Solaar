@@ -45,67 +45,61 @@ def _run(args):
 
 	ui.notify.init()
 
-	from solaar.listener import DUMMY, ReceiverListener
-	window = ui.main_window.create(NAME, DUMMY.name, 6, True)
+	from solaar.listener import DUMMY_RECEIVER, ReceiverListener
+	window = ui.main_window.create(NAME)
 	assert window
-	menu_actions = (ui.action.toggle_notifications,
-					ui.action.about)
-	icon = ui.status_icon.create(window, menu_actions)
+	icon = ui.status_icon.create(window)
 	assert icon
 
-	listener = [None]
+	listeners = {}
 
 	# initializes the receiver listener
 	def check_for_listener(notify=False):
 		# print ("check_for_listener", notify)
-		listener[0] = None
 
 		try:
-			listener[0] = ReceiverListener.open(status_changed)
+			l = ReceiverListener.open(status_changed)
 		except OSError:
+			l = None
 			ui.error_dialog(window, 'Permissions error',
 							'Found a possible Unifying Receiver device,\n'
 							'but did not have permission to open it.')
 
-		if listener[0] is None:
+		listeners.clear()
+		if l:
+			listeners[l.receiver.serial] = l
+		else:
 			if notify:
-				status_changed(DUMMY)
+				status_changed(DUMMY_RECEIVER)
 			else:
 				return True
 
-	from gi.repository import Gtk, GObject
-	from logitech.unifying_receiver import status
+	from gi.repository import Gtk, GLib
+	from logitech.unifying_receiver.status import ALERT
 
 	# callback delivering status notifications from the receiver/devices to the UI
-	def status_changed(receiver, device=None, alert=status.ALERT.NONE, reason=None):
-		if alert & status.ALERT.SHOW_WINDOW:
-			GObject.idle_add(window.present)
-		if window:
-			GObject.idle_add(ui.main_window.update, window, receiver, device)
-		if icon:
-			GObject.idle_add(ui.status_icon.update, icon, receiver, device)
+	def status_changed(device, alert=ALERT.NONE, reason=None):
+		assert device is not None
+
+		if alert & ALERT.SHOW_WINDOW:
+			GLib.idle_add(window.present)
+		GLib.idle_add(ui.main_window.update, window, device)
+		GLib.idle_add(ui.status_icon.update, icon, device)
 
 		if ui.notify.available:
 			# always notify on receiver updates
-			if device is None or alert & status.ALERT.NOTIFICATION:
-				GObject.idle_add(ui.notify.show, device or receiver, reason)
+			if device is DUMMY_RECEIVER or alert & ALERT.NOTIFICATION:
+				GLib.idle_add(ui.notify.show, device, reason)
 
-		if receiver is DUMMY:
-			GObject.timeout_add(3000, check_for_listener)
+		if device is DUMMY_RECEIVER:
+			GLib.timeout_add(3000, check_for_listener)
 
-	GObject.timeout_add(10, check_for_listener, True)
-	if icon:
-		GObject.timeout_add(1000, ui.status_icon.check_systray, icon, window)
+	GLib.timeout_add(10, check_for_listener, True)
 	Gtk.main()
 
-	if listener[0]:
-		listener[0].stop()
-
+	map(ReceiverListener.stop, listeners.values())
 	ui.notify.uninit()
-
-	if listener[0]:
-		listener[0].join()
-		listener[0] = None
+	map(ReceiverListener.join, listeners.values())
 
 
 def main():

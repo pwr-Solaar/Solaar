@@ -4,9 +4,11 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GLib, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf
 
-from . import action as _action, icons as _icons
+from . import (action as _action,
+				icons as _icons,
+				main_window as _main_window)
 from logitech.unifying_receiver import status as _status
 
 #
@@ -15,8 +17,9 @@ from logitech.unifying_receiver import status as _status
 
 _NO_DEVICES = [None] * 6
 
-def create(window, menu_actions=None):
+def create(window):
 	name = window.get_title()
+
 	icon = Gtk.StatusIcon()
 	icon.set_title(name)
 	icon.set_name(name)
@@ -24,38 +27,26 @@ def create(window, menu_actions=None):
 	icon._devices = list(_NO_DEVICES)
 
 	icon.set_tooltip_text(name)
-	icon.connect('activate', window.toggle_visible)
+	icon.connect('activate', _main_window.toggle, window)
 
 	menu = Gtk.Menu()
-	for a in menu_actions or ():
-		if a:
-			menu.append(a.create_menu_item())
 
-	menu.append(_action.quit.create_menu_item())
+	menu.append(Gtk.SeparatorMenuItem.new())
+
+	menu.append(_action.about.create_menu_item())
+	menu.append(_action.make('application-exit', 'Quit', Gtk.main_quit).create_menu_item())
 	menu.show_all()
+
+	for x in _NO_DEVICES:
+		m = Gtk.ImageMenuItem()
+		m.set_sensitive(False)
+		menu.insert(m, 0)
 
 	icon.connect('popup_menu',
 					lambda icon, button, time, menu:
 						menu.popup(None, None, icon.position_menu, icon, button, time),
 					menu)
 	return icon
-
-
-def check_systray(icon, window):
-	# use size-changed to detect if the systray is available or not
-	def _size_changed(i, size, w):
-		import logging
-		logging.info("size-chagend %s %s", size, w)
-		def _check_systray(i2, w2):
-			logging.info("check_systray %s %s", i2.is_embedded(), i2.get_visible())
-			w2.set_has_systray(i2.is_embedded() and i2.get_visible())
-		# first guess
-		GLib.timeout_add(250, _check_systray, i, w)
-		# just to make sure...
-		# GLib.timeout_add(1000, _check_systray, i, w)
-
-	_size_changed(icon, None, window)
-	icon.connect('size-changed', _size_changed, window)
 
 
 _PIXMAPS = {}
@@ -82,12 +73,18 @@ def _icon_with_battery(level, active):
 
 	return _PIXMAPS[name]
 
-def update(icon, receiver, device=None):
-	# print ("icon update", receiver, receiver.status, len(receiver), device)
-	if device is not None:
+def update(icon, device):
+	assert device is not None
+	# print ("icon update", device)
+
+	if device.kind is None:
+		receiver = device
+		if not device:
+			icon._devices[:] = _NO_DEVICES
+	else:
 		icon._devices[device.number] = None if device.status is None else device
-	if not receiver:
-		icon._devices[:] = _NO_DEVICES
+		receiver = device.receiver
+
 	if not icon.is_embedded():
 		return
 

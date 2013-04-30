@@ -25,7 +25,7 @@ del namedtuple
 def _ghost(device):
 	return _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None, max_devices=None)
 
-DUMMY = _GHOST_DEVICE(Receiver.number, 'dialog-error', None, 'Receiver not found.', 6)
+DUMMY_RECEIVER = _GHOST_DEVICE(0xFF, 'Solaar', None, 'Receiver not found.', 0)
 
 #
 #
@@ -52,15 +52,15 @@ class ReceiverListener(_listener.EventsListener):
 		_log.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
 		self.receiver.enable_notifications()
 		self.receiver.notify_devices()
-		self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
+		# self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
 
 	def has_stopped(self):
 		_log.info("%s: notifications listener has stopped", self.receiver)
 		if self.receiver:
 			self.receiver.enable_notifications(False)
 			self.receiver.close()
-		self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
 		self.receiver = None
+		self.status_changed_callback(DUMMY_RECEIVER, _status.ALERT.NOTIFICATION)
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):
@@ -76,7 +76,7 @@ class ReceiverListener(_listener.EventsListener):
 		self._last_tick = timestamp
 
 		# read these in case they haven't been read already
-		self.receiver.serial, self.receiver.firmware
+		# self.receiver.serial, self.receiver.firmware
 		if self.receiver.status.lock_open:
 			# don't mess with stuff while pairing
 			return
@@ -86,27 +86,36 @@ class ReceiverListener(_listener.EventsListener):
 				dev.status.poll(timestamp)
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
+		assert device is not None
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("status_changed %s: %s %s (%X) %s", device,
-						None if device is None else 'active' if device.status else 'inactive',
-						None if device is None else device.status,
-						alert, reason or '')
-		if self.status_changed_callback:
-			r = self.receiver or DUMMY
-			if device is None or device.kind is None:
-				# the status of the receiver changed
-				self.status_changed_callback(r, None, alert, reason)
-			else:
-				if device.status is None:
-					# device was unpaired, and since the object is weakref'ed
-					# it won't be valid for much longer
-					device = _ghost(device)
+			_log.debug("%s: status_changed %s: %s, %s (%X) %s", self.receiver, device,
+						'active' if device.status else 'inactive',
+						device.status, alert, reason or '')
 
-				self.status_changed_callback(r, device, alert, reason)
+		if device.kind is None:
+			# print ("self.receiver: ", self.receiver, id(self.receiver))
+			# print ("device: ", device, id(device))
+			assert device == self.receiver
+			# the status of the receiver changed
+			self.status_changed_callback(device, alert, reason)
+		else:
+			if device.status is None:
+				# the device may be paired later, possibly to another receiver?
+				# so maybe we shouldn't forget about it
+				# configuration.forget(device)
 
-				if device.status is None:
-					# the receiver changed status as well
-					self.status_changed_callback(r)
+				# device was unpaired, and since the object is weakref'ed
+				# it won't be valid for much longer
+				device = _ghost(device)
+
+			# elif device.status:
+			# 	configuration.sync(device)
+
+			self.status_changed_callback(device, alert, reason)
+
+			if device.status is None:
+				# the receiver changed status as well
+				self.status_changed_callback(self.receiver)
 
 	def _notifications_handler(self, n):
 		assert self.receiver

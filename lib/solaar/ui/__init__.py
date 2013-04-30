@@ -44,4 +44,5 @@ def error_dialog(window, title, text):
 	m.destroy()
 
 
-from . import notify, status_icon, main_window
+from . import status_icon
+from . import notify, main_window

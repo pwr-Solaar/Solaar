@@ -41,7 +41,7 @@ def lux(level):
 
 _ICON_SETS = {}
 
-def device_icon_set(name, kind=None):
+def device_icon_set(name='_', kind=None):
 	icon_set = _ICON_SETS.get(name)
 	if icon_set is None:
 		icon_set = Gtk.IconSet.new()
@@ -56,10 +56,7 @@ def device_icon_set(name, kind=None):
 			elif str(kind) == 'trackball':
 				names += ('input-mouse',)
 			names += ('input-' + str(kind),)
-
-		theme = Gtk.IconTheme.get_default()
-		if theme.has_icon(name):
-			names += (name,)
+		names += (name,)
 
 		source = Gtk.IconSource.new()
 		for n in names:

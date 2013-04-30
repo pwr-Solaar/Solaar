@@ -66,10 +66,12 @@ def _show_about_window(action):
 						))
 	except TypeError:
 		# gtk3 < 3.6 has incorrect gi bindings
-		pass
+		import logging
+		logging.exception("failed to fully create the about dialog")
 	except:
 		# is the Gtk3 version too old?
-		pass
+		import logging
+		logging.exception("failed to fully create the about dialog")
 
 	about.set_website('http://pwr.github.io/Solaar/')
 	about.set_website_label('Solaar')
@@ -77,8 +79,6 @@ def _show_about_window(action):
 	about.run()
 	about.destroy()
 about = make('help-about', 'About ' + _NAME, _show_about_window)
-
-quit = make('application-exit', 'Quit', Gtk.main_quit)
 
 #
 #

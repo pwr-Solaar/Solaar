@@ -20,17 +20,17 @@ _STATUS_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _TOOLBAR_ICON_SIZE = Gtk.IconSize.MENU
 _PLACEHOLDER = '~'
 _FALLBACK_ICON = 'preferences-desktop-peripherals'
+_MAX_DEVICES = 7
 
 #
 #
 #
 
-def _make_receiver_box(name):
+def _make_receiver_box():
 	frame = Gtk.Frame()
 	frame._device = None
-	frame.set_name(name)
 
-	icon_set = _icons.device_icon_set(name)
+	icon_set = _icons.device_icon_set()
 	icon = Gtk.Image.new_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
 	icon.set_padding(2, 2)
 	frame._icon = icon
@@ -39,7 +39,7 @@ def _make_receiver_box(name):
 	label.set_alignment(0, 0.5)
 	frame._label = label
 
-	pairing_icon = Gtk.Image.new_from_icon_name('network-wireless', _RECEIVER_ICON_SIZE)
+	pairing_icon = Gtk.Image.new_from_icon_name('network-wireless', _TOOLBAR_ICON_SIZE)
 	pairing_icon.set_tooltip_text('The pairing lock is open.')
 	pairing_icon._tick = 0
 	frame._pairing_icon = pairing_icon
@@ -242,18 +242,48 @@ def _make_device_box(index):
 	return frame
 
 
-def create(title, name, max_devices, systray=False):
+def hide(w, trigger):
+	position = w.get_position()
+	w.hide()
+	w.move(*position)
+	return True
+
+
+def toggle(trigger, w):
+	if w.get_visible():
+		return hide(w, trigger)
+
+	if isinstance(trigger, Gtk.StatusIcon):
+		x, y = w.get_position()
+		if x == 0 and y == 0:
+			# if the window hasn't been shown yet, position it next to the status icon
+			x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
+			w.move(x, y)
+	w.present()
+	return True
+
+
+def set_icon_name(window, icon_name):
+	icon_file = _icons.icon_file(icon_name)
+	if icon_file:
+		window.set_icon_from_file(icon_file)
+	else:
+		window.set_icon_name(icon_name)
+
+
+def create(title):
 	window = Gtk.Window()
 	window.set_title(title)
-	window.set_icon_name(_icons.APP_ICON[0])
+	set_icon_name(window, _icons.APP_ICON[0])
 	window.set_role('status-window')
+	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=12)
 	vbox.set_border_width(4)
 
-	rbox = _make_receiver_box(name)
+	rbox = _make_receiver_box()
 	vbox.add(rbox)
-	for i in range(1, 1 + max_devices):
+	for i in range(1, _MAX_DEVICES):
 		dbox = _make_device_box(i)
 		vbox.add(dbox)
 	vbox.set_visible(True)
@@ -264,53 +294,13 @@ def create(title, name, max_devices, systray=False):
 	geometry.min_width = 320
 	geometry.min_height = 32
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
+
 	window.set_resizable(False)
-
-	def _toggle_visible(w, trigger):
-		if w.get_visible():
-			# hiding moves the window to 0,0
-			position = w.get_position()
-			w.hide()
-			w.move(*position)
-		else:
-			if isinstance(trigger, Gtk.StatusIcon):
-				x, y = w.get_position()
-				if x == 0 and y == 0:
-					# if the window hasn't been shown yet, position it next to the status icon
-					x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
-					w.move(x, y)
-			w.present()
-		return True
-
-	def _set_has_systray(w, systray):
-		# print ("set has systray", systray, w._has_systray)
-		if systray != w._has_systray:
-			w._has_systray = systray
-			if systray:
-				if w._delete_event_connection is None or not w.get_skip_taskbar_hint():
-					w.set_skip_taskbar_hint(True)
-					w.set_skip_pager_hint(True)
-					if w._delete_event_connection:
-						w.disconnect(w._delete_event_connection)
-					w._delete_event_connection = w.connect('delete-event', _toggle_visible)
-			else:
-				if w._delete_event_connection is None or w.get_skip_taskbar_hint():
-					w.set_skip_taskbar_hint(False)
-					w.set_skip_pager_hint(False)
-					if w._delete_event_connection:
-						w.disconnect(w._delete_event_connection)
-					w._delete_event_connection = w.connect('delete-event', Gtk.main_quit)
-					w.present()
-
-	from types import MethodType
-	window.toggle_visible = MethodType(_toggle_visible, window)
-	window.set_has_systray = MethodType(_set_has_systray, window)
-	del MethodType
-
+	window.set_skip_taskbar_hint(True)
+	window.set_skip_pager_hint(True)
 	window.set_keep_above(True)
-	window._delete_event_connection = None
-	window._has_systray = None
-	window.set_has_systray(systray)
+	# window.set_decorations(Gdk.DECOR_BORDER | Gdk.DECOR_TITLE)
+	window.connect('delete-event', hide)
 
 	return window
 
@@ -322,6 +312,8 @@ def _update_receiver_box(frame, receiver):
 	frame._label.set_text(str(receiver.status))
 	if receiver:
 		frame._device = receiver
+		icon_set = _icons.device_icon_set(receiver.name)
+		frame._icon.set_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
 		frame._icon.set_sensitive(True)
 		if receiver.status.lock_open:
 			if frame._pairing_icon._tick == 0:
@@ -342,6 +334,7 @@ def _update_receiver_box(frame, receiver):
 		frame._toolbar.set_sensitive(True)
 	else:
 		frame._device = None
+		frame._icon.set_from_icon_name('dialog-error', _RECEIVER_ICON_SIZE)
 		frame._icon.set_sensitive(False)
 		frame._pairing_icon.set_visible(False)
 		frame._toolbar.set_sensitive(False)
@@ -420,19 +413,21 @@ def _update_device_box(frame, dev):
 	_config_panel.update(frame)
 
 
-def update(window, receiver, device=None):
-	assert receiver is not None
-	# print ("update", receiver, receiver.status, len(receiver), device)
-	window.set_icon_name(_icons.APP_ICON[1 if receiver else -1])
+def update(window, device):
+	assert device is not None
+	# print ("main_window.update", device)
 
 	vbox = window.get_child()
 	frames = list(vbox.get_children())
-	assert len(frames) == 1 + receiver.max_devices, frames
 
-	if device is None:
-		_update_receiver_box(frames[0], receiver)
-		if not receiver:
+	if device.kind is None:
+		# update on the receiver
+		_update_receiver_box(frames[0], device)
+		if device:
+			set_icon_name(window, _icons.APP_ICON[1])
+		else:
 			for frame in frames[1:]:
 				_update_device_box(frame, None)
+			set_icon_name(window, _icons.APP_ICON[-1])
 	else:
 		_update_device_box(frames[device.number], None if device.status is None else device)
