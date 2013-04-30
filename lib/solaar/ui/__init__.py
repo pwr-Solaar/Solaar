@@ -33,8 +33,8 @@ def _look_for_application_icons():
 _look_for_application_icons()
 
 
-from gi.repository import GObject, Gtk
-GObject.threads_init()
+from gi.repository import GLib, Gtk
+GLib.threads_init()
 
 
 def error_dialog(window, title, text):

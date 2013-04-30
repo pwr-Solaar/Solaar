@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GLib
 
 from logitech.unifying_receiver import status as _status
 from . import config_panel as _config_panel
@@ -77,7 +77,7 @@ def _make_receiver_box(name):
 			c.set_visible(active)
 
 		if active:
-			GObject.timeout_add(50, _update_info_label, f)
+			GLib.timeout_add(50, _update_info_label, f)
 
 	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
@@ -194,7 +194,7 @@ def _make_device_box(index):
 		children[2].set_visible(active)  # info label
 
 		if active:
-			GObject.timeout_add(30, _update_info_label, f)
+			GLib.timeout_add(30, _update_info_label, f)
 
 	def _toggle_config(action, f):
 		active = action.get_active()
@@ -209,7 +209,7 @@ def _make_device_box(index):
 		children[4].set_visible(active)  # unpair button
 
 		if active:
-			GObject.timeout_add(30, _config_panel.update, f)
+			GLib.timeout_add(30, _config_panel.update, f)
 
 	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
@@ -334,7 +334,7 @@ def _update_receiver_box(frame, receiver):
 					i.set_sensitive(True)
 					i._tick = 0
 				frame._pairing_icon.set_visible(True)
-				GObject.timeout_add(1000, _pairing_tick, frame._pairing_icon, receiver.status)
+				GLib.timeout_add(1000, _pairing_tick, frame._pairing_icon, receiver.status)
 		else:
 			frame._pairing_icon.set_visible(False)
 			frame._pairing_icon.set_sensitive(True)

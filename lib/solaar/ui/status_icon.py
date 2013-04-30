@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GObject, GdkPixbuf
+from gi.repository import Gtk, GLib, GdkPixbuf
 
 from . import action as _action, icons as _icons
 from logitech.unifying_receiver import status as _status
@@ -50,9 +50,9 @@ def check_systray(icon, window):
 			logging.info("check_systray %s %s", i2.is_embedded(), i2.get_visible())
 			w2.set_has_systray(i2.is_embedded() and i2.get_visible())
 		# first guess
-		GObject.timeout_add(250, _check_systray, i, w)
+		GLib.timeout_add(250, _check_systray, i, w)
 		# just to make sure...
-		# GObject.timeout_add(1000, _check_systray, i, w)
+		# GLib.timeout_add(1000, _check_systray, i, w)
 
 	_size_changed(icon, None, window)
 	icon.connect('size-changed', _size_changed, window)

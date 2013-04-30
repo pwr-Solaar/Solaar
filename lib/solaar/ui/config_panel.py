@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GLib
 
 from logitech.unifying_receiver import settings as _settings
 
@@ -32,12 +32,12 @@ def _process_apply_queue():
 		# print ("task", *task)
 		if task[0] == 'write':
 			_, setting, value, sbox = task
-			GObject.idle_add(_write_start, sbox, priority=0)
+			GLib.idle_add(_write_start, sbox, priority=0)
 			value = setting.write(value)
 		elif task[0] == 'read':
 			_, setting, force_read, sbox = task
 			value = setting.read(not force_read)
-		GObject.idle_add(_update_setting_item, sbox, value, priority=99)
+		GLib.idle_add(_update_setting_item, sbox, value, priority=99)
 
 from threading import Thread as _Thread
 _queue_processor = _Thread(name='SettingsProcessor', target=_process_apply_queue)

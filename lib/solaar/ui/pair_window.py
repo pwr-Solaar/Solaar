@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GLib
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('pair-window')
@@ -95,10 +95,10 @@ def _prepare(assistant, page, receiver):
 			assert receiver.status.get(_status.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GObject.timeout_add(2000, _check_lock_state, assistant, receiver)
+			GLib.timeout_add(2000, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
-			GObject.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
+			GLib.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
 	else:
 		assistant.remove_page(0)
 
@@ -167,7 +167,7 @@ def _pairing_succeeded(assistant, receiver, device):
 				hbox.show_all()
 			else:
 				return True
-	GObject.timeout_add(500, _check_encrypted, device)
+	GLib.timeout_add(500, _check_encrypted, device)
 
 	page.show_all()
 
