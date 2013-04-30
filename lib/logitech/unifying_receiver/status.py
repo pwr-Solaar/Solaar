@@ -283,11 +283,11 @@ class DeviceStatus(dict):
 					alert = ALERT.NONE
 					reason = self[ERROR] = None
 					if _log.isEnabledFor(_DEBUG):
-						_log.debug("%s: battery %d% charged, %s", self._device, discharge, self[BATTERY_STATUS])
+						_log.debug("%s: battery %d%% charged, %s", self._device, discharge, self[BATTERY_STATUS])
 				else:
 					alert = ALERT.ALL
 					reason = self[ERROR] = self[BATTERY_STATUS]
-					_log.warn("%s: battery %d% charged, ALERT %s", self._device, discharge, reason)
+					_log.warn("%s: battery %d%% charged, ALERT %s", self._device, discharge, reason)
 				self._changed(alert=alert, reason=reason)
 			else:
 				_log.info("%s: unknown BATTERY %s", self._device, n)

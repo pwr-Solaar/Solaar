@@ -17,7 +17,7 @@ class NamedInt(int):
 	def __new__(cls, value, name):
 		assert isinstance(name, str) or isinstance(name, unicode)
 		obj = int.__new__(cls, value)
-		obj.name = unicode(name)
+		obj.name = str(name)
 		return obj
 
 	def bytes(self, count=2):
