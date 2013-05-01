@@ -114,9 +114,6 @@ class EventsListener(_threading.Thread):
 	def __init__(self, receiver, notifications_callback):
 		super(EventsListener, self).__init__(name=self.__class__.__name__)
 
-		# replace the handle with a threaded one
-		receiver.handle = _ThreadedHandle(self, receiver.path, receiver.handle)
-
 		self.daemon = True
 		self._active = False
 
@@ -129,7 +126,9 @@ class EventsListener(_threading.Thread):
 	def run(self):
 		self._active = True
 
+		# replace the handle with a threaded one
 		ihandle = int(self.receiver.handle)
+		self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
 		_log.info("started with %s (%d)", self.receiver, ihandle)
 
 		self.has_started()

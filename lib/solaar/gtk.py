@@ -45,41 +45,54 @@ def _run(args):
 
 	ui.notify.init()
 
-	from solaar.listener import DUMMY_RECEIVER, ReceiverListener
 	window = ui.main_window.create(NAME)
 	assert window
 	icon = ui.status_icon.create(window)
 	assert icon
 
 	listeners = {}
+	from logitech.unifying_receiver import base as _base
 
-	# initializes the receiver listener
-	def check_for_listener(notify=False):
-		# print ("check_for_listener", notify)
+	from solaar.listener import ReceiverListener
 
-		try:
-			l = ReceiverListener.open(status_changed)
-		except OSError:
-			l = None
-			ui.error_dialog(window, 'Permissions error',
-							'Found a possible Unifying Receiver device,\n'
-							'but did not have permission to open it.')
+	def handle_receivers_events(action, device):
+		assert action is not None
+		assert device is not None
 
-		listeners.clear()
-		if l:
-			listeners[l.receiver.serial] = l
-		else:
-			if notify:
-				status_changed(DUMMY_RECEIVER)
-			else:
-				return True
+		if action == 'add':
+			# a new receiver device was detected
+			if not listeners:
+				# handle only one receiver for now, the rest are ignored
+				try:
+					l = ReceiverListener.open(device.path, status_changed)
+					if l is not None:
+						listeners[device.path] = l
+				except OSError:
+					# permission error, blacklist this path for now
+					listeners.pop(device.path, None)
+					import logging
+					logging.exception("failed to open %s", device.path)
+					# ui.error_dialog(window, 'Permissions error',
+					# 				'Found a possible Unifying Receiver device,\n'
+					# 				'but did not have permission to open it.')
 
-	from gi.repository import Gtk, GLib
-	from logitech.unifying_receiver.status import ALERT
+		elif action == 'remove':
+			# we'll be receiving remove events for any hidraw devices,
+			# not just Logitech receivers, so it's okay if the device is not
+			# already in our listeners map
+			l = listeners.pop(device.path, None)
+			if l is not None:
+				assert isinstance(l, ReceiverListener)
+				l.stop()
+
+		# print ("****", action, device, listeners)
 
 	# callback delivering status notifications from the receiver/devices to the UI
+	from gi.repository import GLib
+	from logitech.unifying_receiver.status import ALERT
 	def status_changed(device, alert=ALERT.NONE, reason=None):
 		assert device is not None
+		# print ("status changed", device, reason)
 
 		if alert & ALERT.SHOW_WINDOW:
 			GLib.idle_add(window.present)
@@ -87,14 +100,25 @@ def _run(args):
 		GLib.idle_add(ui.status_icon.update, icon, device)
 
 		if ui.notify.available:
-			# always notify on receiver updates
-			if device is DUMMY_RECEIVER or alert & ALERT.NOTIFICATION:
+			if alert & ALERT.NOTIFICATION:
+				GLib.idle_add(ui.notify.show, device, reason)
+			elif device.kind is None and not device:
+				# notify when a receiver was removed
 				GLib.idle_add(ui.notify.show, device, reason)
 
-		if device is DUMMY_RECEIVER:
-			GLib.timeout_add(3000, check_for_listener)
+		# if device.kind is None and not device:
+		# 	# a receiver was removed
+		# 	listeners.clear()
 
-	GLib.timeout_add(10, check_for_listener, True)
+	# ugly...
+	def _startup_check_receiver():
+		from solaar.listener import DUMMY_RECEIVER
+		if not listeners:
+			status_changed(DUMMY_RECEIVER, ALERT.NOTIFICATION)
+	GLib.timeout_add(1000, _startup_check_receiver)
+
+	GLib.timeout_add(10, _base.notify_on_receivers, handle_receivers_events)
+	from gi.repository import Gtk
 	Gtk.main()
 
 	map(ReceiverListener.stop, listeners.values())

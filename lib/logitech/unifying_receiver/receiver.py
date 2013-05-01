@@ -375,24 +375,16 @@ class Receiver(object):
 	__bool__ = __nonzero__ = lambda self: self.handle is not None
 
 	@classmethod
-	def open(self):
-		"""Opens the first Logitech Unifying Receiver found attached to the machine.
+	def open(self, path):
+		"""Opens a Logitech Receiver found attached to the machine, by device path.
 
 		:returns: An open file handle for the found receiver, or ``None``.
 		"""
-		exception = None
-
-		for rawdevice in _base.receivers():
-			exception = None
-			try:
-				handle = _base.open_path(rawdevice.path)
-				if handle:
-					return Receiver(handle, rawdevice.path)
-			except OSError as e:
-				_log.exception("open %s", rawdevice.path)
-				if e.errno == _errno.EACCES:
-					exception = e
-
-		if exception:
-			# only keep the last exception
-			raise exception
+		try:
+			handle = _base.open_path(path)
+			if handle:
+				return Receiver(handle, path)
+		except OSError as e:
+			_log.exception("open %s", path)
+			if e.errno == _errno.EACCES:
+				raise

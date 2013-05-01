@@ -153,10 +153,12 @@ class ReceiverListener(_listener.EventsListener):
 	__unicode__ = __str__
 
 	@classmethod
-	def open(self, status_changed_callback):
+	def open(self, path, status_changed_callback):
 		assert status_changed_callback
-		receiver = Receiver.open()
+		receiver = Receiver.open(path)
 		if receiver:
 			rl = ReceiverListener(receiver, status_changed_callback)
 			rl.start()
 			return rl
+		else:
+			_log.warn("failed to open %s", path)

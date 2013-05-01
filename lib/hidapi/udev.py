@@ -94,13 +94,29 @@ def monitor(callback, *device_filters):
 	m = _Monitor.from_netlink(_Context())
 	m.filter_by(subsystem='hidraw')
 	for action, device in m:
-		hid_dev = device.find_parent('hid')
-		if hid_dev:
-			for filter in device_filters:
-				dev_info = _match(device, hid_dev, *filter)
-				if dev_info:
-					callback(action, dev_info)
-					break
+		if action == 'add':
+			hid_dev = device.find_parent(subsystem='hid')
+			# print ("****", action, device, hid_dev)
+			if hid_dev:
+				for filter in device_filters:
+					d_info = _match(device, hid_dev, *filter)
+					if d_info:
+						callback(action, d_info)
+						break
+		elif action == 'remove':
+			# this is ugly, but... well.
+			# signal the callback for each removed device; it will have figure
+			# out for itself if it's a device it should handle
+			d_info = DeviceInfo(path=device.device_node,
+								vendor_id=None,
+								product_id=None,
+								serial=None,
+								release=None,
+								manufacturer=None,
+								product=None,
+								interface=None,
+								driver=None)
+			callback(action, d_info)
 
 
 def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=None):
