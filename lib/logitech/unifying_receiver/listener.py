@@ -59,8 +59,7 @@ class _ThreadedHandle(object):
 			handles, self._handles = self._handles, []
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("%s closing %s", repr(self), handles)
-			for h in handles:
-				_base.close(h)
+			map(_base.close, handles)
 
 	@property
 	def notifications_hook(self):
@@ -87,7 +86,7 @@ class _ThreadedHandle(object):
 	__unicode__ = __str__
 
 	def __repr__(self):
-		return '<ThreadedHandle(%s)>' % self.path
+		return '<_ThreadedHandle(%s)>' % self.path
 
 	def __bool__(self):
 		return bool(self._local)
@@ -104,7 +103,7 @@ class _ThreadedHandle(object):
 _EVENT_READ_TIMEOUT = 500
 
 # After this many reads that did not produce a packet, call the tick() method.
-_IDLE_READS = 4
+_IDLE_READS = 3
 
 
 class EventsListener(_threading.Thread):
@@ -163,9 +162,8 @@ class EventsListener(_threading.Thread):
 					_log.exception("processing %s", n)
 
 			elif self.tick_period:
-				idle_reads += 1
-				if idle_reads % _IDLE_READS == 0:
-					idle_reads = 0
+				idle_reads = (idle_reads + 1) % _IDLE_READS
+				if idle_reads == 0:
 					now = _timestamp()
 					if now - last_tick >= self.tick_period:
 						last_tick = now

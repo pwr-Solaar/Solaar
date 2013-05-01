@@ -33,7 +33,7 @@ DUMMY_RECEIVER = _GHOST_DEVICE(0xFF, 'Solaar', None, 'Receiver not found.', 0)
 
 # how often to poll devices that haven't updated their statuses on their own
 # (through notifications)
-_POLL_TICK = 60  # seconds
+_POLL_TICK = 120  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
@@ -93,8 +93,6 @@ class ReceiverListener(_listener.EventsListener):
 						device.status, alert, reason or '')
 
 		if device.kind is None:
-			# print ("self.receiver: ", self.receiver, id(self.receiver))
-			# print ("device: ", device, id(device))
 			assert device == self.receiver
 			# the status of the receiver changed
 			self.status_changed_callback(device, alert, reason)

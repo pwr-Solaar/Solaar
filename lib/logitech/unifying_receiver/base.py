@@ -229,10 +229,18 @@ def make_notification(devnumber, data):
 	return a Notification tuple if it is."""
 	sub_id = ord(data[:1])
 	if sub_id & 0x80 != 0x80:
-		# HID++ 1.0 standard notifications are 0x40 - 0x7F
-		# HID++ 2.0 feature notifications have the SoftwareID 0
+		# if this is not a HID++1.0 register r/w
 		address = ord(data[1:2])
-		if sub_id >= 0x40 or address & 0x0F == 0x00:
+		if (
+			# standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
+			(sub_id >= 0x40)
+			or
+			# custom HID++1.0 battery events, where SubId is 0x07/0x0D
+			(sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00')
+			or
+			# HID++ 2.0 feature notifications have the SoftwareID 0
+			(address & 0x0F == 0x00)
+			):
 			return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 from collections import namedtuple

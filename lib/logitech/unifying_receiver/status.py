@@ -170,8 +170,8 @@ class DeviceStatus(dict):
 			# read these from the device in case they haven't been read already
 			# d.protocol, d.serial, d.firmware
 
-			# if BATTERY_LEVEL not in self:
-			self.read_battery(timestamp)
+			if BATTERY_LEVEL not in self:
+				self.read_battery(timestamp)
 
 			# make sure we know all the features of the device
 			if d.features:
@@ -192,6 +192,12 @@ class DeviceStatus(dict):
 		if n.sub_id >= 0x40:
 			return self._process_hidpp10_notification(n)
 
+		# some custom battery events for HID++ 1.0 devices
+		if n.sub_id in (0x07, 0x0D) and len(n.data) == 3 and n.data[2:3] == b'\x00':
+			# _log.debug("%s (%s) custom battery notification %s", self._device, self._device.protocol, n)
+			if self._device.protocol < 2:
+				return self._process_hidpp10_custom_notification(n)
+
 		# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
 		try:
 			feature = self._device.features[n.sub_id]
@@ -200,6 +206,17 @@ class DeviceStatus(dict):
 			return False
 
 		return self._process_feature_notification(n, feature)
+
+	def _process_hidpp10_custom_notification(self, n):
+		if n.sub_id == 0x07:
+			# TODO
+			return True
+
+		if n.sub_id == 0x0D:
+			# TODO
+			return True
+
+		_log.warn("%s: unrecognized %s", self._device, n)
 
 	def _process_hidpp10_notification(self, n):
 		if n.sub_id == 0x40:
