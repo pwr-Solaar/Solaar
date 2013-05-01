@@ -33,13 +33,16 @@ def _require(module, os_package):
 
 def _receiver():
 	from logitech.unifying_receiver import Receiver
-	try:
-		r = Receiver.open()
-	except Exception as e:
-		_fail(str(e))
-	if r is None:
-		_fail("Logitech Unifying Receiver not found")
-	return r
+	from logitech.unifying_receiver.base import receivers
+	for dev_info in receivers():
+		try:
+			r = Receiver.open(dev_info.path)
+			if r:
+				return r
+		except Exception as e:
+			_fail(str(e))
+		return r
+	_fail("Logitech receiver not found")
 
 
 def _find_device(receiver, name, may_be_receiver=False):
