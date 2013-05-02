@@ -19,9 +19,6 @@ def init_paths():
 
 
 if __name__ == '__main__':
-	if sys.version_info >= (2, 8):
-		sys.exit("Python 3 is not supported by hidconsole.")
-
 	init_paths()
 	from hidapi import hidconsole
 	hidconsole.main()

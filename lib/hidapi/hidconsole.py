@@ -15,12 +15,17 @@ import hidapi
 #
 #
 
-# no Python 3 support :(
-read_packet = raw_input
+try:
+	read_packet = raw_input
+except NameError:
+	# Python 3 equivalent of raw_input
+	read_packet = input
+
 interactive = os.isatty(0)
 prompt = '?? Input: ' if interactive else ''
 
 strhex = lambda d: hexlify(d).decode('ascii').upper()
+is_string = lambda d: type(d) == (str if type(u'') == str else unicode)
 start_time = time.time()
 
 #
@@ -33,7 +38,7 @@ del Lock
 
 def _print(marker, data, scroll=False):
 	t = time.time() - start_time
-	if type(data) == unicode:
+	if is_string(data):
 		s = marker + ' ' + data
 	else:
 		hexs = strhex(data)
