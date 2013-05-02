@@ -125,6 +125,27 @@ class DeviceStatus(dict):
 		return bool(self._active)
 	__nonzero__ = __bool__
 
+	def set_battery_info(self, level, status, timestamp=None):
+		# TODO: this is also executed when pressing Fn+F7 on K800.
+		# Modify this such that alerts/writes are only done when the
+		# level/status actually changes.
+		self[BATTERY_LEVEL] = level
+		self[BATTERY_STATUS] = status
+		error = None
+		if _hidpp20.BATTERY_OK(status):
+			alert = ALERT.NONE
+			reason = self[ERROR] = None
+			if _log.isEnabledFor(_DEBUG):
+				_log.debug("%s: battery %d%% charged, %s", self._device, level, status)
+		else:
+			alert = ALERT.ALL
+			error = status
+			_log.warn("%s: battery %d%% charged, ALERT %s", self._device, level, error)
+		if error is not None:
+			# TODO: show visual warning/notif to user
+			self[ERROR] = error
+		self._changed(alert=alert, reason=error, timestamp=timestamp)
+
 	def read_battery(self, timestamp=None):
 		d = self._device
 		if d and self._active:
@@ -139,8 +160,8 @@ class DeviceStatus(dict):
 				# 	return
 
 			if battery:
-				self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
-				self._changed(timestamp=timestamp)
+				level, status = battery
+				self.set_battery_info(level, status, timestamp=timestamp)
 			elif BATTERY_STATUS in self:
 				self[BATTERY_STATUS] = None
 				self._changed(timestamp=timestamp)
@@ -209,7 +230,9 @@ class DeviceStatus(dict):
 
 	def _process_hidpp10_custom_notification(self, n):
 		if n.sub_id == 0x07:
-			# TODO
+			# message layout: 10 ix  07("address")  <LEVEL> <STATUS>  00 00
+			level, status = _hidpp10.parse_battery_reply(n.address, ord(n.data[:1]))
+			self.set_battery_info(level, status)
 			return True
 
 		if n.sub_id == 0x0D:
@@ -294,18 +317,7 @@ class DeviceStatus(dict):
 			if n.address == 0x00:
 				discharge = ord(n.data[:1])
 				battery_status = ord(n.data[1:2])
-				self[BATTERY_LEVEL] = discharge
-				self[BATTERY_STATUS] = BATTERY_STATUS[battery_status]
-				if _hidpp20.BATTERY_OK(battery_status):
-					alert = ALERT.NONE
-					reason = self[ERROR] = None
-					if _log.isEnabledFor(_DEBUG):
-						_log.debug("%s: battery %d%% charged, %s", self._device, discharge, self[BATTERY_STATUS])
-				else:
-					alert = ALERT.ALL
-					reason = self[ERROR] = self[BATTERY_STATUS]
-					_log.warn("%s: battery %d%% charged, ALERT %s", self._device, discharge, reason)
-				self._changed(alert=alert, reason=reason)
+				self.set_battery_info(discharge, _hidpp20.BATTERY_STATUS[battery_status])
 			else:
 				_log.info("%s: unknown BATTERY %s", self._device, n)
 			return True
