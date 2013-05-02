@@ -125,7 +125,7 @@ class DeviceStatus(dict):
 		return bool(self._active)
 	__nonzero__ = __bool__
 
-	def set_battery_info(self, level, status):
+	def set_battery_info(self, level, status, timestamp=None):
 		self[BATTERY_LEVEL] = level
 		self[BATTERY_STATUS] = status
 		error = None
@@ -141,7 +141,7 @@ class DeviceStatus(dict):
 		if error is not None:
 			# TODO: show visual warning/notif to user
 			self[ERROR] = error
-		self._changed(alert=alert, reason=error)
+		self._changed(alert=alert, reason=error, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):
 		d = self._device
@@ -157,8 +157,8 @@ class DeviceStatus(dict):
 				# 	return
 
 			if battery:
-				self[BATTERY_LEVEL], self[BATTERY_STATUS] = battery
-				self._changed(timestamp=timestamp)
+				level, status = battery
+				self.set_battery_info(level, status, timestamp=timestamp)
 			elif BATTERY_STATUS in self:
 				self[BATTERY_STATUS] = None
 				self._changed(timestamp=timestamp)
