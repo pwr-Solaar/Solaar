@@ -76,20 +76,11 @@ def receivers():
 
 def notify_on_receivers(callback):
 	"""Starts a thread that monitors receiver events from udev."""
-	from threading import Thread as _Thread
-	t = _Thread(name='receivers_monitor', target=_hid.monitor,
-				args=(callback,
+	_hid.monitor_async(callback,
 					DEVICE_UNIFYING_RECEIVER,
 					DEVICE_UNIFYING_RECEIVER_2,
 					# DEVICE_NANO_RECEIVER,
-					))
-	t.daemon = True
-	t.start()
-
-	# the HID monitor will only send events when devices are added/removed,
-	# so we need to trigger the callback for all currently detected receivers
-	for r in receivers():
-		callback('add', r)
+		)
 
 
 def open_path(path):
