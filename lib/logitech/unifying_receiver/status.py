@@ -126,6 +126,9 @@ class DeviceStatus(dict):
 	__nonzero__ = __bool__
 
 	def set_battery_info(self, level, status, timestamp=None):
+		# TODO: this is also executed when pressing Fn+F7 on K800.
+		# Modify this such that alerts/writes are only done when the
+		# level/status actually changes.
 		self[BATTERY_LEVEL] = level
 		self[BATTERY_STATUS] = status
 		error = None
@@ -227,7 +230,9 @@ class DeviceStatus(dict):
 
 	def _process_hidpp10_custom_notification(self, n):
 		if n.sub_id == 0x07:
-			# TODO
+			# message layout: 10 ix  07("address")  <LEVEL> <STATUS>  00 00
+			level, status = _hidpp10.parse_battery_reply(n.address, ord(n.data[:1]))
+			self.set_battery_info(level, status)
 			return True
 
 		if n.sub_id == 0x0D:
