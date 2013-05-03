@@ -96,15 +96,18 @@ def get_battery(device):
 	if reply:
 		level = ord(reply[:1])
 		battery_status = ord(reply[1:2])
-		charge = (90 if level == 7 # full
-			else 50 if level == 5 # good
-			else 20 if level == 3 # low
-			else 5 if level == 1 # critical
-			else 0 ) # wtf?
-		status = ('charging' if battery_status == 0x25
-			else 'fully charged' if battery_status == 0x22
-			else 'discharging')
-		return charge, status
+		return parse_battery_reply(level, battery_status)
+
+def parse_battery_reply(level, battery_status):
+	charge = (90 if level == 7 # full
+		else 50 if level == 5 # good
+		else 20 if level == 3 # low
+		else 5 if level == 1 # critical
+		else 0 ) # wtf?
+	status = ('charging' if battery_status == 0x25
+		else 'fully charged' if battery_status == 0x22
+		else 'discharging')
+	return charge, status
 
 
 def get_serial(device):
