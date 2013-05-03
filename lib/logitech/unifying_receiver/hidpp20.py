@@ -33,8 +33,10 @@ FEATURE = _NamedInts(
 				BATTERY=0x1000,
 				REPROGRAMMABLE_KEYS=0x1B00,
 				WIRELESS=0x1D4B,
+				MOUSE_POINTER=0x2200,
 				FN_STATUS=0x40A0,
 				SOLAR_CHARGE=0x4301,
+				TOUCH_PAD=0x6100,
 				TOUCH_MOUSE=0x6110)
 FEATURE._fallback = lambda x: 'unknown:%04X' % x
 
@@ -395,3 +397,18 @@ def get_keys(device):
 	count = feature_request(device, FEATURE.REPROGRAMMABLE_KEYS)
 	if count:
 		return KeysArray(device, ord(count[:1]))
+
+
+def get_mouse_pointer_info(device):
+	pointer_info = feature_request(device, FEATURE.MOUSE_POINTER)
+	if pointer_info:
+		dpi, flags = _unpack(b'!HB', pointer_info[:3])
+		acceleration = ['none', 'low', 'med', 'high' ][flags & 0x3]
+		suggest_os_ballistics = (flags & 0x04) != 0
+		suggest_vertical_orientation = (flags & 0x08) != 0
+		return {
+				'dpi': dpi,
+				'acceleration': acceleration,
+				'suggest_os_ballistics': suggest_os_ballistics,
+				'suggest_vertical_orientation': suggest_vertical_orientation
+			}
