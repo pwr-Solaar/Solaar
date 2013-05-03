@@ -376,7 +376,7 @@ def _parse_arguments():
 		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
 	else:
 		logging.root.addHandler(logging.NullHandler())
-		logging.root.setLevel(logging.CRITICAL)
+		logging.root.setLevel(logging.ERROR)
 
 	return args
 
