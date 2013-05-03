@@ -152,11 +152,9 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=Non
 	:returns: a list of matching ``DeviceInfo`` tuples.
 	"""
 	for dev in _Context().list_devices(subsystem='hidraw'):
-		hid_dev = dev.find_parent('hid')
-		if hid_dev:
-			dev_info = _match(dev, hid_dev, vendor_id, product_id, interface_number, driver)
-			if dev_info:
-				yield dev_info
+		dev_info = _match('add', dev, vendor_id, product_id, interface_number, driver)
+		if dev_info:
+			yield dev_info
 
 
 def open(vendor_id, product_id, serial=None):
