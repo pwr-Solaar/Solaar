@@ -215,6 +215,8 @@ def write(device_handle, data):
 	the Control Endpoint (Endpoint 0).
 	"""
 	assert device_handle
+	assert data
+	assert isinstance(data, bytes), (repr(data), type(data))
 	bytes_written = _os.write(device_handle, data)
 	if bytes_written != len(data):
 		raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
@@ -248,6 +250,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 		assert rlist == [device_handle]
 		data = _os.read(device_handle, bytes_count)
 		assert data is not None
+		assert isinstance(data, bytes), (repr(data), type(data))
 		return data
 	else:
 		return b''

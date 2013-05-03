@@ -141,6 +141,9 @@ def write(handle, devnumber, data):
 	unloaded. The handle will be closed automatically.
 	"""
 	# the data is padded to either 5 or 18 bytes
+	assert data is not None
+	assert isinstance(data, bytes), (repr(data), type(data))
+
 	if len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
 		wdata = _pack(b'!BB18s', 0x11, devnumber, data)
 	else:
@@ -188,6 +191,7 @@ def _read(handle, timeout):
 		raise NoReceiver(reason=reason)
 
 	if data:
+		assert isinstance(data, bytes), (repr(data), type(data))
 		report_id = ord(data[:1])
 		assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
 				report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE or
@@ -218,6 +222,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 			raise NoReceiver(reason=reason)
 
 		if data:
+			assert isinstance(data, bytes), (repr(data), type(data))
 			if _log.isEnabledFor(_DEBUG):
 				report_id = ord(data[:1])
 				assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
