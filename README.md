@@ -13,27 +13,8 @@ also pair/unpair supported devices with the receiver.
 the very least display some basic information about them.
 
 For some devices, extra settings (usually not available through the standard
-Linux system configuration) are supported:
-
-* The [K750 Solar Keyboard][K750] is also queried for its solar charge status.
-  Pressing the `Solar` key on the keyboard will pop-up the application window
-  and display the current lighting value (Lux) as reported by the keyboard,
-  similar to Logitech's *Solar.app* for Windows.
-
-* The state of the `FN` key can be toggled on some keyboards ([K750][K750],
-  [K800][K800] and [K360][K360]). It changes the way the function keys
-  (`F1`..`F12`) work, i.e. whether holding `FN` while pressing the function keys
-  will generate the standard `Fx` keycodes or the special function (yellow
-  icons) keycodes.
-
-* The DPI can be changed on the [Performance MX Mouse][P_MX].
-
-* Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705] and [Anywhere MX Mouse][A_MX].
-
-Extended support for other devices may be added in the future, depending on the
-documentation available, but the K750 keyboard and M705 mouse are the only
-devices I have and can directly test on right now.
+Linux system configuration) are supported. For a full list of supported devices
+and their features, see [`docs/devices.md`](docs/devices.md).
 
 
 ## Pre-built packages
@@ -130,6 +111,7 @@ who also provided some internal
 - [Lars-Dominik Braun](http://6xq.net/git/lars/lshidpp.git)
 - [Alexander Hofbauer](http://derhofbauer.at/blog/blog/2012/08/28/logitech-performance-mx)
 - [Clach04](http://bitbucket.org/clach04/logitech-unifying-receiver-tools)
+- [Peter Wu](https://lekensteyn.nl/logitech-unifying.html)
 
 Also thanks to Douglas Wagner and Julien Gascard for helping with application
 testing and supporting new devices.
