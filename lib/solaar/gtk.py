@@ -83,14 +83,14 @@ def _run(args):
 		# 	if l is not None:
 		# 		l.stop()
 
-		print ("****", action, device, listeners)
+		# print ("****", action, device, listeners)
 
 	# callback delivering status notifications from the receiver/devices to the UI
 	from gi.repository import GLib
 	from logitech.unifying_receiver.status import ALERT
 	def status_changed(device, alert=ALERT.NONE, reason=None):
 		assert device is not None
-		print ("status changed", device, reason)
+		# print ("status changed", device, reason)
 
 		GLib.idle_add(ui.status_icon.update, icon, device)
 		GLib.idle_add(ui.main_window.update, device, alert & ALERT.SHOW_WINDOW)

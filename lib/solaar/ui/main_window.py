@@ -425,7 +425,7 @@ def _update_device_box(frame, dev):
 
 def update(device, popup=False):
 	assert device is not None
-	print ("main_window.update", device)
+	# print ("main_window.update", device)
 
 	receiver = device if device.kind is None else device.receiver
 	w = _windows.get(receiver.path)
