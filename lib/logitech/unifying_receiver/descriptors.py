@@ -76,6 +76,8 @@ def _D(name, codename=None, kind=None, registers=None, settings=None):
 
 # Some HID++1.0 registers and HID++2.0 features can be discovered at run-time,
 # so they are not specified here.
+# Registers are only supported for HID++ 1.0 devices. Specify a negative value
+# to blacklist that register (prevent Solaar from accessing the register)
 
 # Keyboards
 
