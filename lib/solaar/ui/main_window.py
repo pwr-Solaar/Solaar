@@ -59,6 +59,7 @@ def _make_receiver_box(receiver):
 
 	info_label = Gtk.Label()
 	info_label.set_markup('<small>reading ...</small>')
+	info_label.set_sensitive(False)
 	info_label.set_property('margin-left', 36)
 	info_label.set_alignment(0, 0)
 	info_label.set_selectable(True)
@@ -70,6 +71,7 @@ def _make_receiver_box(receiver):
 			items = [('Path', device.path), ('Serial', device.serial)] + \
 					[(fw.kind, fw.version) for fw in device.firmware]
 			f._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-13s: %s' % item for item in items))
+		f._info_label.set_sensitive(True)
 
 	def _toggle_info_label(action, f):
 		active = action.get_active()
@@ -78,7 +80,7 @@ def _make_receiver_box(receiver):
 			c.set_visible(active)
 
 		if active:
-			GLib.timeout_add(50, _update_info_label, f)
+			GLib.timeout_add(20, _update_info_label, f)
 
 	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
@@ -162,6 +164,7 @@ def _make_device_box(index):
 	info_label = Gtk.Label()
 	info_label.set_markup('<small>reading ...</small>')
 	info_label.set_property('margin-left', 54)
+	info_label.set_sensitive(False)
 	info_label.set_selectable(True)
 	info_label.set_alignment(0, 0)
 	frame._info_label = info_label
@@ -182,6 +185,7 @@ def _make_device_box(index):
 				items[4:] = [(fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in firmware]
 
 			frame._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-13s: %s' % i for i in items if i))
+		frame._info_label.set_sensitive(True)
 
 	def _toggle_info_label(action, f):
 		active = action.get_active()
