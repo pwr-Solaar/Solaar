@@ -23,58 +23,63 @@ Linux system configuration) are supported:
 
 # Supported devices
 
+Ver as noted in the below tables refers to the reported HID++ protocol version.
+1.0 is the initial protocol that retrieves information by reading/writing
+registers. HID++ 2.0 is a newer protocol that uses standardised *features* to
+read or change details.
+
 Keyboards:
 
-| Device           | Battery | Other features                                  |
-|------------------|---------|-------------------------------------------------|
-| K230             |         |                                                 |
-| K270             |         |                                                 |
-| K350             |         |                                                 |
-| K360             |         |                                                 |
-| K400 Touch       |         |                                                 |
-| K750 Solar       | yes     | FN swap, Lux reading, solar button              |
-| K800 Illuminated | yes     | FN swap, rechargable over USB                   |
+| Device           | Battery | Other features                            | Ver |
+|------------------|---------|-------------------------------------------|-----|
+| K230             |         |                                           |     |
+| K270             |         |                                           |     |
+| K350             |         |                                           |     |
+| K360             |         |                                           |     |
+| K400 Touch       |         |                                           |     |
+| K750 Solar       | yes     | FN swap, Lux reading, solar button        |     |
+| K800 Illuminated | yes     | FN swap, rechargable over USB             | 1.0 |
 
 
 Mice:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| M315             |         |       |                                         |
-| M325             |         |       |                                         |
-| M345             |         |       |                                         |
-| M505             |         |       |                                         |
-| M510             |         |       |                                         |
-| M515 Couch       | yes     | -     |                                         |
-| M525             | yes     | -     |                                         |
-| M705 Marathon    | yes     | -     | smooth scrolling                        |
-| T400 Zone Touch  |         |       |                                         |
-| T620 Touch       |         |       |                                         |
-| Performance MX   | yes     | yes   |                                         |
-| Anywhere MX      | yes     | -     | smooth scrolling                        |
-| Cube             |         |       |                                         |
+| Device           | Battery | DPI   | Other features                    | Ver |
+|------------------|---------|-------|-----------------------------------|-----|
+| M315             |         |       |                                   |     |
+| M325             |         |       |                                   |     |
+| M345             |         |       |                                   |     |
+| M505             |         |       |                                   |     |
+| M510             |         |       |                                   | 1.0 |
+| M515 Couch       | yes     | -     |                                   |     |
+| M525             | yes     | -     |                                   | 2.0 |
+| M705 Marathon    | yes     | -     | smooth scrolling                  | 1.0 |
+| T400 Zone Touch  |         |       |                                   |     |
+| T620 Touch       |         |       |                                   |     |
+| Performance MX   | yes     | yes   |                                   | 1.0 |
+| Anywhere MX      | yes     | -     | smooth scrolling                  |     |
+| Cube             |         |       |                                   |     |
 
 
 Trackballs:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| M570 Trackball   |         |       |                                         |
+| Device           | Battery | DPI   | Other features                    | Ver |
+|------------------|---------|-------|-----------------------------------|-----|
+| M570 Trackball   |         |       |                                   |     |
 
 
 Touchpads:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| T650 Touchpad    |         |       |                                         |
+| Device           | Battery | DPI   | Other features                    | Ver |
+|------------------|---------|-------|-----------------------------------|-----|
+| T650 Touchpad    |         |       |                                   |     |
 
 
 Mouse-Keyboard combos:
 
-| Device           | Battery | Other features                                  |
-|------------------|---------|-------------------------------------------------|
-| MK330            |         |                                                 |
-| MK710            |         | FN swap                                         |
+| Device           | Battery | Other features                            | Ver |
+|------------------|---------|-------------------------------------------|-----|
+| MK330            |         |                                           |     |
+| MK710            |         | FN swap                                   |     |
 
 
 --
