@@ -27,11 +27,11 @@ _MAX_DEVICES = 7
 #
 #
 
-def _make_receiver_box():
+def _make_receiver_box(receiver):
 	frame = Gtk.Frame()
-	frame._device = None
+	frame._device = receiver
 
-	icon_set = _icons.device_icon_set()
+	icon_set = _icons.device_icon_set(receiver.name)
 	icon = Gtk.Image.new_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
 	icon.set_padding(2, 2)
 	frame._icon = icon
@@ -243,18 +243,15 @@ def _make_device_box(index):
 	return frame
 
 
-def hide(w, trigger):
+def _hide(w):
 	position = w.get_position()
 	w.hide()
 	w.move(*position)
 	return True
 
 
-def toggle(trigger, w):
-	if w.get_visible():
-		return hide(w, trigger)
-
-	if isinstance(trigger, Gtk.StatusIcon):
+def _show(w, trigger=None):
+	if trigger and isinstance(trigger, Gtk.StatusIcon):
 		x, y = w.get_position()
 		if x == 0 and y == 0:
 			# if the window hasn't been shown yet, position it next to the status icon
@@ -264,25 +261,26 @@ def toggle(trigger, w):
 	return True
 
 
-def set_icon_name(window, icon_name):
-	icon_file = _icons.icon_file(icon_name)
+# all created windows will be placed here, keyed by the receiver path
+_windows = {}
+
+def _create(receiver):
+	window = Gtk.Window()
+
+	window.set_title(NAME + ': ' + receiver.name)
+	icon_file = _icons.icon_file(_icons.APP_ICON[1])
 	if icon_file:
 		window.set_icon_from_file(icon_file)
 	else:
-		window.set_icon_name(icon_name)
+		window.set_icon_name(_icons.APP_ICON[1])
 
-
-def create(title):
-	window = Gtk.Window()
-	window.set_title(title)
-	set_icon_name(window, _icons.APP_ICON[0])
 	window.set_role('status-window')
 	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=12)
 	vbox.set_border_width(4)
 
-	rbox = _make_receiver_box()
+	rbox = _make_receiver_box(receiver)
 	vbox.add(rbox)
 	for i in range(1, _MAX_DEVICES):
 		dbox = _make_device_box(i)
@@ -301,46 +299,57 @@ def create(title):
 	window.set_skip_pager_hint(True)
 	window.set_keep_above(True)
 	# window.set_decorations(Gdk.DECOR_BORDER | Gdk.DECOR_TITLE)
-	window.connect('delete-event', hide)
+	window.connect('delete-event', _hide)
 
+	_windows[receiver.path] = window
 	return window
+
+
+def _destroy(receiver):
+	w = _windows.pop(receiver.path, None)
+	if w:
+		w.destroy()
+
+
+def toggle_all(trigger):
+	if not _windows:
+		return
+
+	visible = [w.get_visible() for w in _windows.values()]
+	if all(visible):
+		map(_hide, _windows.values())
+	else:
+		for w in _windows.values():
+			if w.get_visible():
+				_hide(w)
+			else:
+				_show(w, trigger)
 
 #
 #
 #
 
 def _update_receiver_box(frame, receiver):
+	assert frame
+	assert receiver
+
 	frame._label.set_text(str(receiver.status))
-	if receiver:
-		frame._device = receiver
-		icon_set = _icons.device_icon_set(receiver.name)
-		frame._icon.set_from_icon_set(icon_set, _RECEIVER_ICON_SIZE)
-		frame._icon.set_sensitive(True)
-		if receiver.status.lock_open:
-			if frame._pairing_icon._tick == 0:
-				def _pairing_tick(i, s):
-					if s and s.lock_open:
-						i.set_sensitive(bool(i._tick % 2))
-						i._tick += 1
-						return True
-					i.set_visible(False)
-					i.set_sensitive(True)
-					i._tick = 0
-				frame._pairing_icon.set_visible(True)
-				GLib.timeout_add(1000, _pairing_tick, frame._pairing_icon, receiver.status)
-		else:
-			frame._pairing_icon.set_visible(False)
-			frame._pairing_icon.set_sensitive(True)
-			frame._pairing_icon._tick = 0
-		frame._toolbar.set_sensitive(True)
+	if receiver.status.lock_open:
+		if frame._pairing_icon._tick == 0:
+			def _pairing_tick(i, s):
+				if s and s.lock_open:
+					i.set_sensitive(bool(i._tick % 2))
+					i._tick += 1
+					return True
+				i.set_visible(False)
+				i.set_sensitive(True)
+				i._tick = 0
+			frame._pairing_icon.set_visible(True)
+			GLib.timeout_add(1000, _pairing_tick, frame._pairing_icon, receiver.status)
 	else:
-		frame._device = None
-		frame._icon.set_from_icon_name('dialog-error', _RECEIVER_ICON_SIZE)
-		frame._icon.set_sensitive(False)
 		frame._pairing_icon.set_visible(False)
-		frame._toolbar.set_sensitive(False)
-		frame._toolbar.get_children()[0].set_active(False)
-		frame._info_label.set_text('')
+		frame._pairing_icon.set_sensitive(True)
+		frame._pairing_icon._tick = 0
 
 
 def _update_device_box(frame, dev):
@@ -414,21 +423,25 @@ def _update_device_box(frame, dev):
 	_config_panel.update(frame)
 
 
-def update(window, device):
+def update(device, popup=False):
 	assert device is not None
-	# print ("main_window.update", device)
+	print ("main_window.update", device)
 
-	vbox = window.get_child()
-	frames = list(vbox.get_children())
+	receiver = device if device.kind is None else device.receiver
+	w = _windows.get(receiver.path)
+	if receiver and not w:
+		w = _create(receiver)
 
-	if device.kind is None:
-		# update on the receiver
-		_update_receiver_box(frames[0], device)
-		if device:
-			set_icon_name(window, _icons.APP_ICON[1])
+	if w:
+		if receiver:
+			if popup:
+				w.present()
+			vbox = w.get_child()
+			frames = list(vbox.get_children())
+
+			if device is receiver:
+				_update_receiver_box(frames[0], receiver)
+			else:
+				_update_device_box(frames[device.number], None if device.status is None else device)
 		else:
-			for frame in frames[1:]:
-				_update_device_box(frame, None)
-			set_icon_name(window, _icons.APP_ICON[-1])
-	else:
-		_update_device_box(frames[device.number], None if device.status is None else device)
+			_destroy(receiver)

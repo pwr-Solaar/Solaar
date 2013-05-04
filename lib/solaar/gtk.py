@@ -44,78 +44,67 @@ def _run(args):
 
 	ui.notify.init()
 
-	window = ui.main_window.create(NAME)
-	assert window
-	icon = ui.status_icon.create(window)
+	icon = ui.status_icon.create(ui.main_window.toggle_all)
 	assert icon
 
 	listeners = {}
-	from logitech.unifying_receiver import base as _base
-
 	from solaar.listener import ReceiverListener
 
 	def handle_receivers_events(action, device):
 		assert action is not None
 		assert device is not None
 
+		# whatever the action, stop any previous receivers at this path
+		l = listeners.pop(device.path, None)
+		if l is not None:
+			assert isinstance(l, ReceiverListener)
+			l.stop()
+
 		if action == 'add':
 			# a new receiver device was detected
-			if not listeners:
-				# handle only one receiver for now, the rest are ignored
-				try:
-					l = ReceiverListener.open(device.path, status_changed)
-					if l is not None:
-						listeners[device.path] = l
-				except OSError:
-					# permission error, blacklist this path for now
-					listeners.pop(device.path, None)
-					import logging
-					logging.exception("failed to open %s", device.path)
-					# ui.error_dialog(window, 'Permissions error',
-					# 				'Found a possible Unifying Receiver device,\n'
-					# 				'but did not have permission to open it.')
+			try:
+				l = ReceiverListener.open(device.path, status_changed)
+				if l is not None:
+					listeners[device.path] = l
+			except OSError:
+				# permission error, blacklist this path for now
+				listeners.pop(device.path, None)
+				import logging
+				logging.exception("failed to open %s", device.path)
+				# ui.error_dialog(window, 'Permissions error',
+				# 				'Found a possible Unifying Receiver device,\n'
+				# 				'but did not have permission to open it.')
 
-		elif action == 'remove':
-			# we'll be receiving remove events for any hidraw devices,
-			# not just Logitech receivers, so it's okay if the device is not
-			# already in our listeners map
-			l = listeners.pop(device.path, None)
-			if l is not None:
-				assert isinstance(l, ReceiverListener)
-				l.stop()
+		# elif action == 'remove':
+		# 	# we'll be receiving remove events for any hidraw devices,
+		# 	# not just Logitech receivers, so it's okay if the device is not
+		# 	# already in our listeners map
+		# 	l = listeners.pop(device.path, None)
+		# 	if l is not None:
+		# 		l.stop()
 
-		# print ("****", action, device, listeners)
+		print ("****", action, device, listeners)
 
 	# callback delivering status notifications from the receiver/devices to the UI
 	from gi.repository import GLib
 	from logitech.unifying_receiver.status import ALERT
 	def status_changed(device, alert=ALERT.NONE, reason=None):
 		assert device is not None
-		# print ("status changed", device, reason)
+		print ("status changed", device, reason)
 
-		if alert & ALERT.SHOW_WINDOW:
-			GLib.idle_add(window.present)
-		GLib.idle_add(ui.main_window.update, window, device)
 		GLib.idle_add(ui.status_icon.update, icon, device)
+		GLib.idle_add(ui.main_window.update, device, alert & ALERT.SHOW_WINDOW)
 
-		if ui.notify.available:
-			if alert & ALERT.NOTIFICATION:
-				GLib.idle_add(ui.notify.show, device, reason)
-			elif device.kind is None and not device:
-				# notify when a receiver was removed
-				GLib.idle_add(ui.notify.show, device, reason)
-
-		# if device.kind is None and not device:
-		# 	# a receiver was removed
-		# 	listeners.clear()
+		if alert & ALERT.NOTIFICATION:
+			GLib.idle_add(ui.notify.show, device, reason)
 
 	# ugly...
 	def _startup_check_receiver():
-		from solaar.listener import DUMMY_RECEIVER
 		if not listeners:
-			status_changed(DUMMY_RECEIVER, ALERT.NOTIFICATION)
+			ui.notify.alert('No receiver found.')
 	GLib.timeout_add(1000, _startup_check_receiver)
 
+	from logitech.unifying_receiver import base as _base
 	GLib.timeout_add(10, _base.notify_on_receivers, handle_receivers_events)
 	from gi.repository import Gtk
 	Gtk.main()

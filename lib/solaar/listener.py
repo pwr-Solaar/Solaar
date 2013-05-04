@@ -25,15 +25,13 @@ del namedtuple
 def _ghost(device):
 	return _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None, max_devices=None)
 
-DUMMY_RECEIVER = _GHOST_DEVICE(0xFF, 'Solaar', None, 'Receiver not found.', 0)
-
 #
 #
 #
 
 # how often to poll devices that haven't updated their statuses on their own
 # (through notifications)
-_POLL_TICK = 120  # seconds
+_POLL_TICK = 100  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
@@ -52,15 +50,16 @@ class ReceiverListener(_listener.EventsListener):
 		_log.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
 		self.receiver.enable_notifications()
 		self.receiver.notify_devices()
-		# self._status_changed(self.receiver, _status.ALERT.NOTIFICATION)
+		self._status_changed(self.receiver)  #, _status.ALERT.NOTIFICATION)
 
 	def has_stopped(self):
-		_log.info("%s: notifications listener has stopped", self.receiver)
-		if self.receiver:
-			self.receiver.enable_notifications(False)
-			self.receiver.close()
-		self.receiver = None
-		self.status_changed_callback(DUMMY_RECEIVER, _status.ALERT.NOTIFICATION)
+		r, self.receiver = self.receiver, None
+		_log.info("%s: notifications listener has stopped", r)
+		if r:
+			r.enable_notifications(False)
+			r.close()
+		r.status = 'The device was unplugged.'
+		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
 	def tick(self, timestamp):
 		if _log.isEnabledFor(_DEBUG):

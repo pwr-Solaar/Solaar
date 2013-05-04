@@ -6,10 +6,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GdkPixbuf
 
-from . import (action as _action,
-				icons as _icons,
-				main_window as _main_window)
 from solaar import NAME
+from . import action as _action, icons as _icons
 from logitech.unifying_receiver import status as _status
 
 #
@@ -18,7 +16,9 @@ from logitech.unifying_receiver import status as _status
 
 _NO_DEVICES = [None] * 6
 
-def create(window):
+
+def create(activate_callback):
+	assert activate_callback
 
 	icon = Gtk.StatusIcon()
 	icon.set_title(NAME)
@@ -26,8 +26,8 @@ def create(window):
 	icon.set_from_icon_name(_icons.APP_ICON[0])
 	icon._devices = list(_NO_DEVICES)
 
-	icon.connect('activate', _main_window.toggle, window)
 	icon.set_tooltip_text(NAME)
+	icon.connect('activate', activate_callback)
 
 	menu = Gtk.Menu()
 
