@@ -33,7 +33,7 @@ Keyboards:
 | K360             |         |                                                 |
 | K400 Touch       |         |                                                 |
 | K750 Solar       | yes     | FN swap, Lux reading, solar button              |
-| K800 Illuminated | yes     | FN swap                                         |
+| K800 Illuminated | yes     | FN swap, rechargable over USB                   |
 
 
 Mice:
@@ -46,7 +46,7 @@ Mice:
 | M505             |         |       |                                         |
 | M510             |         |       |                                         |
 | M515 Couch       | yes     | -     |                                         |
-| M525             |         |       |                                         |
+| M525             | yes     | -     |                                         |
 | M705 Marathon    | yes     | -     | smooth scrolling                        |
 | T400 Zone Touch  |         |       |                                         |
 | T620 Touch       |         |       |                                         |
