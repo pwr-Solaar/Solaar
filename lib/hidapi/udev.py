@@ -59,6 +59,7 @@ def exit():
 
 def _match(action, device, vendor_id=None, product_id=None, interface_number=None, driver=None):
 	usb_device = device.find_parent('usb', 'usb_device')
+	# print (action, device, "usb:", usb_device)
 	if not usb_device:
 		return
 
@@ -70,6 +71,7 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 
 	if action == 'add':
 		hid_device = device.find_parent('hid')
+		# print (action, device, "hid:", usb_device)
 		if not hid_device:
 			return
 		hid_driver_name = hid_device['DRIVER']
@@ -77,6 +79,7 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 			return
 
 		intf_device = device.find_parent('usb', 'usb_interface')
+		# print (action, device, "usb_interface:", usb_device)
 		if interface_number is None:
 			usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
 		else:

@@ -214,7 +214,7 @@ class Receiver(object):
 		serial_reply = self.request(0x83B5, 0x03)
 		assert serial_reply
 		self._serial = _strhex(serial_reply[1:5])
-		self.max_devices = ord(serial_reply[6:7][0:1])
+		self.max_devices = ord(serial_reply[6:7])
 
 		if self.max_devices == 1:
 			self.name = 'Nano Receiver'

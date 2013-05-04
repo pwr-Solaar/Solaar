@@ -87,7 +87,7 @@ def _print_receiver(receiver, verbose=False):
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))
 
-	print ("   Has", paired_count, "paired device(s).")
+	print ("   Has", paired_count, "paired device(s) out of a maximum of", receiver.max_devices)
 
 	notification_flags = receiver.request(0x8100)
 	if notification_flags:
@@ -97,7 +97,7 @@ def _print_receiver(receiver, verbose=False):
 			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
 			print ("   Enabled notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
 		else:
-			print ("   All notifications disabled.")
+			print ("   All notifications disabled")
 
 	if paired_count > 0:
 		activity = receiver.request(0x83B3)
