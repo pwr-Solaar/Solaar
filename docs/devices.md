@@ -25,56 +25,56 @@ Linux system configuration) are supported:
 
 Keyboards:
 
-| Device           | Battery | Other features                                  |
-|------------------|---------|-------------------------------------------------|
-| K230             |         |                                                 |
-| K270             |         |                                                 |
-| K350             |         |                                                 |
-| K360             |         |                                                 |
-| K400 Touch       |         |                                                 |
-| K750 Solar       | yes     | FN swap, Lux reading, solar button              |
-| K800 Illuminated | yes     | FN swap                                         |
+| Device           | HID++ | Battery | Other features                          |
+|------------------|-------|---------|-----------------------------------------|
+| K230             |       |         |                                         |
+| K270             |       |         |                                         |
+| K350             |       |         |                                         |
+| K360             |       |         |                                         |
+| K400 Touch       |       |         |                                         |
+| K750 Solar       | 2.0   | yes     | FN swap, Lux reading, solar button      |
+| K800 Illuminated |       | yes     | FN swap                                 |
 
 
 Mice:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| M315             |         |       |                                         |
-| M325             |         |       |                                         |
-| M345             |         |       |                                         |
-| M505             |         |       |                                         |
-| M510             |         |       |                                         |
-| M515 Couch       | yes     | -     |                                         |
-| M525             |         |       |                                         |
-| M705 Marathon    | yes     | -     | smooth scrolling                        |
-| T400 Zone Touch  |         |       |                                         |
-| T620 Touch       |         |       |                                         |
-| Performance MX   | yes     | yes   |                                         |
-| Anywhere MX      | yes     | -     | smooth scrolling                        |
-| Cube             |         |       |                                         |
+| Device           | HID++ | Battery | DPI   | Other features                  |
+|------------------|-------|---------|-------|---------------------------------|
+| M315             |       |         |       |                                 |
+| M325             |       |         |       |                                 |
+| M345             |       |         |       |                                 |
+| M505             |       |         |       |                                 |
+| M510             |       |         |       |                                 |
+| M515 Couch       | 2.0   | yes     | -     |                                 |
+| M525             |       |         |       |                                 |
+| M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
+| T400 Zone Touch  |       |         |       |                                 |
+| T620 Touch       |       |         |       |                                 |
+| Performance MX   | 1.0   | yes     | r/w   |                                 |
+| Anywhere MX      |       | yes     | -     | smooth scrolling                |
+| Cube             |       |         |       |                                 |
 
 
 Trackballs:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| M570 Trackball   |         |       |                                         |
+| Device           | HID++ | Battery | DPI   | Other features                  |
+|------------------|-------|---------|-------|---------------------------------|
+| M570 Trackball   |       |         |       |                                 |
 
 
 Touchpads:
 
-| Device           | Battery | DPI   | Other features                          |
-|------------------|---------|-------|-----------------------------------------|
-| T650 Touchpad    |         |       |                                         |
+| Device           | HID++ | Battery | DPI   | Other features                  |
+|------------------|-------|---------|-------|---------------------------------|
+| T650 Touchpad    |       |         |       |                                 |
 
 
 Mouse-Keyboard combos:
 
-| Device           | Battery | Other features                                  |
-|------------------|---------|-------------------------------------------------|
-| MK330            |         |                                                 |
-| MK710            |         | FN swap                                         |
+| Device           | HID++ | Battery | Other features                          |
+|------------------|-------|---------|-----------------------------------------|
+| MK330            |       |         |                                         |
+| MK710            | 1.0   |         | FN swap                                 |
 
 
 --
