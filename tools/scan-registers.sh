@@ -5,8 +5,7 @@ if test -z "$1"; then
 	exit 2
 fi
 
-Z=`readlink -f "$0"`
-HC=`dirname "$Z"`/hidconsole
+HC="$(dirname "$(readlink -f "$0")")/hidconsole"
 
 z='0 1 2 3 4 5 6 7 8 9 a b c d e f'
 
