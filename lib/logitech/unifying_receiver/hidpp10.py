@@ -77,7 +77,7 @@ def get_register(device, name, default_number=-1):
 
 		if not known_register and device.ping():
 			_log.warn("%s: failed to read '%s' from default register 0x%02X, blacklisting", device, name, default_number)
-			device.registers[-default_number] = name
+			device.registers[name] = -default_number
 
 
 def get_battery(device):
