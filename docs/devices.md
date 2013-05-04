@@ -9,80 +9,96 @@ Linux system configuration) are supported:
   and display the current lighting value (Lux) as reported by the keyboard,
   similar to Logitech's *Solar.app* for Windows.
 
-* The state of the `FN` key can be toggled on some keyboards ([K750][K750],
-  [K800][K800] and [K360][K360]). It changes the way the function keys
-  (`F1`..`F12`) work, i.e. whether holding `FN` while pressing the function keys
-  will generate the standard `Fx` keycodes or the special function (yellow
-  icons) keycodes.
+* The state of the `FN` key can be toggled on some keyboards ([K750][K750] and
+  [K800][K800]). It changes the way the function keys (`F1`..`F12`) work, i.e.
+  whether holding `FN` while pressing the function keys will generate the
+  standard `Fx` keycodes or the special function (yellow icons) keycodes.
 
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
 * Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705].
+  be toggled on the [M705 Marathon Mouse][M705] and [M510 Wireless Mouse][M510].
 
 
 # Supported devices
 
+These tables list all known Logitech [Unifying][unifying] devices, and to what
+degree their features are supported by Solaar. If your device is not listed here
+at all, it is very unlikely Solaar would be able to support it.
+
+The HID++ column specifies the device's HID++ version.
+
+The Battery column specifies if Solaar is able to read the device's battery
+level.
+
+For mice, the DPI column specifies if the mouse's sensitivity is fixed (-), can
+only be read (R), or can be read and changed by Solaar (R/W).
+
 
 Keyboards:
 
-| Device           | HID++ | Battery | Other features                          |
+| Device           | HID++ | Battery | Other supported features                |
 |------------------|-------|---------|-----------------------------------------|
-| K230             |       |         |                                         |
+| K230             | 2.0   | yes     |                                         |
 | K270             |       |         |                                         |
 | K350             |       |         |                                         |
 | K360             |       |         |                                         |
 | K400 Touch       |       |         |                                         |
-| K750 Solar       | 2.0   | yes     | FN swap, Lux reading, solar button      |
+| K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap                                 |
 
 
 Mice:
 
-| Device           | HID++ | Battery | DPI   | Other features                  |
+| Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M315             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
 | M345             |       |         |       |                                 |
 | M505             |       |         |       |                                 |
-| M510             |       | yes     |       |                                 |
+| M510             | 1.0   | yes     |       | smooth scrolling                |
 | M515 Couch       | 2.0   | yes     | -     |                                 |
-| M525             | 2.0   |         |       |                                 |
+| M525             | 2.0   | yes     | -     |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  |       |         |       |                                 |
 | T620 Touch       |       |         |       |                                 |
-| Performance MX   | 1.0   | yes     | r/w   |                                 |
+| Performance MX   | 1.0   | yes     | R/W   |                                 |
 | Anywhere MX      |       |         |       |                                 |
 | Cube             |       |         |       |                                 |
 
 
 Trackballs:
 
-| Device           | HID++ | Battery | DPI   | Other features                  |
+| Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M570 Trackball   |       |         |       |                                 |
 
 
 Touchpads:
 
-| Device           | HID++ | Battery | DPI   | Other features                  |
+| Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | T650 Touchpad    |       |         |       |                                 |
 
 
 Mouse-Keyboard combos:
 
-| Device           | HID++ | Battery | Other features                          |
+| Device           | HID++ | Battery | Other supported features                |
 |------------------|-------|---------|-----------------------------------------|
 | MK330            |       |         |                                         |
 | MK710            | 1.0   | yes     | FN swap                                 |
 
 
+The information in these tables is incomplete, based on what devices myself and
+other users have been able to test Solaar with.
+
 --
 
+[unifying]: http://logitech.com/en-us/66/6079
 [K750]: http://logitech.com/product/k750-keyboard
 [K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
 [K360]: http://logitech.com/product/keyboard-k360
+[M510]: http://logitech.com/product/wireless-mouse-m510
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
