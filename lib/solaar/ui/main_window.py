@@ -303,7 +303,7 @@ def _create(receiver):
 	window.set_skip_pager_hint(True)
 	window.set_keep_above(True)
 	# window.set_decorations(Gdk.DECOR_BORDER | Gdk.DECOR_TITLE)
-	window.connect('delete-event', _hide)
+	window.connect('delete-event', lambda widget, event: _hide(widget))
 
 	_windows[receiver.path] = window
 	return window
@@ -315,19 +315,17 @@ def _destroy(receiver):
 		w.destroy()
 
 
-def toggle_all(trigger):
+def toggle_all(status_icon):
 	if not _windows:
 		return
 
 	visible = [w.get_visible() for w in _windows.values()]
 	if all(visible):
-		map(_hide, _windows.values())
+		for w in _windows.values():
+			_hide(w)
 	else:
 		for w in _windows.values():
-			if w.get_visible():
-				_hide(w)
-			else:
-				_show(w, trigger)
+			_show(w, status_icon)
 
 #
 #
