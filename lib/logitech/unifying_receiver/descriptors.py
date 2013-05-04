@@ -123,10 +123,10 @@ _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
 _D('Logitech Cube', kind='mouse')
 _D('Anywhere Mouse MX', codename='Anywhere MX',
-				registers={'battery_charge': 0x0D},
-				settings=[
-							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-						],
+				# registers={'battery_charge': 0x0D},
+				# settings=[
+				# 			_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+				# 		],
 				)
 _D('Performance Mouse MX', codename='Performance MX',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
