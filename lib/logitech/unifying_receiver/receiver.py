@@ -388,3 +388,5 @@ class Receiver(object):
 			_log.exception("open %s", path)
 			if e.errno == _errno.EACCES:
 				raise
+		except:
+			_log.exception("open %s", path)

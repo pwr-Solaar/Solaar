@@ -66,12 +66,12 @@ class ReceiverListener(_listener.EventsListener):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
 
-		if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 3:
-			# if we missed a couple of polls, most likely the computer went into
-			# sleep, and we have to reinitialize the receiver again
-			_log.warn("%s: possible sleep detected, closing this listener", self.receiver)
-			self.stop()
-			return
+		# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
+		# 	# if we missed a couple of polls, most likely the computer went into
+		# 	# sleep, and we have to reinitialize the receiver again
+		# 	_log.warn("%s: possible sleep detected, closing this listener", self.receiver)
+		# 	self.stop()
+		# 	return
 
 		self._last_tick = timestamp
 

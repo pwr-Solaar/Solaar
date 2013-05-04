@@ -121,26 +121,43 @@ def monitor_async(callback, *device_filters):
 
 
 def monitor(callback, *device_filters):
-	c = _Context()
+	def _monitor():
+		c = _Context()
 
-	for device in c.list_devices(subsystem='hidraw'):
-		# print (device, dict(device), dict(device.attributes))
-		for filter in device_filters:
-			d_info = _match('add', device, *filter)
-			if d_info:
-				callback('add', d_info)
-				break
-
-	m = _Monitor.from_netlink(c)
-	m.filter_by(subsystem='hidraw')
-	for action, device in m:
-		# print ('----', action, device)
-		if action in ('add', 'remove'):
+		for device in c.list_devices(subsystem='hidraw'):
+			# print (device, dict(device), dict(device.attributes))
 			for filter in device_filters:
-				d_info = _match(action, device, *filter)
+				d_info = _match('add', device, *filter)
 				if d_info:
-					callback(action, d_info)
+					callback('add', d_info)
 					break
+
+		m = _Monitor.from_netlink(c)
+		del c
+
+		m.filter_by(subsystem='hidraw')
+		try:
+			for action, device in m:
+				# print ('----', action, device)
+				if action in ('add', 'remove'):
+					for filter in device_filters:
+						d_info = _match(action, device, *filter)
+						if d_info:
+							callback(action, d_info)
+							break
+		finally:
+			del m
+
+	while True:
+		try:
+			_monitor()
+		except IOError as e:
+			print ("monitor IOError", e)
+			if e.errno == _errno.EINTR:
+				# raised when the computer wakes from sleep
+				# in this case, just restart the monitor
+				continue
+			raise
 
 
 def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=None):
