@@ -75,3 +75,13 @@ Mouse-Keyboard combos:
 |------------------|---------|-------------------------------------------------|
 | MK330            |         |                                                 |
 | MK710            |         | FN swap                                         |
+
+
+--
+
+[K750]: http://logitech.com/product/k750-keyboard
+[K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
+[K360]: http://logitech.com/product/keyboard-k360
+[M705]: http://logitech.com/product/marathon-mouse-m705
+[P_MX]: http://logitech.com/product/performance-mouse-mx
+[A_MX]: http://logitech.com/product/anywhere-mouse-mx

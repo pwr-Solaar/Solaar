@@ -14,7 +14,7 @@ the very least display some basic information about them.
 
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported. For a full list of supported devices
-and their features, see [`docs/devices.md`](docs/devices.md).
+and their features, see [docs/devices.md](docs/devices.md).
 
 
 ## Pre-built packages
@@ -28,53 +28,16 @@ Pre-built packages are available for a few Linux distros:
 * an [Arch package][arch], courtesy of Arnaud Taffanel
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.7-1_all.deb
+[debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.7.1-1_all.deb
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
 [opensuse]: http://software.opensuse.org/package/Solaar
 [arch]: http://aur.archlinux.org/packages/solaar
 
-## Manual instalation
 
-### Requirements
+## Manual installation
 
-You should have a reasonably new kernel (3.2+), with the `logitech-djreceiver`
-driver enabled and loaded; also, the `udev` package must be installed and the
-daemon running.  If you have a modern Linux distribution (2011+), you're most
-likely good to go.
-
-The command-line application (`bin/solaar-cli`) requires Python 2.7.3 or 3.2+
-(either version should work), and the `python-pyudev`/`python3-pyudev` package.
-
-The GUI application (`bin/solaar`) also requires Gtk3, and its GObject
-Introspection bindings. The Debian/Ubuntu package names are
-`python-gi`/`python3-gi` and `gir1.2-gtk-3.0`; if you're using another
-distribution the required packages are most likely named something similar.
-If the desktop notifications bindings are also installed (`gir1.2-notify-0.7`),
-you will also get desktop notifications when devices come online/go offline.
-
-### Installation
-
-Normally USB devices are not accessible for r/w by regular users, so you will
-need to do a one-time udev rule installation to allow access to the Logitech
-Unifying Receiver.
-
-You can run the `rules.d/install.sh` script from Solaar to do this installation
-automatically (it will switch to root when necessary), or you can do all the
-required steps by hand, as the root user:
-
-1. copy `rules.d/99-logitech-unfiying-receiver.rules` from Solaar to
-  `/etc/udev/rules.d/`
-
-  By default, the rule makes the Unifying Receiver device available for r/w by
-  all users belonging to the `plugdev` system group (standard Debian/Ubuntu
-  group for pluggable devices). It may need changes, specific to your
-  particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
-  with `GROUP="<your username>"` should just work.
-
-2. run `udevadm control --reload-rules` to let the udev daemon know about the
-  new rule
-
-3. physically remove the Unifying Receiver, wait 10 seconds and re-insert it
+See [docs/installation.md](docs/installation.md) for the step-by-step
+procedure for manual installation.
 
 
 ## Known Issues
@@ -113,16 +76,10 @@ who also provided some internal
 - [Clach04](http://bitbucket.org/clach04/logitech-unifying-receiver-tools)
 - [Peter Wu](https://lekensteyn.nl/logitech-unifying.html)
 
-Also thanks to Douglas Wagner and Julien Gascard for helping with application
-testing and supporting new devices.
+Also thanks to Douglas Wagner, Julien Gascard and Peter Wu for helping with
+application testing and supporting new devices.
 
 --
 
 [unifying]: http://logitech.com/en-us/66/6079
 [nano]: http://logitech.com/mice-pointers/articles/5926
-[K750]: http://logitech.com/product/k750-keyboard
-[K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
-[K360]: http://logitech.com/product/keyboard-k360
-[M705]: http://logitech.com/product/marathon-mouse-m705
-[P_MX]: http://logitech.com/product/performance-mouse-mx
-[A_MX]: http://logitech.com/product/anywhere-mouse-mx
