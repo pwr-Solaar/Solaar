@@ -82,7 +82,11 @@ def get_register(device, name, default_number=-1):
 
 def get_battery(device):
 	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
-	reply = get_register(device, 'battery', 0x0D)
+	if device.protocol >= 2.0:
+		# let's just assume HID++ 2.0 devices do not provide the battery info in a register
+		return
+
+	reply = get_register(device, 'battery_charge', 0x0D)
 	if reply:
 		charge = ord(reply[:1])
 		status = ord(reply[2:3]) & 0xF0

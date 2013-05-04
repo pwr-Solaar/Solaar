@@ -18,10 +18,11 @@ Linux system configuration) are supported:
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
 * Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705] and [Anywhere MX Mouse][A_MX].
+  be toggled on the [M705 Marathon Mouse][M705].
 
 
 # Supported devices
+
 
 Keyboards:
 
@@ -33,7 +34,7 @@ Keyboards:
 | K360             |       |         |                                         |
 | K400 Touch       |       |         |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, solar button      |
-| K800 Illuminated |       | yes     | FN swap                                 |
+| K800 Illuminated | 1.0   | yes     | FN swap                                 |
 
 
 Mice:
@@ -44,14 +45,14 @@ Mice:
 | M325             |       |         |       |                                 |
 | M345             |       |         |       |                                 |
 | M505             |       |         |       |                                 |
-| M510             |       |         |       |                                 |
+| M510             |       | yes     |       |                                 |
 | M515 Couch       | 2.0   | yes     | -     |                                 |
-| M525             |       |         |       |                                 |
+| M525             | 2.0   |         |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  |       |         |       |                                 |
 | T620 Touch       |       |         |       |                                 |
 | Performance MX   | 1.0   | yes     | r/w   |                                 |
-| Anywhere MX      |       | yes     | -     | smooth scrolling                |
+| Anywhere MX      |       |         |       |                                 |
 | Cube             |       |         |       |                                 |
 
 
@@ -74,7 +75,7 @@ Mouse-Keyboard combos:
 | Device           | HID++ | Battery | Other features                          |
 |------------------|-------|---------|-----------------------------------------|
 | MK330            |       |         |                                         |
-| MK710            | 1.0   |         | FN swap                                 |
+| MK710            | 1.0   | yes     | FN swap                                 |
 
 
 --

@@ -74,6 +74,9 @@ def _D(name, codename=None, kind=None, registers=None, settings=None):
 #
 #
 
+# Some HID++1.0 registers and HID++2.0 features can be discovered at run-time,
+# so they are not specified here.
+
 # Keyboards
 
 _D('Wireless Keyboard K230')
@@ -82,12 +85,14 @@ _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360')
 _D('Wireless Touch Keyboard K400')
 _D('Wireless Keyboard K710',
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
 						],
 				)
 _D('Wireless Solar Keyboard K750')
 _D('Wireless Illuminated Keyboard K800',
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
 						],
@@ -98,11 +103,17 @@ _D('Wireless Illuminated Keyboard K800',
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M505')
-_D('Wireless Mouse M510')
+_D('Wireless Mouse M510',
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				settings=[
+							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+						],
+				)
 _D('Couch Mouse M515')
 _D('Wireless Mouse M525')
 _D('Touch Mouse M600')
 _D('Marathon Mouse M705',
+				registers={'battery_charge': 0x0D},
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
 							# _register_dpi(0x63, _NamedInts(**{'100': 10, '300': 30, '350':35, '500':50})),
@@ -112,11 +123,13 @@ _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
 _D('Logitech Cube', kind='mouse')
 _D('Anywhere Mouse MX', codename='Anywhere MX',
+				registers={'battery_charge': 0x0D},
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
 						],
 				)
 _D('Performance Mouse MX', codename='Performance MX',
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
 						],
