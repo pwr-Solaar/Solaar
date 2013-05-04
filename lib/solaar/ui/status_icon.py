@@ -9,6 +9,7 @@ from gi.repository import Gtk, GdkPixbuf
 from . import (action as _action,
 				icons as _icons,
 				main_window as _main_window)
+from solaar import NAME
 from logitech.unifying_receiver import status as _status
 
 #
@@ -18,16 +19,15 @@ from logitech.unifying_receiver import status as _status
 _NO_DEVICES = [None] * 6
 
 def create(window):
-	name = window.get_title()
 
 	icon = Gtk.StatusIcon()
-	icon.set_title(name)
-	icon.set_name(name)
+	icon.set_title(NAME)
+	icon.set_name(NAME)
 	icon.set_from_icon_name(_icons.APP_ICON[0])
 	icon._devices = list(_NO_DEVICES)
 
-	icon.set_tooltip_text(name)
 	icon.connect('activate', _main_window.toggle, window)
+	icon.set_tooltip_text(NAME)
 
 	menu = Gtk.Menu()
 
@@ -89,7 +89,7 @@ def update(icon, device):
 		return
 
 	def _lines(r, devices):
-		yield '<b>Solaar</b>: %s' % r.status
+		yield '<b>%s</b>: %s' % (NAME, r.status)
 		yield ''
 
 		for dev in devices:

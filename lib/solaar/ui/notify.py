@@ -10,10 +10,9 @@ try:
 	from gi.repository import Notify
 	import logging
 
+	from solaar import NAME
 	from . import icons as _icons
 
-
-	_NAMESPACE = 'Solaar'
 	# assumed to be working since the import succeeded
 	available = True
 
@@ -28,7 +27,7 @@ try:
 			if not Notify.is_initted():
 				logging.info("starting desktop notifications")
 				try:
-					return Notify.init(_NAMESPACE)
+					return Notify.init(NAME)
 				except:
 					logging.exception("initializing desktop notifications")
 					available = False
@@ -42,13 +41,33 @@ try:
 			Notify.uninit()
 
 
-	def toggle(action):
-		if action.get_active():
-			init()
-		else:
-			uninit()
-		action.set_sensitive(available)
-		return action.get_active()
+	# def toggle(action):
+	# 	if action.get_active():
+	# 		init()
+	# 	else:
+	# 		uninit()
+	# 	action.set_sensitive(available)
+	# 	return action.get_active()
+
+
+	def alert(reason):
+		assert reason
+
+		if available and Notify.is_initted():
+			n = _notifications.get(NAME)
+			if n is None:
+				n = _notifications[NAME] = Notify.Notification()
+
+			# we need to use the filename here because the notifications daemon
+			# is an external application that does not know about our icon sets
+			n.update(NAME, reason, _icons.icon_file(NAME.lower()))
+			n.set_urgency(Notify.Urgency.NORMAL)
+
+			try:
+				# logging.debug("showing %s", n)
+				n.show()
+			except Exception:
+				logging.exception("showing %s", n)
 
 
 	def show(dev, reason=None):
@@ -80,5 +99,6 @@ except ImportError:
 	available = False
 	init = lambda: False
 	uninit = lambda: None
-	toggle = lambda action: False
+	# toggle = lambda action: False
+	alert = lambda reason: None
 	show = lambda dev, reason=None: None

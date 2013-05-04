@@ -5,8 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-NAME = 'Solaar'
-from solaar import __version__
+from solaar import __version__, NAME
 
 #
 #

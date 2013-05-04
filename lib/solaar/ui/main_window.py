@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, Gdk, GLib
 
+from solaar import NAME
 from logitech.unifying_receiver import status as _status
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
