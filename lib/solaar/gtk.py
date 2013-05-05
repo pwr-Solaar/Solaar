@@ -69,11 +69,12 @@ def _run(args):
 			except OSError:
 				# permission error, blacklist this path for now
 				listeners.pop(device.path, None)
-				import logging
-				logging.exception("failed to open %s", device.path)
-				# ui.error_dialog(window, 'Permissions error',
-				# 				'Found a possible Unifying Receiver device,\n'
-				# 				'but did not have permission to open it.')
+				GLib.idle_add(ui.error_dialog, 'Permissions error',
+					'Found a Logitech Unifying Receiver device,\n'
+					'but did not have permission to open it.\n'
+					'\n'
+					'If you\'ve just installed Solaar, try removing\n'
+					'the receiver and plugging it back in.')
 
 		# elif action == 'remove':
 		# 	# we'll be receiving remove events for any hidraw devices,

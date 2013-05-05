@@ -37,8 +37,8 @@ from gi.repository import GLib, Gtk
 GLib.threads_init()
 
 
-def error_dialog(window, title, text):
-	m = Gtk.MessageDialog(window, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
+def error_dialog(title, text):
+	m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
 	m.set_title(title)
 	m.run()
 	m.destroy()
