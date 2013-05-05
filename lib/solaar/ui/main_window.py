@@ -254,14 +254,31 @@ def _hide(w):
 	return True
 
 
-def _show(w, trigger=None):
-	if trigger and isinstance(trigger, Gtk.StatusIcon):
-		x, y = w.get_position()
-		if x == 0 and y == 0:
-			# if the window hasn't been shown yet, position it next to the status icon
-			x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), trigger)
-			w.move(x, y)
+def _show(w, status_icon):
+	if w.is_visible():
+		return True
+
+	x, y = w.get_position()
 	w.present()
+	if x == 0 and y == 0:
+		# if the window hasn't been shown yet, position it relative to
+		# an other window (if it was shown before) or the status icon.
+		# TODO: need a more clever positioning algorithm like finding
+		# the window where space exist on the right, else pick the
+		# left-most window.
+		for win in _windows.values():
+			x, y = win.get_position()
+			if win != w and (x, y) != (0, 0):
+				# position left plus some window decoration
+				w_width, w_height = w.get_size()
+				x -= w_width + 10
+				w.move(x, y)
+				break
+		else:
+			if isinstance(status_icon, Gtk.StatusIcon):
+				x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), status_icon)
+				w.move(x, y)
+
 	return True
 
 
