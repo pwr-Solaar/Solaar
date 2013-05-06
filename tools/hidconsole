@@ -4,8 +4,6 @@
 
 from __future__ import absolute_import
 
-import sys
-
 
 def init_paths():
 	"""Make the app work in the source tree."""
