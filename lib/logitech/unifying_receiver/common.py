@@ -6,6 +6,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from binascii import hexlify as _hexlify
 from struct import pack as _pack
+# In Py3, unicode and str are equal (the unicode object does not exist)
+is_string = lambda d: isinstance(d, str) or \
+	(False if type(u'') == str else isinstance(d, unicode))
 
 
 class NamedInt(int):
@@ -15,7 +18,7 @@ class NamedInt(int):
 	(case-insensitive)."""
 
 	def __new__(cls, value, name):
-		assert isinstance(name, str) or isinstance(name, unicode)
+		assert is_string(name)
 		obj = int.__new__(cls, value)
 		obj.name = str(name)
 		return obj
@@ -30,8 +33,12 @@ class NamedInt(int):
 			return int(self) == int(other) and self.name == other.name
 		if isinstance(other, int):
 			return int(self) == int(other)
-		if isinstance(other, str) or isinstance(other, unicode):
+		if is_string(other):
 			return self.name.lower() == other.lower()
+		# this should catch comparisons with bytes in Py3
+		if other is not None:
+			raise TypeError("Unsupported type " + str(type(other)))
+
 
 	def __ne__(self, other):
 		return not self.__eq__(other)
@@ -64,8 +71,8 @@ class NamedInts(object):
 
 	def __init__(self, **kwargs):
 		def _readable_name(n):
-			if not isinstance(n, str) and not isinstance(n, unicode):
-				raise TypeError("expected string, got " + type(n))
+			if not is_string(n):
+				raise TypeError("expected string, got " + str(type(n)))
 			return n.replace('__', '/').replace('_', ' ')
 
 		values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
@@ -100,7 +107,7 @@ class NamedInts(object):
 				self._values = sorted(self._values + [value])
 				return value
 
-		elif isinstance(index, str) or isinstance(index, unicode):
+		elif is_string(index):
 			if index in self.__dict__:
 				return self.__dict__[index]
 
@@ -135,7 +142,7 @@ class NamedInts(object):
 		if isinstance(name, NamedInt):
 			assert int(index) == int(name), repr(index) + ' ' + repr(name)
 			value = name
-		elif isinstance(name, str) or isinstance(name, unicode):
+		elif is_string(name):
 			value = NamedInt(index, name)
 		else:
 			raise TypeError('name must be a string')
@@ -152,7 +159,7 @@ class NamedInts(object):
 	def __contains__(self, value):
 		if isinstance(value, int):
 			return value in self._indexed
-		if isinstance(value, str) or isinstance(value, unicode):
+		elif is_string(value):
 			return value in self.__dict__
 
 	def __iter__(self):
