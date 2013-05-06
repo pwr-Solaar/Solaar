@@ -59,7 +59,8 @@ class _ThreadedHandle(object):
 			handles, self._handles = self._handles, []
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("%s closing %s", repr(self), handles)
-			map(_base.close, handles)
+			for h in handles:
+				_base.close(h)
 
 	@property
 	def notifications_hook(self):

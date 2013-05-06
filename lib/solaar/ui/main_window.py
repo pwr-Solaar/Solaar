@@ -359,7 +359,7 @@ def toggle_all(status_icon):
 	if not _windows:
 		return
 
-	visible = [w.get_visible() for w in _windows.values()]
+	visible = (w.get_visible() for w in _windows.values())
 	if all(visible):
 		for w in _windows.values():
 			_hide(w)

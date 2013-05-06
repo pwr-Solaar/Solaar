@@ -110,9 +110,11 @@ def _run(args):
 	from gi.repository import Gtk
 	Gtk.main()
 
-	map(ReceiverListener.stop, listeners.values())
+	for l in listeners.values():
+		l.stop()
 	ui.notify.uninit()
-	map(ReceiverListener.join, listeners.values())
+	for l in listeners.values():
+		l.join()
 
 
 def main():
