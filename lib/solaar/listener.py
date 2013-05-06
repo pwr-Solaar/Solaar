@@ -17,13 +17,13 @@ from logitech.unifying_receiver import (Receiver,
 #
 
 from collections import namedtuple
-_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['number', 'name', 'kind', 'status', 'max_devices'])
+_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'status'])
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple
 
 def _ghost(device):
-	return _GHOST_DEVICE(number=device.number, name=device.name, kind=device.kind, status=None, max_devices=None)
+	return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, status=None)
 
 #
 #
@@ -54,11 +54,19 @@ class ReceiverListener(_listener.EventsListener):
 
 	def has_stopped(self):
 		r, self.receiver = self.receiver, None
+		assert r is not None
 		_log.info("%s: notifications listener has stopped", r)
-		if r:
-			r.enable_notifications(False)
-			r.close()
 		r.status = 'The device was unplugged.'
+		if r:
+			try:
+				r.enable_notifications(False)
+			except:
+				_log.exception("disabling notifications on receiver %s" % r)
+			finally:
+				try:
+					r.close()
+				except:
+					_log.exception("closing receiver %s" % r.path)
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
 	def tick(self, timestamp):
