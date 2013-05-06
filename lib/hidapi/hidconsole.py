@@ -56,23 +56,23 @@ def _print(marker, data, scroll=False):
 		hexs = strhex(data)
 		s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 
-	print_lock.acquire()
+	with print_lock:
+		# allow only one thread at a time to write to the console, otherwise
+		# the output gets garbled, especially with ANSI codes.
 
-	if interactive and scroll:
-		# scroll the entire screen above the current line up by 1 line
-		sys.stdout.write('\033[s'  # save cursor position
-						'\033[S'  # scroll up
-						'\033[A'   # cursor up
-						'\033[L'    # insert 1 line
-						'\033[G')   # move cursor to column 1
-	sys.stdout.write(s)
-	if interactive and scroll:
-		# restore cursor position
-		sys.stdout.write('\033[u')
-	else:
-		sys.stdout.write('\n')
-
-	print_lock.release()
+		if interactive and scroll:
+			# scroll the entire screen above the current line up by 1 line
+			sys.stdout.write('\033[s'  # save cursor position
+							'\033[S'  # scroll up
+							'\033[A'   # cursor up
+							'\033[L'    # insert 1 line
+							'\033[G')   # move cursor to column 1
+		sys.stdout.write(s)
+		if interactive and scroll:
+			# restore cursor position
+			sys.stdout.write('\033[u')
+		else:
+			sys.stdout.write('\n')
 
 
 def _error(text, scroll=False):
