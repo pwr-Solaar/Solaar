@@ -29,7 +29,7 @@ strhex = lambda d: hexlify(d).decode('ascii').upper()
 try:
 	unicode
 	# this is certanly Python 2
-	is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
+	is_string = lambda d: isinstance(d, unicode)
 	# no easy way to distinguish between b'' and '' :(
 						# or (isinstance(d, str) \
 						# 	and not any((chr(k) in d for k in range(0x00, 0x1F))) \
@@ -73,6 +73,11 @@ def _print(marker, data, scroll=False):
 			sys.stdout.write('\033[u')
 		else:
 			sys.stdout.write('\n')
+
+		# flush stdout manually...
+		# because trying to open stdin/out unbuffered programatically
+		# works much too differently in Python 2/3
+		sys.stdout.flush()
 
 
 def _error(text, scroll=False):
@@ -183,13 +188,6 @@ def main():
 			# file may not exist yet
 			pass
 
-		# re-open stdout unbuffered
-		try:
-			sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-		except:
-			# will fail in python3
-			pass
-
 	try:
 		from threading import Thread
 		t = Thread(target=_continuous_read, args=(handle,))
@@ -227,13 +225,12 @@ def main():
 			print ("")
 		else:
 			time.sleep(1)
-	except Exception as e:
-		print ('%s: %s' % (type(e).__name__, e))
 
-	print (".. Closing handle %r" % handle)
-	hidapi.close(handle)
-	if interactive:
-		readline.write_history_file(args.history)
+	finally:
+		print (".. Closing handle %r" % handle)
+		hidapi.close(handle)
+		if interactive:
+			readline.write_history_file(args.history)
 
 
 if __name__ == '__main__':
