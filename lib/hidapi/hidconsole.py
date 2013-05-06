@@ -23,10 +23,22 @@ except NameError:
 
 interactive = os.isatty(0)
 prompt = '?? Input: ' if interactive else ''
+start_time = time.time()
 
 strhex = lambda d: hexlify(d).decode('ascii').upper()
-is_string = lambda d: type(d) == (str if type(u'') == str else unicode)
-start_time = time.time()
+try:
+	unicode
+	# this is certanly Python 2
+	is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
+	# no easy way to distinguish between b'' and '' :(
+						# or (isinstance(d, str) \
+						# 	and not any((chr(k) in d for k in range(0x00, 0x1F))) \
+						# 	and not any((chr(k) in d for k in range(0x80, 0xFF))) \
+						# 	)
+except:
+	# this is certanly Python 3
+	# In Py3, unicode and str are equal (the unicode object does not exist)
+	is_string = lambda d: isinstance(d, str)
 
 #
 #

@@ -6,9 +6,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from binascii import hexlify as _hexlify
 from struct import pack as _pack
-# In Py3, unicode and str are equal (the unicode object does not exist)
-is_string = lambda d: isinstance(d, str) or \
-	(False if type(u'') == str else isinstance(d, unicode))
+try:
+	unicode
+	# this is certanly Python 2
+	is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
+	# no easy way to distinguish between b'' and '' :(
+						# or (isinstance(d, str) \
+						# 	and not any((chr(k) in d for k in range(0x00, 0x1F))) \
+						# 	and not any((chr(k) in d for k in range(0x80, 0xFF))) \
+						# 	)
+except:
+	# this is certanly Python 3
+	# In Py3, unicode and str are equal (the unicode object does not exist)
+	is_string = lambda d: isinstance(d, str)
 
 
 class NamedInt(int):
@@ -72,9 +82,10 @@ class NamedInts(object):
 	def __init__(self, **kwargs):
 		def _readable_name(n):
 			if not is_string(n):
-				raise TypeError("expected string, got " + str(type(n)))
+				raise TypeError("expected (unicode) string, got " + str(type(n)))
 			return n.replace('__', '/').replace('_', ' ')
 
+		# print (repr(kwargs))
 		values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
 		self.__dict__ = values
 		self._values = sorted(list(values.values()))
