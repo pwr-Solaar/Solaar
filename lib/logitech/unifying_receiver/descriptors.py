@@ -76,8 +76,39 @@ def _D(name, codename=None, kind=None, registers=None, settings=None):
 
 # Some HID++1.0 registers and HID++2.0 features can be discovered at run-time,
 # so they are not specified here.
-# Registers are only supported for HID++ 1.0 devices. Specify a negative value
-# to blacklist that register (prevent Solaar from accessing the register)
+#
+# For known registers, however, please do specify them here -- avoids
+# unnecessary communication with the device and makes it easier to make certain
+# decisions when querying the device's state.
+#
+# Specify a negative value to blacklist a certain register for a device.
+#
+# Usually, state registers (battery, leds, some features, etc) are only used by
+# HID++ 1.0 devices, while HID++ 2.0 devices use features for the same
+# functionalities. This is a rule that's been discovered by trial-and-error,
+# so it may change in the future.
+
+# Well-known registers (in hex):
+#  * 00 - notification flags (all devices)
+#    01 - mice: smooth scrolling
+#    07 - battery status
+#    09 - keyboards: FN swap (if it has the FN key)
+#    0D - battery charge
+#       a device may have either the 07 or 0D register available;
+#       no known device uses both
+#    51 - leds
+#    63 - mice: DPI
+#    F1 - firmware info
+# Some registers appear to be universally supported, no matter the HID++ version
+# (marked with *). The rest may or may not be supported, and their values may or
+# may not mean the same thing across different devices.
+
+# The 'registers' field indicates read-only registers, specifying a state.
+# The 'settings' field indicates a read/write register; based on them Solaar
+# generates, at runtime, the settings controls in the device panel.
+#
+# HID++ 2.0 features are not specified here, they are always discovered at
+# run-time.
 
 # Keyboards
 
