@@ -124,11 +124,10 @@ class PairedDevice(object):
 	@property
 	def firmware(self):
 		if self._firmware is None:
-			p = self.protocol
-			if p >= 2.0:
-				self._firmware = _hidpp20.get_firmware(self)
-			if self._firmware is None and p == 1.0:
+			if self.protocol < 2.0:
 				self._firmware = _hidpp10.get_firmware(self)
+			else:
+				self._firmware = _hidpp20.get_firmware(self)
 		return self._firmware or ()
 
 	@property

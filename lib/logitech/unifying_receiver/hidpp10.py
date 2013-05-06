@@ -88,21 +88,26 @@ def get_battery(device):
 
 	reply = get_register(device, 'battery_charge', 0x0D)
 	if reply:
-		charge = ord(reply[:1])
-		status = ord(reply[2:3]) & 0xF0
-		status = ('discharging' if status == 0x30
-				else 'charging' if status == 0x50
-				else 'fully charged' if status == 0x90
-				else None)
-		return charge, status
+		level = ord(reply[:1])
+		battery_status = ord(reply[2:3])
+		return parse_battery_reply_0D(level, battery_status)
 
 	reply = get_register(device, 'battery_status', 0x07)
 	if reply:
 		level = ord(reply[:1])
 		battery_status = ord(reply[1:2])
-		return parse_battery_reply(level, battery_status)
+		return parse_battery_reply_07(level, battery_status)
 
-def parse_battery_reply(level, battery_status):
+def parse_battery_reply_0D(level, battery_status):
+	charge = level
+	status = battery_status & 0xF0
+	status = ('discharging' if status == 0x30
+			else 'charging' if status == 0x50
+			else 'fully charged' if status == 0x90
+			else None)
+	return charge, status
+
+def parse_battery_reply_07(level, battery_status):
 	charge = (90 if level == 7 # full
 		else 50 if level == 5 # good
 		else 20 if level == 3 # low

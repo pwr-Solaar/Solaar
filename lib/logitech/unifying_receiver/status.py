@@ -57,6 +57,7 @@ class ReceiverStatus(dict):
 
 		self.lock_open = False
 		self.new_device = None
+
 		self[ERROR] = None
 
 	def __str__(self):
@@ -75,8 +76,9 @@ class ReceiverStatus(dict):
 			self.lock_open = bool(n.address & 0x01)
 			reason = 'pairing lock is ' + ('open' if self.lock_open else 'closed')
 			_log.info("%s: %s", self._receiver, reason)
+
+			self[ERROR] = None
 			if self.lock_open:
-				self[ERROR] = None
 				self.new_device = None
 
 			pair_error = ord(n.data[:1])
@@ -84,8 +86,6 @@ class ReceiverStatus(dict):
 				self[ERROR] = _hidpp10.PAIRING_ERRORS[pair_error]
 				self.new_device = None
 				_log.warn("pairing error %d: %s", pair_error, self[ERROR])
-			else:
-				self[ERROR] = None
 
 			self._changed(reason=reason)
 			return True
@@ -134,25 +134,22 @@ class DeviceStatus(dict):
 	__nonzero__ = __bool__
 
 	def set_battery_info(self, level, status, timestamp=None):
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: battery %d%% charged, %s", self._device, level, status)
+
 		# TODO: this is also executed when pressing Fn+F7 on K800.
-		# Modify this such that alerts/writes are only done when the
-		# level/status actually changes.
-		self[BATTERY_LEVEL] = level
-		self[BATTERY_STATUS] = status
-		error = None
-		if _hidpp20.BATTERY_OK(status):
-			alert = ALERT.NONE
-			reason = self[ERROR] = None
-			if _log.isEnabledFor(_DEBUG):
-				_log.debug("%s: battery %d%% charged, %s", self._device, level, status)
-		else:
-			alert = ALERT.ALL
-			error = status
-			_log.warn("%s: battery %d%% charged, ALERT %s", self._device, level, error)
-		if error is not None:
-			# TODO: show visual warning/notif to user
-			self[ERROR] = error
-		self._changed(alert=alert, reason=error, timestamp=timestamp)
+		old_level, self[BATTERY_LEVEL] = self.get(BATTERY_LEVEL), level
+		old_status, self[BATTERY_STATUS] = self.get(BATTERY_STATUS), status
+		changed = old_level != level or old_status != status
+		alert, reason = ALERT.NONE, None
+
+		if not _hidpp20.BATTERY_OK(status):
+			_log.warn("%s: battery %d%% charged, ALERT %s", self._device, level, status)
+			alert = ALERT.NOTIFICATION
+			reason = status
+
+		if changed or reason:
+			self._changed(alert=alert, reason=reason, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):
 		d = self._device
@@ -169,7 +166,7 @@ class DeviceStatus(dict):
 
 			if battery:
 				level, status = battery
-				self.set_battery_info(level, status, timestamp=timestamp)
+				self.set_battery_info(level, status, timestamp)
 			elif BATTERY_STATUS in self:
 				self[BATTERY_STATUS] = None
 				self._changed(timestamp=timestamp)
@@ -222,29 +219,35 @@ class DeviceStatus(dict):
 			return self._process_hidpp10_notification(n)
 
 		# some custom battery events for HID++ 1.0 devices
-		if n.sub_id in (0x07, 0x0D) and len(n.data) == 3 and n.data[2:3] == b'\x00':
-			# _log.debug("%s (%s) custom battery notification %s", self._device, self._device.protocol, n)
-			if self._device.protocol < 2:
+		if self._device.protocol < 2.0:
+			# README assuming HID++ 2.0 devices don't use the 0x07/0x0D registers
+			# however, this has not been fully verified yet
+			if n.sub_id in (0x07, 0x0D) and len(n.data) == 3 and n.data[2:3] == b'\x00':
 				return self._process_hidpp10_custom_notification(n)
+		else:
+			# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
+			try:
+				feature = self._device.features[n.sub_id]
+			except IndexError:
+				_log.warn("%s: notification from invalid feature index %02X: %s", self._device, n.sub_id, n)
+				return False
 
-		# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
-		try:
-			feature = self._device.features[n.sub_id]
-		except IndexError:
-			_log.warn("%s: notification from invalid feature index %02X: %s", self._device, n.sub_id, n)
-			return False
-
-		return self._process_feature_notification(n, feature)
+			return self._process_feature_notification(n, feature)
 
 	def _process_hidpp10_custom_notification(self, n):
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s (%s) custom battery notification %s", self._device, self._device.protocol, n)
+
 		if n.sub_id == 0x07:
 			# message layout: 10 ix  07("address")  <LEVEL> <STATUS>  00 00
-			level, status = _hidpp10.parse_battery_reply(n.address, ord(n.data[:1]))
+			level, status = _hidpp10.parse_battery_reply_07(n.address, ord(n.data[:1]))
 			self.set_battery_info(level, status)
 			return True
 
 		if n.sub_id == 0x0D:
-			# TODO
+			# message layout: 10 ix  0D("address")  <CHARGE> <?> <STATUS> 00
+			level, status = _hidpp10.parse_battery_reply_0D(n.address, ord(n.data[1:2]))
+			self.set_battery_info(level, status)
 			return True
 
 		_log.warn("%s: unrecognized %s", self._device, n)
