@@ -1,3 +1,13 @@
+0.8.8:
+
+  * Improved support for some devices: M510, K800, Performance MX.
+  * Improved battery support for some HID++ 1.0 devices.
+  * Properly handle device loss on computer sleep/wake.
+  * Better handling of receiver adding and removal at runtime.
+  * Removed a few more unhelpful notifications.
+  * Incipient support for multiple connected receivers.
+  * More Python 3 fixes.
+
 0.8.7:
 
   * Don't show the "device disconnected" notification, it can be annoying and
