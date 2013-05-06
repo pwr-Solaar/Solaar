@@ -8,6 +8,14 @@ from binascii import hexlify as _hexlify
 from struct import pack as _pack
 try:
 	unicode
+	# if Python2, unicode_literals will mess our first (un)pack() argument
+	_pack_str = _pack
+	_pack = lambda x, *args: _pack_str(str(x), *args)
+except:
+	pass
+
+try:
+	unicode
 	# this is certanly Python 2
 	is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
 	# no easy way to distinguish between b'' and '' :(
@@ -36,7 +44,7 @@ class NamedInt(int):
 	def bytes(self, count=2):
 		if self.bit_length() > count * 8:
 			raise ValueError('cannot fit %X into %d bytes' % (self, count))
-		return _pack(b'!L', self)[-count:]
+		return _pack('!L', self)[-count:]
 
 	def __eq__(self, other):
 		if isinstance(other, NamedInt):

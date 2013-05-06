@@ -5,8 +5,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from time import time as _timestamp
-from struct import unpack as _unpack
 from weakref import proxy as _proxy
+
+from struct import unpack as _unpack
+try:
+	unicode
+	# if Python2, unicode_literals will mess our first (un)pack() argument
+	_unpack_str = _unpack
+	_unpack = lambda x, *args: _unpack_str(str(x), *args)
+except:
+	pass
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.status')
@@ -343,7 +351,7 @@ class DeviceStatus(dict):
 
 		if feature == _hidpp20.FEATURE.SOLAR_CHARGE:
 			if n.data[5:9] == b'GOOD':
-				charge, lux, adc = _unpack(b'!BHH', n.data[:5])
+				charge, lux, adc = _unpack('!BHH', n.data[:5])
 				self[BATTERY_LEVEL] = charge
 				# guesstimate the battery voltage, emphasis on 'guess'
 				self[BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)

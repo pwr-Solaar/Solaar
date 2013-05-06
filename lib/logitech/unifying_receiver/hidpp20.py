@@ -5,6 +5,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from struct import pack as _pack, unpack as _unpack
+try:
+	unicode
+	# if Python2, unicode_literals will mess our first (un)pack() argument
+	_pack_str = _pack
+	_unpack_str = _unpack
+	_pack = lambda x, *args: _pack_str(str(x), *args)
+	_unpack = lambda x, *args: _unpack_str(str(x), *args)
+except:
+	pass
+
 from weakref import proxy as _proxy
 
 from logging import getLogger, DEBUG as _DEBUG
@@ -156,7 +166,7 @@ class FeaturesArray(object):
 				self.device = None
 				return False
 
-			reply = self.device.request(0x0000, _pack(b'!H', FEATURE.FEATURE_SET))
+			reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
 			if reply is None:
 				self.supported = False
 			else:
@@ -190,7 +200,7 @@ class FeaturesArray(object):
 				if self.features[index] is None:
 					feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
 					if feature:
-						feature, = _unpack(b'!H', feature[:2])
+						feature, = _unpack('!H', feature[:2])
 						self.features[index] = FEATURE[feature]
 
 				return self.features[index]
@@ -213,7 +223,7 @@ class FeaturesArray(object):
 					break
 
 			if may_have:
-				reply = self.device.request(0x0000, _pack(b'!H', ivalue))
+				reply = self.device.request(0x0000, _pack('!H', ivalue))
 				if reply:
 					index = ord(reply[0:1])
 					if index:
@@ -233,7 +243,7 @@ class FeaturesArray(object):
 					raise ValueError("%s not in list" % repr(value))
 
 			if may_have:
-				reply = self.device.request(0x0000, _pack(b'!H', ivalue))
+				reply = self.device.request(0x0000, _pack('!H', ivalue))
 				if reply:
 					index = ord(reply[0:1])
 					self.features[index] = FEATURE[ivalue]
@@ -274,7 +284,7 @@ class KeysArray(object):
 			if self.keys[index] is None:
 				keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
 				if keydata:
-					key, key_task, flags = _unpack(b'!HHB', keydata[:5])
+					key, key_task, flags = _unpack('!HHB', keydata[:5])
 					self.keys[index] = _ReprogrammableKeyInfo(index, KEY[key], KEY[key_task], flags)
 
 			return self.keys[index]
@@ -327,7 +337,7 @@ def get_firmware(device):
 			if fw_info:
 				level = ord(fw_info[:1]) & 0x0F
 				if level == 0 or level == 1:
-					name, version_major, version_minor, build = _unpack(b'!3sBBH', fw_info[1:8])
+					name, version_major, version_minor, build = _unpack('!3sBBH', fw_info[1:8])
 					version = '%02X.%02X' % (version_major, version_minor)
 					if build:
 						version += '.B%04X' % build
@@ -386,7 +396,7 @@ def get_battery(device):
 	"""
 	battery = feature_request(device, FEATURE.BATTERY)
 	if battery:
-		discharge, dischargeNext, status = _unpack(b'!BBB', battery[:3])
+		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
 						device.number, discharge, dischargeNext, status, BATTERY_STATUS[status])
@@ -402,7 +412,7 @@ def get_keys(device):
 def get_mouse_pointer_info(device):
 	pointer_info = feature_request(device, FEATURE.MOUSE_POINTER)
 	if pointer_info:
-		dpi, flags = _unpack(b'!HB', pointer_info[:3])
+		dpi, flags = _unpack('!HB', pointer_info[:3])
 		acceleration = ['none', 'low', 'med', 'high' ][flags & 0x3]
 		suggest_os_ballistics = (flags & 0x04) != 0
 		suggest_vertical_orientation = (flags & 0x08) != 0

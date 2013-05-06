@@ -6,8 +6,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from time import time as _timestamp
-from struct import pack as _pack
 from random import getrandbits as _random_bits
+
+from struct import pack as _pack
+try:
+	unicode
+	# if Python2, unicode_literals will mess our first (un)pack() argument
+	_pack_str = _pack
+	_pack = lambda x, *args: _pack_str(str(x), *args)
+except:
+	pass
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.base')
@@ -145,9 +153,9 @@ def write(handle, devnumber, data):
 	assert isinstance(data, bytes), (repr(data), type(data))
 
 	if len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
-		wdata = _pack(b'!BB18s', 0x11, devnumber, data)
+		wdata = _pack('!BB18s', 0x11, devnumber, data)
 	else:
-		wdata = _pack(b'!BB5s', 0x10, devnumber, data)
+		wdata = _pack('!BB5s', 0x10, devnumber, data)
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
@@ -291,10 +299,13 @@ def request(handle, devnumber, request_id, *params):
 	else:
 		timeout = _RECEIVER_REQUEST_TIMEOUT
 
-	params = b''.join(_pack(b'B', p) if isinstance(p, int) else p for p in params)
+	if params:
+		params = b''.join(_pack('B', p) if isinstance(p, int) else p for p in params)
+	else:
+		params = b''
 	# if _log.isEnabledFor(_DEBUG):
 	# 	_log.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
-	request_data = _pack(b'!H', request_id) + params
+	request_data = _pack('!H', request_id) + params
 
 	ihandle = int(handle)
 	notifications_hook = getattr(handle, 'notifications_hook', None)
@@ -378,7 +389,7 @@ def ping(handle, devnumber):
 	# reply, and set most significant (0x8) bit in SoftwareId so that the reply
 	# is always distinguishable from notifications
 	request_id = 0x0018 | _random_bits(3)
-	request_data = _pack(b'!HBBB', request_id, 0, 0, _random_bits(8))
+	request_data = _pack('!HBBB', request_id, 0, 0, _random_bits(8))
 
 	ihandle = int(handle)
 	notifications_hook = getattr(handle, 'notifications_hook', None)
