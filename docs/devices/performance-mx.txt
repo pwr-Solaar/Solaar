@@ -1,12 +1,40 @@
+# Notifications (r1_bit0 = battery status?)
+<< (   0.113) [10 01 8100 000000] '\x10\x01\x81\x00\x00\x00\x00'
+>> (   0.157) [10 01 8100 100000] '\x10\x01\x81\x00\x10\x00\x00'
 
-short register 0x63: values 0x81 .. 0x8F
-	set DPI as 100 .. 1500
+# ?
+<< (   1.050) [10 01 8101 000000] '\x10\x01\x81\x01\x00\x00\x00'
+>> (   1.097) [10 01 8101 020000] '\x10\x01\x81\x01\x02\x00\x00'
 
+# battery (07 means full)
+<< (   7.335) [10 01 8107 000000] '\x10\x01\x81\x07\x00\x00\x00' 
+>> (   7.382) [10 01 8107 070000] '\x10\x01\x81\x07\x07\x00\x00'
 
-short register 0x51: set leds
-	value: ab cd 00
-	where a/b/c/d values are 1=off, 2=on, 3=flash
-		a = lower led
-		b = red led
-		c = upper led
-		d = middle led
+# Set LEDS - ab cd 00, where a/b/c/d values are 1=off, 2=on, 3=flash
+#   a = lower led
+#   b = red led
+#   c = upper led
+#   d = middle led
+# below: all leds are off
+<< (  86.592) [10 01 8151 000000] '\x10\x01\x81Q\x00\x00\x00'
+>> (  86.639) [10 01 8151 111100] '\x10\x01\x81Q\x11\x11\x00'
+
+# DPI (values in range 0x81..0x8F; logical value: 100..1500)
+<< ( 108.430) [10 01 8163 000000] '\x10\x01\x81c\x00\x00\x00'
+>> ( 108.477) [10 01 8163 890000] '\x10\x01\x81c\x89\x00\x00'
+
+# ?
+<< ( 240.505) [10 01 81D0 000000] '\x10\x01\x81\xd0\x00\x00\x00'
+>> ( 240.550) [10 01 81D0 000000] '\x10\x01\x81\xd0\x00\x00\x00'
+
+# ?
+<< ( 245.690) [10 01 81D4 000000] '\x10\x01\x81\xd4\x00\x00\x00'
+>> ( 245.737) [10 01 81D4 000012] '\x10\x01\x81\xd4\x00\x00\x12'
+
+# Firmware/bootloader version
+<< ( 281.016) [10 01 81F1 000000] '\x10\x01\x81\xf1\x00\x00\x00'
+>> ( 282.177) [10 01 8F81 F10300] '\x10\x01\x8f\x81\xf1\x03\x00'
+
+# ?
+<< ( 284.106) [10 01 81F3 000000] '\x10\x01\x81\xf3\x00\x00\x00'
+>> ( 284.153) [10 01 81F3 000000] '\x10\x01\x81\xf3\x00\x00\x00'
