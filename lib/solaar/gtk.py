@@ -44,8 +44,8 @@ def _run(args):
 
 	ui.notify.init()
 
-	icon = ui.status_icon.create(ui.main_window.toggle_all)
-	assert icon
+	status_icon = ui.status_icon.create(ui.main_window.toggle_all)
+	assert status_icon
 
 	listeners = {}
 	from solaar.listener import ReceiverListener
@@ -93,8 +93,8 @@ def _run(args):
 		assert device is not None
 		# print ("status changed", device, reason)
 
-		GLib.idle_add(ui.status_icon.update, icon, device)
-		GLib.idle_add(ui.main_window.update, device, alert & ALERT.SHOW_WINDOW)
+		GLib.idle_add(ui.status_icon.update, status_icon, device)
+		GLib.idle_add(ui.main_window.update, device, alert & ALERT.SHOW_WINDOW, status_icon)
 
 		if alert & ALERT.NOTIFICATION:
 			GLib.idle_add(ui.notify.show, device, reason)

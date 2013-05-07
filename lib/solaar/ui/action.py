@@ -61,7 +61,6 @@ def pair(frame):
 from ..ui import error_dialog
 def _unpair_device(action, frame):
 	window = frame.get_toplevel()
-	# window.present()
 	device = frame._device
 	qdialog = Gtk.MessageDialog(window, 0,
 								Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,

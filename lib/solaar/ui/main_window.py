@@ -255,53 +255,27 @@ def _hide(w, _=None):
 
 
 def _show(w, status_icon=None):
-	if w.get_visible():
-		return True
-
-	# x, y = w.get_position()
-	# w.present()
-	# if x == 0 and y == 0:
-	# 	# if the window hasn't been shown yet, position it relative to
-	# 	# an other window (if it was shown before) or the status icon.
-	# 	# TODO: need a more clever positioning algorithm like finding
-	# 	# the window where space exist on the right, else pick the
-	# 	# left-most window.
-	# 	for win in _windows.values():
-	# 		x, y = win.get_position()
-	# 		if win != w and (x, y) != (0, 0):
-	# 			# position left plus some window decoration
-	# 			w_width, w_height = w.get_size()
-	# 			x -= w_width + 10
-	# 			w.move(x, y)
-	# 			break
-	# 	else:
-	# 		if isinstance(status_icon, Gtk.StatusIcon):
-	# 			x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), status_icon)
-	# 			w.move(x, y)
-
-	# Nah. It's a bit more complicated than that.
-	# If the first window is already at the right edge, this would place the
-	# second window out-of-bounds -- if the status icon is in the top-right
-	# corner. It might be in any of the other corners. Depending on the window
-	# manager and its settings, it might also have its own ideas of there the
-	# window should be when first shown. Etc...
-
-	# Trying to cover all the bases would ridiculously complicate this code.
-	# The current way all receiver windows may be overlapped initially, and the
-	# user will have to move some out of the way, but I think it's a good
-	# compromise betwen simplicity of code and covering 99% of users, that have
-	# a single receiver.
-
-	if status_icon and isinstance(status_icon, Gtk.StatusIcon):
-		x, y = w.get_position()
-		if x == 0 and y == 0:
-			# if the window hasn't been shown yet, position it next to the status icon
-			x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), status_icon)
-			w.move(x, y)
-	# Show the window only after it's been moved to its location, otherwise
-	# the user might get to see it moving from (0, 0) to the location.
-	w.present()
-
+	if not w.get_visible():
+		w.present()
+		if not w._was_shown:
+			w._was_shown = True
+			if isinstance(status_icon, Gtk.StatusIcon):
+				# if the window hasn't been shown yet, position it relative to
+				# an other window (if it was shown before) or the status icon.
+				# TODO: need a more clever positioning algorithm like finding
+				# the window where space exist on the right, else pick the
+				# left-most window.
+				# for win in _windows.values():
+				# 	x, y = win.get_position()
+				# 	if win != w and (x, y) != (0, 0):
+				# 		# position left plus some window decoration
+				# 		w_width, w_height = w.get_size()
+				# 		x -= w_width + 10
+				# 		w.move(x, y)
+				# 		break
+				# else:
+				x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), status_icon)
+				w.move(x, y)
 	return True
 
 
@@ -344,6 +318,7 @@ def _create(receiver):
 	window.set_keep_above(True)
 	# window.set_decorations(Gdk.DECOR_BORDER | Gdk.DECOR_TITLE)
 	window.connect('delete-event', _hide)
+	window._was_shown = False
 
 	_windows[receiver.path] = window
 	return window
@@ -465,11 +440,12 @@ def _update_device_box(frame, dev):
 	_config_panel.update(frame)
 
 
-def update(device, popup=False):
+def update(device, popup=False, status_icon=None):
 	assert device is not None
 	# print ("main_window.update", device)
 
 	receiver = device if device.kind is None else device.receiver
+	assert receiver is not None, '%s has no receiver' % device
 	w = _windows.get(receiver.path)
 	if receiver and not w:
 		w = _create(receiver)
@@ -477,7 +453,7 @@ def update(device, popup=False):
 	if w:
 		if receiver:
 			if popup:
-				w.present()
+				_show(w, status_icon)
 			vbox = w.get_child()
 			frames = list(vbox.get_children())
 
