@@ -62,9 +62,9 @@ class ReceiverStatus(dict):
 
 	def __str__(self):
 		count = len(self._receiver)
-		return ('No devices found.' if count == 0 else
-				'1 device found.' if count == 1 else
-				'%d devices found.' % count)
+		return ('No paired devices.' if count == 0 else
+				'1 paired device.' if count == 1 else
+				'%d paired devices.' % count)
 	__unicode__ = __str__
 
 	def _changed(self, alert=ALERT.NOTIFICATION, reason=None):

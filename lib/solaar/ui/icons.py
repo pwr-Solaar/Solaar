@@ -27,14 +27,14 @@ APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' 
 #
 #
 
-def battery(level):
-	if level < 0:
+def battery(level=None):
+	if level is None or level < 0:
 		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
 
 
-def lux(level):
-	if level < 0:
+def lux(level=None):
+	if level is None or level < 0:
 		return 'light_unknown'
 	return 'light_%03d' % (20 * ((level + 50) // 100))
 
