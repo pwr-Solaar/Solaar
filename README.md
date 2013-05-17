@@ -22,13 +22,13 @@ and their features, see [docs/devices.md](docs/devices.md).
 Pre-built packages are available for a few Linux distros:
 
 * Ubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
-* a Debian/sid package: [.deb][debian]
+* a Debian Wheezy package [.deb][debian], should work on testing and Sid as well
 * a [Gentoo overlay][gentoo], courtesy of Carlos Silva
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Arch package][arch], courtesy of Arnaud Taffanel
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[debian]: http://pwr.github.com/Solaar/packages/solaar_0.8.7.1-1_all.deb
+[debian]: http://pwr.github.io/Solaar/packages/solaar_0.8.8-3_all.deb
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
 [opensuse]: http://software.opensuse.org/package/Solaar
 [arch]: http://aur.archlinux.org/packages/solaar
