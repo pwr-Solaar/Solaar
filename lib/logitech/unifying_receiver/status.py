@@ -182,9 +182,11 @@ class DeviceStatus(dict):
 			self.clear()
 			if battery is not None:
 				self[BATTERY_LEVEL] = battery
-		if self.updated == 0:
+
+		if self.updated == 0 and active:
 			alert |= ALERT.NOTIFICATION
 		self.updated = timestamp or _timestamp()
+
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
 		self._changed_callback(self._device, alert, reason)
