@@ -103,6 +103,7 @@ def _run(args):
 	def _startup_check_receiver():
 		if not listeners:
 			ui.notify.alert('No receiver found.')
+			ui.status_icon.update(status_icon)
 	GLib.timeout_add(1000, _startup_check_receiver)
 
 	from logitech.unifying_receiver import base as _base
