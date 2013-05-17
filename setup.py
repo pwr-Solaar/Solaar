@@ -15,7 +15,7 @@ battery status.
 		author='Daniel Pavel',
 		author_email='daniel.pavel@gmail.com',
 		license='GPLv2',
-		url='http://pwr.github.com/Solaar/',
+		url='http://pwr.github.io/Solaar/',
 		classifiers=[
 			'Development Status :: 4 - Beta',
 			'Environment :: X11 Applications :: GTK',

@@ -9,7 +9,7 @@ PYTHON_COMPAT=( python{2_7,3_2} )
 inherit distutils-r1 udev user linux-info gnome2-utils
 
 DESCRIPTION="Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals"
-HOMEPAGE="http://pwr.github.com/Solaar/"
+HOMEPAGE="http://pwr.github.io/Solaar/"
 SRC_URI="https://github.com/pwr/Solaar/archive/${PV}.tar.gz"
 
 LICENSE="GPL-2"

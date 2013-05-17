@@ -5,7 +5,7 @@ pkgver=0.8.8
 pkgrel=1
 pkgdesc="Linux devices manager for the Logitech Unifying Receiver"
 arch=("any")
-url="http://pwr.github.com/Solaar/"
+url="http://pwr.github.io/Solaar/"
 license=('GPL')
 depends=(
       'systemd' 'python' 'python-pyudev'
