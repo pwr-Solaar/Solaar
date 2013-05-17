@@ -48,10 +48,6 @@ procedure for manual installation.
 
 [ubuntu_systray]: http://askubuntu.com/questions/30742
 
-- The application only looks at the first Unifying Receiver it finds, even if
-  there's more than one plugged in. Support for multiple receivers is in
-  progress.
-
 - Devices connected throught a [Nano Receiver][nano] (which is very similar to
   the Unifying Receiver) are not supported at this time.
 
