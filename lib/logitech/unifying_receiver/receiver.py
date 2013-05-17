@@ -165,6 +165,25 @@ class PairedDevice(object):
 			_descriptors.check_features(self, self._settings)
 		return self._settings
 
+	def enable_notifications(self, enable=True):
+		"""Enable or disable device (dis)connection notifications on this
+		receiver."""
+		if not self.receiver or not self.receiver.handle:
+			return False
+
+		set_flag_bits = _hidpp10.NOTIFICATION_FLAG.all_bits() if enable else 0
+		ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+
+		flag_bits = _hidpp10.get_notification_flags(self)
+		if flag_bits is not None:
+			flag_bits = tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
+
+		if ok:
+			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_bits)
+		else:
+			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flag_bits)
+		return ok
+
 	def request(self, request_id, *params):
 		return _base.request(self.receiver.handle, self.number, request_id, *params)
 
@@ -252,22 +271,18 @@ class Receiver(object):
 		receiver."""
 		if not self.handle:
 			return False
-		if enable:
-			# set all possible flags
-			ok = self.request(0x8000, 0xFF, 0xFF, 0xFF)
-		else:
-			# clear out all possible flags
-			ok = self.request(0x8000)
 
-		flags = self.request(0x8100)
-		if flags:
-			flags = ord(flags[0:1]) << 16 | ord(flags[1:2]) << 8 | ord(flags[2:3])
-			flags = tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flags))
+		flag_bits = _hidpp10.NOTIFICATION_FLAG.all_bits() if enable else 0
+		ok = _hidpp10.set_notification_flags(self, flag_bits)
+
+		flag_bits = _hidpp10.get_notification_flags(self)
+		if flag_bits is not None:
+			flag_bits = tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
 
 		if ok:
-			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flags)
+			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_bits)
 		else:
-			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flags)
+			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flag_bits)
 		return ok
 
 	def notify_devices(self):
@@ -375,7 +390,7 @@ class Receiver(object):
 
 	@classmethod
 	def open(self, path):
-		"""Opens a Logitech Receiver found attached to the machine, by device path.
+		"""Opens a Logitech Receiver found attached to the machine, by Linux device path.
 
 		:returns: An open file handle for the found receiver, or ``None``.
 		"""

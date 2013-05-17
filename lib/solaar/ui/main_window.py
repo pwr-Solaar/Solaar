@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from gi.repository import Gtk, Gdk, GLib
 
 from solaar import NAME
-from logitech.unifying_receiver import status as _status
+from logitech.unifying_receiver import status as _status, hidpp10 as _hidpp10
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
 
@@ -67,10 +67,18 @@ def _make_receiver_box(receiver):
 
 	def _update_info_label(f):
 		device = f._device
-		if f._info_label.get_visible() and '\n' not in f._info_label.get_text():
+		if True:  # f._info_label.get_visible() and '\n' not in f._info_label.get_text():
 			items = [('Path', device.path), ('Serial', device.serial)] + \
 					[(fw.kind, fw.version) for fw in device.firmware]
-			f._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-13s: %s' % item for item in items))
+
+			notification_flags = _hidpp10.get_notification_flags(device)
+			if notification_flags:
+				notification_flags = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+			else:
+				notification_flags = ('(none)',)
+			items.append(('Notifications', ('\n%16s' % ' ').join(notification_flags)))
+
+			f._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-14s: %s' % item for item in items))
 		f._info_label.set_sensitive(True)
 
 	def _toggle_info_label(action, f):
@@ -170,11 +178,11 @@ def _make_device_box(index):
 	frame._info_label = info_label
 
 	def _update_info_label(f):
-		if frame._info_label.get_text().count('\n') < 4:
+		if True:  # frame._info_label.get_text().count('\n') < 4:
 			device = f._device
 			assert device
 
-			items = [None, None, None, None, None, None, None, None]
+			items = [None, None, None, None, None, None, None, None, None]
 			hid = device.protocol
 			items[0] = ('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown')
 			items[1] = ('Polling rate', '%d ms' % device.polling_rate)
@@ -184,7 +192,17 @@ def _make_device_box(index):
 			if firmware:
 				items[4:] = [(fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in firmware]
 
-			frame._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-13s: %s' % i for i in items if i))
+			if device.status:
+				notification_flags = _hidpp10.get_notification_flags(device)
+				if notification_flags:
+					notification_flags = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+				else:
+					notification_flags = ('(none)',)
+				items[-1] = ('Notifications', ('\n%16s' % ' ').join(notification_flags))
+			else:
+				items[-1] = None
+
+			frame._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-14s: %s' % i for i in items if i))
 		frame._info_label.set_sensitive(True)
 
 	def _toggle_info_label(action, f):

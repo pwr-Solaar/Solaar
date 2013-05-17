@@ -40,6 +40,7 @@ POWER_SWITCH_LOCATION = _NamedInts(
 
 NOTIFICATION_FLAG = _NamedInts(
 				battery_status=0x100000,
+				# reserved_r1b4=0x001000,  unknown
 				wireless=0x000100,
 				software_present=0x000800)
 
@@ -76,7 +77,8 @@ def get_register(device, name, default_number=-1):
 			return reply
 
 		if not known_register and device.ping():
-			_log.warn("%s: failed to read '%s' from default register 0x%02X, blacklisting", device, name, default_number)
+			_log.warn("%s: failed to read '%s' from default register 0x%02X, blacklisting",
+							device, name, default_number)
 			device.registers[name] = -default_number
 
 
@@ -160,3 +162,16 @@ def get_firmware(device):
 		firmware.append(bl)
 
 	return tuple(firmware)
+
+
+def get_notification_flags(device):
+	flags = device.request(0x8100)
+	if flags is not None:
+		assert len(flags) == 3
+		return ord(flags[0:1]) << 16 | ord(flags[1:2]) << 8 | ord(flags[2:3])
+
+
+def set_notification_flags(device, *flag_bits):
+	flag_bits = sum(int(b) for b in flag_bits)
+	result = device.request(0x8000, 0xFF & (flag_bits >> 16), 0xFF & (flag_bits >> 8), 0xFF & flag_bits)
+	return result is not None

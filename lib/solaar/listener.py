@@ -59,7 +59,8 @@ class ReceiverListener(_listener.EventsListener):
 		r.status = 'The device was unplugged.'
 		if r:
 			try:
-				r.enable_notifications(False)
+				pass
+				# r.enable_notifications(False)
 			except:
 				_log.exception("disabling notifications on receiver %s" % r)
 			finally:

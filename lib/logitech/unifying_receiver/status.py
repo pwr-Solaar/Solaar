@@ -173,8 +173,11 @@ class DeviceStatus(dict):
 
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
-		self._active = active
-		if not active:
+		was_active, self._active = self._active, active
+		if active:
+			if not was_active:
+				self._device.enable_notifications()
+		else:
 			battery = self.get(BATTERY_LEVEL)
 			self.clear()
 			if battery is not None:

@@ -85,7 +85,7 @@ class NamedInts(object):
 	if the value already exists in the set (int or string), ValueError will be
 	raised.
 	"""
-	__slots__ = ['__dict__', '_values', '_indexed', '_fallback']
+	__slots__ = ['__dict__', '_values', '_indexed', '_fallback', '_all_bits']
 
 	def __init__(self, **kwargs):
 		def _readable_name(n):
@@ -99,6 +99,7 @@ class NamedInts(object):
 		self._values = sorted(list(values.values()))
 		self._indexed = {int(v): v for v in self._values}
 		self._fallback = None
+		self._all_bits = sum(self._values)
 
 	@classmethod
 	def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):
@@ -115,6 +116,9 @@ class NamedInts(object):
 
 		if unknown_bits:
 			yield 'unknown:%06X' % unknown_bits
+
+	def all_bits(self):
+		return self._all_bits
 
 	def __getitem__(self, index):
 		if isinstance(index, int):
