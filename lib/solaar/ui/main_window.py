@@ -254,12 +254,12 @@ def _hide(w, _=None):
 	return True
 
 
-def _show(w, status_icon=None):
+def _show(w, trigger=None):
 	if not w.get_visible():
 		w.present()
 		if not w._was_shown:
 			w._was_shown = True
-			if isinstance(status_icon, Gtk.StatusIcon):
+			if isinstance(trigger, Gtk.StatusIcon):
 				# if the window hasn't been shown yet, position it relative to
 				# an other window (if it was shown before) or the status icon.
 				# TODO: need a more clever positioning algorithm like finding
@@ -274,8 +274,10 @@ def _show(w, status_icon=None):
 				# 		w.move(x, y)
 				# 		break
 				# else:
-				x, y, _ = Gtk.StatusIcon.position_menu(Gtk.Menu(), status_icon)
+				x, y, _ = Gtk.StatusIcon.position_menu(trigger._menu, trigger)
 				w.move(x, y)
+			elif isinstance(trigger, Gtk.MenuItem):
+				x, y = trigger
 	return True
 
 
@@ -308,7 +310,7 @@ def _create(receiver):
 	window.add(vbox)
 
 	geometry = Gdk.Geometry()
-	geometry.min_width = 320
+	geometry.min_width = 340
 	geometry.min_height = 32
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 
@@ -328,6 +330,16 @@ def _destroy(receiver):
 	w = _windows.pop(receiver.path, None)
 	if w:
 		w.destroy()
+
+
+def popup(trigger_widget, receiver_path, status_icon=None):
+	if receiver_path is not None:
+		w = _windows.get(receiver_path)
+		if w:
+			_show(w, status_icon)
+			return
+
+	toggle_all(status_icon)
 
 
 def toggle_all(status_icon):

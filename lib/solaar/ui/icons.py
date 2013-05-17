@@ -56,7 +56,7 @@ def device_icon_set(name='_', kind=None):
 			elif str(kind) == 'trackball':
 				names += ('input-mouse',)
 			names += ('input-' + str(kind),)
-		names += (name,)
+		# names += (name,)
 
 		source = Gtk.IconSource.new()
 		for n in names:

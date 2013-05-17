@@ -14,8 +14,9 @@ from logitech.unifying_receiver import status as _status
 #
 #
 
-def create(activate_callback):
+def create(activate_callback, menu_activate_callback):
 	assert activate_callback
+	assert menu_activate_callback
 
 	icon = Gtk.StatusIcon()
 	icon.set_title(NAME)
@@ -26,8 +27,9 @@ def create(activate_callback):
 
 	icon.set_tooltip_text(NAME)
 	icon.connect('activate', activate_callback)
+	icon._menu_activate_callback = menu_activate_callback
 
-	menu = Gtk.Menu()
+	menu = icon._menu = Gtk.Menu()
 
 	# per-device menu entries will be generated as-needed
 
@@ -35,8 +37,6 @@ def create(activate_callback):
 	menu.append(_action.about.create_menu_item())
 	menu.append(_action.make('application-exit', 'Quit', Gtk.main_quit).create_menu_item())
 	menu.show_all()
-
-	icon._menu = menu
 
 	icon.connect('popup_menu',
 					lambda icon, button, time, menu:
@@ -132,6 +132,7 @@ def _add_device(icon, device):
 	icon._menu.insert(menu_item, index)
 	menu_item.set_image(Gtk.Image())
 	menu_item.show_all()
+	menu_item.connect('activate', icon._menu_activate_callback, device.receiver.path, icon)
 
 	return index
 
@@ -162,8 +163,9 @@ def _update_menu_item(icon, index, device_status):
 
 	image = menu_item.get_image()
 	battery_level = device_status.get(_status.BATTERY_LEVEL) if device_status else None
-	image.set_from_icon_name(_icons.battery(battery_level), Gtk.IconSize.MENU)
-	image.set_sensitive(battery_level is not None)
+	image.set_from_icon_name(_icons.battery(battery_level), Gtk.IconSize.LARGE_TOOLBAR)
+	image.set_sensitive(bool(device_status))
+	# menu_item.set_sensitive(bool(device_status))
 
 #
 #

@@ -44,7 +44,7 @@ def _run(args):
 
 	ui.notify.init()
 
-	status_icon = ui.status_icon.create(ui.main_window.toggle_all)
+	status_icon = ui.status_icon.create(ui.main_window.toggle_all, ui.main_window.popup)
 	assert status_icon
 
 	listeners = {}
