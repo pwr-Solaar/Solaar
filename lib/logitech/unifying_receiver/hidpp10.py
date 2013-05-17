@@ -14,7 +14,8 @@ from .common import (strhex as _strhex,
 from .hidpp20 import FIRMWARE_KIND
 
 #
-# constants
+# Constants - most of them as defined by the official Logitech HID++ 1.0
+# documentation, some of them guessed.
 #
 
 DEVICE_KIND = _NamedInts(
@@ -38,11 +39,20 @@ POWER_SWITCH_LOCATION = _NamedInts(
 				left_edge=0x0B,
 				bottom_edge=0x0C)
 
+# Some flags are used both by devices and receivers, the Logitech documentation makes no difference
+# - wireless and software present were seen on receivers, reserved_r1b4 as well
+# - the rest work only on devices as far as we can tell right now
+# In the future would be useful to have separate enums for receiver and device notification flags,
+# but right now we don't know enough.
 NOTIFICATION_FLAG = _NamedInts(
-				battery_status=0x100000,
-				# reserved_r1b4=0x001000,  unknown
-				wireless=0x000100,
-				software_present=0x000800)
+				battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
+				keyboard_sleep_raw=0x020000,  # guess
+				keyboard_multimedia_raw=0x010000,  # guess
+				# reserved_r1b4=0x001000,  # unknown, seen on a unifying receiver
+				keyboard_backlight=0x000200,  # guess
+				software_present=0x000800,  # .. no idea
+				wireless=0x000100,  # notify when the device wireless goes on/off-line
+				)
 
 ERROR = _NamedInts(
 				invalid_SubID__command=0x01,
