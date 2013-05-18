@@ -46,6 +46,9 @@ _STATUS_TIMEOUT = 120  # seconds
 #
 
 class ReceiverStatus(dict):
+	"""The 'runtime' status of a receiver, mostly about the pairing process --
+	is the pairing lock open or closed, any pairing errors, etc.
+	"""
 	def __init__(self, receiver, changed_callback):
 		assert receiver
 		self._receiver = _proxy(receiver)
@@ -95,6 +98,10 @@ class ReceiverStatus(dict):
 #
 
 class DeviceStatus(dict):
+	"""Holds the 'runtime' status of a peripheral -- things like
+	active/inactive, battery charge, lux, etc. It updates them mostly by
+	processing incoming notification events from the device itself.
+	"""
 	def __init__(self, device, changed_callback):
 		assert device
 		self._device = _proxy(device)
@@ -115,7 +122,7 @@ class DeviceStatus(dict):
 			battery_level = _item(BATTERY_LEVEL, 'Battery: %d%%')
 			if battery_level:
 				yield battery_level
-				battery_status = _item(BATTERY_STATUS, ' <small>(%s)</small>')
+				battery_status = _item(BATTERY_STATUS, ' (%s)')
 				if battery_status:
 					yield battery_status
 
@@ -143,10 +150,10 @@ class DeviceStatus(dict):
 		changed = old_level != level or old_status != status
 		alert, reason = ALERT.NONE, None
 
-		if not _hidpp20.BATTERY_OK(status):
+		if not _hidpp20.BATTERY_OK(status) or level <= 5:
 			_log.warn("%s: battery %d%% charged, ALERT %s", self._device, level, status)
 			alert = ALERT.NOTIFICATION
-			reason = status
+			reason = 'Battery: %d%% (%s)' % (level, status)
 
 		if changed or reason:
 			self._changed(alert=alert, reason=reason, timestamp=timestamp)
@@ -175,11 +182,16 @@ class DeviceStatus(dict):
 		assert self._changed_callback
 		was_active, self._active = self._active, active
 		if active:
+			# Make sure to set notification flags on the device, they
+			# get cleared when the device is turned off (but not when the device
+			# goes idle, and we can't tell the difference right now).
 			if not was_active:
 				self._device.enable_notifications()
 		else:
 			battery = self.get(BATTERY_LEVEL)
 			self.clear()
+			# if we had a known battery level before, assume it's not going
+			# to change much while the device is offline
 			if battery is not None:
 				self[BATTERY_LEVEL] = battery
 
@@ -197,6 +209,9 @@ class DeviceStatus(dict):
 			if not d:
 				_log.error("polling status of invalid device")
 				return
+
+			if _log.isEnabledFor(_DEBUG):
+				_log.debug("polling status of %s", d)
 
 			# read these from the device in case they haven't been read already
 			# d.protocol, d.serial, d.firmware
@@ -321,7 +336,8 @@ class DeviceStatus(dict):
 			if n.address == 0x01:
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("%s: device powered on", self._device)
-				self._changed(alert=ALERT.NOTIFICATION, reason='powered on')
+				reason = str(self) or 'powered on'
+				self._changed(alert=ALERT.NOTIFICATION, reason=reason)
 			else:
 				_log.info("%s: unknown %s", self._device, n)
 			return True

@@ -71,8 +71,8 @@ class ReceiverListener(_listener.EventsListener):
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
 	def tick(self, timestamp):
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
 
 		# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
 		# 	# if we missed a couple of polls, most likely the computer went into
