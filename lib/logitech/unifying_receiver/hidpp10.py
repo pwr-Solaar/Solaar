@@ -45,13 +45,13 @@ POWER_SWITCH_LOCATION = _NamedInts(
 # In the future would be useful to have separate enums for receiver and device notification flags,
 # but right now we don't know enough.
 NOTIFICATION_FLAG = _NamedInts(
-				battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
-				keyboard_sleep_raw=0x020000,  # system control keys such as Sleep
+				battery_status=         0x100000,  # send battery charge notifications (0x07 or 0x0D)
+				keyboard_sleep_raw=     0x020000,  # system control keys such as Sleep
 				keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
-				# reserved_r1b4=0x001000,  # unknown, seen on a unifying receiver
-				keyboard_backlight=0x000200,  # illumination brightness level changes (by pressing keys)
-				software_present=0x000800,  # .. no idea
-				wireless=0x000100,  # notify when the device wireless goes on/off-line
+				# reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
+				software_present=       0x000800,  # .. no idea
+				keyboard_backlight=     0x000200,  # illumination brightness level changes (by pressing keys)
+				wireless=               0x000100,  # notify when the device wireless goes on/off-line
 				)
 
 ERROR = _NamedInts(
