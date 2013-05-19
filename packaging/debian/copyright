@@ -4,7 +4,7 @@ Upstream-Contact: Daniel Pavel <daniel.pavel@gmail.com>
 Upstream-Source: http://github.com/pwr/Solaar
 
 Files: *
-Copyright: Copyright (C) 2012 Daniel Pavel
+Copyright: Copyright (C) 2012-2013 Daniel Pavel
 License: GPL-2
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ License: GPL-2
  version 2, can be found in /usr/share/common-licenses/GPL-2.
 
 Files: share/icons/solaar*.png
-Copyright: Copyright (C) 2012 Daniel Pavel
+Copyright: Copyright (C) 2012-2013 Daniel Pavel
 License: LGPL
  .
 

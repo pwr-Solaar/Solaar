@@ -1,7 +1,7 @@
 # $Id$
 # Maintainer: Patrick Hüther <patrick dot huether at gmail dot com>
 pkgname=solaar
-pkgver=0.8.8
+pkgver=0.8.8.1
 pkgrel=1
 pkgdesc="Linux devices manager for the Logitech Unifying Receiver"
 arch=("any")
