@@ -39,19 +39,26 @@ POWER_SWITCH_LOCATION = _NamedInts(
 				left_edge=0x0B,
 				bottom_edge=0x0C)
 
-# Some flags are used both by devices and receivers, the Logitech documentation makes no difference
+# Some flags are used both by devices and receivers. The Logitech documentation
+# mentions that the first and last (third) byte are used for devices while the
+# second is used for the receiver. In practise, the second byte is also used for
+# some device-specific notifications (keyboard illumination level). Do not
+# simply set all notification bits if the software does not support it. For
+# example, enabling keyboard_sleep_raw makes the Sleep key a no-operation unless
+# the software is updated to handle that event.
+# Observations:
 # - wireless and software present were seen on receivers, reserved_r1b4 as well
 # - the rest work only on devices as far as we can tell right now
 # In the future would be useful to have separate enums for receiver and device notification flags,
 # but right now we don't know enough.
 NOTIFICATION_FLAG = _NamedInts(
-				battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
-				keyboard_sleep_raw=0x020000,  # guess
-				keyboard_multimedia_raw=0x010000,  # guess
-				# reserved_r1b4=0x001000,  # unknown, seen on a unifying receiver
-				keyboard_backlight=0x000200,  # guess
-				software_present=0x000800,  # .. no idea
-				wireless=0x000100,  # notify when the device wireless goes on/off-line
+				battery_status=         0x100000,  # send battery charge notifications (0x07 or 0x0D)
+				keyboard_sleep_raw=     0x020000,  # system control keys such as Sleep
+				keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
+				# reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
+				software_present=       0x000800,  # .. no idea
+				keyboard_backlight=     0x000200,  # illumination brightness level changes (by pressing keys)
+				wireless=               0x000100,  # notify when the device wireless goes on/off-line
 				)
 
 ERROR = _NamedInts(
