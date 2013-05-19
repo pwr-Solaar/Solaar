@@ -75,7 +75,8 @@ def _icon_with_battery(level, active):
 	name = '%s-%s' % (battery_icon, active)
 	if name not in _PIXMAPS:
 		mask = _icons.icon_file(_icons.APP_ICON[2], 128)
-		assert mask
+		if not mask:
+			return
 		mask = GdkPixbuf.Pixbuf.new_from_file(mask)
 		assert mask.get_width() == 128 and mask.get_height() == 128
 		mask.saturate_and_pixelate(mask, 0.7, False)
@@ -110,7 +111,11 @@ def _update_image(icon):
 	if battery_status is None:
 		icon.set_from_icon_name(_icons.APP_ICON[1])
 	else:
-		icon.set_from_pixbuf(_icon_with_battery(battery_level, bool(battery_status)))
+		pixbuf = _icon_with_battery(battery_level, bool(battery_status))
+		if pixbuf:
+			icon.set_from_pixbuf(pixbuf)
+		else:
+			icon.set_from_icon_name(_icons.APP_ICON[1])
 
 #
 #
@@ -121,6 +126,8 @@ def _device_index(icon, device):
 		for index, (rserial, serial, name, _) in enumerate(icon._devices_info):
 			if rserial == device.receiver.serial and serial == device.serial:
 				return index
+
+	# print ("== device", device, device.receiver.serial, "not found in", icon._receivers, "/", icon._devices_info)
 
 
 def _add_device(icon, device):
@@ -162,7 +169,7 @@ def _update_menu_item(icon, index, device_status):
 	menu_item = menu_items[index]
 
 	image = menu_item.get_image()
-	battery_level = device_status.get(_status.BATTERY_LEVEL) if device_status else None
+	battery_level = device_status.get(_status.BATTERY_LEVEL)
 	image.set_from_icon_name(_icons.battery(battery_level), Gtk.IconSize.LARGE_TOOLBAR)
 	image.set_sensitive(bool(device_status))
 	# menu_item.set_sensitive(bool(device_status))

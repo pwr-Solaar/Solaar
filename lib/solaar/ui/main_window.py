@@ -306,11 +306,11 @@ def _create(receiver):
 	window = Gtk.Window()
 
 	window.set_title(NAME + ': ' + receiver.name)
-	icon_file = _icons.icon_file(_icons.APP_ICON[1])
+	icon_file = _icons.icon_file(NAME.lower())
 	if icon_file:
 		window.set_icon_from_file(icon_file)
 	else:
-		window.set_icon_name(_icons.APP_ICON[1])
+		window.set_icon_name(NAME.lower())
 
 	window.set_role('status-window')
 	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
@@ -429,7 +429,8 @@ def _update_device_box(frame, dev):
 			battery_label.set_markup('<small>no status</small>')
 			battery_label.set_sensitive(True)
 		else:
-			battery_icon.set_from_icon_name(_icons.battery(battery_level), _STATUS_ICON_SIZE)
+			icon_name = _icons.battery(battery_level)
+			battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(True)
 			battery_label.set_text('%d%%' % battery_level)
 			battery_label.set_sensitive(True)
@@ -442,7 +443,7 @@ def _update_device_box(frame, dev):
 			light_icon.set_visible(False)
 			light_label.set_visible(False)
 		else:
-			icon_name = 'light_%03d' % (20 * ((light_level + 50) // 100))
+			icon_name = _icons.lux(light_level)
 			light_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 			light_icon.set_visible(True)
 			light_label.set_text('%d lux' % light_level)

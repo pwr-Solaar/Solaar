@@ -27,7 +27,7 @@ APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' 
 #
 #
 
-def battery(level=None):
+def battery(level=None, charging=False):
 	if level is None or level < 0:
 		return 'battery_unknown'
 	return 'battery_%03d' % (10 * ((level + 5) // 10))
@@ -88,4 +88,7 @@ def device_icon_name(name, kind=None):
 def icon_file(name, size=_LARGE_SIZE):
 	theme = Gtk.IconTheme.get_default()
 	if theme.has_icon(name):
-		return theme.lookup_icon(name, size, 0).get_filename()
+		theme_icon = theme.lookup_icon(name, size, 0)
+		file_name = theme_icon.get_filename()
+		# print ("icon", name, "->", theme_icon, file_name)
+		return file_name

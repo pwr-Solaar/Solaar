@@ -15,6 +15,7 @@ def _look_for_application_icons():
 	src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
 	local_share = _os.environ.get('XDG_DATA_HOME', _path.expanduser('~/.local/share'))
 	data_dirs = _os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
+	del _sys
 
 	share_solaar = [prefix_share] + list(_path.join(x, 'solaar') for x in [src_share, local_share] + data_dirs.split(':'))
 	for location in share_solaar:
@@ -25,7 +26,6 @@ def _look_for_application_icons():
 			# print ('XDG_DATA_DIRS=%s' % _os.environ['XDG_DATA_DIRS'])
 			break
 
-	del _sys
 	del _os
 	# del _path
 
