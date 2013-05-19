@@ -15,8 +15,9 @@ Package: solaar
 Architecture: all
 Depends: ${misc:Depends}, udev (>= 175), adduser,
  ${python:Depends}, python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
+ ${DesktopIconTheme}
 Recommends: gir1.2-notify-0.7
-Suggests: gnome-icon-theme | gnome-icon-theme-full | oxygen-icon-theme | lxde-icon-theme | moblin-icon-theme | nuvola-icon-theme | xubuntu-icon-theme
+Suggests: gir1.2-gtk-3.0 (>= 3.6.4)
 Description: Logitech Unifying Receiver peripherals manager for Linux
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read

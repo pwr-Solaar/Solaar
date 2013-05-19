@@ -2,6 +2,8 @@
 
 set -e
 
+# shamelessly copied from usbmuxd.postinst
+
 # creating plugdev group if he isn't already there
 if ! getent group plugdev >/dev/null; then
 	addgroup --system plugdev
