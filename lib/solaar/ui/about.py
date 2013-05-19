@@ -8,7 +8,10 @@ from gi.repository import Gtk
 from solaar import __version__, NAME
 
 
-def show_window(action):
+_dialog = None
+
+
+def _create():
 	about = Gtk.AboutDialog()
 
 	about.set_icon_name(NAME.lower())
@@ -29,19 +32,24 @@ def show_window(action):
 						))
 		about.add_credit_section('Technical specifications\nprovided by', (
 						'Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',
-						'Nestor Lopez Casado https://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28'
+						'Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28',
 						))
 	except TypeError:
-		# gtk3 < 3.6 has incorrect gi bindings
+		# gtk3 < ~3.6.4 has incorrect gi bindings
 		import logging
 		logging.exception("failed to fully create the about dialog")
 	except:
-		# is the Gtk3 version too old?
+		# the Gtk3 version may be too old, and the function does not exist
 		import logging
 		logging.exception("failed to fully create the about dialog")
 
 	about.set_website('http://pwr.github.io/Solaar/')
 	about.set_website_label(NAME)
 
-	about.run()
-	about.destroy()
+	return about
+
+
+def show_window(_):
+	w = _create()
+	w.run()
+	w.destroy()
