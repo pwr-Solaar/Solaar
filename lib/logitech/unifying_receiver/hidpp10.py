@@ -39,7 +39,14 @@ POWER_SWITCH_LOCATION = _NamedInts(
 				left_edge=0x0B,
 				bottom_edge=0x0C)
 
-# Some flags are used both by devices and receivers, the Logitech documentation makes no difference
+# Some flags are used both by devices and receivers. The Logitech documentation
+# mentions that the first and last (third) byte are used for devices while the
+# second is used for the receiver. In practise, the second byte is also used for
+# some device-specific notifications (keyboard illumination level). Do not
+# simply set all notification bits if the software does not support it. For
+# example, enabling keyboard_sleep_raw makes the Sleep key a no-operation unless
+# the software is updated to handle that event.
+# Observations:
 # - wireless and software present were seen on receivers, reserved_r1b4 as well
 # - the rest work only on devices as far as we can tell right now
 # In the future would be useful to have separate enums for receiver and device notification flags,
