@@ -388,7 +388,7 @@ class DeviceStatus(dict):
 						self[BATTERY_STATUS] += ', charging'
 					self._changed()
 				elif n.address == 0x20:
-					_log.debug("%s: Solar key pressed", self._device)
+					_log.debug("%s: Light Check button pressed", self._device)
 					self._changed(alert=ALERT.SHOW_WINDOW)
 					# first cancel any reporting
 					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE)
