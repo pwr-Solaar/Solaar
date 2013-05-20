@@ -80,6 +80,8 @@ who also provided some internal
 - [Alexander Hofbauer](http://derhofbauer.at/blog/blog/2012/08/28/logitech-performance-mx)
 - [Clach04](http://bitbucket.org/clach04/logitech-unifying-receiver-tools)
 - [Peter Wu](https://lekensteyn.nl/logitech-unifying.html)
+- [Nestor Lopez Casado](http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28)
+provided some more Logitech specifications for the HID++ protocol
 
 Also thanks to Douglas Wagner, Julien Gascard and Peter Wu for helping with
 application testing and supporting new devices.

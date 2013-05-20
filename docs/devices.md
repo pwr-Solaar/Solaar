@@ -7,9 +7,9 @@ For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported:
 
 * The [K750 Solar Keyboard][K750] is also queried for its solar charge status.
-  Pressing the `Solar` key on the keyboard will pop-up the application window
-  and display the current lighting value (Lux) as reported by the keyboard,
-  similar to Logitech's *Solar.app* for Windows.
+  Pressing the `Light-Check` button on the keyboard will pop-up the application
+  window and display the current lighting value (Lux) as reported by the
+  keyboard, similar to Logitech's *Solar.app* for Windows.
 
 * The state of the `FN` key can be toggled on some keyboards ([K750][K750] and
   [K800][K800]). It changes the way the function keys (`F1`..`F12`) work, i.e.

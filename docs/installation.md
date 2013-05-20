@@ -28,22 +28,22 @@ automatically (it will switch to root when necessary), or you can do all the
 required steps by hand, as the root user:
 
 1. copy `rules.d/99-logitech-unfiying-receiver.rules` from Solaar to
-  `/etc/udev/rules.d/`
+   `/etc/udev/rules.d/`
 
-  By default, the rule makes the Unifying Receiver device available for r/w by
-  all users belonging to the `plugdev` system group (standard Debian/Ubuntu
-  group for pluggable devices). It may need changes, specific to your
-  particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
-  with `GROUP="<your username>"` should just work.
+   By default, the rule makes the Unifying Receiver device available for r/w by
+   all users belonging to the `plugdev` system group (standard Debian/Ubuntu
+   group for pluggable devices). It may need changes, specific to your
+   particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
+   with `GROUP="<your username>"` should just work.
 
 2. run `udevadm control --reload-rules` to let the udev daemon know about the
-  new rule
+   new rule
 
 3. physically remove the Unifying Receiver, wait 10 seconds and re-insert it
 
-  This is necessary because if the receiver is already plugged-in, it already
-  has a `/dev/hidraw?` device node, but with the old (`root:root`) permissions.
-  Plugging it again will re-create the device node with the right permissions.
+   This is necessary because if the receiver is already plugged-in, it already
+   has a `/dev/hidraw?` device node, but with the old (`root:root`) permissions.
+   Plugging it again will re-create the device node with the right permissions.
 
 4. make sure your desktop users are part of the `plugdev` group, by running
-`adduser <linux user> plugdev` as root
+   `adduser <linux user> plugdev` as root
