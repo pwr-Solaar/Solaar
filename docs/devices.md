@@ -1,3 +1,7 @@
+---
+title: Supported devices
+---
+
 **Solaar** will detect all devices paired with your Unifying Receiver, and at
 the very least display some basic information about them.
 
@@ -86,13 +90,13 @@ Mouse-Keyboard combos:
 | Device           | HID++ | Battery | Other supported features                |
 |------------------|-------|---------|-----------------------------------------|
 | MK330            |       |         |                                         |
+| MK520            |       |         |                                         |
+| MK550            |       |         |                                         |
 | MK710            | 1.0   | yes     | FN swap                                 |
 
 
 The information in these tables is incomplete, based on what devices myself and
 other users have been able to test Solaar with.
-
---
 
 [unifying]: http://logitech.com/en-us/66/6079
 [K750]: http://logitech.com/product/k750-keyboard

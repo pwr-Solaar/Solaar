@@ -1,4 +1,6 @@
-## Manual instalation
+---
+title: Manual installation
+---
 
 ### Requirements
 
@@ -40,3 +42,10 @@ required steps by hand, as the root user:
   new rule
 
 3. physically remove the Unifying Receiver, wait 10 seconds and re-insert it
+
+  This is necessary because if the receiver is already plugged-in, it already
+  has a `/dev/hidraw?` device node, but with the old (`root:root`) permissions.
+  Plugging it again will re-create the device node with the right permissions.
+
+4. make sure your desktop users are part of the `plugdev` group, by running
+`adduser <linux user> plugdev` as root

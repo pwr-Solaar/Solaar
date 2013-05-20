@@ -6,6 +6,7 @@ It comes in two flavors, command-line and GUI.  Both are able to list the
 devices paired to a Unifying Receiver, show detailed info for each device, and
 also pair/unpair supported devices with the receiver.
 
+[unifying]: http://logitech.com/en-us/66/6079
 
 ## Supported Devices
 
@@ -28,7 +29,7 @@ Pre-built packages are available for a few Linux distros:
 * an [Arch package][arch], courtesy of Arnaud Taffanel
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[debian]: http://pwr.github.io/Solaar/packages/solaar_0.8.8-3_all.deb
+[debian]: http://pwr.github.io/Solaar/packages/solaar_0.8.8.1-2_all.deb
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
 [opensuse]: http://software.opensuse.org/package/Solaar
 [arch]: http://aur.archlinux.org/packages/solaar
@@ -50,6 +51,8 @@ procedure for manual installation.
 
 - Devices connected throught a [Nano Receiver][nano] (which is very similar to
   the Unifying Receiver) are not supported at this time.
+
+[nano]: http://logitech.com/mice-pointers/articles/5926
 
 - Running the command-line application (`bin/solaar-cli`) while the GUI
   application is also running *may* occasionally cause either of them to become
@@ -74,8 +77,3 @@ who also provided some internal
 
 Also thanks to Douglas Wagner, Julien Gascard and Peter Wu for helping with
 application testing and supporting new devices.
-
---
-
-[unifying]: http://logitech.com/en-us/66/6079
-[nano]: http://logitech.com/mice-pointers/articles/5926
