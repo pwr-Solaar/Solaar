@@ -3,9 +3,15 @@
 from glob import glob
 from distutils.core import setup
 
+import sys
+backup_path_0 = sys.path[0]
+sys.path[0] = backup_path_0 + '/lib'
+from solaar import NAME, __version__
+sys.path[0] = backup_path_0
+del sys, backup_path_0
 
-setup(name='solaar',
-		version='0.8.8.1',
+setup(name=NAME.lower(),
+		version=__version__,
 		description='Linux devices manager for the Logitech Unifying Receiver.',
 		long_description='''
 Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
