@@ -60,6 +60,12 @@ procedure for manual installation.
   enough to be able to be able to diagnose it properly yet.
 
 
+## License
+
+This software is distributed under the terms of the
+[GNU Public License, v2](COPYING).
+
+
 ## Thanks
 
 This project began as a third-hand clone of [Noah K. Tilton](https://github.com/noah)'s
