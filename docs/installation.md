@@ -1,6 +1,4 @@
----
-title: Manual installation
----
+# Manual installation
 
 ### Requirements
 

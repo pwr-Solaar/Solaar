@@ -1,6 +1,4 @@
----
-title: Supported devices
----
+# Supported devices
 
 **Solaar** will detect all devices paired with your Unifying Receiver, and at
 the very least display some basic information about them.
@@ -24,11 +22,17 @@ Linux system configuration) are supported:
   be toggled on the [M705 Marathon Mouse][M705] and [M510 Wireless Mouse][M510].
 
 
-# Supported devices
+# Supported features
 
 These tables list all known Logitech [Unifying][unifying] devices, and to what
 degree their features are supported by Solaar. If your device is not listed here
 at all, it is very unlikely Solaar would be able to support it.
+
+The information in these tables is incomplete, based on what devices myself and
+other users have been able to test Solaar with. If your device works with
+Solaar, but its supported features are not specified here, I would love to hear
+about it.
+
 
 The HID++ column specifies the device's HID++ version.
 
@@ -94,9 +98,6 @@ Mouse-Keyboard combos:
 | MK550            |       |         |                                         |
 | MK710            | 1.0   | yes     | FN swap                                 |
 
-
-The information in these tables is incomplete, based on what devices myself and
-other users have been able to test Solaar with.
 
 [unifying]: http://logitech.com/en-us/66/6079
 [K750]: http://logitech.com/product/k750-keyboard
