@@ -2,8 +2,6 @@
 
 set -e
 
-BACKUPS=".git packages"
-
 BUILD="$(mktemp -dt solaar-gh-pages-XXXXXX)"
 cd "$(dirname "$0")"/..
 SELF="$PWD"
@@ -57,6 +55,7 @@ fix_times() {
 
 cp -upr "$SELF/jekyll"/* "$BUILD/"
 cp -up "$SELF/share/solaar/icons/solaar-logo.png" "$BUILD/images/"
+cp -up "$SELF/share/solaar/icons/solaar.png" "$BUILD/images/favicon.png"
 
 add_md docs/devices.md
 add_md docs/installation.md
@@ -71,13 +70,15 @@ for l in "$BUILD/_layouts"/*.html; do
 	mv "$l=" "$l"
 done
 
-BACKUPS_DIR="$(mktemp -d --tmpdir="$SITE/.." backups-XXXXXX)"
-for d in $BACKUPS; do
-	mv "$SITE/$d" "$BACKUPS_DIR"
-done
+mkdir -p "$SITE/../packages"
+cp -up "$SELF/dist/debian"/*.deb "$SITE/../packages/"
+
+GIT_BACKUP="$(mktemp -ud --tmpdir="$SITE/.." git-backup-XXXXXX)"
+mv "$SITE/.git" "$GIT_BACKUP"
 jekyll --kramdown "$BUILD" "$SITE"
-mv "$BACKUPS_DIR"/* "$BACKUPS_DIR"/.[a-z]* "$SITE/"
-rm -rf "$BACKUPS_DIR"
+mv "$GIT_BACKUP" "$SITE/.git"
+
+cp -al "$SITE/../packages/" "$SITE/"
 
 for p in "$SITE"/*.html; do
 	sed -i -e 's#^[ ]*##g' "$p"
@@ -99,6 +100,3 @@ fix_times docs/installation.md installation.html
 fix_times jekyll/images images
 fix_times share/solaar/icons/solaar-logo.png images/solaar-logo.png
 fix_times jekyll/style style
-
-mkdir -p "$SITE/packages"
-cp -up "$SELF/dist/debian"/*.deb "$SITE/packages/"
