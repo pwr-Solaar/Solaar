@@ -132,9 +132,10 @@ def parse_battery_reply_07(level, battery_status):
 		else 20 if level == 3 # low
 		else 5 if level == 1 # critical
 		else 0 ) # wtf?
-	status = ('charging' if battery_status == 0x25
+	status = ('charging' if battery_status == 0x21 or battery_status == 0x25
 		else 'fully charged' if battery_status == 0x22
-		else 'discharging')
+		else 'discharging' if battery_status == 0x00
+		else None)
 	return charge, status
 
 
