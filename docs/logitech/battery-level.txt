@@ -1,0 +1,26 @@
+The battery/charging level and status is reported only if the related
+reporting flag in register 0x00 is enabled by the host. The
+"Battery/Charging Level" byte indicates the battery level if the
+"Charging State" indicates 0x00 ("Not Charging"). If "Charging State"
+indicates 0x21 to 0x23 ("Charging"), the "Battery/Charging Level" byte
+indicates the level of charging.
+
+10 ix 07 r0 r1 r2 00
+r0 -> Battery/Charging Level
+                  0x00 = Reserved/Unknown
+                  0x01 = Critical
+                  0x02 = Critical (legacy value, don't use)
+                  0x03 = Low
+                  0x04 = Low (legacy value, don't use)
+                  0x05 = Good
+                  0x06 = Good (legacy value, don't use)
+                  0x07 = Full
+                  0x08..0xFF = Reserved
+r1 ->  Charging state
+                  0x00 = Not charging
+                  0x01..0x1F = Reserved (not charging)
+                  0x20 = Unknown charging state
+                  0x21 = Charging
+                  0x22 = Charging complete
+                  0x23 = Charging error
+                  0x24..0xFF = Reserved
