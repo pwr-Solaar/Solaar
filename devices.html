@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<meta name="description" content="Linux devices manager for the Logitech Unifying Receiver." />
+<link rel="stylesheet" type="text/css" media="screen" href="style/stylesheet.css">
+<link rel="icon" type="image/png" href="images/favicon.png" />
+<title>Solaar - Supported devices</title>
+</head>
+<body>
+<div id="header_wrap" class="outer">
+<header class="inner">
+<h1 id="project_title">
+<a href="index.html"><img alt="logo" class="logo" src="images/solaar-logo.png" /> Solaar</a>
+</h1>
+</header>
+</div>
+<div id="main_content_wrap" class="outer">
+<section id="main_content" class="inner">
+<h1 id="supported-devices">Supported devices</h1>
+
+<p><strong>Solaar</strong> will detect all devices paired with your Unifying Receiver, and at
+the very least display some basic information about them.</p>
+
+<p>For some devices, extra settings (usually not available through the standard
+Linux system configuration) are supported:</p>
+
+<ul>
+<li>The <a href="http://logitech.com/product/k750-keyboard">K750 Solar Keyboard</a> is also queried for its solar charge status.
+Pressing the <code>Light-Check</code> button on the keyboard will pop-up the application
+window and display the current lighting value (Lux) as reported by the
+keyboard, similar to Logitech’s <em>Solar.app</em> for Windows.
+</li>
+<li>The state of the <code>FN</code> key can be toggled on some keyboards (<a href="http://logitech.com/product/k750-keyboard">K750</a> and
+<a href="http://logitech.com/product/wireless-illuminated-keyboard-k800">K800</a>). It changes the way the function keys (<code>F1</code>..<code>F12</code>) work, i.e.
+whether holding <code>FN</code> while pressing the function keys will generate the
+standard <code>Fx</code> keycodes or the special function (yellow icons) keycodes.
+</li>
+<li>The DPI can be changed on the <a href="http://logitech.com/product/performance-mouse-mx">Performance MX Mouse</a>.
+</li>
+<li>Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
+be toggled on the <a href="http://logitech.com/product/marathon-mouse-m705">M705 Marathon Mouse</a> and <a href="http://logitech.com/product/wireless-mouse-m510">M510 Wireless Mouse</a>.
+</li>
+</ul>
+
+<h1 id="supported-features">Supported features</h1>
+
+<p>These tables list all known Logitech <a href="http://logitech.com/en-us/66/6079">Unifying</a> devices, and to what
+degree their features are supported by Solaar. If your device is not listed here
+at all, it is very unlikely Solaar would be able to support it.</p>
+
+<p>The information in these tables is incomplete, based on what devices myself and
+other users have been able to test Solaar with. If your device works with
+Solaar, but its supported features are not specified here, I would love to hear
+about it.</p>
+
+<p>The HID++ column specifies the device’s HID++ version.</p>
+
+<p>The Battery column specifies if Solaar is able to read the device’s battery
+level.</p>
+
+<p>For mice, the DPI column specifies if the mouse’s sensitivity is fixed (-), can
+only be read (R), or can be read and changed by Solaar (R/W).</p>
+
+<p>Keyboards:</p>
+
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>HID++</th>
+<th>Battery</th>
+<th>Other supported features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>K230</td>
+<td>2.0</td>
+<td>yes</td>
+<td> </td>
+</tr>
+<tr>
+<td>K270</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>K350</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>K360</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>K400 Touch</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>K750 Solar</td>
+<td>2.0</td>
+<td>yes</td>
+<td>FN swap, Lux reading, light button</td>
+</tr>
+<tr>
+<td>K800 Illuminated</td>
+<td>1.0</td>
+<td>yes</td>
+<td>FN swap</td>
+</tr>
+</tbody>
+</table>
+
+<p>Mice:</p>
+
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>HID++</th>
+<th>Battery</th>
+<th>DPI</th>
+<th>Other supported features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M315</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>M325</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>M345</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>M505</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>M510</td>
+<td>1.0</td>
+<td>yes</td>
+<td> </td>
+<td>smooth scrolling</td>
+</tr>
+<tr>
+<td>M515 Couch</td>
+<td>2.0</td>
+<td>yes</td>
+<td>-</td>
+<td> </td>
+</tr>
+<tr>
+<td>M525</td>
+<td>2.0</td>
+<td>yes</td>
+<td>-</td>
+<td> </td>
+</tr>
+<tr>
+<td>M705 Marathon</td>
+<td>1.0</td>
+<td>yes</td>
+<td>-</td>
+<td>smooth scrolling</td>
+</tr>
+<tr>
+<td>T400 Zone Touch</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>T620 Touch</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>Performance MX</td>
+<td>1.0</td>
+<td>yes</td>
+<td>R/W</td>
+<td> </td>
+</tr>
+<tr>
+<td>Anywhere MX</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>Cube</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table>
+
+<p>Trackballs:</p>
+
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>HID++</th>
+<th>Battery</th>
+<th>DPI</th>
+<th>Other supported features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M570 Trackball</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table>
+
+<p>Touchpads:</p>
+
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>HID++</th>
+<th>Battery</th>
+<th>DPI</th>
+<th>Other supported features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T650 Touchpad</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table>
+
+<p>Mouse-Keyboard combos:</p>
+
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>HID++</th>
+<th>Battery</th>
+<th>Other supported features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MK330</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>MK520</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>MK550</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>MK710</td>
+<td>1.0</td>
+<td>yes</td>
+<td>FN swap</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</div>
+<div id="footer_wrap" class="outer">
+<footer class="inner">
+<p class="copyright"><a href="https://github.com/pwr/Solaar">Solaar</a> maintained by <a href="https://github.com/pwr">pwr</a></p>
+<p><a href="https://github.com/jsncostello/slate">Slate</a> theme by <a href="https://github.com/jsncostello">Jason Costello</a></p>
+</footer>
+</div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-36908718-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>

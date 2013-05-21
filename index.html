@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<meta name="description" content="Linux devices manager for the Logitech Unifying Receiver." />
+<link rel="stylesheet" type="text/css" media="screen" href="style/stylesheet.css">
+<link rel="icon" type="image/png" href="images/favicon.png" />
+<title>Solaar</title>
+</head>
+<body>
+<div id="header_wrap" class="outer">
+<header class="inner">
+<a id="forkme_banner" href="https://github.com/pwr/Solaar">View on GitHub</a>
+<h1 id="project_title"><img class="logo" alt="logo" src="images/solaar-logo.png" /> Solaar</h1>
+<h2 id="project_tagline">Linux devices manager for the Logitech Unifying Receiver.</h2>
+<section id="downloads">
+<a class="tar_download_link" href="https://github.com/pwr/Solaar/archive/0.8.8.1.tar.gz">Solaar 0.8.8.1</a>
+<p style="color: #fff">
+Latest version:<br/>
+<span style="float: right; font-weight: bolder;">0.8.8.1</span>
+</p>
+</section>
+</header>
+</div>
+<div id="main_content_wrap" class="outer">
+<section id="main_content" class="inner">
+<p><strong>Solaar</strong> is a Linux device manager for Logitech’s <a href="http://logitech.com/en-us/66/6079">Unifying Receiver</a>
+peripherals. It is able to pair/unpair devices to the receiver, and for most
+devices read battery status.</p>
+
+<p>It comes in two flavors, command-line and GUI.  Both are able to list the
+devices paired to a Unifying Receiver, show detailed info for each device, and
+also pair/unpair supported devices with the receiver.</p>
+
+<h2 id="supported-devices">Supported Devices</h2>
+
+<p><strong>Solaar</strong> will detect all devices paired with your Unifying Receiver, and at
+the very least display some basic information about them.</p>
+
+<p>For some devices, extra settings (usually not available through the standard
+Linux system configuration) are supported. For a full list of supported devices
+and their features, see <a href="devices.html">devices</a>.</p>
+
+<h2 id="pre-built-packages">Pre-built packages</h2>
+
+<p>Pre-built packages are available for a few Linux distros:</p>
+
+<ul>
+<li>Ubuntu 12.04+: <a href="http://launchpad.net/~daniel.pavel/+archive/solaar">ppa:daniel.pavel/solaar</a></li>
+<li>a Debian Wheezy package <a href="http://pwr.github.io/Solaar/packages/solaar_0.8.8.1-2_all.deb">.deb</a>, should work on testing and Sid as well</li>
+<li>a <a href="http://code.r3pek.org/gentoo-overlay/src">Gentoo overlay</a>, courtesy of Carlos Silva</li>
+<li>an <a href="http://software.opensuse.org/package/Solaar">OpenSUSE rpm</a>, courtesy of Mathias Homann</li>
+<li>an <a href="http://aur.archlinux.org/packages/solaar">Arch package</a>, courtesy of Arnaud Taffanel</li>
+</ul>
+
+<h2 id="manual-installation">Manual installation</h2>
+
+<p>See <a href="installation.html">installation</a> for the step-by-step
+procedure for manual installation.</p>
+
+<h2 id="known-issues">Known Issues</h2>
+
+<ul>
+<li>Ubuntu’s Unity indicators are not supported at this time. However, if you
+whitelist ‘Solaar’ in the systray, you will get an icon (see
+<a href="http://askubuntu.com/questions/30742">Enable more icons to be in the system tray?</a> for details).</li>
+</ul>
+
+<ul>
+<li>Devices connected throught a <a href="http://logitech.com/mice-pointers/articles/5926">Nano Receiver</a> (which is very similar to
+the Unifying Receiver) are not supported at this time.</li>
+</ul>
+
+<ul>
+<li>Running the command-line application (<code>bin/solaar-cli</code>) while the GUI
+application is also running <em>may</em> occasionally cause either of them to become
+confused about the state of the devices. I haven’t encountered this often
+enough to be able to be able to diagnose it properly yet.</li>
+</ul>
+
+<h2 id="license">License</h2>
+
+<p>This software is distributed under the terms of the
+<a href="https://github.com/pwr/Solaar/blob/master/COPYING">GNU Public License, v2</a>.</p>
+
+<h2 id="thanks">Thanks</h2>
+
+<p>This project began as a third-hand clone of <a href="https://github.com/noah">Noah K. Tilton</a>’s
+logitech-solar-k750 project on GitHub (no longer available). It was developed
+further thanks to the diggings in Logitech’s HID++ protocol done by many other
+people:</p>
+
+<ul>
+<li><a href="http://julien.danjou.info/blog/2012/logitech-k750-linux-support">Julien Danjou</a>,
+who also provided some internal
+<a href="http://julien.danjou.info/blog/2012/logitech-unifying-upower">Logitech documentation</a></li>
+<li><a href="http://6xq.net/git/lars/lshidpp.git">Lars-Dominik Braun</a></li>
+<li><a href="http://derhofbauer.at/blog/blog/2012/08/28/logitech-performance-mx">Alexander Hofbauer</a></li>
+<li><a href="http://bitbucket.org/clach04/logitech-unifying-receiver-tools">Clach04</a></li>
+<li><a href="https://lekensteyn.nl/logitech-unifying.html">Peter Wu</a></li>
+<li><a href="http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28">Nestor Lopez Casado</a>
+provided some more Logitech specifications for the HID++ protocol</li>
+</ul>
+
+<p>Also thanks to Douglas Wagner, Julien Gascard and Peter Wu for helping with
+application testing and supporting new devices.</p>
+
+</section>
+</div>
+<div id="footer_wrap" class="outer">
+<footer class="inner">
+<p class="copyright"><a href="https://github.com/pwr/Solaar">Solaar</a> maintained by <a href="https://github.com/pwr">pwr</a></p>
+<p><a href="https://github.com/jsncostello/slate">Slate</a> theme by <a href="https://github.com/jsncostello">Jason Costello</a></p>
+</footer>
+</div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-36908718-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>
