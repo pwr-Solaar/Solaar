@@ -4,9 +4,9 @@ set -e
 
 # shamelessly copied from usbmuxd.postinst
 
-# creating plugdev group if he isn't already there
+# creating plugdev group if it's not already present on the system
 if ! getent group plugdev >/dev/null; then
-	addgroup --system plugdev
+	groupadd --system --force plugdev || addgroup --system plugdev
 fi
 
 #DEBHELPER#
