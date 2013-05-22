@@ -29,6 +29,7 @@ _MAX_DEVICES = 7
 
 def _make_receiver_box(receiver):
 	frame = Gtk.Frame()
+	# frame.set_shadow_type(Gtk.ShadowType.NONE)
 	frame._device = receiver
 
 	icon_set = _icons.device_icon_set(receiver.name)
@@ -92,8 +93,11 @@ def _make_receiver_box(receiver):
 
 	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
-	toolbar.insert(_action.pair(frame).create_tool_item(), -1)
-	# toolbar.insert(ui.action.about.create_tool_item(), -1)
+	pair_action = _action.pair(frame)
+	if receiver.max_devices == 1:
+		pair_action.set_sensitive(False)
+		pair_action.set_tooltip('Pairing not supported by this receiver')
+	toolbar.insert(pair_action.create_tool_item(), -1)
 
 	vbox = Gtk.VBox(homogeneous=False, spacing=2)
 	vbox.set_border_width(2)
@@ -137,7 +141,7 @@ def _make_device_box(index):
 
 	not_encrypted_icon = Gtk.Image.new_from_icon_name('security-low', _STATUS_ICON_SIZE)
 	not_encrypted_icon.set_name('not-encrypted')
-	not_encrypted_icon.set_tooltip_text('The wireless link between this device and the Unifying Receiver is not encrypted.\n'
+	not_encrypted_icon.set_tooltip_text('The wireless link between this device and its receiver is not encrypted.\n'
 										'\n'
 										'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
 										'\n'
@@ -182,15 +186,16 @@ def _make_device_box(index):
 			device = f._device
 			assert device
 
-			items = [None, None, None, None, None, None, None, None, None]
+			items = [None] * 8
 			hid = device.protocol
 			items[0] = ('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown')
-			items[1] = ('Polling rate', '%d ms' % device.polling_rate)
+			items[1] = ('Polling rate', '%d ms' % device.polling_rate) if device.polling_rate else None
 			items[2] = ('Wireless PID', device.wpid)
 			items[3] = ('Serial', device.serial)
 			firmware = device.firmware
 			if firmware:
-				items[4:] = [(fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in firmware]
+				firmware = [(fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in firmware]
+				items[4:4+len(firmware)] = firmware
 
 			if device.status:
 				notification_flags = _hidpp10.get_notification_flags(device)
@@ -417,6 +422,11 @@ def _update_device_box(frame, dev):
 		for i in frame._toolbar.get_children():
 			i.set_active(False)
 
+		if dev.receiver.max_devices == 1:
+			unpair_button = frame.get_child().get_children()[-1]
+			unpair_button.set_sensitive(False)
+			unpair_button.set_tooltip_text('Unpairing not supported by this device')
+
 	battery_icon, battery_label, light_icon, light_label, not_encrypted_icon, _ = frame._status_icons
 	battery_level = dev.status.get(_status.BATTERY_LEVEL)
 
@@ -425,7 +435,7 @@ def _update_device_box(frame, dev):
 
 		if battery_level is None:
 			battery_icon.set_sensitive(False)
-			battery_icon.set_from_icon_name(_icons.battery(-1), _STATUS_ICON_SIZE)
+			battery_icon.set_from_icon_name(_icons.battery(None), _STATUS_ICON_SIZE)
 			battery_label.set_markup('<small>no status</small>')
 			battery_label.set_sensitive(True)
 		else:

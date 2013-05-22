@@ -57,9 +57,9 @@ def exit():
 	return True
 
 
-def _match(action, device, vendor_id=None, product_id=None, interface_number=None, driver=None):
+def _match(action, device, vendor_id=None, product_id=None, interface_number=None, hid_driver=None):
 	usb_device = device.find_parent('usb', 'usb_device')
-	# print (action, device, "usb:", usb_device)
+	# print ("* parent", action, device, "usb:", usb_device)
 	if not usb_device:
 		return
 
@@ -71,15 +71,15 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 
 	if action == 'add':
 		hid_device = device.find_parent('hid')
-		# print (action, device, "hid:", usb_device)
+		# print ("** found hid", action, device, "hid:", hid_device, hid_device['DRIVER'])
 		if not hid_device:
 			return
 		hid_driver_name = hid_device['DRIVER']
-		if driver is not None and driver != hid_driver_name:
+		if hid_driver is not None and hid_driver != hid_driver_name:
 			return
 
 		intf_device = device.find_parent('usb', 'usb_interface')
-		# print (action, device, "usb_interface:", usb_device)
+		# print ("*** usb interface", action, device, "usb_interface:", intf_device)
 		if interface_number is None:
 			usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
 		else:
@@ -163,7 +163,7 @@ def monitor(callback, *device_filters):
 			raise
 
 
-def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=None):
+def enumerate(vendor_id=None, product_id=None, interface_number=None, hid_driver=None):
 	"""Enumerate the HID Devices.
 
 	List all the HID devices attached to the system, optionally filtering by
@@ -172,7 +172,7 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None, driver=Non
 	:returns: a list of matching ``DeviceInfo`` tuples.
 	"""
 	for dev in _Context().list_devices(subsystem='hidraw'):
-		dev_info = _match('add', dev, vendor_id, product_id, interface_number, driver)
+		dev_info = _match('add', dev, vendor_id, product_id, interface_number, hid_driver)
 		if dev_info:
 			yield dev_info
 
