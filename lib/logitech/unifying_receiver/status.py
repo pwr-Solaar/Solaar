@@ -39,7 +39,7 @@ ERROR='error'
 
 # if not updates have been receiver from the device for a while, assume
 # it has gone offline and clear all its know properties.
-_STATUS_TIMEOUT = 120  # seconds
+_STATUS_TIMEOUT = 5 * 60  # seconds
 
 #
 #
@@ -196,6 +196,9 @@ class DeviceStatus(dict):
 				self[BATTERY_LEVEL] = battery
 
 		if self.updated == 0 and active:
+			# if the device is active on the very first status notification,
+			# (meaning just when the program started or a new receiver was just
+			# detected), pop-up a notification about it
 			alert |= ALERT.NOTIFICATION
 		self.updated = timestamp or _timestamp()
 
@@ -214,7 +217,7 @@ class DeviceStatus(dict):
 				_log.debug("polling status of %s", d)
 
 			# read these from the device in case they haven't been read already
-			# d.protocol, d.serial, d.firmware
+			d.protocol, d.serial, d.firmware
 
 			if BATTERY_LEVEL not in self:
 				self.read_battery(timestamp)

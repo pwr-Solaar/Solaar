@@ -39,7 +39,8 @@ class ReceiverListener(_listener.EventsListener):
 	"""
 	def __init__(self, receiver, status_changed_callback):
 		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
-		self.tick_period = _POLL_TICK
+		# no reason to enable polling yet
+		# self.tick_period = _POLL_TICK
 		self._last_tick = 0
 
 		assert status_changed_callback
@@ -74,6 +75,7 @@ class ReceiverListener(_listener.EventsListener):
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
 
+		# not necessary anymore, we're now using udev monitor to watch for receiver status
 		# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
 		# 	# if we missed a couple of polls, most likely the computer went into
 		# 	# sleep, and we have to reinitialize the receiver again

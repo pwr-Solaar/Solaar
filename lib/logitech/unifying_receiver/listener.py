@@ -104,7 +104,7 @@ class _ThreadedHandle(object):
 _EVENT_READ_TIMEOUT = 500
 
 # After this many reads that did not produce a packet, call the tick() method.
-_IDLE_READS = 3
+_IDLE_READS = 4
 
 
 class EventsListener(_threading.Thread):
@@ -135,7 +135,7 @@ class EventsListener(_threading.Thread):
 		self.has_started()
 
 		last_tick = 0
-		idle_reads = 0
+		idle_reads = _IDLE_READS * 10
 
 		while self._active:
 			if self._queued_notifications.empty():
@@ -162,8 +162,9 @@ class EventsListener(_threading.Thread):
 					_log.exception("processing %s", n)
 
 			elif self.tick_period:
-				idle_reads = (idle_reads + 1) % _IDLE_READS
-				if idle_reads == 0:
+				idle_reads -= 1
+				if idle_reads <= 0:
+					idle_reads = _IDLE_READS
 					now = _timestamp()
 					if now - last_tick >= self.tick_period:
 						last_tick = now
