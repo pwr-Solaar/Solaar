@@ -2,7 +2,7 @@
 
 set -e
 
-Z=`readlink -f "$0"`
+Z=$(readlink -f "$0")
 
 RULES_D=/etc/udev/rules.d
 if ! test -d "$RULES_D"; then
@@ -15,18 +15,18 @@ RULE=99-logitech-unifying-receiver.rules
 if test -n "$1"; then
 	SOURCE="$1"
 else
-	SOURCE="`dirname "$Z"`/$RULE"
+	SOURCE="$(dirname "$Z")/$RULE"
 	if ! id -G -n | grep -q -F plugdev; then
-		GROUP=$(id -g -n)
+		GROUP="$(id -g -n)"
 		echo "User '$USER' does not belong to the 'plugdev' group, will use group '$GROUP' in the udev rule."
 		TEMP_RULE="${TMPDIR:-/tmp}/$$-$RULE"
 		cp -f "$SOURCE" "$TEMP_RULE"
-		SOURCE=$TEMP_RULE
+		SOURCE="$TEMP_RULE"
 		sed -i -e "s/GROUP=\"plugdev\"/GROUP=\"$GROUP\"/" "$SOURCE"
 	fi
 fi
 
-if test "`id -u`" != "0"; then
+if test "$(id -u)" != "0"; then
 	echo "Switching to root to install the udev rule."
 	test -x /usr/bin/pkexec && exec /usr/bin/pkexec "$Z" "$SOURCE"
 	test -x /usr/bin/sudo && exec /usr/bin/sudo -- "$Z" "$SOURCE"
@@ -39,7 +39,4 @@ echo "Installing $RULE."
 cp "$SOURCE" "$RULES_D/$RULE"
 chmod a+r "$RULES_D/$RULE"
 
-echo "Reloading udev rules."
-udevadm control --reload-rules
-
-echo "Done. Now remove the Unfiying Receiver, wait 10 seconds and plug it in again."
+echo "Done. Now remove the Unfiying Receiver and plug it in again."

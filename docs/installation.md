@@ -24,15 +24,16 @@ need to do a one-time udev rule installation to allow access to the Logitech
 Unifying Receiver.
 
 You can run the `rules.d/install.sh` script from Solaar to do this installation
-automatically (it will switch to root when necessary), or you can do all the
-required steps by hand, as the root user:
+automatically (make sure to run it as your regular desktop user, it will switch
+to root when necessary), or you can do all the required steps by hand, as the
+root user:
 
 1. Copy `rules.d/99-logitech-unifying-receiver.rules` from Solaar to
-   `/etc/udev/rules.d/`. udev will automatically pick up this file using
-   inotify.
+   `/etc/udev/rules.d/`. The `udev` daemon will automatically pick up this file
+   using inotify.
 
    By default, the rule allows all members of the `plugdev` group to have
-   read/write access to the Unifying Receiver device. (standard Debian/ Ubuntu
+   read/write access to the Unifying Receiver device. (standard Debian/Ubuntu
    group for pluggable devices). It may need changes, specific to your
    particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
    with `GROUP="<your username>"` should just work.
@@ -40,9 +41,9 @@ required steps by hand, as the root user:
 2. Physically remove the Unifying Receiver and re-insert it.
 
    This is necessary because if the receiver is already plugged-in, it already
-   has a `/dev/hidraw?` device node, but with the old (`root:root`) permissions.
+   has a `/dev/hidrawX` device node, but with the old (`root:root`) permissions.
    Plugging it again will re-create the device node with the right permissions.
 
 3. Make sure your desktop users are part of the `plugdev` group, by running
-   `gpasswd $USER plugdev` as root. If these users were not assigned to the
+   `gpasswd <desktop username> plugdev`. If these users were not assigned to the
    group before, they must re-login for the changes to take effect.
