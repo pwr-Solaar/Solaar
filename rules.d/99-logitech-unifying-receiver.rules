@@ -8,8 +8,13 @@
 
 # HIDAPI/hidraw for Logitech Unifying Receiver
 ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GROUP="plugdev", MODE="0660"
+ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c532", GROUP="plugdev", MODE="0660"
 
-# HIDAPI/hidraw for Logitech Nano Receiver
+# HIDAPI/hidraw for Logitech Nano Receiver, "Unifying ready"
+ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GROUP="plugdev", MODE="0660"
+
+# HIDAPI/hidraw for VX Nano receiver
+#ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c51a", GROUP="plugdev", MODE="0660"
 #ACTION=="add", KERNEL=="hidraw*", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GROUP="plugdev", MODE="0660"
 
 # vim: ft=udevrules

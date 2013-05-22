@@ -70,16 +70,17 @@ def _make_receiver_box(receiver):
 		device = f._device
 		if True:  # f._info_label.get_visible() and '\n' not in f._info_label.get_text():
 			items = [('Path', device.path), ('Serial', device.serial)] + \
-					[(fw.kind, fw.version) for fw in device.firmware]
+					list((fw.kind, fw.version) for fw in device.firmware) + \
+					[None]
 
 			notification_flags = _hidpp10.get_notification_flags(device)
 			if notification_flags:
 				notification_flags = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
 			else:
 				notification_flags = ('(none)',)
-			items.append(('Notifications', ('\n%16s' % ' ').join(notification_flags)))
+			items[-1] = ('Notifications', ('\n%16s' % ' ').join(notification_flags))
 
-			f._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-14s: %s' % item for item in items))
+			f._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-14s: %s' % i for i in items if i))
 		f._info_label.set_sensitive(True)
 
 	def _toggle_info_label(action, f):
@@ -94,7 +95,7 @@ def _make_receiver_box(receiver):
 	toggle_info_action = _action.make_toggle('dialog-information', 'Details', _toggle_info_label, frame)
 	toolbar.insert(toggle_info_action.create_tool_item(), 0)
 	pair_action = _action.pair(frame)
-	if receiver.max_devices == 1:
+	if not receiver.unifying_supported:
 		pair_action.set_sensitive(False)
 		pair_action.set_tooltip('Pairing not supported by this receiver')
 	toolbar.insert(pair_action.create_tool_item(), -1)
@@ -186,16 +187,14 @@ def _make_device_box(index):
 			device = f._device
 			assert device
 
-			items = [None] * 8
 			hid = device.protocol
-			items[0] = ('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown')
-			items[1] = ('Polling rate', '%d ms' % device.polling_rate) if device.polling_rate else None
-			items[2] = ('Wireless PID', device.wpid)
-			items[3] = ('Serial', device.serial)
-			firmware = device.firmware
-			if firmware:
-				firmware = [(fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in firmware]
-				items[4:4+len(firmware)] = firmware
+			items = [
+					('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown'),
+					('Polling rate', '%d ms' % device.polling_rate) if device.polling_rate else None,
+					('Wireless PID', device.wpid),
+					('Serial', device.serial) ] + \
+					list((fw.kind, (fw.name + ' ' + fw.version).strip()) for fw in device.firmware) + \
+					[None]
 
 			if device.status:
 				notification_flags = _hidpp10.get_notification_flags(device)
@@ -204,8 +203,6 @@ def _make_device_box(index):
 				else:
 					notification_flags = ('(none)',)
 				items[-1] = ('Notifications', ('\n%16s' % ' ').join(notification_flags))
-			else:
-				items[-1] = None
 
 			frame._info_label.set_markup('<small><tt>%s</tt></small>' % '\n'.join('%-14s: %s' % i for i in items if i))
 		frame._info_label.set_sensitive(True)
@@ -422,7 +419,7 @@ def _update_device_box(frame, dev):
 		for i in frame._toolbar.get_children():
 			i.set_active(False)
 
-		if dev.receiver.max_devices == 1:
+		if not dev.receiver.unifying_supported:
 			unpair_button = frame.get_child().get_children()[-1]
 			unpair_button.set_sensitive(False)
 			unpair_button.set_tooltip_text('Unpairing not supported by this device')

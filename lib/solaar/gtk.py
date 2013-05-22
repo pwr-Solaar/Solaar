@@ -50,12 +50,12 @@ def _run(args):
 	listeners = {}
 	from solaar.listener import ReceiverListener
 
-	def handle_receivers_events(action, device):
+	def handle_receivers_events(action, device_info):
 		assert action is not None
-		assert device is not None
+		assert device_info is not None
 
 		# whatever the action, stop any previous receivers at this path
-		l = listeners.pop(device.path, None)
+		l = listeners.pop(device_info.path, None)
 		if l is not None:
 			assert isinstance(l, ReceiverListener)
 			l.stop()
@@ -63,18 +63,17 @@ def _run(args):
 		if action == 'add':
 			# a new receiver device was detected
 			try:
-				l = ReceiverListener.open(device.path, status_changed)
+				l = ReceiverListener.open(device_info, status_changed)
 				if l is not None:
-					listeners[device.path] = l
+					listeners[device_info.path] = l
 			except OSError:
 				# permission error, blacklist this path for now
-				listeners.pop(device.path, None)
+				listeners.pop(device_info.path, None)
 				GLib.idle_add(ui.error_dialog, 'Permissions error',
-					'Found a Logitech Unifying Receiver device,\n'
-					'but did not have permission to open it.\n'
+					'Found a Logitech Receiver, but did not have permission to open it.\n'
 					'\n'
-					'If you\'ve just installed Solaar, try removing\n'
-					'the receiver and plugging it back in.')
+					'If you\'ve just installed Solaar, try removing the receiver\n'
+					'and plugging it back in.')
 
 		# elif action == 'remove':
 		# 	# we'll be receiving remove events for any hidraw devices,

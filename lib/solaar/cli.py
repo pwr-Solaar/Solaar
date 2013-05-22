@@ -36,7 +36,7 @@ def _receiver():
 	from logitech.unifying_receiver.base import receivers
 	for dev_info in receivers():
 		try:
-			r = Receiver.open(dev_info.path)
+			r = Receiver.open(dev_info)
 			if r:
 				return r
 		except Exception as e:
@@ -99,7 +99,7 @@ def _print_receiver(receiver, verbose=False):
 		else:
 			print ("   All notifications disabled")
 
-	if paired_count > 0:
+	if receiver.unifying_supported:
 		activity = receiver.request(0x83B3)
 		if activity:
 			activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]

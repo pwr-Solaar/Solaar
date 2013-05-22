@@ -51,11 +51,11 @@ def check_features(device, already_known):
 #
 
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-				['name', 'kind', 'codename', 'registers', 'settings'])
+				['name', 'kind', 'product_id', 'codename', 'registers', 'settings'])
 
 DEVICES = {}
 
-def _D(name, codename=None, kind=None, registers=None, settings=None):
+def _D(name, codename=None, kind=None, product_id=None, registers=None, settings=None):
 	if kind is None:
 		kind = (_hidpp10.DEVICE_KIND.mouse if 'Mouse' in name
 				else _hidpp10.DEVICE_KIND.keyboard if 'Keyboard' in name
@@ -68,7 +68,9 @@ def _D(name, codename=None, kind=None, registers=None, settings=None):
 		codename = name.split(' ')[-1]
 	assert codename is not None
 
-	DEVICES[codename] = _DeviceDescriptor(name, kind, codename, registers, settings)
+	DEVICES[codename] = _DeviceDescriptor(name, kind, product_id, codename, registers, settings)
+	if product_id:
+		DEVICES[product_id] = DEVICES[codename]
 
 #
 #
@@ -133,6 +135,13 @@ _D('Wireless Illuminated Keyboard K800',
 
 # Mice
 
+# _D('VX Nano Cordless Laser Mouse', product_id='c526', codename='VXNano',
+# 				registers={'battery_charge': 0x0D},
+# 				settings=[
+# 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+# 						],
+# 				)
+
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M505')
@@ -154,7 +163,7 @@ _D('Marathon Mouse M705',
 				)
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
-_D('Logitech Cube', kind='mouse')
+_D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse)
 _D('Anywhere Mouse MX', codename='Anywhere MX',
 				# registers={'battery_charge': 0x0D},
 				# settings=[

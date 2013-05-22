@@ -273,6 +273,7 @@ class DeviceStatus(dict):
 		_log.warn("%s: unrecognized %s", self._device, n)
 
 	def _process_hidpp10_notification(self, n):
+		# unpair notification
 		if n.sub_id == 0x40:
 			if n.address == 0x02:
 				# device un-paired
@@ -283,44 +284,33 @@ class DeviceStatus(dict):
 				_log.warn("%s: disconnection with unknown type %02X: %s", self._device, n.address, n)
 			return True
 
+		# wireless link notification
 		if n.sub_id == 0x41:
-			if n.address == 0x04:  # unifying protocol
-				# wpid = _strhex(n.data[4:5] + n.data[3:4])
-				# assert wpid == device.wpid
-
+			protocol_name = ('unifying (eQuad DJ)' if n.address == 0x04
+						else 'eQuad' if n.address == 0x03
+						else None)
+			if protocol_name:
 				flags = ord(n.data[:1]) & 0xF0
 				link_encrypyed = bool(flags & 0x20)
 				link_established = not (flags & 0x40)
 				if _log.isEnabledFor(_DEBUG):
 					sw_present = bool(flags & 0x10)
 					has_payload = bool(flags & 0x80)
-					_log.debug("%s: unifying connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
-								self._device, sw_present, link_encrypyed, link_established, has_payload)
+					_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
+								self._device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
 				self[ENCRYPTED] = link_encrypyed
 				self._changed(link_established)
 
-			elif n.address == 0x03:  # eQuad protocol
-				# Nano devices might not have been initialized fully
-				if self._device._kind is None:
-					kind = ord(n.data[:1]) & 0x0F
-					self._device._kind = _hidpp10.DEVICE_KIND[kind]
-				if self._device._wpid is None:
-					self._device._wpid = _strhex(n.data[2:3] + n.data[1:2])
-
-				flags = ord(n.data[:1]) & 0xF0
-				link_encrypyed = bool(flags & 0x20)
-				link_established = not (flags & 0x40)
-				if _log.isEnabledFor(_DEBUG):
-					sw_present = bool(flags & 0x10)
-					has_payload = bool(flags & 0x80)
-					_log.debug("%s: eQuad connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
-								self._device, sw_present, link_encrypyed, link_established, has_payload)
-				self[ENCRYPTED] = link_encrypyed
-				self._changed(link_established)
-
+				if protocol_name == 'eQuad':
+					# some Nano devices might not have been initialized fully
+					if self._device._kind is None:
+						kind = ord(n.data[:1]) & 0x0F
+						self._device._kind = _hidpp10.DEVICE_KIND[kind]
+					assert self._device.wpid == _strhex(n.data[2:3] + n.data[1:2])
 			else:
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
 
+			# if the device just came online, read the battery charge
 			if self._active:  # and BATTERY_LEVEL not in self:
 				self.read_battery()
 
@@ -332,6 +322,7 @@ class DeviceStatus(dict):
 			# if n.address == 0x03, it's an actual input event
 			return True
 
+		# power notification
 		if n.sub_id == 0x4B:
 			if n.address == 0x01:
 				if _log.isEnabledFor(_DEBUG):

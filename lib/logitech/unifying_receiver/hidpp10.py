@@ -153,7 +153,7 @@ def get_serial(device):
 
 
 def get_firmware(device):
-	firmware = []
+	firmware = [None, None]
 
 	reply = device.request(0x81F1, 0x01)
 	if reply:
@@ -163,23 +163,17 @@ def get_firmware(device):
 		if reply:
 			fw_version += '.B' + _strhex(reply[1:3])
 		fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
-		firmware.append(fw)
-
-	if device.kind is None and device.max_devices == 1:
-		# Nano receiver
-		return firmware
-	if device.kind is not None and not device._unifying:
-		# Nano device
-		return firmware
+		firmware[0] = fw
 
 	reply = device.request(0x81F1, 0x04)
 	if reply:
 		bl_version = _strhex(reply[1:3])
 		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
 		bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, '', bl_version, None)
-		firmware.append(bl)
+		firmware[1] = bl
 
-	return tuple(firmware)
+	if any(firmware):
+		return tuple(f for f in firmware if f)
 
 
 def get_notification_flags(device):
