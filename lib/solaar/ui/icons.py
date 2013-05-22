@@ -47,12 +47,14 @@ def device_icon_set(name='_', kind=None):
 		icon_set = Gtk.IconSet.new()
 		_ICON_SETS[name] = icon_set
 
+		# names of possible icons, in reverse order of likelihood
+		# the theme will hopefully pick up the most appropiate
 		names = ['preferences-desktop-peripherals']
 		if kind:
 			if str(kind) == 'numpad':
-				names += ('input-dialpad',)
+				names += ('input-keyboard', 'input-dialpad')
 			elif str(kind) == 'touchpad':
-				names += ('input-tablet',)
+				names += ('input-mouse', 'input-tablet')
 			elif str(kind) == 'trackball':
 				names += ('input-mouse',)
 			names += ('input-' + str(kind),)
