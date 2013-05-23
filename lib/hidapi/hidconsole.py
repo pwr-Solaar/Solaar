@@ -216,10 +216,10 @@ def main():
 				rlist, wlist, xlist = _select([handle], [], [], 1)
 				if data[1:2] == b'\xFF':
 					# the receiver will reply very fast, in a few milliseconds
-					time.sleep(0.100)
+					time.sleep(0.010)
 				else:
 					# the devices might reply quite slow
-					time.sleep(1)
+					time.sleep(0.700)
 	except EOFError:
 		if interactive:
 			print ("")
