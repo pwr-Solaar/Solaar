@@ -13,32 +13,35 @@ else
 fi
 HIDRAW=$2
 
-z='0 1 2 3 4 5 6 7 8 9 a b c d e f'
 do_req() {
-	"$HC" --hidpp $HIDRAW | grep -v "\[1. $DEVNUMBER 8F.. ..0[12]" | grep -B 1 '^>> '
+	"$HC" --hidpp $HIDRAW | grep -v "\[1. ${DEVNUMBER} 8F.. ..0[12]" | grep -B 1 "^>> "
 }
 
-oldflags=$(echo "10 ${DEVNUMBER} 8100 000000" | do_req | grep -Po "^>> \([0-9. ]*\) \[10 $DEVNUMBER 8100 \K[0-9a-f]{6}(?=\])")
+req00="$(mktemp --tmpdir req00-XXXXXX)"
+echo "10 ${DEVNUMBER} 8100 000000" | do_req >"$req00"
+oldflags=$(grep -Po "^>> \([0-9. ]*\) \[10 ${DEVNUMBER} 8100 \K[0-9a-f]{6}(?=\])" "$req00")
 if [ -n "$oldflags" ]; then
 	echo "# Old notification flags: $oldflags"
-	{
-		echo "10 ${DEVNUMBER} 8000 ffffff"     # enable all notifications
-		echo "10 ${DEVNUMBER} 8100 000000"     # read available notifs
-		echo "10 ${DEVNUMBER} 8000 $oldflags"  # restore notifications
-	} | do_req | grep -B 1 "^>>.* $DEVNUMBER 8100 "
+	cat >"$req00-flags" <<-_CHECK_NOTIFICATIONS
+		10 ${DEVNUMBER} 8000 ffffff
+		10 ${DEVNUMBER} 8100 000000
+		10 ${DEVNUMBER} 8000 ${oldflags}
+	_CHECK_NOTIFICATIONS
+	# set all possible flags, read the new value, then restore the old value
+	# this will show all supported notification flags by this device
+	cat "$req00-flags" | do_req | grep "^>>.* ${DEVNUMBER} 8100 "
 else
-	echo "# Failed to read notification flags."
+	echo "# Warning: hidconsole API got changed - unrecognized output"
+	cat "$req00"
 fi
+rm --force "$req00" "$req00-flags" &
 
-for x in $z; do
-	for y in $z; do
-		[ "$x$y" = 00 ] || \
-		echo "10 ${DEVNUMBER} 81${x}${y} 000000"
-	done
+# read all short registers, skipping 00
+for n in $(seq 1 255); do
+	printf "10 ${DEVNUMBER} 81%02x 000000\n" $n
 done | do_req
 
-for x in $z; do
-	for y in $z; do
-		echo "10 ${DEVNUMBER} 83${x}${y} 000000"
-	done
+# read all long registers
+for n in $(seq 0 255); do
+	printf "10 ${DEVNUMBER} 83%02x 000000\n" $n
 done | do_req
