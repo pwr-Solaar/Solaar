@@ -370,6 +370,13 @@ def _parse_arguments():
 
 	args = arg_parser.parse_args()
 
+	# Python 3 has an undocumented 'feature' that breaks parsing empty args
+	# http://bugs.python.org/issue16308
+	if not 'cmd' in args:
+		arg_parser.print_usage(sys.stderr)
+		sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
+		sys.exit(2)
+
 	if args.debug > 0:
 		log_level = logging.WARNING - 10 * args.debug
 		log_format='%(asctime)s %(levelname)8s %(name)s: %(message)s'
