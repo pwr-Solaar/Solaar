@@ -47,10 +47,18 @@ def _create():
 	about.set_website('http://pwr.github.io/Solaar/')
 	about.set_website_label(NAME)
 
+	about.connect('response', lambda x, y: x.hide())
+
+	def _hide(dialog, event):
+		dialog.hide()
+		return True
+	about.connect('delete-event', _hide)
+
 	return about
 
 
 def show_window(_):
-	w = _create()
-	w.run()
-	w.destroy()
+	global _dialog
+	if _dialog is None:
+		_dialog = _create()
+	_dialog.present()
