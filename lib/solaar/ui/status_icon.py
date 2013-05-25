@@ -112,6 +112,9 @@ def _generate_tooltip_lines(icon):
 	yield ''
 
 	for _, serial, name, status in icon._devices_info:
+		if serial is None:  # receiver
+			continue
+
 		yield '<b>%s</b>' % name
 
 		p = str(status)
