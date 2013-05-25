@@ -14,35 +14,94 @@ from logitech.unifying_receiver import status as _status
 #
 #
 
-def create(activate_callback, menu_activate_callback):
-	assert activate_callback
-	assert menu_activate_callback
-
-	icon = Gtk.StatusIcon()
-	icon.set_title(NAME)
-	icon.set_name(NAME)
-	icon.set_from_icon_name(_icons.APP_ICON[0])
+def _create_common(icon, menu_activate_callback):
 	icon._devices_info = []
-	icon._receivers = set()
 
-	icon.set_tooltip_text(NAME)
-	icon.connect('activate', activate_callback)
+	icon.set_title(NAME)
+
 	icon._menu_activate_callback = menu_activate_callback
+	icon._menu = menu = Gtk.Menu()
 
-	menu = icon._menu = Gtk.Menu()
+	no_receiver = Gtk.MenuItem.new_with_label('No receiver found')
+	no_receiver.set_sensitive(False)
+	menu.append(no_receiver)
 
 	# per-device menu entries will be generated as-needed
-
 	menu.append(Gtk.SeparatorMenuItem.new())
 	menu.append(_action.about.create_menu_item())
 	menu.append(_action.make('application-exit', 'Quit', Gtk.main_quit).create_menu_item())
 	menu.show_all()
 
-	icon.connect('popup_menu',
-					lambda icon, button, time, menu:
-						menu.popup(None, None, icon.position_menu, icon, button, time),
-					menu)
-	return icon
+
+try:
+	raise ImportError
+	# try:
+	# 	from gi.repository import AppIndicator3 as AppIndicator
+	# except ImportError:
+	# 	from gi.repository import AppIndicator
+
+	# def create(activate_callback, menu_activate_callback):
+	# 	assert activate_callback
+	# 	assert menu_activate_callback
+
+	# 	ind = AppIndicator.Indicator.new('indicator-solaar', _icons.APP_ICON[0], AppIndicator.IndicatorCategory.HARDWARE)
+	# 	ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+
+	# 	_create_common(ind, menu_activate_callback)
+	# 	ind.set_menu(ind._menu)
+
+	# 	return ind
+
+
+	# def destroy(ind):
+	# 	ind.set_status(AppIndicator.IndicatorStatus.PASSIVE)
+	# 	ind.set_menu(None)
+
+
+	# def _update_icon_tooltip(ind, lines_generator):
+	# 	pass
+
+
+	# def _update_icon_image(ind, image):
+	# 	if isinstance(image, GdkPixbuf.Pixbuf):
+	# 		pass
+	# 	else:
+	# 		ind.set_icon(image)
+
+except ImportError:
+
+	def create(activate_callback, menu_activate_callback):
+		assert activate_callback
+		assert menu_activate_callback
+
+		icon = Gtk.StatusIcon.new_from_icon_name(_icons.APP_ICON[0])
+		icon.set_name(NAME)
+		icon.set_tooltip_text(NAME)
+		icon.connect('activate', activate_callback)
+
+		_create_common(icon, menu_activate_callback)
+		icon.connect('popup_menu',
+						lambda icon, button, time, menu:
+							icon._menu.popup(None, None, icon.position_menu, icon, button, time),
+						icon._menu)
+
+		return icon
+
+
+	def destroy(icon):
+		icon.set_visible(False)
+
+
+	def _update_icon_tooltip(icon, lines_generator):
+		tooltip_lines = lines_generator(icon)
+		icon.set_tooltip_markup('\n'.join(tooltip_lines).rstrip('\n'))
+
+
+	def _update_icon_image(icon, image):
+		if isinstance(image, GdkPixbuf.Pixbuf):
+			icon.set_from_pixbuf(image)
+		else:
+			icon.set_from_icon_name(image)
 
 #
 #
@@ -94,48 +153,41 @@ def _icon_with_battery(level, active):
 
 	return _PIXMAPS[name]
 
-def _update_image(icon):
-	if not icon._receivers:
-		icon.set_from_icon_name(_icons.APP_ICON[-1])
-		return
+
+def _generate_image(icon):
+	if not icon._devices_info:
+		return _icons.APP_ICON[-1]
 
 	battery_status = None
 	battery_level = 1000
 
 	for _, serial, name, status in icon._devices_info:
+		if serial is None: # is receiver
+			continue
 		level = status.get(_status.BATTERY_LEVEL)
 		if level is not None and level < battery_level:
 			battery_status = status
 			battery_level = level
 
 	if battery_status is None:
-		icon.set_from_icon_name(_icons.APP_ICON[1])
+		return _icons.APP_ICON[1]
 	else:
 		pixbuf = _icon_with_battery(battery_level, bool(battery_status))
 		if pixbuf:
-			icon.set_from_pixbuf(pixbuf)
+			return pixbuf
 		else:
-			icon.set_from_icon_name(_icons.APP_ICON[1])
+			return _icons.APP_ICON[1]
 
 #
 #
 #
-
-def _device_index(icon, device):
-	if device.receiver.serial in icon._receivers:
-		for index, (rserial, serial, name, _) in enumerate(icon._devices_info):
-			if rserial == device.receiver.serial and serial == device.serial:
-				return index
-
-	# print ("== device", device, device.receiver.serial, "not found in", icon._receivers, "/", icon._devices_info)
-
 
 def _add_device(icon, device):
 	index = len(icon._devices_info)
 	device_info = (device.receiver.serial, device.serial, device.name, device.status)
 	icon._devices_info.append(device_info)
 
-	menu_item = Gtk.ImageMenuItem.new_with_label(device.name)
+	menu_item = Gtk.ImageMenuItem.new_with_label('  ' + device.name)
 	icon._menu.insert(menu_item, index)
 	menu_item.set_image(Gtk.Image())
 	menu_item.show_all()
@@ -152,8 +204,20 @@ def _remove_device(icon, index):
 	icon._menu.remove(menu_items[index])
 
 
+def _add_receiver(icon, receiver):
+	device_info = (receiver.serial, None, receiver.name, None)
+	icon._devices_info.insert(0, device_info)
+
+	menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
+	icon._menu.insert(menu_item, 0)
+	menu_item.set_image(Gtk.Image().new_from_icon_name(receiver.name, Gtk.IconSize.LARGE_TOOLBAR))
+	menu_item.show_all()
+	menu_item.connect('activate', icon._menu_activate_callback, receiver.path, icon)
+
+	return 0
+
+
 def _remove_receiver(icon, receiver):
-	icon._receivers.remove(receiver.serial)
 	index = 0
 	while index < len(icon._devices_info):
 		rserial, _, _, _ = icon._devices_info[index]
@@ -170,6 +234,7 @@ def _update_menu_item(icon, index, device_status):
 
 	image = menu_item.get_image()
 	battery_level = device_status.get(_status.BATTERY_LEVEL)
+	print ("device_status", dict(device_status), battery_level)
 	image.set_from_icon_name(_icons.battery(battery_level), Gtk.IconSize.LARGE_TOOLBAR)
 	image.set_sensitive(bool(device_status))
 	# menu_item.set_sensitive(bool(device_status))
@@ -186,12 +251,24 @@ def update(icon, device=None):
 			# receiver
 			receiver = device
 			if receiver:
-				icon._receivers.add(receiver.serial)
+				index = None
+				for idx, (rserial, _, _, _) in enumerate(icon._devices_info):
+					if rserial == receiver.serial:
+						index = idx
+						break
+
+				if index is None:
+					_add_receiver(icon, receiver)
 			else:
 				_remove_receiver(icon, receiver)
+
 		else:
 			# peripheral
-			index = _device_index(icon, device)
+			index = None
+			for idx, (rserial, serial, name, _) in enumerate(icon._devices_info):
+				if rserial == device.receiver.serial and serial == device.serial:
+					index = idx
+
 			if device.status is None:
 				# was just unpaired
 				assert index is not None
@@ -201,6 +278,8 @@ def update(icon, device=None):
 					index = _add_device(icon, device)
 				_update_menu_item(icon, index, device.status)
 
-	tooltip_lines = _generate_tooltip_lines(icon)
-	icon.set_tooltip_markup('\n'.join(tooltip_lines).rstrip('\n'))
-	_update_image(icon)
+		menu_items = icon._menu.get_children()
+		menu_items[len(icon._devices_info)].set_visible(not icon._devices_info)
+
+	_update_icon_tooltip(icon, _generate_tooltip_lines)
+	_update_icon_image(icon, _generate_image(icon))
