@@ -1,7 +1,15 @@
 # Supported devices
 
-**Solaar** will detect all devices paired with your Unifying Receiver, and at
-the very least display some basic information about them.
+**Solaar** will detect all devices paired with your receiver, and at the very
+least display some basic information about them.
+
+At this moment, all [Unifying Receiver][unifying] are supported (devices with
+USB ID `046d:c52b` or `046d:c532`), but only some newer [Nano Receiver][nano]s
+(devices with USB ID `046d:c52f`). You can check your connected Logitech devices
+by running `lsusb -d 046d:` in a console.
+
+[unifying]: http://logitech.com/en-us/66/6079
+[nano]: http://logitech.com/mice-pointers/articles/5926
 
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported:
@@ -49,9 +57,10 @@ Keyboards:
 |------------------|-------|---------|-----------------------------------------|
 | K230             | 2.0   | yes     |                                         |
 | K270             |       |         |                                         |
+| K340             |       |         |                                         |
 | K350             |       |         |                                         |
 | K360             |       |         |                                         |
-| K400 Touch       |       |         |                                         |
+| K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap                                 |
 
@@ -60,6 +69,7 @@ Mice:
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
+| M215             | 1.0   | yes     |       |                                 |
 | M315             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
 | M345             |       |         |       |                                 |

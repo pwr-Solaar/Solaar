@@ -49,8 +49,9 @@ procedure for manual installation.
 
 [ubuntu_systray]: http://askubuntu.com/questions/30742
 
-- Devices connected throught a [Nano Receiver][nano] (which is very similar to
-  the Unifying Receiver) are not supported at this time.
+- Some devices using the [Nano Receiver][nano] (which is very similar to the
+  Unifying Receiver) are supported, but not all. For details, see
+  [docs/devices.md](docs/devices.md).
 
 [nano]: http://logitech.com/mice-pointers/articles/5926
 

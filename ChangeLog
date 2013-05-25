@@ -1,5 +1,6 @@
 0.8.8:
 
+  * Partial support for some Nano receivers.
   * Improved support for some devices: M510, K800, Performance MX.
   * Improved battery support for some HID++ 1.0 devices.
   * Properly handle device loss on computer sleep/wake.
