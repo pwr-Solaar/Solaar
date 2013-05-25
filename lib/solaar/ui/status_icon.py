@@ -10,6 +10,8 @@ from solaar import NAME
 from . import action as _action, icons as _icons
 from logitech.unifying_receiver import status as _status
 
+_MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+
 #
 #
 #
@@ -213,7 +215,8 @@ def _add_receiver(icon, receiver):
 
 	menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
 	icon._menu.insert(menu_item, 0)
-	menu_item.set_image(Gtk.Image().new_from_icon_name(receiver.name, Gtk.IconSize.LARGE_TOOLBAR))
+	icon_set = _icons.device_icon_set(receiver.name)
+	menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
 	menu_item.show_all()
 	menu_item.connect('activate', icon._menu_activate_callback, receiver.path, icon)
 
@@ -238,7 +241,7 @@ def _update_menu_item(icon, index, device_status):
 	image = menu_item.get_image()
 	battery_level = device_status.get(_status.BATTERY_LEVEL)
 	print ("device_status", dict(device_status), battery_level)
-	image.set_from_icon_name(_icons.battery(battery_level), Gtk.IconSize.LARGE_TOOLBAR)
+	image.set_from_icon_name(_icons.battery(battery_level), _MENU_ICON_SIZE)
 	image.set_sensitive(bool(device_status))
 	# menu_item.set_sensitive(bool(device_status))
 
