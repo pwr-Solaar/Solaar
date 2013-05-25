@@ -1,26 +1,29 @@
-# $Id$
-# Maintainer: Patrick Hüther <patrick dot huether at gmail dot com>
+# Maintainer: Arnaud Taffanel <dev@taffanel.org>
+
 pkgname=solaar
 pkgver=0.8.8.1
 pkgrel=1
-pkgdesc="Linux devices manager for the Logitech Unifying Receiver"
-arch=("any")
-url="http://pwr.github.io/Solaar/"
-license=('GPL')
-depends=(
-      'systemd' 'python' 'python-pyudev'
-      )
-optdepends=(
-      'gtk3: required for GUI application'
-      'gobject-introspection: required for GUI application'
-      'python-gobject: required for GUI application'
-      )
+pkgdesc="Device manager for Logitech's Unifying receiver peripherals"
+url="http://pwr.github.com/Solaar/"
+license=('GPL2')
+groups=()
+arch=('any')
+depends=('python' 'python-pyudev' 'python-gobject' 'pygtk')
+makedepends=('python')
+provides=('solaar')
+conflicts=('solaar')
+options=(!emptydirs)
 install=solaar.install
-source=("https://github.com/pwr/Solaar/archive/$pkgver.tar.gz")
-md5sums=('6b61313b0b113ffcd38b1d6ffbaf5ba3')
+source=("https://github.com/pwr/Solaar/archive/${pkgver}.tar.gz" 
+        'solaar.install')
+md5sums=('2fee5353702b32e6958a51c2e603178f'
+         '2416fcb58a4c24da5bbb94a9207799b4')
 
 package() {
-  cd "$srcdir/Solaar-$pkgver"
-  python setup.py install --root="$pkgdir/" --optimize=1
+  cd "$srcdir/Solaar-${pkgver}/"
+  python3 setup.py install --root="$pkgdir/" --optimize=1
+  install -D -m0644 rules.d/99-logitech-unifying-receiver.rules \
+                   "$pkgdir/etc/udev/rules.d/99-logitech-unifying-receiver.rules"
 }
-#vim: set ft=PKGBUILD sw=2 ts=2 et
+
+# vim:set ts=2 sw=2 et:
