@@ -395,7 +395,7 @@ def _parse_arguments():
 def main():
 	_require('pyudev', 'python-pyudev')
 	args = _parse_arguments()
-	receiver = _receiver(args.hidraw_path[0])
+	receiver = _receiver(args.hidraw_path[0] if args.hidraw_path else None)
 	args.cmd(receiver, args)
 
 if __name__ == '__main__':
