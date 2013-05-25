@@ -31,10 +31,12 @@ def _require(module, os_package):
 #
 #
 
-def _receiver():
+def _receiver(dev_path=None):
 	from logitech.unifying_receiver import Receiver
 	from logitech.unifying_receiver.base import receivers
 	for dev_info in receivers():
+		if dev_path is not None and dev_path != dev_info.path:
+			continue
 		try:
 			r = Receiver.open(dev_info)
 			if r:
@@ -336,6 +338,8 @@ def _parse_arguments():
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
+	arg_parser.add_argument('-D', '--hidraw', nargs=1, dest='hidraw_path', metavar='PATH',
+					help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
 
 	subparsers = arg_parser.add_subparsers(title='commands')
 
@@ -370,6 +374,13 @@ def _parse_arguments():
 
 	args = arg_parser.parse_args()
 
+	# Python 3 has an undocumented 'feature' that breaks parsing empty args
+	# http://bugs.python.org/issue16308
+	if not 'cmd' in args:
+		arg_parser.print_usage(sys.stderr)
+		sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
+		sys.exit(2)
+
 	if args.debug > 0:
 		log_level = logging.WARNING - 10 * args.debug
 		log_format='%(asctime)s %(levelname)8s %(name)s: %(message)s'
@@ -384,7 +395,7 @@ def _parse_arguments():
 def main():
 	_require('pyudev', 'python-pyudev')
 	args = _parse_arguments()
-	receiver = _receiver()
+	receiver = _receiver(args.hidraw_path[0])
 	args.cmd(receiver, args)
 
 if __name__ == '__main__':
