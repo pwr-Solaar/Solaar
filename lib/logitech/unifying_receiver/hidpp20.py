@@ -37,18 +37,34 @@ A particular device might not support all these features, and may support other
 unknown features as well.
 """
 FEATURE = _NamedInts(
-				ROOT=0x0000,
-				FEATURE_SET=0x0001,
-				FIRMWARE=0x0003,
-				NAME=0x0005,
-				BATTERY=0x1000,
-				REPROGRAMMABLE_KEYS=0x1B00,
-				WIRELESS=0x1D4B,
-				MOUSE_POINTER=0x2200,
-				FN_STATUS=0x40A0,
-				SOLAR_CHARGE=0x4301,
-				TOUCH_PAD=0x6100,
-				TOUCH_MOUSE=0x6110)
+	ROOT=0x0000,
+	FEATURE_SET=0x0001,
+	FEATURE_INFO=0x0002,
+	DEVICE_FW_VERSION=0x0003, 
+	DEVICE_NAME=0x0005,
+	DEVICE_GROUPS=0x0006,
+	DFUCONTROL=0x00C0,
+	BATTERY_STATUS=0x1000,
+	BACKLIGHT=0x1981,
+	REPROG_CONTROLS=0x1B00,
+	REPROG_CONTROLS_V2=0x1B01,
+	REPROG_CONTROLS_V3=0x1B03,
+	WIRELESS_DEVICE_STATUS=0x1D4B,
+	LEFT_RIGHT_SWAP=0x2001,
+	VERTICAL_SCROLLING=0x2100,
+	HI_RES_SCROLLING=0x2120,
+	MOUSE_POINTER=0x2200,
+	FN_INVERSION=0x40A0,
+	NEW_FN_INVERSION=0x40A2,
+	ENCRYPTION=0x4100,
+	SOLAR_DASHBOARD=0x4301,
+	KEYBOARD_LAYOUT=0x4520,
+	TOUCHPAD_FW_ITEMS=0x6010,
+	TOUCHPAD_SW_ITEMS=0x6011,
+	TOUCHPAD_WIN8_FW_ITEMS=0x6012,
+	TOUCHPAD_RAW_XY=0x6100,
+	TOUCHMOUSE_RAW_POINTS=0x6110,
+)
 FEATURE._fallback = lambda x: 'unknown:%04X' % x
 
 FEATURE_FLAG = _NamedInts(
@@ -259,7 +275,7 @@ class KeysArray(object):
 				raise IndexError(index)
 
 			if self.keys[index] is None:
-				keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
+				keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
 				if keydata:
 					key, key_task, flags = _unpack('!HHB', keydata[:5])
 					ctrl_id_text = special_keys.CONTROL[key]
@@ -306,13 +322,13 @@ def get_firmware(device):
 
 	:returns: a list of FirmwareInfo tuples, ordered by firmware layer.
 	"""
-	count = feature_request(device, FEATURE.FIRMWARE)
+	count = feature_request(device, FEATURE.DEVICE_FW_VERSION)
 	if count:
 		count = ord(count[:1])
 
 		fw = []
 		for index in range(0, count):
-			fw_info = feature_request(device, FEATURE.FIRMWARE, 0x10, index)
+			fw_info = feature_request(device, FEATURE.DEVICE_FW_VERSION, 0x10, index)
 			if fw_info:
 				level = ord(fw_info[:1]) & 0x0F
 				if level == 0 or level == 1:
@@ -337,9 +353,9 @@ def get_kind(device):
 
 	:see DEVICE_KIND:
 	:returns: a string describing the device type, or ``None`` if the device is
-	not available or does not support the ``NAME`` feature.
+	not available or does not support the ``DEVICE_NAME`` feature.
 	"""
-	kind = feature_request(device, FEATURE.NAME, 0x20)
+	kind = feature_request(device, FEATURE.DEVICE_NAME, 0x20)
 	if kind:
 		kind = ord(kind[:1])
 		# _log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
@@ -350,15 +366,15 @@ def get_name(device):
 	"""Reads a device's name.
 
 	:returns: a string with the device name, or ``None`` if the device is not
-	available or does not support the ``NAME`` feature.
+	available or does not support the ``DEVICE_NAME`` feature.
 	"""
-	name_length = feature_request(device, FEATURE.NAME)
+	name_length = feature_request(device, FEATURE.DEVICE_NAME)
 	if name_length:
 		name_length = ord(name_length[:1])
 
 		name = b''
 		while len(name) < name_length:
-			fragment = feature_request(device, FEATURE.NAME, 0x10, len(name))
+			fragment = feature_request(device, FEATURE.DEVICE_NAME, 0x10, len(name))
 			if fragment:
 				name += fragment[:name_length - len(name)]
 			else:
@@ -373,7 +389,7 @@ def get_battery(device):
 
 	:raises FeatureNotSupported: if the device does not support this feature.
 	"""
-	battery = feature_request(device, FEATURE.BATTERY)
+	battery = feature_request(device, FEATURE.BATTERY_STATUS)
 	if battery:
 		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
 		if _log.isEnabledFor(_DEBUG):
@@ -383,7 +399,7 @@ def get_battery(device):
 
 
 def get_keys(device):
-	count = feature_request(device, FEATURE.REPROGRAMMABLE_KEYS)
+	count = feature_request(device, FEATURE.REPROG_CONTROLS)
 	if count:
 		return KeysArray(device, ord(count[:1]))
 
