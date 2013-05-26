@@ -141,7 +141,7 @@ def _print_device(dev, verbose=False):
 				flags = dev.request(0x0000, feature.bytes(2))
 				flags = 0 if flags is None else ord(flags[1:2])
 				flags = hidpp20.FEATURE_FLAG.flag_names(flags)
-				print ("      %2d: %-20s {%04X}   %s" % (index, feature, feature, ', '.join(flags)))
+				print ("      %2d: %-22s {%04X}   %s" % (index, feature, feature, ', '.join(flags)))
 
 		if dev.keys:
 			print ("   Has %d reprogrammable keys:" % len(dev.keys))
