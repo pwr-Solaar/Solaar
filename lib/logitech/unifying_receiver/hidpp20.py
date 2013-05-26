@@ -25,6 +25,7 @@ from .common import (FirmwareInfo as _FirmwareInfo,
 					ReprogrammableKeyInfo as _ReprogrammableKeyInfo,
 					KwException as _KwException,
 					NamedInts as _NamedInts)
+from . import special_keys
 
 #
 #
@@ -81,30 +82,6 @@ BATTERY_STATUS = _NamedInts(
 				slow_recharge=0x04,
 				invalid_battery=0x05,
 				thermal_error=0x06)
-
-KEY = _NamedInts(
-				Volume_Up=0x0001,
-				Volume_Down=0x0002,
-				Mute=0x0003,
-				Play__Pause=0x0004,
-				Next=0x0005,
-				Previous=0x0006,
-				Stop=0x0007,
-				Application_Switcher=0x0008,
-				Calculator=0x000A,
-				Mail=0x000E,
-				Home=0x001A,
-				Music=0x001D,
-				Search=0x0029,
-				Sleep=0x002F)
-KEY._fallback = lambda x: 'unknown:%04X' % x
-
-KEY_FLAG = _NamedInts(
-				reprogrammable=0x10,
-				FN_sensitive=0x08,
-				nonstandard=0x04,
-				is_FN=0x02,
-				mse=0x01)
 
 ERROR = _NamedInts(
 				unknown=0x01,
@@ -285,7 +262,9 @@ class KeysArray(object):
 				keydata = feature_request(self.device, FEATURE.REPROGRAMMABLE_KEYS, 0x10, index)
 				if keydata:
 					key, key_task, flags = _unpack('!HHB', keydata[:5])
-					self.keys[index] = _ReprogrammableKeyInfo(index, KEY[key], KEY[key_task], flags)
+					ctrl_id_text = special_keys.CONTROL[key]
+					ctrl_task_text = special_keys.TASK[key_task]
+					self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
 
 			return self.keys[index]
 

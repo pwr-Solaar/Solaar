@@ -1,0 +1,167 @@
+#
+# Reprogrammable keys information
+#
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from .common import NamedInts as _NamedInts
+
+CONTROL = _NamedInts(
+	Volume_Up=0x0001,
+	Volume_Down=0x0002,
+	Mute=0x0003,
+	Play__Pause=0x0004,
+	Next=0x0005,
+	Previous=0x0006,
+	Stop=0x0007,
+	Application_Switcher=0x0008,
+	Calculator=0x000A,
+	Mail=0x000E,
+	Home=0x001A,
+	Music=0x001D,
+	Search=0x0029,
+	Sleep=0x002F,
+)
+CONTROL._fallback = lambda x: 'unknown:%04X' % x
+
+# <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'
+TASK = _NamedInts(
+	Volume_Up=0x0001,
+	Volume_Down=0x0002,
+	Mute=0x0003,
+	# Multimedia tasks:
+	Play__Pause=0x0004,
+	Next=0x0005,
+	Previous=0x0006,
+	Stop=0x0007,
+
+	Application_Switcher=0x0008,
+	BurnMediaPlayer=0x0009,
+	Calculator=0x000A,
+	Mail=0x000E,
+	Home=0x001A,
+	Calendar=0x000B,
+	Close_Application=0x000C,
+	Eject=0x000D,
+	Email=0x000E,
+	Help=0x000F,
+	OffDocument=0x0010,
+	OffSpreadsheet=0x0011,
+	OffPowerpnt=0x0012,
+	Undo=0x0013,
+	Redo=0x0014,
+	Print=0x0015,
+	Save=0x0016,
+	SmartKeySet=0x0017,
+	Favorites=0x0018,
+	GadgetsSet=0x0019,
+	HomePage=0x001A,
+	WindowsRestore=0x001B,
+	WindowsMinimize=0x001C,
+	Music=0x001D, # also known as MediaPlayer
+
+	# Both 0x001E and 0x001F are known as MediaCenterSet
+	Media_Center_Logitech=0x001E,
+	Media_Center_Microsoft=0x001F,
+
+	UserMenu=0x0020,
+	Messenger=0x0021,
+	PersonalFolders=0x0022,
+	MyMusic=0x0023,
+	Webcam=0x0024,
+	PicturesFolder=0x0025,
+	MyVideos=0x0026,
+	My_Computer=0x0027,
+	PictureAppSet=0x0028,
+	Search=0x0029, # also known as AdvSmartSearch
+	RecordMediaPlayer=0x002A,
+	BrowserRefresh=0x002B,
+	RotateRight=0x002C,
+	SearchForFiles=0x002D,
+	MM_SHUFFLE=0x002E,
+	Sleep=0x002F, # also known as StandBySet
+	BrowserStop=0x0030,
+	OneTouchSync=0x0031,
+	ZoomSet=0x0032,
+	ZoomBtnInSet2=0x0033,
+	ZoomBtnInSet=0x0034,
+	ZoomBtnOutSet2=0x0035,
+	ZoomBtnOutSet=0x0036,
+	ZoomBtnResetSet=0x0037,
+	LeftClick=0x0038,
+	RightClick=0x0039,
+	MiddleMouseButton=0x003A,
+	Back=0x003B,
+	BackEx=0x003C,
+	BrowserForward=0x003D,
+	BrowserForwardEx=0x003E,
+	HorzScrollLeftSet=0x003F,
+	HorzScrollRightSet=0x0040,
+	QuickSwitch=0x0041,
+	BatteryStatus=0x0042,
+	ShowDesktop=0x0043,
+	WindowsLock=0x0044,
+	FileLauncher=0x0045,
+	FolderLauncher=0x0046,
+	GotoWebAddress=0x0047,
+	GenericMouseButton=0x0048,
+	KeystrokeAssignment=0x0049,
+	LaunchProgram=0x004A,
+	MinMaxWindow=0x004B,
+	VOLUMEMUTE_NoOSD=0x004C,
+	New=0x004D,
+	Copy=0x004E,
+	CruiseDown=0x004F,
+	CruiseUp=0x0050,
+	Cut=0x0051,
+	Do_Nothing=0x0052,
+	PageDown=0x0053,
+	PageUp=0x0054,
+	Paste=0x0055,
+	SearchPicture=0x0056,
+	Reply=0x0057,
+	PhotoGallerySet=0x0058,
+	MM_REWIND=0x0059,
+	MM_FASTFORWARD=0x005A,
+	Send=0x005B,
+	ControlPanel=0x005C,
+	UniversalScroll=0x005D,
+	AutoScroll=0x005E,
+	GenericButton=0x005F,
+	MM_NEXT=0x0060,
+	MM_PREVIOUS=0x0061,
+	Do_Nothing_One=0x0062, # also known as Do_Nothing
+	SnapLeft=0x0063,
+	SnapRight=0x0064,
+	WinMinRestore=0x0065,
+	WinMaxRestore=0x0066,
+	WinStretch=0x0067,
+	SwitchMonitorLeft=0x0068,
+	SwitchMonitorRight=0x0069,
+	ShowPresentation=0x006A,
+	ShowMobilityCenter=0x006B,
+	HorzScrollNoRepeatSet=0x006C,
+	TouchBackForwardHorzScroll=0x0077,
+	MetroAppSwitch=0x0078,
+	MetroAppBar=0x0079,
+	MetroCharms=0x007A,
+	Calculator_VKEY=0x007B, # also known as Calculator
+	MetroSearch=0x007C,
+	MetroStartScreen=0x0080,
+	MetroShare=0x007D,
+	MetroSettings=0x007E,
+	MetroDevices=0x007F,
+	MetroBackLeftHorz=0x0082,
+	MetroForwRightHorz=0x0083,
+	Win8_Back=0x0084, # also known as MetroCharms
+	Win8_Forward=0x0085, # also known as AppSwitchBar
+)
+TASK._fallback = lambda x: 'unknown:%04X' % x
+
+KEY_FLAG = _NamedInts(
+	reprogrammable=0x10,
+	FN_sensitive=0x08,
+	nonstandard=0x04,
+	is_FN=0x02,
+	mse=0x01
+)
