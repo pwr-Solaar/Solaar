@@ -188,11 +188,17 @@ def _generate_image(icon):
 #
 
 def _add_device(icon, device):
-	index = len(icon._devices_info)
-	device_info = (device.receiver.serial, device.serial, device.name, device.status)
-	icon._devices_info.append(device_info)
+	index = None
+	for idx, (rserial, _, _, _) in enumerate(icon._devices_info):
+		if rserial == device.receiver.serial:
+			index = idx + 1
+			break
+	assert index is not None
 
-	menu_item = Gtk.ImageMenuItem.new_with_label('  ' + device.name)
+	device_info = (device.receiver.serial, device.serial, device.name, device.status)
+	icon._devices_info.insert(index, device_info)
+
+	menu_item = Gtk.ImageMenuItem.new_with_label('    ' + device.name)
 	icon._menu.insert(menu_item, index)
 	menu_item.set_image(Gtk.Image())
 	menu_item.show_all()
@@ -220,16 +226,26 @@ def _add_receiver(icon, receiver):
 	menu_item.show_all()
 	menu_item.connect('activate', icon._menu_activate_callback, receiver.path, icon)
 
+	icon._devices_info.insert(1, ('-', None, None, None))
+	separator = Gtk.SeparatorMenuItem.new()
+	separator.set_visible(True)
+	icon._menu.insert(separator, 1)
+
 	return 0
 
 
 def _remove_receiver(icon, receiver):
 	index = 0
+	found = False
 	while index < len(icon._devices_info):
 		rserial, _, _, _ = icon._devices_info[index]
 		# print ("remove receiver", index, rserial)
 		if rserial == receiver.serial:
+			found = True
 			_remove_device(icon, index)
+		elif found and rserial == '-':
+			_remove_device(icon, index)
+			break
 		else:
 			index += 1
 
@@ -250,7 +266,7 @@ def _update_menu_item(icon, index, device_status):
 #
 
 def update(icon, device=None):
-	# print ("icon update", device)
+	# print ("icon update", device, icon._devices_info)
 
 	if device is not None:
 		if device.kind is None:
@@ -285,7 +301,11 @@ def update(icon, device=None):
 				_update_menu_item(icon, index, device.status)
 
 		menu_items = icon._menu.get_children()
-		menu_items[len(icon._devices_info)].set_visible(not icon._devices_info)
+		no_receivers_index = len(icon._devices_info)
+		menu_items[no_receivers_index].set_visible(not icon._devices_info)
+		menu_items[no_receivers_index + 1].set_visible(not icon._devices_info)
 
 	_update_icon_tooltip(icon, _generate_tooltip_lines)
 	_update_icon_image(icon, _generate_image(icon))
+
+	# print ("icon updated", device, icon._devices_info)
