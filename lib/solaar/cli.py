@@ -338,7 +338,7 @@ def _parse_arguments():
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
-	arg_parser.add_argument('-D', '--hidraw', nargs=1, dest='hidraw_path', metavar='PATH',
+	arg_parser.add_argument('-D', '--hidraw', action='store', dest='hidraw_path', metavar='PATH',
 					help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
 
 	subparsers = arg_parser.add_subparsers(title='commands')
@@ -395,7 +395,7 @@ def _parse_arguments():
 def main():
 	_require('pyudev', 'python-pyudev')
 	args = _parse_arguments()
-	receiver = _receiver(args.hidraw_path[0] if args.hidraw_path else None)
+	receiver = _receiver(args.hidraw_path)
 	args.cmd(receiver, args)
 
 if __name__ == '__main__':

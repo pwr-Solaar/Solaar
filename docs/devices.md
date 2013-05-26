@@ -50,6 +50,10 @@ level.
 For mice, the DPI column specifies if the mouse's sensitivity is fixed (-), can
 only be read (R), or can be read and changed by Solaar (R/W).
 
+The reprog(rammable) keys feature is currently not fully supported by Solaar.
+You are able to read this feature using solaar-cli, but it is not possible to
+assign different keys.
+
 
 Keyboards:
 
@@ -59,10 +63,10 @@ Keyboards:
 | K270             |       |         |                                         |
 | K340             |       |         |                                         |
 | K350             |       |         |                                         |
-| K360             |       |         |                                         |
+| K360             | 2.0   | yes     | FN swap, reprog keys                    |
 | K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
-| K800 Illuminated | 1.0   | yes     | FN swap                                 |
+| K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
 
 
 Mice:
