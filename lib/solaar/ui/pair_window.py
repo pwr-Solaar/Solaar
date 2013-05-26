@@ -95,7 +95,7 @@ def _prepare(assistant, page, receiver):
 			assert receiver.status.get(_status.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GLib.timeout_add(2000, _check_lock_state, assistant, receiver)
+			GLib.timeout_add(750, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
 			GLib.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
