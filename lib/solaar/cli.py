@@ -132,7 +132,7 @@ def _print_device(dev, verbose=False):
 	if dev.power_switch_location:
 		print ("   The power switch is located on the", dev.power_switch_location)
 
-	from logitech.unifying_receiver import hidpp10, hidpp20
+	from logitech.unifying_receiver import hidpp10, hidpp20, special_keys
 	if p > 0:
 		if dev.features:
 			print ("   Supports %d HID++ 2.0 features:" % len(dev.features))
@@ -146,7 +146,7 @@ def _print_device(dev, verbose=False):
 		if dev.keys:
 			print ("   Has %d reprogrammable keys:" % len(dev.keys))
 			for k in dev.keys:
-				flags = hidpp20.KEY_FLAG.flag_names(k.flags)
+				flags = special_keys.KEY_FLAG.flag_names(k.flags)
 				print ("      %2d: %-20s => %-20s   %s" % (k.index, k.key, k.task, ', '.join(flags)))
 
 	if p > 0:
