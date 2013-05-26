@@ -41,8 +41,8 @@ def _register_dpi(register, choices):
 
 
 def check_features(device, already_known):
-	if _hidpp20.FEATURE.FN_STATUS in device.features and not any(s.name == 'fn-swap' for s in already_known):
-		tfn = _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_STATUS, write_returns_value=True,
+	if _hidpp20.FEATURE.FN_INVERSION in device.features and not any(s.name == 'fn-swap' for s in already_known):
+		tfn = _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION, write_returns_value=True,
 						label=_FN_SWAP[1], description=_FN_SWAP[2])
 		already_known.append(tfn(device))
 
