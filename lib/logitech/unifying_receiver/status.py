@@ -165,10 +165,10 @@ class DeviceStatus(dict):
 			if battery is None and d.protocol >= 2.0:
 				battery = _hidpp20.get_battery(d)
 
-				# really unnecessary, if the device has SOLAR_CHARGE it should be
+				# really unnecessary, if the device has SOLAR_DASHBOARD it should be
 				# broadcasting it's battery status anyway, it will just take a little while
-				# if battery is None and _hidpp20.FEATURE.SOLAR_CHARGE in d.features:
-				# 	d.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, 1, 1)
+				# if battery is None and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
+				# 	d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
 				# 	return
 
 			if battery:
@@ -339,7 +339,7 @@ class DeviceStatus(dict):
 		_log.warn("%s: unrecognized %s", self._device, n)
 
 	def _process_feature_notification(self, n, feature):
-		if feature == _hidpp20.FEATURE.BATTERY:
+		if feature == _hidpp20.FEATURE.BATTERY_STATUS:
 			if n.address == 0x00:
 				discharge = ord(n.data[:1])
 				battery_status = ord(n.data[1:2])
@@ -348,14 +348,15 @@ class DeviceStatus(dict):
 				_log.info("%s: unknown BATTERY %s", self._device, n)
 			return True
 
-		if feature == _hidpp20.FEATURE.REPROGRAMMABLE_KEYS:
+		# TODO: what are REPROG_CONTROLS_V{2,3}?
+		if feature == _hidpp20.FEATURE.REPROG_CONTROLS:
 			if n.address == 0x00:
 				_log.info("%s: reprogrammable key: %s", self._device, n)
 			else:
 				_log.info("%s: unknown REPROGRAMMABLE KEYS %s", self._device, n)
 			return True
 
-		if feature == _hidpp20.FEATURE.WIRELESS:
+		if feature == _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS:
 			if n.address == 0x00:
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("wireless status: %s", n)
@@ -367,7 +368,7 @@ class DeviceStatus(dict):
 				_log.info("%s: unknown WIRELESS %s", self._device, n)
 			return True
 
-		if feature == _hidpp20.FEATURE.SOLAR_CHARGE:
+		if feature == _hidpp20.FEATURE.SOLAR_DASHBOARD:
 			if n.data[5:9] == b'GOOD':
 				charge, lux, adc = _unpack('!BHH', n.data[:5])
 				self[BATTERY_LEVEL] = charge
@@ -385,18 +386,18 @@ class DeviceStatus(dict):
 					_log.debug("%s: Light Check button pressed", self._device)
 					self._changed(alert=ALERT.SHOW_WINDOW)
 					# first cancel any reporting
-					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE)
+					self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD)
 					# trigger a new report chain
 					reports_count = 15
 					reports_period = 2  # seconds
-					self._device.feature_request(_hidpp20.FEATURE.SOLAR_CHARGE, 0x00, reports_count, reports_period)
+					self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
 				else:
 					_log.info("%s: unknown SOLAR CHAGE %s", self._device, n)
 			else:
 				_log.warn("%s: SOLAR CHARGE not GOOD? %s", self._device, n)
 			return True
 
-		if feature == _hidpp20.FEATURE.TOUCH_MOUSE:
+		if feature == _hidpp20.FEATURE.TOUCHMOUSE_RAW_POINTS:
 			if n.address == 0x00:
 				_log.info("%s: TOUCH MOUSE points %s", self._device, n)
 			elif n.address == 0x10:
