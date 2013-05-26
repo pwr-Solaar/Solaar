@@ -256,7 +256,7 @@ def _update_menu_item(icon, index, device_status):
 
 	image = menu_item.get_image()
 	battery_level = device_status.get(_status.BATTERY_LEVEL)
-	print ("device_status", dict(device_status), battery_level)
+	# print ("device_status", dict(device_status), battery_level)
 	image.set_from_icon_name(_icons.battery(battery_level), _MENU_ICON_SIZE)
 	image.set_sensitive(bool(device_status))
 	# menu_item.set_sensitive(bool(device_status))
