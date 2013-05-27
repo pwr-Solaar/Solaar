@@ -53,36 +53,36 @@ Total number of HID++ 2.0 features: 12
      Firmware   : RQK 36.00.B0007
    The power switch is located on the top case
    Supports 13 HID++ 2.0 features:
-       0: ROOT                 {0000}   
-       1: FEATURE SET          {0001}   
-       2: FIRMWARE             {0003}   
-       3: NAME                 {0005}   
-       4: BATTERY              {1000}   
-       5: unknown:1820         {1820}   hidden
-       6: REPROGRAMMABLE KEYS  {1B00}   
-       7: WIRELESS             {1D4B}   
-       8: unknown:1DF0         {1DF0}   hidden
-       9: unknown:1DF3         {1DF3}   hidden
-      10: FN STATUS            {40A0}   
-      11: unknown:4100         {4100}   
-      12: unknown:4520         {4520}   
+       0: ROOT                   {0000}   
+       1: FEATURE SET            {0001}   
+       2: DEVICE FW VERSION      {0003}   
+       3: DEVICE NAME            {0005}   
+       4: BATTERY STATUS         {1000}   
+       5: unknown:1820           {1820}   hidden
+       6: REPROG CONTROLS        {1B00}   
+       7: WIRELESS DEVICE STATUS {1D4B}   
+       8: unknown:1DF0           {1DF0}   hidden
+       9: unknown:1DF3           {1DF3}   hidden
+      10: FN INVERSION           {40A0}   
+      11: ENCRYPTION             {4100}   
+      12: KEYBOARD LAYOUT        {4520}   
    Has 18 reprogrammable keys:
-       0: unknown:  22   34    => Home                   FN sensitive, is FN, reprogrammable    (F1)
-       1: Mail       E   14    => Mail                   FN sensitive, is FN, reprogrammable    (...)
-       2: unknown:  3E   62    => Search                 FN sensitive, is FN, reprogrammable
-       3: unknown:  28   40    => Music                  FN sensitive, is FN, reprogrammable
-       4: Applica    8    8    => Application Switcher   FN sensitive, is FN, reprogrammable    Alt+Tab
-       5: unknown:  6E  110    => unknown:0043           FN sensitive, is FN, reprogrammable    Win+D ("Show desktop")
-       6: unknown:  27   39    => unknown:001C           FN sensitive, is FN, reprogrammable    Win+M ("Minimize")
-       7: unknown:  25   37    => unknown:001B           FN sensitive, is FN, reprogrammable    Win+Shift+M ("Restore windows")
-       8: unknown:  33   51    => unknown:0027           FN sensitive, is FN, reprogrammable    Win+E ("My Computer")
-       9: unknown:  6F  111    => unknown:0044           FN sensitive, is FN, reprogrammable    Win+L ("Lock")
-      10: unknown:  40   64    => Sleep                  FN sensitive, is FN, reprogrammable
-      11: Calcul     A   10    => Calculator             FN sensitive, is FN, reprogrammable    (F12)
-      12: Previou    6    6    => Previous               nonstandard
-      13: Play/P     4    4    => Play/Pause             nonstandard
-      14: Next       5    5    => Next                   nonstandard
-      15: Mute       3    3    => Mute                   nonstandard
-      16: Volume D   2    2    => Volume Down            nonstandard
-      17: Volume Up  1    1    => Volume Up              nonstandard
-   Battery is 90% charged, dischargin
+       0: MY HOME                    => HomePage                      FN sensitive, is FN, reprogrammable
+       1: Mail                       => Mail                          FN sensitive, is FN, reprogrammable
+       2: SEARCH                     => Search                        FN sensitive, is FN, reprogrammable
+       3: MEDIA PLAYER               => Music                         FN sensitive, is FN, reprogrammable
+       4: Application Switcher       => Application Switcher          FN sensitive, is FN, reprogrammable
+       5: SHOW DESKTOP               => ShowDesktop                   FN sensitive, is FN, reprogrammable
+       6: MINIMIZE AS WIN M          => WindowsMinimize               FN sensitive, is FN, reprogrammable
+       7: MAXIMIZE AS WIN SHIFT M    => WindowsRestore                FN sensitive, is FN, reprogrammable
+       8: MY COMPUTER AS WIN E       => My Computer                   FN sensitive, is FN, reprogrammable
+       9: Lock PC                    => WindowsLock                   FN sensitive, is FN, reprogrammable
+      10: SLEEP                      => Sleep                         FN sensitive, is FN, reprogrammable
+      11: Calculator                 => Calculator                    FN sensitive, is FN, reprogrammable
+      12: Previous                   => Previous                      nonstandard
+      13: Play/Pause                 => Play/Pause                    nonstandard
+      14: Next                       => Next                          nonstandard
+      15: Mute                       => Mute                          nonstandard
+      16: Volume Down                => Volume Down                   nonstandard
+      17: Volume Up                  => Volume Up                     nonstandard
+   Battery is 90% charged, discharging
