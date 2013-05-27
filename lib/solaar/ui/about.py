@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from gi.repository import Gtk
 
 from solaar import __version__, NAME
-from . import icons as _icons
 
 
 _dialog = None
@@ -14,12 +13,6 @@ _dialog = None
 
 def _create():
 	about = Gtk.AboutDialog()
-
-	icon_file = _icons.icon_file(NAME.lower())
-	if icon_file:
-		about.set_icon_from_file(icon_file)
-	else:
-		about.set_icon_name(NAME.lower())
 
 	about.set_program_name(NAME)
 	about.set_version(__version__)

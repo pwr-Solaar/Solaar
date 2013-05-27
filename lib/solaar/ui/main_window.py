@@ -304,16 +304,11 @@ def _show(w, trigger=None):
 # all created windows will be placed here, keyed by the receiver path
 _windows = {}
 
+
 def _create(receiver):
 	window = Gtk.Window()
 
 	window.set_title(NAME + ': ' + receiver.name)
-	icon_file = _icons.icon_file(NAME.lower())
-	if icon_file:
-		window.set_icon_from_file(icon_file)
-	else:
-		window.set_icon_name(NAME.lower())
-
 	window.set_role('status-window')
 	window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 

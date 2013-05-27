@@ -44,5 +44,13 @@ def error_dialog(title, text):
 	m.destroy()
 
 
+#
+#
+#
+
 from . import status_icon
 from . import notify, main_window
+
+
+from . import icons
+Gtk.Window.set_default_icon_from_file(icons.icon_file(main_window.NAME.lower()))
