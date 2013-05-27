@@ -155,7 +155,7 @@ def _print_device(dev, verbose=False):
 			print ("   Has %d reprogrammable keys:" % len(dev.keys))
 			for k in dev.keys:
 				flags = special_keys.KEY_FLAG.flag_names(k.flags)
-				print ("      %2d: %-20s => %-20s   %s" % (k.index, k.key, k.task, ', '.join(flags)))
+				print ("      %2d: %-26s => %-27s   %s" % (k.index, k.key, k.task, ', '.join(flags)))
 
 	if p > 0:
 		battery = hidpp20.get_battery(dev)
