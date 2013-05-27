@@ -192,46 +192,39 @@ def pair_device(receiver, args):
 	# get all current devices
 	known_devices = [dev.number for dev in receiver]
 
-	from logitech.unifying_receiver import status
+	from logitech.unifying_receiver import base, hidpp10, status
 	r_status = status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
-	done = [False]
-
-	def _notification_handler(n):
-		if n.devnumber == 0xFF:
-			r_status.process_notification(n)
-			if not r_status.lock_open:
-				done[0] = True
-		elif n.sub_id == 0x41 and n.address == 0x04:
-			if n.devnumber not in known_devices:
-				r_status.new_device = receiver[n.devnumber]
-
-	from logitech.unifying_receiver import base
-	base.notifications_hook = _notification_handler
-
 	# check if it's necessary to set the notification flags
-	notification_flags = receiver.request(0x8100)
-	if notification_flags:
-		# just to see if any bits are set
-		notification_flags = ord(notification_flags[:1]) + ord(notification_flags[1:2]) + ord(notification_flags[2:3])
-	if not notification_flags:
-		# if there are any notifications set, just assume the one we need is already set
-		receiver.enable_notifications()
-	receiver.set_lock(False, timeout=20)
-	print ("Pairing: turn your new device on (timing out in 20 seconds).")
+	notification_flags = hidpp10.get_notification_flags(receiver) or 0
+	if not notification_flags & hidpp10.NOTIFICATION_FLAG.wireless:
+		hidpp10.set_notification_flags(receiver, notification_flags | hidpp10.NOTIFICATION_FLAG.wireless)
 
-	while not done[0]:
-		n = base.read(receiver.handle, 2000)
+	class HandleWithNotificationHook(int):
+		def notifications_hook(self, n):
+			assert n
+			if n.devnumber == 0xFF:
+				r_status.process_notification(n)
+			elif n.sub_id == 0x41 and n.address == 0x04:
+				if n.devnumber not in known_devices:
+					r_status.new_device = receiver[n.devnumber]
+
+	timeout = 20  # seconds
+	receiver.handle = HandleWithNotificationHook(receiver.handle)
+	receiver.set_lock(False, timeout=timeout)
+	print ("Pairing: turn your new device on (timing out in", timeout, "seconds).")
+
+	while r_status.lock_open:
+		n = base.read(receiver.handle)
 		if n:
 			n = base.make_notification(*n)
 			if n:
-				_notification_handler(n)
+				receiver.handle.notifications_hook(n)
 
-	if not notification_flags:
+	if not notification_flags & hidpp10.NOTIFICATION_FLAG.wireless:
 		# only clear the flags if they weren't set before, otherwise a
-		# concurrently running Solaar app will stop working properly
-		receiver.enable_notifications(False)
-	base.notifications_hook = None
+		# concurrently running Solaar app might stop working properly
+		hidpp10.set_notification_flags(receiver, notification_flags)
 
 	if r_status.new_device:
 		dev = r_status.new_device
