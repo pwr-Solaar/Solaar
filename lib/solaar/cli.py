@@ -91,15 +91,14 @@ def _print_receiver(receiver, verbose=False):
 
 	print ("   Has", paired_count, "paired device(s) out of a maximum of", receiver.max_devices)
 
-	notification_flags = receiver.request(0x8100)
-	if notification_flags:
-		notification_flags = ord(notification_flags[0:1]) << 16 | ord(notification_flags[1:2]) << 8
+	from logitech.unifying_receiver import hidpp10
+	notification_flags = hidpp10.get_notification_flags(receiver)
+	if notification_flags is not None:
 		if notification_flags:
-			from logitech.unifying_receiver import hidpp10
 			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-			print ("   Enabled notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
+			print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
 		else:
-			print ("   All notifications disabled")
+			print ("   Notifications: (none).")
 
 	if receiver.unifying_supported:
 		activity = receiver.request(0x83B3)
@@ -133,6 +132,15 @@ def _print_device(dev, verbose=False):
 		print ("   The power switch is located on the", dev.power_switch_location)
 
 	from logitech.unifying_receiver import hidpp10, hidpp20, special_keys
+
+	notification_flags = hidpp10.get_notification_flags(dev)
+	if notification_flags is not None:
+		if notification_flags:
+			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+			print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
+		else:
+			print ("   Notifications: (none).")
+
 	if p > 0:
 		if dev.features:
 			print ("   Supports %d HID++ 2.0 features:" % len(dev.features))
@@ -333,8 +341,8 @@ def config_device(receiver, args):
 #
 
 def _parse_arguments():
-	import argparse
-	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
+	from argparse import ArgumentParser
+	arg_parser = ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
