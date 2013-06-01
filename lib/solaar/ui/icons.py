@@ -41,7 +41,7 @@ _has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
 
 _log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s", _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons)
 if not _has_gpm_icons and not _has_gnome_icons and not _has_oxygen_icons:
-	_log.warning("failed to detect an icon set")
+	_log.warning("failed to detect a known icon set")
 
 def battery(level=None, charging=False):
 	icon_name = _battery_icon_name(level, charging)

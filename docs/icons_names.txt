@@ -1,0 +1,25 @@
+# battery icon names across various icon themes
+
+level	gnome					humanity						faenza							ubuntu-mono								oxygen
+								(gpm-B-?/gpm-primary-?)			(gpm-B-?/gpm-primary-?)			(gpm-B-?/gpm-primary-?)
+
+?		B-missing				-								-								GB-missing								B-missing
+
+0		B-empty					B_empty, GB-000					B-000, B_empty, GB-000			B-000, B_empty, GB-000, GB-empty		B-low
+0 C		-						-, GB-000-charging				GB-000-charging					B-000-charging, GB-000-charging			B-charging-low
+
+20		B-caution				B-caution, GB-020				B_caution, GB-020				B-020, B-caution, GB-020				B-caution
+20 C	B-caution-charging		-, GB-020-charging				-, GB-020-charging				B-020-charging, GB-020-charging			B-charging-caution
+
+40		B-low					B-low, GB-040					B_low, GB-040					B-040, B-low, GB-040					B-040
+40 C	B-low-charging			-, GB-040-charging				-, GB-040-charging				B-040-charging, GB-040-charging			B-charging-040
+
+60		-						B_two_thirds, GB-060			B_two_thirds, GB-060			B-060, GB-060							B-060
+60 C	-						-, GB-060-charging				-, GB-060-charging				B-060-charging, GB-060-charging			B-charging-060
+
+80		B-good					B_third_fourth, GB-080			B_third_fourth, GB-080			B-080, GB-080							B-080
+80 C	B-good-charging			-, GB-080-charging				-, GB-080-charging				B-080-charging, GB-080-charging			B-charging-080
+
+100		B-full					B_full, GB-100					B_full, GB-100					B-100, B_full, GB-100					B-100
+100 C	B-full-charging			B_plugged, GB-100-charging		B_plugged, GB-100-charging		B-100-charging, GB-100-charging			B-charging
+100 F	B-full-charged			B_charged, GB-charged			B_charged, GB-charged			B_charged, B-charged, GB-charged		-
