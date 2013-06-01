@@ -33,17 +33,68 @@ _log.debug("icon theme paths: %s", _default_theme.get_search_path())
 #
 #
 
-def battery(level=None, charging=False):
-	if level is None or level < 0:
-		return 'battery_unknown'
-	return 'battery_%03d' % (20 * ((level + 10) // 20))
+_has_gpm_icons = _default_theme.has_icon('gpm-battery-020-charging')
+_has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
+					_default_theme.has_icon('battery-charging-040')
+_has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
+					_default_theme.has_icon('battery-full-charged')
 
+_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s", _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons)
+if not _has_gpm_icons and not _has_gnome_icons and not _has_oxygen_icons:
+	_log.warning("failed to detect an icon set")
+
+def battery(level=None, charging=False):
+	icon_name = _battery_icon_name(level, charging)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
+	return icon_name
+
+def _battery_icon_name(level, charging):
+	level_approx = None if level is None else 20 * ((level  + 10) // 20)
+
+	if _has_gpm_icons:
+		if level is None or level < 0:
+			return 'gpm-battery-missing' if _default_theme.has_icon('gpm-battery-missing') \
+				else 'battery-missing'
+		if level == 100 and charging:
+			return 'gpm-battery-charged'
+		return 'gpm-battery-%03d%s' % (level_approx, '-charging' if charging else '')
+
+	if _has_oxygen_icons:
+		if level is None or level < 0:
+			return 'battery-missing'
+		if level_approx == 100 and charging:
+			return 'battery-charging'
+		level_name = ('low', 'caution', '040', '060', '080', '100')[level_approx // 20]
+		return 'battery%s-%s' % ('-charging' if charging else '', level_name)
+
+	if _has_gnome_icons:
+		if level is None or level < 0:
+			return 'battery-missing'
+		if level == 100 and charging:
+			return 'battery-full-charged'
+		if level_approx == 0 and charging:
+			return 'battery-caution-charging'
+		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
+		return 'battery-%s%s' % (level_name, '-charging' if charging else '')
+
+	# fallback... most likely will fail
+	if level is None or level < 0:
+		return 'battery-missing'
+	return 'battery-%03d%s' % (level_approx, '-charging' if charging else '')
+
+#
+#
+#
 
 def lux(level=None):
 	if level is None or level < 0:
 		return 'light_unknown'
 	return 'light_%03d' % (20 * ((level + 50) // 100))
 
+#
+#
+#
 
 _ICON_SETS = {}
 
