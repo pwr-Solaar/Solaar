@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 
 from solaar import NAME
 from . import action as _action, icons as _icons
@@ -61,10 +61,7 @@ try:
 
 
 	def _update_icon(ind, image, tooltip):
-		if isinstance(image, GdkPixbuf.Pixbuf):
-			pass
-		else:
-			ind.set_icon_full(image, tooltip)
+		ind.set_icon_full(image, tooltip)
 
 
 except ImportError:
@@ -92,10 +89,7 @@ except ImportError:
 
 
 	def _update_icon(icon, image, tooltip):
-		if isinstance(image, GdkPixbuf.Pixbuf):
-			icon.set_from_pixbuf(image)
-		else:
-			icon.set_from_icon_name(image)
+		icon.set_from_icon_name(image)
 		icon.set_tooltip_markup(tooltip)
 
 #
@@ -126,32 +120,6 @@ def _generate_tooltip_lines(devices_info):
 		yield ''
 
 
-_PIXMAPS = {}
-def _icon_with_battery(level, active):
-	battery_icon = _icons.battery(level)
-	name = '%s-%s' % (battery_icon, active)
-	if name not in _PIXMAPS:
-		mask = _icons.icon_file(_icons.APP_ICON[2], 128)
-		if not mask:
-			return
-		mask = GdkPixbuf.Pixbuf.new_from_file(mask)
-		assert mask.get_width() == 128 and mask.get_height() == 128
-		mask.saturate_and_pixelate(mask, 0.7, False)
-
-		battery = _icons.icon_file(battery_icon, 128)
-		assert battery, "faild to find file for %s" % battery_icon
-		battery = GdkPixbuf.Pixbuf.new_from_file(battery)
-		assert battery.get_width() == 128 and battery.get_height() == 128
-		if not active:
-			battery.saturate_and_pixelate(battery, 0, True)
-
-		# TODO can the masking be done at runtime?
-		battery.composite(mask, 0, 7, 80, 121, -32, 7, 1, 1, GdkPixbuf.InterpType.NEAREST, 255)
-		_PIXMAPS[name] = mask
-
-	return _PIXMAPS[name]
-
-
 def _generate_image(icon):
 	if not icon._devices_info:
 		return _icons.APP_ICON[-1]
@@ -170,11 +138,8 @@ def _generate_image(icon):
 	if battery_status is None:
 		return _icons.APP_ICON[1]
 	else:
-		pixbuf = _icon_with_battery(battery_level, bool(battery_status))
-		if pixbuf:
-			return pixbuf
-		else:
-			return _icons.APP_ICON[1]
+		charging = battery_status.get(_status.BATTERY_CHARGING)
+		return _icons.battery(battery_level, charging) or _icons.APP_ICON[1]
 
 #
 #
