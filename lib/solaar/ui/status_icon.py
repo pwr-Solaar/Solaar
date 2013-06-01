@@ -137,12 +137,13 @@ def _generate_image(icon):
 
 	if battery_status is None:
 		return _icons.APP_ICON[1]
-	else:
-		charging = bool(battery_status.get(_status.BATTERY_CHARGING))
-		icon_name = _icons.battery(battery_level, charging)
-		if icon_name and 'missing' in icon_name:
-			icon_name = None
-		return icon_name or _icons.APP_ICON[1]
+
+	assert battery_level < 1000
+	charging = battery_status.get(_status.BATTERY_CHARGING)
+	icon_name = _icons.battery(battery_level, charging)
+	if icon_name and 'missing' in icon_name:
+		icon_name = None
+	return icon_name or _icons.APP_ICON[1]
 
 #
 #
@@ -216,11 +217,10 @@ def _update_menu_item(icon, index, device_status):
 	menu_item = menu_items[index]
 
 	image = menu_item.get_image()
-	battery_level = device_status.get(_status.BATTERY_LEVEL)
-	# print ("device_status", dict(device_status), battery_level)
-	image.set_from_icon_name(_icons.battery(battery_level), _MENU_ICON_SIZE)
+	level = device_status.get(_status.BATTERY_LEVEL)
+	charging = device_status.get(_status.BATTERY_CHARGING)
+	image.set_from_icon_name(_icons.battery(level, charging), _MENU_ICON_SIZE)
 	image.set_sensitive(bool(device_status))
-	# menu_item.set_sensitive(bool(device_status))
 
 #
 #

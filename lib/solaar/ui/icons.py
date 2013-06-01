@@ -24,7 +24,7 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
 # print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
-APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' }
+APP_ICON = ('solaar-init', 'solaar', 'solaar-fail')
 
 _default_theme = Gtk.IconTheme.get_default()
 _log.debug("icon theme paths: %s", _default_theme.get_search_path())
