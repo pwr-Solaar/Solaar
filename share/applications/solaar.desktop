@@ -6,5 +6,6 @@ Icon=solaar
 StartupNotify=false
 Terminal=false
 Type=Application
+Keywords=logitech;unifying;receiver;mouse;keyboard;
 Categories=Utility;GTK;
 #Categories=Utility;GTK;Settings;HardwareSettings;
