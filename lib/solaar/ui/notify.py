@@ -50,7 +50,7 @@ try:
 	# 	return action.get_active()
 
 
-	def alert(reason):
+	def alert(reason, icon=None):
 		assert reason
 
 		if available and Notify.is_initted():
@@ -60,7 +60,10 @@ try:
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets
-			n.update(NAME, reason, _icons.icon_file(NAME.lower()))
+			icon_file = _icons.icon_file(NAME.lower()) if icon is None \
+						else _icons.icon_file(icon)
+
+			n.update(NAME, reason, icon_file)
 			n.set_urgency(Notify.Urgency.NORMAL)
 
 			try:
@@ -70,7 +73,7 @@ try:
 				logging.exception("showing %s", n)
 
 
-	def show(dev, reason=None):
+	def show(dev, reason=None, icon=None):
 		"""Show a notification with title and text."""
 		if available and Notify.is_initted():
 			summary = dev.name
@@ -85,7 +88,10 @@ try:
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets
-			n.update(summary, message, _icons.device_icon_file(dev.name, dev.kind))
+			icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None \
+						else _icons.icon_file(icon)
+
+			n.update(summary, message, icon_file)
 			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
 
