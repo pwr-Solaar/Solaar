@@ -4,6 +4,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
+_DEBUG = logging.DEBUG
+_log = logging.getLogger('solaar.ui.icons')
+
 from gi.repository import Gtk
 
 #
@@ -20,8 +24,10 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
 # print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
-
 APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' }
+
+_default_theme = Gtk.IconTheme.get_default()
+_log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
 #
 #
@@ -30,7 +36,7 @@ APP_ICON = { 1: 'solaar', 2: 'solaar-mask', 0: 'solaar-init', -1: 'solaar-fail' 
 def battery(level=None, charging=False):
 	if level is None or level < 0:
 		return 'battery_unknown'
-	return 'battery_%03d' % (10 * ((level + 5) // 10))
+	return 'battery_%03d' % (20 * ((level + 10) // 20))
 
 
 def lux(level=None):
