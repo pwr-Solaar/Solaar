@@ -1,3 +1,4 @@
 DesktopIconTheme=gnome-icon-theme-full | oxygen-icon-theme-complete
-DistroDepends=gir1.2-appindicator3-0.1
+DistroDepends=gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10)
 DistroRecommends=
+DistroSuggests=

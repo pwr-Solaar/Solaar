@@ -17,6 +17,7 @@ Depends: ${misc:Depends}, udev (>= 175), passwd | adduser,
  ${python:Depends}, python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
  ${DesktopIconTheme}, ${DistroDepends}
 Recommends: gir1.2-notify-0.7, ${DistroRecommends}
+Suggests: ${DistroSuggests}
 Description: Logitech Unifying Receiver peripherals manager for Linux
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read
@@ -25,10 +26,10 @@ Description: Logitech Unifying Receiver peripherals manager for Linux
 Package: solaar-gnome3
 Architecture: all
 Depends: ${misc:Depends}, solaar (= ${source:Version}),
- gnome-shell (>= 3.4), gir1.2-appindicator3-0.1
-Description: gnome-shell integration for Solaar
+ gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10)
+Description: gnome-shell/Unity integration for Solaar
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read
  battery status.
  .
- This metapackage provides integration with gnome-shell.
+ This metapackage ensures integration with gnome-shell/Unity.
