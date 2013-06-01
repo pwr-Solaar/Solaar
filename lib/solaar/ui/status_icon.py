@@ -36,39 +36,36 @@ def _create_common(icon, menu_activate_callback):
 
 
 try:
-	raise ImportError
-	# try:
-	# 	from gi.repository import AppIndicator3 as AppIndicator
-	# except ImportError:
-	# 	from gi.repository import AppIndicator
+	from gi.repository import AppIndicator3 as AppIndicator
 
-	# def create(activate_callback, menu_activate_callback):
-	# 	assert activate_callback
-	# 	assert menu_activate_callback
+	# def _scroll(ind, delta, direction):
+	# 	print ("scroll", ind, delta, direction)
 
-	# 	ind = AppIndicator.Indicator.new('indicator-solaar', _icons.APP_ICON[0], AppIndicator.IndicatorCategory.HARDWARE)
-	# 	ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+	def create(activate_callback, menu_activate_callback):
+		assert activate_callback
+		assert menu_activate_callback
 
-	# 	_create_common(ind, menu_activate_callback)
-	# 	ind.set_menu(ind._menu)
+		ind = AppIndicator.Indicator.new('indicator-solaar', _icons.APP_ICON[0], AppIndicator.IndicatorCategory.HARDWARE)
+		ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
 
-	# 	return ind
+		_create_common(ind, menu_activate_callback)
+		ind.set_menu(ind._menu)
+
+		# ind.connect('scroll-event', _scroll)
+
+		return ind
 
 
 	# def destroy(ind):
 	# 	ind.set_status(AppIndicator.IndicatorStatus.PASSIVE)
-	# 	ind.set_menu(None)
 
 
-	# def _update_icon_tooltip(ind, lines_generator):
-	# 	pass
+	def _update_icon(ind, image, tooltip):
+		if isinstance(image, GdkPixbuf.Pixbuf):
+			pass
+		else:
+			ind.set_icon_full(image, tooltip)
 
-
-	# def _update_icon_image(ind, image):
-	# 	if isinstance(image, GdkPixbuf.Pixbuf):
-	# 		pass
-	# 	else:
-	# 		ind.set_icon(image)
 
 except ImportError:
 
@@ -90,30 +87,26 @@ except ImportError:
 		return icon
 
 
-	def destroy(icon):
-		icon.set_visible(False)
+	# def destroy(icon):
+	# 	icon.set_visible(False)
 
 
-	def _update_icon_tooltip(icon, lines_generator):
-		tooltip_lines = lines_generator(icon)
-		icon.set_tooltip_markup('\n'.join(tooltip_lines).rstrip('\n'))
-
-
-	def _update_icon_image(icon, image):
+	def _update_icon(icon, image, tooltip):
 		if isinstance(image, GdkPixbuf.Pixbuf):
 			icon.set_from_pixbuf(image)
 		else:
 			icon.set_from_icon_name(image)
+		icon.set_tooltip_markup(tooltip)
 
 #
 #
 #
 
-def _generate_tooltip_lines(icon):
+def _generate_tooltip_lines(devices_info):
 	yield '<b>%s</b>' % NAME
 	yield ''
 
-	for _, serial, name, status in icon._devices_info:
+	for _, serial, name, status in devices_info:
 		if serial is None:  # receiver
 			continue
 
@@ -146,7 +139,7 @@ def _icon_with_battery(level, active):
 		mask.saturate_and_pixelate(mask, 0.7, False)
 
 		battery = _icons.icon_file(battery_icon, 128)
-		assert battery
+		assert battery, "faild to find file for %s" % battery_icon
 		battery = GdkPixbuf.Pixbuf.new_from_file(battery)
 		assert battery.get_width() == 128 and battery.get_height() == 128
 		if not active:
@@ -305,7 +298,8 @@ def update(icon, device=None):
 		menu_items[no_receivers_index].set_visible(not icon._devices_info)
 		menu_items[no_receivers_index + 1].set_visible(not icon._devices_info)
 
-	_update_icon_tooltip(icon, _generate_tooltip_lines)
-	_update_icon_image(icon, _generate_image(icon))
+	tooltip_lines = _generate_tooltip_lines(icon._devices_info)
+	tooltip = '\n'.join(tooltip_lines).rstrip('\n')
+	_update_icon(icon, _generate_image(icon), tooltip)
 
 	# print ("icon updated", device, icon._devices_info)

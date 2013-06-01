@@ -109,7 +109,7 @@ def _run(args):
 	GLib.timeout_add(10, _base.notify_on_receivers, handle_receivers_events)
 	from gi.repository import Gtk
 	Gtk.main()
-	ui.status_icon.destroy(status_icon)
+	# ui.status_icon.destroy(status_icon)
 
 	for l in listeners.values():
 		l.stop()

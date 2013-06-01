@@ -4,6 +4,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
+_DEBUG = logging.DEBUG
+_log = logging.getLogger('solaar.ui.window')
+
 from gi.repository import Gtk, Gdk, GLib
 
 from solaar import NAME
@@ -275,29 +279,20 @@ def _hide(w, _=None):
 
 
 def _show(w, trigger=None):
-	if not w.get_visible():
+	if w.get_visible() or w._was_shown:
 		w.present()
-		if not w._was_shown:
-			w._was_shown = True
-			if isinstance(trigger, Gtk.StatusIcon):
-				# if the window hasn't been shown yet, position it relative to
-				# an other window (if it was shown before) or the status icon.
-				# TODO: need a more clever positioning algorithm like finding
-				# the window where space exist on the right, else pick the
-				# left-most window.
-				# for win in _windows.values():
-				# 	x, y = win.get_position()
-				# 	if win != w and (x, y) != (0, 0):
-				# 		# position left plus some window decoration
-				# 		w_width, w_height = w.get_size()
-				# 		x -= w_width + 10
-				# 		w.move(x, y)
-				# 		break
-				# else:
-				x, y, _ = Gtk.StatusIcon.position_menu(trigger._menu, trigger)
-				w.move(x, y)
-			elif isinstance(trigger, Gtk.MenuItem):
-				x, y = trigger
+	else:
+		w._was_shown = True
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("first show %s", trigger)
+		if isinstance(trigger, Gtk.StatusIcon):
+			x, y, _ = Gtk.StatusIcon.position_menu(trigger._menu, trigger)
+			w.present()
+			w.move(x, y)
+		else:
+			w.set_position(Gtk.WindowPosition.CENTER)
+			w.present()
+
 	return True
 
 
@@ -333,6 +328,7 @@ def _create(receiver):
 	window.set_skip_taskbar_hint(True)
 	window.set_skip_pager_hint(True)
 	window.set_keep_above(True)
+	# window.set_position(Gtk.WindowPosition.MOUSE)
 	# window.set_decorations(Gdk.DECOR_BORDER | Gdk.DECOR_TITLE)
 	window.connect('delete-event', _hide)
 	window._was_shown = False
