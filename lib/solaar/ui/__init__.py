@@ -26,7 +26,7 @@ def _look_for_application_icons():
 	for location in share_solaar:
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("looking for icons in %s", location)
-		solaar_png = _path.join(location, 'icons', 'solaar-mask.png')
+		solaar_png = _path.join(location, 'icons', 'solaar-logo.png')
 		if _path.exists(solaar_png):
 			_os.environ['XDG_DATA_DIRS'] = location + ':' + data_dirs
 			_log.info("XDG_DATA_DIRS = %s", _os.environ['XDG_DATA_DIRS'])
