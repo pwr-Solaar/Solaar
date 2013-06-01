@@ -1,1 +1,3 @@
 DesktopIconTheme=gnome-icon-theme | oxygen-icon-theme
+DistroDepends=
+DistroRecommends=

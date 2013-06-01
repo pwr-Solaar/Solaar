@@ -1,1 +1,3 @@
 DesktopIconTheme=gnome-icon-theme-full | oxygen-icon-theme-complete
+DistroDepends=gir1.2-appindicator3-0.1
+DistroRecommends=
