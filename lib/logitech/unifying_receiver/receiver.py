@@ -167,7 +167,7 @@ class PairedDevice(object):
 	def enable_notifications(self, enable=True):
 		"""Enable or disable device (dis)connection notifications on this
 		receiver."""
-		if not self.receiver or not self.receiver.handle:
+		if not self.receiver or not self.receiver.handle or self.protocol >= 2.0:
 			return False
 
 		if enable:

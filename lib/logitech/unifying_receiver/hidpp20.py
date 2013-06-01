@@ -40,7 +40,7 @@ FEATURE = _NamedInts(
 	ROOT=0x0000,
 	FEATURE_SET=0x0001,
 	FEATURE_INFO=0x0002,
-	DEVICE_FW_VERSION=0x0003, 
+	DEVICE_FW_VERSION=0x0003,
 	DEVICE_NAME=0x0005,
 	DEVICE_GROUPS=0x0006,
 	DFUCONTROL=0x00C0,
@@ -129,7 +129,7 @@ class FeatureCallError(_KwException):
 class FeaturesArray(object):
 	"""A sequence of features supported by a HID++ 2.0 device."""
 	__slots__ = ('supported', 'device', 'features')
-	assert int(FEATURE.ROOT) == 0x0000
+	assert FEATURE.ROOT == 0x0000
 
 	def __init__(self, device):
 		assert device is not None

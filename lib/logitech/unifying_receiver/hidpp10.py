@@ -177,6 +177,11 @@ def get_firmware(device):
 
 
 def get_notification_flags(device):
+	if device.kind:
+		p = device.protocol
+		if p is None or p >= 2.0:
+			return
+
 	flags = device.request(0x8100)
 	if flags is not None:
 		assert len(flags) == 3
@@ -184,6 +189,11 @@ def get_notification_flags(device):
 
 
 def set_notification_flags(device, *flag_bits):
+	if device.kind:
+		p = device.protocol
+		if p is None or p >= 2.0:
+			return
+
 	flag_bits = sum(int(b) for b in flag_bits)
 	result = device.request(0x8000, 0xFF & (flag_bits >> 16), 0xFF & (flag_bits >> 8), 0xFF & flag_bits)
 	return result is not None
