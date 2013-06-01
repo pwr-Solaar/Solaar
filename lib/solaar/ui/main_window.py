@@ -132,13 +132,13 @@ def _make_device_box(index):
 	label.set_padding(4, 0)
 	frame._label = label
 
-	battery_icon = Gtk.Image.new_from_icon_name(_icons.battery(-1), _STATUS_ICON_SIZE)
+	battery_icon = Gtk.Image.new_from_icon_name(_icons.battery(), _STATUS_ICON_SIZE)
 
 	battery_label = Gtk.Label()
 	battery_label.set_width_chars(6)
 	battery_label.set_alignment(0, 0.5)
 
-	light_icon = Gtk.Image.new_from_icon_name('light_unknown', _STATUS_ICON_SIZE)
+	light_icon = Gtk.Image.new_from_icon_name(_icons.lux(), _STATUS_ICON_SIZE)
 
 	light_label = Gtk.Label()
 	light_label.set_alignment(0, 0.5)
@@ -423,11 +423,12 @@ def _update_device_box(frame, dev):
 
 		if battery_level is None:
 			battery_icon.set_sensitive(False)
-			battery_icon.set_from_icon_name(_icons.battery(None), _STATUS_ICON_SIZE)
+			battery_icon.set_from_icon_name(_icons.battery(), _STATUS_ICON_SIZE)
 			battery_label.set_markup('<small>no status</small>')
 			battery_label.set_sensitive(True)
 		else:
-			icon_name = _icons.battery(battery_level)
+			battery_charging = dev.status.get(_status.BATTERY_CHARGING)
+			icon_name = _icons.battery(battery_level, battery_charging)
 			battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
 			battery_icon.set_sensitive(True)
 			battery_label.set_text('%d%%' % battery_level)

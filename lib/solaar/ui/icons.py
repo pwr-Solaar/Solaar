@@ -50,27 +50,24 @@ def battery(level=None, charging=False):
 	return icon_name
 
 def _battery_icon_name(level, charging):
-	level_approx = None if level is None else 20 * ((level  + 10) // 20)
+	if level is None or level < 0:
+		return 'gpm-battery-missing' if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing') \
+			else 'battery-missing'
+
+	level_approx = 20 * ((level  + 10) // 20)
 
 	if _has_gpm_icons:
-		if level is None or level < 0:
-			return 'gpm-battery-missing' if _default_theme.has_icon('gpm-battery-missing') \
-				else 'battery-missing'
 		if level == 100 and charging:
 			return 'gpm-battery-charged'
 		return 'gpm-battery-%03d%s' % (level_approx, '-charging' if charging else '')
 
 	if _has_oxygen_icons:
-		if level is None or level < 0:
-			return 'battery-missing'
 		if level_approx == 100 and charging:
 			return 'battery-charging'
 		level_name = ('low', 'caution', '040', '060', '080', '100')[level_approx // 20]
 		return 'battery%s-%s' % ('-charging' if charging else '', level_name)
 
 	if _has_gnome_icons:
-		if level is None or level < 0:
-			return 'battery-missing'
 		if level == 100 and charging:
 			return 'battery-full-charged'
 		if level_approx == 0 and charging:

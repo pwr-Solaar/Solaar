@@ -138,8 +138,11 @@ def _generate_image(icon):
 	if battery_status is None:
 		return _icons.APP_ICON[1]
 	else:
-		charging = battery_status.get(_status.BATTERY_CHARGING)
-		return _icons.battery(battery_level, charging) or _icons.APP_ICON[1]
+		charging = bool(battery_status.get(_status.BATTERY_CHARGING))
+		icon_name = _icons.battery(battery_level, charging)
+		if icon_name and 'missing' in icon_name:
+			icon_name = None
+		return icon_name or _icons.APP_ICON[1]
 
 #
 #

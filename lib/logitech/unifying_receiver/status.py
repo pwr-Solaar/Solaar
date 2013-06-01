@@ -34,6 +34,7 @@ ALERT = _NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ALL=0xFF)
 ENCRYPTED='encrypted'
 BATTERY_LEVEL='battery-level'
 BATTERY_STATUS='battery-status'
+BATTERY_CHARGING='battery-charging'
 LIGHT_LEVEL='light-level'
 ERROR='error'
 
@@ -142,16 +143,20 @@ class DeviceStatus(dict):
 
 	def set_battery_info(self, level, status, timestamp=None):
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s: battery %d%% charged, %s", self._device, level, status)
+			_log.debug("%s: battery %d%%, %s", self._device, level, status)
 
 		# TODO: this is also executed when pressing Fn+F7 on K800.
 		old_level, self[BATTERY_LEVEL] = self.get(BATTERY_LEVEL), level
 		old_status, self[BATTERY_STATUS] = self.get(BATTERY_STATUS), status
-		changed = old_level != level or old_status != status
+
+		charging = status in ('charging', 'recharging', 'slow recharge')
+		old_charging, self[BATTERY_CHARGING] = self.get(BATTERY_CHARGING), charging
+
+		changed = old_level != level or old_status != status or old_charging != charging
 		alert, reason = ALERT.NONE, None
 
 		if not _hidpp20.BATTERY_OK(status) or level <= 5:
-			_log.warn("%s: battery %d%% charged, ALERT %s", self._device, level, status)
+			_log.warn("%s: battery %d%%, ALERT %s", self._device, level, status)
 			alert = ALERT.NOTIFICATION
 			reason = 'Battery: %d%% (%s)' % (level, status)
 
@@ -376,11 +381,11 @@ class DeviceStatus(dict):
 				self[BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
 				if n.address == 0x00:
 					self[LIGHT_LEVEL] = None
+					self[BATTERY_CHARGING] = None
 					self._changed()
 				elif n.address == 0x10:
 					self[LIGHT_LEVEL] = lux
-					if lux > 200:  # guesstimate
-						self[BATTERY_STATUS] += ', charging'
+					self[BATTERY_CHARGING] = lux > 200
 					self._changed()
 				elif n.address == 0x20:
 					_log.debug("%s: Light Check button pressed", self._device)
