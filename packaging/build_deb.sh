@@ -59,5 +59,6 @@ debuild ${DEBUILD_ARGS:-$@}
 
 rm -rf "$DIST"
 mkdir -p "$DIST"
-cp -a ../solaar_$VERSION* "$DIST"
+cp -a -t "$DIST" ../solaar_$VERSION*
+cp -a -t "$DIST" ../solaar-*_$VERSION* || true
 cd "$DIST"
