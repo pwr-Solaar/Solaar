@@ -17,6 +17,10 @@ distribution the required packages are most likely named something similar.
 If the desktop notifications bindings are also installed (`gir1.2-notify-0.7`),
 you will also get desktop notifications when devices come online/go offline.
 
+For gnome-shell/Unity support, you also need to have `gir1.2-appindicator3-0.1`
+installed.
+
+
 ### Installation
 
 Normally USB devices are not accessible for r/w by regular users, so you will

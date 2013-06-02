@@ -23,7 +23,7 @@ and their features, see [docs/devices.md](docs/devices.md).
 Pre-built packages are available for a few Linux distros:
 
 * Ubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
-* a Debian Wheezy package [.deb][debian], should work on testing and Sid as well
+* a Debian *Wheezy* package [.deb][debian], should work on *testing* and *Sid* as well
 * a [Gentoo overlay][gentoo], courtesy of Carlos Silva
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Arch package][arch], courtesy of Arnaud Taffanel
@@ -42,12 +42,6 @@ procedure for manual installation.
 
 
 ## Known Issues
-
-- Ubuntu's Unity indicators are not supported at this time. However, if you
-  whitelist 'Solaar' in the systray, you will get an icon (see
-  [Enable more icons to be in the system tray?][ubuntu_systray] for details).
-
-[ubuntu_systray]: http://askubuntu.com/questions/30742
 
 - Some devices using the [Nano Receiver][nano] (which is very similar to the
   Unifying Receiver) are supported, but not all. For details, see
