@@ -41,7 +41,7 @@ class PairedDevice(object):
 
 		self._protocol = None if self.receiver.unifying_supported else 1.0
 		self._power_switch = None if self.receiver.unifying_supported else '(unknown)'
-		self._serial = None if self.receiver.unifying_supported else self.receiver.serial
+		self.serial = _hidpp10.get_serial(self) if self.receiver.unifying_supported else self.receiver.serial
 
 		if self.receiver.unifying_supported:
 			pair_info = self.receiver.request(0x83B5, 0x20 + self.number - 1)
@@ -110,8 +110,8 @@ class PairedDevice(object):
 			if pair_info:
 				kind = ord(pair_info[7:8]) & 0x0F
 				self._kind = _hidpp10.DEVICE_KIND[kind]
-				if self._wpid is None:
-					self._wpid = _strhex(pair_info[3:5])
+				if self.wpid is None:
+					self.wpid = _strhex(pair_info[3:5])
 			if self._kind is None:
 				if self.codename in _descriptors.DEVICES:
 					self._name, self._kind = _descriptors.DEVICES[self._codename][:2]
@@ -128,11 +128,11 @@ class PairedDevice(object):
 				self._firmware = _hidpp20.get_firmware(self)
 		return self._firmware or ()
 
-	@property
-	def serial(self):
-		if self._serial is None:
-			self._serial = _hidpp10.get_serial(self)
-		return self._serial or '?'
+	# @property
+	# def serial(self):
+	# 	if self._serial is None:
+	# 		self._serial = _hidpp10.get_serial(self)
+	# 	return self._serial or '?'
 
 	@property
 	def keys(self):
