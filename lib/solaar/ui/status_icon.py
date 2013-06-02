@@ -100,7 +100,7 @@ def _generate_tooltip_lines(devices_info):
 	yield '<b>%s</b>' % NAME
 	yield ''
 
-	for _, serial, name, status in devices_info:
+	for _, serial, name, _, status in devices_info:
 		if serial is None:  # receiver
 			continue
 
@@ -127,7 +127,7 @@ def _generate_image(icon):
 	battery_status = None
 	battery_level = 1000
 
-	for _, serial, name, status in icon._devices_info:
+	for _, serial, name, _, status in icon._devices_info:
 		if serial is None: # is receiver
 			continue
 		level = status.get(_status.BATTERY_LEVEL)
@@ -151,14 +151,27 @@ def _generate_image(icon):
 
 def _add_device(icon, device):
 	index = None
-	for idx, (rserial, _, _, _) in enumerate(icon._devices_info):
+	for idx, (rserial, _, _, _, _) in enumerate(icon._devices_info):
 		if rserial == device.receiver.serial:
+			# the first entry matching the receiver serial should be for the receiver itself
 			index = idx + 1
 			break
 	assert index is not None
 
-	device_info = (device.receiver.serial, device.serial, device.name, device.status)
+	# proper ordering (according to device.number) for a receiver's devices
+	while True:
+		rserial, _, _, number, _ = icon._devices_info[index]
+		if rserial == '-':
+			break
+		assert rserial == device.receiver.serial
+		if number > device.number:
+			break
+		index = index + 1
+
+	device_info = (device.receiver.serial, device.serial, device.name, device.number, device.status)
 	icon._devices_info.insert(index, device_info)
+
+	print ("status_icon: added", index, ":", device_info)
 
 	menu_item = Gtk.ImageMenuItem.new_with_label('    ' + device.name)
 	icon._menu.insert(menu_item, index)
@@ -178,7 +191,7 @@ def _remove_device(icon, index):
 
 
 def _add_receiver(icon, receiver):
-	device_info = (receiver.serial, None, receiver.name, None)
+	device_info = (receiver.serial, None, receiver.name, None, None)
 	icon._devices_info.insert(0, device_info)
 
 	menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
@@ -188,7 +201,7 @@ def _add_receiver(icon, receiver):
 	menu_item.show_all()
 	menu_item.connect('activate', icon._menu_activate_callback, receiver.path, icon)
 
-	icon._devices_info.insert(1, ('-', None, None, None))
+	icon._devices_info.insert(1, ('-', None, None, None, None))
 	separator = Gtk.SeparatorMenuItem.new()
 	separator.set_visible(True)
 	icon._menu.insert(separator, 1)
@@ -200,7 +213,7 @@ def _remove_receiver(icon, receiver):
 	index = 0
 	found = False
 	while index < len(icon._devices_info):
-		rserial, _, _, _ = icon._devices_info[index]
+		rserial, _, _, _, _ = icon._devices_info[index]
 		# print ("remove receiver", index, rserial)
 		if rserial == receiver.serial:
 			found = True
@@ -235,7 +248,7 @@ def update(icon, device=None):
 			receiver = device
 			if receiver:
 				index = None
-				for idx, (rserial, _, _, _) in enumerate(icon._devices_info):
+				for idx, (rserial, _, _, _, _) in enumerate(icon._devices_info):
 					if rserial == receiver.serial:
 						index = idx
 						break
@@ -248,7 +261,7 @@ def update(icon, device=None):
 		else:
 			# peripheral
 			index = None
-			for idx, (rserial, serial, name, _) in enumerate(icon._devices_info):
+			for idx, (rserial, serial, name, _, _) in enumerate(icon._devices_info):
 				if rserial == device.receiver.serial and serial == device.serial:
 					index = idx
 
