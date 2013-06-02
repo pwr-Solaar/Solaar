@@ -3,15 +3,15 @@
 <head>
 <meta charset='utf-8' />
 <meta name="description" content="Linux devices manager for the Logitech Unifying Receiver." />
-<link rel="stylesheet" type="text/css" media="screen" href="style/stylesheet.css">
-<link rel="icon" type="image/png" href="images/favicon.png" />
+<link rel="stylesheet" type="text/css" media="screen" href="/Solaar/style/stylesheet.css">
+<link rel="icon" type="image/png" href="/Solaar/images/favicon.png" />
 <title>Solaar - Supported devices</title>
 </head>
 <body>
 <div id="header_wrap" class="outer">
 <header class="inner">
 <h1 id="project_title">
-<a href="index.html"><img alt="logo" class="logo" src="images/solaar-logo.png" /> Solaar</a>
+<a href="index.html"><img alt="logo" class="logo" src="/Solaar/images/solaar-logo.png" /> Solaar</a>
 </h1>
 </header>
 </div>
@@ -19,8 +19,13 @@
 <section id="main_content" class="inner">
 <h1 id="supported-devices">Supported devices</h1>
 
-<p><strong>Solaar</strong> will detect all devices paired with your Unifying Receiver, and at
-the very least display some basic information about them.</p>
+<p><strong>Solaar</strong> will detect all devices paired with your receiver, and at the very
+least display some basic information about them.</p>
+
+<p>At this moment, all <a href="http://logitech.com/en-us/66/6079">Unifying Receiver</a> are supported (devices with
+USB ID <code>046d:c52b</code> or <code>046d:c532</code>), but only some newer <a href="http://logitech.com/mice-pointers/articles/5926">Nano Receiver</a>s
+(devices with USB ID <code>046d:c52f</code>). You can check your connected Logitech devices
+by running <code>lsusb -d 046d:</code> in a console.</p>
 
 <p>For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported:</p>
@@ -62,6 +67,10 @@ level.</p>
 <p>For mice, the DPI column specifies if the mouse’s sensitivity is fixed (-), can
 only be read (R), or can be read and changed by Solaar (R/W).</p>
 
+<p>The reprog(rammable) keys feature is currently not fully supported by Solaar.
+You are able to read this feature using solaar-cli, but it is not possible to
+assign different keys.</p>
+
 <p>Keyboards:</p>
 
 <table>
@@ -87,6 +96,12 @@ only be read (R), or can be read and changed by Solaar (R/W).</p>
 <td> </td>
 </tr>
 <tr>
+<td>K340</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td>K350</td>
 <td> </td>
 <td> </td>
@@ -94,14 +109,14 @@ only be read (R), or can be read and changed by Solaar (R/W).</p>
 </tr>
 <tr>
 <td>K360</td>
-<td> </td>
-<td> </td>
-<td> </td>
+<td>2.0</td>
+<td>yes</td>
+<td>FN swap, reprog keys</td>
 </tr>
 <tr>
 <td>K400 Touch</td>
-<td> </td>
-<td> </td>
+<td>2.0</td>
+<td>yes</td>
 <td> </td>
 </tr>
 <tr>
@@ -114,7 +129,7 @@ only be read (R), or can be read and changed by Solaar (R/W).</p>
 <td>K800 Illuminated</td>
 <td>1.0</td>
 <td>yes</td>
-<td>FN swap</td>
+<td>FN swap, reprog keys</td>
 </tr>
 </tbody>
 </table>
@@ -132,6 +147,13 @@ only be read (R), or can be read and changed by Solaar (R/W).</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>M215</td>
+<td>1.0</td>
+<td>yes</td>
+<td> </td>
+<td> </td>
+</tr>
 <tr>
 <td>M315</td>
 <td> </td>
