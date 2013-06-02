@@ -171,7 +171,7 @@ def _add_device(icon, device):
 	device_info = (device.receiver.serial, device.serial, device.name, device.number, device.status)
 	icon._devices_info.insert(index, device_info)
 
-	print ("status_icon: added", index, ":", device_info)
+	# print ("status_icon: added", index, ":", device_info)
 
 	menu_item = Gtk.ImageMenuItem.new_with_label('    ' + device.name)
 	icon._menu.insert(menu_item, index)

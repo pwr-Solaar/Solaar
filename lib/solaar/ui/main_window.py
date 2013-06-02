@@ -4,9 +4,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging
-_DEBUG = logging.DEBUG
-_log = logging.getLogger('solaar.ui.window')
+from logging import getLogger, DEBUG as _DEBUG
+_log = getLogger('solaar.ui.window')
+del getLogger
 
 from gi.repository import Gtk, Gdk, GLib
 

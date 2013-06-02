@@ -8,7 +8,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 try:
 	# this import is allowed to fail, in which case the entire feature is unavailable
 	from gi.repository import Notify
-	import logging
+
+	from logging import getLogger, DEBUG as _DEBUG
+	_log = getLogger('solaar.ui.notify')
+	del getLogger
 
 	from solaar import NAME
 	from . import icons as _icons
@@ -25,18 +28,18 @@ try:
 		global available
 		if available:
 			if not Notify.is_initted():
-				logging.info("starting desktop notifications")
+				_log.info("starting desktop notifications")
 				try:
 					return Notify.init(NAME)
 				except:
-					logging.exception("initializing desktop notifications")
+					_log.exception("initializing desktop notifications")
 					available = False
 		return available and Notify.is_initted()
 
 
 	def uninit():
 		if available and Notify.is_initted():
-			logging.info("stopping desktop notifications")
+			_log.info("stopping desktop notifications")
 			_notifications.clear()
 			Notify.uninit()
 
@@ -67,10 +70,11 @@ try:
 			n.set_urgency(Notify.Urgency.NORMAL)
 
 			try:
-				# logging.debug("showing %s", n)
+				if _log.isEnabledFor(_DEBUG):
+					_log.debug("showing %s", n)
 				n.show()
 			except Exception:
-				logging.exception("showing %s", n)
+				_log.exception("showing %s", n)
 
 
 	def show(dev, reason=None, icon=None):
@@ -96,10 +100,11 @@ try:
 			n.set_urgency(urgency)
 
 			try:
-				# logging.debug("showing %s", n)
+				if _log.isEnabledFor(_DEBUG):
+					_log.debug("showing %s", n)
 				n.show()
 			except Exception:
-				logging.exception("showing %s", n)
+				_log.exception("showing %s", n)
 
 except ImportError:
 	available = False
