@@ -13,7 +13,7 @@ SITE="$(readlink -f "$SELF/../gh-pages")"
 
 add_md() {
 	local SOURCE="$SELF/$1"
-	local TARGET="$BUILD/$(basename "$1")"
+	local TARGET="$BUILD/${2:-$(basename "$1")}"
 
 	LAYOUT=default
 	TITLE=$(grep '^# ' "$SOURCE" -m 1 | cut -c 3-)
@@ -24,6 +24,7 @@ add_md() {
 		local TITLE=Solaar
 	fi
 
+	mkdir -p "$(dirname "$TARGET")"
 	cat >"$TARGET" <<-FRONTMATTER
 		---
 		layout: $LAYOUT
@@ -60,18 +61,24 @@ cp -up "$SELF/share/solaar/icons/solaar.png" "$BUILD/images/favicon.png"
 add_md docs/devices.md
 add_md docs/installation.md
 
-add_md README.md
-sed -i -e 's#\[docs/\([a-z]*\)\.md\]#[\1]#g' "$BUILD/README.md"
-sed -i -e 's#(docs/\([a-z]*\)\.md)#(\1.html)#g' "$BUILD/README.md"
-sed -i -e 's#(COPYING)#({{ site.repository }}/blob/master/COPYING)#g' "$BUILD/README.md"
+add_md README.md index.md
+sed -i -e 's#\[docs/\([a-z]*\)\.md\]#[\1]#g' "$BUILD/index.md"
+sed -i -e 's#(docs/\([a-z]*\)\.md)#(\1.html)#g' "$BUILD/index.md"
+sed -i -e 's#(COPYING)#({{ site.repository }}/blob/master/COPYING)#g' "$BUILD/index.md"
 
 for l in "$BUILD/_layouts"/*.html; do
 	sed -e '/^$/d' "$l" | tr -d '\t' >"$l="
 	mv "$l=" "$l"
 done
 
-mkdir -p "$SITE/../packages"
+mkdir -p "$SITE/../packages" "$SITE/packages/"
 cp -up "$SELF/dist/debian"/*.deb "$SITE/../packages/"
+if test -x /usr/bin/dpkg-scanpackages; then
+	cd "$SITE/../packages/"
+	dpkg-scanpackages -m . > Packages
+	add_md docs/debian-repo.md packages/index.md
+	cd -
+fi
 
 GIT_BACKUP="$(mktemp -ud --tmpdir="$SITE/.." git-backup-XXXXXX)"
 mv "$SITE/.git" "$GIT_BACKUP"
@@ -92,11 +99,11 @@ for p in "$SITE"/*.html; do
 		:end
 		SED
 done
-mv "$SITE/README.html" "$SITE/index.html"
 
 fix_times README.md index.html
 fix_times docs/devices.md devices.html
 fix_times docs/installation.md installation.html
+fix_times docs/debian-repo.md packages/index.html
 fix_times jekyll/images images
 fix_times share/solaar/icons/solaar-logo.png images/solaar-logo.png
 fix_times jekyll/style style
