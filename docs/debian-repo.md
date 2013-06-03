@@ -5,4 +5,5 @@ To use this repository with your Debian machine, create a file `solaar.list` in
 
 ```
 deb http://pwr.github.io/Solaar/packages/ ./
+deb-src http://pwr.github.io/Solaar/packages/ ./
 ```

@@ -28,6 +28,7 @@ Architecture: all
 Section: gnome
 Depends: ${misc:Depends}, solaar (= ${source:Version}),
  gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10)
+Enhances: solaar
 Description: gnome-shell/Unity integration for Solaar
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read

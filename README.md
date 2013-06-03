@@ -22,8 +22,10 @@ and their features, see [docs/devices.md](docs/devices.md).
 
 Pre-built packages are available for a few Linux distros:
 
+* Debian 7 (Wheezy) or higher: packages in this [repository][debian]; the
+`solaar` package uses a systray icon; to make sure you're using gnome-shell's
+indicators, install `solaar-gnome3`.
 * Ubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
-* Debian *Wheezy*+ packages in this [minimal repository][debian]
 * a [Gentoo overlay][gentoo], courtesy of Carlos Silva
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Arch package][arch], courtesy of Arnaud Taffanel
@@ -42,6 +44,9 @@ procedure for manual installation.
 
 
 ## Known Issues
+
+- KDE/Kubuntu: is some icons appear broken in the application, make sure you've
+  configured the Gtk theme.
 
 - Some devices using the [Nano Receiver][nano] (which is very similar to the
   Unifying Receiver) are supported, but not all. For details, see
