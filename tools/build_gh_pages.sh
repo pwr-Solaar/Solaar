@@ -72,12 +72,23 @@ for l in "$BUILD/_layouts"/*.html; do
 done
 
 mkdir -p "$SITE/../packages" "$SITE/packages/"
-cp -up "$SELF/dist/debian"/*.deb "$SITE/../packages/"
+cp -up "$SELF/dist/debian"/solaar_* "$SITE/../packages/"
+cp -up "$SELF/dist/debian"/solaar-gnome3_* "$SITE/../packages/"
 if test -x /usr/bin/dpkg-scanpackages; then
 	cd "$SITE/../packages/"
 	dpkg-scanpackages -m . > Packages
 	add_md docs/debian-repo.md packages/index.md
 	cd -
+fi
+
+if test -x /usr/bin/uscan; then
+	TAG=$(uscan --no-conf --report-status --check-dirname-regex packaging ./packaging/ \
+				| grep 'Newest version' \
+				| grep -ow '[0-9.]*' | head -1)
+	if test -n "$TAG"; then
+		sed -i -e 's#^version: .*$#'"version: $TAG#" "$SELF/jekyll/_config.yml"
+		sed -i -e 's#/archive/[0-9.]*\.tar\.gz$#'"/archive/$TAG.tar.gz#" "$SELF/jekyll/_config.yml"
+	fi
 fi
 
 GIT_BACKUP="$(mktemp -ud --tmpdir="$SITE/.." git-backup-XXXXXX)"
