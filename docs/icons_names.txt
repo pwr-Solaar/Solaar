@@ -1,25 +1,34 @@
 # battery icon names across various icon themes
 
-level	gnome					humanity						faenza							ubuntu-mono								oxygen
-								(gpm-B-?/gpm-primary-?)			(gpm-B-?/gpm-primary-?)			(gpm-B-?/gpm-primary-?)
+B = 'battery'
+CG = 'charging'
+GB = 'gpm-battery'
 
-?		B-missing				-								-								GB-missing								B-missing
+theme		(unknown)	0			0-CG		20			20-CG			40			40-CG		60				60-CG		80				80-CG		100		100-CG		100-full
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-0		B-empty					B_empty, GB-000					B-000, B_empty, GB-000			B-000, B_empty, GB-000, GB-empty		B-low
-0 C		-						-, GB-000-charging				GB-000-charging					B-000-charging, GB-000-charging			B-charging-low
+gnome		B-missing	B-empty		-			B-caution	B-caution-CG	B-low		B-low-CG	-				-			B-good			B-good-CG	B-full	B-full-CG	B-full-charged
 
-20		B-caution				B-caution, GB-020				B_caution, GB-020				B-020, B-caution, GB-020				B-caution
-20 C	B-caution-charging		-, GB-020-charging				-, GB-020-charging				B-020-charging, GB-020-charging			B-charging-caution
+Humanity	GB-missing	GB-000		GB-000-CG	GB-020		GB-020-CG		GB-040		GB-040-CG	GB-060			GB-060-CG	GB-080			GB-080-CG	GB-100	GB-100-CG	GB-charged
+(gnome)		-			B_empty		-			B-caution	-				B-low		-			B_two_thirds	-			B_third_fourth	-			B_full	B_plugged	B_charged
 
-40		B-low					B-low, GB-040					B_low, GB-040					B-040, B-low, GB-040					B-040
-40 C	B-low-charging			-, GB-040-charging				-, GB-040-charging				B-040-charging, GB-040-charging			B-charging-040
+elementary	B-missing	B-000		B-000-CG	B-020		B-020-CG		B-040		B-040-CG	B-060			B-060-CG	B-080			B-080-CG	B-100	B-100-CG	B-charged
+(gnome)		-			B-empty		-			B-caution	B-caution-CG	B-low		B-low-CG	-				-			B-good			B-good-CG	B-full	B-full-CG	B-full-charged
+			-			B_empty		-			-			-				-			-			B_two_thirds	-			B_third_fourth	-			B_full	B_plugged	B_charged
 
-60		-						B_two_thirds, GB-060			B_two_thirds, GB-060			B-060, GB-060							B-060
-60 C	-						-, GB-060-charging				-, GB-060-charging				B-060-charging, GB-060-charging			B-charging-060
+faenza		-			GB-000		GB-000-CG	GB-020		GB-020-CG		GB-040		GB-040-CG	GB-060			GB-060-CG	GB-080			GB-080-CG	GB-100	GB-100-CG	GB-charged
+(gnome)		-			B_empty		-			B_caution	-				B_low		-			B_two_thirds	-			B_third_fourth	-			B_full	B_plugged	B_charged
 
-80		B-good					B_third_fourth, GB-080			B_third_fourth, GB-080			B-080, GB-080							B-080
-80 C	B-good-charging			-, GB-080-charging				-, GB-080-charging				B-080-charging, GB-080-charging			B-charging-080
+ubuntu-mono	GB-missing	GB-000		GB-000-CG	GB-020		GB-020-CG		GB-040		GB-040-CG	GB-060			GB-060-CG	GB-080			GB-080-CG	GB-100	GB-100-CG	GB-charged
+(Humanity)				B-000		B-000-CG	B-020		B-020-CG		B-040		B-040-CG	B-060			B-060-CG	B-080			B-080-CG	B-100	B-100-CG	B-charged
+						B_empty		-			B-caution	-				B-low		-			-				-			-				-			B_full	-			B_charged
 
-100		B-full					B_full, GB-100					B_full, GB-100					B-100, B_full, GB-100					B-100
-100 C	B-full-charging			B_plugged, GB-100-charging		B_plugged, GB-100-charging		B-100-charging, GB-100-charging			B-charging
-100 F	B-full-charged			B_charged, GB-charged			B_charged, GB-charged			B_charged, B-charged, GB-charged		-
+oxygen		B-missing	B-low		B-CG-low	B-caution	B-CG-caution	B-040		B-CG-040	B-060			B-CG-060	B-080			B-CG-080	B-100	B-CG		-
+
+moblin		-			-			-			B-low		-				B-caution	-			-				-			B-good			-			B-full	B-charging	-
+
+nuvola		B-missing	B-low		-			-			-				-			-			-				-			-				-			-		B-charging	-
+
+
+
+# weather icons (for lux)
