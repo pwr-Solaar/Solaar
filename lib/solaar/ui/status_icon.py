@@ -4,6 +4,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from logging import getLogger, DEBUG as _DEBUG
+_log = getLogger('solaar.ui.tray')
+del getLogger
+
 from gi.repository import Gtk
 
 from solaar import NAME
@@ -38,6 +42,8 @@ def _create_common(icon, menu_activate_callback):
 try:
 	from gi.repository import AppIndicator3 as AppIndicator
 
+	_log.debug("using AppIndicator3")
+
 	# def _scroll(ind, delta, direction):
 	# 	print ("scroll", ind, delta, direction)
 
@@ -47,6 +53,9 @@ try:
 
 		ind = AppIndicator.Indicator.new('indicator-solaar', _icons.APP_ICON[0], AppIndicator.IndicatorCategory.HARDWARE)
 		ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+
+		theme_paths = Gtk.IconTheme.get_default().get_search_path()
+		ind.set_icon_theme_path(':'.join(theme_paths))
 
 		_create_common(ind, menu_activate_callback)
 		ind.set_menu(ind._menu)
@@ -60,11 +69,15 @@ try:
 	# 	ind.set_status(AppIndicator.IndicatorStatus.PASSIVE)
 
 
-	def _update_icon(ind, image, tooltip):
-		ind.set_icon_full(image, tooltip)
+	def _update_icon(ind, icon_name, tooltip):
+		#ind.set_icon(icon_name)
+		ind.set_icon_full(icon_name, tooltip)
+		# _log.debug("set icon %s => %s %s %s", icon_name, ind.get_icon(), ind.get_title(), ind.get_status())
 
 
 except ImportError:
+
+	_log.debug("using StatusIcon")
 
 	def create(activate_callback, menu_activate_callback):
 		assert activate_callback
@@ -88,8 +101,8 @@ except ImportError:
 	# 	icon.set_visible(False)
 
 
-	def _update_icon(icon, image, tooltip):
-		icon.set_from_icon_name(image)
+	def _update_icon(icon, icon_name, tooltip):
+		icon.set_from_icon_name(icon_name)
 		icon.set_tooltip_markup(tooltip)
 
 #
@@ -120,7 +133,7 @@ def _generate_tooltip_lines(devices_info):
 		yield ''
 
 
-def _generate_image(icon):
+def _generate_icon_name(icon):
 	if not icon._devices_info:
 		return _icons.APP_ICON[-1]
 
@@ -164,6 +177,7 @@ def _add_device(icon, device):
 		if rserial == '-':
 			break
 		assert rserial == device.receiver.serial
+		assert number != device.number
 		if number > device.number:
 			break
 		index = index + 1
@@ -281,6 +295,6 @@ def update(icon, device=None):
 
 	tooltip_lines = _generate_tooltip_lines(icon._devices_info)
 	tooltip = '\n'.join(tooltip_lines).rstrip('\n')
-	_update_icon(icon, _generate_image(icon), tooltip)
+	_update_icon(icon, _generate_icon_name(icon), tooltip)
 
 	# print ("icon updated", device, icon._devices_info)

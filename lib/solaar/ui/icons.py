@@ -26,7 +26,34 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 
 APP_ICON = ('solaar-init', 'solaar', 'solaar-fail')
 
+
+def _look_for_application_icons():
+	import os.path as _path
+	from os import environ as _environ
+
+	import sys as _sys
+	_log.debug("sys.path[0] = %s", _sys.path[0])
+	prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
+	src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
+	local_share = _environ.get('XDG_DATA_HOME', _path.expanduser('~/.local/share'))
+	data_dirs = _environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
+	del _sys
+
+	share_solaar = [prefix_share] + list(_path.join(x, 'solaar') for x in [src_share, local_share] + data_dirs.split(':'))
+	for location in share_solaar:
+		location = _path.join(location, 'icons')
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("looking for icons in %s", location)
+		solaar_png = _path.join(location, APP_ICON[0] + '.png')
+		if _path.exists(solaar_png):
+			yield location
+
+	del _environ
+	# del _path
+
 _default_theme = Gtk.IconTheme.get_default()
+for p in _look_for_application_icons():
+	_default_theme.prepend_search_path(p)
 _log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
 #
@@ -38,20 +65,29 @@ _has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
 					_default_theme.has_icon('battery-charging-040')
 _has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
 					_default_theme.has_icon('battery-full-charged')
+_has_elementary_icons = _default_theme.has_icon('battery-020-charging')
 
-_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s", _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons)
-if not _has_gpm_icons and not _has_gnome_icons and not _has_oxygen_icons:
+_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s", _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
+if (not _has_gpm_icons and not _has_oxygen_icons and
+	not _has_gnome_icons and not _has_elementary_icons):
 	_log.warning("failed to detect a known icon set")
+
+#
+#
+#
 
 def battery(level=None, charging=False):
 	icon_name = _battery_icon_name(level, charging)
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
+	if not _default_theme.has_icon(icon_name):
+		_log.warning("icon %s not found in current theme", icon_name);
+	# elif _log.isEnabledFor(_DEBUG):
+	# 	_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
 	return icon_name
 
 def _battery_icon_name(level, charging):
 	if level is None or level < 0:
-		return 'gpm-battery-missing' if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing') \
+		return 'gpm-battery-missing' \
+			if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing') \
 			else 'battery-missing'
 
 	level_approx = 20 * ((level  + 10) // 20)
@@ -67,6 +103,11 @@ def _battery_icon_name(level, charging):
 		level_name = ('low', 'caution', '040', '060', '080', '100')[level_approx // 20]
 		return 'battery%s-%s' % ('-charging' if charging else '', level_name)
 
+	if _has_elementary_icons:
+		if level == 100 and charging:
+			return 'battery-charged'
+		return 'battery-%03d%s' % (level_approx, '-charging' if charging else '')
+
 	if _has_gnome_icons:
 		if level == 100 and charging:
 			return 'battery-full-charged'
@@ -75,9 +116,9 @@ def _battery_icon_name(level, charging):
 		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
 		return 'battery-%s%s' % (level_name, '-charging' if charging else '')
 
+	if level == 100 and charging:
+		return 'battery-charged'
 	# fallback... most likely will fail
-	if level is None or level < 0:
-		return 'battery-missing'
 	return 'battery-%03d%s' % (level_approx, '-charging' if charging else '')
 
 #
@@ -112,7 +153,7 @@ def device_icon_set(name='_', kind=None):
 			elif str(kind) == 'trackball':
 				names += ('input-mouse',)
 			names += ('input-' + str(kind),)
-		# names += (name,)
+		# names += (name.replace(' ', '-'),)
 
 		source = Gtk.IconSource.new()
 		for n in names:
@@ -126,25 +167,23 @@ def device_icon_set(name='_', kind=None):
 def device_icon_file(name, kind=None, size=_LARGE_SIZE):
 	icon_set = device_icon_set(name, kind)
 	assert icon_set
-	theme = Gtk.IconTheme.get_default()
 	for n in reversed(icon_set.names):
-		if theme.has_icon(n):
-			return theme.lookup_icon(n, size, 0).get_filename()
+		if _default_theme.has_icon(n):
+			return _default_theme.lookup_icon(n, size, 0).get_filename()
 
 
 def device_icon_name(name, kind=None):
 	icon_set = device_icon_set(name, kind)
 	assert icon_set
-	theme = Gtk.IconTheme.get_default()
 	for n in reversed(icon_set.names):
-		if theme.has_icon(n):
+		if _default_theme.has_icon(n):
 			return n
 
 
 def icon_file(name, size=_LARGE_SIZE):
-	theme = Gtk.IconTheme.get_default()
-	if theme.has_icon(name):
-		theme_icon = theme.lookup_icon(name, size, 0)
+	# _log.debug("looking for file of icon %s at size %s", name, size)
+	if _default_theme.has_icon(name):
+		theme_icon = _default_theme.lookup_icon(name, size, 0)
 		file_name = theme_icon.get_filename()
-		# print ("icon", name, "->", theme_icon, file_name)
+		# _log.debug("icon %s => %s : %s", name, theme_icon, file_name)
 		return file_name
