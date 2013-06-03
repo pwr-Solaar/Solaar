@@ -8,7 +8,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('solaar.ui.tray')
 del getLogger
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from solaar import NAME
 from . import action as _action, icons as _icons
@@ -40,22 +40,30 @@ def _create_common(icon, menu_activate_callback):
 
 
 try:
-	from gi.repository import AppIndicator3 as AppIndicator
+	from gi.repository import AppIndicator3
 
 	_log.debug("using AppIndicator3")
 
 	# def _scroll(ind, delta, direction):
-	# 	print ("scroll", ind, delta, direction)
+	# 	if _log.isEnabledFor(_DEBUG):
+	# 		_log.debug("scroll delta %s direction %s", delta, direction)
 
 	def create(activate_callback, menu_activate_callback):
 		assert activate_callback
 		assert menu_activate_callback
 
-		ind = AppIndicator.Indicator.new('indicator-solaar', _icons.APP_ICON[0], AppIndicator.IndicatorCategory.HARDWARE)
-		ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+		ind = AppIndicator3.Indicator.new(
+						'indicator-solaar',
+						_icons.TRAY_INIT,
+						AppIndicator3.IndicatorCategory.HARDWARE)
+		ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+		ind.set_label(NAME, NAME)
 
-		theme_paths = Gtk.IconTheme.get_default().get_search_path()
-		ind.set_icon_theme_path(':'.join(theme_paths))
+		# theme_paths = Gtk.IconTheme.get_default().get_search_path()
+		# ind.set_icon_theme_path(':'.join(theme_paths))
+
+		# ind.set_icon(_icons.TRAY_INIT)
+		ind.set_attention_icon(_icons.TRAY_ATTENTION)
 
 		_create_common(ind, menu_activate_callback)
 		ind.set_menu(ind._menu)
@@ -66,14 +74,19 @@ try:
 
 
 	# def destroy(ind):
-	# 	ind.set_status(AppIndicator.IndicatorStatus.PASSIVE)
+	# 	ind.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
 
 	def _update_icon(ind, icon_name, tooltip):
-		#ind.set_icon(icon_name)
-		ind.set_icon_full(icon_name, tooltip)
-		# _log.debug("set icon %s => %s %s %s", icon_name, ind.get_icon(), ind.get_title(), ind.get_status())
+		icon_file = _icons.icon_file(icon_name, 32)
+		ind.set_icon(icon_file)
+		# ind.set_icon_full(icon_name, tooltip)
 
+
+	def attention(ind):
+		if ind.get_status != AppIndicator3.IndicatorStatus.ATTENTION:
+			ind.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
+			GLib.timeout_add(10 * 1000, ind.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
 except ImportError:
 
@@ -83,7 +96,7 @@ except ImportError:
 		assert activate_callback
 		assert menu_activate_callback
 
-		icon = Gtk.StatusIcon.new_from_icon_name(_icons.APP_ICON[0])
+		icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
 		icon.set_name(NAME)
 		icon.set_tooltip_text(NAME)
 		icon.connect('activate', activate_callback)
@@ -104,6 +117,25 @@ except ImportError:
 	def _update_icon(icon, icon_name, tooltip):
 		icon.set_from_icon_name(icon_name)
 		icon.set_tooltip_markup(tooltip)
+
+
+	_icon_after_attention = None
+
+	def _blink(icon, count):
+		global _icon_after_attention
+		if count % 2:
+			icon.set_from_icon_name(_icons.TRAY_ATTENTION)
+		else:
+			icon.set_from_icon_name(_icon_after_attention)
+
+		if count > 0:
+			GLib.timeout_add(1000, _blink, icon, count - 1)
+
+	def attention(icon):
+		global _icon_after_attention
+		if _icon_after_attention is None:
+			_icon_after_attention = icon.get_icon_name()
+			GLib.idle_add(_blink, icon, 9)
 
 #
 #
@@ -135,7 +167,7 @@ def _generate_tooltip_lines(devices_info):
 
 def _generate_icon_name(icon):
 	if not icon._devices_info:
-		return _icons.APP_ICON[-1]
+		return _icons.TRAY_INIT
 
 	battery_status = None
 	battery_level = 1000
@@ -149,14 +181,14 @@ def _generate_icon_name(icon):
 			battery_level = level
 
 	if battery_status is None:
-		return _icons.APP_ICON[1]
+		return _icons.TRAY_OKAY
 
 	assert battery_level < 1000
 	charging = battery_status.get(_status.BATTERY_CHARGING)
 	icon_name = _icons.battery(battery_level, charging)
 	if icon_name and 'missing' in icon_name:
 		icon_name = None
-	return icon_name or _icons.APP_ICON[1]
+	return icon_name or _icons.TRAY_OKAY
 
 #
 #

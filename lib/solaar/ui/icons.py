@@ -24,7 +24,9 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
 # print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
-APP_ICON = ('solaar-init', 'solaar', 'solaar-fail')
+TRAY_INIT = 'solaar-tray-init'
+TRAY_OKAY = 'solaar-tray'
+TRAY_ATTENTION = 'solaar-tray-attention'
 
 
 def _look_for_application_icons():
@@ -44,8 +46,8 @@ def _look_for_application_icons():
 		location = _path.join(location, 'icons')
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("looking for icons in %s", location)
-		solaar_png = _path.join(location, APP_ICON[0] + '.png')
-		if _path.exists(solaar_png):
+
+		if _path.exists(_path.join(location, TRAY_ATTENTION + '.png')):
 			yield location
 
 	del _environ
@@ -181,9 +183,10 @@ def device_icon_name(name, kind=None):
 
 
 def icon_file(name, size=_LARGE_SIZE):
-	# _log.debug("looking for file of icon %s at size %s", name, size)
 	if _default_theme.has_icon(name):
 		theme_icon = _default_theme.lookup_icon(name, size, 0)
 		file_name = theme_icon.get_filename()
-		# _log.debug("icon %s => %s : %s", name, theme_icon, file_name)
+ 		_log.debug("icon %s(%d) => %s", name, size, file_name)
 		return file_name
+
+	_log.warn("icon %s(%d) not found in current theme", name, size)

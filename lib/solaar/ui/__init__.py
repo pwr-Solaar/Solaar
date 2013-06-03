@@ -25,4 +25,4 @@ from . import notify, main_window
 from . import icons
 # for some reason, set_icon_name does not always work on windows
 Gtk.Window.set_default_icon_name(main_window.NAME.lower())
-Gtk.Window.set_default_icon_from_file(icons.icon_file(main_window.NAME.lower()))
+Gtk.Window.set_default_icon_from_file(icons.icon_file(main_window.NAME.lower(), 32))
