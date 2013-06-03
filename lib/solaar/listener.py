@@ -8,6 +8,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('solaar.listener')
 del getLogger
 
+from . import configuration
 from logitech.unifying_receiver import (Receiver,
 										listener as _listener,
 										status as _status)
@@ -71,6 +72,8 @@ class ReceiverListener(_listener.EventsListener):
 					_log.exception("closing receiver %s" % r.path)
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
+		# configuration.save()
+
 	def tick(self, timestamp):
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
@@ -108,7 +111,8 @@ class ReceiverListener(_listener.EventsListener):
 			self.status_changed_callback(device, alert, reason)
 		else:
 			if device.status is None:
-				# the device may be paired later, possibly to another receiver?
+				# device was just un-paired
+				# it may be paired later, possibly to another receiver?
 				# so maybe we shouldn't forget about it
 				# configuration.forget(device)
 
@@ -117,12 +121,15 @@ class ReceiverListener(_listener.EventsListener):
 				device = _ghost(device)
 
 			# elif device.status:
-			# 	configuration.sync(device)
+			# 	configuration.apply_to(device)
+			# 	configuration.acquire_from(device)
+
 
 			self.status_changed_callback(device, alert, reason)
 
 			if device.status is None:
-				# the receiver changed status as well
+				# the device was just unpaired, need to update the
+				# status of the receiver as well
 				self.status_changed_callback(self.receiver)
 
 	def _notifications_handler(self, n):
