@@ -93,7 +93,11 @@ def _run(args):
 		# print ("status changed", device, reason)
 
 		GLib.idle_add(ui.status_icon.update, status_icon, device)
-		GLib.idle_add(ui.main_window.update, device, alert & ALERT.SHOW_WINDOW, status_icon)
+		if alert & ALERT.ATTENTION:
+			GLib.idle_add(ui.status_icon.attention, status_icon)
+
+		popup_window = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
+		GLib.idle_add(ui.main_window.update, device, popup_window, status_icon)
 
 		if alert & ALERT.NOTIFICATION:
 			GLib.idle_add(ui.notify.show, device, reason)

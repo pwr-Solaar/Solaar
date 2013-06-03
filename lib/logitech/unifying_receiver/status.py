@@ -28,7 +28,7 @@ from . import hidpp20 as _hidpp20
 #
 #
 
-ALERT = _NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ALL=0xFF)
+ALERT = _NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
 
 # device properties that may be reported
 ENCRYPTED='encrypted'
@@ -37,6 +37,10 @@ BATTERY_STATUS='battery-status'
 BATTERY_CHARGING='battery-charging'
 LIGHT_LEVEL='light-level'
 ERROR='error'
+
+# if the battery charge is under this percentage, trigger an attention event
+# (blink systray icon)
+_BATTERY_ATTENTION_LEVEL = 5
 
 # if not updates have been receiver from the device for a while, assume
 # it has gone offline and clear all its know properties.
@@ -155,9 +159,9 @@ class DeviceStatus(dict):
 		changed = old_level != level or old_status != status or old_charging != charging
 		alert, reason = ALERT.NONE, None
 
-		if not _hidpp20.BATTERY_OK(status) or level <= 5:
+		if not _hidpp20.BATTERY_OK(status) or level <= _BATTERY_ATTENTION_LEVEL:
 			_log.warn("%s: battery %d%%, ALERT %s", self._device, level, status)
-			alert = ALERT.NOTIFICATION
+			alert = ALERT.NOTIFICATION | ALERT.ATTENTION
 			reason = 'Battery: %d%% (%s)' % (level, status)
 
 		if changed or reason:
@@ -170,11 +174,13 @@ class DeviceStatus(dict):
 			if battery is None and d.protocol >= 2.0:
 				battery = _hidpp20.get_battery(d)
 
-				# really unnecessary, if the device has SOLAR_DASHBOARD it should be
-				# broadcasting it's battery status anyway, it will just take a little while
-				# if battery is None and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
-				# 	d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
-				# 	return
+			# really unnecessary, if the device has SOLAR_DASHBOARD it should be
+			# broadcasting it's battery status anyway, it will just take a little while
+			# however, when the device has just been detected, it will not show
+			# any battery status for a while (broadcasts happen every 90 seconds)
+			if battery is None and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
+				d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
+				return
 
 			if battery:
 				level, status = battery
