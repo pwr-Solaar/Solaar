@@ -119,7 +119,7 @@ _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360')
 _D('Wireless Touch Keyboard K400')
-_D('Wireless Keyboard K710',
+_D('Wireless Keyboard K700', codename='MK700',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
@@ -184,5 +184,6 @@ _D('Wireless Trackball M570')
 # Touchpads
 
 _D('Wireless Rechargeable Touchpad T650')
+
 
 del namedtuple
