@@ -14,10 +14,10 @@
 <h1 id="project_title"><img class="logo" alt="logo" src="/Solaar/images/solaar-logo.png" /> Solaar</h1>
 <h2 id="project_tagline">Linux devices manager for the Logitech Unifying Receiver.</h2>
 <section id="downloads">
-<a class="tar_download_link" href="https://github.com/pwr/Solaar/archive/0.8.9.tar.gz">Solaar 0.8.9</a>
+<a class="tar_download_link" href="https://github.com/pwr/Solaar/archive/0.8.9.1.tar.gz">Solaar 0.8.9.1</a>
 <p style="color: #fff">
 Latest version:<br/>
-<span style="float: right; font-weight: bolder;">0.8.9</span>
+<span style="float: right; font-weight: bolder;">0.8.9.1</span>
 </p>
 </section>
 </header>
@@ -46,8 +46,10 @@ and their features, see <a href="devices.html">devices</a>.</p>
 <p>Pre-built packages are available for a few Linux distros:</p>
 
 <ul>
+<li>Debian 7 (Wheezy) or higher: packages in this <a href="http://pwr.github.io/Solaar/packages/">repository</a>; the
+<code>solaar</code> package uses a systray icon; to make sure you’re using gnome-shell’s
+indicators, install <code>solaar-gnome3</code>.</li>
 <li>Ubuntu 12.04+: <a href="http://launchpad.net/~daniel.pavel/+archive/solaar">ppa:daniel.pavel/solaar</a></li>
-<li>Debian <em>Wheezy</em>+ packages in this <a href="http://pwr.github.io/Solaar/packages/">minimal repository</a></li>
 <li>a <a href="http://code.r3pek.org/gentoo-overlay/src">Gentoo overlay</a>, courtesy of Carlos Silva</li>
 <li>an <a href="http://software.opensuse.org/package/Solaar">OpenSUSE rpm</a>, courtesy of Mathias Homann</li>
 <li>an <a href="http://aur.archlinux.org/packages/solaar">Arch package</a>, courtesy of Arnaud Taffanel</li>
@@ -61,9 +63,13 @@ procedure for manual installation.</p>
 <h2 id="known-issues">Known Issues</h2>
 
 <ul>
+<li>KDE/Kubuntu: is some icons appear broken in the application, make sure you’ve
+configured the Gtk theme.
+</li>
 <li>Some devices using the <a href="http://logitech.com/mice-pointers/articles/5926">Nano Receiver</a> (which is very similar to the
 Unifying Receiver) are supported, but not all. For details, see
-<a href="devices.html">devices</a>.</li>
+<a href="devices.html">devices</a>.
+</li>
 </ul>
 
 <ul>
