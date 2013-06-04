@@ -1,14 +1,17 @@
 Receiver
 LZ22175-DJ
+LZ30965-DJ (another receiver)
 M/N:C-U0007
 (ltunify)
-Serial number: 0353B192
+Serial number: 53B19204
+Serial number: 82C3964B (another receiver)
 Firmware version: 012.001.00019
 Bootloader version: BL.002.014
 (solaar-cli)
 -: Unifying Receiver
    Device path  : /dev/hidraw2
    Serial       : 53B19204
+   Serial       : 82C3964B (another receiver)
      Firmware   : 12.01.B0019
      Bootloader : 02.14
    Has 1 paired device(s) out of a maximum of 6
@@ -18,6 +21,7 @@ Keyboard
 K360
 P/N: 820-003472
 S/N: 1223CE0521E8
+S/N: 1311CE0097D8 (another keyboard)
 M/N: Y-R0017
 (ltunify)
 HID++ version: 2.0
@@ -50,6 +54,7 @@ Total number of HID++ 2.0 features: 12
    Polling rate : 20 ms
    Wireless PID : 4004
    Serial number: 60BA944E
+   Serial number: 0D2694C9 (another keyboard)
      Firmware   : RQK 36.00.B0007
    The power switch is located on the top case
    Supports 13 HID++ 2.0 features:
