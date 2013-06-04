@@ -28,12 +28,6 @@ License: LGPL
  .
 
 Files: share/icons/light_*.png
-Copyright: GNOME Project
-License: LGPL
- These files were copied from the Gnome icon theme (weather-*).
-
-Files: share/icons/battery_*.png
 Copyright: Oxygen Icons
-           Copyright (C) 2012 Daniel Pavel
 License: LGPL
- Based on icons from the Oxygen icon theme, with some modifications.
+ These files were copied from the Oxygen icon theme (weather-*).
