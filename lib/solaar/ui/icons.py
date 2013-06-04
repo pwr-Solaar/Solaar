@@ -186,7 +186,7 @@ def icon_file(name, size=_LARGE_SIZE):
 	if _default_theme.has_icon(name):
 		theme_icon = _default_theme.lookup_icon(name, size, 0)
 		file_name = theme_icon.get_filename()
- 		_log.debug("icon %s(%d) => %s", name, size, file_name)
+		_log.debug("icon %s(%d) => %s", name, size, file_name)
 		return file_name
 
 	_log.warn("icon %s(%d) not found in current theme", name, size)
