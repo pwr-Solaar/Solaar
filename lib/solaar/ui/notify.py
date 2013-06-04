@@ -70,8 +70,8 @@ try:
 			n.set_urgency(Notify.Urgency.NORMAL)
 
 			try:
-				if _log.isEnabledFor(_DEBUG):
-					_log.debug("showing %s", n)
+				# if _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("showing %s", n)
 				n.show()
 			except Exception:
 				_log.exception("showing %s", n)
@@ -100,8 +100,8 @@ try:
 			n.set_urgency(urgency)
 
 			try:
-				if _log.isEnabledFor(_DEBUG):
-					_log.debug("showing %s", n)
+				# if _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("showing %s", n)
 				n.show()
 			except Exception:
 				_log.exception("showing %s", n)
