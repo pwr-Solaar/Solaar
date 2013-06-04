@@ -146,7 +146,7 @@ class PairedDevice(object):
 		if self._registers is None:
 			descriptor = _descriptors.DEVICES.get(self.codename)
 			if descriptor is None or descriptor.registers is None:
-				self._registers = _NamedInts()
+				self._registers = {}
 			else:
 				self._registers = descriptor.registers
 		return self._registers
