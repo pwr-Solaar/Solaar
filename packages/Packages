@@ -1,25 +1,4 @@
 Package: solaar
-Version: 0.8.9-6
-Architecture: all
-Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
-Installed-Size: 286
-Depends: udev (>= 175), passwd | adduser, python (>= 2.7), python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4), gnome-icon-theme | oxygen-icon-theme
-Recommends: gir1.2-notify-0.7
-Suggests: gir1.2-appindicator3-0.1
-Filename: ./solaar_0.8.9-6_all.deb
-Size: 162912
-MD5sum: 637c6d6cb484b3e87671cdbcab1ee117
-SHA1: 3ac3d57e1494e91b1f983d4277bc36eb374cacd4
-SHA256: 3cf5dbc9746e8829666247e813fba947b990e36b48a86a83f91cd0b0652e7f5e
-Section: misc
-Priority: optional
-Homepage: http://pwr.github.io/Solaar
-Description: Logitech Unifying Receiver peripherals manager for Linux
- Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
- It is able to pair/unpair devices to the receiver, and for some devices read
- battery status.
-
-Package: solaar
 Version: 0.8.8.1-2
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
@@ -32,6 +11,27 @@ Size: 250070
 MD5sum: 7363b8ff745d2171cb5d00384e4d8b16
 SHA1: 231065f30e8d55589b4eb3a58396ba21f3500344
 SHA256: 0daf6386f1baf0e365bceac89e144aec8769b10e5a4908d93585656d2d6d7b27
+Section: misc
+Priority: optional
+Homepage: http://pwr.github.io/Solaar
+Description: Logitech Unifying Receiver peripherals manager for Linux
+ Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+ It is able to pair/unpair devices to the receiver, and for some devices read
+ battery status.
+
+Package: solaar
+Version: 0.8.9.1-4
+Architecture: all
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Installed-Size: 207
+Depends: udev (>= 175), passwd | adduser, python (>= 2.7), python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4), gnome-icon-theme | oxygen-icon-theme
+Recommends: gir1.2-notify-0.7
+Suggests: gir1.2-appindicator3-0.1
+Filename: ./solaar_0.8.9.1-4_all.deb
+Size: 76166
+MD5sum: 63d0e8b39a0a9dcc24bc612ba4f50349
+SHA1: 94adf67bbd2b0cd4f6701e0c30a396482af2ed9c
+SHA256: bcefcdedc9ae7cdcfbd9923fe38be09996d10caadd055e10deccf67759d5d6f3
 Section: misc
 Priority: optional
 Homepage: http://pwr.github.io/Solaar
@@ -62,16 +62,17 @@ Description: Logitech Unifying Receiver peripherals manager for Linux
 
 Package: solaar-gnome3
 Source: solaar
-Version: 0.8.9-6
+Version: 0.8.9.1-4
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
 Installed-Size: 3
-Depends: solaar (= 0.8.9-6), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10)
-Filename: ./solaar-gnome3_0.8.9-6_all.deb
-Size: 2582
-MD5sum: f2740c36732befc91131b6886d1e9423
-SHA1: 64a61c57a088db3768aac67aa429b75a334f47c1
-SHA256: 191515d4e2da9f8efaedd48eb9eed525e6d262a11af1b6c24050bd664d70d7bc
+Depends: solaar (= 0.8.9.1-4), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10)
+Enhances: solaar
+Filename: ./solaar-gnome3_0.8.9.1-4_all.deb
+Size: 2570
+MD5sum: ee952c5721e3b5bd6ebfd6a3c0211fde
+SHA1: bcfa1253094e72e62ce53f03aa9f2c84ae8497d5
+SHA256: d95e6a03b42c6474fd79384c9da025808050955a05aba555c803a8d4cb2c8e50
 Section: gnome
 Priority: optional
 Homepage: http://pwr.github.io/Solaar

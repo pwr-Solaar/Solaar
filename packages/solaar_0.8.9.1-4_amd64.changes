@@ -1,0 +1,50 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Format: 1.8
+Date: Tue, 04 Jun 2013 10:03:37 +0200
+Source: solaar
+Binary: solaar solaar-gnome3
+Architecture: source all
+Version: 0.8.9.1-4
+Distribution: UNRELEASED
+Urgency: low
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Changed-By: Daniel Pavel <daniel.pavel@gmail.com>
+Description: 
+ solaar     - Logitech Unifying Receiver peripherals manager for Linux
+ solaar-gnome3 - gnome-shell/Unity integration for Solaar
+Changes: 
+ solaar (0.8.9.1-4) UNRELEASED; urgency=low
+ .
+   * Debian packaging scripts, supports ubuntu ppa as well.
+Checksums-Sha1: 
+ 11472da20ebebf830d642bcd148b77bbe64cfdba 1506 solaar_0.8.9.1-4.dsc
+ b65e2f8fa57d8ffb03e2c7f3e02c43250b7137d1 80873 solaar_0.8.9.1.orig.tar.gz
+ 662303c1c7fbf5e160b0a7d9a899138e1cfbd7bd 2365 solaar_0.8.9.1-4.debian.tar.gz
+ 94adf67bbd2b0cd4f6701e0c30a396482af2ed9c 76166 solaar_0.8.9.1-4_all.deb
+ bcfa1253094e72e62ce53f03aa9f2c84ae8497d5 2570 solaar-gnome3_0.8.9.1-4_all.deb
+Checksums-Sha256: 
+ d1b197ef99fa3b1a1ec1d10e85fb5e6764ef9229680e15890093807fb9383f09 1506 solaar_0.8.9.1-4.dsc
+ c94d97f7a045068d47e37535eaea0d692fa46a0971868b9d693ee152d69e65d2 80873 solaar_0.8.9.1.orig.tar.gz
+ 0e406f2fa3be89c19cc54069ffa58c852254e0cce89dad3e5c83fd04229da51d 2365 solaar_0.8.9.1-4.debian.tar.gz
+ bcefcdedc9ae7cdcfbd9923fe38be09996d10caadd055e10deccf67759d5d6f3 76166 solaar_0.8.9.1-4_all.deb
+ d95e6a03b42c6474fd79384c9da025808050955a05aba555c803a8d4cb2c8e50 2570 solaar-gnome3_0.8.9.1-4_all.deb
+Files: 
+ 0a60c6d3503189bbe13a1b2be9690c3d 1506 misc optional solaar_0.8.9.1-4.dsc
+ 6342f2d950a56ebe5fdb23713fa8d106 80873 misc optional solaar_0.8.9.1.orig.tar.gz
+ e4468557b2f54eb85bffc4c2b8f6d866 2365 misc optional solaar_0.8.9.1-4.debian.tar.gz
+ 63d0e8b39a0a9dcc24bc612ba4f50349 76166 misc optional solaar_0.8.9.1-4_all.deb
+ ee952c5721e3b5bd6ebfd6a3c0211fde 2570 gnome optional solaar-gnome3_0.8.9.1-4_all.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQEcBAEBAgAGBQJRrZ9iAAoJEEuxm/KfVJIECa8H/2KT/pDYSpaqOQIsir6NHAK7
+K8QuebzDU9c0XhJkbJMHhE9ZnuEPRL5Ksvpsa+/BjQRP6akoXUhC6Sm/VPlI7epc
+US481noCLe/HOs+GzPGTDoa3Xy52brta6d2tG4+DDYL5TyyRZCTy61bAKv39jig8
+X6H+rZpNGtvfu9K7uhZQRfm5bK19SDINvb8Y+oS3OnhmlpH5hS9ackLvhIz3yaSU
+am+74zULYGVt1huyHMU/biccdMHwJc0J4mXSk9VJkiX3i2sc4/Lr4YSygPLPfH1P
+rOu2mDN0S3U3piMH8UIGYtPca4F0RpDkWB38+GElLta9jK02lQF6nmXU9qZTn6E=
+=PpHz
+-----END PGP SIGNATURE-----
