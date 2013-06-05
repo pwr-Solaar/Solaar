@@ -75,6 +75,7 @@ Mice:
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M215             | 1.0   | yes     |       |                                 |
+| M310             |       |         |       |                                 |
 | M315             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
 | M345             |       |         |       |                                 |
@@ -111,7 +112,7 @@ Mouse-Keyboard combos:
 | MK330            |       |         |                                         |
 | MK520            |       |         |                                         |
 | MK550            |       |         |                                         |
-| MK710            | 1.0   | yes     | FN swap                                 |
+| MK700            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
 [unifying]: http://logitech.com/en-us/66/6079
