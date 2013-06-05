@@ -67,6 +67,7 @@ Keyboards:
 | K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
+| MK700            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
 Mice:
