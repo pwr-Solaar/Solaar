@@ -125,6 +125,7 @@ def _make_device_box(index):
 
 	icon = Gtk.Image.new_from_icon_name(_FALLBACK_ICON, _DEVICE_ICON_SIZE)
 	icon.set_alignment(0.5, 0)
+	icon.set_padding(2, 2)
 	frame._icon = icon
 
 	label = Gtk.Label('Initializing...')
@@ -135,7 +136,7 @@ def _make_device_box(index):
 	battery_icon = Gtk.Image.new_from_icon_name(_icons.battery(), _STATUS_ICON_SIZE)
 
 	battery_label = Gtk.Label()
-	battery_label.set_width_chars(6)
+	battery_label.set_width_chars(8)
 	battery_label.set_alignment(0, 0.5)
 
 	light_icon = Gtk.Image.new_from_icon_name(_icons.lux(), _STATUS_ICON_SIZE)
@@ -320,7 +321,7 @@ def _create(receiver):
 	window.add(vbox)
 
 	geometry = Gdk.Geometry()
-	geometry.min_width = 340
+	geometry.min_width = 360
 	geometry.min_height = 32
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 
