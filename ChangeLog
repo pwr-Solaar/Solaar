@@ -1,6 +1,10 @@
 0.8.9:
 
   * Improved support for gnome-shell/Unity.
+  * Fixed reading of MK700 keyboard battery status.
+  * Use battery icons from the current theme instead of custom ones.
+  * Debian/Ubuntu packages now depend on an icon theme, to make sure
+    no missing icons appear in the application window.
 
 0.8.8:
 

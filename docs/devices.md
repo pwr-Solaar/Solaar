@@ -8,9 +8,6 @@ USB ID `046d:c52b` or `046d:c532`), but only some newer [Nano Receiver][nano]s
 (devices with USB ID `046d:c52f`). You can check your connected Logitech devices
 by running `lsusb -d 046d:` in a console.
 
-[unifying]: http://logitech.com/en-us/66/6079
-[nano]: http://logitech.com/mice-pointers/articles/5926
-
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported:
 
@@ -19,10 +16,11 @@ Linux system configuration) are supported:
   window and display the current lighting value (Lux) as reported by the
   keyboard, similar to Logitech's *Solar.app* for Windows.
 
-* The state of the `FN` key can be toggled on some keyboards ([K750][K750] and
-  [K800][K800]). It changes the way the function keys (`F1`..`F12`) work, i.e.
-  whether holding `FN` while pressing the function keys will generate the
-  standard `Fx` keycodes or the special function (yellow icons) keycodes.
+* The state of the `FN` key can be toggled on some keyboards ([K360][K360],
+  [MK700][K700], [K750][K750] and [K800][K800]). It changes the way the function
+  keys (`F1`..`F12`) work, i.e. whether holding `FN` while pressing the function
+  keys will generate the standard `Fx` keycodes or the special function (yellow
+  icons) keycodes.
 
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
@@ -47,8 +45,8 @@ The HID++ column specifies the device's HID++ version.
 The Battery column specifies if Solaar is able to read the device's battery
 level.
 
-For mice, the DPI column specifies if the mouse's sensitivity is fixed (-), can
-only be read (R), or can be read and changed by Solaar (R/W).
+For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
+can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
 The reprog(rammable) keys feature is currently not fully supported by Solaar.
 You are able to read this feature using solaar-cli, but it is not possible to
@@ -112,13 +110,15 @@ Mouse-Keyboard combos:
 | MK330            |       |         |                                         |
 | MK520            |       |         |                                         |
 | MK550            |       |         |                                         |
-| MK700            | 1.0   | yes     | FN swap, reprog keys                    |
+| MK710            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
 [unifying]: http://logitech.com/en-us/66/6079
+[nano]: http://logitech.com/mice-pointers/articles/5926
+[K360]: http://logitech.com/product/keyboard-k360
+[K700]: http://logitech.com/product/wireless-desktop-mk710
 [K750]: http://logitech.com/product/k750-keyboard
 [K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
-[K360]: http://logitech.com/product/keyboard-k360
 [M510]: http://logitech.com/product/wireless-mouse-m510
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx

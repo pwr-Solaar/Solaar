@@ -20,12 +20,14 @@ and their features, see [docs/devices.md](docs/devices.md).
 
 ## Pre-built packages
 
-Pre-built packages are available for a few Linux distros:
+Pre-built packages are available for a few Linux distros.
 
-* Debian 7 (Wheezy) or higher: packages in this [repository][debian]; the
-`solaar` package uses a systray icon; to make sure you're using gnome-shell's
-indicators, install `solaar-gnome3`.
-* Ubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
+* Debian 7 (Wheezy) or higher: packages in this [repository][debian]
+* Ubuntu/Kubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
+
+The `solaar` package uses a standard system tray implementation; to ensure
+integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
+
 * a [Gentoo overlay][gentoo], courtesy of Carlos Silva
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Arch package][arch], courtesy of Arnaud Taffanel
@@ -45,19 +47,19 @@ procedure for manual installation.
 
 ## Known Issues
 
-- KDE/Kubuntu: is some icons appear broken in the application, make sure you've
-  configured the Gtk theme.
+- KDE/Kubuntu: if some icons appear broken in the application, make sure you've
+  properly configured the Gtk theme and icon theme in KDE's control panel.
 
 - Some devices using the [Nano Receiver][nano] (which is very similar to the
   Unifying Receiver) are supported, but not all. For details, see
   [docs/devices.md](docs/devices.md).
 
-[nano]: http://logitech.com/mice-pointers/articles/5926
-
 - Running the command-line application (`bin/solaar-cli`) while the GUI
   application is also running *may* occasionally cause either of them to become
   confused about the state of the devices. I haven't encountered this often
   enough to be able to be able to diagnose it properly yet.
+
+[nano]: http://logitech.com/mice-pointers/articles/5926
 
 
 ## License
