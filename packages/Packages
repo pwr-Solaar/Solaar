@@ -20,6 +20,27 @@ Description: Logitech Unifying Receiver peripherals manager for Linux
  battery status.
 
 Package: solaar
+Version: 0.8.9.2-4
+Architecture: all
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Installed-Size: 212
+Depends: udev (>= 175), passwd | adduser, python (>= 2.7), python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4), gnome-icon-theme | oxygen-icon-theme
+Recommends: gir1.2-notify-0.7
+Suggests: solaar-gnome3 (= 0.8.9.2-4)
+Filename: ./solaar_0.8.9.2-4_all.deb
+Size: 77560
+MD5sum: 378b6da12ce1a94308239bc70e68e381
+SHA1: 406daa4795b5241b4a162d8184c6327174001481
+SHA256: a07495d38873efc3f2f616006d71140eae189b9080fbfb0f1cfed8cd7658ae8d
+Section: misc
+Priority: optional
+Homepage: http://pwr.github.io/Solaar
+Description: Logitech Unifying Receiver peripherals manager for Linux
+ Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+ It is able to pair/unpair devices to the receiver, and for some devices read
+ battery status.
+
+Package: solaar
 Version: 0.8.9.1-4
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
@@ -59,6 +80,29 @@ Description: Logitech Unifying Receiver peripherals manager for Linux
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read
  battery status.
+
+Package: solaar-gnome3
+Source: solaar
+Version: 0.8.9.2-4
+Architecture: all
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Installed-Size: 3
+Depends: solaar (= 0.8.9.2-4), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10), gnome-icon-theme
+Enhances: solaar
+Filename: ./solaar-gnome3_0.8.9.2-4_all.deb
+Size: 2722
+MD5sum: 8eef2c472ba665f3d8d03cfe038183e5
+SHA1: dfd55138d678323f48ba26bc315048faf7c6dbb8
+SHA256: b542da64e4173e83c7d031e94d5fc8b0b92545be39d69b5c254944f8ef5e3074
+Section: gnome
+Priority: optional
+Homepage: http://pwr.github.io/Solaar
+Description: gnome-shell/Unity integration for Solaar
+ Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+ It is able to pair/unpair devices to the receiver, and for some devices read
+ battery status.
+ .
+ This metapackage ensures integration with gnome-shell/Unity.
 
 Package: solaar-gnome3
 Source: solaar
