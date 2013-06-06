@@ -36,10 +36,11 @@ Pressing the <code>Light-Check</code> button on the keyboard will pop-up the app
 window and display the current lighting value (Lux) as reported by the
 keyboard, similar to Logitech’s <em>Solar.app</em> for Windows.
 </li>
-<li>The state of the <code>FN</code> key can be toggled on some keyboards (<a href="http://logitech.com/product/k750-keyboard">K750</a> and
-<a href="http://logitech.com/product/wireless-illuminated-keyboard-k800">K800</a>). It changes the way the function keys (<code>F1</code>..<code>F12</code>) work, i.e.
-whether holding <code>FN</code> while pressing the function keys will generate the
-standard <code>Fx</code> keycodes or the special function (yellow icons) keycodes.
+<li>The state of the <code>FN</code> key can be toggled on some keyboards (<a href="http://logitech.com/product/keyboard-k360">K360</a>,
+<a href="http://logitech.com/product/wireless-desktop-mk710">MK700</a>, <a href="http://logitech.com/product/k750-keyboard">K750</a> and <a href="http://logitech.com/product/wireless-illuminated-keyboard-k800">K800</a>). It changes the way the function
+keys (<code>F1</code>..<code>F12</code>) work, i.e. whether holding <code>FN</code> while pressing the function
+keys will generate the standard <code>Fx</code> keycodes or the special function (yellow
+icons) keycodes.
 </li>
 <li>The DPI can be changed on the <a href="http://logitech.com/product/performance-mouse-mx">Performance MX Mouse</a>.
 </li>
@@ -64,8 +65,8 @@ about it.</p>
 <p>The Battery column specifies if Solaar is able to read the device’s battery
 level.</p>
 
-<p>For mice, the DPI column specifies if the mouse’s sensitivity is fixed (-), can
-only be read (R), or can be read and changed by Solaar (R/W).</p>
+<p>For mice, the DPI column specifies if the mouse’s sensitivity is fixed (<code>-</code>),
+can only be read (<code>R</code>), or can be read and changed by Solaar (<code>R/W</code>).</p>
 
 <p>The reprog(rammable) keys feature is currently not fully supported by Solaar.
 You are able to read this feature using solaar-cli, but it is not possible to
@@ -131,6 +132,12 @@ assign different keys.</p>
 <td>yes</td>
 <td>FN swap, reprog keys</td>
 </tr>
+<tr>
+<td>MK700</td>
+<td>1.0</td>
+<td>yes</td>
+<td>FN swap, reprog keys</td>
+</tr>
 </tbody>
 </table>
 
@@ -151,6 +158,13 @@ assign different keys.</p>
 <td>M215</td>
 <td>1.0</td>
 <td>yes</td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>M310</td>
+<td> </td>
+<td> </td>
 <td> </td>
 <td> </td>
 </tr>
@@ -328,7 +342,7 @@ assign different keys.</p>
 <td>MK710</td>
 <td>1.0</td>
 <td>yes</td>
-<td>FN swap</td>
+<td>FN swap, reprog keys</td>
 </tr>
 </tbody>
 </table>
