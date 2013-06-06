@@ -1,4 +1,2 @@
 DesktopIconTheme=gnome-icon-theme | oxygen-icon-theme
-DistroDepends=
-DistroRecommends=
-DistroSuggests=gir1.2-appindicator3-0.1
+GnomeIconTheme=gnome-icon-theme

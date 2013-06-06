@@ -62,4 +62,4 @@ mkdir -p "$DIST"
 cp -a -t "$DIST" ../solaar_$VERSION*
 cp -a -t "$DIST" ../solaar-*_$VERSION* || true
 cd "$DIST"
-cp -av -t ../../../packages/ * || true
+#cp -av -t ../../../packages/ * || true
