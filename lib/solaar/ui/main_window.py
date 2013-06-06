@@ -471,7 +471,7 @@ def _update_device_box(frame, dev):
 	_config_panel.update(frame)
 
 
-def update(device, popup=False, status_icon=None):
+def update(device, need_popup=False, status_icon=None):
 	assert device is not None
 	# print ("main_window.update", device)
 
@@ -483,7 +483,7 @@ def update(device, popup=False, status_icon=None):
 
 	if w:
 		if receiver:
-			if popup:
+			if need_popup:
 				_show(w, status_icon)
 			vbox = w.get_child()
 			frames = list(vbox.get_children())

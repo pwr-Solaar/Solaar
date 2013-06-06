@@ -40,6 +40,10 @@ def _parse_arguments():
 
 
 def _run(args):
+	from logging import getLogger
+	_log = getLogger('solaar.gtk')
+	del getLogger
+
 	import solaar.ui as ui
 
 	ui.notify.init()
@@ -53,6 +57,8 @@ def _run(args):
 	def handle_receivers_events(action, device_info):
 		assert action is not None
 		assert device_info is not None
+
+		_log.info("receiver event %s: %s", action, device_info)
 
 		# whatever the action, stop any previous receivers at this path
 		l = listeners.pop(device_info.path, None)
@@ -94,10 +100,10 @@ def _run(args):
 
 		GLib.idle_add(ui.status_icon.update, status_icon, device)
 		if alert & ALERT.ATTENTION:
-			GLib.idle_add(ui.status_icon.attention, status_icon)
+			GLib.idle_add(ui.status_icon.attention, status_icon, reason)
 
-		popup_window = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
-		GLib.idle_add(ui.main_window.update, device, popup_window, status_icon)
+		need_popup = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
+		GLib.idle_add(ui.main_window.update, device, need_popup, status_icon)
 
 		if alert & ALERT.NOTIFICATION:
 			GLib.idle_add(ui.notify.show, device, reason)
@@ -105,15 +111,21 @@ def _run(args):
 	# ugly...
 	def _startup_check_receiver():
 		if not listeners:
+			# this is called on the Main (GTK) thread, so we can make direct calls
 			ui.notify.alert('No receiver found.')
 			ui.status_icon.update(status_icon)
+			ui.status_icon.attention(status_icon, 'No receiver found.')
+	# check for a receiver 1 second after the app was started
 	GLib.timeout_add(1000, _startup_check_receiver)
 
 	from logitech.unifying_receiver import base as _base
+	# receiver add/remove events will start/stop listener threads
 	GLib.timeout_add(10, _base.notify_on_receivers, handle_receivers_events)
 	from gi.repository import Gtk
 	Gtk.main()
-	# ui.status_icon.destroy(status_icon)
+	# this is unnecessary for the Gtk.StatusIcon implementation
+	# but the AppIdicator implementation may need it to make the indicator go away
+	ui.status_icon.destroy(status_icon)
 
 	for l in listeners.values():
 		l.stop()
