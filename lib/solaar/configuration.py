@@ -7,7 +7,7 @@ import os.path as _path
 from json import load as _json_load, dump as _json_save
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('solaar.configuration')
+_log = getLogger(__name__)
 del getLogger
 
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.join(_path.expanduser('~'), '.config')

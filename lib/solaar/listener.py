@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('solaar.listener')
+_log = getLogger(__name__)
 del getLogger
 
 from . import configuration

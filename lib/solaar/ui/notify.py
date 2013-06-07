@@ -10,7 +10,7 @@ try:
 	from gi.repository import Notify
 
 	from logging import getLogger, DEBUG as _DEBUG
-	_log = getLogger('solaar.ui.notify')
+	_log = getLogger(__name__)
 	del getLogger
 
 	from solaar import NAME

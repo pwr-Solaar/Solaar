@@ -40,8 +40,8 @@ def _parse_arguments():
 
 
 def _run(args):
-	from logging import getLogger
-	_log = getLogger('solaar.gtk')
+	from logging import getLogger, DEBUG as _DEBUG
+	_log = getLogger(__name__)
 	del getLogger
 
 	import solaar.ui as ui

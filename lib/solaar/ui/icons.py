@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 _DEBUG = logging.DEBUG
-_log = logging.getLogger('solaar.ui.icons')
+_log = logging.getLogger(__name__)
 
 from gi.repository import Gtk
 
