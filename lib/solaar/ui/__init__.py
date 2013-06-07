@@ -8,6 +8,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from gi.repository import GLib, Gtk
 GLib.threads_init()
 
+async = GLib.idle_add
+run_loop = Gtk.main
+
 
 def error_dialog(title, text):
 	m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)

@@ -96,17 +96,18 @@ def _run(args):
 	from logitech.unifying_receiver.status import ALERT
 	def status_changed(device, alert=ALERT.NONE, reason=None):
 		assert device is not None
-		# print ("status changed", device, reason)
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("status changed: %s, %s, %s", device, alert, reason)
 
-		GLib.idle_add(ui.status_icon.update, status_icon, device)
+		ui.async(ui.status_icon.update, status_icon, device)
 		if alert & ALERT.ATTENTION:
-			GLib.idle_add(ui.status_icon.attention, status_icon, reason)
+			ui.async(ui.status_icon.attention, status_icon, reason)
 
 		need_popup = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
-		GLib.idle_add(ui.main_window.update, device, need_popup, status_icon)
+		ui.async(ui.main_window.update, device, need_popup, status_icon)
 
 		if alert & ALERT.NOTIFICATION:
-			GLib.idle_add(ui.notify.show, device, reason)
+			ui.async(ui.notify.show, device, reason)
 
 	# ugly...
 	def _startup_check_receiver():
@@ -121,10 +122,8 @@ def _run(args):
 	from logitech.unifying_receiver import base as _base
 	# receiver add/remove events will start/stop listener threads
 	GLib.timeout_add(10, _base.notify_on_receivers, handle_receivers_events)
-	from gi.repository import Gtk
-	Gtk.main()
-	# this is unnecessary for the Gtk.StatusIcon implementation
-	# but the AppIdicator implementation may need it to make the indicator go away
+	# main UI event loop
+	ui.run_loop()
 	ui.status_icon.destroy(status_icon)
 
 	for l in listeners.values():
