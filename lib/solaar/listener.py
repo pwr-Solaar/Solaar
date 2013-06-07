@@ -169,13 +169,69 @@ class ReceiverListener(_listener.EventsListener):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
 	__unicode__ = __str__
 
-	@classmethod
-	def open(self, device_info, status_changed_callback):
-		assert status_changed_callback
-		receiver = Receiver.open(device_info)
-		if receiver:
-			rl = ReceiverListener(receiver, status_changed_callback)
-			rl.start()
-			return rl
-		else:
-			_log.warn("failed to open %s", device_info)
+#
+#
+#
+
+# all currently running receiver listeners
+_all_listeners = {}
+
+
+def start(device_info, status_changed_callback):
+	assert status_changed_callback
+	receiver = Receiver.open(device_info)
+	if receiver:
+		rl = ReceiverListener(receiver, status_changed_callback)
+		rl.start()
+		_all_listeners[device_info.path] = rl
+		return rl
+	else:
+		_log.warn("failed to open %s", device_info)
+
+
+def stop_all():
+	listeners = list(_all_listeners.values())
+	_all_listeners.clear()
+
+	for l in listeners:
+		l.stop()
+	for l in listeners:
+		l.join()
+
+
+_status_callback = None
+_error_callback = None
+
+def start_scanner(status_changed_callback, error_callback):
+	global _status_callback, _error_callback
+	if _status_callback:
+		raise Exception("scanner was already set-up")
+
+	_status_callback = status_changed_callback
+	_error_callback = error_callback
+
+	from logitech.unifying_receiver import base as _base
+	_base.notify_on_receivers_glib(_process_receiver_event)
+
+
+# receiver add/remove events will start/stop listener threads
+def _process_receiver_event(action, device_info):
+	assert action is not None
+	assert device_info is not None
+
+	_log.info("receiver event %s %s", action, device_info)
+
+	# whatever the action, stop any previous receivers at this path
+	l = _all_listeners.pop(device_info.path, None)
+	if l is not None:
+		assert isinstance(l, ReceiverListener)
+		l.stop()
+
+	if action == 'add':
+		# a new receiver device was detected
+		try:
+			l = start(device_info, _status_callback)
+		except OSError:
+			# permission error, ignore this path for now
+			_all_listeners.pop(device_info.path, None)
+			_error_callback('permissions', device_info.path)

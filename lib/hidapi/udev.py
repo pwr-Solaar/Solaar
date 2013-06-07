@@ -114,53 +114,45 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 		return d_info
 
 
-def monitor_async(callback, *device_filters):
-	from threading import Thread as _Thread
-	t = _Thread(name='monitor_async_' + callback.__name__,
-				target=monitor,
-				args=[callback] + list(device_filters))
-	t.daemon = True
-	t.start()
+def monitor_glib(callback, *device_filters):
+	from gi.repository import GLib
 
+	c = _Context()
 
-def monitor(callback, *device_filters):
-	def _monitor():
-		c = _Context()
+	# already existing devices
+	for device in c.list_devices(subsystem='hidraw'):
+		# print (device, dict(device), dict(device.attributes))
+		for filter in device_filters:
+			d_info = _match('add', device, *filter)
+			if d_info:
+				GLib.idle_add(callback, 'add', d_info)
+				break
 
-		for device in c.list_devices(subsystem='hidraw'):
-			# print (device, dict(device), dict(device.attributes))
-			for filter in device_filters:
-				d_info = _match('add', device, *filter)
-				if d_info:
-					callback('add', d_info)
-					break
+	m = _Monitor.from_netlink(c)
+	m.filter_by(subsystem='hidraw')
 
-		m = _Monitor.from_netlink(c)
-		del c
-
-		m.filter_by(subsystem='hidraw')
-		try:
-			for action, device in m:
-				# print ('----', action, device)
-				if action in ('add', 'remove'):
-					for filter in device_filters:
-						d_info = _match(action, device, *filter)
+	def _process_udev_event(monitor, condition, cb, filters):
+		if condition == GLib.IO_IN:
+			event = monitor.receive_device()
+			if event:
+				action, device = event
+				# print ("udev action:", action, device)
+				if action == 'add':
+					for filter in filters:
+						d_info = _match('add', device, *filter)
 						if d_info:
-							callback(action, d_info)
+							GLib.idle_add(cb, 'add', d_info)
 							break
-		finally:
-			del m
+				elif action == 'remove':
+					for filter in filters:
+						d_info = _match('remove', device, *filter)
+						if d_info:
+							GLib.idle_add(cb, 'remove', d_info)
+							break
+		return True
+	GLib.io_add_watch(m, GLib.PRIORITY_DEFAULT, GLib.IO_IN, _process_udev_event, callback, device_filters)
 
-	while True:
-		try:
-			_monitor()
-		except IOError as e:
-			print ("monitor IOError", e)
-			if e.errno == _errno.EINTR:
-				# raised when the computer wakes from sleep
-				# in this case, just restart the monitor
-				continue
-			raise
+	m.start()
 
 
 def enumerate(vendor_id=None, product_id=None, interface_number=None, hid_driver=None):

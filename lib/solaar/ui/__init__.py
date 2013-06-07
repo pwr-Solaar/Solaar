@@ -11,12 +11,23 @@ GLib.threads_init()
 async = GLib.idle_add
 run_loop = Gtk.main
 
+def error_dialog(reason, object):
+	if reason == 'permission':
+		title = 'Permissions error'
+		text = ('Found a Logitech Receiver (%s), but did not have permission to open it.\n'
+				'\n'
+				'If you\'ve just installed Solaar, try removing the receiver\n'
+				'and plugging it back in.' % object)
+	else:
+		raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
 
-def error_dialog(title, text):
+	def _show_dialog(d):
+		d.run()
+		d.destroy()
+
 	m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
 	m.set_title(title)
-	m.run()
-	m.destroy()
+	async(_show_dialog, m)
 
 #
 #

@@ -85,15 +85,18 @@ def receivers():
 	# 	yield d
 
 
-def notify_on_receivers(callback):
-	"""Starts a thread that monitors receiver events from udev."""
-	_hid.monitor_async(callback,
+def notify_on_receivers_glib(callback):
+	"""Watch for matching devices and notifies the callback on the GLib thread."""
+	_hid.monitor_glib(callback,
 					DEVICE_UNIFYING_RECEIVER,
 					DEVICE_UNIFYING_RECEIVER_2,
 					DEVICE_NANO_RECEIVER,
 					# DEVICE_VXNANO_RECEIVER,
 		)
 
+#
+#
+#
 
 def open_path(path):
 	"""Checks if the given Linux device path points to the right UR device.
