@@ -24,7 +24,13 @@ _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple
 
 def _ghost(device):
-	return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, serial=device.serial, status=None)
+	return _GHOST_DEVICE(
+					receiver=device.receiver,
+					number=device.number,
+					name=device.name,
+					kind=device.kind,
+					serial=device.serial,
+					status=None)
 
 #
 #
@@ -119,28 +125,31 @@ class ReceiverListener(_listener.EventsListener):
 			assert device == self.receiver
 			# the status of the receiver changed
 			self.status_changed_callback(device, alert, reason)
-		else:
-			if device.status is None:
-				# device was just un-paired
-				# it may be paired later, possibly to another receiver?
-				# so maybe we shouldn't forget about it
-				# configuration.forget(device)
+			return
 
-				# device was unpaired, and since the object is weakref'ed
-				# it won't be valid for much longer
-				device = _ghost(device)
+		assert device.receiver == self.receiver
 
-			# elif device.status:
-			# 	configuration.apply_to(device)
-			# 	configuration.acquire_from(device)
+		if device.status is None:
+			# device was just un-paired
+			# it may be paired later, possibly to another receiver?
+			# so maybe we shouldn't forget about it
+			# configuration.forget(device)
 
+			# device was unpaired, and since the object is weakref'ed
+			# it won't be valid for much longer
+			_log.info("device %s was unpaired, ghosting", device)
+			device = _ghost(device)
 
-			self.status_changed_callback(device, alert, reason)
+		# elif device.status:
+		# 	configuration.apply_to(device)
+		# 	configuration.acquire_from(device)
 
-			if device.status is None:
-				# the device was just unpaired, need to update the
-				# status of the receiver as well
-				self.status_changed_callback(self.receiver)
+		self.status_changed_callback(device, alert, reason)
+
+		if device.status is None:
+			# the device was just unpaired, need to update the
+			# status of the receiver as well
+			self.status_changed_callback(self.receiver)
 
 	def _notifications_handler(self, n):
 		assert self.receiver
@@ -149,31 +158,32 @@ class ReceiverListener(_listener.EventsListener):
 			# a receiver notification
 			if self.receiver.status is not None:
 				self.receiver.status.process_notification(n)
-		else:
-			# a device notification
-			assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
-			already_known = n.devnumber in self.receiver
-			dev = self.receiver[n.devnumber]
+			return
 
-			if not dev:
-				_log.warn("%s: received %s for invalid device %d: %r", self.receiver, n, n.devnumber, dev)
-				return
+		# a device notification
+		assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
+		already_known = n.devnumber in self.receiver
+		dev = self.receiver[n.devnumber]
 
-			if not already_known:
-				# read these as soon as possible, they will be used everywhere
-				dev.protocol, dev.codename
-				dev.status = _status.DeviceStatus(dev, self._status_changed)
-				# the receiver changed status as well
-				self._status_changed(self.receiver)
+		if not dev:
+			_log.warn("%s: received %s for invalid device %d: %r", self.receiver, n, n.devnumber, dev)
+			return
 
-			# status may be None if the device has just been unpaired
-			if dev.status is not None:
-				dev.status.process_notification(n)
-				if self.receiver.status.lock_open and not already_known:
-					# this should be the first notification after a device was paired
-					assert n.sub_id == 0x41 and n.address == 0x04
-					_log.info("%s: pairing detected new device", self.receiver)
-					self.receiver.status.new_device = dev
+		if not already_known:
+			# read these as soon as possible, they will be used everywhere
+			dev.protocol, dev.codename
+			dev.status = _status.DeviceStatus(dev, self._status_changed)
+			# the receiver changed status as well
+			self._status_changed(self.receiver)
+
+		# status may be None if the device has just been unpaired
+		if dev.status is not None:
+			dev.status.process_notification(n)
+			if self.receiver.status.lock_open and not already_known:
+				# this should be the first notification after a device was paired
+				assert n.sub_id == 0x41 and n.address == 0x04
+				_log.info("%s: pairing detected new device", self.receiver)
+				self.receiver.status.new_device = dev
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
@@ -240,8 +250,7 @@ def _process_receiver_event(action, device_info):
 	if action == 'add':
 		# a new receiver device was detected
 		try:
-			l = start(device_info, _status_callback)
+			start(device_info, _status_callback)
 		except OSError:
 			# permission error, ignore this path for now
-			_all_listeners.pop(device_info.path, None)
 			_error_callback('permissions', device_info.path)
