@@ -106,7 +106,7 @@ _EVENT_READ_TIMEOUT = 0.5
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
-_IDLE_READS = 5
+_IDLE_READS = (5 / 0.5)  # wait at least 5 seconds between ticks
 
 
 class EventsListener(_threading.Thread):
@@ -140,7 +140,7 @@ class EventsListener(_threading.Thread):
 		last_tick = 0
 		# the first idle read -- delay it a bit, and make sure to stagger
 		# idle reads for multiple receivers
-		idle_reads = _IDLE_READS * 2 + (ihandle % 3) * 3
+		idle_reads = _IDLE_READS * 2 + (ihandle % 3) * 4
 
 		while self._active:
 			if self._queued_notifications.empty():

@@ -397,7 +397,7 @@ def request(handle, devnumber, request_id, *params):
 		# 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
 		if delta >= timeout:
-			_log.warn("timeout on device %d request {%04X} params[%s]", devnumber, request_id, _strhex(params))
+			_log.warn("timeout on device %d request {%04X} params [%s]", devnumber, request_id, _strhex(params))
 			break
 			# raise DeviceUnreachable(number=devnumber, request=request_id)
 

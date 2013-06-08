@@ -176,8 +176,8 @@ class PairedDevice(object):
 
 		if enable:
 			set_flag_bits = ( _hidpp10.NOTIFICATION_FLAG.battery_status
-							+ _hidpp10.NOTIFICATION_FLAG.wireless
-							+ _hidpp10.NOTIFICATION_FLAG.software_present )
+							| _hidpp10.NOTIFICATION_FLAG.wireless
+							| _hidpp10.NOTIFICATION_FLAG.software_present )
 		else:
 			set_flag_bits = 0
 		ok = _hidpp10.set_notification_flags(self, set_flag_bits)
@@ -282,8 +282,8 @@ class Receiver(object):
 
 		if enable:
 			set_flag_bits = ( _hidpp10.NOTIFICATION_FLAG.battery_status
-							+ _hidpp10.NOTIFICATION_FLAG.wireless
-							+ _hidpp10.NOTIFICATION_FLAG.software_present )
+							| _hidpp10.NOTIFICATION_FLAG.wireless
+							| _hidpp10.NOTIFICATION_FLAG.software_present )
 		else:
 			set_flag_bits = 0
 		ok = _hidpp10.set_notification_flags(self, set_flag_bits)

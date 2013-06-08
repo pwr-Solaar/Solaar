@@ -38,7 +38,7 @@ def _ghost(device):
 
 # how often to poll devices that haven't updated their statuses on their own
 # (through notifications)
-_POLL_TICK = 4 * 60  # seconds
+_POLL_TICK = 5 * 60  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
@@ -193,7 +193,8 @@ class ReceiverListener(_listener.EventsListener):
 #
 #
 
-# all currently running receiver listeners
+# all known receiver listeners
+# listeners that stop on their own may remain here
 _all_listeners = {}
 
 
@@ -214,9 +215,11 @@ def stop_all():
 	_all_listeners.clear()
 
 	for l in listeners:
-		l.stop()
+		if l:
+			l.stop()
 	for l in listeners:
-		l.join()
+		if l:
+			l.join()
 
 
 _status_callback = None
