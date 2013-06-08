@@ -163,7 +163,9 @@ try:
 		else:
 			# there may be a receiver, but no peripherals
 			tray_icon_name = _icons.TRAY_OKAY if ind._devices_info else _icons.TRAY_INIT
-			description = '%s: no receivers found' % NAME
+
+			tooltip_lines = _generate_tooltip_lines(ind._devices_info)
+			description = '\n'.join(tooltip_lines).rstrip('\n')
 
 		# icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
 		ind.set_icon_full(tray_icon_name, description)
