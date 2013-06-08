@@ -12,7 +12,7 @@ async = GLib.idle_add
 run_loop = Gtk.main
 
 def error_dialog(reason, object):
-	if reason == 'permission':
+	if reason == 'permissions':
 		title = 'Permissions error'
 		text = ('Found a Logitech Receiver (%s), but did not have permission to open it.\n'
 				'\n'
