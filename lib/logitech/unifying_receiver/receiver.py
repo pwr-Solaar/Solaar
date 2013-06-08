@@ -14,7 +14,7 @@ del getLogger
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
-from .common import strhex as _strhex, NamedInts as _NamedInts
+from .common import strhex as _strhex
 from . import descriptors as _descriptors
 
 #
@@ -50,6 +50,10 @@ class PairedDevice(object):
 				kind = ord(pair_info[7:8]) & 0x0F
 				self._kind = _hidpp10.DEVICE_KIND[kind]
 				self.polling_rate = ord(pair_info[2:3])
+			else:
+				# no device at this address...
+				return
+
 		# else:
 		# 	# guesswork...
 		# 	descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
@@ -251,6 +255,7 @@ class Receiver(object):
 
 		old_equad_reply = self.request(0x83B5, 0x04)
 		self.unifying_supported = old_equad_reply is None
+		_log.info("%s (%s) uses protocol %s", self.name, self.path, 'eQuad' if old_equad_reply else 'eQuad DJ')
 
 		self._firmware = None
 		self._devices = {}
@@ -275,18 +280,22 @@ class Receiver(object):
 		if not self.handle:
 			return False
 
-		# flag_bits = _hidpp10.NOTIFICATION_FLAG.all_bits() if enable else 0
-		flag_bits = 0xFFFFFF if enable else 0
-		ok = _hidpp10.set_notification_flags(self, flag_bits)
+		if enable:
+			set_flag_bits = ( _hidpp10.NOTIFICATION_FLAG.battery_status
+							+ _hidpp10.NOTIFICATION_FLAG.wireless
+							+ _hidpp10.NOTIFICATION_FLAG.software_present )
+		else:
+			set_flag_bits = 0
+		ok = _hidpp10.set_notification_flags(self, set_flag_bits)
 
 		flag_bits = _hidpp10.get_notification_flags(self)
 		if flag_bits is not None:
 			flag_bits = tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
 
 		if ok:
-			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_bits)
+			_log.info("%s: receiver notifications %s => %s", self, 'enabled' if enable else 'disabled', flag_bits)
 		else:
-			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flag_bits)
+			_log.warn("%s: failed to %s receiver notifications %s", self, 'enable' if enable else 'disable', flag_bits)
 		return ok
 
 	def notify_devices(self):
@@ -301,10 +310,11 @@ class Receiver(object):
 
 		dev = PairedDevice(self, number)
 		if dev.wpid:
-			_log.info("%s: found device %d (%s)", self, number, dev.wpid)
+			_log.info("%s: found new device %d (%s)", self, number, dev.wpid)
 			self._devices[number] = dev
 			return dev
 
+		_log.warning("%s: looked for device %d, not found", self, number)
 		self._devices[number] = None
 
 	def set_lock(self, lock_closed=True, device=0, timeout=0):
@@ -318,6 +328,9 @@ class Receiver(object):
 	def count(self):
 		count = self.request(0x8102)
 		return 0 if count is None else ord(count[1:2])
+
+	# def has_devices(self):
+	# 	return len(self) > 0 or self.count() > 0
 
 	def request(self, request_id, *params):
 		if self.handle:

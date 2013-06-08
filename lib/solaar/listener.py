@@ -62,15 +62,9 @@ class ReceiverListener(_listener.EventsListener):
 		r.status = 'The receiver was unplugged.'
 		if r:
 			try:
-				pass
-				# r.enable_notifications(False)
+				r.close()
 			except:
-				_log.exception("disabling notifications on receiver %s" % r)
-			finally:
-				try:
-					r.close()
-				except:
-					_log.exception("closing receiver %s" % r.path)
+				_log.exception("closing receiver %s" % r.path)
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
 		# configuration.save()
