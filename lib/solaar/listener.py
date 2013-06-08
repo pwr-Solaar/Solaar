@@ -32,7 +32,7 @@ def _ghost(device):
 
 # how often to poll devices that haven't updated their statuses on their own
 # (through notifications)
-_POLL_TICK = 100  # seconds
+_POLL_TICK = 3 * 60  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):
@@ -41,7 +41,7 @@ class ReceiverListener(_listener.EventsListener):
 	def __init__(self, receiver, status_changed_callback):
 		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
 		# no reason to enable polling yet
-		# self.tick_period = _POLL_TICK
+		self.tick_period = _POLL_TICK
 		self._last_tick = 0
 
 		assert status_changed_callback
@@ -58,7 +58,8 @@ class ReceiverListener(_listener.EventsListener):
 		r, self.receiver = self.receiver, None
 		assert r is not None
 		_log.info("%s: notifications listener has stopped", r)
-		r.status = 'The device was unplugged.'
+
+		r.status = 'The receiver was unplugged.'
 		if r:
 			try:
 				pass
@@ -75,8 +76,12 @@ class ReceiverListener(_listener.EventsListener):
 		# configuration.save()
 
 	def tick(self, timestamp):
-		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("%s: polling status: %s", self.receiver, list(iter(self.receiver)))
+		if not self.tick_period:
+			raise Exception("tick() should not be called without a tick_period: %s", self)
+
+		if not self.receiver:
+			# just in case the receiver was just removed
+			return
 
 		# not necessary anymore, we're now using udev monitor to watch for receiver status
 		# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
@@ -94,9 +99,20 @@ class ReceiverListener(_listener.EventsListener):
 			# don't mess with stuff while pairing
 			return
 
-		for dev in self.receiver:
-			if dev.status is not None:
-				dev.status.poll(timestamp)
+		self.receiver.status.poll(timestamp)
+
+		# Iterating directly through the reciver would unnecessarily probe
+		# all possible devices, even unpaired ones.
+		# Checking for each device number in turn makes sure only already
+		# known devices are polled.
+		# This is okay because we should have already known about them all
+		# long before the first poll() happents, through notifications.
+		for number in range(1, 6):
+			if number in self.receiver:
+				dev = self.receiver[number]
+				assert dev
+				if dev.status is not None:
+					dev.status.poll(timestamp)
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		assert device is not None

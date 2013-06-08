@@ -79,6 +79,16 @@ class ReceiverStatus(dict):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)
 
+	def poll(self, timestamp):
+		r = self._receiver
+		assert r
+
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("polling status of %s", r)
+
+		# make sure to read some stuff that may be read later by the UI
+		r.serial, r.firmware, None
+
 	def process_notification(self, n):
 		if n.sub_id == 0x4A:
 			self.lock_open = bool(n.address & 0x01)
@@ -227,15 +237,15 @@ class DeviceStatus(dict):
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("polling status of %s", d)
 
-			# read these from the device in case they haven't been read already
-			d.protocol, d.serial, d.firmware
+			# read these from the device, the UI may need them later
+			d.protocol, d.firmware, d.kind, d.name, d.settings, None
+
+			# make sure we know all the features of the device
+			# if d.features:
+			# 	d.features[:]
 
 			if BATTERY_LEVEL not in self:
 				self.read_battery(timestamp)
-
-			# make sure we know all the features of the device
-			if d.features:
-				d.features[:]
 
 		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
 			# if the device has been inactive for too long, clear out any known

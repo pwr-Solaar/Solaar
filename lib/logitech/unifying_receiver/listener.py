@@ -40,6 +40,7 @@ class _ThreadedHandle(object):
 		self._listener = listener
 		self.path = path
 		self._local = _threading.local()
+		# take over the current handle for the thread doing the replacement
 		self._local.handle = handle
 		self._handles = [handle]
 
@@ -104,7 +105,8 @@ class _ThreadedHandle(object):
 _EVENT_READ_TIMEOUT = 500
 
 # After this many reads that did not produce a packet, call the tick() method.
-_IDLE_READS = 4
+# This only happens if tick_period is enabled (>0) for the Listener instance.
+_IDLE_READS = 5
 
 
 class EventsListener(_threading.Thread):
@@ -113,7 +115,7 @@ class EventsListener(_threading.Thread):
 	Incoming packets will be passed to the callback function in sequence.
 	"""
 	def __init__(self, receiver, notifications_callback):
-		super(EventsListener, self).__init__(name=self.__class__.__name__)
+		super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path)
 
 		self.daemon = True
 		self._active = False
@@ -128,14 +130,17 @@ class EventsListener(_threading.Thread):
 		self._active = True
 
 		# replace the handle with a threaded one
-		ihandle = int(self.receiver.handle)
 		self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
+		# get the right low-level handle for this thead
+		ihandle = int(self.receiver.handle)
 		_log.info("started with %s (%d)", self.receiver, ihandle)
 
 		self.has_started()
 
 		last_tick = 0
-		idle_reads = _IDLE_READS * 10
+		# the first idle read -- delay it a bit, and make sure to stagger
+		# idle reads for multiple receivers
+		idle_reads = _IDLE_READS + (ihandle % 3) * 2
 
 		while self._active:
 			if self._queued_notifications.empty():
