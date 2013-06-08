@@ -150,7 +150,11 @@ def monitor_glib(callback, *device_filters):
 							GLib.idle_add(cb, 'remove', d_info)
 							break
 		return True
-	GLib.io_add_watch(m, GLib.PRIORITY_DEFAULT, GLib.IO_IN, _process_udev_event, callback, device_filters)
+	try:
+		# io_add_watch_full appeared in a later version of glib
+		GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
+	except:
+		GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, device_filters)
 
 	m.start()
 
