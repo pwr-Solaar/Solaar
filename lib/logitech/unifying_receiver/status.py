@@ -184,17 +184,17 @@ class DeviceStatus(dict):
 			if battery is None and d.protocol >= 2.0:
 				battery = _hidpp20.get_battery(d)
 
-			# really unnecessary, if the device has SOLAR_DASHBOARD it should be
-			# broadcasting it's battery status anyway, it will just take a little while
-			# however, when the device has just been detected, it will not show
-			# any battery status for a while (broadcasts happen every 90 seconds)
+			# Really unnecessary, if the device has SOLAR_DASHBOARD it should be
+			# broadcasting it's battery status anyway, it will just take a little while.
+			# However, when the device has just been detected, it will not show
+			# any battery status for a while (broadcasts happen every 90 seconds).
 			if battery is None and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
 				d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
 				return
 
 			if battery:
 				level, status = battery
-				self.set_battery_info(level, status, timestamp)
+				self.set_battery_info(level, status, timestamp=timestamp)
 			elif BATTERY_STATUS in self:
 				self[BATTERY_STATUS] = None
 				self._changed(timestamp=timestamp)
@@ -211,8 +211,8 @@ class DeviceStatus(dict):
 		else:
 			battery = self.get(BATTERY_LEVEL)
 			self.clear()
-			# if we had a known battery level before, assume it's not going
-			# to change much while the device is offline
+			# If we had a known battery level before, assume it's not going
+			# to change much while the device is offline.
 			if battery is not None:
 				self[BATTERY_LEVEL] = battery
 
@@ -248,9 +248,13 @@ class DeviceStatus(dict):
 				self.read_battery(timestamp)
 
 		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
-			# if the device has been inactive for too long, clear out any known
-			# properties, they are most likely obsolete anyway
+			# If the device has been inactive for too long, clear out any known
+			# properties, they are most likely obsolete anyway.
+			# The battery level stays because it's unlikely to change much.
+			battery_level = self.get(BATTERY_LEVEL)
 			self.clear()
+			if battery_level is not None:
+				self[BATTERY_LEVEL] = battery_level
 			self._changed(active=False, timestamp=timestamp)
 
 	def process_notification(self, n):
@@ -407,7 +411,7 @@ class DeviceStatus(dict):
 					_log.debug("%s: Light Check button pressed", self._device)
 					self._changed(alert=ALERT.SHOW_WINDOW)
 					# first cancel any reporting
-					self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD)
+					# self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD)
 					# trigger a new report chain
 					reports_count = 15
 					reports_period = 2  # seconds
