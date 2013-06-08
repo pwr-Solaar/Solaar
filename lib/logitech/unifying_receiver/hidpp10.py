@@ -86,7 +86,7 @@ PAIRING_ERRORS = _NamedInts(
 #
 
 def get_register(device, name, default_number=-1):
-	known_register = device.registers[name]
+	known_register = device.registers.get(name)
 	register = known_register or default_number
 	if register > 0:
 		reply = device.request(0x8100 + (register & 0xFF))
