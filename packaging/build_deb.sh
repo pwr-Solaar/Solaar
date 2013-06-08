@@ -2,11 +2,10 @@
 
 set -e
 
-if test ! -r "$HOME/.devscripts"; then
-	echo "$HOME/.descripts must exist"
-	exit 1
-fi
-. "$HOME/.devscripts"
+DEVSCRIPTS="${HOME}/.devscripts"
+test -r "${DEVSCRIPTS}" && . "${DEVSCRIPTS}"
+DEVSCRIPTS="${XDG_CONFIG_HOME:-${HOME}/.config}/debian/devscripts"
+test -r "${DEVSCRIPTS}" && . "${DEVSCRIPTS}"
 
 cd "$(dirname "$0")/.."
 DEBIAN_FILES="$PWD/packaging/debian"
