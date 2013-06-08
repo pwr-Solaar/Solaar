@@ -5,6 +5,8 @@
   * Use battery icons from the current theme instead of custom ones.
   * Debian/Ubuntu packages now depend on an icon theme, to make sure
     no missing icons appear in the application window.
+  * Fixed missing icons under Kubuntu.
+  * Many more bug-fixes and reliability improvements.
 
 0.8.8:
 
