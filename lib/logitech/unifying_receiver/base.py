@@ -35,11 +35,14 @@ _LONG_MESSAGE_SIZE = 20
 _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
 
-"""Default timeout on read (in ms)."""
-DEFAULT_TIMEOUT = 3000
-_RECEIVER_REQUEST_TIMEOUT = 500
+"""Default timeout on read (in seconds)."""
+DEFAULT_TIMEOUT = 2
+# the receiver itself should reply very fast, within 500ms
+_RECEIVER_REQUEST_TIMEOUT = 0.5
+# devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
-_PING_TIMEOUT = 5000
+# when pinging, be extra patient
+_PING_TIMEOUT = DEFAULT_TIMEOUT * 2
 
 #
 # Exceptions that may be raised by this API.
@@ -178,6 +181,9 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 	"""Read some data from the receiver. Usually called after a write (feature
 	call), to get the reply.
 
+	:param: handle open handle to the receiver
+	:param: timeout how long to wait for a reply, in seconds
+
 	:returns: a tuple of (devnumber, message data), or `None`
 
 	:raises NoReceiver: if the receiver is no longer available, i.e. has
@@ -199,6 +205,8 @@ def _read(handle, timeout):
 	unloaded. The handle will be closed automatically.
 	"""
 	try:
+		# convert timeout to milliseconds, the hidapi expects it
+		timeout = int(timeout * 1000)
 		data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
 	except Exception as reason:
 		_log.error("read failed, assuming handle %r no longer available", handle)
@@ -230,6 +238,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 
 	while True:
 		try:
+			# read whatever is already in the buffer, if any
 			data = _hid.read(ihandle, _MAX_READ_SIZE, 0)
 		except Exception as reason:
 			_log.error("read failed, assuming receiver %s no longer available", handle)
@@ -248,6 +257,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 				if n:
 					notifications_hook(n)
 		else:
+			# nothing in the input buffer, we're done
 			return
 
 
@@ -319,10 +329,12 @@ def request(handle, devnumber, request_id, *params):
 	_skip_incoming(handle, ihandle, notifications_hook)
 	write(ihandle, devnumber, request_data)
 
+	# we consider timeout from this point
+	request_started = _timestamp()
+
 	while True:
-		now = _timestamp()
 		reply = _read(handle, timeout)
-		delta = _timestamp() - now
+		delta = _timestamp() - request_started
 
 		if reply:
 			report_id, reply_devnumber, reply_data = reply
@@ -374,6 +386,15 @@ def request(handle, devnumber, request_id, *params):
 				n = make_notification(reply_devnumber, reply_data)
 				if n:
 					notifications_hook(n)
+				# elif _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+
+			# a reply was received, but did not match our request in any way
+			# reset the timeout starting point
+			request_started = _timestamp()
+
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
 		if delta >= timeout:
 			_log.warn("timeout on device %d request {%04X} params[%s]", devnumber, request_id, _strhex(params))
@@ -403,10 +424,12 @@ def ping(handle, devnumber):
 	_skip_incoming(handle, ihandle, notifications_hook)
 	write(ihandle, devnumber, request_data)
 
+	# we consider timeout from this point
+	request_started = _timestamp()
+
 	while True:
-		now = _timestamp()
 		reply = _read(handle, _PING_TIMEOUT)
-		delta = _timestamp() - now
+		delta = _timestamp() - request_started
 
 		if reply:
 			report_id, reply_devnumber, reply_data = reply

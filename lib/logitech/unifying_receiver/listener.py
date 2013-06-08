@@ -98,11 +98,11 @@ class _ThreadedHandle(object):
 #
 #
 
-# How long to wait during a read for the next packet.
+# How long to wait during a read for the next packet, in seconds
 # Ideally this should be rather long (10s ?), but the read is blocking
 # and this means that when the thread is signalled to stop, it would take
 # a while for it to acknowledge it.
-_EVENT_READ_TIMEOUT = 500
+_EVENT_READ_TIMEOUT = 0.5
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
