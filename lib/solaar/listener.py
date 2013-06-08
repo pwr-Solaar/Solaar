@@ -38,7 +38,7 @@ def _ghost(device):
 
 # how often to poll devices that haven't updated their statuses on their own
 # (through notifications)
-_POLL_TICK = 3 * 60  # seconds
+_POLL_TICK = 4 * 60  # seconds
 
 
 class ReceiverListener(_listener.EventsListener):

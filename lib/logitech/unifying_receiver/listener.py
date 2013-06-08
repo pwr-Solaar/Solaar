@@ -140,7 +140,7 @@ class EventsListener(_threading.Thread):
 		last_tick = 0
 		# the first idle read -- delay it a bit, and make sure to stagger
 		# idle reads for multiple receivers
-		idle_reads = _IDLE_READS + (ihandle % 3) * 2
+		idle_reads = _IDLE_READS * 2 + (ihandle % 3) * 3
 
 		while self._active:
 			if self._queued_notifications.empty():
