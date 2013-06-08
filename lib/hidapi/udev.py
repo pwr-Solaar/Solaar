@@ -136,25 +136,26 @@ def monitor_glib(callback, *device_filters):
 			event = monitor.receive_device()
 			if event:
 				action, device = event
-				# print ("udev action:", action, device)
 				if action == 'add':
 					for filter in filters:
-						d_info = _match('add', device, *filter)
+						d_info = _match(action, device, *filter)
 						if d_info:
-							GLib.idle_add(cb, 'add', d_info)
+							GLib.idle_add(cb, action, d_info)
 							break
 				elif action == 'remove':
-					for filter in filters:
-						d_info = _match('remove', device, *filter)
-						if d_info:
-							GLib.idle_add(cb, 'remove', d_info)
-							break
+					# the GLib notification does _not_ match!
+					pass
 		return True
+
 	try:
-		# io_add_watch_full appeared in a later version of glib
+		# io_add_watch_full may not be available...
 		GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
-	except:
-		GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, device_filters)
+	except AttributeError:
+		try:
+			# and the priority parameter appeared later in the API
+			GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
+		except:
+			GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, device_filters)
 
 	m.start()
 
