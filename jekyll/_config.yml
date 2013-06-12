@@ -4,8 +4,8 @@ root: /Solaar/
 owner: pwr
 owner_url: https://github.com/pwr
 repository: https://github.com/pwr/Solaar
-version: 0.8.9.1
-tar_download: https://github.com/pwr/Solaar/archive/0.8.9.1.tar.gz
+version: 0.8.9.2
+tar_download: https://github.com/pwr/Solaar/archive/0.8.9.2.tar.gz
 ga_id: UA-36908718-1
 
 pygments: true

@@ -3,18 +3,24 @@
 set -e
 
 DEVSCRIPTS="${HOME}/.devscripts"
-test -r "${DEVSCRIPTS}" && . "${DEVSCRIPTS}"
-DEVSCRIPTS="${XDG_CONFIG_HOME:-${HOME}/.config}/debian/devscripts"
-test -r "${DEVSCRIPTS}" && . "${DEVSCRIPTS}"
+. "${DEVSCRIPTS}"
+
+DISTRIBUTION=${DISTRIBUTION:-debian}
 
 cd "$(dirname "$0")/.."
 DEBIAN_FILES="$PWD/packaging/debian"
-DIST="$PWD/dist/${DISTRIBUTION:=debian}"
-DIST_RELEASE=${DIST_RELEASE:-UNRELEASED}
+DIST="$PWD/dist/$DISTRIBUTION"
+export DIST_RELEASE=${DIST_RELEASE:-UNRELEASED}
 
-BUILD_DIR="${TMPDIR:-/tmp}/$DIST"
-rm -rf "$BUILD_DIR"
-mkdir -m 0700 -p "$BUILD_DIR"
+#
+# build a python sdist package
+#
+
+export TMPDIR=${TMPDIR:-/tmp}/solaar-build-$USER
+/bin/mkdir --parents --mode=0700 "$TMPDIR"
+BUILD_DIR="$TMPDIR/build-$DISTRIBUTION"
+/bin/rm --recursive --force "$BUILD_DIR"
+/bin/mkdir --parents --mode=0700 "$BUILD_DIR"
 python "setup.py" sdist --dist-dir="$BUILD_DIR" --formats=gztar
 
 cd "$BUILD_DIR"
@@ -40,6 +46,10 @@ fi
 tar xfz "$S"
 mv "$S" solaar_$VERSION.orig.tar.gz
 
+#
+# finally build the package
+#
+
 cd solaar-$VERSION
 cp -a "$DEBIAN_FILES" .
 cat >debian/changelog <<_CHANGELOG
@@ -54,10 +64,11 @@ test -z "$BUILD_EXTRA" && cp debian/changelog "$DEBIAN_FILES"/changelog
 
 test -n "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
 
-debuild ${DEBUILD_ARGS:-$@}
+/usr/bin/debuild ${DEBUILD_ARGS:-$@} \
+	--lintian-opts --profile $DISTRIBUTION
 
-rm -rf "$DIST"
-mkdir -p "$DIST"
+/bin/rm --force "$DIST"/*
+/bin/mkdir --parents "$DIST"
 cp -a -t "$DIST" ../solaar_$VERSION*
 cp -a -t "$DIST" ../solaar-*_$VERSION* || true
 cd "$DIST"
