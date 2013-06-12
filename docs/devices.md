@@ -86,7 +86,7 @@ Mice:
 | T620 Touch       |       |         |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   |                                 |
 | Anywhere MX      |       |         |       |                                 |
-| Cube             |       |         |       |                                 |
+| Cube             | 2.0   | yes     |       |                                 |
 
 
 Trackballs:
@@ -100,6 +100,7 @@ Touchpads:
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
+| Wireless Touch   | 2.0   |         |       |                                 |
 | T650 Touchpad    |       |         |       |                                 |
 
 
