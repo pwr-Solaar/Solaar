@@ -339,7 +339,7 @@ def get_firmware(device):
 					extras = fw_info[9:].rstrip(b'\x00') or None
 					fw_info = _FirmwareInfo(FIRMWARE_KIND[level], name.decode('ascii'), version, extras)
 				elif level == FIRMWARE_KIND.Hardware:
-					fw_info = _FirmwareInfo(FIRMWARE_KIND.Hardware, '', ord(fw_info[1:2]), None)
+					fw_info = _FirmwareInfo(FIRMWARE_KIND.Hardware, '', str(ord(fw_info[1:2])), None)
 				else:
 					fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, '', '', None)
 
