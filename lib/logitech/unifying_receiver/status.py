@@ -248,6 +248,7 @@ class DeviceStatus(dict):
 				self.read_battery(timestamp)
 
 		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
+			self._active = False
 			# If the device has been inactive for too long, clear out any known
 			# properties, they are most likely obsolete anyway.
 			# The battery level stays because it's unlikely to change much.
