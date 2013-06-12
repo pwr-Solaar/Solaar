@@ -38,12 +38,12 @@ BATTERY_CHARGING='battery-charging'
 LIGHT_LEVEL='light-level'
 ERROR='error'
 
-# if the battery charge is under this percentage, trigger an attention event
-# (blink systray icon)
+# If the battery charge is under this percentage, trigger an attention event
+# (blink systray icon/notification/whatever).
 _BATTERY_ATTENTION_LEVEL = 5
 
-# if not updates have been receiver from the device for a while, assume
-# it has gone offline and clear all its know properties.
+# If no updates have been receiver from the device for a while, ping the device
+# and update it status accordinly.
 _STATUS_TIMEOUT = 5 * 60  # seconds
 
 #
@@ -180,8 +180,9 @@ class DeviceStatus(dict):
 	def read_battery(self, timestamp=None):
 		d = self._device
 		if d and self._active:
-			battery = _hidpp10.get_battery(d)
-			if battery is None and d.protocol >= 2.0:
+			if d.protocol < 2.0:
+				battery = _hidpp10.get_battery(d)
+			else:
 				battery = _hidpp20.get_battery(d)
 
 			# Really unnecessary, if the device has SOLAR_DASHBOARD it should be
@@ -197,24 +198,26 @@ class DeviceStatus(dict):
 				self.set_battery_info(level, status, timestamp=timestamp)
 			elif BATTERY_STATUS in self:
 				self[BATTERY_STATUS] = None
-				self._changed(timestamp=timestamp)
+				self[BATTERY_CHARGING] = None
+				self._changed()
 
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
 		was_active, self._active = self._active, active
 		if active:
-			# Make sure to set notification flags on the device, they
-			# get cleared when the device is turned off (but not when the device
-			# goes idle, and we can't tell the difference right now).
 			if not was_active:
+				# Make sure to set notification flags on the device, they
+				# get cleared when the device is turned off (but not when the device
+				# goes idle, and we can't tell the difference right now).
 				self._device.enable_notifications()
 		else:
-			battery = self.get(BATTERY_LEVEL)
-			self.clear()
-			# If we had a known battery level before, assume it's not going
-			# to change much while the device is offline.
-			if battery is not None:
-				self[BATTERY_LEVEL] = battery
+			if was_active:
+				battery = self.get(BATTERY_LEVEL)
+				self.clear()
+				# If we had a known battery level before, assume it's not going
+				# to change much while the device is offline.
+				if battery is not None:
+					self[BATTERY_LEVEL] = battery
 
 		if self.updated == 0 and active:
 			# if the device is active on the very first status notification,
@@ -228,12 +231,12 @@ class DeviceStatus(dict):
 		self._changed_callback(self._device, alert, reason)
 
 	def poll(self, timestamp):
-		if self._active:
-			d = self._device
-			if not d:
-				_log.error("polling status of invalid device")
-				return
+		d = self._device
+		if not d:
+			_log.error("polling status of invalid device")
+			return
 
+		if self._active:
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("polling status of %s", d)
 
@@ -244,19 +247,23 @@ class DeviceStatus(dict):
 			# if d.features:
 			# 	d.features[:]
 
+			# devices may go out-of-range while still active, or the computer
+			# may go to sleep and wake up without the devices available
+			if timestamp - self.updated > _STATUS_TIMEOUT:
+				if d.ping():
+					self.updated = _timestamp()
+				else:
+					self._changed(active=False, reason='out of range')
+
+			# if still active, make sure we know the battery level
 			if BATTERY_LEVEL not in self:
 				self.read_battery(timestamp)
 
-		elif len(self) > 0 and timestamp - self.updated > _STATUS_TIMEOUT:
-			self._active = False
-			# If the device has been inactive for too long, clear out any known
-			# properties, they are most likely obsolete anyway.
-			# The battery level stays because it's unlikely to change much.
-			battery_level = self.get(BATTERY_LEVEL)
-			self.clear()
-			if battery_level is not None:
-				self[BATTERY_LEVEL] = battery_level
-			self._changed(active=False, timestamp=timestamp)
+		elif timestamp - self.updated > _STATUS_TIMEOUT:
+			if d.ping():
+				self._changed(active=True)
+			else:
+				self.updated = _timestamp()
 
 	def process_notification(self, n):
 		# incoming packets with SubId >= 0x80 are supposedly replies from
