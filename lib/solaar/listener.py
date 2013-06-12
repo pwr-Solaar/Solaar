@@ -65,6 +65,10 @@ class ReceiverListener(_listener.EventsListener):
 		assert r is not None
 		_log.info("%s: notifications listener has stopped", r)
 
+		# because udev is not notifying us about device removal,
+		# make sure to clean up in _all_listeners
+		_all_listeners.pop(r.path, None)
+
 		r.status = 'The receiver was unplugged.'
 		if r:
 			try:

@@ -40,41 +40,15 @@ def _parse_arguments():
 
 
 def _run(args):
-	from logging import getLogger, DEBUG as _DEBUG
-	_log = getLogger(__name__)
-	del getLogger
-
 	import solaar.ui as ui
 
-	ui.notify.init()
-
-	status_icon = ui.status_icon.create(ui.main_window.toggle_all, ui.main_window.popup)
-	assert status_icon
-
-	# callback delivering status notifications from the receiver/devices to the UI
-	from logitech.unifying_receiver.status import ALERT
-	def status_changed(device, alert=ALERT.NONE, reason=None):
-		assert device is not None
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("status changed: %s, %s, %s", device, alert, reason)
-
-		ui.async(ui.status_icon.update, status_icon, device)
-		if alert & ALERT.ATTENTION:
-			ui.async(ui.status_icon.attention, status_icon, reason)
-
-		need_popup = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
-		ui.async(ui.main_window.update, device, need_popup, status_icon)
-
-		if alert & ALERT.NOTIFICATION:
-			ui.async(ui.notify.show, device, reason)
+	ui.init()
 
 	import solaar.listener as listener
-	listener.start_scanner(status_changed, ui.error_dialog)
+	listener.start_scanner(ui.status_changed, ui.error_dialog)
 
 	# main UI event loop
 	ui.run_loop()
-	ui.status_icon.destroy(status_icon)
-	ui.notify.uninit()
 
 	listener.stop_all()
 
