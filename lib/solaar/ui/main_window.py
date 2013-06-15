@@ -400,6 +400,7 @@ def _update_device_box(frame, dev):
 		frame._device = None
 		_config_panel.update(frame)
 		return
+	assert dev.status is not None
 
 	first_run = frame.get_name() != dev.name
 	if first_run:
@@ -419,25 +420,23 @@ def _update_device_box(frame, dev):
 	battery_icon, battery_label, light_icon, light_label, not_encrypted_icon, _ = frame._status_icons
 	battery_level = dev.status.get(_status.BATTERY_LEVEL)
 
-	if dev.status:
-		frame._label.set_sensitive(True)
+	device_is_active = bool(dev.status)
+	frame._label.set_sensitive(device_is_active)
+	if battery_level is None:
+		battery_icon.set_from_icon_name(_icons.battery(), _STATUS_ICON_SIZE)
+		battery_label.set_markup('<small>no status</small>')
+	else:
+		battery_charging = dev.status.get(_status.BATTERY_CHARGING)
+		icon_name = _icons.battery(battery_level, battery_charging)
+		battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
+		battery_label.set_text('%d%%' % battery_level)
 
-		if battery_level is None:
-			battery_icon.set_sensitive(False)
-			battery_icon.set_from_icon_name(_icons.battery(), _STATUS_ICON_SIZE)
-			battery_label.set_markup('<small>no status</small>')
-			battery_label.set_sensitive(True)
-		else:
-			battery_charging = dev.status.get(_status.BATTERY_CHARGING)
-			icon_name = _icons.battery(battery_level, battery_charging)
-			battery_icon.set_from_icon_name(icon_name, _STATUS_ICON_SIZE)
-			battery_icon.set_sensitive(True)
-			battery_label.set_text('%d%%' % battery_level)
-			battery_label.set_sensitive(True)
+	battery_status = dev.status.get(_status.BATTERY_STATUS)
+	battery_icon.set_tooltip_text(battery_status or '')
+	battery_icon.set_sensitive(device_is_active)
+	battery_label.set_sensitive(device_is_active)
 
-		battery_status = dev.status.get(_status.BATTERY_STATUS)
-		battery_icon.set_tooltip_text(battery_status or '')
-
+	if device_is_active:
 		light_level = dev.status.get(_status.LIGHT_LEVEL)
 		if light_level is None:
 			light_icon.set_visible(False)
@@ -450,17 +449,7 @@ def _update_device_box(frame, dev):
 			light_label.set_visible(True)
 
 		not_encrypted_icon.set_visible(dev.status.get(_status.ENCRYPTED) == False)
-
 	else:
-		frame._label.set_sensitive(False)
-
-		battery_icon.set_sensitive(False)
-		battery_label.set_sensitive(False)
-		if battery_level is None:
-			battery_label.set_markup('<small>inactive</small>')
-		else:
-			battery_label.set_markup('%d%%' % battery_level)
-
 		light_icon.set_visible(False)
 		light_label.set_visible(False)
 		not_encrypted_icon.set_visible(False)
