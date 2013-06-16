@@ -15,7 +15,7 @@ _file_path = _path.join(_path.join(_XDG_CONFIG_HOME, 'solaar'), 'config.json')
 
 
 from solaar import __version__
-_configuration = { '_version': __version__ }
+_configuration = {}
 
 
 def _load():
@@ -98,13 +98,14 @@ def get_device(device, key, default_value=None):
 
 
 def apply_to(device):
+	"""Apply the last saved configuration to a device."""
 	if not _configuration:
 		_load()
 
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("applying to %s", device)
-
 	entry = _device_entry(device)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("applying %s to %s", entry, device)
+
 	for s in device.settings:
 		value = s.read()
 		if s.name in entry:
@@ -117,17 +118,18 @@ def apply_to(device):
 
 
 def acquire_from(device):
+	"""Read the values of all the settings a device has, and save them."""
 	if not _configuration:
 		_load()
-
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("acquiring from %s", device)
 
 	entry = _device_entry(device)
 	for s in device.settings:
 		value = s.read()
 		if value is not None:
 			entry[s.name] = value
+
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("acquired %s from %s", entry, device)
 
 	save()
 

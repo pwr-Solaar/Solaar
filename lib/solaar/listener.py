@@ -77,7 +77,7 @@ class ReceiverListener(_listener.EventsListener):
 				_log.exception("closing receiver %s" % r.path)
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
-		# configuration.save()
+		configuration.save()
 
 	def tick(self, timestamp):
 		if not self.tick_period:
@@ -177,6 +177,7 @@ class ReceiverListener(_listener.EventsListener):
 			# read these as soon as possible, they will be used everywhere
 			dev.protocol, dev.codename
 			dev.status = _status.DeviceStatus(dev, self._status_changed)
+			dev.status.configuration = configuration
 			# the receiver changed status as well
 			self._status_changed(self.receiver)
 

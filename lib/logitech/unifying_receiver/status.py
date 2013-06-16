@@ -124,8 +124,14 @@ class DeviceStatus(dict):
 		assert changed_callback
 		self._changed_callback = changed_callback
 
+		# is the device active?
 		self._active = None
+
+		# timestamp of when this status object was last updated
 		self.updated = 0
+
+		# optional object able to persist device settings
+		self.configuration = None
 
 	def __str__(self):
 		def _item(name, format):
@@ -203,13 +209,18 @@ class DeviceStatus(dict):
 
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
+		assert self._device
+		d = self._device
 		was_active, self._active = self._active, active
 		if active:
 			if not was_active:
 				# Make sure to set notification flags on the device, they
 				# get cleared when the device is turned off (but not when the device
 				# goes idle, and we can't tell the difference right now).
-				self._device.enable_notifications()
+				d.enable_notifications()
+				d.settings, None
+				if self.configuration:
+					self.configuration.apply_to(d)
 		else:
 			if was_active:
 				battery = self.get(BATTERY_LEVEL)
@@ -218,6 +229,8 @@ class DeviceStatus(dict):
 				# to change much while the device is offline.
 				if battery is not None:
 					self[BATTERY_LEVEL] = battery
+				if self.configuration:
+					self.configuration.acquire_from(d)
 
 		if self.updated == 0 and active:
 			# if the device is active on the very first status notification,
@@ -228,7 +241,7 @@ class DeviceStatus(dict):
 
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
-		self._changed_callback(self._device, alert, reason)
+		self._changed_callback(d, alert, reason)
 
 	def poll(self, timestamp):
 		d = self._device

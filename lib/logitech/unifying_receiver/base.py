@@ -73,7 +73,6 @@ class DeviceUnreachable(_KwException):
 DEVICE_UNIFYING_RECEIVER	= (0x046d, 0xc52b, 2, 'logitech-djreceiver')
 DEVICE_UNIFYING_RECEIVER_2	= (0x046d, 0xc532, 2, 'logitech-djreceiver')
 DEVICE_NANO_RECEIVER		= (0x046d, 0xc52f, 1, 'hid-generic')
-# DEVICE_VXNANO_RECEIVER		= (0x046d, 0xc526, 1, 'hid-generic')
 
 
 def receivers():
