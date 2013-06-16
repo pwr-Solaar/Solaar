@@ -218,11 +218,13 @@ def stop_all():
 	listeners = list(_all_listeners.values())
 	_all_listeners.clear()
 
-	for l in listeners:
-		if l:
-			l.stop()
-	for l in listeners:
-		if l:
+	if listeners:
+		_log.info("stopping %s", listeners)
+
+		for l in listeners:
+			if l:
+				l.stop()
+		for l in listeners:
 			l.join()
 
 
