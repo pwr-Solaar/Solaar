@@ -1,0 +1,27 @@
+# Allows non-root users to have raw access the Logitech Unifying USB Receiver
+# device. For development purposes, allowing users to write to the receiver is
+# potentially dangerous (e.g. perform firmware updates).
+
+# skip actual unified devices, only consider the receiver
+DRIVERS=="logitech-djdevice", GOTO="not_unify_recv"
+
+# official Unifying receivers
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GOTO="unify_dev"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c532", GOTO="unify_dev"
+
+# "Unifying Ready" Nano receiver
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GOTO="unify_dev"
+
+GOTO="not_unify_recv"
+
+LABEL="unify_dev"
+# Allow any seated user to access the receiver.
+# uaccess: modern ACL-enabled udev
+# udev-acl: for Ubuntu 12.10 and older
+TAG+="uaccess", TAG+="udev-acl"
+
+# Grant members of the "plugdev" group access to receiver (useful for SSH users)
+#MODE="0660", GROUP="plugdev"
+
+LABEL="not_unify_recv"
+# vim: ft=udevrules
