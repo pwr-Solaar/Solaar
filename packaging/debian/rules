@@ -18,9 +18,5 @@ override_dh_auto_install:
 override_dh_python2:
 	dh_python2 $(PREFIX)/share/solaar
 
-override_dh_installudev:
-	cp rules.d/??-logitech-unifying-receiver.rules debian/solaar.logitech-unifying-receiver.udev
-	dh_installudev --priority=99 --name=logitech-unifying-receiver
-
 override_dh_gencontrol:
 	dh_gencontrol -- -Tdebian/substvars.extra

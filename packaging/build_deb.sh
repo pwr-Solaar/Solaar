@@ -8,6 +8,7 @@ DEVSCRIPTS="${HOME}/.devscripts"
 DISTRIBUTION=${DISTRIBUTION:-debian}
 
 cd "$(dirname "$0")/.."
+UDEV_RULES="$PWD/rules.d"
 DEBIAN_FILES="$PWD/packaging/debian"
 DIST="$PWD/dist/$DISTRIBUTION"
 export DIST_RELEASE=${DIST_RELEASE:-UNRELEASED}
@@ -52,6 +53,7 @@ mv "$S" solaar_$VERSION.orig.tar.gz
 
 cd solaar-$VERSION
 cp -a "$DEBIAN_FILES" .
+test -s debian/solaar.udev || cp -a "$UDEV_RULES"/??-*.rules debian/solaar.udev
 cat >debian/changelog <<_CHANGELOG
 solaar ($VERSION-$BUILD_NUMBER$BUILD_EXTRA) $DIST_RELEASE; urgency=low
 
@@ -60,9 +62,10 @@ solaar ($VERSION-$BUILD_NUMBER$BUILD_EXTRA) $DIST_RELEASE; urgency=low
  -- $DEBFULLNAME <$DEBMAIL>  $(date -R)
 
 _CHANGELOG
-test -z "$BUILD_EXTRA" && cp debian/changelog "$DEBIAN_FILES"/changelog
+# if this is the main (Debian) build, update the changelog
+test "$BUILD_EXTRA" || cp -a debian/changelog "$DEBIAN_FILES"/changelog
 
-test -n "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
+test "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
 
 /usr/bin/debuild ${DEBUILD_ARGS:-$@} \
 	--lintian-opts --profile $DISTRIBUTION

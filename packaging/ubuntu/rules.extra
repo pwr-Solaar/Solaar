@@ -4,7 +4,8 @@ PREFIX = /opt/extras.ubuntu.com/solaar
 
 # hacky...
 override_dh_link:
-	dh_link
+	dh_link "$@"
+	# replace the Exec and Icon targets with the proper full paths
 	sed -i -e 's#Exec=solaar#Exec=/opt/extras.ubuntu.com/solaar/bin/solaar#' \
 		debian/solaar/opt/extras.ubuntu.com/solaar/share/applications/solaar.desktop
 	sed -i -e 's#Icon=solaar#Icon=/opt/extras.ubuntu.com/solaar/share/pixmaps/solaar.png#' \
