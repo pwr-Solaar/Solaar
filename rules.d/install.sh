@@ -10,19 +10,30 @@ if ! test -d "$RULES_D"; then
 	exit 1
 fi
 
-RULE=99-logitech-unifying-receiver.rules
+RULE=42-logitech-unify-permissions.rules
 
 if test -n "$1"; then
 	SOURCE="$1"
 else
 	SOURCE="$(dirname "$Z")/$RULE"
-	if ! id -G -n | grep -q -F plugdev; then
-		GROUP="$(id -g -n)"
-		echo "User '$USER' does not belong to the 'plugdev' group, will use group '$GROUP' in the udev rule."
-		TEMP_RULE="${TMPDIR:-/tmp}/$$-$RULE"
-		cp -f "$SOURCE" "$TEMP_RULE"
+	REALUSER="${SUDO_USER-$USER}"
+	if [ -z "$REALUSER" -o "$REALUSER" = "root" ]; then
+		: # ignore unknown and root user
+	else
+		GROUP=plugdev
+		TEMP_RULE="$(mktemp --tmpdir "ltudev.XXXXXXXX")"
+		sed -e "/^#MODE.*\"plugdev\"/s/^#//" "$SOURCE" > "$TEMP_RULE"
+		if ! id -G -n "$REALUSER" | grep -q -F plugdev; then
+			GROUP="$(id -g -n "$REALUSER")"
+			if getent group plugdev >/dev/null; then
+				printf "User '%s' does not belong to the 'plugdev' group, " "$REALUSER"
+			else
+				printf "Group 'plugdev' does not exist, "
+			fi
+			echo "will use group '$GROUP' in the udev rule."
+			sed -i -e "s/\"plugdev\"/\"$GROUP\"/" "$TEMP_RULE"
+		fi
 		SOURCE="$TEMP_RULE"
-		sed -i -e "s/GROUP=\"plugdev\"/GROUP=\"$GROUP\"/" "$SOURCE"
 	fi
 fi
 
@@ -36,7 +47,6 @@ if test "$(id -u)" != "0"; then
 fi
 
 echo "Installing $RULE."
-cp "$SOURCE" "$RULES_D/$RULE"
-chmod a+r "$RULES_D/$RULE"
+install -m 644 "$SOURCE" "$RULES_D/$RULE"
 
 echo "Done. Now remove the Unfiying Receiver and plug it in again."
