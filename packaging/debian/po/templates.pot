@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar\n"
+"Report-Msgid-Bugs-To: solaar@packages.debian.org\n"
+"POT-Creation-Date: 2013-06-17 16:01+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../solaar.templates:1001
+msgid "Use plugdev group?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../solaar.templates:1001
+msgid ""
+"By default, the Logitech receiver devices are only accessible by the root "
+"user."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../solaar.templates:1001
+msgid ""
+"To allow access to regular users (through solaar), the needed ACLs can be "
+"applied, either by the ConsoleKit or systemd daemon, to the current seat "
+"(logged-in user). Right now, ${SEAT_DAEMON_STATUS} daemon is running."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../solaar.templates:1001
+msgid ""
+"If neither of these daemons is installed on your system, or you want to make "
+"the receiver accessible to ssh logged-in through ssh, members of the "
+"'plugdev' system group can be given access to the receiver devices."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../solaar.templates:1001
+msgid ""
+"If you do use the 'plugdev' group, don't forget to make sure all your "
+"desktop users are members of the plugdev system group. You can add new "
+"members to the group by running, as root:\n"
+"    gpasswd --add <username> plugdev\n"
+"For the group membership to take effect, the affected users have to log-out "
+"and log-in again."
+msgstr ""
