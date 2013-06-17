@@ -115,7 +115,7 @@ class EventsListener(_threading.Thread):
 	Incoming packets will be passed to the callback function in sequence.
 	"""
 	def __init__(self, receiver, notifications_callback):
-		super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path)
+		super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
 
 		self.daemon = True
 		self._active = False
