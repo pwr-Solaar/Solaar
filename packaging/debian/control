@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
 Build-Depends: debhelper (>= 8)
-Build-Depends-Indep: python
+Build-Depends-Indep: python, po-debconf
 X-Python-Version: >= 2.7
 X-Python3-Version: >= 3.2
 Standards-Version: 3.9.4
@@ -13,10 +13,10 @@ Vcs-browser: http://github.com/pwr/Solaar
 
 Package: solaar
 Architecture: all
-Depends: ${misc:Depends}, udev (>= 175), passwd | adduser,
+Depends: ${misc:Depends}, ${debconf:Depends}, udev (>= 175), passwd | adduser,
  ${python:Depends}, python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
  ${DesktopIconTheme}
-Recommends: gir1.2-notify-0.7
+Recommends: gir1.2-notify-0.7, consolekit (>= 0.4.3) | systemd (>= 44)
 Suggests: solaar-gnome3 (= ${source:Version})
 Description: Logitech Unifying Receiver peripherals manager for Linux
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.

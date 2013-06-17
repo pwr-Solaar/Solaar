@@ -1,0 +1,39 @@
+# Allows non-root users to have raw access the Logitech Unifying USB Receiver
+# device. For development purposes, allowing users to write to the receiver is
+# potentially dangerous (e.g. perform firmware updates).
+
+ACTION != "add", GOTO="solaar_end"
+SUBSYSTEM != "hidraw", GOTO="solaar_end"
+
+# Unifying receiver
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c532", GOTO="solaar_apply"
+
+# Nano receiver, "Unifying ready"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GOTO="solaar_apply"
+
+GOTO="solaar_end"
+
+#
+#
+#
+LABEL="solaar_apply"
+
+# don't apply to the paired devices, just the receivers
+DRIVERS=="logitech-djdevice", GOTO="solaar_end"
+
+# if the package configuration does not want the plugdev group, don't change the
+# group and access mode
+PROGRAM="/usr/bin/debconf-show solaar", RESULT=="*use_plugdev_group: false*", GOTO="solaar_no_plugdev"
+MODE="0660", GROUP="plugdev"
+
+LABEL="solaar_no_plugdev"
+# tags for systemd/consolekit, they will apply the right ACLs for seated users
+TAG+="uaccess", TAG+="udev-acl"
+
+#
+#
+#
+
+LABEL="solaar_end"
+# vim: ft=udevrules
