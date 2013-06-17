@@ -1,7 +1,7 @@
 Template: solaar/use_plugdev_group
 Type: boolean
 Default: false
-Description: Use plugdev group?
+_Description: Use plugdev group?
  By default, the Logitech receiver devices are only accessible by the root user.
  .
  To allow access to regular users (through solaar), the needed ACLs can be
@@ -10,18 +10,12 @@ Description: Use plugdev group?
  Right now, ${SEAT_DAEMON_STATUS} daemon is running.
  .
  If neither of these daemons is installed on your system, or you want to make
- the receiver accessible to ssh users, members of the 'plugdev' system group
- can be given access to the receiver devices.
-
-Template: solaar/plugdev_membership
-Type: note
-Description:
- Don't forget to make sure all your desktop users are members of the plugdev
- system group.
+ the receiver accessible to ssh logged-in through ssh, members of the 'plugdev'
+ system group can be given access to the receiver devices.
  .
- You can add new members to the group by running, as root:
- .
+ If you do use the 'plugdev' group, don't forget to make sure all your desktop
+ users are members of the plugdev system group. You can add new members to the
+ group by running, as root:
      gpasswd --add <username> plugdev
- .
  For the group membership to take effect, the affected users have to log-out
  and log-in again.

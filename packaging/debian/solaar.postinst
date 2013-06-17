@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+. /usr/share/debconf/confmodule
+db_get solaar/use_plugdev_group
+if test "$RET" = true; then
+	# make sure the group exists if required
+	if ! getent group plugdev >/dev/null; then
+		groupadd --system plugdev || addgroup --system plugdev
+	fi
+fi
+
+#DEBHELPER#
