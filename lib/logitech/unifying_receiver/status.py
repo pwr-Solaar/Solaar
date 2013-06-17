@@ -218,9 +218,8 @@ class DeviceStatus(dict):
 				# get cleared when the device is turned off (but not when the device
 				# goes idle, and we can't tell the difference right now).
 				d.enable_notifications()
-				d.settings, None
 				if self.configuration:
-					self.configuration.apply_to(d)
+					self.configuration.attach_to(d)
 		else:
 			if was_active:
 				battery = self.get(BATTERY_LEVEL)
@@ -229,8 +228,6 @@ class DeviceStatus(dict):
 				# to change much while the device is offline.
 				if battery is not None:
 					self[BATTERY_LEVEL] = battery
-				if self.configuration:
-					self.configuration.acquire_from(d)
 
 		if self.updated == 0 and active:
 			# if the device is active on the very first status notification,
@@ -360,7 +357,7 @@ class DeviceStatus(dict):
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
 
 			# if the device just came online, read the battery charge
-			if self._active:  # and BATTERY_LEVEL not in self:
+			if self._active and BATTERY_LEVEL not in self:
 				self.read_battery()
 
 			return True

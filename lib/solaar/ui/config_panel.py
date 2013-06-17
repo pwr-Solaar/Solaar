@@ -186,11 +186,11 @@ def update(frame):
 		if device.status:
 			items = list(_add_settings(box, device))
 			assert len(device.settings) == len(items)
-			force_read = True
+			# force_read = True
 
 	device_active = bool(device.status)
 	# if the device just became active, re-read the settings
-	force_read |= device_active and not box.get_sensitive()
+	# force_read |= device_active and not box.get_sensitive()
 	box.set_sensitive(device_active)
 	if device_active:
 		for sbox, s in zip(items, device.settings):

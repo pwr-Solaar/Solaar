@@ -67,6 +67,7 @@ def all():
 def _device_key(device):
 	return '%s:%s' % (device.serial, device.kind)
 
+
 def _device_entry(device):
 	if not _configuration:
 		_load()
@@ -81,66 +82,17 @@ def _device_entry(device):
 	return c
 
 
-def set(key, value):
-	set(None, key, value)
-
-
-def get(key, default_value=None):
-	return
-
-
-def set_device(device, key, value):
-	_device_entry(device)[key] = value
-
-
-def get_device(device, key, default_value=None):
-	return _device_entry(device).get(key, default_value)
-
-
-def apply_to(device):
+def attach_to(device):
 	"""Apply the last saved configuration to a device."""
 	if not _configuration:
 		_load()
 
-	entry = _device_entry(device)
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("applying %s to %s", entry, device)
-
+	persister = _device_entry(device)
 	for s in device.settings:
-		value = s.read()
-		if s.name in entry:
-			if value is None:
-				del entry[s.name]
-			elif value != entry[s.name]:
-				s.write(entry[s.name])
+		if s.persister is None:
+			s.persister = persister
+		assert s.persister == persister
+		if s.name in persister:
+			s.write(persister[s.name])
 		else:
-			entry[s.name] = value
-
-
-def acquire_from(device):
-	"""Read the values of all the settings a device has, and save them."""
-	if not _configuration:
-		_load()
-
-	entry = _device_entry(device)
-	for s in device.settings:
-		value = s.read()
-		if value is not None:
-			entry[s.name] = value
-
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("acquired %s from %s", entry, device)
-
-	save()
-
-
-def forget(device):
-	if not _configuration:
-		_load()
-
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("forgetting %s", device)
-
-	device_key = _device_key(device)
-	if device_key in _configuration:
-		del _configuration[device_key]
+			persister[s.name] = s.read(cached=False)

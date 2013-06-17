@@ -16,9 +16,8 @@ from .common import NamedInt as _NamedInt, NamedInts as _NamedInts
 KIND = _NamedInts(toggle=0x1, choice=0x02, range=0x12)
 
 class _Setting(object):
-	__slots__ = ['name', 'label', 'description',
-					'kind', '_rw', '_validator',
-					'_device', '_value']
+	__slots__ = ['name', 'label', 'description', 'kind', 'persister',
+					'_rw', '_validator', '_device', '_value']
 
 	def __init__(self, name, rw, validator, kind=None, label=None, description=None):
 		assert name
@@ -31,6 +30,7 @@ class _Setting(object):
 
 		assert kind is None or kind & validator.kind != 0
 		self.kind = kind or validator.kind
+		self.persister = None
 
 	def __call__(self, device):
 		o = _copy(self)
@@ -43,14 +43,17 @@ class _Setting(object):
 		return self._validator.choices if self._validator.kind & KIND.choice else None
 
 	def read(self, cached=True):
+		if cached and self._value is not None:
+			if self.persister and self.name not in self.persister:
+				self.persister[self.name] = self._value
+			return self._value
+
 		if self._device:
-			if self._value is None or not cached:
-				reply = self._rw.read(self._device)
-				# print ("read reply", repr(reply))
-				if reply:
-					# print ("pre-read", self._value)
-					self._value = self._validator.validate_read(reply)
-					# print ("post-read", self._value)
+			reply = self._rw.read(self._device)
+			if reply:
+				self._value = self._validator.validate_read(reply)
+			if self.persister and self.name not in self.persister:
+				self.persister[self.name] = self._value
 			return self._value
 
 	def write(self, value):
@@ -59,6 +62,8 @@ class _Setting(object):
 			reply = self._rw.write(self._device, data_bytes)
 			if reply:
 				self._value = self._validator.validate_write(value, reply)
+			if self.persister and self._value is not None:
+				self.persister[self.name] = self._value
 			return self._value
 
 	def __str__(self):
