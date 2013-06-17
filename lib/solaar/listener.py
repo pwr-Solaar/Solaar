@@ -77,8 +77,6 @@ class ReceiverListener(_listener.EventsListener):
 				_log.exception("closing receiver %s" % r.path)
 		self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
 
-		configuration.save()
-
 	def tick(self, timestamp):
 		if not self.tick_period:
 			raise Exception("tick() should not be called without a tick_period: %s", self)
@@ -134,19 +132,10 @@ class ReceiverListener(_listener.EventsListener):
 		assert device.receiver == self.receiver
 
 		if device.status is None:
-			# device was just un-paired
-			# it may be paired later, possibly to another receiver?
-			# so maybe we shouldn't forget about it
-			# configuration.forget(device)
-
 			# device was unpaired, and since the object is weakref'ed
 			# it won't be valid for much longer
 			_log.info("device %s was unpaired, ghosting", device)
 			device = _ghost(device)
-
-		# elif device.status:
-		# 	configuration.apply_to(device)
-		# 	configuration.acquire_from(device)
 
 		self.status_changed_callback(device, alert, reason)
 
@@ -227,6 +216,8 @@ def stop_all():
 				l.stop()
 		for l in listeners:
 			l.join()
+
+	configuration.save()
 
 
 _status_callback = None
