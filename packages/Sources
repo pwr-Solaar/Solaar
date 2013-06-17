@@ -56,3 +56,32 @@ Files:
  504bbdf905489c287aedd163c9a9badf 81886 solaar_0.8.9.2.orig.tar.gz
  30adcfeb7111a285f40f01c072ed5457 2410 solaar_0.8.9.2-4.debian.tar.gz
 
+Format: 3.0 (quilt)
+Package: solaar
+Binary: solaar, solaar-gnome3
+Architecture: all
+Version: 0.8.9.4-3
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Homepage: http://pwr.github.io/Solaar
+Standards-Version: 3.9.4
+Vcs-Browser: http://github.com/pwr/Solaar
+Vcs-Git: git://github.com/pwr/Solaar.git
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: python, po-debconf
+Package-List: 
+ solaar deb misc optional
+ solaar-gnome3 deb gnome optional
+Directory: .
+Checksums-Sha1: 
+ 3d4baa8c80c2a960a9e07540a3be8072da724049 1518 solaar_0.8.9.4-3.dsc
+ 7e59983cb3c2caa2eb69bda2e2e26a0f2e8ee434 82961 solaar_0.8.9.4.orig.tar.gz
+ 44f488110282ce0d5cb8da8cda960ed6e86f3b2b 4670 solaar_0.8.9.4-3.debian.tar.gz
+Checksums-Sha256: 
+ 0f9222c3afc6b123f33c1ba07f9bcfae837927c78a56e5740ce3424a0ee60d52 1518 solaar_0.8.9.4-3.dsc
+ 0b0961ae67df709df503ed20c3769d2e8f0da62e29d85c1803e7038423db5aa9 82961 solaar_0.8.9.4.orig.tar.gz
+ 4915e14350d83d5963524f566444afd30cd435b889ded485687d60a144333154 4670 solaar_0.8.9.4-3.debian.tar.gz
+Files: 
+ 448084cab6a5c67ce99f50a27c5e9267 1518 solaar_0.8.9.4-3.dsc
+ 7a8dc9cfab3929304b413e2f67b94fa1 82961 solaar_0.8.9.4.orig.tar.gz
+ ccb62430266560e5ab7286a288b145f1 4670 solaar_0.8.9.4-3.debian.tar.gz
+
