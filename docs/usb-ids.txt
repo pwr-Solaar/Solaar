@@ -1,0 +1,12 @@
+Unifying receiver:
+	046d:c52b		interface: 2		driver: logitech-djreceiver
+	046d:c532		interface: 2		driver: logitech-djreceiver
+
+
+Nano receiver, Advanced/Unifying ready:
+	046d:c52f		interface: 1		driver: hid-generic
+
+
+Nano receiver:
+	046d:c51a		interface: 1		driver: hid-generic
+	046d:c526		interface: 1		driver: hid-generic
