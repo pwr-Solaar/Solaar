@@ -76,6 +76,7 @@ cp -up "$SELF/dist/debian"/solaar_* "$SITE/../packages/"
 cp -up "$SELF/dist/debian"/solaar-gnome3_* "$SITE/../packages/"
 if test -x /usr/bin/dpkg-scanpackages; then
 	cd "$SITE/../packages/"
+	rm -f *.build
 	dpkg-scanpackages -m . > Packages
 	dpkg-scansources . > Sources
 	add_md docs/debian-repo.md packages/index.md
