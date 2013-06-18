@@ -40,11 +40,15 @@ def _register_dpi(register, choices):
 					label=_DPI[1], description=_DPI[2])
 
 
+def _feature_fn_swap():
+	return _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION,
+					write_returns_value=True,
+					label=_FN_SWAP[1], description=_FN_SWAP[2])
+
+
 def check_features(device, already_known):
 	if _hidpp20.FEATURE.FN_INVERSION in device.features and not any(s.name == 'fn-swap' for s in already_known):
-		tfn = _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION, write_returns_value=True,
-						label=_FN_SWAP[1], description=_FN_SWAP[2])
-		already_known.append(tfn(device))
+		already_known.append(_feature_fn_swap())
 
 #
 #
@@ -125,7 +129,11 @@ _D('Wireless Keyboard K700', codename='MK700',
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
 						],
 				)
-_D('Wireless Solar Keyboard K750')
+_D('Wireless Solar Keyboard K750',
+				settings=[
+							_feature_fn_swap()
+						],
+				)
 _D('Wireless Illuminated Keyboard K800',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
