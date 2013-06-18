@@ -70,9 +70,9 @@ class DeviceUnreachable(_KwException):
 #
 
 # vendor_id, product_id, usb interface number, hid driver
-DEVICE_UNIFYING_RECEIVER	= (0x046d, 0xc52b, 2, 'logitech-djreceiver')
-DEVICE_UNIFYING_RECEIVER_2	= (0x046d, 0xc532, 2, 'logitech-djreceiver')
-DEVICE_NANO_RECEIVER		= (0x046d, 0xc52f, 1, 'hid-generic')
+DEVICE_UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, 'logitech-djreceiver')
+DEVICE_UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, 'logitech-djreceiver')
+DEVICE_NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, 'hid-generic')
 
 
 def receivers():
@@ -81,10 +81,8 @@ def receivers():
 		yield d
 	for d in _hid.enumerate(*DEVICE_UNIFYING_RECEIVER_2):
 		yield d
-	for d in _hid.enumerate(*DEVICE_NANO_RECEIVER):
+	for d in _hid.enumerate(*DEVICE_NANO_RECEIVER_ADVANCED):
 		yield d
-	# for d in _hid.enumerate(*DEVICE_VXNANO_RECEIVER):
-	# 	yield d
 
 
 def notify_on_receivers_glib(callback):
@@ -92,8 +90,7 @@ def notify_on_receivers_glib(callback):
 	_hid.monitor_glib(callback,
 					DEVICE_UNIFYING_RECEIVER,
 					DEVICE_UNIFYING_RECEIVER_2,
-					DEVICE_NANO_RECEIVER,
-					# DEVICE_VXNANO_RECEIVER,
+					DEVICE_NANO_RECEIVER_ADVANCED,
 		)
 
 #
