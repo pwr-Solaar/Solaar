@@ -81,10 +81,6 @@ class ReceiverListener(_listener.EventsListener):
 		if not self.tick_period:
 			raise Exception("tick() should not be called without a tick_period: %s", self)
 
-		if not self.receiver:
-			# just in case the receiver was just removed
-			return
-
 		# not necessary anymore, we're now using udev monitor to watch for receiver status
 		# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
 		# 	# if we missed a couple of polls, most likely the computer went into
@@ -95,26 +91,29 @@ class ReceiverListener(_listener.EventsListener):
 
 		self._last_tick = timestamp
 
-		# read these in case they haven't been read already
-		# self.receiver.serial, self.receiver.firmware
-		if self.receiver.status.lock_open:
-			# don't mess with stuff while pairing
-			return
+		try:
+			# read these in case they haven't been read already
+			# self.receiver.serial, self.receiver.firmware
+			if self.receiver.status.lock_open:
+				# don't mess with stuff while pairing
+				return
 
-		self.receiver.status.poll(timestamp)
+			self.receiver.status.poll(timestamp)
 
-		# Iterating directly through the reciver would unnecessarily probe
-		# all possible devices, even unpaired ones.
-		# Checking for each device number in turn makes sure only already
-		# known devices are polled.
-		# This is okay because we should have already known about them all
-		# long before the first poll() happents, through notifications.
-		for number in range(1, 6):
-			if number in self.receiver:
-				dev = self.receiver[number]
-				assert dev
-				if dev.status is not None:
-					dev.status.poll(timestamp)
+			# Iterating directly through the reciver would unnecessarily probe
+			# all possible devices, even unpaired ones.
+			# Checking for each device number in turn makes sure only already
+			# known devices are polled.
+			# This is okay because we should have already known about them all
+			# long before the first poll() happents, through notifications.
+			for number in range(1, 6):
+				if number in self.receiver:
+					dev = self.receiver[number]
+					assert dev
+					if dev.status is not None:
+						dev.status.poll(timestamp)
+		except Exception as e:
+			_log.exception("polling", e)
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		assert device is not None
