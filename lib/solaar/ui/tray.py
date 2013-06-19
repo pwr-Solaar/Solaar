@@ -439,9 +439,9 @@ def update(device=None):
 	if device is not None:
 		if device.kind is None:
 			# receiver
-			receiver = device
-			receiver_path = receiver.path
-			if receiver:
+			is_alive = bool(device)
+			receiver_path = device.path
+			if is_alive:
 				index = None
 				for idx, (path, _, _, _, _) in enumerate(_devices_info):
 					if path == receiver_path:
@@ -449,26 +449,27 @@ def update(device=None):
 						break
 
 				if index is None:
-					_add_receiver(receiver)
+					_add_receiver(device)
 			else:
-				_remove_receiver(receiver)
+				_remove_receiver(device)
 
 		else:
-			receiver_path = device.receiver.path
 			# peripheral
+			is_alive = device.status is not None
+			receiver_path = device.receiver.path
 			index = None
 			for idx, (path, serial, name, _, _) in enumerate(_devices_info):
 				if path == receiver_path and serial == device.serial:
 					index = idx
 
-			if device.status is None:
-				# was just unpaired
-				assert index is not None
-				_remove_device(index)
-			else:
+			if is_alive:
 				if index is None:
 					index = _add_device(device)
 				_update_menu_item(index, device.status)
+			else:
+				# was just unpaired
+				if index:
+					_remove_device(index)
 
 		menu_items = _menu.get_children()
 		no_receivers_index = len(_devices_info)

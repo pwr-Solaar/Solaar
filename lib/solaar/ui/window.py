@@ -685,7 +685,7 @@ def update(device, need_popup=False):
 
 		elif item:
 			_model.remove(item)
-			_config_panel.clean(device.path)
+			_config_panel.clean(device.serial)
 
 	# make sure all rows are visible
 	_tree.expand_all()

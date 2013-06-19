@@ -41,12 +41,12 @@ def _parse_arguments():
 
 def _run(args):
 	import solaar.ui as ui
+	ui.init()
 
 	import solaar.listener as listener
 	listener.start_scanner(ui.status_changed, ui.error_dialog)
 
 	# main UI event loop
-	ui.init()
 	ui.run_loop()
 	ui.destroy()
 
