@@ -177,7 +177,8 @@ def get_firmware(device):
 
 
 def get_notification_flags(device):
-	if device.kind:
+	if device.kind is not None:
+		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
 		if p is None or p >= 2.0:
 			return
@@ -189,7 +190,8 @@ def get_notification_flags(device):
 
 
 def set_notification_flags(device, *flag_bits):
-	if device.kind:
+	if device.kind is not None:
+		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
 		if p is None or p >= 2.0:
 			return

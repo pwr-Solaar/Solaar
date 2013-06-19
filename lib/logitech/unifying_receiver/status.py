@@ -92,7 +92,7 @@ class ReceiverStatus(dict):
 		# make sure to read some stuff that may be read later by the UI
 		r.serial, r.firmware, None
 
-		# r.enable_notifications()
+		# get an update of the notification flags
 		self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
 
 	def process_notification(self, n):

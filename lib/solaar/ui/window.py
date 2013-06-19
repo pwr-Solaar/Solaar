@@ -49,7 +49,7 @@ _UNIFYING_RECEIVER_TEXT = (
 		'%d paired device(s).\n\n<small>Up to %d devices can be paired to this receiver.</small>',
 	)
 _NANO_RECEIVER_TEXT = (
-	'No paired device.\n\n<small> \n </small>',
+	'No paired device.\n\n<small> </small>',
 	' \n\n<small>Only one device can be paired to this receiver.</small>',
 	)
 
@@ -144,6 +144,7 @@ def _create_details_panel():
 	p = Gtk.Frame()
 	# p.set_border_width(2)
 	p.set_shadow_type(Gtk.ShadowType.ETCHED_OUT)
+	p.set_size_request(240, 90)
 
 	p._text = Gtk.Label()
 	p._text.set_padding(4, 4)
@@ -225,7 +226,7 @@ def _create_info_panel():
 
 def _create_tree(model):
 	tree = Gtk.TreeView()
-	tree.set_size_request(240, 120)
+	tree.set_size_request(240, 0)
 	tree.set_headers_visible(False)
 	tree.set_show_expanders(False)
 	tree.set_level_indentation(16)
@@ -437,6 +438,7 @@ def _update_details(button):
 			if device.kind is None:
 				yield ('Path', device.path)
 			else:
+				# yield ('Codename', device.codename)
 				hid = device.protocol
 				yield ('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown')
 				if device.polling_rate:
@@ -451,11 +453,11 @@ def _update_details(button):
 			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
 			if flag_bits is not None:
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
-				yield ('Notifications', ('\n%16s' % ' ').join(flag_names))
+				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
 
 		items = _details_items(device)
-		markup_text = '<small><tt>' + '\n'.join('%-14s: %s' % i for i in items if i) + '</tt></small>'
-		_details._text.set_markup(markup_text)
+		text = '\n'.join('%-13s: %s' % i for i in items if i)
+		_details._text.set_markup('<small><tt>' + text + '</tt></small>')
 
 	_details.set_visible(visible)
 
@@ -469,7 +471,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 			panel._count.set_markup(_UNIFYING_RECEIVER_TEXT[1] % (devices_count, receiver.max_devices))
 	else:
 		if devices_count == 0:
-			panel._count.set_text(_NANO_RECEIVER_TEXT[0])
+			panel._count.set_markup(_NANO_RECEIVER_TEXT[0])
 		else:
 			panel._count.set_markup(_NANO_RECEIVER_TEXT[1])
 

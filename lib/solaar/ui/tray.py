@@ -29,11 +29,6 @@ _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 #
 #
 
-# for which device to show the battery info in systray, if more than one
-_picked_device = None
-
-
-
 def _create_menu():
 	menu = Gtk.Menu()
 
@@ -409,6 +404,10 @@ def _update_menu_item(index, device_status):
 #
 #
 
+# for which device to show the battery info in systray, if more than one
+_picked_device = None
+
+# cached list of devices and some of their properties
 _devices_info = []
 _menu = None
 _icon = None

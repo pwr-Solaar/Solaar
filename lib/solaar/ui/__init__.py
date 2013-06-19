@@ -63,8 +63,7 @@ def destroy():
 from logitech.unifying_receiver.status import ALERT
 def _status_changed(device, alert, reason):
 	assert device is not None
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("status changed: %s, %s, %s", device, alert, reason)
+	_log.info("status changed: %s, %s, %s", device, alert, reason)
 
 	tray.update(device)
 	if alert & ALERT.ATTENTION:
