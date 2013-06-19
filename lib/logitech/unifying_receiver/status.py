@@ -68,8 +68,8 @@ class ReceiverStatus(dict):
 		self.lock_open = False
 		self.new_device = None
 
-		self[NOTIFICATIONS] = _hidpp10.get_notification_flags(receiver)
 		self[KEYS.ERROR] = None
+		self[KEYS.NOTIFICATION_FLAGS] = receiver.enable_notifications()
 
 	def __str__(self):
 		count = len(self._receiver)

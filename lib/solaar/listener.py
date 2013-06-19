@@ -56,7 +56,7 @@ class ReceiverListener(_listener.EventsListener):
 
 	def has_started(self):
 		_log.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
-		self.receiver.enable_notifications()
+		# self.receiver.enable_notifications()
 		self.receiver.notify_devices()
 		self._status_changed(self.receiver)  #, _status.ALERT.NOTIFICATION)
 
