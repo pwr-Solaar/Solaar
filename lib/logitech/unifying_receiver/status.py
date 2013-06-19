@@ -30,14 +30,15 @@ from . import hidpp20 as _hidpp20
 
 ALERT = _NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
 
-# device properties that may be reported
-ENCRYPTED='encrypted'
-BATTERY_LEVEL='battery-level'
-BATTERY_STATUS='battery-status'
-BATTERY_CHARGING='battery-charging'
-LIGHT_LEVEL='light-level'
-ERROR='error'
-NOTIFICATIONS='notifications'
+KEYS = _NamedInts(
+				BATTERY_LEVEL=1,
+				BATTERY_CHARGING=2,
+				BATTERY_STATUS=3,
+				LIGHT_LEVEL=4,
+				LINK_ENCRYPTED=5,
+				NOTIFICATION_FLAGS=6,
+				ERROR=7,
+			)
 
 # If the battery charge is under this percentage, trigger an attention event
 # (blink systray icon/notification/whatever).
@@ -67,8 +68,8 @@ class ReceiverStatus(dict):
 		self.lock_open = False
 		self.new_device = None
 
-		self[ERROR] = None
 		self[NOTIFICATIONS] = _hidpp10.get_notification_flags(receiver)
+		self[KEYS.ERROR] = None
 
 	def __str__(self):
 		count = len(self._receiver)
@@ -92,7 +93,7 @@ class ReceiverStatus(dict):
 		r.serial, r.firmware, None
 
 		# r.enable_notifications()
-		self[NOTIFICATIONS] = _hidpp10.get_notification_flags(r)
+		self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
 
 	def process_notification(self, n):
 		if n.sub_id == 0x4A:
@@ -100,15 +101,15 @@ class ReceiverStatus(dict):
 			reason = 'pairing lock is ' + ('open' if self.lock_open else 'closed')
 			_log.info("%s: %s", self._receiver, reason)
 
-			self[ERROR] = None
+			self[KEYS.ERROR] = None
 			if self.lock_open:
 				self.new_device = None
 
 			pair_error = ord(n.data[:1])
 			if pair_error:
-				self[ERROR] = _hidpp10.PAIRING_ERRORS[pair_error]
+				self[KEYS.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
 				self.new_device = None
-				_log.warn("pairing error %d: %s", pair_error, self[ERROR])
+				_log.warn("pairing error %d: %s", pair_error, error_string)
 
 			self._changed(reason=reason)
 			return True
@@ -145,14 +146,14 @@ class DeviceStatus(dict):
 				return format % value
 
 		def _items():
-			battery_level = _item(BATTERY_LEVEL, 'Battery: %d%%')
+			battery_level = _item(KEYS.BATTERY_LEVEL, 'Battery: %d%%')
 			if battery_level:
 				yield battery_level
-				battery_status = _item(BATTERY_STATUS, ' (%s)')
+				battery_status = _item(KEYS.BATTERY_STATUS, ' (%s)')
 				if battery_status:
 					yield battery_status
 
-			light_level = _item(LIGHT_LEVEL, 'Light: %d lux')
+			light_level = _item(KEYS.LIGHT_LEVEL, 'Light: %d lux')
 			if light_level:
 				if battery_level:
 					yield ', '
@@ -171,11 +172,11 @@ class DeviceStatus(dict):
 			_log.debug("%s: battery %d%%, %s", self._device, level, status)
 
 		# TODO: this is also executed when pressing Fn+F7 on K800.
-		old_level, self[BATTERY_LEVEL] = self.get(BATTERY_LEVEL), level
-		old_status, self[BATTERY_STATUS] = self.get(BATTERY_STATUS), status
+		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
+		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
 
 		charging = status in ('charging', 'recharging', 'slow recharge')
-		old_charging, self[BATTERY_CHARGING] = self.get(BATTERY_CHARGING), charging
+		old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
 		changed = old_level != level or old_status != status or old_charging != charging
 		alert, reason = ALERT.NONE, None
@@ -207,9 +208,9 @@ class DeviceStatus(dict):
 			if battery:
 				level, status = battery
 				self.set_battery_info(level, status, timestamp=timestamp)
-			elif BATTERY_STATUS in self:
-				self[BATTERY_STATUS] = None
-				self[BATTERY_CHARGING] = None
+			elif KEYS.BATTERY_STATUS in self:
+				self[KEYS.BATTERY_STATUS] = None
+				self[KEYS.BATTERY_CHARGING] = None
 				self._changed()
 
 	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
@@ -222,18 +223,17 @@ class DeviceStatus(dict):
 				# Make sure to set notification flags on the device, they
 				# get cleared when the device is turned off (but not when the device
 				# goes idle, and we can't tell the difference right now).
-				self[NOTIFICATIONS] = d.enable_notifications()
-
+				self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
 				if self.configuration:
 					self.configuration.attach_to(d)
 		else:
 			if was_active:
-				battery = self.get(BATTERY_LEVEL)
+				battery = self.get(KEYS.BATTERY_LEVEL)
 				self.clear()
 				# If we had a known battery level before, assume it's not going
 				# to change much while the device is offline.
 				if battery is not None:
-					self[BATTERY_LEVEL] = battery
+					self[KEYS.BATTERY_LEVEL] = battery
 
 		if self.updated == 0 and active:
 			# if the device is active on the very first status notification,
@@ -272,7 +272,7 @@ class DeviceStatus(dict):
 					self._changed(active=False, reason='out of range')
 
 			# if still active, make sure we know the battery level
-			if BATTERY_LEVEL not in self:
+			if KEYS.BATTERY_LEVEL not in self:
 				self.read_battery(timestamp)
 
 		elif timestamp - self.updated > _STATUS_TIMEOUT:
@@ -350,7 +350,7 @@ class DeviceStatus(dict):
 					has_payload = bool(flags & 0x80)
 					_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
 								self._device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
-				self[ENCRYPTED] = link_encrypyed
+				self[KEYS.LINK_ENCRYPTED] = link_encrypyed
 				self._changed(link_established)
 
 				if protocol_name == 'eQuad':
@@ -363,7 +363,7 @@ class DeviceStatus(dict):
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
 
 			# if the device just came online, read the battery charge
-			if self._active and BATTERY_LEVEL not in self:
+			if self._active and KEYS.BATTERY_LEVEL not in self:
 				self.read_battery()
 
 			return True
@@ -420,16 +420,16 @@ class DeviceStatus(dict):
 		if feature == _hidpp20.FEATURE.SOLAR_DASHBOARD:
 			if n.data[5:9] == b'GOOD':
 				charge, lux, adc = _unpack('!BHH', n.data[:5])
-				self[BATTERY_LEVEL] = charge
+				self[KEYS.BATTERY_LEVEL] = charge
 				# guesstimate the battery voltage, emphasis on 'guess'
-				self[BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
+				self[KEYS.BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
 				if n.address == 0x00:
-					self[LIGHT_LEVEL] = None
-					self[BATTERY_CHARGING] = None
+					self[KEYS.LIGHT_LEVEL] = None
+					self[KEYS.BATTERY_CHARGING] = None
 					self._changed()
 				elif n.address == 0x10:
-					self[LIGHT_LEVEL] = lux
-					self[BATTERY_CHARGING] = lux > 200
+					self[KEYS.LIGHT_LEVEL] = lux
+					self[KEYS.BATTERY_CHARGING] = lux > 200
 					self._changed()
 				elif n.address == 0x20:
 					_log.debug("%s: Light Check button pressed", self._device)

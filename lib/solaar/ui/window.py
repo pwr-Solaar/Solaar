@@ -15,13 +15,7 @@ from solaar import NAME
 # from solaar import __version__ as VERSION
 from logitech.unifying_receiver import hidpp10 as _hidpp10
 from logitech.unifying_receiver.common import NamedInts as _NamedInts
-from logitech.unifying_receiver.status import (
-				BATTERY_LEVEL as _BATTERY_LEVEL,
-				BATTERY_CHARGING as _BATTERY_CHARGING,
-				LIGHT_LEVEL as _LIGHT_LEVEL,
-				ENCRYPTED as _ENCRYPTED,
-				NOTIFICATIONS as _NOTFITICATIONS,
-				)
+from logitech.unifying_receiver.status import KEYS as _K
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
 from .about import show_window as _show_about_window
@@ -454,7 +448,7 @@ def _update_details(button):
 			for fw in list(device.firmware):
 				yield (fw.kind, (fw.name + ' ' + fw.version).strip())
 
-			flag_bits = device.status.get(_NOTFITICATIONS)
+			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
 			if flag_bits is not None:
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
 				yield ('Notifications', ('\n%16s' % ' ').join(flag_names))
@@ -503,7 +497,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 	is_active = bool(device.status)
 	panel.set_sensitive(is_active)
 
-	battery_level = device.status.get(_BATTERY_LEVEL)
+	battery_level = device.status.get(_K.BATTERY_LEVEL)
 	if battery_level is None:
 		icon_name = _icons.battery()
 		panel._battery._icon.set_sensitive(False)
@@ -511,7 +505,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._text.set_sensitive(True)
 		panel._battery._text.set_markup('<small>unknown</small>')
 	else:
-		charging = device.status.get(_BATTERY_CHARGING)
+		charging = device.status.get(_K.BATTERY_CHARGING)
 		icon_name = _icons.battery(battery_level, charging)
 		panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
 		panel._battery._icon.set_sensitive(True)
@@ -526,7 +520,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._text.set_markup(text)
 
 	if is_active:
-		not_secure = device.status.get(_ENCRYPTED) == False
+		not_secure = device.status.get(_K.LINK_ENCRYPTED) == False
 		if not_secure:
 			panel._secure._text.set_text('not encrypted')
 			panel._secure._icon.set_from_icon_name('security-low', _INFO_ICON_SIZE)
@@ -542,7 +536,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._secure.set_tooltip_text('')
 
 	if is_active:
-		light_level = device.status.get(_LIGHT_LEVEL)
+		light_level = device.status.get(_K.LIGHT_LEVEL)
 		if light_level is None:
 			panel._lux.set_visible(False)
 		else:
@@ -669,11 +663,11 @@ def update(device, need_popup=False):
 		item = _device_row(device.receiver.path, device.serial, device if is_alive else None)
 		if is_alive and item:
 			_model.set_value(item, _COLUMN.ACTIVE, bool(device.status))
-			battery_level = device.status.get(_BATTERY_LEVEL)
+			battery_level = device.status.get(_K.BATTERY_LEVEL)
 			if battery_level is None:
 				_model.set_value(item, _COLUMN.STATUS_ICON, '')
 			else:
-				charging = device.status.get(_BATTERY_CHARGING)
+				charging = device.status.get(_K.BATTERY_CHARGING)
 				icon_name = _icons.battery(battery_level, charging)
 				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
