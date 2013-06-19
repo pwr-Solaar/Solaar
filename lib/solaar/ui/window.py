@@ -451,7 +451,7 @@ def _update_details(button):
 
 			yield ('Serial', device.serial)
 
-			for fw in device.firmware:
+			for fw in list(device.firmware):
 				yield (fw.kind, (fw.name + ' ' + fw.version).strip())
 
 			flag_bits = device.status.get(_NOTFITICATIONS)
