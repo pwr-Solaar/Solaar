@@ -175,10 +175,13 @@ def _pairing_succeeded(assistant, receiver, device):
 	assistant.commit()
 
 
-def create(action, receiver):
+def create(receiver):
+	assert receiver is not None
+	assert receiver.kind is None
+
 	assistant = Gtk.Assistant()
-	assistant.set_title(action.get_label())
-	assistant.set_icon_name(action.get_icon_name())
+	assistant.set_title(receiver.name + ': pair new device')
+	assistant.set_icon_name('list-add')
 
 	assistant.set_size_request(400, 240)
 	assistant.set_resizable(False)

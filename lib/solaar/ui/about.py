@@ -25,6 +25,7 @@ def _create():
 
 	about.set_authors(('Daniel Pavel http://github.com/pwr',))
 	try:
+		about.add_credit_section('GUI design', ('Julien Gascard',))
 		about.add_credit_section('Testing', (
 						'Douglas Wagner',
 						'Julien Gascard',
@@ -56,7 +57,7 @@ def _create():
 	return about
 
 
-def show_window(_):
+def show_window(trigger=None):
 	global _dialog
 	if _dialog is None:
 		_dialog = _create()

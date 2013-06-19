@@ -43,10 +43,11 @@ about = make('help-about', 'About ' + NAME, _show_about_window)
 #
 
 from . import pair_window
-def _pair_device(action, frame):
-	window = frame.get_toplevel()
+def pair(window, receiver):
+	assert receiver is not None
+	assert receiver.kind is None
 
-	pair_dialog = pair_window.create(action, frame._device)
+	pair_dialog = pair_window.create(receiver)
 	pair_dialog.set_transient_for(window)
 	pair_dialog.set_destroy_with_parent(True)
 	pair_dialog.set_modal(True)
@@ -54,14 +55,12 @@ def _pair_device(action, frame):
 	pair_dialog.set_position(Gtk.WindowPosition.CENTER)
 	pair_dialog.present()
 
-def pair(frame):
-	return make('list-add', 'Pair new device', _pair_device, frame)
-
 
 from ..ui import error_dialog
-def _unpair_device(action, frame):
-	window = frame.get_toplevel()
-	device = frame._device
+def unpair(window, device):
+	assert device is not None
+	assert device.kind is not None
+
 	qdialog = Gtk.MessageDialog(window, 0,
 								Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
 								"Unpair device\n%s ?" % device.name)
@@ -71,10 +70,11 @@ def _unpair_device(action, frame):
 	choice = qdialog.run()
 	qdialog.destroy()
 	if choice == Gtk.ResponseType.ACCEPT:
-		try:
-			del device.receiver[device.number]
-		except:
-			error_dialog(window, 'Unpairing failed', 'Failed to unpair device\n%s .' % device.name)
+		receiver = device.receiver
+		assert receiver
+		device_number = device.number
 
-def unpair(frame):
-	return make('edit-delete', 'Unpair', _unpair_device, frame)
+		try:
+			del receiver[device_number]
+		except:
+			error_dialog('unpair', device)
