@@ -136,6 +136,7 @@ def monitor_glib(callback, *device_filters):
 			event = monitor.receive_device()
 			if event:
 				action, device = event
+				# print ("***", action, device)
 				if action == 'add':
 					for filter in filters:
 						d_info = _match(action, device, *filter)
@@ -150,12 +151,15 @@ def monitor_glib(callback, *device_filters):
 	try:
 		# io_add_watch_full may not be available...
 		GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
+		# print ("did io_add_watch_full")
 	except AttributeError:
 		try:
 			# and the priority parameter appeared later in the API
 			GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
+			# print ("did io_add_watch with priority")
 		except:
 			GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, device_filters)
+			# print ("did io_add_watch")
 
 	m.start()
 
