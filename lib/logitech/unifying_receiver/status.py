@@ -37,6 +37,7 @@ BATTERY_STATUS='battery-status'
 BATTERY_CHARGING='battery-charging'
 LIGHT_LEVEL='light-level'
 ERROR='error'
+NOTIFICATIONS='notifications'
 
 # If the battery charge is under this percentage, trigger an attention event
 # (blink systray icon/notification/whatever).
@@ -67,6 +68,7 @@ class ReceiverStatus(dict):
 		self.new_device = None
 
 		self[ERROR] = None
+		self[NOTIFICATIONS] = _hidpp10.get_notification_flags(receiver)
 
 	def __str__(self):
 		count = len(self._receiver)
@@ -88,6 +90,9 @@ class ReceiverStatus(dict):
 
 		# make sure to read some stuff that may be read later by the UI
 		r.serial, r.firmware, None
+
+		# r.enable_notifications()
+		self[NOTIFICATIONS] = _hidpp10.get_notification_flags(r)
 
 	def process_notification(self, n):
 		if n.sub_id == 0x4A:
@@ -217,7 +222,8 @@ class DeviceStatus(dict):
 				# Make sure to set notification flags on the device, they
 				# get cleared when the device is turned off (but not when the device
 				# goes idle, and we can't tell the difference right now).
-				d.enable_notifications()
+				self[NOTIFICATIONS] = d.enable_notifications()
+
 				if self.configuration:
 					self.configuration.attach_to(d)
 		else:

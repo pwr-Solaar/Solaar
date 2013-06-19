@@ -20,6 +20,7 @@ from logitech.unifying_receiver.status import (
 				BATTERY_CHARGING as _BATTERY_CHARGING,
 				LIGHT_LEVEL as _LIGHT_LEVEL,
 				ENCRYPTED as _ENCRYPTED,
+				NOTIFICATIONS as _NOTFITICATIONS,
 				)
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
@@ -453,15 +454,10 @@ def _update_details(button):
 			for fw in device.firmware:
 				yield (fw.kind, (fw.name + ' ' + fw.version).strip())
 
-			if device.kind is None or device.status:
-				# don't show notifications for offline devices
-				notification_flags = _hidpp10.get_notification_flags(device)
-				if notification_flags:
-					notification_flags = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-				else:
-					notification_flags = ('(none)',)
-
-				yield ('Notifications', ('\n%16s' % ' ').join(notification_flags))
+			flag_bits = device.status.get(_NOTFITICATIONS)
+			if flag_bits is not None:
+				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
+				yield ('Notifications', ('\n%16s' % ' ').join(flag_names))
 
 		items = _details_items(device)
 		markup_text = '<small><tt>' + '\n'.join('%-14s: %s' % i for i in items if i) + '</tt></small>'
