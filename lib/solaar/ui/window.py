@@ -170,6 +170,7 @@ def _create_buttons_box():
 	bb.set_child_non_homogeneous(bb._details, True)
 
 	def _pair_new_device(trigger):
+		assert _find_selected_device_id() is not None
 		receiver = _find_selected_device()
 		assert receiver is not None
 		assert receiver.kind is None
@@ -179,6 +180,7 @@ def _create_buttons_box():
 	bb.add(bb._pair)
 
 	def _unpair_current_device(trigger):
+		assert _find_selected_device_id() is not None
 		device = _find_selected_device()
 		assert device is not None
 		assert device.kind is not None
@@ -285,8 +287,8 @@ def _create_window_layout():
 	panel.pack_start(_info, True, True, 0)
 	panel.pack_start(_empty, True, True, 0)
 
-	about_button = _new_button('About', 'help-about', clicked=_show_about_window)
-	# about_button.set_relief(Gtk.ReliefStyle.NONE)
+	about_button = _new_button('About ' + NAME, 'help-about',
+					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
 
 	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
 	bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
@@ -339,8 +341,13 @@ def _create():
 def _find_selected_device():
 	selection = _tree.get_selection()
 	model, item = selection.get_selected()
-	device = model.get_value(item, _COLUMN.DEVICE) if item else None
-	return device or None
+	return model.get_value(item, _COLUMN.DEVICE) if item else None
+
+
+def _find_selected_device_id():
+	selection = _tree.get_selection()
+	model, item = selection.get_selected()
+	return model.get_value(item, _COLUMN.ID) if item else None
 
 
 # triggered by changing selection in the tree
@@ -640,35 +647,49 @@ def update(device, need_popup=False):
 	if need_popup:
 		popup()
 
+	selected_device_id = _find_selected_device_id()
+
 	if device.kind is None:
 		is_alive = bool(device)
 		item = _receiver_row(device.path, device if is_alive else None)
 		assert item
 		if is_alive:
 			_model.set_value(item, _COLUMN.ACTIVE, True)
+			is_pairing = is_alive and device.status.lock_open
+			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else '')
+
+			if selected_device_id == device.path:
+				_update_info_panel(device, need_popup)
+
 		elif item:
 			separator = _model.iter_next(item)
 			_model.remove(separator)
 			_model.remove(item)
 
-		is_pairing = is_alive and device.status.lock_open
-		_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else '')
-
 	else:
 		is_alive = device.status is not None
 		item = _device_row(device.receiver.path, device.serial, device if is_alive else None)
 		assert item
-		_model.set_value(item, _COLUMN.ACTIVE, bool(device.status))
-		battery_level = device.status.get(_BATTERY_LEVEL)
-		if battery_level is None:
-			charging = device.status.get(_BATTERY_CHARGING)
-			battery_icon_name = _icons.battery(battery_level, charging)
-		_model.set_value(item, _COLUMN.STATUS_ICON, '' if battery_level is None else battery_icon_name)
+		if is_alive:
+			_model.set_value(item, _COLUMN.ACTIVE, bool(device.status))
+			battery_level = device.status.get(_BATTERY_LEVEL)
+			if battery_level is None:
+				_model.set_value(item, _COLUMN.STATUS_ICON, '')
+			else:
+				charging = device.status.get(_BATTERY_CHARGING)
+				icon_name = _icons.battery(battery_level, charging)
+				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
+
+			if selected_device_id is None:
+				select(device.receiver.path, device.serial)
+			elif selected_device_id == device.serial:
+				_update_info_panel(device, need_popup)
+
+		else:
+			_model.remove(item)
+
+		if is_alive:
+			select(device.receiver.path, device.serial)
 
 	# make sure all rows are visible
 	_tree.expand_all()
-	selected_device = _find_selected_device()
-	if device == selected_device:
-		_update_info_panel(device, need_popup)
-	elif selected_device is None and device.kind is not None:
-		select(device.receiver.path, device.serial)
