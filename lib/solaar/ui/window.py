@@ -646,10 +646,11 @@ def update(device, need_popup=False):
 	selected_device_id = _find_selected_device_id()
 
 	if device.kind is None:
+		# receiver
 		is_alive = bool(device)
 		item = _receiver_row(device.path, device if is_alive else None)
 		assert item
-		if is_alive:
+		if is_alive and item:
 			_model.set_value(item, _COLUMN.ACTIVE, True)
 			is_pairing = is_alive and device.status.lock_open
 			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else '')
@@ -661,12 +662,13 @@ def update(device, need_popup=False):
 			separator = _model.iter_next(item)
 			_model.remove(separator)
 			_model.remove(item)
+			# _config_panel.clean(device.path)
 
 	else:
+		# peripheral
 		is_alive = device.status is not None
 		item = _device_row(device.receiver.path, device.serial, device if is_alive else None)
-		assert item
-		if is_alive:
+		if is_alive and item:
 			_model.set_value(item, _COLUMN.ACTIVE, bool(device.status))
 			battery_level = device.status.get(_BATTERY_LEVEL)
 			if battery_level is None:
@@ -681,11 +683,9 @@ def update(device, need_popup=False):
 			elif selected_device_id == device.serial:
 				_update_info_panel(device, need_popup)
 
-		else:
+		elif item:
 			_model.remove(item)
-
-		if is_alive:
-			select(device.receiver.path, device.serial)
+			_config_panel.clean(device.path)
 
 	# make sure all rows are visible
 	_tree.expand_all()

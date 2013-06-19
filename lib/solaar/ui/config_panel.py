@@ -194,6 +194,8 @@ def update(box, device, is_active):
 			_update_setting_item(sbox, None, False)
 
 
-def _remove_children(container):
-	container.foreach(lambda x, _: container.remove(x), None)
-
+def clean(box, device_id):
+	partial_key = device_id + '_'
+	for k in list(box._items.keys()):
+		if k.startswith(partial_key):
+			del box._items[k]
