@@ -517,14 +517,13 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_sensitive(True)
 
 		text = '%d%%' % battery_level
-		if bool(device.status):
+		if is_active:
 			if charging:
 				text += ' <small>(charging)</small>'
-			panel._battery._text.set_sensitive(True)
 		else:
 			text += ' <small>(last known)</small>'
-			panel._battery._text.set_sensitive(False)
-			panel._battery._text.set_markup(text)
+		panel._battery._text.set_sensitive(is_active)
+		panel._battery._text.set_markup(text)
 
 	if is_active:
 		not_secure = device.status.get(_ENCRYPTED) == False
