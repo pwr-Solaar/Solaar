@@ -15,7 +15,10 @@ _file_path = _path.join(_path.join(_XDG_CONFIG_HOME, 'solaar'), 'config.json')
 
 
 from solaar import __version__
+_KEY_VERSION = '_version'
+_KEY_NAME = '_name'
 _configuration = {}
+
 
 
 def _load():
@@ -34,11 +37,15 @@ def _load():
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("load => %s", _configuration)
 
-	_configuration['_version'] = __version__
+	_configuration[_KEY_VERSION] = __version__
 	return _configuration
 
 
 def save():
+	# don't save if the configuration hasn't been loaded
+	if _KEY_VERSION not in _configuration:
+		return
+
 	dirname = _os.path.dirname(_file_path)
 	if not _path.isdir(dirname):
 		try:
@@ -78,7 +85,7 @@ def _device_entry(device):
 	else:
 		c = _configuration[device_key] = {}
 
-	c['_name'] = device.name
+	c[_KEY_NAME] = device.name
 	return c
 
 
