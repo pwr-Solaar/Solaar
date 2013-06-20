@@ -141,19 +141,18 @@ class FeaturesArray(object):
 		self.supported = False
 
 	def _check(self):
-		# print (self.device, "check")
+		# print (self.device, "check", self.supported, self.features, self.device.protocol)
 		if self.supported:
 			assert self.device
 			if self.features is not None:
 				return True
 
-			protocol = self.device.protocol
-			if protocol == 0:
+			if hasattr(self.device, 'status') and not bool(self.device.status):
 				# device is not connected right now, will have to try later
 				return False
 
 			# I _think_ this is universally true
-			if protocol < 2.0:
+			if self.device.protocol < 2.0:
 				self.supported = False
 				# self.device.features = None
 				self.device = None

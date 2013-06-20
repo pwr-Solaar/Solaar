@@ -47,7 +47,7 @@ def _feature_fn_swap():
 
 
 def check_features(device, already_known):
-	if device.protocol < 2.0:
+	if device.protocol is not None and device.protocol < 2.0:
 		return
 	if not any(s.name == _FN_SWAP[0] for s in already_known) and _hidpp20.FEATURE.FN_INVERSION in device.features:
 		already_known.append(_feature_fn_swap())
