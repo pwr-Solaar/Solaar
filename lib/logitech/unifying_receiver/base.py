@@ -73,6 +73,7 @@ class DeviceUnreachable(_KwException):
 DEVICE_UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, 'logitech-djreceiver')
 DEVICE_UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, 'logitech-djreceiver')
 DEVICE_NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, 'hid-generic')
+DEVICE_VXNANO                    = (0x046d, 0xc526, 1, 'hid-generic')
 
 
 def receivers():
@@ -83,6 +84,8 @@ def receivers():
 		yield d
 	for d in _hid.enumerate(*DEVICE_NANO_RECEIVER_ADVANCED):
 		yield d
+	for d in _hid.enumerate(*DEVICE_VXNANO):
+		yield d
 
 
 def notify_on_receivers_glib(callback):
@@ -91,6 +94,7 @@ def notify_on_receivers_glib(callback):
 					DEVICE_UNIFYING_RECEIVER,
 					DEVICE_UNIFYING_RECEIVER_2,
 					DEVICE_NANO_RECEIVER_ADVANCED,
+					DEVICE_VXNANO,
 		)
 
 #

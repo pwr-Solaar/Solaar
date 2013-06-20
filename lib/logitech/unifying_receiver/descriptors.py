@@ -153,13 +153,6 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0,
 
 # Mice
 
-# _D('VX Nano Cordless Laser Mouse', product_id='c526', codename='VXNano',
-# 				registers={'battery_charge': 0x0D},
-# 				settings=[
-# 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-# 						],
-# 				)
-
 _D('Wireless Mouse M215', protocol=1.0)
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M325')
@@ -204,5 +197,16 @@ _D('Wireless Trackball M570')
 
 _D('Wireless Rechargeable Touchpad T650')
 
+#
+# classic Nano devices
+# a product_id is necessary to properly identify them
+#
+
+_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, product_id='c526',
+				registers={'battery_charge': 0x0D, 'battery_status': -0x07},
+				settings=[
+							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+						],
+				)
 
 del namedtuple
