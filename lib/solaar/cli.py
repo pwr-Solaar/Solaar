@@ -109,7 +109,7 @@ def _print_receiver(receiver, verbose=False):
 
 def _print_device(dev, verbose=False):
 	p = dev.protocol
-	state = '' if p > 0 else 'inactive'
+	state = '' if p > 0 else 'offline'
 
 	if not verbose:
 		print ("%d: %s [%s:%s]" % (dev.number, dev.name, dev.codename, dev.serial), state)
@@ -119,7 +119,7 @@ def _print_device(dev, verbose=False):
 	print ("   Codename     :", dev.codename)
 	print ("   Kind         :", dev.kind)
 	if p == 0:
-		print ("   Protocol     : unknown (device is inactive)")
+		print ("   Protocol     : unknown (device is offline)")
 	else:
 		print ("   Protocol     : HID++ %1.1f" % p)
 	print ("   Polling rate :", dev.polling_rate, "ms")
@@ -167,7 +167,7 @@ def _print_device(dev, verbose=False):
 		else:
 			print ("   Battery status unavailable.")
 	else:
-		print ("   Battery status is unknown (device is inactive).")
+		print ("   Battery status is unknown (device is offline).")
 
 #
 #

@@ -257,19 +257,19 @@ def _generate_tooltip_lines():
 		if serial is None:  # receiver
 			continue
 
-		yield '<b>%s</b>' % name
 
 		p = str(status)
 		if p:  # does it have any properties to print?
+			yield '<b>%s</b>' % name
 			if status:
 				yield '\t%s' % p
 			else:
-				yield '\t%s <small>(inactive)</small>' % p
+				yield '\t%s <small>(offline)</small>' % p
 		else:
 			if status:
-				yield '\t<small>no status</small>'
+				yield '<b>%s</b> <small>no status</small>' % name
 			else:
-				yield '\t<small>(inactive)</small>'
+				yield '<b>%s</b> <small>(offline)</small>' % name
 		yield ''
 
 

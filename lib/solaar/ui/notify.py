@@ -88,7 +88,7 @@ try:
 				n = _notifications[summary] = Notify.Notification()
 
 			message = reason or ('unpaired' if dev.status is None else
-						(str(dev.status) or ('connected' if dev.status else 'inactive')))
+						(str(dev.status) or ('connected' if dev.status else 'offline')))
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets
