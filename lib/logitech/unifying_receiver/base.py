@@ -36,9 +36,9 @@ _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
 
 """Default timeout on read (in seconds)."""
-DEFAULT_TIMEOUT = 2
+DEFAULT_TIMEOUT = 4
 # the receiver itself should reply very fast, within 500ms
-_RECEIVER_REQUEST_TIMEOUT = 0.5
+_RECEIVER_REQUEST_TIMEOUT = 0.9
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient
