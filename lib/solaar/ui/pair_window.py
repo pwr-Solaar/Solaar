@@ -11,6 +11,7 @@ _log = getLogger(__name__)
 del getLogger
 
 from . import icons as _icons
+from logitech.unifying_receiver.status import KEYS as _K
 from logitech.unifying_receiver import status as _status
 
 #
@@ -48,28 +49,15 @@ def _create_page(assistant, kind, header=None, icon_name=None, text=None):
 	return p
 
 
-# def _fake_device(receiver):
-# 	from logitech.unifying_receiver import PairedDevice
-# 	dev = PairedDevice(receiver, 6)
-# 	dev._wpid = '1234'
-# 	dev._kind = 'touchpad'
-# 	dev._codename = 'T650'
-# 	dev._name = 'Wireless Rechargeable Touchpad T650'
-# 	dev._serial = '0123456789'
-# 	dev._protocol = 2.0
-# 	dev.status = _status.DeviceStatus(dev, lambda *foo: None)
-# 	dev.status['encrypted'] = False
-# 	return dev
-
 def _check_lock_state(assistant, receiver):
 	if not assistant.is_drawable():
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("assistant %s destroyed, bailing out", assistant)
 		return False
 
-	if receiver.status.get(_status.ERROR):
+	if receiver.status.get(_K.ERROR):
 		# receiver.status.new_device = _fake_device(receiver)
-		_pairing_failed(assistant, receiver, receiver.status.pop(_status.ERROR))
+		_pairing_failed(assistant, receiver, receiver.status.pop(_K.ERROR))
 		return False
 
 	if receiver.status.new_device:
@@ -92,7 +80,7 @@ def _prepare(assistant, page, receiver):
 	if index == 0:
 		if receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
 			assert receiver.status.new_device is None
-			assert receiver.status.get(_status.ERROR) is None
+			assert receiver.status.get(_K.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
 			GLib.timeout_add(750, _check_lock_state, assistant, receiver)
@@ -111,7 +99,7 @@ def _finish(assistant, receiver):
 	if receiver.status.lock_open:
 		receiver.set_lock()
 	else:
-		receiver.status[_status.ERROR] = None
+		receiver.status[_K.ERROR] = None
 
 
 def _pairing_failed(assistant, receiver, error):
