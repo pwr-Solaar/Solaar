@@ -275,8 +275,9 @@ def _create_window_layout():
 	_tree.get_selection().connect('changed', _device_selected)
 
 	tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
+	tree_panel.set_homogeneous(False)
 	tree_panel.pack_start(_tree, True, True, 0)
-	tree_panel.pack_start(_details, True, True, 0)
+	tree_panel.pack_start(_details, False, False, 0)
 
 	panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
 	panel.pack_start(tree_panel, False, False, 0)
