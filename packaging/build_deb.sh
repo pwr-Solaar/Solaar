@@ -72,7 +72,7 @@ test "$DEBIAN_FILES_EXTRA" && cp -a $DEBIAN_FILES_EXTRA/* debian/
 
 /bin/rm --force "$DIST"/*
 /bin/mkdir --parents "$DIST"
-cp -a -t "$DIST" ../solaar_$VERSION*
+cp -a -t "$DIST" ../solaar_$VERSION* || true
 cp -a -t "$DIST" ../solaar-*_$VERSION* || true
 cd "$DIST"
 #cp -av -t ../../../packages/ * || true
