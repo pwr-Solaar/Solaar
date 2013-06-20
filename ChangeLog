@@ -1,6 +1,11 @@
+0.8.99:
+  * New single-window UI.
+  * Support the VX Nano mouse.
+
 0.8.9:
 
   * Improved support for gnome-shell/Unity.
+  * Persist devices settings between runs.
   * Fixed reading of MK700 keyboard battery status.
   * Use battery icons from the current theme instead of custom ones.
   * Debian/Ubuntu packages now depend on an icon theme, to make sure
