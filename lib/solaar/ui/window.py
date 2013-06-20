@@ -362,9 +362,9 @@ def _receiver_row(receiver_path, receiver=None):
 		item = _model.iter_next(item)
 
 	if not item and receiver is not None:
-		_model.insert(None, 0, _TREE_SEPATATOR)
 		row_data = (receiver_path, True, receiver.name, _icons.device_icon_name(receiver.name), '', receiver)
-		item = _model.insert(None, 0, row_data)
+		item = _model.append(None, row_data)
+		_model.append(None, _TREE_SEPATATOR)
 
 	return item or None
 

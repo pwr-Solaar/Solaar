@@ -352,20 +352,22 @@ def _remove_device(index):
 
 
 def _add_receiver(receiver):
+	index = len(_devices_info)
+
 	device_info = (receiver.path, None, receiver.name, None, None)
-	_devices_info.insert(0, device_info)
+	_devices_info.append(device_info)
 
 	new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
-	_menu.insert(new_menu_item, 0)
+	_menu.insert(new_menu_item, index)
 	icon_set = _icons.device_icon_set(receiver.name)
 	new_menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
 	new_menu_item.show_all()
 	new_menu_item.connect('activate', _window_popup, receiver.path)
 
-	_devices_info.insert(1, ('-', None, None, None, None))
+	_devices_info.append(('-', None, None, None, None))
 	separator = Gtk.SeparatorMenuItem.new()
 	separator.set_visible(True)
-	_menu.insert(separator, 1)
+	_menu.insert(separator, index + 1)
 
 	return 0
 
