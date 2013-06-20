@@ -144,7 +144,7 @@ def _create_details_panel():
 	p = Gtk.Frame()
 	# p.set_border_width(2)
 	p.set_shadow_type(Gtk.ShadowType.ETCHED_OUT)
-	p.set_size_request(240, 90)
+	p.set_size_request(240, 0)
 
 	p._text = Gtk.Label()
 	p._text.set_padding(4, 4)
@@ -437,6 +437,7 @@ def _update_details(button):
 		def _details_items(device):
 			if device.kind is None:
 				yield ('Path', device.path)
+				yield ('USB id', '046d:' + device.product_id)
 			else:
 				# yield ('Codename', device.codename)
 				hid = device.protocol
