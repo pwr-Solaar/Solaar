@@ -142,12 +142,12 @@ def _create_device_panel():
 
 def _create_details_panel():
 	p = Gtk.Frame()
-	# p.set_border_width(2)
-	p.set_shadow_type(Gtk.ShadowType.ETCHED_OUT)
+	p.set_shadow_type(Gtk.ShadowType.NONE)
 	p.set_size_request(240, 0)
+	p.set_state_flags(Gtk.StateFlags.ACTIVE, True)
 
 	p._text = Gtk.Label()
-	p._text.set_padding(4, 4)
+	p._text.set_padding(6, 4)
 	p._text.set_alignment(0, 0)
 	p._text.set_selectable(True)
 	p.add(p._text)
@@ -160,7 +160,7 @@ def _create_buttons_box():
 	bb.set_layout(Gtk.ButtonBoxStyle.END)
 
 	bb._details = _new_button(None, 'dialog-information', _SMALL_BUTTON_ICON_SIZE,
-					tooltip='Show Details', toggle=True, clicked=_update_details)
+					tooltip='Show Technical Details', toggle=True, clicked=_update_details)
 	bb.add(bb._details)
 	bb.set_child_secondary(bb._details, True)
 	bb.set_child_non_homogeneous(bb._details, True)
@@ -274,7 +274,7 @@ def _create_window_layout():
 	assert _tree.get_selection().get_mode() == Gtk.SelectionMode.SINGLE
 	_tree.get_selection().connect('changed', _device_selected)
 
-	tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
+	tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 	tree_panel.set_homogeneous(False)
 	tree_panel.pack_start(_tree, True, True, 0)
 	tree_panel.pack_start(_details, False, False, 0)
