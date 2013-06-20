@@ -55,24 +55,32 @@ def check_features(device, already_known):
 #
 
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-				['name', 'kind', 'product_id', 'codename', 'registers', 'settings'])
+				['name', 'kind', 'product_id', 'codename', 'protocol', 'registers', 'settings'])
 
 DEVICES = {}
 
-def _D(name, codename=None, kind=None, product_id=None, registers=None, settings=None):
+def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers=None, settings=None):
 	if kind is None:
 		kind = (_hidpp10.DEVICE_KIND.mouse if 'Mouse' in name
 				else _hidpp10.DEVICE_KIND.keyboard if 'Keyboard' in name
 				else _hidpp10.DEVICE_KIND.touchpad if 'Touchpad' in name
 				else _hidpp10.DEVICE_KIND.trackball if 'Trackball' in name
 				else None)
-	assert kind is not None
+	assert kind is not None, "descriptor for %s does not have 'kind' set" % name
 
+	# heuristic: the codename is the last word in the device name
 	if codename is None:
 		codename = name.split(' ')[-1]
-	assert codename is not None
+	assert codename is not None, "descriptor for %s does not have codename set" % name
 
-	DEVICES[codename] = _DeviceDescriptor(name, kind, product_id, codename, registers, settings)
+	DEVICES[codename] = _DeviceDescriptor(
+					name=name,
+					kind=kind,
+					product_id=product_id,
+					codename=codename,
+					protocol=protocol,
+					registers=registers,
+					settings=settings)
 	if product_id:
 		DEVICES[product_id] = DEVICES[codename]
 
@@ -118,23 +126,23 @@ def _D(name, codename=None, kind=None, product_id=None, registers=None, settings
 
 # Keyboards
 
-_D('Wireless Keyboard K230')
+_D('Wireless Keyboard K230', protocol=2.0)
 _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
-_D('Wireless Keyboard K360')
-_D('Wireless Touch Keyboard K400')
-_D('Wireless Keyboard K700', codename='MK700',
+_D('Wireless Keyboard K360', protocol=2.0)
+_D('Wireless Touch Keyboard K400', protocol=2.0)
+_D('Wireless Keyboard K700', codename='MK700', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
 						],
 				)
-_D('Wireless Solar Keyboard K750',
+_D('Wireless Solar Keyboard K750', protocol=2.0,
 				settings=[
 							_feature_fn_swap()
 						],
 				)
-_D('Wireless Illuminated Keyboard K800',
+_D('Wireless Illuminated Keyboard K800', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
@@ -150,19 +158,20 @@ _D('Wireless Illuminated Keyboard K800',
 # 						],
 # 				)
 
+_D('Wireless Mouse M215', protocol=1.0)
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M505')
-_D('Wireless Mouse M510',
+_D('Wireless Mouse M510', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
 						],
 				)
-_D('Couch Mouse M515')
-_D('Wireless Mouse M525')
+_D('Couch Mouse M515', protocol=2.0)
+_D('Wireless Mouse M525', protocol=2.0)
 _D('Touch Mouse M600')
-_D('Marathon Mouse M705',
+_D('Marathon Mouse M705', protocol=1.0,
 				registers={'battery_charge': 0x0D},
 				settings=[
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
@@ -171,14 +180,14 @@ _D('Marathon Mouse M705',
 				)
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
-_D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse)
+_D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX',
 				# registers={'battery_charge': 0x0D},
 				# settings=[
 				# 			_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
 				# 		],
 				)
-_D('Performance Mouse MX', codename='Performance MX',
+_D('Performance Mouse MX', codename='Performance MX', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
