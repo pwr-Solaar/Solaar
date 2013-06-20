@@ -284,7 +284,8 @@ def _pick_device_with_lowest_battery():
 		if info[1] is None: # is receiver/separator
 			continue
 		level = info[-1].get(_K.BATTERY_LEVEL)
-		if not picked or (level is not None and picked_level > level):
+		# print ("checking %s -> %s", info, level)
+		if level is not None and picked_level > level:
 			picked = info
 			picked_level = level or 0
 
