@@ -36,9 +36,9 @@ _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
 
 """Default timeout on read (in seconds)."""
-DEFAULT_TIMEOUT = 4
+DEFAULT_TIMEOUT = 3.5
 # the receiver itself should reply very fast, within 500ms
-_RECEIVER_REQUEST_TIMEOUT = 0.9
+_RECEIVER_REQUEST_TIMEOUT = 0.8
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient
@@ -307,14 +307,14 @@ def request(handle, devnumber, request_id, *params):
 
 	assert isinstance(request_id, int)
 	if devnumber != 0xFF and request_id < 0x8000:
-		timeout = _DEVICE_REQUEST_TIMEOUT
-		# for HID++ 2.0 feature requests, randomize the SoftwareId to make it
+		# For HID++ 2.0 feature requests, randomize the SoftwareId to make it
 		# easier to recognize the reply for this request. also, always set the
 		# most significant bit (8) in SoftwareId, to make notifications easier
-		# to distinguish from request replies
+		# to distinguish from request replies.
+		# This only applies to peripheral requests, ofc.
 		request_id = (request_id & 0xFFF0) | 0x08 | _random_bits(3)
-	else:
-		timeout = _RECEIVER_REQUEST_TIMEOUT
+
+	timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
 
 	if params:
 		params = b''.join(_pack('B', p) if isinstance(p, int) else p for p in params)
@@ -397,7 +397,8 @@ def request(handle, devnumber, request_id, *params):
 		# 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
 		if delta >= timeout:
-			_log.warn("timeout on device %d request {%04X} params [%s]", devnumber, request_id, _strhex(params))
+			_log.warn("timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]",
+							delta, timeout, devnumber, request_id, _strhex(params))
 			break
 			# raise DeviceUnreachable(number=devnumber, request=request_id)
 
@@ -459,5 +460,5 @@ def ping(handle, devnumber):
 					notifications_hook(n)
 
 		if delta >= _PING_TIMEOUT:
-			_log.warn("(%s) timeout on device %d ping", handle, devnumber)
+			_log.warn("(%s) timeout (%0.2f/%0.2f) on device %d ping", handle, delta, _PING_TIMEOUT, devnumber)
 			# raise DeviceUnreachable(number=devnumber, request=request_id)
