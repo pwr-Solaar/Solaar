@@ -431,6 +431,7 @@ def _update_details(button):
 	assert button
 	visible = button.get_active()
 	device = _find_selected_device()
+	assert device
 
 	if visible:
 		_details._text.set_markup('<small>reading...</small>')
@@ -465,6 +466,8 @@ def _update_details(button):
 
 
 def _update_receiver_panel(receiver, panel, buttons, full=False):
+	assert receiver
+
 	devices_count = len(receiver)
 	if receiver.max_devices > 1:
 		if devices_count == 0:
@@ -498,8 +501,9 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
 
 def _update_device_panel(device, panel, buttons, full=False):
-	is_active = bool(device.status)
-	panel.set_sensitive(is_active)
+	assert device
+	is_online = bool(device.online)
+	panel.set_sensitive(is_online)
 
 	battery_level = device.status.get(_K.BATTERY_LEVEL)
 	if battery_level is None:
@@ -515,15 +519,15 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_sensitive(True)
 
 		text = '%d%%' % battery_level
-		if is_active:
+		if is_online:
 			if charging:
 				text += ' <small>(charging)</small>'
 		else:
 			text += ' <small>(last known)</small>'
-		panel._battery._text.set_sensitive(is_active)
+		panel._battery._text.set_sensitive(is_online)
 		panel._battery._text.set_markup(text)
 
-	if is_active:
+	if is_online:
 		not_secure = device.status.get(_K.LINK_ENCRYPTED) == False
 		if not_secure:
 			panel._secure._text.set_text('not encrypted')
@@ -539,7 +543,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._secure._icon.set_visible(False)
 		panel._secure.set_tooltip_text('')
 
-	if is_active:
+	if is_online:
 		light_level = device.status.get(_K.LIGHT_LEVEL)
 		if light_level is None:
 			panel._lux.set_visible(False)
@@ -557,7 +561,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 	panel.set_visible(True)
 
 	if full:
-		_config_panel.update(panel._config, device, is_active)
+		_config_panel.update(device, is_online)
 
 
 def _update_info_panel(device, full=False):
@@ -567,19 +571,24 @@ def _update_info_panel(device, full=False):
 		_empty.set_visible(True)
 		return
 
-	is_active = bool(device.status)
+	# a receiver must be valid
+	# a device must be paired
+	assert device
 
 	_info._title.set_markup('<b>%s</b>' % device.name)
-	_info._title.set_sensitive(is_active)
 	icon_name = _icons.device_icon_name(device.name, device.kind)
 	_info._icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
-	_info._icon.set_sensitive(is_active)
 
 	if device.kind is None:
 		_info._device.set_visible(False)
+		_info._icon.set_sensitive(True)
+		_info._title.set_sensitive(True)
 		_update_receiver_panel(device, _info._receiver, _info._buttons, full)
 	else:
 		_info._receiver.set_visible(False)
+		is_online = bool(device.online)
+		_info._icon.set_sensitive(is_online)
+		_info._title.set_sensitive(is_online)
 		_update_device_panel(device, _info._device, _info._buttons, full)
 
 	_empty.set_visible(False)
@@ -664,10 +673,16 @@ def update(device, need_popup=False):
 
 	else:
 		# peripheral
-		is_alive = device.status is not None
-		item = _device_row(device.receiver.path, device.serial, device if is_alive else None)
-		if is_alive and item:
-			_model.set_value(item, _COLUMN.ACTIVE, bool(device.status))
+		is_paired = bool(device)
+		assert device.receiver
+		assert device.serial
+		item = _device_row(device.receiver.path, device.serial, device if is_paired else None)
+
+		if is_paired and item:
+			was_online = _model.get_value(item, _COLUMN.ACTIVE)
+			is_online = bool(device.online)
+			_model.set_value(item, _COLUMN.ACTIVE, is_online)
+
 			battery_level = device.status.get(_K.BATTERY_LEVEL)
 			if battery_level is None:
 				_model.set_value(item, _COLUMN.STATUS_ICON, '')
@@ -679,7 +694,8 @@ def update(device, need_popup=False):
 			if selected_device_id is None:
 				select(device.receiver.path, device.serial)
 			elif selected_device_id == device.serial:
-				_update_info_panel(device, need_popup)
+				full_update = need_popup or was_online != is_online
+				_update_info_panel(device, full=full_update)
 
 		elif item:
 			_model.remove(item)

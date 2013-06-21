@@ -18,7 +18,7 @@ from logitech.unifying_receiver import (Receiver,
 #
 
 from collections import namedtuple
-_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'serial', 'status'])
+_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'serial', 'status', 'online'])
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple
@@ -30,7 +30,8 @@ def _ghost(device):
 					name=device.name,
 					kind=device.kind,
 					serial=device.serial,
-					status=None)
+					status=None,
+					online=False)
 
 #
 #
@@ -109,8 +110,7 @@ class ReceiverListener(_listener.EventsListener):
 			for number in range(1, 6):
 				if number in self.receiver:
 					dev = self.receiver[number]
-					assert dev
-					if dev.status is not None:
+					if dev and dev.status is not None:
 						dev.status.poll(timestamp)
 		except Exception as e:
 			_log.exception("polling", e)
@@ -118,9 +118,15 @@ class ReceiverListener(_listener.EventsListener):
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		assert device is not None
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s: status_changed %s: %s, %s (%X) %s", self.receiver, device,
-						'active' if device.status else 'inactive',
-						device.status, alert, reason or '')
+			if device.kind is None:
+				_log.debug("status_changed %s: %s, %s (%X) %s", device,
+							'present' if bool(device) else 'removed',
+							device.status, alert, reason or '')
+			else:
+				_log.debug("status_changed %s: %s %s, %s (%X) %s", device,
+							'paired' if bool(device) else 'unpaired',
+							'online' if device.online else 'offline',
+							device.status, alert, reason or '')
 
 		if device.kind is None:
 			assert device == self.receiver
@@ -129,16 +135,15 @@ class ReceiverListener(_listener.EventsListener):
 			return
 
 		assert device.receiver == self.receiver
-
-		if device.status is None:
+		if not device:
 			# device was unpaired, and since the object is weakref'ed
 			# it won't be valid for much longer
-			_log.info("device %s was unpaired, ghosting", device)
+			_log.warn("device %s was unpaired, ghosting", device)
 			device = _ghost(device)
 
 		self.status_changed_callback(device, alert, reason)
 
-		if device.status is None:
+		if not device:
 			# the device was just unpaired, need to update the
 			# status of the receiver as well
 			self.status_changed_callback(self.receiver)
@@ -155,28 +160,33 @@ class ReceiverListener(_listener.EventsListener):
 		# a device notification
 		assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
 		already_known = n.devnumber in self.receiver
-		dev = self.receiver[n.devnumber]
+		if not already_known and n.sub_id == 0x41:
+			dev = self.receiver.register_new_device(n.devnumber, n)
+		else:
+			dev = self.receiver[n.devnumber]
 
 		if not dev:
 			_log.warn("%s: received %s for invalid device %d: %r", self.receiver, n, n.devnumber, dev)
 			return
 
 		if not already_known:
-			# read these as soon as possible, they will be used everywhere
-			dev.protocol, dev.codename
+			# _log.info("%s triggered new device %s", n, dev)
 			dev.status = _status.DeviceStatus(dev, self._status_changed)
 			dev.status.configuration = configuration
 			# the receiver changed status as well
 			self._status_changed(self.receiver)
 
-		# status may be None if the device has just been unpaired
-		if dev.status is not None:
-			dev.status.process_notification(n)
-			if self.receiver.status.lock_open and not already_known:
-				# this should be the first notification after a device was paired
-				assert n.sub_id == 0x41 and n.address == 0x04
-				_log.info("%s: pairing detected new device", self.receiver)
-				self.receiver.status.new_device = dev
+		assert dev
+		assert dev.status is not None
+		dev.status.process_notification(n)
+		if self.receiver.status.lock_open and not already_known:
+			# this should be the first notification after a device was paired
+			assert n.sub_id == 0x41 and n.address == 0x04
+			_log.info("%s: pairing detected new device", self.receiver)
+			self.receiver.status.new_device = dev
+		else:
+			if dev.online is None:
+				dev.ping()
 
 	def __str__(self):
 		return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)

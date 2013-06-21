@@ -127,7 +127,7 @@ def _create_sbox(s):
 	return sbox
 
 
-def _update_setting_item(sbox, value, is_active=True):
+def _update_setting_item(sbox, value, is_online=True):
 	_, failed, spinner, control = sbox.get_children()
 	spinner.set_visible(False)
 	spinner.stop()
@@ -135,7 +135,7 @@ def _update_setting_item(sbox, value, is_active=True):
 	# print ("update", control, "with new value", value)
 	if value is None:
 		control.set_sensitive(False)
-		failed.set_visible(is_active)
+		failed.set_visible(is_online)
 		return
 
 	failed.set_visible(False)

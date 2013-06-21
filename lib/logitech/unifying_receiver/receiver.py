@@ -26,11 +26,12 @@ MAX_PAIRED_DEVICES = 6
 
 
 class PairedDevice(object):
-	def __init__(self, receiver, number):
+	def __init__(self, receiver, number, link_notification=None):
 		assert receiver
 		self.receiver = _proxy(receiver)
 		assert number > 0 and number <= receiver.max_devices
 		self.number = number
+		self.online = None
 
 		self.wpid = None
 		self.polling_rate = 0
@@ -38,56 +39,61 @@ class PairedDevice(object):
 		self._kind = None
 		self._codename = None
 		self._name = None
+		self._protocol = None
+		self._serial = None
 
 		unifying = self.receiver.unifying_supported
-		if unifying:
-			# force a reading of the codename
-			if self.codename is None:
-				raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read codename")
+		if link_notification is None:
+			if unifying:
+				# force a reading of the codename
+				pair_info = receiver.read_register(0x2B5, 0x20 + number - 1)
+				if pair_info is None:
+					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read pair info")
 
-			pair_info = receiver.request(0x83B5, 0x20 + number - 1)
-			if pair_info is None:
-				raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read pair info")
-
-			self.wpid = _strhex(pair_info[3:5])
-			kind = ord(pair_info[7:8]) & 0x0F
-			self._kind = _hidpp10.DEVICE_KIND[kind]
-			self.polling_rate = ord(pair_info[2:3])
-		else:
-			# guesswork...
-			descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
-			if descriptor is None:
-				self._codename = self.receiver.product_id
-				# actually there IS a device, just that we can't identify it
-				# raise _base.NoSuchDevice(nuber=number, receiver=receiver, product_id=receiver.product_id, failed="no descriptor")
-				self._name = 'Unknown device ' + self._codename
+				self.wpid = _strhex(pair_info[3:5])
+				kind = ord(pair_info[7:8]) & 0x0F
+				self._kind = _hidpp10.DEVICE_KIND[kind]
+				self.polling_rate = ord(pair_info[2:3])
 			else:
-				self._codename = descriptor.codename
-				self._name = descriptor.name
+				# guesswork... look for the product id in the descriptors
+				descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
+				if descriptor is None:
+					self._codename = self.receiver.product_id
+					# actually there IS a device, just that we can't identify it
+					# raise _base.NoSuchDevice(nuber=number, receiver=receiver, product_id=receiver.product_id, failed="no descriptor")
+					self._name = 'Unknown device ' + self._codename
+				else:
+					self._codename = descriptor.codename
+					self._name = descriptor.name
 
-			device_info = self.receiver.request(0x83B5, 0x04)
-			assert device_info, "failed to read Nano device info"
-			self.wpid = _strhex(device_info[3:5])
-			# self._kind = descriptor.kind
-			self.polling_rate = 0
+				device_info = self.receiver.read_register(0x2B5, 0x04)
+				if device_info is None:
+					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read Nano wpid")
+				self.wpid = _strhex(device_info[3:5])
+				# self._kind = descriptor.kind
+				self.serial = self.receiver.serial
+		else:
+			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
+			assert link_notification.address == (0x04 if unifying else 0x03)
+			kind = ord(link_notification.data[1:2]) & 0x0F
+			self._kind = _hidpp10.DEVICE_KIND[kind]
+			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
 
 		# the wpid is necessary to properly identify wireless link on/off notifications
+		# also it gets set to None when the device is unpaired
 		assert self.wpid is not None, "failed to read wpid: device %d of %s" % (number, receiver)
-		# the codename is necessary to guess all other info
-		assert self._codename is not None, "failed to read codename: device %d of %s" % (number, receiver)
 
 		# knowing the protocol as soon as possible helps reading all other info
 		# and avoids an unecessary ping
-		descriptor = _descriptors.DEVICES.get(self.codename)
-		if descriptor is None:
-			_log.warn("device without descriptor found: %s (%d of %s)", self.codename, number, receiver)
-			self._protocol = None if unifying else 1.0
-		else:
-			self._protocol = descriptor.protocol if unifying else 1.0  # may be None
+		if self._codename is not None:
+			descriptor = _descriptors.DEVICES.get(self._codename)
+			if descriptor is None:
+				_log.warn("device without descriptor found: %s (%d of %s)", self._codename, number, receiver)
+				self._protocol = None if unifying else 1.0
+			else:
+				self._protocol = descriptor.protocol if unifying else 1.0  # may be None
 
 		self._power_switch = None if unifying else '(unknown)'
-		self.serial = _hidpp10.get_serial(self) if unifying else self.receiver.serial
-
 		self._firmware = None
 		self._keys = None
 
@@ -106,10 +112,22 @@ class PairedDevice(object):
 	def protocol(self):
 		if self._protocol is None:
 			self._protocol = _base.ping(self.receiver.handle, self.number)
+			# if the ping failed, the peripheral is (almost) certainly offline
+			self.online = self._protocol is not None
+
+			# use the descriptor only as a fallback, because it may not be 100% correct
+			descriptor = _descriptors.DEVICES.get(self.codename)
 			if self._protocol is None:
-				descriptor = _descriptors.DEVICES.get(self.codename)
 				if descriptor and descriptor.protocol is not None:
 					self._protocol = descriptor.protocol
+			else:
+				if descriptor:
+					if descriptor.protocol is None:
+						_log.info("%s: descriptor has no protocol, should be %0.1f", self, self._protocol)
+					elif descriptor.protocol != self._protocol:
+						_log.error("%s: descriptor has wrong protocol %0.1f, should be %0.1f",
+									self, descriptor.protocol, self._protocol)
+
 			# _log.debug("device %d protocol %s", self.number, self._protocol)
 		return self._protocol or 0
 
@@ -131,12 +149,12 @@ class PairedDevice(object):
 				if codename:
 					self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
 					# _log.debug("device %d codename %s", self.number, self._codename)
-		return self._codename
+		return self._codename or '?'
 
 	@property
 	def name(self):
 		if self._name is None:
-			if self.protocol >= 2.0:
+			if self.protocol >= 2.0 and self.online:
 				self._name = _hidpp20.get_name(self)
 			if self._name is None:
 				descriptor = _descriptors.DEVICES.get(self.codename)
@@ -155,7 +173,7 @@ class PairedDevice(object):
 			# 		self._kind = _hidpp10.DEVICE_KIND[kind]
 			# 		if self.wpid is None:
 			# 			self.wpid = _strhex(pair_info[3:5])
-			if self.protocol >= 2.0:
+			if self.protocol >= 2.0 and self.online:
 				self._kind = _hidpp20.get_kind(self)
 			if self._kind is None:
 				descriptor = _descriptors.DEVICES.get(self.codename)
@@ -165,26 +183,25 @@ class PairedDevice(object):
 
 	@property
 	def firmware(self):
-		if self._firmware is None:
+		if self._firmware is None and self.online:
 			if self.protocol < 2.0:
 				self._firmware = _hidpp10.get_firmware(self)
 			else:
 				self._firmware = _hidpp20.get_firmware(self)
 		return self._firmware or ()
 
-	# @property
-	# def serial(self):
-	# 	if self._serial is None:
-	# 		if self.receiver.unifying_supported:
-	# 			self._serial = _hidpp10.get_serial(self)
-	# 		else:
-	# 			self._serial = self.receiver.serial
-	# 	return self._serial or '?'
+	@property
+	def serial(self):
+		if self._serial is None:
+			assert self.receiver.unifying_supported
+			# otherwise it should have been set in the constructor
+			self._serial = _hidpp10.get_serial(self)
+		return self._serial or '?'
 
 	@property
 	def keys(self):
 		if self._keys is None:
-			if self.protocol >= 2.0:
+			if self.protocol >= 2.0 and self.online:
 				self._keys = _hidpp20.get_keys(self) or ()
 		return self._keys
 
@@ -207,14 +224,14 @@ class PairedDevice(object):
 			else:
 				self._settings = [s(self) for s in descriptor.settings]
 
-		if self.features:
+		if self.online and self.features:
 			_descriptors.check_features(self, self._settings)
 		return self._settings
 
 	def enable_notifications(self, enable=True):
 		"""Enable or disable device (dis)connection notifications on this
 		receiver."""
-		if not self.receiver or not self.receiver.handle or self.protocol >= 2.0:
+		if not bool(self.receiver) or self.protocol >= 2.0:
 			return False
 
 		if enable:
@@ -245,7 +262,10 @@ class PairedDevice(object):
 			return _hidpp20.feature_request(self, feature, function, *params)
 
 	def ping(self):
-		return _base.ping(self.receiver.handle, self.number) is not None
+		"""Checks if the device is online, returns True of False"""
+		protocol = _base.ping(self.receiver.handle, self.number)
+		self.online = protocol is not None
+		return self.online
 
 	def __index__(self):
 		return self.number
@@ -259,6 +279,8 @@ class PairedDevice(object):
 
 	def __hash__(self):
 		return self.serial.__hash__()
+
+	__bool__ = __nonzero__ = lambda self: self.wpid is not None and self.number in self.receiver
 
 	def __str__(self):
 		return '<PairedDevice(%d,%s,%s)>' % (self.number, self.wpid, self.codename or '?')
@@ -349,12 +371,15 @@ class Receiver(object):
 			if not self.write_register(0x02, 0x02):
 				_log.warn("%s: failed to trigger device link notifications", self)
 
-	def register_new_device(self, number):
+	def register_new_device(self, number, notification=None):
 		if self._devices.get(number) is not None:
 			raise IndexError("%s: device number %d already registered" % (self, number))
 
+		assert notification is None or notification.devnumber == number
+		assert notification is None or notification.sub_id == 0x41
+
 		try:
-			dev = PairedDevice(self, number)
+			dev = PairedDevice(self, number, notification)
 			assert dev.wpid
 			_log.info("%s: found new device %d (%s)", self, number, dev.wpid)
 			self._devices[number] = dev
@@ -420,6 +445,7 @@ class Receiver(object):
 		if reply:
 			# invalidate the device
 			dev.wpid = None
+			dev.online = False
 			del self._devices[key]
 			_log.warn("%s unpaired device %s", self, dev)
 		else:

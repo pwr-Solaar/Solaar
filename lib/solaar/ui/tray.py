@@ -391,16 +391,19 @@ def _remove_receiver(receiver):
 			index += 1
 
 
-def _update_menu_item(index, device_status):
+def _update_menu_item(index, device):
+	assert device
+	assert device.status is not None
+
 	menu_items = _menu.get_children()
 	menu_item = menu_items[index]
 
-	level = device_status.get(_K.BATTERY_LEVEL)
-	charging = device_status.get(_K.BATTERY_CHARGING)
+	level = device.status.get(_K.BATTERY_LEVEL)
+	charging = device.status.get(_K.BATTERY_CHARGING)
 	icon_name = _icons.battery(level, charging)
 
 	image_widget = menu_item.get_image()
-	image_widget.set_sensitive(bool(device_status))
+	image_widget.set_sensitive(bool(device.online))
 	_update_menu_icon(image_widget, icon_name)
 
 #
@@ -455,17 +458,17 @@ def update(device=None):
 
 		else:
 			# peripheral
-			is_alive = device.status is not None
+			is_paired = bool(device)
 			receiver_path = device.receiver.path
 			index = None
 			for idx, (path, serial, name, _, _) in enumerate(_devices_info):
 				if path == receiver_path and serial == device.serial:
 					index = idx
 
-			if is_alive:
+			if is_paired:
 				if index is None:
 					index = _add_device(device)
-				_update_menu_item(index, device.status)
+				_update_menu_item(index, device)
 			else:
 				# was just unpaired
 				if index:

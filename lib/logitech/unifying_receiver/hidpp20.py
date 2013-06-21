@@ -147,7 +147,7 @@ class FeaturesArray(object):
 			if self.features is not None:
 				return True
 
-			if hasattr(self.device, 'status') and not bool(self.device.status):
+			if not self.device.online:
 				# device is not connected right now, will have to try later
 				return False
 

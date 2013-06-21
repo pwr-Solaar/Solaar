@@ -190,8 +190,10 @@ class DeviceStatus(dict):
 			self._changed(alert=alert, reason=reason, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):
-		d = self._device
-		if d and self._active:
+		if self._active:
+			d = self._device
+			assert d
+
 			if d.protocol < 2.0:
 				battery = _hidpp10.get_battery(d)
 			else:
@@ -213,29 +215,32 @@ class DeviceStatus(dict):
 				self[KEYS.BATTERY_CHARGING] = None
 				self._changed()
 
-	def _changed(self, active=True, alert=ALERT.NONE, reason=None, timestamp=None):
+	def _changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
-		assert self._device
 		d = self._device
-		was_active, self._active = self._active, active
-		if active:
-			if not was_active:
-				# Make sure to set notification flags on the device, they
-				# get cleared when the device is turned off (but not when the device
-				# goes idle, and we can't tell the difference right now).
-				self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
-				if self.configuration:
-					self.configuration.attach_to(d)
-		else:
-			if was_active:
-				battery = self.get(KEYS.BATTERY_LEVEL)
-				self.clear()
-				# If we had a known battery level before, assume it's not going
-				# to change much while the device is offline.
-				if battery is not None:
-					self[KEYS.BATTERY_LEVEL] = battery
+		assert d
 
-		if self.updated == 0 and active:
+		if active is not None:
+			d.online = active
+			was_active, self._active = self._active, active
+			if active:
+				if not was_active:
+					# Make sure to set notification flags on the device, they
+					# get cleared when the device is turned off (but not when the device
+					# goes idle, and we can't tell the difference right now).
+					self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
+					if self.configuration:
+						self.configuration.attach_to(d)
+			else:
+				if was_active:
+					battery = self.get(KEYS.BATTERY_LEVEL)
+					self.clear()
+					# If we had a known battery level before, assume it's not going
+					# to change much while the device is offline.
+					if battery is not None:
+						self[KEYS.BATTERY_LEVEL] = battery
+
+		if self.updated == 0 and active == True:
 			# if the device is active on the very first status notification,
 			# (meaning just when the program started or a new receiver was just
 			# detected), pop-up a notification about it
@@ -330,8 +335,10 @@ class DeviceStatus(dict):
 			if n.address == 0x02:
 				# device un-paired
 				self.clear()
-				self._device.status = None
-				self._changed(False, ALERT.ALL, 'unpaired')
+				dev = self._device
+				dev.wpid = None
+				dev.status = None
+				self._changed(active=False, alert=ALERT.ALL, reason='unpaired')
 			else:
 				_log.warn("%s: disconnection with unknown type %02X: %s", self._device, n.address, n)
 			return True
@@ -342,6 +349,10 @@ class DeviceStatus(dict):
 						else 'eQuad' if n.address == 0x03
 						else None)
 			if protocol_name:
+				if _log.isEnabledFor(_DEBUG):
+					wpid = _strhex(n.data[2:3] + n.data[1:2])
+					assert wpid == self._device.wpid, "%s wpid mismatch, got %s" % (self._device, wpid)
+
 				flags = ord(n.data[:1]) & 0xF0
 				link_encrypyed = bool(flags & 0x20)
 				link_established = not (flags & 0x40)
@@ -351,20 +362,20 @@ class DeviceStatus(dict):
 					_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
 								self._device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
 				self[KEYS.LINK_ENCRYPTED] = link_encrypyed
-				self._changed(link_established)
+				self._changed(active=link_established)
 
-				if protocol_name == 'eQuad':
-					# some Nano devices might not have been initialized fully
-					if self._device._kind is None:
-						kind = ord(n.data[:1]) & 0x0F
-						self._device._kind = _hidpp10.DEVICE_KIND[kind]
-					assert self._device.wpid == _strhex(n.data[2:3] + n.data[1:2])
+				# if protocol_name == 'eQuad':
+				# 	# some Nano devices might not have been initialized fully
+				# 	if self._device._kind is None:
+				# 		kind = ord(n.data[:1]) & 0x0F
+				# 		self._device._kind = _hidpp10.DEVICE_KIND[kind]
+				# 	assert self._device.wpid == _strhex(n.data[2:3] + n.data[1:2])
+
+				# if the device just came online, read the battery charge
+				if self._active and KEYS.BATTERY_LEVEL not in self:
+					self.read_battery()
 			else:
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
-
-			# if the device just came online, read the battery charge
-			if self._active and KEYS.BATTERY_LEVEL not in self:
-				self.read_battery()
 
 			return True
 
@@ -380,7 +391,7 @@ class DeviceStatus(dict):
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("%s: device powered on", self._device)
 				reason = str(self) or 'powered on'
-				self._changed(alert=ALERT.NOTIFICATION, reason=reason)
+				self._changed(active=True, alert=ALERT.NOTIFICATION, reason=reason)
 			else:
 				_log.info("%s: unknown %s", self._device, n)
 			return True
@@ -410,7 +421,7 @@ class DeviceStatus(dict):
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("wireless status: %s", n)
 				if n.data[0:3] == b'\x01\x01\x01':
-					self._changed(alert=ALERT.NOTIFICATION, reason='powered on')
+					self._changed(active=True, alert=ALERT.NOTIFICATION, reason='powered on')
 				else:
 					_log.info("%s: unknown WIRELESS %s", self._device, n)
 			else:
@@ -426,11 +437,11 @@ class DeviceStatus(dict):
 				if n.address == 0x00:
 					self[KEYS.LIGHT_LEVEL] = None
 					self[KEYS.BATTERY_CHARGING] = None
-					self._changed()
+					self._changed(active=True)
 				elif n.address == 0x10:
 					self[KEYS.LIGHT_LEVEL] = lux
 					self[KEYS.BATTERY_CHARGING] = lux > 200
-					self._changed()
+					self._changed(active=True)
 				elif n.address == 0x20:
 					_log.debug("%s: Light Check button pressed", self._device)
 					self._changed(alert=ALERT.SHOW_WINDOW)

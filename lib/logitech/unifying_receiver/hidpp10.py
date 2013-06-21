@@ -105,8 +105,8 @@ def get_register(device, name, default_number=-1):
 		if reply:
 			return reply
 
-		if not known_register and device.ping():
-			_log.warn("%s: failed to read '%s' from default register 0x%02X, blacklisting",
+		if not known_register and device.kind is not None and device.online:
+			_log.warn("%s: failed to read register '%s' (0x%02X), blacklisting",
 							device, name, default_number)
 			device.registers[name] = -default_number
 
