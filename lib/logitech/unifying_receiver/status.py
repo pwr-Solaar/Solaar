@@ -207,9 +207,9 @@ class DeviceStatus(dict):
 				d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
 				return
 
-			if battery:
+			if battery is not None:
 				level, status = battery
-				self.set_battery_info(level, status, timestamp=timestamp)
+				self.set_battery_info(level, status)
 			elif KEYS.BATTERY_STATUS in self:
 				self[KEYS.BATTERY_STATUS] = None
 				self[KEYS.BATTERY_CHARGING] = None
@@ -272,7 +272,7 @@ class DeviceStatus(dict):
 			# may go to sleep and wake up without the devices available
 			if timestamp - self.updated > _STATUS_TIMEOUT:
 				if d.ping():
-					self.updated = _timestamp()
+					timestamp = self.updated = _timestamp()
 				else:
 					self._changed(active=False, reason='out of range')
 
@@ -363,17 +363,6 @@ class DeviceStatus(dict):
 								self._device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
 				self[KEYS.LINK_ENCRYPTED] = link_encrypyed
 				self._changed(active=link_established)
-
-				# if protocol_name == 'eQuad':
-				# 	# some Nano devices might not have been initialized fully
-				# 	if self._device._kind is None:
-				# 		kind = ord(n.data[:1]) & 0x0F
-				# 		self._device._kind = _hidpp10.DEVICE_KIND[kind]
-				# 	assert self._device.wpid == _strhex(n.data[2:3] + n.data[1:2])
-
-				# if the device just came online, read the battery charge
-				if self._active and KEYS.BATTERY_LEVEL not in self:
-					self.read_battery()
 			else:
 				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
 
