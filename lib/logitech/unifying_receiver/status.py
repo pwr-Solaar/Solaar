@@ -218,7 +218,7 @@ class DeviceStatus(dict):
 	def _changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
 		d = self._device
-		assert d
+		# assert d  # may be invalid when processing the 'unpaired' notification
 
 		if active is not None:
 			d.online = active
