@@ -34,15 +34,22 @@ class PairedDevice(object):
 		self.online = None
 
 		self.wpid = None
-		self.polling_rate = 0
 
 		self._kind = None
 		self._codename = None
 		self._name = None
 		self._protocol = None
 		self._serial = None
+		self._polling_rate = None
+
+		self._firmware = None
+		self._keys = None
+		self._registers = None
+		self._settings = None
 
 		unifying = self.receiver.unifying_supported
+		self._power_switch = None if unifying else '(unknown)'
+
 		if link_notification is None:
 			if unifying:
 				# force a reading of the codename
@@ -53,7 +60,7 @@ class PairedDevice(object):
 				self.wpid = _strhex(pair_info[3:5])
 				kind = ord(pair_info[7:8]) & 0x0F
 				self._kind = _hidpp10.DEVICE_KIND[kind]
-				self.polling_rate = ord(pair_info[2:3])
+				self._polling_rate = ord(pair_info[2:3])
 			else:
 				# guesswork... look for the product id in the descriptors
 				descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
@@ -71,7 +78,8 @@ class PairedDevice(object):
 					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read Nano wpid")
 				self.wpid = _strhex(device_info[3:5])
 				# self._kind = descriptor.kind
-				self.serial = self.receiver.serial
+				self._serial = self.receiver.serial
+				self._polling_rate = 0
 		else:
 			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
 			assert link_notification.address == (0x04 if unifying else 0x03)
@@ -93,20 +101,13 @@ class PairedDevice(object):
 			else:
 				self._protocol = descriptor.protocol if unifying else 1.0  # may be None
 
-		self._power_switch = None if unifying else '(unknown)'
-		self._firmware = None
-		self._keys = None
-
-		if self.protocol is not None:
-			self.features = _hidpp20.FeaturesArray(self) if self.protocol >= 2.0 else None
+		if self._protocol is not None:
+			self.features = _hidpp20.FeaturesArray(self) if self._protocol >= 2.0 else None
 		elif unifying:
 			# may be a 2.0 device
 			self.features = _hidpp20.FeaturesArray(self)
 		else:
 			self.features = None
-
-		self._registers = None
-		self._settings = None
 
 	@property
 	def protocol(self):
@@ -130,16 +131,6 @@ class PairedDevice(object):
 
 			# _log.debug("device %d protocol %s", self.number, self._protocol)
 		return self._protocol or 0
-
-	@property
-	def power_switch_location(self):
-		if self._power_switch is None:
-			assert self.receiver.unifying_supported
-			ps = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
-			if ps:
-				ps = ord(ps[9:10]) & 0x0F
-				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
-		return self._power_switch
 
 	@property
 	def codename(self):
@@ -197,6 +188,28 @@ class PairedDevice(object):
 			# otherwise it should have been set in the constructor
 			self._serial = _hidpp10.get_serial(self)
 		return self._serial or '?'
+
+	@property
+	def power_switch_location(self):
+		if self._power_switch is None:
+			assert self.receiver.unifying_supported
+			ps = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
+			if ps:
+				ps = ord(ps[9:10]) & 0x0F
+				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
+		return self._power_switch
+
+	@property
+	def polling_rate(self):
+		if self._polling_rate is None:
+			assert self.receiver.unifying_supported
+			pair_info = self.receiver.read_register(0x2B5, 0x20 + self.number - 1)
+			if pair_info is None:
+				# wtf?
+				self._polling_rate = 0
+			else:
+				self._polling_rate = ord(pair_info[2:3])
+		return self._polling_rate
 
 	@property
 	def keys(self):
@@ -301,7 +314,7 @@ class Receiver(object):
 		self.handle = handle
 		assert device_info
 		self.path = device_info.path
-		# USB product id
+		# USB product id, used for some Nano receivers
 		self.product_id = device_info.product_id
 
 		# read the serial immediately, so we can find out max_devices

@@ -460,11 +460,12 @@ def _update_details(button):
 		def _details_items(device):
 			if device.kind is None:
 				yield ('Path', device.path)
+				# 046d is the Logitech vendor id
 				yield ('USB id', '046d:' + device.product_id)
 			else:
 				# yield ('Codename', device.codename)
-				hid = device.protocol
-				yield ('Protocol', 'HID++ %1.1f' % hid if hid else 'unknown')
+				hid_version = device.protocol
+				yield ('Protocol', 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
 				if device.polling_rate:
 					yield ('Polling rate', '%d ms' % device.polling_rate)
 				yield ('Wireless PID', device.wpid)
