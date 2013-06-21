@@ -101,7 +101,7 @@ def _print_receiver(receiver, verbose=False):
 			print ("   Notifications: (none).")
 
 	if receiver.unifying_supported:
-		activity = receiver.request(0x83B3)
+		activity = receiver.read_register(0x2B3)
 		if activity:
 			activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
 			print ("   Device activity counters:", ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))

@@ -85,11 +85,23 @@ PAIRING_ERRORS = _NamedInts(
 # functions
 #
 
+def read_register(device, register_number, *params):
+	# support long registers by adding a 2 in front of the number
+	request_id = 0x8100 | (int(register_number) & 0x2FF)
+	return device.request(request_id, *params)
+
+
+def write_register(device, register_number, *value):
+	# support long registers by adding a 2 in front of the number
+	request_id = 0x8000 | (int(register_number) & 0x2FF)
+	return device.request(request_id, *value)
+
+
 def get_register(device, name, default_number=-1):
 	known_register = device.registers.get(name)
 	register = known_register or default_number
 	if register > 0:
-		reply = device.request(0x8100 + (register & 0xFF))
+		reply = read_register(device, register)
 		if reply:
 			return reply
 
@@ -147,25 +159,28 @@ def get_serial(device):
 		dev_id = 0x30 + device.number - 1
 		receiver = device.receiver
 
-	serial = receiver.request(0x83B5, dev_id)
-	if serial:
+	serial = read_register(receiver, 0x2B5, dev_id)
+	if serial is not None:
 		return _strhex(serial[1:5])
 
 
 def get_firmware(device):
 	firmware = [None, None]
 
-	reply = device.request(0x81F1, 0x01)
-	if reply:
-		fw_version = _strhex(reply[1:3])
-		fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
-		reply = device.request(0x81F1, 0x02)
-		if reply:
-			fw_version += '.B' + _strhex(reply[1:3])
-		fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
-		firmware[0] = fw
+	reply = read_register(device, 0xF1, 0x01)
+	if not reply:
+		# won't be able to read any of it now...
+		return
 
-	reply = device.request(0x81F1, 0x04)
+	fw_version = _strhex(reply[1:3])
+	fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
+	reply = read_register(device, 0xF1, 0x02)
+	if reply:
+		fw_version += '.B' + _strhex(reply[1:3])
+	fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
+	firmware[0] = fw
+
+	reply = read_register(device, 0xF1, 0x04)
 	if reply:
 		bl_version = _strhex(reply[1:3])
 		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
@@ -183,7 +198,7 @@ def get_notification_flags(device):
 		if p is None or p >= 2.0:
 			return
 
-	flags = device.request(0x8100)
+	flags = read_register(device, 0x00)
 	if flags is not None:
 		assert len(flags) == 3
 		return ord(flags[0:1]) << 16 | ord(flags[1:2]) << 8 | ord(flags[2:3])
@@ -197,5 +212,5 @@ def set_notification_flags(device, *flag_bits):
 			return
 
 	flag_bits = sum(int(b) for b in flag_bits)
-	result = device.request(0x8000, 0xFF & (flag_bits >> 16), 0xFF & (flag_bits >> 8), 0xFF & flag_bits)
+	result = write_register(device, 0x00, 0xFF & (flag_bits >> 16), 0xFF & (flag_bits >> 8), 0xFF & flag_bits)
 	return result is not None

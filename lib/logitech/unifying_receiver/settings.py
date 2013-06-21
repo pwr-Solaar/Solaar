@@ -84,10 +84,10 @@ class _RegisterRW(object):
 		self.register = register
 
 	def read(self, device):
-		return device.request(0x8100 | (self.register & 0x2FF))
+		return device.read_register(self.register)
 
 	def write(self, device, data_bytes):
-		return device.request(0x8000 | (self.register & 0x2FF), data_bytes)
+		return device.write_register(self.register, data_bytes)
 
 
 class _FeatureRW(object):
