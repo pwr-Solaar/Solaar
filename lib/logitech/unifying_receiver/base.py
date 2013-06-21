@@ -264,11 +264,6 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 def make_notification(devnumber, data):
 	"""Guess if this is a notification (and not just a request reply), and
 	return a Notification tuple if it is."""
-	if devnumber == 0x0FF:
-		# Assuming no notifications come for the receiver.
-		# Some notifications may come _from_ the receiver, but for one of its peripherals.
-		return
-
 	sub_id = ord(data[:1])
 	if sub_id & 0x80 == 0x80:
 		# if this is a HID++1.0 register r/w, bail out
