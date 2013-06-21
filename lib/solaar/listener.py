@@ -222,12 +222,13 @@ def stop_all():
 		_log.info("stopping %s", listeners)
 
 		for l in listeners:
-			if l:
-				l.stop()
-		for l in listeners:
-			l.join()
+			l.stop()
 
 	configuration.save()
+
+	if listeners:
+		for l in listeners:
+			l.join()
 
 
 _status_callback = None
