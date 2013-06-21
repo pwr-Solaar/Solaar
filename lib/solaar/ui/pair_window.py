@@ -16,7 +16,8 @@ from logitech.unifying_receiver.status import KEYS as _K
 #
 #
 #
-_PAIRING_TIMEOUT = 30
+_PAIRING_TIMEOUT = 30  # seconds
+_STATUS_CHECK = 500  # milliseconds
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None):
@@ -48,7 +49,7 @@ def _create_page(assistant, kind, header=None, icon_name=None, text=None):
 	return p
 
 
-def _check_lock_state(assistant, receiver):
+def _check_lock_state(assistant, receiver, count=2):
 	if not assistant.is_drawable():
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("assistant %s destroyed, bailing out", assistant)
@@ -65,7 +66,12 @@ def _check_lock_state(assistant, receiver):
 		return False
 
 	if not receiver.status.lock_open:
-		_pairing_failed(assistant, receiver, 'failed to open pairing lock')
+		if count > 0:
+			# the actual device notification may arrive after the lock was paired,
+			# so have a little patience
+			GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver, count - 1)
+		else:
+			_pairing_failed(assistant, receiver, 'failed to open pairing lock')
 		return False
 
 	return True
@@ -82,7 +88,7 @@ def _prepare(assistant, page, receiver):
 			assert receiver.status.get(_K.ERROR) is None
 			spinner = page.get_children()[-1]
 			spinner.start()
-			GLib.timeout_add(750, _check_lock_state, assistant, receiver)
+			GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
 			assistant.set_page_complete(page, True)
 		else:
 			GLib.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
@@ -154,7 +160,7 @@ def _pairing_succeeded(assistant, receiver, device):
 				hbox.show_all()
 			else:
 				return True
-	GLib.timeout_add(500, _check_encrypted, device)
+	GLib.timeout_add(_STATUS_CHECK, _check_encrypted, device)
 
 	page.show_all()
 
