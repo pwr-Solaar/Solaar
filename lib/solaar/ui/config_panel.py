@@ -203,6 +203,7 @@ def clean(device_id):
 		sbox = _items[k]
 		if sbox.get_name() == device_id:
 			del _items[k]
+			_box.remove(sbox)
 
 
 def destroy():
