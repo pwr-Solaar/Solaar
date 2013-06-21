@@ -12,7 +12,6 @@ del getLogger
 
 from . import icons as _icons
 from logitech.unifying_receiver.status import KEYS as _K
-from logitech.unifying_receiver import status as _status
 
 #
 #
@@ -149,7 +148,7 @@ def _pairing_succeeded(assistant, receiver, device):
 
 	def _check_encrypted(dev):
 		if assistant.is_drawable():
-			if device.status.get('encrypted') == False:
+			if device.status.get(_K.LINK_ENCRYPTED) == False:
 				hbox.pack_start(Gtk.Image.new_from_icon_name('security-low', Gtk.IconSize.MENU), False, False, 0)
 				hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
 				hbox.show_all()
