@@ -420,12 +420,15 @@ _icon = None
 
 def init():
 	global _menu, _icon
+	assert _menu is None
 	_menu = _create_menu()
+	assert _icon is None
 	_icon = _create(_menu)
 
 
 def destroy():
 	global _icon, _menu, _devices_info
+	assert _icon is not None
 	i, _icon = _icon, None
 	_destroy(i)
 	i = None
@@ -480,7 +483,8 @@ def update(device=None):
 		menu_items[no_receivers_index + 1].set_visible(not _devices_info)
 
 	global _picked_device
-	if not _picked_device:
+	if not _picked_device and device is not None and device.kind is not None:
+		# if it's just a receiver update, it's unlikely the picked device would change
 		_picked_device = _pick_device_with_lowest_battery()
 
 	_update_tray_icon()
