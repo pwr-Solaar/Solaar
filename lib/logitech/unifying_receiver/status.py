@@ -69,7 +69,7 @@ class ReceiverStatus(dict):
 		self.new_device = None
 
 		self[KEYS.ERROR] = None
-		self[KEYS.NOTIFICATION_FLAGS] = receiver.enable_notifications()
+		# self[KEYS.NOTIFICATION_FLAGS] = receiver.enable_notifications()
 
 	def __str__(self):
 		count = len(self._receiver)
@@ -93,7 +93,7 @@ class ReceiverStatus(dict):
 		r.serial, r.firmware, None
 
 		# get an update of the notification flags
-		self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
+		# self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
 
 	def process_notification(self, n):
 		if n.sub_id == 0x4A:

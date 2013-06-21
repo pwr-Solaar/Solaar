@@ -241,14 +241,12 @@ class PairedDevice(object):
 		else:
 			set_flag_bits = 0
 		ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+		if ok is None:
+			_log.warn("%s: failed to %s device notifications", self, 'enable' if enable else 'disable')
 
 		flag_bits = _hidpp10.get_notification_flags(self)
 		flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-
-		if ok:
-			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_names)
-		else:
-			_log.warn("%s: failed to %s device notifications %s", self, 'enable' if enable else 'disable', flag_names)
+		_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_names)
 		return flag_bits if ok else None
 
 	def request(self, request_id, *params):
@@ -355,15 +353,14 @@ class Receiver(object):
 		else:
 			set_flag_bits = 0
 		ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+		if ok is None:
+			_log.warn("%s: failed to %s receiver notifications", self, 'enable' if enable else 'disable')
+			return None
 
 		flag_bits = _hidpp10.get_notification_flags(self)
 		flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-
-		if ok:
-			_log.info("%s: receiver notifications %s => %s", self, 'enabled' if enable else 'disabled', flag_names)
-		else:
-			_log.warn("%s: failed to %s receiver notifications %s", self, 'enable' if enable else 'disable', flag_names)
-		return flag_bits if ok else None
+		_log.info("%s: receiver notifications %s => %s", self, 'enabled' if enable else 'disabled', flag_names)
+		return flag_bits
 
 	def notify_devices(self):
 		"""Scan all devices."""
