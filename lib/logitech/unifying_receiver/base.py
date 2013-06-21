@@ -36,9 +36,9 @@ _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
 
 """Default timeout on read (in seconds)."""
-DEFAULT_TIMEOUT = 3.5
+DEFAULT_TIMEOUT = 4
 # the receiver itself should reply very fast, within 500ms
-_RECEIVER_REQUEST_TIMEOUT = 0.8
+_RECEIVER_REQUEST_TIMEOUT = 0.9
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient
@@ -264,21 +264,28 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 def make_notification(devnumber, data):
 	"""Guess if this is a notification (and not just a request reply), and
 	return a Notification tuple if it is."""
+	if devnumber == 0x0FF:
+		# Assuming no notifications come for the receiver.
+		# Some notifications may come _from_ the receiver, but for one of its peripherals.
+		return
+
 	sub_id = ord(data[:1])
-	if sub_id & 0x80 != 0x80:
-		# if this is not a HID++1.0 register r/w
-		address = ord(data[1:2])
-		if (
-			# standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
-			(sub_id >= 0x40)
-			or
-			# custom HID++1.0 battery events, where SubId is 0x07/0x0D
-			(sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00')
-			or
-			# HID++ 2.0 feature notifications have the SoftwareID 0
-			(address & 0x0F == 0x00)
-			):
-			return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
+	if sub_id & 0x80 == 0x80:
+		# if this is a HID++1.0 register r/w, bail out
+		return
+
+	address = ord(data[1:2])
+	if (
+		# standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
+		(sub_id >= 0x40)
+		or
+		# custom HID++1.0 battery events, where SubId is 0x07/0x0D
+		(sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00')
+		or
+		# HID++ 2.0 feature notifications have the SoftwareID 0
+		(address & 0x0F == 0x00)
+		):
+		return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 from collections import namedtuple
 _HIDPP_Notification = namedtuple('_HIDPP_Notification', ['devnumber', 'sub_id', 'address', 'data'])
@@ -315,6 +322,9 @@ def request(handle, devnumber, request_id, *params):
 		request_id = (request_id & 0xFFF0) | 0x08 | _random_bits(3)
 
 	timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
+	# be extra patient on long register read
+	if request_id & 0xFF00 == 0x8300:
+		timeout *= 2
 
 	if params:
 		params = b''.join(_pack('B', p) if isinstance(p, int) else p for p in params)
@@ -331,10 +341,10 @@ def request(handle, devnumber, request_id, *params):
 
 	# we consider timeout from this point
 	request_started = _timestamp()
+	delta = 0
 
-	while True:
+	while delta < timeout:
 		reply = _read(handle, timeout)
-		delta = _timestamp() - request_started
 
 		if reply:
 			report_id, reply_devnumber, reply_data = reply
@@ -352,7 +362,7 @@ def request(handle, devnumber, request_id, *params):
 
 					_log.debug("(%s) device 0x%02X error on request {%04X}: %d = %s",
 									handle, devnumber, request_id, error, _hidpp10.ERROR[error])
-					break
+					return
 
 				if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
 					# a HID++ 2.0 feature call returned with an error
@@ -362,10 +372,10 @@ def request(handle, devnumber, request_id, *params):
 					raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
 				if reply_data[:2] == request_data[:2]:
-					if request_id & 0xFF00 == 0x8300:
+					if request_id & 0xFE00 == 0x8200:
 						# long registry r/w should return a long reply
 						assert report_id == 0x11
-					elif request_id & 0xF000 == 0x8000:
+					elif request_id & 0xFE00 == 0x8000:
 						# short registry r/w should return a short reply
 						assert report_id == 0x10
 
@@ -381,30 +391,31 @@ def request(handle, devnumber, request_id, *params):
 							return reply_data[2:]
 					else:
 						return reply_data[2:]
+			else:
+				# a reply was received, but did not match our request in any way
+				# reset the timeout starting point
+				request_started = _timestamp()
 
 			if notifications_hook:
 				n = make_notification(reply_devnumber, reply_data)
 				if n:
 					notifications_hook(n)
-				# elif _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+				elif _log.isEnabledFor(_DEBUG):
+					_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+			elif _log.isEnabledFor(_DEBUG):
+				_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
-			# a reply was received, but did not match our request in any way
-			# reset the timeout starting point
-			request_started = _timestamp()
-
+		delta = _timestamp() - request_started
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
-		if delta >= timeout:
-			_log.warn("timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]",
-							delta, timeout, devnumber, request_id, _strhex(params))
-			break
-			# raise DeviceUnreachable(number=devnumber, request=request_id)
+	_log.warn("timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]",
+					delta, timeout, devnumber, request_id, _strhex(params))
+	# raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
 def ping(handle, devnumber):
-	"""Check if a device is connected to the UR.
+	"""Check if a device is connected to the receiver.
 
 	:returns: The HID protocol supported by the device, as a floating point number, if the device is active.
 	"""
@@ -413,6 +424,10 @@ def ping(handle, devnumber):
 
 	# import inspect as _inspect
 	# print ('\n  '.join(str(s) for s in _inspect.stack()))
+
+	assert devnumber != 0xFF
+	assert devnumber > 0x00
+	assert devnumber < 0x0F
 
 	# randomize the SoftwareId and mark byte to be able to identify the ping
 	# reply, and set most significant (0x8) bit in SoftwareId so that the reply
@@ -427,10 +442,10 @@ def ping(handle, devnumber):
 
 	# we consider timeout from this point
 	request_started = _timestamp()
+	delta = 0
 
-	while True:
+	while delta < _PING_TIMEOUT:
 		reply = _read(handle, _PING_TIMEOUT)
-		delta = _timestamp() - request_started
 
 		if reply:
 			report_id, reply_devnumber, reply_data = reply
@@ -447,8 +462,7 @@ def ping(handle, devnumber):
 						return 1.0
 
 					if error == _hidpp10.ERROR.resource_error: # device unreachable
-						# raise DeviceUnreachable(number=devnumber, request=request_id)
-						break
+						return
 
 					if error == _hidpp10.ERROR.unknown_device: # no paired device with that number
 						_log.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
@@ -459,6 +473,7 @@ def ping(handle, devnumber):
 				if n:
 					notifications_hook(n)
 
-		if delta >= _PING_TIMEOUT:
-			_log.warn("(%s) timeout (%0.2f/%0.2f) on device %d ping", handle, delta, _PING_TIMEOUT, devnumber)
-			# raise DeviceUnreachable(number=devnumber, request=request_id)
+		delta = _timestamp() - request_started
+
+	_log.warn("(%s) timeout (%0.2f/%0.2f) on device %d ping", handle, delta, _PING_TIMEOUT, devnumber)
+	# raise DeviceUnreachable(number=devnumber, request=request_id)
