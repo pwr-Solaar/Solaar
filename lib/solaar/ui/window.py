@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger
+from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
@@ -229,8 +229,12 @@ def _create_tree(model):
 	tree.set_size_request(240, 0)
 	tree.set_headers_visible(False)
 	tree.set_show_expanders(False)
-	tree.set_level_indentation(16)
+	tree.set_level_indentation(20)
+	# tree.set_fixed_height_mode(True)
 	tree.set_enable_tree_lines(True)
+	tree.set_reorderable(False)
+	tree.set_activate_on_single_click(True)
+	tree.set_enable_search(False)
 	# tree.set_rules_hint(True)
 	tree.set_model(model)
 
@@ -355,21 +359,32 @@ def _device_selected(selection):
 
 
 def _receiver_row(receiver_path, receiver=None):
+	assert receiver_path
+
 	item = _model.get_iter_first()
 	while item:
 		if _model.get_value(item, _COLUMN.ID) == receiver_path:
 			return item
 		item = _model.iter_next(item)
 
-	if not item and receiver is not None:
-		row_data = (receiver_path, True, receiver.name, _icons.device_icon_name(receiver.name), '', receiver)
+	if not item and receiver:
+		icon_name = _icons.device_icon_name(receiver.name)
+		pairing_icon_name = ''
+		row_data = (receiver_path, True, receiver.name, icon_name, pairing_icon_name, receiver)
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("new receiver row %s", row_data)
+			# _log.debug("receiver %s", receiver)
 		item = _model.append(None, row_data)
-		_model.append(None, _TREE_SEPATATOR)
+		if _TREE_SEPATATOR:
+			_model.append(None, _TREE_SEPATATOR)
 
 	return item or None
 
 
 def _device_row(receiver_path, device_serial, device=None):
+	assert receiver_path
+	assert device_serial
+
 	receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
 	item = _model.iter_children(receiver_row)
 	while item:
@@ -377,9 +392,13 @@ def _device_row(receiver_path, device_serial, device=None):
 			return item
 		item = _model.iter_next(item)
 
-	if not item and device is not None:
-		# print ("new device row", device)
-		row_data = (device_serial, bool(device.status), device.codename, _icons.device_icon_name(device.name, device.kind), '', device)
+	if not item and device:
+		icon_name = _icons.device_icon_name(device.name, device.kind)
+		battery_icon_name = ''
+		row_data = (device_serial, bool(device.online), device.codename, icon_name, battery_icon_name, device)
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("new device row %s", row_data)
+			# _log.debug("device %s", device)
 		item = _model.append(receiver_row, row_data)
 
 	return item or None
@@ -398,6 +417,8 @@ def select(receiver_path, device_id=None):
 	if item:
 		selection = _tree.get_selection()
 		selection.select_iter(item)
+	else:
+		_log.warn("select(%s, %s) failed to find an item", receiver_path, device_id)
 
 
 def _hide(w, _=None):
@@ -434,7 +455,7 @@ def _update_details(button):
 	assert device
 
 	if visible:
-		_details._text.set_markup('<small>reading...</small>')
+		# _details._text.set_markup('<small>reading...</small>')
 
 		def _details_items(device):
 			if device.kind is None:
@@ -566,6 +587,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 
 def _update_info_panel(device, full=False):
 	if device is None:
+		# no selected device, show the 'empty' panel
 		_details.set_visible(False)
 		_info.set_visible(False)
 		_empty.set_visible(True)
@@ -633,6 +655,7 @@ def destroy():
 	w, _window = _window, None
 	w.destroy()
 	w = None
+	_config_panel.destroy()
 
 	_empty = None
 	_info = None
@@ -657,6 +680,7 @@ def update(device, need_popup=False):
 		is_alive = bool(device)
 		item = _receiver_row(device.path, device if is_alive else None)
 		assert item
+
 		if is_alive and item:
 			_model.set_value(item, _COLUMN.ACTIVE, True)
 			is_pairing = is_alive and device.status.lock_open
@@ -666,10 +690,10 @@ def update(device, need_popup=False):
 				_update_info_panel(device, need_popup)
 
 		elif item:
-			separator = _model.iter_next(item)
-			_model.remove(separator)
+			if _TREE_SEPATATOR:
+				separator = _model.iter_next(item)
+				_model.remove(separator)
 			_model.remove(item)
-			# _config_panel.clean(device.path)
 
 	else:
 		# peripheral

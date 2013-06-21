@@ -81,8 +81,9 @@ def _combo_notify(cbbox, setting, spinner):
 # 	return True
 
 
-def _create_sbox(s):
-	sbox = Gtk.HBox(homogeneous=False, spacing=8)
+def _create_sbox(s, device_id):
+	sbox = Gtk.HBox(homogeneous=False, spacing=6)
+	sbox.set_name(device_id)
 	sbox.pack_start(Gtk.Label(s.label), False, False, 0)
 
 	spinner = Gtk.Spinner()
@@ -153,49 +154,58 @@ def _update_setting_item(sbox, value, is_online=True):
 #
 #
 
+# config panel
+_box = None
+_items = {}
+
 def create():
-	b = Gtk.VBox(homogeneous=False, spacing=4)
-	# b.set_property('margin', 8)
-	b._last_device = None
-	b._items = {}
-	return b
+	global _box
+	assert _box is None
+	_box = Gtk.VBox(homogeneous=False, spacing=4)
+	# _box.set_property('margin', 8)
+	_box._last_device = None
+	return _box
 
 
-def update(box, device, is_active):
-	assert box is not None
-	assert device is not None
+def update(device, is_online):
+	assert _box is not None
+	assert device
 
 	# if the device changed since last update, clear the box first
-	if not box._last_device:
-		box._last_device = None
-	if device.serial != box._last_device:
-		box.set_visible(False)
+	if device.serial != _box._last_device:
+		_box.set_visible(False)
+		_box._last_device = device.serial
 
-	# if the device just became active, re-read the settings
-	box.foreach(lambda x, s: x.set_visible(x.get_name() == s), device.serial)
-
-	if device.serial != box._last_device:
-		box._last_device = device.serial
-		box.set_visible(True)
+	# hide
+	_box.foreach(lambda x, s: x.set_visible(x.get_name() == s), device.serial)
 
 	for s in device.settings:
 		k = device.serial + '_' + s.name
-		if k not in box._items:
-			sbox = _create_sbox(s)
-			sbox.set_name(device.serial)
-			box._items[k] = sbox
-			box.pack_start(sbox, False, False, 0)
+		if k in _items:
+			sbox = _items[k]
 		else:
-			sbox = box._items[k]
+			sbox = _items[k] = _create_sbox(s, device.serial)
+			_box.pack_start(sbox, False, False, 0)
 
-		if is_active:
+		if is_online:
 			_apply_queue.put(('read', s, False, sbox))
 		else:
 			_update_setting_item(sbox, None, False)
 
+	_box.set_visible(True)
 
-def clean(box, device_id):
-	partial_key = device_id + '_'
-	for k in list(box._items.keys()):
-		if k.startswith(partial_key):
-			del box._items[k]
+def clean(device_id):
+	"""Remove the controls for a given device serial.
+	Needed after the device has been unpaired.
+	"""
+	assert _box is not None
+	for k in list(_items.keys()):
+		sbox = _items[k]
+		if sbox.get_name() == device_id:
+			del _items[k]
+
+
+def destroy():
+	global _box
+	_box = None
+	_items.clear()
