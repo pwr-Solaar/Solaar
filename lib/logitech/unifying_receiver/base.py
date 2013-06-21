@@ -395,10 +395,10 @@ def request(handle, devnumber, request_id, *params):
 				n = make_notification(reply_devnumber, reply_data)
 				if n:
 					notifications_hook(n)
-				elif _log.isEnabledFor(_DEBUG):
-					_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
-			elif _log.isEnabledFor(_DEBUG):
-				_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+				# elif _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+			# elif _log.isEnabledFor(_DEBUG):
+			# 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
 		delta = _timestamp() - request_started
 		# if _log.isEnabledFor(_DEBUG):
@@ -467,6 +467,8 @@ def ping(handle, devnumber):
 				n = make_notification(reply_devnumber, reply_data)
 				if n:
 					notifications_hook(n)
+				# elif _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
 		delta = _timestamp() - request_started
 
