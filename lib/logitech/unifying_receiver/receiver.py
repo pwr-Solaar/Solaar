@@ -326,15 +326,15 @@ class Receiver(object):
 
 		if self.max_devices == 1:
 			self.name = 'Nano Receiver'
+			old_equad_reply = self.read_register(0x2B5, 0x04)
+			self.unifying_supported = old_equad_reply is None
+			_log.info("%s (%s) uses protocol %s", self.name, self.path, 'eQuad' if old_equad_reply else 'eQuad DJ')
 		elif self.max_devices == 6:
 			self.name = 'Unifying Receiver'
+			self.unifying_supported = True
 		else:
-			raise Exception("unknown receiver type")
+			raise Exception("unknown receiver type", self.max_devices)
 		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if type(self.handle) == int else 'T', self.handle)
-
-		old_equad_reply = self.read_register(0x2B5, 0x04)
-		self.unifying_supported = old_equad_reply is None
-		_log.info("%s (%s) uses protocol %s", self.name, self.path, 'eQuad' if old_equad_reply else 'eQuad DJ')
 
 		self._firmware = None
 		self._devices = {}
