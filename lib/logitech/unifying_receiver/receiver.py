@@ -40,18 +40,26 @@ class PairedDevice(object):
 		self._name = None
 		self._protocol = None
 		self._serial = None
-		self._polling_rate = None
 
 		self._firmware = None
 		self._keys = None
 		self._registers = None
 		self._settings = None
 
-		unifying = self.receiver.unifying_supported
-		self._power_switch = None if unifying else '(unknown)'
+		self._polling_rate = None
+		self._power_switch = None
 
-		if link_notification is None:
-			if unifying:
+		unifying = self.receiver.unifying_supported
+
+		if link_notification is not None:
+			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
+			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
+			assert link_notification.address == (0x04 if unifying else 0x03)
+			kind = ord(link_notification.data[1:2]) & 0x0F
+			self._kind = _hidpp10.DEVICE_KIND[kind]
+
+		if unifying:
+			if self.wpid is None:
 				# force a reading of the codename
 				pair_info = receiver.read_register(0x2B5, 0x20 + number - 1)
 				if pair_info is None:
@@ -61,31 +69,27 @@ class PairedDevice(object):
 				kind = ord(pair_info[7:8]) & 0x0F
 				self._kind = _hidpp10.DEVICE_KIND[kind]
 				self._polling_rate = ord(pair_info[2:3])
-			else:
-				# guesswork... look for the product id in the descriptors
-				descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
-				if descriptor is None:
-					self._codename = self.receiver.product_id
-					# actually there IS a device, just that we can't identify it
-					# raise _base.NoSuchDevice(nuber=number, receiver=receiver, product_id=receiver.product_id, failed="no descriptor")
-					self._name = 'Unknown device ' + self._codename
-				else:
-					self._codename = descriptor.codename
-					self._name = descriptor.name
 
+		else:
+			self._serial = self.receiver.serial
+			self._polling_rate = 0
+			self._power_switch = '(unknown)'
+
+			descriptor = _descriptors.DEVICES.get(self.receiver.product_id)
+			if descriptor is None:
+				self._codename = self.receiver.product_id
+				# actually there IS a device, just that we can't identify it
+				# raise _base.NoSuchDevice(nuber=number, receiver=receiver, product_id=receiver.product_id, failed="no descriptor")
+				self._name = 'Unknown device ' + self._codename
+			else:
+				self._codename = descriptor.codename
+				self._name = descriptor.name
+
+			if self.wpid is None:
 				device_info = self.receiver.read_register(0x2B5, 0x04)
 				if device_info is None:
 					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read Nano wpid")
 				self.wpid = _strhex(device_info[3:5])
-				# self._kind = descriptor.kind
-				self._serial = self.receiver.serial
-				self._polling_rate = 0
-		else:
-			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
-			assert link_notification.address == (0x04 if unifying else 0x03)
-			kind = ord(link_notification.data[1:2]) & 0x0F
-			self._kind = _hidpp10.DEVICE_KIND[kind]
-			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
 
 		# the wpid is necessary to properly identify wireless link on/off notifications
 		# also it gets set to None when the device is unpaired
@@ -194,7 +198,7 @@ class PairedDevice(object):
 		if self._power_switch is None:
 			assert self.receiver.unifying_supported
 			ps = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
-			if ps:
+			if ps is not None:
 				ps = ord(ps[9:10]) & 0x0F
 				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
 		return self._power_switch
