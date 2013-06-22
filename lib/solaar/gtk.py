@@ -62,6 +62,9 @@ def main():
 	from . import appinstance
 	appid = appinstance.check()
 	try:
+		# handle ^C in console
+		import signal
+		signal.signal(signal.SIGINT, signal.SIG_DFL)
 		_run(args)
 	finally:
 		appinstance.close(appid)
