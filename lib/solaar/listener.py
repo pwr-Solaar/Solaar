@@ -47,7 +47,7 @@ class ReceiverListener(_listener.EventsListener):
 	def __init__(self, receiver, status_changed_callback):
 		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
 		# no reason to enable polling yet
-		self.tick_period = _POLL_TICK
+		# self.tick_period = _POLL_TICK
 		self._last_tick = 0
 
 		assert status_changed_callback

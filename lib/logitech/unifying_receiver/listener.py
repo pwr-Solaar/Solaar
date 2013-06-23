@@ -102,11 +102,13 @@ class _ThreadedHandle(object):
 # Ideally this should be rather long (10s ?), but the read is blocking
 # and this means that when the thread is signalled to stop, it would take
 # a while for it to acknowledge it.
-_EVENT_READ_TIMEOUT = 0.5
+# Forcibly closing the file handle on another thread does _not_ interrupt the
+# read on Linux systems.
+_EVENT_READ_TIMEOUT = 0.4  # in seconds
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
-_IDLE_READS = (5 / 0.5)  # wait at least 5 seconds between ticks
+_IDLE_READS = 1 + int(5 // _EVENT_READ_TIMEOUT)  # wait at least 5 seconds between ticks
 
 
 class EventsListener(_threading.Thread):
