@@ -235,9 +235,7 @@ def _create_tree(model):
 	# tree.set_fixed_height_mode(True)
 	tree.set_enable_tree_lines(True)
 	tree.set_reorderable(False)
-	tree.set_activate_on_single_click(True)
 	tree.set_enable_search(False)
-	# tree.set_rules_hint(True)
 	tree.set_model(model)
 
 	def _is_separator(model, item, _=None):
