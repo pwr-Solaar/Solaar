@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from weakref import proxy as _proxy
+# from weakref import proxy as _proxy
 from copy import copy as _copy
 
 from .common import NamedInt as _NamedInt, NamedInts as _NamedInts
@@ -35,7 +35,7 @@ class _Setting(object):
 	def __call__(self, device):
 		o = _copy(self)
 		o._value = None
-		o._device = _proxy(device)
+		o._device = device  # _proxy(device)
 		return o
 
 	@property

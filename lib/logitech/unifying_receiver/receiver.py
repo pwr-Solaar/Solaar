@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
-from weakref import proxy as _proxy
+# from weakref import proxy as _proxy
 
 from logging import getLogger
 _log = getLogger('LUR.receiver')
@@ -28,7 +28,7 @@ MAX_PAIRED_DEVICES = 6
 class PairedDevice(object):
 	def __init__(self, receiver, number, link_notification=None):
 		assert receiver
-		self.receiver = _proxy(receiver)
+		self.receiver = receiver  # _proxy(receiver)
 		assert number > 0 and number <= receiver.max_devices
 		self.number = number
 		self.online = None
