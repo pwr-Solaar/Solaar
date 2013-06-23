@@ -75,6 +75,10 @@ def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers
 		codename = name.split(' ')[-1]
 	assert codename is not None, "descriptor for %s does not have codename set" % name
 
+	if protocol is not None:
+		# ? 2.0 devices should not have any registers
+		assert protocol < 2.0 or registers is None
+
 	DEVICES[codename] = _DeviceDescriptor(
 					name=name,
 					kind=kind,
@@ -183,7 +187,7 @@ _D('Anywhere Mouse MX', codename='Anywhere MX',
 				# 		],
 				)
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0,
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
 							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
 						],

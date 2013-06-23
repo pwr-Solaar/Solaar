@@ -187,6 +187,8 @@ class DeviceStatus(dict):
 			reason = 'Battery: %d%% (%s)' % (level, status)
 
 		if changed or reason:
+			# update the leds on the device, if any
+			_hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
 			self._changed(alert=alert, reason=reason, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):

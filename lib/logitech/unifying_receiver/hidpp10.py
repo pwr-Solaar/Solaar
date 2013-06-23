@@ -81,6 +81,13 @@ PAIRING_ERRORS = _NamedInts(
 				too_many_devices=0x03,
 				sequence_timeout=0x06)
 
+BATTERY_APPOX = _NamedInts(
+				empty = 0,
+				critical = 5,
+				low = 20,
+				good = 50,
+				full = 90)
+
 #
 # functions
 #
@@ -151,11 +158,11 @@ def parse_battery_reply_0D(level, battery_status):
 	return charge, status
 
 def parse_battery_reply_07(level, battery_status):
-	charge = (90 if level == 7 # full
-		else 50 if level == 5 # good
-		else 20 if level == 3 # low
-		else 5 if level == 1 # critical
-		else 0 ) # wtf?
+	charge = (BATTERY_APPOX.full if level == 7 # full
+		else BATTERY_APPOX.good if level == 5 # good
+		else BATTERY_APPOX.low if level == 3 # low
+		else BATTERY_APPOX.critical if level == 1 # critical
+		else BATTERY_APPOX.empty ) # wtf?
 	status = ('charging' if battery_status == 0x21 or battery_status == 0x25
 		else 'fully charged' if battery_status == 0x22
 		else 'discharging' if battery_status == 0x00
@@ -206,6 +213,47 @@ def get_firmware(device):
 
 	if any(firmware):
 		return tuple(f for f in firmware if f)
+
+
+def set_3leds(device, battery_level=None, charging=None, warning=None):
+	assert device
+	assert device.kind is not None
+	if not device.online:
+		return
+
+	leds_register = device.registers.get('leds')
+	if leds_register is None or leds_register < 0:
+		return
+
+	if battery_level is not None:
+		if battery_level < BATTERY_APPOX.critical:
+			# 1 orange, and force blink
+			v1, v2 = 0x22, 0x00
+			warning = True
+		elif battery_level < BATTERY_APPOX.low:
+			# 1 orange
+			v1, v2 = 0x22, 0x00
+		elif battery_level < BATTERY_APPOX.good:
+			# 1 green
+			v1, v2 = 0x20, 0x00
+		elif battery_level < BATTERY_APPOX.full:
+			# 2 greens
+			v1, v2 = 0x20, 0x02
+		else:
+			# all 3 green
+			v1, v2 = 0x20, 0x22
+		if warning:
+			# set the blinking flag for the leds already set
+			v1 |= (v1 >> 1)
+			v2 |= (v2 >> 1)
+	elif warning:
+		# 1 red
+		v1, v2 = 0x02, 0x00
+	else:
+		# turn off all leds
+		v1, v2 = 0x11, 0x11
+
+	write_register(device, leds_register, v1, v2)
 
 
 def get_notification_flags(device):
