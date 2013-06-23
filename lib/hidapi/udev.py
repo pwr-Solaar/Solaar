@@ -120,13 +120,13 @@ def monitor_glib(callback, *device_filters):
 	c = _Context()
 
 	# already existing devices
-	for device in c.list_devices(subsystem='hidraw'):
-		# print (device, dict(device), dict(device.attributes))
-		for filter in device_filters:
-			d_info = _match('add', device, *filter)
-			if d_info:
-				GLib.idle_add(callback, 'add', d_info)
-				break
+	# for device in c.list_devices(subsystem='hidraw'):
+	# 	# print (device, dict(device), dict(device.attributes))
+	# 	for filter in device_filters:
+	# 		d_info = _match('add', device, *filter)
+	# 		if d_info:
+	# 			GLib.idle_add(callback, 'add', d_info)
+	# 			break
 
 	m = _Monitor.from_netlink(c)
 	m.filter_by(subsystem='hidraw')

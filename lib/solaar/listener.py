@@ -201,11 +201,11 @@ class ReceiverListener(_listener.EventsListener):
 _all_listeners = {}
 
 
-def start(device_info, status_changed_callback):
-	assert status_changed_callback
+def _start(device_info):
+	assert _status_callback
 	receiver = Receiver.open(device_info)
 	if receiver:
-		rl = ReceiverListener(receiver, status_changed_callback)
+		rl = ReceiverListener(receiver, _status_callback)
 		rl.start()
 		_all_listeners[device_info.path] = rl
 		return rl
@@ -213,12 +213,21 @@ def start(device_info, status_changed_callback):
 		_log.warn("failed to open %s", device_info)
 
 
+def start_all():
+	# just in case this it called twice in a row...
+	stop_all()
+
+	_log.info("starting receiver listening threads")
+	for device_info in _base.receivers():
+		_process_receiver_event('add', device_info)
+
+
 def stop_all():
 	listeners = list(_all_listeners.values())
 	_all_listeners.clear()
 
 	if listeners:
-		_log.info("stopping %s", listeners)
+		_log.info("stopping receiver listening threads %s", listeners)
 
 		for l in listeners:
 			l.stop()
@@ -230,10 +239,16 @@ def stop_all():
 			l.join()
 
 
+# stop/start all receiver threads on suspend/resume events, if possible
+from . import upower
+upower.watch(start_all, stop_all)
+
+
+from logitech.unifying_receiver import base as _base
 _status_callback = None
 _error_callback = None
 
-def start_scanner(status_changed_callback, error_callback):
+def setup_scanner(status_changed_callback, error_callback):
 	global _status_callback, _error_callback
 	if _status_callback:
 		raise Exception("scanner was already set-up")
@@ -241,7 +256,6 @@ def start_scanner(status_changed_callback, error_callback):
 	_status_callback = status_changed_callback
 	_error_callback = error_callback
 
-	from logitech.unifying_receiver import base as _base
 	_base.notify_on_receivers_glib(_process_receiver_event)
 
 
@@ -249,6 +263,7 @@ def start_scanner(status_changed_callback, error_callback):
 def _process_receiver_event(action, device_info):
 	assert action is not None
 	assert device_info is not None
+	assert _error_callback
 
 	_log.info("receiver event %s %s", action, device_info)
 
@@ -261,7 +276,7 @@ def _process_receiver_event(action, device_info):
 	if action == 'add':
 		# a new receiver device was detected
 		try:
-			start(device_info, _status_callback)
+			_start(device_info)
 		except OSError:
 			# permission error, ignore this path for now
 			_error_callback('permissions', device_info.path)

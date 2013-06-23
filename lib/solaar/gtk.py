@@ -44,7 +44,9 @@ def _run(args):
 	ui.init()
 
 	import solaar.listener as listener
-	listener.start_scanner(ui.status_changed, ui.error_dialog)
+	listener.setup_scanner(ui.status_changed, ui.error_dialog)
+
+	listener.start_all()
 
 	# main UI event loop
 	ui.run_loop()
