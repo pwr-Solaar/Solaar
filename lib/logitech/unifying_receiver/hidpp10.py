@@ -86,18 +86,25 @@ PAIRING_ERRORS = _NamedInts(
 #
 
 def read_register(device, register_number, *params):
+	assert device
 	# support long registers by adding a 2 in front of the number
 	request_id = 0x8100 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
+	assert device
 	# support long registers by adding a 2 in front of the number
 	request_id = 0x8000 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *value)
 
 
 def get_register(device, name, default_number=-1):
+	assert device
+	assert device.kind is not None
+	if not device.online:
+		return
+
 	known_register = device.registers.get(name)
 	register = known_register or default_number
 	if register > 0:
@@ -112,6 +119,11 @@ def get_register(device, name, default_number=-1):
 
 
 def get_battery(device):
+	assert device
+	assert device.kind is not None
+	if not device.online:
+		return
+
 	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
 	if device.protocol >= 2.0:
 		# let's just assume HID++ 2.0 devices do not provide the battery info in a register
@@ -152,6 +164,8 @@ def parse_battery_reply_07(level, battery_status):
 
 
 def get_serial(device):
+	assert device
+
 	if device.kind is None:
 		dev_id = 0x03
 		receiver = device
@@ -166,6 +180,8 @@ def get_serial(device):
 
 
 def get_firmware(device):
+	assert device
+
 	firmware = [None, None]
 
 	reply = read_register(device, 0xF1, 0x01)
@@ -193,6 +209,8 @@ def get_firmware(device):
 
 
 def get_notification_flags(device):
+	assert device
+
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
@@ -206,6 +224,8 @@ def get_notification_flags(device):
 
 
 def set_notification_flags(device, *flag_bits):
+	assert device
+
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
