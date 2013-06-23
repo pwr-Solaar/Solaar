@@ -44,7 +44,7 @@ about = make('help-about', 'About ' + NAME, _show_about_window)
 
 from . import pair_window
 def pair(window, receiver):
-	assert receiver is not None
+	assert receiver
 	assert receiver.kind is None
 
 	pair_dialog = pair_window.create(receiver)
@@ -58,7 +58,7 @@ def pair(window, receiver):
 
 from ..ui import error_dialog
 def unpair(window, device):
-	assert device is not None
+	assert device
 	assert device.kind is not None
 
 	qdialog = Gtk.MessageDialog(window, 0,

@@ -158,6 +158,7 @@ def get_serial(device):
 	else:
 		dev_id = 0x30 + device.number - 1
 		receiver = device.receiver
+		assert receiver.unifying_supported
 
 	serial = read_register(receiver, 0x2B5, dev_id)
 	if serial is not None:

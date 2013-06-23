@@ -18,7 +18,7 @@ from logitech.unifying_receiver import (Receiver,
 #
 
 from collections import namedtuple
-_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'serial', 'status', 'online'])
+_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'status', 'online'])
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple
@@ -29,7 +29,6 @@ def _ghost(device):
 					number=device.number,
 					name=device.name,
 					kind=device.kind,
-					serial=device.serial,
 					status=None,
 					online=False)
 

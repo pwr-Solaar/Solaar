@@ -262,7 +262,7 @@ class DeviceStatus(dict):
 				_log.debug("polling status of %s", d)
 
 			# read these from the device, the UI may need them later
-			d.protocol, d.firmware, d.kind, d.name, d.settings, None
+			d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None
 
 			# make sure we know all the features of the device
 			# if d.features:

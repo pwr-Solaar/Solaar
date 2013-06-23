@@ -266,7 +266,7 @@ def make_notification(devnumber, data):
 	return a Notification tuple if it is."""
 	sub_id = ord(data[:1])
 	if sub_id & 0x80 == 0x80:
-		# if this is a HID++1.0 register r/w, bail out
+		# this is either a HID++1.0 register r/w, or an error reply
 		return
 
 	address = ord(data[1:2])

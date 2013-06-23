@@ -116,22 +116,17 @@ class PairedDevice(object):
 	@property
 	def protocol(self):
 		if self._protocol is None:
-			self._protocol = _base.ping(self.receiver.handle, self.number)
-			# if the ping failed, the peripheral is (almost) certainly offline
-			self.online = self._protocol is not None
-
-			# use the descriptor only as a fallback, because it may not be 100% correct
 			descriptor = _descriptors.DEVICES.get(self.codename)
-			if self._protocol is None:
-				if descriptor and descriptor.protocol is not None:
+			if descriptor:
+				if descriptor.protocol:
 					self._protocol = descriptor.protocol
-			else:
-				if descriptor:
-					if descriptor.protocol is None:
-						_log.info("%s: descriptor has no protocol, should be %0.1f", self, self._protocol)
-					elif descriptor.protocol != self._protocol:
-						_log.error("%s: descriptor has wrong protocol %0.1f, should be %0.1f",
-									self, descriptor.protocol, self._protocol)
+				else:
+					_log.warn("%s: descriptor has no protocol, should be %0.1f", self, self._protocol)
+
+			if self._protocol is None:
+				self._protocol = _base.ping(self.receiver.handle, self.number)
+				# if the ping failed, the peripheral is (almost) certainly offline
+				self.online = self._protocol is not None
 
 			# _log.debug("device %d protocol %s", self.number, self._protocol)
 		return self._protocol or 0
@@ -160,15 +155,12 @@ class PairedDevice(object):
 	@property
 	def kind(self):
 		if self._kind is None:
-			# already handled in the constructor
-			# if self.receiver.unifying_supported:
-			# 	pair_info = self.receiver.read_register(0x2B5, 0x20 + self.number - 1)
-			# 	if pair_info:
-			# 		kind = ord(pair_info[7:8]) & 0x0F
-			# 		self._kind = _hidpp10.DEVICE_KIND[kind]
-			# 		if self.wpid is None:
-			# 			self.wpid = _strhex(pair_info[3:5])
-			if self.protocol >= 2.0 and self.online:
+			if self.receiver.unifying_supported:
+				pair_info = self.receiver.read_register(0x2B5, 0x20 + self.number - 1)
+				if pair_info:
+					kind = ord(pair_info[7:8]) & 0x0F
+					self._kind = _hidpp10.DEVICE_KIND[kind]
+			if self._kind is None and self.protocol >= 2.0 and self.online:
 				self._kind = _hidpp20.get_kind(self)
 			if self._kind is None:
 				descriptor = _descriptors.DEVICES.get(self.codename)
@@ -287,13 +279,13 @@ class PairedDevice(object):
 	__int__ = __index__
 
 	def __eq__(self, other):
-		return other is not None and self.kind == other.kind and self.serial == other.serial
+		return other is not None and self.kind == other.kind and self.wpid == other.wpid
 
 	def __ne__(self, other):
-		return other is None or self.kind != other.kind or self.serial != other.serial
+		return other is None or self.kind != other.kind or self.wpid != other.wpid
 
 	def __hash__(self):
-		return self.serial.__hash__()
+		return self.wpid.__hash__()
 
 	__bool__ = __nonzero__ = lambda self: self.wpid is not None and self.number in self.receiver
 

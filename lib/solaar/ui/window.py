@@ -8,7 +8,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 from gi.repository.GObject import TYPE_PYOBJECT
 
 from solaar import NAME
@@ -32,9 +32,9 @@ _INFO_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DND
 
 # tree model columns
-_COLUMN = _NamedInts(ID=0, ACTIVE=1, NAME=2, ICON=3, STATUS_ICON=4, DEVICE=5)
-_COLUMN_TYPES = (str, bool, str, str, str, TYPE_PYOBJECT)
-_TREE_SEPATATOR = (None, False, None, None, None, None)
+_COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_ICON=5, DEVICE=6)
+_COLUMN_TYPES = (str, int, bool, str, str, str, TYPE_PYOBJECT)
+_TREE_SEPATATOR = (None, 0, False, None, None, None, None)
 
 _TOOLTIP_LINK_SECURE = 'The wireless link between this device and its receiver is not encrypted.'
 _TOOLTIP_LINK_INSECURE = ('The wireless link between this device and its receiver is not encrypted.\n'
@@ -169,6 +169,7 @@ def _create_buttons_box():
 		assert _find_selected_device_id() is not None
 		receiver = _find_selected_device()
 		assert receiver is not None
+		assert bool(receiver)
 		assert receiver.kind is None
 		_action.pair(_window, receiver)
 
@@ -179,6 +180,7 @@ def _create_buttons_box():
 		assert _find_selected_device_id() is not None
 		device = _find_selected_device()
 		assert device is not None
+		assert bool(device)
 		assert device.kind is not None
 		_action.unpair(_window, device)
 
@@ -239,7 +241,7 @@ def _create_tree(model):
 	tree.set_model(model)
 
 	def _is_separator(model, item, _=None):
-		return model.get_value(item, _COLUMN.ID) is None
+		return model.get_value(item, _COLUMN.PATH) is None
 	tree.set_row_separator_func(_is_separator, None)
 
 	icon_cell_renderer = Gtk.CellRendererPixbuf()
@@ -348,7 +350,8 @@ def _find_selected_device():
 def _find_selected_device_id():
 	selection = _tree.get_selection()
 	model, item = selection.get_selected()
-	return model.get_value(item, _COLUMN.ID) if item else None
+	if item:
+		return _model.get_value(item, _COLUMN.PATH), _model.get_value(item, _COLUMN.NUMBER)
 
 
 # triggered by changing selection in the tree
@@ -363,17 +366,18 @@ def _receiver_row(receiver_path, receiver=None):
 
 	item = _model.get_iter_first()
 	while item:
-		if _model.get_value(item, _COLUMN.ID) == receiver_path:
+		# first row matching the path must be the receiver one
+		if _model.get_value(item, _COLUMN.PATH) == receiver_path:
 			return item
 		item = _model.iter_next(item)
 
 	if not item and receiver:
 		icon_name = _icons.device_icon_name(receiver.name)
 		pairing_icon_name = ''
-		row_data = (receiver_path, True, receiver.name, icon_name, pairing_icon_name, receiver)
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("new receiver row %s", row_data)
-			# _log.debug("receiver %s", receiver)
+		row_data = (receiver_path, 0, True, receiver.name, icon_name, pairing_icon_name, receiver)
+		assert len(row_data) == len(_TREE_SEPATATOR)
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("new receiver row %s", row_data)
 		item = _model.append(None, row_data)
 		if _TREE_SEPATATOR:
 			_model.append(None, _TREE_SEPATATOR)
@@ -381,24 +385,25 @@ def _receiver_row(receiver_path, receiver=None):
 	return item or None
 
 
-def _device_row(receiver_path, device_serial, device=None):
+def _device_row(receiver_path, device_number, device=None):
 	assert receiver_path
-	assert device_serial
+	assert device_number is not None
 
 	receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
 	item = _model.iter_children(receiver_row)
 	while item:
-		if _model.get_value(item, _COLUMN.ID) == device_serial:
+		if ((_model.get_value(item, _COLUMN.PATH) == receiver_path) and
+			(_model.get_value(item, _COLUMN.NUMBER) == device_number)):
 			return item
 		item = _model.iter_next(item)
 
 	if not item and device:
 		icon_name = _icons.device_icon_name(device.name, device.kind)
 		battery_icon_name = ''
-		row_data = (device_serial, bool(device.online), device.codename, icon_name, battery_icon_name, device)
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("new device row %s", row_data)
-			# _log.debug("device %s", device)
+		row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, battery_icon_name, device)
+		assert len(row_data) == len(_TREE_SEPATATOR)
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("new device row %s", row_data)
 		item = _model.append(receiver_row, row_data)
 
 	return item or None
@@ -407,18 +412,18 @@ def _device_row(receiver_path, device_serial, device=None):
 #
 #
 
-def select(receiver_path, device_id=None):
+def select(receiver_path, device_number=None):
 	assert _window
 	assert receiver_path is not None
-	if device_id is None:
+	if device_number is None:
 		item = _receiver_row(receiver_path)
 	else:
-		item = _device_row(receiver_path, device_id)
+		item = _device_row(receiver_path, device_number)
 	if item:
 		selection = _tree.get_selection()
 		selection.select_iter(item)
 	else:
-		_log.warn("select(%s, %s) failed to find an item", receiver_path, device_id)
+		_log.warn("select(%s, %s) failed to find an item", receiver_path, device_number)
 
 
 def _hide(w, _=None):
@@ -451,8 +456,6 @@ def toggle(trigger=None):
 def _update_details(button):
 	assert button
 	visible = button.get_active()
-	device = _find_selected_device()
-	assert device
 
 	if visible:
 		# _details._text.set_markup('<small>reading...</small>')
@@ -480,7 +483,9 @@ def _update_details(button):
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
 				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
 
-		items = _details_items(device)
+		selected_device = _find_selected_device()
+		assert selected_device
+		items = _details_items(selected_device)
 		text = '\n'.join('%-13s: %s' % i for i in items if i)
 		_details._text.set_markup('<small><tt>' + text + '</tt></small>')
 
@@ -502,7 +507,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 		else:
 			panel._count.set_markup(_NANO_RECEIVER_TEXT[1])
 
-	is_pairing = receiver and receiver.status.lock_open
+	is_pairing = receiver.status.lock_open
 	if is_pairing:
 		panel._scanning.set_visible(True)
 		if not panel._spinner.get_visible():
@@ -683,12 +688,13 @@ def update(device, need_popup=False):
 		assert item
 
 		if is_alive and item:
-			_model.set_value(item, _COLUMN.ACTIVE, True)
-			is_pairing = is_alive and device.status.lock_open
+			was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
+			is_pairing = bool(device.status.lock_open)
 			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else '')
 
-			if selected_device_id == device.path:
-				_update_info_panel(device, need_popup)
+			if selected_device_id == (device.path, 0):
+				full_update = need_popup or was_pairing != is_pairing
+				_update_info_panel(device, full=full_update)
 
 		elif item:
 			if _TREE_SEPATATOR:
@@ -700,8 +706,8 @@ def update(device, need_popup=False):
 		# peripheral
 		is_paired = bool(device)
 		assert device.receiver
-		assert device.serial
-		item = _device_row(device.receiver.path, device.serial, device if is_paired else None)
+		assert device.number is not None and device.number > 0, "invalid device number" + str(device.number)
+		item = _device_row(device.receiver.path, device.number, device if is_paired else None)
 
 		if is_paired and item:
 			was_online = _model.get_value(item, _COLUMN.ACTIVE)
@@ -717,14 +723,14 @@ def update(device, need_popup=False):
 				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
 			if selected_device_id is None:
-				select(device.receiver.path, device.serial)
-			elif selected_device_id == device.serial:
+				select(device.receiver.path, device.number)
+			elif selected_device_id == (device.receiver.path, device.number):
 				full_update = need_popup or was_online != is_online
 				_update_info_panel(device, full=full_update)
 
 		elif item:
 			_model.remove(item)
-			_config_panel.clean(device.serial)
+			_config_panel.clean(device)
 
 	# make sure all rows are visible
 	_tree.expand_all()

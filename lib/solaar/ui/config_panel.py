@@ -81,9 +81,8 @@ def _combo_notify(cbbox, setting, spinner):
 # 	return True
 
 
-def _create_sbox(s, device_id):
+def _create_sbox(s):
 	sbox = Gtk.HBox(homogeneous=False, spacing=6)
-	sbox.set_name(device_id)
 	sbox.pack_start(Gtk.Label(s.label), False, False, 0)
 
 	spinner = Gtk.Spinner()
@@ -170,21 +169,24 @@ def create():
 def update(device, is_online):
 	assert _box is not None
 	assert device
+	device_id = (device.receiver.path, device.number)
 
 	# if the device changed since last update, clear the box first
-	if device.serial != _box._last_device:
+	if device_id != _box._last_device:
 		_box.set_visible(False)
-		_box._last_device = device.serial
+		_box._last_device = device_id
 
-	# hide
-	_box.foreach(lambda x, s: x.set_visible(x.get_name() == s), device.serial)
+	# hide controls belonging to other devices
+	for k, sbox in _items.items():
+		sbox = _items[k]
+		sbox.set_visible(k[0:2] == device_id)
 
 	for s in device.settings:
-		k = device.serial + '_' + s.name
+		k = (device_id[0], device_id[1], s.name)
 		if k in _items:
 			sbox = _items[k]
 		else:
-			sbox = _items[k] = _create_sbox(s, device.serial)
+			sbox = _items[k] = _create_sbox(s)
 			_box.pack_start(sbox, False, False, 0)
 
 		if is_online:
@@ -194,16 +196,16 @@ def update(device, is_online):
 
 	_box.set_visible(True)
 
-def clean(device_id):
+def clean(device):
 	"""Remove the controls for a given device serial.
 	Needed after the device has been unpaired.
 	"""
 	assert _box is not None
+	device_id = (device.receiver.path, device.number)
 	for k in list(_items.keys()):
-		sbox = _items[k]
-		if sbox.get_name() == device_id:
+		if k[0:2] == device_id:
+			_box.remove(_items[k])
 			del _items[k]
-			_box.remove(sbox)
 
 
 def destroy():

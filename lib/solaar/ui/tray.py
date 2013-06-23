@@ -24,6 +24,7 @@ from .window import popup as _window_popup, toggle as _window_toggle
 
 _TRAY_ICON_SIZE = 32 #  pixels
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
+_RECEIVER_SEPARATOR = ('~', None, None, None)
 
 #
 #
@@ -93,8 +94,8 @@ try:
 				if not info[1]:
 					# only conside peripherals
 					continue
-				# compare peripheral serials
-				if info[1] == _picked_device[1]:
+				# compare peripherals
+				if info[0:2] == _picked_device[0:2]:
 					if direction == ScrollDirection.UP and candidate:
 						# select previous device
 						break
@@ -151,7 +152,7 @@ try:
 
 	def _update_tray_icon():
 		if _picked_device:
-			_, _, name, _, device_status = _picked_device
+			_, _, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
@@ -209,7 +210,7 @@ except ImportError:
 		_icon.set_tooltip_markup(tooltip)
 
 		if _picked_device:
-			_, _, name, _, device_status = _picked_device
+			_, _, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
@@ -253,10 +254,9 @@ def _generate_tooltip_lines():
 	yield '<b>%s</b>' % NAME
 	yield ''
 
-	for _, serial, name, _, status in _devices_info:
-		if serial is None:  # receiver
+	for _, number, name, status in _devices_info:
+		if number is None:  # receiver
 			continue
-
 
 		p = str(status)
 		if p:  # does it have any properties to print?
@@ -306,7 +306,7 @@ def _add_device(device):
 	assert receiver_path
 
 	index = None
-	for idx, (path, _, _, _, _) in enumerate(_devices_info):
+	for idx, (path, _, _, _) in enumerate(_devices_info):
 		if path == receiver_path:
 			# the first entry matching the receiver serial should be for the receiver itself
 			index = idx + 1
@@ -315,8 +315,8 @@ def _add_device(device):
 
 	# proper ordering (according to device.number) for a receiver's devices
 	while True:
-		path, _, _, number, _ = _devices_info[index]
-		if path == '-':
+		path, number, _, _ = _devices_info[index]
+		if path == _RECEIVER_SEPARATOR[0]:
 			break
 		assert path == receiver_path
 		assert number != device.number
@@ -324,7 +324,8 @@ def _add_device(device):
 			break
 		index = index + 1
 
-	new_device_info = (receiver_path, device.serial, device.name, device.number, device.status)
+	new_device_info = (receiver_path, device.number, device.name, device.status)
+	assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
 	_devices_info.insert(index, new_device_info)
 
 	# label_prefix = b'\xE2\x94\x84 '.decode('utf-8')
@@ -333,7 +334,7 @@ def _add_device(device):
 	new_menu_item = Gtk.ImageMenuItem.new_with_label(label_prefix + device.name)
 	new_menu_item.set_image(Gtk.Image())
 	new_menu_item.show_all()
-	new_menu_item.connect('activate', _window_popup, receiver_path, device.serial)
+	new_menu_item.connect('activate', _window_popup, receiver_path, device.number)
 	_menu.insert(new_menu_item, index)
 
 	return index
@@ -347,7 +348,7 @@ def _remove_device(index):
 
 	removed_device = _devices_info.pop(index)
 	global _picked_device
-	if _picked_device and _picked_device[1] == removed_device[1]:
+	if _picked_device and _picked_device[0:2] == removed_device[0:2]:
 		# the current pick was unpaired
 		_picked_device = None
 
@@ -355,8 +356,9 @@ def _remove_device(index):
 def _add_receiver(receiver):
 	index = len(_devices_info)
 
-	device_info = (receiver.path, None, receiver.name, None, None)
-	_devices_info.append(device_info)
+	new_receiver_info = (receiver.path, None, receiver.name, None)
+	assert len(new_receiver_info) == len(_RECEIVER_SEPARATOR)
+	_devices_info.append(new_receiver_info)
 
 	new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
 	_menu.insert(new_menu_item, index)
@@ -365,7 +367,7 @@ def _add_receiver(receiver):
 	new_menu_item.show_all()
 	new_menu_item.connect('activate', _window_popup, receiver.path)
 
-	_devices_info.append(('-', None, None, None, None))
+	_devices_info.append(_RECEIVER_SEPARATOR)
 	separator = Gtk.SeparatorMenuItem.new()
 	separator.set_visible(True)
 	_menu.insert(separator, index + 1)
@@ -379,11 +381,11 @@ def _remove_receiver(receiver):
 
 	# remove all entries in devices_info that match this receiver
 	while index < len(_devices_info):
-		path, _, _, _, _ = _devices_info[index]
+		path, _, _, _ = _devices_info[index]
 		if path == receiver.path:
 			found = True
 			_remove_device(index)
-		elif found and path == '-':
+		elif found and path == _RECEIVER_SEPARATOR[0]:
 			# the separator after this receiver
 			_remove_device(index)
 			break
@@ -411,10 +413,13 @@ def _update_menu_item(index, device):
 #
 
 # for which device to show the battery info in systray, if more than one
+# it's actually an entry in _devices_info
 _picked_device = None
 
 # cached list of devices and some of their properties
+# contains tuples of (receiver path, device number, name, status)
 _devices_info = []
+
 _menu = None
 _icon = None
 
@@ -449,7 +454,7 @@ def update(device=None):
 			receiver_path = device.path
 			if is_alive:
 				index = None
-				for idx, (path, _, _, _, _) in enumerate(_devices_info):
+				for idx, (path, _, _, _) in enumerate(_devices_info):
 					if path == receiver_path:
 						index = idx
 						break
@@ -464,8 +469,8 @@ def update(device=None):
 			is_paired = bool(device)
 			receiver_path = device.receiver.path
 			index = None
-			for idx, (path, serial, name, _, _) in enumerate(_devices_info):
-				if path == receiver_path and serial == device.serial:
+			for idx, (path, number, _, _) in enumerate(_devices_info):
+				if path == receiver_path and number == device.number:
 					index = idx
 
 			if is_paired:
