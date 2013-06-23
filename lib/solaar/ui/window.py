@@ -356,7 +356,16 @@ def _find_selected_device_id():
 def _device_selected(selection):
 	model, item = selection.get_selected()
 	device = model.get_value(item, _COLUMN.DEVICE) if item else None
-	_update_info_panel(device, full=True)
+	# if _log.isEnabledFor(_DEBUG):
+	# 	_log.debug("window tree selected device %s", device)
+	if device:
+		_update_info_panel(device, full=True)
+	else:
+		# When removing a receiver, one of its children may get automatically selected
+		# before the tree had time to remove them as well.
+		# Rather than chase around for another device to select, just clear the selection.
+		_tree.get_selection().unselect_all()
+		_update_info_panel(None, full=True)
 
 
 def _receiver_row(receiver_path, receiver=None):
