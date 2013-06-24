@@ -80,36 +80,38 @@ def _find_device(receiver, name, may_be_receiver=False):
 def _print_receiver(receiver, verbose=False):
 	paired_count = receiver.count()
 	if not verbose:
-		print ("-: Unifying Receiver [%s:%s] with %d devices" % (receiver.path, receiver.serial, paired_count))
+		print ("Unifying Receiver [%s:%s] with %d devices" % (receiver.path, receiver.serial, paired_count))
 		return
 
-	print ("-: Unifying Receiver")
+	print ("Unifying Receiver")
 	print ("   Device path  :", receiver.path)
+	print ("   USB id       : 046d:%s" % receiver.product_id)
 	print ("   Serial       :", receiver.serial)
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))
 
-	print ("   Has", paired_count, "paired device(s) out of a maximum of", receiver.max_devices)
+	print ("   Has", paired_count, "paired device(s) out of a maximum of", receiver.max_devices, ".")
 
 	from logitech.unifying_receiver import hidpp10
 	notification_flags = hidpp10.get_notification_flags(receiver)
 	if notification_flags is not None:
 		if notification_flags:
 			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-			print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
+			print ("   Notifications: 0x%06X = %s" % (notification_flags, ', '.join(notification_names)))
 		else:
-			print ("   Notifications: (none).")
+			print ("   Notifications: (none)")
 
 	if receiver.unifying_supported:
 		activity = receiver.read_register(0x2B3)
 		if activity:
 			activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
-			print ("   Device activity counters:", ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0))
+			activity_text = ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0)
+			print ("   Device activity counters:", activity_text or '(empty)')
 
 
 def _print_device(dev, verbose=False):
-	p = dev.protocol
-	state = '' if p > 0 else 'offline'
+	assert dev
+	state = '' if dev.ping() else 'offline'
 
 	if not verbose:
 		print ("%d: %s [%s:%s]" % (dev.number, dev.name, dev.codename, dev.serial), state)
@@ -118,10 +120,10 @@ def _print_device(dev, verbose=False):
 	print ("%d: %s" % (dev.number, dev.name))
 	print ("   Codename     :", dev.codename)
 	print ("   Kind         :", dev.kind)
-	if p == 0:
+	if dev.protocol == 0:
 		print ("   Protocol     : unknown (device is offline)")
 	else:
-		print ("   Protocol     : HID++ %1.1f" % p)
+		print ("   Protocol     : HID++ %1.1f" % dev.protocol)
 	print ("   Polling rate :", dev.polling_rate, "ms")
 	print ("   Wireless PID :", dev.wpid)
 	print ("   Serial number:", dev.serial)
@@ -129,19 +131,20 @@ def _print_device(dev, verbose=False):
 		print ("     %-11s:" % fw.kind, (fw.name + ' ' + fw.version).strip())
 
 	if dev.power_switch_location:
-		print ("   The power switch is located on the", dev.power_switch_location)
+		print ("   The power switch is located on the %s." % dev.power_switch_location)
 
 	from logitech.unifying_receiver import hidpp10, hidpp20, special_keys
 
-	notification_flags = hidpp10.get_notification_flags(dev)
-	if notification_flags is not None:
-		if notification_flags:
-			notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
-			print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
-		else:
-			print ("   Notifications: (none).")
+	if dev.online:
+		notification_flags = hidpp10.get_notification_flags(dev)
+		if notification_flags is not None:
+			if notification_flags:
+				notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+				print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))
+			else:
+				print ("   Notifications: (none).")
 
-	if p > 0:
+	if dev.online:
 		if dev.features:
 			print ("   Supports %d HID++ 2.0 features:" % len(dev.features))
 			for index, feature in enumerate(dev.features):
@@ -151,19 +154,25 @@ def _print_device(dev, verbose=False):
 				flags = hidpp20.FEATURE_FLAG.flag_names(flags)
 				print ("      %2d: %-22s {%04X}   %s" % (index, feature, feature, ', '.join(flags)))
 
+	if dev.online:
 		if dev.keys:
 			print ("   Has %d reprogrammable keys:" % len(dev.keys))
 			for k in dev.keys:
 				flags = special_keys.KEY_FLAG.flag_names(k.flags)
 				print ("      %2d: %-26s => %-27s   %s" % (k.index, k.key, k.task, ', '.join(flags)))
 
-	if p > 0:
+	if dev.online:
 		battery = hidpp20.get_battery(dev)
 		if battery is None:
 			battery = hidpp10.get_battery(dev)
-		if battery:
-			charge, status = battery
-			print ("   Battery is %d%% charged," % charge, status)
+		if battery is not None:
+			from logitech.unifying_receiver.common import NamedInt as _NamedInt
+			level, status = battery
+			if isinstance(level, _NamedInt):
+				text = str(level)
+			else:
+				text = '%d%%' % level
+			print ("   Battery: %s, %s," % (text, status))
 		else:
 			print ("   Battery status unavailable.")
 	else:
