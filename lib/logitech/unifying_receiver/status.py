@@ -20,7 +20,7 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.status')
 del getLogger
 
-from .common import NamedInts as _NamedInts, strhex as _strhex
+from .common import NamedInts as _NamedInts, NamedInt as _NamedInt, strhex as _strhex
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 
@@ -146,6 +146,7 @@ class DeviceStatus(dict):
 				return format % value
 
 		def _items():
+			# TODO properly string approximative battery levels
 			battery_level = _item(KEYS.BATTERY_LEVEL, 'Battery: %d%%')
 			if battery_level:
 				yield battery_level
@@ -168,8 +169,9 @@ class DeviceStatus(dict):
 	__nonzero__ = __bool__
 
 	def set_battery_info(self, level, status, timestamp=None):
+		assert isinstance(level, int)
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s: battery %d%%, %s", self._device, level, status)
+			_log.debug("%s: battery %s, %s", self._device, level, status)
 
 		# TODO: this is also executed when pressing Fn+F7 on K800.
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
@@ -184,7 +186,10 @@ class DeviceStatus(dict):
 		if not _hidpp20.BATTERY_OK(status) or level <= _BATTERY_ATTENTION_LEVEL:
 			_log.warn("%s: battery %d%%, ALERT %s", self._device, level, status)
 			alert = ALERT.NOTIFICATION | ALERT.ATTENTION
-			reason = 'Battery: %d%% (%s)' % (level, status)
+			if isinstance(level, _NamedInt):
+				reason = 'battery: %s (%s)' % (level, status)
+			else:
+				reason = 'battery: %d%% (%s)' % (level, status)
 
 		if changed or reason:
 			# update the leds on the device, if any

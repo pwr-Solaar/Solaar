@@ -8,13 +8,13 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk
 from gi.repository.GObject import TYPE_PYOBJECT
 
 from solaar import NAME
 # from solaar import __version__ as VERSION
 from logitech.unifying_receiver import hidpp10 as _hidpp10
-from logitech.unifying_receiver.common import NamedInts as _NamedInts
+from logitech.unifying_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from logitech.unifying_receiver.status import KEYS as _K
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
@@ -552,7 +552,10 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
 		panel._battery._icon.set_sensitive(True)
 
-		text = '%d%%' % battery_level
+		if isinstance(battery_level, _NamedInt):
+			text = str(battery_level)
+		else:
+			text = '%d%%' % battery_level
 		if is_online:
 			if charging:
 				text += ' <small>(charging)</small>'
