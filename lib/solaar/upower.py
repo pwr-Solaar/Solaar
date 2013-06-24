@@ -36,7 +36,7 @@ def watch(on_resume_callback, on_suspend_callback):
 
 
 try:
-	import dbus      # for dbus communication (obviously)
+	import dbus
 
 	_UPOWER_BUS = 'org.freedesktop.UPower'
 	_UPOWER_INTERFACE = 'org.freedesktop.UPower'

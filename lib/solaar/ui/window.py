@@ -36,7 +36,7 @@ _COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_ICON=5, 
 _COLUMN_TYPES = (str, int, bool, str, str, str, TYPE_PYOBJECT)
 _TREE_SEPATATOR = (None, 0, False, None, None, None, None)
 
-_TOOLTIP_LINK_SECURE = 'The wireless link between this device and its receiver is not encrypted.'
+_TOOLTIP_LINK_SECURE = 'The wireless link between this device and its receiver is encrypted.'
 _TOOLTIP_LINK_INSECURE = ('The wireless link between this device and its receiver is not encrypted.\n'
 						'\n'
 						'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'

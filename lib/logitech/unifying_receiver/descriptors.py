@@ -4,8 +4,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import namedtuple
-
 from .common import NamedInts as _NamedInts
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -15,13 +13,15 @@ from . import settings as _settings
 # common strings for settings
 #
 
-_SMOOTH_SCROLL = ('smooth-scroll', 'Smooth Scrolling', 'High-sensitivity mode for vertical scroll with the wheel.')
+_SMOOTH_SCROLL = ('smooth-scroll', 'Smooth Scrolling',
+							'High-sensitivity mode for vertical scroll with the wheel.')
 _DPI = ('dpi', 'Sensitivity (DPI)', None)
-_FN_SWAP = ('fn-swap', 'Swap Fx function', ('When set, the F1..F12 keys will activate their special function,\n'
-						 					'and you must hold the FN key to activate their standard function.\n'
-						 					'\n'
-						 					'When unset, the F1..F12 keys will activate their standard function,\n'
-						 					'and you must hold the FN key to activate their special function.'))
+_FN_SWAP = ('fn-swap', 'Swap Fx function',
+							('When set, the F1..F12 keys will activate their special function,\n'
+						 	'and you must hold the FN key to activate their standard function.\n'
+						 	'\n'
+						 	'When unset, the F1..F12 keys will activate their standard function,\n'
+						 	'and you must hold the FN key to activate their special function.'))
 
 # this register is only applicable to HID++ 1.0 devices, it should not exist with HID++ 2.0 devices
 # using Features
@@ -56,8 +56,10 @@ def check_features(device, already_known):
 #
 #
 
+from collections import namedtuple
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
 				['name', 'kind', 'product_id', 'codename', 'protocol', 'registers', 'settings'])
+del namedtuple
 
 DEVICES = {}
 
@@ -158,6 +160,8 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0,
 # Mice
 
 _D('Wireless Mouse M215', protocol=1.0)
+_D('Wireless Mouse M305')
+_D('Wireless Mouse M310')
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M505')
@@ -212,5 +216,3 @@ _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, product_id=
 							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
 						],
 				)
-
-del namedtuple
