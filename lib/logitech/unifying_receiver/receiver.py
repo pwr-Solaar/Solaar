@@ -55,7 +55,7 @@ class PairedDevice(object):
 			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
 			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
 			assert link_notification.address == (0x04 if unifying else 0x03)
-			kind = ord(link_notification.data[1:2]) & 0x0F
+			kind = ord(link_notification.data[0:1]) & 0x0F
 			self._kind = _hidpp10.DEVICE_KIND[kind]
 
 		if unifying:

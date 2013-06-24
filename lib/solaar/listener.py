@@ -170,7 +170,7 @@ class ReceiverListener(_listener.EventsListener):
 			return
 
 		if not already_known:
-			# _log.info("%s triggered new device %s", n, dev)
+			_log.info("%s triggered new device %s (%s)", n, dev, dev.kind)
 			dev.status = _status.DeviceStatus(dev, self._status_changed)
 			dev.status.configuration = configuration
 			# the receiver changed status as well
