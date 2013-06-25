@@ -18,7 +18,7 @@ def _create():
 	about.set_version(__version__)
 	about.set_comments('Shows status of devices connected\nto a Logitech Unifying Receiver.')
 
-	about.set_logo_icon_name(NAME.lower() + '-logo')
+	about.set_logo_icon_name(NAME.lower())
 
 	about.set_copyright(b'\xC2\xA9'.decode('utf-8') + ' 2012-2013 Daniel Pavel')
 	about.set_license_type(Gtk.License.GPL_2_0)

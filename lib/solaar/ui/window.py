@@ -58,7 +58,7 @@ _NANO_RECEIVER_TEXT = (
 #
 
 Gtk.Window.set_default_icon_name(NAME.lower())
-Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower(), 32))
+Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
 
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
 	if toggle:

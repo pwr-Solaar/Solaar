@@ -24,9 +24,9 @@ Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
 # print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
-TRAY_INIT = 'solaar-tray-init'
-TRAY_OKAY = 'solaar-tray'
-TRAY_ATTENTION = 'solaar-tray-attention'
+TRAY_INIT = 'solaar-init'
+TRAY_OKAY = 'solaar'
+TRAY_ATTENTION = 'solaar-attention'
 
 
 def _look_for_application_icons():
@@ -47,7 +47,7 @@ def _look_for_application_icons():
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("looking for icons in %s", location)
 
-		if _path.exists(_path.join(location, TRAY_ATTENTION + '.png')):
+		if _path.exists(_path.join(location, TRAY_ATTENTION + '.svg')):
 			yield location
 
 	del _environ

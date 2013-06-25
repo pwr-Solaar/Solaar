@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100"
+   height="100"
+   id="solaar-master"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="solaar-master.svg"
+   enable-background="new">
+  <defs
+     id="defs3003">
+    <linearGradient
+       id="gradient_blue">
+      <stop
+         id="stop_dark_blue"
+         offset="0"
+         style="stop-color:#009099;stop-opacity:1;" />
+      <stop
+         id="stop_light_blue"
+         offset="1"
+         style="stop-color:#00a899;stop-opacity:0.9;" />
+    </linearGradient>
+    <linearGradient
+       id="gradient_gray">
+      <stop
+         id="stop_dark_gray"
+         offset="0"
+         style="stop-color:#848484;stop-opacity:1;" />
+      <stop
+         id="stop_light_gray"
+         offset="1"
+         style="stop-color:#9c9c9c;stop-opacity:0.9;" />
+    </linearGradient>
+    <linearGradient
+       id="gradient_orange">
+      <stop
+         style="stop-color:#f09018;stop-opacity:1;"
+         offset="0"
+         id="stop_dark_orange" />
+      <stop
+         style="stop-color:#f8a840;stop-opacity:0.9;"
+         offset="1"
+         id="stop_light_orange" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#gradient_blue"
+       id="gradient_rect"
+       gradientUnits="userSpaceOnUse"
+       x1="5"
+       y1="50"
+       x2="95"
+       y2="50" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#gradient_blue"
+       id="gradient_dot"
+       x1="37"
+       y1="50"
+       x2="63"
+       y2="50"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <title
+     id="title">Solaar master template</title>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.45"
+     inkscape:cx="49.633028"
+     inkscape:cy="50"
+     inkscape:current-layer="layer3"
+     showgrid="true"
+     inkscape:document-units="px"
+     inkscape:grid-bbox="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1366"
+     inkscape:window-height="744"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     units="px"
+     inkscape:showpageshadow="true"
+     inkscape:snap-grids="false">
+    <inkscape:grid
+       type="axonomgrid"
+       id="grid4201"
+       units="px"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="false"
+       gridanglex="60"
+       gridanglez="60"
+       originx="50px"
+       originy="50px"
+       spacingy="5px" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Solaar master template</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Daniel Pavel</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
+        <dc:date>2013-06-25</dc:date>
+        <dc:identifier>solaar-master</dc:identifier>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer">
+    <path
+       style="fill:url(#gradient_rect);fill-opacity:1.0;fill-rule:nonzero;stroke:#16161d;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
+       d="M 21.5 5.5 C 12.636 5.5 5.5 12.636 5.5 21.5 L 5.5 78.5 C 5.5 87.364 12.636 94.5 21.5 94.5 L 78.5 94.5 C 87.364 94.5 94.5 87.364 94.5 78.5 L 94.5 21.5 C 94.5 12.636 87.364 5.5 78.5 5.5 L 21.5 5.5 z M 37.6875 16.6875 L 46.71875 32.3125 C 47.784179 32.115965 48.877705 32 50 32 C 51.122295 32 52.215821 32.115965 53.28125 32.3125 L 62.3125 16.6875 L 72.6875 22.6875 L 63.65625 38.3125 C 65.078123 39.972287 66.191785 41.898777 66.9375 44 L 85 44 L 85 56 L 66.9375 56 C 66.191785 58.101223 65.078123 60.027713 63.65625 61.6875 L 72.6875 77.3125 L 62.3125 83.3125 L 53.28125 67.6875 C 52.215821 67.884035 51.122295 68 50 68 C 48.877705 68 47.784179 67.884035 46.71875 67.6875 L 37.6875 83.3125 L 27.3125 77.3125 L 36.34375 61.6875 C 34.921877 60.027713 33.808215 58.101223 33.0625 56 L 15 56 L 15 44 L 33.0625 44 C 33.808215 41.898777 34.921877 39.972287 36.34375 38.3125 L 27.3125 22.6875 L 37.6875 16.6875 z "
+       id="starred_rect" />
+    <path
+       sodipodi:type="arc"
+       style="fill:url(#gradient_dot);fill-opacity:1.0;fill-rule:nonzero;stroke:#16161d;stroke-opacity:1"
+       id="center_dot"
+       sodipodi:cx="50"
+       sodipodi:cy="50"
+       sodipodi:rx="12"
+       sodipodi:ry="12" />
+  </g>
+</svg>
