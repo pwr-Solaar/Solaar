@@ -55,8 +55,10 @@ fix_times() {
 #
 
 cp -upr "$SELF/jekyll"/* "$BUILD/"
-convert.im6 "$SELF/share/solaar/icons/solaar.svg" -resize 48x48 "$BUILD/images/solaar-logo.png"
-convert.im6 "$SELF/share/solaar/icons/solaar.svg" -resize 32x32 "$BUILD/images/favicon.png"
+convert.im6 "$SELF/share/solaar/icons/solaar.svg" -transparent white \
+	-resize 48x48  "$BUILD/images/solaar-logo.png"
+convert.im6 "$SELF/share/solaar/icons/solaar.svg" -transparent white \
+	-resize 32x32 "$BUILD/images/favicon.png"
 
 add_md docs/devices.md
 add_md docs/installation.md
