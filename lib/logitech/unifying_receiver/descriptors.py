@@ -162,11 +162,17 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0,
 
 # Mice
 
+_D('Wireless Mouse M175', protocol=1.0)
+_D('Wireless Mouse M185', protocol=1.0)
+_D('Wireless Mouse M187', protocol=1.0)
 _D('Wireless Mouse M215', protocol=1.0)
-_D('Wireless Mouse M305')
-_D('Wireless Mouse M310')
-_D('Wireless Mouse M315')
+_D('Wireless Mouse M235', protocol=1.0)
+_D('Wireless Mouse M305', protocol=1.0)
+_D('Wireless Mouse M310', protocol=1.0)
+_D('Wireless Mouse M315', protocol=1.0)
+_D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
+_D('Wireless Mouse M345')
 _D('Wireless Mouse M505')
 _D('Wireless Mouse M510', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
@@ -200,7 +206,8 @@ _D('Wireless Trackball M570')
 
 # Touchpads
 
-_D('Wireless Rechargeable Touchpad T650')
+_D('Wireless Rechargeable Touchpad T650', protocol=2.0)
+_D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0)
 
 #
 # classic Nano devices

@@ -40,6 +40,9 @@ Solaar, but its supported features are not specified here, I would love to hear
 about it.
 
 
+Devices marked with an asterisk (*) use a Nano receiver that knows the Unifying
+protocol, and should be fully supported by Solaar.
+
 The HID++ column specifies the device's HID++ version.
 
 The Battery column specifies if Solaar is able to read the device's battery
@@ -72,16 +75,22 @@ Mice:
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
-| M215             | 1.0   | yes     |       |                                 |
-| M305             |       |         |       |                                 |
-| M310             |       |         |       |                                 |
-| M315             |       |         |       |                                 |
+| M175 *           | 1.0   | yes     |       |                                 |
+| M185 *           | 1.0   | yes     |       |                                 |
+| M187 *           | 1.0   | yes     |       |                                 |
+| M215 *           | 1.0   | yes     |       |                                 |
+| M235 *           | 1.0   | yes     |       |                                 |
+| M305 *           | 1.0   | yes     |       |                                 |
+| M310 *           | 1.0   | yes     |       |                                 |
+| M315 *           | 1.0   | yes     |       |                                 |
+| M317             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
 | M345             |       |         |       |                                 |
 | M505             |       |         |       |                                 |
 | M510             | 1.0   | yes     |       | smooth scrolling                |
 | M515 Couch       | 2.0   | yes     | -     |                                 |
 | M525             | 2.0   | yes     | -     |                                 |
+| M600 Touch       |       |         |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  |       |         |       |                                 |
 | T620 Touch       |       |         |       |                                 |
@@ -102,7 +111,7 @@ Touchpads:
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | Wireless Touch   | 2.0   |         |       |                                 |
-| T650 Touchpad    |       |         |       |                                 |
+| T650 Touchpad    | 2.0   |         |       |                                 |
 
 
 Mouse-Keyboard combos:
