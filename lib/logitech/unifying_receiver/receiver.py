@@ -245,6 +245,7 @@ class PairedDevice(object):
 
 		if enable:
 			set_flag_bits = ( _hidpp10.NOTIFICATION_FLAG.battery_status
+							| _hidpp10.NOTIFICATION_FLAG.keyboard_backlight
 							| _hidpp10.NOTIFICATION_FLAG.wireless
 							| _hidpp10.NOTIFICATION_FLAG.software_present )
 		else:
