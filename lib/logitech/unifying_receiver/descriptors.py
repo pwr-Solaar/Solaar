@@ -25,17 +25,16 @@ _FN_SWAP = ('fn-swap', 'Swap Fx function',
 
 # this register is only applicable to HID++ 1.0 devices, it should not exist with HID++ 2.0 devices
 # using Features
-def _register_fn_swap(register, true_value, mask):
+def _register_fn_swap(register=0x09, true_value=b'\x00\x01', mask=b'\x00\x01'):
 	return _settings.register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
 					label=_FN_SWAP[1], description=_FN_SWAP[2])
 
-
-def _register_smooth_scroll(register, true_value, mask):
+def _register_smooth_scroll(register=0x01, true_value=0x40, mask=0x40):
 	return _settings.register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2])
 
 
-def _register_dpi(register, choices):
+def _register_dpi(register=0x63, choices=None):
 	return _settings.register_choices(_DPI[0], register, choices,
 					label=_DPI[1], description=_DPI[2])
 
@@ -137,12 +136,16 @@ def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers
 _D('Wireless Keyboard K230', protocol=2.0)
 _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
-_D('Wireless Keyboard K360', protocol=2.0)
+_D('Wireless Keyboard K360', protocol=2.0,
+				settings=[
+							_feature_fn_swap()
+						],
+				)
 _D('Wireless Touch Keyboard K400', protocol=2.0)
-_D('Wireless Keyboard K700', codename='MK700', protocol=1.0,
+_D('Wireless Keyboard MK700', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
-							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
+							_register_fn_swap(),
 						],
 				)
 _D('Wireless Solar Keyboard K750', protocol=2.0,
@@ -153,7 +156,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0,
 _D('Wireless Illuminated Keyboard K800', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
-							_register_fn_swap(0x09, true_value=b'\x00\x01', mask=b'\x00\x01'),
+							_register_fn_swap(),
 						],
 				)
 
@@ -168,7 +171,7 @@ _D('Wireless Mouse M505')
 _D('Wireless Mouse M510', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
-							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+							_register_smooth_scroll(),
 						],
 				)
 _D('Couch Mouse M515', protocol=2.0)
@@ -177,23 +180,17 @@ _D('Touch Mouse M600')
 _D('Marathon Mouse M705', protocol=1.0,
 				registers={'battery_charge': 0x0D},
 				settings=[
-							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-							# _register_dpi(0x63, _NamedInts(**{'100': 10, '300': 30, '350':35, '500':50})),
+							_register_smooth_scroll(),
 						],
 				)
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
-_D('Anywhere Mouse MX', codename='Anywhere MX',
-				# registers={'battery_charge': 0x0D},
-				# settings=[
-				# 			_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
-				# 		],
-				)
+_D('Anywhere Mouse MX', codename='Anywhere MX')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
-							_register_dpi(0x63, _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
+							_register_dpi(choices=_NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
 						],
 				)
 
@@ -213,6 +210,6 @@ _D('Wireless Rechargeable Touchpad T650')
 _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, product_id='c526',
 				registers={'battery_charge': 0x0D, 'battery_status': -0x07},
 				settings=[
-							_register_smooth_scroll(0x01, true_value=0x40, mask=0x40),
+							_register_smooth_scroll(),
 						],
 				)
