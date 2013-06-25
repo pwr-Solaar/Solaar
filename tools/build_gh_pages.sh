@@ -55,8 +55,8 @@ fix_times() {
 #
 
 cp -upr "$SELF/jekyll"/* "$BUILD/"
-cp -up "$SELF/share/solaar/icons/solaar-logo.png" "$BUILD/images/"
-cp -up "$SELF/share/solaar/icons/solaar.png" "$BUILD/images/favicon.png"
+convert.im6 "$SELF/share/solaar/icons/solaar.svg" -resize 48x48 "$BUILD/images/solaar-logo.png"
+convert.im6 "$SELF/share/solaar/icons/solaar.svg" -resize 32x32 "$BUILD/images/favicon.png"
 
 add_md docs/devices.md
 add_md docs/installation.md
@@ -118,5 +118,6 @@ fix_times docs/devices.md devices.html
 fix_times docs/installation.md installation.html
 fix_times docs/debian-repo.md packages/index.html
 fix_times jekyll/images images
-fix_times share/solaar/icons/solaar-logo.png images/solaar-logo.png
+fix_times share/solaar/icons/solaar.svg images/solaar-logo.png
+fix_times share/solaar/icons/solaar.svg images/favicon.png
 fix_times jekyll/style style
