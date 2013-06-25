@@ -22,7 +22,7 @@ License: GPL-2
  On Debian systems, the complete text of the GNU General Public License,
  version 2, can be found in /usr/share/common-licenses/GPL-2.
 
-Files: share/icons/solaar*.png
+Files: share/icons/solaar*.svg
 Copyright: Copyright (C) 2012-2013 Daniel Pavel
 License: LGPL
  .
