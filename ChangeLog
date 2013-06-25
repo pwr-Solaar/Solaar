@@ -1,6 +1,9 @@
 0.8.99:
   * New single-window UI.
+  * Performance MX leds show the current battery charge.
   * Support the VX Nano mouse.
+  * If upower is accessible through DBus, handle suspend/resume.
+  * Replaced Solaar icons with SVGs.
 
 0.8.9:
 
