@@ -277,6 +277,9 @@ def make_notification(devnumber, data):
 		# custom HID++1.0 battery events, where SubId is 0x07/0x0D
 		(sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00')
 		or
+		# custom HID++1.0 illumination event, where SubId is 0x17
+		(sub_id == 0x17 and len(data) == 5)
+		or
 		# HID++ 2.0 feature notifications have the SoftwareID 0
 		(address & 0x0F == 0x00)
 		):

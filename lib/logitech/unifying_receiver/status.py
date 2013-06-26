@@ -308,6 +308,8 @@ class DeviceStatus(dict):
 			# however, this has not been fully verified yet
 			if n.sub_id in (0x07, 0x0D) and len(n.data) == 3 and n.data[2:3] == b'\x00':
 				return self._process_hidpp10_custom_notification(n)
+			if n.sub_id == 0x17 and len(n.data) == 3:
+				return self._process_hidpp10_custom_notification(n)
 		else:
 			# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
 			try:
@@ -332,6 +334,12 @@ class DeviceStatus(dict):
 			# message layout: 10 ix  0D("address")  <CHARGE> <?> <STATUS> 00
 			level, status = _hidpp10.parse_battery_reply_0D(n.address, ord(n.data[1:2]))
 			self.set_battery_info(level, status)
+			return True
+
+		if n.sub_id == 0x17:
+			# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
+			# TODO anything we can do with this?
+			_log.info("backlight event: %s", n)
 			return True
 
 		_log.warn("%s: unrecognized %s", self._device, n)
