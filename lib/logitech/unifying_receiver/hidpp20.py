@@ -232,7 +232,7 @@ class FeaturesArray(object):
 				elif ivalue == int(f):
 					return index
 				elif ivalue < int(f):
-					raise ValueError("%s not in list" % repr(value))
+					raise ValueError("%r not in list" % value)
 
 			if may_have:
 				reply = self.device.request(0x0000, _pack('!H', ivalue))
@@ -241,7 +241,7 @@ class FeaturesArray(object):
 					self.features[index] = FEATURE[ivalue]
 					return index
 
-		raise ValueError("%s not in list" % repr(value))
+		raise ValueError("%r not in list" % value)
 
 	def __iter__(self):
 		if self._check():

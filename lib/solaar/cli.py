@@ -335,7 +335,7 @@ def config_device(receiver, args):
 
 	result = setting.write(value)
 	if result is None:
-		_fail("failed to set '%s' = '%s' [%s]" % (setting.name, value, repr(value)))
+		_fail("failed to set '%s' = '%s' [%r]" % (setting.name, value, value))
 	print ("%s = %s" % (setting.name, result))
 
 #

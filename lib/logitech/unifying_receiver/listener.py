@@ -47,9 +47,9 @@ class _ThreadedHandle(object):
 	def _open(self):
 		handle = _base.open_path(self.path)
 		if handle is None:
-			_log.error("%s failed to open new handle", repr(self))
+			_log.error("%r failed to open new handle", self)
 		else:
-			# _log.debug("%s opened new handle %d", repr(self), handle)
+			# _log.debug("%r opened new handle %d", self, handle)
 			self._local.handle = handle
 			self._handles.append(handle)
 			return handle
@@ -59,7 +59,7 @@ class _ThreadedHandle(object):
 			self._local = None
 			handles, self._handles = self._handles, []
 			if _log.isEnabledFor(_DEBUG):
-				_log.debug("%s closing %s", repr(self), handles)
+				_log.debug("%r closing %s", self, handles)
 			for h in handles:
 				_base.close(h)
 
