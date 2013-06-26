@@ -37,6 +37,7 @@ def _load():
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("load => %s", _configuration)
 
+	_cleanup(_configuration)
 	_configuration[_KEY_VERSION] = __version__
 	return _configuration
 
@@ -54,6 +55,8 @@ def save():
 			_log.error("failed to create %s", dirname)
 			return False
 
+	_cleanup(_configuration)
+
 	try:
 		with open(_file_path, 'w') as config_file:
 			_json_save(_configuration, config_file, skipkeys=True, indent=2, sort_keys=True)
@@ -64,11 +67,14 @@ def save():
 		_log.error("failed to save to %s", _file_path)
 
 
-def all():
-	if not _configuration:
-		_load()
-
-	return dict(_configuration)
+def _cleanup(d):
+	# remove None values from the dict
+	for key in list(d.keys()):
+		value = d.get(key)
+		if value is None:
+			del d[key]
+		elif isinstance(value, dict):
+			_cleanup(value)
 
 
 def _device_key(device):
