@@ -154,7 +154,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0,
 						],
 				)
 _D('Wireless Illuminated Keyboard K800', protocol=1.0,
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
 							_register_fn_swap(),
 						],
