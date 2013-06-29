@@ -16,7 +16,7 @@ try:
 	from Queue import Queue as _Queue
 except ImportError:
 	from queue import Queue as _Queue
-_apply_queue = _Queue(4)
+_apply_queue = _Queue(8)
 
 def _process_apply_queue():
 	def _write_start(sbox):
@@ -160,16 +160,17 @@ _items = {}
 def create():
 	global _box
 	assert _box is None
-	_box = Gtk.VBox(homogeneous=False, spacing=4)
-	# _box.set_property('margin', 8)
+	_box = Gtk.VBox(homogeneous=False, spacing=8)
 	_box._last_device = None
 	return _box
 
 
-def update(device, is_online):
+def update(device, is_online=None):
 	assert _box is not None
 	assert device
 	device_id = (device.receiver.path, device.number)
+	if is_online is None:
+		is_online = bool(device.online)
 
 	# if the device changed since last update, clear the box first
 	if device_id != _box._last_device:
@@ -195,6 +196,7 @@ def update(device, is_online):
 			_update_setting_item(sbox, None, False)
 
 	_box.set_visible(True)
+
 
 def clean(device):
 	"""Remove the controls for a given device serial.
