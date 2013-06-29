@@ -163,10 +163,21 @@ def parse_battery_reply_07(level, battery_status):
 		else BATTERY_APPOX.low if level == 3 # low
 		else BATTERY_APPOX.critical if level == 1 # critical
 		else BATTERY_APPOX.empty ) # wtf?
-	status = ('charging' if battery_status == 0x21 or battery_status == 0x25
-		else 'fully charged' if battery_status == 0x22
-		else 'discharging' if battery_status == 0x00
-		else None)
+
+	if battery_status == 0x00:
+		status = 'discharging'
+	elif battery_status & 0x21 == 0x21:
+		status = 'charging'
+	elif battery_status & 0x22 == 0x22:
+		status = 'fully charged'
+	else:
+		_log.warn("could not parse 0x07 battery status: %02X (level %02X)", battery_status, level)
+		status = None
+
+	if battery_status & 0x03 and level == 0:
+		# some 'charging' notifications may come with no battery level information
+		charge = None
+
 	return charge, status
 
 

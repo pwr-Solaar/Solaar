@@ -169,15 +169,21 @@ class DeviceStatus(dict):
 	__nonzero__ = __bool__
 
 	def set_battery_info(self, level, status, timestamp=None):
-		assert isinstance(level, int)
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s: battery %s, %s", self._device, level, status)
+
+		if level is None:
+			# Some notifications may come with no battery level info, just
+			# charging state info, so assume the level is unchanged.
+			level = self[KEYS.BATTERY_LEVEL]
+		else:
+			assert isinstance(level, int)
 
 		# TODO: this is also executed when pressing Fn+F7 on K800.
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
 		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
 
-		charging = status in ('charging', 'recharging', 'slow recharge')
+		charging = status in ('charging', 'fully charged', 'recharging', 'slow recharge')
 		old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
 		changed = old_level != level or old_status != status or old_charging != charging
