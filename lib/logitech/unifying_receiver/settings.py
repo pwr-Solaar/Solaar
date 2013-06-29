@@ -16,14 +16,17 @@ from .common import NamedInt as _NamedInt, NamedInts as _NamedInts
 KIND = _NamedInts(toggle=0x1, choice=0x02, range=0x12)
 
 class _Setting(object):
-	__slots__ = ['name', 'label', 'description', 'kind', 'persister',
+	"""A setting descriptor.
+	Needs to be instantiated for each specific device."""
+	__slots__ = ['name', 'label', 'description', 'kind', 'persister', 'device_kind',
 					'_rw', '_validator', '_device', '_value']
 
-	def __init__(self, name, rw, validator, kind=None, label=None, description=None):
+	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None):
 		assert name
 		self.name = name
 		self.label = label or name
 		self.description = description
+		self.device_kind = device_kind
 
 		self._rw = rw
 		self._validator = validator
@@ -34,6 +37,7 @@ class _Setting(object):
 
 	def __call__(self, device):
 		assert not hasattr(self, '_value')
+		assert self.device_kind is None or self.device_kind == device.kind
 		o = _copy(self)
 		o._value = None
 		o._device = device  # _proxy(device)
@@ -213,26 +217,26 @@ class _ChoicesValidator(object):
 def register_toggle(name, register,
 					true_value=_BooleanValidator.default_true, false_value=_BooleanValidator.default_false,
 					mask=_BooleanValidator.default_mask, write_returns_value=False,
-					label=None, description=None):
+					label=None, description=None, device_kind=None):
 	rw = _RegisterRW(register)
 	validator = _BooleanValidator(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, label=label, description=description)
+	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 
 def register_choices(name, register, choices,
 					kind=KIND.choice, write_returns_value=False,
-					label=None, description=None):
+					label=None, description=None, device_kind=None):
 	assert choices
 	rw = _RegisterRW(register)
 	validator = _ChoicesValidator(choices, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, kind=kind, label=label, description=description)
+	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
 
 
 def feature_toggle(name, feature,
 					read_function_id=_FeatureRW.default_read_fnid, write_function_id=_FeatureRW.default_write_fnid,
 					true_value=_BooleanValidator.default_true, false_value=_BooleanValidator.default_false,
 					mask=_BooleanValidator.default_mask, write_returns_value=False,
-					label=None, description=None):
+					label=None, description=None, device_kind=None):
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
 	validator = _BooleanValidator(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, label=label, description=description)
+	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)

@@ -27,25 +27,31 @@ _FN_SWAP = ('fn-swap', 'Swap Fx function',
 # using Features
 def _register_fn_swap(register=0x09, true_value=b'\x00\x01', mask=b'\x00\x01'):
 	return _settings.register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
-					label=_FN_SWAP[1], description=_FN_SWAP[2])
+					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					device_kind=_hidpp10.DEVICE_KIND.keyboard)
 
 def _register_smooth_scroll(register=0x01, true_value=0x40, mask=0x40):
 	return _settings.register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
-					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2])
+					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_hidpp10.DEVICE_KIND.mouse)
 
 
+_PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
 def _register_dpi(register=0x63, choices=None):
 	return _settings.register_choices(_DPI[0], register, choices,
-					label=_DPI[1], description=_DPI[2])
+					label=_DPI[1], description=_DPI[2],
+					device_kind=_hidpp10.DEVICE_KIND.mouse)
 
 
 def _feature_fn_swap():
 	return _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION,
 					write_returns_value=True,
-					label=_FN_SWAP[1], description=_FN_SWAP[2])
+					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					device_kind=_hidpp10.DEVICE_KIND.keyboard)
 
 
 def check_features(device, already_known):
+	"""Try to auto-detect device settings by the HID++ 2.0 features they have."""
 	if device.protocol is not None and device.protocol < 2.0:
 		return
 	if not any(s.name == _FN_SWAP[0] for s in already_known) and _hidpp20.FEATURE.FN_INVERSION in device.features:
@@ -72,7 +78,7 @@ def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers
 	assert kind is not None, "descriptor for %s does not have 'kind' set" % name
 
 	# heuristic: the codename is the last word in the device name
-	if codename is None:
+	if codename is None and ' ' in name:
 		codename = name.split(' ')[-1]
 	assert codename is not None, "descriptor for %s does not have codename set" % name
 
@@ -196,7 +202,7 @@ _D('Anywhere Mouse MX', codename='Anywhere MX')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0,
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
-							_register_dpi(choices=_NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))),
+							_register_dpi(choices=_PERFORMANCE_MX_DPIS),
 						],
 				)
 
