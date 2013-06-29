@@ -50,38 +50,39 @@ _queue_processor.start()
 #
 #
 
-def _switch_notify(switch, _, setting, spinner):
-	# print ("switch notify", switch, switch.get_active(), setting)
-	if switch.get_sensitive():
-		# value = setting.write(switch.get_active() == True)
-		# _update_setting_item(switch.get_parent(), value)
-		_apply_queue.put(('write', setting, switch.get_active() == True, switch.get_parent()))
+def _create_toggle_control(setting):
+	def _switch_notify(switch, _, s):
+		if switch.get_sensitive():
+			_apply_queue.put(('write', s, switch.get_active() == True, switch.get_parent()))
 
+	c = Gtk.Switch()
+	c.connect('notify::active', _switch_notify, setting)
+	return c
 
-def _combo_notify(cbbox, setting, spinner):
-	# print ("combo notify", cbbox, cbbox.get_active_id(), setting)
-	if cbbox.get_sensitive():
-		_apply_queue.put(('write', setting, cbbox.get_active_id(), cbbox.get_parent()))
+def _create_choice_control(setting):
+	def _combo_notify(cbbox, s):
+		if cbbox.get_sensitive():
+			_apply_queue.put(('write', s, cbbox.get_active_id(), cbbox.get_parent()))
 
+	c = Gtk.ComboBoxText()
+	for entry in setting.choices:
+		c.append(str(entry), str(entry))
+	c.connect('changed', _combo_notify, setting)
+	return c
 
-# def _scale_notify(scale, setting, spinner):
-# 	_apply_queue.put(('write', setting, scale.get_value(), scale.get_parent()))
+# def _create_slider_control(setting):
+# 	def _slider_notify(slider, s):
+# 		if slider.get_sensitive():
+# 			_apply_queue.put(('write', s, slider.get_value(), slider.get_parent()))
+#
+# 	c = Gtk.Scale(setting.choices)
+# 	c.connect('value-changed', _slider_notify, setting)
+#
+# 	return c
 
-
-# def _snap_to_markers(scale, scroll, value, setting):
-# 	value = int(value)
-# 	candidate = None
-# 	delta = 0xFFFFFFFF
-# 	for c in setting.choices:
-# 		d = abs(value - int(c))
-# 		if d < delta:
-# 			candidate = c
-# 			delta = d
-
-# 	assert candidate is not None
-# 	scale.set_value(int(candidate))
-# 	return True
-
+#
+#
+#
 
 def _create_sbox(s):
 	sbox = Gtk.HBox(homogeneous=False, spacing=6)
@@ -94,23 +95,11 @@ def _create_sbox(s):
 	failed.set_tooltip_text('Failed to read value from the device.')
 
 	if s.kind == _settings.KIND.toggle:
-		control = Gtk.Switch()
-		control.connect('notify::active', _switch_notify, s, spinner)
+		control = _create_toggle_control(s)
 	elif s.kind == _settings.KIND.choice:
-		control = Gtk.ComboBoxText()
-		for entry in s.choices:
-			control.append(str(entry), str(entry))
-		control.connect('changed', _combo_notify, s, spinner)
+		control = _create_choice_control(s)
 	# elif s.kind == _settings.KIND.range:
-	# 	first, second = s.choices[:2]
-	# 	last = s.choices[-1:][0]
-	# 	control = Gtk.HScale.new_with_range(first, last, second - first)
-	# 	control.set_draw_value(False)
-	# 	control.set_has_origin(False)
-	# 	for entry in s.choices:
-	# 		control.add_mark(int(entry), Gtk.PositionType.TOP, str(entry))
-	# 	control.connect('change-value', _snap_to_markers, s)
-	# 	control.connect('value-changed', _scale_notify, s, spinner)
+	# 	control = _create_slider_control(s)
 	else:
 		raise NotImplemented
 
