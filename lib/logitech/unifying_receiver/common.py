@@ -5,12 +5,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from binascii import hexlify as _hexlify
-from struct import pack as _pack
+from struct import pack as _pack, unpack as _unpack
 try:
 	unicode
 	# if Python2, unicode_literals will mess our first (un)pack() argument
 	_pack_str = _pack
+	_unpack_str = _unpack
 	_pack = lambda x, *args: _pack_str(str(x), *args)
+	_unpack = lambda x, *args: _unpack_str(str(x), *args)
 except:
 	pass
 
@@ -42,9 +44,7 @@ class NamedInt(int):
 		return obj
 
 	def bytes(self, count=2):
-		if self.bit_length() > count * 8:
-			raise ValueError('cannot fit %X into %d bytes' % (self, count))
-		return _pack('!L', self)[-count:]
+		return int2bytes(self, count)
 
 	def __eq__(self, other):
 		if isinstance(other, NamedInt):
@@ -85,7 +85,7 @@ class NamedInts(object):
 	if the value already exists in the set (int or string), ValueError will be
 	raised.
 	"""
-	__slots__ = ['__dict__', '_values', '_indexed', '_fallback', '_all_bits']
+	__slots__ = ['__dict__', '_values', '_indexed', '_fallback']
 
 	def __init__(self, **kwargs):
 		def _readable_name(n):
@@ -99,7 +99,6 @@ class NamedInts(object):
 		self._values = sorted(list(values.values()))
 		self._indexed = {int(v): v for v in self._values}
 		self._fallback = None
-		self._all_bits = sum(self._values)
 
 	@classmethod
 	def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):
@@ -116,9 +115,6 @@ class NamedInts(object):
 
 		if unknown_bits:
 			yield 'unknown:%06X' % unknown_bits
-
-	def all_bits(self):
-		return self._all_bits
 
 	def __getitem__(self, index):
 		if isinstance(index, int):
@@ -197,10 +193,45 @@ class NamedInts(object):
 
 
 def strhex(x):
+	"""Produce a hex-string representation of a sequence of bytes."""
 	return _hexlify(x).decode('ascii').upper()
 
 
+def bytes2int(x):
+	"""Convert a bytes string to an int.
+	The bytes are assumed to be in most-significant-first order.
+	"""
+	assert isinstance(x, bytes)
+	assert len(x) < 9
+	result = 0
+	for b in x:
+		result <<= 8
+		result |= b if isinstance(b, int) else ord(b)
+	return result
+
+
+def int2bytes(x, count=None):
+	"""Convert an int to a bytes representation.
+	The bytes are ordered in most-significant-first order.
+	If 'count' is not given, the necessary number of bytes is computed.
+	"""
+	assert isinstance(x, int)
+	if count is None:
+		no_bits = x.bit_length()
+		count = (no_bits // 8) + (1 if no_bits % 8 else 0)
+	else:
+		assert isinstance(count, int)
+		assert count > 0
+		assert x.bit_length() <= count * 8
+	result = _pack('!Q', x)
+	assert isinstance(result, bytes)
+	return result[:-count]
+
+
 class KwException(Exception):
+	"""An exception that remembers all arguments passed to the constructor.
+	They can be later accessed by simple member access.
+	"""
 	def __init__(self, **kwargs):
 		super(KwException, self).__init__(kwargs)
 
