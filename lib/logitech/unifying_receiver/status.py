@@ -136,9 +136,6 @@ class DeviceStatus(dict):
 		# timestamp of when this status object was last updated
 		self.updated = 0
 
-		# optional object able to persist device settings
-		self.configuration = None
-
 	def __str__(self):
 		def _item(name, format):
 			value = self.get(name)
@@ -242,8 +239,11 @@ class DeviceStatus(dict):
 					# get cleared when the device is turned off (but not when the device
 					# goes idle, and we can't tell the difference right now).
 					self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
-					if self.configuration:
-						self.configuration.attach_to(d)
+
+					# Devices lose configuration when they are turned off,
+					# make sure they're up-to-date.
+					for s in self._device.settings:
+						s.apply()
 			else:
 				if was_active:
 					battery = self.get(KEYS.BATTERY_LEVEL)

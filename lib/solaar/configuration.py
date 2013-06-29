@@ -105,7 +105,3 @@ def attach_to(device):
 		if s.persister is None:
 			s.persister = persister
 		assert s.persister == persister
-		if s.name in persister:
-			s.write(persister[s.name])
-		else:
-			persister[s.name] = s.read(cached=False)

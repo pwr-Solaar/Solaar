@@ -171,8 +171,10 @@ class ReceiverListener(_listener.EventsListener):
 
 		if not already_known:
 			_log.info("%s triggered new device %s (%s)", n, dev, dev.kind)
+			# If there are saved configs, bring the device's settings up-to-date.
+			# They will be applied when the device is marked as online.
+			configuration.attach_to(dev)
 			dev.status = _status.DeviceStatus(dev, self._status_changed)
-			dev.status.configuration = configuration
 			# the receiver changed status as well
 			self._status_changed(self.receiver)
 

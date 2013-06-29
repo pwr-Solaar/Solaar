@@ -33,6 +33,7 @@ class _Setting(object):
 		self.persister = None
 
 	def __call__(self, device):
+		assert not hasattr(self, '_value')
 		o = _copy(self)
 		o._value = None
 		o._device = device  # _proxy(device)
@@ -43,12 +44,15 @@ class _Setting(object):
 		return self._validator.choices if self._validator.kind & KIND.choice else None
 
 	def read(self, cached=True):
+		if self._value is None and self.persister:
+			self._value = self.persister.get(self.name)
+
 		if cached and self._value is not None:
 			if self.persister and self.name not in self.persister:
 				self.persister[self.name] = self._value
 			return self._value
 
-		if self._device:
+		if self._device.online:
 			reply = self._rw.read(self._device)
 			if reply:
 				self._value = self._validator.validate_read(reply)
@@ -66,6 +70,10 @@ class _Setting(object):
 				self.persister[self.name] = self._value
 			return self._value
 
+	def apply(self):
+		if self._value is not None:
+			self.write(self._value)
+
 	def __str__(self):
 		if hasattr(self, '_value'):
 			assert hasattr(self, '_device')
@@ -73,6 +81,9 @@ class _Setting(object):
 		return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind, self.name)
 	__unicode__ = __repr__ = __str__
 
+#
+# read/write low-level operators
+#
 
 class _RegisterRW(object):
 	__slots__ = ['register']
@@ -111,6 +122,10 @@ class _FeatureRW(object):
 		assert self.feature is not None
 		return device.feature_request(self.feature, self.write_fnid, data_bytes)
 
+#
+# value validators
+# handle the conversion from read bytes, to setting value, and back
+#
 
 class _BooleanValidator(object):
 	__slots__ = ['true_value', 'false_value', 'mask', 'write_returns_value']
@@ -118,6 +133,7 @@ class _BooleanValidator(object):
 	kind = KIND.toggle
 	default_true = 0x01
 	default_false = 0x00
+	# mask specifies all the affected bits in the value
 	default_mask = 0xFF
 
 	def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask, write_returns_value=False):
@@ -191,7 +207,7 @@ class _ChoicesValidator(object):
 		return self.choices[value]
 
 #
-#
+# pre-defined basic setting descriptors
 #
 
 def register_toggle(name, register,

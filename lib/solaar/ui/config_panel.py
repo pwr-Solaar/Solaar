@@ -9,7 +9,8 @@ from gi.repository import Gtk, GLib
 from logitech.unifying_receiver import settings as _settings
 
 #
-#
+# a separate thread is used to read/write from the device
+# so as not to block the main (GUI) thread
 #
 
 try:
@@ -29,15 +30,16 @@ def _process_apply_queue():
 	while True:
 		task = _apply_queue.get()
 		assert isinstance(task, tuple)
+		device_is_online = True
 		# print ("task", *task)
 		if task[0] == 'write':
 			_, setting, value, sbox = task
 			GLib.idle_add(_write_start, sbox, priority=0)
 			value = setting.write(value)
 		elif task[0] == 'read':
-			_, setting, force_read, sbox = task
+			_, setting, force_read, sbox, device_is_online = task
 			value = setting.read(not force_read)
-		GLib.idle_add(_update_setting_item, sbox, value, priority=99)
+		GLib.idle_add(_update_setting_item, sbox, value, device_is_online, priority=99)
 
 from threading import Thread as _Thread
 _queue_processor = _Thread(name='SettingsProcessor', target=_process_apply_queue)
@@ -190,10 +192,7 @@ def update(device, is_online=None):
 			sbox = _items[k] = _create_sbox(s)
 			_box.pack_start(sbox, False, False, 0)
 
-		if is_online:
-			_apply_queue.put(('read', s, False, sbox))
-		else:
-			_update_setting_item(sbox, None, False)
+		_apply_queue.put(('read', s, False, sbox, is_online))
 
 	_box.set_visible(True)
 
