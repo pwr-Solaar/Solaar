@@ -63,12 +63,14 @@ def check_features(device, already_known):
 
 from collections import namedtuple
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-				['name', 'kind', 'product_id', 'codename', 'protocol', 'registers', 'settings'])
+				['name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings'])
 del namedtuple
 
 DEVICES = {}
 
-def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers=None, settings=None):
+def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None, settings=None):
+	assert name
+
 	if kind is None:
 		kind = (_hidpp10.DEVICE_KIND.mouse if 'Mouse' in name
 				else _hidpp10.DEVICE_KIND.keyboard if 'Keyboard' in name
@@ -89,13 +91,15 @@ def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers
 	DEVICES[codename] = _DeviceDescriptor(
 					name=name,
 					kind=kind,
-					product_id=product_id,
+					wpid=wpid,
 					codename=codename,
 					protocol=protocol,
 					registers=registers,
 					settings=settings)
-	if product_id:
-		DEVICES[product_id] = DEVICES[codename]
+
+	if wpid:
+		assert wpid not in DEVICES
+		DEVICES[wpid] = DEVICES[codename]
 
 #
 #
@@ -125,41 +129,47 @@ def _D(name, codename=None, kind=None, product_id=None, protocol=None, registers
 #       no known device uses both
 #    51 - leds
 #    63 - mice: DPI
-#    F1 - firmware info
+#  * F1 - firmware info
 # Some registers appear to be universally supported, no matter the HID++ version
 # (marked with *). The rest may or may not be supported, and their values may or
 # may not mean the same thing across different devices.
 
+# The 'codename' and 'kind' fields are usually guessed from the device name,
+# but in some cases (like the Logitech Cube) that heuristic fails and they have
+# to be specified.
+#
+# The 'protocol' and 'wpid' fields are optional (they can be discovered at
+# runtime), but specifying them here speeds up device discovery and reduces the
+# USB traffic Solaar has to do to fully identify peripherals.
+# Same goes for HID++ 2.0 feature settings (like _feature_fn_swap).
+#
 # The 'registers' field indicates read-only registers, specifying a state.
 # The 'settings' field indicates a read/write register; based on them Solaar
 # generates, at runtime, the settings controls in the device panel.
-#
-# HID++ 2.0 features are not specified here, they are always discovered at
-# run-time.
 
 # Keyboards
 
-_D('Wireless Keyboard K230', protocol=2.0)
+_D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
 _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
-_D('Wireless Keyboard K360', protocol=2.0,
+_D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
 							_feature_fn_swap()
 						],
 				)
-_D('Wireless Touch Keyboard K400', protocol=2.0)
-_D('Wireless Keyboard MK700', protocol=1.0,
+_D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024')
+_D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_fn_swap(),
 						],
 				)
-_D('Wireless Solar Keyboard K750', protocol=2.0,
+_D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 				settings=[
 							_feature_fn_swap()
 						],
 				)
-_D('Wireless Illuminated Keyboard K800', protocol=1.0,
+_D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
 							_register_fn_swap(),
@@ -171,7 +181,7 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0,
 _D('Wireless Mouse M175', protocol=1.0)
 _D('Wireless Mouse M185', protocol=1.0)
 _D('Wireless Mouse M187', protocol=1.0)
-_D('Wireless Mouse M215', protocol=1.0)
+_D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235', protocol=1.0)
 _D('Wireless Mouse M305', protocol=1.0)
 _D('Wireless Mouse M310', protocol=1.0)
@@ -180,7 +190,7 @@ _D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M345')
 _D('Wireless Mouse M505')
-_D('Wireless Mouse M510', protocol=1.0,
+_D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
 							_register_smooth_scroll(),
@@ -189,7 +199,7 @@ _D('Wireless Mouse M510', protocol=1.0,
 _D('Couch Mouse M515', protocol=2.0)
 _D('Wireless Mouse M525', protocol=2.0)
 _D('Touch Mouse M600')
-_D('Marathon Mouse M705', protocol=1.0,
+_D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				registers={'battery_charge': 0x0D},
 				settings=[
 							_register_smooth_scroll(),
@@ -199,7 +209,7 @@ _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX')
-_D('Performance Mouse MX', codename='Performance MX', protocol=1.0,
+_D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
 				settings=[
 							_register_dpi(choices=_PERFORMANCE_MX_DPIS),
@@ -213,14 +223,14 @@ _D('Wireless Trackball M570')
 # Touchpads
 
 _D('Wireless Rechargeable Touchpad T650', protocol=2.0)
-_D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0)
+_D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 
 #
-# classic Nano devices
-# a product_id is necessary to properly identify them
+# Classic Nano peripherals (that don't support the Unifying protocol).
+# A wpid is necessary to properly identify them.
 #
 
-_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, product_id='c526',
+_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F',
 				registers={'battery_charge': 0x0D, 'battery_status': -0x07},
 				settings=[
 							_register_smooth_scroll(),
