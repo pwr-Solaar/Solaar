@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GLib
 
-from logitech.unifying_receiver import settings as _settings
+from logitech.unifying_receiver.settings import KIND as _SETTING_KIND
 
 #
 # a separate thread is used to read/write from the device
@@ -94,11 +94,11 @@ def _create_sbox(s):
 	failed = Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.SMALL_TOOLBAR)
 	failed.set_tooltip_text('Failed to read value from the device.')
 
-	if s.kind == _settings.KIND.toggle:
+	if s.kind == _SETTING_KIND.toggle:
 		control = _create_toggle_control(s)
-	elif s.kind == _settings.KIND.choice:
+	elif s.kind == _SETTING_KIND.choice:
 		control = _create_choice_control(s)
-	# elif s.kind == _settings.KIND.range:
+	# elif s.kind == _SETTING_KIND.range:
 	# 	control = _create_slider_control(s)
 	else:
 		raise NotImplemented
