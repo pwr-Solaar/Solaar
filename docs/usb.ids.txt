@@ -1,0 +1,364 @@
+#
+#	List of USB ID's
+#
+#	Maintained by Stephen J. Gowdy <linux.usb.ids@gmail.com>
+#	If you have any new entries, please submit them via
+#		http://www.linux-usb.org/usb-ids.html
+#	or send entries as patches (diff -u old new) in the
+#	body of your email (a bot will attempt to deal with it).
+#	The latest version can be obtained from
+#		http://www.linux-usb.org/usb.ids
+#
+# Version: 2013.05.24
+# Date:    2013-05-24 20:34:03
+#
+
+# Vendors, devices and interfaces. Please keep sorted.
+
+# Syntax:
+# vendor  vendor_name
+#	device  device_name				<-- single tab
+#		interface  interface_name		<-- two tabs
+
+046d  Logitech, Inc.
+	0082  Acer Aspire 5672 Webcam
+	0200  WingMan Extreme Joystick
+	0203  M2452 Keyboard
+	0301  M4848 Mouse
+	0401  HP PageScan
+	0402  NEC PageScan
+	040f  Logitech/Storm PageScan
+	0430  Mic (Cordless)
+	0801  QuickCam Home
+	0802  Webcam C200
+	0804  Webcam C250
+	0805  Webcam C300
+	0807  Webcam B500
+	0808  Webcam C600
+	0809  Webcam Pro 9000
+	080a  Portable Webcam C905
+	080f  Webcam C120
+	0810  QuickCam Pro
+	0819  Webcam C210
+	081b  Webcam C310
+	081d  HD Webcam C510
+	0820  QuickCam VC
+	0821  HD Webcam C910
+	0825  Webcam C270
+	0828  HD Webcam B990
+	082d  HD Pro Webcam C920
+	0830  QuickClip
+	0840  QuickCam Express
+	0850  QuickCam Web
+	0870  QuickCam Express
+	0890  QuickCam Traveler
+	0892  OrbiCam
+	0894  CrystalCam
+	0895  QuickCam for Dell Notebooks
+	0896  OrbiCam
+	0897  QuickCam for Dell Notebooks
+	0899  QuickCam for Dell Notebooks
+	089d  QuickCam E2500 series
+	08a0  QuickCam IM
+	08a1  QuickCam IM with sound
+	08a2  Labtec Webcam Pro
+	08a3  QuickCam QuickCam Chat
+	08a6  QuickCam IM
+	08a7  QuickCam Image
+	08a9  Notebook Deluxe
+	08aa  Labtec Notebooks
+	08ac  QuickCam Cool
+	08ad  QuickCam Communicate STX
+	08ae  QuickCam for Notebooks
+	08af  QuickCam Easy/Cool
+	08b0  QuickCam 3000 Pro [pwc]
+	08b1  QuickCam Notebook Pro
+	08b2  QuickCam Pro 4000
+	08b3  QuickCam Zoom
+	08b4  QuickCam Zoom
+	08b5  QuickCam Sphere
+	08b9  QuickCam IM
+	08bd  Microphone (Pro 4000)
+	08c0  QuickCam Pro 3000
+	08c1  QuickCam Fusion
+	08c2  QuickCam PTZ
+	08c3  Camera (Notebooks Pro)
+	08c5  QuickCam Pro 5000
+	08c6  QuickCam for DELL Notebooks
+	08c7  QuickCam OEM Cisco VT Camera II
+	08c9  QuickCam Ultra Vision
+	08ca  Mic (Fusion)
+	08cb  Mic (Notebooks Pro)
+	08cc  Mic (PTZ)
+	08ce  QuickCam Pro 5000
+	08cf  QuickCam UpdateMe
+	08d0  QuickCam Express
+	08d7  QuickCam Communicate STX
+	08d8  QuickCam for Notebook Deluxe
+	08d9  QuickCam IM/Connect
+	08da  QuickCam Messanger
+	08dd  QuickCam for Notebooks
+	08e0  QuickCam Express
+	08e1  Labtec Webcam
+	08f0  QuickCam Messenger
+	08f1  QuickCam Express
+	08f2  Microphone (Messenger)
+	08f3  QuickCam Express
+	08f4  Labtec Webcam
+	08f5  QuickCam Messenger Communicate
+	08f6  QuickCam Messenger Plus
+	0900  ClickSmart 310
+	0901  ClickSmart 510
+	0903  ClickSmart 820
+	0905  ClickSmart 820
+	0910  QuickCam Cordless
+	0920  QuickCam Express
+	0921  Labtec Webcam
+	0922  QuickCam Live
+	0928  QuickCam Express
+	0929  Labtec Webcam Pro
+	092a  QuickCam for Notebooks
+	092b  Labtec Webcam Plus
+	092c  QuickCam Chat
+	092d  QuickCam Express / Go
+	092e  QuickCam Chat
+	092f  QuickCam Express Plus
+	0950  Pocket Camera
+	0960  ClickSmart 420
+	0970  Pocket750
+	0990  QuickCam Pro 9000
+	0991  QuickCam Pro for Notebooks
+	0992  QuickCam Communicate Deluxe
+	0994  QuickCam Orbit/Sphere AF
+	09a1  QuickCam Communicate MP/S5500
+	09a2  QuickCam Communicate Deluxe/S7500
+	09a4  QuickCam E 3500
+	09a5  Quickcam 3000 For Business
+	09a6  QuickCam Vision Pro
+	09b0  Acer OrbiCam
+	09b2  Fujitsu Webcam
+	09c0  QuickCam for Dell Notebooks Mic
+	09c1  QuickCam Deluxe for Notebooks
+	0a01  USB Headset
+	0a02  Premium Stereo USB Headset 350
+	0a03  Logitech USB Microphone
+	0a04  V20 portable speakers (USB powered)
+	0a07  Z-10 Speakers
+	0a0b  ClearChat Pro USB
+	0a0c  Clear Chat Comfort USB Headset
+	0a13  Z-5 Speakers
+	0a17  G330 Headset
+	0a1f  G930
+	0b02  C-UV35 [Bluetooth Mini-Receiver] (HID proxy mode)
+	8801  Video Camera
+	b305  BT Mini-Receiver
+	bfe4  Premium Optical Wheel Mouse
+	c000  N43 [Pilot Mouse]
+	c001  N48/M-BB48 [FirstMouse Plus]
+	c002  M-BA47 [MouseMan Plus]
+	c003  MouseMan
+	c004  WingMan Gaming Mouse
+	c005  WingMan Gaming Wheel Mouse
+	c00b  MouseMan Wheel
+	c00c  Optical Wheel Mouse
+	c00d  MouseMan Wheel+
+	c00e  M-BJ58/M-BJ69 Optical Wheel Mouse
+	c00f  MouseMan Traveler/Mobile
+	c011  Optical MouseMan
+	c012  Mouseman Dual Optical
+	c014  Corded Workstation Mouse
+	c015  Corded Workstation Mouse
+	c016  Optical Wheel Mouse
+	c018  Optical Wheel Mouse
+	c019  Optical Tilt Wheel Mouse
+	c01a  M-BQ85 Optical Wheel Mouse
+	c01b  MX310 Optical Mouse
+	c01c  Optical Mouse
+	c01d  MX510 Optical Mouse
+	c01e  MX518 Optical Mouse
+	c024  MX300 Optical Mouse
+	c025  MX500 Optical Mouse
+	c030  iFeel Mouse
+	c031  iFeel Mouse+
+	c032  MouseMan iFeel
+	c033  iFeel MouseMan+
+	c034  MouseMan Optical
+	c035  Mouse
+	c036  Mouse
+	c037  Mouse
+	c038  Mouse
+	c03d  M-BT96a Pilot Optical Mouse
+	c03e  Premium Optical Wheel Mouse (M-BT58)
+	c03f  M-BT85 [UltraX Optical Mouse]
+	c040  Corded Tilt-Wheel Mouse
+	c041  G5 Laser Mouse
+	c042  G3 Laser Mouse
+	c043  MX320/MX400 Laser Mouse
+	c044  LX3 Optical Mouse
+	c045  Optical Mouse
+	c046  RX1000 Laser Mouse
+	c047  Laser Mouse M-UAL120
+	c048  G9 Laser Mouse
+	c049  G5 Laser Mouse
+	c050  RX 250 Optical Mouse
+	c051  G3 (MX518) Optical Mouse
+	c053  Laser Mouse
+	c054  Bluetooth mini-receiver
+	c058  M115 Mouse
+	c05a  M90/M100 Optical Mouse
+	c05b  M-U0004 810-001317 [B110 Optical USB Mouse]
+	c05d  Optical Mouse
+	c05f  M115 Optical Mouse
+	c061  RX1500 Laser Mouse
+	c062  M-UAS144 [LS1 Laser Mouse]
+	c063  DELL Laser Mouse
+	c068  G500 Laser Mouse
+	c069  M500 Laser Mouse
+	c06a  USB Optical Mouse
+	c06b  G700 Wireless Gaming Mouse
+	c06c  Optical Mouse
+	c101  UltraX Media Remote
+	c110  Harmony 785/885 Remote
+	c111  Harmony 525 Remote
+	c112  Harmony 890 Remote
+	c11f  Harmony 900/1100 Remote
+	c121  Harmony One Remote
+	c122  Harmony 700 Remote
+	c124  Harmony 300 Remote
+	c125  Harmony 200 Remote
+	c201  WingMan Extreme Joystick with Throttle
+	c202  WingMan Formula
+	c207  WingMan Extreme Digital 3D
+	c208  WingMan Gamepad Extreme
+	c209  WingMan Gamepad
+	c20a  WingMan RumblePad
+	c20b  WingMan Action Pad
+	c20c  WingMan Precision
+	c20d  WingMan Attack 2
+	c20e  WingMan Formula GP
+	c211  iTouch Cordless Reciever
+	c212  WingMan Extreme Digital 3D
+	c213  J-UH16 (Freedom 2.4 Cordless Joystick)
+	c214  ATK3 (Attack III Joystick)
+	c215  Extreme 3D Pro
+	c216  Dual Action Gamepad
+	c218  Logitech RumblePad 2 USB
+	c219  Cordless RumblePad 2
+	c21a  Precision Gamepad
+	c21c  G13 Advanced Gameboard
+	c21d  F310 Gamepad [XInput Mode]
+	c21e  F510 Gamepad [XInput Mode]
+	c21f  F710 Wireless Gamepad [XInput Mode]
+	c221  G11/G15 Keyboard / Keyboard
+	c222  G15 Keyboard / LCD
+	c223  G11/G15 Keyboard / USB Hub
+	c225  G11/G15 Keyboard / G keys
+	c226  G15 Refresh Keyboard
+	c227  G15 Refresh Keyboard
+	c22a  Gaming Keyboard G110
+	c22b  Gaming Keyboard G110 G-keys
+	c22d  G510 Gaming Keyboard
+	c22e  G510 Gaming Keyboard onboard audio
+	c245  G400 Optical Mouse
+	c246  Gaming Mouse G300
+	c281  WingMan Force
+	c283  WingMan Force 3D
+	c285  WingMan Strike Force 3D
+	c286  Force 3D Pro
+	c287  Flight System G940
+	c291  WingMan Formula Force
+	c293  WingMan Formula Force GP
+	c294  Driving Force
+	c295  Momo Force Steering Wheel
+	c298  Driving Force Pro
+	c299  G25 Racing Wheel
+	c29b  G27 Racing Wheel
+	c29c  Speed Force Wireless Wheel for Wii
+	c2a0  Wingman Force Feedback Mouse
+	c2a1  WingMan Force Feedback Mouse
+	c301  iTouch Keyboard
+	c302  iTouch Pro Keyboard
+	c303  iTouch Keyboard
+	c305  Internet Keyboard
+	c307  Internet Keyboard
+	c308  Internet Navigator Keyboard
+	c309  Internet Keyboard
+	c30a  iTouch Composite
+	c30b  NetPlay Keyboard
+	c30c  Internet Keys (X)
+	c30d  Internet Keys
+	c30e  UltraX Keyboard (Y-BL49)
+	c30f  Logicool HID-Compliant Keyboard (106 key)
+	c311  Y-UF49 [Internet Pro Keyboard]
+	c312  DeLuxe 250 Keyboard
+	c313  Internet 350 Keyboard
+	c315  Classic Keyboard 200
+	c316  HID-Compliant Keyboard
+	c317  Wave Corded Keyboard
+	c318  Illuminated Keyboard
+	c31a  Comfort Wave 450
+	c31b  Compact Keyboard K300
+	c31c  Keyboard K120 for Business
+	c31d  Media Keyboard K200
+	c401  TrackMan Marble Wheel
+	c402  Marble Mouse (2-button)
+	c403  Turbo TrackMan Marble FX
+	c404  TrackMan Wheel
+	c408  Marble Mouse (4-button)
+	c501  Cordless Mouse Receiver
+	c502  Cordless Mouse & iTouch Keys
+	c503  Cordless Mouse+Keyboard Receiver
+	c504  Cordless Mouse+Keyboard Receiver
+	c505  Cordless Mouse+Keyboard Receiver
+	c506  MX700 Cordless Mouse Receiver
+	c508  Cordless Trackball
+	c509  Cordless Keyboard & Mouse
+	c50a  Cordless Mouse
+	c50b  Cordless Desktop Optical
+	c50c  Cordless Desktop S510
+	c50d  Cordless Mouse
+	c50e  Cordless Mouse Receiver
+	c510  Cordless Mouse
+	c512  LX-700 Cordless Desktop Receiver
+	c513  MX3000 Cordless Desktop Receiver
+	c514  Cordless Mouse
+	c515  Cordless 2.4 GHz Presenter Presentation remote control
+	c517  LX710 Cordless Desktop Laser
+	c518  MX610 Laser Cordless Mouse
+	c51a  MX Revolution/G7 Cordless Mouse
+	c51b  V220 Cordless Optical Mouse for Notebooks
+	c521  Cordless Mouse Receiver
+	c525  MX Revolution Cordless Mouse
+	c526  Nano Receiver
+	c529  Logitech Keyboard + Mice
+	c52b  Unifying Receiver
+	c52f  Unifying Receiver
+	c532  Unifying Receiver
+	c623  3Dconnexion Space Traveller 3D Mouse
+	c625  3Dconnexion Space Pilot 3D Mouse
+	c626  3Dconnexion Space Navigator 3D Mouse
+	c627  3Dconnexion Space Explorer 3D Mouse
+	c702  Cordless Presenter
+	c703  Elite Keyboard Y-RP20 + Mouse MX900 (Bluetooth)
+	c704  diNovo Wireless Desktop
+	c705  MX900 Bluetooth Wireless Hub (C-UJ16A)
+	c707  Bluetooth wireless hub
+	c708  Bluetooth wireless hub
+	c709  BT Mini-Receiver (HCI mode)
+	c70a  MX5000 Cordless Desktop
+	c70b  BT Mini-Receiver (HID proxy mode)
+	c70c  BT Mini-Receiver (HID proxy mode)
+	c70d  Bluetooth wireless hub
+	c70e  MX1000 Bluetooth Laser Mouse
+	c70f  Bluetooth wireless hub
+	c712  Bluetooth wireless hub
+	c714  diNovo Edge Keyboard
+	c715  Bluetooth wireless hub
+	c71a  Bluetooth wireless hub
+	c71d  Bluetooth wireless hub
+	c71f  diNovo Mini Wireless Keyboard
+	c720  Bluetooth wireless hub
+	ca03  MOMO Racing
+	ca04  Formula Vibration Feedback Wheel
+	cab1  Cordless Keyboard for Wii HID Receiver
+	d001  QuickCam Pro

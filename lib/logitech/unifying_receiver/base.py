@@ -69,33 +69,18 @@ class DeviceUnreachable(_KwException):
 #
 #
 
-# vendor_id, product_id, usb interface number, hid driver
-DEVICE_UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, 'logitech-djreceiver')
-DEVICE_UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, 'logitech-djreceiver')
-DEVICE_NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, 'hid-generic')
-DEVICE_VXNANO                    = (0x046d, 0xc526, 1, 'hid-generic')
-
+from .base_usb import ALL as _RECEIVER_USB_IDS
 
 def receivers():
 	"""List all the Linux devices exposed by the UR attached to the machine."""
-	for d in _hid.enumerate(*DEVICE_UNIFYING_RECEIVER):
-		yield d
-	for d in _hid.enumerate(*DEVICE_UNIFYING_RECEIVER_2):
-		yield d
-	for d in _hid.enumerate(*DEVICE_NANO_RECEIVER_ADVANCED):
-		yield d
-	for d in _hid.enumerate(*DEVICE_VXNANO):
-		yield d
+	for receiver_usb_id in _RECEIVER_USB_IDS:
+		for d in _hid.enumerate(*receiver_usb_id):
+			yield d
 
 
 def notify_on_receivers_glib(callback):
 	"""Watch for matching devices and notifies the callback on the GLib thread."""
-	_hid.monitor_glib(callback,
-					DEVICE_UNIFYING_RECEIVER,
-					DEVICE_UNIFYING_RECEIVER_2,
-					DEVICE_NANO_RECEIVER_ADVANCED,
-					DEVICE_VXNANO,
-		)
+	_hid.monitor_glib(callback, *_RECEIVER_USB_IDS)
 
 #
 #

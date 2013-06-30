@@ -139,6 +139,8 @@ class FeaturesArray(object):
 
 	def __del__(self):
 		self.supported = False
+		self.device = None
+		self.features = None
 
 	def _check(self):
 		# print (self.device, "check", self.supported, self.features, self.device.protocol)

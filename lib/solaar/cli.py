@@ -86,6 +86,7 @@ def _print_receiver(receiver, verbose=False):
 	print ("Unifying Receiver")
 	print ("   Device path  :", receiver.path)
 	print ("   USB id       : 046d:%s" % receiver.product_id)
+	print ("   Unifying     : %s" % ('supported' if receiver.unifying_supported else 'not supported'))
 	print ("   Serial       :", receiver.serial)
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))

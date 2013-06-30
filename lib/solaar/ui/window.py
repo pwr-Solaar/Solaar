@@ -472,6 +472,10 @@ def _update_details(button):
 				yield ('Path', device.path)
 				# 046d is the Logitech vendor id
 				yield ('USB id', '046d:' + device.product_id)
+				if device.unifying_supported:
+					yield ('Unifying', 'supported')
+				else:
+					yield ('Unifying', 'not supported')
 			else:
 				# yield ('Codename', device.codename)
 				hid_version = device.protocol
