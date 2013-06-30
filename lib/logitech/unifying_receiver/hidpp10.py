@@ -9,6 +9,8 @@ _log = getLogger('LUR.hidpp10')
 del getLogger
 
 from .common import (strhex as _strhex,
+					bytes2int as _bytes2int,
+					int2bytes as _int2bytes,
 					NamedInts as _NamedInts,
 					FirmwareInfo as _FirmwareInfo)
 from .hidpp20 import FIRMWARE_KIND
@@ -273,13 +275,13 @@ def get_notification_flags(device):
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
-		if p is None or p >= 2.0:
+		if p is not None and p >= 2.0:
 			return
 
 	flags = read_register(device, 0x00)
 	if flags is not None:
 		assert len(flags) == 3
-		return ord(flags[0:1]) << 16 | ord(flags[1:2]) << 8 | ord(flags[2:3])
+		return _bytes2int(flags)
 
 
 def set_notification_flags(device, *flag_bits):
@@ -288,9 +290,10 @@ def set_notification_flags(device, *flag_bits):
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
-		if p is None or p >= 2.0:
+		if p is not None and p >= 2.0:
 			return
 
 	flag_bits = sum(int(b) for b in flag_bits)
-	result = write_register(device, 0x00, 0xFF & (flag_bits >> 16), 0xFF & (flag_bits >> 8), 0xFF & flag_bits)
+	assert flag_bits & 0x00FFFFFF == flag_bits
+	result = write_register(device, 0x00, _int2bytes(flag_bits, 3))
 	return result is not None

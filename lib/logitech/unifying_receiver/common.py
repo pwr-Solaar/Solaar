@@ -203,10 +203,9 @@ def bytes2int(x):
 	"""
 	assert isinstance(x, bytes)
 	assert len(x) < 9
-	result = 0
-	for b in x:
-		result <<= 8
-		result |= b if isinstance(b, int) else ord(b)
+	qx = (b'\x00' * 8) + x
+	result, = _unpack('!Q', qx[-8:])
+	# assert x == int2bytes(result, len(x))
 	return result
 
 
@@ -216,16 +215,17 @@ def int2bytes(x, count=None):
 	If 'count' is not given, the necessary number of bytes is computed.
 	"""
 	assert isinstance(x, int)
-	if count is None:
-		no_bits = x.bit_length()
-		count = (no_bits // 8) + (1 if no_bits % 8 else 0)
-	else:
-		assert isinstance(count, int)
-		assert count > 0
-		assert x.bit_length() <= count * 8
 	result = _pack('!Q', x)
 	assert isinstance(result, bytes)
-	return result[:-count]
+	# assert x == bytes2int(result)
+
+	if count is None:
+		return result.lstrip(b'\x00')
+
+	assert isinstance(count, int)
+	assert count > 0
+	assert x.bit_length() <= count * 8
+	return result[-count:]
 
 
 class KwException(Exception):
