@@ -157,7 +157,11 @@ _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 							_feature_fn_swap()
 						],
 				)
-_D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024')
+_D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024',
+				settings=[
+							_feature_fn_swap()
+						],
+				)
 _D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
