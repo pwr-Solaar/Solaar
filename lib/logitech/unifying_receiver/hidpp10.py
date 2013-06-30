@@ -232,7 +232,7 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 	if not device.online:
 		return
 
-	leds_register = device.registers.get('leds')
+	leds_register = device.registers.get('3leds')
 	if leds_register is None or leds_register < 0:
 		return
 

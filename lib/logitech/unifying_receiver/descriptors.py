@@ -174,7 +174,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 						],
 				)
 _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
 				settings=[
 							_register_fn_swap(),
 						],
@@ -214,7 +214,7 @@ _D('Touch Mouse T620')
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07, 'leds': 0x51},
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
 				settings=[
 							_register_dpi(choices=_PERFORMANCE_MX_DPIS),
 						],
