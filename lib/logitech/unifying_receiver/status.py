@@ -144,9 +144,13 @@ class DeviceStatus(dict):
 
 		def _items():
 			# TODO properly string approximative battery levels
-			battery_level = _item(KEYS.BATTERY_LEVEL, 'Battery: %d%%')
-			if battery_level:
-				yield battery_level
+			battery_level = self.get(KEYS.BATTERY_LEVEL)
+			if battery_level is not None:
+				if isinstance(battery_level, _NamedInt):
+					yield 'Battery: %s' % str(battery_level)
+				else:
+					yield 'Battery: %d%%' % battery_level
+
 				battery_status = _item(KEYS.BATTERY_STATUS, ' (%s)')
 				if battery_status:
 					yield battery_status
@@ -244,6 +248,9 @@ class DeviceStatus(dict):
 					# make sure they're up-to-date.
 					for s in self._device.settings:
 						s.apply()
+
+					if KEYS.BATTERY_LEVEL not in self:
+						self.read_battery(timestamp)
 			else:
 				if was_active:
 					battery = self.get(KEYS.BATTERY_LEVEL)
