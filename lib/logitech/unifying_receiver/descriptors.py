@@ -187,7 +187,9 @@ _D('Wireless Mouse M185', protocol=1.0)
 _D('Wireless Mouse M187', protocol=1.0)
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235', protocol=1.0)
-_D('Wireless Mouse M305', protocol=1.0)
+_D('Wireless Mouse M305', protocol=1.0, wpid='101F',
+				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				)
 _D('Wireless Mouse M310', protocol=1.0)
 _D('Wireless Mouse M315', protocol=1.0)
 _D('Wireless Mouse M317')
