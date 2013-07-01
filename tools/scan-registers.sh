@@ -6,7 +6,7 @@ if test -z "$1"; then
 fi
 
 HC="$(dirname "$(readlink -f "$0")")/hidconsole"
-if test "$1" = "FF"; then
+if test "$1" = "FF" -o "$1" = "ff"; then
 	DEVNUMBER=FF
 else
 	DEVNUMBER=0$1
