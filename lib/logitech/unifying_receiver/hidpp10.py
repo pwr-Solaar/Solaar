@@ -183,22 +183,6 @@ def parse_battery_reply_07(level, battery_status):
 	return charge, status
 
 
-def get_serial(device):
-	assert device
-
-	if device.kind is None:
-		dev_id = 0x03
-		receiver = device
-	else:
-		dev_id = 0x30 + device.number - 1
-		receiver = device.receiver
-		assert receiver.unifying_supported
-
-	serial = read_register(receiver, 0x2B5, dev_id)
-	if serial is not None:
-		return _strhex(serial[1:5])
-
-
 def get_firmware(device):
 	assert device
 

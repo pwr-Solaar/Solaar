@@ -199,9 +199,18 @@ class PairedDevice(object):
 	@property
 	def serial(self):
 		if self._serial is None:
-			if self.receiver.unifying_supported:
-				self._serial = _hidpp10.get_serial(self)
+			serial = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
+			if serial:
+				ps = ord(serial[9:10]) & 0x0F
+				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
 			else:
+				# some Nano receivers?
+				serial = self.receiver.read_register(0x2D5)
+
+			if serial:
+				self._serial = _strhex(serial[1:5])
+			else:
+				# fallback...
 				self._serial = self.receiver.serial
 		return self._serial or '?'
 
