@@ -154,9 +154,9 @@ class FeaturesArray(object):
 				return False
 
 			# I _think_ this is universally true
-			if self.device.protocol < 2.0:
+			if self.device.protocol is not None and self.device.protocol < 2.0:
 				self.supported = False
-				# self.device.features = None
+				self.device.features = None
 				self.device = None
 				return False
 
@@ -312,7 +312,7 @@ class KeysArray(object):
 #
 
 def feature_request(device, feature, function=0x00, *params):
-	if device.features:
+	if device.online and device.features:
 		if feature in device.features:
 			feature_index = device.features.index(int(feature))
 			return device.request((feature_index << 8) + (function & 0xFF), *params)

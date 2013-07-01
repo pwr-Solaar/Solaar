@@ -124,6 +124,8 @@ del _SETTINGS_LIST
 
 def check_feature_settings(device, already_known):
 	"""Try to auto-detect device settings by the HID++ 2.0 features they have."""
+	if device.features is None:
+		return
 	if device.protocol is not None and device.protocol < 2.0:
 		return
 	if not any(s.name == _FN_SWAP[0] for s in already_known) and _hidpp20.FEATURE.FN_INVERSION in device.features:
