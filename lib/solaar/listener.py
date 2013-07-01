@@ -117,16 +117,15 @@ class ReceiverListener(_listener.EventsListener):
 
 	def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
 		assert device is not None
-		if _log.isEnabledFor(_DEBUG):
-			if device.kind is None:
-				_log.debug("status_changed %s: %s, %s (%X) %s", device,
-							'present' if bool(device) else 'removed',
-							device.status, alert, reason or '')
-			else:
-				_log.debug("status_changed %s: %s %s, %s (%X) %s", device,
-							'paired' if bool(device) else 'unpaired',
-							'online' if device.online else 'offline',
-							device.status, alert, reason or '')
+		if device.kind is None:
+			_log.info("status_changed %s: %s, %s (%X) %s", device,
+						'present' if bool(device) else 'removed',
+						device.status, alert, reason or '')
+		else:
+			_log.info("status_changed %s: %s %s, %s (%X) %s", device,
+						'paired' if bool(device) else 'unpaired',
+						'online' if device.online else 'offline',
+						device.status, alert, reason or '')
 
 		if device.kind is None:
 			assert device == self.receiver

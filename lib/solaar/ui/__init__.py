@@ -14,6 +14,8 @@ GLib.threads_init()
 
 
 def _error_dialog(reason, object):
+	_log.error("%s: %s", reason, object)
+
 	if reason == 'permissions':
 		title = 'Permissions error'
 		text = ('Found a Logitech Receiver (%s), but did not have permission to open it.\n'
@@ -26,7 +28,7 @@ def _error_dialog(reason, object):
 	else:
 		raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
 
-	assert text
+	assert title
 	assert text
 
 	m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
@@ -63,7 +65,8 @@ def destroy():
 from logitech.unifying_receiver.status import ALERT
 def _status_changed(device, alert, reason):
 	assert device is not None
-	_log.info("status changed: %s (%s) %s", device, alert, reason)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("status changed: %s (%s) %s", device, alert, reason)
 
 	tray.update(device)
 	if alert & ALERT.ATTENTION:
