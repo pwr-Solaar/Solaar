@@ -4,58 +4,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .common import NamedInts as _NamedInts
 from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
-from . import settings as _settings
-
-#
-# common strings for settings
-#
-
-_SMOOTH_SCROLL = ('smooth-scroll', 'Smooth Scrolling',
-							'High-sensitivity mode for vertical scroll with the wheel.')
-_DPI = ('dpi', 'Sensitivity (DPI)', None)
-_FN_SWAP = ('fn-swap', 'Swap Fx function',
-							('When set, the F1..F12 keys will activate their special function,\n'
-						 	'and you must hold the FN key to activate their standard function.\n'
-						 	'\n'
-						 	'When unset, the F1..F12 keys will activate their standard function,\n'
-						 	'and you must hold the FN key to activate their special function.'))
-
-# this register is only applicable to HID++ 1.0 devices, it should not exist with HID++ 2.0 devices
-# using Features
-def _register_fn_swap(register=0x09, true_value=b'\x00\x01', mask=b'\x00\x01'):
-	return _settings.register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
-					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_hidpp10.DEVICE_KIND.keyboard)
-
-def _register_smooth_scroll(register=0x01, true_value=0x40, mask=0x40):
-	return _settings.register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
-					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=_hidpp10.DEVICE_KIND.mouse)
-
-
-_PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
-def _register_dpi(register=0x63, choices=None):
-	return _settings.register_choices(_DPI[0], register, choices,
-					label=_DPI[1], description=_DPI[2],
-					device_kind=_hidpp10.DEVICE_KIND.mouse)
-
-
-def _feature_fn_swap():
-	return _settings.feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION,
-					write_returns_value=True,
-					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_hidpp10.DEVICE_KIND.keyboard)
-
-
-def check_features(device, already_known):
-	"""Try to auto-detect device settings by the HID++ 2.0 features they have."""
-	if device.protocol is not None and device.protocol < 2.0:
-		return
-	if not any(s.name == _FN_SWAP[0] for s in already_known) and _hidpp20.FEATURE.FN_INVERSION in device.features:
-		already_known.append(_feature_fn_swap())
+from .common import NamedInts as _NamedInts
+from .settings_templates import Register as _R, Feature as _F
 
 #
 #
@@ -86,7 +37,11 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 
 	if protocol is not None:
 		# ? 2.0 devices should not have any registers
-		assert protocol < 2.0 or registers is None
+		if protocol < 2.0:
+			assert settings is None or all(s._rw.kind == 1 for s in settings)
+		else:
+			assert registers is None
+			assert settings is None or all(s._rw.kind == 2 for s in settings)
 
 	DEVICES[codename] = _DeviceDescriptor(
 					name=name,
@@ -100,6 +55,12 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 	if wpid:
 		assert wpid not in DEVICES
 		DEVICES[wpid] = DEVICES[codename]
+
+#
+#
+#
+
+_PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
 
 #
 #
@@ -143,9 +104,12 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 # USB traffic Solaar has to do to fully identify peripherals.
 # Same goes for HID++ 2.0 feature settings (like _feature_fn_swap).
 #
-# The 'registers' field indicates read-only registers, specifying a state.
+# The 'registers' field indicates read-only registers, specifying a state. These
+# are valid (AFAIK) only to HID+= 1.0 devices.
 # The 'settings' field indicates a read/write register; based on them Solaar
-# generates, at runtime, the settings controls in the device panel.
+# generates, at runtime, the settings controls in the device panel. HID++ 1.0
+# devices may only have register-based settings; HID++ 2.0 devices may only have
+# feature-based settings.
 
 # Keyboards
 
@@ -154,29 +118,29 @@ _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
-							_feature_fn_swap()
+							_F.fn_swap()
 						],
 				)
 _D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024',
 				settings=[
-							_feature_fn_swap()
+							_F.fn_swap()
 						],
 				)
 _D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
-							_register_fn_swap(),
+							_R.fn_swap(),
 						],
 				)
 _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 				settings=[
-							_feature_fn_swap()
+							_F.fn_swap()
 						],
 				)
 _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
 				settings=[
-							_register_fn_swap(),
+							_R.fn_swap(),
 						],
 				)
 
@@ -199,7 +163,7 @@ _D('Wireless Mouse M505')
 _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
 				settings=[
-							_register_smooth_scroll(),
+							_R.smooth_scroll(),
 						],
 				)
 _D('Couch Mouse M515', protocol=2.0)
@@ -208,7 +172,7 @@ _D('Touch Mouse M600')
 _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				registers={'battery_charge': 0x0D},
 				settings=[
-							_register_smooth_scroll(),
+							_R.smooth_scroll(),
 						],
 				)
 _D('Zone Touch Mouse T400')
@@ -218,7 +182,7 @@ _D('Anywhere Mouse MX', codename='Anywhere MX')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
 				settings=[
-							_register_dpi(choices=_PERFORMANCE_MX_DPIS),
+							_R.dpi(choices=_PERFORMANCE_MX_DPIS),
 						],
 				)
 
@@ -239,6 +203,6 @@ _D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F',
 				registers={'battery_charge': 0x0D, 'battery_status': -0x07},
 				settings=[
-							_register_smooth_scroll(),
+							_R.smooth_scroll(),
 						],
 				)

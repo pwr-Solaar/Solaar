@@ -15,7 +15,7 @@ from .common import NamedInt as _NamedInt, NamedInts as _NamedInts
 
 KIND = _NamedInts(toggle=0x1, choice=0x02, range=0x12)
 
-class _Setting(object):
+class Setting(object):
 	"""A setting descriptor.
 	Needs to be instantiated for each specific device."""
 	__slots__ = ['name', 'label', 'description', 'kind', 'persister', 'device_kind',
@@ -41,10 +41,10 @@ class _Setting(object):
 		p = device.protocol
 		if p == 1.0:
 			# HID++ 1.0 devices do not support features
-			assert self._rw.kind == _RegisterRW.kind
+			assert self._rw.kind == RegisterRW.kind
 		elif p >= 2.0:
 			# HID++ 2.0 devices do not support registers
-			assert self._rw.kind == _FeatureRW.kind
+			assert self._rw.kind == FeatureRW.kind
 
 		o = _copy(self)
 		o._value = None
@@ -53,14 +53,24 @@ class _Setting(object):
 
 	@property
 	def choices(self):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+
 		return self._validator.choices if self._validator.kind & KIND.choice else None
 
 	def read(self, cached=True):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+
 		if self._value is None and self.persister:
+			# We haven't read a value from the device yet,
+			# maybe we have something in the configuration.
 			self._value = self.persister.get(self.name)
 
 		if cached and self._value is not None:
 			if self.persister and self.name not in self.persister:
+				# If this is a new device (or a new setting for an old device),
+				# make sure to save its current value for the next time.
 				self.persister[self.name] = self._value
 			return self._value
 
@@ -69,10 +79,15 @@ class _Setting(object):
 			if reply:
 				self._value = self._validator.validate_read(reply)
 			if self.persister and self.name not in self.persister:
+				# Don't update the persister if it already has a value,
+				# otherwise the first read might overwrite the value we wanted.
 				self.persister[self.name] = self._value
 			return self._value
 
 	def write(self, value):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+
 		if self._device:
 			data_bytes = self._validator.prepare_write(value)
 			reply = self._rw.write(self._device, data_bytes)
@@ -83,6 +98,9 @@ class _Setting(object):
 			return self._value
 
 	def apply(self):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+
 		if self._value is not None:
 			self.write(self._value)
 
@@ -97,7 +115,7 @@ class _Setting(object):
 # read/write low-level operators
 #
 
-class _RegisterRW(object):
+class RegisterRW(object):
 	__slots__ = ['register']
 
 	kind = _NamedInt(0x01, 'register')
@@ -113,7 +131,7 @@ class _RegisterRW(object):
 		return device.write_register(self.register, data_bytes)
 
 
-class _FeatureRW(object):
+class FeatureRW(object):
 	__slots__ = ['feature', 'read_fnid', 'write_fnid']
 
 	kind = _NamedInt(0x02, 'feature')
@@ -139,7 +157,7 @@ class _FeatureRW(object):
 # handle the conversion from read bytes, to setting value, and back
 #
 
-class _BooleanValidator(object):
+class BooleanValidator(object):
 	__slots__ = ['true_value', 'false_value', 'mask', 'write_returns_value']
 
 	kind = KIND.toggle
@@ -181,7 +199,7 @@ class _BooleanValidator(object):
 		return bool(value)
 
 
-class _ChoicesValidator(object):
+class ChoicesValidator(object):
 	__slots__ = ['choices', 'write_returns_value']
 
 	kind = KIND.choice
@@ -218,33 +236,5 @@ class _ChoicesValidator(object):
 		# be any reply_bytes to check
 		return self.choices[value]
 
-#
-# pre-defined basic setting descriptors
-#
 
-def register_toggle(name, register,
-					true_value=_BooleanValidator.default_true, false_value=_BooleanValidator.default_false,
-					mask=_BooleanValidator.default_mask, write_returns_value=False,
-					label=None, description=None, device_kind=None):
-	rw = _RegisterRW(register)
-	validator = _BooleanValidator(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
-
-
-def register_choices(name, register, choices,
-					kind=KIND.choice, write_returns_value=False,
-					label=None, description=None, device_kind=None):
-	assert choices
-	rw = _RegisterRW(register)
-	validator = _ChoicesValidator(choices, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
-
-
-def feature_toggle(name, feature,
-					read_function_id=_FeatureRW.default_read_fnid, write_function_id=_FeatureRW.default_write_fnid,
-					true_value=_BooleanValidator.default_true, false_value=_BooleanValidator.default_false,
-					mask=_BooleanValidator.default_mask, write_returns_value=False,
-					label=None, description=None, device_kind=None):
-	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	validator = _BooleanValidator(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+__all__ = ('KIND', 'Setting', 'RegisterRW', 'FeatureRW', 'BooleanValidator', 'ChoicesValidator')
