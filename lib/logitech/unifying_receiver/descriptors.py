@@ -168,7 +168,7 @@ _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				)
 _D('Couch Mouse M515', protocol=2.0)
 _D('Wireless Mouse M525', protocol=2.0)
-_D('Touch Mouse M600')
+_D('Touch Mouse M600', protocol=2.0, wpid='401A')
 _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				registers={'battery_charge': 0x0D},
 				settings=[
@@ -178,7 +178,7 @@ _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620')
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
-_D('Anywhere Mouse MX', codename='Anywhere MX')
+_D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
 				settings=[
