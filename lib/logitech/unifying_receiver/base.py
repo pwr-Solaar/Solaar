@@ -201,9 +201,15 @@ def _read(handle, timeout):
 	if data:
 		assert isinstance(data, bytes), (repr(data), type(data))
 		report_id = ord(data[:1])
+		if report_id & 0xF0 == 0x00:
+			if _log.isEnabledFor(_DEBUG):
+				_log.debug("(%s) => r[%02X %s] ignoring unknown report", handle, report_id, _strhex(data[1:]))
+			return
+
 		assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
 				report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE or
-				report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)
+				report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE), \
+				"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 		devnumber = ord(data[1:2])
 
 		if _log.isEnabledFor(_DEBUG):
