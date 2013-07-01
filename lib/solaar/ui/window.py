@@ -32,9 +32,11 @@ _INFO_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DND
 
 # tree model columns
-_COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_ICON=5, DEVICE=6)
-_COLUMN_TYPES = (str, int, bool, str, str, str, TYPE_PYOBJECT)
-_TREE_SEPATATOR = (None, 0, False, None, None, None, None)
+_COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
+_COLUMN_TYPES = (str, int, bool, str, str, str, str, TYPE_PYOBJECT)
+_TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
+assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
+assert len(_COLUMN_TYPES) == len(_COLUMN)
 
 _TOOLTIP_LINK_SECURE = 'The wireless link between this device and its receiver is encrypted.'
 _TOOLTIP_LINK_INSECURE = ('The wireless link between this device and its receiver is not encrypted.\n'
@@ -251,16 +253,25 @@ def _create_tree(model):
 	tree.append_column(icon_column)
 
 	name_cell_renderer = Gtk.CellRendererText()
-	name_column = Gtk.TreeViewColumn('Name', name_cell_renderer)
+	name_column = Gtk.TreeViewColumn('device name', name_cell_renderer)
 	name_column.add_attribute(name_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
 	name_column.add_attribute(name_cell_renderer, 'text', _COLUMN.NAME)
 	name_column.set_expand(True)
 	tree.append_column(name_column)
 	tree.set_expander_column(name_column)
 
+	status_cell_renderer = Gtk.CellRendererText()
+	status_cell_renderer.set_property('scale', 0.85)
+	status_cell_renderer.set_property('xalign', 1)
+	status_column = Gtk.TreeViewColumn('status text', status_cell_renderer)
+	status_column.add_attribute(status_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
+	status_column.add_attribute(status_cell_renderer, 'text', _COLUMN.STATUS_TEXT)
+	status_column.set_expand(True)
+	tree.append_column(status_column)
+
 	battery_cell_renderer = Gtk.CellRendererPixbuf()
 	battery_cell_renderer.set_property('stock-size', _TREE_ICON_SIZE)
-	battery_column = Gtk.TreeViewColumn('Status', battery_cell_renderer)
+	battery_column = Gtk.TreeViewColumn('status icon', battery_cell_renderer)
 	battery_column.add_attribute(battery_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
 	battery_column.add_attribute(battery_cell_renderer, 'icon-name', _COLUMN.STATUS_ICON)
 	battery_column.set_fixed_width(1)
@@ -380,8 +391,9 @@ def _receiver_row(receiver_path, receiver=None):
 
 	if not item and receiver:
 		icon_name = _icons.device_icon_name(receiver.name)
-		pairing_icon_name = ''
-		row_data = (receiver_path, 0, True, receiver.name, icon_name, pairing_icon_name, receiver)
+		status_text = None
+		status_icon = None
+		row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
 		assert len(row_data) == len(_TREE_SEPATATOR)
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("new receiver row %s", row_data)
@@ -406,8 +418,9 @@ def _device_row(receiver_path, device_number, device=None):
 
 	if not item and device:
 		icon_name = _icons.device_icon_name(device.name, device.kind)
-		battery_icon_name = ''
-		row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, battery_icon_name, device)
+		status_text = None
+		status_icon = None
+		row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device)
 		assert len(row_data) == len(_TREE_SEPATATOR)
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("new device row %s", row_data)
@@ -579,7 +592,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 	else:
 		panel._secure._text.set_markup('<small>offline</small>')
 		panel._secure._icon.set_visible(False)
-		panel._secure.set_tooltip_text('')
+		panel._secure.set_tooltip_text(None)
 
 	if is_online:
 		light_level = device.status.get(_K.LIGHT_LEVEL)
@@ -701,7 +714,7 @@ def update(device, need_popup=False):
 		if is_alive and item:
 			was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
 			is_pairing = bool(device.status.lock_open)
-			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else '')
+			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else None)
 
 			if selected_device_id == (device.path, 0):
 				full_update = need_popup or was_pairing != is_pairing
@@ -727,8 +740,15 @@ def update(device, need_popup=False):
 
 			battery_level = device.status.get(_K.BATTERY_LEVEL)
 			if battery_level is None:
-				_model.set_value(item, _COLUMN.STATUS_ICON, '')
+				_model.set_value(item, _COLUMN.STATUS_TEXT, None)
+				_model.set_value(item, _COLUMN.STATUS_ICON, None)
 			else:
+				if isinstance(battery_level, _NamedInt):
+					status_text = str(battery_level)
+				else:
+					status_text = '%d%%' % battery_level
+				_model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
+
 				charging = device.status.get(_K.BATTERY_CHARGING)
 				icon_name = _icons.battery(battery_level, charging)
 				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
