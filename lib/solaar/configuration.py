@@ -78,7 +78,7 @@ def _cleanup(d):
 
 
 def _device_key(device):
-	return '%s:%s' % (device.serial, device.kind)
+	return '%s:%s' % (device.wpid, device.serial)
 
 
 def _device_entry(device):
