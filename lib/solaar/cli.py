@@ -86,7 +86,6 @@ def _print_receiver(receiver, verbose=False):
 	print ("Unifying Receiver")
 	print ("   Device path  :", receiver.path)
 	print ("   USB id       : 046d:%s" % receiver.product_id)
-	print ("   Unifying     : %s" % ('supported' if receiver.unifying_supported else 'not supported'))
 	print ("   Serial       :", receiver.serial)
 	for f in receiver.firmware:
 		print ("     %-11s: %s" % (f.kind, f.version))
@@ -121,12 +120,12 @@ def _print_device(dev, verbose=False):
 	print ("%d: %s" % (dev.number, dev.name))
 	print ("   Codename     :", dev.codename)
 	print ("   Kind         :", dev.kind)
-	if dev.protocol == 0:
-		print ("   Protocol     : unknown (device is offline)")
-	else:
-		print ("   Protocol     : HID++ %1.1f" % dev.protocol)
-	print ("   Polling rate :", dev.polling_rate, "ms")
 	print ("   Wireless PID :", dev.wpid)
+	if dev.protocol:
+		print ("   Protocol     : HID++ %1.1f" % dev.protocol)
+	else:
+		print ("   Protocol     : unknown (device is offline)")
+	print ("   Polling rate :", dev.polling_rate, "ms")
 	print ("   Serial number:", dev.serial)
 	for fw in dev.firmware:
 		print ("     %-11s:" % fw.kind, (fw.name + ' ' + fw.version).strip())
