@@ -116,6 +116,8 @@ def _pairing_failed(assistant, receiver, error):
 	header = 'Pairing failed: %s.' % error
 	if 'timeout' in str(error):
 		text = 'Make sure your device is within range,\nand it has a decent battery charge.'
+	elif str(error) == 'device not supported':
+		text = 'A new device was detected, but\nit is not compatible with this receiver.'
 	else:
 		text = None
 	_create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
