@@ -6,7 +6,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from . import hidpp10 as _hidpp10
 from .common import NamedInts as _NamedInts
-from .settings_templates import Register as _R, Feature as _F
+from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS
+
+_R = _hidpp10.REGISTERS
 
 #
 #
@@ -118,29 +120,29 @@ _D('Wireless Keyboard K270')
 _D('Wireless Keyboard K350')
 _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
-							_F.fn_swap()
+							_FS.fn_swap()
 						],
 				)
 _D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024',
 				settings=[
-							_F.fn_swap()
+							_FS.fn_swap()
 						],
 				)
 _D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				registers=(_R.battery_status, ),
 				settings=[
-							_R.fn_swap(),
+							_RS.fn_swap(),
 						],
 				)
 _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 				settings=[
-							_F.fn_swap()
+							_FS.fn_swap()
 						],
 				)
 _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
+				registers=(_R.battery_status, _R.three_leds, ),
 				settings=[
-							_R.fn_swap(),
+							_RS.fn_swap(),
 						],
 				)
 
@@ -152,7 +154,7 @@ _D('Wireless Mouse M187', protocol=1.0)
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235', protocol=1.0)
 _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				registers=(_R.battery_status, ),
 				)
 _D('Wireless Mouse M310', protocol=1.0)
 _D('Wireless Mouse M315', protocol=1.0)
@@ -161,18 +163,18 @@ _D('Wireless Mouse M325')
 _D('Wireless Mouse M345')
 _D('Wireless Mouse M505')
 _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07},
+				registers=(_R.battery_status, ),
 				settings=[
-							_R.smooth_scroll(),
+							_RS.smooth_scroll(),
 						],
 				)
 _D('Couch Mouse M515', protocol=2.0)
 _D('Wireless Mouse M525', protocol=2.0)
 _D('Touch Mouse M600', protocol=2.0, wpid='401A')
 _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
-				registers={'battery_charge': 0x0D},
+				registers=(_R.battery_charge, ),
 				settings=[
-							_R.smooth_scroll(),
+							_RS.smooth_scroll(),
 						],
 				)
 _D('Zone Touch Mouse T400')
@@ -180,9 +182,9 @@ _D('Touch Mouse T620')
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017')
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
-				registers={'battery_charge': -0x0D, 'battery_status': 0x07, '3leds': 0x51},
+				registers=(_R.battery_status, _R.three_leds, ),
 				settings=[
-							_R.dpi(choices=_PERFORMANCE_MX_DPIS),
+							_RS.dpi(choices=_PERFORMANCE_MX_DPIS),
 						],
 				)
 
@@ -201,8 +203,8 @@ _D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 #
 
 _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F',
-				registers={'battery_charge': 0x0D, 'battery_status': -0x07},
+				registers=(_R.battery_charge, ),
 				settings=[
-							_R.smooth_scroll(),
+							_RS.smooth_scroll(),
 						],
 				)

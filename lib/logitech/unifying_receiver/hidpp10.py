@@ -59,7 +59,7 @@ NOTIFICATION_FLAG = _NamedInts(
 				keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
 				# reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
 				software_present=       0x000800,  # .. no idea
-				keyboard_backlight=     0x000200,  # illumination brightness level changes (by pressing keys)
+				keyboard_illumination=  0x000200,  # illumination brightness level changes (by pressing keys)
 				wireless=               0x000100,  # notify when the device wireless goes on/off-line
 				)
 
@@ -90,41 +90,47 @@ BATTERY_APPOX = _NamedInts(
 				good = 50,
 				full = 90)
 
+"""Known registers.
+Devices usually have a (small) sub-set of these. Some registers are only
+applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
+REGISTERS = _NamedInts(
+				# only apply to receivers
+				receiver_connection=0x02,
+				receiver_pairing=0xB2,
+				devices_activity=0x2B3,
+				receiver_info=0x2B5,
+
+				# only apply to devices
+				mouse_smooth_scroll=0x01,
+				keyboard_hand_detection=0x01,
+				battery_status=0x07,
+				keyboard_fn_swap=0x09,
+				battery_charge=0x0D,
+				keyboard_illumination=0x17,
+				three_leds=0x51,
+				mouse_dpi=0x63,
+
+				# apply to both
+				notifications=0x00,
+				firmware=0xF1,
+			)
+
 #
 # functions
 #
 
 def read_register(device, register_number, *params):
 	assert device
-	# support long registers by adding a 2 in front of the number
+	# support long registers by adding a 2 in front of the register number
 	request_id = 0x8100 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
 	assert device
-	# support long registers by adding a 2 in front of the number
+	# support long registers by adding a 2 in front of the register number
 	request_id = 0x8000 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *value)
-
-
-def get_register(device, name, default_number=-1):
-	assert device
-	assert device.kind is not None
-	if not device.online:
-		return
-
-	known_register = device.registers.get(name)
-	register = known_register or default_number
-	if register > 0:
-		reply = read_register(device, register)
-		if reply:
-			return reply
-
-		if not known_register and device.kind is not None and device.online:
-			_log.warn("%s: failed to read register '%s' (0x%02X), blacklisting",
-							device, name, default_number)
-			device.registers[name] = -default_number
 
 
 def get_battery(device):
@@ -138,75 +144,95 @@ def get_battery(device):
 		# let's just assume HID++ 2.0 devices do not provide the battery info in a register
 		return
 
-	reply = get_register(device, 'battery_charge', 0x0D)
+	for r in (REGISTERS.battery_status, REGISTERS.battery_charge):
+		if r in device.registers:
+			reply = read_register(device, r)
+			if reply:
+				return parse_battery_status(r, reply)
+			return
+
+	# the descriptor does not tell us which register this device has, try them both
+	reply = read_register(device, REGISTERS.battery_charge)
 	if reply:
-		level = ord(reply[:1])
-		battery_status = ord(reply[2:3])
-		return parse_battery_reply_0D(level, battery_status)
+		# remember this for the next time
+		device.registers.append(REGISTERS.battery_charge)
+		return parse_battery_status(REGISTERS.battery_charge, reply)
 
-	reply = get_register(device, 'battery_status', 0x07)
+	reply = read_register(device, REGISTERS.battery_status)
 	if reply:
-		level = ord(reply[:1])
-		battery_status = ord(reply[1:2])
-		return parse_battery_reply_07(level, battery_status)
+		# remember this for the next time
+		device.registers.append(REGISTERS.battery_status)
+		return parse_battery_status(REGISTERS.battery_status, reply)
 
-def parse_battery_reply_0D(level, battery_status):
-	charge = level
-	status = battery_status & 0xF0
-	status = ('discharging' if status == 0x30
-			else 'charging' if status == 0x50
-			else 'fully charged' if status == 0x90
-			else None)
-	return charge, status
 
-def parse_battery_reply_07(level, battery_status):
-	charge = (BATTERY_APPOX.full if level == 7 # full
-		else BATTERY_APPOX.good if level == 5 # good
-		else BATTERY_APPOX.low if level == 3 # low
-		else BATTERY_APPOX.critical if level == 1 # critical
-		else BATTERY_APPOX.empty ) # wtf?
+def parse_battery_status(register, reply):
+	if register == REGISTERS.battery_charge:
+		charge = ord(reply[:1])
+		status_byte = ord(reply[2:3]) & 0xF0
+		status_text = ('discharging' if status_byte == 0x30
+				else 'charging' if status_byte == 0x50
+				else 'fully charged' if status_byte == 0x90
+				else None)
+		return charge, status_text
 
-	if battery_status == 0x00:
-		status = 'discharging'
-	elif battery_status & 0x21 == 0x21:
-		status = 'charging'
-	elif battery_status & 0x22 == 0x22:
-		status = 'fully charged'
-	else:
-		_log.warn("could not parse 0x07 battery status: %02X (level %02X)", battery_status, level)
-		status = None
+	if register == REGISTERS.battery_status:
+		status_byte = ord(reply[:1])
+		charge = (BATTERY_APPOX.full if status_byte == 7 # full
+			else BATTERY_APPOX.good if status_byte == 5 # good
+			else BATTERY_APPOX.low if status_byte == 3 # low
+			else BATTERY_APPOX.critical if status_byte == 1 # critical
+			# pure 'charging' notifications may come without a status
+			else BATTERY_APPOX.empty)
 
-	if battery_status & 0x03 and level == 0:
-		# some 'charging' notifications may come with no battery level information
-		charge = None
+		charging_byte = ord(reply[1:2])
+		if charging_byte == 0x00:
+			status_text = 'discharging'
+		elif charging_byte & 0x21 == 0x21:
+			status_text = 'charging'
+		elif charging_byte & 0x22 == 0x22:
+			status_text = 'fully charged'
+		else:
+			_log.warn("could not parse 0x07 battery status: %02X (level %02X)", charging_byte, status_byte)
+			status_text = None
 
-	return charge, status
+		if charging_byte & 0x03 and status_byte == 0:
+			# some 'charging' notifications may come with no battery level information
+			charge = None
+
+		return charge, status_text
 
 
 def get_firmware(device):
 	assert device
 
-	firmware = [None, None]
+	firmware = [None, None, None]
 
-	reply = read_register(device, 0xF1, 0x01)
+	reply = read_register(device, REGISTERS.firmware, 0x01)
 	if not reply:
 		# won't be able to read any of it now...
 		return
 
 	fw_version = _strhex(reply[1:3])
 	fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
-	reply = read_register(device, 0xF1, 0x02)
+	reply = read_register(device, REGISTERS.firmware, 0x02)
 	if reply:
 		fw_version += '.B' + _strhex(reply[1:3])
 	fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
 	firmware[0] = fw
 
-	reply = read_register(device, 0xF1, 0x04)
+	reply = read_register(device, REGISTERS.firmware, 0x04)
 	if reply:
 		bl_version = _strhex(reply[1:3])
 		bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
 		bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, '', bl_version, None)
 		firmware[1] = bl
+
+	reply = read_register(device, REGISTERS.firmware, 0x03)
+	if reply:
+		o_version = _strhex(reply[1:3])
+		o_version = '%s.%s' % (o_version[0:2], o_version[2:4])
+		o = _FirmwareInfo(FIRMWARE_KIND.Other, '', o_version, None)
+		firmware[2] = o
 
 	if any(firmware):
 		return tuple(f for f in firmware if f)
@@ -218,8 +244,7 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 	if not device.online:
 		return
 
-	leds_register = device.registers.get('3leds')
-	if leds_register is None or leds_register < 0:
+	if REGISTERS.three_leds not in device.registers:
 		return
 
 	if battery_level is not None:
@@ -243,6 +268,9 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 			# set the blinking flag for the leds already set
 			v1 |= (v1 >> 1)
 			v2 |= (v2 >> 1)
+	elif charging:
+		# blink all green
+		v1, v2 = 0x30,0x33
 	elif warning:
 		# 1 red
 		v1, v2 = 0x02, 0x00
@@ -250,19 +278,21 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 		# turn off all leds
 		v1, v2 = 0x11, 0x11
 
-	write_register(device, leds_register, v1, v2)
+	write_register(device, REGISTERS.three_leds, v1, v2)
 
 
 def get_notification_flags(device):
 	assert device
 
+	# Avoid a call if the device is not online,
+	# or the device does not support registers.
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
 		if p is not None and p >= 2.0:
 			return
 
-	flags = read_register(device, 0x00)
+	flags = read_register(device, REGISTERS.notifications)
 	if flags is not None:
 		assert len(flags) == 3
 		return _bytes2int(flags)
@@ -271,6 +301,8 @@ def get_notification_flags(device):
 def set_notification_flags(device, *flag_bits):
 	assert device
 
+	# Avoid a call if the device is not online,
+	# or the device does not support registers.
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
 		p = device.protocol
@@ -279,5 +311,5 @@ def set_notification_flags(device, *flag_bits):
 
 	flag_bits = sum(int(b) for b in flag_bits)
 	assert flag_bits & 0x00FFFFFF == flag_bits
-	result = write_register(device, 0x00, _int2bytes(flag_bits, 3))
+	result = write_register(device, REGISTERS.notifications, _int2bytes(flag_bits, 3))
 	return result is not None

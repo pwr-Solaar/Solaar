@@ -101,7 +101,7 @@ def _print_receiver(receiver, verbose=False):
 		else:
 			print ("   Notifications: (none)")
 
-	activity = receiver.read_register(0x2B3)
+	activity = receiver.read_register(hidpp10.REGISTERS.devices_activity)
 	if activity:
 		activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
 		activity_text = ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0)

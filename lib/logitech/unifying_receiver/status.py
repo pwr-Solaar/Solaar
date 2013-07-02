@@ -24,6 +24,8 @@ from .common import NamedInts as _NamedInts, NamedInt as _NamedInt, strhex as _s
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 
+_R = _hidpp10.REGISTERS
+
 #
 #
 #
@@ -82,18 +84,18 @@ class ReceiverStatus(dict):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)
 
-	def poll(self, timestamp):
-		r = self._receiver
-		assert r
-
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("polling status of %s", r)
-
-		# make sure to read some stuff that may be read later by the UI
-		r.serial, r.firmware, None
-
-		# get an update of the notification flags
-		# self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
+	# def poll(self, timestamp):
+	# 	r = self._receiver
+	# 	assert r
+	#
+	# 	if _log.isEnabledFor(_DEBUG):
+	# 		_log.debug("polling status of %s", r)
+	#
+	# 	# make sure to read some stuff that may be read later by the UI
+	# 	r.serial, r.firmware, None
+	#
+	# 	# get an update of the notification flags
+	# 	# self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
 
 	def process_notification(self, n):
 		if n.sub_id == 0x4A:
@@ -271,40 +273,40 @@ class DeviceStatus(dict):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
 		self._changed_callback(d, alert, reason)
 
-	def poll(self, timestamp):
-		d = self._device
-		if not d:
-			_log.error("polling status of invalid device")
-			return
-
-		if self._active:
-			if _log.isEnabledFor(_DEBUG):
-				_log.debug("polling status of %s", d)
-
-			# read these from the device, the UI may need them later
-			d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None
-
-			# make sure we know all the features of the device
-			# if d.features:
-			# 	d.features[:]
-
-			# devices may go out-of-range while still active, or the computer
-			# may go to sleep and wake up without the devices available
-			if timestamp - self.updated > _STATUS_TIMEOUT:
-				if d.ping():
-					timestamp = self.updated = _timestamp()
-				else:
-					self._changed(active=False, reason='out of range')
-
-			# if still active, make sure we know the battery level
-			if KEYS.BATTERY_LEVEL not in self:
-				self.read_battery(timestamp)
-
-		elif timestamp - self.updated > _STATUS_TIMEOUT:
-			if d.ping():
-				self._changed(active=True)
-			else:
-				self.updated = _timestamp()
+	# def poll(self, timestamp):
+	# 	d = self._device
+	# 	if not d:
+	# 		_log.error("polling status of invalid device")
+	# 		return
+	#
+	# 	if self._active:
+	# 		if _log.isEnabledFor(_DEBUG):
+	# 			_log.debug("polling status of %s", d)
+	#
+	# 		# read these from the device, the UI may need them later
+	# 		d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None
+	#
+	# 		# make sure we know all the features of the device
+	# 		# if d.features:
+	# 		# 	d.features[:]
+	#
+	# 		# devices may go out-of-range while still active, or the computer
+	# 		# may go to sleep and wake up without the devices available
+	# 		if timestamp - self.updated > _STATUS_TIMEOUT:
+	# 			if d.ping():
+	# 				timestamp = self.updated = _timestamp()
+	# 			else:
+	# 				self._changed(active=False, reason='out of range')
+	#
+	# 		# if still active, make sure we know the battery level
+	# 		if KEYS.BATTERY_LEVEL not in self:
+	# 			self.read_battery(timestamp)
+	#
+	# 	elif timestamp - self.updated > _STATUS_TIMEOUT:
+	# 		if d.ping():
+	# 			self._changed(active=True)
+	# 		else:
+	# 			self.updated = _timestamp()
 
 	def process_notification(self, n):
 		# incoming packets with SubId >= 0x80 are supposedly replies from
@@ -319,9 +321,9 @@ class DeviceStatus(dict):
 		if self._device.protocol < 2.0:
 			# README assuming HID++ 2.0 devices don't use the 0x07/0x0D registers
 			# however, this has not been fully verified yet
-			if n.sub_id in (0x07, 0x0D) and len(n.data) == 3 and n.data[2:3] == b'\x00':
+			if n.sub_id in (_R.battery_charge, _R.battery_status) and len(n.data) == 3 and n.data[2:3] == b'\x00':
 				return self._process_hidpp10_custom_notification(n)
-			if n.sub_id == 0x17 and len(n.data) == 3:
+			if n.sub_id == _R.illumination and len(n.data) == 3:
 				return self._process_hidpp10_custom_notification(n)
 		else:
 			# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
@@ -337,22 +339,16 @@ class DeviceStatus(dict):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s (%s) custom battery notification %s", self._device, self._device.protocol, n)
 
-		if n.sub_id == 0x07:
-			# message layout: 10 ix  07("address")  <LEVEL> <STATUS>  00 00
-			level, status = _hidpp10.parse_battery_reply_07(n.address, ord(n.data[:1]))
+		if n.sub_id in (_R.battery_status, _R.battery_charge):
+			data = '%c%s' % (n.address, n.data)
+			level, status = _hidpp10.parse_battery_status(n.sub_id, data)
 			self.set_battery_info(level, status)
 			return True
 
-		if n.sub_id == 0x0D:
-			# message layout: 10 ix  0D("address")  <CHARGE> <?> <STATUS> 00
-			level, status = _hidpp10.parse_battery_reply_0D(n.address, ord(n.data[1:2]))
-			self.set_battery_info(level, status)
-			return True
-
-		if n.sub_id == 0x17:
+		if n.sub_id == _R.illumination:
 			# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
 			# TODO anything we can do with this?
-			_log.info("backlight event: %s", n)
+			_log.info("illumination event: %s", n)
 			return True
 
 		_log.warn("%s: unrecognized %s", self._device, n)

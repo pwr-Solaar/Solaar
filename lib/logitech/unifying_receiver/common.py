@@ -98,7 +98,7 @@ class NamedInts(object):
 		self.__dict__ = values
 		self._values = sorted(list(values.values()))
 		self._indexed = {int(v): v for v in self._values}
-		assert len(values) == len(self._indexed), "(%d) %r\n=> (%d) %r" % (len(values), values, len(self._indexed), self._indexed)
+		# assert len(values) == len(self._indexed), "(%d) %r\n=> (%d) %r" % (len(values), values, len(self._indexed), self._indexed)
 		self._fallback = None
 
 	@classmethod

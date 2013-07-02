@@ -18,6 +18,8 @@ from .common import strhex as _strhex
 from .descriptors import DEVICES as _DESCRIPTORS
 from .settings_templates import check_feature_settings as _check_feature_settings
 
+_R = _hidpp10.REGISTERS
+
 #
 #
 #
@@ -66,7 +68,7 @@ class PairedDevice(object):
 			self._kind = _hidpp10.DEVICE_KIND[kind]
 		else:
 			# force a reading of the wpid
-			pair_info = receiver.read_register(0x2B5, 0x20 + number - 1)
+			pair_info = receiver.read_register(_R.receiver_info, 0x20 + number - 1)
 			if pair_info:
 				# may be either a Unifying receiver, or an Unifying-ready receiver
 				self.wpid = _strhex(pair_info[3:5])
@@ -76,7 +78,7 @@ class PairedDevice(object):
 
 			else:
 				# unifying protocol not supported, must be a Nano receiver
-				device_info = self.receiver.read_register(0x2B5, 0x04)
+				device_info = self.receiver.read_register(_R.receiver_info, 0x04)
 				if device_info is None:
 					_log.error("failed to read Nano wpid for device %d of %s", number, receiver)
 					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read Nano wpid")
@@ -93,7 +95,7 @@ class PairedDevice(object):
 		if self.descriptor is None:
 			# Last chance to correctly identify the device; many Nano receivers
 			# do not support this call.
-			codename = self.receiver.read_register(0x2B5, 0x40 + self.number - 1)
+			codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
 			if codename:
 				self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
 				self.descriptor = _DESCRIPTORS.get(self._codename)
@@ -125,7 +127,7 @@ class PairedDevice(object):
 	@property
 	def codename(self):
 		if self._codename is None:
-			codename = self.receiver.read_register(0x2B5, 0x40 + self.number - 1)
+			codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
 			if codename:
 				self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
 				# _log.debug("device %d codename %s", self.number, self._codename)
@@ -143,7 +145,7 @@ class PairedDevice(object):
 	@property
 	def kind(self):
 		if self._kind is None:
-			pair_info = self.receiver.read_register(0x2B5, 0x20 + self.number - 1)
+			pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + self.number - 1)
 			if pair_info:
 				kind = ord(pair_info[7:8]) & 0x0F
 				self._kind = _hidpp10.DEVICE_KIND[kind]
@@ -164,7 +166,7 @@ class PairedDevice(object):
 	@property
 	def serial(self):
 		if self._serial is None:
-			serial = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
+			serial = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
 			if serial:
 				ps = ord(serial[9:10]) & 0x0F
 				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
@@ -182,7 +184,7 @@ class PairedDevice(object):
 	@property
 	def power_switch_location(self):
 		if self._power_switch is None:
-			ps = self.receiver.read_register(0x2B5, 0x30 + self.number - 1)
+			ps = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
 			if ps is not None:
 				ps = ord(ps[9:10]) & 0x0F
 				self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
@@ -193,7 +195,7 @@ class PairedDevice(object):
 	@property
 	def polling_rate(self):
 		if self._polling_rate is None:
-			pair_info = self.receiver.read_register(0x2B5, 0x20 + self.number - 1)
+			pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + self.number - 1)
 			if pair_info:
 				self._polling_rate = ord(pair_info[2:3])
 			else:
@@ -211,9 +213,9 @@ class PairedDevice(object):
 	def registers(self):
 		if self._registers is None:
 			if self.descriptor and self.descriptor.registers:
-				self._registers = dict(self.descriptor.registers)
+				self._registers = list(self.descriptor.registers)
 			else:
-				self._registers = {}
+				self._registers = []
 		return self._registers
 
 	@property
@@ -235,7 +237,7 @@ class PairedDevice(object):
 
 		if enable:
 			set_flag_bits = ( _hidpp10.NOTIFICATION_FLAG.battery_status
-							| _hidpp10.NOTIFICATION_FLAG.keyboard_backlight
+							| _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
 							| _hidpp10.NOTIFICATION_FLAG.wireless
 							| _hidpp10.NOTIFICATION_FLAG.software_present )
 		else:
@@ -308,7 +310,7 @@ class Receiver(object):
 
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
-		serial_reply = self.read_register(0x2B5, 0x03)
+		serial_reply = self.read_register(_R.receiver_info, 0x03)
 		assert serial_reply
 		self.serial = _strhex(serial_reply[1:5])
 		self.max_devices = ord(serial_reply[6:7])
@@ -363,7 +365,7 @@ class Receiver(object):
 	def notify_devices(self):
 		"""Scan all devices."""
 		if self.handle:
-			if not self.write_register(0x02, 0x02):
+			if not self.write_register(_R.receiver_connection, 0x02):
 				_log.warn("%s: failed to trigger device link notifications", self)
 
 	def register_new_device(self, number, notification=None):
@@ -387,14 +389,14 @@ class Receiver(object):
 
 	def set_lock(self, lock_closed=True, device=0, timeout=0):
 		if self.handle:
-			lock = 0x02 if lock_closed else 0x01
-			reply = self.write_register(0xB2, lock, device, timeout)
+			action = 0x02 if lock_closed else 0x01
+			reply = self.write_register(_R.receiver_pairing, action, device, timeout)
 			if reply:
 				return True
 			_log.warn("%s: failed to %s the receiver lock", self, 'close' if lock_closed else 'open')
 
 	def count(self):
-		count = self.read_register(0x02)
+		count = self.read_register(_R.receiver_connection)
 		return 0 if count is None else ord(count[1:2])
 
 	# def has_devices(self):
@@ -436,11 +438,12 @@ class Receiver(object):
 			raise IndexError(key)
 
 		dev = self._devices[key]
-		reply = self.write_register(0xB2, 0x03, int(key))
+		action = 0x03
+		reply = self.write_register(_R.receiver_pairing, action, int(key))
 		if reply:
 			# invalidate the device
-			dev.wpid = None
 			dev.online = False
+			dev.wpid = None
 			del self._devices[key]
 			_log.warn("%s unpaired device %s", self, dev)
 		else:

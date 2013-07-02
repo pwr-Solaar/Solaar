@@ -15,6 +15,10 @@ from .settings import (
 				ChoicesValidator as _ChoicesV,
 			)
 
+_DK = _hidpp10.DEVICE_KIND
+_R = _hidpp10.REGISTERS
+_F = _hidpp20.FEATURE
+
 #
 # pre-defined basic setting descriptors
 #
@@ -64,27 +68,27 @@ _FN_SWAP = ('fn-swap', 'Swap Fx function',
 #
 #
 
-def _register_fn_swap(register=0x09, true_value=b'\x00\x01', mask=b'\x00\x01'):
+def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
 	return register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_hidpp10.DEVICE_KIND.keyboard)
+					device_kind=_DK.keyboard)
 
-def _register_smooth_scroll(register=0x01, true_value=0x40, mask=0x40):
+def _register_smooth_scroll(register=_R.mouse_smooth_scroll, true_value=0x40, mask=0x40):
 	return register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=_hidpp10.DEVICE_KIND.mouse)
+					device_kind=_DK.mouse)
 
-def _register_dpi(register=0x63, choices=None):
+def _register_dpi(register=_R.mouse_dpi, choices=None):
 	return register_choices(_DPI[0], register, choices,
 					label=_DPI[1], description=_DPI[2],
-					device_kind=_hidpp10.DEVICE_KIND.mouse)
+					device_kind=_DK.mouse)
 
 
 def _feature_fn_swap():
-	return feature_toggle(_FN_SWAP[0], _hidpp20.FEATURE.FN_INVERSION,
+	return feature_toggle(_FN_SWAP[0], _F.FN_INVERSION,
 					write_returns_value=True,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_hidpp10.DEVICE_KIND.keyboard)
+					device_kind=_DK.keyboard)
 
 
 #
@@ -101,14 +105,14 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					])
 del namedtuple
 
-Register = _SETTINGS_LIST(
+RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				smooth_scroll=_register_smooth_scroll,
 				dpi=_register_dpi,
 				hand_detection=None,
 				typing_illumination=None,
 			)
-Feature =  _SETTINGS_LIST(
+FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				smooth_scroll=None,
 				dpi=None,
@@ -128,6 +132,6 @@ def check_feature_settings(device, already_known):
 		return
 	if device.protocol is not None and device.protocol < 2.0:
 		return
-	if not any(s.name == _FN_SWAP[0] for s in already_known) and _hidpp20.FEATURE.FN_INVERSION in device.features:
-		fn_swap = Feature.fn_swap()
+	if not any(s.name == _FN_SWAP[0] for s in already_known) and _F.FN_INVERSION in device.features:
+		fn_swap = FeatureSettings.fn_swap()
 		already_known.append(fn_swap(device))
