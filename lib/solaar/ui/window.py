@@ -492,7 +492,7 @@ def _update_details(button):
 				hid_version = device.protocol
 				yield ('Protocol', 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
 				if device.polling_rate:
-					yield ('Polling rate', '%d ms' % device.polling_rate)
+					yield ('Polling rate', '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
 
 			yield ('Serial', device.serial)
 
