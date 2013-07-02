@@ -592,7 +592,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 	else:
 		panel._secure._text.set_markup('<small>offline</small>')
 		panel._secure._icon.set_visible(False)
-		panel._secure.set_tooltip_text(None)
+		panel._secure.set_tooltip_text('')
 
 	if is_online:
 		light_level = device.status.get(_K.LIGHT_LEVEL)
