@@ -323,6 +323,9 @@ class Receiver(object):
 			raise Exception("unknown receiver type", self.max_devices)
 		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if type(self.handle) == int else 'T', self.handle)
 
+		# TODO _properly_ figure out which receivers do and which don't support unpairing
+		self.may_unpair = self.write_register(_R.receiver_pairing) is None
+
 		self._firmware = None
 		self._devices = {}
 

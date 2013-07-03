@@ -606,7 +606,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._lux.set_visible(False)
 
 	buttons._pair.set_visible(False)
-	buttons._unpair.set_sensitive(device.receiver.max_devices >= 6)
+	buttons._unpair.set_sensitive(device.receiver.may_unpair)
 	buttons._unpair.set_visible(True)
 
 	panel.set_visible(True)
