@@ -8,23 +8,15 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.hidpp20')
 del getLogger
 
-from struct import pack as _pack, unpack as _unpack
-try:
-	unicode
-	# if Python2, unicode_literals will mess our first (un)pack() argument
-	_pack_str = _pack
-	_unpack_str = _unpack
-	_pack = lambda x, *args: _pack_str(str(x), *args)
-	_unpack = lambda x, *args: _unpack_str(str(x), *args)
-except:
-	pass
 
 # from weakref import proxy as _proxy
 
 from .common import (FirmwareInfo as _FirmwareInfo,
 					ReprogrammableKeyInfo as _ReprogrammableKeyInfo,
 					KwException as _KwException,
-					NamedInts as _NamedInts)
+					NamedInts as _NamedInts,
+					pack as _pack,
+					unpack as _unpack)
 from . import special_keys
 
 #

@@ -7,20 +7,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from time import time as _timestamp
 # from weakref import proxy as _proxy
 
-from struct import unpack as _unpack
-try:
-	unicode
-	# if Python2, unicode_literals will mess our first (un)pack() argument
-	_unpack_str = _unpack
-	_unpack = lambda x, *args: _unpack_str(str(x), *args)
-except:
-	pass
-
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.status')
 del getLogger
 
-from .common import NamedInts as _NamedInts, NamedInt as _NamedInt, strhex as _strhex
+
+from .common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 
@@ -48,7 +40,20 @@ _BATTERY_ATTENTION_LEVEL = 5
 
 # If no updates have been receiver from the device for a while, ping the device
 # and update it status accordinly.
-_STATUS_TIMEOUT = 5 * 60  # seconds
+# _STATUS_TIMEOUT = 5 * 60  # seconds
+
+#
+#
+#
+
+def attach_to(device, changed_callback):
+	assert device
+	assert changed_callback
+
+	if device.kind is None:
+		device.status = ReceiverStatus(device, changed_callback)
+	else:
+		device.status = DeviceStatus(device, changed_callback)
 
 #
 #
@@ -71,7 +76,6 @@ class ReceiverStatus(dict):
 		self.new_device = None
 
 		self[KEYS.ERROR] = None
-		# self[KEYS.NOTIFICATION_FLAGS] = receiver.enable_notifications()
 
 	def __str__(self):
 		count = len(self._receiver)
@@ -80,7 +84,7 @@ class ReceiverStatus(dict):
 				'%d paired devices.' % count)
 	__unicode__ = __str__
 
-	def _changed(self, alert=ALERT.NOTIFICATION, reason=None):
+	def changed(self, alert=ALERT.NOTIFICATION, reason=None):
 		# self.updated = _timestamp()
 		self._changed_callback(self._receiver, alert=alert, reason=reason)
 
@@ -96,25 +100,6 @@ class ReceiverStatus(dict):
 	#
 	# 	# get an update of the notification flags
 	# 	# self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
-
-	def process_notification(self, n):
-		if n.sub_id == 0x4A:
-			self.lock_open = bool(n.address & 0x01)
-			reason = 'pairing lock is ' + ('open' if self.lock_open else 'closed')
-			_log.info("%s: %s", self._receiver, reason)
-
-			self[KEYS.ERROR] = None
-			if self.lock_open:
-				self.new_device = None
-
-			pair_error = ord(n.data[:1])
-			if pair_error:
-				self[KEYS.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
-				self.new_device = None
-				_log.warn("pairing error %d: %s", pair_error, error_string)
-
-			self._changed(reason=reason)
-			return True
 
 #
 #
@@ -203,7 +188,7 @@ class DeviceStatus(dict):
 		if changed or reason:
 			# update the leds on the device, if any
 			_hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
-			self._changed(alert=alert, reason=reason, timestamp=timestamp)
+			self.changed(alert=alert, reason=reason, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):
 		if self._active:
@@ -229,9 +214,9 @@ class DeviceStatus(dict):
 			elif KEYS.BATTERY_STATUS in self:
 				self[KEYS.BATTERY_STATUS] = None
 				self[KEYS.BATTERY_CHARGING] = None
-				self._changed()
+				self.changed()
 
-	def _changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
+	def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
 		d = self._device
 		# assert d  # may be invalid when processing the 'unpaired' notification
@@ -296,7 +281,7 @@ class DeviceStatus(dict):
 	# 			if d.ping():
 	# 				timestamp = self.updated = _timestamp()
 	# 			else:
-	# 				self._changed(active=False, reason='out of range')
+	# 				self.changed(active=False, reason='out of range')
 	#
 	# 		# if still active, make sure we know the battery level
 	# 		if KEYS.BATTERY_LEVEL not in self:
@@ -304,182 +289,6 @@ class DeviceStatus(dict):
 	#
 	# 	elif timestamp - self.updated > _STATUS_TIMEOUT:
 	# 		if d.ping():
-	# 			self._changed(active=True)
+	# 			self.changed(active=True)
 	# 		else:
 	# 			self.updated = _timestamp()
-
-	def process_notification(self, n):
-		# incoming packets with SubId >= 0x80 are supposedly replies from
-		# HID++ 1.0 requests, should never get here
-		assert n.sub_id < 0x80
-
-		# 0x40 to 0x7F appear to be HID++ 1.0 notifications
-		if n.sub_id >= 0x40:
-			return self._process_hidpp10_notification(n)
-
-		# some custom battery events for HID++ 1.0 devices
-		if self._device.protocol < 2.0:
-			# README assuming HID++ 2.0 devices don't use the 0x07/0x0D registers
-			# however, this has not been fully verified yet
-			if n.sub_id in (_R.battery_charge, _R.battery_status) and len(n.data) == 3 and n.data[2:3] == b'\x00':
-				return self._process_hidpp10_custom_notification(n)
-			if n.sub_id == _R.illumination and len(n.data) == 3:
-				return self._process_hidpp10_custom_notification(n)
-		else:
-			# assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
-			try:
-				feature = self._device.features[n.sub_id]
-			except IndexError:
-				_log.warn("%s: notification from invalid feature index %02X: %s", self._device, n.sub_id, n)
-				return False
-
-			return self._process_feature_notification(n, feature)
-
-	def _process_hidpp10_custom_notification(self, n):
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s (%s) custom battery notification %s", self._device, self._device.protocol, n)
-
-		if n.sub_id in (_R.battery_status, _R.battery_charge):
-			data = '%c%s' % (n.address, n.data)
-			level, status = _hidpp10.parse_battery_status(n.sub_id, data)
-			self.set_battery_info(level, status)
-			return True
-
-		if n.sub_id == _R.illumination:
-			# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
-			# TODO anything we can do with this?
-			_log.info("illumination event: %s", n)
-			return True
-
-		_log.warn("%s: unrecognized %s", self._device, n)
-
-	def _process_hidpp10_notification(self, n):
-		# unpair notification
-		if n.sub_id == 0x40:
-			if n.address == 0x02:
-				# device un-paired
-				self.clear()
-				dev = self._device
-				dev.wpid = None
-				dev.status = None
-				self._changed(active=False, alert=ALERT.ALL, reason='unpaired')
-			else:
-				_log.warn("%s: disconnection with unknown type %02X: %s", self._device, n.address, n)
-			return True
-
-		# wireless link notification
-		if n.sub_id == 0x41:
-			protocol_name = ('unifying (eQuad DJ)' if n.address == 0x04
-						else 'eQuad' if n.address == 0x03
-						else None)
-			if protocol_name:
-				if _log.isEnabledFor(_DEBUG):
-					wpid = _strhex(n.data[2:3] + n.data[1:2])
-					assert wpid == self._device.wpid, "%s wpid mismatch, got %s" % (self._device, wpid)
-
-				flags = ord(n.data[:1]) & 0xF0
-				link_encrypyed = bool(flags & 0x20)
-				link_established = not (flags & 0x40)
-				if _log.isEnabledFor(_DEBUG):
-					sw_present = bool(flags & 0x10)
-					has_payload = bool(flags & 0x80)
-					_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
-								self._device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
-				self[KEYS.LINK_ENCRYPTED] = link_encrypyed
-				self._changed(active=link_established)
-			else:
-				_log.warn("%s: connection notification with unknown protocol %02X: %s", self._device.number, n.address, n)
-
-			return True
-
-		if n.sub_id == 0x49:
-			# raw input event? just ignore it
-			# if n.address == 0x01, no idea what it is, but they keep on coming
-			# if n.address == 0x03, it's an actual input event
-			return True
-
-		# power notification
-		if n.sub_id == 0x4B:
-			if n.address == 0x01:
-				if _log.isEnabledFor(_DEBUG):
-					_log.debug("%s: device powered on", self._device)
-				reason = str(self) or 'powered on'
-				self._changed(active=True, alert=ALERT.NOTIFICATION, reason=reason)
-			else:
-				_log.info("%s: unknown %s", self._device, n)
-			return True
-
-		_log.warn("%s: unrecognized %s", self._device, n)
-
-	def _process_feature_notification(self, n, feature):
-		if feature == _hidpp20.FEATURE.BATTERY_STATUS:
-			if n.address == 0x00:
-				discharge = ord(n.data[:1])
-				battery_status = ord(n.data[1:2])
-				self.set_battery_info(discharge, _hidpp20.BATTERY_STATUS[battery_status])
-			else:
-				_log.info("%s: unknown BATTERY %s", self._device, n)
-			return True
-
-		# TODO: what are REPROG_CONTROLS_V{2,3}?
-		if feature == _hidpp20.FEATURE.REPROG_CONTROLS:
-			if n.address == 0x00:
-				_log.info("%s: reprogrammable key: %s", self._device, n)
-			else:
-				_log.info("%s: unknown REPROGRAMMABLE KEYS %s", self._device, n)
-			return True
-
-		if feature == _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS:
-			if n.address == 0x00:
-				if _log.isEnabledFor(_DEBUG):
-					_log.debug("wireless status: %s", n)
-				if n.data[0:3] == b'\x01\x01\x01':
-					self._changed(active=True, alert=ALERT.NOTIFICATION, reason='powered on')
-				else:
-					_log.info("%s: unknown WIRELESS %s", self._device, n)
-			else:
-				_log.info("%s: unknown WIRELESS %s", self._device, n)
-			return True
-
-		if feature == _hidpp20.FEATURE.SOLAR_DASHBOARD:
-			if n.data[5:9] == b'GOOD':
-				charge, lux, adc = _unpack('!BHH', n.data[:5])
-				self[KEYS.BATTERY_LEVEL] = charge
-				# guesstimate the battery voltage, emphasis on 'guess'
-				self[KEYS.BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
-				if n.address == 0x00:
-					self[KEYS.LIGHT_LEVEL] = None
-					self[KEYS.BATTERY_CHARGING] = None
-					self._changed(active=True)
-				elif n.address == 0x10:
-					self[KEYS.LIGHT_LEVEL] = lux
-					self[KEYS.BATTERY_CHARGING] = lux > 200
-					self._changed(active=True)
-				elif n.address == 0x20:
-					_log.debug("%s: Light Check button pressed", self._device)
-					self._changed(alert=ALERT.SHOW_WINDOW)
-					# first cancel any reporting
-					# self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD)
-					# trigger a new report chain
-					reports_count = 15
-					reports_period = 2  # seconds
-					self._device.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
-				else:
-					_log.info("%s: unknown SOLAR CHAGE %s", self._device, n)
-			else:
-				_log.warn("%s: SOLAR CHARGE not GOOD? %s", self._device, n)
-			return True
-
-		if feature == _hidpp20.FEATURE.TOUCHMOUSE_RAW_POINTS:
-			if n.address == 0x00:
-				_log.info("%s: TOUCH MOUSE points %s", self._device, n)
-			elif n.address == 0x10:
-				touch = ord(n.data[:1])
-				button_down = bool(touch & 0x02)
-				mouse_lifted = bool(touch & 0x01)
-				_log.info("%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s", self._device, button_down, mouse_lifted)
-			else:
-				_log.info("%s: unknown TOUCH MOUSE %s", self._device, n)
-			return True
-
-		_log.info("%s: unrecognized %s for feature %s (index %02X)", self._device, n, feature, n.sub_id)

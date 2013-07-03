@@ -5,14 +5,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from binascii import hexlify as _hexlify
-from struct import pack as _pack, unpack as _unpack
+from struct import pack, unpack
 try:
 	unicode
 	# if Python2, unicode_literals will mess our first (un)pack() argument
-	_pack_str = _pack
-	_unpack_str = _unpack
-	_pack = lambda x, *args: _pack_str(str(x), *args)
-	_unpack = lambda x, *args: _unpack_str(str(x), *args)
+	_pack_str = pack
+	_unpack_str = unpack
+	pack = lambda x, *args: _pack_str(str(x), *args)
+	unpack = lambda x, *args: _unpack_str(str(x), *args)
 except:
 	pass
 
@@ -56,7 +56,6 @@ class NamedInt(int):
 		# this should catch comparisons with bytes in Py3
 		if other is not None:
 			raise TypeError("Unsupported type " + str(type(other)))
-
 
 	def __ne__(self, other):
 		return not self.__eq__(other)
@@ -205,7 +204,7 @@ def bytes2int(x):
 	assert isinstance(x, bytes)
 	assert len(x) < 9
 	qx = (b'\x00' * 8) + x
-	result, = _unpack('!Q', qx[-8:])
+	result, = unpack('!Q', qx[-8:])
 	# assert x == int2bytes(result, len(x))
 	return result
 
@@ -216,7 +215,7 @@ def int2bytes(x, count=None):
 	If 'count' is not given, the necessary number of bytes is computed.
 	"""
 	assert isinstance(x, int)
-	result = _pack('!Q', x)
+	result = pack('!Q', x)
 	assert isinstance(result, bytes)
 	# assert x == bytes2int(result)
 

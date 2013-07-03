@@ -8,20 +8,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from time import time as _timestamp
 from random import getrandbits as _random_bits
 
-from struct import pack as _pack
-try:
-	unicode
-	# if Python2, unicode_literals will mess our first (un)pack() argument
-	_pack_str = _pack
-	_pack = lambda x, *args: _pack_str(str(x), *args)
-except:
-	pass
-
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger('LUR.base')
 del getLogger
 
-from .common import strhex as _strhex, KwException as _KwException
+
+from .common import strhex as _strhex, KwException as _KwException, pack as _pack
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 import hidapi as _hid
@@ -242,7 +234,8 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 				report_id = ord(data[:1])
 				assert (report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE or
 						report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE or
-						report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)
+						report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE), \
+						"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 			if notifications_hook:
 				n = make_notification(ord(data[1:2]), data[2:])
 				if n:
