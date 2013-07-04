@@ -42,9 +42,45 @@ def error_dialog(reason, object):
 	GLib.idle_add(_error_dialog, reason, object)
 
 #
-#
+# A separate thread is used to read/write from the device
+# so as not to block the main (GUI) thread.
 #
 
+try:
+	from Queue import Queue
+except ImportError:
+	from queue import Queue
+_task_queue = Queue(16)
+del Queue
+
+
+from threading import Thread, current_thread as _current_thread
+
+def _process_async_queue():
+	t = _current_thread()
+	t.alive = True
+	while t.alive:
+		function, args, kwargs = _task_queue.get()
+		if function:
+			function(*args, **kwargs)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("stopped %s", t.name)
+
+_queue_processor = Thread(name='AsyncUI', target=_process_async_queue)
+_queue_processor.daemon = True
+_queue_processor.alive = False
+_queue_processor.start()
+
+del Thread
+
+def async(function, *args, **kwargs):
+	task = (function, args, kwargs)
+	_task_queue.put(task)
+
+
+#
+#
+#
 
 from . import notify, tray, window
 
@@ -57,6 +93,10 @@ def run_loop():
 	Gtk.main()
 
 def destroy():
+	# stop the async UI processor
+	_queue_processor.alive = False
+	async(None)
+
 	tray.destroy()
 	window.destroy()
 	notify.uninit()

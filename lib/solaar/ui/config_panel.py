@@ -6,45 +6,34 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, GLib
 
+
+from solaar.ui import async as _ui_async
 from logitech.unifying_receiver.settings import KIND as _SETTING_KIND
 
 #
-# a separate thread is used to read/write from the device
-# so as not to block the main (GUI) thread
+#
 #
 
-try:
-	from Queue import Queue as _Queue
-except ImportError:
-	from queue import Queue as _Queue
-_apply_queue = _Queue(8)
+def _read_async(setting, force_read, sbox, device_is_online):
+	def _do_read(s, force, sb, online):
+		v = s.read(not force)
+		GLib.idle_add(_update_setting_item, sb, v, online, priority=99)
 
-def _process_apply_queue():
-	def _write_start(sbox):
-		_, failed, spinner, control = sbox.get_children()
-		control.set_sensitive(False)
-		failed.set_visible(False)
-		spinner.set_visible(True)
-		spinner.start()
+	_ui_async(_do_read, setting, force_read, sbox, device_is_online)
 
-	while True:
-		task = _apply_queue.get()
-		assert isinstance(task, tuple)
-		device_is_online = True
-		# print ("task", *task)
-		if task[0] == 'write':
-			_, setting, value, sbox = task
-			GLib.idle_add(_write_start, sbox, priority=0)
-			value = setting.write(value)
-		elif task[0] == 'read':
-			_, setting, force_read, sbox, device_is_online = task
-			value = setting.read(not force_read)
-		GLib.idle_add(_update_setting_item, sbox, value, device_is_online, priority=99)
 
-from threading import Thread as _Thread
-_queue_processor = _Thread(name='SettingsProcessor', target=_process_apply_queue)
-_queue_processor.daemon = True
-_queue_processor.start()
+def _write_async(setting, value, sbox):
+	_, failed, spinner, control = sbox.get_children()
+	control.set_sensitive(False)
+	failed.set_visible(False)
+	spinner.set_visible(True)
+	spinner.start()
+
+	def _do_write(s, v, sb):
+		v = setting.write(v)
+		GLib.idle_add(_update_setting_item, sb, v, True, priority=99)
+
+	_ui_async(_do_write, setting, value, sbox)
 
 #
 #
@@ -53,7 +42,7 @@ _queue_processor.start()
 def _create_toggle_control(setting):
 	def _switch_notify(switch, _, s):
 		if switch.get_sensitive():
-			_apply_queue.put(('write', s, switch.get_active() == True, switch.get_parent()))
+			_write_async(s, switch.get_active() == True, switch.get_parent())
 
 	c = Gtk.Switch()
 	c.connect('notify::active', _switch_notify, setting)
@@ -62,7 +51,7 @@ def _create_toggle_control(setting):
 def _create_choice_control(setting):
 	def _combo_notify(cbbox, s):
 		if cbbox.get_sensitive():
-			_apply_queue.put(('write', s, cbbox.get_active_id(), cbbox.get_parent()))
+			_write_async(s, cbbox.get_active_id(), cbbox.get_parent())
 
 	c = Gtk.ComboBoxText()
 	for entry in setting.choices:
@@ -181,7 +170,7 @@ def update(device, is_online=None):
 			sbox = _items[k] = _create_sbox(s)
 			_box.pack_start(sbox, False, False, 0)
 
-		_apply_queue.put(('read', s, False, sbox, is_online))
+		_read_async(s, False, sbox, is_online)
 
 	_box.set_visible(True)
 

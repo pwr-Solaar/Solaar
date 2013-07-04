@@ -127,7 +127,7 @@ def _print_device(dev, verbose=False):
 	print ("   Polling rate :", dev.polling_rate, "ms")
 	print ("   Serial number:", dev.serial)
 	for fw in dev.firmware:
-		print ("     %-11s:" % fw.kind, (fw.name + ' ' + fw.version).strip())
+		print ("     %11s:" % fw.kind, (fw.name + ' ' + fw.version).strip())
 
 	if dev.power_switch_location:
 		print ("   The power switch is located on the %s." % dev.power_switch_location)

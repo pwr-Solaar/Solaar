@@ -8,18 +8,18 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 from gi.repository.GObject import TYPE_PYOBJECT
 
 from solaar import NAME
 # from solaar import __version__ as VERSION
+from solaar.ui import async as _ui_async
 from logitech.unifying_receiver import hidpp10 as _hidpp10
 from logitech.unifying_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from logitech.unifying_receiver.status import KEYS as _K
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
 from .about import show_window as _show_about_window
-
 
 #
 # constants
@@ -480,7 +480,10 @@ def _update_details(button):
 	if visible:
 		# _details._text.set_markup('<small>reading...</small>')
 
-		def _details_items(device):
+		def _details_items(device, read_all=False):
+			# If read_all is False, only return stuff that is ~100% already
+			# cached, and involves no HID++ calls.
+
 			if device.kind is None:
 				yield ('Path', device.path)
 				# 046d is the Logitech vendor id
@@ -491,13 +494,15 @@ def _update_details(button):
 				yield ('Wireless PID', device.wpid)
 				hid_version = device.protocol
 				yield ('Protocol', 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
-				if device.polling_rate:
+				if read_all and device.polling_rate:
 					yield ('Polling rate', '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
 
-			yield ('Serial', device.serial)
+			if read_all or (device.kind is not None and device.online):
+				yield ('Serial', device.serial)
 
-			for fw in list(device.firmware):
-				yield (fw.kind, (fw.name + ' ' + fw.version).strip())
+			if read_all:
+				for fw in list(device.firmware):
+					yield ('  ' +  str(fw.kind), (fw.name + ' ' + fw.version).strip())
 
 			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
 			if flag_bits is None and device.kind is not None:
@@ -506,11 +511,31 @@ def _update_details(button):
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
 				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
 
+		def _set_details(text):
+			_details._text.set_markup(text)
+
+		def _make_text(items):
+			text = '\n'.join('%-13s: %s' % i for i in items)
+			return '<small><tt>' + text + '</tt></small>'
+
+		def _read_slow(device):
+			items = _details_items(selected_device, True)
+			text = _make_text(items)
+			if device == _details._current_device:
+				GLib.idle_add(_set_details, text)
+
 		selected_device = _find_selected_device()
 		assert selected_device
-		items = _details_items(selected_device)
-		text = '\n'.join('%-13s: %s' % i for i in items if i)
-		_details._text.set_markup('<small><tt>' + text + '</tt></small>')
+		_details._current_device = selected_device
+
+		read_all = not (selected_device.kind is None or selected_device.online)
+		items = _details_items(selected_device, read_all)
+		_set_details(_make_text(items))
+
+		if read_all:
+			_details._current_device = None
+		else:
+			_ui_async(_read_slow, selected_device)
 
 	_details.set_visible(visible)
 
