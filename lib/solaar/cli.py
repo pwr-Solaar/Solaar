@@ -136,7 +136,9 @@ def _print_device(dev, verbose=False):
 
 	if dev.online:
 		notification_flags = hidpp10.get_notification_flags(dev)
-		if notification_flags is not None:
+		if notification_flags is None:
+			print ("   Notifications: N/A.")
+		else:
 			if notification_flags:
 				notification_names = hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
 				print ("   Notifications: 0x%06X = %s." % (notification_flags, ', '.join(notification_names)))

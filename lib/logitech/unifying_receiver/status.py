@@ -229,7 +229,8 @@ class DeviceStatus(dict):
 					# Make sure to set notification flags on the device, they
 					# get cleared when the device is turned off (but not when the device
 					# goes idle, and we can't tell the difference right now).
-					self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
+					if d.protocol < 2.0:
+						self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
 
 					# Devices lose configuration when they are turned off,
 					# make sure they're up-to-date.
