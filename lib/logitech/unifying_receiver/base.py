@@ -22,7 +22,6 @@ import hidapi as _hid
 #
 #
 
-_EVENT_MESSAGE_SIZE = 8
 _SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
 _MEDIUM_MESSAGE_SIZE = 15
@@ -194,7 +193,7 @@ def _read(handle, timeout):
 	if data:
 		assert isinstance(data, bytes), (repr(data), type(data))
 		report_id = ord(data[:1])
-		assert ((report_id & 0xF0 == 0 and len(data) == _EVENT_MESSAGE_SIZE) or
+		assert ((report_id & 0xF0 == 0) or
 				(report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE) or
 				(report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE) or
 				(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
@@ -233,7 +232,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 			assert isinstance(data, bytes), (repr(data), type(data))
 			report_id = ord(data[:1])
 			if _log.isEnabledFor(_DEBUG):
-				assert ((report_id & 0xF0 == 0 and len(data) == _EVENT_MESSAGE_SIZE) or
+				assert ((report_id & 0xF0 == 0) or
 						(report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE) or
 						(report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE) or
 						(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
