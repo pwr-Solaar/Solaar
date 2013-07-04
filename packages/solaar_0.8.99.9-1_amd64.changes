@@ -1,0 +1,50 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Format: 1.8
+Date: Thu, 04 Jul 2013 13:48:53 +0200
+Source: solaar
+Binary: solaar solaar-gnome3
+Architecture: source all
+Version: 0.8.99.9-1
+Distribution: UNRELEASED
+Urgency: low
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Changed-By: Daniel Pavel <daniel.pavel@gmail.com>
+Description: 
+ solaar     - Logitech Unifying Receiver peripherals manager for Linux
+ solaar-gnome3 - gnome-shell/Unity integration for Solaar
+Changes: 
+ solaar (0.8.99.9-1) UNRELEASED; urgency=low
+ .
+   * Debian packaging scripts, supports ubuntu ppa as well.
+Checksums-Sha1: 
+ c080e47ca43e18f9c4439cc3ea5ed82d646d7193 1525 solaar_0.8.99.9-1.dsc
+ cc4580e0e71ccd7fd4b84c9a2b7c0adb174cb743 92351 solaar_0.8.99.9.orig.tar.gz
+ 236467ad8b63febd1d7ff11da159bb4563d53cbe 4544 solaar_0.8.99.9-1.debian.tar.gz
+ 41d6385494117721289ebbb30502efb86d85264f 89152 solaar_0.8.99.9-1_all.deb
+ cd93f6b98cb5da6f5a30966fdda033e0ebe87768 2870 solaar-gnome3_0.8.99.9-1_all.deb
+Checksums-Sha256: 
+ 9d00c45951005565d9116de85035c869297b4846670ade9644639d434601ec97 1525 solaar_0.8.99.9-1.dsc
+ f3c75a9780aa0cb101f781292018a9a8ec4163c632d1e33c64fed31dc904b9d2 92351 solaar_0.8.99.9.orig.tar.gz
+ 99fbef2f298aadbd19df7b6aa479fefdb14846501a148bd196fc5f467b042648 4544 solaar_0.8.99.9-1.debian.tar.gz
+ d6178cf5a7cf46437e67332588d6155aae23e4200a848222c812e8e228dfc7be 89152 solaar_0.8.99.9-1_all.deb
+ f3276e7fe1bab3d1c196361bf22d5ff5aef9b17964d5ef67a82d638da3b8c46b 2870 solaar-gnome3_0.8.99.9-1_all.deb
+Files: 
+ bb2211c39244263565e5bad8b5250808 1525 misc optional solaar_0.8.99.9-1.dsc
+ 94e184fb744d2b437b0eed7e5bc25e71 92351 misc optional solaar_0.8.99.9.orig.tar.gz
+ 92688de9d478406823e10995a9bcc472 4544 misc optional solaar_0.8.99.9-1.debian.tar.gz
+ 9cd7c0b3c479def456f61e12fc485cb0 89152 misc optional solaar_0.8.99.9-1_all.deb
+ 49dbf3a314d270c1a45e0545a7bee354 2870 gnome optional solaar-gnome3_0.8.99.9-1_all.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQEcBAEBAgAGBQJR1WExAAoJEEuxm/KfVJIE2fUIAIRVi5PrH5nwmRpytCwLL/eN
+Gl0ziIZGDD0/GgEcx1lLvw2irnO7HpOwTYfjDRiZxHBX27tqV/X2pUin7I7zqpR4
+6SQ7pFreBiqQV46ruKWz4ho/sF2eXLy+EhLrPOsy5IcGBaBDikqHpagZKvmnmavV
+dxrw0fTmoykwJQoRccVSoNMp1/Tn5gNAqK5juANwPjBn372yccMEg9hEMwB9B+/r
+l3jreIIHvENMX6y4Lw7bdPo69B3XwC2qBqXXxRUDEH0A8/2roSR2nFa3bTzrrNF+
+Eirccr+x7Q2V0IjjFLazs3CTQaowPtaWrLsNtBIDQ3zz3ygeXab5NvebCEQ0fRA=
+=kQL5
+-----END PGP SIGNATURE-----
