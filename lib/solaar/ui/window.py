@@ -488,6 +488,12 @@ def _update_details(button):
 				yield ('Path', device.path)
 				# 046d is the Logitech vendor id
 				yield ('USB id', '046d:' + device.product_id)
+
+				if read_all:
+					yield ('Serial', device.serial)
+				else:
+					yield ('Serial', '...')
+
 			else:
 				# yield ('Codename', device.codename)
 				yield ('Index', device.number)
@@ -497,16 +503,20 @@ def _update_details(button):
 				if read_all and device.polling_rate:
 					yield ('Polling rate', '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
 
-			if read_all or (device.kind is not None and device.online):
-				yield ('Serial', device.serial)
+				if read_all or not device.online:
+					yield ('Serial', device.serial)
+				else:
+					yield ('Serial', '...')
 
 			if read_all:
 				for fw in list(device.firmware):
 					yield ('  ' +  str(fw.kind), (fw.name + ' ' + fw.version).strip())
+			elif device.kind is None or device.online:
+				yield ('  Firmware', '...')
 
 			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
 			if flag_bits is None and device.kind is not None:
-				yield ('Notifications', ('N/A',))
+				yield ('Notifications', 'N/A')
 			else:
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
 				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
