@@ -54,11 +54,12 @@ def _find_device(receiver, name, may_be_receiver=False):
 		except:
 			pass
 		else:
-			if number in range(1, 1 + receiver.max_devices):
-				dev = receiver[number]
-				if dev is None:
-					_fail("no paired device with number", number)
-				return dev
+			if number < 1 or number > receiver.max_devices:
+				_fail("%s (%s) supports device numbers 1 to %d" % (receiver.name, receiver.path, receiver.max_devices))
+			dev = receiver[number]
+			if dev is None:
+				_fail("no paired device with number %s" % number)
+			return dev
 
 	if len(name) < 3:
 		_fail("need at least 3 characters to match a device")
