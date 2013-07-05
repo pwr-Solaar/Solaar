@@ -35,7 +35,7 @@ class _ThreadedHandle(object):
 		assert listener is not None
 		assert path is not None
 		assert handle is not None
-		assert type(handle) == int
+		assert isinstance(handle, int)
 
 		self._listener = listener
 		self.path = path

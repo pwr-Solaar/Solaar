@@ -109,7 +109,7 @@ def close(handle):
 	"""Closes a HID device handle."""
 	if handle:
 		try:
-			if type(handle) == int:
+			if isinstance(handle, int):
 				_hid.close(handle)
 			else:
 				handle.close()

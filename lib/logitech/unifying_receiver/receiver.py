@@ -321,7 +321,7 @@ class Receiver(object):
 			self.name = 'Nano Receiver'
 		else:
 			raise Exception("unknown receiver type", self.max_devices)
-		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if type(self.handle) == int else 'T', self.handle)
+		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
 
 		# TODO _properly_ figure out which receivers do and which don't support unpairing
 		self.may_unpair = self.write_register(_R.receiver_pairing) is None
@@ -429,7 +429,7 @@ class Receiver(object):
 		if dev is not None:
 			return dev
 
-		if type(key) != int:
+		if not isinstance(key, int):
 			raise TypeError('key must be an integer')
 		if key < 1 or key > self.max_devices:
 			raise IndexError(key)
@@ -457,7 +457,7 @@ class Receiver(object):
 		return len([d for d in self._devices.values() if d is not None])
 
 	def __contains__(self, dev):
-		if type(dev) == int:
+		if isinstance(dev, int):
 			return self._devices.get(dev) is not None
 
 		return self.__contains__(dev.number)

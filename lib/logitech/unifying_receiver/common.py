@@ -120,7 +120,7 @@ class NamedInts(object):
 		if isinstance(index, int):
 			if index in self._indexed:
 				return self._indexed[int(index)]
-			if self._fallback and type(index) == int:
+			if self._fallback and isinstance(index, int):
 				value = NamedInt(index, self._fallback(index))
 				self._indexed[index] = value
 				self._values = sorted(self._values + [value])
