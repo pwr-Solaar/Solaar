@@ -9,7 +9,7 @@ import sys
 from select import select as _select
 import time
 from binascii import hexlify, unhexlify
-import hidapi
+import hidapi as _hid
 
 #
 #
@@ -87,7 +87,7 @@ def _error(text, scroll=False):
 def _continuous_read(handle, timeout=2000):
 	while True:
 		try:
-			reply = hidapi.read(handle, 128, timeout)
+			reply = _hid.read(handle, 128, timeout)
 		except OSError as e:
 			_error("Read failed, aborting: " + str(e), True)
 			break
@@ -129,9 +129,10 @@ def _validate_input(line, hidpp=False):
 	return data
 
 
-def _open(device, hidpp):
-	if hidpp and not device:
-		for d in hidapi.enumerate(vendor_id=0x046d):
+def _open(args):
+	device = args.device
+	if args.hidpp and not device:
+		for d in _hid.enumerate(vendor_id=0x046d):
 			if d.driver == 'logitech-djreceiver':
 				device = d.path
 				break
@@ -141,19 +142,24 @@ def _open(device, hidpp):
 		sys.exit("!! Device path required.")
 
 	print (".. Opening device", device)
-	handle = hidapi.open_path(device)
+	handle = _hid.open_path(device)
 	if not handle:
 		sys.exit("!! Failed to open %s, aborting." % device)
 
 	print (".. Opened handle %r, vendor %r product %r serial %r." % (
 					handle,
-					hidapi.get_manufacturer(handle),
-					hidapi.get_product(handle),
-					hidapi.get_serial(handle)))
-	if hidpp:
-		if hidapi.get_manufacturer(handle) != b'Logitech':
+					_hid.get_manufacturer(handle),
+					_hid.get_product(handle),
+					_hid.get_serial(handle)))
+	if args.hidpp:
+		if _hid.get_manufacturer(handle) != b'Logitech':
 			sys.exit("!! Only Logitech devices support the HID++ protocol.")
 		print (".. HID++ validation enabled.")
+	else:
+		if (_hid.get_manufacturer(handle) == b'Logitech' and
+			b'Receiver' in _hid.get_product(handle)):
+			args.hidpp = True
+			print (".. Logitech receiver detected, HID++ validation enabled.")
 
 	return handle
 
@@ -173,7 +179,7 @@ def _parse_arguments():
 
 def main():
 	args = _parse_arguments()
-	handle = _open(args.device, args.hidpp)
+	handle = _open(args)
 
 	if interactive:
 		print (".. Press ^C/^D to exit, or type hex bytes to write to the device.")
@@ -210,7 +216,7 @@ def main():
 				continue
 
 			_print("<<", data)
-			hidapi.write(handle, data)
+			_hid.write(handle, data)
 			# wait for some kind of reply
 			if args.hidpp and not interactive:
 				rlist, wlist, xlist = _select([handle], [], [], 1)
@@ -228,7 +234,7 @@ def main():
 
 	finally:
 		print (".. Closing handle %r" % handle)
-		hidapi.close(handle)
+		_hid.close(handle)
 		if interactive:
 			readline.write_history_file(args.history)
 
