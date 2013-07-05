@@ -515,9 +515,7 @@ def _update_details(button):
 				yield ('  Firmware', '...')
 
 			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
-			if flag_bits is None and device.kind is not None:
-				yield ('Notifications', 'N/A')
-			else:
+			if flag_bits is not None:
 				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
 				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
 
