@@ -124,6 +124,8 @@ def _process_hidpp10_notification(device, status, n):
 			status.clear()
 			device.wpid = None
 			device.status = None
+			if device.number in device.receiver:
+				del device.receiver[device.number]
 			status.changed(active=False, alert=_ALERT.ALL, reason='unpaired')
 		else:
 			_log.warn("%s: disconnection with unknown type %02X: %s", device, n.address, n)

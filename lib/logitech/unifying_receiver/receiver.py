@@ -60,6 +60,8 @@ class PairedDevice(object):
 		self._polling_rate = None
 		self._power_switch = None
 
+		# _log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
+
 		if link_notification is not None:
 			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
 			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
@@ -81,7 +83,7 @@ class PairedDevice(object):
 				device_info = self.receiver.read_register(_R.receiver_info, 0x04)
 				if device_info is None:
 					_log.error("failed to read Nano wpid for device %d of %s", number, receiver)
-					raise _base.NoSuchDevice(nuber=number, receiver=receiver, error="read Nano wpid")
+					raise _base.NoSuchDevice(number=number, receiver=receiver, error="read Nano wpid")
 
 				self.wpid = _strhex(device_info[3:5])
 				self._polling_rate = 0
@@ -437,17 +439,25 @@ class Receiver(object):
 		return self.register_new_device(key)
 
 	def __delitem__(self, key):
+		key = int(key)
+
 		if self._devices.get(key) is None:
 			raise IndexError(key)
 
 		dev = self._devices[key]
+		if not dev:
+			if key in self._devices:
+				del self._devices[key]
+			return
+
 		action = 0x03
-		reply = self.write_register(_R.receiver_pairing, action, int(key))
+		reply = self.write_register(_R.receiver_pairing, action, key)
 		if reply:
 			# invalidate the device
 			dev.online = False
 			dev.wpid = None
-			del self._devices[key]
+			if key in self._devices:
+				del self._devices[key]
 			_log.warn("%s unpaired device %s", self, dev)
 		else:
 			_log.error("%s failed to unpair device %s", self, dev)

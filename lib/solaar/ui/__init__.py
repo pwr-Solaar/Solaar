@@ -14,7 +14,7 @@ GLib.threads_init()
 
 
 def _error_dialog(reason, object):
-	_log.error("%s: %s", reason, object)
+	_log.error("error: %s %s", reason, object)
 
 	if reason == 'permissions':
 		title = 'Permissions error'

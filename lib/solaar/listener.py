@@ -139,8 +139,9 @@ class ReceiverListener(_listener.EventsListener):
 
 		assert device.receiver == self.receiver
 		if not device:
-			# device was unpaired, and since the object is weakref'ed
-			# it won't be valid for much longer
+			# Device was unpaired, and isn't valid anymore.
+			# We replace it with a ghost so that the UI has something to work
+			# with while cleaning up.
 			_log.warn("device %s was unpaired, ghosting", device)
 			device = _ghost(device)
 
@@ -190,7 +191,7 @@ class ReceiverListener(_listener.EventsListener):
 			if _log.isEnabledFor(_INFO):
 				_log.info("%s: pairing detected new device", self.receiver)
 			self.receiver.status.new_device = dev
-		else:
+		elif dev:
 			if dev.online is None:
 				dev.ping()
 

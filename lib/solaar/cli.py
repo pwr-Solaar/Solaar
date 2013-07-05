@@ -223,7 +223,12 @@ def pair_device(receiver, args):
 	receiver.set_lock(False, timeout=timeout)
 	print ("Pairing: turn your new device on (timing out in", timeout, "seconds).")
 
-	while receiver.status.lock_open:
+	# the lock-open notification may come slightly later, wait for it a bit
+	from time import time as timestamp
+	pairing_start = timestamp()
+	patience = 5  # seconds
+
+	while receiver.status.lock_open or timestamp() - pairing_start < patience:
 		n = base.read(receiver.handle)
 		if n:
 			n = base.make_notification(*n)
@@ -239,7 +244,8 @@ def pair_device(receiver, args):
 		dev = receiver.status.new_device
 		print ("Paired device %d: %s [%s:%s:%s]" % (dev.number, dev.name, dev.wpid, dev.codename, dev.serial))
 	else:
-		_fail(receiver.status[status.KEYS.ERROR])
+		error = receiver.status[status.KEYS.ERROR] or 'no device detected?'
+		_fail(error)
 
 
 def unpair_device(receiver, args):
