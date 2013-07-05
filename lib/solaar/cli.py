@@ -202,45 +202,45 @@ def pair_device(receiver, args):
 	# get all current devices
 	known_devices = [dev.number for dev in receiver]
 
-	from logitech.unifying_receiver import base, hidpp10, status
-	r_status = status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
+	from logitech.unifying_receiver import base, hidpp10, status, notifications
+	receiver.status = status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
 	# check if it's necessary to set the notification flags
-	notification_flags = hidpp10.get_notification_flags(receiver) or 0
-	if not notification_flags & hidpp10.NOTIFICATION_FLAG.wireless:
-		hidpp10.set_notification_flags(receiver, notification_flags | hidpp10.NOTIFICATION_FLAG.wireless)
+	old_notification_flags = hidpp10.get_notification_flags(receiver) or 0
+	if not (old_notification_flags & hidpp10.NOTIFICATION_FLAG.wireless):
+		hidpp10.set_notification_flags(receiver, old_notification_flags | hidpp10.NOTIFICATION_FLAG.wireless)
 
 	class HandleWithNotificationHook(int):
 		def notifications_hook(self, n):
 			assert n
 			if n.devnumber == 0xFF:
-				r_status.process_notification(n)
+				notifications.process(receiver, n)
 			elif n.sub_id == 0x41 and n.address == 0x04:
 				if n.devnumber not in known_devices:
-					r_status.new_device = receiver[n.devnumber]
+					receiver.status.new_device = receiver[n.devnumber]
 
 	timeout = 20  # seconds
 	receiver.handle = HandleWithNotificationHook(receiver.handle)
 	receiver.set_lock(False, timeout=timeout)
 	print ("Pairing: turn your new device on (timing out in", timeout, "seconds).")
 
-	while r_status.lock_open:
+	while receiver.status.lock_open:
 		n = base.read(receiver.handle)
 		if n:
 			n = base.make_notification(*n)
 			if n:
 				receiver.handle.notifications_hook(n)
 
-	if not notification_flags & hidpp10.NOTIFICATION_FLAG.wireless:
+	if not (old_notification_flags & hidpp10.NOTIFICATION_FLAG.wireless):
 		# only clear the flags if they weren't set before, otherwise a
 		# concurrently running Solaar app might stop working properly
-		hidpp10.set_notification_flags(receiver, notification_flags)
+		hidpp10.set_notification_flags(receiver, old_notification_flags)
 
-	if r_status.new_device:
-		dev = r_status.new_device
-		print ("Paired device %d: %s [%s:%s]" % (dev.number, dev.name, dev.codename, dev.serial))
+	if receiver.status.new_device:
+		dev = receiver.status.new_device
+		print ("Paired device %d: %s [%s:%s:%s]" % (dev.number, dev.name, dev.wpid, dev.codename, dev.serial))
 	else:
-		_fail(r_status[status.ERROR])
+		_fail(receiver.status[status.KEYS.ERROR])
 
 
 def unpair_device(receiver, args):
