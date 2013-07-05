@@ -235,6 +235,3 @@ class ChoicesValidator(object):
 		# just assume the value was written correctly, otherwise there would not
 		# be any reply_bytes to check
 		return self.choices[value]
-
-
-__all__ = ('KIND', 'Setting', 'RegisterRW', 'FeatureRW', 'BooleanValidator', 'ChoicesValidator')

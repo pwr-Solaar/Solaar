@@ -9,7 +9,7 @@ try:
 	# this import is allowed to fail, in which case the entire feature is unavailable
 	from gi.repository import Notify
 
-	from logging import getLogger, DEBUG as _DEBUG
+	from logging import getLogger, INFO as _INFO
 	_log = getLogger(__name__)
 	del getLogger
 
@@ -28,7 +28,8 @@ try:
 		global available
 		if available:
 			if not Notify.is_initted():
-				_log.info("starting desktop notifications")
+				if _log.isEnabledFor(_INFO):
+					_log.info("starting desktop notifications")
 				try:
 					return Notify.init(NAME)
 				except:
@@ -39,7 +40,8 @@ try:
 
 	def uninit():
 		if available and Notify.is_initted():
-			_log.info("stopping desktop notifications")
+			if _log.isEnabledFor(_INFO):
+				_log.info("stopping desktop notifications")
 			_notifications.clear()
 			Notify.uninit()
 
