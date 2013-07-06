@@ -81,7 +81,7 @@ if test -x /usr/bin/dpkg-scanpackages; then
 	rm -f *.build
 	dpkg-scanpackages -m . > Packages
 	dpkg-scansources . > Sources
-	add_md docs/debian-repo.md packages/index.md
+	add_md docs/debian.md
 	cd -
 fi
 
@@ -118,7 +118,7 @@ done
 fix_times README.md index.html
 fix_times docs/devices.md devices.html
 fix_times docs/installation.md installation.html
-fix_times docs/debian-repo.md packages/index.html
+fix_times docs/debian.md debian.html
 fix_times jekyll/images images
 fix_times share/solaar/icons/solaar.svg images/solaar-logo.png
 fix_times share/solaar/icons/solaar.svg images/favicon.png

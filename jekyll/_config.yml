@@ -1,6 +1,5 @@
 title: Solaar
 tagline: Linux devices manager for the Logitech Unifying Receiver.
-root: /Solaar/
 owner: pwr
 owner_url: https://github.com/pwr
 repository: https://github.com/pwr/Solaar

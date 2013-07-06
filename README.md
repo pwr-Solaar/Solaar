@@ -22,7 +22,7 @@ and their features, see [docs/devices.md](docs/devices.md).
 
 Pre-built packages are available for a few Linux distros.
 
-* Debian 7 (Wheezy) or higher: packages in this [repository][debian]
+* Debian 7 (Wheezy) or higher: packages in this [repository](docs/debian.md)
 * Ubuntu/Kubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
 
 The `solaar` package uses a standard system tray implementation; to ensure
@@ -33,7 +33,6 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 * an [Arch package][arch], courtesy of Arnaud Taffanel
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[debian]: http://pwr.github.io/Solaar/packages/
 [gentoo]: http://code.r3pek.org/gentoo-overlay/src
 [opensuse]: http://software.opensuse.org/package/Solaar
 [arch]: http://aur.archlinux.org/packages/solaar
