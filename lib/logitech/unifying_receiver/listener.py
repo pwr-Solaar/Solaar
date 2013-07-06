@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import threading as _threading
-from time import time as _timestamp
+# from time import time as _timestamp
 
 # for both Python 2 and 3
 try:
@@ -108,7 +108,7 @@ _EVENT_READ_TIMEOUT = 0.4  # in seconds
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
-_IDLE_READS = 1 + int(5 // _EVENT_READ_TIMEOUT)  # wait at least 5 seconds between ticks
+# _IDLE_READS = 1 + int(5 // _EVENT_READ_TIMEOUT)  # wait at least 5 seconds between ticks
 
 
 class EventsListener(_threading.Thread):
@@ -126,7 +126,7 @@ class EventsListener(_threading.Thread):
 		self._queued_notifications = _Queue(16)
 		self._notifications_callback = notifications_callback
 
-		self.tick_period = 0
+		# self.tick_period = 0
 
 	def run(self):
 		self._active = True
@@ -139,10 +139,10 @@ class EventsListener(_threading.Thread):
 
 		self.has_started()
 
-		last_tick = 0
+		# last_tick = 0
 		# the first idle read -- delay it a bit, and make sure to stagger
 		# idle reads for multiple receivers
-		idle_reads = _IDLE_READS + (ihandle % 5) * 2
+		# idle_reads = _IDLE_READS + (ihandle % 5) * 2
 
 		while self._active:
 			if self._queued_notifications.empty():
@@ -168,14 +168,14 @@ class EventsListener(_threading.Thread):
 				except:
 					_log.exception("processing %s", n)
 
-			elif self.tick_period:
-				idle_reads -= 1
-				if idle_reads <= 0:
-					idle_reads = _IDLE_READS
-					now = _timestamp()
-					if now - last_tick >= self.tick_period:
-						last_tick = now
-						self.tick(now)
+			# elif self.tick_period:
+			# 	idle_reads -= 1
+			# 	if idle_reads <= 0:
+			# 		idle_reads = _IDLE_READS
+			# 		now = _timestamp()
+			# 		if now - last_tick >= self.tick_period:
+			# 			last_tick = now
+			# 			self.tick(now)
 
 		del self._queued_notifications
 		self.has_stopped()
@@ -193,9 +193,9 @@ class EventsListener(_threading.Thread):
 		"""Called right before the thread stops."""
 		pass
 
-	def tick(self, timestamp):
-		"""Called about every tick_period seconds."""
-		pass
+	# def tick(self, timestamp):
+	# 	"""Called about every tick_period seconds."""
+	# 	pass
 
 	def _notifications_hook(self, n):
 		# Only consider unhandled notifications that were sent from this thread,
