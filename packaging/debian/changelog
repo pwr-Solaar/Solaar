@@ -1,6 +1,6 @@
-solaar (0.8.99.9-1) UNRELEASED; urgency=low
+solaar (0.8.99.10-1) unstable; urgency=low
 
   * Debian packaging scripts, supports ubuntu ppa as well.
 
- -- Daniel Pavel <daniel.pavel@gmail.com>  Thu, 04 Jul 2013 13:48:53 +0200
+ -- Daniel Pavel <daniel.pavel+debian@gmail.com>  Sat, 06 Jul 2013 14:24:27 +0200
 
