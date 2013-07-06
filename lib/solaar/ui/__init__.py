@@ -24,7 +24,7 @@ def _error_dialog(reason, object):
 				'and plugging it back in.' % object)
 	elif reason == 'unpair':
 		title = 'Unpairing failed'
-		text = ('Failed to unpair\n%s\nfrom %s.'
+		text = ('Failed to unpair %s from %s.\n'
 				'\n'
 				'The receiver returned an error, with no further details.'
 				% (object.name, object.receiver.name))

@@ -6,9 +6,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk, Gdk
 
-from logging import getLogger
-_log = getLogger(__name__)
-del getLogger
+# from logging import getLogger
+# _log = getLogger(__name__)
+# del getLogger
 
 #
 #
@@ -84,5 +84,5 @@ def unpair(window, device):
 		try:
 			del receiver[device_number]
 		except:
-			_log.exception("unpairing %s", device)
+			# _log.exception("unpairing %s", device)
 			error_dialog('unpair', device)
