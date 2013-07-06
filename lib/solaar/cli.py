@@ -399,8 +399,8 @@ def _parse_arguments():
 
 	if args.debug > 0:
 		log_level = logging.WARNING - 10 * args.debug
-		log_format='%(asctime)s %(levelname)8s %(name)s: %(message)s'
-		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format)
+		log_format='%(asctime)s,%(msecs)03d %(levelname)8s %(name)s: %(message)s'
+		logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format, datefmt='%H:%M:%S')
 	else:
 		logging.root.addHandler(logging.NullHandler())
 		logging.root.setLevel(logging.ERROR)
