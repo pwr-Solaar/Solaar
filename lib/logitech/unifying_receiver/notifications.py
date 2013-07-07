@@ -100,9 +100,9 @@ def _process_hidpp10_custom_notification(device, status, n):
 		_log.debug("%s (%s) custom notification %s", device, device.protocol, n)
 
 	if n.sub_id in (_R.battery_status, _R.battery_charge):
-		assert n.data[-1:] == b'\x00'
 		# message layout: 10 ix <register> <xx> <yy> <zz> <00>
-		data = '%c%s' % (n.address, n.data)
+		assert n.data[-1:] == b'\x00'
+		data = chr(n.address).encode() + n.data
 		charge, status_text = _hidpp10.parse_battery_status(n.sub_id, data)
 		status.set_battery_info(charge, status_text)
 		return True
