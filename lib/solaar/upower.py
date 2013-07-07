@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger
+from logging import getLogger, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
 
@@ -16,14 +16,16 @@ del getLogger
 _suspend_callback = None
 def _suspend():
 	if _suspend_callback:
-		_log.info("received suspend event from UPower")
+		if _log.isEnabledFor(_INFO):
+			_log.info("received suspend event from UPower")
 		_suspend_callback()
 
 
 _resume_callback = None
 def _resume():
 	if _resume_callback:
-		_log.info("received resume event from UPower")
+		if _log.isEnabledFor(_INFO):
+			_log.info("received resume event from UPower")
 		_resume_callback()
 
 
@@ -54,7 +56,8 @@ try:
 	bus.add_signal_receiver(_resume, signal_name='Resuming',
 					dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
 
-	_log.info("connected to system dbus, watching for suspend/resume events")
+	if _log.isEnabledFor(_INFO):
+		_log.info("connected to system dbus, watching for suspend/resume events")
 
 except:
 	# Either:

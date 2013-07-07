@@ -13,7 +13,7 @@ try:
 except ImportError:
 	from queue import Queue as _Queue
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger('LUR.listener')
 del getLogger
 
@@ -49,7 +49,8 @@ class _ThreadedHandle(object):
 		if handle is None:
 			_log.error("%r failed to open new handle", self)
 		else:
-			# _log.debug("%r opened new handle %d", self, handle)
+			# if _log.isEnabledFor(_DEBUG):
+			# 	_log.debug("%r opened new handle %d", self, handle)
 			self._local.handle = handle
 			self._handles.append(handle)
 			return handle
@@ -135,7 +136,8 @@ class EventsListener(_threading.Thread):
 		self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
 		# get the right low-level handle for this thead
 		ihandle = int(self.receiver.handle)
-		_log.info("started with %s (%d)", self.receiver, ihandle)
+		if _log.isEnabledFor(_INFO):
+			_log.info("started with %s (%d)", self.receiver, ihandle)
 
 		self.has_started()
 

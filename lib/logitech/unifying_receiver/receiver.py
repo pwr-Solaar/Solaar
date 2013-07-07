@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import errno as _errno
 # from weakref import proxy as _proxy
 
-from logging import getLogger
+from logging import getLogger, INFO as _INFO
 _log = getLogger('LUR.receiver')
 del getLogger
 
@@ -60,7 +60,8 @@ class PairedDevice(object):
 		self._polling_rate = None
 		self._power_switch = None
 
-		# _log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
 
 		if link_notification is not None:
 			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
@@ -123,7 +124,8 @@ class PairedDevice(object):
 			# if the ping failed, the peripheral is (almost) certainly offline
 			self.online = self._protocol is not None
 
-			# _log.debug("device %d protocol %s", self.number, self._protocol)
+			# if _log.isEnabledFor(_DEBUG):
+			# 	_log.debug("device %d protocol %s", self.number, self._protocol)
 		return self._protocol or 0
 
 	@property
@@ -132,7 +134,8 @@ class PairedDevice(object):
 			codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
 			if codename:
 				self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
-				# _log.debug("device %d codename %s", self.number, self._codename)
+				# if _log.isEnabledFor(_DEBUG):
+				#	 _log.debug("device %d codename %s", self.number, self._codename)
 			else:
 				self._codename = '? (%s)' % self.wpid
 		return self._codename
@@ -250,7 +253,8 @@ class PairedDevice(object):
 
 		flag_bits = _hidpp10.get_notification_flags(self)
 		flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-		_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_names)
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: device notifications %s %s", self, 'enabled' if enable else 'disabled', flag_names)
 		return flag_bits if ok else None
 
 	def request(self, request_id, *params):
@@ -364,7 +368,8 @@ class Receiver(object):
 
 		flag_bits = _hidpp10.get_notification_flags(self)
 		flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-		_log.info("%s: receiver notifications %s => %s", self, 'enabled' if enable else 'disabled', flag_names)
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: receiver notifications %s => %s", self, 'enabled' if enable else 'disabled', flag_names)
 		return flag_bits
 
 	def notify_devices(self):
@@ -383,7 +388,8 @@ class Receiver(object):
 		try:
 			dev = PairedDevice(self, number, notification)
 			assert dev.wpid
-			_log.info("%s: found new device %d (%s)", self, number, dev.wpid)
+			if _log.isEnabledFor(_INFO):
+				_log.info("%s: found new device %d (%s)", self, number, dev.wpid)
 			self._devices[number] = dev
 			return dev
 		except _base.NoSuchDevice:

@@ -337,7 +337,8 @@ def get_firmware(device):
 					fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, '', '', None)
 
 				fw.append(fw_info)
-				# _log.debug("device %d firmware %s", devnumber, fw_info)
+				# if _log.isEnabledFor(_DEBUG):
+				# 	_log.debug("device %d firmware %s", devnumber, fw_info)
 		return tuple(fw)
 
 
@@ -351,7 +352,8 @@ def get_kind(device):
 	kind = feature_request(device, FEATURE.DEVICE_NAME, 0x20)
 	if kind:
 		kind = ord(kind[:1])
-		# _log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
 		return DEVICE_KIND[kind]
 
 

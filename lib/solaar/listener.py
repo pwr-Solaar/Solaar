@@ -154,7 +154,8 @@ class ReceiverListener(_listener.EventsListener):
 
 	def _notifications_handler(self, n):
 		assert self.receiver
-		# _log.debug("%s: handling %s", self.receiver, n)
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("%s: handling %s", self.receiver, n)
 		if n.devnumber == 0xFF:
 			# a receiver notification
 			_notifications.process(self.receiver, n)

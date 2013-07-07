@@ -6,7 +6,7 @@ import os as _os
 import os.path as _path
 from json import load as _json_load, dump as _json_save
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
 
@@ -61,7 +61,8 @@ def save():
 		with open(_file_path, 'w') as config_file:
 			_json_save(_configuration, config_file, skipkeys=True, indent=2, sort_keys=True)
 
-		_log.info("saved %s to %s", _configuration, _file_path)
+		if _log.isEnabledFor(_INFO):
+			_log.info("saved %s to %s", _configuration, _file_path)
 		return True
 	except:
 		_log.error("failed to save to %s", _file_path)

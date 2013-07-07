@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger('LUR.notifications')
 del getLogger
 
@@ -46,7 +46,8 @@ def _process_receiver_notification(receiver, status, n):
 	if n.sub_id == 0x4A:
 		status.lock_open = bool(n.address & 0x01)
 		reason = 'pairing lock is ' + ('open' if status.lock_open else 'closed')
-		_log.info("%s: %s", receiver, reason)
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: %s", receiver, reason)
 
 		status[_K.ERROR] = None
 		if status.lock_open:
@@ -110,7 +111,8 @@ def _process_hidpp10_custom_notification(device, status, n):
 	if n.sub_id == _R.illumination:
 		# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
 		# TODO anything we can do with this?
-		_log.info("illumination event: %s", n)
+		if _log.isEnabledFor(_INFO):
+			_log.info("illumination event: %s", n)
 		return True
 
 	_log.warn("%s: unrecognized %s", device, n)
@@ -171,7 +173,7 @@ def _process_hidpp10_notification(device, status, n):
 			reason = str(status) or 'powered on'
 			status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
 		else:
-			_log.info("%s: unknown %s", device, n)
+			_log.warn("%s: unknown %s", device, n)
 		return True
 
 	_log.warn("%s: unrecognized %s", device, n)
@@ -184,15 +186,16 @@ def _process_feature_notification(device, status, n, feature):
 			battery_status = ord(n.data[1:2])
 			status.set_battery_info(discharge, _hidpp20.BATTERY_STATUS[battery_status])
 		else:
-			_log.info("%s: unknown BATTERY %s", device, n)
+			_log.warn("%s: unknown BATTERY %s", device, n)
 		return True
 
 	# TODO: what are REPROG_CONTROLS_V{2,3}?
 	if feature == _F.REPROG_CONTROLS:
 		if n.address == 0x00:
-			_log.info("%s: reprogrammable key: %s", device, n)
+			if _log.isEnabledFor(_INFO):
+				_log.info("%s: reprogrammable key: %s", device, n)
 		else:
-			_log.info("%s: unknown REPROGRAMMABLE KEYS %s", device, n)
+			_log.warn("%s: unknown REPROGRAMMABLE KEYS %s", device, n)
 		return True
 
 	if feature == _F.WIRELESS_DEVICE_STATUS:
@@ -202,9 +205,9 @@ def _process_feature_notification(device, status, n, feature):
 			if n.data[0:3] == b'\x01\x01\x01':
 				status.changed(active=True, alert=_ALERT.NOTIFICATION, reason='powered on')
 			else:
-				_log.info("%s: unknown WIRELESS %s", device, n)
+				_log.warn("%s: unknown WIRELESS %s", device, n)
 		else:
-			_log.info("%s: unknown WIRELESS %s", device, n)
+			_log.warn("%s: unknown WIRELESS %s", device, n)
 		return True
 
 	if feature == _F.SOLAR_DASHBOARD:
@@ -222,7 +225,8 @@ def _process_feature_notification(device, status, n, feature):
 				status[_K.BATTERY_CHARGING] = lux > 200
 				status.changed(active=True)
 			elif n.address == 0x20:
-				_log.debug("%s: Light Check button pressed", device)
+				if _log.isEnabledFor(_DEBUG):
+					_log.debug("%s: Light Check button pressed", device)
 				status.changed(alert=_ALERT.SHOW_WINDOW)
 				# first cancel any reporting
 				# device.feature_request(_F.SOLAR_DASHBOARD)
@@ -231,21 +235,23 @@ def _process_feature_notification(device, status, n, feature):
 				reports_period = 2  # seconds
 				device.feature_request(_F.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
 			else:
-				_log.info("%s: unknown SOLAR CHAGE %s", device, n)
+				_log.warn("%s: unknown SOLAR CHAGE %s", device, n)
 		else:
 			_log.warn("%s: SOLAR CHARGE not GOOD? %s", device, n)
 		return True
 
 	if feature == _F.TOUCHMOUSE_RAW_POINTS:
 		if n.address == 0x00:
-			_log.info("%s: TOUCH MOUSE points %s", device, n)
+			if _log.isEnabledFor(_INFO):
+				_log.info("%s: TOUCH MOUSE points %s", device, n)
 		elif n.address == 0x10:
 			touch = ord(n.data[:1])
 			button_down = bool(touch & 0x02)
 			mouse_lifted = bool(touch & 0x01)
-			_log.info("%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s", device, button_down, mouse_lifted)
+			if _log.isEnabledFor(_INFO):
+				_log.info("%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s", device, button_down, mouse_lifted)
 		else:
 			_log.warn("%s: unknown TOUCH MOUSE %s", device, n)
 		return True
 
-	_log.info("%s: unrecognized %s for feature %s (index %02X)", device, n, feature, n.sub_id)
+	_log.warn("%s: unrecognized %s for feature %s (index %02X)", device, n, feature, n.sub_id)

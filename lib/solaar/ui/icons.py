@@ -34,7 +34,8 @@ def _look_for_application_icons():
 	from os import environ as _environ
 
 	import sys as _sys
-	_log.debug("sys.path[0] = %s", _sys.path[0])
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("sys.path[0] = %s", _sys.path[0])
 	prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
 	src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
 	local_share = _environ.get('XDG_DATA_HOME', _path.expanduser('~/.local/share'))
@@ -56,7 +57,8 @@ def _look_for_application_icons():
 _default_theme = Gtk.IconTheme.get_default()
 for p in _look_for_application_icons():
 	_default_theme.prepend_search_path(p)
-_log.debug("icon theme paths: %s", _default_theme.get_search_path())
+if _log.isEnabledFor(_DEBUG):
+	_log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
 #
 #
@@ -69,7 +71,9 @@ _has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
 					_default_theme.has_icon('battery-full-charged')
 _has_elementary_icons = _default_theme.has_icon('battery-020-charging')
 
-_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s", _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
+if _log.isEnabledFor(_DEBUG):
+	_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s",
+					_has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
 if (not _has_gpm_icons and not _has_oxygen_icons and
 	not _has_gnome_icons and not _has_elementary_icons):
 	_log.warning("failed to detect a known icon set")
@@ -186,7 +190,8 @@ def icon_file(name, size=_LARGE_SIZE):
 	if _default_theme.has_icon(name):
 		theme_icon = _default_theme.lookup_icon(name, size, 0)
 		file_name = theme_icon.get_filename()
-		_log.debug("icon %s(%d) => %s", name, size, file_name)
+		# if _log.isEnabledFor(_DEBUG):
+		# 	_log.debug("icon %s(%d) => %s", name, size, file_name)
 		return file_name
 
 	_log.warn("icon %s(%d) not found in current theme", name, size)

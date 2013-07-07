@@ -343,8 +343,9 @@ def request(handle, devnumber, request_id, *params):
 					# 	_log.error("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
 					# 	raise NoSuchDevice(number=devnumber, request=request_id)
 
-					_log.debug("(%s) device 0x%02X error on request {%04X}: %d = %s",
-									handle, devnumber, request_id, error, _hidpp10.ERROR[error])
+					if _log.isEnabledFor(_DEBUG):
+						_log.debug("(%s) device 0x%02X error on request {%04X}: %d = %s",
+										handle, devnumber, request_id, error, _hidpp10.ERROR[error])
 					return
 
 				if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
