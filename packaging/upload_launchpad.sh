@@ -2,16 +2,15 @@
 
 set -e
 
-export DEBSIGN_KEYID=07D8904B
-export DEBMAIL="daniel.pavel+launchpad@gmail.com"
+export DEBCHANGE_VENDOR=ubuntu
+export DISTRIBUTION=precise
 
-export DISTRIBUTION=ubuntu
-export DIST_RELEASE=precise
-export DEBIAN_FILES_EXTRA="$PWD/packaging/ubuntu"
-export BUILD_EXTRA=ppa1
+export DEBFULLNAME='Daniel Pavel'
+export DEBEMAIL='daniel.pavel+launchpad@gmail.com'
+export DEBSIGN_KEYID=07D8904B
 
 Z="$(readlink -f "$(dirname "$0")")"
-"$Z"/build_deb.sh -S
+"$Z"/build_deb.sh --rebuild "$@"
 
-cd "$Z/../dist/ubuntu/"
-/usr/bin/dput --config="$Z/dput.cf" solaar-snapshots-ppa solaar_*_source.changes
+/usr/bin/dput --config="$Z/dput.cf" solaar-snapshots-ppa \
+	"$Z/../dist/ubuntu"/solaar_*_source.changes
