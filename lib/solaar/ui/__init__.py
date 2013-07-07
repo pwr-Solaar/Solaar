@@ -10,11 +10,15 @@ _log = getLogger(__name__)
 del getLogger
 
 from gi.repository import GLib, Gtk
-GLib.threads_init()
+
+
+from solaar.i18n import _
 
 #
 #
 #
+
+GLib.threads_init()
 
 def _init_application():
 	app = Gtk.Application.new('io.github.pwr.solaar', 0)
@@ -43,17 +47,15 @@ def _error_dialog(reason, object):
 	_log.error("error: %s %s", reason, object)
 
 	if reason == 'permissions':
-		title = 'Permissions error'
-		text = ('Found a Logitech Receiver (%s), but did not have permission to open it.\n'
-				'\n'
-				'If you\'ve just installed Solaar, try removing the receiver\n'
-				'and plugging it back in.' % object)
+		title = _("Permissions error")
+		text = _("Found a Logitech Receiver (%s), but did not have permission to open it.") % object + \
+				'\n\n' + \
+				_("If you've just installed Solaar, try removing the receiver and plugging it back in.")
 	elif reason == 'unpair':
-		title = 'Unpairing failed'
-		text = ('Failed to unpair %s from %s.\n'
-				'\n'
-				'The receiver returned an error, with no further details.'
-				% (object.name, object.receiver.name))
+		title = _("Unpairing failed")
+		text = _("Failed to unpair %s from %s.") % (object.name, object.receiver.name) + \
+				'\n\n' + \
+				_("The receiver returned an error, with no further details.")
 	else:
 		raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
 

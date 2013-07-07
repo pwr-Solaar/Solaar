@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from gi.repository import Gtk, GLib
 
 
+from solaar.i18n import _
 from solaar.ui import async as _ui_async
 from logitech_receiver.settings import KIND as _SETTING_KIND
 
@@ -75,13 +76,14 @@ def _create_choice_control(setting):
 
 def _create_sbox(s):
 	sbox = Gtk.HBox(homogeneous=False, spacing=6)
-	sbox.pack_start(Gtk.Label(s.label), False, False, 0)
+	label_text = _(s.label)
+	sbox.pack_start(Gtk.Label(label_text), False, False, 0)
 
 	spinner = Gtk.Spinner()
-	spinner.set_tooltip_text('Working...')
+	spinner.set_tooltip_text(_("Working") + '...')
 
 	failed = Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.SMALL_TOOLBAR)
-	failed.set_tooltip_text('Failed to read value from the device.')
+	failed.set_tooltip_text(_("Read/write operation failed."))
 
 	if s.kind == _SETTING_KIND.toggle:
 		control = _create_toggle_control(s)
@@ -98,7 +100,8 @@ def _create_sbox(s):
 	sbox.pack_end(failed, False, False, 0)
 
 	if s.description:
-		sbox.set_tooltip_text(s.description)
+		description_text = _(s.description)
+		sbox.set_tooltip_text(description_text)
 
 	sbox.show_all()
 	spinner.start()  # the first read will stop it

@@ -1,2 +1,3 @@
 include COPYRIGHT COPYING README.md ChangeLog
 recursive-include rules.d *
+recursive-include share/locale *

@@ -1,4 +1,4 @@
-#
+# -*- coding: UTF-8 -*-
 #
 #
 
@@ -11,7 +11,9 @@ del getLogger
 from gi.repository import Gtk, Gdk, GLib
 from gi.repository.GObject import TYPE_PYOBJECT
 
+
 from solaar import NAME
+from solaar.i18n import _
 # from solaar import __version__ as VERSION
 from solaar.ui import async as _ui_async
 from logitech_receiver import hidpp10 as _hidpp10
@@ -38,21 +40,21 @@ _TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
 assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
 assert len(_COLUMN_TYPES) == len(_COLUMN)
 
-_TOOLTIP_LINK_SECURE = 'The wireless link between this device and its receiver is encrypted.'
-_TOOLTIP_LINK_INSECURE = ('The wireless link between this device and its receiver is not encrypted.\n'
-						'\n'
-						'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
-						'\n'
-						'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
-						'because typed text can be sniffed inconspicuously by 3rd parties within range.')
+_TOOLTIP_LINK_SECURE = _("The wireless link between this device and its receiver is encrypted.")
+_TOOLTIP_LINK_INSECURE = _("The wireless link between this device and its receiver is not encrypted.\n"
+						"\n"
+						"For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n"
+						"\n"
+						"It is, however, a major security issue for text-input devices (keyboards, numpads),\n"
+						"because typed text can be sniffed inconspicuously by 3rd parties within range.")
 
 _UNIFYING_RECEIVER_TEXT = (
-		'No paired devices.\n\n<small>Up to %d devices can be paired to this receiver.</small>',
-		'%d paired device(s).\n\n<small>Up to %d devices can be paired to this receiver.</small>',
+		_("No device paired") + '.\n\n<small>' + _("Up to %d devices can be paired to this receiver") + '.</small>',
+		'%d ' + _("paired devices") + '\n\n<small>' + _("Up to %d devices can be paired to this receiver") + '.</small>',
 	)
 _NANO_RECEIVER_TEXT = (
-	'No paired device.\n\n<small> </small>',
-	' \n\n<small>Only one device can be paired to this receiver.</small>',
+		_("No device paired") + '.\n\n<small> </small>',
+		' \n\n<small>' + _("Only one device can be paired to this receiver") + '.</small>',
 	)
 
 #
@@ -93,7 +95,7 @@ def _create_receiver_panel():
 	p._count.set_alignment(0, 0.5)
 	p.pack_start(p._count, True, True, 0)
 
-	p._scanning = Gtk.Label('Scanning...')
+	p._scanning = Gtk.Label(_("Scanning") + '...')
 	p._spinner = Gtk.Spinner()
 
 	bp = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
@@ -126,14 +128,14 @@ def _create_device_panel():
 
 		return b
 
-	p._battery = _status_line('Battery')
+	p._battery = _status_line(_("Battery"))
 	p.pack_start(p._battery, False, False, 0)
 
-	p._secure = _status_line('Wireless Link')
+	p._secure = _status_line(_("Wireless Link"))
 	p._secure._icon.set_from_icon_name('dialog-warning', _INFO_ICON_SIZE)
 	p.pack_start(p._secure, False, False, 0)
 
-	p._lux = _status_line('Lighting')
+	p._lux = _status_line(_("Lighting"))
 	p.pack_start(p._lux, False, False, 0)
 
 	p._config = _config_panel.create()
@@ -162,7 +164,7 @@ def _create_buttons_box():
 	bb.set_layout(Gtk.ButtonBoxStyle.END)
 
 	bb._details = _new_button(None, 'dialog-information', _SMALL_BUTTON_ICON_SIZE,
-					tooltip='Show Technical Details', toggle=True, clicked=_update_details)
+					tooltip=_("Show Technical Details"), toggle=True, clicked=_update_details)
 	bb.add(bb._details)
 	bb.set_child_secondary(bb._details, True)
 	bb.set_child_non_homogeneous(bb._details, True)
@@ -175,7 +177,7 @@ def _create_buttons_box():
 		assert receiver.kind is None
 		_action.pair(_window, receiver)
 
-	bb._pair = _new_button('Pair new device', 'list-add', clicked=_pair_new_device)
+	bb._pair = _new_button(_("Pair new device"), 'list-add', clicked=_pair_new_device)
 	bb.add(bb._pair)
 
 	def _unpair_current_device(trigger):
@@ -186,7 +188,7 @@ def _create_buttons_box():
 		assert device.kind is not None
 		_action.unpair(_window, device)
 
-	bb._unpair = _new_button('Unpair', 'edit-delete', clicked=_unpair_current_device)
+	bb._unpair = _new_button(_("Unpair"), 'edit-delete', clicked=_unpair_current_device)
 	bb.add(bb._unpair)
 
 	return bb
@@ -194,7 +196,7 @@ def _create_buttons_box():
 
 def _create_empty_panel():
 	p = Gtk.Label()
-	p.set_markup('<small>Select a device</small>')
+	p.set_markup('<small>' + _("Select a device") + '</small>')
 	p.set_sensitive(False)
 
 	return p
@@ -299,7 +301,7 @@ def _create_window_layout():
 	panel.pack_start(_info, True, True, 0)
 	panel.pack_start(_empty, True, True, 0)
 
-	about_button = _new_button('About ' + NAME, 'help-about',
+	about_button = _new_button(_("About") + ' ' + NAME, 'help-about',
 					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
 
 	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
@@ -491,39 +493,39 @@ def _update_details(button):
 			# cached, and involves no HID++ calls.
 
 			if device.kind is None:
-				yield ('Path', device.path)
+				yield (_("Path"), device.path)
 				# 046d is the Logitech vendor id
-				yield ('USB id', '046d:' + device.product_id)
+				yield (_("USB id"), '046d:' + device.product_id)
 
 				if read_all:
-					yield ('Serial', device.serial)
+					yield (_("Serial"), device.serial)
 				else:
-					yield ('Serial', '...')
+					yield (_("Serial"), '...')
 
 			else:
 				# yield ('Codename', device.codename)
-				yield ('Index', device.number)
-				yield ('Wireless PID', device.wpid)
+				yield (_("Index"), device.number)
+				yield (_("Wireless PID"), device.wpid)
 				hid_version = device.protocol
-				yield ('Protocol', 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
+				yield (_("Protocol"), 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
 				if read_all and device.polling_rate:
-					yield ('Polling rate', '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
+					yield (_("Polling rate"), '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
 
 				if read_all or not device.online:
-					yield ('Serial', device.serial)
+					yield (_("Serial"), device.serial)
 				else:
-					yield ('Serial', '...')
+					yield (_("Serial"), '...')
 
 			if read_all:
 				for fw in list(device.firmware):
 					yield ('  ' +  str(fw.kind), (fw.name + ' ' + fw.version).strip())
 			elif device.kind is None or device.online:
-				yield ('  Firmware', '...')
+				yield ('  %s' % _("Firmware"), '...')
 
 			flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
 			if flag_bits is not None:
-				flag_names = ('(none)',) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
-				yield ('Notifications', ('\n%15s' % ' ').join(flag_names))
+				flag_names = ('(%s)' % _("none"),) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
+				yield (_("Notifications"), ('\n%15s' % ' ').join(flag_names))
 
 		def _set_details(text):
 			_details._text.set_markup(text)
@@ -605,7 +607,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_sensitive(False)
 		panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
 		panel._battery._text.set_sensitive(True)
-		panel._battery._text.set_markup('<small>unknown</small>')
+		panel._battery._text.set_markup('<small>%s</small>' % _("unknown"))
 	else:
 		charging = device.status.get(_K.BATTERY_CHARGING)
 		icon_name = _icons.battery(battery_level, charging)
@@ -618,25 +620,25 @@ def _update_device_panel(device, panel, buttons, full=False):
 			text = '%d%%' % battery_level
 		if is_online:
 			if charging:
-				text += ' <small>(charging)</small>'
+				text += ' <small>(%s)</small>' % _("charging")
 		else:
-			text += ' <small>(last known)</small>'
+			text += ' <small>(%s)</small>' % _("last known")
 		panel._battery._text.set_sensitive(is_online)
 		panel._battery._text.set_markup(text)
 
 	if is_online:
 		not_secure = device.status.get(_K.LINK_ENCRYPTED) == False
 		if not_secure:
-			panel._secure._text.set_text('not encrypted')
+			panel._secure._text.set_text(_("not encrypted"))
 			panel._secure._icon.set_from_icon_name('security-low', _INFO_ICON_SIZE)
 			panel._secure.set_tooltip_text(_TOOLTIP_LINK_INSECURE)
 		else:
-			panel._secure._text.set_text('encrypted')
+			panel._secure._text.set_text(_("encrypted"))
 			panel._secure._icon.set_from_icon_name('security-high', _INFO_ICON_SIZE)
 			panel._secure.set_tooltip_text(_TOOLTIP_LINK_SECURE)
 		panel._secure._icon.set_visible(True)
 	else:
-		panel._secure._text.set_markup('<small>offline</small>')
+		panel._secure._text.set_markup('<small>%s</small>' % _("offline"))
 		panel._secure._icon.set_visible(False)
 		panel._secure.set_tooltip_text('')
 
@@ -646,7 +648,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 			panel._lux.set_visible(False)
 		else:
 			panel._lux._icon.set_from_icon_name(_icons.lux(light_level), _INFO_ICON_SIZE)
-			panel._lux._text.set_text('%d lux' % light_level)
+			panel._lux._text.set_text('%d %s' % (light_level, _("lux")))
 			panel._lux.set_visible(True)
 	else:
 		panel._lux.set_visible(False)

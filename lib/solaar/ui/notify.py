@@ -5,6 +5,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
+from solaar.i18n import _
+
+#
+#
+#
+
 try:
 	# this import is allowed to fail, in which case the entire feature is unavailable
 	from gi.repository import Notify
@@ -89,8 +95,8 @@ try:
 			if n is None:
 				n = _notifications[summary] = Notify.Notification()
 
-			message = reason or ('unpaired' if dev.status is None else
-						(str(dev.status) or ('connected' if dev.status else 'offline')))
+			message = reason or (_("unpaired") if dev.status is None else
+						(str(dev.status) or (_("connected") if dev.status else _("offline"))))
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets

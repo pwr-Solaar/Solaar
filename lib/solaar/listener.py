@@ -8,6 +8,8 @@ from logging import getLogger, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
 
+
+from solaar.i18n import _
 from . import configuration
 from logitech_receiver import (
 				Receiver,
@@ -75,7 +77,7 @@ class ReceiverListener(_listener.EventsListener):
 		# make sure to clean up in _all_listeners
 		_all_listeners.pop(r.path, None)
 
-		r.status = 'The receiver was unplugged.'
+		r.status = _("The receiver was unplugged.")
 		if r:
 			try:
 				r.close()
@@ -262,8 +264,7 @@ _error_callback = None
 
 def setup_scanner(status_changed_callback, error_callback):
 	global _status_callback, _error_callback
-	if _status_callback:
-		raise Exception("scanner was already set-up")
+	assert _status_callback is None, 'scanner was already set-up'
 
 	_status_callback = status_changed_callback
 	_error_callback = error_callback

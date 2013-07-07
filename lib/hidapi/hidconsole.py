@@ -81,7 +81,7 @@ def _print(marker, data, scroll=False):
 
 
 def _error(text, scroll=False):
-	_print("!!", text, scroll)
+	_print('!!', text, scroll)
 
 
 def _continuous_read(handle, timeout=2000):
@@ -93,7 +93,7 @@ def _continuous_read(handle, timeout=2000):
 			break
 		assert reply is not None
 		if reply:
-			_print(">>", reply, True)
+			_print('>>', reply, True)
 
 
 def _validate_input(line, hidpp=False):
@@ -170,10 +170,10 @@ def _open(args):
 def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument('--history', help='history file (default ~/.hidconsole-history)')
-	arg_parser.add_argument('--hidpp', action='store_true', help='ensure input data is a valid HID++ request')
-	arg_parser.add_argument('device', nargs='?', help='linux device to connect to (/dev/hidrawX); '
-							'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver')
+	arg_parser.add_argument('--history', help="history file (default ~/.hidconsole-history)")
+	arg_parser.add_argument('--hidpp', action='store_true', help="ensure input data is a valid HID++ request")
+	arg_parser.add_argument('device', nargs='?', help="linux device to connect to (/dev/hidrawX); "
+							"may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver")
 	return arg_parser.parse_args()
 
 
@@ -187,7 +187,7 @@ def main():
 		import readline
 		if args.history is None:
 			import os.path
-			args.history = os.path.join(os.path.expanduser("~"), ".hidconsole-history")
+			args.history = os.path.join(os.path.expanduser('~'), '.hidconsole-history')
 		try:
 			readline.read_history_file(args.history)
 		except:
@@ -215,7 +215,7 @@ def main():
 			if data is None:
 				continue
 
-			_print("<<", data)
+			_print('<<', data)
 			_hid.write(handle, data)
 			# wait for some kind of reply
 			if args.hidpp and not interactive:

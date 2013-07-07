@@ -10,21 +10,28 @@ from gi.repository import Gtk, Gdk
 # _log = getLogger(__name__)
 # del getLogger
 
+
+from solaar.i18n import _
+
 #
 #
 #
 
-def make(name, label, function, *args):
+def make(name, label, function, stock_id=None, *args):
 	action = Gtk.Action(name, label, label, None)
 	action.set_icon_name(name)
+	if stock_id is not None:
+		action.set_stock_id(stock_id)
 	if function:
 		action.connect('activate', function, *args)
 	return action
 
 
-def make_toggle(name, label, function, *args):
+def make_toggle(name, label, function, stock_id=None, *args):
 	action = Gtk.ToggleAction(name, label, label, None)
 	action.set_icon_name(name)
+	if stock_id is not None:
+		action.set_stock_id(stock_id)
 	action.connect('activate', function, *args)
 	return action
 
@@ -43,7 +50,7 @@ def make_toggle(name, label, function, *args):
 
 from .about import show_window as _show_about_window
 from solaar import NAME
-about = make('help-about', 'About ' + NAME, _show_about_window)
+about = make('help-about', _("About") + ' ' + NAME, _show_about_window, stock_id=Gtk.STOCK_ABOUT)
 
 #
 #
@@ -70,10 +77,10 @@ def unpair(window, device):
 
 	qdialog = Gtk.MessageDialog(window, 0,
 								Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
-								"Unpair device\n%s ?" % device.name)
+								_("Unpair") + ' ' + device.name + ' ?')
 	qdialog.set_icon_name('remove')
 	qdialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
-	qdialog.add_button('Unpair', Gtk.ResponseType.ACCEPT)
+	qdialog.add_button(_("Unpair"), Gtk.ResponseType.ACCEPT)
 	choice = qdialog.run()
 	qdialog.destroy()
 	if choice == Gtk.ResponseType.ACCEPT:

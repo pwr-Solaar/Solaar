@@ -13,7 +13,9 @@ from time import time as _timestamp
 from gi.repository import Gtk, GLib
 from gi.repository.Gdk import ScrollDirection
 
+
 from solaar import NAME
+from solaar.i18n import _
 from logitech_receiver.status import KEYS as _K
 from . import icons as _icons
 from .window import popup as _window_popup, toggle as _window_toggle
@@ -35,14 +37,14 @@ def _create_menu(quit_handler):
 
 	# per-device menu entries will be generated as-needed
 
-	no_receiver = Gtk.MenuItem.new_with_label('No receiver found')
+	no_receiver = Gtk.MenuItem.new_with_label(_("No Logitech receiver found"))
 	no_receiver.set_sensitive(False)
 	menu.append(no_receiver)
 	menu.append(Gtk.SeparatorMenuItem.new())
 
 	from .action import about, make
 	menu.append(about.create_menu_item())
-	menu.append(make('application-exit', 'Quit', quit_handler).create_menu_item())
+	menu.append(make('application-exit', _("Quit"), quit_handler, stock_id=Gtk.STOCK_QUIT).create_menu_item())
 	del about, make
 
 	menu.show_all()
@@ -249,7 +251,7 @@ except ImportError:
 
 def _generate_tooltip_lines():
 	if not _devices_info:
-		yield '<b>%s</b>: no receivers' % NAME
+		yield '<b>%s</b>: ' % NAME + _("no receiver")
 		return
 
 	yield '<b>%s</b>' % NAME
@@ -265,12 +267,12 @@ def _generate_tooltip_lines():
 			if status:
 				yield '\t%s' % p
 			else:
-				yield '\t%s <small>(offline)</small>' % p
+				yield '\t%s <small>(' % p + _("offline") + ')</small>'
 		else:
 			if status:
-				yield '<b>%s</b> <small>no status</small>' % name
+				yield '<b>%s</b> <small>(' % name + _("no status") + ')</small>'
 			else:
-				yield '<b>%s</b> <small>(offline)</small>' % name
+				yield '<b>%s</b> <small>(' % name + _("offline") + ')</small>'
 		yield ''
 
 

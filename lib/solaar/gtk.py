@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 
 from solaar import __version__, NAME
+import solaar.i18n as _i18n
 
 #
 #
@@ -23,7 +24,7 @@ def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
-							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
+							help="print logging messages, for debugging purposes (may be repeated for extra verbosity)")
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	args = arg_parser.parse_args()
 
@@ -35,6 +36,9 @@ def _parse_arguments():
 	else:
 		logging.root.addHandler(logging.NullHandler())
 		logging.root.setLevel(logging.ERROR)
+
+	if logging.root.isEnabledFor(logging.INFO):
+		logging.info("language %s (%s), translations path %s", _i18n.language, _i18n.encoding, _i18n.path)
 
 	return args
 
@@ -63,7 +67,7 @@ def main():
 		listener.stop_all()
 	except Exception as e:
 		import sys
-		sys.exit("%s: error: %s" % (NAME.lower(), e))
+		sys.exit('%s: error: %s' % (NAME.lower(), e))
 
 
 if __name__ == '__main__':

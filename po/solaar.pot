@@ -1,0 +1,291 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: solaar 0.9.1\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2013-07-15 17:11+0200\n"
+        "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+        "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+        "Language-Team: LANGUAGE <LL@li.org>\n"
+        "Language: \n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+
+#: /home/pwr/projects/solaar/master/lib/solaar/listener.py:80
+msgid   "The receiver was unplugged."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:50
+msgid   "Permissions error"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:51
+#, python-format
+msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
+        "it."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:53
+msgid   "If you've just installed Solaar, try removing the receiver and "
+        "plugging it back in."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:55
+msgid   "Unpairing failed"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:56
+#, python-format
+msgid   "Failed to unpair %s from %s."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/__init__.py:58
+msgid   "The receiver returned an error, with no further details."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/about.py:23
+msgid   "Shows status of devices connected\n"
+        "through wireless Logitech receivers."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/about.py:32
+msgid   "GUI design"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/about.py:33
+msgid   "Testing"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/about.py:38
+msgid   "Logitech documentation"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/action.py:53
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:304
+msgid   "About"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/action.py:80
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/action.py:83
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:191
+msgid   "Unpair"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/config_panel.py:83
+msgid   "Working"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/config_panel.py:86
+msgid   "Read/write operation failed."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/notify.py:98
+msgid   "unpaired"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/notify.py:99
+msgid   "connected"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/notify.py:99
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:270
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:275
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:641
+msgid   "offline"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:118
+msgid   "Pairing failed"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:120
+msgid   "Make sure your device is within range, and it has a decent battery "
+        "charge."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:122
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:124
+#, python-format
+msgid   "The receiver only supports %d paired device(s)."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:126
+msgid   "No further details are available about the error."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:140
+msgid   "Found a new device"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:165
+msgid   "The wireless link is not encrypted"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:182
+msgid   "pair new device"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:190
+msgid   "Turn on the device you want to pair."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/pair_window.py:191
+msgid   "If the device is already turned on,\n"
+        "turn if off and on again."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:40
+msgid   "No Logitech receiver found"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:47
+msgid   "Quit"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:254
+msgid   "no receiver"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/tray.py:273
+msgid   "no status"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:43
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:44
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "\n"
+        "For pointing devices (mice, trackballs, trackpads), this is a minor "
+        "security issue.\n"
+        "\n"
+        "It is, however, a major security issue for text-input devices "
+        "(keyboards, numpads),\n"
+        "because typed text can be sniffed inconspicuously by 3rd parties "
+        "within range."
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:52
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:56
+msgid   "No device paired"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:52
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:53
+#, python-format
+msgid   "Up to %d devices can be paired to this receiver"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:53
+msgid   "paired devices"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:57
+msgid   "Only one device can be paired to this receiver"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:98
+msgid   "Scanning"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:131
+msgid   "Battery"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:134
+msgid   "Wireless Link"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:138
+msgid   "Lighting"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:167
+msgid   "Show Technical Details"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:180
+msgid   "Pair new device"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:199
+msgid   "Select a device"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:496
+msgid   "Path"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:498
+msgid   "USB id"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:501
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:503
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:515
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:517
+msgid   "Serial"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:507
+msgid   "Index"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:508
+msgid   "Wireless PID"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:510
+msgid   "Protocol"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:512
+msgid   "Polling rate"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:523
+msgid   "Firmware"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:527
+msgid   "none"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:528
+msgid   "Notifications"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:610
+msgid   "unknown"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:623
+msgid   "charging"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:625
+msgid   "last known"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:632
+msgid   "not encrypted"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:636
+msgid   "encrypted"
+msgstr  ""
+
+#: /home/pwr/projects/solaar/master/lib/solaar/ui/window.py:651
+msgid   "lux"
+msgstr  ""

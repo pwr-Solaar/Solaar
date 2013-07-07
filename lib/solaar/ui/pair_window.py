@@ -10,6 +10,8 @@ from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
+
+from solaar.i18n import _
 from . import icons as _icons
 from logitech_receiver.status import KEYS as _K
 
@@ -113,19 +115,15 @@ def _pairing_failed(assistant, receiver, error):
 
 	assistant.commit()
 
-	header = 'Pairing failed: %s.' % error
+	header = _("Pairing failed") + ': ' + _(error) + '.'
 	if 'timeout' in str(error):
-		text = ('Make sure your device is within range,\n'
-				'and it has a decent battery charge.')
+		text = _("Make sure your device is within range, and it has a decent battery charge.")
 	elif str(error) == 'device not supported':
-		text = ('A new device was detected, but\n'
-				'it is not compatible with this receiver.')
+		text = _("A new device was detected, but it is not compatible with this receiver.")
 	elif 'many' in str(error):
-		text = ('The receiver only supports\n'
-				'%d paired device(s).')
+		text = _("The receiver only supports %d paired device(s).")
 	else:
-		text = ('No further details are available\n'
-				'about the error.')
+		text = _("No further details are available about the error.")
 	_create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
 
 	assistant.next_page()
@@ -139,7 +137,7 @@ def _pairing_succeeded(assistant, receiver, device):
 
 	page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 
-	header = Gtk.Label('Found a new device:')
+	header = Gtk.Label(_("Found a new device") + ':')
 	header.set_alignment(0.5, 0)
 	page.pack_start(header, False, False, 0)
 
@@ -164,7 +162,7 @@ def _pairing_succeeded(assistant, receiver, device):
 		if assistant.is_drawable():
 			if device.status.get(_K.LINK_ENCRYPTED) == False:
 				hbox.pack_start(Gtk.Image.new_from_icon_name('security-low', Gtk.IconSize.MENU), False, False, 0)
-				hbox.pack_start(Gtk.Label('The wireless link is not encrypted!'), False, False, 0)
+				hbox.pack_start(Gtk.Label(_("The wireless link is not encrypted") + '!'), False, False, 0)
 				hbox.show_all()
 			else:
 				return True
@@ -181,7 +179,7 @@ def create(receiver):
 	assert receiver.kind is None
 
 	assistant = Gtk.Assistant()
-	assistant.set_title(receiver.name + ': pair new device')
+	assistant.set_title(receiver.name + ': ' + _("pair new device"))
 	assistant.set_icon_name('list-add')
 
 	assistant.set_size_request(400, 240)
@@ -189,8 +187,8 @@ def create(receiver):
 	assistant.set_role('pair-device')
 
 	page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS,
-					'Turn on the device you want to pair.', 'preferences-desktop-peripherals',
-					'If the device is already turned on,\nturn if off and on again.')
+					_("Turn on the device you want to pair."), 'preferences-desktop-peripherals',
+					_("If the device is already turned on,\nturn if off and on again."))
 	spinner = Gtk.Spinner()
 	spinner.set_visible(True)
 	page_intro.pack_end(spinner, True, True, 24)
