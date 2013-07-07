@@ -81,17 +81,27 @@ def _device_key(device):
 	return '%s:%s' % (device.wpid, device.serial)
 
 
+class _DeviceEntry(dict):
+	def __init__(self, *args, **kwargs):
+		super(_DeviceEntry, self).__init__(*args, **kwargs)
+
+	def __setitem__(self, key, value):
+		super(_DeviceEntry, self).__setitem__(key, value)
+		save()
+
+
 def _device_entry(device):
 	if not _configuration:
 		_load()
 
 	device_key = _device_key(device)
-	if device_key in _configuration:
-		c = _configuration[device_key]
-	else:
-		c = _configuration[device_key] = {}
+	c = _configuration.get(device_key) or {}
 
-	c[_KEY_NAME] = device.name
+	if not isinstance(c, _DeviceEntry):
+		c[_KEY_NAME] = device.name
+		c = _DeviceEntry(c)
+		_configuration[device_key] = c
+
 	return c
 
 
