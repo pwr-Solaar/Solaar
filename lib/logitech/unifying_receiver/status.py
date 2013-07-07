@@ -41,6 +41,7 @@ _BATTERY_ATTENTION_LEVEL = 5
 # If no updates have been receiver from the device for a while, ping the device
 # and update it status accordinly.
 # _STATUS_TIMEOUT = 5 * 60  # seconds
+_LONG_SLEEP = 15 * 60  # seconds
 
 #
 #
@@ -163,7 +164,7 @@ class DeviceStatus(dict):
 		if level is None:
 			# Some notifications may come with no battery level info, just
 			# charging state info, so assume the level is unchanged.
-			level = self[KEYS.BATTERY_LEVEL]
+			level = self.get(KEYS.BATTERY_LEVEL)
 		else:
 			assert isinstance(level, int)
 
@@ -220,6 +221,7 @@ class DeviceStatus(dict):
 		assert self._changed_callback
 		d = self._device
 		# assert d  # may be invalid when processing the 'unpaired' notification
+		timestamp = timestamp or _timestamp()
 
 		if active is not None:
 			d.online = active
@@ -232,12 +234,19 @@ class DeviceStatus(dict):
 					if d.protocol < 2.0:
 						self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
 
+					# If we've been inactive for a long time, forget anything
+					# about the battery.
+					if self.updated > 0 and timestamp - self.updated > _LONG_SLEEP:
+						self[KEYS.BATTERY_LEVEL] = None
+						self[KEYS.BATTERY_STATUS] = None
+						self[KEYS.BATTERY_CHARGING] = None
+
 					# Devices lose configuration when they are turned off,
 					# make sure they're up-to-date.
 					for s in self._device.settings:
 						s.apply()
 
-					if KEYS.BATTERY_LEVEL not in self:
+					if self.get(KEYS.BATTERY_LEVEL) is None:
 						self.read_battery(timestamp)
 			else:
 				if was_active:
@@ -253,7 +262,7 @@ class DeviceStatus(dict):
 			# (meaning just when the program started or a new receiver was just
 			# detected), pop-up a notification about it
 			alert |= ALERT.NOTIFICATION
-		self.updated = timestamp or _timestamp()
+		self.updated = timestamp
 
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
