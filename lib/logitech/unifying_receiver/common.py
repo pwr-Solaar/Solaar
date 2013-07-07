@@ -13,12 +13,7 @@ try:
 	_unpack_str = unpack
 	pack = lambda x, *args: _pack_str(str(x), *args)
 	unpack = lambda x, *args: _unpack_str(str(x), *args)
-except:
-	pass
 
-try:
-	unicode
-	# this is certanly Python 2
 	is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
 	# no easy way to distinguish between b'' and '' :(
 						# or (isinstance(d, str) \
@@ -30,6 +25,9 @@ except:
 	# In Py3, unicode and str are equal (the unicode object does not exist)
 	is_string = lambda d: isinstance(d, str)
 
+#
+#
+#
 
 class NamedInt(int):
 	"""An reqular Python integer with an attached name.
