@@ -5,7 +5,6 @@
   * Faster and more accurate detection of devices.
   * If upower is accessible through DBus, handle suspend/resume.
   * Replaced Solaar icons with SVGs.
-  * For devices that
   * Running solaar-cli in parallel with solaar is now less likely to cause issues.
   * Bugfixes to saving and applying device settings.
   * Properly handle ^C when running in console.
