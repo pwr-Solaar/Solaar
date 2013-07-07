@@ -1,6 +1,5 @@
-solaar (0.8.99.10-1) unstable; urgency=low
+solaar (0.8.99.11-1) unstable; urgency=low
 
-  * Debian packaging scripts, supports ubuntu ppa as well.
+  * Initial Debian release (closes: #715172)
 
- -- Daniel Pavel <daniel.pavel+debian@gmail.com>  Sat, 06 Jul 2013 14:24:27 +0200
-
+ -- Daniel Pavel <daniel.pavel+debian@gmail.com>  Sun, 07 Jul 2013 13:31:11 +0200
