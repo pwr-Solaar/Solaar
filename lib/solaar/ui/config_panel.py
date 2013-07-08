@@ -23,7 +23,7 @@ def _read_async(setting, force_read, sbox, device_is_online):
 
 
 def _write_async(setting, value, sbox):
-	_, failed, spinner, control = sbox.get_children()
+	_ignore, failed, spinner, control = sbox.get_children()
 	control.set_sensitive(False)
 	failed.set_visible(False)
 	spinner.set_visible(True)
@@ -40,7 +40,7 @@ def _write_async(setting, value, sbox):
 #
 
 def _create_toggle_control(setting):
-	def _switch_notify(switch, _, s):
+	def _switch_notify(switch, _ignore, s):
 		if switch.get_sensitive():
 			_write_async(s, switch.get_active() == True, switch.get_parent())
 
@@ -108,7 +108,7 @@ def _create_sbox(s):
 
 
 def _update_setting_item(sbox, value, is_online=True):
-	_, failed, spinner, control = sbox.get_children()
+	_ignore, failed, spinner, control = sbox.get_children()
 	spinner.set_visible(False)
 	spinner.stop()
 

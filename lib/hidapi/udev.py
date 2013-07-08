@@ -326,7 +326,7 @@ def get_indexed_string(device_handle, index):
 		hid_dev = dev.find_parent('hid')
 		if hid_dev:
 			assert 'HID_ID' in hid_dev
-			bus, _, _ = hid_dev['HID_ID'].split(':')
+			bus, _ignore, _ignore = hid_dev['HID_ID'].split(':')
 
 			if bus == '0003':  # USB
 				usb_dev = dev.find_parent('usb', 'usb_device')

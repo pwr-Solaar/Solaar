@@ -58,7 +58,7 @@ try:
 		_log.info("using AppIndicator3")
 
 	_last_scroll = 0
-	def _scroll(ind, _, direction):
+	def _scroll(ind, _ignore, direction):
 		if direction != ScrollDirection.UP and direction != ScrollDirection.DOWN:
 			# ignore all other directions
 			return
@@ -152,7 +152,7 @@ try:
 
 	def _update_tray_icon():
 		if _picked_device:
-			_, _, name, device_status = _picked_device
+			_ignore, _ignore, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
@@ -211,7 +211,7 @@ except ImportError:
 		_icon.set_tooltip_markup(tooltip)
 
 		if _picked_device:
-			_, _, name, device_status = _picked_device
+			_ignore, _ignore, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
@@ -255,7 +255,7 @@ def _generate_tooltip_lines():
 	yield '<b>%s</b>' % NAME
 	yield ''
 
-	for _, number, name, status in _devices_info:
+	for _ignore, number, name, status in _devices_info:
 		if number is None:  # receiver
 			continue
 
@@ -307,7 +307,7 @@ def _add_device(device):
 	assert receiver_path
 
 	index = None
-	for idx, (path, _, _, _) in enumerate(_devices_info):
+	for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
 		if path == receiver_path:
 			# the first entry matching the receiver serial should be for the receiver itself
 			index = idx + 1
@@ -316,7 +316,7 @@ def _add_device(device):
 
 	# proper ordering (according to device.number) for a receiver's devices
 	while True:
-		path, number, _, _ = _devices_info[index]
+		path, number, _ignore, _ignore = _devices_info[index]
 		if path == _RECEIVER_SEPARATOR[0]:
 			break
 		assert path == receiver_path
@@ -382,7 +382,7 @@ def _remove_receiver(receiver):
 
 	# remove all entries in devices_info that match this receiver
 	while index < len(_devices_info):
-		path, _, _, _ = _devices_info[index]
+		path, _ignore, _ignore, _ignore = _devices_info[index]
 		if path == receiver.path:
 			found = True
 			_remove_device(index)
@@ -455,7 +455,7 @@ def update(device=None):
 			receiver_path = device.path
 			if is_alive:
 				index = None
-				for idx, (path, _, _, _) in enumerate(_devices_info):
+				for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
 					if path == receiver_path:
 						index = idx
 						break
@@ -470,7 +470,7 @@ def update(device=None):
 			is_paired = bool(device)
 			receiver_path = device.receiver.path
 			index = None
-			for idx, (path, number, _, _) in enumerate(_devices_info):
+			for idx, (path, number, _ignore, _ignore) in enumerate(_devices_info):
 				if path == receiver_path and number == device.number:
 					index = idx
 

@@ -240,7 +240,7 @@ def _create_tree(model):
 	tree.set_enable_search(False)
 	tree.set_model(model)
 
-	def _is_separator(model, item, _=None):
+	def _is_separator(model, item, _ignore=None):
 		return model.get_value(item, _COLUMN.PATH) is None
 	tree.set_row_separator_func(_is_separator, None)
 
@@ -446,7 +446,7 @@ def select(receiver_path, device_number=None):
 		_log.warn("select(%s, %s) failed to find an item", receiver_path, device_number)
 
 
-def _hide(w, _=None):
+def _hide(w, _ignore=None):
 	assert w == _window
 	# some window managers move the window to 0,0 after hide()
 	# so try to remember the last position
