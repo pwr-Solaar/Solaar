@@ -107,7 +107,7 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 # Same goes for HID++ 2.0 feature settings (like _feature_fn_swap).
 #
 # The 'registers' field indicates read-only registers, specifying a state. These
-# are valid (AFAIK) only to HID+= 1.0 devices.
+# are valid (AFAIK) only to HID++ 1.0 devices.
 # The 'settings' field indicates a read/write register; based on them Solaar
 # generates, at runtime, the settings controls in the device panel. HID++ 1.0
 # devices may only have register-based settings; HID++ 2.0 devices may only have
