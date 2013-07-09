@@ -1,4 +1,4 @@
-0.8.99:
+0.9.0:
   * New single-window UI.
   * Performance MX leds show the current battery charge.
   * Support the VX Nano mouse.
