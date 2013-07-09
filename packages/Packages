@@ -61,18 +61,18 @@ Description: Logitech Unifying Receiver peripherals manager for Linux
  battery status.
 
 Package: solaar
-Version: 0.8.99.9-1
+Version: 0.9.0-1
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
-Installed-Size: 267
+Installed-Size: 341
 Depends: debconf (>= 0.5) | debconf-2.0, udev (>= 175), passwd | adduser, python (>= 2.7), python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4), gnome-icon-theme | oxygen-icon-theme
 Recommends: gir1.2-notify-0.7, consolekit (>= 0.4.3) | systemd (>= 44), python-dbus (>= 1.1.0), upower
-Suggests: gir1.2-appindicator3-0.1, solaar-gnome3 (= 0.8.99.9-1)
-Filename: ./solaar_0.8.99.9-1_all.deb
-Size: 89152
-MD5sum: 9cd7c0b3c479def456f61e12fc485cb0
-SHA1: 41d6385494117721289ebbb30502efb86d85264f
-SHA256: d6178cf5a7cf46437e67332588d6155aae23e4200a848222c812e8e228dfc7be
+Suggests: gir1.2-appindicator3-0.1, solaar-gnome3 (= 0.9.0-1)
+Filename: ./solaar_0.9.0-1_all.deb
+Size: 85710
+MD5sum: 94f5842c34a02d5df3fa204fe8df9a81
+SHA1: 1aad92e5dee2791543202c224aee22ad32e2c609
+SHA256: 1aaf7ecffece7dba3eeabf99402ed9fb76bb62c9bcae8103d43b0f27b94cec67
 Section: misc
 Priority: optional
 Homepage: http://pwr.github.io/Solaar
@@ -106,17 +106,17 @@ Description: gnome-shell/Unity integration for Solaar
 
 Package: solaar-gnome3
 Source: solaar
-Version: 0.8.99.9-1
+Version: 0.9.0-1
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
-Installed-Size: 3
-Depends: solaar (= 0.8.99.9-1), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10), gnome-icon-theme
+Installed-Size: 27
+Depends: solaar (= 0.9.0-1), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10), gnome-icon-theme
 Enhances: solaar
-Filename: ./solaar-gnome3_0.8.99.9-1_all.deb
-Size: 2870
-MD5sum: 49dbf3a314d270c1a45e0545a7bee354
-SHA1: cd93f6b98cb5da6f5a30966fdda033e0ebe87768
-SHA256: f3276e7fe1bab3d1c196361bf22d5ff5aef9b17964d5ef67a82d638da3b8c46b
+Filename: ./solaar-gnome3_0.9.0-1_all.deb
+Size: 2974
+MD5sum: 9b214bc593907b4845026ed45a05c49d
+SHA1: 436db2c3e2186ef2bb47dd00e73ef12ec0dcbfc5
+SHA256: a517e163f48f36dfad7bfa699e056fa34f81826c5b06ea4adf967527f39581c7
 Section: gnome
 Priority: optional
 Homepage: http://pwr.github.io/Solaar
