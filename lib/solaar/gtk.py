@@ -39,37 +39,31 @@ def _parse_arguments():
 	return args
 
 
-def _run(args):
-	import solaar.ui as ui
-	ui.init()
-
-	import solaar.listener as listener
-	listener.setup_scanner(ui.status_changed, ui.error_dialog)
-
-	listener.start_all()
-
-	# main UI event loop
-	ui.run_loop()
-	ui.destroy()
-
-	listener.stop_all()
-
-
 def main():
 	_require('pyudev', 'python-pyudev')
 	_require('gi.repository', 'python-gi')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
-	args = _parse_arguments()
+	_parse_arguments()
 
-	from . import appinstance
-	appid = appinstance.check()
+	# handle ^C in console
+	import signal
+	signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 	try:
-		# handle ^C in console
-		import signal
-		signal.signal(signal.SIGINT, signal.SIG_DFL)
-		_run(args)
-	finally:
-		appinstance.close(appid)
+		import solaar.ui as ui
+		ui.init()
+
+		import solaar.listener as listener
+		listener.setup_scanner(ui.status_changed, ui.error_dialog)
+		listener.start_all()
+
+		# main UI event loop
+		ui.run_loop()
+
+		listener.stop_all()
+	except Exception as e:
+		import sys
+		sys.exit("%s: error: %s" % (NAME.lower(), e))
 
 
 if __name__ == '__main__':

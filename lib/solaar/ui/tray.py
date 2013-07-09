@@ -30,7 +30,7 @@ _RECEIVER_SEPARATOR = ('~', None, None, None)
 #
 #
 
-def _create_menu():
+def _create_menu(quit_handler):
 	menu = Gtk.Menu()
 
 	# per-device menu entries will be generated as-needed
@@ -42,7 +42,7 @@ def _create_menu():
 
 	from .action import about, make
 	menu.append(about.create_menu_item())
-	menu.append(make('application-exit', 'Quit', Gtk.main_quit).create_menu_item())
+	menu.append(make('application-exit', 'Quit', quit_handler).create_menu_item())
 	del about, make
 
 	menu.show_all()
@@ -424,10 +424,10 @@ _devices_info = []
 _menu = None
 _icon = None
 
-def init():
+def init(_quit_handler):
 	global _menu, _icon
 	assert _menu is None
-	_menu = _create_menu()
+	_menu = _create_menu(_quit_handler)
 	assert _icon is None
 	_icon = _create(_menu)
 
