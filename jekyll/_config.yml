@@ -3,8 +3,8 @@ tagline: Linux devices manager for the Logitech Unifying Receiver.
 owner: pwr
 owner_url: https://github.com/pwr
 repository: https://github.com/pwr/Solaar
-version: 0.8.9.4
-tar_download: https://github.com/pwr/Solaar/archive/0.8.9.4.tar.gz
+version: 0.9.0
+tar_download: https://github.com/pwr/Solaar/archive/0.9.0.tar.gz
 ga_id: UA-36908718-1
 
 pygments: true

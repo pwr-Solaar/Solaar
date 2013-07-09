@@ -1,5 +1,7 @@
-solaar (0.8.99.12-1) unstable; urgency=low
+solaar (0.9.0-1) UNRELEASED; urgency=low
 
+  * Release 0.9.0.
   * Initial Debian release (closes: #715172)
 
- -- Daniel Pavel <daniel.pavel+debian@gmail.com>  Sun, 07 Jul 2013 22:13:30 +0200
+ -- Daniel Pavel <pwr@pwr-x220.acasa>  Tue, 09 Jul 2013 14:50:08 +0200
+
