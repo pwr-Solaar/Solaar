@@ -38,7 +38,7 @@ def _look_for_application_icons():
 		_log.debug("sys.path[0] = %s", _sys.path[0])
 	prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
 	src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
-	local_share = _environ.get('XDG_DATA_HOME', _path.expanduser('~/.local/share'))
+	local_share = _environ.get('XDG_DATA_HOME', _path.expanduser(_path.join('~', '.local', 'share')))
 	data_dirs = _environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
 	del _sys
 

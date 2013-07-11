@@ -10,8 +10,8 @@ from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
 
-_XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.join(_path.expanduser('~'), '.config')
-_file_path = _path.join(_path.join(_XDG_CONFIG_HOME, 'solaar'), 'config.json')
+_XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))
+_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
 
 from solaar import __version__
