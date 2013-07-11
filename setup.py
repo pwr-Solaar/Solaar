@@ -1,13 +1,27 @@
 #!/usr/bin/env python
 
-from glob import glob
+from glob import glob as _glob
 from distutils.core import setup
+
+autostart_path = '/etc/xdg/autostart'
 
 import sys
 backup_path_0 = sys.path[0]
 sys.path[0] = backup_path_0 + '/lib'
 from solaar import NAME, __version__
 sys.path[0] = backup_path_0
+
+if 'install' in sys.argv:
+	# naively guess where the autostart .desktop file should be installed
+	if '--prefix' in sys.argv or '--home' in sys.argv:
+		autostart_path = 'etc/xdg/autostart'
+	elif '--user' in sys.argv:
+		from os import environ
+		from os import path
+		xdg_config_home = environ.get('XDG_CONFIG_HOME', path.expanduser(path.join('~', '.config')))
+		autostart_path = path.join(xdg_config_home, 'autostart')
+		del environ, path, xdg_config_home
+
 del sys, backup_path_0
 
 setup(name=NAME.lower(),
@@ -42,11 +56,12 @@ battery status.
 		package_dir={'': 'lib'},
 		packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
 
-		data_files=[('share/solaar/icons', glob('share/solaar/icons/solaar*.svg')),
-					('share/solaar/icons', glob('share/solaar/icons/light_*.png')),
+		data_files=[('share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')),
+					('share/solaar/icons', _glob('share/solaar/icons/light_*.png')),
 					('share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']),
 					('share/applications', ['share/applications/solaar.desktop']),
+					(autostart_path, ['share/applications/solaar.desktop']),
 					],
 
-		scripts=glob('bin/*'),
+		scripts=_glob('bin/*'),
 	)
