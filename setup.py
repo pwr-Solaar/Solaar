@@ -42,10 +42,10 @@ battery status.
 		package_dir={'': 'lib'},
 		packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
 
-		data_files=[('share/pixmaps', ['share/solaar/icons/solaar.svg']),
-					('share/applications', ['share/applications/solaar.desktop']),
+		data_files=[('share/solaar/icons', glob('share/solaar/icons/solaar*.svg')),
 					('share/solaar/icons', glob('share/solaar/icons/light_*.png')),
-					('share/solaar/icons', glob('share/solaar/icons/solaar*.svg')),
+					('share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']),
+					('share/applications', ['share/applications/solaar.desktop']),
 					],
 
 		scripts=glob('bin/*'),
