@@ -119,17 +119,21 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 
 _D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
 _D('Wireless Keyboard K270')
-_D('Wireless Keyboard K350')
+_D('Wireless Keyboard MK330')
+_D('Wireless Keyboard K340')
+_D('Wireless Keyboard K350', wpid='200A')
 _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Touch Keyboard K400', protocol=2.0, wpid='4024',
+_D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 				settings=[
 							_FS.fn_swap()
 						],
 				)
+_D('Wireless Keyboard MK520')
+_D('Wireless Keyboard MK550')
 _D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
 				registers=(_R.battery_status, ),
 				settings=[
@@ -163,7 +167,9 @@ _D('Wireless Mouse M315', protocol=1.0)
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M345')
-_D('Wireless Mouse M505')
+_D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
+				registers=(_R.battery_charge, ),
+				)
 _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				registers=(_R.battery_status, ),
 				settings=[
