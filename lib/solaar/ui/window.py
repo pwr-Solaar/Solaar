@@ -582,7 +582,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
 	may_pair = receiver.may_unpair and not is_pairing
 	if may_pair and devices_count >= receiver.max_devices:
-		online_devices = (n for n in range(1, receiver.max_devices) if n in receiver and receiver[n].online)
+		online_devices = tuple(n for n in range(1, receiver.max_devices) if n in receiver and receiver[n].online)
 		may_pair &= len(online_devices) < receiver.max_devices
 	buttons._pair.set_sensitive(may_pair)
 	buttons._pair.set_visible(True)
