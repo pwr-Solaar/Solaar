@@ -25,6 +25,9 @@ _log.setLevel(logging.root.level)
 del logging
 
 
+__version__ = '0.9'
+
+
 from .common import strhex
 from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
 from .receiver import Receiver, PairedDevice

@@ -14,7 +14,7 @@ from gi.repository import Gtk, GLib
 from gi.repository.Gdk import ScrollDirection
 
 from solaar import NAME
-from logitech.unifying_receiver.status import KEYS as _K
+from logitech_receiver.status import KEYS as _K
 from . import icons as _icons
 from .window import popup as _window_popup, toggle as _window_toggle
 

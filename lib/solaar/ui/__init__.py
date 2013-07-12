@@ -139,7 +139,7 @@ def run_loop():
 #
 #
 
-from logitech.unifying_receiver.status import ALERT
+from logitech_receiver.status import ALERT
 def _status_changed(device, alert, reason):
 	assert device is not None
 	if _log.isEnabledFor(_DEBUG):

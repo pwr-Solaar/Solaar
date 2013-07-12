@@ -8,7 +8,7 @@ from gi.repository import Gtk, GLib
 
 
 from solaar.ui import async as _ui_async
-from logitech.unifying_receiver.settings import KIND as _SETTING_KIND
+from logitech_receiver.settings import KIND as _SETTING_KIND
 
 #
 #

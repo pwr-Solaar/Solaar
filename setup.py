@@ -54,7 +54,7 @@ battery status.
 		requires=['pyudev (>= 0.13)', 'gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
 		package_dir={'': 'lib'},
-		packages=['hidapi', 'logitech', 'logitech.unifying_receiver', 'solaar', 'solaar.ui'],
+		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui'],
 
 		data_files=[('share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')),
 					('share/solaar/icons', _glob('share/solaar/icons/light_*.png')),

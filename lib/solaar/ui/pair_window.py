@@ -11,7 +11,7 @@ _log = getLogger(__name__)
 del getLogger
 
 from . import icons as _icons
-from logitech.unifying_receiver.status import KEYS as _K
+from logitech_receiver.status import KEYS as _K
 
 #
 #

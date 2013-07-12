@@ -9,10 +9,12 @@ _log = getLogger(__name__)
 del getLogger
 
 from . import configuration
-from logitech.unifying_receiver import (Receiver,
-										listener as _listener,
-										status as _status,
-										notifications as _notifications)
+from logitech_receiver import (
+				Receiver,
+				listener as _listener,
+				status as _status,
+				notifications as _notifications
+			)
 
 #
 #
@@ -254,7 +256,7 @@ from . import upower
 upower.watch(start_all, stop_all)
 
 
-from logitech.unifying_receiver import base as _base
+from logitech_receiver import base as _base
 _status_callback = None
 _error_callback = None
 

@@ -12,7 +12,6 @@ del getLogger
 # As suggested here: http://stackoverflow.com/a/13548984
 #
 
-
 _suspend_callback = None
 def _suspend():
 	if _suspend_callback:

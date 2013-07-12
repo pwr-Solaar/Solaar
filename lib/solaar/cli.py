@@ -32,8 +32,8 @@ def _require(module, os_package):
 #
 
 def _receiver(dev_path=None):
-	from logitech.unifying_receiver import Receiver
-	from logitech.unifying_receiver.base import receivers
+	from logitech_receiver import Receiver
+	from logitech_receiver.base import receivers
 	for dev_info in receivers():
 		if dev_path is not None and dev_path != dev_info.path:
 			continue
@@ -93,7 +93,7 @@ def _print_receiver(receiver, verbose=False):
 
 	print ("   Has", paired_count, "paired device(s) out of a maximum of", receiver.max_devices, ".")
 
-	from logitech.unifying_receiver import hidpp10
+	from logitech_receiver import hidpp10
 	notification_flags = hidpp10.get_notification_flags(receiver)
 	if notification_flags is not None:
 		if notification_flags:
@@ -133,7 +133,7 @@ def _print_device(dev, verbose=False):
 	if dev.power_switch_location:
 		print ("   The power switch is located on the %s." % dev.power_switch_location)
 
-	from logitech.unifying_receiver import hidpp10, hidpp20, special_keys
+	from logitech_receiver import hidpp10, hidpp20, special_keys
 
 	if dev.online:
 		notification_flags = hidpp10.get_notification_flags(dev)
@@ -166,7 +166,7 @@ def _print_device(dev, verbose=False):
 		if battery is None:
 			battery = hidpp10.get_battery(dev)
 		if battery is not None:
-			from logitech.unifying_receiver.common import NamedInt as _NamedInt
+			from logitech_receiver.common import NamedInt as _NamedInt
 			level, status = battery
 			if isinstance(level, _NamedInt):
 				text = str(level)
@@ -201,7 +201,7 @@ def pair_device(receiver, args):
 	# get all current devices
 	known_devices = [dev.number for dev in receiver]
 
-	from logitech.unifying_receiver import base, hidpp10, status, notifications
+	from logitech_receiver import base, hidpp10, status, notifications
 	receiver.status = status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
 	# check if it's necessary to set the notification flags
@@ -300,7 +300,7 @@ def config_device(receiver, args):
 		print ("%s = %s" % (setting.name, setting.read()))
 		return
 
-	from logitech.unifying_receiver import settings as _settings
+	from logitech_receiver import settings as _settings
 
 	if setting.kind == _settings.KIND.toggle:
 		value = args.value

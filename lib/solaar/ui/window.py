@@ -14,9 +14,9 @@ from gi.repository.GObject import TYPE_PYOBJECT
 from solaar import NAME
 # from solaar import __version__ as VERSION
 from solaar.ui import async as _ui_async
-from logitech.unifying_receiver import hidpp10 as _hidpp10
-from logitech.unifying_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
-from logitech.unifying_receiver.status import KEYS as _K
+from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
+from logitech_receiver.status import KEYS as _K
 from . import config_panel as _config_panel
 from . import action as _action, icons as _icons
 from .about import show_window as _show_about_window
