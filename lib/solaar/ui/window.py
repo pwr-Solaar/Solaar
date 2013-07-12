@@ -410,10 +410,16 @@ def _device_row(receiver_path, device_number, device=None):
 
 	receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
 	item = _model.iter_children(receiver_row)
+	new_child_index = 0
 	while item:
-		if ((_model.get_value(item, _COLUMN.PATH) == receiver_path) and
-			(_model.get_value(item, _COLUMN.NUMBER) == device_number)):
+		assert _model.get_value(item, _COLUMN.PATH) == receiver_path
+		item_number = _model.get_value(item, _COLUMN.NUMBER)
+		if item_number == device_number:
 			return item
+		if item_number > device_number:
+			item = None
+			break
+		new_child_index += 1
 		item = _model.iter_next(item)
 
 	if not item and device:
@@ -423,8 +429,8 @@ def _device_row(receiver_path, device_number, device=None):
 		row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device)
 		assert len(row_data) == len(_TREE_SEPATATOR)
 		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("new device row %s", row_data)
-		item = _model.append(receiver_row, row_data)
+		# 	_log.debug("new device row %s at index %d", row_data, new_child_index)
+		item = _model.insert(receiver_row, new_child_index, row_data)
 
 	return item or None
 
