@@ -178,9 +178,14 @@ class DeviceStatus(dict):
 		changed = old_level != level or old_status != status or old_charging != charging
 		alert, reason = ALERT.NONE, None
 
-		if not _hidpp20.BATTERY_OK(status) or level <= _BATTERY_ATTENTION_LEVEL:
+		if _hidpp20.BATTERY_OK(status) and level > _BATTERY_ATTENTION_LEVEL:
+			self[KEYS.ERROR] = None
+		else:
 			_log.warn("%s: battery %d%%, ALERT %s", self._device, level, status)
-			alert = ALERT.NOTIFICATION | ALERT.ATTENTION
+			if self.get(KEYS.ERROR) != status:
+				self[KEYS.ERROR] = status
+				# only show the notification once
+				alert = ALERT.NOTIFICATION | ALERT.ATTENTION
 			if isinstance(level, _NamedInt):
 				reason = 'battery: %s (%s)' % (level, status)
 			else:
@@ -189,7 +194,7 @@ class DeviceStatus(dict):
 		if changed or reason:
 			# update the leds on the device, if any
 			_hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
-			self.changed(alert=alert, reason=reason, timestamp=timestamp)
+			self.changed(active=True, alert=alert, reason=reason, timestamp=timestamp)
 
 	def read_battery(self, timestamp=None):
 		if self._active:

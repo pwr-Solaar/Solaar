@@ -213,17 +213,18 @@ def _process_feature_notification(device, status, n, feature):
 	if feature == _F.SOLAR_DASHBOARD:
 		if n.data[5:9] == b'GOOD':
 			charge, lux, adc = _unpack('!BHH', n.data[:5])
-			status[_K.BATTERY_LEVEL] = charge
 			# guesstimate the battery voltage, emphasis on 'guess'
-			status[_K.BATTERY_STATUS] = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
+			# status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
+			status_text = _hidpp20.BATTERY_STATUS.discharging
+
 			if n.address == 0x00:
 				status[_K.LIGHT_LEVEL] = None
-				status[_K.BATTERY_CHARGING] = None
-				status.changed(active=True)
+				status.set_battery_info(charge, status_text)
 			elif n.address == 0x10:
 				status[_K.LIGHT_LEVEL] = lux
-				status[_K.BATTERY_CHARGING] = lux > 200
-				status.changed(active=True)
+				if lux > 200:
+					status_text = _hidpp20.BATTERY_STATUS.recharging
+				status.set_battery_info(charge, status_text)
 			elif n.address == 0x20:
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("%s: Light Check button pressed", device)
