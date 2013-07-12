@@ -12,9 +12,6 @@ export DEBSIGN_KEYID=0B34B1A7
 Z="$(readlink -f "$(dirname "$0")")"
 "$Z"/build_deb.sh --release "$@"
 
-read -p 'Version: ' VERSION
-test "$VERSION"
-CHANGES_FILE="$Z/../dist/solaar_${VERSION}_source.changes"
-test -r "$CHANGES_FILE"
-
+cd "$Z/../dist"
+CHANGES_FILE=$(/bin/ls --format=single-column --sort=time solaar_*_source.changes | /usr/bin/head --lines=1)
 /usr/bin/dput --config="$Z/dput.cf" mentors "$CHANGES_FILE"
