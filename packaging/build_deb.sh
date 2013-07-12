@@ -95,10 +95,19 @@ cd "$BUILD_DIR"
 if test "$DEBCHANGE_VENDOR" = debian; then
 	# if this is the main (Debian) build, update the source changelog
 	/bin/cp --archive --no-target-directory debian/changelog "$DEBIAN_FILES"/changelog
-else
+elif test -d "$DEBIAN_FILES_VENDOR"; then
 	# else copy any additional files
 	/bin/cp --archive --target-directory=debian/ "$DEBIAN_FILES_VENDOR"/* || true
 fi
+
+# install vendor-specific substvars files, if any
+/usr/bin/find debian/ -type f -name "substvars.*.$DEBCHANGE_VENDOR" |\
+while read subst_source; do
+	subst_target="${subst_source%.$DEBCHANGE_VENDOR}"
+	/bin/mv --force "$subst_source" "$subst_target"
+done
+# remove the templates, they are not relevant to the debian source package
+/bin/rm --force debian/substvars.*.*
 
 /usr/bin/debuild \
 	--lintian --tgz-check \

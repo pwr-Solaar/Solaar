@@ -1,0 +1,5 @@
+# distro package containing some required icons
+Desktop-Icon-Theme=gnome-icon-theme | oxygen-icon-theme
+
+# dependency for solaar-gnome3 (gnome-shell/unity specific)
+Gnome-Icon-Theme=gnome-icon-theme
