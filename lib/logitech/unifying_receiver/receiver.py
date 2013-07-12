@@ -145,7 +145,7 @@ class PairedDevice(object):
 		if self._name is None:
 			if self.protocol >= 2.0 and self.online:
 				self._name = _hidpp20.get_name(self)
-		return self._name or ('Unknown device %s' % self.wpid)
+		return self._name or self.codename  or ('Unknown device %s' % self.wpid)
 
 	@property
 	def kind(self):
