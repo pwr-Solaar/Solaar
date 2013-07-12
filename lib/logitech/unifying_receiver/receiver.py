@@ -119,7 +119,7 @@ class PairedDevice(object):
 
 	@property
 	def protocol(self):
-		if self._protocol is None:
+		if self._protocol is None and self.online is not False:
 			self._protocol = _base.ping(self.receiver.handle, self.number)
 			# if the ping failed, the peripheral is (almost) certainly offline
 			self.online = self._protocol is not None
