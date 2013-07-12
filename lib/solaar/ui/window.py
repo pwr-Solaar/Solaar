@@ -793,7 +793,7 @@ def update(device, need_popup=False):
 				icon_name = _icons.battery(battery_level, charging)
 				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
-			if selected_device_id is None:
+			if selected_device_id is None or need_popup:
 				select(device.receiver.path, device.number)
 			elif selected_device_id == (device.receiver.path, device.number):
 				full_update = need_popup or was_online != is_online
