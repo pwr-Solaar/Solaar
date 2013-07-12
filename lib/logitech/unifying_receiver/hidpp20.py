@@ -146,7 +146,7 @@ class FeaturesArray(object):
 				return False
 
 			# I _think_ this is universally true
-			if self.device.protocol is not None and self.device.protocol < 2.0:
+			if self.device.protocol and self.device.protocol < 2.0:
 				self.supported = False
 				self.device.features = None
 				self.device = None

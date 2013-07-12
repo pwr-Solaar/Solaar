@@ -140,7 +140,7 @@ def get_battery(device):
 		return
 
 	"""Reads a device's battery level, if provided by the HID++ 1.0 protocol."""
-	if device.protocol >= 2.0:
+	if device.protocol and device.protocol >= 2.0:
 		# let's just assume HID++ 2.0 devices do not provide the battery info in a register
 		return
 
@@ -288,8 +288,7 @@ def get_notification_flags(device):
 	# or the device does not support registers.
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
-		p = device.protocol
-		if p is not None and p >= 2.0:
+		if device.protocol and device.protocol >= 2.0:
 			return
 
 	flags = read_register(device, REGISTERS.notifications)
@@ -305,8 +304,7 @@ def set_notification_flags(device, *flag_bits):
 	# or the device does not support registers.
 	if device.kind is not None:
 		# peripherals with protocol >= 2.0 don't support registers
-		p = device.protocol
-		if p is not None and p >= 2.0:
+		if device.protocol and device.protocol >= 2.0:
 			return
 
 	flag_bits = sum(int(b) for b in flag_bits)
