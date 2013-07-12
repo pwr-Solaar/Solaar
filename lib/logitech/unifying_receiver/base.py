@@ -9,7 +9,7 @@ from time import time as _timestamp
 from random import getrandbits as _random_bits
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('LUR.base')
+_log = getLogger(__name__)
 del getLogger
 
 

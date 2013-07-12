@@ -5,10 +5,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from time import time as _timestamp
-# from weakref import proxy as _proxy
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('LUR.status')
+_log = getLogger(__name__)
 del getLogger
 
 
@@ -66,7 +65,7 @@ class ReceiverStatus(dict):
 	"""
 	def __init__(self, receiver, changed_callback):
 		assert receiver
-		self._receiver = receiver  # _proxy(receiver)
+		self._receiver = receiver
 
 		assert changed_callback
 		self._changed_callback = changed_callback
@@ -113,7 +112,7 @@ class DeviceStatus(dict):
 	"""
 	def __init__(self, device, changed_callback):
 		assert device
-		self._device = device  #_proxy(device)
+		self._device = device
 
 		assert changed_callback
 		self._changed_callback = changed_callback

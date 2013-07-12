@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
 
 # standard Unifying receivers (marked with the orange Unifying logo)

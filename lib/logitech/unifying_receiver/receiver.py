@@ -5,11 +5,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
-# from weakref import proxy as _proxy
 
 from logging import getLogger, INFO as _INFO
-_log = getLogger('LUR.receiver')
+_log = getLogger(__name__)
 del getLogger
+
 
 from . import base as _base
 from . import hidpp10 as _hidpp10
@@ -27,7 +27,7 @@ _R = _hidpp10.REGISTERS
 class PairedDevice(object):
 	def __init__(self, receiver, number, link_notification=None):
 		assert receiver
-		self.receiver = receiver  # _proxy(receiver)
+		self.receiver = receiver
 
 		assert number > 0 and number <= receiver.max_devices
 		# Device number, 1..6 for unifying devices, 1 otherwise.

@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+
 from . import hidpp10 as _hidpp10
 from .common import NamedInts as _NamedInts
 from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS

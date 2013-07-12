@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .settings import (

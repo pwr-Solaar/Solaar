@@ -4,8 +4,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# from weakref import proxy as _proxy
 from copy import copy as _copy
+
 
 from .common import NamedInt as _NamedInt, NamedInts as _NamedInts
 
@@ -48,7 +48,7 @@ class Setting(object):
 
 		o = _copy(self)
 		o._value = None
-		o._device = device  # _proxy(device)
+		o._device = device
 		return o
 
 	@property

@@ -6,8 +6,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
-_log = getLogger('LUR.notifications')
+_log = getLogger(__name__)
 del getLogger
+
 
 from .common import strhex as _strhex, unpack as _unpack
 from . import hidpp10 as _hidpp10

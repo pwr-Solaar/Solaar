@@ -5,11 +5,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger('LUR.hidpp20')
+_log = getLogger(__name__)
 del getLogger
 
-
-# from weakref import proxy as _proxy
 
 from .common import (FirmwareInfo as _FirmwareInfo,
 					ReprogrammableKeyInfo as _ReprogrammableKeyInfo,
@@ -125,7 +123,7 @@ class FeaturesArray(object):
 
 	def __init__(self, device):
 		assert device is not None
-		self.device = device  # _proxy(device)
+		self.device = device
 		self.supported = True
 		self.features = None
 
@@ -259,7 +257,7 @@ class KeysArray(object):
 
 	def __init__(self, device, count):
 		assert device is not None
-		self.device = device  # _proxy(device)
+		self.device = device
 		self.keys = [None] * count
 
 	def __getitem__(self, index):

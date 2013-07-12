@@ -16,7 +16,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 
 _DEBUG = logging.DEBUG
-_log = logging.getLogger('LUR')
+_log = logging.getLogger(__name__)
 _log.setLevel(logging.root.level)
 # if logging.root.level > logging.DEBUG:
 # 	_log.addHandler(logging.NullHandler())

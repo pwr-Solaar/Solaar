@@ -14,8 +14,9 @@ except ImportError:
 	from queue import Queue as _Queue
 
 from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
-_log = getLogger('LUR.listener')
+_log = getLogger(__name__)
 del getLogger
+
 
 from . import base as _base
 
