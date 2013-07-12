@@ -45,18 +45,20 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 			assert registers is None
 			assert settings is None or all(s._rw.kind == 2 for s in settings)
 
-	DEVICES[codename] = _DeviceDescriptor(
-					name=name,
-					kind=kind,
-					wpid=wpid,
-					codename=codename,
-					protocol=protocol,
-					registers=registers,
-					settings=settings)
+	device_descriptor = _DeviceDescriptor(name=name, kind=kind,
+					wpid=wpid, codename=codename, protocol=protocol,
+					registers=registers, settings=settings)
+
+	assert codename not in DEVICES, "duplicate codename in device descriptors: %s" % (DEVICES[codename], )
+	DEVICES[codename] = device_descriptor
 
 	if wpid:
-		assert wpid not in DEVICES
-		DEVICES[wpid] = DEVICES[codename]
+		if not isinstance(wpid, tuple):
+			wpid = (wpid, )
+
+		for w in wpid:
+			assert w not in DEVICES, "duplicate wpid in device descriptors: %s" % (DEVICES[w], )
+			DEVICES[w] = device_descriptor
 
 #
 #
