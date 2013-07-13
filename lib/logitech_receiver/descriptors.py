@@ -155,16 +155,16 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 
 # Mice
 
-_D('Wireless Mouse M175', protocol=1.0)
-_D('Wireless Mouse M185', protocol=1.0)
-_D('Wireless Mouse M187', protocol=1.0)
+_D('Wireless Mouse M175')
+_D('Wireless Mouse M185')
+_D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
-_D('Wireless Mouse M235', protocol=1.0)
+_D('Wireless Mouse M235')
 _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
 				registers=(_R.battery_status, ),
 				)
-_D('Wireless Mouse M310', protocol=1.0)
-_D('Wireless Mouse M315', protocol=1.0)
+_D('Wireless Mouse M310')
+_D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M345')
