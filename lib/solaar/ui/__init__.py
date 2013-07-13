@@ -18,6 +18,8 @@ GLib.threads_init()
 
 def _init_application():
 	app = Gtk.Application.new('io.github.pwr.solaar', 0)
+	# not sure this is necessary...
+	# app.set_property('register-session', True)
 	registered = app.register(None)
 	if _log.isEnabledFor(_INFO):
 		_log.info("application %s, registered %s", app.get_dbus_object_path(), registered)
