@@ -21,7 +21,9 @@ fi
 export DEBMAIL="$DEBEMAIL"
 
 export DEBCHANGE_VENDOR=${DEBCHANGE_VENDOR:-$(/usr/bin/dpkg-vendor --query vendor | /usr/bin/tr 'A-Z' 'a-z')}
+test "$DEBCHANGE_VENDOR"
 DISTRIBUTION=${DISTRIBUTION:-UNRELEASED}
+test "$DISTRIBUTION"
 
 cd "$(dirname "$0")/.."
 DEBIAN_FILES="$PWD/packaging/debian"
@@ -108,6 +110,13 @@ while read subst_source; do
 done
 # remove the templates, they are not relevant to the debian source package
 /bin/rm --force debian/substvars.*.*
+
+# apply custom substvars and clean-up debian/
+cat debian/substvars.* | /bin/grep '^[-A-Za-z]*=' | /usr/bin/tr '=' ' ' |\
+while read variable value; do
+	/bin/sed --in-place --expression="s/\${solaar:$variable}/$value/" debian/control
+done
+/bin/rm --force debian/substvars.*
 
 /usr/bin/debuild \
 	--lintian --tgz-check \

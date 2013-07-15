@@ -1,22 +1,22 @@
+[DEFAULT]
+progress_indicator = 2
+allow_unsigned_uploads = 0
+login = anonymous
+
 [solaar-ppa]
 fqdn = ppa.launchpad.net
-method = ftp
 incoming = ~daniel.pavel/solaar/ubuntu/
-login = anonymous
-allow_unsigned_uploads = 0
+method = ftp
+allowed_distributions = precise
 
 [solaar-snapshots-ppa]
 fqdn = ppa.launchpad.net
-method = ftp
 incoming = ~daniel.pavel/solaar-snapshots/ubuntu/
-login = anonymous
-allow_unsigned_uploads = 0
+method = ftp
+allowed_distributions = precise
 
 [mentors]
 fqdn = mentors.debian.net
 incoming = /upload
 method = http
-allow_unsigned_uploads = 0
-progress_indicator = 2
-# Allow uploads for UNRELEASED packages
-allowed_distributions = .*
+allowed_distributions = unstable

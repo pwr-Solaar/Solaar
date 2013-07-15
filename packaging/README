@@ -1,5 +1,5 @@
-The debian/ and ubuntu/ folders are maintained by me and used for all releases
-for those respective distros.
+The debian/ folder is maintained by me and used for all releases for Debian
+and Ubuntu.
 
 The rest of the files serve as samples/guidelines for packaging Solaar.
 They may be out-of-date or simply wrong, and are not necessarily used to build

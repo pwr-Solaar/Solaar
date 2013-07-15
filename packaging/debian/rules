@@ -6,7 +6,6 @@
 #export DH_OPTIONS=-v
 
 PREFIX = /usr
--include debian/rules.extra
 
 %:
 	# Adding the required helpers
@@ -16,7 +15,4 @@ override_dh_auto_install:
 	dh_auto_install -- --prefix=$(PREFIX) --install-lib=$(PREFIX)/share/solaar/lib
 
 override_dh_python2:
-	dh_python2 $(PREFIX)/share/solaar
-
-override_dh_gencontrol:
-	dh_gencontrol -- -Tdebian/substvars.theme
+	dh_python2 $(PREFIX)/share/solaar/lib

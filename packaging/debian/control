@@ -15,7 +15,7 @@ Package: solaar
 Architecture: all
 Depends: ${misc:Depends}, ${debconf:Depends}, udev (>= 175), passwd | adduser,
  ${python:Depends}, python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
- ${Desktop-Icon-Theme}
+ ${solaar:Desktop-Icon-Theme}
 Recommends: gir1.2-notify-0.7, consolekit (>= 0.4.3) | systemd (>= 44),
  python-dbus (>= 1.1.0), upower
 Suggests: gir1.2-appindicator3-0.1, solaar-gnome3 (= ${source:Version})
@@ -29,7 +29,7 @@ Architecture: all
 Section: gnome
 Depends: ${misc:Depends}, solaar (= ${source:Version}),
  gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10),
- ${Gnome-Icon-Theme}
+ ${solaar:Gnome-Icon-Theme}
 Enhances: solaar
 Description: gnome-shell/Unity integration for Solaar
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
