@@ -55,11 +55,9 @@ fix_times() {
 #
 
 /bin/cp --archive --update "$SELF/jekyll"/* "$BUILD/"
-# convert the svg logo to png for the web site
+# convert the svg logo to png for the web site favicon
 /usr/bin/convert.im6 "$SELF/share/solaar/icons/solaar.svg" -transparent white \
-	-resize 48x48  "$BUILD/images/solaar-logo.png"
-/usr/bin/convert.im6 "$SELF/share/solaar/icons/solaar.svg" -transparent white \
-	-resize 16x16 "$BUILD/images/favicon.png"
+	-resize 32x32 "$BUILD/images/favicon.png"
 
 # optimize the converted pngs
 command -V optipng && optipng -preserve -quiet -o 7 "$BUILD/images"/*.png
@@ -133,6 +131,5 @@ fix_times docs/devices.md devices.html
 fix_times docs/installation.md installation.html
 fix_times docs/debian.md debian.html
 fix_times jekyll/images images
-fix_times share/solaar/icons/solaar.svg images/solaar-logo.png
 fix_times share/solaar/icons/solaar.svg images/favicon.png
 fix_times jekyll/style style
