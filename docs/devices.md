@@ -85,7 +85,7 @@ Mice:
 | M315 *           |       | yes     |       |                                 |
 | M317             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
-| M345             |       |         |       |                                 |
+| M345             | 2.0   | yes     | -     |                                 |
 | M505             | 1.0   | yes     |       |                                 |
 | M510             | 1.0   | yes     |       | smooth scrolling                |
 | M515 Couch       | 2.0   | yes     | -     |                                 |
