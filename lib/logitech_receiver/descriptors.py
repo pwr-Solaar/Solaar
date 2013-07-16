@@ -182,7 +182,7 @@ _D('Wireless Mouse M310')
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
-_D('Wireless Mouse M345')
+_D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
 				registers=(_R.battery_charge, ),
 				)
