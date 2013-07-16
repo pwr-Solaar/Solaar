@@ -1,0 +1,56 @@
+Receiver
+LZ141AX-DJ
+M/N: C-U0008
+(ltunify)
+Serial number: 574197D3
+Firmware version: 024.000.00018
+Bootloader version: BL.000.006
+
+Mouse
+HID++ version: 2.0
+Device index 1
+Mouse
+Name: M345
+Wireless Product ID: 4017
+Serial number: 920DC223
+Device was unavailable, version information not available.
+Total number of HID++ 2.0 features: 12
+  0: [0000]    IRoot
+  1: [0001]    IFeatureSet
+  2: [0003]    IFirmwareInfo
+  3: [0005]    GetDeviceNameType
+  4: [1000]    batteryLevelStatus
+  5: [1D4B]    WirelessDeviceStatus
+  6: [1DF3]  H unknown
+  7: [1B00]    SpecialKeysMSEButtons
+  8: [1DF0]  H unknown
+  9: [1F03]  H unknown
+ 10: [2100]    VerticalScrolling
+ 11: [2120]    HiResScrolling
+ 12: [2200]    MousePointer
+(O = obsolete feature; H = SW hidden feature)
+(solaar-cli)
+1: Wireless Mouse M345
+   Codename     : M345
+   Kind         : mouse
+   Wireless PID : 4017
+   Protocol     : HID++ 2.0
+   Polling rate : 8 ms
+   Serial number: 920DC223
+        Firmware: RQM 27.02.B0028
+   The power switch is located on the base.
+   Supports 13 HID++ 2.0 features:
+       0: ROOT                   {0000}   
+       1: FEATURE SET            {0001}   
+       2: DEVICE FW VERSION      {0003}   
+       3: DEVICE NAME            {0005}   
+       4: BATTERY STATUS         {1000}   
+       5: WIRELESS DEVICE STATUS {1D4B}   
+       6: unknown:1DF3           {1DF3}   hidden
+       7: REPROG CONTROLS        {1B00}   
+       8: unknown:1DF0           {1DF0}   hidden
+       9: unknown:1F03           {1F03}   hidden
+      10: VERTICAL SCROLLING     {2100}   
+      11: HI RES SCROLLING       {2120}   
+      12: MOUSE POINTER          {2200}   
+   Battery: 90%, discharging,
