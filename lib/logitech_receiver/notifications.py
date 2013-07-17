@@ -27,6 +27,7 @@ _log = getLogger(__name__)
 del getLogger
 
 
+from .i18n import _
 from .common import strhex as _strhex, unpack as _unpack
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -63,7 +64,7 @@ def _process_receiver_notification(receiver, status, n):
 	# pairing lock notification
 	if n.sub_id == 0x4A:
 		status.lock_open = bool(n.address & 0x01)
-		reason = 'pairing lock is ' + ('open' if status.lock_open else 'closed')
+		reason = _("pairing lock is ") + (_("open") if status.lock_open else _("closed"))
 		if _log.isEnabledFor(_INFO):
 			_log.info("%s: %s", receiver, reason)
 
@@ -188,7 +189,7 @@ def _process_hidpp10_notification(device, status, n):
 		if n.address == 0x01:
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("%s: device powered on", device)
-			reason = str(status) or 'powered on'
+			reason = str(status) or _("powered on")
 			status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
 		else:
 			_log.warn("%s: unknown %s", device, n)

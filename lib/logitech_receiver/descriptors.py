@@ -46,12 +46,12 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 				else _hidpp10.DEVICE_KIND.touchpad if 'Touchpad' in name
 				else _hidpp10.DEVICE_KIND.trackball if 'Trackball' in name
 				else None)
-	assert kind is not None, "descriptor for %s does not have 'kind' set" % name
+	assert kind is not None, 'descriptor for %s does not have kind set' % name
 
 	# heuristic: the codename is the last word in the device name
 	if codename is None and ' ' in name:
 		codename = name.split(' ')[-1]
-	assert codename is not None, "descriptor for %s does not have codename set" % name
+	assert codename is not None, 'descriptor for %s does not have codename set' % name
 
 	if protocol is not None:
 		# ? 2.0 devices should not have any registers
@@ -65,7 +65,7 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 					wpid=wpid, codename=codename, protocol=protocol,
 					registers=registers, settings=settings)
 
-	assert codename not in DEVICES, "duplicate codename in device descriptors: %s" % (DEVICES[codename], )
+	assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
 	DEVICES[codename] = device_descriptor
 
 	if wpid:
@@ -73,7 +73,7 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 			wpid = (wpid, )
 
 		for w in wpid:
-			assert w not in DEVICES, "duplicate wpid in device descriptors: %s" % (DEVICES[w], )
+			assert w not in DEVICES, 'duplicate wpid in device descriptors: %s' % (DEVICES[w], )
 			DEVICES[w] = device_descriptor
 
 #

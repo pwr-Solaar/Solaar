@@ -51,15 +51,14 @@ del locale
 _LOCALE_DOMAIN = _NAME.lower()
 path = _find_locale_path(_LOCALE_DOMAIN)
 
-import gettext
+import gettext as _gettext
 
-gettext.bindtextdomain(_LOCALE_DOMAIN, path)
-gettext.textdomain(_LOCALE_DOMAIN)
-gettext.install(_LOCALE_DOMAIN)
+_gettext.bindtextdomain(_LOCALE_DOMAIN, path)
+_gettext.textdomain(_LOCALE_DOMAIN)
+_gettext.install(_LOCALE_DOMAIN)
 
 try:
 	unicode
-	def _(x):
-		return gettext.gettext(x).decode('UTF-8')
+	_ = lambda x: _gettext.gettext(x).decode('UTF-8')
 except:
-	_ = gettext.gettext
+	_ = _gettext.gettext

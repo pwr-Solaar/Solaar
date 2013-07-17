@@ -95,7 +95,7 @@ FIRMWARE_KIND = _NamedInts(
 				Hardware=0x02,
 				Other=0x03)
 
-BATTERY_OK = lambda status: status not in ("invalid_battery", "thermal_error")
+BATTERY_OK = lambda status: status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
 
 BATTERY_STATUS = _NamedInts(
 				discharging=0x00,

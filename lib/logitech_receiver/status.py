@@ -26,6 +26,7 @@ _log = getLogger(__name__)
 del getLogger
 
 
+from .i18n import _
 from .common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -94,9 +95,9 @@ class ReceiverStatus(dict):
 
 	def __str__(self):
 		count = len(self._receiver)
-		return ('No paired devices.' if count == 0 else
-				'1 paired device.' if count == 1 else
-				'%d paired devices.' % count)
+		return (_("No paired devices.") if count == 0 else
+				_("1 paired device.") if count == 1 else
+				(str(count) + _(" paired devices.")))
 	__unicode__ = __str__
 
 	def changed(self, alert=ALERT.NOTIFICATION, reason=None):
@@ -149,15 +150,15 @@ class DeviceStatus(dict):
 			battery_level = self.get(KEYS.BATTERY_LEVEL)
 			if battery_level is not None:
 				if isinstance(battery_level, _NamedInt):
-					yield 'Battery: %s' % str(battery_level)
+					yield _("Battery") + ': ' + _(str(battery_level))
 				else:
-					yield 'Battery: %d%%' % battery_level
+					yield _("Battery") + ': ' + ('%d%%' % battery_level)
 
 				battery_status = _item(KEYS.BATTERY_STATUS, ' (%s)')
 				if battery_status:
 					yield battery_status
 
-			light_level = _item(KEYS.LIGHT_LEVEL, 'Light: %d lux')
+			light_level = _item(KEYS.LIGHT_LEVEL, _("Lighting") + ': %d ' + _("lux"))
 			if light_level:
 				if battery_level:
 					yield ', '
@@ -186,7 +187,7 @@ class DeviceStatus(dict):
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
 		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
 
-		charging = status in ('charging', 'fully charged', 'recharging', 'slow recharge')
+		charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.slow_recharge)
 		old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
 		changed = old_level != level or old_status != status or old_charging != charging

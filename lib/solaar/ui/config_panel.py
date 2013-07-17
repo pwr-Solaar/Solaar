@@ -91,8 +91,7 @@ def _create_choice_control(setting):
 
 def _create_sbox(s):
 	sbox = Gtk.HBox(homogeneous=False, spacing=6)
-	label_text = _(s.label)
-	sbox.pack_start(Gtk.Label(label_text), False, False, 0)
+	sbox.pack_start(Gtk.Label(s.label), False, False, 0)
 
 	spinner = Gtk.Spinner()
 	spinner.set_tooltip_text(_("Working") + '...')
@@ -115,8 +114,7 @@ def _create_sbox(s):
 	sbox.pack_end(failed, False, False, 0)
 
 	if s.description:
-		description_text = _(s.description)
-		sbox.set_tooltip_text(description_text)
+		sbox.set_tooltip_text(s.description)
 
 	sbox.show_all()
 	spinner.start()  # the first read will stop it

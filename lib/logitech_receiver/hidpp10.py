@@ -29,7 +29,7 @@ from .common import (strhex as _strhex,
 					int2bytes as _int2bytes,
 					NamedInts as _NamedInts,
 					FirmwareInfo as _FirmwareInfo)
-from .hidpp20 import FIRMWARE_KIND
+from .hidpp20 import FIRMWARE_KIND, BATTERY_STATUS
 
 #
 # Constants - most of them as defined by the official Logitech HID++ 1.0
@@ -185,9 +185,9 @@ def parse_battery_status(register, reply):
 	if register == REGISTERS.battery_charge:
 		charge = ord(reply[:1])
 		status_byte = ord(reply[2:3]) & 0xF0
-		status_text = ('discharging' if status_byte == 0x30
-				else 'charging' if status_byte == 0x50
-				else 'fully charged' if status_byte == 0x90
+		status_text = (BATTERY_STATUS.discharging if status_byte == 0x30
+				else BATTERY_STATUS.recharging if status_byte == 0x50
+				else BATTERY_STATUS.full if status_byte == 0x90
 				else None)
 		return charge, status_text
 
@@ -202,11 +202,11 @@ def parse_battery_status(register, reply):
 
 		charging_byte = ord(reply[1:2])
 		if charging_byte == 0x00:
-			status_text = 'discharging'
+			status_text = BATTERY_STATUS.discharging
 		elif charging_byte & 0x21 == 0x21:
-			status_text = 'charging'
+			status_text = BATTERY_STATUS.recharging
 		elif charging_byte & 0x22 == 0x22:
-			status_text = 'fully charged'
+			status_text = BATTERY_STATUS.full
 		else:
 			_log.warn("could not parse 0x07 battery status: %02X (level %02X)", charging_byte, status_byte)
 			status_text = None

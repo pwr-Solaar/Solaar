@@ -130,9 +130,9 @@ def _pairing_failed(assistant, receiver, error):
 
 	assistant.commit()
 
-	header = _("Pairing failed") + ': ' + _(error) + '.'
+	header = _("Pairing failed") + ': ' + _(str(error)) + '.'
 	if 'timeout' in str(error):
-		text = _("Make sure your device is within range, and it has a decent battery charge.")
+		text = _("Make sure your device is within range, and has a decent battery charge.")
 	elif str(error) == 'device not supported':
 		text = _("A new device was detected, but it is not compatible with this receiver.")
 	elif 'many' in str(error):

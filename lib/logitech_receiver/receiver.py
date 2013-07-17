@@ -26,6 +26,7 @@ _log = getLogger(__name__)
 del getLogger
 
 
+from .i18n import _
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -103,7 +104,7 @@ class PairedDevice(object):
 
 				self.wpid = _strhex(device_info[3:5])
 				self._polling_rate = 0
-				self._power_switch = '(unknown)'
+				self._power_switch = '(' + _("unknown") + ')'
 
 		# the wpid is necessary to properly identify wireless link on/off notifications
 		# also it gets set to None on this object when the device is unpaired

@@ -20,6 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
+from .i18n import _
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .settings import (
@@ -70,15 +71,15 @@ def feature_toggle(name, feature,
 # common strings for settings
 #
 
-_SMOOTH_SCROLL = ('smooth-scroll', 'Smooth Scrolling',
-							'High-sensitivity mode for vertical scroll with the wheel.')
-_DPI = ('dpi', 'Sensitivity (DPI)', None)
-_FN_SWAP = ('fn-swap', 'Swap Fx function',
-							('When set, the F1..F12 keys will activate their special function,\n'
-						 	'and you must hold the FN key to activate their standard function.\n'
-						 	'\n'
-						 	'When unset, the F1..F12 keys will activate their standard function,\n'
-						 	'and you must hold the FN key to activate their special function.'))
+_SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
+							_("High-sensitivity mode for vertical scroll with the wheel."))
+_DPI = ('dpi', _("Sensitivity (DPI)"), None)
+_FN_SWAP = ('fn-swap', _("Swap Fx function"),
+							_("When set, the F1..F12 keys will activate their special function,\n"
+						 	"and you must hold the FN key to activate their standard function.")
+						 	+ '\n\n' +
+						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
+						 	"and you must hold the FN key to activate their special function."))
 
 #
 #

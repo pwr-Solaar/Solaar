@@ -70,7 +70,7 @@ class NamedInt(int):
 			return self.name.lower() == other.lower()
 		# this should catch comparisons with bytes in Py3
 		if other is not None:
-			raise TypeError("Unsupported type " + str(type(other)))
+			raise TypeError('Unsupported type ' + str(type(other)))
 
 	def __ne__(self, other):
 		return not self.__eq__(other)

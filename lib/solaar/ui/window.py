@@ -106,7 +106,7 @@ def _create_receiver_panel():
 	p = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
 
 	p._count = Gtk.Label()
-	p._count.set_padding(32, 0)
+	p._count.set_padding(24, 0)
 	p._count.set_alignment(0, 0.5)
 	p.pack_start(p._count, True, True, 0)
 
