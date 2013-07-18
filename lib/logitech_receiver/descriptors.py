@@ -61,6 +61,16 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 			assert registers is None
 			assert settings is None or all(s._rw.kind == 2 for s in settings)
 
+		if wpid:
+			for w in wpid if isinstance(wpid, tuple) else (wpid, ):
+				if protocol > 1.0:
+					assert w[0:1] == '4', name + ' has protocol ' + protocol + ', wpid ' + w
+				else:
+					if w[0:1] == '1':
+						assert kind == _hidpp10.DEVICE_KIND.mouse, name + ' has protocol ' + protocol + ', wpid ' + w
+					elif w[0:1] == '2':
+						assert kind == _hidpp10.DEVICE_KIND.keyboard, name + ' has protocol ' + protocol + ', wpid ' + w
+
 	device_descriptor = _DeviceDescriptor(name=name, kind=kind,
 					wpid=wpid, codename=codename, protocol=protocol,
 					registers=registers, settings=settings)
