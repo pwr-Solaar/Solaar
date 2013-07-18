@@ -23,23 +23,29 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
+_UNIFYING_DRIVER = 'logitech-djreceiver'
+_GENERIC_DRIVER = ('hid-generic', 'generic-usb')
+
+
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
 
 # standard Unifying receivers (marked with the orange Unifying logo)
-UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, 'logitech-djreceiver')
-UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, 'logitech-djreceiver')
+UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, _UNIFYING_DRIVER)
+UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, _UNIFYING_DRIVER)
+
+
 
 # Nano receviers that support the Unifying protocol
-NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, 'hid-generic')
+NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, _GENERIC_DRIVER)
 
 # Nano receivers that don't support the Unifying protocol
-NANO_RECEIVER_C517        = (0x046d, 0xc517, 1, 'hid-generic')
-NANO_RECEIVER_C518        = (0x046d, 0xc518, 1, 'hid-generic')
-NANO_RECEIVER_C51A        = (0x046d, 0xc51a, 1, 'hid-generic')
-NANO_RECEIVER_C51B        = (0x046d, 0xc51b, 1, 'hid-generic')
-NANO_RECEIVER_C521        = (0x046d, 0xc521, 1, 'hid-generic')
-NANO_RECEIVER_C525        = (0x046d, 0xc525, 1, 'hid-generic')
-NANO_RECEIVER_C526        = (0x046d, 0xc526, 1, 'hid-generic')
+NANO_RECEIVER_C517        = (0x046d, 0xc517, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C518        = (0x046d, 0xc518, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C51A        = (0x046d, 0xc51a, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C51B        = (0x046d, 0xc51b, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C521        = (0x046d, 0xc521, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C525        = (0x046d, 0xc525, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C526        = (0x046d, 0xc526, 1, _GENERIC_DRIVER)
 
 
 

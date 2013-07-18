@@ -94,8 +94,12 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 		if not hid_device:
 			return
 		hid_driver_name = hid_device['DRIVER']
-		if hid_driver is not None and hid_driver != hid_driver_name:
-			return
+		if hid_driver:
+			if isinstance(hid_driver, tuple):
+				if hid_driver_name not in hid_driver:
+					return
+			elif hid_driver_name != hid_driver:
+				return
 
 		intf_device = device.find_parent('usb', 'usb_interface')
 		# print ("*** usb interface", action, device, "usb_interface:", intf_device)
