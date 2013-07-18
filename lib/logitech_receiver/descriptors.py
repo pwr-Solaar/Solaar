@@ -237,3 +237,9 @@ _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F'
 _D('V450 Nano Cordless Laser Mouse', codename='V450 Nano', protocol=1.0, wpid='1011',
 				registers=(_R.battery_charge, ),
 				)
+_D('V550 Nano Cordless Laser Mouse', codename='V550 Nano', protocol=1.0, wpid='1013',
+				registers=(_R.battery_charge, ),
+				settings=[
+							_RS.smooth_scroll(),
+						],
+				)
