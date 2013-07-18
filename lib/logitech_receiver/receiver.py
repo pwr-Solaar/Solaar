@@ -116,7 +116,9 @@ class PairedDevice(object):
 			# do not support this call.
 			codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
 			if codename:
-				self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
+				codename_length = ord(codename[1:2])
+				codename = codename[2:2 + codename_length]
+				self._codename = codename.decode('ascii')
 				self.descriptor = _DESCRIPTORS.get(self._codename)
 
 		if self.descriptor:
@@ -149,7 +151,9 @@ class PairedDevice(object):
 		if self._codename is None:
 			codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
 			if codename:
-				self._codename = codename[2:].rstrip(b'\x00').decode('utf-8')
+				codename_length = ord(codename[1:2])
+				codename = codename[2:2 + codename_length]
+				self._codename = codename.decode('ascii')
 				# if _log.isEnabledFor(_DEBUG):
 				#	 _log.debug("device %d codename %s", self.number, self._codename)
 			else:
