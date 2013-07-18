@@ -41,30 +41,33 @@ _F = _hidpp20.FEATURE
 #
 
 def register_toggle(name, register,
-					true_value=_BooleanV.default_true, false_value=_BooleanV.default_false,
-					mask=_BooleanV.default_mask, write_returns_value=False,
+					true_value=_BooleanV.default_true,
+					false_value=_BooleanV.default_false,
+					mask=_BooleanV.default_mask,
 					label=None, description=None, device_kind=None):
+	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _RegisterRW(register)
-	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
 	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 
 def register_choices(name, register, choices,
-					kind=_KIND.choice, write_returns_value=False,
+					kind=_KIND.choice,
 					label=None, description=None, device_kind=None):
 	assert choices
+	validator = _ChoicesV(choices)
 	rw = _RegisterRW(register)
-	validator = _ChoicesV(choices, write_returns_value=write_returns_value)
 	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
 
 
 def feature_toggle(name, feature,
-					read_function_id=_FeatureRW.default_read_fnid, write_function_id=_FeatureRW.default_write_fnid,
-					true_value=_BooleanV.default_true, false_value=_BooleanV.default_false,
-					mask=_BooleanV.default_mask, write_returns_value=False,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					true_value=_BooleanV.default_true,
+					false_value=_BooleanV.default_false,
+					mask=_BooleanV.default_mask,
 					label=None, description=None, device_kind=None):
+	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask, write_returns_value=write_returns_value)
 	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 #
@@ -90,7 +93,7 @@ def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 
-def _register_smooth_scroll(register=_R.mouse_smooth_scroll, true_value=0x40, mask=0x40):
+def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
 	return register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
@@ -103,7 +106,6 @@ def _register_dpi(register=_R.mouse_dpi, choices=None):
 
 def _feature_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.FN_INVERSION,
-					write_returns_value=True,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 

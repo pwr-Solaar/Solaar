@@ -117,7 +117,7 @@ REGISTERS = _NamedInts(
 				receiver_info=0x2B5,
 
 				# only apply to devices
-				mouse_smooth_scroll=0x01,
+				mouse_button_flags=0x01,
 				keyboard_hand_detection=0x01,
 				battery_status=0x07,
 				keyboard_fn_swap=0x09,
