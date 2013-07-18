@@ -1,0 +1,34 @@
+1: Couch Mouse M515
+   Codename     : M515
+   Kind         : mouse
+   Wireless PID : 4007
+   Protocol     : HID++ 2.0
+   Polling rate : 8 ms
+   Serial number: BED587E9
+        Firmware: RQM 24.00.B0023
+      Bootloader: DFU 00.02.B0010
+   The power switch is located on the base.
+   Supports 16 HID++ 2.0 features:
+       0: ROOT                   {0000}
+       1: FEATURE SET            {0001}
+       2: DEVICE FW VERSION      {0003}
+       3: DEVICE NAME            {0005}
+       4: DFUCONTROL             {00C0}
+       5: BATTERY STATUS         {1000}
+       6: unknown:1A30           {1A30}   hidden
+       7: REPROG CONTROLS        {1B00}
+       8: WIRELESS DEVICE STATUS {1D4B}
+       9: unknown:1DF3           {1DF3}   hidden
+      10: VERTICAL SCROLLING     {2100}
+      11: HI RES SCROLLING       {2120}
+      12: MOUSE POINTER          {2200}
+      13: unknown:1F02           {1F02}   hidden
+      14: unknown:1F03           {1F03}   hidden
+      15: unknown:1E80           {1E80}   hidden
+   Has 5 reprogrammable keys:
+       0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+       1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+       2: MIDDLE BUTTON              => MiddleMouseButton             mse, reprogrammable
+       3: BACK AS BUTTON 4           => BackEx                        mse, reprogrammable
+       4: FORWARD AS BUTTON 5        => BrowserForwardEx              mse, reprogrammable
+   Battery: 65%, discharging,
