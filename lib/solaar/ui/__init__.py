@@ -36,12 +36,14 @@ from solaar.i18n import _
 GLib.threads_init()
 
 def _init_application():
-	app = Gtk.Application.new('io.github.pwr.solaar', 0)
+	APP_ID = 'io.github.pwr.solaar'
+	app = Gtk.Application.new(APP_ID, 0)
 	# not sure this is necessary...
 	# app.set_property('register-session', True)
 	registered = app.register(None)
+	dbus_path = app.get_dbus_object_path() if hasattr(app, 'get_dbus_object_path') else APP_ID
 	if _log.isEnabledFor(_INFO):
-		_log.info("application %s, registered %s", app.get_dbus_object_path(), registered)
+		_log.info("application %s, registered %s", dbus_path, registered)
 	# assert registered, "failed to register unique application %s" % app
 
 	# if there is already a running instance, bail out
