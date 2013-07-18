@@ -76,6 +76,9 @@ def feature_toggle(name, feature,
 
 _SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
+_SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
+							_("When disabled, pushing the wheel sideways sends custom button events\n"
+							"instead of the standard side-scrolling events."))
 _DPI = ('dpi', _("Sensitivity (DPI)"), None)
 _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 							_("When set, the F1..F12 keys will activate their special function,\n"
@@ -98,6 +101,11 @@ def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mas
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
 
+def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
+	return register_toggle(_SIDE_SCROLL[0], register, true_value=true_value, mask=mask,
+ 					label=_SIDE_SCROLL[1], description=_SIDE_SCROLL[2],
+					device_kind=_DK.mouse)
+
 def _register_dpi(register=_R.mouse_dpi, choices=None):
 	return register_choices(_DPI[0], register, choices,
 					label=_DPI[1], description=_DPI[2],
@@ -118,6 +126,7 @@ from collections import namedtuple
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
 					'smooth_scroll',
+					'side_scroll',
 					'dpi',
 					'hand_detection',
 					'typing_illumination',
@@ -127,6 +136,7 @@ del namedtuple
 RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				smooth_scroll=_register_smooth_scroll,
+				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
 				hand_detection=None,
 				typing_illumination=None,
@@ -134,6 +144,7 @@ RegisterSettings = _SETTINGS_LIST(
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				smooth_scroll=None,
+				side_scroll=None,
 				dpi=None,
 				hand_detection=None,
 				typing_illumination=None,

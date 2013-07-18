@@ -177,6 +177,9 @@ _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235')
 _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
 				registers=(_R.battery_status, ),
+				settings=[
+							_RS.side_scroll(),
+						],
 				)
 _D('Wireless Mouse M310')
 _D('Wireless Mouse M315')
@@ -185,11 +188,16 @@ _D('Wireless Mouse M325')
 _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
 				registers=(_R.battery_charge, ),
+				settings=[
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
+						],
 				)
 _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				registers=(_R.battery_status, ),
 				settings=[
 							_RS.smooth_scroll(),
+							_RS.side_scroll(),
 						],
 				)
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
@@ -199,6 +207,7 @@ _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
+							_RS.side_scroll(),
 						],
 				)
 _D('Zone Touch Mouse T400')
@@ -206,11 +215,17 @@ _D('Touch Mouse T620', protocol=2.0)
 _D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017',
 				registers=(_R.battery_charge, ),
+				settings=[
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
+						],
 				)
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 				registers=(_R.battery_status, _R.three_leds, ),
 				settings=[
 							_RS.dpi(choices=_PERFORMANCE_MX_DPIS),
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
 						],
 				)
 
@@ -232,6 +247,7 @@ _D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F'
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
+							_RS.side_scroll(),
 						],
 				)
 _D('V450 Nano Cordless Laser Mouse', codename='V450 Nano', protocol=1.0, wpid='1011',
@@ -241,5 +257,6 @@ _D('V550 Nano Cordless Laser Mouse', codename='V550 Nano', protocol=1.0, wpid='1
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
+							_RS.side_scroll(),
 						],
 				)
