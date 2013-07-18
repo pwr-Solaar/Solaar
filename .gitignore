@@ -2,6 +2,7 @@
 *.pyo
 __pycache__/
 *.log
+*.mo
 
 /lib/Solaar.egg-info/
 /build/

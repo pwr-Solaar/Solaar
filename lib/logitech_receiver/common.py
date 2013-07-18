@@ -208,6 +208,7 @@ class NamedInts(object):
 
 
 def strhex(x):
+	assert x is not None
 	"""Produce a hex-string representation of a sequence of bytes."""
 	return _hexlify(x).decode('ascii').upper()
 

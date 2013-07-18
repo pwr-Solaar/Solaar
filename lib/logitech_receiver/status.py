@@ -263,7 +263,8 @@ class DeviceStatus(dict):
 
 					# Devices lose configuration when they are turned off,
 					# make sure they're up-to-date.
-					for s in self._device.settings:
+					# _log.debug("%s settings %s", d, d.settings)
+					for s in d.settings:
 						s.apply()
 
 					if self.get(KEYS.BATTERY_LEVEL) is None:
@@ -285,7 +286,7 @@ class DeviceStatus(dict):
 		self.updated = timestamp
 
 		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("device %d changed: active=%s %s", self._device.number, self._active, dict(self))
+		# 	_log.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
 		self._changed_callback(d, alert, reason)
 
 	# def poll(self, timestamp):
