@@ -220,7 +220,7 @@ _D('Wireless Trackball M570')
 
 # Touchpads
 
-_D('Wireless Rechargeable Touchpad T650', protocol=2.0)
+_D('Wireless Rechargeable Touchpad T650', protocol=2.0, wpid='4101')
 _D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 
 #
