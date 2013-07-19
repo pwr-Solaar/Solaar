@@ -136,14 +136,14 @@ REGISTERS = _NamedInts(
 #
 
 def read_register(device, register_number, *params):
-	assert device
+	assert device, 'tried to read register %02X from invalid device %s' % (register_number, device)
 	# support long registers by adding a 2 in front of the register number
 	request_id = 0x8100 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-	assert device
+	assert device, 'tried to write register %02X to invalid device %s' % (register_number, device)
 	# support long registers by adding a 2 in front of the register number
 	request_id = 0x8000 | (int(register_number) & 0x2FF)
 	return device.request(request_id, *value)

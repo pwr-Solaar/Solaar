@@ -38,7 +38,7 @@ from logitech_receiver import (
 #
 
 from collections import namedtuple
-_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ['receiver', 'number', 'name', 'kind', 'status', 'online'])
+_GHOST_DEVICE = namedtuple('_GHOST_DEVICE', ('receiver', 'number', 'name', 'kind', 'status', 'online'))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 del namedtuple

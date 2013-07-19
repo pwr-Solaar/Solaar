@@ -32,7 +32,7 @@ _R = _hidpp10.REGISTERS
 
 from collections import namedtuple
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-				['name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings'])
+				('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings'))
 del namedtuple
 
 DEVICES = {}

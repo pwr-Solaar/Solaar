@@ -288,7 +288,7 @@ def make_notification(devnumber, data):
 		return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 from collections import namedtuple
-_HIDPP_Notification = namedtuple('_HIDPP_Notification', ['devnumber', 'sub_id', 'address', 'data'])
+_HIDPP_Notification = namedtuple('_HIDPP_Notification', ('devnumber', 'sub_id', 'address', 'data'))
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address, _strhex(self.data))
 _HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple

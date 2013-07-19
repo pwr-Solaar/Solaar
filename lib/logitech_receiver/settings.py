@@ -41,8 +41,8 @@ KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x12)
 class Setting(object):
 	"""A setting descriptor.
 	Needs to be instantiated for each specific device."""
-	__slots__ = ['name', 'label', 'description', 'kind', 'persister', 'device_kind',
-					'_rw', '_validator', '_device', '_value']
+	__slots__ = ('name', 'label', 'description', 'kind', 'persister', 'device_kind',
+					'_rw', '_validator', '_device', '_value')
 
 	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None):
 		assert name
@@ -163,7 +163,7 @@ class Setting(object):
 #
 
 class RegisterRW(object):
-	__slots__ = ['register']
+	__slots__ = ('register', )
 
 	kind = _NamedInt(0x01, 'register')
 
@@ -179,7 +179,7 @@ class RegisterRW(object):
 
 
 class FeatureRW(object):
-	__slots__ = ['feature', 'read_fnid', 'write_fnid']
+	__slots__ = ('feature', 'read_fnid', 'write_fnid')
 
 	kind = _NamedInt(0x02, 'feature')
 	default_read_fnid = 0x00
@@ -205,7 +205,7 @@ class FeatureRW(object):
 #
 
 class BooleanValidator(object):
-	__slots__ = ['true_value', 'false_value', 'mask', 'needs_current_value']
+	__slots__ = ('true_value', 'false_value', 'mask', 'needs_current_value')
 
 	kind = KIND.toggle
 	default_true = 0x01
@@ -313,7 +313,7 @@ class BooleanValidator(object):
 
 
 class ChoicesValidator(object):
-	__slots__ = ['choices', 'flag', '_bytes_count', 'needs_current_value']
+	__slots__ = ('choices', 'flag', '_bytes_count', 'needs_current_value')
 
 	kind = KIND.choice
 

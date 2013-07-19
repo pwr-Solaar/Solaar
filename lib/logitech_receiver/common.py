@@ -99,7 +99,7 @@ class NamedInts(object):
 	if the value already exists in the set (int or string), ValueError will be
 	raised.
 	"""
-	__slots__ = ['__dict__', '_values', '_indexed', '_fallback']
+	__slots__ = ('__dict__', '_values', '_indexed', '_fallback')
 
 	def __init__(self, **kwargs):
 		def _readable_name(n):

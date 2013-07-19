@@ -45,7 +45,7 @@ class _ThreadedHandle(object):
 	Closing a ThreadedHandle will close all handles.
 	"""
 
-	__slots__ = ['path', '_local', '_handles', '_listener']
+	__slots__ = ('path', '_local', '_handles', '_listener')
 
 	def __init__(self, listener, path, handle):
 		assert listener is not None

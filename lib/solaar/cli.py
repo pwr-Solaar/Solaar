@@ -323,9 +323,9 @@ def config_device(receiver, args):
 		try:
 			value = bool(int(value))
 		except:
-			if value.lower() in ['1', 'true', 'yes', 'on', 't', 'y']:
+			if value.lower() in ('1', 'true', 'yes', 'on', 't', 'y'):
 				value = True
-			elif value.lower() in ['0', 'false', 'no', 'off', 'f', 'n']:
+			elif value.lower() in ('0', 'false', 'no', 'off', 'f', 'n'):
 				value = False
 			else:
 				_fail("don't know how to interpret '%s' as boolean" % value)
@@ -333,7 +333,7 @@ def config_device(receiver, args):
 	elif setting.choices:
 		value = args.value.lower()
 
-		if value in ['higher', 'lower']:
+		if value in ('higher', 'lower'):
 			old_value = setting.read()
 			if old_value is None:
 				_fail("could not read current value of '%s'" % setting.name)

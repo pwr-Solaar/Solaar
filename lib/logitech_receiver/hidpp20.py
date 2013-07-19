@@ -418,7 +418,7 @@ def get_mouse_pointer_info(device):
 	pointer_info = feature_request(device, FEATURE.MOUSE_POINTER)
 	if pointer_info:
 		dpi, flags = _unpack('!HB', pointer_info[:3])
-		acceleration = ['none', 'low', 'med', 'high' ][flags & 0x3]
+		acceleration = ('none', 'low', 'med', 'high')[flags & 0x3]
 		suggest_os_ballistics = (flags & 0x04) != 0
 		suggest_vertical_orientation = (flags & 0x08) != 0
 		return {
