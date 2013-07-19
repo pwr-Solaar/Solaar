@@ -86,10 +86,18 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	+ '\n\n' +
 						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
 						 	"and you must hold the FN key to activate their special function."))
+_HAND_DETECTION = ('hand-detection', _("Hand Detection"),
+							_("Turn on illumination when the hands hover over the keyboard."))
 
 #
 #
 #
+
+def _register_hand_detection(register=_R.keyboard_hand_detection,
+					true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF'):
+	return register_toggle(_HAND_DETECTION[0], register, true_value=true_value, false_value=false_value,
+					label=_HAND_DETECTION[1], description=_HAND_DETECTION[2],
+					device_kind=_DK.keyboard)
 
 def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
 	return register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
@@ -138,7 +146,7 @@ RegisterSettings = _SETTINGS_LIST(
 				smooth_scroll=_register_smooth_scroll,
 				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
-				hand_detection=None,
+				hand_detection=_register_hand_detection,
 				typing_illumination=None,
 			)
 FeatureSettings =  _SETTINGS_LIST(

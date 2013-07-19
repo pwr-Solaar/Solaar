@@ -175,6 +175,7 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 				registers=(_R.battery_status, _R.three_leds, ),
 				settings=[
 							_RS.fn_swap(),
+							_RS.hand_detection(),
 						],
 				)
 
