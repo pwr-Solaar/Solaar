@@ -82,18 +82,18 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 	if not usb_device:
 		return
 
-	vid = usb_device['ID_VENDOR_ID']
-	pid = usb_device['ID_MODEL_ID']
+	vid = usb_device.get('ID_VENDOR_ID')
+	pid = usb_device.get('ID_MODEL_ID')
 	if not ((vendor_id is None or vendor_id == int(vid, 16)) and
 			(product_id is None or product_id == int(pid, 16))):
 		return
 
 	if action == 'add':
 		hid_device = device.find_parent('hid')
-		# print ("** found hid", action, device, "hid:", hid_device, hid_device['DRIVER'])
 		if not hid_device:
 			return
-		hid_driver_name = hid_device['DRIVER']
+		hid_driver_name = hid_device.get('DRIVER')
+		# print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
 		if hid_driver:
 			if isinstance(hid_driver, tuple):
 				if hid_driver_name not in hid_driver:
@@ -115,9 +115,9 @@ def _match(action, device, vendor_id=None, product_id=None, interface_number=Non
 							vendor_id=vid[-4:],
 							product_id=pid[-4:],
 							serial=hid_device.get('HID_UNIQ'),
-							release=attrs['bcdDevice'],
-							manufacturer=attrs['manufacturer'],
-							product=attrs['product'],
+							release=attrs.get('bcdDevice'),
+							manufacturer=attrs.get('manufacturer'),
+							product=attrs.get('product'),
 							interface=usb_interface,
 							driver=hid_driver_name)
 		return d_info
