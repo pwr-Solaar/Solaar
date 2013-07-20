@@ -33,6 +33,8 @@ from solaar.i18n import _
 #
 #
 
+assert Gtk.get_major_version() > 2, 'Solaar requires Gtk 3 python bindings'
+
 GLib.threads_init()
 
 def _init_application():
