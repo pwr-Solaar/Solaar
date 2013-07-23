@@ -42,6 +42,10 @@ test -r "$PO_FILE" || /usr/bin/msginit \
 
 unfmt() {
 	local SOURCE="/usr/share/locale/$LL_CC/LC_MESSAGES/$1.mo"
+	if [ ! -f $SOURCE ]
+	then
+            local SOURCE="/usr/share/locale-langpack/$LL_CC/LC_MESSAGES/$1.mo"
+	fi
 	local TARGET="$(mktemp --tmpdir $1-$LL_CC-XXXXXX.po)"
 	/usr/bin/msgunfmt \
 		--no-escape --indent \
