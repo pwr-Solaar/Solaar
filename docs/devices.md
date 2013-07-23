@@ -75,7 +75,9 @@ Mice:
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
-| V450 Nano        | 1.0   | yes     | -     |                                 |
+| V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
+| V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
+| VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
 | M175 *           |       | yes     |       |                                 |
 | M185 *           |       | yes     |       |                                 |
 | M187 *           | 2.0   | yes     |       |                                 |
