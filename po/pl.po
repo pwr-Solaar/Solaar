@@ -3,476 +3,452 @@
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2013.
 #
-msgid ""
-msgstr ""
-"Project-Id-Version: solaar 0.9.1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-23 10:04+0200\n"
-"PO-Revision-Date: 2013-07-23 10:41+0100\n"
-"Last-Translator: Adrian Piotrowicz <nexces@nxstudio.pl>\n"
-"Language-Team: none\n"
-"Language: pl\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 1.5.4\n"
+msgid   ""
+msgstr  "Project-Id-Version: solaar 0.9.1\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2013-07-23 22:38+0200\n"
+        "PO-Revision-Date: 2013-07-23 10:41+0100\n"
+        "Last-Translator: Adrian Piotrowicz <nexces@nxstudio.pl>\n"
+        "Language-Team: none\n"
+        "Language: pl\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n"
+        "%100<10 || n%100>=20) ? 1 : 2);\n"
+        "X-Generator: Poedit 1.5.4\n"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:38
-msgid "critical"
-msgstr "krytyczny"
+#: lib/logitech_receiver/i18n.py:38
+msgid   "critical"
+msgstr  "krytyczny"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:38
-msgid "empty"
-msgstr "pusty"
+#: lib/logitech_receiver/i18n.py:38
+msgid   "empty"
+msgstr  "pusty"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:38
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:41
-msgid "full"
-msgstr "pełny"
+#: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
+msgid   "full"
+msgstr  "pełny"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:38
-msgid "good"
-msgstr "dobry"
+#: lib/logitech_receiver/i18n.py:38
+msgid   "good"
+msgstr  "dobry"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:38
-msgid "low"
-msgstr "niski"
+#: lib/logitech_receiver/i18n.py:38
+msgid   "low"
+msgstr  "niski"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:41
-msgid "almost full"
-msgstr "prawie pełny"
+#: lib/logitech_receiver/i18n.py:41
+msgid   "almost full"
+msgstr  "prawie pełny"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:41
-msgid "discharging"
-msgstr "rozładowywanie"
+#: lib/logitech_receiver/i18n.py:41
+msgid   "discharging"
+msgstr  "rozładowywanie"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:41
-msgid "recharging"
-msgstr "ładowanie"
+#: lib/logitech_receiver/i18n.py:41
+msgid   "recharging"
+msgstr  "ładowanie"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:42
-msgid "invalid battery"
-msgstr "nieprawidłowa bateria"
+#: lib/logitech_receiver/i18n.py:42
+msgid   "invalid battery"
+msgstr  "nieprawidłowa bateria"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:42
-msgid "slow recharge"
-msgstr "wolne ładowanie"
+#: lib/logitech_receiver/i18n.py:42
+msgid   "slow recharge"
+msgstr  "wolne ładowanie"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:42
-msgid "thermal error"
-msgstr "błąd temperatury"
+#: lib/logitech_receiver/i18n.py:42
+msgid   "thermal error"
+msgstr  "błąd temperatury"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:45
-msgid "device not supported"
-msgstr "urządzenie nie obsługiwane"
+#: lib/logitech_receiver/i18n.py:45
+msgid   "device not supported"
+msgstr  "urządzenie nie obsługiwane"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:45
-msgid "device timeout"
-msgstr "upłynął limit czasu dla urządzenia"
+#: lib/logitech_receiver/i18n.py:45
+msgid   "device timeout"
+msgstr  "upłynął limit czasu dla urządzenia"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:45
-msgid "sequence timeout"
-msgstr "upłynął limit czasu dla sekwencji"
+#: lib/logitech_receiver/i18n.py:45
+msgid   "sequence timeout"
+msgstr  "upłynął limit czasu dla sekwencji"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:45
-msgid "too many devices"
-msgstr "za dużo urządzeń"
+#: lib/logitech_receiver/i18n.py:45
+msgid   "too many devices"
+msgstr  "za dużo urządzeń"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:48
-msgid "Bootloader"
-msgstr "Bootloader"
+#: lib/logitech_receiver/i18n.py:48
+msgid   "Bootloader"
+msgstr  "Bootloader"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:48
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:538
-msgid "Firmware"
-msgstr "Firmware"
+#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:538
+msgid   "Firmware"
+msgstr  "Firmware"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:48
-msgid "Hardware"
-msgstr "Hardware"
+#: lib/logitech_receiver/i18n.py:48
+msgid   "Hardware"
+msgstr  "Hardware"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/i18n.py:48
-msgid "Other"
-msgstr "Inne"
+#: lib/logitech_receiver/i18n.py:48
+msgid   "Other"
+msgstr  "Inne"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/notifications.py:67
-msgid "closed"
-msgstr "zamknięte"
+#: lib/logitech_receiver/notifications.py:67
+msgid   "closed"
+msgstr  "zamknięte"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/notifications.py:67
-msgid "open"
-msgstr "otwarte"
+#: lib/logitech_receiver/notifications.py:67
+msgid   "open"
+msgstr  "otwarte"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/notifications.py:67
-msgid "pairing lock is "
-msgstr "blokada parowania jest"
+#: lib/logitech_receiver/notifications.py:67
+msgid   "pairing lock is "
+msgstr  "blokada parowania jest"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/notifications.py:192
-msgid "powered on"
-msgstr "włączone"
+#: lib/logitech_receiver/notifications.py:192
+msgid   "powered on"
+msgstr  "włączone"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/receiver.py:107
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:625
-msgid "unknown"
-msgstr "nieznane"
+#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:625
+msgid   "unknown"
+msgstr  "nieznane"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:77
-msgid "Smooth Scrolling"
-msgstr "Płynne przewijanie"
+#: lib/logitech_receiver/settings_templates.py:77
+msgid   "Smooth Scrolling"
+msgstr  "Płynne przewijanie"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:78
-msgid "High-sensitivity mode for vertical scroll with the wheel."
-msgstr ""
-"Tryb wysokiej rozdzielczości dla przewijania pionowego\n"
-"przy użyciu kółka myszy."
+#: lib/logitech_receiver/settings_templates.py:78
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  "Tryb wysokiej rozdzielczości dla przewijania pionowego\n"
+        "przy użyciu kółka myszy."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:79
-msgid "Side Scrolling"
-msgstr "Przewijanie na boki"
+#: lib/logitech_receiver/settings_templates.py:79
+msgid   "Side Scrolling"
+msgstr  "Przewijanie na boki"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:80
-msgid ""
-"When disabled, pushing the wheel sideways sends custom button events\n"
-"instead of the standard side-scrolling events."
-msgstr ""
-"Gdy jest wyłączone to przechylanie kółka myszy wysyła niestandardowe\n"
-"zdarzenia przycisków zamiast standardowych do przewijania na boki."
+#: lib/logitech_receiver/settings_templates.py:80
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  "Gdy jest wyłączone to przechylanie kółka myszy wysyła "
+        "niestandardowe\n"
+        "zdarzenia przycisków zamiast standardowych do przewijania na boki."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:82
-msgid "Sensitivity (DPI)"
-msgstr "Czułość (DPI)"
+#: lib/logitech_receiver/settings_templates.py:82
+msgid   "Sensitivity (DPI)"
+msgstr  "Czułość (DPI)"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:83
-msgid "Swap Fx function"
-msgstr "Funkcja Swap Fx"
+#: lib/logitech_receiver/settings_templates.py:83
+msgid   "Swap Fx function"
+msgstr  "Funkcja Swap Fx"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:84
-msgid ""
-"When set, the F1..F12 keys will activate their special function,\n"
-"and you must hold the FN key to activate their standard function."
-msgstr ""
-"Gdy włączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
-"ich funkcja pomocnicza. Aby aktywować standardową funkcję należy\n"
-"przytrzymać klawisz FN."
+#: lib/logitech_receiver/settings_templates.py:84
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  "Gdy włączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
+        "ich funkcja pomocnicza. Aby aktywować standardową funkcję należy\n"
+        "przytrzymać klawisz FN."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:87
-msgid ""
-"When unset, the F1..F12 keys will activate their standard function,\n"
-"and you must hold the FN key to activate their special function."
-msgstr ""
-"Gdy wyłączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
-"ich standardowa funkcja. Aby aktywować funkcję pomocniczą należy\n"
-"przytrzymać klawisz FN."
+#: lib/logitech_receiver/settings_templates.py:87
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  "Gdy wyłączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
+        "ich standardowa funkcja. Aby aktywować funkcję pomocniczą należy\n"
+        "przytrzymać klawisz FN."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:89
-msgid "Hand Detection"
-msgstr "Wykrywanie dłoni"
+#: lib/logitech_receiver/settings_templates.py:89
+msgid   "Hand Detection"
+msgstr  "Wykrywanie dłoni"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/settings_templates.py:90
-msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "Włącz podświetlenie gdy dłoń znajdzie się nad klawiaturą."
+#: lib/logitech_receiver/settings_templates.py:90
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  "Włącz podświetlenie gdy dłoń znajdzie się nad klawiaturą."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:98
-msgid "No paired devices."
-msgstr "Brak sparowanych urządzeń."
+#: lib/logitech_receiver/status.py:98
+msgid   "No paired devices."
+msgstr  "Brak sparowanych urządzeń."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:99
-msgid "1 paired device."
-msgstr "1 sparowane urządzenie."
+#: lib/logitech_receiver/status.py:99
+msgid   "1 paired device."
+msgstr  "1 sparowane urządzenie."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:100
-msgid " paired devices."
-msgstr "sparowane(-ych) urządzeń."
+#: lib/logitech_receiver/status.py:100
+msgid   " paired devices."
+msgstr  "sparowane(-ych) urządzeń."
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:153
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:155
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:146
-msgid "Battery"
-msgstr "Bateria"
+#: lib/logitech_receiver/status.py:153 lib/logitech_receiver/status.py:155
+#: lib/solaar/ui/window.py:146
+msgid   "Battery"
+msgstr  "Bateria"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:161
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:153
-msgid "Lighting"
-msgstr "Podświetlenie"
+#: lib/logitech_receiver/status.py:161 lib/solaar/ui/window.py:153
+msgid   "Lighting"
+msgstr  "Podświetlenie"
 
-#: /home/adrianp/Install/Solaar/lib/logitech_receiver/status.py:161
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:666
-msgid "lux"
-msgstr "lux"
+#: lib/logitech_receiver/status.py:161 lib/solaar/ui/window.py:666
+msgid   "lux"
+msgstr  "lux"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/listener.py:95
-msgid "The receiver was unplugged."
-msgstr "Odbiornik został odłączony."
+#: lib/solaar/listener.py:95
+msgid   "The receiver was unplugged."
+msgstr  "Odbiornik został odłączony."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:69
-msgid "Permissions error"
-msgstr "Błąd uprawnień"
+#: lib/solaar/ui/__init__.py:69
+msgid   "Permissions error"
+msgstr  "Błąd uprawnień"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:70
+#: lib/solaar/ui/__init__.py:70
 #, fuzzy, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Znaleziono odbiornik Logitech (%s), ale nie ma uprawnień do otworzenia go."
+msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
+        "it."
+msgstr  "Znaleziono odbiornik Logitech (%s), ale nie ma uprawnień do "
+        "otworzenia go."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:72
-msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
-msgstr ""
-"Jeżeli właśnie zainstalowałeś Solaar spróbuj odłączyć nadajnik i podłączyć "
-"go ponownie."
+#: lib/solaar/ui/__init__.py:72
+msgid   "If you've just installed Solaar, try removing the receiver and "
+        "plugging it back in."
+msgstr  "Jeżeli właśnie zainstalowałeś Solaar spróbuj odłączyć nadajnik i "
+        "podłączyć go ponownie."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:74
-msgid "Unpairing failed"
-msgstr "Usunięcie parowania nie powiodło się"
+#: lib/solaar/ui/__init__.py:74
+msgid   "Unpairing failed"
+msgstr  "Usunięcie parowania nie powiodło się"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:75
+#: lib/solaar/ui/__init__.py:75
 #, python-format
-msgid "Failed to unpair %s from %s."
-msgstr "Nie powidło się usunięcie parowania %s z %s."
+msgid   "Failed to unpair %s from %s."
+msgstr  "Nie powidło się usunięcie parowania %s z %s."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/__init__.py:77
-msgid "The receiver returned an error, with no further details."
-msgstr "Odbiornik zwrócił błąd bez dodatkowych informacji."
+#: lib/solaar/ui/__init__.py:77
+msgid   "The receiver returned an error, with no further details."
+msgstr  "Odbiornik zwrócił błąd bez dodatkowych informacji."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/about.py:39
-msgid ""
-"Shows status of devices connected\n"
-"through wireless Logitech receivers."
-msgstr ""
-"Wyświetla status urządzeń podłączonych\n"
-"przez bezprzewodowe odbiorniki Logitech."
+#: lib/solaar/ui/about.py:39
+msgid   "Shows status of devices connected\n"
+        "through wireless Logitech receivers."
+msgstr  "Wyświetla status urządzeń podłączonych\n"
+        "przez bezprzewodowe odbiorniki Logitech."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/about.py:48
-msgid "GUI design"
-msgstr "Projekt GUI"
+#: lib/solaar/ui/about.py:48
+msgid   "GUI design"
+msgstr  "Projekt GUI"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "Testy"
+#: lib/solaar/ui/about.py:49
+msgid   "Testing"
+msgstr  "Testy"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/about.py:54
-msgid "Logitech documentation"
-msgstr "Dokumentacja Logitech"
+#: lib/solaar/ui/about.py:54
+msgid   "Logitech documentation"
+msgstr  "Dokumentacja Logitech"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/action.py:68
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:319
-msgid "About"
-msgstr "O"
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:319
+msgid   "About"
+msgstr  "O"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/action.py:95
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/action.py:98
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:206
-msgid "Unpair"
-msgstr "Usuń parowanie"
+#: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
+#: lib/solaar/ui/window.py:206
+msgid   "Unpair"
+msgstr  "Usuń parowanie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/config_panel.py:97
-msgid "Working"
-msgstr "Pracuję"
+#: lib/solaar/ui/config_panel.py:97
+msgid   "Working"
+msgstr  "Pracuję"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/config_panel.py:100
-msgid "Read/write operation failed."
-msgstr "Operacja odczytu/zapisu nie powiodła się."
+#: lib/solaar/ui/config_panel.py:100
+msgid   "Read/write operation failed."
+msgstr  "Operacja odczytu/zapisu nie powiodła się."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/notify.py:115
-msgid "unpaired"
-msgstr "nie sparowany"
+#: lib/solaar/ui/notify.py:115
+msgid   "unpaired"
+msgstr  "nie sparowany"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/notify.py:116
-msgid "connected"
-msgstr "podłączony"
+#: lib/solaar/ui/notify.py:116
+msgid   "connected"
+msgstr  "podłączony"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/notify.py:116
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:285
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:290
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:656
-msgid "offline"
-msgstr "wyłączony"
+#: lib/solaar/ui/notify.py:116 lib/solaar/ui/tray.py:285
+#: lib/solaar/ui/tray.py:290 lib/solaar/ui/window.py:656
+msgid   "offline"
+msgstr  "wyłączony"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:133
-msgid "Pairing failed"
-msgstr "Parowanie nie powiodło się"
+#: lib/solaar/ui/pair_window.py:133
+msgid   "Pairing failed"
+msgstr  "Parowanie nie powiodło się"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:135
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr "Upewnij się, że urządzenie jest w zasięgu i ma naładowane baterie."
+#: lib/solaar/ui/pair_window.py:135
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "Upewnij się, że urządzenie jest w zasięgu i ma naładowane baterie."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:137
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr ""
-"Wykryto nowe urządzenie, jednak nie jest ono kompatybilne z tym odbiornikiem."
+#: lib/solaar/ui/pair_window.py:137
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "Wykryto nowe urządzenie, jednak nie jest ono kompatybilne z tym "
+        "odbiornikiem."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:139
+#: lib/solaar/ui/pair_window.py:139
 #, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
+msgid   "The receiver only supports %d paired device(s)."
+msgstr  "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:141
-msgid "No further details are available about the error."
-msgstr "Brak dodatkowych informacji na temat błędu."
+#: lib/solaar/ui/pair_window.py:141
+msgid   "No further details are available about the error."
+msgstr  "Brak dodatkowych informacji na temat błędu."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:155
-msgid "Found a new device"
-msgstr "Wykryto nowe urządzenie"
+#: lib/solaar/ui/pair_window.py:155
+msgid   "Found a new device"
+msgstr  "Wykryto nowe urządzenie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:180
-msgid "The wireless link is not encrypted"
-msgstr "Połączenie nie jest szyfrowane"
+#: lib/solaar/ui/pair_window.py:180
+msgid   "The wireless link is not encrypted"
+msgstr  "Połączenie nie jest szyfrowane"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:197
-msgid "pair new device"
-msgstr "sparuj nowe urządzenie"
+#: lib/solaar/ui/pair_window.py:197
+msgid   "pair new device"
+msgstr  "sparuj nowe urządzenie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:205
-msgid "Turn on the device you want to pair."
-msgstr "Włącz urządzenie które chcesz sparować."
+#: lib/solaar/ui/pair_window.py:205
+msgid   "Turn on the device you want to pair."
+msgstr  "Włącz urządzenie które chcesz sparować."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/pair_window.py:206
-msgid ""
-"If the device is already turned on,\n"
-"turn if off and on again."
-msgstr ""
-"Jeżeli urządzenie jest już włączone,\n"
-"wyłącz je i włącz ponownie."
+#: lib/solaar/ui/pair_window.py:206
+msgid   "If the device is already turned on,\n"
+        "turn if off and on again."
+msgstr  "Jeżeli urządzenie jest już włączone,\n"
+        "wyłącz je i włącz ponownie."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:55
-msgid "No Logitech receiver found"
-msgstr "Nie znaleziono odbiornika Logitech"
+#: lib/solaar/ui/tray.py:55
+msgid   "No Logitech receiver found"
+msgstr  "Nie znaleziono odbiornika Logitech"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:62
-msgid "Quit"
-msgstr "Wyjdź"
+#: lib/solaar/ui/tray.py:62
+msgid   "Quit"
+msgstr  "Wyjdź"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:269
-msgid "no receiver"
-msgstr "brak odbiornika"
+#: lib/solaar/ui/tray.py:269
+msgid   "no receiver"
+msgstr  "brak odbiornika"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/tray.py:288
-msgid "no status"
-msgstr "brak statusu"
+#: lib/solaar/ui/tray.py:288
+msgid   "no status"
+msgstr  "brak statusu"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:58
-msgid "The wireless link between this device and its receiver is encrypted."
-msgstr ""
-"Połączenie bezprzewodowe pomiędzy tym urządzeniem i odbiornikiem jest "
-"szyfrowane."
+#: lib/solaar/ui/window.py:58
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  "Połączenie bezprzewodowe pomiędzy tym urządzeniem i odbiornikiem "
+        "jest szyfrowane."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:59
-msgid ""
-"The wireless link between this device and its receiver is not encrypted.\n"
-"\n"
-"For pointing devices (mice, trackballs, trackpads), this is a minor security "
-"issue.\n"
-"\n"
-"It is, however, a major security issue for text-input devices (keyboards, "
-"numpads),\n"
-"because typed text can be sniffed inconspicuously by 3rd parties within "
-"range."
-msgstr ""
-"Połączenie pomiędzy tym urządzeniem i odbiornikiem nie jest szyfrowane.\n"
-"\n"
-"Dla urządzeń wskazujących (myszki, trackballe, trackpady) nie stanowi to "
-"zagrożenia\n"
-"bezpieczeństwa.\n"
-"\n"
-"Jest to jednak duże zagrożenie dla urządzeń służących do wprowadzania "
-"tekstu\n"
-"(klawiatury, klawiatury numeryczne), gdyż wpisywany tekst może być "
-"podsłuchany\n"
-"przez kogoś będącego w zasięgu."
+#: lib/solaar/ui/window.py:59
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "\n"
+        "For pointing devices (mice, trackballs, trackpads), this is a minor "
+        "security issue.\n"
+        "\n"
+        "It is, however, a major security issue for text-input devices "
+        "(keyboards, numpads),\n"
+        "because typed text can be sniffed inconspicuously by 3rd parties "
+        "within range."
+msgstr  "Połączenie pomiędzy tym urządzeniem i odbiornikiem nie jest "
+        "szyfrowane.\n"
+        "\n"
+        "Dla urządzeń wskazujących (myszki, trackballe, trackpady) nie "
+        "stanowi to zagrożenia\n"
+        "bezpieczeństwa.\n"
+        "\n"
+        "Jest to jednak duże zagrożenie dla urządzeń służących do "
+        "wprowadzania tekstu\n"
+        "(klawiatury, klawiatury numeryczne), gdyż wpisywany tekst może być "
+        "podsłuchany\n"
+        "przez kogoś będącego w zasięgu."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:67
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:71
-msgid "No device paired"
-msgstr "Brak sparowanych urządzeń."
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
+msgid   "No device paired"
+msgstr  "Brak sparowanych urządzeń."
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:67
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:68
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
-msgid "Up to %d devices can be paired to this receiver"
-msgstr "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
+msgid   "Up to %d devices can be paired to this receiver"
+msgstr  "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:68
-msgid "paired devices"
-msgstr "sparowane urządzenia"
+#: lib/solaar/ui/window.py:68
+msgid   "paired devices"
+msgstr  "sparowane urządzenia"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:72
-msgid "Only one device can be paired to this receiver"
-msgstr "Tylko jedno urządzenie może być sparowane z tym odbiornikiem"
+#: lib/solaar/ui/window.py:72
+msgid   "Only one device can be paired to this receiver"
+msgstr  "Tylko jedno urządzenie może być sparowane z tym odbiornikiem"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:113
-msgid "Scanning"
-msgstr "Wyszukiwanie"
+#: lib/solaar/ui/window.py:113
+msgid   "Scanning"
+msgstr  "Wyszukiwanie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:149
-msgid "Wireless Link"
-msgstr "Połączenie bezprzewodowe"
+#: lib/solaar/ui/window.py:149
+msgid   "Wireless Link"
+msgstr  "Połączenie bezprzewodowe"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:182
-msgid "Show Technical Details"
-msgstr "Wyświetl szczegóły techniczne"
+#: lib/solaar/ui/window.py:182
+msgid   "Show Technical Details"
+msgstr  "Wyświetl szczegóły techniczne"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:195
-msgid "Pair new device"
-msgstr "Sparuj nowe urządzenie"
+#: lib/solaar/ui/window.py:195
+msgid   "Pair new device"
+msgstr  "Sparuj nowe urządzenie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:214
-msgid "Select a device"
-msgstr "Wybierz urządzenie"
+#: lib/solaar/ui/window.py:214
+msgid   "Select a device"
+msgstr  "Wybierz urządzenie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:511
-msgid "Path"
-msgstr "Ścieżka"
+#: lib/solaar/ui/window.py:511
+msgid   "Path"
+msgstr  "Ścieżka"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:513
-msgid "USB id"
-msgstr "USB id"
+#: lib/solaar/ui/window.py:513
+msgid   "USB id"
+msgstr  "USB id"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:516
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:518
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:530
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:532
-msgid "Serial"
-msgstr "Serial"
+#: lib/solaar/ui/window.py:516 lib/solaar/ui/window.py:518
+#: lib/solaar/ui/window.py:530 lib/solaar/ui/window.py:532
+msgid   "Serial"
+msgstr  "Serial"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:522
-msgid "Index"
-msgstr "Index"
+#: lib/solaar/ui/window.py:522
+msgid   "Index"
+msgstr  "Index"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:523
-msgid "Wireless PID"
-msgstr "Wireless PID"
+#: lib/solaar/ui/window.py:523
+msgid   "Wireless PID"
+msgstr  "Wireless PID"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:525
-msgid "Protocol"
-msgstr "Protokół"
+#: lib/solaar/ui/window.py:525
+msgid   "Protocol"
+msgstr  "Protokół"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:527
-msgid "Polling rate"
-msgstr "Częstotliwość próbkowania"
+#: lib/solaar/ui/window.py:527
+msgid   "Polling rate"
+msgstr  "Częstotliwość próbkowania"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:542
-msgid "none"
-msgstr "brak"
+#: lib/solaar/ui/window.py:542
+msgid   "none"
+msgstr  "brak"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:543
-msgid "Notifications"
-msgstr "Powiadomienia"
+#: lib/solaar/ui/window.py:543
+msgid   "Notifications"
+msgstr  "Powiadomienia"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:638
-msgid "charging"
-msgstr "ładowanie"
+#: lib/solaar/ui/window.py:638
+msgid   "charging"
+msgstr  "ładowanie"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:640
-msgid "last known"
-msgstr "ostatni znany"
+#: lib/solaar/ui/window.py:640
+msgid   "last known"
+msgstr  "ostatni znany"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:647
-msgid "not encrypted"
-msgstr "nie szyfrowane"
+#: lib/solaar/ui/window.py:647
+msgid   "not encrypted"
+msgstr  "nie szyfrowane"
 
-#: /home/adrianp/Install/Solaar/lib/solaar/ui/window.py:651
-msgid "encrypted"
-msgstr "szyfrowane"
+#: lib/solaar/ui/window.py:651
+msgid   "encrypted"
+msgstr  "szyfrowane"

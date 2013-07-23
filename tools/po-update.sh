@@ -15,7 +15,7 @@ VERSION=$(python setup.py --version)
 DOMAIN=$(python setup.py --name)
 
 SOURCE_FILES=$(/bin/mktemp --tmpdir $DOMAIN-po-update-XXXXXX)
-find "$PWD/lib" -name '*.py' >"$SOURCE_FILES"
+find "lib" -name '*.py' >"$SOURCE_FILES"
 
 POT_DIR="$PWD/po"
 test -d "$POT_DIR"
