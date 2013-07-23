@@ -66,6 +66,7 @@ def _create():
 
 	about.set_translator_credits('\n'.join((
 					'Daniel Pavel (română)',
+					'Adrian Piotrowicz (polski)',
 					)))
 
 	about.set_website('http://pwr.github.io/Solaar/')
