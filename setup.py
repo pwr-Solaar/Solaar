@@ -24,6 +24,23 @@ if 'install' in sys.argv:
 
 del sys, backup_path_0
 
+
+def _data_files():
+	from os.path import dirname as _dirname
+
+	yield 'share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')
+	yield 'share/solaar/icons', _glob('share/solaar/icons/light_*.png')
+	yield 'share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']
+
+	for mo in _glob('share/locale/*/LC_MESSAGES/solaar.mo'):
+		yield _dirname(mo), [mo]
+
+	yield 'share/applications', ['share/applications/solaar.desktop']
+	yield autostart_path, ['share/applications/solaar.desktop']
+
+	del _dirname
+
+
 setup(name=NAME.lower(),
 		version=__version__,
 		description='Linux devices manager for the Logitech Unifying Receiver.',
@@ -55,13 +72,6 @@ battery status.
 
 		package_dir={'': 'lib'},
 		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui'],
-
-		data_files=[('share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')),
-					('share/solaar/icons', _glob('share/solaar/icons/light_*.png')),
-					('share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']),
-					('share/applications', ['share/applications/solaar.desktop']),
-					(autostart_path, ['share/applications/solaar.desktop']),
-					],
-
+		data_files=list(_data_files()),
 		scripts=_glob('bin/*'),
 	)

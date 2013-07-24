@@ -47,6 +47,7 @@ fi
 
 export TMPDIR="$(/bin/mktemp --directory --tmpdir debbuild-$P_NAME-$P_VERSION-$USER-XXXXXX)"
 
+./tools/po-compile.sh
 python2.7 setup.py sdist --formats=gztar --quiet
 /bin/tar --extract --gunzip --file "$SDIST_FILE" --directory "$DIST_DIR"
 test -d "$BUILD_DIR"
