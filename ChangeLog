@@ -1,3 +1,11 @@
+0.9.2:
+  * Added support for hand detection on the K800.
+  * Added support for V550 and V450 Nano.
+  * Fixed side-scrolling wit the M705 Marathon.
+  * Fixed identification of the T650 Touchpad.
+  * Added internationalization support and romanian translation.
+  * Polish translation courtesy of Adrian Piotrowicz.
+
 0.9.1:
   * When devices report a battery alert, only show the alert once.
   * Make sure devices in the window tree are sorted by registration index.
