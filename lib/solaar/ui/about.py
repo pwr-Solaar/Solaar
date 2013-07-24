@@ -65,8 +65,8 @@ def _create():
 		logging.exception("failed to fully create the about dialog")
 
 	about.set_translator_credits('\n'.join((
-					'Daniel Pavel (română)',
 					'Adrian Piotrowicz (polski)',
+					'Daniel Pavel (română)',
 					)))
 
 	about.set_website('http://pwr.github.io/Solaar/')
