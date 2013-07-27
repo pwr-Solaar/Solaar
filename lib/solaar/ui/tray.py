@@ -19,7 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
+from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
@@ -71,8 +71,8 @@ try:
 	# raise ImportError
 	from gi.repository import AppIndicator3
 
-	if _log.isEnabledFor(_INFO):
-		_log.info("using AppIndicator3")
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("using AppIndicator3")
 
 	_last_scroll = 0
 	def _scroll(ind, _ignore, direction):
@@ -201,8 +201,8 @@ try:
 
 except ImportError:
 
-	if _log.isEnabledFor(_INFO):
-		_log.info("using StatusIcon")
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("using StatusIcon")
 
 	def _create(menu):
 		icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)

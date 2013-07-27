@@ -69,29 +69,41 @@ def _look_for_application_icons():
 	del _environ
 	# del _path
 
-_default_theme = Gtk.IconTheme.get_default()
-for p in _look_for_application_icons():
-	_default_theme.prepend_search_path(p)
-if _log.isEnabledFor(_DEBUG):
-	_log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
-#
-#
-#
+_default_theme = None
+_has_gpm_icons = None
+_has_oxygen_icons = None
+_has_gnome_icons = None
+_has_elementary_icons = None
 
-_has_gpm_icons = _default_theme.has_icon('gpm-battery-020-charging')
-_has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
-					_default_theme.has_icon('battery-charging-040')
-_has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
-					_default_theme.has_icon('battery-full-charged')
-_has_elementary_icons = _default_theme.has_icon('battery-020-charging')
 
-if _log.isEnabledFor(_DEBUG):
-	_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s",
-					_has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
-if (not _has_gpm_icons and not _has_oxygen_icons and
-	not _has_gnome_icons and not _has_elementary_icons):
-	_log.warning("failed to detect a known icon set")
+def _init_icon_paths():
+	global _default_theme
+	if _default_theme:
+		return
+
+	_default_theme = Gtk.IconTheme.get_default()
+	for p in _look_for_application_icons():
+		_default_theme.prepend_search_path(p)
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("icon theme paths: %s", _default_theme.get_search_path())
+
+	global _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons
+
+	_has_gpm_icons = _default_theme.has_icon('gpm-battery-020-charging')
+	_has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
+						_default_theme.has_icon('battery-charging-040')
+	_has_gnome_icons = _default_theme.has_icon('battery-caution-charging') and \
+						_default_theme.has_icon('battery-full-charged')
+	_has_elementary_icons = _default_theme.has_icon('battery-020-charging')
+
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s",
+						_has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
+
+	if (not _has_gpm_icons and not _has_oxygen_icons and
+		not _has_gnome_icons and not _has_elementary_icons):
+		_log.warning("failed to detect a known icon set")
 
 #
 #
@@ -106,6 +118,8 @@ def battery(level=None, charging=False):
 	return icon_name
 
 def _battery_icon_name(level, charging):
+	_init_icon_paths()
+
 	if level is None or level < 0:
 		return 'gpm-battery-missing' \
 			if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing') \
@@ -186,6 +200,8 @@ def device_icon_set(name='_', kind=None):
 
 
 def device_icon_file(name, kind=None, size=_LARGE_SIZE):
+	_init_icon_paths()
+
 	icon_set = device_icon_set(name, kind)
 	assert icon_set
 	for n in reversed(icon_set.names):
@@ -194,6 +210,8 @@ def device_icon_file(name, kind=None, size=_LARGE_SIZE):
 
 
 def device_icon_name(name, kind=None):
+	_init_icon_paths()
+
 	icon_set = device_icon_set(name, kind)
 	assert icon_set
 	for n in reversed(icon_set.names):
@@ -202,6 +220,8 @@ def device_icon_name(name, kind=None):
 
 
 def icon_file(name, size=_LARGE_SIZE):
+	_init_icon_paths()
+
 	if _default_theme.has_icon(name):
 		theme_icon = _default_theme.lookup_icon(name, size, 0)
 		file_name = theme_icon.get_filename()
