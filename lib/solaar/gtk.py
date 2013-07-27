@@ -71,16 +71,10 @@ def main():
 
 	try:
 		import solaar.ui as ui
-		ui.init()
-
 		import solaar.listener as listener
 		listener.setup_scanner(ui.status_changed, ui.error_dialog)
-		listener.start_all()
-
 		# main UI event loop
-		ui.run_loop()
-
-		listener.stop_all()
+		ui.run_loop(listener.start_all, listener.stop_all)
 	except Exception as e:
 		import sys
 		sys.exit('%s: error: %s' % (NAME.lower(), e))

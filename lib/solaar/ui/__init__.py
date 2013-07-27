@@ -20,7 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
+from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
@@ -36,27 +36,6 @@ from solaar.i18n import _
 assert Gtk.get_major_version() > 2, 'Solaar requires Gtk 3 python bindings'
 
 GLib.threads_init()
-
-def _init_application():
-	APP_ID = 'io.github.pwr.solaar'
-	app = Gtk.Application.new(APP_ID, 0)
-	# not sure this is necessary...
-	# app.set_property('register-session', True)
-	registered = app.register(None)
-	dbus_path = app.get_dbus_object_path() if hasattr(app, 'get_dbus_object_path') else APP_ID
-	if _log.isEnabledFor(_INFO):
-		_log.info("application %s, registered %s", dbus_path, registered)
-	# assert registered, "failed to register unique application %s" % app
-
-	# if there is already a running instance, bail out
-	if app.get_is_remote():
-		# pop up the window in the other instance
-		app.activate()
-		raise Exception("already running")
-
-	return app
-
-application = _init_application()
 
 #
 #
@@ -92,40 +71,13 @@ def error_dialog(reason, object):
 	GLib.idle_add(_error_dialog, reason, object)
 
 #
-# A separate thread is used to read/write from the device
-# so as not to block the main (GUI) thread.
+#
 #
 
-try:
-	from Queue import Queue
-except ImportError:
-	from queue import Queue
-_task_queue = Queue(16)
-del Queue
-
-
-from threading import Thread, current_thread as _current_thread
-
-def _process_async_queue():
-	t = _current_thread()
-	t.alive = True
-	while t.alive:
-		function, args, kwargs = _task_queue.get()
-		if function:
-			function(*args, **kwargs)
-	if _log.isEnabledFor(_DEBUG):
-		_log.debug("stopped")
-
-_queue_processor = Thread(name='AsyncUI', target=_process_async_queue)
-_queue_processor.daemon = True
-_queue_processor.alive = False
-_queue_processor.start()
-
-del Thread
-
+_task_runner = None
 def async(function, *args, **kwargs):
-	task = (function, args, kwargs)
-	_task_queue.put(task)
+	if _task_runner:
+		_task_runner(function, *args, **kwargs)
 
 #
 #
@@ -133,36 +85,73 @@ def async(function, *args, **kwargs):
 
 from . import notify, tray, window
 
-def init():
+
+def _startup(app, startup_hook):
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
+
+	from solaar.async import TaskRunner as _TaskRunner
+	global _task_runner
+	_task_runner = _TaskRunner('AsyncUI')
+	_task_runner.start()
+
 	notify.init()
 	tray.init(lambda _ignore: window.destroy())
 	window.init()
 
-def run_loop():
-	def _activate(app):
-		assert app == application
-		if app.get_windows():
-			window.popup()
-		else:
-			app.add_window(window._window)
+	startup_hook()
 
-	def _shutdown(app):
-		# stop the async UI processor
-		_queue_processor.alive = False
-		async(None)
 
-		tray.destroy()
-		notify.uninit()
+def _activate(app):
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("activate")
+	if app.get_windows():
+		window.popup()
+	else:
+		app.add_window(window._window)
 
+
+def _command_line(app, command_line):
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("command_line %s", command_line.get_arguments())
+
+	return 0
+
+
+def _shutdown(app, shutdown_hook):
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("shutdown")
+
+	shutdown_hook()
+
+	# stop the async UI processor
+	global _task_runner
+	_task_runner.stop()
+	_task_runner = None
+
+	tray.destroy()
+	notify.uninit()
+
+
+def run_loop(startup_hook, shutdown_hook, args=None):
+	# from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
+	APP_ID = 'io.github.pwr.solaar'
+	application = Gtk.Application.new(APP_ID, 0) # _ApplicationFlags.HANDLES_COMMAND_LINE)
+
+	application.connect('startup', _startup, startup_hook)
+	application.connect('command-line', _command_line)
 	application.connect('activate', _activate)
-	application.connect('shutdown', _shutdown)
-	application.run(None)
+	application.connect('shutdown', _shutdown, shutdown_hook)
+
+	application.run(args)
 
 #
 #
 #
 
 from logitech_receiver.status import ALERT
+
+
 def _status_changed(device, alert, reason):
 	assert device is not None
 	if _log.isEnabledFor(_DEBUG):
