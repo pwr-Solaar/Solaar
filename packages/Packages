@@ -1,4 +1,25 @@
 Package: solaar
+Version: 0.9.2-2
+Architecture: all
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Installed-Size: 434
+Depends: debconf (>= 0.5) | debconf-2.0, udev (>= 175), passwd | adduser, python (>= 2.7), python-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4), gnome-icon-theme | oxygen-icon-theme
+Recommends: gir1.2-notify-0.7, consolekit (>= 0.4.3) | systemd (>= 44), python-dbus (>= 1.1.0), upower
+Suggests: gir1.2-appindicator3-0.1, solaar-gnome3 (= 0.9.2-2)
+Filename: ./solaar_0.9.2-2_all.deb
+Size: 97338
+MD5sum: 99d6d720aac87617678d47accb578c11
+SHA1: b7c356fc59b3542acf16f5a41afe263b841375e8
+SHA256: 201ba6f2b250f7348884deada5a2fefe126f92809cc28c687c3177543ffc4cb5
+Section: misc
+Priority: optional
+Homepage: http://pwr.github.io/Solaar
+Description: Logitech Unifying Receiver peripherals manager for Linux
+ Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+ It is able to pair/unpair devices to the receiver, and for some devices read
+ battery status.
+
+Package: solaar
 Version: 0.8.8.1-2
 Architecture: all
 Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
@@ -115,6 +136,29 @@ Size: 2752
 MD5sum: 889be27ea167832ab805ecfbddd9bcb7
 SHA1: 5d682422f0d086d4b603009c8208e7851edbf215
 SHA256: d67419716a12bf4697cd76117b02f2b357490fe6109d8ec72196f6649eebff8e
+Section: gnome
+Priority: optional
+Homepage: http://pwr.github.io/Solaar
+Description: gnome-shell/Unity integration for Solaar
+ Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+ It is able to pair/unpair devices to the receiver, and for some devices read
+ battery status.
+ .
+ This metapackage ensures integration with gnome-shell/Unity.
+
+Package: solaar-gnome3
+Source: solaar
+Version: 0.9.2-2
+Architecture: all
+Maintainer: Daniel Pavel <daniel.pavel@gmail.com>
+Installed-Size: 28
+Depends: solaar (= 0.9.2-2), gir1.2-appindicator3-0.1, gnome-shell (>= 3.4) | unity (>= 5.10), gnome-icon-theme
+Enhances: solaar
+Filename: ./solaar-gnome3_0.9.2-2_all.deb
+Size: 3524
+MD5sum: d1a97a1db8be2cf91d27f2000e706839
+SHA1: 304b2e0c904f027168b633a896bb6e8c04d184e5
+SHA256: f6208ab54106b7279d30fb93237bfb188b494d4bb2aa2507bca89f485fe1ad8e
 Section: gnome
 Priority: optional
 Homepage: http://pwr.github.io/Solaar
