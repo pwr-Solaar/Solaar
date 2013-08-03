@@ -1,5 +1,3 @@
-  
-
     # French translations for solaar package.
     # Copyright (C) 2013 THE solaar'S COPYRIGHT HOLDER
     # This file is distributed under the same license as the solaar package.
