@@ -243,7 +243,7 @@ msgstr "Interface graphique"
 
 #: lib/solaar/ui/about.py:49
 msgid "Testing"
-msgstr "Analyse"
+msgstr "Testeur"
 
 #: lib/solaar/ui/about.py:54
 msgid "Logitech documentation"
@@ -455,7 +455,7 @@ msgstr "chargement"
 
 #: lib/solaar/ui/window.py:640
 msgid "last known"
-msgstr "dernière connue"
+msgstr "dernière valeur connue"
 
 #: lib/solaar/ui/window.py:647
 msgid "not encrypted"
