@@ -1,0 +1,657 @@
+# Swedish translations for solaar package.
+# Copyright (C) 2013 THE solaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
+# Automatically generated, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar 0.9.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-07-27 13:13+0200\n"
+"PO-Revision-Date: 2013-07-27 16:28+0100\n"
+"Last-Translator: Daniel Zippert & Emelie Snecker <daniel@zippert.se>\n"
+"Language-Team: none\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-Basepath: /pwr/Solaar/po\n"
+"X-Poedit-SearchPath-0: /pwr/Solaar/po\n"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:38
+msgid "critical"
+msgstr "kritisk"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:38
+msgid "empty"
+msgstr "tom"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:38
+#: (kopia)/lib/logitech_receiver/i18n.py:41
+msgid "full"
+msgstr "full"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:38
+msgid "good"
+msgstr "normal"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:38
+msgid "low"
+msgstr "låg"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:41
+msgid "almost full"
+msgstr "nästan full"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:41
+msgid "discharging"
+msgstr "laddar ur"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:41
+msgid "recharging"
+msgstr "laddar"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:42
+msgid "invalid battery"
+msgstr "batterifel"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:42
+msgid "slow recharge"
+msgstr "långsam laddning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:42
+msgid "thermal error"
+msgstr "termiskt fel"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:45
+msgid "device not supported"
+msgstr "enheten stöds inte"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:45
+msgid "device timeout"
+msgstr "enheten svarde inte i tid"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:45
+msgid "sequence timeout"
+msgstr "sekvens timout"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:45
+msgid "too many devices"
+msgstr "för många enheter"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:48
+msgid "Bootloader"
+msgstr "Bootloader"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:48
+#: (kopia)/lib/solaar/ui/window.py:538
+msgid "Firmware"
+msgstr "Firmware"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:48
+msgid "Hardware"
+msgstr "Hårdvara"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/i18n.py:48
+msgid "Other"
+msgstr "Annan"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/notifications.py:67
+msgid "closed"
+msgstr "låst"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/notifications.py:67
+msgid "open"
+msgstr "öppen"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/notifications.py:67
+msgid "pairing lock is "
+msgstr "parkopplingsläge låst"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/notifications.py:192
+msgid "powered on"
+msgstr "påslagen"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/receiver.py:107
+#: (kopia)/lib/solaar/ui/window.py:625
+msgid "unknown"
+msgstr "okänd"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:77
+msgid "Smooth Scrolling"
+msgstr "Mjuk Scrollning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:78
+msgid "High-sensitivity mode for vertical scroll with the wheel."
+msgstr "Hög känslighet för scrollhjulet. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:79
+msgid "Side Scrolling"
+msgstr "Vertikal Scrollning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:80
+msgid ""
+"When disabled, pushing the wheel sideways sends custom button events\n"
+"instead of the standard side-scrolling events."
+msgstr ""
+"Vid avaktivering, kommer tryckningar sidledes på scrollhjulet\n"
+"fungera som specialknappar istället för standard sidscrolling."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:82
+msgid "Sensitivity (DPI)"
+msgstr "Känslighet (DPI)"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:83
+msgid "Swap Fx function"
+msgstr "Skifta funktionen för F1-12 tangenterna"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:84
+msgid ""
+"When set, the F1..F12 keys will activate their special function,\n"
+"and you must hold the FN key to activate their standard function."
+msgstr ""
+"Vid aktivering, kommer F1-12 tangenterna få sina specialfunktioner,\n"
+"och du behöver trycka ned FN tangenten för att komma åt dess normala "
+"funktioner."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:87
+msgid ""
+"When unset, the F1..F12 keys will activate their standard function,\n"
+"and you must hold the FN key to activate their special function."
+msgstr ""
+"Vid avaktivering, kommer F1-12 tangenterna få sina standardfunktioner,\n"
+"och du behöver trycka ned FN tangenten för att komma åt dess "
+"spesicalfunktioner."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:89
+msgid "Hand Detection"
+msgstr "Handavkänning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/settings_templates.py:90
+msgid "Turn on illumination when the hands hover over the keyboard."
+msgstr "Tänd belysning, om en hand hålls över tangentbordet. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:98
+msgid "No paired devices."
+msgstr "Inga enheter är parkopplade"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:99
+msgid "1 paired device."
+msgstr "1 parkopplad enhet."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:100
+msgid " paired devices."
+msgstr "parkopplade enheter."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:153
+#: (kopia)/lib/logitech_receiver/status.py:155
+#: (kopia)/lib/solaar/ui/window.py:146
+msgid "Battery"
+msgstr "Batteri"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:161
+#: (kopia)/lib/solaar/ui/window.py:153
+msgid "Lighting"
+msgstr "Belysning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/logitech_receiver/status.py:161
+#: (kopia)/lib/solaar/ui/window.py:666
+msgid "lux"
+msgstr "lux"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/listener.py:95
+msgid "The receiver was unplugged."
+msgstr "Mottagaren kopplades ur"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:69
+msgid "Permissions error"
+msgstr "Behörighetsfel"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:70
+#, python-format
+msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
+msgstr ""
+"En Logitech mottagare hittades  (%s),  men behörighet att använda den saknas."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:72
+msgid ""
+"If you've just installed Solaar, try removing the receiver and plugging it "
+"back in."
+msgstr ""
+"Om du just installerade solaar, prova koppla ur mottagaren och anslut den "
+"sedan igen. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:74
+msgid "Unpairing failed"
+msgstr "Kunde inte bryta parkoppling."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:75
+#, python-format
+msgid "Failed to unpair %s from %s."
+msgstr "Misslyckades att bryta parkoppling mellan %s och %s."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/__init__.py:77
+msgid "The receiver returned an error, with no further details."
+msgstr "Mottagaren rapporterade  ett fel, utan specifika detaljer."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/about.py:39
+msgid ""
+"Shows status of devices connected\n"
+"through wireless Logitech receivers."
+msgstr ""
+"Visa status för enheter kopplade till\n"
+"din  trådlösa Logitech mottagare"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/about.py:48
+msgid "GUI design"
+msgstr "GUI utseende"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/about.py:49
+msgid "Testing"
+msgstr "Prövar"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/about.py:54
+msgid "Logitech documentation"
+msgstr "Logitech dokumentation"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/action.py:68 (kopia)/lib/solaar/ui/window.py:319
+msgid "About"
+msgstr "Om"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/action.py:95 (kopia)/lib/solaar/ui/action.py:98
+#: (kopia)/lib/solaar/ui/window.py:206
+msgid "Unpair"
+msgstr "Ta bort parkoppling"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/config_panel.py:97
+msgid "Working"
+msgstr "Lyckades"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/config_panel.py:100
+msgid "Read/write operation failed."
+msgstr "Läsning/Skrivning misslyckades."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/notify.py:115
+msgid "unpaired"
+msgstr "inte parkopplad"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/notify.py:116
+msgid "connected"
+msgstr "ansluten"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/notify.py:116 (kopia)/lib/solaar/ui/tray.py:285
+#: (kopia)/lib/solaar/ui/tray.py:290 (kopia)/lib/solaar/ui/window.py:656
+msgid "offline"
+msgstr "avstängd"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:133
+msgid "Pairing failed"
+msgstr "Parkoppling misslyckades"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:135
+msgid "Make sure your device is within range, and has a decent battery charge."
+msgstr ""
+"Se till så att enheten inom räckhåll, och har tillräckligt laddat batteri. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:137
+msgid "A new device was detected, but it is not compatible with this receiver."
+msgstr "En ny enhet upptäcktes, men  är inte kompatibel med mottagaren. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:139
+#, python-format
+msgid "The receiver only supports %d paired device(s)."
+msgstr "Mottagaren klarar bara %d parkopplad(e) enhet(er)."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:141
+msgid "No further details are available about the error."
+msgstr "Ingen mer information är tillgänglig om felet. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:155
+msgid "Found a new device"
+msgstr "Ny enhet har hittats"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:180
+msgid "The wireless link is not encrypted"
+msgstr "Den trådlösa anslutningen är  okrypterad"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:197
+msgid "pair new device"
+msgstr "parkoppla ny enhet"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:205
+msgid "Turn on the device you want to pair."
+msgstr "Sätt på enheten du vill parkoppla."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/pair_window.py:206
+msgid ""
+"If the device is already turned on,\n"
+"turn if off and on again."
+msgstr ""
+"Om enheten redan är igång,\n"
+"stäng av den och sätt på den igen."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/tray.py:55
+msgid "No Logitech receiver found"
+msgstr "Ingen Logitech motagare hittades"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/tray.py:62
+msgid "Quit"
+msgstr "Stäng"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/tray.py:269
+msgid "no receiver"
+msgstr "ingen mottagare"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/tray.py:288
+msgid "no status"
+msgstr "ingen status"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:58
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr "Den trådlösa anslutningen är  krypterad."
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:59
+msgid ""
+"The wireless link between this device and its receiver is not encrypted.\n"
+"\n"
+"For pointing devices (mice, trackballs, trackpads), this is a minor security "
+"issue.\n"
+"\n"
+"It is, however, a major security issue for text-input devices (keyboards, "
+"numpads),\n"
+"because typed text can be sniffed inconspicuously by 3rd parties within "
+"range."
+msgstr ""
+"Den trådlösa anslutningen mellan den här enheten och mottagaren är "
+"okrypterad\n"
+"\n"
+"For pekdon (möss, styrkulor, pekplattor), är detta inget stort "
+"säkerhetsproblem.\n"
+"\n"
+"Men för textinmatande enheter (tangentbord, numpads) är denna säkerhetsbrist "
+"allvarlig, eftersom skriven text obemärkt kan fångas upp av tredje part som "
+"befinner sig inom enhetens räckhåll. "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:67 (kopia)/lib/solaar/ui/window.py:71
+msgid "No device paired"
+msgstr "Inga enheter parkopplade"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:67 (kopia)/lib/solaar/ui/window.py:68
+#, python-format
+msgid "Up to %d devices can be paired to this receiver"
+msgstr "Upp till %d enheter kan parkopplas till mottagaren"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:68
+msgid "paired devices"
+msgstr "parkopplade enheter"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:72
+msgid "Only one device can be paired to this receiver"
+msgstr "Bara en enhet kan parkopplas till den här mottagaren"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:113
+msgid "Scanning"
+msgstr "Söker"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:149
+msgid "Wireless Link"
+msgstr "Trådlös anslutning"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:182
+msgid "Show Technical Details"
+msgstr "Visa Tekniska Detaljer"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:195
+msgid "Pair new device"
+msgstr "Parkoppla en ny enhet"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:214
+msgid "Select a device"
+msgstr "Välj en enhet"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:511
+msgid "Path"
+msgstr "Sökväg"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:513
+msgid "USB id"
+msgstr "USB id"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:516 (kopia)/lib/solaar/ui/window.py:518
+#: (kopia)/lib/solaar/ui/window.py:530 (kopia)/lib/solaar/ui/window.py:532
+msgid "Serial"
+msgstr "Seriell"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:522
+msgid "Index"
+msgstr "Index"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:523
+msgid "Wireless PID"
+msgstr "Trådlös PID"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:525
+msgid "Protocol"
+msgstr "Protokoll"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:527
+msgid "Polling rate"
+msgstr "Uppdateringshastighet"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:542
+msgid "none"
+msgstr "ingen"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:543
+msgid "Notifications"
+msgstr "Notifikation "
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:638
+msgid "charging"
+msgstr "laddar"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:640
+msgid "last known"
+msgstr "senast kända"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:647
+msgid "not encrypted"
+msgstr "okrypterad"
+
+#: /home/zippert/Skrivbord/Translate
+#: Solaar/Solaar-a7ac5896925038ffc0ab023321cb2037720b7e21
+#: (kopia)/lib/solaar/ui/window.py:651
+msgid "encrypted"
+msgstr "krypterad"
