@@ -7,9 +7,9 @@ msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
         "POT-Creation-Date: 2013-08-03 12:58+0200\n"
-        "PO-Revision-Date: 2013-08-03 12:58+0200\n"
-        "Last-Translator: Papoteur & Geiger David <david.david@mageialinux-online.org>\n"
-        "Language-Team: French <kde-i18n-doc@kde.org>\n"
+        "PO-Revision-Date: 2013-08-06 16:58+0200\n"
+        "Last-Translator: Damien Lallement <dams@mageia.org>\n"
+        "Language-Team: "
         "Language: fr\n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=UTF-8\n"
@@ -78,11 +78,11 @@ msgstr "trop de périphériques"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Bootloader"
-msgstr "Bootloader"
+msgstr "Chargeur d'amorçage"
 
 #: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:538
 msgid "Firmware"
-msgstr "Firmware"
+msgstr "Micrologiciel"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Hardware"
@@ -102,7 +102,7 @@ msgstr "ouvert"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "pairing lock is "
-msgstr "le verrou d'appairage est "
+msgstr "le verrou de jumelage est "
 
 #: lib/logitech_receiver/notifications.py:192
 msgid "powered on"
@@ -147,16 +147,16 @@ msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
 msgstr ""
-"Lorsque défini, les touches F1..F12 activeront leurs fonctions spéciale,\n"
-"et vous devez maintenir la touche FN pour activer leurs fonctions standard."
+"Lorsque défini, les touches F1..F12 activeront leurs fonctions spéciales,\n"
+"et vous devez maintenir la touche FN pour activer leurs fonctions standards."
 
 #: lib/logitech_receiver/settings_templates.py:87
 msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
 msgstr ""
-"Lorsque non défini, les touches F1..F12 activeront leurs fonctions standard,\n"
-"et vous devez maintenir la touche FN pour activer leurs fonctions spéciale."
+"Lorsque non défini, les touches F1..F12 activeront leurs fonctions standards,\n"
+"et vous devez maintenir la touche FN pour activer leurs fonctions spéciales."
 
 #: lib/logitech_receiver/settings_templates.py:89
 msgid "Hand Detection"
@@ -168,15 +168,15 @@ msgstr "Allume l'éclairage lorsque les mains passent au-dessus du clavier."
 
 #: lib/logitech_receiver/status.py:98
 msgid "No paired devices."
-msgstr "Aucun périphériques connectés"
+msgstr "Aucun périphériques jumelés"
 
 #: lib/logitech_receiver/status.py:99
 msgid "1 paired device."
-msgstr "1 périphérique connecté."
+msgstr "1 périphérique jumelé."
 
 #: lib/logitech_receiver/status.py:100
 msgid " paired devices."
-msgstr " périphériques connectés."
+msgstr " périphériques jumelés."
 
 #: lib/logitech_receiver/status.py:153 lib/logitech_receiver/status.py:155
 #: lib/solaar/ui/window.py:146
@@ -185,7 +185,7 @@ msgstr "Batterie"
 
 #: lib/logitech_receiver/status.py:161 lib/solaar/ui/window.py:153
 msgid "Lighting"
-msgstr "Eclairage"
+msgstr "Éclairage"
 
 #: lib/logitech_receiver/status.py:161 lib/solaar/ui/window.py:666
 msgid "lux"
@@ -218,7 +218,7 @@ msgstr ""
 
 #: lib/solaar/ui/__init__.py:74
 msgid "Unpairing failed"
-msgstr "La deconnection a échouée"
+msgstr "La déconnexion a échoué"
 
 #: lib/solaar/ui/__init__.py:75
 #, python-format
@@ -251,7 +251,7 @@ msgstr "Documentațion Logitech"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:319
 msgid "About"
-msgstr "A propos de"
+msgstr "À propos"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:206
@@ -264,11 +264,11 @@ msgstr "En fonctionnement"
 
 #: lib/solaar/ui/config_panel.py:100
 msgid "Read/write operation failed."
-msgstr "Les opérations de lecture/écriture ont échouées."
+msgstr "Les opérations de lecture/écriture ont échoué."
 
 #: lib/solaar/ui/notify.py:115
 msgid "unpaired"
-msgstr "déconnecté"
+msgstr "non jumelé"
 
 #: lib/solaar/ui/notify.py:116
 msgid "connected"
@@ -277,11 +277,11 @@ msgstr "connecté"
 #: lib/solaar/ui/notify.py:116 lib/solaar/ui/tray.py:285
 #: lib/solaar/ui/tray.py:290 lib/solaar/ui/window.py:656
 msgid "offline"
-msgstr "inactif"
+msgstr "non connecté"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid "Pairing failed"
-msgstr "La connection a échouée"
+msgstr "Le jumelage a échoué"
 
 #: lib/solaar/ui/pair_window.py:135
 msgid ""
@@ -314,15 +314,15 @@ msgstr "Nouveau périphérique disponible"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid "The wireless link is not encrypted"
-msgstr "La connection sans fil n'est pas cryptée"
+msgstr "La connection sans fil n'est pas chiffrée"
 
 #: lib/solaar/ui/pair_window.py:197
 msgid "pair new device"
-msgstr "connecte un nouveau périphérique"
+msgstr "Jumele le nouveau périphérique"
 
 #: lib/solaar/ui/pair_window.py:205
 msgid "Turn on the device you want to pair."
-msgstr "Allumez le périphérique que vous souhaitez connecter."
+msgstr "Allumez le périphérique que vous souhaitez jumeler."
 
 #: lib/solaar/ui/pair_window.py:206
 msgid ""
@@ -350,7 +350,7 @@ msgstr "aucun statut"
 
 #: lib/solaar/ui/window.py:58
 msgid "The wireless link between this device and its receiver is encrypted."
-msgstr "La connection sans fil entre cet appareil et son récepteur est cryptée."
+msgstr "La connexion sans fil entre cet appareil et son récepteur est chiffrée."
 
 #: lib/solaar/ui/window.py:59
 msgid ""
@@ -365,7 +365,7 @@ msgid ""
 "because typed text can be sniffed inconspicuously by 3rd parties "
 "within range."
 msgstr ""
-"La connection sans fil entre cet appareil et son récepteur n'est pas cryptée.\n"
+"La connection sans fil entre cet appareil et son récepteur n'est pas chiffrée.\n"
 "\n"
 "Pour des dispositifs de pointage (souris, trackball, trackpad), c'est une "
 "faille mineure de sécurité\n"
@@ -377,20 +377,20 @@ msgstr ""
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
 msgid "No device paired"
-msgstr "Aucun périphérique connecté"
+msgstr "Aucun périphérique jumelé"
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
 msgid "Up to %d devices can be paired to this receiver"
-msgstr "Jusqu'à %d périphériques peuvent être couplés à ce récepteur"
+msgstr "Jusqu'à %d périphériques peuvent être jumelés à ce récepteur"
 
 #: lib/solaar/ui/window.py:68
 msgid "paired devices"
-msgstr "périphérique(s) connecté(s)"
+msgstr "périphérique(s) jumelé(s)"
 
 #: lib/solaar/ui/window.py:72
 msgid "Only one device can be paired to this receiver"
-msgstr "Un seul périphérique peut être couplé à ce récepteur"
+msgstr "Un seul périphérique peut être jumelé à ce récepteur"
 
 #: lib/solaar/ui/window.py:113
 msgid "Scanning"
@@ -398,7 +398,7 @@ msgstr "Balayage"
 
 #: lib/solaar/ui/window.py:149
 msgid "Wireless Link"
-msgstr "Connection sans fil"
+msgstr "Connexion sans fil"
 
 #: lib/solaar/ui/window.py:182
 msgid "Show Technical Details"
@@ -406,11 +406,11 @@ msgstr "Voir les détails techniques"
 
 #: lib/solaar/ui/window.py:195
 msgid "Pair new device"
-msgstr "Connecter un nouveau périphérique"
+msgstr "Jumeler un nouveau périphérique"
 
 #: lib/solaar/ui/window.py:214
 msgid "Select a device"
-msgstr "Sélectionnez un périphérique"
+msgstr "Sélectionner un périphérique"
 
 #: lib/solaar/ui/window.py:511
 msgid "Path"
@@ -423,7 +423,7 @@ msgstr "Id USB"
 #: lib/solaar/ui/window.py:516 lib/solaar/ui/window.py:518
 #: lib/solaar/ui/window.py:530 lib/solaar/ui/window.py:532
 msgid "Serial"
-msgstr "N°Série"
+msgstr "Numéro de série"
 
 #: lib/solaar/ui/window.py:522
 msgid "Index"
@@ -431,7 +431,7 @@ msgstr "Index"
 
 #: lib/solaar/ui/window.py:523
 msgid "Wireless PID"
-msgstr "Wireless PID"
+msgstr "PID sans fil"
 
 #: lib/solaar/ui/window.py:525
 msgid "Protocol"
@@ -451,7 +451,7 @@ msgstr "Notifications"
 
 #: lib/solaar/ui/window.py:638
 msgid "charging"
-msgstr "chargement"
+msgstr "en charge"
 
 #: lib/solaar/ui/window.py:640
 msgid "last known"
@@ -459,8 +459,8 @@ msgstr "dernière valeur connue"
 
 #: lib/solaar/ui/window.py:647
 msgid "not encrypted"
-msgstr "non cryptée"
+msgstr "non chiffré"
 
 #: lib/solaar/ui/window.py:651
 msgid "encrypted"
-msgstr "cryptée"
+msgstr "chiffré"
