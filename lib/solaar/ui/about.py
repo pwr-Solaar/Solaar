@@ -65,8 +65,10 @@ def _create():
 		logging.exception("failed to fully create the about dialog")
 
 	about.set_translator_credits('\n'.join((
+					'Papoteur, David Geiger, Damien Lallement (français)',
 					'Adrian Piotrowicz (polski)',
 					'Daniel Pavel (română)',
+					'Daniel Zippert, Emelie Snecker (svensk)',
 					)))
 
 	about.set_website('http://pwr.github.io/Solaar/')
