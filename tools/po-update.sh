@@ -1,13 +1,12 @@
 #!/bin/sh
 
-if test -z "$1"; then
-	echo "Use: $0 <locale>"
-	exit 2
-fi
-LL_CC="$1"
-shift
-
 set -e
+
+if test "$1" = "-h" -o "$1" = "--help"; then
+	echo "Use: $0 [<language>]"
+	echo "Run without arguments to update all translation files."
+	exit 0
+fi
 
 cd "$(readlink -f "$(dirname "$0")/..")"
 
@@ -33,18 +32,11 @@ POT_FILE="$POT_DIR/$DOMAIN.pot"
 
 /bin/sed --in-place --expression="s/charset=CHARSET/charset=UTF-8/" "$POT_FILE"
 
-PO_FILE="$POT_DIR/$LL_CC.po"
-
-test -r "$PO_FILE" || /usr/bin/msginit \
-		--no-translator --locale="$LL_CC" \
-		--input="$POT_FILE" \
-		--output-file="$PO_FILE"
 
 unfmt() {
 	local SOURCE="/usr/share/locale/$LL_CC/LC_MESSAGES/$1.mo"
-	if [ ! -f $SOURCE ]
-	then
-            local SOURCE="/usr/share/locale-langpack/$LL_CC/LC_MESSAGES/$1.mo"
+	if test ! -f "$SOURCE"; then
+		SOURCE="/usr/share/locale-langpack/$LL_CC/LC_MESSAGES/$1.mo"
 	fi
 	local TARGET="$(mktemp --tmpdir $1-$LL_CC-XXXXXX.po)"
 	/usr/bin/msgunfmt \
@@ -54,14 +46,32 @@ unfmt() {
 	echo "$TARGET"
 }
 
-/usr/bin/msgmerge \
-	--update --no-fuzzy-matching \
-	--no-escape --indent --add-location --sort-by-file \
-	--lang="$LL_CC" \
-	--compendium="$(unfmt gtk30)" \
-	--compendium="$(unfmt gtk30-properties)" \
-	"$PO_FILE" "$POT_FILE"
+update_po() {
+	local LL_CC="$1"
+	local PO_FILE="$POT_DIR/$LL_CC.po"
 
-# /bin/sed --in-place --expression="s/Language: \\\\n/Language: $L_NAME\\\\n/" "$PO_FILE"
+	test -r "$PO_FILE" || /usr/bin/msginit \
+			--no-translator --locale="$LL_CC" \
+			--input="$POT_FILE" \
+			--output-file="$PO_FILE"
 
-echo "Language file is $PO_FILE"
+	/usr/bin/msgmerge \
+		--update --no-fuzzy-matching \
+		--no-escape --indent --add-location --sort-by-file \
+		--lang="$LL_CC" \
+		--compendium="$(unfmt gtk30)" \
+		--compendium="$(unfmt gtk30-properties)" \
+		"$PO_FILE" "$POT_FILE"
+
+	# /bin/sed --in-place --expression="s/Language: \\\\n/Language: $L_NAME\\\\n/" "$PO_FILE"
+	echo "Updated $PO_FILE"
+}
+
+if test "$1"; then
+	update_po "$1"
+else
+	for l in $(ls -1 "$POT_DIR"/??.po); do
+		l="$(basename "$l")"
+		update_po "${l%.po}"
+	done
+fi
