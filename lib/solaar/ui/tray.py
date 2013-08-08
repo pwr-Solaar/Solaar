@@ -511,7 +511,7 @@ def update(device=None):
 		menu_items[no_receivers_index + 1].set_visible(not _devices_info)
 
 	global _picked_device
-	if not _picked_device and device is not None and device.kind is not None:
+	if (not _picked_device or _last_scroll == 0) and device is not None and device.kind is not None:
 		# if it's just a receiver update, it's unlikely the picked device would change
 		_picked_device = _pick_device_with_lowest_battery()
 
