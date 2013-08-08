@@ -40,9 +40,6 @@ Solaar, but its supported features are not specified here, I would love to hear
 about it.
 
 
-Devices marked with an asterisk (*) use a Nano receiver that knows the Unifying
-protocol, and should be fully supported by Solaar.
-
 The HID++ column specifies the device's HID++ version.
 
 The Battery column specifies if Solaar is able to read the device's battery
@@ -56,14 +53,14 @@ You are able to read this feature using solaar-cli, but it is not possible to
 assign different keys.
 
 
-Keyboards:
+Keyboards (Unifying):
 
 | Device           | HID++ | Battery | Other supported features                |
 |------------------|-------|---------|-----------------------------------------|
 | K230             | 2.0   | yes     |                                         |
-| K270             |       |         |                                         |
-| K340             |       |         |                                         |
-| K350             |       |         |                                         |
+| K270             | 1.0   | yes     |                                         |
+| K340             | 1.0   | yes     |                                         |
+| K350             | 1.0   | yes     |                                         |
 | K360             | 2.0   | yes     | FN swap, reprog keys                    |
 | K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
@@ -71,50 +68,70 @@ Keyboards:
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
-Mice:
+Mice (Unifying):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
-| V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
-| V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
-| VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
-| M175 *           |       | yes     |       |                                 |
-| M185 *           |       | yes     |       |                                 |
-| M187 *           | 2.0   | yes     |       |                                 |
-| M215 *           | 1.0   | yes     |       |                                 |
-| M235 *           |       | yes     |       |                                 |
-| M305 *           | 1.0   | yes     |       |                                 |
-| M310 *           |       | yes     |       |                                 |
-| M315 *           |       | yes     |       |                                 |
 | M317             |       |         |       |                                 |
 | M325             |       |         |       |                                 |
 | M345             | 2.0   | yes     | -     |                                 |
-| M505             | 1.0   | yes     |       |                                 |
+| M350             | 1.0   | yes     |       |                                 |
+| M505             | 1.0   | yes     |       | smooth scrolling                |
 | M510             | 1.0   | yes     |       | smooth scrolling                |
 | M515 Couch       | 2.0   | yes     | -     |                                 |
 | M525             | 2.0   | yes     | -     |                                 |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  |       |         |       |                                 |
-| T620 Touch       | 2.0   |         |       |                                 |
+| T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   |                                 |
 | Anywhere MX      | 1.0   | yes     | -     |                                 |
 | Cube             | 2.0   | yes     |       |                                 |
 
 
-Trackballs:
+Mice (Nano):
+
+| Device           | HID++ | Battery | DPI   | Other supported features        |
+|------------------|-------|---------|-------|---------------------------------|
+| V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
+| V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
+| VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
+| M175             |       | yes     |       |                                 |
+| M185             |       | yes     |       |                                 |
+| M187             | 2.0   | yes     |       |                                 |
+| M215             | 1.0   | yes     |       |                                 |
+| M235             |       | yes     |       |                                 |
+| M305             | 1.0   | yes     |       |                                 |
+| M310             | 1.0   | yes     |       |                                 |
+| M315             |       | yes     |       |                                 |
+
+
+Mice (Mini):
+
+| Device           | HID++ | Battery | DPI   | Other supported features        |
+|------------------|-------|---------|-------|---------------------------------|
+| MX610            | 1.0   | yes     |       |                                 |
+| MX610 lefthanded | 1.0   | yes     |       |                                 |
+| V400             | 1.0   | yes     |       |                                 |
+| V450             | 1.0   | yes     |       |                                 |
+| VX Revolution    | 1.0   | yes     |       |                                 |
+| MX Air           | 1.0   | yes     |       |                                 |
+| MX Revolution    | 1.0   | yes     |       |                                 |
+
+
+Trackballs (Unifying):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M570 Trackball   |       |         |       |                                 |
 
 
-Touchpads:
+Touchpads (Unifying):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
-| Wireless Touch   | 2.0   |         |       |                                 |
-| T650 Touchpad    | 2.0   |         |       |                                 |
+| Wireless Touch   | 2.0   | yes     |       |                                 |
+| T650 Touchpad    | 2.0   | yes     |       |                                 |
 
 
 Mouse-Keyboard combos:
