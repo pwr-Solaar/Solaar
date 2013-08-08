@@ -51,7 +51,7 @@ def _error_dialog(reason, object):
 				_("If you've just installed Solaar, try removing the receiver and plugging it back in.")
 	elif reason == 'unpair':
 		title = _("Unpairing failed")
-		text = _("Failed to unpair %s from %s.") % (object.name, object.receiver.name) + \
+		text = _("Failed to unpair %{device} from %{receiver}.").format(device=object.name, receiver=object.receiver.name) + \
 				'\n\n' + \
 				_("The receiver returned an error, with no further details.")
 	else:
