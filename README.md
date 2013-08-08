@@ -28,14 +28,16 @@ Pre-built packages are available for a few Linux distros.
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 
-* a [Gentoo overlay][gentoo], courtesy of Carlos Silva
-* an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Arch package][arch], courtesy of Arnaud Taffanel
+* a [Gentoo overlay][gentoo], courtesy of Carlos Silva
+* a [Mageia package][mageia], courtesy of Damien Lallement
+* an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[gentoo]: http://code.r3pek.org/gentoo-overlay/src
-[opensuse]: http://software.opensuse.org/package/Solaar
 [arch]: http://aur.archlinux.org/packages/solaar
+[gentoo]: http://code.r3pek.org/gentoo-overlay/src
+[mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
+[opensuse]: http://software.opensuse.org/package/Solaar
 
 
 ## Manual installation
