@@ -627,7 +627,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_sensitive(True)
 
 		if isinstance(battery_level, _NamedInt):
-			text = str(battery_level)
+			text = _(str(battery_level))
 		else:
 			text = '%d%%' % battery_level
 		if is_online:

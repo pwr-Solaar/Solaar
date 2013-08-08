@@ -140,13 +140,9 @@ class DeviceStatus(dict):
 		self.updated = 0
 
 	def __str__(self):
-		def _item(name, format):
-			value = self.get(name)
-			if value is not None:
-				return format % value
-
 		def _items():
-			# TODO properly string approximative battery levels
+			comma = False
+
 			battery_level = self.get(KEYS.BATTERY_LEVEL)
 			if battery_level is not None:
 				if isinstance(battery_level, _NamedInt):
@@ -154,19 +150,23 @@ class DeviceStatus(dict):
 				else:
 					yield _("Battery") + ': ' + ('%d%%' % battery_level)
 
-				battery_status = _item(KEYS.BATTERY_STATUS, ' (%s)')
-				if battery_status:
-					yield battery_status
+				battery_status = self.get(KEYS.BATTERY_STATUS)
+				if battery_status is not None:
+					yield ' (%s)' % _(str(battery_status))
 
-			light_level = _item(KEYS.LIGHT_LEVEL, _("Lighting") + ': %d ' + _("lux"))
-			if light_level:
-				if battery_level:
-					yield ', '
-				yield light_level
+				comma = True
+
+			light_level = self.get(KEYS.LIGHT_LEVEL)
+			if light_level is not None:
+				if comma: yield ', '
+				yield _("Lighting") + (': %d ' % light_level) + _("lux")
 
 		return ''.join(i for i in _items())
 
 	__unicode__ = __str__
+
+	def __repr__(self):
+		return '{' +  ', '.join('\'%s\': %r' % (k, v) for k, v in self.items()) + '}'
 
 	def __bool__(self):
 		return bool(self._active)
