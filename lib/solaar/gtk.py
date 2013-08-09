@@ -23,6 +23,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from solaar import __version__, NAME
 import solaar.i18n as _i18n
+import solaar.cli as _cli
 
 #
 #
@@ -40,9 +41,17 @@ def _parse_arguments():
 	import argparse
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
-							help="print logging messages, for debugging purposes (may be repeated for extra verbosity)")
+							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
+	arg_parser.add_argument('--help-actions', action='store_true',
+							help='print help for the optional actions')
+	arg_parser.add_argument('action', nargs=argparse.REMAINDER, choices=_cli.actions,
+							help='optional actions to perform')
+
 	args = arg_parser.parse_args()
+
+	if args.help_actions:
+		return 'help'
 
 	import logging
 	if args.debug > 0:
@@ -53,21 +62,26 @@ def _parse_arguments():
 		logging.root.addHandler(logging.NullHandler())
 		logging.root.setLevel(logging.ERROR)
 
+	if args.action:
+		return args.action
+
 	if logging.root.isEnabledFor(logging.INFO):
 		logging.info("language %s (%s), translations path %s", _i18n.language, _i18n.encoding, _i18n.path)
-
-	return args
 
 
 def main():
 	_require('pyudev', 'python-pyudev')
-	_require('gi.repository', 'python-gi')
-	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
-	_parse_arguments()
 
 	# handle ^C in console
 	import signal
 	signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+	cli_action = _parse_arguments()
+	if cli_action:
+		return _cli.run(cli_action)
+
+	_require('gi.repository', 'python-gi')
+	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
 
 	try:
 		import solaar.ui as ui

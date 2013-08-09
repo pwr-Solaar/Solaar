@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- python-mode -*-
 # -*- coding: UTF-8 -*-
 
@@ -18,26 +17,20 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-def init_paths():
-	"""Make the app work in the source tree."""
-	import sys
-	import os.path as _path
+def run(receivers, args, find_receiver, find_device):
+	assert receivers
+	assert args.device
 
-	prefix = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..'))
-	src_lib = _path.join(prefix, 'lib')
-	share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
-	for location in src_lib, share_lib:
-		init_py = _path.join(location, 'solaar', '__init__.py')
-		if _path.exists(init_py):
-			sys.path[0] = location
-			break
+	device_name = args.device.lower()
+	dev = find_device(receivers, device_name)
 
-
-if __name__ == '__main__':
-	print ('WARNING: solaar-cli is deprecated; use solaar with the usual arguments')
-	init_paths()
-	import solaar.cli
-	solaar.cli.run()
+	# query these now, it's last chance to get them
+	try:
+		number, codename, wpid, serial  = dev.number, dev.codename, dev.wpid, dev.serial
+		del dev.receiver[number]
+		print ('Unpaired %d: %s (%s) [%s:%s]' % (number, dev.name, codename, wpid, serial))
+	except Exception as e:
+		raise Exception('failed to unpair device %s: %s' % (dev.name, e))
