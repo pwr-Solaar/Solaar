@@ -1,3 +1,10 @@
+0.9.3:
+  * Merged solaar-cli functionality into main solaar.
+  * Scrolling over the systray icon switches between multiple peripherals.
+  * Swedish translation courtesy of Daniel Zippert and Emelie Snecker
+  * French translation courtesy of Papoteur, David Geiger and Damien Lallement.
+  * Fixed some untranslated strings.
+
 0.9.2:
   * Added support for hand detection on the K800.
   * Added support for V550 and V450 Nano.
