@@ -28,30 +28,33 @@ _GENERIC_DRIVER = ('hid-generic', 'generic-usb')
 
 
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
+_unifying_receiver = lambda product_id: (0x046d, product_id, 2, _UNIFYING_DRIVER)
+_nano_receiver = lambda product_id: (0x046d, product_id, 1, _GENERIC_DRIVER)
+
 
 # standard Unifying receivers (marked with the orange Unifying logo)
-UNIFYING_RECEIVER         = (0x046d, 0xc52b, 2, _UNIFYING_DRIVER)
-UNIFYING_RECEIVER_2       = (0x046d, 0xc532, 2, _UNIFYING_DRIVER)
-
-
+UNIFYING_RECEIVER_C52B    = _unifying_receiver(0xc52b)
+UNIFYING_RECEIVER_C532    = _unifying_receiver(0xc532)
 
 # Nano receviers that support the Unifying protocol
-NANO_RECEIVER_ADVANCED    = (0x046d, 0xc52f, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_ADVANCED    = _nano_receiver(0xc52f)
 
 # Nano receivers that don't support the Unifying protocol
-NANO_RECEIVER_C517        = (0x046d, 0xc517, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C518        = (0x046d, 0xc518, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C51A        = (0x046d, 0xc51a, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C51B        = (0x046d, 0xc51b, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C521        = (0x046d, 0xc521, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C525        = (0x046d, 0xc525, 1, _GENERIC_DRIVER)
-NANO_RECEIVER_C526        = (0x046d, 0xc526, 1, _GENERIC_DRIVER)
+NANO_RECEIVER_C517        = _nano_receiver(0xc517)
+NANO_RECEIVER_C518        = _nano_receiver(0xc518)
+NANO_RECEIVER_C51A        = _nano_receiver(0xc51a)
+NANO_RECEIVER_C51B        = _nano_receiver(0xc51b)
+NANO_RECEIVER_C521        = _nano_receiver(0xc521)
+NANO_RECEIVER_C525        = _nano_receiver(0xc525)
+NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 
+
+del _unifying_receiver, _nano_receiver
 
 
 ALL = (
-		UNIFYING_RECEIVER,
-		UNIFYING_RECEIVER_2,
+		UNIFYING_RECEIVER_C52B,
+		UNIFYING_RECEIVER_C532,
 		NANO_RECEIVER_ADVANCED,
 		NANO_RECEIVER_C517,
 		NANO_RECEIVER_C518,

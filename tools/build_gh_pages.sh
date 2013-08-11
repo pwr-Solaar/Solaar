@@ -80,8 +80,8 @@ done
 
 # create packages/ sub-directory
 /bin/mkdir --parents "$SITE/../packages" "$SITE/packages/"
-/bin/cp --archive --update --target-directory="$SITE/../packages/" "$SELF/dist/debian"/solaar_* || true
-/bin/cp --archive --update --target-directory="$SITE/../packages/" "$SELF/dist/debian"/solaar-gnome3_* || true
+#/bin/cp --archive --update --target-directory="$SITE/../packages/" "$SELF/dist/debian"/solaar_* || true
+#/bin/cp --archive --update --target-directory="$SITE/../packages/" "$SELF/dist/debian"/solaar-gnome3_* || true
 if test -x /usr/bin/dpkg-scanpackages; then
 	cd "$SITE/../packages/"
 	/bin/rm --force *.build

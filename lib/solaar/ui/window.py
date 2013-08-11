@@ -76,9 +76,6 @@ _NANO_RECEIVER_TEXT = (
 # create UI layout
 #
 
-Gtk.Window.set_default_icon_name(NAME.lower())
-Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
-
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
 	if toggle:
 		b = Gtk.ToggleButton()
@@ -630,7 +627,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._icon.set_sensitive(True)
 
 		if isinstance(battery_level, _NamedInt):
-			text = str(battery_level)
+			text = _(str(battery_level))
 		else:
 			text = '%d%%' % battery_level
 		if is_online:
@@ -734,6 +731,9 @@ _window = None
 
 
 def init():
+	Gtk.Window.set_default_icon_name(NAME.lower())
+	Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
+
 	global _model, _tree, _details, _info, _empty, _window
 	_model = Gtk.TreeStore(*_COLUMN_TYPES)
 	_tree = _create_tree(_model)

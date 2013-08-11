@@ -19,7 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
+from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
@@ -67,82 +67,88 @@ def _create_menu(quit_handler):
 	return menu
 
 
+_last_scroll = 0
+def _scroll(tray_icon, event, direction=None):
+	if direction is None:
+		direction = event.direction
+		now = event.time / 1000.0
+	else:
+		now = None
+
+	if direction != ScrollDirection.UP and direction != ScrollDirection.DOWN:
+		# ignore all other directions
+		return
+
+	if len(_devices_info) < 4:
+		# don't bother with scrolling when there's only one receiver
+		# with only one device (3 = [receiver, device, separator])
+		return
+
+	# scroll events come way too fast (at least 5-6 at once)
+	# so take a little break between them
+	global _last_scroll
+	now = now or _timestamp()
+	if now - _last_scroll < 0.33:  # seconds
+		return
+	_last_scroll = now
+
+	# if _log.isEnabledFor(_DEBUG):
+	# 	_log.debug("scroll direction %s", direction)
+
+	global _picked_device
+	candidate = None
+
+	if _picked_device is None:
+		for info in _devices_info:
+			# pick first peripheral found
+			if info[1] is not None:
+				candidate = info
+				break
+	else:
+		found = False
+		for info in _devices_info:
+			if not info[1]:
+				# only conside peripherals
+				continue
+			# compare peripherals
+			if info[0:2] == _picked_device[0:2]:
+				if direction == ScrollDirection.UP and candidate:
+					# select previous device
+					break
+				found = True
+			else:
+				if found:
+					candidate = info
+					if direction == ScrollDirection.DOWN:
+						break
+					# if direction is up, but no candidate found before _picked,
+					# let it run through all candidates, will get stuck with the last one
+				else:
+					if direction == ScrollDirection.DOWN:
+						# only use the first one, in case no candidates are after _picked
+						if candidate is None:
+							candidate = info
+					else:
+						candidate = info
+
+		# if the last _picked_device is gone, clear it
+		# the candidate will be either the first or last one remaining,
+		# depending on the scroll direction
+		if not found:
+			_picked_device = None
+
+	_picked_device = candidate or _picked_device
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("scroll: picked %s", _picked_device)
+	_update_tray_icon()
+
+
 try:
 	# raise ImportError
 	from gi.repository import AppIndicator3
 
-	if _log.isEnabledFor(_INFO):
-		_log.info("using AppIndicator3")
-
-	_last_scroll = 0
-	def _scroll(ind, _ignore, direction):
-		if direction != ScrollDirection.UP and direction != ScrollDirection.DOWN:
-			# ignore all other directions
-			return
-
-		if len(_devices_info) < 4:
-			# don't bother with scrolling when there's only one receiver
-			# with only one device (3 = [receiver, device, separator])
-			return
-
-		# scroll events come way too fast (at least 5-6 at once)
-		# so take a little break between them
-		global _last_scroll
-		now = _timestamp()
-		if now - _last_scroll < 0.33:  # seconds
-			return
-		_last_scroll = now
-
-		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("scroll direction %s", direction)
-
-		global _picked_device
-		candidate = None
-
-		if _picked_device is None:
-			for info in _devices_info:
-				# pick first peripheral found
-				if info[1] is not None:
-					candidate = info
-					break
-		else:
-			found = False
-			for info in _devices_info:
-				if not info[1]:
-					# only conside peripherals
-					continue
-				# compare peripherals
-				if info[0:2] == _picked_device[0:2]:
-					if direction == ScrollDirection.UP and candidate:
-						# select previous device
-						break
-					found = True
-				else:
-					if found:
-						candidate = info
-						if direction == ScrollDirection.DOWN:
-							break
-						# if direction is up, but no candidate found before _picked,
-						# let it run through all candidates, will get stuck with the last one
-					else:
-						if direction == ScrollDirection.DOWN:
-							# only use the first one, in case no candidates are after _picked
-							if candidate is None:
-								candidate = info
-						else:
-							candidate = info
-
-			# if the last _picked_device is gone, clear it
-			# the candidate will be either the first or last one remaining,
-			# depending on the scroll direction
-			if not found:
-				_picked_device = None
-
-		_picked_device = candidate or _picked_device
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("scroll: picked %s", _picked_device)
-		_update_tray_icon()
-
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("using AppIndicator3")
 
 	def _create(menu):
 		theme_paths = Gtk.IconTheme.get_default().get_search_path()
@@ -201,8 +207,8 @@ try:
 
 except ImportError:
 
-	if _log.isEnabledFor(_INFO):
-		_log.info("using StatusIcon")
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("using StatusIcon")
 
 	def _create(menu):
 		icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
@@ -210,10 +216,9 @@ except ImportError:
 		icon.set_title(NAME)
 		icon.set_tooltip_text(NAME)
 		icon.connect('activate', _window_toggle)
-
-		icon.connect('popup_menu',
-						lambda icon, button, time:
-							menu.popup(None, None, icon.position_menu, icon, button, time))
+		icon.connect('scroll-event', _scroll)
+		icon.connect('popup-menu',
+						lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
 
 		return icon
 
@@ -506,7 +511,7 @@ def update(device=None):
 		menu_items[no_receivers_index + 1].set_visible(not _devices_info)
 
 	global _picked_device
-	if not _picked_device and device is not None and device.kind is not None:
+	if (not _picked_device or _last_scroll == 0) and device is not None and device.kind is not None:
 		# if it's just a receiver update, it's unlikely the picked device would change
 		_picked_device = _pick_device_with_lowest_battery()
 

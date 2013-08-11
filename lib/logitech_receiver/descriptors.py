@@ -20,11 +20,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-from . import hidpp10 as _hidpp10
 from .common import NamedInts as _NamedInts
+from .hidpp10 import REGISTERS as _R, DEVICE_KIND as _DK
 from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS
-
-_R = _hidpp10.REGISTERS
 
 #
 #
@@ -41,10 +39,11 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 	assert name
 
 	if kind is None:
-		kind = (_hidpp10.DEVICE_KIND.mouse if 'Mouse' in name
-				else _hidpp10.DEVICE_KIND.keyboard if 'Keyboard' in name
-				else _hidpp10.DEVICE_KIND.touchpad if 'Touchpad' in name
-				else _hidpp10.DEVICE_KIND.trackball if 'Trackball' in name
+		kind = (_DK.mouse if 'Mouse' in name
+				else _DK.keyboard if 'Keyboard' in name
+				else _DK.numpad if 'Number Pad' in name
+				else _DK.touchpad if 'Touchpad' in name
+				else _DK.trackball if 'Trackball' in name
 				else None)
 	assert kind is not None, 'descriptor for %s does not have kind set' % name
 
@@ -64,12 +63,12 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 		if wpid:
 			for w in wpid if isinstance(wpid, tuple) else (wpid, ):
 				if protocol > 1.0:
-					assert w[0:1] == '4', name + ' has protocol ' + protocol + ', wpid ' + w
+					assert w[0:1] == '4', '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
 				else:
 					if w[0:1] == '1':
-						assert kind == _hidpp10.DEVICE_KIND.mouse, name + ' has protocol ' + protocol + ', wpid ' + w
+						assert kind == _DK.mouse, '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
 					elif w[0:1] == '2':
-						assert kind == _hidpp10.DEVICE_KIND.keyboard, name + ' has protocol ' + protocol + ', wpid ' + w
+						assert kind in (_DK.keyboard, _DK.numpad), '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
 
 	device_descriptor = _DeviceDescriptor(name=name, kind=kind,
 					wpid=wpid, codename=codename, protocol=protocol,
@@ -144,10 +143,16 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 # Keyboards
 
 _D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
-_D('Wireless Keyboard K270')
+_D('Wireless Keyboard K270', protocol=1.0,
+				registers=(_R.battery_status, ),
+				)
 _D('Wireless Keyboard MK330')
-_D('Wireless Keyboard K340')
-_D('Wireless Keyboard K350', wpid='200A')
+_D('Wireless Compact Keyboard K340', protocol=1.0, wpid='2007',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Wave Keyboard K350', protocol=1.0, wpid='200A',
+				registers=(_R.battery_status, ),
+				)
 _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
 							_FS.fn_swap()
@@ -158,7 +163,15 @@ _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Keyboard MK520')
+_D('Wireless Keyboard K520', protocol=1.0, wpid='2011',
+				registers=(_R.battery_status, ),
+				settings=[
+							_RS.fn_swap(),
+						],
+				)
+_D('Number Pad N545', protocol=1.0, wpid='2006',
+				registers=(_R.battery_status, ),
+				)
 _D('Wireless Keyboard MK550')
 _D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
 				registers=(_R.battery_status, ),
@@ -192,11 +205,16 @@ _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
 							_RS.side_scroll(),
 						],
 				)
-_D('Wireless Mouse M310')
+_D('Wireless Mouse M310', protocol=1.0, wpid='1024',
+				registers=(_R.battery_status, ),
+				)
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325')
 _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
+_D('Wireless Mouse M350', protocol=1.0, wpid='101C',
+				registers=(_R.battery_charge, ),
+				)
 _D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
 				registers=(_R.battery_charge, ),
 				settings=[
@@ -223,7 +241,7 @@ _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				)
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620', protocol=2.0)
-_D('Logitech Cube', kind=_hidpp10.DEVICE_KIND.mouse, protocol=2.0)
+_D('Logitech Cube', kind=_DK.mouse, protocol=2.0)
 _D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017',
 				registers=(_R.battery_charge, ),
 				settings=[
@@ -240,6 +258,13 @@ _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 						],
 				)
 
+_D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
+				registers=(_R.battery_status, ),
+				)
+_D('G700 Gaming Mouse', codename='G700', protocol=1.0, wpid='1023',
+				registers=(_R.battery_status, ),
+				)
+
 # Trackballs
 
 _D('Wireless Trackball M570')
@@ -254,7 +279,7 @@ _D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 # A wpid is necessary to properly identify them.
 #
 
-_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid='100F',
+_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid=('100B', '100F'),
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
@@ -271,3 +296,34 @@ _D('V550 Nano Cordless Laser Mouse', codename='V550 Nano', protocol=1.0, wpid='1
 							_RS.side_scroll(),
 						],
 				)
+
+# Mini receiver mice
+
+_D('MX610 Laser Cordless Mouse', codename='MX610', protocol=1.0, wpid='1001',
+				registers=(_R.battery_status, ),
+				)
+_D('MX620 Laser Cordless Mouse', codename='MX620', protocol=1.0, wpid=('100A', '1016'),
+				registers=(_R.battery_charge, ),
+				)
+_D('MX610 Left-Handled Mouse', codename='MX610L', protocol=1.0, wpid='1004',
+				registers=(_R.battery_status, ),
+				)
+_D('V400 Laser Cordless Mouse', codename='V400', protocol=1.0, wpid='1003',
+				registers=(_R.battery_status, ),
+				)
+_D('V450 Laser Cordless Mouse', codename='V450', protocol=1.0, wpid='1005',
+				registers=(_R.battery_status, ),
+				)
+_D('VX Revolution', codename='VX Revolution', kind=_DK.mouse, protocol=1.0, wpid=('1006', '100D'),
+				registers=(_R.battery_charge, ),
+				)
+_D('MX Air', codename='MX Air', protocol=1.0, kind=_DK.mouse, wpid=('1007', '100E'),
+				registers=(_R.battery_charge, ),
+				)
+_D('MX Revolution', codename='MX Revolution', protocol=1.0, kind=_DK.mouse, wpid=('1008', '100C'),
+				registers=(_R.battery_charge, ),
+				)
+
+# Some exotics...
+
+_D('Fujitsu Sonic Mouse', codename='Sonic', protocol=1.0, wpid='1029')

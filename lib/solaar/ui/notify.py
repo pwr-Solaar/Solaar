@@ -112,8 +112,14 @@ try:
 			if n is None:
 				n = _notifications[summary] = Notify.Notification()
 
-			message = reason or (_("unpaired") if dev.status is None else
-						(str(dev.status) or (_("connected") if dev.status else _("offline"))))
+			if reason:
+				message = reason
+			elif dev.status is None:
+				message = _("unpaired")
+			elif bool(dev.status):
+				message = dev.status.__str__() or _("connected")
+			else:
+				message = _("offline")
 
 			# we need to use the filename here because the notifications daemon
 			# is an external application that does not know about our icon sets
