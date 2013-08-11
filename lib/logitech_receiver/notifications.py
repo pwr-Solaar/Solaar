@@ -189,7 +189,7 @@ def _process_hidpp10_notification(device, status, n):
 		if n.address == 0x01:
 			if _log.isEnabledFor(_DEBUG):
 				_log.debug("%s: device powered on", device)
-			reason = str(status) or _("powered on")
+			reason = status.to_string() or _("powered on")
 			status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
 		else:
 			_log.warn("%s: unknown %s", device, n)
