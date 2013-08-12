@@ -43,7 +43,7 @@ def _resume():
 		_resume_callback()
 
 
-def watch(on_resume_callback, on_suspend_callback):
+def watch(on_resume_callback=None, on_suspend_callback=None):
 	"""Register callback for suspend/resume events.
 	They are called only if the system DBus is running, and the UPower daemon is available."""
 	global _resume_callback, _suspend_callback

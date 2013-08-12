@@ -73,6 +73,7 @@ def _create_parser():
 
 
 _cli_parser, actions = _create_parser()
+print_help = _cli_parser.print_help
 
 
 def _receivers():
@@ -130,10 +131,6 @@ def _find_device(receivers, name):
 
 
 def run(cli_args=None):
-	if cli_args == 'help':
-		_cli_parser.print_help()
-		return
-
 	if cli_args:
 		action = cli_args[0]
 		args = _cli_parser.parse_args(cli_args)
