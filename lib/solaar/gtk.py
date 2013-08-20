@@ -42,6 +42,8 @@ def _parse_arguments():
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
+	arg_parser.add_argument('-D', '--hidraw', action='store', dest='hidraw_path', metavar='PATH',
+							help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
 	arg_parser.add_argument('--restart-on-wake-up', action='store_true',
 							help='restart Solaar on sleep wake-up (experimental)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
@@ -81,7 +83,7 @@ def main():
 
 	args = _parse_arguments()
 	if not args: return
-	if args.action: return _cli.run(args.action)
+	if args.action: return _cli.run(args.action, args.hidraw_path)
 
 	_require('gi.repository', 'python-gi')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')

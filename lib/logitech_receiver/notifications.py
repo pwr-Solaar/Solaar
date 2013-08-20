@@ -127,7 +127,7 @@ def _process_hidpp10_custom_notification(device, status, n):
 		status.set_battery_info(charge, status_text)
 		return True
 
-	if n.sub_id == _R.illumination:
+	if n.sub_id == _R.keyboard_illumination:
 		# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
 		# TODO anything we can do with this?
 		if _log.isEnabledFor(_INFO):
