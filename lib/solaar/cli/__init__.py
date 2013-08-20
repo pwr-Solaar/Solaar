@@ -136,6 +136,12 @@ def run(cli_args=None):
 		args = _cli_parser.parse_args(cli_args)
 	else:
 		args = _cli_parser.parse_args()
+		# Python 3 has an undocumented 'feature' that breaks parsing empty args
+		# http://bugs.python.org/issue16308
+		if not 'cmd' in args:
+			_cli_parser.print_usage(_sys.stderr)
+			_sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
+			_sys.exit(2)
 		action = args.action
 	assert action in actions
 
