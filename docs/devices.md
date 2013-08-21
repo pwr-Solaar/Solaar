@@ -82,10 +82,10 @@ Mice (Unifying):
 | M525             | 2.0   | yes     | -     |                                 |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
-| T400 Zone Touch  |       |         |       |                                 |
+| T400 Zone Touch  | 2.0   | yes     |       |                                 |
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   |                                 |
-| Anywhere MX      | 1.0   | yes     | -     |                                 |
+| Anywhere MX      | 1.0   | yes     | R/W   | smooth scrolling                |
 | Cube             | 2.0   | yes     |       |                                 |
 
 
