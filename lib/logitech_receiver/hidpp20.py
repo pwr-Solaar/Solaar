@@ -210,9 +210,10 @@ class FeaturesArray(object):
 				indices = index.indices(len(self.features))
 				return [self.__getitem__(i) for i in range(*indices)]
 
-	def __contains__(self, value):
+	def __contains__(self, featureId):
+		"""Tests whether the list contains given Feature ID"""
 		if self._check():
-			ivalue = int(value)
+			ivalue = int(featureId)
 
 			may_have = False
 			for f in self.features:
@@ -220,8 +221,6 @@ class FeaturesArray(object):
 					may_have = True
 				elif ivalue == int(f):
 					return True
-				elif ivalue < int(f):
-					break
 
 			if may_have:
 				reply = self.device.request(0x0000, _pack('!H', ivalue))
@@ -231,17 +230,16 @@ class FeaturesArray(object):
 						self.features[index] = FEATURE[ivalue]
 						return True
 
-	def index(self, value):
+	def index(self, featureId):
+		"""Gets the Feature Index for a given Feature ID"""
 		if self._check():
 			may_have = False
-			ivalue = int(value)
+			ivalue = int(featureId)
 			for index, f in enumerate(self.features):
 				if f is None:
 					may_have = True
 				elif ivalue == int(f):
 					return index
-				elif ivalue < int(f):
-					raise ValueError("%r not in list" % value)
 
 			if may_have:
 				reply = self.device.request(0x0000, _pack('!H', ivalue))
@@ -250,7 +248,7 @@ class FeaturesArray(object):
 					self.features[index] = FEATURE[ivalue]
 					return index
 
-		raise ValueError("%r not in list" % value)
+		raise ValueError("%r not in list" % featureId)
 
 	def __iter__(self):
 		if self._check():
