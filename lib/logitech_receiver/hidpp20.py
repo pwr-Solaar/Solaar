@@ -38,6 +38,7 @@ from . import special_keys
 #
 #
 
+# <FeaturesSupported.xml sed '/LD_FID_/{s/.*LD_FID_/\t/;s/"[ \t]*Id="/=/;s/" \/>/,/p}' | sort -t= -k2
 """Possible features available on a Logitech device.
 
 A particular device might not support all these features, and may support other
@@ -71,6 +72,7 @@ FEATURE = _NamedInts(
 	TOUCHPAD_WIN8_FW_ITEMS=0x6012,
 	TOUCHPAD_RAW_XY=0x6100,
 	TOUCHMOUSE_RAW_POINTS=0x6110,
+	TOUCHMOUSE_6120=0x6120,
 )
 FEATURE._fallback = lambda x: 'unknown:%04X' % x
 
