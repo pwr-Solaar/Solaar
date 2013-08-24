@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.1\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-08 21:53+0200\n"
+        "POT-Creation-Date: 2013-08-25 01:33+0300\n"
         "PO-Revision-Date: 2013-07-17 20:27+0100\n"
         "Last-Translator: Daniel Pavel <daniel.pavel@gmail.com>\n"
         "Language-Team: none\n"
@@ -251,11 +251,11 @@ msgstr  "Despre"
 msgid   "Unpair"
 msgstr  "Deconectează"
 
-#: lib/solaar/ui/config_panel.py:97
+#: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
 msgstr  "Prelucrez"
 
-#: lib/solaar/ui/config_panel.py:100
+#: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
 msgstr  "Operațiunea a eșuat."
 
