@@ -1,2 +1,56 @@
-No non-error messages received for GET_REG and GET_REG_LONG. Perhaps because
-this is a HID++ 2.0 device?
+Mouse
+(ltunify)
+HID++ version: 2.0
+Device index 1
+Mouse
+Name: M525
+Wireless Product ID: 4013
+Serial number: DAFA335E
+Device was unavailable, version information not available.
+Total number of HID++ 2.0 features: 12
+  0: [0000]     IRoot
+  1: [0001]     IFeatureSet
+  2: [0003]     IFirmwareInfo
+  3: [0005]     GetDeviceNameType
+  4: [1000]     batteryLevelStatus
+  5: [1D4B]     WirelessDeviceStatus
+  6: [1DF3]  H  unknown
+  7: [1B00]     SpecialKeysMSEButtons
+  8: [1DF0]  H  unknown
+  9: [1F03]  H  unknown
+ 10: [2100]     VerticalScrolling
+ 11: [2120]     HiResScrolling
+ 12: [2200]     MousePointer
+(O = obsolete feature; H = SW hidden feature;
+ I = reserved for internal use)
+(solaar)
+  1: Wireless Mouse M525
+     Codename     : M525
+     Kind         : mouse
+     Wireless PID : 4013
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: DAFA335E
+          Firmware: RQM 27.02.B0028
+     The power switch is located on the base.
+     Supports 13 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: DEVICE FW VERSION      {0003}   
+         3: DEVICE NAME            {0005}   
+         4: BATTERY STATUS         {1000}   
+         5: WIRELESS DEVICE STATUS {1D4B}   
+         6: unknown:1DF3           {1DF3}   hidden
+         7: REPROG CONTROLS        {1B00}   
+         8: unknown:1DF0           {1DF0}   hidden
+         9: unknown:1F03           {1F03}   hidden
+        10: VERTICAL SCROLLING     {2100}   
+        11: HI RES SCROLLING       {2120}   
+        12: MOUSE POINTER          {2200}   
+     Has 5 reprogrammable keys:
+         0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+         1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+         2: MIDDLE BUTTON              => MiddleMouseButton             mse, reprogrammable
+         3: BACK AS BUTTON 4           => Back                          mse, reprogrammable
+         4: FORWARD AS BUTTON 5        => BrowserForward                mse, reprogrammable
+     Battery: 90%, discharging.
