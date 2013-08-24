@@ -3,449 +3,456 @@
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2013.
 #
-msgid   ""
-msgstr  "Project-Id-Version: solaar 0.9.1\n"
-        "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-08 19:46+0200\n"
-        "PO-Revision-Date: 2013-07-27 16:28+0100\n"
-        "Last-Translator: Daniel Zippert & Emelie Snecker <daniel@zippert."
-        "se>\n"
-        "Language-Team: none\n"
-        "Language: sv\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-        "X-Generator: Poedit 1.5.4\n"
-        "X-Poedit-Basepath: /pwr/Solaar/po\n"
-        "X-Poedit-SearchPath-0: /pwr/Solaar/po\n"
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar 0.9.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-08-08 19:46+0200\n"
+"PO-Revision-Date: 2013-08-20 22:43+0100\n"
+"Last-Translator: Daniel Zippert & Emelie Snecker <daniel@zippert.se>\n"
+"Language-Team: none\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-Basepath: /pwr/Solaar/po\n"
+"X-Poedit-SearchPath-0: /pwr/Solaar/po\n"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "critical"
-msgstr  "kritisk"
+msgid "critical"
+msgstr "kritisk"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "empty"
-msgstr  "tom"
+msgid "empty"
+msgstr "tom"
 
 #: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
-msgid   "full"
-msgstr  "full"
+msgid "full"
+msgstr "full"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "good"
-msgstr  "normal"
+msgid "good"
+msgstr "normal"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "low"
-msgstr  "låg"
+msgid "low"
+msgstr "låg"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid   "almost full"
-msgstr  "nästan full"
+msgid "almost full"
+msgstr "nästan full"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid   "discharging"
-msgstr  "laddar ur"
+msgid "discharging"
+msgstr "laddar ur"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid   "recharging"
-msgstr  "laddar"
+msgid "recharging"
+msgstr "laddar"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid   "invalid battery"
-msgstr  "batterifel"
+msgid "invalid battery"
+msgstr "batterifel"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid   "slow recharge"
-msgstr  "långsam laddning"
+msgid "slow recharge"
+msgstr "långsam laddning"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid   "thermal error"
-msgstr  "termiskt fel"
+msgid "thermal error"
+msgstr "termiskt fel"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "device not supported"
-msgstr  "enheten stöds inte"
+msgid "device not supported"
+msgstr "enheten stöds inte"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "device timeout"
-msgstr  "enheten svarde inte i tid"
+msgid "device timeout"
+msgstr "enheten svarde inte i tid"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "sequence timeout"
-msgstr  "sekvens timout"
+msgid "sequence timeout"
+msgstr "sekvens timout"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "too many devices"
-msgstr  "för många enheter"
+msgid "too many devices"
+msgstr "för många enheter"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid   "Bootloader"
-msgstr  "Bootloader"
+msgid "Bootloader"
+msgstr "Bootloader"
 
 #: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
-msgid   "Firmware"
-msgstr  "Firmware"
+msgid "Firmware"
+msgstr "Firmware"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid   "Hardware"
-msgstr  "Hårdvara"
+msgid "Hardware"
+msgstr "Hårdvara"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid   "Other"
-msgstr  "Annan"
+msgid "Other"
+msgstr "Annan"
 
 #: lib/logitech_receiver/notifications.py:67
-msgid   "closed"
-msgstr  "låst"
+msgid "closed"
+msgstr "inaktiverat"
 
 #: lib/logitech_receiver/notifications.py:67
-msgid   "open"
-msgstr  "öppen"
+msgid "open"
+msgstr "aktiverat"
 
 #: lib/logitech_receiver/notifications.py:67
-msgid   "pairing lock is "
-msgstr  "parkopplingsläge låst"
+msgid "pairing lock is "
+msgstr "parkopplingsläget är "
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
-msgid   "unpaired"
-msgstr  "inte parkopplad"
+msgid "unpaired"
+msgstr "inte parkopplad"
 
 #: lib/logitech_receiver/notifications.py:192
-msgid   "powered on"
-msgstr  "påslagen"
+msgid "powered on"
+msgstr "påslagen"
 
 #: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
-msgid   "unknown"
-msgstr  "okänd"
+msgid "unknown"
+msgstr "okänd"
 
 #: lib/logitech_receiver/settings_templates.py:77
-msgid   "Smooth Scrolling"
-msgstr  "Mjuk Scrollning"
+msgid "Smooth Scrolling"
+msgstr "Mjuk Scrollning"
 
 #: lib/logitech_receiver/settings_templates.py:78
-msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  "Hög känslighet för scrollhjulet. "
+msgid "High-sensitivity mode for vertical scroll with the wheel."
+msgstr "Hög känslighet för scrollhjulet. "
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid   "Side Scrolling"
-msgstr  "Vertikal Scrollning"
+msgid "Side Scrolling"
+msgstr "Vertikal Scrollning"
 
 #: lib/logitech_receiver/settings_templates.py:80
-msgid   "When disabled, pushing the wheel sideways sends custom button "
-        "events\n"
-        "instead of the standard side-scrolling events."
-msgstr  "Vid avaktivering, kommer tryckningar sidledes på scrollhjulet\n"
-        "fungera som specialknappar istället för standard sidscrolling."
+msgid ""
+"When disabled, pushing the wheel sideways sends custom button events\n"
+"instead of the standard side-scrolling events."
+msgstr ""
+"Vid avaktivering, kommer tryckningar sidledes på scrollhjulet\n"
+"fungera som specialknappar istället för standard sidscrolling."
 
 #: lib/logitech_receiver/settings_templates.py:82
-msgid   "Sensitivity (DPI)"
-msgstr  "Känslighet (DPI)"
+msgid "Sensitivity (DPI)"
+msgstr "Känslighet (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:83
-msgid   "Swap Fx function"
-msgstr  "Skifta funktionen för F1-12 tangenterna"
+msgid "Swap Fx function"
+msgstr "Skifta funktionen för F1-12 tangenterna"
 
 #: lib/logitech_receiver/settings_templates.py:84
-msgid   "When set, the F1..F12 keys will activate their special function,\n"
-        "and you must hold the FN key to activate their standard function."
-msgstr  "Vid aktivering, kommer F1-12 tangenterna få sina specialfunktioner,\n"
-        "och du behöver trycka ned FN tangenten för att komma åt dess normala "
-        "funktioner."
+msgid ""
+"When set, the F1..F12 keys will activate their special function,\n"
+"and you must hold the FN key to activate their standard function."
+msgstr ""
+"Vid aktivering, kommer F1-12 tangenterna få sina specialfunktioner,\n"
+"och du behöver trycka ned FN tangenten för att komma åt dess normala "
+"funktioner."
 
 #: lib/logitech_receiver/settings_templates.py:87
-msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
-        "and you must hold the FN key to activate their special function."
-msgstr  "Vid avaktivering, kommer F1-12 tangenterna få sina "
-        "standardfunktioner,\n"
-        "och du behöver trycka ned FN tangenten för att komma åt dess "
-        "spesicalfunktioner."
+msgid ""
+"When unset, the F1..F12 keys will activate their standard function,\n"
+"and you must hold the FN key to activate their special function."
+msgstr ""
+"Vid avaktivering, kommer F1-12 tangenterna få sina standardfunktioner,\n"
+"och du behöver trycka ned FN tangenten för att komma åt dess "
+"spesicalfunktioner."
 
 #: lib/logitech_receiver/settings_templates.py:89
-msgid   "Hand Detection"
-msgstr  "Handavkänning"
+msgid "Hand Detection"
+msgstr "Handavkänning"
 
 #: lib/logitech_receiver/settings_templates.py:90
-msgid   "Turn on illumination when the hands hover over the keyboard."
-msgstr  "Tänd belysning, om en hand hålls över tangentbordet. "
+msgid "Turn on illumination when the hands hover over the keyboard."
+msgstr "Tänd belysning, om en hand hålls över tangentbordet. "
 
 #: lib/logitech_receiver/status.py:98
-msgid   "No paired devices."
-msgstr  "Inga enheter är parkopplade"
+msgid "No paired devices."
+msgstr "Inga enheter är parkopplade"
 
 #: lib/logitech_receiver/status.py:99
-msgid   "1 paired device."
-msgstr  "1 parkopplad enhet."
+msgid "1 paired device."
+msgstr "1 parkopplad enhet."
 
 #: lib/logitech_receiver/status.py:100
-msgid   " paired devices."
-msgstr  "parkopplade enheter."
+msgid " paired devices."
+msgstr "parkopplade enheter."
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
 #: lib/solaar/ui/window.py:143
-msgid   "Battery"
-msgstr  "Batteri"
+msgid "Battery"
+msgstr "Batteri"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
-msgid   "Lighting"
-msgstr  "Belysning"
+msgid "Lighting"
+msgstr "Belysning"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
-msgid   "lux"
-msgstr  "lux"
+msgid "lux"
+msgstr "lux"
 
 #: lib/solaar/listener.py:95
-msgid   "The receiver was unplugged."
-msgstr  "Mottagaren kopplades ur"
+msgid "The receiver was unplugged."
+msgstr "Mottagaren kopplades ur"
 
 #: lib/solaar/ui/__init__.py:48
-msgid   "Permissions error"
-msgstr  "Behörighetsfel"
+msgid "Permissions error"
+msgstr "Behörighetsfel"
 
 #: lib/solaar/ui/__init__.py:49
 #, python-format
-msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
-        "it."
-msgstr  "En Logitech mottagare hittades  (%s),  men behörighet att använda "
-        "den saknas."
+msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
+msgstr ""
+"En Logitech mottagare hittades (%s), men behörighet att använda den saknas."
 
 #: lib/solaar/ui/__init__.py:51
-msgid   "If you've just installed Solaar, try removing the receiver and "
-        "plugging it back in."
-msgstr  "Om du just installerade solaar, prova koppla ur mottagaren och "
-        "anslut den sedan igen. "
+msgid ""
+"If you've just installed Solaar, try removing the receiver and plugging it "
+"back in."
+msgstr ""
+"Om du just installerade solaar, prova koppla ur mottagaren och anslut den "
+"sedan igen. "
 
 #: lib/solaar/ui/__init__.py:53
-msgid   "Unpairing failed"
-msgstr  "Kunde inte bryta parkoppling."
+msgid "Unpairing failed"
+msgstr "Kunde inte bryta parkoppling."
 
 #: lib/solaar/ui/__init__.py:54
-#, python-brace-format
-msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "Misslyckades att bryta parkoppling mellan %{device} och %{receiver}."
+msgid "Failed to unpair %{device} from %{receiver}."
+msgstr "Misslyckades att bryta parkoppling mellan %{device} och %{receiver}."
 
 #: lib/solaar/ui/__init__.py:56
-msgid   "The receiver returned an error, with no further details."
-msgstr  "Mottagaren rapporterade  ett fel, utan specifika detaljer."
+msgid "The receiver returned an error, with no further details."
+msgstr "Mottagaren rapporterade ett fel, utan specifika detaljer."
 
 #: lib/solaar/ui/about.py:39
-msgid   "Shows status of devices connected\n"
-        "through wireless Logitech receivers."
-msgstr  "Visa status för enheter kopplade till\n"
-        "din  trådlösa Logitech mottagare"
+msgid ""
+"Shows status of devices connected\n"
+"through wireless Logitech receivers."
+msgstr ""
+"Visa status för enheter kopplade till\n"
+"din trådlösa Logitech mottagare"
 
 #: lib/solaar/ui/about.py:48
-msgid   "GUI design"
-msgstr  "GUI utseende"
+msgid "GUI design"
+msgstr "GUI utseende"
 
 #: lib/solaar/ui/about.py:49
-msgid   "Testing"
-msgstr  "Prövar"
+msgid "Testing"
+msgstr "Prövar"
 
 #: lib/solaar/ui/about.py:54
-msgid   "Logitech documentation"
-msgstr  "Logitech dokumentation"
+msgid "Logitech documentation"
+msgstr "Logitech dokumentation"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
-msgid   "About"
-msgstr  "Om"
+msgid "About"
+msgstr "Om"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:203
-msgid   "Unpair"
-msgstr  "Ta bort parkoppling"
+msgid "Unpair"
+msgstr "Ta bort parkoppling"
 
 #: lib/solaar/ui/config_panel.py:97
-msgid   "Working"
-msgstr  "Lyckades"
+msgid "Working"
+msgstr "Lyckades"
 
 #: lib/solaar/ui/config_panel.py:100
-msgid   "Read/write operation failed."
-msgstr  "Läsning/Skrivning misslyckades."
+msgid "Read/write operation failed."
+msgstr "Läsning/Skrivning misslyckades."
 
 #: lib/solaar/ui/notify.py:120
-msgid   "connected"
-msgstr  "ansluten"
+msgid "connected"
+msgstr "ansluten"
 
 #: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
 #: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
-msgid   "offline"
-msgstr  "avstängd"
+msgid "offline"
+msgstr "avstängd"
 
 #: lib/solaar/ui/pair_window.py:133
-msgid   "Pairing failed"
-msgstr  "Parkoppling misslyckades"
+msgid "Pairing failed"
+msgstr "Parkoppling misslyckades"
 
 #: lib/solaar/ui/pair_window.py:135
-msgid   "Make sure your device is within range, and has a decent battery "
-        "charge."
-msgstr  "Se till så att enheten inom räckhåll, och har tillräckligt laddat "
-        "batteri. "
+msgid "Make sure your device is within range, and has a decent battery charge."
+msgstr ""
+"Se till så att enheten inom räckhåll, och har tillräckligt laddat batteri. "
 
 #: lib/solaar/ui/pair_window.py:137
-msgid   "A new device was detected, but it is not compatible with this "
-        "receiver."
-msgstr  "En ny enhet upptäcktes, men  är inte kompatibel med mottagaren. "
+msgid "A new device was detected, but it is not compatible with this receiver."
+msgstr "En ny enhet upptäcktes, men är inte kompatibel med mottagaren. "
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
-msgid   "The receiver only supports %d paired device(s)."
-msgstr  "Mottagaren klarar bara %d parkopplad(e) enhet(er)."
+msgid "The receiver only supports %d paired device(s)."
+msgstr "Mottagaren klarar bara %d parkopplad(e) enhet(er)."
 
 #: lib/solaar/ui/pair_window.py:141
-msgid   "No further details are available about the error."
-msgstr  "Ingen mer information är tillgänglig om felet. "
+msgid "No further details are available about the error."
+msgstr "Ingen mer information är tillgänglig om felet. "
 
 #: lib/solaar/ui/pair_window.py:155
-msgid   "Found a new device"
-msgstr  "Ny enhet har hittats"
+msgid "Found a new device"
+msgstr "Ny enhet har hittats"
 
 #: lib/solaar/ui/pair_window.py:180
-msgid   "The wireless link is not encrypted"
-msgstr  "Den trådlösa anslutningen är  okrypterad"
+msgid "The wireless link is not encrypted"
+msgstr "Den trådlösa anslutningen är okrypterad"
 
 #: lib/solaar/ui/pair_window.py:197
-msgid   "pair new device"
-msgstr  "parkoppla ny enhet"
+msgid "pair new device"
+msgstr "parkoppla ny enhet"
 
 #: lib/solaar/ui/pair_window.py:205
-msgid   "Turn on the device you want to pair."
-msgstr  "Sätt på enheten du vill parkoppla."
+msgid "Turn on the device you want to pair."
+msgstr "Sätt på enheten du vill parkoppla."
 
 #: lib/solaar/ui/pair_window.py:206
-msgid   "If the device is already turned on,\n"
-        "turn if off and on again."
-msgstr  "Om enheten redan är igång,\n"
-        "stäng av den och sätt på den igen."
+msgid ""
+"If the device is already turned on,\n"
+"turn if off and on again."
+msgstr ""
+"Om enheten redan är igång,\n"
+"stäng av den och sätt på den igen."
 
 #: lib/solaar/ui/tray.py:55
-msgid   "No Logitech receiver found"
-msgstr  "Ingen Logitech motagare hittades"
+msgid "No Logitech receiver found"
+msgstr "Ingen Logitech motagare hittades"
 
 #: lib/solaar/ui/tray.py:62
-msgid   "Quit"
-msgstr  "Stäng"
+msgid "Quit"
+msgstr "Stäng"
 
 #: lib/solaar/ui/tray.py:274
-msgid   "no receiver"
-msgstr  "ingen mottagare"
+msgid "no receiver"
+msgstr "ingen mottagare"
 
 #: lib/solaar/ui/tray.py:293
-msgid   "no status"
-msgstr  "ingen status"
+msgid "no status"
+msgstr "ingen status"
 
 #: lib/solaar/ui/window.py:58
-msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  "Den trådlösa anslutningen är  krypterad."
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr "Den trådlösa anslutningen är krypterad."
 
 #: lib/solaar/ui/window.py:59
-msgid   "The wireless link between this device and its receiver is not "
-        "encrypted.\n"
-        "\n"
-        "For pointing devices (mice, trackballs, trackpads), this is a minor "
-        "security issue.\n"
-        "\n"
-        "It is, however, a major security issue for text-input devices "
-        "(keyboards, numpads),\n"
-        "because typed text can be sniffed inconspicuously by 3rd parties "
-        "within range."
-msgstr  "Den trådlösa anslutningen mellan den här enheten och mottagaren är "
-        "okrypterad\n"
-        "\n"
-        "For pekdon (möss, styrkulor, pekplattor), är detta inget stort "
-        "säkerhetsproblem.\n"
-        "\n"
-        "Men för textinmatande enheter (tangentbord, numpads) är denna "
-        "säkerhetsbrist allvarlig, eftersom skriven text obemärkt kan fångas "
-        "upp av tredje part som befinner sig inom enhetens räckhåll. "
+msgid ""
+"The wireless link between this device and its receiver is not encrypted.\n"
+"\n"
+"For pointing devices (mice, trackballs, trackpads), this is a minor security "
+"issue.\n"
+"\n"
+"It is, however, a major security issue for text-input devices (keyboards, "
+"numpads),\n"
+"because typed text can be sniffed inconspicuously by 3rd parties within "
+"range."
+msgstr ""
+"Den trådlösa anslutningen mellan den här enheten och mottagaren är "
+"okrypterad\n"
+"\n"
+"For pekdon (möss, styrkulor, pekplattor), är detta inget stort "
+"säkerhetsproblem.\n"
+"\n"
+"Men för textinmatande enheter (tangentbord, numpads) är denna säkerhetsbrist "
+"allvarlig, eftersom skriven text obemärkt kan fångas upp av tredje part som "
+"befinner sig inom enhetens räckhåll. "
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
-msgid   "No device paired"
-msgstr  "Inga enheter parkopplade"
+msgid "No device paired"
+msgstr "Inga enheter parkopplade"
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
-msgid   "Up to %d devices can be paired to this receiver"
-msgstr  "Upp till %d enheter kan parkopplas till mottagaren"
+msgid "Up to %d devices can be paired to this receiver"
+msgstr "Upp till %d enheter kan parkopplas till mottagaren"
 
 #: lib/solaar/ui/window.py:68
-msgid   "paired devices"
-msgstr  "parkopplade enheter"
+msgid "paired devices"
+msgstr "parkopplade enheter"
 
 #: lib/solaar/ui/window.py:72
-msgid   "Only one device can be paired to this receiver"
-msgstr  "Bara en enhet kan parkopplas till den här mottagaren"
+msgid "Only one device can be paired to this receiver"
+msgstr "Bara en enhet kan parkopplas till den här mottagaren"
 
 #: lib/solaar/ui/window.py:110
-msgid   "Scanning"
-msgstr  "Söker"
+msgid "Scanning"
+msgstr "Söker"
 
 #: lib/solaar/ui/window.py:146
-msgid   "Wireless Link"
-msgstr  "Trådlös anslutning"
+msgid "Wireless Link"
+msgstr "Trådlös anslutning"
 
 #: lib/solaar/ui/window.py:179
-msgid   "Show Technical Details"
-msgstr  "Visa Tekniska Detaljer"
+msgid "Show Technical Details"
+msgstr "Visa Tekniska Detaljer"
 
 #: lib/solaar/ui/window.py:192
-msgid   "Pair new device"
-msgstr  "Parkoppla en ny enhet"
+msgid "Pair new device"
+msgstr "Parkoppla en ny enhet"
 
 #: lib/solaar/ui/window.py:211
-msgid   "Select a device"
-msgstr  "Välj en enhet"
+msgid "Select a device"
+msgstr "Välj en enhet"
 
 #: lib/solaar/ui/window.py:508
-msgid   "Path"
-msgstr  "Sökväg"
+msgid "Path"
+msgstr "Sökväg"
 
 #: lib/solaar/ui/window.py:510
-msgid   "USB id"
-msgstr  "USB id"
+msgid "USB id"
+msgstr "USB id"
 
 #: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
-msgid   "Serial"
-msgstr  "Seriell"
+msgid "Serial"
+msgstr "Seriell"
 
 #: lib/solaar/ui/window.py:519
-msgid   "Index"
-msgstr  "Index"
+msgid "Index"
+msgstr "Index"
 
 #: lib/solaar/ui/window.py:520
-msgid   "Wireless PID"
-msgstr  "Trådlös PID"
+msgid "Wireless PID"
+msgstr "Trådlös PID"
 
 #: lib/solaar/ui/window.py:522
-msgid   "Protocol"
-msgstr  "Protokoll"
+msgid "Protocol"
+msgstr "Protokoll"
 
 #: lib/solaar/ui/window.py:524
-msgid   "Polling rate"
-msgstr  "Uppdateringshastighet"
+msgid "Polling rate"
+msgstr "Uppdateringshastighet"
 
 #: lib/solaar/ui/window.py:539
-msgid   "none"
-msgstr  "ingen"
+msgid "none"
+msgstr "ingen"
 
 #: lib/solaar/ui/window.py:540
-msgid   "Notifications"
-msgstr  "Notifikation "
+msgid "Notifications"
+msgstr "Notifikation "
 
 #: lib/solaar/ui/window.py:635
-msgid   "charging"
-msgstr  "laddar"
+msgid "charging"
+msgstr "laddar"
 
 #: lib/solaar/ui/window.py:637
-msgid   "last known"
-msgstr  "senast kända"
+msgid "last known"
+msgstr "senast kända"
 
 #: lib/solaar/ui/window.py:644
-msgid   "not encrypted"
-msgstr  "okrypterad"
+msgid "not encrypted"
+msgstr "okrypterad"
 
 #: lib/solaar/ui/window.py:648
-msgid   "encrypted"
-msgstr  "krypterad"
+msgid "encrypted"
+msgstr "krypterad"
