@@ -200,9 +200,9 @@ class DeviceStatus(dict):
 				# only show the notification once
 				alert = ALERT.NOTIFICATION | ALERT.ATTENTION
 			if isinstance(level, _NamedInt):
-				reason = 'battery: %s (%s)' % (level, status)
+				reason = '%s: %s (%s)' % (_("Battery"), _(str(level)), _(str(status)))
 			else:
-				reason = 'battery: %d%% (%s)' % (level, status)
+				reason = '%s: %d%% (%s)' % (_("Battery"), level, _(str(status)))
 
 		if changed or reason:
 			# update the leds on the device, if any
