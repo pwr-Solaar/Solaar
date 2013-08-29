@@ -88,4 +88,7 @@ Unifying Receiver
         20: unknown:18E5           {18E5}   internal, hidden
         21: unknown:18A0           {18A0}   internal, hidden
         22: unknown:1830           {1830}   internal, hidden
+     Has 2 reprogrammable keys:
+         0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+         1: RIGHT CLICK                => RightClick                    mse, reprogrammable
      Battery: 50%, discharging.
