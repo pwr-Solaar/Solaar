@@ -73,12 +73,15 @@ def _create_parser():
 
 
 _cli_parser, actions = _create_parser()
+print_help = _cli_parser.print_help
 
 
-def _receivers():
+def _receivers(dev_path=None):
 	from logitech_receiver import Receiver
 	from logitech_receiver.base import receivers
 	for dev_info in receivers():
+		if dev_path is not None and dev_path != dev_info.path:
+			continue
 		try:
 			r = Receiver.open(dev_info)
 			if _log.isEnabledFor(_DEBUG):
@@ -129,21 +132,23 @@ def _find_device(receivers, name):
 	raise Exception("no device found matching '%s'" % name)
 
 
-def run(cli_args=None):
-	if cli_args == 'help':
-		_cli_parser.print_help()
-		return
-
+def run(cli_args=None, hidraw_path=None):
 	if cli_args:
 		action = cli_args[0]
 		args = _cli_parser.parse_args(cli_args)
 	else:
 		args = _cli_parser.parse_args()
+		# Python 3 has an undocumented 'feature' that breaks parsing empty args
+		# http://bugs.python.org/issue16308
+		if not 'cmd' in args:
+			_cli_parser.print_usage(_sys.stderr)
+			_sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
+			_sys.exit(2)
 		action = args.action
 	assert action in actions
 
 	try:
-		c = list(_receivers())
+		c = list(_receivers(hidraw_path))
 		if not c:
 			raise Exception('Logitech receiver not found')
 

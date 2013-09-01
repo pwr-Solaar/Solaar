@@ -268,9 +268,16 @@ def stop_all():
 			l.join()
 
 
-# stop/start all receiver threads on suspend/resume events, if possible
-from . import upower
-upower.watch(start_all, stop_all)
+def ping_all():
+	for l in _all_listeners.values():
+		count = l.receiver.count()
+		if count:
+			for dev in l.receiver:
+				dev.ping()
+				l._status_changed(dev)
+				count -= 1
+				if not count:
+					break
 
 
 from logitech_receiver import base as _base

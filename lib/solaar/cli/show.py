@@ -128,12 +128,14 @@ def run(receivers, args, find_receiver, find_device):
 		for r in receivers:
 			_print_receiver(r)
 			count = r.count()
-			for dev in r:
-				print ('')
-				_print_device(dev)
-				count -= 1
-				if count == 0:
-					break
+			if count:
+				for dev in r:
+					print ('')
+					_print_device(dev)
+					count -= 1
+					if not count:
+						break
+			print ('')
 		return
 
 	dev = find_receiver(receivers, device_name)
