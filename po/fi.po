@@ -219,6 +219,7 @@ msgid   "Unpairing failed"
 msgstr  "Parituksen poisto epäonnistui"
 
 #: lib/solaar/ui/__init__.py:54
+#, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
 msgstr  "%{device}n parituksen poisto epäonnistui %{receiver}sta."
 
