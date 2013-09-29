@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-11 16:49+0300\n"
+        "POT-Creation-Date: 2013-09-29 16:22+0300\n"
         "PO-Revision-Date: 2013-08-05 18:49+0300\n"
         "Last-Translator: Tomi Leppänen\n"
         "Language-Team: none\n"
@@ -179,6 +179,7 @@ msgid   " paired devices."
 msgstr  " paritettua laitetta"
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
+#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
 #: lib/solaar/ui/window.py:143
 msgid   "Battery"
 msgstr  "Akku"
@@ -252,11 +253,11 @@ msgstr  "Tietoja"
 msgid   "Unpair"
 msgstr  "Poista paritus"
 
-#: lib/solaar/ui/config_panel.py:97
+#: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
 msgstr  "Työskentelee"
 
-#: lib/solaar/ui/config_panel.py:100
+#: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
 msgstr  "Luku/kirjoitus operaatio epäonnistui."
 
@@ -349,11 +350,11 @@ msgid   "The wireless link between this device and its receiver is not "
         "within range."
 msgstr  "Langaton yhteys laitteen ja vastaanottimen välillä ei ole salattu.\n"
         "\n"
-        "Osoitinlaitteita (hiiret, ohjainpallot, tasohiiret) käytettäessä se on pieni "
-        "tietoturvallisuusriski.\n"
+        "Osoitinlaitteita (hiiret, ohjainpallot, tasohiiret) käytettäessä se "
+        "on pieni tietoturvallisuusriski.\n"
         "\n"
-        "Kuitenkin, näppäimistöjen kanssa se on suuri tietoturvallisuusriski sillä "
-        "kolmannet osapuolet\n"
+        "Kuitenkin, näppäimistöjen kanssa se on suuri tietoturvallisuusriski "
+        "sillä kolmannet osapuolet\n"
         "voivat lukea huomaamattomasti kirjoitetun tekstin yhteyden kantaman "
         "sisällä."
 
@@ -420,7 +421,6 @@ msgid   "Protocol"
 msgstr  "Yhteyskäytäntö"
 
 #: lib/solaar/ui/window.py:524
-#. fuzzy
 msgid   "Polling rate"
 msgstr  "Päivitysnopeus"
 

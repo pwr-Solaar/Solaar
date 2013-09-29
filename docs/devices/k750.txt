@@ -1,0 +1,39 @@
+(from Julien Danjou)
+
+(solaar)
+  2: Wireless Solar Keyboard K750
+     Codename     : K750
+     Kind         : keyboard
+     Wireless PID : 4002
+     Protocol     : HID++ 2.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: 5692B2EC
+          Firmware: RQK 33.00.B0015
+        Bootloader: DFU 00.02.B0003
+     The power switch is located on the edge of top right corner.
+     Supports 11 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: DEVICE FW VERSION      {0003}   
+         3: DEVICE NAME            {0005}   
+         4: REPROG CONTROLS        {1B00}   
+         5: WIRELESS DEVICE STATUS {1D4B}   
+         6: unknown:1DF3           {1DF3}   hidden
+         7: FN INVERSION           {40A0}   
+         8: ENCRYPTION             {4100}   
+         9: SOLAR DASHBOARD        {4301}   
+        10: KEYBOARD LAYOUT        {4520}   
+     Has 12 reprogrammable keys:
+         0: MY HOME                    => HomePage                      FN sensitive, is FN, reprogrammable
+         1: Mail                       => Email                         FN sensitive, is FN, reprogrammable
+         2: SEARCH                     => Search                        FN sensitive, is FN, reprogrammable
+         3: Calculator                 => Calculator                    FN sensitive, is FN, reprogrammable
+         4: MEDIA PLAYER               => Music                         FN sensitive, is FN, reprogrammable
+         5: Previous                   => Previous                      FN sensitive, is FN
+         6: Play/Pause                 => Play/Pause                    FN sensitive, is FN
+         7: Next                       => Next                          FN sensitive, is FN
+         8: Mute                       => Mute                          FN sensitive, is FN
+         9: Volume Down                => Volume Down                   FN sensitive, is FN
+        10: Volume Up                  => Volume Up                     FN sensitive, is FN
+        11: SLEEP                      => Sleep                         FN sensitive, is FN, reprogrammable
+     Battery status unavailable.

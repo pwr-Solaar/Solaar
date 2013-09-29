@@ -70,6 +70,7 @@ def _create_choice_control(setting):
 			_write_async(s, cbbox.get_active_id(), cbbox.get_parent())
 
 	c = Gtk.ComboBoxText()
+	# TODO i18n text entries
 	for entry in setting.choices:
 		c.append(str(entry), str(entry))
 	c.connect('changed', _combo_notify, setting)

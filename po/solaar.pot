@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-11 16:49+0300\n"
+        "POT-Creation-Date: 2013-09-29 16:22+0300\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -173,6 +173,7 @@ msgid   " paired devices."
 msgstr  ""
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
+#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
 #: lib/solaar/ui/window.py:143
 msgid   "Battery"
 msgstr  ""
@@ -242,11 +243,11 @@ msgstr  ""
 msgid   "Unpair"
 msgstr  ""
 
-#: lib/solaar/ui/config_panel.py:97
+#: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
 msgstr  ""
 
-#: lib/solaar/ui/config_panel.py:100
+#: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
 msgstr  ""
 

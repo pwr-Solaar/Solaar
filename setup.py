@@ -71,7 +71,7 @@ battery status.
 		requires=['pyudev (>= 0.13)', 'gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
 		package_dir={'': 'lib'},
-		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui'],
+		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
 		data_files=list(_data_files()),
 		scripts=_glob('bin/*'),
 	)

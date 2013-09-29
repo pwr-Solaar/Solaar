@@ -281,7 +281,7 @@ def _generate_tooltip_lines():
 		if number is None:  # receiver
 			continue
 
-		p = str(status)
+		p = status.to_string()
 		if p:  # does it have any properties to print?
 			yield '<b>%s</b>' % name
 			if status:

@@ -6,8 +6,8 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.1\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-08 19:46+0200\n"
-        "PO-Revision-Date: 2013-07-27 16:28+0100\n"
+        "POT-Creation-Date: 2013-08-25 01:33+0300\n"
+        "PO-Revision-Date: 2013-08-20 22:43+0100\n"
         "Last-Translator: Daniel Zippert & Emelie Snecker <daniel@zippert."
         "se>\n"
         "Language-Team: none\n"
@@ -98,15 +98,15 @@ msgstr  "Annan"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "closed"
-msgstr  "låst"
+msgstr  "inaktiverat"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "open"
-msgstr  "öppen"
+msgstr  "aktiverat"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "pairing lock is "
-msgstr  "parkopplingsläge låst"
+msgstr  "parkopplingsläget är "
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid   "unpaired"
@@ -207,8 +207,8 @@ msgstr  "Behörighetsfel"
 #, python-format
 msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
         "it."
-msgstr  "En Logitech mottagare hittades  (%s),  men behörighet att använda "
-        "den saknas."
+msgstr  "En Logitech mottagare hittades (%s), men behörighet att använda den "
+        "saknas."
 
 #: lib/solaar/ui/__init__.py:51
 msgid   "If you've just installed Solaar, try removing the receiver and "
@@ -227,13 +227,13 @@ msgstr  "Misslyckades att bryta parkoppling mellan %{device} och %{receiver}."
 
 #: lib/solaar/ui/__init__.py:56
 msgid   "The receiver returned an error, with no further details."
-msgstr  "Mottagaren rapporterade  ett fel, utan specifika detaljer."
+msgstr  "Mottagaren rapporterade ett fel, utan specifika detaljer."
 
 #: lib/solaar/ui/about.py:39
 msgid   "Shows status of devices connected\n"
         "through wireless Logitech receivers."
 msgstr  "Visa status för enheter kopplade till\n"
-        "din  trådlösa Logitech mottagare"
+        "din trådlösa Logitech mottagare"
 
 #: lib/solaar/ui/about.py:48
 msgid   "GUI design"
@@ -256,11 +256,11 @@ msgstr  "Om"
 msgid   "Unpair"
 msgstr  "Ta bort parkoppling"
 
-#: lib/solaar/ui/config_panel.py:97
+#: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
 msgstr  "Lyckades"
 
-#: lib/solaar/ui/config_panel.py:100
+#: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
 msgstr  "Läsning/Skrivning misslyckades."
 
@@ -286,7 +286,7 @@ msgstr  "Se till så att enheten inom räckhåll, och har tillräckligt laddat "
 #: lib/solaar/ui/pair_window.py:137
 msgid   "A new device was detected, but it is not compatible with this "
         "receiver."
-msgstr  "En ny enhet upptäcktes, men  är inte kompatibel med mottagaren. "
+msgstr  "En ny enhet upptäcktes, men är inte kompatibel med mottagaren. "
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
@@ -303,7 +303,7 @@ msgstr  "Ny enhet har hittats"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid   "The wireless link is not encrypted"
-msgstr  "Den trådlösa anslutningen är  okrypterad"
+msgstr  "Den trådlösa anslutningen är okrypterad"
 
 #: lib/solaar/ui/pair_window.py:197
 msgid   "pair new device"
@@ -337,7 +337,7 @@ msgstr  "ingen status"
 
 #: lib/solaar/ui/window.py:58
 msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  "Den trådlösa anslutningen är  krypterad."
+msgstr  "Den trådlösa anslutningen är krypterad."
 
 #: lib/solaar/ui/window.py:59
 msgid   "The wireless link between this device and its receiver is not "

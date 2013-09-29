@@ -42,6 +42,10 @@ def _parse_arguments():
 	arg_parser = argparse.ArgumentParser(prog=NAME.lower())
 	arg_parser.add_argument('-d', '--debug', action='count', default=0,
 							help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
+	arg_parser.add_argument('-D', '--hidraw', action='store', dest='hidraw_path', metavar='PATH',
+							help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
+	arg_parser.add_argument('--restart-on-wake-up', action='store_true',
+							help='restart Solaar on sleep wake-up (experimental)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	arg_parser.add_argument('--help-actions', action='store_true',
 							help='print help for the optional actions')
@@ -51,7 +55,8 @@ def _parse_arguments():
 	args = arg_parser.parse_args()
 
 	if args.help_actions:
-		return 'help'
+		_cli.print_help()
+		return
 
 	import logging
 	if args.debug > 0:
@@ -62,11 +67,11 @@ def _parse_arguments():
 		logging.root.addHandler(logging.NullHandler())
 		logging.root.setLevel(logging.ERROR)
 
-	if args.action:
-		return args.action
+	if not args.action:
+		if logging.root.isEnabledFor(logging.INFO):
+			logging.info("language %s (%s), translations path %s", _i18n.language, _i18n.encoding, _i18n.path)
 
-	if logging.root.isEnabledFor(logging.INFO):
-		logging.info("language %s (%s), translations path %s", _i18n.language, _i18n.encoding, _i18n.path)
+	return args
 
 
 def main():
@@ -76,9 +81,9 @@ def main():
 	import signal
 	signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-	cli_action = _parse_arguments()
-	if cli_action:
-		return _cli.run(cli_action)
+	args = _parse_arguments()
+	if not args: return
+	if args.action: return _cli.run(args.action, args.hidraw_path)
 
 	_require('gi.repository', 'python-gi')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
@@ -87,6 +92,13 @@ def main():
 		import solaar.ui as ui
 		import solaar.listener as listener
 		listener.setup_scanner(ui.status_changed, ui.error_dialog)
+
+		import solaar.upower as _upower
+		if args.restart_on_wake_up:
+			_upower.watch(listener.start_all, listener.stop_all)
+		else:
+			_upower.watch(listener.ping_all)
+
 		# main UI event loop
 		ui.run_loop(listener.start_all, listener.stop_all)
 	except Exception as e:

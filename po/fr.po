@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-08 21:51+0200\n"
+        "POT-Creation-Date: 2013-08-25 01:33+0300\n"
         "PO-Revision-Date: 2013-08-07 14:43+0200\n"
         "Last-Translator: Damien Lallement <dams@mageia.org>\n"
         "Language-Team: Language: fr\n"
@@ -255,11 +255,11 @@ msgstr  "À propos de"
 msgid   "Unpair"
 msgstr  "Déconnecter"
 
-#: lib/solaar/ui/config_panel.py:97
+#: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
 msgstr  "En fonctionnement"
 
-#: lib/solaar/ui/config_panel.py:100
+#: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
 msgstr  "Les opérations de lecture/écriture ont échoué."
 

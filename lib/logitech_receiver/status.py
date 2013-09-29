@@ -139,7 +139,7 @@ class DeviceStatus(dict):
 		# timestamp of when this status object was last updated
 		self.updated = 0
 
-	def __str__(self):
+	def to_string(self):
 		def _items():
 			comma = False
 
@@ -162,8 +162,6 @@ class DeviceStatus(dict):
 				yield _("Lighting") + (': %d ' % light_level) + _("lux")
 
 		return ''.join(i for i in _items())
-
-	__unicode__ = __str__
 
 	def __repr__(self):
 		return '{' +  ', '.join('\'%s\': %r' % (k, v) for k, v in self.items()) + '}'
@@ -202,9 +200,9 @@ class DeviceStatus(dict):
 				# only show the notification once
 				alert = ALERT.NOTIFICATION | ALERT.ATTENTION
 			if isinstance(level, _NamedInt):
-				reason = 'battery: %s (%s)' % (level, status)
+				reason = '%s: %s (%s)' % (_("Battery"), _(str(level)), _(str(status)))
 			else:
-				reason = 'battery: %d%% (%s)' % (level, status)
+				reason = '%s: %d%% (%s)' % (_("Battery"), level, _(str(status)))
 
 		if changed or reason:
 			# update the leds on the device, if any
