@@ -48,6 +48,7 @@ msgstr  "tyhjenee"
 msgid   "recharging"
 msgstr  "latautuu"
 
+#, fuzzy
 #: lib/logitech_receiver/i18n.py:42
 msgid   "invalid battery"
 msgstr  "virheellinen akku"
@@ -134,7 +135,7 @@ msgid   "When disabled, pushing the wheel sideways sends custom button "
         "instead of the standard side-scrolling events."
 msgstr  "Pois päältä ollessaan, rullan painaminen sivuttain lähettää "
         "muokattuja\n"
-        "toimintoja normaalien vaakarullaustoimintojen sijaan."
+        "toimintoja normaalien sivuttaisvieritystoimintojen sijaan."
 
 #: lib/logitech_receiver/settings_templates.py:82
 msgid   "Sensitivity (DPI)"
@@ -172,7 +173,7 @@ msgstr  "Ei paritettuja laitteita."
 
 #: lib/logitech_receiver/status.py:99
 msgid   "1 paired device."
-msgstr  "1 paritettu laite."
+msgstr  "Yksi paritettu laite."
 
 #: lib/logitech_receiver/status.py:100
 msgid   " paired devices."
@@ -204,7 +205,7 @@ msgstr  "Virheelliset käyttöoikeudet"
 #, python-format
 msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
         "it."
-msgstr  "Logitechin vastaanotin (%s) löydetty, mutta sitä ei ole oikeutta "
+msgstr  "Logitechin vastaanotin (%s) löydettiin, mutta sitä ei ollut oikeutta "
         "avata."
 
 #: lib/solaar/ui/__init__.py:51
@@ -240,6 +241,7 @@ msgstr  "Käyttöliittymäsuunnittelu"
 msgid   "Testing"
 msgstr  "Testaus"
 
+#, fuzzy
 #: lib/solaar/ui/about.py:54
 msgid   "Logitech documentation"
 msgstr  "Logitechin dokumentointi"
