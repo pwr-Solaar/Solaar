@@ -47,6 +47,12 @@ _NORMAL_BUTTON_ICON_SIZE = Gtk.IconSize.BUTTON
 _TREE_ICON_SIZE = Gtk.IconSize.BUTTON
 _INFO_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DND
+try:
+    import gi
+    gi.check_version("3.7.4")
+    _CAN_SET_ROW_NONE = None
+except (ValueError, AttributeError):
+    _CAN_SET_ROW_NONE = ''
 
 # tree model columns
 _COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
@@ -777,7 +783,7 @@ def update(device, need_popup=False):
 		if is_alive and item:
 			was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
 			is_pairing = bool(device.status.lock_open)
-			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else None)
+			_model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else _CAN_SET_ROW_NONE)
 
 			if selected_device_id == (device.path, 0):
 				full_update = need_popup or was_pairing != is_pairing
@@ -803,8 +809,8 @@ def update(device, need_popup=False):
 
 			battery_level = device.status.get(_K.BATTERY_LEVEL)
 			if battery_level is None:
-				_model.set_value(item, _COLUMN.STATUS_TEXT, None)
-				_model.set_value(item, _COLUMN.STATUS_ICON, None)
+				_model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
+				_model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
 			else:
 				if isinstance(battery_level, _NamedInt):
 					status_text = str(battery_level)
