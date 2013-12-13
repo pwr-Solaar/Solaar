@@ -73,7 +73,7 @@ Mice (Unifying):
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M317             |       |         |       |                                 |
-| M325             |       |         |       |                                 |
+| M325             | 2.0   | yes     | 1000  |                                 |
 | M345             | 2.0   | yes     | -     |                                 |
 | M350             | 1.0   | yes     |       |                                 |
 | M505             | 1.0   | yes     |       | smooth scrolling                |
