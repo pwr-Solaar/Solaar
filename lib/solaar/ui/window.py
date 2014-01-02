@@ -303,6 +303,11 @@ def _create_window_layout():
 	assert _tree.get_selection().get_mode() == Gtk.SelectionMode.SINGLE
 	_tree.get_selection().connect('changed', _device_selected)
 
+	tree_scroll = Gtk.ScrolledWindow()
+	tree_scroll.add(_tree)
+	tree_scroll.set_min_content_width(_tree.get_size_request()[0])
+	tree_scroll.set_shadow_type(Gtk.ShadowType.IN)
+
 	tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 	tree_panel.set_homogeneous(False)
 	tree_panel.pack_start(_tree, True, True, 0)
