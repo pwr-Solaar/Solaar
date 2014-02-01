@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Solaar
 Comment=Logitech Unifying Receiver peripherals manager
+Comment[de]=Verwaltungsprogramm für Geräte an Logitech Unifying Empfängern
 Exec=solaar
 Icon=solaar
 StartupNotify=true
