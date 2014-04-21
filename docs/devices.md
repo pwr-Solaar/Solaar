@@ -65,6 +65,7 @@ Keyboards (Unifying):
 | K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
+| TK820            | 2.0   | yes     | FN swap                                 |
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
