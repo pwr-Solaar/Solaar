@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 0.9.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-08-25 01:33+0300\n"
-"PO-Revision-Date: 2014-04-29 12:40-0000\n"
+"PO-Revision-Date: 2014-04-29 12:44-0000\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -20,11 +20,11 @@ msgstr ""
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "critical"
-msgstr "crítico"
+msgstr "crítica"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "empty"
-msgstr "vacío"
+msgstr "vacía"
 
 #: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
 msgid "full"
@@ -32,11 +32,11 @@ msgstr "llena"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "good"
-msgstr "bueno"
+msgstr "buena"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "low"
-msgstr "bajo"
+msgstr "baja"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid "almost full"
