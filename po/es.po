@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 0.9.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-08-25 01:33+0300\n"
-"PO-Revision-Date: 2014-04-29 12:44-0000\n"
+"PO-Revision-Date: 2014-04-29 13:03-0000\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -240,7 +240,7 @@ msgid ""
 "through wireless Logitech receivers."
 msgstr ""
 "Mostrar estatus de dispositivos conectados\n"
-"a través de receptores inalámbricos Logitech."
+"mediante receptores inalámbricos Logitech."
 
 #: lib/solaar/ui/about.py:48
 msgid "GUI design"
@@ -377,7 +377,7 @@ msgstr "Ningún dispositivo vinculado"
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
 msgid "Up to %d devices can be paired to this receiver"
-msgstr "Hasta %d dispositivos pueden emparejarse con este receptor"
+msgstr "Hasta %d dispositivos pueden vincularse con este receptor"
 
 #: lib/solaar/ui/window.py:68
 msgid "paired devices"
@@ -385,7 +385,7 @@ msgstr "dispositivos vinculados"
 
 #: lib/solaar/ui/window.py:72
 msgid "Only one device can be paired to this receiver"
-msgstr "Sólo un dispositivo puede emparejarse con este receptor"
+msgstr "Sólo puede vincularse un dispositivo con este receptor"
 
 #: lib/solaar/ui/window.py:110
 msgid "Scanning"
@@ -401,7 +401,7 @@ msgstr "Mostrar detalles técnicos"
 
 #: lib/solaar/ui/window.py:192
 msgid "Pair new device"
-msgstr "Emparejar nuevo dispositivo"
+msgstr "Vincular nuevo dispositivo"
 
 #: lib/solaar/ui/window.py:211
 msgid "Select a device"
