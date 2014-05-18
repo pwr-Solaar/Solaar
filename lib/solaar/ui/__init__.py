@@ -112,9 +112,14 @@ def _activate(app):
 
 
 def _command_line(app, command_line):
+	args = command_line.get_arguments()
 	if _log.isEnabledFor(_DEBUG):
-		_log.debug("command_line %s", command_line.get_arguments())
+		_log.debug("command_line %s", args)
 
+	if "--hide-icon" in args:
+		tray.set_visibility(False)
+
+	app.activate()
 	return 0
 
 
@@ -134,9 +139,9 @@ def _shutdown(app, shutdown_hook):
 
 
 def run_loop(startup_hook, shutdown_hook, args=None):
-	# from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
+	from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
 	APP_ID = 'io.github.pwr.solaar'
-	application = Gtk.Application.new(APP_ID, 0) # _ApplicationFlags.HANDLES_COMMAND_LINE)
+	application = Gtk.Application.new(APP_ID, _ApplicationFlags.HANDLES_COMMAND_LINE)
 
 	application.connect('startup', _startup, startup_hook)
 	application.connect('command-line', _command_line)
