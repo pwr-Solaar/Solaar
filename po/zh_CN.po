@@ -235,7 +235,7 @@ msgid ""
 "through wireless Logitech receivers."
 msgstr ""
 "显示罗技接收器\n"
-"已连接的设备状态。\n"
+"已连接的设备状态。"
 
 #: lib/solaar/ui/about.py:48
 msgid "GUI design"
