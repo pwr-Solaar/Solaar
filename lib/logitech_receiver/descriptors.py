@@ -270,6 +270,7 @@ _D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A',
 							#_RS.dpi(choices=_PERFORMANCE_MX_DPIS),
 							_RS.smooth_scroll(),
 							_RS.side_scroll(),
+						],
 				)
 
 # Trackballs
