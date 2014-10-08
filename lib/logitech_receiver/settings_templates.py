@@ -135,6 +135,11 @@ def _feature_smooth_scroll():
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
 
+def _feature_side_scroll():
+	return feature_toggle(_SIDE_SCROLL[0], _F.VERTICAL_SCROLLING,
+					label=_SIDE_SCROLL[1], description=_SIDE_SCROLL[2],
+					device_kind=_DK.mouse)
+
 #
 #
 #
@@ -164,7 +169,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
-				side_scroll=None,
+				side_scroll=_feature_side_scroll,
 				dpi=None,
 				hand_detection=None,
 				typing_illumination=None,
