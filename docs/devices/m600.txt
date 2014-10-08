@@ -1,0 +1,39 @@
+  1: Touch Mouse M600
+     Codename     : M600
+     Kind         : mouse
+     Wireless PID : 401A
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 84DF19F3
+          Firmware: RQM 34.00.B0019
+        Bootloader: BL  02.00.B0013
+          Hardware: 72
+             Other: 
+     The power switch is located on the base.
+     Supports 22 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: FEATURE INFO           {0002}   
+         3: DEVICE FW VERSION      {0003}   
+         4: DEVICE NAME            {0005}   
+         5: BATTERY STATUS         {1000}   
+         6: WIRELESS DEVICE STATUS {1D4B}   
+         7: unknown:1DF3           {1DF3}   internal, hidden
+         8: REPROG CONTROLS        {1B00}   
+         9: unknown:1F03           {1F03}   internal, hidden
+        10: VERTICAL SCROLLING     {2100}   
+        11: MOUSE POINTER          {2200}   
+        12: DFUCONTROL             {00C0}   
+        13: unknown:1E80           {1E80}   internal, hidden
+        14: TOUCHMOUSE RAW POINTS  {6110}   hidden
+        15: unknown:2101           {2101}   hidden
+        16: LEFT RIGHT SWAP        {2001}   
+        17: unknown:1E00           {1E00}   hidden
+        18: unknown:1F04           {1F04}   internal, hidden
+        19: unknown:18E2           {18E2}   internal, hidden
+        20: HI RES SCROLLING       {2120}   
+        21: unknown:18E3           {18E3}   internal, hidden
+     Has 2 reprogrammable keys:
+         0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+         1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+     Battery: 80%, discharging.
