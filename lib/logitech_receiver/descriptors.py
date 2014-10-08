@@ -239,7 +239,12 @@ _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 				)
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
-_D('Touch Mouse M600', protocol=2.0, wpid='401A')
+_D('Touch Mouse M600', protocol=2.0, wpid='401A',
+				settings=[
+							# _FS.side_scroll(),
+							_FS.smooth_scroll(),
+						],
+		)
 _D('Marathon Mouse M705', protocol=1.0, wpid='101B',
 				registers=(_R.battery_charge, ),
 				settings=[
