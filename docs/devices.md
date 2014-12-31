@@ -140,6 +140,7 @@ Mouse-Keyboard combos:
 
 | Device           | HID++ | Battery | Other supported features                |
 |------------------|-------|---------|-----------------------------------------|
+| MK220            | 2.0   | yes     |                                         |
 | MK330            |       |         |                                         |
 | MK520            |       |         |                                         |
 | MK550            |       |         |                                         |

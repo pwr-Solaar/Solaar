@@ -47,6 +47,7 @@ NANO_RECEIVER_C51B        = _nano_receiver(0xc51b)
 NANO_RECEIVER_C521        = _nano_receiver(0xc521)
 NANO_RECEIVER_C525        = _nano_receiver(0xc525)
 NANO_RECEIVER_C526        = _nano_receiver(0xc526)
+NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 
 
 del _unifying_receiver, _nano_receiver
@@ -63,4 +64,5 @@ ALL = (
 		NANO_RECEIVER_C521,
 		NANO_RECEIVER_C525,
 		NANO_RECEIVER_C526,
+		NANO_RECEIVER_C52e,
 	)
