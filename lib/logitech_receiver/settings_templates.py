@@ -125,6 +125,11 @@ def _feature_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 
+def _feature_new_fn_swap():
+	return feature_toggle(_FN_SWAP[0], _F.NEW_FN_INVERSION,
+					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					device_kind=_DK.keyboard)
+
 
 #
 #
@@ -133,6 +138,7 @@ def _feature_fn_swap():
 from collections import namedtuple
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
+					'new_fn_swap',
 					'smooth_scroll',
 					'side_scroll',
 					'dpi',
@@ -143,6 +149,7 @@ del namedtuple
 
 RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
+				new_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
 				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
@@ -151,6 +158,7 @@ RegisterSettings = _SETTINGS_LIST(
 			)
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
+				new_fn_swap=_feature_new_fn_swap,
 				smooth_scroll=None,
 				side_scroll=None,
 				dpi=None,
