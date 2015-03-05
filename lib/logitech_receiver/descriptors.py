@@ -191,6 +191,11 @@ _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 							_RS.hand_detection(),
 						],
 				)
+_D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
+				settings=[
+							_FS.new_fn_swap()
+						],
+				)
 
 # Mice
 
