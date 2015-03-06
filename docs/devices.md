@@ -17,10 +17,10 @@ Linux system configuration) are supported:
   keyboard, similar to Logitech's *Solar.app* for Windows.
 
 * The state of the `FN` key can be toggled on some keyboards ([K360][K360],
-  [MK700][K700], [K750][K750] and [K800][K800]). It changes the way the function
-  keys (`F1`..`F12`) work, i.e. whether holding `FN` while pressing the function
-  keys will generate the standard `Fx` keycodes or the special function (yellow
-  icons) keycodes.
+  [MK700][K700], [K750][K750], [K800][K800] and [K830][K830]). It changes the
+  way the function keys (`F1`..`F12`) work, i.e. whether holding `FN` while
+  pressing the function keys will generate the standard `Fx` keycodes or the
+  special function (yellow icons) keycodes.
 
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
@@ -65,6 +65,7 @@ Keyboards (Unifying):
 | K400 Touch       | 2.0   | yes     |                                         |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
+| K830 Illuminated | 2.0   | yes     | FN swap                                 |
 | TK820            | 2.0   | yes     | FN swap                                 |
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
 
@@ -151,6 +152,7 @@ Mouse-Keyboard combos:
 [K700]: http://logitech.com/product/wireless-desktop-mk710
 [K750]: http://logitech.com/product/k750-keyboard
 [K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
+[K830]: http://logitech.com/product/living-room-keyboard-k830
 [M510]: http://logitech.com/product/wireless-mouse-m510
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx

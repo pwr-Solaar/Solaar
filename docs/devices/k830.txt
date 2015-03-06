@@ -1,0 +1,41 @@
+# Provided by Mikkel Munch Mortensen
+
+(solaar)
+  3: Illuminated Living-Room Keyboard K830
+     Codename     : K830
+     Kind         : keyboard
+     Wireless PID : 4032
+     Protocol     : HID++ 4.1
+     Polling rate : 8 ms (125Hz)
+     Serial number: 9F7C6FD7
+          Firmware: RQK 56.00.B0020
+     The power switch is located on the edge of top right corner.
+     Supports 27 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: DEVICE FW VERSION      {0003}   
+         3: DEVICE NAME            {0005}   
+         4: WIRELESS DEVICE STATUS {1D4B}   
+         5: unknown:0020           {0020}   
+         6: BATTERY STATUS         {1000}   
+         7: BACKLIGHT              {1981}   
+         8: unknown:1B04           {1B04}   
+         9: unknown:2005           {2005}   
+        10: NEW FN INVERSION       {40A2}   
+        11: ENCRYPTION             {4100}   
+        12: unknown:4521           {4521}   
+        13: TOUCHPAD RAW XY        {6100}   hidden
+        14: unknown:6501           {6501}   
+        15: unknown:00C1           {00C1}   
+        16: unknown:1811           {1811}   internal, hidden
+        17: unknown:1830           {1830}   internal, hidden
+        18: unknown:1890           {1890}   internal, hidden
+        19: unknown:18A0           {18A0}   internal, hidden
+        20: unknown:1DF3           {1DF3}   internal, hidden
+        21: unknown:1E00           {1E00}   hidden
+        22: unknown:1EB0           {1EB0}   internal, hidden
+        23: unknown:1861           {1861}   internal, hidden
+        24: unknown:1A20           {1A20}   internal, hidden
+        25: unknown:18B0           {18B0}   internal, hidden
+        26: unknown:1F07           {1F07}   internal, hidden
+     Battery: 50%, discharging.
