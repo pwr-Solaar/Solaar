@@ -17,6 +17,9 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GOTO="solaar_apply"
 # classic Nano receiver -- VX Nano mouse
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GOTO="solaar_apply"
 
+# G-Series receiver -- G-Series mouse
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c531", GOTO="solaar_apply"
+
 GOTO="solaar_end"
 
 #
