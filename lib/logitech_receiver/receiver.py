@@ -76,6 +76,10 @@ class PairedDevice(object):
 		self._polling_rate = None
 		self._power_switch = None
 
+		# Current status of smooth scrolling as measured by the preliminary check
+		self._pre_smooth_status = None
+		self._smooth_status = None
+
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
 

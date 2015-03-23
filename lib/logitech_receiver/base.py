@@ -230,7 +230,7 @@ def _read(handle, timeout):
 #
 #
 
-def _skip_incoming(handle, ihandle, notifications_hook):
+def _skip_incoming(handle, ihandle, notifications_hook, check_notify_updates=None):
 	"""Read anything already in the input buffer.
 
 	Used by request() and ping() before their write.
@@ -255,7 +255,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 						(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
 						"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 			if notifications_hook and report_id & 0xF0:
-				n = make_notification(ord(data[1:2]), data[2:])
+				n = make_notification(ord(data[1:2]), data[2:], check_notify_updates)
 				if n:
 					notifications_hook(n)
 		else:
@@ -263,7 +263,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 			return
 
 
-def make_notification(devnumber, data):
+def make_notification(devnumber, data, check_notify_updates=None):
 	"""Guess if this is a notification (and not just a request reply), and
 	return a Notification tuple if it is."""
 	sub_id = ord(data[:1])
@@ -272,7 +272,11 @@ def make_notification(devnumber, data):
 		return
 
 	address = ord(data[1:2])
+
 	if (
+		# Regular update events that we want to let through so we can inspect them
+		((sub_id == 0x02) and check_notify_updates and check_notify_updates(devnumber, data))
+		or
 		# standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
 		(sub_id >= 0x40)
 		or
@@ -336,6 +340,7 @@ def request(handle, devnumber, request_id, *params):
 
 	ihandle = int(handle)
 	notifications_hook = getattr(handle, 'notifications_hook', None)
+	check_notify_updates = getattr(handle, 'check_notify_updates', None)
 	_skip_incoming(handle, ihandle, notifications_hook)
 	write(ihandle, devnumber, request_data)
 
@@ -398,7 +403,7 @@ def request(handle, devnumber, request_id, *params):
 				request_started = _timestamp()
 
 			if notifications_hook:
-				n = make_notification(reply_devnumber, reply_data)
+				n = make_notification(reply_devnumber, reply_data, check_notify_updates)
 				if n:
 					notifications_hook(n)
 				# elif _log.isEnabledFor(_DEBUG):
@@ -438,6 +443,7 @@ def ping(handle, devnumber):
 
 	ihandle = int(handle)
 	notifications_hook = getattr(handle, 'notifications_hook', None)
+	check_notify_updates = getattr(handle, 'check_notify_updates', None)
 	_skip_incoming(handle, ihandle, notifications_hook)
 	write(ihandle, devnumber, request_data)
 
@@ -470,7 +476,7 @@ def ping(handle, devnumber):
 						raise NoSuchDevice(number=devnumber, request=request_id)
 
 			if notifications_hook:
-				n = make_notification(reply_devnumber, reply_data)
+				n = make_notification(reply_devnumber, reply_data, check_notify_updates)
 				if n:
 					notifications_hook(n)
 				# elif _log.isEnabledFor(_DEBUG):

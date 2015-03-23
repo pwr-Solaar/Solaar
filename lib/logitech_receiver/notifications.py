@@ -33,6 +33,8 @@ from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .status import KEYS as _K, ALERT as _ALERT
 
+from subprocess import call
+
 _R = _hidpp10.REGISTERS
 _F = _hidpp20.FEATURE
 
@@ -127,6 +129,19 @@ def _process_hidpp10_custom_notification(device, status, n):
 		status.set_battery_info(charge, status_text)
 		return True
 
+	if n.sub_id == 0x02: # Button event, such as smooth scrolling
+		# Check smooth scrolling
+		if device.descriptor:
+			for setting in device.descriptor.settings:
+				if setting.name == "smooth-scroll":
+					# Found a smooth scroll capable device, get smooth scroll button status
+					# If it's changed, perform update action
+					smooth_status = (ord(n.data[0]) & 0x80) != 0
+					if device._smooth_status == None or device._smooth_status != smooth_status:
+						device._smooth_status = smooth_status
+						_process_smooth_scroll_toggle(device, smooth_status)
+					break
+
 	if n.sub_id == _R.keyboard_illumination:
 		# message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
 		# TODO anything we can do with this?
@@ -136,6 +151,24 @@ def _process_hidpp10_custom_notification(device, status, n):
 
 	_log.warn("%s: unrecognized %s", device, n)
 
+# TODO: find somewhere proper to put this
+from Xlib.display import Display
+_display = Display()
+_mapping = _display.get_pointer_mapping()
+_mapping[19] = 0 # Disable smooth scroll indicator
+_display.set_pointer_mapping(_mapping)
+
+def _process_smooth_scroll_toggle(device, smooth):
+	if device.descriptor:
+		for setting in device.descriptor.settings:
+			# Set smooth scroll state so mouse outputs correct number of clicks
+			if setting.name == "smooth-scroll":
+				setting(device).write(smooth)
+				# Temporary hack to demo code working as it should. -1 indicates natural scrolling (to be added as an option soon...)
+				if smooth:
+					call(['xinput','set-prop','Logitech Performance MX','Evdev Scrolling Distance','-8','128','1'])
+				else:
+					call(['xinput','set-prop','Logitech Performance MX','Evdev Scrolling Distance','-1','128','1'])
 
 def _process_hidpp10_notification(device, status, n):
 	# unpair notification

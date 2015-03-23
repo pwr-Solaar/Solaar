@@ -133,7 +133,7 @@ class EventsListener(_threading.Thread):
 
 	Incoming packets will be passed to the callback function in sequence.
 	"""
-	def __init__(self, receiver, notifications_callback):
+	def __init__(self, receiver, notifications_callback, check_notify_updates=None):
 		super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
 
 		self.daemon = True
@@ -142,6 +142,7 @@ class EventsListener(_threading.Thread):
 		self.receiver = receiver
 		self._queued_notifications = _Queue(16)
 		self._notifications_callback = notifications_callback
+		self._check_notify_updates = check_notify_updates
 
 		# self.tick_period = 0
 
@@ -173,7 +174,7 @@ class EventsListener(_threading.Thread):
 					break
 
 				if n:
-					n = _base.make_notification(*n)
+					n = _base.make_notification(*n, check_notify_updates=self._check_notify_updates)
 			else:
 				# deliver any queued notifications
 				n = self._queued_notifications.get()

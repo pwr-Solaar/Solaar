@@ -65,7 +65,7 @@ class ReceiverListener(_listener.EventsListener):
 	"""Keeps the status of a Receiver.
 	"""
 	def __init__(self, receiver, status_changed_callback):
-		super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
+		super(ReceiverListener, self).__init__(receiver, self._notifications_handler, self._check_notify_updates)
 		# no reason to enable polling yet
 		# self.tick_period = _POLL_TICK
 		# self._last_tick = 0
@@ -170,6 +170,33 @@ class ReceiverListener(_listener.EventsListener):
 			# the device was just unpaired, need to update the
 			# status of the receiver as well
 			self.status_changed_callback(self.receiver)
+
+	def _check_notify_updates(self, devnumber, data):
+		if devnumber == 0xFF:
+			return False
+		# a device notification
+		assert devnumber > 0 and devnumber <= self.receiver.max_devices
+		already_known = devnumber in self.receiver
+		sub_id = ord(data[:1])
+		if not already_known:
+			return False
+		dev = self.receiver[devnumber]
+
+		# Work out if device supports smooth scrolling
+		if dev.descriptor:
+			for setting in dev.descriptor.settings:
+				if setting.name == "smooth-scroll":
+					# Found a smooth scroll capable device, get smooth scroll button status
+					# If it's changed, pass this update through
+					smooth_status = (ord(data[2]) & 0x80) != 0
+					if dev._pre_smooth_status == None:
+						dev._pre_smooth_status = smooth_status
+						return True
+					if dev._pre_smooth_status != smooth_status:
+						dev._pre_smooth_status = smooth_status
+						return True
+					break
+		return False
 
 	def _notifications_handler(self, n):
 		assert self.receiver
