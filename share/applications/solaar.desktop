@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Solaar
 Comment=Logitech Unifying Receiver peripherals manager
+Comment[hr]=Upravitelj Logitechovih uređaja povezanih putem Unifying i Nano prijemnika
 Exec=solaar
 Icon=solaar
 StartupNotify=true
