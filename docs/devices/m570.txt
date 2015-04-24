@@ -1,0 +1,25 @@
+Unifying Receiver
+  Device path  : /dev/hidraw0
+  USB id       : 046d:c52b
+  Serial       : BAFF9007
+    Firmware   : 12.03.B0025
+    Bootloader : 02.15
+    Other      : AA.AA
+  Has 1 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=221
+
+  1: Wireless Trackball M570
+     Codename     : M570
+     Kind         : mouse
+     Wireless PID : 1028
+     Protocol     : HID++ 1.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 891DC05A
+          Firmware: 26.00.B0003
+        Bootloader: 02.06
+             Other: 00.01
+     The power switch is located on the base.
+     Notifications: battery status (0x100000).
+     Battery: 100%, discharging.
+

@@ -125,7 +125,7 @@ Trackballs (Unifying):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
-| M570 Trackball   |       |         |       |                                 |
+| M570 Trackball   | 1.0   | yes     | -     |                                 |
 
 
 Touchpads (Unifying):
