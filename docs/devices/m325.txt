@@ -1,0 +1,29 @@
+Wireless Mouse M325
+Codename     : M325
+Kind         : mouse
+Wireless PID : 400A
+Protocol     : HID++ 2.0
+Polling rate : 8 ms (125Hz)
+Serial number: ABB05E01
+     Firmware: RQM 27.02.B0028
+The power switch is located on the base.
+Supports 13 HID++ 2.0 features:
+    0: ROOT                   {0000}   
+    1: FEATURE SET            {0001}   
+    2: DEVICE FW VERSION      {0003}   
+    3: DEVICE NAME            {0005}   
+    4: BATTERY STATUS         {1000}   
+    5: WIRELESS DEVICE STATUS {1D4B}   
+    6: unknown:1DF3           {1DF3}   hidden
+    7: REPROG CONTROLS        {1B00}   
+    8: unknown:1DF0           {1DF0}   hidden
+    9: unknown:1F03           {1F03}   hidden
+   10: VERTICAL SCROLLING     {2100}   
+   11: HI RES SCROLLING       {2120}   
+   12: MOUSE POINTER          {2200}   
+Has 5 reprogrammable keys:
+    0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+    1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+    2: MIDDLE BUTTON              => MiddleMouseButton             mse, reprogrammable
+    3: BACK AS BUTTON 4           => Back                          mse, reprogrammable
+    4: FORWARD AS BUTTON 5        => BrowserForward                mse, reprogrammable

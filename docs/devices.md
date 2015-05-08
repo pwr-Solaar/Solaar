@@ -25,7 +25,8 @@ Linux system configuration) are supported:
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
 * Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705] and [M510 Wireless Mouse][M510].
+  be toggled on the [M705 Marathon Mouse][M705], [M510 Wireless Mouse][M510] and
+  [M325][M325].
 
 
 # Supported features
@@ -75,7 +76,7 @@ Mice (Unifying):
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | M317             |       |         |       |                                 |
-| M325             | 2.0   | yes     | 1000  |                                 |
+| M325             | 2.0   | yes     | 1000  | smooth scrolling                |
 | M345             | 2.0   | yes     | -     |                                 |
 | M350             | 1.0   | yes     |       |                                 |
 | M505             | 1.0   | yes     |       | smooth scrolling                |
@@ -158,3 +159,4 @@ Mouse-Keyboard combos:
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
+[M325]: http://logitech.com/product/wireless-mouse-m325
