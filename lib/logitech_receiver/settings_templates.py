@@ -130,6 +130,10 @@ def _feature_new_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 
+def _feature_smooth_scroll():
+	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
+					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_DK.mouse)
 
 #
 #
@@ -159,7 +163,7 @@ RegisterSettings = _SETTINGS_LIST(
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
-				smooth_scroll=None,
+				smooth_scroll=_feature_smooth_scroll,
 				side_scroll=None,
 				dpi=None,
 				hand_detection=None,
@@ -181,3 +185,6 @@ def check_feature_settings(device, already_known):
 	if not any(s.name == _FN_SWAP[0] for s in already_known) and _F.FN_INVERSION in device.features:
 		fn_swap = FeatureSettings.fn_swap()
 		already_known.append(fn_swap(device))
+	if not any(s.name == _SMOOTH_SCROLL[0] for s in already_known) and _F.HI_RES_SCROLLING in device.features:
+		smooth_scroll = FeatureSettings.smooth_scroll()
+		already_known.append(smooth_scroll(device))
