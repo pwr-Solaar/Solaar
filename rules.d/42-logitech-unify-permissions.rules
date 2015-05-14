@@ -14,7 +14,7 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c532", GOTO="solaar_apply"
 # Nano receiver, "Unifying Ready"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GOTO="solaar_apply"
 
-# clasic Nano receiver -- VX Nano mouse
+# classic Nano receiver -- VX Nano mouse
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GOTO="solaar_apply"
 
 # classic Nano receiver -- MK220 mouse and keyboard combo
@@ -25,7 +25,7 @@ GOTO="solaar_end"
 LABEL="solaar_apply"
 
 # don't apply to the paired peripherals, just the receivers
-DRIVERS=="logitech-djdevice", GOTO="solaar_end"
+DRIVERS=="logitech-djdevice|logitech-hidpp-device", GOTO="solaar_end"
 
 # Allow any seated user to access the receiver.
 # uaccess: modern ACL-enabled udev

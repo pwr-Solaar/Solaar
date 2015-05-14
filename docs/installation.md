@@ -3,9 +3,10 @@
 ### Requirements
 
 You should have a reasonably new kernel (3.2+), with the `logitech-djreceiver`
-driver enabled and loaded; also, the `udev` package must be installed and the
-daemon running.  If you have a modern Linux distribution (2011+), you're most
-likely good to go.
+driver enabled and loaded (kernel module `hid-logitech-dj`) or Linux 3.19+
+(kernel module `hid-logitech-hidpp`); also, the `udev` package must be installed
+and the daemon running.  If you have a modern Linux distribution (2011+), you're
+most likely good to go.
 
 The command-line application (`bin/solaar-cli`) requires Python 2.7.3 or 3.2+
 (either version should work), and the `python-pyudev`/`python3-pyudev` package.
