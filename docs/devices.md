@@ -77,15 +77,15 @@ Mice (Unifying):
 |------------------|-------|---------|-------|---------------------------------|
 | M317             |       |         |       |                                 |
 | M325             | 2.0   | yes     | 1000  | smooth scrolling                |
-| M345             | 2.0   | yes     | -     |                                 |
+| M345             | 2.0   | yes     | -     | smooth scrolling                |
 | M350             | 1.0   | yes     |       |                                 |
 | M505             | 1.0   | yes     |       | smooth scrolling                |
 | M510             | 1.0   | yes     |       | smooth scrolling                |
-| M515 Couch       | 2.0   | yes     | -     |                                 |
-| M525             | 2.0   | yes     | -     |                                 |
+| M515 Couch       | 2.0   | yes     | -     | smooth scrolling                |
+| M525             | 2.0   | yes     | -     | smooth scrolling                |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
-| T400 Zone Touch  | 2.0   | yes     |       |                                 |
+| T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   | smooth scrolling                |
 | Anywhere MX      | 1.0   | yes     | R/W   | smooth scrolling                |
@@ -134,7 +134,7 @@ Touchpads (Unifying):
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
 | Wireless Touch   | 2.0   | yes     |       |                                 |
-| T650 Touchpad    | 2.0   | yes     |       |                                 |
+| T650 Touchpad    | 2.0   | yes     |       | smooth scrolling                |
 
 
 Mouse-Keyboard combos:
