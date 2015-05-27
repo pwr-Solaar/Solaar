@@ -322,6 +322,17 @@ TASK = _NamedInts(
 	MetroForwRightHorz=0x0083,
 	Win8_Back=0x0084, # also known as MetroCharms
 	Win8_Forward=0x0085, # also known as AppSwitchBar
+	Win8Charm_Appswitch_GifAnimation=0x0086,
+	Win8BackHorzLeft=0x008B, # also known as Back
+	Win8ForwardHorzRight=0x008C, # also known as BrowserForward
+	MetroSearch2=0x0087,
+	MetroShare2=0x0088,
+	MetroSettings2=0x008A,
+	MetroDevices2=0x0089,
+	Win8MetroWin7Forward=0x008D, # also known as MetroStartScreen
+	Win8ShowDesktopWin7Back=0x008E, # also known as ShowDesktop
+	MetroApplicationSwitch=0x0090, # also known as MetroStartScreen
+	ShowUI=0x0092,
 )
 TASK._fallback = lambda x: 'unknown:%04X' % x
 
