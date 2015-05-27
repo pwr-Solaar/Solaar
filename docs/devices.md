@@ -86,6 +86,7 @@ Mice (Unifying):
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   |                                 |
 | Anywhere MX      | 1.0   | yes     | R/W   | smooth scrolling                |
+| MX Master        | 4.5   | yes     | TODO  |                                 |
 | Cube             | 2.0   | yes     |       |                                 |
 
 
