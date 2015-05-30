@@ -182,9 +182,24 @@ def check_feature_settings(device, already_known):
 		return
 	if device.protocol and device.protocol < 2.0:
 		return
-	if not any(s.name == _FN_SWAP[0] for s in already_known) and _F.FN_INVERSION in device.features:
-		fn_swap = FeatureSettings.fn_swap()
-		already_known.append(fn_swap(device))
-	if not any(s.name == _SMOOTH_SCROLL[0] for s in already_known) and _F.HI_RES_SCROLLING in device.features:
-		smooth_scroll = FeatureSettings.smooth_scroll()
-		already_known.append(smooth_scroll(device))
+
+	def check_feature(name, featureId, field_name=None):
+		"""
+		:param name: user-visible setting name.
+		:param featureId: the numeric Feature ID for this setting.
+		:param field_name: override the FeatureSettings name if it is
+		different from the user-visible setting name. Useful if there
+		are multiple features for the same setting.
+		"""
+		if not featureId in device.features:
+			return
+		if any(s.name == name for s in already_known):
+			return
+		if not field_name:
+			# Convert user-visible settings name for FeatureSettings
+			field_name = name.replace('-', '_')
+		feature = getattr(FeatureSettings, field_name)()
+		already_known.append(feature(device))
+
+	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
+	check_feature(_FN_SWAP[0],      _F.FN_INVERSION)
