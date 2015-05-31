@@ -203,3 +203,4 @@ def check_feature_settings(device, already_known):
 
 	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
 	check_feature(_FN_SWAP[0],      _F.FN_INVERSION)
+	check_feature(_FN_SWAP[0],      _F.NEW_FN_INVERSION, 'new_fn_swap')
