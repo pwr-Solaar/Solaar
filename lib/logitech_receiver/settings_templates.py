@@ -70,6 +70,16 @@ def feature_toggle(name, feature,
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
 	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
+def feature_choices(name, feature, choices,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					kind=_KIND.choice,
+					label=None, description=None, device_kind=None):
+	assert choices
+	validator = _ChoicesV(choices)
+	rw = _FeatureRW(feature, read_function_id, write_function_id)
+	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
+
 #
 # common strings for settings
 #
@@ -135,6 +145,15 @@ def _feature_smooth_scroll():
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
 
+def _feature_adjustable_dpi(register=_R.mouse_dpi, choices=None):
+	"""Pointer Speed feature"""
+	return feature_choices(_DPI[0], _F.ADJUSTABLE_DPI, choices,
+					# TODO: is this really the read function?
+					read_function_id=0x20,
+					write_function_id=0x30,
+					label=_DPI[1], description=_DPI[2],
+					device_kind=_DK.mouse)
+
 #
 #
 #
@@ -165,7 +184,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				new_fn_swap=_feature_new_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
 				side_scroll=None,
-				dpi=None,
+				dpi=_feature_adjustable_dpi,
 				hand_detection=None,
 				typing_illumination=None,
 			)
