@@ -83,7 +83,7 @@ Mice (Unifying):
 | M510             | 1.0   | yes     |       | smooth scrolling                |
 | M515 Couch       | 2.0   | yes     | -     | smooth scrolling                |
 | M525             | 2.0   | yes     | -     | smooth scrolling                |
-| M600 Touch       | 2.0   | yes     |       |                                 |
+| M600 Touch       | 2.0   | yes     |       | smooth scrolling                |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       | 2.0   | yes     |       |                                 |
@@ -157,6 +157,7 @@ Mouse-Keyboard combos:
 [K800]: http://logitech.com/product/wireless-illuminated-keyboard-k800
 [K830]: http://logitech.com/product/living-room-keyboard-k830
 [M510]: http://logitech.com/product/wireless-mouse-m510
+[M600]: http://support.logitech.com/en_us/product/touch-mouse-m600
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
