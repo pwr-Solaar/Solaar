@@ -32,6 +32,7 @@ import os as _os
 import errno as _errno
 from select import select as _select
 from pyudev import Context as _Context, Monitor as _Monitor, Device as _Device
+from pyudev import DeviceNotFoundError
 
 
 native_implementation = 'udev'
@@ -338,27 +339,31 @@ def get_indexed_string(device_handle, index):
 
 	:param device_handle: a device handle returned by open() or open_path().
 	:param index: the index of the string to get.
+	:returns: the value corresponding to index, or None if no value found
+	:rtype: bytes or NoneType
 	"""
-	if index not in _DEVICE_STRINGS:
-		return None
+	try:
+	    key = _DEVICE_STRINGS[index]
+	except KeyError:
+	    return None
 
 	assert device_handle
 	stat = _os.fstat(device_handle)
-	dev = _Device.from_device_number(_Context(), 'char', stat.st_rdev)
-	if dev:
-		hid_dev = dev.find_parent('hid')
-		if hid_dev:
-			assert 'HID_ID' in hid_dev
-			bus, _ignore, _ignore = hid_dev['HID_ID'].split(':')
+	try:
+		dev = _Device.from_device_number(_Context(), 'char', stat.st_rdev)
+	except (DeviceNotFoundError, ValueError):
+		return None
 
-			if bus == '0003':  # USB
-				usb_dev = dev.find_parent('usb', 'usb_device')
-				assert usb_dev
-				key = _DEVICE_STRINGS[index]
-				attrs = usb_dev.attributes
-				if key in attrs:
-					return attrs[key]
+	hid_dev = dev.find_parent('hid')
+	if hid_dev:
+		assert 'HID_ID' in hid_dev
+		bus, _ignore, _ignore = hid_dev['HID_ID'].split(':')
 
-			elif bus == '0005':  # BLUETOOTH
-				# TODO
-				pass
+		if bus == '0003':  # USB
+			usb_dev = dev.find_parent('usb', 'usb_device')
+			assert usb_dev
+			return usb_dev.attributes.get(key)
+
+		elif bus == '0005':  # BLUETOOTH
+			# TODO
+			pass
