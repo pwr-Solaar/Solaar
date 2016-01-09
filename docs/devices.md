@@ -5,7 +5,7 @@ least display some basic information about them.
 
 At this moment, all [Unifying Receiver][unifying] are supported (devices with
 USB ID `046d:c52b` or `046d:c532`), but only some newer [Nano Receiver][nano]s
-(devices with USB ID `046d:c52f`). You can check your connected Logitech devices
+(devices with USB ID `046d:c52f` and `046d:c52b`). You can check your connected Logitech devices
 by running `lsusb -d 046d:` in a console.
 
 For some devices, extra settings (usually not available through the standard
@@ -63,7 +63,7 @@ Keyboards (Unifying):
 | K340             | 1.0   | yes     |                                         |
 | K350             | 1.0   | yes     |                                         |
 | K360             | 2.0   | yes     | FN swap, reprog keys                    |
-| K400 Touch       | 2.0   | yes     |                                         |
+| K400 Touch       | 2.0   | yes     | FN swap                                 |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
 | K830 Illuminated | 2.0   | yes     | FN swap                                 |
