@@ -116,6 +116,11 @@ class NamedInts(object):
 		self._fallback = None
 
 	@classmethod
+	def list(cls, items, name_generator=lambda x: str(x)):
+		values = {name_generator(x): x for x in items}
+		return NamedInts(**values)
+
+	@classmethod
 	def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):
 		values = {name_generator(x): x for x in range(from_value, to_value + 1, step)}
 		return NamedInts(**values)

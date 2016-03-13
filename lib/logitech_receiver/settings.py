@@ -317,7 +317,11 @@ class ChoicesValidator(object):
 
 	kind = KIND.choice
 
-	def __init__(self, choices):
+	"""Translates between NamedInts and a byte sequence.
+	:param choices: a list of NamedInts
+	:param bytes_count: the size of the derived byte sequence. If None, it
+	will be calculated from the choices."""
+	def __init__(self, choices, bytes_count=None):
 		assert choices is not None
 		assert isinstance(choices, _NamedInts)
 		assert len(choices) > 2
@@ -326,6 +330,9 @@ class ChoicesValidator(object):
 
 		max_bits = max(x.bit_length() for x in choices)
 		self._bytes_count = (max_bits // 8) + (1 if max_bits % 8 else 0)
+		if bytes_count:
+			assert self._bytes_count <= bytes_count
+			self._bytes_count = bytes_count
 		assert self._bytes_count < 8
 
 	def validate_read(self, reply_bytes):

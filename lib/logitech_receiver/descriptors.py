@@ -90,7 +90,6 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 #
 
 _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
-_MX_MASTER_DPIS = _NamedInts.range(400, 1600, step=200)
 
 #
 #
@@ -267,11 +266,7 @@ _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 						],
 				)
 
-_D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041',
-				settings=[
-							_FS.dpi(choices=_MX_MASTER_DPIS),
-						],
-				)
+_D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041')
 
 _D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
 				registers=(_R.battery_status, ),

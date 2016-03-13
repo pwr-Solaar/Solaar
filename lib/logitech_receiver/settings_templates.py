@@ -23,6 +23,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from .i18n import _
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from .common import (
+				bytes2int as _bytes2int,
+				NamedInts as _NamedInts,
+			)
 from .settings import (
 				KIND as _KIND,
 				Setting as _Setting,
@@ -71,14 +75,28 @@ def feature_toggle(name, feature,
 	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 def feature_choices(name, feature, choices,
-					read_function_id=_FeatureRW.default_read_fnid,
-					write_function_id=_FeatureRW.default_write_fnid,
-					kind=_KIND.choice,
+					read_function_id, write_function_id,
+					bytes_count=None,
 					label=None, description=None, device_kind=None):
 	assert choices
-	validator = _ChoicesV(choices)
+	validator = _ChoicesV(choices, bytes_count=bytes_count)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kind=device_kind)
+
+def feature_choices_dynamic(name, feature, choices_callback,
+					read_function_id, write_function_id,
+					bytes_count=None,
+					label=None, description=None, device_kind=None):
+	# Proxy that obtains choices dynamically from a device
+	def instantiate(device):
+		# Obtain choices for this feature
+		choices = choices_callback(device)
+		setting = feature_choices(name, feature, choices,
+						read_function_id, write_function_id,
+						bytes_count=bytes_count,
+						label=None, description=None, device_kind=None)
+		return setting(device)
+	return instantiate
 
 #
 # common strings for settings
@@ -145,12 +163,40 @@ def _feature_smooth_scroll():
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
 
-def _feature_adjustable_dpi(register=_R.mouse_dpi, choices=None):
+def _feature_adjustable_dpi_choices(device):
+	# [1] getSensorDpiList(sensorIdx)
+	reply = device.feature_request(_F.ADJUSTABLE_DPI, 0x10)
+	# Should not happen, but might happen when the user unplugs device while the
+	# query is being executed. TODO retry logic?
+	assert reply, 'Oops, DPI list cannot be retrieved!'
+	dpi_list = []
+	step = None
+	for offset in range(0, 14, 2):
+		val = _bytes2int(reply[offset:offset+2])
+		if val == 0:
+			break
+		if val >> 13 == 0b111:
+			assert offset == 2, 'Invalid DPI list item: %r' % val
+			step = val & 0x1fff
+		else:
+			dpi_list.append(val)
+	if step:
+		assert dpi_list == 2, 'Invalid DPI list range: %r' % dpi_list
+		dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
+	# getSensorDpi/setSensorDpi use (sensorIdx, dpiMSB, dpiLSB). Assume for now
+	# that sensorIdx is always zero and represent dpi 400 as 0x000190.
+	dpi_vals_list = [dpi << 8 for dpi in dpi_list]
+	return _NamedInts.list(dpi_vals_list, name_generator=lambda x: str(x >> 8))
+
+def _feature_adjustable_dpi():
 	"""Pointer Speed feature"""
-	return feature_choices(_DPI[0], _F.ADJUSTABLE_DPI, choices,
-					# TODO: is this really the read function?
+	# [2] getSensorDpi(sensorIdx)
+	# [3] setSensorDpi(sensorIdx, dpi)
+	return feature_choices_dynamic(_DPI[0], _F.ADJUSTABLE_DPI,
+					_feature_adjustable_dpi_choices,
 					read_function_id=0x20,
 					write_function_id=0x30,
+					bytes_count=3,
 					label=_DPI[1], description=_DPI[2],
 					device_kind=_DK.mouse)
 
@@ -223,3 +269,4 @@ def check_feature_settings(device, already_known):
 	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
 	check_feature(_FN_SWAP[0],      _F.FN_INVERSION)
 	check_feature(_FN_SWAP[0],      _F.NEW_FN_INVERSION, 'new_fn_swap')
+	check_feature(_DPI[0],          _F.ADJUSTABLE_DPI)
