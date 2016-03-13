@@ -161,10 +161,10 @@ def _status_changed(device, alert, reason):
 	if alert & ALERT.ATTENTION:
 		tray.attention(reason)
 
-	need_popup = alert & (ALERT.SHOW_WINDOW | ALERT.ATTENTION)
+	need_popup = alert & ALERT.SHOW_WINDOW
 	window.update(device, need_popup)
 
-	if alert & ALERT.NOTIFICATION:
+	if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
 		notify.show(device, reason)
 
 
