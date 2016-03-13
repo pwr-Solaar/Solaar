@@ -27,7 +27,8 @@ from logitech_receiver import settings as _settings
 def _print_setting(s, verbose=True):
 	print ('#', s.label)
 	if verbose:
-		print ('#', s.description.replace('\n', ' '))
+		if s.description:
+			print ('#', s.description.replace('\n', ' '))
 		if s.kind == _settings.KIND.toggle:
 			print ('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
 		elif s.choices:
