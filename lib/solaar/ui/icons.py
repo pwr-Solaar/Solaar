@@ -222,8 +222,11 @@ def device_icon_name(name, kind=None):
 def icon_file(name, size=_LARGE_SIZE):
 	_init_icon_paths()
 
-	if _default_theme.has_icon(name):
-		theme_icon = _default_theme.lookup_icon(name, size, 0)
+        # has_icon() somehow returned False while lookup_icon returns non-None.
+        # I guess it happens because share/solaar/icons/ has no hicolor and
+        # resolution subdirs
+	theme_icon = _default_theme.lookup_icon(name, size, 0)
+	if theme_icon:
 		file_name = theme_icon.get_filename()
 		# if _log.isEnabledFor(_DEBUG):
 		# 	_log.debug("icon %s(%d) => %s", name, size, file_name)
