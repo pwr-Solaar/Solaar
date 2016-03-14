@@ -291,17 +291,17 @@ class BooleanValidator(object):
 			if current_value is not None and to_write == ord(current_value[:1]):
 				return None
 		else:
-			to_write = list(to_write)
+			to_write = bytearray(to_write)
 			count = len(self.mask)
 			for i in range(0, count):
-				b = ord(to_write[i])
+				b = ord(to_write[i:i+1])
 				m = ord(self.mask[i : i + 1])
 				assert b & m == b
 				# b &= m
 				if current_value is not None and self.needs_current_value:
 					b |= ord(current_value[i : i + 1]) & (0xFF ^ m)
-				to_write[i] = chr(b)
-			to_write = b''.join(to_write)
+				to_write[i] = b
+			to_write = bytes(to_write)
 
 			if current_value is not None and to_write == current_value[:len(to_write)]:
 				return None
