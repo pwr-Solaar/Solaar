@@ -108,6 +108,7 @@ Mice (Nano):
 | M305             | 1.0   | yes     |       |                                 |
 | M310             | 1.0   | yes     |       |                                 |
 | M315             |       | yes     |       |                                 |
+| MX 1100          | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 
 
 Mice (Mini):
