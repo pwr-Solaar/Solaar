@@ -20,6 +20,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import importlib
+
 
 from solaar import __version__, NAME
 import solaar.i18n as _i18n
@@ -31,7 +33,7 @@ import solaar.cli as _cli
 
 def _require(module, os_package):
 	try:
-		__import__(module)
+		return importlib.import_module(module)
 	except ImportError:
 		import sys
 		sys.exit("%s: missing required package '%s'" % (NAME, os_package))
@@ -85,7 +87,8 @@ def main():
 	if not args: return
 	if args.action: return _cli.run(args.action, args.hidraw_path)
 
-	_require('gi.repository', 'python-gi')
+	gi = _require('gi', 'python-gi')
+	gi.require_version('Gtk', '3.0')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
 
 	try:

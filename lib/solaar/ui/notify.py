@@ -29,18 +29,23 @@ from solaar.i18n import _
 #
 
 try:
+	import gi
+	gi.require_version('Notify', '0.7')
 	# this import is allowed to fail, in which case the entire feature is unavailable
 	from gi.repository import Notify
 
+	# assumed to be working since the import succeeded
+	available = True
+except (ValueError, ImportError):
+	available = False
+
+if available:
 	from logging import getLogger, INFO as _INFO
 	_log = getLogger(__name__)
 	del getLogger
 
 	from solaar import NAME
 	from . import icons as _icons
-
-	# assumed to be working since the import succeeded
-	available = True
 
 	# cache references to shown notifications here, so if another status comes
 	# while its notification is still visible we don't create another one
@@ -137,8 +142,7 @@ try:
 			except Exception:
 				_log.exception("showing %s", n)
 
-except ImportError:
-	available = False
+else:
 	init = lambda: False
 	uninit = lambda: None
 	# toggle = lambda action: False
