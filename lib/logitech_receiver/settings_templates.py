@@ -183,14 +183,12 @@ def _feature_adjustable_dpi_choices(device):
 	if step:
 		assert dpi_list == 2, 'Invalid DPI list range: %r' % dpi_list
 		dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
-	# getSensorDpi/setSensorDpi use (sensorIdx, dpiMSB, dpiLSB). Assume for now
-	# that sensorIdx is always zero and represent dpi 400 as 0x000190.
-	dpi_vals_list = [dpi << 8 for dpi in dpi_list]
-	return _NamedInts.list(dpi_vals_list, name_generator=lambda x: str(x >> 8))
+	return _NamedInts.list(dpi_list)
 
 def _feature_adjustable_dpi():
 	"""Pointer Speed feature"""
-	# [2] getSensorDpi(sensorIdx)
+	# Assume sensorIdx 0 (there is only one sensor)
+	# [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
 	# [3] setSensorDpi(sensorIdx, dpi)
 	return feature_choices_dynamic(_DPI[0], _F.ADJUSTABLE_DPI,
 					_feature_adjustable_dpi_choices,
