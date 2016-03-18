@@ -117,5 +117,5 @@ def run(receivers, args, find_receiver, find_device):
 
 	result = setting.write(value)
 	if result is None:
-		raise Exception("failed to set '%s' = '%s' [%r]" % (setting.name, value, value))
+		raise Exception("failed to set '%s' = '%s' [%r]" % (setting.name, str(value), value))
 	_print_setting(setting, False)
