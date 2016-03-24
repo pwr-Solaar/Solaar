@@ -336,6 +336,13 @@ _D('MX Air', codename='MX Air', protocol=1.0, kind=_DK.mouse, wpid=('1007', '100
 _D('MX Revolution', codename='MX Revolution', protocol=1.0, kind=_DK.mouse, wpid=('1008', '100C'),
 				registers=(_R.battery_charge, ),
 				)
+_D('MX 1100 Cordless Laser Mouse', codename='MX 1100', protocol=1.0, kind=_DK.mouse, wpid='1014',
+                registers=(_R.battery_charge, ),
+                settings=[
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
+						],
+                )
 
 # Some exotics...
 
