@@ -172,7 +172,7 @@ def _feature_adjustable_dpi_choices(device):
 	assert reply, 'Oops, DPI list cannot be retrieved!'
 	dpi_list = []
 	step = None
-	for val in _unpack('!B7H', reply)[1:]:
+	for val in _unpack('!7H', reply[1:1+14]):
 		if val == 0:
 			break
 		if val >> 13 == 0b111:
