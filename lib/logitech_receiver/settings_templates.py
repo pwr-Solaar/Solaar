@@ -26,6 +26,7 @@ from . import hidpp20 as _hidpp20
 from .common import (
 				bytes2int as _bytes2int,
 				NamedInts as _NamedInts,
+				unpack as _unpack,
 			)
 from .settings import (
 				KIND as _KIND,
@@ -171,12 +172,12 @@ def _feature_adjustable_dpi_choices(device):
 	assert reply, 'Oops, DPI list cannot be retrieved!'
 	dpi_list = []
 	step = None
-	for offset in range(0, 14, 2):
-		val = _bytes2int(reply[offset:offset+2])
+	for val in _unpack('!B7H', reply)[1:]:
 		if val == 0:
 			break
 		if val >> 13 == 0b111:
-			assert offset == 2, 'Invalid DPI list item: %r' % val
+			assert step is None and len(dpi_list) == 1, \
+					'Invalid DPI list item: %r' % val
 			step = val & 0x1fff
 		else:
 			dpi_list.append(val)
