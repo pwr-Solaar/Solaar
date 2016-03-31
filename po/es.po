@@ -64,7 +64,7 @@ msgstr "error térmico"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "device not supported"
-msgstr "dispositivo  no soportado"
+msgstr "dispositivo no soportado"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "device timeout"
@@ -88,7 +88,7 @@ msgstr "Firmware"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Hardware"
-msgstr "Hardware"
+msgstr "Material"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Other"
@@ -120,7 +120,7 @@ msgstr "desconocido"
 
 #: lib/logitech_receiver/settings_templates.py:77
 msgid "Smooth Scrolling"
-msgstr "Desplazamiento continuo"
+msgstr "Desplazamiento Suave"
 
 #: lib/logitech_receiver/settings_templates.py:78
 msgid "High-sensitivity mode for vertical scroll with the wheel."
@@ -128,31 +128,31 @@ msgstr "Modo de alta sensibilidad para desplazamiento vertical con la rueda."
 
 #: lib/logitech_receiver/settings_templates.py:79
 msgid "Side Scrolling"
-msgstr "Desplazamiento lateral"
+msgstr "Desplazamiento Lateral"
 
 #: lib/logitech_receiver/settings_templates.py:80
 msgid ""
 "When disabled, pushing the wheel sideways sends custom button events\n"
 "instead of the standard side-scrolling events."
 msgstr ""
-"Al desactivarse, apretar la rueda a los lados envía  eventos de botones "
+"Al desactivarse, apretar la rueda a los lados envía eventos de botones "
 "personalizados\n"
 "en vez de los eventos estándar de desplazamiento lateral."
 
 #: lib/logitech_receiver/settings_templates.py:82
 msgid "Sensitivity (DPI)"
-msgstr "sensibilidad(PPP)"
+msgstr "Sensibilidad (PPP)"
 
 #: lib/logitech_receiver/settings_templates.py:83
 msgid "Swap Fx function"
-msgstr "cambiar funciones Fx"
+msgstr "Intercambiar función Fx"
 
 #: lib/logitech_receiver/settings_templates.py:84
 msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
 msgstr ""
-"Cuando se definen las configuraciones, las teclas F1..F12 activarán sus "
+"Al activarse, las teclas F1..F12 activarán sus "
 "funciones especiales,\n"
 "y debe mantener pulsada la tecla FN para activar su función estándar."
 
@@ -161,7 +161,7 @@ msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
 msgstr ""
-"Cuando se borran las configuraciones, las teclas F1..F12 activarán sus "
+"Al desactivarse, las teclas F1..F12 activarán sus "
 "funciones estándar,\n"
 "y debe mantener pulsada la tecla FN para activar su función especial."
 
@@ -171,11 +171,11 @@ msgstr "Detección de manos"
 
 #: lib/logitech_receiver/settings_templates.py:90
 msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "Encender iluminación cuando las manos pasen sobre el teclado."
+msgstr "Encender la iluminación cuando las manos pasen sobre el teclado."
 
 #: lib/logitech_receiver/status.py:98
 msgid "No paired devices."
-msgstr "Sin dispositivos conectados."
+msgstr "Ningún dispositivo conectado."
 
 #: lib/logitech_receiver/status.py:99
 msgid "1 paired device."
@@ -183,7 +183,7 @@ msgstr "1 dispositivo conectado."
 
 #: lib/logitech_receiver/status.py:100
 msgid " paired devices."
-msgstr "dispositivos conectados."
+msgstr " dispositivos conectados."
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
 #: lib/solaar/ui/window.py:143
@@ -210,7 +210,7 @@ msgstr "Error de permisos."
 #, python-format
 msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
 msgstr ""
-"Encontrado un receptor Logitech {%s}, pero no se obtuvieron los permisos "
+"Se encontró un receptor Logitech {%s}, pero no se obtuvieron los permisos "
 "para abrirlo."
 
 #: lib/solaar/ui/__init__.py:51
@@ -218,7 +218,7 @@ msgid ""
 "If you've just installed Solaar, try removing the receiver and plugging it "
 "back in."
 msgstr ""
-"Si acaba de instalar Solaar, pruebe a quitar el receptor y conectarlo de "
+"Si acaba de instalar Solaar, intente quitar el receptor y conectarlo de "
 "nuevo."
 
 #: lib/solaar/ui/__init__.py:53
@@ -239,12 +239,12 @@ msgid ""
 "Shows status of devices connected\n"
 "through wireless Logitech receivers."
 msgstr ""
-"Mostrar estatus de dispositivos conectados\n"
+"Mostrar el estado de dispositivos conectados\n"
 "mediante receptores inalámbricos Logitech."
 
 #: lib/solaar/ui/about.py:48
 msgid "GUI design"
-msgstr "Diseño de GUI"
+msgstr "Diseño de interfaz gráfica"
 
 #: lib/solaar/ui/about.py:49
 msgid "Testing"
@@ -256,7 +256,7 @@ msgstr "Documentación de Logitech"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
 msgid "About"
-msgstr "Acerca de "
+msgstr "Acerca de"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:203
@@ -287,17 +287,17 @@ msgstr "Vinculación fallida."
 #: lib/solaar/ui/pair_window.py:135
 msgid "Make sure your device is within range, and has a decent battery charge."
 msgstr ""
-"Asegurese que su dispositivo está dentro del alcance del receptor, y que la "
-"batería tiene suficiente carga."
+"Asegúrese de que su dispositivo esté dentro del alcance del receptor, y que la "
+"batería tenga suficiente carga."
 
 #: lib/solaar/ui/pair_window.py:137
 msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "Nuevo dispositivo detectado, pero no es compatible con este receptor."
+msgstr "Se detectó un nuevo dispositivo, pero no es compatible con este receptor."
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
 msgid "The receiver only supports %d paired device(s)."
-msgstr "El receptor solo  soporta %d dispositivo(s)  vinculado(s)"
+msgstr "El receptor solo soporta %d dispositivo(s) vinculado(s)"
 
 #: lib/solaar/ui/pair_window.py:141
 msgid "No further details are available about the error."
@@ -305,7 +305,7 @@ msgstr "No hay más detalles disponibles sobre este error."
 
 #: lib/solaar/ui/pair_window.py:155
 msgid "Found a new device"
-msgstr "Encontrado nuevo dispositivo"
+msgstr "Se encontró un nuevo dispositivo"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid "The wireless link is not encrypted"
@@ -362,13 +362,13 @@ msgid ""
 msgstr ""
 "La conexión inalámbrica entre el dispositivo y su receptor no está cifrada.\n"
 "\n"
-"a dispositivos apuntadores (ratones, trackballs, trackpads), este es un "
+"Para dispositivos apuntadores (ratones, trackballs, trackpads), este es un "
 "problema menor de seguridad.\n"
 "\n"
 "Sin embargo, para dispositivos de entrada de texto (teclados, teclados "
-"numéricos) si es un problema grave,\n"
+"numéricos) sí es un problema grave,\n"
 "pues el texto introducido puede ser capturado de forma inadvertida por "
-"terceras parte."
+"terceros que estén cerca."
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
 msgid "No device paired"
@@ -389,7 +389,7 @@ msgstr "Sólo puede vincularse un dispositivo con este receptor"
 
 #: lib/solaar/ui/window.py:110
 msgid "Scanning"
-msgstr "Escaneando"
+msgstr "Explorando"
 
 #: lib/solaar/ui/window.py:146
 msgid "Wireless Link"
@@ -434,7 +434,7 @@ msgstr "Protocolo"
 
 #: lib/solaar/ui/window.py:524
 msgid "Polling rate"
-msgstr "Tasa de monitorización"
+msgstr "Tasa de sondeo"
 
 #: lib/solaar/ui/window.py:539
 msgid "none"
