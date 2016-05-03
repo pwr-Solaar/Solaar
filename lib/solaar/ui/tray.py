@@ -144,7 +144,8 @@ def _scroll(tray_icon, event, direction=None):
 
 
 try:
-	# raise ImportError
+	import gi
+	gi.require_version('AppIndicator3', '0.1')
 	from gi.repository import AppIndicator3
 
 	if _log.isEnabledFor(_DEBUG):
