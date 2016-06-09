@@ -112,6 +112,12 @@ def run(receivers, args, find_receiver, find_device):
 			raise Exception("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
 			value = setting.choices[value]
 
+	elif setting.kind == _settings.KIND.range:
+		try:
+			value = int(args.value)
+		except ValueError:
+			raise Exception("can't interpret '%s' as integer" % args.value)
+
 	else:
 		raise NotImplemented
 
