@@ -35,6 +35,7 @@ from .settings import (
 				FeatureRW as _FeatureRW,
 				BooleanValidator as _BooleanV,
 				ChoicesValidator as _ChoicesV,
+				RangeValidator as _RangeV,
 			)
 
 _DK = _hidpp10.DEVICE_KIND
@@ -98,6 +99,17 @@ def feature_choices_dynamic(name, feature, choices_callback,
 						label=None, description=None, device_kind=None)
 		return setting(device)
 	return instantiate
+
+def feature_range(name, feature, min_value, max_value,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					rw=None,
+					bytes_count=None,
+					label=None, description=None, device_kind=None):
+	validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
+	if rw is None:
+		rw = _FeatureRW(feature, read_function_id, write_function_id)
+	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
 
 #
 # common strings for settings
