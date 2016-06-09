@@ -20,7 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from gi.repository import Gtk, GLib
-
+from threading import Timer as _Timer
 
 from solaar.i18n import _
 from solaar.ui import async as _ui_async
@@ -76,15 +76,37 @@ def _create_choice_control(setting):
 	c.connect('changed', _combo_notify, setting)
 	return c
 
-# def _create_slider_control(setting):
-# 	def _slider_notify(slider, s):
-# 		if slider.get_sensitive():
-# 			_apply_queue.put(('write', s, slider.get_value(), slider.get_parent()))
-#
-# 	c = Gtk.Scale(setting.choices)
-# 	c.connect('value-changed', _slider_notify, setting)
-#
-# 	return c
+def _create_slider_control(setting):
+	class SliderControl:
+		__slots__ = ('gtk_range', 'timer', 'setting')
+		def __init__(self, setting):
+			self.setting = setting
+			self.timer = None
+
+			self.gtk_range = Gtk.Scale()
+			self.gtk_range.set_range(*self.setting.range)
+			self.gtk_range.set_round_digits(0)
+			self.gtk_range.set_digits(0)
+			self.gtk_range.set_increments(1, 5)
+			self.gtk_range.connect('value-changed',
+			                       lambda _, c: c._changed(),
+								   self)
+
+		def _write(self):
+			_write_async(self.setting,
+			             int(self.gtk_range.get_value()),
+						 self.gtk_range.get_parent())
+			self.timer.cancel()
+
+		def _changed(self):
+			if self.gtk_range.get_sensitive():
+				if self.timer:
+					self.timer.cancel()
+				self.timer = _Timer(0.5, lambda: GLib.idle_add(self._write))
+				self.timer.start()
+
+	control = SliderControl(setting)
+	return control.gtk_range
 
 #
 #
@@ -102,15 +124,17 @@ def _create_sbox(s):
 
 	if s.kind == _SETTING_KIND.toggle:
 		control = _create_toggle_control(s)
+		sbox.pack_end(control, False, False, 0)
 	elif s.kind == _SETTING_KIND.choice:
 		control = _create_choice_control(s)
-	# elif s.kind == _SETTING_KIND.range:
-	# 	control = _create_slider_control(s)
+		sbox.pack_end(control, False, False, 0)
+	elif s.kind == _SETTING_KIND.range:
+		control = _create_slider_control(s)
+		sbox.pack_end(control, True, True, 0)
 	else:
 		raise NotImplemented
 
 	control.set_sensitive(False)  # the first read will enable it
-	sbox.pack_end(control, False, False, 0)
 	sbox.pack_end(spinner, False, False, 0)
 	sbox.pack_end(failed, False, False, 0)
 
@@ -140,8 +164,8 @@ def _update_setting_item(sbox, value, is_online=True):
 		control.set_active(value)
 	elif isinstance(control, Gtk.ComboBoxText):
 		control.set_active_id(str(value))
-	# elif isinstance(control, Gtk.Scale):
-	# 	control.set_value(int(value))
+	elif isinstance(control, Gtk.Scale):
+		control.set_value(int(value))
 	else:
 		raise NotImplemented
 	control.set_sensitive(True)
