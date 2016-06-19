@@ -95,6 +95,8 @@ Mice (Nano):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
+| G700s            | 1.0   | yes     | -     | smooth scrolling                |
+| G700             | 1.0   | yes     | -     | smooth scrolling                |
 | V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
 | V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
 | VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
@@ -158,3 +160,4 @@ Mouse-Keyboard combos:
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
+[G700s]: http://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
