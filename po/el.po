@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 0.9.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-31 17:35+0200\n"
+"POT-Creation-Date: 2014-06-13 00:42+0300\n"
 "PO-Revision-Date: 2014-06-13 14:14+0200\n"
 "Last-Translator: Giannis Tsagatakis <jtsagata@gmail.com>\n"
 "Language-Team: none\n"
@@ -18,194 +18,326 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.5.4\n"
 
-#. approximative battery levels
-#: ../lib/logitech_receiver/i18n.py:38
-msgid "empty"
-msgstr "άδεια"
-
-#: ../lib/logitech_receiver/i18n.py:38
+#: lib/logitech_receiver/i18n.py:38
 msgid "critical"
 msgstr "κρίσιμη"
 
-#: ../lib/logitech_receiver/i18n.py:38
-msgid "low"
-msgstr "χαμηλή"
+#: lib/logitech_receiver/i18n.py:38
+msgid "empty"
+msgstr "άδεια"
 
-#: ../lib/logitech_receiver/i18n.py:38
-msgid "good"
-msgstr "καλή"
-
-#: ../lib/logitech_receiver/i18n.py:38 ../lib/logitech_receiver/i18n.py:41
+#: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
 msgid "full"
 msgstr "γεμάτη"
 
-#. battery charging statuses
-#: ../lib/logitech_receiver/i18n.py:41
-msgid "discharging"
-msgstr "εκφορτίζεται"
+#: lib/logitech_receiver/i18n.py:38
+msgid "good"
+msgstr "καλή"
 
-#: ../lib/logitech_receiver/i18n.py:41
-msgid "recharging"
-msgstr "επαναφόρτιση"
+#: lib/logitech_receiver/i18n.py:38
+msgid "low"
+msgstr "χαμηλή"
 
-#: ../lib/logitech_receiver/i18n.py:41
+#: lib/logitech_receiver/i18n.py:41
 msgid "almost full"
 msgstr "σχεδόν γεμάτη"
 
-#: ../lib/logitech_receiver/i18n.py:42
-msgid "slow recharge"
-msgstr "Δείξε εκφόρτηση "
+#: lib/logitech_receiver/i18n.py:41
+msgid "discharging"
+msgstr "εκφορτίζεται"
 
-#: ../lib/logitech_receiver/i18n.py:42
+#: lib/logitech_receiver/i18n.py:41
+msgid "recharging"
+msgstr "επαναφόρτιση"
+
+#: lib/logitech_receiver/i18n.py:42
 msgid "invalid battery"
 msgstr "προβληματική μπαταρία"
 
-#: ../lib/logitech_receiver/i18n.py:42
+#: lib/logitech_receiver/i18n.py:42
+msgid "slow recharge"
+msgstr "Δείξε εκφόρτηση "
+
+#: lib/logitech_receiver/i18n.py:42
 msgid "thermal error"
 msgstr "θερμικό σφάλμα"
 
-#. pairing errors
-#: ../lib/logitech_receiver/i18n.py:45
-msgid "device timeout"
-msgstr "ορίου χρόνου συσκευής"
-
-#: ../lib/logitech_receiver/i18n.py:45
+#: lib/logitech_receiver/i18n.py:45
 msgid "device not supported"
 msgstr "η συσκευή δεν υποστηρίζετε"
 
-#: ../lib/logitech_receiver/i18n.py:45
-msgid "too many devices"
-msgstr "πάρα πολλές συσκευές"
+#: lib/logitech_receiver/i18n.py:45
+msgid "device timeout"
+msgstr "ορίου χρόνου συσκευής"
 
-#: ../lib/logitech_receiver/i18n.py:45
+#: lib/logitech_receiver/i18n.py:45
 msgid "sequence timeout"
 msgstr "ορίου χρόνου ακολουθίας"
 
-#. firmware kinds
-#: ../lib/logitech_receiver/i18n.py:48 ../lib/solaar/ui/window.py:535
-msgid "Firmware"
-msgstr "Firmware"
+#: lib/logitech_receiver/i18n.py:45
+msgid "too many devices"
+msgstr "πάρα πολλές συσκευές"
 
-#: ../lib/logitech_receiver/i18n.py:48
+#: lib/logitech_receiver/i18n.py:48
 msgid "Bootloader"
 msgstr "Bootloader"
 
-#: ../lib/logitech_receiver/i18n.py:48
+#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
+msgid "Firmware"
+msgstr "Firmware"
+
+#: lib/logitech_receiver/i18n.py:48
 msgid "Hardware"
 msgstr "Υλικό"
 
-#: ../lib/logitech_receiver/i18n.py:48
+#: lib/logitech_receiver/i18n.py:48
 msgid "Other"
 msgstr "Άλλο"
 
-#: ../lib/logitech_receiver/notifications.py:67
-msgid "pairing lock is "
-msgstr "το κλείδωμα ταιριάσματος είναι"
-
-#: ../lib/logitech_receiver/notifications.py:67
-msgid "open"
-msgstr "ανοιχτή"
-
-#: ../lib/logitech_receiver/notifications.py:67
+#: lib/logitech_receiver/notifications.py:67
 msgid "closed"
 msgstr "κλειστή"
 
-#: ../lib/logitech_receiver/notifications.py:150
-#: ../lib/solaar/ui/notify.py:118
+#: lib/logitech_receiver/notifications.py:67
+msgid "open"
+msgstr "ανοιχτή"
+
+#: lib/logitech_receiver/notifications.py:67
+msgid "pairing lock is "
+msgstr "το κλείδωμα ταιριάσματος είναι"
+
+#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid "unpaired"
 msgstr "διαχωρισμένη"
 
-#: ../lib/logitech_receiver/notifications.py:192
+#: lib/logitech_receiver/notifications.py:192
 msgid "powered on"
 msgstr "ανοιχτή"
 
-#: ../lib/logitech_receiver/receiver.py:107 ../lib/solaar/ui/window.py:622
+#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
 msgid "unknown"
 msgstr "άγνωστο"
 
-#.
-#. common strings for settings
-#.
-#: ../lib/logitech_receiver/settings_templates.py:77
+#: lib/logitech_receiver/settings_templates.py:77
 msgid "Smooth Scrolling"
 msgstr "Ομαλή κύλιση"
 
-#: ../lib/logitech_receiver/settings_templates.py:78
+#: lib/logitech_receiver/settings_templates.py:78
 msgid "High-sensitivity mode for vertical scroll with the wheel."
 msgstr "Κατάσταση υψηλής ευαισθησίας ροδέλας"
 
-#: ../lib/logitech_receiver/settings_templates.py:79
+#: lib/logitech_receiver/settings_templates.py:79
 msgid "Side Scrolling"
 msgstr "Πλάγια κύλιση"
 
-#: ../lib/logitech_receiver/settings_templates.py:80
+#: lib/logitech_receiver/settings_templates.py:80
 msgid ""
 "When disabled, pushing the wheel sideways sends custom button events\n"
 "instead of the standard side-scrolling events."
 msgstr ""
 
-#: ../lib/logitech_receiver/settings_templates.py:82
+#: lib/logitech_receiver/settings_templates.py:82
 msgid "Sensitivity (DPI)"
 msgstr "Ευαισθησία (DPI)"
 
-#: ../lib/logitech_receiver/settings_templates.py:83
+#: lib/logitech_receiver/settings_templates.py:83
 msgid "Swap Fx function"
 msgstr "Αντιστροφή λειτουργιών Fx"
 
-#: ../lib/logitech_receiver/settings_templates.py:84
+#: lib/logitech_receiver/settings_templates.py:84
 msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
 msgstr ""
 
-#: ../lib/logitech_receiver/settings_templates.py:87
+#: lib/logitech_receiver/settings_templates.py:87
 msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
 msgstr ""
 
-#: ../lib/logitech_receiver/settings_templates.py:89
+#: lib/logitech_receiver/settings_templates.py:89
 msgid "Hand Detection"
 msgstr "Ανίχνευση χεριού"
 
-#: ../lib/logitech_receiver/settings_templates.py:90
+#: lib/logitech_receiver/settings_templates.py:90
 msgid "Turn on illumination when the hands hover over the keyboard."
 msgstr ""
 
-#: ../lib/logitech_receiver/status.py:98
+#: lib/logitech_receiver/status.py:98
 msgid "No paired devices."
 msgstr "Δεν έχω συνταιριασμένες συσκευές"
 
-#: ../lib/logitech_receiver/status.py:99
+#: lib/logitech_receiver/status.py:99
 msgid "1 paired device."
 msgstr "Μία συνταιριασμένη συσκευή"
 
-#: ../lib/logitech_receiver/status.py:100
+#: lib/logitech_receiver/status.py:100
 msgid " paired devices."
 msgstr "συνταιριασμένες συσκευές"
 
-#: ../lib/logitech_receiver/status.py:149
-#: ../lib/logitech_receiver/status.py:151
-#: ../lib/logitech_receiver/status.py:203
-#: ../lib/logitech_receiver/status.py:205 ../lib/solaar/ui/window.py:143
+#: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
+#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
+#: lib/solaar/ui/window.py:143
 msgid "Battery"
 msgstr "Μπαταρία"
 
-#: ../lib/logitech_receiver/status.py:162 ../lib/solaar/ui/window.py:150
+#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
 msgid "Lighting"
 msgstr "Φωτισμός"
 
-#: ../lib/logitech_receiver/status.py:162 ../lib/solaar/ui/window.py:663
+#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
 msgid "lux"
 msgstr "lux"
 
-#: ../lib/solaar/ui/window.py:58
+#: lib/solaar/listener.py:95
+msgid "The receiver was unplugged."
+msgstr "Ο δέκτης αποσυνδέθηκε."
+
+#: lib/solaar/ui/__init__.py:48
+msgid "Permissions error"
+msgstr "Σφάλμα δικαιωμάτων"
+
+#: lib/solaar/ui/__init__.py:49
+#, python-format
+msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
+msgstr ""
+"Βρέθηκε ένας Logitech Receiver (%s), αλλά δεν έχεις δικαίωμα να τον ανοίξεις."
+
+#: lib/solaar/ui/__init__.py:51
+msgid ""
+"If you've just installed Solaar, try removing the receiver and plugging it "
+"back in."
+msgstr ""
+"Εάν μόλις έκανες εγκατάσταση του  Solaar, δοκίμασε να τον αφαιρέσεις και να "
+"τον ξανασυνδέσεις."
+
+#: lib/solaar/ui/__init__.py:53
+msgid "Unpairing failed"
+msgstr "Αποτυχία διαχωρισμού"
+
+#: lib/solaar/ui/__init__.py:54
+#, python-brace-format
+msgid "Failed to unpair %{device} from %{receiver}."
+msgstr "Απέτυχα να διαχωρίσω την συσκευή %{device} από τον %{receiver}."
+
+#: lib/solaar/ui/__init__.py:56
+msgid "The receiver returned an error, with no further details."
+msgstr "Ο δέκτης επέστρεψε ένα λάθος, χωρίς άλλες πληροφορίες."
+
+#: lib/solaar/ui/about.py:39
+msgid ""
+"Shows status of devices connected\n"
+"through wireless Logitech receivers."
+msgstr ""
+"Δείχνει την κατάσταση των συσκευών που συνδέονται ασύρματα στο δέκτη "
+"Logitech."
+
+#: lib/solaar/ui/about.py:48
+msgid "GUI design"
+msgstr "Σχεδιασμός GUI:"
+
+#: lib/solaar/ui/about.py:49
+msgid "Testing"
+msgstr "Δοκιμές"
+
+#: lib/solaar/ui/about.py:54
+msgid "Logitech documentation"
+msgstr "Τεκμηρίωση Logitech"
+
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
+msgid "About"
+msgstr "Περί"
+
+#: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
+#: lib/solaar/ui/window.py:203
+msgid "Unpair"
+msgstr "Διαχωρισμός"
+
+#: lib/solaar/ui/config_panel.py:98
+msgid "Working"
+msgstr ""
+
+#: lib/solaar/ui/config_panel.py:101
+msgid "Read/write operation failed."
+msgstr "Αποτυχία λειτουργίας ανάγνωσης/εγγραφής. "
+
+#: lib/solaar/ui/notify.py:120
+msgid "connected"
+msgstr "συνδεμένη"
+
+#: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
+#: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
+msgid "offline"
+msgstr "εκτός σύνδεσης"
+
+#: lib/solaar/ui/pair_window.py:133
+msgid "Pairing failed"
+msgstr "Αποτυχία Συνταιρίασματος"
+
+#: lib/solaar/ui/pair_window.py:135
+msgid "Make sure your device is within range, and has a decent battery charge."
+msgstr ""
+"Σιγουρέψου ότι η συσκευή είναι εντός εμβέλειας, και έχει φορτισμένη μπαταρία."
+
+#: lib/solaar/ui/pair_window.py:137
+msgid "A new device was detected, but it is not compatible with this receiver."
+msgstr "Εντόπισα μια συσκευή, αλλά δεν είναι συμβατή με αυτόν τον δέκτη."
+
+#: lib/solaar/ui/pair_window.py:139
+#, python-format
+msgid "The receiver only supports %d paired device(s)."
+msgstr "Ο δέκτης υποστηρίζει μέχρι %d συνταιριασμένες συσκευές. "
+
+#: lib/solaar/ui/pair_window.py:141
+msgid "No further details are available about the error."
+msgstr "Δεν έχω άλλες πληροφορίες για το λάθος."
+
+#: lib/solaar/ui/pair_window.py:155
+msgid "Found a new device"
+msgstr "Βρέθηκε μια νέα συσκευή"
+
+#: lib/solaar/ui/pair_window.py:180
+msgid "The wireless link is not encrypted"
+msgstr "Η ασύρματη σύνδεση είναι χωρίς κρυπτογράφηση. "
+
+#: lib/solaar/ui/pair_window.py:197
+msgid "pair new device"
+msgstr "συνταίριασε μια νέα συσκευή"
+
+#: lib/solaar/ui/pair_window.py:205
+msgid "Turn on the device you want to pair."
+msgstr "Άνοιξε την συσκευή που θέλεις να συνταιριάξεις. "
+
+#: lib/solaar/ui/pair_window.py:206
+msgid ""
+"If the device is already turned on,\n"
+"turn if off and on again."
+msgstr "Αν η συσκευή είναι ήδη ανοικτή,κλείσε την και μετά άνοιξε την."
+
+#: lib/solaar/ui/tray.py:55
+msgid "No Logitech receiver found"
+msgstr "Δεν βρέθηκαν δέκτες Logitech"
+
+#: lib/solaar/ui/tray.py:62
+msgid "Quit"
+msgstr "Έξοδος"
+
+#: lib/solaar/ui/tray.py:274
+msgid "no receiver"
+msgstr "χωρίς δέκτη"
+
+#: lib/solaar/ui/tray.py:293
+msgid "no status"
+msgstr "χωρίς κατάσταση"
+
+#: lib/solaar/ui/window.py:58
 msgid "The wireless link between this device and its receiver is encrypted."
 msgstr ""
 "Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη είναι  "
 "κρυπτογραφημένη."
 
-#: ../lib/solaar/ui/window.py:59
+#: lib/solaar/ui/window.py:59
 msgid ""
 "The wireless link between this device and its receiver is not encrypted.\n"
 "\n"
@@ -223,236 +355,92 @@ msgstr ""
 "[αριθμητικά] πληκτρολόγια, μιαςκαι το κείμενο μπορεί να υποκλαπεί από "
 "κακόβουλους ή την κυβέρνηση. "
 
-#: ../lib/solaar/ui/window.py:67 ../lib/solaar/ui/window.py:71
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
 msgid "No device paired"
 msgstr "Χωρίς συνταιριασμένες συσκευές "
 
-#: ../lib/solaar/ui/window.py:67 ../lib/solaar/ui/window.py:68
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
 msgid "Up to %d devices can be paired to this receiver"
 msgstr "Μέχρι %d συσκευές μπορούν να συνταιριαστούν με αυτόν τον δέκτη"
 
-#: ../lib/solaar/ui/window.py:68
+#: lib/solaar/ui/window.py:68
 msgid "paired devices"
 msgstr "συνταιριασμένες συσκευές"
 
-#: ../lib/solaar/ui/window.py:72
+#: lib/solaar/ui/window.py:72
 msgid "Only one device can be paired to this receiver"
 msgstr "Μόνο μία συσκευή μπορεί να συνταιριαστεί με αυτόν τον δέκτη"
 
-#: ../lib/solaar/ui/window.py:110
+#: lib/solaar/ui/window.py:110
 msgid "Scanning"
 msgstr "Σάρωση"
 
-#: ../lib/solaar/ui/window.py:146
+#: lib/solaar/ui/window.py:146
 msgid "Wireless Link"
 msgstr "Ασύρματη ζεύξη"
 
-#: ../lib/solaar/ui/window.py:179
+#: lib/solaar/ui/window.py:179
 msgid "Show Technical Details"
 msgstr "Δείξε τεχνικές λεπτομέρειες "
 
-#: ../lib/solaar/ui/window.py:192
+#: lib/solaar/ui/window.py:192
 msgid "Pair new device"
 msgstr "Συνταίριασμα μιας νέας συσκευής"
 
-#: ../lib/solaar/ui/window.py:203 ../lib/solaar/ui/action.py:95
-#: ../lib/solaar/ui/action.py:98
-msgid "Unpair"
-msgstr "Διαχωρισμός"
-
-#: ../lib/solaar/ui/window.py:211
+#: lib/solaar/ui/window.py:211
 msgid "Select a device"
 msgstr "Επέλεξε μια συσκευή"
 
-#: ../lib/solaar/ui/window.py:316 ../lib/solaar/ui/action.py:68
-msgid "About"
-msgstr "Περί"
-
-#: ../lib/solaar/ui/window.py:508
+#: lib/solaar/ui/window.py:508
 msgid "Path"
 msgstr "Διαδρομή"
 
-#. 046d is the Logitech vendor id
-#: ../lib/solaar/ui/window.py:510
+#: lib/solaar/ui/window.py:510
 msgid "USB id"
 msgstr "USB id"
 
-#: ../lib/solaar/ui/window.py:513 ../lib/solaar/ui/window.py:515
-#: ../lib/solaar/ui/window.py:527 ../lib/solaar/ui/window.py:529
+#: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 msgid "Serial"
 msgstr "Serial"
 
-#. yield ('Codename', device.codename)
-#: ../lib/solaar/ui/window.py:519
+#: lib/solaar/ui/window.py:519
 msgid "Index"
 msgstr "Index"
 
-#: ../lib/solaar/ui/window.py:520
+#: lib/solaar/ui/window.py:520
 msgid "Wireless PID"
 msgstr "Wireless PID"
 
-#: ../lib/solaar/ui/window.py:522
+#: lib/solaar/ui/window.py:522
 msgid "Protocol"
 msgstr "Πρωτόκολλο"
 
-#: ../lib/solaar/ui/window.py:524
+#: lib/solaar/ui/window.py:524
 msgid "Polling rate"
 msgstr "Ρυθμός ανανέωσης"
 
-#: ../lib/solaar/ui/window.py:539
+#: lib/solaar/ui/window.py:539
 msgid "none"
 msgstr "καμία"
 
-#: ../lib/solaar/ui/window.py:540
+#: lib/solaar/ui/window.py:540
 msgid "Notifications"
 msgstr "Ειδοποιήσεις"
 
-#: ../lib/solaar/ui/window.py:635
+#: lib/solaar/ui/window.py:635
 msgid "charging"
 msgstr "φορτίζεται"
 
-#: ../lib/solaar/ui/window.py:637
+#: lib/solaar/ui/window.py:637
 msgid "last known"
 msgstr "τελευταίος γνωστή"
 
-#: ../lib/solaar/ui/window.py:644
+#: lib/solaar/ui/window.py:644
 msgid "not encrypted"
 msgstr "χωρίς κρυπτογράφηση"
 
-#: ../lib/solaar/ui/window.py:648
+#: lib/solaar/ui/window.py:648
 msgid "encrypted"
 msgstr "κρυπτογραφημένη"
-
-#: ../lib/solaar/ui/window.py:653 ../lib/solaar/ui/notify.py:122
-#: ../lib/solaar/ui/tray.py:290 ../lib/solaar/ui/tray.py:295
-msgid "offline"
-msgstr "εκτός σύνδεσης"
-
-#: ../lib/solaar/listener.py:95
-msgid "The receiver was unplugged."
-msgstr "Ο δέκτης αποσυνδέθηκε."
-
-#: ../lib/solaar/ui/__init__.py:48
-msgid "Permissions error"
-msgstr "Σφάλμα δικαιωμάτων"
-
-#: ../lib/solaar/ui/__init__.py:49
-#, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Βρέθηκε ένας Logitech Receiver (%s), αλλά δεν έχεις δικαίωμα να τον ανοίξεις."
-
-#: ../lib/solaar/ui/__init__.py:51
-msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
-msgstr ""
-"Εάν μόλις έκανες εγκατάσταση του  Solaar, δοκίμασε να τον αφαιρέσεις και να "
-"τον ξανασυνδέσεις."
-
-#: ../lib/solaar/ui/__init__.py:53
-msgid "Unpairing failed"
-msgstr "Αποτυχία διαχωρισμού"
-
-#: ../lib/solaar/ui/__init__.py:54
-#, python-brace-format
-msgid "Failed to unpair %{device} from %{receiver}."
-msgstr "Απέτυχα να διαχωρίσω την συσκευή %{device} από τον %{receiver}."
-
-#: ../lib/solaar/ui/__init__.py:56
-msgid "The receiver returned an error, with no further details."
-msgstr "Ο δέκτης επέστρεψε ένα λάθος, χωρίς άλλες πληροφορίες."
-
-#: ../lib/solaar/ui/about.py:39
-msgid ""
-"Shows status of devices connected\n"
-"through wireless Logitech receivers."
-msgstr ""
-"Δείχνει την κατάσταση των συσκευών που συνδέονται ασύρματα στο δέκτη "
-"Logitech."
-
-#: ../lib/solaar/ui/about.py:48
-msgid "GUI design"
-msgstr "Σχεδιασμός GUI:"
-
-#: ../lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "Δοκιμές"
-
-#: ../lib/solaar/ui/about.py:54
-msgid "Logitech documentation"
-msgstr "Τεκμηρίωση Logitech"
-
-#: ../lib/solaar/ui/config_panel.py:98
-msgid "Working"
-msgstr ""
-
-#: ../lib/solaar/ui/config_panel.py:101
-msgid "Read/write operation failed."
-msgstr "Αποτυχία λειτουργίας ανάγνωσης/εγγραφής. "
-
-#: ../lib/solaar/ui/notify.py:120
-msgid "connected"
-msgstr "συνδεμένη"
-
-#. per-device menu entries will be generated as-needed
-#: ../lib/solaar/ui/tray.py:55
-msgid "No Logitech receiver found"
-msgstr "Δεν βρέθηκαν δέκτες Logitech"
-
-#: ../lib/solaar/ui/tray.py:62
-msgid "Quit"
-msgstr "Έξοδος"
-
-#: ../lib/solaar/ui/tray.py:274
-msgid "no receiver"
-msgstr "χωρίς δέκτη"
-
-#: ../lib/solaar/ui/tray.py:293
-msgid "no status"
-msgstr "χωρίς κατάσταση"
-
-#: ../lib/solaar/ui/pair_window.py:133
-msgid "Pairing failed"
-msgstr "Αποτυχία Συνταιρίασματος"
-
-#: ../lib/solaar/ui/pair_window.py:135
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr ""
-"Σιγουρέψου ότι η συσκευή είναι εντός εμβέλειας, και έχει φορτισμένη μπαταρία."
-
-#: ../lib/solaar/ui/pair_window.py:137
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "Εντόπισα μια συσκευή, αλλά δεν είναι συμβατή με αυτόν τον δέκτη."
-
-#: ../lib/solaar/ui/pair_window.py:139
-#, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Ο δέκτης υποστηρίζει μέχρι %d συνταιριασμένες συσκευές. "
-
-#: ../lib/solaar/ui/pair_window.py:141
-msgid "No further details are available about the error."
-msgstr "Δεν έχω άλλες πληροφορίες για το λάθος."
-
-#: ../lib/solaar/ui/pair_window.py:155
-msgid "Found a new device"
-msgstr "Βρέθηκε μια νέα συσκευή"
-
-#: ../lib/solaar/ui/pair_window.py:180
-msgid "The wireless link is not encrypted"
-msgstr "Η ασύρματη σύνδεση είναι χωρίς κρυπτογράφηση. "
-
-#: ../lib/solaar/ui/pair_window.py:197
-msgid "pair new device"
-msgstr "συνταίριασε μια νέα συσκευή"
-
-#: ../lib/solaar/ui/pair_window.py:205
-msgid "Turn on the device you want to pair."
-msgstr "Άνοιξε την συσκευή που θέλεις να συνταιριάξεις. "
-
-#: ../lib/solaar/ui/pair_window.py:206
-msgid ""
-"If the device is already turned on,\n"
-"turn if off and on again."
-msgstr "Αν η συσκευή είναι ήδη ανοικτή,κλείσε την και μετά άνοιξε την."
