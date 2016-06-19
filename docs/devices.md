@@ -160,4 +160,4 @@ Mouse-Keyboard combos:
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
-[G700s]: http://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
+[G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
