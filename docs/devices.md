@@ -150,7 +150,7 @@ Mouse-Keyboard combos:
 
 
 [unifying]: http://logitech.com/en-us/66/6079
-[nano]: http://logitech.com/mice-pointers/articles/5926[G700s]: 
+[nano]: http://logitech.com/mice-pointers/articles/5926 
 [K360]: http://logitech.com/product/keyboard-k360
 [K700]: http://logitech.com/product/wireless-desktop-mk710
 [K750]: http://logitech.com/product/k750-keyboard
