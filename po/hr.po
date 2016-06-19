@@ -28,15 +28,15 @@ msgstr "kritično"
 
 #: ../lib/logitech_receiver/i18n.py:38
 msgid "low"
-msgstr "nisko"
+msgstr "slaba"
 
 #: ../lib/logitech_receiver/i18n.py:38
 msgid "good"
-msgstr "dobro"
+msgstr "dobra"
 
 #: ../lib/logitech_receiver/i18n.py:38 ../lib/logitech_receiver/i18n.py:41
 msgid "full"
-msgstr "puna"
+msgstr "napunjena"
 
 #. battery charging statuses
 #: ../lib/logitech_receiver/i18n.py:41
@@ -49,7 +49,7 @@ msgstr "punjenje"
 
 #: ../lib/logitech_receiver/i18n.py:41
 msgid "almost full"
-msgstr "skoro puno"
+msgstr "uskoro puno"
 
 #: ../lib/logitech_receiver/i18n.py:42
 msgid "slow recharge"
