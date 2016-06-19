@@ -150,7 +150,8 @@ Mouse-Keyboard combos:
 
 
 [unifying]: http://logitech.com/en-us/66/6079
-[nano]: http://logitech.com/mice-pointers/articles/5926 
+[nano]: http://logitech.com/mice-pointers/articles/5926
+[G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
 [K360]: http://logitech.com/product/keyboard-k360
 [K700]: http://logitech.com/product/wireless-desktop-mk710
 [K750]: http://logitech.com/product/k750-keyboard
@@ -160,4 +161,3 @@ Mouse-Keyboard combos:
 [M705]: http://logitech.com/product/marathon-mouse-m705
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
-[G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
