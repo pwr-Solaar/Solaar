@@ -25,13 +25,10 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c531", GOTO="solaar_apply"
 
 GOTO="solaar_end"
 
-#
-#
-#
 LABEL="solaar_apply"
 
 # don't apply to the paired peripherals, just the receivers
-DRIVERS=="logitech-djdevice", GOTO="solaar_end"
+DRIVERS=="logitech-djdevice|logitech-hidpp-device", GOTO="solaar_end"
 
 # if the package configuration does not want the plugdev group, don't change the
 # group and access mode
