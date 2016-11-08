@@ -146,6 +146,9 @@ _D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
 _D('Wireless Keyboard K270', protocol=1.0,
 				registers=(_R.battery_status, ),
 				)
+_D('Wireless Keyboard MK320', protocol=1.0, wpid='200F',
+				registers=(_R.battery_status, ),
+				)
 _D('Wireless Keyboard MK330')
 _D('Wireless Compact Keyboard K340', protocol=1.0, wpid='2007',
 				registers=(_R.battery_status, ),
