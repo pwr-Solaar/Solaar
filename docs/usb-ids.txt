@@ -11,3 +11,4 @@ Nano receiver:
 	046d:c51a		interface: 1		driver: hid-generic
 	046d:c526		interface: 1		driver: hid-generic
 	046d:c52e		interface: 1		driver: hid-generic
+	046d:c531		interface: 1		driver: hid-generic
