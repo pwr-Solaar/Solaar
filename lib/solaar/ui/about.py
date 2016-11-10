@@ -66,6 +66,7 @@ def _create():
 
 	about.set_translator_credits('\n'.join((
 					'Papoteur, David Geiger, Damien Lallement (français)',
+					'Michele Olivo (italiano)',
 					'Adrian Piotrowicz (polski)',
 					'Daniel Pavel (română)',
 					'Daniel Zippert, Emelie Snecker (svensk)',

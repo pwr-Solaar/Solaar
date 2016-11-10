@@ -1,0 +1,462 @@
+# Italian translations for solaar package.
+# Copyright (C) 2013 THE solaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
+# Automatically generated, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar 0.9.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-12-13 17:13+0100\n"
+"PO-Revision-Date: 2013-12-13 18:06+0100\n"
+"Last-Translator: Michele Olivo <bud@planetbud.net>\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: lib/logitech_receiver/i18n.py:38
+msgid "critical"
+msgstr "critico"
+
+#: lib/logitech_receiver/i18n.py:38
+msgid "empty"
+msgstr "vuoto"
+
+#: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
+msgid "full"
+msgstr "piena"
+
+#: lib/logitech_receiver/i18n.py:38
+msgid "good"
+msgstr "buono"
+
+#: lib/logitech_receiver/i18n.py:38
+msgid "low"
+msgstr "bassa"
+
+#: lib/logitech_receiver/i18n.py:41
+msgid "almost full"
+msgstr "quasi piena"
+
+#: lib/logitech_receiver/i18n.py:41
+msgid "discharging"
+msgstr "in scarica"
+
+#: lib/logitech_receiver/i18n.py:41
+msgid "recharging"
+msgstr "in ricarica"
+
+#: lib/logitech_receiver/i18n.py:42
+msgid "invalid battery"
+msgstr "batteria non valida"
+
+#: lib/logitech_receiver/i18n.py:42
+msgid "slow recharge"
+msgstr "ricarica lenta"
+
+#: lib/logitech_receiver/i18n.py:42
+msgid "thermal error"
+msgstr "errore di temperatura"
+
+#: lib/logitech_receiver/i18n.py:45
+msgid "device not supported"
+msgstr "dispositivo non supportato"
+
+#: lib/logitech_receiver/i18n.py:45
+msgid "device timeout"
+msgstr "timeout del dispositivo"
+
+#: lib/logitech_receiver/i18n.py:45
+msgid "sequence timeout"
+msgstr "timeout della sequenza"
+
+#: lib/logitech_receiver/i18n.py:45
+msgid "too many devices"
+msgstr "troppe periferiche"
+
+#: lib/logitech_receiver/i18n.py:48
+msgid "Bootloader"
+msgstr "Bootloader"
+
+#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
+msgid "Firmware"
+msgstr "Firmware"
+
+#: lib/logitech_receiver/i18n.py:48
+msgid "Hardware"
+msgstr "Hardware"
+
+#: lib/logitech_receiver/i18n.py:48
+msgid "Other"
+msgstr "Altro"
+
+#: lib/logitech_receiver/notifications.py:67
+msgid "closed"
+msgstr "chiuso"
+
+#: lib/logitech_receiver/notifications.py:67
+msgid "open"
+msgstr "aperto"
+
+#: lib/logitech_receiver/notifications.py:67
+msgid "pairing lock is "
+msgstr "il blocco per l'associazione è "
+
+#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
+msgid "unpaired"
+msgstr "non associato"
+
+#: lib/logitech_receiver/notifications.py:192
+msgid "powered on"
+msgstr "acceso"
+
+#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
+msgid "unknown"
+msgstr "sconosciuto"
+
+#: lib/logitech_receiver/settings_templates.py:77
+msgid "Smooth Scrolling"
+msgstr "Smooth Scrolling"
+
+#: lib/logitech_receiver/settings_templates.py:78
+msgid "High-sensitivity mode for vertical scroll with the wheel."
+msgstr ""
+"Modalità di alta sensibilità per lo scorrimento verticale con la rotella."
+
+#: lib/logitech_receiver/settings_templates.py:79
+msgid "Side Scrolling"
+msgstr "Scorrimento Laterale"
+
+#: lib/logitech_receiver/settings_templates.py:80
+msgid ""
+"When disabled, pushing the wheel sideways sends custom button events\n"
+"instead of the standard side-scrolling events."
+msgstr ""
+"Quando disabilitato, spingendo la rotella lateralmente vengono inviati "
+"eventi personalizzati\n"
+"invece degli eventi standard di scorrimento laterale."
+
+#: lib/logitech_receiver/settings_templates.py:82
+msgid "Sensitivity (DPI)"
+msgstr "Sensibilità (DPI)"
+
+#: lib/logitech_receiver/settings_templates.py:83
+msgid "Swap Fx function"
+msgstr "Inverti funzioni Fx"
+
+#: lib/logitech_receiver/settings_templates.py:84
+msgid ""
+"When set, the F1..F12 keys will activate their special function,\n"
+"and you must hold the FN key to activate their standard function."
+msgstr ""
+"Quando abilitato, i tasti F1..F12 attivano le funzioni speciali,\n"
+"e dovrai tenere premuto il tasto FN per attivare le funzioni standard."
+
+#: lib/logitech_receiver/settings_templates.py:87
+msgid ""
+"When unset, the F1..F12 keys will activate their standard function,\n"
+"and you must hold the FN key to activate their special function."
+msgstr ""
+"Quando disabilitato, i tasti F1..F12 attivano le funzioni standard,\n"
+"dovrai tenere premuto il tasto FN per attivare le funzioni speciali."
+
+#: lib/logitech_receiver/settings_templates.py:89
+msgid "Hand Detection"
+msgstr "Rilevamento mano"
+
+#: lib/logitech_receiver/settings_templates.py:90
+msgid "Turn on illumination when the hands hover over the keyboard."
+msgstr "Accendi l'illuminazione quando le mani sono sopra la tastiera."
+
+#: lib/logitech_receiver/status.py:98
+msgid "No paired devices."
+msgstr "Nessun dispositivo associato."
+
+#: lib/logitech_receiver/status.py:99
+msgid "1 paired device."
+msgstr "1 dispositivo associato."
+
+#: lib/logitech_receiver/status.py:100
+msgid " paired devices."
+msgstr " dispositivi associati."
+
+#: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
+#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
+#: lib/solaar/ui/window.py:143
+msgid "Battery"
+msgstr "Batteria"
+
+#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
+msgid "Lighting"
+msgstr "Luminosità"
+
+#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
+msgid "lux"
+msgstr "lux"
+
+#: lib/solaar/listener.py:95
+msgid "The receiver was unplugged."
+msgstr "Il ricevitore è stato scollegato."
+
+#: lib/solaar/ui/__init__.py:48
+msgid "Permissions error"
+msgstr "Errore di permessi"
+
+#: lib/solaar/ui/__init__.py:49
+#, python-format
+msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
+msgstr ""
+"Rilevato un ricevitore Logitech (%s), ma non si hanno i permessi per aprirlo."
+
+#: lib/solaar/ui/__init__.py:51
+msgid ""
+"If you've just installed Solaar, try removing the receiver and plugging it "
+"back in."
+msgstr ""
+"Se hai appena installato Solaar prova a scollegare e ricollegare il "
+"ricevitore."
+
+#: lib/solaar/ui/__init__.py:53
+msgid "Unpairing failed"
+msgstr "Disassociazione fallita"
+
+#: lib/solaar/ui/__init__.py:54
+msgid "Failed to unpair %{device} from %{receiver}."
+msgstr "Disassociazione fallita di  %{device} da %{receiver}."
+
+#: lib/solaar/ui/__init__.py:56
+msgid "The receiver returned an error, with no further details."
+msgstr "Il ricevitore ha ritornato un errore senza ulteriori dettagli."
+
+#: lib/solaar/ui/about.py:39
+msgid ""
+"Shows status of devices connected\n"
+"through wireless Logitech receivers."
+msgstr ""
+"Mostra lo stato dei dispositivi connessi\n"
+"attraverso i ricevitori Logitech."
+
+#: lib/solaar/ui/about.py:48
+msgid "GUI design"
+msgstr "GUI design"
+
+#: lib/solaar/ui/about.py:49
+msgid "Testing"
+msgstr "Testing"
+
+#: lib/solaar/ui/about.py:54
+msgid "Logitech documentation"
+msgstr "Documentazione Logitech"
+
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
+msgid "About"
+msgstr "Informazioni"
+
+#: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
+#: lib/solaar/ui/window.py:203
+msgid "Unpair"
+msgstr "Disassocia"
+
+#: lib/solaar/ui/config_panel.py:98
+msgid "Working"
+msgstr "Lavorando"
+
+#: lib/solaar/ui/config_panel.py:101
+msgid "Read/write operation failed."
+msgstr "Operazione di Lettura/Scrittura fallita."
+
+#: lib/solaar/ui/notify.py:120
+msgid "connected"
+msgstr "connesso"
+
+#: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
+#: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
+msgid "offline"
+msgstr "disconnesso"
+
+#: lib/solaar/ui/pair_window.py:133
+msgid "Pairing failed"
+msgstr "Associazione fallita"
+
+#: lib/solaar/ui/pair_window.py:135
+msgid "Make sure your device is within range, and has a decent battery charge."
+msgstr ""
+"Assicurati che il dispositivo sia vicino al ricevitore e che abbia le "
+"batterie cariche."
+
+#: lib/solaar/ui/pair_window.py:137
+msgid "A new device was detected, but it is not compatible with this receiver."
+msgstr ""
+"Un nuovo dispositivo è stato rilevato, ma non è compatibile con questo "
+"ricevitore."
+
+#: lib/solaar/ui/pair_window.py:139
+#, python-format
+msgid "The receiver only supports %d paired device(s)."
+msgstr "Il ricevitore supporta solo %d dispositivi associati."
+
+#: lib/solaar/ui/pair_window.py:141
+msgid "No further details are available about the error."
+msgstr "Non sono disponibili ulteriori dettagli per l'errore."
+
+#: lib/solaar/ui/pair_window.py:155
+msgid "Found a new device"
+msgstr "Trovata una nuova periferica"
+
+#: lib/solaar/ui/pair_window.py:180
+msgid "The wireless link is not encrypted"
+msgstr "Il collegamento wireless non è ciftrato."
+
+#: lib/solaar/ui/pair_window.py:197
+msgid "pair new device"
+msgstr "associa nuovo dispositivo"
+
+#: lib/solaar/ui/pair_window.py:205
+msgid "Turn on the device you want to pair."
+msgstr "Accendi il dispositivo che vuoi associare."
+
+#: lib/solaar/ui/pair_window.py:206
+msgid ""
+"If the device is already turned on,\n"
+"turn if off and on again."
+msgstr ""
+"Se il dispositivo è già acceso,\n"
+"spegnilo e riaccendilo."
+
+#: lib/solaar/ui/tray.py:55
+msgid "No Logitech receiver found"
+msgstr "Nessun ricevitore Logitech trovato"
+
+#: lib/solaar/ui/tray.py:62
+msgid "Quit"
+msgstr "Esci"
+
+#: lib/solaar/ui/tray.py:274
+msgid "no receiver"
+msgstr "nessun ricevitore"
+
+#: lib/solaar/ui/tray.py:293
+msgid "no status"
+msgstr "nessuno stato"
+
+#: lib/solaar/ui/window.py:58
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr ""
+"Il collegamento wireless tra il dispositivo e il suo ricevitore è cifrato."
+
+#: lib/solaar/ui/window.py:59
+msgid ""
+"The wireless link between this device and its receiver is not encrypted.\n"
+"\n"
+"For pointing devices (mice, trackballs, trackpads), this is a minor security "
+"issue.\n"
+"\n"
+"It is, however, a major security issue for text-input devices (keyboards, "
+"numpads),\n"
+"because typed text can be sniffed inconspicuously by 3rd parties within "
+"range."
+msgstr ""
+"Il collegamento wireless tra il dispositivo e il suo ricevitore non è "
+"cifrato.\n"
+"\n"
+"Per i dispositivi di puntamento (mouse, trackball, trackpad) non è un grave "
+"problema.\n"
+"\n"
+"E' un problema maggiore per i dispositivi di immissione di testo (tastiera, "
+"numpad),\n"
+"perché il testo digitato potrebbe essere intercettato da dispositivi di "
+"terze parti vicini."
+
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
+msgid "No device paired"
+msgstr "Nessun dispositivo associato"
+
+#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
+#, python-format
+msgid "Up to %d devices can be paired to this receiver"
+msgstr "Fino a %d dispositivi possono essere associati a questo ricevitore"
+
+#: lib/solaar/ui/window.py:68
+msgid "paired devices"
+msgstr "dispositivi associati"
+
+#: lib/solaar/ui/window.py:72
+msgid "Only one device can be paired to this receiver"
+msgstr "Solo un dispositivo può essere associato a questo ricevitore"
+
+#: lib/solaar/ui/window.py:110
+msgid "Scanning"
+msgstr "Ricerca"
+
+#: lib/solaar/ui/window.py:146
+msgid "Wireless Link"
+msgstr "Collegamento Wireless"
+
+#: lib/solaar/ui/window.py:179
+msgid "Show Technical Details"
+msgstr "Mostra Dettagli Tecnici"
+
+#: lib/solaar/ui/window.py:192
+msgid "Pair new device"
+msgstr "Associa un nuovo dispositivo"
+
+#: lib/solaar/ui/window.py:211
+msgid "Select a device"
+msgstr "Seleziona un dispositivo"
+
+#: lib/solaar/ui/window.py:508
+msgid "Path"
+msgstr "Percorso"
+
+#: lib/solaar/ui/window.py:510
+msgid "USB id"
+msgstr "Id USB"
+
+#: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
+msgid "Serial"
+msgstr "Seriale"
+
+#: lib/solaar/ui/window.py:519
+msgid "Index"
+msgstr "Indice"
+
+#: lib/solaar/ui/window.py:520
+msgid "Wireless PID"
+msgstr "PID Wireless"
+
+#: lib/solaar/ui/window.py:522
+msgid "Protocol"
+msgstr "Protocollo"
+
+#: lib/solaar/ui/window.py:524
+msgid "Polling rate"
+msgstr "Frequenza di aggiornamento"
+
+#: lib/solaar/ui/window.py:539
+msgid "none"
+msgstr "nessuno"
+
+#: lib/solaar/ui/window.py:540
+msgid "Notifications"
+msgstr "Notifiche"
+
+#: lib/solaar/ui/window.py:635
+msgid "charging"
+msgstr "in ricarica"
+
+#: lib/solaar/ui/window.py:637
+msgid "last known"
+msgstr "ultimo conosciuto"
+
+#: lib/solaar/ui/window.py:644
+msgid "not encrypted"
+msgstr "non cifrato"
+
+#: lib/solaar/ui/window.py:648
+msgid "encrypted"
+msgstr "cifrato"
