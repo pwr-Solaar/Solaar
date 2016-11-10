@@ -34,7 +34,7 @@ DRIVERS=="logitech-djdevice|logitech-hidpp-device", GOTO="solaar_end"
 TAG+="uaccess", TAG+="udev-acl"
 
 # Grant members of the "plugdev" group access to receiver (useful for SSH users)
-MODE="0660", GROUP="plugdev"
+#MODE="0660", GROUP="plugdev"
 
 LABEL="solaar_end"
 # vim: ft=udevrules
