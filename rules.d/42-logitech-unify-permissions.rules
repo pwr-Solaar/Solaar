@@ -21,6 +21,9 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GOTO="solaar_apply"
 # classic Nano receiver -- MK220/MK320 mouse and keyboard combo
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52e", GOTO="solaar_apply"
 
+# G-Series receiver -- G-Series mouse
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c531", GOTO="solaar_apply"
+
 GOTO="solaar_end"
 
 LABEL="solaar_apply"
