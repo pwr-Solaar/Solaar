@@ -65,6 +65,7 @@ def _create():
 		logging.exception("failed to fully create the about dialog")
 
 	about.set_translator_credits('\n'.join((
+					'gogo (croatian)',
 					'Papoteur, David Geiger, Damien Lallement (français)',
 					'Michele Olivo (italiano)',
 					'Adrian Piotrowicz (polski)',
