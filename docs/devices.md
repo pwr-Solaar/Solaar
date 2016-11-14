@@ -25,8 +25,8 @@ Linux system configuration) are supported:
 * The DPI can be changed on the [Performance MX Mouse][P_MX].
 
 * Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705], [M510 Wireless Mouse][M510] and
-  [M325][M325].
+  be toggled on the [M705 Marathon Mouse][M705], [M510 Wireless Mouse][M510],
+  [M325][M325] and [G700s][G700s].
 
 
 # Supported features
@@ -97,6 +97,8 @@ Mice (Nano):
 
 | Device           | HID++ | Battery | DPI   | Other supported features        |
 |------------------|-------|---------|-------|---------------------------------|
+| G700s            | 1.0   | yes     | -     | smooth scrolling                |
+| G700             | 1.0   | yes     | -     | smooth scrolling                |
 | V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
 | V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
 | VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
@@ -152,6 +154,7 @@ Mouse-Keyboard combos:
 
 [unifying]: http://logitech.com/en-us/66/6079
 [nano]: http://logitech.com/mice-pointers/articles/5926
+[G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
 [K360]: http://logitech.com/product/keyboard-k360
 [K700]: http://logitech.com/product/wireless-desktop-mk710
 [K750]: http://logitech.com/product/k750-keyboard
