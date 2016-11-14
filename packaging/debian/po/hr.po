@@ -1,0 +1,75 @@
+# Croatian translations for solaar package
+# Copyright (C) YEAR THE solaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
+# gogo <trebelnik2@gmail.com>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-31 17:40+0200\n"
+"PO-Revision-Date: 2015-03-31 18:08+0100\n"
+"Last-Translator: gogo <trebelnik2@gmail.com>\n"
+"Language-Team: Croatian <hr@li.org>\n"
+"Language: hr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#. Description
+#: ../solaar.templates:4
+msgid "Use plugdev group?"
+msgstr "Koristi plugdev grupu?"
+
+#. Description
+#: ../solaar.templates:4
+msgid ""
+"By default, the Logitech receiver devices are only accessible by the root "
+"user."
+msgstr ""
+"Prema zadanom, uređaji Logitech prijemnika su dostupni samo korijenskom "
+"korisniku."
+
+#. Description
+#: ../solaar.templates:4
+msgid ""
+"To allow access to regular users (through solaar), the needed ACLs can be "
+"applied, either by the ConsoleKit or systemd daemon, to the current seat "
+"(logged-in user). Right now, ${SEAT_DAEMON_STATUS} daemon is running."
+msgstr ""
+"Kako bi se dopustio pristup običnom korisniku (putem solaara), potrebni ACL-"
+"ovi mogu se primijeniti, ili ConsoleKitom systemd pozadinskim programom, na "
+"trenutno prijavljenog korisnika. Trenutno je, ${SEAT_DAEMON_STATUS} "
+"pozadinki program pokrenut."
+
+#. Description
+#: ../solaar.templates:4
+msgid ""
+"If neither of these daemons is installed on your system, or you want to make "
+"the receiver accessible to ssh logged-in through ssh, members of the "
+"'plugdev' system group can be given access to the receiver devices."
+msgstr ""
+"Ako nijedan od tih pozadinskih programa nije instaliran na vaš sustav, ili "
+"ako želite prijemnik učiniti dostupnim putem ssh prijave, članovima "
+"'plugdev' grupe sustava može biti dan pristup uređajima prijemnika."
+
+#. Description
+#: ../solaar.templates:4
+msgid ""
+"If you do use the 'plugdev' group, don't forget to make sure all your "
+"desktop users are members of the plugdev system group. You can add new "
+"members to the group by running, as root:\n"
+"    gpasswd --add <username> plugdev\n"
+"For the group membership to take effect, the affected users have to log-out "
+"and log-in again."
+msgstr ""
+"Ako koristite 'plugdev' grupu, pobrinite se da svi vaši korisnici radne "
+"površine su članovi plugdev grupe sustava. Možete dodati novog člana u grupu "
+"pokretanjem kao korijenskog korisnika (root):\n"
+"    gpasswd --add <korisnikovo ime> plugdev\n"
+"Kako bi članstvo grupe postalo aktivno, dodani korisnik mora se odjaviti i "
+"ponovno prijaviti u sustav."
