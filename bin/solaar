@@ -26,7 +26,20 @@ def init_paths():
 	import sys
 	import os.path as _path
 
-	prefix = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..'))
+	# Python 2 need conversion from utf-8 filenames
+	# Python 3 might have problems converting back to UTF-8 in case of Unicode surrogates
+	try:
+	    if sys.version_info < (3,):
+	    	decoded_path = sys.path[0].decode(sys.getfilesystemencoding())
+	    else:
+	    	decoded_path = sys.path[0]
+	    	sys.path[0].encode(sys.getfilesystemencoding())
+
+	except UnicodeError:
+	    sys.stderr.write('ERROR: Solaar cannot recognize encoding of filesystem path, this may happen because non UTF-8 characters in the pathname.\n')
+	    sys.exit(1)
+
+	prefix = _path.normpath(_path.join(_path.realpath(decoded_path), '..'))
 	src_lib = _path.join(prefix, 'lib')
 	share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
 	for location in src_lib, share_lib:
