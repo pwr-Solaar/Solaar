@@ -69,6 +69,7 @@ def _create():
 					'Papoteur, David Geiger, Damien Lallement (français)',
 					'Michele Olivo (italiano)',
 					'Adrian Piotrowicz (polski)',
+					'Drovetto, JrBenito (Portuguese-BR)',
 					'Daniel Pavel (română)',
 					'Daniel Zippert, Emelie Snecker (svensk)',
 					)))
