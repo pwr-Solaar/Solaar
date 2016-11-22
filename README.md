@@ -62,7 +62,7 @@ procedure for manual installation.
   confused about the state of the devices. I haven't encountered this often
   enough to be able to be able to diagnose it properly yet.
 
-[nano]: http://logitech.com/mice-pointers/articles/5926
+[nano]: http://support.logitech.com/en_us/parts
 
 
 ## License
