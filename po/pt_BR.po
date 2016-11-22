@@ -107,7 +107,7 @@ msgstr "trava de emparelhamento está "
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid "unpaired"
-msgstr "desemparelhar"
+msgstr "desemparelhado"
 
 #: lib/logitech_receiver/notifications.py:192
 msgid "powered on"
@@ -277,7 +277,7 @@ msgstr "offline"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid "Pairing failed"
-msgstr "Pareamento falhou"
+msgstr "Emparelhamento falhou"
 
 #: lib/solaar/ui/pair_window.py:135
 msgid "Make sure your device is within range, and has a decent battery charge."
@@ -352,13 +352,13 @@ msgid ""
 "because typed text can be sniffed inconspicuously by 3rd parties within "
 "range."
 msgstr ""
-"O link sem fio entre o dispositivo e seu receptor é criptografado.\n"
+"O link sem fio entre o dispositivo e seu receptor não é criptografado.\n"
 "\n"
 "Para dispositivos de apontamento (mouses, trackballs, trackpads), isto não representa um grande "
 "problema de segurança.\n"
 "\n"
 "No entando, é um grande problema de segurança para dipositivos de entrada de texto (teclados, "
-"numpads) pois,\n"
+"teclados numéricos) pois,\n"
 "o texto digitado pode ser capturado, de forma indetectável, por terceiros que estejam dentro do "
 "alcance."
 
