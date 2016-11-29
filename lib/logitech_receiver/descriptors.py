@@ -143,7 +143,7 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 # Keyboards
 
 _D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
-_D('Wireless Keyboard K270', protocol=1.0,
+_D('Wireless Keyboard K270', protocol=1.0, wpid='4023',
 				registers=(_R.battery_status, ),
 				)
 _D('Wireless Keyboard MK320', protocol=1.0, wpid='200F',
