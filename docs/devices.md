@@ -65,6 +65,7 @@ Keyboards (Unifying):
 | K360             | 2.0   | yes     | FN swap, reprog keys                    |
 | K400 Touch       | 2.0   | yes     | FN swap                                 |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
+| K780             | 4.5   | yes     | FN swap                                 |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
 | K830 Illuminated | 2.0   | yes     | FN swap                                 |
 | TK820            | 2.0   | yes     | FN swap                                 |
