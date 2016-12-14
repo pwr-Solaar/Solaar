@@ -29,6 +29,7 @@ from gi.repository.GObject import TYPE_PYOBJECT
 
 from solaar import NAME
 from solaar.i18n import _
+from gettext import ngettext
 # from solaar import __version__ as VERSION
 from solaar.ui import async as _ui_async
 from logitech_receiver import hidpp10 as _hidpp10
@@ -60,23 +61,6 @@ _COLUMN_TYPES = (str, int, bool, str, str, str, str, TYPE_PYOBJECT)
 _TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
 assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
 assert len(_COLUMN_TYPES) == len(_COLUMN)
-
-_TOOLTIP_LINK_SECURE = _("The wireless link between this device and its receiver is encrypted.")
-_TOOLTIP_LINK_INSECURE = _("The wireless link between this device and its receiver is not encrypted.\n"
-						"\n"
-						"For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n"
-						"\n"
-						"It is, however, a major security issue for text-input devices (keyboards, numpads),\n"
-						"because typed text can be sniffed inconspicuously by 3rd parties within range.")
-
-_UNIFYING_RECEIVER_TEXT = (
-		_("No device paired") + '.\n\n<small>' + _("Up to %d devices can be paired to this receiver") + '.</small>',
-		'%d ' + _("paired devices") + '\n\n<small>' + _("Up to %d devices can be paired to this receiver") + '.</small>',
-	)
-_NANO_RECEIVER_TEXT = (
-		_("No device paired") + '.\n\n<small> </small>',
-		' \n\n<small>' + _("Only one device can be paired to this receiver") + '.</small>',
-	)
 
 #
 # create UI layout
@@ -525,9 +509,9 @@ def _update_details(button):
 				yield (_("Index"), device.number)
 				yield (_("Wireless PID"), device.wpid)
 				hid_version = device.protocol
-				yield (_("Protocol"), 'HID++ %1.1f' % hid_version if hid_version else 'unknown')
+				yield (_("Protocol"), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
 				if read_all and device.polling_rate:
-					yield (_("Polling rate"), '%d ms (%dHz)' % (device.polling_rate, 1000 // device.polling_rate))
+					yield (_("Polling rate"), _('%(rate)d ms (%(rate_hz)dHz)') % { 'rate': device.polling_rate, 'rate_hz': 1000 // device.polling_rate })
 
 				if read_all or not device.online:
 					yield (_("Serial"), device.serial)
@@ -578,16 +562,15 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 	assert receiver
 
 	devices_count = len(receiver)
-	if receiver.max_devices > 1:
-		if devices_count == 0:
-			panel._count.set_markup(_UNIFYING_RECEIVER_TEXT[0] % receiver.max_devices)
-		else:
-			panel._count.set_markup(_UNIFYING_RECEIVER_TEXT[1] % (devices_count, receiver.max_devices))
-	else:
-		if devices_count == 0:
-			panel._count.set_markup(_NANO_RECEIVER_TEXT[0])
-		else:
-			panel._count.set_markup(_NANO_RECEIVER_TEXT[1])
+
+	paired_text = _('No device paired.') if devices_count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', devices_count) % { 'count': devices_count }
+
+	if(receiver.max_devices > 0):
+		paired_text += '\n\n<small>%s</small>' % ngettext('Up to %(max_count)s device can be paired to this receiver.', 'Up to %(max_count)s devices can be paired to this receiver.', receiver.max_devices) % { 'max_count': receiver.max_devices }
+	elif(devices_count > 0):
+		paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
+
+	panel._count.set_markup(paired_text)
 
 	is_pairing = receiver.status.lock_open
 	if is_pairing:
@@ -635,7 +618,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		if isinstance(battery_level, _NamedInt):
 			text = _(str(battery_level))
 		else:
-			text = '%d%%' % battery_level
+			text = _("%(battery_percent)d%%") % { 'battery_percent': battery_level }
 		if is_online:
 			if charging:
 				text += ' <small>(%s)</small>' % _("charging")
@@ -649,11 +632,16 @@ def _update_device_panel(device, panel, buttons, full=False):
 		if not_secure:
 			panel._secure._text.set_text(_("not encrypted"))
 			panel._secure._icon.set_from_icon_name('security-low', _INFO_ICON_SIZE)
-			panel._secure.set_tooltip_text(_TOOLTIP_LINK_INSECURE)
+			panel._secure.set_tooltip_text(_("The wireless link between this device and its receiver is not encrypted.\n"
+						"\n"
+						"For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n"
+						"\n"
+						"It is, however, a major security issue for text-input devices (keyboards, numpads),\n"
+						"because typed text can be sniffed inconspicuously by 3rd parties within range."))
 		else:
 			panel._secure._text.set_text(_("encrypted"))
 			panel._secure._icon.set_from_icon_name('security-high', _INFO_ICON_SIZE)
-			panel._secure.set_tooltip_text(_TOOLTIP_LINK_SECURE)
+			panel._secure.set_tooltip_text(_("The wireless link between this device and its receiver is encrypted."))
 		panel._secure._icon.set_visible(True)
 	else:
 		panel._secure._text.set_markup('<small>%s</small>' % _("offline"))
@@ -666,7 +654,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 			panel._lux.set_visible(False)
 		else:
 			panel._lux._icon.set_from_icon_name(_icons.lux(light_level), _INFO_ICON_SIZE)
-			panel._lux._text.set_text('%d %s' % (light_level, _("lux")))
+			panel._lux._text.set_text(_("%(light_level)d lux") % { 'light_level': light_level })
 			panel._lux.set_visible(True)
 	else:
 		panel._lux.set_visible(False)
@@ -813,9 +801,9 @@ def update(device, need_popup=False):
 				_model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
 			else:
 				if isinstance(battery_level, _NamedInt):
-					status_text = str(battery_level)
+					status_text = _("%(battery_level)s") % { 'battery_level': _(str(battery_level)) }
 				else:
-					status_text = '%d%%' % battery_level
+					status_text = _("%(battery_percent)d%%") % { 'battery_percent': battery_level }
 				_model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
 				charging = device.status.get(_K.BATTERY_CHARGING)
