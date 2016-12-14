@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-09-29 16:36+0300\n"
+        "POT-Creation-Date: 2016-12-21 00:13+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,6 +15,7 @@ msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=UTF-8\n"
         "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "critical"
@@ -24,7 +25,7 @@ msgstr  ""
 msgid   "empty"
 msgstr  ""
 
-#: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
+#: lib/logitech_receiver/i18n.py:38
 msgid   "full"
 msgstr  ""
 
@@ -38,6 +39,10 @@ msgstr  ""
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "almost full"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:41
+msgid   "charged"
 msgstr  ""
 
 #: lib/logitech_receiver/i18n.py:41
@@ -80,7 +85,7 @@ msgstr  ""
 msgid   "Bootloader"
 msgstr  ""
 
-#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
+#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:525
 msgid   "Firmware"
 msgstr  ""
 
@@ -93,18 +98,14 @@ msgid   "Other"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:67
-msgid   "closed"
+msgid   "pairing lock is closed"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:67
-msgid   "open"
+msgid   "pairing lock is open"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:67
-msgid   "pairing lock is "
-msgstr  ""
-
-#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
+#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:123
 msgid   "unpaired"
 msgstr  ""
 
@@ -112,78 +113,98 @@ msgstr  ""
 msgid   "powered on"
 msgstr  ""
 
-#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
+#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:611
 msgid   "unknown"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:77
+#: lib/logitech_receiver/settings_templates.py:119
 msgid   "Smooth Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:78
+#: lib/logitech_receiver/settings_templates.py:120
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:79
+#: lib/logitech_receiver/settings_templates.py:121
 msgid   "Side Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:80
+#: lib/logitech_receiver/settings_templates.py:122
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:82
+#: lib/logitech_receiver/settings_templates.py:124
 msgid   "Sensitivity (DPI)"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:83
+#: lib/logitech_receiver/settings_templates.py:125
 msgid   "Swap Fx function"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:84
+#: lib/logitech_receiver/settings_templates.py:126
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:87
+#: lib/logitech_receiver/settings_templates.py:129
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:89
+#: lib/logitech_receiver/settings_templates.py:131
 msgid   "Hand Detection"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:90
+#: lib/logitech_receiver/settings_templates.py:132
 msgid   "Turn on illumination when the hands hover over the keyboard."
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:98
-msgid   "No paired devices."
+#: lib/logitech_receiver/settings_templates.py:133
+msgid   "Smart Shift"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:134
+msgid   "Automatically switch the mouse wheel between ratchet and freespin "
+        "mode.\n"
+        "The mouse wheel is always free at 0, and always locked at 50"
 msgstr  ""
 
 #: lib/logitech_receiver/status.py:99
-msgid   "1 paired device."
+msgid   "No paired devices."
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:100
-msgid   " paired devices."
+#: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:566
+#, python-format
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/logitech_receiver/status.py:149
+#, python-format
+msgid   "Battery: %(level)s"
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
-#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
-#: lib/solaar/ui/window.py:143
-msgid   "Battery"
+#: lib/logitech_receiver/status.py:151
+#, python-format
+msgid   "Battery: %(percent)d%%"
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
-msgid   "Lighting"
+#: lib/logitech_receiver/status.py:162
+#, python-format
+msgid   "Lighting: %(level)s lux"
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
-msgid   "lux"
+#: lib/logitech_receiver/status.py:203
+#, python-format
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  ""
+
+#: lib/logitech_receiver/status.py:205
+#, python-format
+msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  ""
 
 #: lib/solaar/listener.py:95
@@ -210,6 +231,7 @@ msgid   "Unpairing failed"
 msgstr  ""
 
 #: lib/solaar/ui/__init__.py:54
+#, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
 msgstr  ""
 
@@ -234,29 +256,29 @@ msgstr  ""
 msgid   "Logitech documentation"
 msgstr  ""
 
-#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:306
 msgid   "About"
 msgstr  ""
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
-#: lib/solaar/ui/window.py:203
+#: lib/solaar/ui/window.py:193
 msgid   "Unpair"
 msgstr  ""
 
-#: lib/solaar/ui/config_panel.py:98
+#: lib/solaar/ui/config_panel.py:120
 msgid   "Working"
 msgstr  ""
 
-#: lib/solaar/ui/config_panel.py:101
+#: lib/solaar/ui/config_panel.py:123
 msgid   "Read/write operation failed."
 msgstr  ""
 
-#: lib/solaar/ui/notify.py:120
+#: lib/solaar/ui/notify.py:125
 msgid   "connected"
 msgstr  ""
 
-#: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
-#: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
+#: lib/solaar/ui/notify.py:127 lib/solaar/ui/tray.py:295
+#: lib/solaar/ui/tray.py:300 lib/solaar/ui/window.py:647
 msgid   "offline"
 msgstr  ""
 
@@ -284,7 +306,7 @@ msgid   "No further details are available about the error."
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:155
-msgid   "Found a new device"
+msgid   "Found a new device:"
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:180
@@ -292,7 +314,8 @@ msgid   "The wireless link is not encrypted"
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:197
-msgid   "pair new device"
+#, python-format
+msgid   "%(receiver_name)s: pair new device"
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:205
@@ -312,19 +335,121 @@ msgstr  ""
 msgid   "Quit"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:274
+#: lib/solaar/ui/tray.py:279
 msgid   "no receiver"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:293
+#: lib/solaar/ui/tray.py:298
 msgid   "no status"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:58
-msgid   "The wireless link between this device and its receiver is encrypted."
+#: lib/solaar/ui/window.py:100
+msgid   "Scanning"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:59
+#: lib/solaar/ui/window.py:133
+msgid   "Battery"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:136
+msgid   "Wireless Link"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:140
+msgid   "Lighting"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:169
+msgid   "Show Technical Details"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:182
+msgid   "Pair new device"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:201
+msgid   "Select a device"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:498
+msgid   "Path"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:500
+msgid   "USB id"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:503 lib/solaar/ui/window.py:505
+#: lib/solaar/ui/window.py:517 lib/solaar/ui/window.py:519
+msgid   "Serial"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:509
+msgid   "Index"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:510
+msgid   "Wireless PID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:512
+msgid   "Protocol"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:512
+msgid   "Unknown"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:514
+#, python-format
+msgid   "%(rate)d ms (%(rate_hz)dHz)"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:514
+msgid   "Polling rate"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:529
+msgid   "none"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:530
+msgid   "Notifications"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:566
+msgid   "No device paired."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:569
+#, python-format
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/solaar/ui/window.py:571
+msgid   "Only one device can be paired to this receiver."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:621 lib/solaar/ui/window.py:806
+#, python-format
+msgid   "%(battery_percent)d%%"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:624
+msgid   "charging"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:626
+msgid   "last known"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:633
+msgid   "not encrypted"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:635
 msgid   "The wireless link between this device and its receiver is not "
         "encrypted.\n"
         "\n"
@@ -337,92 +462,20 @@ msgid   "The wireless link between this device and its receiver is not "
         "within range."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
-msgid   "No device paired"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
-#, python-format
-msgid   "Up to %d devices can be paired to this receiver"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:68
-msgid   "paired devices"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:72
-msgid   "Only one device can be paired to this receiver"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:110
-msgid   "Scanning"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:146
-msgid   "Wireless Link"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:179
-msgid   "Show Technical Details"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:192
-msgid   "Pair new device"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:211
-msgid   "Select a device"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:508
-msgid   "Path"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:510
-msgid   "USB id"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
-#: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
-msgid   "Serial"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:519
-msgid   "Index"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:520
-msgid   "Wireless PID"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:522
-msgid   "Protocol"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:524
-msgid   "Polling rate"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:539
-msgid   "none"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:540
-msgid   "Notifications"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:635
-msgid   "charging"
-msgstr  ""
-
-#: lib/solaar/ui/window.py:637
-msgid   "last known"
+#: lib/solaar/ui/window.py:642
+msgid   "encrypted"
 msgstr  ""
 
 #: lib/solaar/ui/window.py:644
-msgid   "not encrypted"
+msgid   "The wireless link between this device and its receiver is encrypted."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:648
-msgid   "encrypted"
+#: lib/solaar/ui/window.py:657
+#, python-format
+msgid   "%(light_level)d lux"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:804
+#, python-format
+msgid   "%(battery_level)s"
 msgstr  ""
