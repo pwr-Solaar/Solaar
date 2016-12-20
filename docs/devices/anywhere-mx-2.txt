@@ -1,0 +1,51 @@
+Unifying Receiver
+  Device path  : /dev/hidraw0
+  USB id       : 046d:c52b
+  Serial       : A7F5923B
+    Firmware   : 24.01.B0023
+    Bootloader : 01.08
+    Other      : AA.AD
+  Has 1 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=11
+
+  1: Wireless Mouse MX Anywhere 2
+     Codename     : MX Anywhere 2
+     Kind         : mouse
+     Wireless PID : 404A
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: F3B81C5B
+        Bootloader: BOT 23.00.B0007
+          Firmware: MPM 02.00.B0007
+          Firmware: MPM 02.00.B0007
+             Other: 
+     The power switch is located on the base.
+     Supports 26 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: DEVICE FW VERSION      {0003}   
+         3: DEVICE NAME            {0005}   
+         4: WIRELESS DEVICE STATUS {1D4B}   
+         5: RESET                  {0020}   
+         6: BATTERY STATUS         {1000}   
+         7: CHANGE HOST            {1814}   
+         8: REPROG CONTROLS V4     {1B04}   
+         9: ADJUSTABLE DPI         {2201}   
+        10: VERTICAL SCROLLING     {2100}   
+        11: HIRES WHEEL            {2121}   
+        12: DFUCONTROL 2           {00C1}   
+        13: unknown:1813           {1813}   internal, hidden
+        14: unknown:1830           {1830}   internal, hidden
+        15: unknown:1890           {1890}   internal, hidden
+        16: unknown:1891           {1891}   internal, hidden
+        17: unknown:18A1           {18A1}   internal, hidden
+        18: unknown:18C0           {18C0}   internal, hidden
+        19: unknown:1DF3           {1DF3}   internal, hidden
+        20: unknown:1E00           {1E00}   hidden
+        21: unknown:1EB0           {1EB0}   internal, hidden
+        22: unknown:1803           {1803}   internal, hidden
+        23: unknown:1861           {1861}   internal, hidden
+        24: unknown:9000           {9000}   internal, hidden
+        25: unknown:1805           {1805}   internal, hidden
+     Battery: 0%, recharging.
