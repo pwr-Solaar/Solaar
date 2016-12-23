@@ -152,7 +152,7 @@ def _pairing_succeeded(assistant, receiver, device):
 
 	page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 
-	header = Gtk.Label(_("Found a new device") + ':')
+	header = Gtk.Label(_("Found a new device:"))
 	header.set_alignment(0.5, 0)
 	page.pack_start(header, False, False, 0)
 
@@ -194,7 +194,7 @@ def create(receiver):
 	assert receiver.kind is None
 
 	assistant = Gtk.Assistant()
-	assistant.set_title(receiver.name + ': ' + _("pair new device"))
+	assistant.set_title(_('%(receiver_name)s: pair new device') % { 'receiver_name': receiver.name })
 	assistant.set_icon_name('list-add')
 
 	assistant.set_size_request(400, 240)

@@ -64,7 +64,7 @@ def _process_receiver_notification(receiver, status, n):
 	# pairing lock notification
 	if n.sub_id == 0x4A:
 		status.lock_open = bool(n.address & 0x01)
-		reason = _("pairing lock is ") + (_("open") if status.lock_open else _("closed"))
+		reason = (_("pairing lock is open") if status.lock_open else _("pairing lock is closed"))
 		if _log.isEnabledFor(_INFO):
 			_log.info("%s: %s", receiver, reason)
 

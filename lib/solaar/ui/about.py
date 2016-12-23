@@ -72,6 +72,7 @@ def _create():
 					'Drovetto, JrBenito (Portuguese-BR)',
 					'Daniel Pavel (română)',
 					'Daniel Zippert, Emelie Snecker (svensk)',
+					'Dimitriy Ryazantcev (Russian)',
 					)))
 
 	about.set_website('http://pwr.github.io/Solaar/')

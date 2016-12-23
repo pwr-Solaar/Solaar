@@ -1,453 +1,472 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Russian translations for solaar package.
+# Copyright (C) 2013 THE solaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
 #
-#, fuzzy
+# Automatically generated, 2013.
+# Dmitry Ryazantcev <DJm00n@mail.ru>, 2013-2016.
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
         "POT-Creation-Date: 2016-12-21 00:13+0200\n"
-        "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-        "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-        "Language-Team: LANGUAGE <LL@li.org>\n"
-        "Language: \n"
+        "PO-Revision-Date: 2016-12-21 00:12+0200\n"
+        "Last-Translator: Dmitry Ryazantcev <DJm00n@mail.ru>\n"
+        "Language-Team: Russian <git@vger.kernel.org>\n"
+        "Language: ru\n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=UTF-8\n"
         "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+        "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 "
+        "&& n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+        "X-Generator: Poedit 1.5.4\n"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "critical"
-msgstr  ""
+msgstr  "критический"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "empty"
-msgstr  ""
+msgstr  "пусто"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "full"
-msgstr  ""
+msgstr  "полный"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "good"
-msgstr  ""
+msgstr  "средний"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "low"
-msgstr  ""
+msgstr  "низкий"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "almost full"
-msgstr  ""
+msgstr  "почти полная"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "charged"
-msgstr  ""
+msgstr  "заряжено"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "discharging"
-msgstr  ""
+msgstr  "разряжается"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "recharging"
-msgstr  ""
+msgstr  "перезаряжается"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "invalid battery"
-msgstr  ""
+msgstr  "недопустимая батарея"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "slow recharge"
-msgstr  ""
+msgstr  "медленная разрядка"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "thermal error"
-msgstr  ""
+msgstr  "тепловая ошибка"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "device not supported"
-msgstr  ""
+msgstr  "устройство не поддерживается"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "device timeout"
-msgstr  ""
+msgstr  "тайм аут устройства"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "sequence timeout"
-msgstr  ""
+msgstr  "тайм аут последовательности"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "too many devices"
-msgstr  ""
+msgstr  "слишком много устройств"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Bootloader"
-msgstr  ""
+msgstr  "Загрузчик"
 
 #: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:525
 msgid   "Firmware"
-msgstr  ""
+msgstr  "Прошивка"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Hardware"
-msgstr  ""
+msgstr  "Оборудование"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Other"
-msgstr  ""
+msgstr  "Другое"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "pairing lock is closed"
-msgstr  ""
+msgstr  "сопряжение заблокировано"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "pairing lock is open"
-msgstr  ""
+msgstr  "сопряжение разблокировано"
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:123
 msgid   "unpaired"
-msgstr  ""
+msgstr  "не сопряжено"
 
 #: lib/logitech_receiver/notifications.py:192
 msgid   "powered on"
-msgstr  ""
+msgstr  "включено"
 
 #: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:611
 msgid   "unknown"
-msgstr  ""
+msgstr  "неизвестно"
 
 #: lib/logitech_receiver/settings_templates.py:119
 msgid   "Smooth Scrolling"
-msgstr  ""
+msgstr  "Плавная прокрутка"
 
 #: lib/logitech_receiver/settings_templates.py:120
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  ""
+msgstr  "Режим высокой чувствительности для вертикальной прокрутки колесом."
 
 #: lib/logitech_receiver/settings_templates.py:121
 msgid   "Side Scrolling"
-msgstr  ""
+msgstr  "Горизонтальная прокрутка"
 
 #: lib/logitech_receiver/settings_templates.py:122
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
-msgstr  ""
+msgstr  "Когда отключено, нажатие на колесо сбоку будет отправлять\n"
+        "пользовательские события нажатия, вместо стандартных\n"
+        "событий горизонтальной прокрутки."
 
 #: lib/logitech_receiver/settings_templates.py:124
 msgid   "Sensitivity (DPI)"
-msgstr  ""
+msgstr  "Чувствительность (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:125
 msgid   "Swap Fx function"
-msgstr  ""
+msgstr  "Сменить поведение Fx"
 
 #: lib/logitech_receiver/settings_templates.py:126
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
-msgstr  ""
+msgstr  "Если включено,  то кнопки F1..F12 будут активировать\n"
+        "их дополнительную функцию и вы должны будете зажать\n"
+        "кнопку FN для активации их стандартной функции."
 
 #: lib/logitech_receiver/settings_templates.py:129
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
-msgstr  ""
+msgstr  "Если выключено,  то кнопки F1..F12 будут активировать\n"
+        "их стандартную функцию и вы должны будете зажать\n"
+        "кнопку FN для активации их дополнительной функции."
 
 #: lib/logitech_receiver/settings_templates.py:131
 msgid   "Hand Detection"
-msgstr  ""
+msgstr  "Обнаружение рук"
 
 #: lib/logitech_receiver/settings_templates.py:132
 msgid   "Turn on illumination when the hands hover over the keyboard."
-msgstr  ""
+msgstr  "Включать подсветку, когда руки над клавиатурой."
 
 #: lib/logitech_receiver/settings_templates.py:133
 msgid   "Smart Shift"
-msgstr  ""
+msgstr  "Smart Shift"
 
 #: lib/logitech_receiver/settings_templates.py:134
 msgid   "Automatically switch the mouse wheel between ratchet and freespin "
         "mode.\n"
         "The mouse wheel is always free at 0, and always locked at 50"
-msgstr  ""
+msgstr  "Автоматически переключать режим колесика между пошаговой и "
+        "сверхбыстрой прокруткой.\n"
+        "Колесико мыши всегда свободно при значении 0 и заблокировано при 50"
 
 #: lib/logitech_receiver/status.py:99
 msgid   "No paired devices."
-msgstr  ""
+msgstr  "Нет сопряженных устройств."
 
 #: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:566
 #, python-format
 msgid   "%(count)s paired device."
 msgid_plural    "%(count)s paired devices."
-msgstr[0]       ""
-msgstr[1]       ""
+msgstr[0]       "%(count)s сопряженное устройство."
+msgstr[1]       "%(count)s сопряженные устройства."
+msgstr[2]       "%(count)s сопряженных устройств."
 
 #: lib/logitech_receiver/status.py:149
 #, python-format
 msgid   "Battery: %(level)s"
-msgstr  ""
+msgstr  "Батарея: %(level)s"
 
 #: lib/logitech_receiver/status.py:151
 #, python-format
 msgid   "Battery: %(percent)d%%"
-msgstr  ""
+msgstr  "Батарея: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:162
 #, python-format
 msgid   "Lighting: %(level)s lux"
-msgstr  ""
+msgstr  "Освещенность: %(level)s lux"
 
 #: lib/logitech_receiver/status.py:203
 #, python-format
 msgid   "Battery: %(level)s (%(status)s)"
-msgstr  ""
+msgstr  "Батарея: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:205
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  ""
+msgstr  "Батарея: %(percent)d%% (%(status)s)"
 
 #: lib/solaar/listener.py:95
 msgid   "The receiver was unplugged."
-msgstr  ""
+msgstr  "Приёмник был извлечен."
 
 #: lib/solaar/ui/__init__.py:48
 msgid   "Permissions error"
-msgstr  ""
+msgstr  "Ошибка доступа"
 
 #: lib/solaar/ui/__init__.py:49
 #, python-format
 msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
         "it."
-msgstr  ""
+msgstr  "Найден приёмник Logitech (%s), но нет прав для доступа к нему."
 
 #: lib/solaar/ui/__init__.py:51
 msgid   "If you've just installed Solaar, try removing the receiver and "
         "plugging it back in."
-msgstr  ""
+msgstr  "Если это первый запуск Solaar, попробуйте извлечь и снова вставить "
+        "приёмник."
 
 #: lib/solaar/ui/__init__.py:53
 msgid   "Unpairing failed"
-msgstr  ""
+msgstr  "Отмена сопряжения не удалась"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  ""
+msgstr  "Отмена сопряжения %{device} с %{receiver} не удалась."
 
 #: lib/solaar/ui/__init__.py:56
 msgid   "The receiver returned an error, with no further details."
-msgstr  ""
+msgstr  "Приёмник вернул ошибку, без дополнительных деталей."
 
 #: lib/solaar/ui/about.py:39
 msgid   "Shows status of devices connected\n"
         "through wireless Logitech receivers."
-msgstr  ""
+msgstr  "Показывает статус устройств, подсоединенных\n"
+        "через беспроводные приёмники Logitech."
 
 #: lib/solaar/ui/about.py:48
 msgid   "GUI design"
-msgstr  ""
+msgstr  "Дизайн интерфейса"
 
 #: lib/solaar/ui/about.py:49
 msgid   "Testing"
-msgstr  ""
+msgstr  "Тестирование"
 
 #: lib/solaar/ui/about.py:54
 msgid   "Logitech documentation"
-msgstr  ""
+msgstr  "Документация Logitech"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:306
 msgid   "About"
-msgstr  ""
+msgstr  "О программе"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:193
 msgid   "Unpair"
-msgstr  ""
+msgstr  "Отмена сопряжения"
 
 #: lib/solaar/ui/config_panel.py:120
 msgid   "Working"
-msgstr  ""
+msgstr  "Работает"
 
 #: lib/solaar/ui/config_panel.py:123
 msgid   "Read/write operation failed."
-msgstr  ""
+msgstr  "Операция чтения/записи не удалась."
 
 #: lib/solaar/ui/notify.py:125
 msgid   "connected"
-msgstr  ""
+msgstr  "соединено"
 
 #: lib/solaar/ui/notify.py:127 lib/solaar/ui/tray.py:295
 #: lib/solaar/ui/tray.py:300 lib/solaar/ui/window.py:647
 msgid   "offline"
-msgstr  ""
+msgstr  "нет соединения"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid   "Pairing failed"
-msgstr  ""
+msgstr  "Сопряжение не удалось"
 
 #: lib/solaar/ui/pair_window.py:135
 msgid   "Make sure your device is within range, and has a decent battery "
         "charge."
-msgstr  ""
+msgstr  "Удостоверьтесь, что ваше устройство в радиусе приёма и батарея "
+        "заряжена."
 
 #: lib/solaar/ui/pair_window.py:137
 msgid   "A new device was detected, but it is not compatible with this "
         "receiver."
-msgstr  ""
+msgstr  "Обнаружено новое устройство, но оно не совместимо с этим приёмником."
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
 msgid   "The receiver only supports %d paired device(s)."
-msgstr  ""
+msgstr  "Приёмник поддерживает только %d сопряженных устройств(а)."
 
 #: lib/solaar/ui/pair_window.py:141
 msgid   "No further details are available about the error."
-msgstr  ""
+msgstr  "Дополнительные детали об этой ошибке не доступны."
 
 #: lib/solaar/ui/pair_window.py:155
 msgid   "Found a new device:"
-msgstr  ""
+msgstr  "Найдено новое устройство:"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid   "The wireless link is not encrypted"
-msgstr  ""
+msgstr  "Беспроводное соединение не зашифровано"
 
 #: lib/solaar/ui/pair_window.py:197
 #, python-format
 msgid   "%(receiver_name)s: pair new device"
-msgstr  ""
+msgstr  "%(receiver_name)s: новое сопряженное устройство"
 
 #: lib/solaar/ui/pair_window.py:205
 msgid   "Turn on the device you want to pair."
-msgstr  ""
+msgstr  "Включите устройство, с которым вы хотите создать сопряжение."
 
 #: lib/solaar/ui/pair_window.py:206
 msgid   "If the device is already turned on,\n"
         "turn if off and on again."
-msgstr  ""
+msgstr  "Если устройство уже включено,\n"
+        "выключите и включите его снова."
 
 #: lib/solaar/ui/tray.py:55
 msgid   "No Logitech receiver found"
-msgstr  ""
+msgstr  "Приёмник Logitech не найден"
 
 #: lib/solaar/ui/tray.py:62
 msgid   "Quit"
-msgstr  ""
+msgstr  "Выйти"
 
 #: lib/solaar/ui/tray.py:279
 msgid   "no receiver"
-msgstr  ""
+msgstr  "нет приёмника"
 
 #: lib/solaar/ui/tray.py:298
 msgid   "no status"
-msgstr  ""
+msgstr  "нет статуса"
 
 #: lib/solaar/ui/window.py:100
 msgid   "Scanning"
-msgstr  ""
+msgstr  "Сканирование"
 
 #: lib/solaar/ui/window.py:133
 msgid   "Battery"
-msgstr  ""
+msgstr  "Батарея"
 
 #: lib/solaar/ui/window.py:136
 msgid   "Wireless Link"
-msgstr  ""
+msgstr  "Беспроводное соединение"
 
 #: lib/solaar/ui/window.py:140
 msgid   "Lighting"
-msgstr  ""
+msgstr  "Подсветка"
 
 #: lib/solaar/ui/window.py:169
 msgid   "Show Technical Details"
-msgstr  ""
+msgstr  "Показать технические детали"
 
 #: lib/solaar/ui/window.py:182
 msgid   "Pair new device"
-msgstr  ""
+msgstr  "Новое сопряженное устройство"
 
 #: lib/solaar/ui/window.py:201
 msgid   "Select a device"
-msgstr  ""
+msgstr  "Выбор устройства"
 
 #: lib/solaar/ui/window.py:498
 msgid   "Path"
-msgstr  ""
+msgstr  "Путь"
 
 #: lib/solaar/ui/window.py:500
 msgid   "USB id"
-msgstr  ""
+msgstr  "Идент. USB"
 
 #: lib/solaar/ui/window.py:503 lib/solaar/ui/window.py:505
 #: lib/solaar/ui/window.py:517 lib/solaar/ui/window.py:519
 msgid   "Serial"
-msgstr  ""
+msgstr  "Серийный ном."
 
 #: lib/solaar/ui/window.py:509
 msgid   "Index"
-msgstr  ""
+msgstr  "Номер"
 
 #: lib/solaar/ui/window.py:510
 msgid   "Wireless PID"
-msgstr  ""
+msgstr  "Беспров. PID"
 
 #: lib/solaar/ui/window.py:512
 msgid   "Protocol"
-msgstr  ""
+msgstr  "Протокол"
 
 #: lib/solaar/ui/window.py:512
 msgid   "Unknown"
-msgstr  ""
+msgstr  "Неизвестен"
 
 #: lib/solaar/ui/window.py:514
 #, python-format
 msgid   "%(rate)d ms (%(rate_hz)dHz)"
-msgstr  ""
+msgstr  "%(rate)d мс (%(rate_hz)dГц)"
 
 #: lib/solaar/ui/window.py:514
 msgid   "Polling rate"
-msgstr  ""
+msgstr  "Част. опроса"
 
 #: lib/solaar/ui/window.py:529
 msgid   "none"
-msgstr  ""
+msgstr  "нет"
 
 #: lib/solaar/ui/window.py:530
 msgid   "Notifications"
-msgstr  ""
+msgstr  "Уведомления"
 
 #: lib/solaar/ui/window.py:566
 msgid   "No device paired."
-msgstr  ""
+msgstr  "Нет сопряженных устройств."
 
 #: lib/solaar/ui/window.py:569
 #, python-format
 msgid   "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0]       ""
-msgstr[1]       ""
+msgstr[0]       "До %(max_count)s устройства может быть сопряжено с этим "
+        "приёмником."
+msgstr[1]       "До %(max_count)s устройств может быть сопряжено с этим "
+        "приёмником."
+msgstr[2]       "До %(max_count)s устройств может быть сопряжено с этим "
+        "приёмником."
 
 #: lib/solaar/ui/window.py:571
 msgid   "Only one device can be paired to this receiver."
-msgstr  ""
+msgstr  "Только одно устройство может быть сопряжено с этим приёмником."
 
 #: lib/solaar/ui/window.py:621 lib/solaar/ui/window.py:806
 #, python-format
 msgid   "%(battery_percent)d%%"
-msgstr  ""
+msgstr  "%(battery_percent)d%%"
 
 #: lib/solaar/ui/window.py:624
 msgid   "charging"
-msgstr  ""
+msgstr  "заряжается"
 
 #: lib/solaar/ui/window.py:626
 msgid   "last known"
-msgstr  ""
+msgstr  "последнее известное"
 
 #: lib/solaar/ui/window.py:633
 msgid   "not encrypted"
-msgstr  ""
+msgstr  "не зашифровано"
 
 #: lib/solaar/ui/window.py:635
 msgid   "The wireless link between this device and its receiver is not "
@@ -460,22 +479,32 @@ msgid   "The wireless link between this device and its receiver is not "
         "(keyboards, numpads),\n"
         "because typed text can be sniffed inconspicuously by 3rd parties "
         "within range."
-msgstr  ""
+msgstr  "Беспроводное соединение между этим устройством и приёмником не "
+        "зашифровано.\n"
+        "\n"
+        "Для указывающих устройств (мышь, трекбол, трекпад) - это не "
+        "серьёзная уязвимость в безопасности.\n"
+        "\n"
+        "Но, это серьезная уязвимость для устройств ввода текста (клавиатура, "
+        "цифровая клавиатура),\n"
+        "т.к. вводимый текст может быть \"подслушан\"  незаметно кем-то еще в "
+        "радиусе передачи."
 
 #: lib/solaar/ui/window.py:642
 msgid   "encrypted"
-msgstr  ""
+msgstr  "зашифровано"
 
 #: lib/solaar/ui/window.py:644
 msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  ""
+msgstr  "Беспроводное соединение между этим устройством и приёмником "
+        "зашифровано."
 
 #: lib/solaar/ui/window.py:657
 #, python-format
 msgid   "%(light_level)d lux"
-msgstr  ""
+msgstr  "%(light_level)d люкс"
 
 #: lib/solaar/ui/window.py:804
 #, python-format
 msgid   "%(battery_level)s"
-msgstr  ""
+msgstr  "%(battery_level)s"

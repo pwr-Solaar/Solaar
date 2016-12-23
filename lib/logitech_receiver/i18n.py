@@ -38,7 +38,7 @@ _DUMMY = (
 		_("empty"), _("critical"), _("low"), _("good"), _("full"),
 
 		# battery charging statuses
-		_("discharging"), _("recharging"), _("almost full"), _("full"),
+		_("discharging"), _("recharging"), _("almost full"), _("charged"),
 		_("slow recharge"), _("invalid battery"), _("thermal error"),
 
 		# pairing errors
