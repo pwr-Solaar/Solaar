@@ -24,6 +24,7 @@ Pre-built packages are available for a few Linux distros.
 
 * Debian 7 (Wheezy) or higher: packages in this [repository](docs/debian.md)
 * Ubuntu/Kubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
+  * packages are not available for Ubuntu 14.10 and above. See workaround in [issue 232](https://github.com/pwr/Solaar/issues/232).
 
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
