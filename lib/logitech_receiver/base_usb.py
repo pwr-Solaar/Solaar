@@ -24,7 +24,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 
 _UNIFYING_DRIVER = 'logitech-djreceiver'
-_GENERIC_DRIVER = ('hid-generic', 'generic-usb')
+_GENERIC_DRIVER = ('hid-generic', 'generic-usb', 'logitech')
 
 
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
@@ -49,7 +49,7 @@ NANO_RECEIVER_C525        = _nano_receiver(0xc525)
 NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 NANO_RECEIVER_C531        = _nano_receiver(0xc531)
-
+NANO_RECEIVER_C534        = _nano_receiver(0xc534)
 
 del _unifying_receiver, _nano_receiver
 
@@ -67,4 +67,5 @@ ALL = (
 		NANO_RECEIVER_C526,
 		NANO_RECEIVER_C52e,
 		NANO_RECEIVER_C531,
+		NANO_RECEIVER_C534,
 	)

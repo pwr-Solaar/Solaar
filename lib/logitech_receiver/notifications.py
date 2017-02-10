@@ -156,6 +156,8 @@ def _process_hidpp10_notification(device, status, n):
 	if n.sub_id == 0x41:
 		protocol_name = ('unifying (eQuad DJ)' if n.address == 0x04
 					else 'eQuad' if n.address == 0x03
+					else 'M185' if n.address == 0x0A
+					else 'EX100' if n.address == 0x02
 					else None)
 		if protocol_name:
 			if _log.isEnabledFor(_DEBUG):

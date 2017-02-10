@@ -107,7 +107,8 @@ Mice (Nano):
 | V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
 | VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
 | M175             |       | yes     |       |                                 |
-| M185             |       | yes     |       |                                 |
+| M185 [old]       | 4.5   | yes     | R/W   | smooth scrolling[note]          |
+| M185 [new]       | 4.5   | no      | R/W   | smooth scrolling[note]          |
 | M187             | 2.0   | yes     |       |                                 |
 | M215             | 1.0   | yes     |       |                                 |
 | M235             |       | yes     |       |                                 |
@@ -115,6 +116,13 @@ Mice (Nano):
 | M310             | 1.0   | yes     |       |                                 |
 | M315             |       | yes     |       |                                 |
 | MX 1100          | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+
+[old]: M185 with P/N: 810-003496
+
+[new]: M185 with P/N: 810-005238
+
+[note]: Currently, smooth scrolling events does not processed in xfce and this
+setting useful only for disable smooth scrolling
 
 
 Mice (Mini):

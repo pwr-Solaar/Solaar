@@ -84,6 +84,12 @@ class PairedDevice(object):
 			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
 			# assert link_notification.address == (0x04 if unifying else 0x03)
 			kind = ord(link_notification.data[0:1]) & 0x0F
+
+			#workaround for EX100 switched kind
+			if (self.wpid == '3F21'):
+				kind=2
+			if (self.wpid == '6511'):
+				kind=1
 			self._kind = _hidpp10.DEVICE_KIND[kind]
 		else:
 			# force a reading of the wpid
@@ -99,12 +105,20 @@ class PairedDevice(object):
 				# unifying protocol not supported, must be a Nano receiver
 				device_info = self.receiver.read_register(_R.receiver_info, 0x04)
 				if device_info is None:
-					_log.error("failed to read Nano wpid for device %d of %s", number, receiver)
-					raise _base.NoSuchDevice(number=number, receiver=receiver, error="read Nano wpid")
+					#ex100 receiver, fill fake device_info with known wpid's
+					if ((receiver.product_id == 'c517') and ((number==1) or (number==3))):
+						if (number == 1):#mouse
+							device_info = '   '+'\x3F\x21'
+						if (number == 3): #keyboard
+							device_info = '   '+'\x65\x11'
+					else:
+						_log.error("failed to read Nano wpid for device %d of %s", number, receiver)
+						raise _base.NoSuchDevice(number=number, receiver=receiver, error="read Nano wpid")
 
 				self.wpid = _strhex(device_info[3:5])
 				self._polling_rate = 0
 				self._power_switch = '(' + _("unknown") + ')'
+
 
 		# the wpid is necessary to properly identify wireless link on/off notifications
 		# also it gets set to None on this object when the device is unpaired
@@ -336,10 +350,14 @@ class Receiver(object):
 
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
-		serial_reply = self.read_register(_R.receiver_info, 0x03)
-		assert serial_reply
-		self.serial = _strhex(serial_reply[1:5])
-		self.max_devices = ord(serial_reply[6:7])
+		if (self.product_id != 'c534') and (self.product_id != 'c517'):
+			serial_reply = self.read_register(_R.receiver_info, 0x03)
+			assert serial_reply
+			self.serial = _strhex(serial_reply[1:5])
+			self.max_devices = ord(serial_reply[6:7])
+		else:
+			self.serial = 0
+			self.max_devices = 6
 
 		if self.max_devices == 6:
 			self.name = 'Unifying Receiver'

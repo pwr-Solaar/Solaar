@@ -122,6 +122,7 @@ _SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
 							_("When disabled, pushing the wheel sideways sends custom button events\n"
 							"instead of the standard side-scrolling events."))
 _DPI = ('dpi', _("Sensitivity (DPI)"), None)
+_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
 _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 							_("When set, the F1..F12 keys will activate their special function,\n"
 						 	"and you must hold the FN key to activate their standard function.")
@@ -176,6 +177,11 @@ def _feature_new_fn_swap():
 
 def _feature_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
+					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_DK.mouse)
+
+def _feature_lowres_smooth_scroll():
+	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
 					device_kind=_DK.mouse)
 
@@ -250,6 +256,15 @@ def _feature_adjustable_dpi():
 					label=_DPI[1], description=_DPI[2],
 					device_kind=_DK.mouse)
 
+def _feature_pointer_speed():
+	"""Pointer Speed feature"""
+	# min and max values taken from usb traces of Win software
+	return feature_range(_POINTER_SPEED[0], _F.POINTER_SPEED, 0x002e, 0x01ff,
+					read_function_id=0x0,
+					write_function_id=0x10,
+					bytes_count=2,
+					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
+					device_kind=_DK.mouse)
 #
 #
 #
@@ -259,8 +274,10 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
 					'new_fn_swap',
 					'smooth_scroll',
+					'lowres_smooth_scroll',
 					'side_scroll',
 					'dpi',
+					'pointer_speed',
 					'hand_detection',
 					'typing_illumination',
 					'smart_shift',
@@ -271,8 +288,10 @@ RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				new_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
+				lowres_smooth_scroll=None,
 				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
+				pointer_speed=None,
 				hand_detection=_register_hand_detection,
 				typing_illumination=None,
 				smart_shift=None,
@@ -281,8 +300,10 @@ FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
+				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
 				side_scroll=None,
 				dpi=_feature_adjustable_dpi,
+				pointer_speed=_feature_pointer_speed,
 				hand_detection=None,
 				typing_illumination=None,
 				smart_shift=_feature_smart_shift,
@@ -320,7 +341,9 @@ def check_feature_settings(device, already_known):
 		already_known.append(feature(device))
 
 	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
+	check_feature(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL)
 	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
 	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
+	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)

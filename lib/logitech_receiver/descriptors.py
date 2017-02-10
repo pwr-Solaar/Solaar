@@ -210,12 +210,24 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 							_FS.new_fn_swap()
 						],
 				)
+_D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='6511',
+				registers=(_R.battery_status, ),
+				)
 
 # Mice
 
 _D('Wireless Mouse M150', protocol=2.0, wpid='4022')
 _D('Wireless Mouse M175', protocol=2.0, wpid='4008')
-_D('Wireless Mouse M185')
+_D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+							_FS.pointer_speed(),
+				])
+_D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+							_FS.pointer_speed(),
+				])
 _D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235')
@@ -305,7 +317,13 @@ _D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A',
 							_RS.side_scroll(),
 						],
 				)
+_D('Wireless Mouse EX100', codename='EX100m', protocol=1.0, wpid='3F21',
+				registers=(_R.battery_status, ),
+				settings=[
+							_RS.smooth_scroll(),
+						],
 
+				)
 # Trackballs
 
 _D('Wireless Trackball M570')
