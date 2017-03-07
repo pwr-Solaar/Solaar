@@ -118,6 +118,12 @@ def feature_range(name, feature, min_value, max_value,
 
 _SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
+_HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
+							_("High-sensitivity wheel invert mode for vertical scroll."))
+_HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
+							_("High-sensitivity mode for vertical scroll with the wheel."))
+_HIRES_TGT = ('hires-smooth-hid', _("High Resolution HID++ notification"),
+							_("High-sensitivity HID++ notification for the wheel."))
 _SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
 							_("When disabled, pushing the wheel sideways sends custom button events\n"
 							"instead of the standard side-scrolling events."))
@@ -183,6 +189,29 @@ def _feature_smooth_scroll():
 def _feature_lowres_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_DK.mouse)
+def _feature_hires_smooth_invert():
+	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					true_value=0x04, mask=0x04,
+					label=_HIRES_INV[1], description=_HIRES_INV[2],
+					device_kind=_DK.mouse)
+
+def _feature_hires_smooth_resolution():
+	return feature_toggle(_HIRES_RES[0], _F.HIRES_WHEEL,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					true_value=0x02, mask=0x02,
+					label=_HIRES_RES[1], description=_HIRES_RES[2],
+					device_kind=_DK.mouse)
+
+def _feature_hires_smooth_hid():
+	return feature_toggle(_HIRES_TGT[0], _F.HIRES_WHEEL,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					true_value=0x01, mask=0x01,
+					label=_HIRES_TGT[1], description=_HIRES_TGT[2],
 					device_kind=_DK.mouse)
 
 def _feature_smart_shift():
@@ -275,6 +304,9 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'new_fn_swap',
 					'smooth_scroll',
 					'lowres_smooth_scroll',
+					'hires_smooth_invert',
+					'hires_smooth_resolution',
+					'hires_smooth_hid',
 					'side_scroll',
 					'dpi',
 					'pointer_speed',
@@ -289,6 +321,9 @@ RegisterSettings = _SETTINGS_LIST(
 				new_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
 				lowres_smooth_scroll=None,
+				hires_smooth_invert=None,
+				hires_smooth_resolution=None,
+				hires_smooth_hid=None,
 				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
 				pointer_speed=None,
@@ -301,6 +336,9 @@ FeatureSettings =  _SETTINGS_LIST(
 				new_fn_swap=_feature_new_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
 				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
+				hires_smooth_invert=_feature_hires_smooth_invert,
+				hires_smooth_resolution=_feature_hires_smooth_resolution,
+				hires_smooth_hid=_feature_hires_smooth_hid,
 				side_scroll=None,
 				dpi=_feature_adjustable_dpi,
 				pointer_speed=_feature_pointer_speed,
@@ -342,6 +380,9 @@ def check_feature_settings(device, already_known):
 
 	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
 	check_feature(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL)
+	check_feature(_HIRES_INV[0],     _F.HIRES_WHEEL, "hires_smooth_invert")
+	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
+	check_feature(_HIRES_TGT[0],     _F.HIRES_WHEEL, "hires_smooth_hid")
 	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
 	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
