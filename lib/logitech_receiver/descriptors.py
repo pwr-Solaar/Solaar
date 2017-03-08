@@ -250,6 +250,10 @@ _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 							_RS.side_scroll(),
 						],
 				)
+_D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+				])
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
 _D('Touch Mouse M600', protocol=2.0, wpid='401A')
