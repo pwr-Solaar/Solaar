@@ -150,7 +150,7 @@ Mouse-Keyboard combos:
 |------------------|-------|---------|-----------------------------------------|
 | MK220            | 2.0   | yes     |                                         |
 | MK330            |       |         |                                         |
-| MK520            |       |         |                                         |
+| MK520            | M2/K1 | yes     | FN swap, reprog keys                    |
 | MK550            |       |         |                                         |
 | MK710            | 1.0   | yes     | FN swap, reprog keys                    |
 
