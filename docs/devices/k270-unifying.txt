@@ -1,0 +1,43 @@
+Unifying Receiver
+  Device path  : /dev/hidraw2
+  USB id       : 046d:c52b
+  Serial       : C03E9E2E
+    Firmware   : 12.01.B0019
+    Bootloader : 02.14
+  Has 2 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 2=118
+
+  2: Wireless Keyboard K270(unifying)
+     Codename     : K270(unifying)
+     Kind         : keyboard
+     Wireless PID : 4003
+     Protocol     : HID++ 2.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: FE8C8542
+          Firmware: RQK 35.00.B0017
+     The power switch is located on the top case.
+     Supports 12 HID++ 2.0 features:
+         0: ROOT                   {0000}   
+         1: FEATURE SET            {0001}   
+         2: DEVICE FW VERSION      {0003}   
+         3: DEVICE NAME            {0005}   
+         4: BATTERY STATUS         {1000}   
+         5: unknown:1820           {1820}   hidden
+         6: REPROG CONTROLS        {1B00}   
+         7: WIRELESS DEVICE STATUS {1D4B}   
+         8: unknown:1DF0           {1DF0}   hidden
+         9: unknown:1DF3           {1DF3}   hidden
+        10: ENCRYPTION             {4100}   
+        11: KEYBOARD LAYOUT        {4520}   
+     Has 8 reprogrammable keys:
+         0: Play/Pause                 => Play/Pause                    nonstandard
+         1: Mute                       => Mute                          nonstandard
+         2: Volume Down                => Volume Down                   nonstandard
+         3: Volume Up                  => Volume Up                     nonstandard
+         4: MY HOME                    => HomePage                      nonstandard, reprogrammable
+         5: Mail                       => Email                         nonstandard, reprogrammable
+         6: SLEEP                      => Sleep                         nonstandard, reprogrammable
+         7: Calculator                 => Calculator                    nonstandard, reprogrammable
+     Battery: 90%, discharging.
+
