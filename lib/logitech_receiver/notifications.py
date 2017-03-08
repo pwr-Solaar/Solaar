@@ -274,4 +274,13 @@ def _process_feature_notification(device, status, n, feature):
 			_log.warn("%s: unknown TOUCH MOUSE %s", device, n)
 		return True
 
+	if feature == _F.DEVICE_FW_VERSION:
+		if (n.address == 0x00) and (n.sub_id == 0x02):
+			if _log.isEnabledFor(_INFO):
+				delta_h, delta_v, wheel = _unpack('<xbhb', n.data[:5])
+				_log.info("%s: MOUSE movement: delta H:%-3d delta V:%-3d wheel: %-3d", device, delta_h, delta_v, wheel)
+			return True
+		else:
+			_log.warn("%s: unknown FW_VERSION %s", device, n)
+
 	_log.warn("%s: unrecognized %s for feature %s (index %02X)", device, n, feature, n.sub_id)
