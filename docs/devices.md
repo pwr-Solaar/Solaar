@@ -60,6 +60,7 @@ Keyboards (Unifying):
 |------------------|-------|---------|-----------------------------------------|
 | K230             | 2.0   | yes     |                                         |
 | K270             | 1.0   | yes     |                                         |
+| K270             | 2.0   | yes     | reprog keys                             |
 | K340             | 1.0   | yes     |                                         |
 | K350             | 1.0   | yes     |                                         |
 | K360             | 2.0   | yes     | FN swap, reprog keys                    |
@@ -91,7 +92,7 @@ Mice (Unifying):
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   | smooth scrolling                |
 | Anywhere MX      | 1.0   | yes     | R/W   | smooth scrolling                |
-| Anywhere MX 2    | 4.5   | yes     |       | smooth scrolling
+| Anywhere MX 2    | 4.5   | yes     |       | smooth scrolling                |
 | MX Master        | 4.5   | yes     | R/W   | smart shift                     |
 | Cube             | 2.0   | yes     |       |                                 |
 
