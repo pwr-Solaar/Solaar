@@ -93,6 +93,31 @@ def _print_device(dev):
 			flags = 0 if flags is None else ord(flags[1:2])
 			flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
 			print ('        %2d: %-22s {%04X}   %s' % (index, feature, feature, ', '.join(flags)))
+			if feature == _hidpp20.FEATURE.HIRES_WHEEL:
+				wheel = _hidpp20.get_hires_wheel(dev)
+				if wheel:
+					multi, has_invert, has_switch, inv, res, target, ratchet = wheel
+					print("            Multiplier: %s" % multi)
+					if has_invert:
+						print("            Has invert")
+						if inv:
+							print("              Inverse wheel motion")
+						else:
+							print("              Normal wheel motion")
+					if has_switch:
+						print("            Has ratchet switch")
+						if ratchet:
+							print("              Normal wheel mode")
+						else:
+							print("              Free wheel mode")
+					if res:
+						print("            High resolution mode")
+					else:
+						print("            Low resolution mode")
+					if target:
+						print("            HID++ notification")
+					else:
+						print("            HID notification")
 
 	if dev.online and dev.keys:
 		print ('     Has %d reprogrammable keys:' % len(dev.keys))
