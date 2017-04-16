@@ -23,7 +23,8 @@ and their features, see [docs/devices.md](docs/devices.md).
 Pre-built packages are available for a few Linux distros.
 
 * Debian 7 (Wheezy) or higher: packages in this [repository](docs/debian.md)
-* Ubuntu/Kubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
+* Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
+* Ubuntu/Kubuntu 12.04 to 14.04: use `solaar` package from [ppa:daniel.pavel/solaar][ppa]
 
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
@@ -40,6 +41,7 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [opensuse]: http://software.opensuse.org/package/Solaar
+[universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
 
 
 ## Manual installation
