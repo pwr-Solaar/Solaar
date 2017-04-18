@@ -457,3 +457,30 @@ def get_mouse_pointer_info(device):
 				'suggest_os_ballistics': suggest_os_ballistics,
 				'suggest_vertical_orientation': suggest_vertical_orientation
 			}
+
+def get_hires_wheel(device):
+	caps = feature_request(device, FEATURE.HIRES_WHEEL, 0x00)
+	mode = feature_request(device, FEATURE.HIRES_WHEEL, 0x10)
+	ratchet = feature_request(device, FEATURE.HIRES_WHEEL, 0x030)
+
+
+	if caps and mode and ratchet:
+		# Parse caps
+		multi, flags = _unpack('!BB', caps[:2])
+
+		has_invert = (flags & 0x08) != 0
+		has_ratchet = (flags & 0x04) != 0
+
+		# Parse mode
+		wheel_mode, reserved = _unpack('!BB', mode[:2])
+
+		target = (wheel_mode & 0x01) != 0
+		res = (wheel_mode & 0x02) != 0
+		inv = (wheel_mode & 0x04) != 0
+
+		# Parse Ratchet switch
+		ratchet_mode,reserved = _unpack('!BB', ratchet[:2])
+
+		ratchet = (ratchet_mode & 0x01) != 0
+
+		return multi, has_invert, has_ratchet, inv, res, target, ratchet

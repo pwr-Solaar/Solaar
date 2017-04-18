@@ -274,7 +274,9 @@ _D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017',
 				)
 _D('Anywhere Mouse MX 2', codename='Anywhere MX 2', protocol=4.5, wpid='404A',
 				settings=[
-							_FS.smooth_scroll(),
+							_FS.hires_smooth_invert(),
+							_FS.hires_smooth_resolution(),
+							_FS.hires_smooth_hid(),
 						],
 				)
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
