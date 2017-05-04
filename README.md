@@ -1,4 +1,4 @@
-**Solaar** is a Linux device manager for Logitech's [Unifying Receiver][unifying]
+**Solaar** is a Linux device manager for Logitech's [Unifying][unifying] Receiver
 peripherals. It is able to pair/unpair devices to the receiver, and for most
 devices read battery status.
 
@@ -6,7 +6,7 @@ It comes in two flavors, command-line and GUI.  Both are able to list the
 devices paired to a Unifying Receiver, show detailed info for each device, and
 also pair/unpair supported devices with the receiver.
 
-[unifying]: http://logitech.com/en-us/66/6079
+[unifying]: http://logitech.com/promotions/6072
 
 ## Supported Devices
 
