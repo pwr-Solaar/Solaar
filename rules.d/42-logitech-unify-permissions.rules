@@ -3,9 +3,14 @@
 # Allows non-root users to have raw access the Logitech Unifying USB Receiver
 # device. For development purposes, allowing users to write to the receiver is
 # potentially dangerous (e.g. perform firmware updates).
+# It also enables the resume from suspend through wireless mice and keyboards.
 
 ACTION != "add", GOTO="solaar_end"
-SUBSYSTEM != "hidraw", GOTO="solaar_end"
+SUBSYSTEM == "usb", ENV{DEVTYPE} == "usb_device", GOTO="solaar_check"
+SUBSYSTEM == "hidraw", GOTO="solaar_check"
+GOTO="solaar_end"
+
+LABEL="solaar_check"
 
 # official Unifying receivers
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GOTO="solaar_apply"
@@ -37,6 +42,8 @@ GOTO="solaar_end"
 
 LABEL="solaar_apply"
 
+SUBSYSTEM=="usb", GOTO="solaar_wakeup"
+
 # don't apply to the paired peripherals, just the receivers
 DRIVERS=="logitech-djdevice|logitech-hidpp-device", GOTO="solaar_end"
 
@@ -47,6 +54,12 @@ TAG+="uaccess", TAG+="udev-acl"
 
 # Grant members of the "plugdev" group access to receiver (useful for SSH users)
 #MODE="0660", GROUP="plugdev"
+
+GOTO="solaar_end"
+
+# Enable wakeup from suspend on the receiver
+LABEL="solaar_wakeup"
+RUN+="/bin/sh -c 'echo enabled > /sys$env{DEVPATH}/power/wakeup'"
 
 LABEL="solaar_end"
 # vim: ft=udevrules
