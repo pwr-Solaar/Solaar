@@ -726,7 +726,6 @@ _window = None
 
 def init():
 	Gtk.Window.set_default_icon_name(NAME.lower())
-	Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
 
 	global _model, _tree, _details, _info, _empty, _window
 	_model = Gtk.TreeStore(*_COLUMN_TYPES)
