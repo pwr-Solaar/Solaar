@@ -279,4 +279,14 @@ ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
 				'task',
 				'flags'])
 
+ReprogrammableKeyInfoV4 = namedtuple('ReprogrammableKeyInfoV4', [
+				'index',
+				'key',
+				'task',
+				'flags',
+				'pos',
+				'group',
+				'group_mask',
+				'remapped'])
+
 del namedtuple

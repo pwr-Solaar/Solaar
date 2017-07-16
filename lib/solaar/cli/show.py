@@ -98,8 +98,12 @@ def _print_device(dev):
 		print ('     Has %d reprogrammable keys:' % len(dev.keys))
 		for k in dev.keys:
 			flags = _special_keys.KEY_FLAG.flag_names(k.flags)
-			print ('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.task, ', '.join(flags)))
-
+			# TODO: add here additional variants for other REPROG_CONTROLS
+			if dev.keys.keyversion == 1:
+				print ('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.task, ', '.join(flags)))
+			if dev.keys.keyversion == 4:
+				print ('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.task, k.remapped))
+				print ('             %s, pos:%d, group:%1d, gmask:%d' % ( ', '.join(flags), k.pos, k.group, k.group_mask))
 	if dev.online:
 		battery = _hidpp20.get_battery(dev)
 		if battery is None:
