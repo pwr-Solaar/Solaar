@@ -351,6 +351,7 @@ class Receiver(object):
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
 		if (self.product_id != 'c534') and (self.product_id != 'c517'):
+
 			serial_reply = self.read_register(_R.receiver_info, 0x03)
 			assert serial_reply
 			self.serial = _strhex(serial_reply[1:5])
