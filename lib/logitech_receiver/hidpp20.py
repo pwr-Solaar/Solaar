@@ -328,13 +328,19 @@ class KeysArray(object):
 					if self.keyversion == 1:
 						self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
 					if self.keyversion == 4:
-						mapped_data = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key&0xff00, key&0xff)
-						if mapped_data:
-							remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
-							# if key not mapped map it to itself for display
-							if remapped == 0:
-								remapped = key
-							remapped_text = special_keys.CONTROL[remapped]
+						try:
+							mapped_data = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key&0xff00, key&0xff)
+							if mapped_data:
+								remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
+								# if key not mapped map it to itself for display
+								if remapped == 0:
+									remapped = key
+						except Exception:
+							remapped = key
+							remap_key = key
+							remap_flag = 0
+
+						remapped_text = special_keys.CONTROL[remapped]
 						self.keys[index] = _ReprogrammableKeyInfoV4(index, ctrl_id_text, ctrl_task_text, flags, pos, group, gmask, remapped_text)
 
 			return self.keys[index]
