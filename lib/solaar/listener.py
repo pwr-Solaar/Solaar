@@ -183,7 +183,9 @@ class ReceiverListener(_listener.EventsListener):
 		# a device notification
 		assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
 		already_known = n.devnumber in self.receiver
-		if not already_known and n.sub_id == 0x41:
+
+		if n.sub_id == 0x41:
+			already_known = False
 			dev = self.receiver.register_new_device(n.devnumber, n)
 		else:
 			dev = self.receiver[n.devnumber]
