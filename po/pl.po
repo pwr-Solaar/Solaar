@@ -7,8 +7,8 @@ msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.1\n"
         "Report-Msgid-Bugs-To: \n"
         "POT-Creation-Date: 2013-08-25 01:33+0300\n"
-        "PO-Revision-Date: 2013-07-23 10:41+0100\n"
-        "Last-Translator: Adrian Piotrowicz <nexces@nxstudio.pl>\n"
+        "PO-Revision-Date: 2017-09-19 19:55+0100\n"
+        "Last-Translator: Michał Bokiniec <michal2229@gmail.com>\n"
         "Language-Team: none\n"
         "Language: pl\n"
         "MIME-Version: 1.0\n"
@@ -96,15 +96,15 @@ msgstr  "Inne"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "closed"
-msgstr  "zamknięte"
+msgstr  "zamknięta"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "open"
-msgstr  "otwarte"
+msgstr  "otwarta"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "pairing lock is "
-msgstr  "blokada parowania jest"
+msgstr  "blokada parowania jest "
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid   "unpaired"
@@ -179,7 +179,7 @@ msgstr  "1 sparowane urządzenie."
 
 #: lib/logitech_receiver/status.py:100
 msgid   " paired devices."
-msgstr  "sparowane(-ych) urządzeń."
+msgstr  " sparowane(-ych) urządzeń."
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
 #: lib/solaar/ui/window.py:143
