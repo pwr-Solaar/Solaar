@@ -3,10 +3,10 @@
 **Solaar** will detect all devices paired with your receiver, and at the very
 least display some basic information about them.
 
-At this moment, all [Unifying Receiver][unifying] are supported (devices with
-USB ID `046d:c52b` or `046d:c532`), but only some newer [Nano Receiver][nano]s
-(devices with USB ID `046d:c52f` and `046d:c52b`). You can check your connected Logitech devices
-by running `lsusb -d 046d:` in a console.
+At this moment, all [Unifying][unifying] Receiver are supported (devices with
+USB ID `046d:c52b` or `046d:c532`), but only some newer Nano Receiver (devices
+with USB ID `046d:c52f` and `046d:c52b`). You can check your connected Logitech
+devices by running `lsusb -d 046d:` in a console.
 
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported:
@@ -164,8 +164,7 @@ Mouse-Keyboard combos:
 | MK710            | 1.0   | yes     | FN swap, reprog keys                    |
 
 
-[unifying]: http://logitech.com/en-us/66/6079
-[nano]: http://logitech.com/mice-pointers/articles/5926
+[unifying]: http://logitech.com/promotions/6072
 [G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
 [K360]: http://logitech.com/product/keyboard-k360
 [K700]: http://logitech.com/product/wireless-desktop-mk710
