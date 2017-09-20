@@ -30,4 +30,19 @@
         19: unknown:1F03           {1F03}   internal, hidden
         20: LOWRES WHEEL           {2130}   
         21: POINTER SPEED          {2205}   
+     Has 7 reprogrammable keys:
+         0: LEFT CLICK                , default: LeftClick                   => LEFT CLICK                
+             divertable, mse, pos:0, group:1, gmask:1
+         1: RIGHT CLICK               , default: RightClick                  => RIGHT CLICK               
+             divertable, mse, pos:0, group:1, gmask:1
+         2: MIDDLE BUTTON             , default: MiddleMouseButton           => MIDDLE BUTTON             
+             divertable, mse, reprogrammable, pos:0, group:2, gmask:3
+         3: LEFT SCROLL AS AC PAN     , default: HorzScrollLeftSet           => LEFT SCROLL AS AC PAN     
+             divertable, mse, reprogrammable, pos:0, group:2, gmask:3
+         4: RIGHT SCROLL AS AC PAN    , default: HorzScrollRightSet          => RIGHT SCROLL AS AC PAN    
+             divertable, mse, reprogrammable, pos:0, group:2, gmask:3
+         5: BACK AS BUTTON 4          , default: BackEx                      => BACK AS BUTTON 4          
+             divertable, mse, reprogrammable, pos:0, group:2, gmask:3
+         6: FORWARD AS BUTTON 5       , default: BrowserForwardEx            => FORWARD AS BUTTON 5       
+             divertable, mse, reprogrammable, pos:0, group:2, gmask:3
      Battery: 70%, discharging.
