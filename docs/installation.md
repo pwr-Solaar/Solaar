@@ -50,5 +50,5 @@ root user:
    Plugging it again will re-create the device node with the right permissions.
 
 3. Make sure your desktop users are part of the `plugdev` group, by running
-   `gpasswd <desktop username> plugdev`. If these users were not assigned to the
+   `gpasswd -a <desktop username> plugdev`. If these users were not assigned to the
    group before, they must re-login for the changes to take effect.
