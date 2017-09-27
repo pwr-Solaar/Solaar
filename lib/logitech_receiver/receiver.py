@@ -119,7 +119,6 @@ class PairedDevice(object):
 				self._polling_rate = 0
 				self._power_switch = '(' + _("unknown") + ')'
 
-
 		# the wpid is necessary to properly identify wireless link on/off notifications
 		# also it gets set to None on this object when the device is unpaired
 		assert self.wpid is not None, "failed to read wpid: device %d of %s" % (number, receiver)
@@ -350,8 +349,8 @@ class Receiver(object):
 
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
+		# workaround for M185 and EX100 receivers
 		if (self.product_id != 'c534') and (self.product_id != 'c517'):
-
 			serial_reply = self.read_register(_R.receiver_info, 0x03)
 			assert serial_reply
 			self.serial = _strhex(serial_reply[1:5])
