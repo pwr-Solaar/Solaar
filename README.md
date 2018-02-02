@@ -37,7 +37,7 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
 [arch]: http://aur.archlinux.org/packages/solaar
-[fedora]: https://admin.fedoraproject.org/pkgdb/package/solaar/
+[fedora]: https://apps.fedoraproject.org/packages/solaar
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [opensuse]: http://software.opensuse.org/package/Solaar
