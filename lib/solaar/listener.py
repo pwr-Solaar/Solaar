@@ -184,8 +184,9 @@ class ReceiverListener(_listener.EventsListener):
 		assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
 		already_known = n.devnumber in self.receiver
 
-		if n.sub_id == 0x41:
-			already_known = False
+		# 0x41 is a connection notice, not a pairing notice
+		# so the device may have been previously paired
+		if n.sub_id == 0x41 and not already_known:
 			dev = self.receiver.register_new_device(n.devnumber, n)
 		else:
 			dev = self.receiver[n.devnumber]
