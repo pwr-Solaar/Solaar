@@ -51,19 +51,19 @@ def register_toggle(name, register,
 					true_value=_BooleanV.default_true,
 					false_value=_BooleanV.default_false,
 					mask=_BooleanV.default_mask,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _RegisterRW(register)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, label=label, description=description, device_kinds=device_kinds)
 
 
 def register_choices(name, register, choices,
 					kind=_KIND.choice,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	assert choices
 	validator = _ChoicesV(choices)
 	rw = _RegisterRW(register)
-	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kinds=device_kinds)
 
 
 def feature_toggle(name, feature,
@@ -72,24 +72,24 @@ def feature_toggle(name, feature,
 					true_value=_BooleanV.default_true,
 					false_value=_BooleanV.default_false,
 					mask=_BooleanV.default_mask,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, label=label, description=description, device_kinds=device_kinds)
 
 def feature_choices(name, feature, choices,
 					read_function_id, write_function_id,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	assert choices
 	validator = _ChoicesV(choices, bytes_count=bytes_count)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kinds=device_kinds)
 
 def feature_choices_dynamic(name, feature, choices_callback,
 					read_function_id, write_function_id,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	# Proxy that obtains choices dynamically from a device
 	def instantiate(device):
 		# Obtain choices for this feature
@@ -97,7 +97,7 @@ def feature_choices_dynamic(name, feature, choices_callback,
 		setting = feature_choices(name, feature, choices,
 						read_function_id, write_function_id,
 						bytes_count=bytes_count,
-						label=None, description=None, device_kind=None)
+						label=None, description=None, device_kinds=None)
 		return setting(device)
 	return instantiate
 
@@ -106,11 +106,11 @@ def feature_range(name, feature, min_value, max_value,
 					write_function_id=_FeatureRW.default_write_fnid,
 					rw=None,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kinds=None):
 	validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
 	if rw is None:
 		rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kinds=device_kinds)
 
 #
 # common strings for settings
@@ -146,55 +146,55 @@ def _register_hand_detection(register=_R.keyboard_hand_detection,
 					true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF'):
 	return register_toggle(_HAND_DETECTION[0], register, true_value=true_value, false_value=false_value,
 					label=_HAND_DETECTION[1], description=_HAND_DETECTION[2],
-					device_kind=_DK.keyboard)
+					device_kinds=(_DK.keyboard,))
 
 def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
 	return register_toggle(_FN_SWAP[0], register, true_value=true_value, mask=mask,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_DK.keyboard)
+					device_kinds=(_DK.keyboard,))
 
 def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
 	return register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
 	return register_toggle(_SIDE_SCROLL[0], register, true_value=true_value, mask=mask,
  					label=_SIDE_SCROLL[1], description=_SIDE_SCROLL[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _register_dpi(register=_R.mouse_dpi, choices=None):
 	return register_choices(_DPI[0], register, choices,
 					label=_DPI[1], description=_DPI[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 
 def _feature_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_DK.keyboard)
+					device_kinds=(_DK.keyboard,))
 
 def _feature_new_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.NEW_FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
-					device_kind=_DK.keyboard)
+					device_kinds=(_DK.keyboard,))
 
 def _feature_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _feature_lowres_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 def _feature_hires_smooth_invert():
 	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
 					read_function_id=0x10,
 					write_function_id=0x20,
 					true_value=0x04, mask=0x04,
 					label=_HIRES_INV[1], description=_HIRES_INV[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _feature_hires_smooth_resolution():
 	return feature_toggle(_HIRES_RES[0], _F.HIRES_WHEEL,
@@ -202,7 +202,7 @@ def _feature_hires_smooth_resolution():
 					write_function_id=0x20,
 					true_value=0x02, mask=0x02,
 					label=_HIRES_RES[1], description=_HIRES_RES[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _feature_smart_shift():
 	_MIN_SMART_SHIFT_VALUE = 0
@@ -238,7 +238,7 @@ def _feature_smart_shift():
 					bytes_count=1,
 					rw=_SmartShiftRW(_F.SMART_SHIFT),
 					label=_SMART_SHIFT[1], description=_SMART_SHIFT[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _feature_adjustable_dpi_choices(device):
 	# [1] getSensorDpiList(sensorIdx)
@@ -273,7 +273,7 @@ def _feature_adjustable_dpi():
 					write_function_id=0x30,
 					bytes_count=3,
 					label=_DPI[1], description=_DPI[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 
 def _feature_pointer_speed():
 	"""Pointer Speed feature"""
@@ -283,7 +283,7 @@ def _feature_pointer_speed():
 					write_function_id=0x10,
 					bytes_count=2,
 					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
-					device_kind=_DK.mouse)
+					device_kinds=(_DK.mouse,))
 #
 #
 #
