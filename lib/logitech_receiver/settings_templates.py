@@ -156,17 +156,17 @@ def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask
 def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
 	return register_toggle(_SMOOTH_SCROLL[0], register, true_value=true_value, mask=mask,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
 	return register_toggle(_SIDE_SCROLL[0], register, true_value=true_value, mask=mask,
  					label=_SIDE_SCROLL[1], description=_SIDE_SCROLL[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _register_dpi(register=_R.mouse_dpi, choices=None):
 	return register_choices(_DPI[0], register, choices,
 					label=_DPI[1], description=_DPI[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_fn_swap():
@@ -187,19 +187,19 @@ def _feature_k375s_fn_swap():
 def _feature_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_lowres_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 def _feature_hires_smooth_invert():
 	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
 					read_function_id=0x10,
 					write_function_id=0x20,
 					true_value=0x04, mask=0x04,
 					label=_HIRES_INV[1], description=_HIRES_INV[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_hires_smooth_resolution():
 	return feature_toggle(_HIRES_RES[0], _F.HIRES_WHEEL,
@@ -207,7 +207,7 @@ def _feature_hires_smooth_resolution():
 					write_function_id=0x20,
 					true_value=0x02, mask=0x02,
 					label=_HIRES_RES[1], description=_HIRES_RES[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_smart_shift():
 	_MIN_SMART_SHIFT_VALUE = 0
@@ -243,7 +243,7 @@ def _feature_smart_shift():
 					bytes_count=1,
 					rw=_SmartShiftRW(_F.SMART_SHIFT),
 					label=_SMART_SHIFT[1], description=_SMART_SHIFT[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_adjustable_dpi_choices(device):
 	# [1] getSensorDpiList(sensorIdx)
@@ -278,7 +278,7 @@ def _feature_adjustable_dpi():
 					write_function_id=0x30,
 					bytes_count=3,
 					label=_DPI[1], description=_DPI[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_pointer_speed():
 	"""Pointer Speed feature"""
@@ -288,7 +288,7 @@ def _feature_pointer_speed():
 					write_function_id=0x10,
 					bytes_count=2,
 					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
-					device_kind=(_DK.mouse,))
+					device_kind=(_DK.mouse, _DK.trackball))
 #
 #
 #
