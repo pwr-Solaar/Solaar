@@ -75,7 +75,7 @@ def error_dialog(reason, object):
 #
 
 _task_runner = None
-def async(function, *args, **kwargs):
+def ui_async(function, *args, **kwargs):
 	if _task_runner:
 		_task_runner(function, *args, **kwargs)
 
@@ -90,7 +90,7 @@ def _startup(app, startup_hook):
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
 
-	from solaar.async import TaskRunner as _TaskRunner
+	from solaar.tasks import TaskRunner as _TaskRunner
 	global _task_runner
 	_task_runner = _TaskRunner('AsyncUI')
 	_task_runner.start()
