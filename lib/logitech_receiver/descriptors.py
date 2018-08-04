@@ -274,13 +274,19 @@ _D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051',
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
 _D('Touch Mouse M600', protocol=2.0, wpid='401A')
-_D('Marathon Mouse M705', protocol=1.0, wpid='101B',
+_D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpid='101B',
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
 							_RS.side_scroll(),
 						],
 				)
+_D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',
+				settings=[
+					_FS.hires_smooth_invert(),
+					_FS.hires_smooth_resolution(),
+					_FS.pointer_speed(),
+				])
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620', protocol=2.0)
 _D('Logitech Cube', kind=_DK.mouse, protocol=2.0)
