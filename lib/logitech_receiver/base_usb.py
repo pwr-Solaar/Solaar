@@ -24,7 +24,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 
 _UNIFYING_DRIVER = 'logitech-djreceiver'
-_GENERIC_DRIVER = ('hid-generic', 'generic-usb')
+_GENERIC_DRIVER = ('hid-generic', 'generic-usb', 'logitech')
 
 
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)

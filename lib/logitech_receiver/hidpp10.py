@@ -226,7 +226,11 @@ def get_firmware(device):
 	reply = read_register(device, REGISTERS.firmware, 0x01)
 	if not reply:
 		# won't be able to read any of it now...
-		return
+		# return unknown for firmware
+		# workarounds for EX100, which doesnt support report firmware
+		fw=_FirmwareInfo(FIRMWARE_KIND.Firmware, '', 'unknown', None)
+		firmware[0]=fw
+		return tuple(f for f in firmware if f)
 
 	fw_version = _strhex(reply[1:3])
 	fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
