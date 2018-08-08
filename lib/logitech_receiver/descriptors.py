@@ -167,6 +167,11 @@ _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 							_FS.fn_swap()
 						],
 				)
+_D('Wireless Keyboard K375s', protocol=2.0, wpid='4061',
+				settings=[
+							_FS.k375s_fn_swap()
+						],
+				)
 _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 				settings=[
 							_FS.fn_swap()

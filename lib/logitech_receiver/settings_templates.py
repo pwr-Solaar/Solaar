@@ -179,6 +179,11 @@ def _feature_new_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 
+def _feature_k375s_fn_swap():
+	return feature_toggle(_FN_SWAP[0], _F.K375S_FN_INVERSION,
+					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					device_kind=_DK.keyboard)
+
 def _feature_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
@@ -292,6 +297,7 @@ from collections import namedtuple
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
 					'new_fn_swap',
+					'k375s_fn_swap',
 					'smooth_scroll',
 					'lowres_smooth_scroll',
 					'hires_smooth_invert',
@@ -308,6 +314,7 @@ del namedtuple
 RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				new_fn_swap=None,
+				k375s_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
 				lowres_smooth_scroll=None,
 				hires_smooth_invert=None,
@@ -322,6 +329,7 @@ RegisterSettings = _SETTINGS_LIST(
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
+				k375s_fn_swap=_feature_k375s_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
 				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
 				hires_smooth_invert=_feature_hires_smooth_invert,
@@ -371,6 +379,7 @@ def check_feature_settings(device, already_known):
 	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
 	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
 	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
+	check_feature(_FN_SWAP[0],       _F.K375S_FN_INVERSION, 'k375s_fn_swap')
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
