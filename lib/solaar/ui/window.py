@@ -300,7 +300,7 @@ def _create_window_layout():
 
 	tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
 	tree_panel.set_homogeneous(False)
-	tree_panel.pack_start(_tree, True, True, 0)
+	tree_panel.pack_start(tree_scroll, True, True, 0)
 	tree_panel.pack_start(_details, False, False, 0)
 
 	panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
