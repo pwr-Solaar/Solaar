@@ -210,6 +210,13 @@ try:
 			_icon.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
 			GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
+
+	def set_visibility(visible):
+		if visible:
+			indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+		else:
+			indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+
 except ImportError:
 
 	if _log.isEnabledFor(_DEBUG):
@@ -269,6 +276,10 @@ except ImportError:
 		if _icon_before_attention is None:
 			_icon_before_attention = _icon.get_icon_name()
 			GLib.idle_add(_blink, 9)
+
+
+	def set_visibility(visible):
+		_icon.set_visible(visible)
 
 #
 #
