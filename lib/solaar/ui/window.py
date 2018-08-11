@@ -31,7 +31,7 @@ from solaar import NAME
 from solaar.i18n import _
 from gettext import ngettext
 # from solaar import __version__ as VERSION
-from solaar.ui import async as _ui_async
+from solaar.ui import ui_async as _ui_async
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from logitech_receiver.status import KEYS as _K

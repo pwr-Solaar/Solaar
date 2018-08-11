@@ -164,14 +164,14 @@ def _process_hidpp10_notification(device, status, n):
 				assert wpid == device.wpid, "%s wpid mismatch, got %s" % (device, wpid)
 
 			flags = ord(n.data[:1]) & 0xF0
-			link_encrypyed = bool(flags & 0x20)
+			link_encrypted = bool(flags & 0x20)
 			link_established = not (flags & 0x40)
 			if _log.isEnabledFor(_DEBUG):
 				sw_present = bool(flags & 0x10)
 				has_payload = bool(flags & 0x80)
 				_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
-							device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
-			status[_K.LINK_ENCRYPTED] = link_encrypyed
+							device, protocol_name, sw_present, link_encrypted, link_established, has_payload)
+			status[_K.LINK_ENCRYPTED] = link_encrypted
 			status.changed(active=link_established)
 		else:
 			_log.warn("%s: connection notification with unknown protocol %02X: %s", device.number, n.address, n)

@@ -23,7 +23,7 @@ from gi.repository import Gtk, GLib
 from threading import Timer as _Timer
 
 from solaar.i18n import _
-from solaar.ui import async as _ui_async
+from solaar.ui import ui_async as _ui_async
 from logitech_receiver.settings import KIND as _SETTING_KIND
 
 #
