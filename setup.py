@@ -13,7 +13,7 @@ sys.path[0] = backup_path_0
 
 if 'install' in sys.argv:
 	# naively guess where the autostart .desktop file should be installed
-	if len([x.startswith('--prefix=') for x in sys.argv]) > 0 or '--home' in sys.argv:
+	if any(x.startswith('--prefix=') for x in sys.argv) or '--home' in sys.argv:
 		autostart_path = 'etc/xdg/autostart'
 	elif '--user' in sys.argv:
 		from os import environ
