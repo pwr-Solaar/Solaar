@@ -155,5 +155,9 @@ def run(cli_args=None, hidraw_path=None):
 		from importlib import import_module
 		m = import_module('.' + action, package=__name__)
 		m.run(c, args, _find_receiver, _find_device)
+	except AssertionError as e:
+		from traceback import extract_tb
+		tb_last = extract_tb(_sys.exc_info()[2])[-1]
+		_sys.exit('%s: assertion failed: %s line %d' % (NAME.lower(), tb_last[0], tb_last[1]))
 	except Exception as e:
 		_sys.exit('%s: error: %s' % (NAME.lower(), e))

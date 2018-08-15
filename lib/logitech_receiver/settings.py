@@ -61,7 +61,7 @@ class Setting(object):
 
 	def __call__(self, device):
 		assert not hasattr(self, '_value')
-		assert self.device_kind is None or self.device_kind == device.kind
+		assert self.device_kind is None or device.kind in self.device_kind
 		p = device.protocol
 		if p == 1.0:
 			# HID++ 1.0 devices do not support features
