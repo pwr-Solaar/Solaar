@@ -232,7 +232,7 @@ msgstr  "Mottagaren rapporterade ett fel, utan specifika detaljer."
 #: lib/solaar/ui/about.py:39
 msgid   "Shows status of devices connected\n"
         "through wireless Logitech receivers."
-msgstr  "Visa status för enheter kopplade till\n"
+msgstr  "Visar status för enheter kopplade till\n"
         "din trådlösa Logitech mottagare"
 
 #: lib/solaar/ui/about.py:48
@@ -353,7 +353,7 @@ msgid   "The wireless link between this device and its receiver is not "
 msgstr  "Den trådlösa anslutningen mellan den här enheten och mottagaren är "
         "okrypterad\n"
         "\n"
-        "For pekdon (möss, styrkulor, pekplattor), är detta inget stort "
+        "För pekdon (möss, styrkulor, pekplattor), är detta inget stort "
         "säkerhetsproblem.\n"
         "\n"
         "Men för textinmatande enheter (tangentbord, numpads) är denna "

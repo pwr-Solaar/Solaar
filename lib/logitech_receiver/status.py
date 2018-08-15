@@ -27,6 +27,7 @@ del getLogger
 
 
 from .i18n import _
+from gettext import ngettext
 from .common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -66,10 +67,11 @@ def attach_to(device, changed_callback):
 	assert device
 	assert changed_callback
 
-	if device.kind is None:
-		device.status = ReceiverStatus(device, changed_callback)
-	else:
-		device.status = DeviceStatus(device, changed_callback)
+	if not hasattr(device, 'status') or device.status is None:
+		if device.kind is None:
+			device.status = ReceiverStatus(device, changed_callback)
+		else:
+			device.status = DeviceStatus(device, changed_callback)
 
 #
 #
@@ -96,8 +98,7 @@ class ReceiverStatus(dict):
 	def __str__(self):
 		count = len(self._receiver)
 		return (_("No paired devices.") if count == 0 else
-				_("1 paired device.") if count == 1 else
-				(str(count) + _(" paired devices.")))
+			ngettext("%(count)s paired device.", "%(count)s paired devices.", count) % { 'count': count })
 	__unicode__ = __str__
 
 	def changed(self, alert=ALERT.NOTIFICATION, reason=None):
@@ -146,9 +147,9 @@ class DeviceStatus(dict):
 			battery_level = self.get(KEYS.BATTERY_LEVEL)
 			if battery_level is not None:
 				if isinstance(battery_level, _NamedInt):
-					yield _("Battery") + ': ' + _(str(battery_level))
+					yield _("Battery: %(level)s") % { 'level': _(str(battery_level)) }
 				else:
-					yield _("Battery") + ': ' + ('%d%%' % battery_level)
+					yield _("Battery: %(percent)d%%") % { 'percent': battery_level }
 
 				battery_status = self.get(KEYS.BATTERY_STATUS)
 				if battery_status is not None:
@@ -159,7 +160,7 @@ class DeviceStatus(dict):
 			light_level = self.get(KEYS.LIGHT_LEVEL)
 			if light_level is not None:
 				if comma: yield ', '
-				yield _("Lighting") + (': %d ' % light_level) + _("lux")
+				yield _("Lighting: %(level)s lux") % { 'level': light_level }
 
 		return ''.join(i for i in _items())
 
@@ -200,9 +201,9 @@ class DeviceStatus(dict):
 				# only show the notification once
 				alert = ALERT.NOTIFICATION | ALERT.ATTENTION
 			if isinstance(level, _NamedInt):
-				reason = '%s: %s (%s)' % (_("Battery"), _(str(level)), _(str(status)))
+				reason = _("Battery: %(level)s (%(status)s)") % { 'level': _(level), 'status': _(status) }
 			else:
-				reason = '%s: %d%% (%s)' % (_("Battery"), level, _(str(status)))
+				reason = _("Battery: %(percent)d%% (%(status)s)") % { 'percent': level, 'status': _(status) }
 
 		if changed or reason:
 			# update the leds on the device, if any

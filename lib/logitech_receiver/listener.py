@@ -150,7 +150,7 @@ class EventsListener(_threading.Thread):
 
 		# replace the handle with a threaded one
 		self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
-		# get the right low-level handle for this thead
+		# get the right low-level handle for this thread
 		ihandle = int(self.receiver.handle)
 		if _log.isEnabledFor(_INFO):
 			_log.info("started with %s (%d)", self.receiver, ihandle)
@@ -222,7 +222,8 @@ class EventsListener(_threading.Thread):
 		if self._active:  # and _threading.current_thread() == self:
 			# if _log.isEnabledFor(_DEBUG):
 			# 	_log.debug("queueing unhandled %s", n)
-			self._queued_notifications.put(n)
+			if not self._queued_notifications.full():
+				self._queued_notifications.put(n)
 
 	def __bool__(self):
 		return bool(self._active and self.receiver)

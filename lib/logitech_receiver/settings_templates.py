@@ -25,6 +25,7 @@ from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import (
 				bytes2int as _bytes2int,
+				int2bytes as _int2bytes,
 				NamedInts as _NamedInts,
 				unpack as _unpack,
 			)
@@ -35,6 +36,7 @@ from .settings import (
 				FeatureRW as _FeatureRW,
 				BooleanValidator as _BooleanV,
 				ChoicesValidator as _ChoicesV,
+				RangeValidator as _RangeV,
 			)
 
 _DK = _hidpp10.DEVICE_KIND
@@ -99,16 +101,32 @@ def feature_choices_dynamic(name, feature, choices_callback,
 		return setting(device)
 	return instantiate
 
+def feature_range(name, feature, min_value, max_value,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					rw=None,
+					bytes_count=None,
+					label=None, description=None, device_kind=None):
+	validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
+	if rw is None:
+		rw = _FeatureRW(feature, read_function_id, write_function_id)
+	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
+
 #
 # common strings for settings
 #
 
 _SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
+_HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
+							_("High-sensitivity wheel invert mode for vertical scroll."))
+_HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
+							_("High-sensitivity mode for vertical scroll with the wheel."))
 _SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
 							_("When disabled, pushing the wheel sideways sends custom button events\n"
 							"instead of the standard side-scrolling events."))
 _DPI = ('dpi', _("Sensitivity (DPI)"), None)
+_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
 _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 							_("When set, the F1..F12 keys will activate their special function,\n"
 						 	"and you must hold the FN key to activate their standard function.")
@@ -117,7 +135,9 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	"and you must hold the FN key to activate their special function."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
-
+_SMART_SHIFT = ('smart-shift', _("Smart Shift"),
+							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
+							"The mouse wheel is always free at 0, and always locked at 50"))
 #
 #
 #
@@ -159,9 +179,70 @@ def _feature_new_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=_DK.keyboard)
 
+def _feature_k375s_fn_swap():
+	return feature_toggle(_FN_SWAP[0], _F.K375S_FN_INVERSION,
+					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					device_kind=_DK.keyboard)
+
 def _feature_smooth_scroll():
 	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
 					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_DK.mouse)
+
+def _feature_lowres_smooth_scroll():
+	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
+					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+					device_kind=_DK.mouse)
+def _feature_hires_smooth_invert():
+	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					true_value=0x04, mask=0x04,
+					label=_HIRES_INV[1], description=_HIRES_INV[2],
+					device_kind=_DK.mouse)
+
+def _feature_hires_smooth_resolution():
+	return feature_toggle(_HIRES_RES[0], _F.HIRES_WHEEL,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					true_value=0x02, mask=0x02,
+					label=_HIRES_RES[1], description=_HIRES_RES[2],
+					device_kind=_DK.mouse)
+
+def _feature_smart_shift():
+	_MIN_SMART_SHIFT_VALUE = 0
+	_MAX_SMART_SHIFT_VALUE = 50
+	class _SmartShiftRW(_FeatureRW):
+		def __init__(self, feature):
+			super(_SmartShiftRW, self).__init__(feature)
+
+		def read(self, device):
+			value = super(_SmartShiftRW, self).read(device)
+			if _bytes2int(value[0:1]) == 1:
+				# Mode = Freespin, map to minimum
+				return _int2bytes(_MIN_SMART_SHIFT_VALUE, count=1)
+			else:
+				# Mode = smart shift, map to the value, capped at maximum
+				threshold = min(_bytes2int(value[1:2]), _MAX_SMART_SHIFT_VALUE)
+				return _int2bytes(threshold, count=1)
+
+		def write(self, device, data_bytes):
+			threshold = _bytes2int(data_bytes)
+			# Freespin at minimum
+			mode = 1 if threshold == _MIN_SMART_SHIFT_VALUE else 2
+
+			# Ratchet at maximum
+			if threshold == _MAX_SMART_SHIFT_VALUE:
+				threshold = 255
+
+			data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1) * 2
+			return super(_SmartShiftRW, self).write(device, data)
+
+	return feature_range(_SMART_SHIFT[0], _F.SMART_SHIFT,
+	                _MIN_SMART_SHIFT_VALUE, _MAX_SMART_SHIFT_VALUE,
+					bytes_count=1,
+					rw=_SmartShiftRW(_F.SMART_SHIFT),
+					label=_SMART_SHIFT[1], description=_SMART_SHIFT[2],
 					device_kind=_DK.mouse)
 
 def _feature_adjustable_dpi_choices(device):
@@ -199,6 +280,15 @@ def _feature_adjustable_dpi():
 					label=_DPI[1], description=_DPI[2],
 					device_kind=_DK.mouse)
 
+def _feature_pointer_speed():
+	"""Pointer Speed feature"""
+	# min and max values taken from usb traces of Win software
+	return feature_range(_POINTER_SPEED[0], _F.POINTER_SPEED, 0x002e, 0x01ff,
+					read_function_id=0x0,
+					write_function_id=0x10,
+					bytes_count=2,
+					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
+					device_kind=_DK.mouse)
 #
 #
 #
@@ -207,31 +297,49 @@ from collections import namedtuple
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
 					'new_fn_swap',
+					'k375s_fn_swap',
 					'smooth_scroll',
+					'lowres_smooth_scroll',
+					'hires_smooth_invert',
+					'hires_smooth_resolution',
 					'side_scroll',
 					'dpi',
+					'pointer_speed',
 					'hand_detection',
 					'typing_illumination',
+					'smart_shift',
 					])
 del namedtuple
 
 RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				new_fn_swap=None,
+				k375s_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
+				lowres_smooth_scroll=None,
+				hires_smooth_invert=None,
+				hires_smooth_resolution=None,
 				side_scroll=_register_side_scroll,
 				dpi=_register_dpi,
+				pointer_speed=None,
 				hand_detection=_register_hand_detection,
 				typing_illumination=None,
+				smart_shift=None,
 			)
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
+				k375s_fn_swap=_feature_k375s_fn_swap,
 				smooth_scroll=_feature_smooth_scroll,
+				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
+				hires_smooth_invert=_feature_hires_smooth_invert,
+				hires_smooth_resolution=_feature_hires_smooth_resolution,
 				side_scroll=None,
 				dpi=_feature_adjustable_dpi,
+				pointer_speed=_feature_pointer_speed,
 				hand_detection=None,
 				typing_illumination=None,
+				smart_shift=_feature_smart_shift,
 			)
 
 del _SETTINGS_LIST
@@ -266,6 +374,12 @@ def check_feature_settings(device, already_known):
 		already_known.append(feature(device))
 
 	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
-	check_feature(_FN_SWAP[0],      _F.FN_INVERSION)
-	check_feature(_FN_SWAP[0],      _F.NEW_FN_INVERSION, 'new_fn_swap')
-	check_feature(_DPI[0],          _F.ADJUSTABLE_DPI)
+	check_feature(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL)
+	check_feature(_HIRES_INV[0],     _F.HIRES_WHEEL, "hires_smooth_invert")
+	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
+	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
+	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
+	check_feature(_FN_SWAP[0],       _F.K375S_FN_INVERSION, 'k375s_fn_swap')
+	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
+	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
+	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)

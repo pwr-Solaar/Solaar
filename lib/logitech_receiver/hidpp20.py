@@ -28,6 +28,7 @@ del getLogger
 
 from .common import (FirmwareInfo as _FirmwareInfo,
 					ReprogrammableKeyInfo as _ReprogrammableKeyInfo,
+					ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4,
 					KwException as _KwException,
 					NamedInts as _NamedInts,
 					pack as _pack,
@@ -80,6 +81,7 @@ FEATURE = _NamedInts(
 	HYBRID_TRACKING=0x2400,
 	FN_INVERSION=0x40A0,
 	NEW_FN_INVERSION=0x40A2,
+	K375S_FN_INVERSION=0x40A3,
 	ENCRYPTION=0x4100,
 	LOCK_KEY_STATE=0x4220,
 	SOLAR_DASHBOARD=0x4301,
@@ -300,11 +302,12 @@ class FeaturesArray(object):
 
 class KeysArray(object):
 	"""A sequence of key mappings supported by a HID++ 2.0 device."""
-	__slots__ = ('device', 'keys')
+	__slots__ = ('device', 'keys', 'keyversion')
 
 	def __init__(self, device, count):
 		assert device is not None
 		self.device = device
+		self.keyversion = 0
 		self.keys = [None] * count
 
 	def __getitem__(self, index):
@@ -312,13 +315,34 @@ class KeysArray(object):
 			if index < 0 or index >= len(self.keys):
 				raise IndexError(index)
 
+			# TODO: add here additional variants for other REPROG_CONTROLS
 			if self.keys[index] is None:
 				keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+				self.keyversion=1
+				if keydata is None:
+					keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
+					self.keyversion=4
 				if keydata:
-					key, key_task, flags = _unpack('!HHB', keydata[:5])
+					key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
 					ctrl_id_text = special_keys.CONTROL[key]
 					ctrl_task_text = special_keys.TASK[key_task]
-					self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
+					if self.keyversion == 1:
+						self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
+					if self.keyversion == 4:
+						try:
+							mapped_data = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key&0xff00, key&0xff)
+							if mapped_data:
+								remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
+								# if key not mapped map it to itself for display
+								if remapped == 0:
+									remapped = key
+						except Exception:
+							remapped = key
+							remap_key = key
+							remap_flag = 0
+
+						remapped_text = special_keys.CONTROL[remapped]
+						self.keys[index] = _ReprogrammableKeyInfoV4(index, ctrl_id_text, ctrl_task_text, flags, pos, group, gmask, remapped_text)
 
 			return self.keys[index]
 
@@ -439,7 +463,10 @@ def get_battery(device):
 
 
 def get_keys(device):
+	# TODO: add here additional variants for other REPROG_CONTROLS
 	count = feature_request(device, FEATURE.REPROG_CONTROLS)
+	if count is None:
+		count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
 	if count:
 		return KeysArray(device, ord(count[:1]))
 
@@ -457,3 +484,30 @@ def get_mouse_pointer_info(device):
 				'suggest_os_ballistics': suggest_os_ballistics,
 				'suggest_vertical_orientation': suggest_vertical_orientation
 			}
+
+def get_hires_wheel(device):
+	caps = feature_request(device, FEATURE.HIRES_WHEEL, 0x00)
+	mode = feature_request(device, FEATURE.HIRES_WHEEL, 0x10)
+	ratchet = feature_request(device, FEATURE.HIRES_WHEEL, 0x030)
+
+
+	if caps and mode and ratchet:
+		# Parse caps
+		multi, flags = _unpack('!BB', caps[:2])
+
+		has_invert = (flags & 0x08) != 0
+		has_ratchet = (flags & 0x04) != 0
+
+		# Parse mode
+		wheel_mode, reserved = _unpack('!BB', mode[:2])
+
+		target = (wheel_mode & 0x01) != 0
+		res = (wheel_mode & 0x02) != 0
+		inv = (wheel_mode & 0x04) != 0
+
+		# Parse Ratchet switch
+		ratchet_mode, reserved = _unpack('!BB', ratchet[:2])
+
+		ratchet = (ratchet_mode & 0x01) != 0
+
+		return multi, has_invert, has_ratchet, inv, res, target, ratchet

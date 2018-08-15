@@ -80,7 +80,7 @@ class PairedDevice(object):
 		# 	_log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
 
 		if link_notification is not None:
-			self.online = bool(ord(link_notification.data[0:1]) & 0x40)
+			self.online = not bool(ord(link_notification.data[0:1]) & 0x40)
 			self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
 			# assert link_notification.address == (0x04 if unifying else 0x03)
 			kind = ord(link_notification.data[0:1]) & 0x0F
@@ -336,10 +336,14 @@ class Receiver(object):
 
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
-		serial_reply = self.read_register(_R.receiver_info, 0x03)
-		assert serial_reply
-		self.serial = _strhex(serial_reply[1:5])
-		self.max_devices = ord(serial_reply[6:7])
+		if self.product_id != 'c534':
+			serial_reply = self.read_register(_R.receiver_info, 0x03)
+			assert serial_reply
+			self.serial = _strhex(serial_reply[1:5])
+			self.max_devices = ord(serial_reply[6:7])
+		else:
+			self.serial = 0
+			self.max_devices = 6
 
 		if self.product_id == u'c525':
 			self.name = 'MX Air Receiver'

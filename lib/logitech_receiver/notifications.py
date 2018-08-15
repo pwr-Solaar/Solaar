@@ -64,7 +64,7 @@ def _process_receiver_notification(receiver, status, n):
 	# pairing lock notification
 	if n.sub_id == 0x4A:
 		status.lock_open = bool(n.address & 0x01)
-		reason = _("pairing lock is ") + (_("open") if status.lock_open else _("closed"))
+		reason = (_("pairing lock is open") if status.lock_open else _("pairing lock is closed"))
 		if _log.isEnabledFor(_INFO):
 			_log.info("%s: %s", receiver, reason)
 
@@ -156,6 +156,7 @@ def _process_hidpp10_notification(device, status, n):
 	if n.sub_id == 0x41:
 		protocol_name = ('unifying (eQuad DJ)' if n.address == 0x04
 					else 'eQuad' if n.address == 0x03
+					else 'M185' if n.address == 0x0A
 					else None)
 		if protocol_name:
 			if _log.isEnabledFor(_DEBUG):
@@ -163,14 +164,14 @@ def _process_hidpp10_notification(device, status, n):
 				assert wpid == device.wpid, "%s wpid mismatch, got %s" % (device, wpid)
 
 			flags = ord(n.data[:1]) & 0xF0
-			link_encrypyed = bool(flags & 0x20)
+			link_encrypted = bool(flags & 0x20)
 			link_established = not (flags & 0x40)
 			if _log.isEnabledFor(_DEBUG):
 				sw_present = bool(flags & 0x10)
 				has_payload = bool(flags & 0x80)
 				_log.debug("%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s",
-							device, protocol_name, sw_present, link_encrypyed, link_established, has_payload)
-			status[_K.LINK_ENCRYPTED] = link_encrypyed
+							device, protocol_name, sw_present, link_encrypted, link_established, has_payload)
+			status[_K.LINK_ENCRYPTED] = link_encrypted
 			status.changed(active=link_established)
 		else:
 			_log.warn("%s: connection notification with unknown protocol %02X: %s", device.number, n.address, n)
@@ -272,6 +273,24 @@ def _process_feature_notification(device, status, n, feature):
 				_log.info("%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s", device, button_down, mouse_lifted)
 		else:
 			_log.warn("%s: unknown TOUCH MOUSE %s", device, n)
+		return True
+
+	if feature == _F.HIRES_WHEEL:
+		if (n.address == 0x00):
+			if _log.isEnabledFor(_INFO):
+				flags, delta_v = _unpack('>bh', n.data[:3])
+				high_res = (flags & 0x10) != 0
+				periods = flags & 0x0f
+				_log.info("%s: WHEEL: res: %d periods: %d delta V:%-3d", device, high_res, periods, delta_v)
+			return True
+		elif (n.address == 0x10):
+			if _log.isEnabledFor(_INFO):
+				flags = ord(n.data[:1])
+				ratchet = flags & 0x01
+				_log.info("%s: WHEEL: ratchet: %d", device, ratchet)
+			return True
+		else:
+			_log.warn("%s: unknown WHEEL %s", device, n)
 		return True
 
 	_log.warn("%s: unrecognized %s for feature %s (index %02X)", device, n, feature, n.sub_id)

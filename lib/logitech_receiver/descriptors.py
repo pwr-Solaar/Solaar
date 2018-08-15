@@ -143,7 +143,16 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 # Keyboards
 
 _D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
+_D('Wireless Keyboard K270(unifying)', protocol=2.0, wpid='4003')
+_D('Wireless Keyboard MK270', protocol=2.0, wpid='4023',
+			        settings=[
+							_FS.fn_swap()
+						],
+				)
 _D('Wireless Keyboard K270', protocol=1.0,
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Keyboard MK320', protocol=1.0, wpid='200F',
 				registers=(_R.battery_status, ),
 				)
 _D('Wireless Keyboard MK330')
@@ -156,6 +165,11 @@ _D('Wireless Wave Keyboard K350', protocol=1.0, wpid='200A',
 _D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
 				settings=[
 							_FS.fn_swap()
+						],
+				)
+_D('Wireless Keyboard K375s', protocol=2.0, wpid='4061',
+				settings=[
+							_FS.k375s_fn_swap()
 						],
 				)
 _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
@@ -189,6 +203,11 @@ _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 							_FS.fn_swap()
 						],
 				)
+_D('Wireless Solar Keyboard K780', protocol=4.5, wpid='405B',
+				settings=[
+							_FS.new_fn_swap()
+						],
+				)
 _D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
 				registers=(_R.battery_status, _R.three_leds, ),
 				settings=[
@@ -204,8 +223,19 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 
 # Mice
 
+_D('Wireless Mouse M150', protocol=2.0, wpid='4022')
 _D('Wireless Mouse M175', protocol=2.0, wpid='4008')
-_D('Wireless Mouse M185')
+_D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+							_FS.pointer_speed(),
+				])
+_D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+							_FS.pointer_speed(),
+				])
+_D('Wireless Mouse M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
 _D('Wireless Mouse M235')
@@ -242,16 +272,26 @@ _D('Wireless Mouse M510', protocol=1.0, wpid='1025',
 							_RS.side_scroll(),
 						],
 				)
+_D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+				])
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
 _D('Touch Mouse M600', protocol=2.0, wpid='401A')
-_D('Marathon Mouse M705', protocol=1.0, wpid='101B',
+_D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpid='101B',
 				registers=(_R.battery_charge, ),
 				settings=[
 							_RS.smooth_scroll(),
 							_RS.side_scroll(),
 						],
 				)
+_D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',
+				settings=[
+					_FS.hires_smooth_invert(),
+					_FS.hires_smooth_resolution(),
+					_FS.pointer_speed(),
+				])
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620', protocol=2.0)
 _D('Logitech Cube', kind=_DK.mouse, protocol=2.0)
@@ -260,6 +300,12 @@ _D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017',
 				settings=[
 							_RS.smooth_scroll(),
 							_RS.side_scroll(),
+						],
+				)
+_D('Anywhere Mouse MX 2', codename='Anywhere MX 2', protocol=4.5, wpid='404A',
+				settings=[
+							_FS.hires_smooth_invert(),
+							_FS.hires_smooth_resolution(),
 						],
 				)
 _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
@@ -273,11 +319,29 @@ _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 
 _D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041')
 
+_D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5,wpid='4069',
+				settings=[
+							_FS.hires_smooth_invert(),
+							_FS.hires_smooth_resolution(),
+						],
+				)
+
 _D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
 				registers=(_R.battery_status, ),
 				)
 _D('G700 Gaming Mouse', codename='G700', protocol=1.0, wpid='1023',
-				registers=(_R.battery_status, ),
+				registers=(_R.battery_status, _R.three_leds, ),
+				settings=[
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
+						],
+				)
+_D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A',
+				registers=(_R.battery_status, _R.three_leds, ),
+				settings=[
+							_RS.smooth_scroll(),
+							_RS.side_scroll(),
+						],
 				)
 
 # Trackballs

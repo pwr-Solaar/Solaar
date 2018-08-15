@@ -33,7 +33,7 @@ automatically (make sure to run it as your regular desktop user, it will switch
 to root when necessary), or you can do all the required steps by hand, as the
 root user:
 
-1. Copy `rules.d/99-logitech-unifying-receiver.rules` from Solaar to
+1. Copy `rules.d/42-logitech-unifying-receiver.rules` from Solaar to
    `/etc/udev/rules.d/`. The `udev` daemon will automatically pick up this file
    using inotify.
 
@@ -50,5 +50,5 @@ root user:
    Plugging it again will re-create the device node with the right permissions.
 
 3. Make sure your desktop users are part of the `plugdev` group, by running
-   `gpasswd <desktop username> plugdev`. If these users were not assigned to the
+   `gpasswd -a <desktop username> plugdev`. If these users were not assigned to the
    group before, they must re-login for the changes to take effect.

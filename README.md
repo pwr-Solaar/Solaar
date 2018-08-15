@@ -1,4 +1,4 @@
-**Solaar** is a Linux device manager for Logitech's [Unifying Receiver][unifying]
+**Solaar** is a Linux device manager for Logitech's [Unifying][unifying] Receiver
 peripherals. It is able to pair/unpair devices to the receiver, and for most
 devices read battery status.
 
@@ -6,7 +6,7 @@ It comes in two flavors, command-line and GUI.  Both are able to list the
 devices paired to a Unifying Receiver, show detailed info for each device, and
 also pair/unpair supported devices with the receiver.
 
-[unifying]: http://logitech.com/en-us/66/6079
+[unifying]: http://logitech.com/promotions/6072
 
 ## Supported Devices
 
@@ -23,7 +23,8 @@ and their features, see [docs/devices.md](docs/devices.md).
 Pre-built packages are available for a few Linux distros.
 
 * Debian 7 (Wheezy) or higher: packages in this [repository](docs/debian.md)
-* Ubuntu/Kubuntu 12.04+: [ppa:daniel.pavel/solaar][ppa]
+* Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
+* Ubuntu/Kubuntu 12.04 to 14.04: use `solaar` package from [ppa:daniel.pavel/solaar][ppa]
 
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
@@ -31,15 +32,16 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 * an [Arch package][arch], courtesy of Arnaud Taffanel
 * a [Fedora package][fedora], courtesy of Eric Smith
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
-* a [Mageia package][mageia], courtesy of Damien Lallement
+* a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
 [arch]: http://aur.archlinux.org/packages/solaar
-[fedora]: https://admin.fedoraproject.org/pkgdb/package/solaar/
+[fedora]: https://apps.fedoraproject.org/packages/solaar
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [opensuse]: http://software.opensuse.org/package/Solaar
+[universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
 
 
 ## Manual installation
@@ -62,7 +64,7 @@ procedure for manual installation.
   confused about the state of the devices. I haven't encountered this often
   enough to be able to be able to diagnose it properly yet.
 
-[nano]: http://logitech.com/mice-pointers/articles/5926
+[nano]: http://support.logitech.com/en_us/parts
 
 
 ## License

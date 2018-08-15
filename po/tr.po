@@ -1,357 +1,347 @@
-# Greek translations for solaar package.
-# Copyright (C) 2014 THE solaar'S COPYRIGHT HOLDER
+# Turkish translations for solaar package.
+# Copyright (C) 2015 THE solaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the solaar package.
-# Automatically generated, 2014.
-# Giannis Tsagatakis <jtsagata@gmail.com>
-# Vangelis Skarmoutsos <skarmoutsosv@gmail.com>, 2017
+# Automatically generated, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: solaar 0.9.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-13 00:42+0300\n"
-"PO-Revision-Date: 2017-09-11 20:55+0300\n"
-"Last-Translator: Vangelis Skarmoutsos <skarmoutsosv@gmail.com>\n"
-"Language-Team: none\n"
-"Language: el\n"
+"POT-Creation-Date: 2015-04-11 15:39+0300\n"
+"PO-Revision-Date: 2015-04-11 17:35+0200\n"
+"Last-Translator: Behzat Erte <b3hzat@gmail.com>\n"
+"Language-Team: Behzat Erte <b3hzat@gmail.com>\n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "critical"
-msgstr "κρίσιμη"
+msgstr "kritik"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "empty"
-msgstr "άδεια"
+msgstr "boş"
 
 #: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
 msgid "full"
-msgstr "γεμάτη"
+msgstr "dolu"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "good"
-msgstr "καλή"
+msgstr "iyi"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "low"
-msgstr "χαμηλή"
+msgstr "az"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid "almost full"
-msgstr "σχεδόν γεμάτη"
+msgstr "nerdeyse dolu"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid "discharging"
-msgstr "εκφορτίζεται"
+msgstr "deşarj"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid "recharging"
-msgstr "επαναφορτίζεται"
+msgstr "şarj ediliyor"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid "invalid battery"
-msgstr "μη έγκυρη μπαταρία"
+msgstr "geçersiz pil"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid "slow recharge"
-msgstr "αργή επαναφόρτιση"
+msgstr "yavaş yeniden doldurma"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid "thermal error"
-msgstr "θερμικό σφάλμα"
+msgstr "ısı hatası"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "device not supported"
-msgstr "η συσκευή δεν υποστηρίζεται"
+msgstr "aygıt desteklenmiyor"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "device timeout"
-msgstr "ορίου χρόνου συσκευής"
+msgstr "aygıt zaman aşımı"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "sequence timeout"
-msgstr "ορίου χρόνου ακολουθίας"
+msgstr "tekrarlama zaman aşımı"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "too many devices"
-msgstr "πάρα πολλές συσκευές"
+msgstr "birden çok aygıt"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Bootloader"
-msgstr "Bootloader"
+msgstr "Önyükleme Yazılımı"
 
 #: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
 msgid "Firmware"
-msgstr "Firmware"
+msgstr "Donanım Yazılımı"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Hardware"
-msgstr "Υλικό"
+msgstr "Donanım"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "Other"
-msgstr "Άλλο"
+msgstr "Diğer"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "closed"
-msgstr "κλειστή"
+msgstr "kapalı"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "open"
-msgstr "ανοιχτή"
+msgstr "açık"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "pairing lock is "
-msgstr "το κλείδωμα ταιριάσματος είναι"
+msgstr "eş kilidi"
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid "unpaired"
-msgstr "διαχωρισμένη"
+msgstr "eşleşmemiş"
 
 #: lib/logitech_receiver/notifications.py:192
 msgid "powered on"
-msgstr "ανοιχτή"
+msgstr "açık"
 
 #: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
 msgid "unknown"
-msgstr "άγνωστο"
+msgstr "bilinmeyen"
 
 #: lib/logitech_receiver/settings_templates.py:77
 msgid "Smooth Scrolling"
-msgstr "Ομαλή κύλιση"
+msgstr "Düz kaydırma"
 
 #: lib/logitech_receiver/settings_templates.py:78
 msgid "High-sensitivity mode for vertical scroll with the wheel."
-msgstr "Κατάσταση υψηλής ευαισθησίας για κατακόρυφη ολίσθηση με τον τροχό."
+msgstr "Tekerleği dikey kaydırma için yüksek hasasiyet kipi"
 
 #: lib/logitech_receiver/settings_templates.py:79
 msgid "Side Scrolling"
-msgstr "Πλάγια κύλιση"
+msgstr "Yana Kaydırma"
 
 #: lib/logitech_receiver/settings_templates.py:80
 msgid ""
 "When disabled, pushing the wheel sideways sends custom button events\n"
 "instead of the standard side-scrolling events."
 msgstr ""
-"Όταν είναι απενεργοποιημένο, πιέζοντας τον τροχό στο πλάι στέλνει "
-"προσαρμοσμένα γεγονότα κουμπιού\n"
-"αντί των τυπικών γεγονότων πλάγιας ολίσθησης."
+"Devredışı olduğunda, tekerleğin yanına basmak standart yana kaydırma komutu "
+"yerine\n"
+"özel tuş komutunu gönderir. "
 
 #: lib/logitech_receiver/settings_templates.py:82
 msgid "Sensitivity (DPI)"
-msgstr "Ευαισθησία (DPI)"
+msgstr "Duyarlılık (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:83
 msgid "Swap Fx function"
-msgstr "Αντιστροφή λειτουργιών Fx"
+msgstr "Fx işlevlerini takasla"
 
 #: lib/logitech_receiver/settings_templates.py:84
 msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
 msgstr ""
-"Όταν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν τις ειδικές τους "
-"λειτουργίες,\n"
-"και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την τυπική "
-"λειτουργία τους."
+"F1..F12 tuşları özel işlevler için ayarlandığında,\n"
+"FN tuşuna basılı tutarak standart işlevlerini aktif edebilirsiniz. "
 
 #: lib/logitech_receiver/settings_templates.py:87
 msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
 msgstr ""
-"Όταν δεν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν την τυπική "
-"λειτουργία τους,\n"
-"και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την ειδική "
-"λειτουργία τους."
+"F1..F12 tuşları standart işlevler için ayarlandığında,\n"
+"FN tuşuna basılı tutarak özel işlevlerini aktif edebilirsiniz."
 
 #: lib/logitech_receiver/settings_templates.py:89
 msgid "Hand Detection"
-msgstr "Ανίχνευση χεριού"
+msgstr "El Algılama"
 
 #: lib/logitech_receiver/settings_templates.py:90
 msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "Άνοιγμα φωτισμού όταν τα χέρια βρεθούν πάνω από το πληκτρολόγιο."
+msgstr "Eller klavyenin üzerindeyken aydınlanmayı aç."
 
 #: lib/logitech_receiver/status.py:98
 msgid "No paired devices."
-msgstr "Δεν έχω συνταιριασμένες συσκευές"
+msgstr "Eşleşmiş aygıt yok."
 
 #: lib/logitech_receiver/status.py:99
 msgid "1 paired device."
-msgstr "Μία συνταιριασμένη συσκευή"
+msgstr "1 eşli cihaz."
 
 #: lib/logitech_receiver/status.py:100
 msgid " paired devices."
-msgstr " συνταιριασμένες συσκευές."
+msgstr " eşleşmiş aygıtlar."
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
 #: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
 #: lib/solaar/ui/window.py:143
 msgid "Battery"
-msgstr "Μπαταρία"
+msgstr "Pil"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
 msgid "Lighting"
-msgstr "Φωτισμός"
+msgstr "Aydınlatma"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
 msgid "lux"
-msgstr "lux"
+msgstr "lüks"
 
 #: lib/solaar/listener.py:95
 msgid "The receiver was unplugged."
-msgstr "Ο δέκτης αποσυνδέθηκε."
+msgstr "Alıcı çıkartıldı."
 
 #: lib/solaar/ui/__init__.py:48
 msgid "Permissions error"
-msgstr "Σφάλμα δικαιωμάτων"
+msgstr "Yetki hatası"
 
 #: lib/solaar/ui/__init__.py:49
 #, python-format
 msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Βρέθηκε ένας δέκτης Logitech (%s), αλλά δεν έχετε δικαίωμα να τον ανοίξετε."
+msgstr "Logitech Alıcısı bulundu (%s),  fakat açmak için yetki yok."
 
 #: lib/solaar/ui/__init__.py:51
 msgid ""
 "If you've just installed Solaar, try removing the receiver and plugging it "
 "back in."
-msgstr ""
-"Εάν μόλις κάνατε εγκατάσταση του  Solaar, δοκιμάστε να αφαιρέσετε τον δέκτη "
-"και να τον ξανασυνδέσετε."
+msgstr "Eğer Solaar'ı yeni yüklediyseniz, alıcıyı çıkartıp tekrar takın."
 
 #: lib/solaar/ui/__init__.py:53
 msgid "Unpairing failed"
-msgstr "Αποτυχία διαχωρισμού"
+msgstr "Eş ayrıma hatalı"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-brace-format
 msgid "Failed to unpair %{device} from %{receiver}."
-msgstr "Απέτυχα να διαχωρίσω την συσκευή %{device} από τον %{receiver}."
+msgstr "%{device},  %{receiver}'dan ayrımı başarısız oldu."
 
 #: lib/solaar/ui/__init__.py:56
 msgid "The receiver returned an error, with no further details."
-msgstr "Ο δέκτης επέστρεψε ένα λάθος, χωρίς άλλες πληροφορίες."
+msgstr "Alıcı hata döndü, bu hata hakkında ayrıntı mevcut değil."
 
 #: lib/solaar/ui/about.py:39
 msgid ""
 "Shows status of devices connected\n"
 "through wireless Logitech receivers."
 msgstr ""
-"Δείχνει την κατάσταση των συσκευών που συνδέονται\n"
-"ασύρματα σε δέκτες Logitech."
+"Aygıtın durumu kablosuz Logitech alıcılarına\n"
+"bağlandığını gösteriyor."
 
 #: lib/solaar/ui/about.py:48
 msgid "GUI design"
-msgstr "Σχεδιασμός GUI:"
+msgstr "GUI tasarımı"
 
 #: lib/solaar/ui/about.py:49
 msgid "Testing"
-msgstr "Δοκιμές"
+msgstr "Test et"
 
 #: lib/solaar/ui/about.py:54
 msgid "Logitech documentation"
-msgstr "Τεκμηρίωση Logitech"
+msgstr "Logitech belgeleri"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
 msgid "About"
-msgstr "Περί"
+msgstr "Hakkında"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:203
 msgid "Unpair"
-msgstr "Διαχωρισμός"
+msgstr "Eş ayrıma"
 
 #: lib/solaar/ui/config_panel.py:98
 msgid "Working"
-msgstr "Εργάζεται"
+msgstr "Çalışıyor"
 
 #: lib/solaar/ui/config_panel.py:101
 msgid "Read/write operation failed."
-msgstr "Αποτυχία λειτουργίας ανάγνωσης/εγγραφής. "
+msgstr "Okuma/yazma işlemi hatası."
 
 #: lib/solaar/ui/notify.py:120
 msgid "connected"
-msgstr "συνδεμένη"
+msgstr "bağlı"
 
 #: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
 #: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
 msgid "offline"
-msgstr "εκτός σύνδεσης"
+msgstr "çevrimdışı"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid "Pairing failed"
-msgstr "Αποτυχία συνταιρίασματος"
+msgstr "Eşleme başarısız"
 
 #: lib/solaar/ui/pair_window.py:135
 msgid "Make sure your device is within range, and has a decent battery charge."
 msgstr ""
-"Σιγουρέψου ότι η συσκευή είναι εντός εμβέλειας, και έχει επαρκώς φορτισμένη "
-"μπαταρία."
+"Aygıtınızın kapsam alanı içerisinde olduğundan, pilin çalıştığından veya "
+"şarjının tam olduğundan emin olun."
 
 #: lib/solaar/ui/pair_window.py:137
 msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "Εντοπίστηκε μια συσκευή, αλλά δεν είναι συμβατή με αυτόν τον δέκτη."
+msgstr "Aygıt algılandı fakat bu alıcı ile uyumlu değil."
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
 msgid "The receiver only supports %d paired device(s)."
-msgstr "Ο δέκτης υποστηρίζει μέχρι %d συνταιριασμένες συσκευές."
+msgstr "Alıcı sadece %d tane eşleşmiş aygıt(lar) destekler."
 
 #: lib/solaar/ui/pair_window.py:141
 msgid "No further details are available about the error."
-msgstr "Δεν υπάρχουν άλλες πληροφορίες για το σφάλμα."
+msgstr "Hata hakkında daha fazla ayrıntı mevcut değil. "
 
 #: lib/solaar/ui/pair_window.py:155
 msgid "Found a new device"
-msgstr "Βρέθηκε νέα συσκευή"
+msgstr "Yeni aygıt bul"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid "The wireless link is not encrypted"
-msgstr "Η ασύρματη σύνδεση είναι χωρίς κρυπτογράφηση. "
+msgstr "Kablosuz bağlantı şifrelenmemiş"
 
 #: lib/solaar/ui/pair_window.py:197
 msgid "pair new device"
-msgstr "συνταίριασε μια νέα συσκευή"
+msgstr "yeni aygıt eşle"
 
 #: lib/solaar/ui/pair_window.py:205
 msgid "Turn on the device you want to pair."
-msgstr "Άνοιξε την συσκευή που θέλεις να συνταιριάξεις. "
+msgstr "Eşleştirmek istediğiniz aygıtı açın."
 
 #: lib/solaar/ui/pair_window.py:206
 msgid ""
 "If the device is already turned on,\n"
 "turn if off and on again."
 msgstr ""
-"Αν η συσκευή είναι ήδη ανοικτή,\n"
-"κλείσε την και μετά άνοιξε την ξανά."
+"Cihaz zaten açıksa,\n"
+"kapatıp tekrardan açın."
 
 #: lib/solaar/ui/tray.py:55
 msgid "No Logitech receiver found"
-msgstr "Δεν βρέθηκε δέκτης Logitech"
+msgstr "Hiçbir Logitech alıcısı bulunamadı"
 
 #: lib/solaar/ui/tray.py:62
 msgid "Quit"
-msgstr "Έξοδος"
+msgstr "Çıkış"
 
 #: lib/solaar/ui/tray.py:274
 msgid "no receiver"
-msgstr "χωρίς δέκτη"
+msgstr "alıcı yok"
 
 #: lib/solaar/ui/tray.py:293
 msgid "no status"
-msgstr "χωρίς κατάσταση"
+msgstr "durum yok"
 
 #: lib/solaar/ui/window.py:58
 msgid "The wireless link between this device and its receiver is encrypted."
-msgstr ""
-"Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη είναι  "
-"κρυπτογραφημένη."
+msgstr "Bu cihaz ile alıcı arasındaki kablosuz bağlantı şirelenmiştir."
 
 #: lib/solaar/ui/window.py:59
 msgid ""
@@ -365,102 +355,102 @@ msgid ""
 "because typed text can be sniffed inconspicuously by 3rd parties within "
 "range."
 msgstr ""
-"Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη της είναι χωρίς "
-"κρυπτογράφηση.\n"
+"Bu cihaz ile alıcı arasındaki kablosuz bağlantı şirelenmemiştir.\n"
 "\n"
-"Για συσκευές κατάδειξης (ποντίκια, ιχνόσφαιρες, επιφάνειες αφής), αυτό είναι "
-"ένα μικρό πρόβλημα ασφάλειας.\n"
+"İşaretçi aygıtlar için (fare, iztopu, dokunmatik fare), bu durum ufak bir "
+"günvenlik sorunudur.\n"
 "\n"
-"Είναι όμως μεγάλο πρόβλημα ασφάλειας για συσκευές εισαγωγής κειμένου "
-"(πληκτρολόγια),\n"
-"μιας και το κείμενο μπορεί να υποκλαπεί από κακόβουλους εντός εμβέλειας."
+"Fakat yazı giriş aygıtları için bu durum büyük bir sorundur(klavyerler, tuş "
+"takımları),\n"
+"çünkü şifrelenmemiş yazı girişleri kapsama alanı içerisindeki 3. kişiler "
+"tarafından dinlenebilir."
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
 msgid "No device paired"
-msgstr "Χωρίς συνταιριασμένες συσκευές"
+msgstr "Eşlenen aygıt yok"
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
 msgid "Up to %d devices can be paired to this receiver"
-msgstr "Μέχρι %d συσκευές μπορούν να συνταιριαστούν σε αυτόν τον δέκτη"
+msgstr "Bu alıcıya %d tane cihaz eşlenebilir"
 
 #: lib/solaar/ui/window.py:68
 msgid "paired devices"
-msgstr "συνταιριασμένες συσκευές"
+msgstr "eşlenmiş aygıtlar"
 
 #: lib/solaar/ui/window.py:72
 msgid "Only one device can be paired to this receiver"
-msgstr "Μόνο μία συσκευή μπορεί να συνταιριαστεί σε αυτόν τον δέκτη"
+msgstr "Bu alıcıya sadece bir tane aygıt eşnebilir"
 
 #: lib/solaar/ui/window.py:110
 msgid "Scanning"
-msgstr "Σάρωση"
+msgstr "Taranıyor"
 
 #: lib/solaar/ui/window.py:146
 msgid "Wireless Link"
-msgstr "Ασύρματη ζεύξη"
+msgstr "Kablosuz Bağlantı"
 
 #: lib/solaar/ui/window.py:179
 msgid "Show Technical Details"
-msgstr "Εμφάνιση τεχνικών λεπτομερειών"
+msgstr "Teknik Ayrıntıları Göster"
 
 #: lib/solaar/ui/window.py:192
 msgid "Pair new device"
-msgstr "Συνταίριασμα νέας συσκευής"
+msgstr "Yeni aygıt eşle"
 
 #: lib/solaar/ui/window.py:211
 msgid "Select a device"
-msgstr "Επέλεξε μια συσκευή"
+msgstr "Aygıtı seç"
 
 #: lib/solaar/ui/window.py:508
 msgid "Path"
-msgstr "Διαδρομή"
+msgstr "Yol"
 
 #: lib/solaar/ui/window.py:510
 msgid "USB id"
-msgstr "USB id"
+msgstr "USB kimliği"
 
 #: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 msgid "Serial"
-msgstr "Serial"
+msgstr "Seri"
 
 #: lib/solaar/ui/window.py:519
 msgid "Index"
-msgstr "Index"
+msgstr "Dizin"
 
 #: lib/solaar/ui/window.py:520
 msgid "Wireless PID"
-msgstr "Wireless PID"
+msgstr "Kablosuz bağlantı kimliği"
 
 #: lib/solaar/ui/window.py:522
 msgid "Protocol"
-msgstr "Πρωτόκολλο"
+msgstr "İletim kuralı"
 
 #: lib/solaar/ui/window.py:524
 msgid "Polling rate"
-msgstr "Ρυθμός ανανέωσης"
+msgstr "Bulunan yerden okunma hızı"
 
 #: lib/solaar/ui/window.py:539
 msgid "none"
-msgstr "καμία"
+msgstr "yok"
 
 #: lib/solaar/ui/window.py:540
 msgid "Notifications"
-msgstr "Ειδοποιήσεις"
+msgstr "Uyarılar"
 
 #: lib/solaar/ui/window.py:635
 msgid "charging"
-msgstr "φορτίζεται"
+msgstr "şarj oluyor"
 
 #: lib/solaar/ui/window.py:637
 msgid "last known"
-msgstr "τελευταία γνωστή"
+msgstr "son bilinen"
 
 #: lib/solaar/ui/window.py:644
 msgid "not encrypted"
-msgstr "χωρίς κρυπτογράφηση"
+msgstr "şifresiz"
 
 #: lib/solaar/ui/window.py:648
 msgid "encrypted"
-msgstr "κρυπτογραφημένη"
+msgstr "şifreli"

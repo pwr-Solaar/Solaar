@@ -1,343 +1,344 @@
-# Polish translations for solaar package.
+# Finnish translations for solaar package.
 # Copyright (C) 2013 THE solaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2013.
 #
 msgid   ""
-msgstr  "Project-Id-Version: solaar 0.9.1\n"
+msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2013-08-25 01:33+0300\n"
-        "PO-Revision-Date: 2017-09-19 19:55+0100\n"
-        "Last-Translator: Michał Bokiniec <michal2229@gmail.com>\n"
+        "POT-Creation-Date: 2013-09-29 16:22+0300\n"
+        "PO-Revision-Date: 2013-08-05 18:49+0300\n"
+        "Last-Translator: Tomi Leppänen\n"
         "Language-Team: none\n"
-        "Language: pl\n"
+        "Language: fi\n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=UTF-8\n"
         "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n"
-        "%100<10 || n%100>=20) ? 1 : 2);\n"
-        "X-Generator: Poedit 1.5.4\n"
+        "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "critical"
-msgstr  "krytyczny"
+msgstr  "kriittinen"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "empty"
-msgstr  "pusty"
+msgstr  "tyhjä"
 
 #: lib/logitech_receiver/i18n.py:38 lib/logitech_receiver/i18n.py:41
 msgid   "full"
-msgstr  "pełny"
+msgstr  "täysi"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "good"
-msgstr  "dobry"
+msgstr  "hyvä"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid   "low"
-msgstr  "niski"
+msgstr  "matala"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "almost full"
-msgstr  "prawie pełny"
+msgstr  "lähes täysi"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "discharging"
-msgstr  "rozładowywanie"
+msgstr  "tyhjenee"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "recharging"
-msgstr  "ładowanie"
+msgstr  "latautuu"
 
+#, fuzzy
 #: lib/logitech_receiver/i18n.py:42
 msgid   "invalid battery"
-msgstr  "nieprawidłowa bateria"
+msgstr  "virheellinen akku"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "slow recharge"
-msgstr  "wolne ładowanie"
+msgstr  "hidas lataus"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "thermal error"
-msgstr  "błąd temperatury"
+msgstr  "lämpötilasta johtuva virhe"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "device not supported"
-msgstr  "urządzenie nie obsługiwane"
+msgstr  "laite ei ole tuettu"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "device timeout"
-msgstr  "upłynął limit czasu dla urządzenia"
+msgstr  "laitteen aikakatkaisu"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "sequence timeout"
-msgstr  "upłynął limit czasu dla sekwencji"
+msgstr  "sarjan aikakatkaisu"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid   "too many devices"
-msgstr  "za dużo urządzeń"
+msgstr  "liian monta laitetta"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Bootloader"
-msgstr  "Bootloader"
+msgstr  "Alkulatausohjelma"
 
 #: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:535
 msgid   "Firmware"
-msgstr  "Firmware"
+msgstr  "Laiteohjelmisto"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Hardware"
-msgstr  "Hardware"
+msgstr  "Laitteisto"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid   "Other"
-msgstr  "Inne"
+msgstr  "Muu"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "closed"
-msgstr  "zamknięta"
+msgstr  "suljettu"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "open"
-msgstr  "otwarta"
+msgstr  "avoin"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid   "pairing lock is "
-msgstr  "blokada parowania jest "
+msgstr  "parituslukko on "
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:118
 msgid   "unpaired"
-msgstr  "nie sparowany"
+msgstr  "parittamaton"
 
 #: lib/logitech_receiver/notifications.py:192
 msgid   "powered on"
-msgstr  "włączone"
+msgstr  "virta päällä"
 
 #: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:622
 msgid   "unknown"
-msgstr  "nieznane"
+msgstr  "tuntematon"
 
 #: lib/logitech_receiver/settings_templates.py:77
 msgid   "Smooth Scrolling"
-msgstr  "Płynne przewijanie"
+msgstr  "Pehmeä vieritys"
 
 #: lib/logitech_receiver/settings_templates.py:78
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  "Tryb wysokiej rozdzielczości dla przewijania pionowego\n"
-        "przy użyciu kółka myszy."
+msgstr  "Korkean herkkyyden tila pystyvieritykseen hiiren rullalla."
 
 #: lib/logitech_receiver/settings_templates.py:79
 msgid   "Side Scrolling"
-msgstr  "Przewijanie na boki"
+msgstr  "Sivuttaisvieritys"
 
 #: lib/logitech_receiver/settings_templates.py:80
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
-msgstr  "Gdy jest wyłączone to przechylanie kółka myszy wysyła "
-        "niestandardowe\n"
-        "zdarzenia przycisków zamiast standardowych do przewijania na boki."
+msgstr  "Pois päältä ollessaan, rullan painaminen sivuttain lähettää "
+        "muokattuja\n"
+        "toimintoja normaalien sivuttaisvieritystoimintojen sijaan."
 
 #: lib/logitech_receiver/settings_templates.py:82
 msgid   "Sensitivity (DPI)"
-msgstr  "Czułość (DPI)"
+msgstr  "Herkkyys (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:83
 msgid   "Swap Fx function"
-msgstr  "Funkcja Swap Fx"
+msgstr  "Vaihda Fx"
 
 #: lib/logitech_receiver/settings_templates.py:84
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
-msgstr  "Gdy włączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
-        "ich funkcja pomocnicza. Aby aktywować standardową funkcję należy\n"
-        "przytrzymać klawisz FN."
+msgstr  "Asetettu: F1..F12 näppäimet aktivoivat erityistoimintonsa ja \n"
+        "FN-näppäintä on painettava, jotta ne aktivoisivat normaalin\n"
+        "toimintonsa."
 
 #: lib/logitech_receiver/settings_templates.py:87
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
-msgstr  "Gdy wyłączona to po wciśnięciu klawiszy F1..F12 aktywowana zostanie\n"
-        "ich standardowa funkcja. Aby aktywować funkcję pomocniczą należy\n"
-        "przytrzymać klawisz FN."
+msgstr  "Ei asetettu: F1..F12 näppäimet aktivoivat tavallisen toimintonsa\n"
+        "ja FN-näppäintä on painettava, jotta ne aktivoisivat\n"
+        "erityistoimintonsa."
 
 #: lib/logitech_receiver/settings_templates.py:89
 msgid   "Hand Detection"
-msgstr  "Wykrywanie dłoni"
+msgstr  "Käsien tunnistus"
 
 #: lib/logitech_receiver/settings_templates.py:90
 msgid   "Turn on illumination when the hands hover over the keyboard."
-msgstr  "Włącz podświetlenie gdy dłoń znajdzie się nad klawiaturą."
+msgstr  "Käynnistä valaistus, kun kädet ovat näppämistön yläpuolella."
 
 #: lib/logitech_receiver/status.py:98
 msgid   "No paired devices."
-msgstr  "Brak sparowanych urządzeń."
+msgstr  "Ei paritettuja laitteita."
 
 #: lib/logitech_receiver/status.py:99
 msgid   "1 paired device."
-msgstr  "1 sparowane urządzenie."
+msgstr  "Yksi paritettu laite."
 
 #: lib/logitech_receiver/status.py:100
 msgid   " paired devices."
-msgstr  " sparowane(-ych) urządzeń."
+msgstr  " paritettua laitetta"
 
 #: lib/logitech_receiver/status.py:149 lib/logitech_receiver/status.py:151
+#: lib/logitech_receiver/status.py:203 lib/logitech_receiver/status.py:205
 #: lib/solaar/ui/window.py:143
 msgid   "Battery"
-msgstr  "Bateria"
+msgstr  "Akku"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:150
 msgid   "Lighting"
-msgstr  "Podświetlenie"
+msgstr  "Valaistus"
 
 #: lib/logitech_receiver/status.py:162 lib/solaar/ui/window.py:663
 msgid   "lux"
-msgstr  "lux"
+msgstr  "luksia"
 
 #: lib/solaar/listener.py:95
 msgid   "The receiver was unplugged."
-msgstr  "Odbiornik został odłączony."
+msgstr  "Vastaanotin irroitettiin."
 
 #: lib/solaar/ui/__init__.py:48
 msgid   "Permissions error"
-msgstr  "Błąd uprawnień"
+msgstr  "Virheelliset käyttöoikeudet"
 
 #: lib/solaar/ui/__init__.py:49
-#, fuzzy, python-format
+#, python-format
 msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
         "it."
-msgstr  "Znaleziono odbiornik Logitech (%s), ale nie ma uprawnień do "
-        "otworzenia go."
+msgstr  "Logitechin vastaanotin (%s) löydettiin, mutta sitä ei ollut oikeutta "
+        "avata."
 
 #: lib/solaar/ui/__init__.py:51
 msgid   "If you've just installed Solaar, try removing the receiver and "
         "plugging it back in."
-msgstr  "Jeżeli właśnie zainstalowałeś Solaar spróbuj odłączyć nadajnik i "
-        "podłączyć go ponownie."
+msgstr  "Jos olet juuri asentanut Solaarin, yritä vastaanottimen "
+        "irroittamista ja liittämistä uudelleen."
 
 #: lib/solaar/ui/__init__.py:53
 msgid   "Unpairing failed"
-msgstr  "Usunięcie parowania nie powiodło się"
+msgstr  "Parituksen poisto epäonnistui"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "Nie powidło się usunięcie parowania %{device} z %{receiver}."
+msgstr  "%{device}n parituksen poisto epäonnistui %{receiver}sta."
 
 #: lib/solaar/ui/__init__.py:56
 msgid   "The receiver returned an error, with no further details."
-msgstr  "Odbiornik zwrócił błąd bez dodatkowych informacji."
+msgstr  "Vastaanotin palautti virheen ilman lisätietoja."
 
 #: lib/solaar/ui/about.py:39
 msgid   "Shows status of devices connected\n"
         "through wireless Logitech receivers."
-msgstr  "Wyświetla status urządzeń podłączonych\n"
-        "przez bezprzewodowe odbiorniki Logitech."
+msgstr  "Näyttää Logitechin langattoman \n"
+        "vastaanottimen kautta liitettyjen\n"
+        "laitteiden tilan."
 
 #: lib/solaar/ui/about.py:48
 msgid   "GUI design"
-msgstr  "Projekt GUI"
+msgstr  "Käyttöliittymäsuunnittelu"
 
 #: lib/solaar/ui/about.py:49
 msgid   "Testing"
-msgstr  "Testy"
+msgstr  "Testaus"
 
+#, fuzzy
 #: lib/solaar/ui/about.py:54
 msgid   "Logitech documentation"
-msgstr  "Dokumentacja Logitech"
+msgstr  "Logitechin dokumentointi"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:316
 msgid   "About"
-msgstr  "O"
+msgstr  "Tietoja"
 
 #: lib/solaar/ui/action.py:95 lib/solaar/ui/action.py:98
 #: lib/solaar/ui/window.py:203
 msgid   "Unpair"
-msgstr  "Usuń parowanie"
+msgstr  "Poista paritus"
 
 #: lib/solaar/ui/config_panel.py:98
 msgid   "Working"
-msgstr  "Pracuję"
+msgstr  "Työskentelee"
 
 #: lib/solaar/ui/config_panel.py:101
 msgid   "Read/write operation failed."
-msgstr  "Operacja odczytu/zapisu nie powiodła się."
+msgstr  "Luku/kirjoitus operaatio epäonnistui."
 
 #: lib/solaar/ui/notify.py:120
 msgid   "connected"
-msgstr  "podłączony"
+msgstr  "yhdistetty"
 
 #: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:290
 #: lib/solaar/ui/tray.py:295 lib/solaar/ui/window.py:653
 msgid   "offline"
-msgstr  "wyłączony"
+msgstr  "ei yhdistetty"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid   "Pairing failed"
-msgstr  "Parowanie nie powiodło się"
+msgstr  "Paritus epäonnistui."
 
 #: lib/solaar/ui/pair_window.py:135
 msgid   "Make sure your device is within range, and has a decent battery "
         "charge."
-msgstr  "Upewnij się, że urządzenie jest w zasięgu i ma naładowane baterie."
+msgstr  "Varmista, että laitteesi on kantaman sisällä ja siinä on riittävä "
+        "lataus."
 
 #: lib/solaar/ui/pair_window.py:137
 msgid   "A new device was detected, but it is not compatible with this "
         "receiver."
-msgstr  "Wykryto nowe urządzenie, jednak nie jest ono kompatybilne z tym "
-        "odbiornikiem."
+msgstr  "Uusi laite tunnistettiin, mutta se ei ole yhteensopiva käytetyn "
+        "vastaanottimen kanssa."
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
 msgid   "The receiver only supports %d paired device(s)."
-msgstr  "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
+msgstr  "Vastaanotin tukee vain %d liitettyä laitetta."
 
 #: lib/solaar/ui/pair_window.py:141
 msgid   "No further details are available about the error."
-msgstr  "Brak dodatkowych informacji na temat błędu."
+msgstr  "Virheestä ei ole saatavilla enempää tietoja."
 
 #: lib/solaar/ui/pair_window.py:155
 msgid   "Found a new device"
-msgstr  "Wykryto nowe urządzenie"
+msgstr  "Löydetty uusi laite."
 
 #: lib/solaar/ui/pair_window.py:180
 msgid   "The wireless link is not encrypted"
-msgstr  "Połączenie nie jest szyfrowane"
+msgstr  "Langaton yhteys ei ole salattu"
 
 #: lib/solaar/ui/pair_window.py:197
 msgid   "pair new device"
-msgstr  "sparuj nowe urządzenie"
+msgstr  "liitä uusi laite"
 
 #: lib/solaar/ui/pair_window.py:205
 msgid   "Turn on the device you want to pair."
-msgstr  "Włącz urządzenie które chcesz sparować."
+msgstr  "Käynnistä laite, jonka haluat parittaa."
 
 #: lib/solaar/ui/pair_window.py:206
 msgid   "If the device is already turned on,\n"
         "turn if off and on again."
-msgstr  "Jeżeli urządzenie jest już włączone,\n"
-        "wyłącz je i włącz ponownie."
+msgstr  "Jos laite on jo päällä, sammuta se\n"
+        "ja kytke virta uudelleen päälle."
 
 #: lib/solaar/ui/tray.py:55
 msgid   "No Logitech receiver found"
-msgstr  "Nie znaleziono odbiornika Logitech"
+msgstr  "Ei löydetty Logitechin vastaanottimia."
 
 #: lib/solaar/ui/tray.py:62
 msgid   "Quit"
-msgstr  "Wyjdź"
+msgstr  "Lopeta"
 
 #: lib/solaar/ui/tray.py:274
 msgid   "no receiver"
-msgstr  "brak odbiornika"
+msgstr  "ei vastaanotinta"
 
 #: lib/solaar/ui/tray.py:293
 msgid   "no status"
-msgstr  "brak statusu"
+msgstr  "ei tietoja"
 
 #: lib/solaar/ui/window.py:58
 msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  "Połączenie bezprzewodowe pomiędzy tym urządzeniem i odbiornikiem "
-        "jest szyfrowane."
+msgstr  "Langaton yhteys laitteen ja vastaanottimen välillä on salattu."
 
 #: lib/solaar/ui/window.py:59
 msgid   "The wireless link between this device and its receiver is not "
@@ -350,59 +351,56 @@ msgid   "The wireless link between this device and its receiver is not "
         "(keyboards, numpads),\n"
         "because typed text can be sniffed inconspicuously by 3rd parties "
         "within range."
-msgstr  "Połączenie pomiędzy tym urządzeniem i odbiornikiem nie jest "
-        "szyfrowane.\n"
+msgstr  "Langaton yhteys laitteen ja vastaanottimen välillä ei ole salattu.\n"
         "\n"
-        "Dla urządzeń wskazujących (myszki, trackballe, trackpady) nie "
-        "stanowi to zagrożenia\n"
-        "bezpieczeństwa.\n"
+        "Osoitinlaitteita (hiiret, ohjainpallot, tasohiiret) käytettäessä se "
+        "on pieni tietoturvallisuusriski.\n"
         "\n"
-        "Jest to jednak duże zagrożenie dla urządzeń służących do "
-        "wprowadzania tekstu\n"
-        "(klawiatury, klawiatury numeryczne), gdyż wpisywany tekst może być "
-        "podsłuchany\n"
-        "przez kogoś będącego w zasięgu."
+        "Kuitenkin, näppäimistöjen kanssa se on suuri tietoturvallisuusriski "
+        "sillä kolmannet osapuolet\n"
+        "voivat lukea huomaamattomasti kirjoitetun tekstin yhteyden kantaman "
+        "sisällä."
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:71
 msgid   "No device paired"
-msgstr  "Brak sparowanych urządzeń."
+msgstr  "Ei paritettuja laitteita"
 
 #: lib/solaar/ui/window.py:67 lib/solaar/ui/window.py:68
 #, python-format
 msgid   "Up to %d devices can be paired to this receiver"
-msgstr  "Maksymalna ilość urządzeń do sparowania z tym odbiornikiem: %d"
+msgstr  "Korkeintaan %d laitetta voidaan parittaa tähän vastaanottimeen"
 
 #: lib/solaar/ui/window.py:68
 msgid   "paired devices"
-msgstr  "sparowane urządzenia"
+msgstr  "paritettua laitetta"
 
 #: lib/solaar/ui/window.py:72
 msgid   "Only one device can be paired to this receiver"
-msgstr  "Tylko jedno urządzenie może być sparowane z tym odbiornikiem"
+msgstr  "Vain yksi laite voidaan parittaa tähän vastaanottimeen"
 
 #: lib/solaar/ui/window.py:110
 msgid   "Scanning"
-msgstr  "Wyszukiwanie"
+msgstr  "Skannataan"
 
 #: lib/solaar/ui/window.py:146
 msgid   "Wireless Link"
-msgstr  "Połączenie bezprzewodowe"
+msgstr  "Langaton yhteys"
 
 #: lib/solaar/ui/window.py:179
 msgid   "Show Technical Details"
-msgstr  "Wyświetl szczegóły techniczne"
+msgstr  "Näytä tekniset tiedot"
 
 #: lib/solaar/ui/window.py:192
 msgid   "Pair new device"
-msgstr  "Sparuj nowe urządzenie"
+msgstr  "Parita uusi laite"
 
 #: lib/solaar/ui/window.py:211
 msgid   "Select a device"
-msgstr  "Wybierz urządzenie"
+msgstr  "Valitse laite"
 
 #: lib/solaar/ui/window.py:508
 msgid   "Path"
-msgstr  "Ścieżka"
+msgstr  "Polku"
 
 #: lib/solaar/ui/window.py:510
 msgid   "USB id"
@@ -411,44 +409,44 @@ msgstr  "USB id"
 #: lib/solaar/ui/window.py:513 lib/solaar/ui/window.py:515
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 msgid   "Serial"
-msgstr  "Serial"
+msgstr  "Sarjanumero"
 
 #: lib/solaar/ui/window.py:519
 msgid   "Index"
-msgstr  "Index"
+msgstr  "Järjestysnumero"
 
 #: lib/solaar/ui/window.py:520
 msgid   "Wireless PID"
-msgstr  "Wireless PID"
+msgstr  "Langaton PID"
 
 #: lib/solaar/ui/window.py:522
 msgid   "Protocol"
-msgstr  "Protokół"
+msgstr  "Yhteyskäytäntö"
 
 #: lib/solaar/ui/window.py:524
 msgid   "Polling rate"
-msgstr  "Częstotliwość próbkowania"
+msgstr  "Päivitysnopeus"
 
 #: lib/solaar/ui/window.py:539
 msgid   "none"
-msgstr  "brak"
+msgstr  "ei mitään"
 
 #: lib/solaar/ui/window.py:540
 msgid   "Notifications"
-msgstr  "Powiadomienia"
+msgstr  "Ilmoitukset"
 
 #: lib/solaar/ui/window.py:635
 msgid   "charging"
-msgstr  "ładowanie"
+msgstr  "lataa"
 
 #: lib/solaar/ui/window.py:637
 msgid   "last known"
-msgstr  "ostatni znany"
+msgstr  "viimeisin tunnettu"
 
 #: lib/solaar/ui/window.py:644
 msgid   "not encrypted"
-msgstr  "nie szyfrowane"
+msgstr  "salaamaton"
 
 #: lib/solaar/ui/window.py:648
 msgid   "encrypted"
-msgstr  "szyfrowane"
+msgstr  "salattu"

@@ -18,6 +18,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import time
 
 from logging import getLogger, INFO as _INFO
 _log = getLogger(__name__)
@@ -181,9 +182,20 @@ class ReceiverListener(_listener.EventsListener):
 			return
 
 		# a device notification
-		assert n.devnumber > 0 and n.devnumber <= self.receiver.max_devices
+		assert 0 < n.devnumber <= self.receiver.max_devices
 		already_known = n.devnumber in self.receiver
-		if not already_known and n.sub_id == 0x41:
+
+		# FIXME: hacky fix for kernel/hardware race condition
+		# If the device was just turned on or woken up from sleep, it may not
+		# be ready to receive commands. The "payload" bit of the wireless
+		# status notification seems to tell us this. If this is the case, we
+		# must wait a short amount of time to avoid causing a broken pipe
+		# error.
+		device_ready = not bool(ord(n.data[0:1]) & 0x80) or n.sub_id != 0x41
+		if not device_ready:
+			time.sleep(0.01)
+
+		if n.sub_id == 0x41 and not already_known:
 			dev = self.receiver.register_new_device(n.devnumber, n)
 		else:
 			dev = self.receiver[n.devnumber]
@@ -192,7 +204,8 @@ class ReceiverListener(_listener.EventsListener):
 			_log.warn("%s: received %s for invalid device %d: %r", self.receiver, n, n.devnumber, dev)
 			return
 
-		if not already_known:
+		# Apply settings every time the device connects
+		if n.sub_id == 0x41:
 			if _log.isEnabledFor(_INFO):
 				_log.info("%s triggered new device %s (%s)", n, dev, dev.kind)
 			# If there are saved configs, bring the device's settings up-to-date.
@@ -211,8 +224,7 @@ class ReceiverListener(_listener.EventsListener):
 			if _log.isEnabledFor(_INFO):
 				_log.info("%s: pairing detected new device", self.receiver)
 			self.receiver.status.new_device = dev
-		elif dev:
-			if dev.online is None:
+		elif dev.online is None:
 				dev.ping()
 
 	def __str__(self):

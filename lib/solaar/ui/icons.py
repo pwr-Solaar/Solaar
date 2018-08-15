@@ -71,6 +71,7 @@ def _look_for_application_icons():
 
 
 _default_theme = None
+_has_mint_icons = None
 _has_gpm_icons = None
 _has_oxygen_icons = None
 _has_gnome_icons = None
@@ -88,8 +89,9 @@ def _init_icon_paths():
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
-	global _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons
+	global _has_mint_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons
 
+	_has_mint_icons = _default_theme.has_icon('battery-good-symbolic')
 	_has_gpm_icons = _default_theme.has_icon('gpm-battery-020-charging')
 	_has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
 						_default_theme.has_icon('battery-charging-040')
@@ -98,10 +100,10 @@ def _init_icon_paths():
 	_has_elementary_icons = _default_theme.has_icon('battery-020-charging')
 
 	if _log.isEnabledFor(_DEBUG):
-		_log.debug("detected icon sets: gpm %s, oxygen %s, gnome %s, elementary %s",
-						_has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
+		_log.debug("detected icon sets: Mint %s, gpm %s, oxygen %s, gnome %s, elementary %s",
+						_has_mint_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
 
-	if (not _has_gpm_icons and not _has_oxygen_icons and
+	if (not _has_mint_icons and not _has_gpm_icons and not _has_oxygen_icons and
 		not _has_gnome_icons and not _has_elementary_icons):
 		_log.warning("failed to detect a known icon set")
 
@@ -121,11 +123,19 @@ def _battery_icon_name(level, charging):
 	_init_icon_paths()
 
 	if level is None or level < 0:
-		return 'gpm-battery-missing' \
-			if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing') \
-			else 'battery-missing'
+		if _has_mint_icons:
+			return 'battery-missing-symbolic'
+		if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing'):
+			return 'gpm-battery-missing'
+		return 'battery-missing'
 
 	level_approx = 20 * ((level  + 10) // 20)
+
+	if _has_mint_icons:
+		if level == 0:
+			return 'battery-empty%s-symbolic' % ('-charging' if charging else '')
+		level_name = ('caution', 'low', 'good', 'full')[3*(level_approx // 100)]
+		return 'battery-%s%s-symbolic' % (level_name, '-charging' if charging else '')
 
 	if _has_gpm_icons:
 		if level == 100 and charging:
@@ -151,9 +161,9 @@ def _battery_icon_name(level, charging):
 		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
 		return 'battery-%s%s' % (level_name, '-charging' if charging else '')
 
+	# fallback... most likely will fail
 	if level == 100 and charging:
 		return 'battery-charged'
-	# fallback... most likely will fail
 	return 'battery-%03d%s' % (level_approx, '-charging' if charging else '')
 
 #
