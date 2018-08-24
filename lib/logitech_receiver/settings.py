@@ -42,15 +42,15 @@ KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04)
 class Setting(object):
 	"""A setting descriptor.
 	Needs to be instantiated for each specific device."""
-	__slots__ = ('name', 'label', 'description', 'kind', 'persister', 'device_kind',
+	__slots__ = ('name', 'label', 'description', 'kind', 'persister', 'device_kinds',
 					'_rw', '_validator', '_device', '_value')
 
-	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None):
+	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kinds=None):
 		assert name
 		self.name = name
 		self.label = label or name
 		self.description = description
-		self.device_kind = device_kind
+		self.device_kinds = device_kinds
 
 		self._rw = rw
 		self._validator = validator
@@ -61,7 +61,7 @@ class Setting(object):
 
 	def __call__(self, device):
 		assert not hasattr(self, '_value')
-		assert self.device_kind is None or device.kind in self.device_kind
+		assert self.device_kinds is None or device.kind in self.device_kinds
 		p = device.protocol
 		if p == 1.0:
 			# HID++ 1.0 devices do not support features
