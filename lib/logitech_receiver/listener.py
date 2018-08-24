@@ -150,7 +150,7 @@ class EventsListener(_threading.Thread):
 
 		# replace the handle with a threaded one
 		self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
-		# get the right low-level handle for this thead
+		# get the right low-level handle for this thread
 		ihandle = int(self.receiver.handle)
 		if _log.isEnabledFor(_INFO):
 			_log.info("started with %s (%d)", self.receiver, ihandle)

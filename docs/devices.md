@@ -140,10 +140,10 @@ Mice (Mini):
 
 Trackballs (Unifying):
 
-| Device           | HID++ | Battery | DPI   | Other supported features        |
-|------------------|-------|---------|-------|---------------------------------|
-| M570 Trackball   | 1.0   | yes     | -     |                                 |
-
+| Device            | HID++ | Battery | DPI   | Other supported features        |
+|-------------------|-------|---------|-------|---------------------------------|
+| M570 Trackball    | 1.0   | yes     | -     |                                 |
+| MX Ergo Trackball | 4.5   | yes     | -     |                                 |
 
 Touchpads (Unifying):
 
