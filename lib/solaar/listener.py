@@ -185,16 +185,8 @@ class ReceiverListener(_listener.EventsListener):
 		assert 0 < n.devnumber <= self.receiver.max_devices
 		already_known = n.devnumber in self.receiver
 
-		# FIXME: hacky fix for kernel/hardware race condition
-		# If the device was just turned on or woken up from sleep, it may not
-		# be ready to receive commands. The "payload" bit of the wireless
-		# status notification seems to tell us this. If this is the case, we
-		# must wait a short amount of time to avoid causing a broken pipe
-		# error.
-		device_ready = not bool(ord(n.data[0:1]) & 0x80) or n.sub_id != 0x41
-		if not device_ready:
-			time.sleep(0.01)
-
+		# 0x41 is a connection notice, not a pairing notice
+		# so the device may have been previously paired
 		if n.sub_id == 0x41 and not already_known:
 			dev = self.receiver.register_new_device(n.devnumber, n)
 		else:
