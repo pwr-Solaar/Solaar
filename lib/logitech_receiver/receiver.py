@@ -345,7 +345,9 @@ class Receiver(object):
 			self.serial = 0
 			self.max_devices = 6
 
-		if self.max_devices == 6:
+		if self.product_id == 'c525':
+			self.name = 'MX Air Receiver'
+		elif self.max_devices == 6:
 			self.name = 'Unifying Receiver'
 		elif self.max_devices < 6:
 			self.name = 'Nano Receiver'
