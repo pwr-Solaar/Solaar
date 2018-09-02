@@ -8,7 +8,10 @@ autostart_path = '/etc/xdg/autostart'
 import sys
 backup_path_0 = sys.path[0]
 sys.path[0] = backup_path_0 + '/lib'
-from solaar import NAME, __version__
+#from solaar import NAME, __version__
+__version__ = '0.9.2'
+NAME = 'Solaar'
+
 sys.path[0] = backup_path_0
 
 if 'install' in sys.argv:
