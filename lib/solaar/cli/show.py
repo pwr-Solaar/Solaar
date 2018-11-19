@@ -118,6 +118,41 @@ def _print_device(dev):
 						print("            HID++ notification")
 					else:
 						print("            HID notification")
+			if feature == _hidpp20.FEATURE.MOUSE_POINTER:
+				mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
+				if mouse_pointer:
+					print("            DPI: %s" % mouse_pointer['dpi'])
+					print("            Acceleration: %s" % mouse_pointer['acceleration'])
+					if mouse_pointer['suggest_os_ballistics']:
+						print("            Use OS ballistics")
+					else:
+						print("            Override OS ballistics")
+					if mouse_pointer['suggest_vertical_orientation']:
+						print("            Provide vertical tuning, trackball")
+					else:
+						print("            No vertical tuning, standard mice")
+			if feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+				vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
+				if vertical_scrolling_info:
+					print("            Roller type: %s" % vertical_scrolling_info['roller'])
+					print("            Ratchet per turn: %s" % vertical_scrolling_info['ratchet'])
+					print("            Scroll lines: %s" % vertical_scrolling_info['lines'])
+			if feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
+				scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(dev)
+				if scrolling_mode:
+					print("            Hi-res scrolling enabled")
+				else:
+					print("            Hi-res scrolling disabled")
+				if scrolling_resolution:
+					print("            Hi-res scrolling multiplier: %s" % scrolling_resolution)
+			if feature == _hidpp20.FEATURE.POINTER_SPEED:
+				pointer_speed = _hidpp20.get_pointer_speed_info(dev)
+				if pointer_speed:
+					print("            Pointer Speed: %s" % pointer_speed)
+			if feature == _hidpp20.FEATURE.LOWRES_WHEEL:
+				wheel_status = _hidpp20.get_lowres_wheel_status(dev)
+				if wheel_status:
+					print("            Wheel Reports: %s" % wheel_status)
 
 	if dev.online and dev.keys:
 		print ('     Has %d reprogrammable keys:' % len(dev.keys))
