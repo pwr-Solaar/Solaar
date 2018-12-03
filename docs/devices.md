@@ -89,6 +89,7 @@ Mice (Unifying):
 | M560             | 2.0   | yes     | -     | smooth scrolling                |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
+| M720 Triathlon   | 4.5   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   | smooth scrolling                |

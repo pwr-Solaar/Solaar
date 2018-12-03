@@ -325,6 +325,8 @@ _D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5,wpid='40
 						],
 				)
 
+_D('Multi-device Wireless Mouse M720 Triathlon', codename='M720 Triathlon', protocol=4.5, wpid='405E')
+
 _D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
 				registers=(_R.battery_status, ),
 				)
