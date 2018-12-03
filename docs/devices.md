@@ -72,6 +72,7 @@ Keyboards (Unifying):
 | K830 Illuminated | 2.0   | yes     | FN swap                                 |
 | TK820            | 2.0   | yes     | FN swap                                 |
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
+| Craft            | 4.5   | yes     |                                         |
 
 
 Mice (Unifying):

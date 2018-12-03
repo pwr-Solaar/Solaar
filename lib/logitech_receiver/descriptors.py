@@ -220,6 +220,7 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 							_FS.new_fn_swap()
 						],
 				)
+_D('Multi-Device Wireless Keyboard Craft', protocol=4.5, wpid='4066')
 
 # Mice
 
