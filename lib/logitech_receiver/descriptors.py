@@ -203,7 +203,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Solar Keyboard K780', protocol=4.5, wpid='405B',
+_D('Multi-Device Wireless Keyboard K780', protocol=4.5, wpid='405B',
 				settings=[
 							_FS.new_fn_swap()
 						],
