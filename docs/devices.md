@@ -1,3 +1,8 @@
+---
+title: Supported Devices
+layout: page
+---
+
 # Supported devices
 
 **Solaar** will detect all devices paired with your receiver, and at the very
