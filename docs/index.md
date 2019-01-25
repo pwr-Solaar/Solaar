@@ -31,6 +31,8 @@ Pre-built packages are available for a few Linux distros.
 * Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
 * Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
 * Ubuntu/Kubuntu 12.04 to 14.04: use `solaar` package from [ppa:daniel.pavel/solaar][ppa]
+* Ubuntu/Kubuntu stable packages: use `solaar-gnome3` and/or `solaar`  package from [Solaar stable ppa][ppa2]
+* Ubuntu/Kubuntu git build packages: use `solaar-gnome3` and/or `solaar`  package from [Solaar git ppa][ppa1]
 
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
@@ -40,7 +42,12 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 * a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
+* an [Ubuntu/Kubuntu git and stable ppa][ppa3], courtesy of [gogo][ppa4]
 
+[ppa4]: https://launchpad.net/~trebelnik-stefina
+[ppa3]: https://launchpad.net/~solaar-unifying
+[ppa2]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
+[ppa1]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/ppa
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
 [arch]: https://www.archlinux.org/packages/community/any/solaar/
 [arch-git]: https://aur.archlinux.org/packages/solaar-git/
