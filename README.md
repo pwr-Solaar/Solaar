@@ -22,6 +22,7 @@ and their features, see [docs/devices.md](docs/devices.md).
 
 Pre-built packages are available for a few Linux distros.
 
+* Arch `solaar` package in the [community repository][arch]
 * Debian 7 (Wheezy) or higher: packages in this [repository](docs/debian.md)
 * Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
 * Ubuntu/Kubuntu 12.04 to 14.04: use `solaar` package from [ppa:daniel.pavel/solaar][ppa]
@@ -29,14 +30,15 @@ Pre-built packages are available for a few Linux distros.
 The `solaar` package uses a standard system tray implementation; to ensure
 integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 
-* an [Arch package][arch], courtesy of Arnaud Taffanel
+* an [Arch AUR solaar-git package][arch-git], courtesy of Maxime Poulin
 * a [Fedora package][fedora], courtesy of Eric Smith
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 * a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
-[arch]: http://aur.archlinux.org/packages/solaar
+[arch]: https://www.archlinux.org/packages/community/any/solaar/
+[arch-git]: https://aur.archlinux.org/packages/solaar-git/
 [fedora]: https://apps.fedoraproject.org/packages/solaar
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
