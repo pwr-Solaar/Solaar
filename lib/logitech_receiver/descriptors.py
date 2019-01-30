@@ -230,7 +230,7 @@ _D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
 				])
-_D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
+_D('Wireless Mouse M185/M235', codename='M185/M235', protocol=4.5, wpid='4055',
 				settings=[
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
@@ -238,7 +238,6 @@ _D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
 _D('Wireless Mouse M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
-_D('Wireless Mouse M235', protocol=4.5, wpid='4055')
 _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
 				registers=(_R.battery_status, ),
 				settings=[
