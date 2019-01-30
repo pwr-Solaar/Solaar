@@ -112,7 +112,7 @@ Mice (Nano):
 | M185 [new]       | 4.5   | no      | R/W   | smooth scrolling[note]          |
 | M187             | 2.0   | yes     |       |                                 |
 | M215             | 1.0   | yes     |       |                                 |
-| M235             |       | yes     |       |                                 |
+| M235             | 4.5   | yes     |       |                                 |
 | M305             | 1.0   | yes     |       |                                 |
 | M310             | 1.0   | yes     |       |                                 |
 | M315             |       | yes     |       |                                 |
