@@ -8,7 +8,10 @@ autostart_path = '/etc/xdg/autostart'
 import sys
 backup_path_0 = sys.path[0]
 sys.path[0] = backup_path_0 + '/lib'
-from solaar import NAME, __version__
+#from solaar import NAME, __version__
+__version__ = '0.9.2'
+NAME = 'Solaar'
+
 sys.path[0] = backup_path_0
 
 if 'install' in sys.argv:
@@ -68,8 +71,12 @@ battery status.
 			],
 
 		platforms=['linux'],
-		requires=['pyudev (>= 0.13)', 'gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
+		# sudo apt install python-gi python3-gi \
+		#        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-appindicator3-0.1
+		# os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
+
+		install_requires=['pyudev (>= 0.13)', ],
 		package_dir={'': 'lib'},
 		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
 		data_files=list(_data_files()),

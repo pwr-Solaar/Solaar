@@ -65,12 +65,14 @@ Keyboards (Unifying):
 | K350             | 1.0   | yes     |                                         |
 | K360             | 2.0   | yes     | FN swap, reprog keys                    |
 | K400 Touch       | 2.0   | yes     | FN swap                                 |
+| K400 Plus        | 2.0   |         | FN swap                                 |
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K780             | 4.5   | yes     | FN swap                                 |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
 | K830 Illuminated | 2.0   | yes     | FN swap                                 |
 | TK820            | 2.0   | yes     | FN swap                                 |
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
+| Craft            | 4.5   | yes     |                                         |
 
 
 Mice (Unifying):
@@ -88,6 +90,7 @@ Mice (Unifying):
 | M560             | 2.0   | yes     | -     | smooth scrolling                |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
+| M720 Triathlon   | 4.5   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       | 2.0   | yes     |       |                                 |
 | Performance MX   | 1.0   | yes     | R/W   | smooth scrolling                |
@@ -111,7 +114,7 @@ Mice (Nano):
 | M185 [new]       | 4.5   | no      | R/W   | smooth scrolling[note]          |
 | M187             | 2.0   | yes     |       |                                 |
 | M215             | 1.0   | yes     |       |                                 |
-| M235             |       | yes     |       |                                 |
+| M235             | 4.5   | yes     |       |                                 |
 | M305             | 1.0   | yes     |       |                                 |
 | M310             | 1.0   | yes     |       |                                 |
 | M315             |       | yes     |       |                                 |

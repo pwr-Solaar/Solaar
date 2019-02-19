@@ -177,7 +177,7 @@ _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Touch Keyboard K400 Plus', protocol=2.0, wpid='404D',
+_D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid='404D',
                                 settings=[
                                                         _FS.new_fn_swap()
                                                 ],
@@ -203,7 +203,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Solar Keyboard K780', protocol=4.5, wpid='405B',
+_D('Multi-Device Wireless Keyboard K780', protocol=4.5, wpid='405B',
 				settings=[
 							_FS.new_fn_swap()
 						],
@@ -223,6 +223,7 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 _D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='6511',
 				registers=(_R.battery_status, ),
 				)
+_D('Multi-Device Wireless Keyboard Craft', protocol=4.5, wpid='4066')
 
 # Mice
 
@@ -233,7 +234,7 @@ _D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
 				])
-_D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
+_D('Wireless Mouse M185/M235', codename='M185/M235', protocol=4.5, wpid='4055',
 				settings=[
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
@@ -241,7 +242,6 @@ _D('Wireless Mouse M185 old', codename='M185o', protocol=4.5, wpid='4055',
 _D('Wireless Mouse M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
-_D('Wireless Mouse M235')
 _D('Wireless Mouse M305', protocol=1.0, wpid='101F',
 				registers=(_R.battery_status, ),
 				settings=[
@@ -328,6 +328,8 @@ _D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5,wpid='40
 							_FS.hires_smooth_resolution(),
 						],
 				)
+
+_D('Multi-device Wireless Mouse M720 Triathlon', codename='M720 Triathlon', protocol=4.5, wpid='405E')
 
 _D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
 				registers=(_R.battery_status, ),

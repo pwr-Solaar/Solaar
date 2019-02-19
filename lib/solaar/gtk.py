@@ -85,7 +85,9 @@ def main():
 
 	args = _parse_arguments()
 	if not args: return
-	if args.action: return _cli.run(args.action, args.hidraw_path)
+	if args.action:
+		# if any argument, run comandline and exit
+		return _cli.run(args.action, args.hidraw_path)
 
 	gi = _require('gi', 'python-gi')
 	gi.require_version('Gtk', '3.0')
