@@ -30,6 +30,7 @@ _GENERIC_DRIVER = ('hid-generic', 'generic-usb')
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
 _unifying_receiver = lambda product_id: (0x046d, product_id, 2, _UNIFYING_DRIVER)
 _nano_receiver = lambda product_id: (0x046d, product_id, 1, _GENERIC_DRIVER)
+_lenovo_receiver = lambda product_id: (0x17ef, product_id, 1, _GENERIC_DRIVER)
 
 
 # standard Unifying receivers (marked with the orange Unifying logo)
@@ -50,6 +51,7 @@ NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 NANO_RECEIVER_C531        = _nano_receiver(0xc531)
 NANO_RECEIVER_C534        = _nano_receiver(0xc534)
+NANO_RECEIVER_6042        = _lenovo_receiver(0x6042)
 
 del _unifying_receiver, _nano_receiver
 
@@ -68,4 +70,5 @@ ALL = (
 		NANO_RECEIVER_C52e,
 		NANO_RECEIVER_C531,
 		NANO_RECEIVER_C534,
+		NANO_RECEIVER_6042,
 	)
