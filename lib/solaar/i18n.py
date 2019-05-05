@@ -60,5 +60,7 @@ _gettext.install(_LOCALE_DOMAIN)
 try:
 	unicode
 	_ = lambda x: _gettext.gettext(x).decode('UTF-8')
+	ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
 except:
 	_ = _gettext.gettext
+	ngettext = _gettext.ngettext
