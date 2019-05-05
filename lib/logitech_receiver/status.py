@@ -26,8 +26,7 @@ _log = getLogger(__name__)
 del getLogger
 
 
-from .i18n import _
-from gettext import ngettext
+from .i18n import _, ngettext
 from .common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20

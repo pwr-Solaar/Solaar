@@ -26,10 +26,8 @@ del getLogger
 from gi.repository import Gtk, Gdk, GLib
 from gi.repository.GObject import TYPE_PYOBJECT
 
-
 from solaar import NAME
-from solaar.i18n import _
-from gettext import ngettext
+from solaar.i18n import _, ngettext
 # from solaar import __version__ as VERSION
 from solaar.ui import ui_async as _ui_async
 from logitech_receiver import hidpp10 as _hidpp10
