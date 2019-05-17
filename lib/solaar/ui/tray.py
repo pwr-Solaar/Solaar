@@ -178,12 +178,12 @@ try:
 		indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
 
-	def _update_tray_icon():
+	def _update_tray_icon(device):
 		if _picked_device:
 			_ignore, _ignore, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
-			tray_icon_name = _icons.battery(battery_level, battery_charging)
+			tray_icon_name = _icons.battery(device.kind, battery_level, battery_charging)
 
 			description =  '%s: %s' % (name, device_status)
 		else:
@@ -232,7 +232,7 @@ except ImportError:
 		icon.set_visible(False)
 
 
-	def _update_tray_icon():
+	def _update_tray_icon(device):
 		tooltip_lines = _generate_tooltip_lines()
 		tooltip = '\n'.join(tooltip_lines).rstrip('\n')
 		_icon.set_tooltip_markup(tooltip)
@@ -241,7 +241,7 @@ except ImportError:
 			_ignore, _ignore, name, device_status = _picked_device
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
-			tray_icon_name = _icons.battery(battery_level, battery_charging)
+			tray_icon_name = _icons.battery(device.kind, battery_level, battery_charging)
 		else:
 			# there may be a receiver, but no peripherals
 			tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_ATTENTION
@@ -430,7 +430,7 @@ def _update_menu_item(index, device):
 
 	level = device.status.get(_K.BATTERY_LEVEL)
 	charging = device.status.get(_K.BATTERY_CHARGING)
-	icon_name = _icons.battery(level, charging)
+	icon_name = _icons.battery(device.kind, level, charging)
 
 	image_widget = menu_item.get_image()
 	image_widget.set_sensitive(bool(device.online))
@@ -520,4 +520,4 @@ def update(device=None):
 		# if it's just a receiver update, it's unlikely the picked device would change
 		_picked_device = _pick_device_with_lowest_battery()
 
-	_update_tray_icon()
+	_update_tray_icon(device)

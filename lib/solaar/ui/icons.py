@@ -24,6 +24,7 @@ _log = getLogger(__name__)
 del getLogger
 
 from gi.repository import Gtk
+import subprocess
 
 #
 #
@@ -72,11 +73,13 @@ def _look_for_application_icons():
 
 
 _default_theme = None
-_has_mint_icons = None
+_has_mintY_icons = None
+_has_mintX_icons = None
 _has_gpm_icons = None
 _has_oxygen_icons = None
 _has_gnome_icons = None
 _has_elementary_icons = None
+_current_icon_theme = None
 
 
 def _init_icon_paths():
@@ -90,9 +93,10 @@ def _init_icon_paths():
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("icon theme paths: %s", _default_theme.get_search_path())
 
-	global _has_mint_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons
+	global _has_mintX_icons, _has_mintY_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons,_current_icon_theme
 
-	_has_mint_icons = _default_theme.has_icon('battery-good-symbolic')
+	_has_mintY_icons = _default_theme.has_icon('mouse-battery-good')
+	_has_mintX_icons = _default_theme.has_icon('battery-good-symbolic')
 	_has_gpm_icons = _default_theme.has_icon('gpm-battery-020-charging')
 	_has_oxygen_icons = _default_theme.has_icon('battery-charging-caution') and \
 						_default_theme.has_icon('battery-charging-040')
@@ -100,11 +104,16 @@ def _init_icon_paths():
 						_default_theme.has_icon('battery-full-charged')
 	_has_elementary_icons = _default_theme.has_icon('battery-020-charging')
 
+	if subprocess.Popen("gsettings list-keys org.cinnamon.desktop.interface", shell=True, stdout=subprocess.PIPE).stdout.read() != '':
+		_current_icon_theme = subprocess.check_output('gsettings get org.cinnamon.desktop.interface icon-theme',shell=True)
+	else:
+		_current_icon_theme = subprocess.check_output('gsettings get org.gnome.desktop.interface icon-theme',shell=True)	
+	
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("detected icon sets: Mint %s, gpm %s, oxygen %s, gnome %s, elementary %s",
-						_has_mint_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
+						_has_mintX_icons, _has_gpm_icons, _has_oxygen_icons, _has_gnome_icons, _has_elementary_icons)
 
-	if (not _has_mint_icons and not _has_gpm_icons and not _has_oxygen_icons and
+	if (not _has_mintX_icons and not _has_mintY_icons and not _has_gpm_icons and not _has_oxygen_icons and
 		not _has_gnome_icons and not _has_elementary_icons):
 		_log.warning("failed to detect a known icon set")
 
@@ -112,27 +121,39 @@ def _init_icon_paths():
 #
 #
 
-def battery(level=None, charging=False):
-	icon_name = _battery_icon_name(level, charging)
+def battery(kind = None, level=None, charging=False):
+	icon_name = _battery_icon_name(kind, level, charging)
 	if not _default_theme.has_icon(icon_name):
 		_log.warning("icon %s not found in current theme", icon_name);
 	# elif _log.isEnabledFor(_DEBUG):
 	# 	_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
 	return icon_name
 
-def _battery_icon_name(level, charging):
+def _battery_icon_name(kind, level, charging):
 	_init_icon_paths()
+	print(kind)
 
 	if level is None or level < 0:
-		if _has_mint_icons:
+		if _has_mintY_icons and _current_icon_theme.startswith("'Mint-Y"):
+			return 'battery-missing'
+		if _has_mintX_icons and _current_icon_theme.startswith("'Mint-X"):
 			return 'battery-missing-symbolic'
 		if _has_gpm_icons and _default_theme.has_icon('gpm-battery-missing'):
 			return 'gpm-battery-missing'
 		return 'battery-missing'
 
 	level_approx = 20 * ((level  + 10) // 20)
+	if _has_mintY_icons and _current_icon_theme.startswith("'Mint-Y"):
+		if level == 100 and charging:
+			return 'battery-full-charged'
+		if level_approx == 0 and charging:
+			return 'battery-empty-charging'
+		level_name = ('empty', 'caution', 'low', 'medium', 'good', 'full')[level_approx // 20]
+		if charging:
+			return 'battery-%s-charging' % level_name
+		return '%sbattery-%s' % (getDeviceType(kind),level_name)
 
-	if _has_mint_icons:
+	if _has_mintX_icons and _current_icon_theme.startswith("'Mint-X"):
 		if level == 0:
 			return 'battery-empty%s-symbolic' % ('-charging' if charging else '')
 		level_name = ('caution', 'low', 'good', 'full')[3*(level_approx // 100)]
@@ -170,6 +191,13 @@ def _battery_icon_name(level, charging):
 #
 #
 #
+
+def getDeviceType(kind):
+	if kind == 'mouse' or kind == 'trackball' or kind == 'touchpad':
+		return 'mouse-'
+	if kind == 'numpad':
+		return 'keyboard-'
+	return ''
 
 def lux(level=None):
 	if level is None or level < 0:

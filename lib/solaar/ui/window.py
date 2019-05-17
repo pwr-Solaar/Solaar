@@ -616,7 +616,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		panel._battery._text.set_markup('<small>%s</small>' % _("unknown"))
 	else:
 		charging = device.status.get(_K.BATTERY_CHARGING)
-		icon_name = _icons.battery(battery_level, charging)
+		icon_name = _icons.battery(device.kind, battery_level, charging)
 		panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
 		panel._battery._icon.set_sensitive(True)
 
@@ -812,7 +812,7 @@ def update(device, need_popup=False):
 				_model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
 				charging = device.status.get(_K.BATTERY_CHARGING)
-				icon_name = _icons.battery(battery_level, charging)
+				icon_name = _icons.battery(device.kind, battery_level, charging)
 				_model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
 			if selected_device_id is None or need_popup:
