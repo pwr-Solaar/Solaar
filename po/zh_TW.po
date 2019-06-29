@@ -199,9 +199,7 @@ msgstr  "沒有已配對的裝置。"
 #: lib/logitech_receiver/status.py:101 lib/solaar/ui/window.py:571
 #, python-format
 msgid   "%(count)s paired device."
-msgid_plural    "%(count)s paired devices."
-msgstr[0]       "%(count)s 個已配對裝置"
-msgstr[1]       "%(count)s 個已配對裝置"
+msgstr  "%(count)s 個已配對裝置"
 
 #: lib/logitech_receiver/status.py:150
 #, python-format
@@ -447,9 +445,7 @@ msgstr  "沒有已經配對的裝置"
 #: lib/solaar/ui/window.py:574
 #, python-format
 msgid   "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0]       "此接收器最多可以配對到 %(max_count)s 個裝置"
-msgstr[1]       "此接收器最多可以配對到 %(max_count)s 個裝置"
+msgstr  "此接收器最多可以配對到 %(max_count)s 個裝置"
 
 #: lib/solaar/ui/window.py:576
 msgid   "Only one device can be paired to this receiver."
