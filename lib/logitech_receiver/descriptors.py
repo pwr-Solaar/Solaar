@@ -251,7 +251,7 @@ _D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325', protocol=2.0, wpid='400A',
 				settings=[
-							_FS.smooth_scroll(),
+							_FS.hi_res_scroll(),
 				])
 _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M350', protocol=1.0, wpid='101C',

@@ -118,6 +118,11 @@ def feature_range(name, feature, min_value, max_value,
 
 _SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
+_LOW_RES_SCROLL = ('low-res-scroll', _("HID++ Scrolling"),
+							_("HID++ mode for vertical scroll with the wheel."))
+
+_HI_RES_SCROLL = ('hi-res-scroll', _("High Resolution Scrolling"),
+							_("High-sensitivity mode for vertical scroll with the wheel."))
 _HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
 							_("High-sensitivity wheel invert mode for vertical scroll."))
 _HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
@@ -184,14 +189,14 @@ def _feature_k375s_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
 
-def _feature_smooth_scroll():
-	return feature_toggle(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING,
-					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+def _feature_hi_res_scroll():
+	return feature_toggle(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING,
+					label=_HI_RES_SCROLL[1], description=_HI_RES_SCROLL[2],
 					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_lowres_smooth_scroll():
-	return feature_toggle(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL,
-					label=_SMOOTH_SCROLL[1], description=_SMOOTH_SCROLL[2],
+	return feature_toggle(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL,
+					label=_LOW_RES_SCROLL[1], description=_LOW_RES_SCROLL[2],
 					device_kind=(_DK.mouse, _DK.trackball))
 def _feature_hires_smooth_invert():
 	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
@@ -299,6 +304,7 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'new_fn_swap',
 					'k375s_fn_swap',
 					'smooth_scroll',
+					'hi_res_scroll',
 					'lowres_smooth_scroll',
 					'hires_smooth_invert',
 					'hires_smooth_resolution',
@@ -316,6 +322,7 @@ RegisterSettings = _SETTINGS_LIST(
 				new_fn_swap=None,
 				k375s_fn_swap=None,
 				smooth_scroll=_register_smooth_scroll,
+				hi_res_scroll=None,
 				lowres_smooth_scroll=None,
 				hires_smooth_invert=None,
 				hires_smooth_resolution=None,
@@ -330,7 +337,8 @@ FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
 				k375s_fn_swap=_feature_k375s_fn_swap,
-				smooth_scroll=_feature_smooth_scroll,
+				smooth_scroll=None,
+				hi_res_scroll=_feature_hi_res_scroll,
 				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
 				hires_smooth_invert=_feature_hires_smooth_invert,
 				hires_smooth_resolution=_feature_hires_smooth_resolution,
@@ -373,8 +381,8 @@ def check_feature_settings(device, already_known):
 		feature = getattr(FeatureSettings, field_name)()
 		already_known.append(feature(device))
 
-	check_feature(_SMOOTH_SCROLL[0], _F.HI_RES_SCROLLING)
-	check_feature(_SMOOTH_SCROLL[0], _F.LOWRES_WHEEL)
+	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
+	check_feature(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL)
 	check_feature(_HIRES_INV[0],     _F.HIRES_WHEEL, "hires_smooth_invert")
 	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
 	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
