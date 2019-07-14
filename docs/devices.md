@@ -92,6 +92,8 @@ Mice (Unifying):
 | M515 Couch       | 2.0   | yes     | -     | smooth scrolling                |
 | M525             | 2.0   | yes     | -     | smooth scrolling                |
 | M560             | 2.0   | yes     | -     | smooth scrolling                |
+| M585             | 4.5   | yes     | -     |                                 |
+| M590             | 4.5   | yes     | -     |                                 |
 | M600 Touch       | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
 | T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
