@@ -202,7 +202,7 @@ class DeviceStatus(dict):
 			if isinstance(level, _NamedInt):
 				reason = _("Battery: %(level)s (%(status)s)") % { 'level': _(level), 'status': _(status) }
 			else:
-				reason = _("Battery: %(percent)d%% (%(status)s)") % { 'percent': level, 'status': _(status) }
+				reason = _("Battery: %(percent)d%% (%(status)s)") % { 'percent': level, 'status': status.name }
 
 		if changed or reason:
 			# update the leds on the device, if any
