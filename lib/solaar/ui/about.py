@@ -75,7 +75,7 @@ def _create():
 					'Dimitriy Ryazantcev (Russian)',
 					)))
 
-	about.set_website('http://pwr.github.io/Solaar/')
+	about.set_website('http://pwr-solaar.github.io/Solaar/')
 	about.set_website_label(NAME)
 
 	about.connect('response', lambda x, y: x.hide())
