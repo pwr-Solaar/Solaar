@@ -264,10 +264,12 @@ def write(device_handle, data):
 	retrycount = 0
 	bytes_written = 0
 	while(retrycount < 3):
-		bytes_written = _os.write(device_handle, data)
-		if bytes_written != len(data):
-			sleep(0.1)
+		try:
+			bytes_written = _os.write(device_handle, data)
 			retrycount += 1
+		except IOError as e:
+			if e.errno == _errno.EPIPE:
+				sleep(0.1)
 		else:
 			break
 	if bytes_written != len(data):
