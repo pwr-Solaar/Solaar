@@ -1,3 +1,10 @@
+1.0.1:
+  * Updated the repo url.
+  * Fixed typo which was crashing the application.
+  * Improved the HID write routine which was causing issues on some devices.
+  * Fix non-unifying receivers in Linux 5.2.
+  * Add new Lightspeed receiver (used in the G305)
+
 1.0.0:
   * Too many to track...
 
