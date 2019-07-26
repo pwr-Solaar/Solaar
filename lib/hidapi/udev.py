@@ -260,9 +260,17 @@ def write(device_handle, data):
 	assert device_handle
 	assert data
 	assert isinstance(data, bytes), (repr(data), type(data))
-	bytes_written = _os.write(device_handle, data)
-	if bytes_written != len(data):
-		raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
+	retrycount = 0
+	while(True and retrycount < 3):
+		try:
+			bytes_written = _os.write(device_handle, data)
+			if bytes_written != len(data):
+				raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
+		except IOError as e:
+			if e.errno != _errno.EPIPE:
+				raise e
+			retrycount += 1
+			continue
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
