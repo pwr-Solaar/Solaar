@@ -55,6 +55,7 @@ NANO_RECEIVER_6042        = _lenovo_receiver(0x6042)
 # Lightspeed receivers
 LIGHTSPEED_RECEIVER_C539  = _lightspeed_receiver(0xc539)
 LIGHTSPEED_RECEIVER_C53a  = _lightspeed_receiver(0xc53a)
+LIGHTSPEED_RECEIVER_C53f  = _lightspeed_receiver(0xc53f)
 
 del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver
 
@@ -76,4 +77,5 @@ ALL = (
 		NANO_RECEIVER_6042,
 		LIGHTSPEED_RECEIVER_C539,
 		LIGHTSPEED_RECEIVER_C53a,
+		LIGHTSPEED_RECEIVER_C53f,
 	)
