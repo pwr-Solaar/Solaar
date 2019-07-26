@@ -7,7 +7,7 @@ Build-Depends-Indep: python, po-debconf
 X-Python-Version: >= 2.7
 X-Python3-Version: >= 3.2
 Standards-Version: 3.9.4
-Homepage: http://pwr.github.io/Solaar
+Homepage: http://pwr-solaar.github.io/Solaar
 Vcs-Git: git://github.com/pwr/Solaar.git
 Vcs-browser: http://github.com/pwr/Solaar
 
