@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 0.9.2\n"
+"Project-Id-Version: solaar 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-07-27 06:49+0200\n"
 "PO-Revision-Date: 2019-07-27 07:04+0200\n"
