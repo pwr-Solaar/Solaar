@@ -20,7 +20,7 @@ the very least display some basic information about them.
 
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported. For a full list of supported devices
-and their features, see [docs/devices.md]({{ site.baseurl }}/devices).
+and their features, see [docs/devices.md](https://pwr-solaar.github.io/Solaar/devices).
 
 
 ## Pre-built packages
@@ -28,7 +28,7 @@ and their features, see [docs/devices.md]({{ site.baseurl }}/devices).
 Pre-built packages are available for a few Linux distros.
 
 * Arch `solaar` package in the [community repository][arch]
-* Debian 7 (Wheezy) or higher: packages in this [repository]({{ site.baseurl }}/debian)
+* Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
 * Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
 * Ubuntu/Kubuntu 12.04 to 14.04: use `solaar` package from [ppa:daniel.pavel/solaar][ppa]
 
@@ -53,7 +53,7 @@ integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
 
 ## Manual installation
 
-See [docs/installation.md]({{ site.baseurl }}/installation) for the step-by-step
+See [docs/installation.md](https://pwr-solaar.github.io/Solaar/installation) for the step-by-step
 procedure for manual installation.
 
 
@@ -64,7 +64,7 @@ procedure for manual installation.
 
 - Some devices using the [Nano Receiver][nano] (which is very similar to the
   Unifying Receiver) are supported, but not all. For details, see
-  [docs/devices.md]({{ site.baseurl }}/devices).
+  [docs/devices.md](https://pwr-solaar.github.io/Solaar/devices).
 
 - Running the command-line application (`bin/solaar-cli`) while the GUI
   application is also running *may* occasionally cause either of them to become
