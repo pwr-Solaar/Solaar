@@ -356,6 +356,8 @@ class ChoicesValidator(object):
 		else:
 			if isinstance(new_value, int):
 				choice = self.choices[new_value]
+			elif int(new_value) in self.choices:
+				choice = self.choices[int(new_value)]
 			elif new_value in self.choices:
 				choice = self.choices[new_value]
 			else:
