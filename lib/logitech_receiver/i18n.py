@@ -26,8 +26,14 @@ import gettext as _gettext
 
 try:
 	unicode
-	_ = lambda x: _gettext.gettext(x).decode('UTF-8')
-	ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
+	if not isinstance(_gettext.gettext(x), basestring):
+		_ = lambda x: _gettext.gettext(x).decode('UTF-8')
+	else:
+		_ = lambda x: _gettext.gettext(x)
+	if not isinstance(_gettext.ngettext(*x), basestring):
+		ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
+	else:
+		ngettext = lambda *x: _gettext.ngettext(*x)
 except:
 	_ = _gettext.gettext
 	ngettext = _gettext.ngettext
