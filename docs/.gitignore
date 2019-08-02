@@ -1,0 +1,6 @@
+# ignore documentation-specific files
+
+.jekyll-metadata
+Gemfile
+Gemfile.lock
+_site/

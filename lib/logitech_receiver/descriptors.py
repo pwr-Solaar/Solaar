@@ -203,7 +203,7 @@ _D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
 							_FS.fn_swap()
 						],
 				)
-_D('Wireless Solar Keyboard K780', protocol=4.5, wpid='405B',
+_D('Wireless Multi-Device Keyboard K780', protocol=4.5, wpid='405B',
 				settings=[
 							_FS.new_fn_swap()
 						],
@@ -251,7 +251,7 @@ _D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
 _D('Wireless Mouse M325', protocol=2.0, wpid='400A',
 				settings=[
-							_FS.smooth_scroll(),
+							_FS.hi_res_scroll(),
 				])
 _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M350', protocol=1.0, wpid='101C',
@@ -316,7 +316,12 @@ _D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
 						],
 				)
 
-_D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041')
+_D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041',
+				settings=[
+							_FS.hires_smooth_invert(),
+							_FS.hires_smooth_resolution(),
+						],
+				)
 
 _D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5,wpid='4069',
 				settings=[

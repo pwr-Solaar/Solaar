@@ -30,6 +30,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os as _os
 import errno as _errno
+from time import sleep
 from select import select as _select
 from pyudev import Context as _Context, Monitor as _Monitor, Device as _Device
 from pyudev import DeviceNotFoundError
@@ -260,7 +261,17 @@ def write(device_handle, data):
 	assert device_handle
 	assert data
 	assert isinstance(data, bytes), (repr(data), type(data))
-	bytes_written = _os.write(device_handle, data)
+	retrycount = 0
+	bytes_written = 0
+	while(retrycount < 3):
+		try:
+			bytes_written = _os.write(device_handle, data)
+			retrycount += 1
+		except IOError as e:
+			if e.errno == _errno.EPIPE:
+				sleep(0.1)
+		else:
+			break
 	if bytes_written != len(data):
 		raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
 

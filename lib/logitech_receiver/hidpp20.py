@@ -485,6 +485,43 @@ def get_mouse_pointer_info(device):
 				'suggest_vertical_orientation': suggest_vertical_orientation
 			}
 
+
+def get_vertical_scrolling_info(device):
+	vertical_scrolling_info = feature_request(device, FEATURE.VERTICAL_SCROLLING)
+	if vertical_scrolling_info:
+		roller, ratchet, lines = _unpack('!BBB', vertical_scrolling_info[:3])
+		roller_type = ('reserved', 'standard', 'reserved', '3G', 'micro', 'normal touch pad', 'inverted touch pad', 'reserved')[roller]
+		return {
+			'roller': roller_type,
+			'ratchet': ratchet,
+			'lines': lines
+		}
+
+
+def get_hi_res_scrolling_info(device):
+	hi_res_scrolling_info = feature_request(device, FEATURE.HI_RES_SCROLLING)
+	if hi_res_scrolling_info:
+		mode, resolution = _unpack('!BB', hi_res_scrolling_info[:2])
+		return mode, resolution
+
+
+def get_pointer_speed_info(device):
+	pointer_speed_info = feature_request(device, FEATURE.POINTER_SPEED)
+	if pointer_speed_info:
+		pointer_speed_hi, pointer_speed_lo = _unpack('!BB', pointer_speed_info[:2])
+		#if pointer_speed_lo > 0:
+		#	pointer_speed_lo = pointer_speed_lo
+		return pointer_speed_hi+pointer_speed_lo/256
+
+
+def get_lowres_wheel_status(device):
+	lowres_wheel_status = feature_request(device, FEATURE.LOWRES_WHEEL)
+	if lowres_wheel_status:
+		wheel_flag = _unpack('!B', lowres_wheel_status[:1])[0]
+		wheel_reporting = ('HID', 'HID++')[wheel_flag & 0x01]
+		return wheel_reporting
+
+
 def get_hires_wheel(device):
 	caps = feature_request(device, FEATURE.HIRES_WHEEL, 0x00)
 	mode = feature_request(device, FEATURE.HIRES_WHEEL, 0x10)

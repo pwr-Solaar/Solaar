@@ -23,14 +23,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 
-_UNIFYING_DRIVER = 'logitech-djreceiver'
-_GENERIC_DRIVER = ('hid-generic', 'generic-usb')
+_DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
 
 # each tuple contains (vendor_id, product_id, usb interface number, hid driver)
-_unifying_receiver = lambda product_id: (0x046d, product_id, 2, _UNIFYING_DRIVER)
-_nano_receiver = lambda product_id: (0x046d, product_id, 1, _GENERIC_DRIVER)
-
+_unifying_receiver = lambda product_id: (0x046d, product_id, 2, _DRIVER)
+_nano_receiver = lambda product_id: (0x046d, product_id, 1, _DRIVER)
+_lenovo_receiver = lambda product_id: (0x17ef, product_id, 1, _DRIVER)
+_lightspeed_receiver = lambda product_id: (0x046d, product_id, 2, _DRIVER)
 
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B    = _unifying_receiver(0xc52b)
@@ -50,8 +50,14 @@ NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 NANO_RECEIVER_C531        = _nano_receiver(0xc531)
 NANO_RECEIVER_C534        = _nano_receiver(0xc534)
+NANO_RECEIVER_6042        = _lenovo_receiver(0x6042)
 
-del _unifying_receiver, _nano_receiver
+# Lightspeed receivers
+LIGHTSPEED_RECEIVER_C539  = _lightspeed_receiver(0xc539)
+LIGHTSPEED_RECEIVER_C53a  = _lightspeed_receiver(0xc53a)
+LIGHTSPEED_RECEIVER_C53f  = _lightspeed_receiver(0xc53f)
+
+del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver
 
 
 ALL = (
@@ -68,4 +74,8 @@ ALL = (
 		NANO_RECEIVER_C52e,
 		NANO_RECEIVER_C531,
 		NANO_RECEIVER_C534,
+		NANO_RECEIVER_6042,
+		LIGHTSPEED_RECEIVER_C539,
+		LIGHTSPEED_RECEIVER_C53a,
+		LIGHTSPEED_RECEIVER_C53f,
 	)

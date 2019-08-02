@@ -1,3 +1,8 @@
+---
+title: Manual Installation
+layout: page
+---
+
 # Manual installation
 
 ### Requirements
