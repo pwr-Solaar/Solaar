@@ -121,17 +121,16 @@ def _init_icon_paths():
 #
 #
 
-def battery(kind = None, level=None, charging=False):
-	icon_name = _battery_icon_name(kind, level, charging)
+def battery(device = None, level=None, charging=False):
+	icon_name = _battery_icon_name(device, level, charging)
 	if not _default_theme.has_icon(icon_name):
 		_log.warning("icon %s not found in current theme", icon_name);
 	# elif _log.isEnabledFor(_DEBUG):
 	# 	_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
 	return icon_name
 
-def _battery_icon_name(kind, level, charging):
+def _battery_icon_name(device, level, charging):
 	_init_icon_paths()
-	print(kind)
 
 	if level is None or level < 0:
 		if _has_mintY_icons and _current_icon_theme.startswith("'Mint-Y"):
@@ -151,7 +150,7 @@ def _battery_icon_name(kind, level, charging):
 		level_name = ('empty', 'caution', 'low', 'medium', 'good', 'full')[level_approx // 20]
 		if charging:
 			return 'battery-%s-charging' % level_name
-		return '%sbattery-%s' % (getDeviceType(kind),level_name)
+		return '%sbattery-%s' % (getDeviceType(device.kind),level_name)
 
 	if _has_mintX_icons and _current_icon_theme.startswith("'Mint-X"):
 		if level == 0:
