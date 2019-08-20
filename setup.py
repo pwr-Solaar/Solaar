@@ -9,7 +9,7 @@ import sys
 backup_path_0 = sys.path[0]
 sys.path[0] = backup_path_0 + '/lib'
 #from solaar import NAME, __version__
-__version__ = '0.9.2'
+__version__ = '1.0.1'
 NAME = 'Solaar'
 
 sys.path[0] = backup_path_0
