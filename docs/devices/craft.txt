@@ -1,0 +1,114 @@
+Unifying Receiver
+  Device path  : /dev/hidraw0
+  USB id       : 046d:c52b
+  Serial       : E21FAD57
+    Firmware   : 24.06.B0030
+    Bootloader : 01.08
+    Other      : AA.AC
+  Has 2 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=243, 2=173
+
+  1: Craft Advanced Keyboard
+     Codename     : Craft
+     Kind         : keyboard
+     Wireless PID : 4066
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 428C2F81
+        Bootloader: BOT 41.00.B0014
+          Firmware: MPK 07.01.B0015
+             Other:
+             Other:
+     The power switch is located on the edge of top right corner.
+     Supports 39 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: unknown:0007           {0007}
+         7: BATTERY STATUS         {1000}
+         8: CHANGE HOST            {1814}
+         9: unknown:1815           {1815}
+        10: unknown:1982           {1982}
+        11: REPROG CONTROLS V4     {1B04}
+        12: unknown:1C00           {1C00}
+        13: K375S FN INVERSION     {40A3}
+        14: ENCRYPTION             {4100}
+        15: LOCK KEY STATE         {4220}
+        16: KEYBOARD DISABLE       {4521}
+        17: unknown:4531           {4531}
+        18: unknown:4600           {4600}
+        19: unknown:00C2           {00C2}
+        20: unknown:1803           {1803}   internal, hidden
+        21: unknown:1806           {1806}   internal, hidden
+        22: unknown:1813           {1813}   internal, hidden
+        23: unknown:1805           {1805}   internal, hidden
+        24: unknown:1830           {1830}   internal, hidden
+        25: unknown:1890           {1890}   internal, hidden
+        26: unknown:1891           {1891}   internal, hidden
+        27: unknown:1801           {1801}   internal, hidden
+        28: unknown:18A1           {18A1}   internal, hidden
+        29: unknown:9280           {9280}   internal, hidden
+        30: unknown:1A20           {1A20}   internal, hidden
+        31: unknown:1DF3           {1DF3}   internal, hidden
+        32: unknown:1E00           {1E00}   hidden
+        33: unknown:1EB0           {1EB0}   internal, hidden
+        34: unknown:1861           {1861}   internal, hidden
+        35: unknown:18B0           {18B0}   internal, hidden
+        36: unknown:92C0           {92C0}   internal, hidden
+        37: unknown:9203           {9203}   internal, hidden
+        38: unknown:3615           {3615}   internal, hidden
+     Has 24 reprogrammable keys:
+         0: unknown:00D1              , default: unknown:00AE                => unknown:00D1
+             divertable, nonstandard, persistently divertable, pos:0, group:0, gmask:0
+         1: unknown:00D2              , default: unknown:00AF                => unknown:00D2
+             divertable, nonstandard, persistently divertable, pos:0, group:0, gmask:0
+         2: unknown:00D3              , default: unknown:00B0                => unknown:00D3
+             divertable, nonstandard, persistently divertable, pos:0, group:0, gmask:0
+         3: unknown:00C7              , default: unknown:00A3                => unknown:00C7
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:1, group:0, gmask:0
+         4: unknown:00C8              , default: unknown:00A4                => unknown:00C8
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:2, group:0, gmask:0
+         5: unknown:00E0              , default: unknown:00BF                => unknown:00E0
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:3, group:0, gmask:0
+         6: unknown:00E1              , default: unknown:00C0                => unknown:00E1
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:4, group:0, gmask:0
+         7: SHOW DESKTOP              , default: ShowDesktop                 => SHOW DESKTOP
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:5, group:0, gmask:0
+         8: unknown:00E2              , default: unknown:00C1                => unknown:00E2
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:6, group:0, gmask:0
+         9: unknown:00E3              , default: unknown:00C2                => unknown:00E3
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:7, group:0, gmask:0
+        10: unknown:00E4              , default: Previous                    => unknown:00E4
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:8, group:0, gmask:0
+        11: unknown:00E5              , default: Play/Pause                  => unknown:00E5
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:9, group:0, gmask:0
+        12: unknown:00E6              , default: Next                        => unknown:00E6
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:10, group:0, gmask:0
+        13: unknown:00E7              , default: Mute                        => unknown:00E7
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:11, group:0, gmask:0
+        14: unknown:00E8              , default: Volume Down                 => unknown:00E8
+             divertable, is FN, FN sensitive, persistently divertable, reprogrammable, pos:12, group:0, gmask:0
+        15: unknown:00E9              , default: Volume Up                   => unknown:00E9
+             divertable, nonstandard, persistently divertable, reprogrammable, pos:0, group:0, gmask:0
+        16: Calculator                , default: Calculator                  => Calculator
+             divertable, nonstandard, persistently divertable, reprogrammable, pos:0, group:0, gmask:0
+        17: unknown:00BF              , default: unknown:009B                => unknown:00BF
+             divertable, nonstandard, persistently divertable, reprogrammable, pos:0, group:0, gmask:0
+        18: unknown:00EA              , default: unknown:00C3                => unknown:00EA
+             divertable, nonstandard, persistently divertable, reprogrammable, pos:0, group:0, gmask:0
+        19: Lock PC                   , default: WindowsLock                 => Lock PC
+             divertable, nonstandard, persistently divertable, reprogrammable, pos:0, group:0, gmask:0
+        20: unknown:00EC              , default: unknown:00B8                => unknown:00EC
+             divertable, nonstandard, persistently divertable, pos:0, group:0, gmask:0
+        21: unknown:00EB              , default: unknown:00B6                => unknown:00EB
+             divertable, nonstandard, persistently divertable, pos:0, group:0, gmask:0
+        22: unknown:00DE              , default: Do Nothing One              => unknown:00DE
+             is FN, pos:0, group:0, gmask:0
+        23: unknown:0034              , default: Do Nothing One              => unknown:0034
+             nonstandard, pos:0, group:0, gmask:0
+     Battery: 0%, full.
+

@@ -133,9 +133,9 @@ def _battery_icon_name(level, charging):
 	level_approx = 20 * ((level  + 10) // 20)
 
 	if _has_mint_icons:
-		if level == 0:
-			return 'battery-empty%s-symbolic' % ('-charging' if charging else '')
-		level_name = ('caution', 'low', 'good', 'full')[3*(level_approx // 100)]
+		if level == 100 and charging:
+			return 'battery-full-charged-symbolic'
+		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
 		return 'battery-%s%s-symbolic' % (level_name, '-charging' if charging else '')
 
 	if _has_gpm_icons:

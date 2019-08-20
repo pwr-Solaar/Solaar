@@ -220,6 +220,12 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 							_FS.new_fn_swap()
 						],
 				)
+_D('Craft Advanced Keyboard', protocol=4.5, wpid='4066',
+				settings=[
+							_FS.new_fn_swap()
+						],
+				)
+
 
 # Mice
 
@@ -277,6 +283,12 @@ _D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051',
 				])
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
+_D('Multi Device Silent Mouse M585/M590', codename='M585/M590', protocol=4.5, wpid='406B',
+				settings=[
+							_FS.lowres_smooth_scroll(),
+							_FS.pointer_speed(),
+				],
+	)
 _D('Touch Mouse M600', protocol=2.0, wpid='401A')
 _D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpid='101B',
 				registers=(_R.battery_charge, ),
@@ -287,9 +299,9 @@ _D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpi
 				)
 _D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',
 				settings=[
-					_FS.hires_smooth_invert(),
-					_FS.hires_smooth_resolution(),
-					_FS.pointer_speed(),
+							_FS.hires_smooth_invert(),
+							_FS.hires_smooth_resolution(),
+							_FS.pointer_speed(),
 				])
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620', protocol=2.0)

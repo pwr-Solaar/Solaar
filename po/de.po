@@ -258,27 +258,25 @@ msgid "The receiver was unplugged."
 msgstr "Der Empfänger wurde ausgesteckt."
 
 #: lib/solaar/ui/__init__.py:48
-msgid "Permissions error"
-msgstr "Zugriffsfehler"
+msgid   "Permissions error"
+msgstr  "Zugriffsfehler"
 
 #: lib/solaar/ui/__init__.py:49
 #, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Ein Logitech Empfänger (%s) wurde gefunden, wegen fehlender Berechtigung "
-"kann aber nicht darauf zugegriffen werden."
+msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
+        "it."
+msgstr  "Ein Logitech Empfänger (%s) wurde gefunden, wegen fehlender "
+        "Berechtigung kann aber nicht darauf zugegriffen werden."
 
 #: lib/solaar/ui/__init__.py:51
-msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
-msgstr ""
-"Wenn Du Solaar gerade neu installiert hast, versuche den Empfänger aus- und "
-"wieder einzustecken."
+msgid   "If you've just installed Solaar, try removing the receiver and "
+        "plugging it back in."
+msgstr  "Wenn Du Solaar gerade neu installiert hast, versuche den Empfänger "
+        "aus- und wieder einzustecken."
 
 #: lib/solaar/ui/__init__.py:53
-msgid "Unpairing failed"
-msgstr "Entkopplung fehlgeschlagen"
+msgid   "Unpairing failed"
+msgstr  "Entkopplung fehlgeschlagen"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-brace-format
@@ -288,28 +286,26 @@ msgstr ""
 "gelöst werden."
 
 #: lib/solaar/ui/__init__.py:56
-msgid "The receiver returned an error, with no further details."
-msgstr "Der Empfänger gab einen Fehler zurück, ohne weitere Details."
+msgid   "The receiver returned an error, with no further details."
+msgstr  "Der Empfänger gab einen Fehler zurück, ohne weitere Details."
 
 #: lib/solaar/ui/about.py:39
-msgid ""
-"Shows status of devices connected\n"
-"through wireless Logitech receivers."
-msgstr ""
-"Zeigt den Status von Geräten an, die\n"
-"über einen Logitech Empfänger verbunden sind."
+msgid   "Shows status of devices connected\n"
+        "through wireless Logitech receivers."
+msgstr  "Zeigt den Status von Geräten an, die\n"
+        "über einen Logitech Empfänger verbunden sind."
 
 #: lib/solaar/ui/about.py:48
-msgid "GUI design"
-msgstr "GUI Design"
+msgid   "GUI design"
+msgstr  "GUI Design"
 
 #: lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "Tester"
+msgid   "Testing"
+msgstr  "Tester"
 
 #: lib/solaar/ui/about.py:54
-msgid "Logitech documentation"
-msgstr "Logitech Dokumentation"
+msgid   "Logitech documentation"
+msgstr  "Logitech Dokumentation"
 
 #: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:309
 msgid "About"
@@ -338,37 +334,37 @@ msgid "offline"
 msgstr "offline"
 
 #: lib/solaar/ui/pair_window.py:133
-msgid "Pairing failed"
-msgstr "Kopplung fehlgeschlagen"
+msgid   "Pairing failed"
+msgstr  "Kopplung fehlgeschlagen"
 
 #: lib/solaar/ui/pair_window.py:135
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr ""
-"Stelle sicher, dass sich das Gerät in Reichweite befindet und über eine "
-"ausreichend geladene Batterie verfügt."
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "Stelle sicher, dass sich das Gerät in Reichweite befindet und über "
+        "eine ausreichend geladene Batterie verfügt."
 
 #: lib/solaar/ui/pair_window.py:137
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr ""
-"Es wurde ein neues Gerät festgestellt, aber es ist nicht mit diesem "
-"Empfänger kompatibel."
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "Es wurde ein neues Gerät festgestellt, aber es ist nicht mit diesem "
+        "Empfänger kompatibel."
 
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Der Empfänger unterstützt nur %d gekoppelte Geräte."
+msgid   "The receiver only supports %d paired device(s)."
+msgstr  "Der Empfänger unterstützt nur %d gekoppelte Geräte."
 
 #: lib/solaar/ui/pair_window.py:141
-msgid "No further details are available about the error."
-msgstr "Es gibt keine näheren Informationen zu diesem Fehler."
+msgid   "No further details are available about the error."
+msgstr  "Es gibt keine näheren Informationen zu diesem Fehler."
 
 #: lib/solaar/ui/pair_window.py:155
 msgid "Found a new device:"
 msgstr "Neues Gerät gefunden:"
 
 #: lib/solaar/ui/pair_window.py:180
-msgid "The wireless link is not encrypted"
-msgstr "Die drahtlose Verbindung ist nicht verschlüsselt"
+msgid   "The wireless link is not encrypted"
+msgstr  "Die drahtlose Verbindung ist nicht verschlüsselt"
 
 #: lib/solaar/ui/pair_window.py:197
 #, python-format
@@ -380,16 +376,14 @@ msgid "Turn on the device you want to pair."
 msgstr "Schalte das zu koppelnde Gerät ein."
 
 #: lib/solaar/ui/pair_window.py:206
-msgid ""
-"If the device is already turned on,\n"
-"turn if off and on again."
-msgstr ""
-"Wenn das Gerät bereits eingeschaltet ist,\n"
-"schalte es aus und dann wieder ein."
+msgid   "If the device is already turned on,\n"
+        "turn if off and on again."
+msgstr  "Wenn das Gerät bereits eingeschaltet ist,\n"
+        "schalte es aus und dann wieder ein."
 
 #: lib/solaar/ui/tray.py:55
-msgid "No Logitech receiver found"
-msgstr "Kein Logitech Empfänger gefunden"
+msgid   "No Logitech receiver found"
+msgstr  "Kein Logitech Empfänger gefunden"
 
 #: lib/solaar/ui/tray.py:62
 msgid "Quit"

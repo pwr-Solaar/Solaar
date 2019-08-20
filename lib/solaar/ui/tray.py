@@ -185,7 +185,7 @@ try:
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
 
-			description =  '%s: %s' % (name, device_status)
+			description =  '%s: %s' % (name, device_status.to_string())
 		else:
 			# there may be a receiver, but no peripherals
 			tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
@@ -278,9 +278,6 @@ def _generate_tooltip_lines():
 	if not _devices_info:
 		yield '<b>%s</b>: ' % NAME + _("no receiver")
 		return
-
-	yield '<b>%s</b>' % NAME
-	yield ''
 
 	for _ignore, number, name, status in _devices_info:
 		if number is None:  # receiver
