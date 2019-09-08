@@ -118,7 +118,7 @@ def feature_range(name, feature, min_value, max_value,
 
 _SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
-_LOW_RES_SCROLL = ('low-res-scroll', _("HID++ Scrolling"),
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _("HID++ Scrolling"),
 							_("HID++ mode for vertical scroll with the wheel."))
 
 _HI_RES_SCROLL = ('hi-res-scroll', _("High Resolution Scrolling"),
