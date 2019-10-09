@@ -96,7 +96,7 @@
 	08d7  QuickCam Communicate STX
 	08d8  QuickCam for Notebook Deluxe
 	08d9  QuickCam IM/Connect
-	08da  QuickCam Messanger
+	08da  QuickCam Messenger
 	08dd  QuickCam for Notebooks
 	08e0  QuickCam Express
 	08e1  Labtec Webcam
@@ -236,7 +236,7 @@
 	c20c  WingMan Precision
 	c20d  WingMan Attack 2
 	c20e  WingMan Formula GP
-	c211  iTouch Cordless Reciever
+	c211  iTouch Cordless Receiver
 	c212  WingMan Extreme Digital 3D
 	c213  J-UH16 (Freedom 2.4 Cordless Joystick)
 	c214  ATK3 (Attack III Joystick)
