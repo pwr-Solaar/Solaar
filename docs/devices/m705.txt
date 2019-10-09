@@ -36,7 +36,7 @@ registers:
 << ( 259.270) [10 02 81F1 000000] '\x10\x02\x81\xf1\x00\x00\x00'
 >> ( 259.283) [10 02 8F81 F10300] '\x10\x02\x8f\x81\xf1\x03\x00'
 
-# writing 01 here will trigger an avalance of events, most likely
+# writing 01 here will trigger an avalanche of events, most likely
 # raw input from the mouse; disable by writing 00
 << ( 261.300) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
 >> ( 261.315) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
