@@ -306,7 +306,7 @@ def request(handle, devnumber, request_id, *params):
 	:param devnumber: attached device number.
 	:param request_id: a 16-bit integer.
 	:param params: parameters for the feature call, 3 to 16 bytes.
-	:returns: the reply data, or ``None`` if some error occured.
+	:returns: the reply data, or ``None`` if some error occurred.
 	"""
 
 	# import inspect as _inspect

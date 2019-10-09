@@ -259,7 +259,7 @@ def _process_feature_notification(device, status, n, feature):
 				reports_period = 2  # seconds
 				device.feature_request(_F.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
 			else:
-				_log.warn("%s: unknown SOLAR CHAGE %s", device, n)
+				_log.warn("%s: unknown SOLAR CHARGE %s", device, n)
 		else:
 			_log.warn("%s: SOLAR CHARGE not GOOD? %s", device, n)
 		return True
