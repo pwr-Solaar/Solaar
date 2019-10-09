@@ -55,7 +55,7 @@ class PairedDevice(object):
 		self.wpid = None
 		self.descriptor = None
 
-		# mose, keyboard, etc (see _hidpp10.DEVICE_KIND)
+		# mouse, keyboard, etc (see _hidpp10.DEVICE_KIND)
 		self._kind = None
 		# Unifying peripherals report a codename.
 		self._codename = None

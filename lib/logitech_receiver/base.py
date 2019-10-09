@@ -386,7 +386,7 @@ def request(handle, devnumber, request_id, *params):
 							if reply_data[2:3] == params[:1]:
 								return reply_data[2:]
 							else:
-								# hm, not mathing my request, and certainly not a notification
+								# hm, not matching my request, and certainly not a notification
 								continue
 						else:
 							return reply_data[2:]

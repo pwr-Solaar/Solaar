@@ -90,7 +90,7 @@ def _print(marker, data, scroll=False):
 			sys.stdout.write('\n')
 
 		# flush stdout manually...
-		# because trying to open stdin/out unbuffered programatically
+		# because trying to open stdin/out unbuffered programmatically
 		# works much too differently in Python 2/3
 		sys.stdout.flush()
 

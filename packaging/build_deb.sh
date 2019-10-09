@@ -53,7 +53,7 @@ python2.7 setup.py sdist --formats=gztar --quiet
 test -d "$BUILD_DIR"
 
 # If the orig file already exists for this version, check that no source
-# changes occured.
+# changes occurred.
 if test -r "$ORIG_FILE"; then
 	ORIG_SOURCES="$TMPDIR/$P_NAME-$P_VERSION"
 	DIFF_OUTPUT="$TMPDIR/orig-diff-$P_VERSION"
