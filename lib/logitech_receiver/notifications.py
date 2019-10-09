@@ -18,7 +18,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Handles incoming events from the receiver/devices, updating the related
-# status object as appropiate.
+# status object as appropriate.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 

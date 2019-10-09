@@ -189,7 +189,7 @@ def device_icon_set(name='_', kind=None):
 		_ICON_SETS[name] = icon_set
 
 		# names of possible icons, in reverse order of likelihood
-		# the theme will hopefully pick up the most appropiate
+		# the theme will hopefully pick up the most appropriate
 		names = ['preferences-desktop-peripherals']
 		if kind:
 			if str(kind) == 'numpad':

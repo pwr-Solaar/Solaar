@@ -54,7 +54,7 @@ KEYS = _NamedInts(
 _BATTERY_ATTENTION_LEVEL = 5
 
 # If no updates have been receiver from the device for a while, ping the device
-# and update it status accordinly.
+# and update it status accordingly.
 # _STATUS_TIMEOUT = 5 * 60  # seconds
 _LONG_SLEEP = 15 * 60  # seconds
 
