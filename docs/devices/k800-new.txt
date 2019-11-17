@@ -1,0 +1,557 @@
+[kamil@kamil-pc Solaar]$ bin/solaar -dd show
+16:01:46,533    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 030000]
+16:01:46,539    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 03DC279AB20A06090000000000000000]
+16:01:46,539    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 80B2 000000]
+16:01:46,550    DEBUG [MainThread] logitech_receiver.base: (3) => r[20 01 4101 71401E0000000400000000]
+16:01:46,551    DEBUG [MainThread] logitech_receiver.base: (3) => r[20 02 4101 6E401A4000000400000000]
+16:01:46,551    DEBUG [MainThread] logitech_receiver.base: (3) => r[20 00 4102 0000000000000000000000]
+16:01:46,551    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 8F80 B20300]
+16:01:46,551    DEBUG [MainThread] logitech_receiver.base: (3) device 0xFF error on request {80B2}: 3 = invalid value
+16:01:46,551    DEBUG [MainThread] solaar.cli: [/dev/hidraw0] => <UnifyingReceiver(/dev/hidraw0,3)>
+16:01:46,646    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 8102 000000]
+16:01:46,651    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 8102 000200]
+Unifying Receiver
+  Device path  : /dev/hidraw0
+  USB id       : 046d:c52b
+  Serial       : DC279AB2
+16:01:46,652    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 81F1 010000]
+16:01:46,657    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 81F1 012411]
+16:01:46,658    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 81F1 020000]
+16:01:46,664    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 81F1 020036]
+16:01:46,664    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 81F1 040000]
+16:01:46,669    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 81F1 040209]
+16:01:46,670    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 81F1 030000]
+16:01:46,675    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 81F1 03AAAC]
+    Firmware   : 24.11.B0036
+    Bootloader : 02.09
+    Other      : AA.AC
+  Has 2 paired device(s) out of a maximum of 6.
+16:01:46,676    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 8100 000000]
+16:01:46,681    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 8100 000900]
+  Notifications: wireless, software present (0x000900)
+16:01:46,682    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B3 000000]
+16:01:46,687    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B3 51060000000000000000000000000000]
+  Device activity counters: 1=81, 2=6
+16:01:46,688    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 8102 000000]
+16:01:46,693    DEBUG [MainThread] logitech_receiver.base: (3) => r[10 FF 8102 000200]
+16:01:46,694    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 200000]
+16:01:46,699    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 20090840710402020700000000000000]
+16:01:46,700    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 400000]
+16:01:46,705    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 40094D58204D61737465720000000000]
+16:01:46,706     INFO [MainThread] logitech_receiver.receiver: <UnifyingReceiver(/dev/hidraw0,3)>: found new device 1 (4071)
+
+16:01:46,706    DEBUG [MainThread] logitech_receiver.base: (3) pinging device 1
+16:01:46,706    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 001E 000016]
+16:01:47,033    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 00000000000000000000000000000000]
+16:01:47,049    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 001E 04051600000000000000000000000000]
+  1: Wireless Mouse MX Master
+     Codename     : MX Master
+     Kind         : mouse
+     Wireless PID : 4071
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+16:01:47,049    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 300000]
+16:01:47,055    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 30A6A400641E00000001000000000000]
+     Serial number: A6A40064
+16:01:47,055    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 000100]
+16:01:47,061    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 00000000000000000000000000000000]
+16:01:47,077    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 01000100000000000000000000000000]
+16:01:47,077    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0108 000000]
+16:01:47,093    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000D 00000000000000000000000000000000]
+16:01:47,101    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0108 1F000000000000000000000000000000]
+16:01:47,101    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 000300]
+16:01:47,109    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 00000000000000000000000000000000]
+16:01:47,117    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 02000200000000000000000000000000]
+16:01:47,117    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 020D 000000]
+16:01:47,125    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 00000000000000000000000000000000]
+16:01:47,133    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 020D 040382B4290006B01E40710000030000]
+16:01:47,134    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 021E 000000]
+16:01:47,141    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 00000000000000000000000000000000]
+16:01:47,149    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 021E 01424F54561000050040717622661101]
+16:01:47,150    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 021C 010000]
+16:01:47,171    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 021C 004D504D1210000500B01E7622661101]
+16:01:47,171    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 021E 020000]
+16:01:47,191    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 021E 004D504D121000050140717622661101]
+16:01:47,191    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 021F 030000]
+16:01:47,213    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 021F 050000000000005A0000000000000000]
+        Bootloader: BOT 56.10.B0005
+          Firmware: MPM 12.10.B0005
+          Firmware: MPM 12.10.B0005
+             Other: 
+     The power switch is located on the base.
+     Supports 32 HID++ 2.0 features:
+16:01:47,214    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000B 000000]
+16:01:47,311    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 00000100000000000000000000000000]
+         0: ROOT                   {0000}   
+16:01:47,312    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 000100]
+16:01:47,333    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 01000100000000000000000000000000]
+         1: FEATURE SET            {0001}   
+16:01:47,334    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000F 000300]
+16:01:47,431    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 02000200000000000000000000000000]
+         2: DEVICE FW VERSION      {0003}   
+16:01:47,431    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011C 030000]
+16:01:47,453    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011C 00050000000000000000000000000000]
+16:01:47,454    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000F 000500]
+16:01:47,475    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 03000000000000000000000000000000]
+         3: DEVICE NAME            {0005}   
+16:01:47,475    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 040000]
+16:01:47,575    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 1D4B0000000000000000000000000000]
+16:01:47,575    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000A 1D4B00]
+16:01:47,593    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000A 04000000000000000000000000000000]
+         4: WIRELESS DEVICE STATUS {1D4B}   
+16:01:47,593    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011A 050000]
+16:01:47,617    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011A 00200000000000000000000000000000]
+16:01:47,617    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 002000]
+16:01:47,715    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 05000000000000000000000000000000]
+         5: RESET                  {0020}   
+16:01:47,715    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011E 060000]
+16:01:47,735    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011E 00210000000000000000000000000000]
+16:01:47,735    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000B 002100]
+16:01:47,755    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 06000000000000000000000000000000]
+         6: unknown:0021           {0021}   
+16:01:47,755    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011C 070000]
+16:01:47,775    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011C 10000000000000000000000000000000]
+16:01:47,775    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 100000]
+16:01:47,795    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 07000000000000000000000000000000]
+         7: BATTERY STATUS         {1000}   
+16:01:47,795    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011F 080000]
+16:01:47,815    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011F 18066000000000000000000000000000]
+16:01:47,815    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 180600]
+16:01:47,835    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 08600000000000000000000000000000]
+         8: unknown:1806           {1806}   internal, hidden
+16:01:47,835    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 090000]
+16:01:47,855    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 18140001000000000000000000000000]
+16:01:47,855    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000A 181400]
+16:01:47,875    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000A 09000100000000000000000000000000]
+         9: CHANGE HOST            {1814}   
+16:01:47,875    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011A 0A0000]
+16:01:47,895    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011A 1B040003000000000000000000000000]
+16:01:47,895    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000A 1B0400]
+16:01:47,915    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000A 0A000300000000000000000000000000]
+        10: REPROG CONTROLS V4     {1B04}   
+16:01:47,915    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011E 0B0000]
+16:01:47,935    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011E 22010001000000000000000000000000]
+16:01:47,935    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000E 220100]
+16:01:47,957    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000E 0B000100000000000000000000000000]
+        11: ADJUSTABLE DPI         {2201}   
+16:01:47,957    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011A 0C0000]
+16:01:47,977    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011A 21000000000000000000000000000000]
+16:01:47,977    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 210000]
+16:01:47,997    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 0C000000000000000000000000000000]
+        12: VERTICAL SCROLLING     {2100}   
+16:01:47,998    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0C0C 000000]
+16:01:48,017    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0C0C 03180000000000000000000000000000]
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+16:01:48,017    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011A 0D0000]
+16:01:48,037    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011A 21100000000000000000000000000000]
+16:01:48,037    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0008 211000]
+16:01:48,057    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0008 0D000000000000000000000000000000]
+        13: SMART SHIFT            {2110}   
+16:01:48,057    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011C 0E0000]
+16:01:48,077    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011C 21210000000000000000000000000000]
+16:01:48,077    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 212100]
+16:01:48,097    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 0E000000000000000000000000000000]
+        14: HIRES WHEEL            {2121}   
+16:01:48,097    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0E09 000000]
+16:01:48,117    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0E09 080C0000000000000000000000000000]
+16:01:48,117    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0E1D 000000]
+16:01:48,137    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0E1D 02000000000000000000000000000000]
+16:01:48,137    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0E38 000000]
+16:01:48,159    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0E38 01000000000000000000000000000000]
+            Multiplier: 8
+            Has invert
+              Normal wheel motion
+            Has ratchet switch
+              Normal wheel mode
+            High resolution mode
+            HID notification
+16:01:48,159    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011F 0F0000]
+16:01:48,179    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011F 65010000000000000000000000000000]
+16:01:48,179    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000A 650100]
+16:01:48,199    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000A 0F000000000000000000000000000000]
+        15: GESTURE 2              {6501}   
+16:01:48,199    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 100000]
+16:01:48,219    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 00C20000000000000000000000000000]
+16:01:48,219    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 00C200]
+16:01:48,239    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 10000000000000000000000000000000]
+        16: unknown:00C2           {00C2}   
+16:01:48,240    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011B 110000]
+16:01:48,259    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011B 18136000000000000000000000000000]
+16:01:48,259    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 181300]
+16:01:48,279    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 11600000000000000000000000000000]
+        17: unknown:1813           {1813}   internal, hidden
+16:01:48,279    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011C 120000]
+16:01:48,299    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011C 18306000000000000000000000000000]
+16:01:48,299    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 183000]
+16:01:48,319    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 12600000000000000000000000000000]
+        18: unknown:1830           {1830}   internal, hidden
+16:01:48,319    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011B 130000]
+16:01:48,339    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011B 18906000000000000000000000000000]
+16:01:48,339    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0008 189000]
+16:01:48,359    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0008 13600000000000000000000000000000]
+        19: unknown:1890           {1890}   internal, hidden
+16:01:48,359    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011B 140000]
+16:01:48,381    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011B 18916000000000000000000000000000]
+16:01:48,381    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0008 189100]
+16:01:48,401    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0008 14600000000000000000000000000000]
+        20: unknown:1891           {1891}   internal, hidden
+16:01:48,401    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011C 150000]
+16:01:48,421    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011C 18A16000000000000000000000000000]
+16:01:48,421    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000F 18A100]
+16:01:48,441    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 15600000000000000000000000000000]
+        21: unknown:18A1           {18A1}   internal, hidden
+16:01:48,441    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011A 160000]
+16:01:48,461    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011A 18C06000000000000000000000000000]
+16:01:48,461    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0008 18C000]
+16:01:48,481    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0008 16600000000000000000000000000000]
+        22: unknown:18C0           {18C0}   internal, hidden
+16:01:48,481    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011E 170000]
+16:01:48,501    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011E 1DF36000000000000000000000000000]
+16:01:48,501    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 1DF300]
+16:01:48,521    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 17600000000000000000000000000000]
+        23: unknown:1DF3           {1DF3}   internal, hidden
+16:01:48,521    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011E 180000]
+16:01:48,541    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011E 1E004000000000000000000000000000]
+16:01:48,541    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 1E0000]
+16:01:48,561    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 18400000000000000000000000000000]
+        24: unknown:1E00           {1E00}   hidden
+16:01:48,561    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 190000]
+16:01:48,581    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 1EB06000000000000000000000000000]
+16:01:48,581    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 1EB000]
+16:01:48,603    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 19600000000000000000000000000000]
+        25: unknown:1EB0           {1EB0}   internal, hidden
+16:01:48,603    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011F 1A0000]
+16:01:48,623    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011F 18036000000000000000000000000000]
+16:01:48,623    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000F 180300]
+16:01:48,643    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 1A600000000000000000000000000000]
+        26: unknown:1803           {1803}   internal, hidden
+16:01:48,643    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0118 1B0000]
+16:01:48,663    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0118 18616000000000000000000000000000]
+16:01:48,663    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0009 186100]
+16:01:48,683    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0009 1B600000000000000000000000000000]
+        27: unknown:1861           {1861}   internal, hidden
+16:01:48,683    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0118 1C0000]
+16:01:48,703    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0118 90016000000000000000000000000000]
+16:01:48,703    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000F 900100]
+16:01:48,723    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000F 1C600000000000000000000000000000]
+        28: unknown:9001           {9001}   internal, hidden
+16:01:48,723    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 1D0000]
+16:01:48,743    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 92006000000000000000000000000000]
+16:01:48,743    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000D 920000]
+16:01:48,763    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000D 1D600000000000000000000000000000]
+        29: unknown:9200           {9200}   internal, hidden
+16:01:48,763    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 011F 1E0000]
+16:01:48,783    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 011F 92026000000000000000000000000000]
+16:01:48,783    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000C 920200]
+16:01:48,805    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000C 1E600000000000000000000000000000]
+        30: unknown:9202           {9202}   internal, hidden
+16:01:48,805    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0119 1F0000]
+16:01:48,825    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0119 18056000000000000000000000000000]
+16:01:48,825    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 000B 180500]
+16:01:48,845    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 000B 1F600000000000000000000000000000]
+        31: unknown:1805           {1805}   internal, hidden
+16:01:48,845    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A0A 000000]
+16:01:48,865    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A0A 08000000000000000000000000000000]
+     Has 8 reprogrammable keys:
+16:01:48,865    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1C 000000]
+16:01:48,885    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1C 00500038010001010000000000000000]
+16:01:48,885    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2B 005000]
+16:01:48,905    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2B 00500000000000000000000000000000]
+         0: LEFT CLICK                , default: LeftClick                   => LEFT CLICK                
+             mse, pos:0, group:1, gmask:1
+16:01:48,905    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1D 010000]
+16:01:48,925    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1D 00510039010001010000000000000000]
+16:01:48,925    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A28 005100]
+16:01:48,945    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A28 00510000000000000000000000000000]
+         1: RIGHT CLICK               , default: RightClick                  => RIGHT CLICK               
+             mse, pos:0, group:1, gmask:1
+16:01:48,945    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1B 020000]
+16:01:48,965    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1B 0052003A310003070100000000000000]
+16:01:48,965    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2B 005200]
+16:01:48,985    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2B 00520000000000000000000000000000]
+         2: MIDDLE BUTTON             , default: MiddleMouseButton           => MIDDLE BUTTON             
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:7
+16:01:48,985    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1E 030000]
+16:01:49,005    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1E 0053003C310002030100000000000000]
+16:01:49,006    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A28 005300]
+16:01:49,027    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A28 00530000000000000000000000000000]
+         3: BACK AS BUTTON 4          , default: BackEx                      => BACK AS BUTTON 4          
+             mse, reprogrammable, divertable, pos:0, group:2, gmask:3
+16:01:49,027    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1B 040000]
+16:01:49,047    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1B 0056003E310002030100000000000000]
+16:01:49,047    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2F 005600]
+16:01:49,067    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2F 00560000000000000000000000000000]
+         4: FORWARD AS BUTTON 5       , default: BrowserForwardEx            => FORWARD AS BUTTON 5       
+             mse, reprogrammable, divertable, pos:0, group:2, gmask:3
+16:01:49,067    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1C 050000]
+16:01:49,087    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1C 00C300A9310003070100000000000000]
+16:01:49,087    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2A 00C300]
+16:01:49,107    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2A 00C30000000000000000000000000000]
+         5: unknown:00C3              , default: unknown:00A9                => unknown:00C3              
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:7
+16:01:49,107    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1A 060000]
+16:01:49,127    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1A 00C4009D310003070100000000000000]
+16:01:49,127    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2C 00C400]
+16:01:49,147    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2C 00C40000000000000000000000000000]
+         6: unknown:00C4              , default: unknown:009D                => unknown:00C4              
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:7
+16:01:49,147    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A1C 070000]
+16:01:49,167    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A1C 00D700B4A00004000300000000000000]
+16:01:49,167    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 0A2C 00D700]
+16:01:49,187    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 0A2C 00D70000000000000000000000000000]
+         7: unknown:00D7              , default: unknown:00B4                => unknown:00D7              
+             divertable, virtual, pos:0, group:4, gmask:0
+16:01:49,187    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 01 070B 000000]
+16:01:49,207    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 01 070B 32140000000000000000000000000000]
+16:01:49,207    DEBUG [MainThread] logitech_receiver.hidpp20: device 1 battery 50% charged, next level 20% charge, status 0 = discharging
+     Battery: 50%, discharging.
+16:01:49,207    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 210000]
+16:01:49,213    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 210814406E0402010700000000000000]
+16:01:49,213     INFO [MainThread] logitech_receiver.receiver: <UnifyingReceiver(/dev/hidraw0,3)>: found new device 2 (406E)
+
+16:01:49,213    DEBUG [MainThread] logitech_receiver.base: (3) pinging device 2
+16:01:49,213    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 001F 0000F4]
+16:01:49,245    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 001F 0405F400000000000000000000000000]
+  2: Wireless Illuminated Keyboard K800 new
+     Codename     : new
+     Kind         : keyboard
+     Wireless PID : 406E
+     Protocol     : HID++ 4.5
+     Polling rate : 20 ms (50Hz)
+16:01:49,245    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 FF 83B5 310000]
+16:01:49,251    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 FF 83B5 31636E14131A40000007000000000000]
+     Serial number: 636E1413
+16:01:49,251    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000A 000100]
+16:01:49,285    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000A 01000100000000000000000000000000]
+16:01:49,285    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 010B 000000]
+16:01:49,325    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 010B 18000000000000000000000000000000]
+16:01:49,325    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0009 000300]
+16:01:49,365    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0009 02000200000000000000000000000000]
+16:01:49,365    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 020C 000000]
+16:01:49,405    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 020C 0254FC62F90004406E00000000010000]
+16:01:49,405    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 021E 000000]
+16:01:49,446    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 021E 01424F546000000200406ED4E7454501]
+16:01:49,446    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 021C 010000]
+16:01:49,487    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 021C 0052514B6801000901406ED4E7454501]
+        Bootloader: BOT 60.00.B0002
+          Firmware: RQK 68.01.B0009
+     The power switch is located on the top right corner.
+     Supports 25 HID++ 2.0 features:
+16:01:49,487    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 000000]
+16:01:49,527    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 00000100000000000000000000000000]
+         0: ROOT                   {0000}   
+16:01:49,527    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 000100]
+16:01:49,567    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 01000100000000000000000000000000]
+         1: FEATURE SET            {0001}   
+16:01:49,568    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000C 000300]
+16:01:49,607    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000C 02000200000000000000000000000000]
+         2: DEVICE FW VERSION      {0003}   
+16:01:49,607    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011A 030000]
+16:01:49,647    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011A 00050000000000000000000000000000]
+16:01:49,647    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000D 000500]
+16:01:49,687    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000D 03000000000000000000000000000000]
+         3: DEVICE NAME            {0005}   
+16:01:49,687    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011C 040000]
+16:01:49,729    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011C 1D4B0000000000000000000000000000]
+16:01:49,729    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000D 1D4B00]
+16:01:49,770    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000D 04000000000000000000000000000000]
+         4: WIRELESS DEVICE STATUS {1D4B}   
+16:01:49,770    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0119 050000]
+16:01:49,809    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0119 00200000000000000000000000000000]
+16:01:49,809    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000D 002000]
+16:01:49,849    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000D 05000000000000000000000000000000]
+         5: RESET                  {0020}   
+16:01:49,849    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 060000]
+16:01:49,889    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 10000000000000000000000000000000]
+16:01:49,889    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0009 100000]
+16:01:49,929    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0009 06000000000000000000000000000000]
+         6: BATTERY STATUS         {1000}   
+16:01:49,929    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011D 070000]
+16:01:49,969    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011D 19830000000000000000000000000000]
+16:01:49,969    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000B 198300]
+16:01:50,009    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000B 07000000000000000000000000000000]
+         7: unknown:1983           {1983}   
+16:01:50,010    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011F 080000]
+16:01:50,051    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011F 1B040003000000000000000000000000]
+16:01:50,051    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000E 1B0400]
+16:01:50,091    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000E 08000300000000000000000000000000]
+         8: REPROG CONTROLS V4     {1B04}   
+16:01:50,091    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0119 090000]
+16:01:50,131    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0119 40A00000000000000000000000000000]
+16:01:50,131    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0009 40A000]
+16:01:50,171    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0009 09000000000000000000000000000000]
+         9: FN INVERSION           {40A0}   
+16:01:50,171    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011C 0A0000]
+16:01:50,211    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011C 41000000000000000000000000000000]
+16:01:50,211    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000A 410000]
+16:01:50,251    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000A 0A000000000000000000000000000000]
+        10: ENCRYPTION             {4100}   
+16:01:50,251    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 0B0000]
+16:01:50,293    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 45210000000000000000000000000000]
+16:01:50,293    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 452100]
+16:01:50,333    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 0B000000000000000000000000000000]
+        11: KEYBOARD DISABLE       {4521}   
+16:01:50,334    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011E 0C0000]
+16:01:50,373    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011E 00C20000000000000000000000000000]
+16:01:50,373    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 00C200]
+16:01:50,413    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 0C000000000000000000000000000000]
+        12: unknown:00C2           {00C2}   
+16:01:50,414    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 0D0000]
+16:01:50,453    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 18036000000000000000000000000000]
+16:01:50,454    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0008 180300]
+16:01:50,493    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0008 0D600000000000000000000000000000]
+        13: unknown:1803           {1803}   internal, hidden
+16:01:50,494    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011D 0E0000]
+16:01:50,533    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011D 18066001000000000000000000000000]
+16:01:50,533    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000C 180600]
+16:01:50,575    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000C 0E600100000000000000000000000000]
+        14: unknown:1806           {1806}   internal, hidden
+16:01:50,576    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011A 0F0000]
+16:01:50,615    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011A 18116000000000000000000000000000]
+16:01:50,615    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0008 181100]
+16:01:50,655    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0008 0F600000000000000000000000000000]
+        15: unknown:1811           {1811}   internal, hidden
+16:01:50,656    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011B 100000]
+16:01:50,695    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011B 18306000000000000000000000000000]
+16:01:50,696    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 183000]
+16:01:50,735    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 10600000000000000000000000000000]
+        16: unknown:1830           {1830}   internal, hidden
+16:01:50,736    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0119 110000]
+16:01:50,775    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0119 18906000000000000000000000000000]
+16:01:50,776    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000A 189000]
+16:01:50,815    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000A 11600000000000000000000000000000]
+        17: unknown:1890           {1890}   internal, hidden
+16:01:50,816    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 120000]
+16:01:50,858    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 18A16000000000000000000000000000]
+16:01:50,858    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 18A100]
+16:01:50,897    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 12600000000000000000000000000000]
+        18: unknown:18A1           {18A1}   internal, hidden
+16:01:50,898    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 130000]
+16:01:50,937    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 1DF36000000000000000000000000000]
+16:01:50,938    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000B 1DF300]
+16:01:50,977    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000B 13600000000000000000000000000000]
+        19: unknown:1DF3           {1DF3}   internal, hidden
+16:01:50,978    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011B 140000]
+16:01:51,017    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011B 1E004000000000000000000000000000]
+16:01:51,018    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000E 1E0000]
+16:01:51,057    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000E 14400000000000000000000000000000]
+        20: unknown:1E00           {1E00}   hidden
+16:01:51,058    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011B 150000]
+16:01:51,097    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011B 1EB06000000000000000000000000000]
+16:01:51,098    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000F 1EB000]
+16:01:51,137    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000F 15600000000000000000000000000000]
+        21: unknown:1EB0           {1EB0}   internal, hidden
+16:01:51,138    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011D 160000]
+16:01:51,179    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011D 18616000000000000000000000000000]
+16:01:51,180    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000E 186100]
+16:01:51,220    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000E 16600000000000000000000000000000]
+        22: unknown:1861           {1861}   internal, hidden
+16:01:51,220    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 011D 170000]
+16:01:51,260    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 011D 1A206000000000000000000000000000]
+16:01:51,260    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0008 1A2000]
+16:01:51,300    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0008 17600000000000000000000000000000]
+        23: unknown:1A20           {1A20}   internal, hidden
+16:01:51,300    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0118 180000]
+16:01:51,339    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0118 18B06000000000000000000000000000]
+16:01:51,340    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 000E 18B000]
+16:01:51,379    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 000E 18600000000000000000000000000000]
+        24: unknown:18B0           {18B0}   internal, hidden
+16:01:51,380    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 080E 000000]
+16:01:51,419    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 080E 0F000000000000000000000000000000]
+     Has 15 reprogrammable keys:
+16:01:51,420    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081C 000000]
+16:01:51,461    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081C 0022001A3A0100000000000000000000]
+16:01:51,462    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082F 002200]
+16:01:51,501    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082F 00220000000000000000000000000000]
+         0: MY HOME                   , default: HomePage                    => MY HOME                   
+             is FN, FN sensitive, reprogrammable, divertable, pos:1, group:0, gmask:0
+16:01:51,502    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0819 010000]
+16:01:51,541    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0819 000E000E3A0200000000000000000000]
+16:01:51,542    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0829 000E00]
+16:01:51,581    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0829 000E0000000000000000000000000000]
+         1: Mail                      , default: Email                       => Mail                      
+             is FN, FN sensitive, reprogrammable, divertable, pos:2, group:0, gmask:0
+16:01:51,582    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0818 020000]
+16:01:51,621    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0818 003E002D3A0300000000000000000000]
+16:01:51,622    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0828 003E00]
+16:01:51,661    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0828 003E0000000000000000000000000000]
+         2: SEARCH                    , default: SearchForFiles              => SEARCH                    
+             is FN, FN sensitive, reprogrammable, divertable, pos:3, group:0, gmask:0
+16:01:51,662    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081B 030000]
+16:01:51,701    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081B 000800083A0400000000000000000000]
+16:01:51,702    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082E 000800]
+16:01:51,743    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082E 00080000000000000000000000000000]
+         3: Application Switcher      , default: Application Switcher        => Application Switcher      
+             is FN, FN sensitive, reprogrammable, divertable, pos:4, group:0, gmask:0
+16:01:51,744    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081D 040000]
+16:01:51,784    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081D 00E200C12A0500000000000000000000]
+16:01:51,784    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082E 00E200]
+16:01:51,824    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082E 00E20000000000000000000000000000]
+         4: unknown:00E2              , default: unknown:00C1                => unknown:00E2              
+             is FN, FN sensitive, divertable, pos:5, group:0, gmask:0
+16:01:51,824    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081A 050000]
+16:01:51,864    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081A 00E300C22A0600000000000000000000]
+16:01:51,864    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082B 00E300]
+16:01:51,904    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082B 00E30000000000000000000000000000]
+         5: unknown:00E3              , default: unknown:00C2                => unknown:00E3              
+             is FN, FN sensitive, divertable, pos:6, group:0, gmask:0
+16:01:51,904    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0818 060000]
+16:01:51,943    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0818 0040002F3A0800000000000000000000]
+16:01:51,944    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082E 004000]
+16:01:51,984    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082E 00400000000000000000000000000000]
+         6: SLEEP                     , default: Sleep                       => SLEEP                     
+             is FN, FN sensitive, reprogrammable, divertable, pos:8, group:0, gmask:0
+16:01:51,984    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081D 070000]
+16:01:52,025    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081D 0028001D3A0900000000000000000000]
+16:01:52,026    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0828 002800]
+16:01:52,065    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0828 00280000000000000000000000000000]
+         7: MEDIA PLAYER              , default: Music                       => MEDIA PLAYER              
+             is FN, FN sensitive, reprogrammable, divertable, pos:9, group:0, gmask:0
+16:01:52,066    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081F 080000]
+16:01:52,106    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081F 000600062A0A00000000000000000000]
+16:01:52,106    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0828 000600]
+16:01:52,145    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0828 00060000000000000000000000000000]
+         8: Previous                  , default: Previous                    => Previous                  
+             is FN, FN sensitive, divertable, pos:10, group:0, gmask:0
+16:01:52,146    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081F 090000]
+16:01:52,186    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081F 000400042A0B00000000000000000000]
+16:01:52,186    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082B 000400]
+16:01:52,225    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082B 00040000000000000000000000000000]
+         9: Play/Pause                , default: Play/Pause                  => Play/Pause                
+             is FN, FN sensitive, divertable, pos:11, group:0, gmask:0
+16:01:52,226    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081B 0A0000]
+16:01:52,265    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081B 000500052A0C00000000000000000000]
+16:01:52,266    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0829 000500]
+16:01:52,308    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0829 00050000000000000000000000000000]
+        10: Next                      , default: Next                        => Next                      
+             is FN, FN sensitive, divertable, pos:12, group:0, gmask:0
+16:01:52,308    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0818 0B0000]
+16:01:52,348    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0818 00010001240000000000000000000000]
+16:01:52,348    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082C 000100]
+16:01:52,387    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082C 00010000000000000000000000000000]
+        11: Volume Up                 , default: Volume Up                   => Volume Up                 
+             nonstandard, divertable, pos:0, group:0, gmask:0
+16:01:52,388    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081C 0C0000]
+16:01:52,427    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081C 00020002240000000000000000000000]
+16:01:52,428    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082C 000200]
+16:01:52,468    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082C 00020000000000000000000000000000]
+        12: Volume Down               , default: Volume Down                 => Volume Down               
+             nonstandard, divertable, pos:0, group:0, gmask:0
+16:01:52,468    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 0819 0D0000]
+16:01:52,507    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 0819 00030003240000000000000000000000]
+16:01:52,508    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082D 000300]
+16:01:52,547    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082D 00030000000000000000000000000000]
+        13: Mute                      , default: Mute                        => Mute                      
+             nonstandard, divertable, pos:0, group:0, gmask:0
+16:01:52,548    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 081B 0E0000]
+16:01:52,589    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 081B 000A000A340000000000000000000000]
+16:01:52,590    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 082F 000A00]
+16:01:52,630    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 082F 000A0000000000000000000000000000]
+        14: Calculator                , default: Calculator                  => Calculator                
+             nonstandard, reprogrammable, divertable, pos:0, group:0, gmask:0
+16:01:52,630    DEBUG [MainThread] logitech_receiver.base: (3) <= w[10 02 060C 000000]
+16:01:52,670    DEBUG [MainThread] logitech_receiver.base: (3) => r[11 02 060C 32140000000000000000000000000000]
+16:01:52,670    DEBUG [MainThread] logitech_receiver.hidpp20: device 2 battery 50% charged, next level 20% charge, status 0 = discharging
+     Battery: 50%, discharging.
