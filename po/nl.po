@@ -56,7 +56,7 @@ msgstr "bezig met opladen"
 
 #: lib/logitech_receiver/i18n.py:44
 msgid "invalid battery"
-msgstr "verkeerde accu"
+msgstr "verkeerde batterij"
 
 #: lib/logitech_receiver/i18n.py:44
 msgid "slow recharge"
@@ -230,12 +230,12 @@ msgstr[1] "%(count)s gekoppelde apparaten."
 #: lib/logitech_receiver/status.py:149
 #, python-format
 msgid "Battery: %(level)s"
-msgstr "Accuniveau: %(level)s"
+msgstr "Batterijniveau: %(level)s"
 
 #: lib/logitech_receiver/status.py:151
 #, python-format
 msgid "Battery: %(percent)d%%"
-msgstr "Accuniveau: %(percent)d%%"
+msgstr "Batterijniveau: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:162
 #, python-format
@@ -245,12 +245,12 @@ msgstr "Verlichting: %(level)s lux"
 #: lib/logitech_receiver/status.py:203
 #, python-format
 msgid "Battery: %(level)s (%(status)s)"
-msgstr "Accuniveau: %(level)s (%(status)s)"
+msgstr "Batterijniveau: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:205
 #, python-format
 msgid "Battery: %(percent)d%% (%(status)s)"
-msgstr "Accuniveau: %(percent)d%% (%(status)s)"
+msgstr "Batterijniveau: %(percent)d%% (%(status)s)"
 
 #: lib/solaar/listener.py:96
 msgid "The receiver was unplugged."
@@ -404,7 +404,7 @@ msgstr "Bezig met zoeken..."
 
 #: lib/solaar/ui/window.py:131
 msgid "Battery"
-msgstr "Accu"
+msgstr "Batterij"
 
 #: lib/solaar/ui/window.py:134
 msgid "Wireless Link"
