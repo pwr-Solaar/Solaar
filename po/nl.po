@@ -100,11 +100,11 @@ msgstr "Overig"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "pairing lock is closed"
-msgstr "koppelvergendeling ingeschakeld"
+msgstr "koppelvergrendeling ingeschakeld"
 
 #: lib/logitech_receiver/notifications.py:67
 msgid "pairing lock is open"
-msgstr "koppelvergendeling uitgeschakeld"
+msgstr "koppelvergrendeling uitgeschakeld"
 
 #: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:132
 msgid "unpaired"
@@ -200,7 +200,7 @@ msgstr "Handpalmdetectie"
 #: lib/logitech_receiver/settings_templates.py:142
 msgid "Turn on illumination when the hands hover over the keyboard."
 msgstr ""
-"Schakelt de verlichting in als u beide handen boven het toetsenbord houdt."
+"Schakelt de verlichting in als u uw hand(en) boven het toetsenbord houdt."
 
 #: lib/logitech_receiver/settings_templates.py:143
 msgid "Smart Shift"
