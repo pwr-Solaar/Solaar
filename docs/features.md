@@ -8,12 +8,12 @@ See functions in hidpp20.py and settings_templates.py
 
 Feature                                | ID       | Status             | Notes
 ---------------------------------------|----------|:------------------:|------
-`ROOT`                                 | `0x0000` | :white_check_mark: | System
-`FEATURE_SET`                          | `0x0001` | :white_check_mark: | System
-`FEATURE_INFO`                         | `0x0002` | :white_check_mark: | System
-`DEVICE_FW_VERSION`                    | `0x0003` | :white_check_mark: | `get_firmware()`
+`ROOT`                                 | `0x0000` | :heavy_check_mark: | System
+`FEATURE_SET`                          | `0x0001` | :heavy_check_mark: | System
+`FEATURE_INFO`                         | `0x0002` | :heavy_check_mark: | System
+`DEVICE_FW_VERSION`                    | `0x0003` | :heavy_check_mark: | `get_firmware()`
 `DEVICE_UNIT_ID`                       | `0x0004` |                    |
-`DEVICE_NAME`                          | `0x0005` | :white_check_mark: | `get_kind()`, `get_name()`
+`DEVICE_NAME`                          | `0x0005` | :heavy_check_mark: | `get_kind()`, `get_name()`
 `DEVICE_GROUPS`                        | `0x0006` |                    |
 `DEVICE_FRIENDLY_NAME`                 | `0x0007` |                    |
 `KEEP_ALIVE`                           | `0x0008` |                    |
@@ -25,7 +25,7 @@ Feature                                | ID       | Status             | Notes
 `DFUCONTROL_UNSIGNED`                  | `0x00C1` |                    |
 `DFUCONTROL_SIGNED`                    | `0x00C2` |                    |
 `DFU`                                  | `0x00D0` |                    |
-`BATTERY_STATUS`                       | `0x1000` | :white_check_mark: | `get_battery()`
+`BATTERY_STATUS`                       | `0x1000` | :heavy_check_mark: | `get_battery()`
 `BATTERY_VOLTAGE`                      | `0x1001` |                    |
 `CHARGING_CONTROL`                     | `0x1010` |                    |
 `LED_CONTROL`                          | `0x1300` |                    |
@@ -40,11 +40,11 @@ Feature                                | ID       | Status             | Notes
 `BACKLIGHT3`                           | `0x1983` |                    |
 `PRESENTER_CONTROL`                    | `0x1A00` |                    |
 `SENSOR_3D`                            | `0x1A01` |                    |
-`REPROG_CONTROLS`                      | `0x1B00` | :white_check_mark: | Partially, only listing. `get_keys()`
+`REPROG_CONTROLS`                      | `0x1B00` | :heavy_check_mark: | Partially, only listing. `get_keys()`
 `REPROG_CONTROLS_V2`                   | `0x1B01` |                    |
 `REPROG_CONTROLS_V2_2`                 | `0x1B02` |                    |
 `REPROG_CONTROLS_V3`                   | `0x1B03` |                    |
-`REPROG_CONTROLS_V4`                   | `0x1B04` | :white_check_mark: | Partially, only listing. `get_keys()`
+`REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_check_mark: | Partially, only listing. `get_keys()`
 `REPORT_HID_USAGE`                     | `0x1BC0` |                    |
 `PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` |                    |
 `WIRELESS_DEVICE_STATUS`               | `0x1D4B` |                    |
@@ -54,21 +54,21 @@ Feature                                | ID       | Status             | Notes
 `LEFT_RIGHT_SWAP`                      | `0x2001` |                    |
 `SWAP_BUTTON_CANCEL`                   | `0x2005` |                    |
 `POINTER_AXIS_ORIENTATION`             | `0x2006` |                    |
-`VERTICAL_SCROLLING`                   | `0x2100` | :white_check_mark: | `get_vertical_scrolling_info()`
-`SMART_SHIFT`                          | `0x2110` | :white_check_mark: | `_feature_smart_shift()`
-`HI_RES_SCROLLING`                     | `0x2120` | :white_check_mark: | `get_hi_res_scrolling_info()`, `_feature_hi_res_scroll()`
-`HIRES_WHEEL`                          | `0x2121` | :white_check_mark: | `get_hires_wheel()`, `_feature_hires_smooth_invert()`, `_feature_hires_smooth_resolution()`
-`LOWRES_WHEEL`                         | `0x2130` | :white_check_mark: | `get_lowres_wheel_status()`, `_feature_lowres_smooth_scroll()`
+`VERTICAL_SCROLLING`                   | `0x2100` | :heavy_check_mark: | `get_vertical_scrolling_info()`
+`SMART_SHIFT`                          | `0x2110` | :heavy_check_mark: | `_feature_smart_shift()`
+`HI_RES_SCROLLING`                     | `0x2120` | :heavy_check_mark: | `get_hi_res_scrolling_info()`, `_feature_hi_res_scroll()`
+`HIRES_WHEEL`                          | `0x2121` | :heavy_check_mark: | `get_hires_wheel()`, `_feature_hires_smooth_invert()`, `_feature_hires_smooth_resolution()`
+`LOWRES_WHEEL`                         | `0x2130` | :heavy_check_mark: | `get_lowres_wheel_status()`, `_feature_lowres_smooth_scroll()`
 `THUMB_WHEEL`                          | `0x2150` |                    |
-`MOUSE_POINTER`                        | `0x2200` | :white_check_mark: | `get_mouse_pointer_info()`
-`ADJUSTABLE_DPI`                       | `0x2201` | :white_check_mark: | `_feature_adjustable_dpi()`
-`POINTER_SPEED`                        | `0x2205` | :white_check_mark: | `get_pointer_speed_info()`, `_feature_pointer_speed()`
+`MOUSE_POINTER`                        | `0x2200` | :heavy_check_mark: | `get_mouse_pointer_info()`
+`ADJUSTABLE_DPI`                       | `0x2201` | :heavy_check_mark: | `_feature_adjustable_dpi()`
+`POINTER_SPEED`                        | `0x2205` | :heavy_check_mark: | `get_pointer_speed_info()`, `_feature_pointer_speed()`
 `ANGLE_SNAPPING`                       | `0x2230` |                    |
 `SURFACE_TUNING`                       | `0x2240` |                    |
 `HYBRID_TRACKING`                      | `0x2400` |                    |
-`FN_INVERSION`                         | `0x40A0` | :white_check_mark: | `_feature_fn_swap()`
-`NEW_FN_INVERSION`                     | `0x40A2` | :white_check_mark: | `_feature_new_fn_swap()`
-`K375S_FN_INVERSION`                   | `0x40A3` | :white_check_mark: | `_feature_k375s_fn_swap()`
+`FN_INVERSION`                         | `0x40A0` | :heavy_check_mark: | `_feature_fn_swap()`
+`NEW_FN_INVERSION`                     | `0x40A2` | :heavy_check_mark: | `_feature_new_fn_swap()`
+`K375S_FN_INVERSION`                   | `0x40A3` | :heavy_check_mark: | `_feature_k375s_fn_swap()`
 `ENCRYPTION`                           | `0x4100` |                    |
 `LOCK_KEY_STATE`                       | `0x4220` |                    |
 `SOLAR_DASHBOARD`                      | `0x4301` |                    |
