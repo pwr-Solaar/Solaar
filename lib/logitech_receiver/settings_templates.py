@@ -140,8 +140,8 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	"and you must hold the FN key to activate their special function."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
-_BACKLIGHT = ('back-light', _("Backlight"),
-				   _("Turn on illumination on or off on keyboard."))
+_BACKLIGHT = ('backlight', _("Backlight"),
+				   _("Turn illumination on or off on keyboard."))
 
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"),
 							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
@@ -192,6 +192,7 @@ def _feature_k375s_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
 
+# FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
 	return feature_toggle(_BACKLIGHT[0], _F.BACKLIGHT2,
 						  label=_BACKLIGHT[1], description=_BACKLIGHT[2],
@@ -402,3 +403,4 @@ def check_feature_settings(device, already_known):
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
+	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
