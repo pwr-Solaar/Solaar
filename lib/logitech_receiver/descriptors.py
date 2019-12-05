@@ -222,7 +222,8 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 				)
 _D('Craft Advanced Keyboard', protocol=4.5, wpid='4066',
 				settings=[
-							_FS.new_fn_swap()
+							_FS.k375s_fn_swap(),
+							_FS.backlight()
 						],
 				)
 
