@@ -123,6 +123,7 @@ Mice (Nano):
 | M305             | 1.0   | yes     |       |                                 |
 | M310             | 1.0   | yes     |       |                                 |
 | M315             |       | yes     |       |                                 |
+| M330             | ?.?   | yes     | ?     | smooth scrolling                |
 | MX 1100          | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 
 [old]: M185 with P/N: 810-003496
@@ -184,3 +185,4 @@ Mouse-Keyboard combos:
 [P_MX]: http://logitech.com/product/performance-mouse-mx
 [A_MX]: http://logitech.com/product/anywhere-mouse-mx
 [M325]: http://logitech.com/product/wireless-mouse-m325
+[M330]: https://www.logitech.com/en-us/product/m330-silent-plus
