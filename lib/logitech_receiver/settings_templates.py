@@ -140,6 +140,9 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	"and you must hold the FN key to activate their special function."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
+_BACKLIGHT = ('backlight', _("Backlight"),
+				   _("Turn illumination on or off on keyboard."))
+
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"),
 							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
@@ -188,6 +191,12 @@ def _feature_k375s_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.K375S_FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
+
+# FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
+def _feature_backlight2():
+	return feature_toggle(_BACKLIGHT[0], _F.BACKLIGHT2,
+						  label=_BACKLIGHT[1], description=_BACKLIGHT[2],
+						  device_kind=(_DK.keyboard,))
 
 def _feature_hi_res_scroll():
 	return feature_toggle(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING,
@@ -312,6 +321,7 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'dpi',
 					'pointer_speed',
 					'hand_detection',
+					'backlight',
 					'typing_illumination',
 					'smart_shift',
 					])
@@ -330,6 +340,7 @@ RegisterSettings = _SETTINGS_LIST(
 				dpi=_register_dpi,
 				pointer_speed=None,
 				hand_detection=_register_hand_detection,
+				backlight=None,
 				typing_illumination=None,
 				smart_shift=None,
 			)
@@ -346,6 +357,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				dpi=_feature_adjustable_dpi,
 				pointer_speed=_feature_pointer_speed,
 				hand_detection=None,
+				backlight=_feature_backlight2,
 				typing_illumination=None,
 				smart_shift=_feature_smart_shift,
 			)
@@ -391,3 +403,4 @@ def check_feature_settings(device, already_known):
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
+	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
