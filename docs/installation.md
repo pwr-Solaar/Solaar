@@ -29,14 +29,20 @@ installed.
 
 ### Installation
 
+The downloaded code from https://github.com/pwr-Solaar/Solaar only has the
+source files. The [byte code](https://en.wikipedia.org/wiki/Bytecode) that 
+is used by the Python interpreter must be build with the command: 
+`python ./setup.py build`. Then the Solaar program must be installed with the 
+command: `sudo python ./setup.py install`.
+
 Normally USB devices are not accessible for r/w by regular users, so you will
 need to do a one-time udev rule installation to allow access to the Logitech
 Unifying Receiver.
 
-You can run the `rules.d/install.sh` script from Solaar to do this installation
-automatically (make sure to run it as your regular desktop user, it will switch
-to root when necessary), or you can do all the required steps by hand, as the
-root user:
+You can run the `sudo ./rules.d/install.sh` script from Solaar to do this 
+installation automatically (make sure to run it as your regular desktop user, 
+it will switch to root when necessary), or you can do all the required steps by 
+hand, as the root user:
 
 1. Copy `rules.d/42-logitech-unifying-receiver.rules` from Solaar to
    `/etc/udev/rules.d/`. The `udev` daemon will automatically pick up this file
