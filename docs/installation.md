@@ -72,4 +72,11 @@ root user:
    `gpasswd -a <desktop username> plugdev`. If these users were not assigned to the
    group before, they must re-login for the changes to take effect.
 
-TO BE DESCRIBED:  Actually installing solaar in /usr/bin
+
+Then solaar can be run from the download directory without using sudo.
+
+Solaar can be installed as a user python program from the solaar directory using `pip install --user .`
+and then run as `~/.local/bin/solaar`.
+Installing python programs to system directories using pip is somewhat frowned on but
+installing to /usr/local can be done via `sudo bash -c 'umask 022 ; pip install .'`
+in the solaar directory.  Then solaar can be run as /usr/local/bin/solaar.
