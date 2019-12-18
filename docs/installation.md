@@ -75,8 +75,18 @@ root user:
 
 Then solaar can be run from the download directory without using sudo.
 
-Solaar can be installed as a user python program from the solaar directory using `pip install --user .`
-and then run as `~/.local/bin/solaar`.
-Installing python programs to system directories using pip is somewhat frowned on but
-installing to /usr/local can be done via `sudo bash -c 'umask 022 ; pip install .'`
-in the solaar directory.  Then solaar can be run as /usr/local/bin/solaar.
+Python programs are usually installed using [pip][pip].
+The pip instructions for solaar are in `setup.py`, the standard place to put such instructions.
+
+To install solaar for yourself only run `pip install --user .` from the solaar directory.
+This tells pip to install into your `.local` directory. You can then run solaar as 
+ `~/.local/bin/solaar`.
+
+Installing python programs to system directories using pip is generally frowned on both
+because this runs arbitrary code as root and because this can override existing python libraries
+that other users or even the system depend on.  If you want to install solaar to /usr/local run
+`sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
+(The umask is needed so that the created files and directories can be read and executed by everyone.)
+Then solaar can be run as /usr/local/bin/solaar.
+
+[pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
