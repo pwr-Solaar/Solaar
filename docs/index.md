@@ -3,7 +3,7 @@ title: Solaar
 layout: default
 ---
 
-**Solaar** is a Linux device manager for Logitech's [Unifying][unifying] and
+**Solaar** is a Linux device manager for Logitech's [Unifying][unifying], Lightspeed, and
 Nano receiver peripherals. It is able to pair/unpair devices with the
 receiver and for most devices show battery status.  Solaar can also control
 some of the changeable features of the devices, such as smooth scrolling or
@@ -27,10 +27,11 @@ the current version.
 
 ## Supported Devices
 
-**Solaar** will detect all devices paired with your Unifying
+**Solaar** will detect all devices paired with your Unifying, Lightspeed, or Nano
 receiver, and at the very least display some basic information about them.
 Solaar can pair and unpair a Logitech device showing the [Unifying logo][logo]
-with any Unifying receiver.  Solaar can pair some Logitech
+with any Unifying receiver and can pair and unpair devices with Lightspeed receivers.
+Solaar can pair some Logitech
 devices with Logitech Nano receivers but not all Logitech devices can be
 paired with Nano receivers.  Logitech devices without a Unifying logo
 generally cannot be paired with Unifying receivers.
