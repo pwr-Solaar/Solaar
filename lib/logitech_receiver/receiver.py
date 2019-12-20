@@ -370,6 +370,8 @@ class Receiver(object):
 
 		self._firmware = None
 		self._devices = {}
+		# remaining pairings (remaining pairings field - 5, -1 for no limit)
+		self._pairings = None
 
 	def close(self):
 		handle, self.handle = self.handle, None
@@ -384,6 +386,14 @@ class Receiver(object):
 		if self._firmware is None and self.handle:
 			self._firmware = _hidpp10.get_firmware(self)
 		return self._firmware
+
+	def pairings(self,cache=True):
+		if self._pairings is None   or  not cache :
+			ps = self.read_register(_R.receiver_connection)
+			if ps is not None:
+				ps = ord(ps[2:3])
+				self._pairings = ps-5 if ps >= 5 else -1
+		return self._pairings
 
 	def enable_notifications(self, enable=True):
 		"""Enable or disable device (dis)connection notifications on this
