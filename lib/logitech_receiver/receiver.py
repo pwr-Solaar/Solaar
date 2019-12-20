@@ -320,6 +320,9 @@ class PairedDevice(object):
 
 # Lightspeed receivers
 lightspeed_receiver_product_ids = { 'c539', 'c53a', 'c53f' }
+# Receivers that don't unpair but instead pairing replaces existing paired devices
+# Maybe all nano receivers are like this
+repairing_receiver_product_ids = { 'c534' }
 
 class Receiver(object):
 	"""A Unifying Receiver instance.
@@ -362,7 +365,8 @@ class Receiver(object):
 		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
 
 		# TODO _properly_ figure out which receivers do and which don't support unpairing
-		self.may_unpair = self.write_register(_R.receiver_pairing) is None
+		self.may_unpair = ( self.write_register(_R.receiver_pairing) is None and 
+				    ( self.product_id not in repairing_receiver_product_ids ) )
 
 		self._firmware = None
 		self._devices = {}
