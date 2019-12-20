@@ -38,6 +38,8 @@ def _print_receiver(receiver):
 		print ('    %-11s: %s' % (f.kind, f.version))
 
 	print ('  Has', paired_count, 'paired device(s) out of a maximum of %d.' % receiver.max_devices)
+	if receiver.pairings() and receiver.pairings() >= 0 :
+		print ('  Has %d successful pairing(s) remaining.' % receiver.pairings() )
 
 	notification_flags = _hidpp10.get_notification_flags(receiver)
 	if notification_flags is not None:
