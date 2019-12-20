@@ -336,14 +336,17 @@ class Receiver(object):
 
 		# read the serial immediately, so we can find out max_devices
 		# this will tell us if it's a Unifying or Nano receiver
-		if self.product_id != 'c534':
-			serial_reply = self.read_register(_R.receiver_info, 0x03)
-			assert serial_reply
+		# Should this be done differently?
+		serial_reply = self.read_register(_R.receiver_info, 0x03)
+		if serial_reply is None :
+			# some receivers have this information in a different place
+			serial_reply = self.read_register(_R.receiver_info, 0x10)
+		if serial_reply :
 			self.serial = _strhex(serial_reply[1:5])
 			self.max_devices = ord(serial_reply[6:7])
-		else:
+		else: # devices that don't provide this information are likely limited receivers
 			self.serial = 0
-			self.max_devices = 6
+			self.max_devices = 2 # a guess
 
 		if self.product_id == 'c539' or self.product_id == 'c53a' or self.product_id == 'c53f':
 			self.name = 'Lightspeed Receiver'
