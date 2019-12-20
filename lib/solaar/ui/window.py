@@ -595,9 +595,10 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 	# b._insecure.set_visible(False)
 	buttons._unpair.set_visible(False)
 
-	may_pair = receiver.may_unpair and not is_pairing
+	may_pair = ( not is_pairing and 
+		     ( receiver.pairings() is None or receiver.pairings() != 0 ) )
 	if may_pair and devices_count >= receiver.max_devices:
-		online_devices = tuple(n for n in range(1, receiver.max_devices) if n in receiver and receiver[n].online)
+		online_devices = tuple(n for n in range(1, receiver.max_devices+1) if n in receiver and receiver[n].online)
 		may_pair &= len(online_devices) < receiver.max_devices
 	buttons._pair.set_sensitive(may_pair)
 	buttons._pair.set_visible(True)
