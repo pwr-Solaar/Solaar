@@ -346,7 +346,7 @@ class Receiver(object):
 		serial_reply = self.read_register(_R.receiver_info, 0x03)
 		if serial_reply is None :
 			# some receivers have this information in a different place
-			serial_reply = self.read_register(_R.receiver_info, 0x10)
+			serial_reply = self.read_register(_R.receiver_info, 0x11)
 		if serial_reply :
 			self.serial = _strhex(serial_reply[1:5])
 			self.max_devices = ord(serial_reply[6:7])
