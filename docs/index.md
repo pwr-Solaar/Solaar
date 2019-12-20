@@ -36,6 +36,15 @@ devices with Logitech Nano receivers but not all Logitech devices can be
 paired with Nano receivers.  Logitech devices without a Unifying logo
 generally cannot be paired with Unifying receivers.
 
+Some (maybe all) Nano receivers can only pair a limited number of times.
+Solaar reports how many successful pairings remain for such receivers.
+Some (maybe all) Nano receivers cannot unpair and pair by replacing an old device by
+a new device instead of adding the new device.
+For receivers that solaar believes work this way, the solaar GUI will not allow unpairing
+and will allow pairing even if the receiver already has its maximum number of paired devices.
+Solaar command line pairing and unpairing do not check whether solaar believes
+pairing or unpairing is impossible before trying to pair or unpair.
+
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported. For a full list of supported devices
 and their features, see [docs/devices.md](https://pwr-solaar.github.io/Solaar/devices).
