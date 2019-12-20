@@ -318,6 +318,9 @@ class PairedDevice(object):
 #
 #
 
+# Lightspeed receivers
+lightspeed_receiver_product_ids = { 'c539', 'c53a', 'c53f' }
+
 class Receiver(object):
 	"""A Unifying Receiver instance.
 
@@ -348,7 +351,7 @@ class Receiver(object):
 			self.serial = 0
 			self.max_devices = 2 # a guess
 
-		if self.product_id == 'c539' or self.product_id == 'c53a' or self.product_id == 'c53f':
+		if self.product_id in lightspeed_receiver_product_ids :
 			self.name = 'Lightspeed Receiver'
 		elif self.max_devices == 6:
 			self.name = 'Unifying Receiver'
