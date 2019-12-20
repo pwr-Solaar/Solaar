@@ -30,7 +30,7 @@ from logitech_receiver import (
 def _print_receiver(receiver):
 	paired_count = receiver.count()
 
-	print ('Unifying Receiver')
+	print (receiver.name)
 	print ('  Device path  :', receiver.path)
 	print ('  USB id       : 046d:%s' % receiver.product_id)
 	print ('  Serial       :', receiver.serial)
