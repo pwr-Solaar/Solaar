@@ -311,7 +311,7 @@ class PairedDevice(object):
 	__bool__ = __nonzero__ = lambda self: self.wpid is not None and self.number in self.receiver
 
 	def __str__(self):
-		return '<PairedDevice(%d,%s,%s)>' % (self.number, self.wpid, self.codename or '?')
+		return '<PairedDevice(%d,%s,%s,%s)>' % (self.number, self.wpid, self.codename or '?', self.serial)
 	__unicode__ = __repr__ = __str__
 
 #
