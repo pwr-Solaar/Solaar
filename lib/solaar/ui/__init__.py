@@ -86,7 +86,7 @@ def ui_async(function, *args, **kwargs):
 from . import notify, tray, window
 
 
-def _startup(app, startup_hook):
+def _startup(app, startup_hook, tray_only):
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
 
@@ -97,7 +97,7 @@ def _startup(app, startup_hook):
 
 	notify.init()
 	tray.init(lambda _ignore: window.destroy())
-	window.init()
+	window.init(tray_only)
 
 	startup_hook()
 
@@ -133,12 +133,12 @@ def _shutdown(app, shutdown_hook):
 	notify.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, args=None):
+def run_loop(startup_hook, shutdown_hook, tray_only, args=None):
 	# from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
 	APP_ID = 'io.github.pwr.solaar'
 	application = Gtk.Application.new(APP_ID, 0) # _ApplicationFlags.HANDLES_COMMAND_LINE)
 
-	application.connect('startup', _startup, startup_hook)
+	application.connect('startup', lambda app, startup_hook:_startup(app,startup_hook,tray_only), startup_hook)
 	application.connect('command-line', _command_line)
 	application.connect('activate', _activate)
 	application.connect('shutdown', _shutdown, shutdown_hook)

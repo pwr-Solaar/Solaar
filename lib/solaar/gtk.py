@@ -48,6 +48,7 @@ def _parse_arguments():
 							help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
 	arg_parser.add_argument('--restart-on-wake-up', action='store_true',
 							help='restart Solaar on sleep wake-up (experimental)')
+	arg_parser.add_argument('-t', '--tray', action='store_true', help='start GUI with only tray icon')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	arg_parser.add_argument('--help-actions', action='store_true',
 							help='print help for the optional actions')
@@ -105,7 +106,7 @@ def main():
 			_upower.watch(listener.ping_all)
 
 		# main UI event loop
-		ui.run_loop(listener.start_all, listener.stop_all)
+		ui.run_loop(listener.start_all, listener.stop_all, args.tray)
 	except Exception as e:
 		import sys
 		sys.exit('%s: error: %s' % (NAME.lower(), e))
