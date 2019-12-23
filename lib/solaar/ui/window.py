@@ -345,7 +345,7 @@ def _create():
 	geometry = Gdk.Geometry()
 	geometry.min_width = 600
 	geometry.min_height = 320
-	geometry.max_width = 800
+	geometry.max_width = 1000
 	geometry.max_height = 600
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE | Gdk.WindowHints.MAX_SIZE)
 	window.set_position(Gtk.WindowPosition.CENTER)
@@ -726,7 +726,7 @@ _empty = None
 _window = None
 
 
-def init():
+def init(tray_only):
 	Gtk.Window.set_default_icon_name(NAME.lower())
 	Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
 
@@ -737,6 +737,8 @@ def init():
 	_info = _create_info_panel()
 	_empty = _create_empty_panel()
 	_window = _create()
+	if (not tray_only) : 
+		_window.present()
 
 
 def destroy():
