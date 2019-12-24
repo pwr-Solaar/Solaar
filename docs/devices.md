@@ -10,8 +10,7 @@ least display some basic information about them.
 
 At this moment, all [Unifying][unifying] receivers are supported (devices with
 USB ID `046d:c52b` or `046d:c532`), but only some newer Nano receivers (devices
-with USB ID `046d:c52f`, `046d:c52b`, and `046d:c534`). You can check your connected Logitech
-receivers by running `lsusb -d 046d:` in a console.  Note that Linux incorrectly states that
+with USB ID `046d:c52f`, `046d:c52b`, and `046d:c534`). Note that Linux incorrectly states that
 some Nano receivers are Unifying receivers.
 
 For some devices, extra settings (usually not available through the standard
