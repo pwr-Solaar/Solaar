@@ -337,7 +337,6 @@ def _create():
 	# window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 	# window.set_skip_taskbar_hint(True)
 	# window.set_skip_pager_hint(True)
-	window.set_keep_above(True)
 	window.connect('delete-event', _hide)
 
 	vbox = _create_window_layout()
