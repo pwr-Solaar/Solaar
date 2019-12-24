@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 from glob import glob as _glob
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 autostart_path = '/etc/xdg/autostart'
 
