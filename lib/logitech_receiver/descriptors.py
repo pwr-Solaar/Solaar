@@ -232,7 +232,9 @@ _D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
 				])
-_D('Wireless Mouse M185/M235', codename='M185/M235', protocol=4.5, wpid='4055',
+# Apparently Logitech uses wpid 4055 for three different mice
+# That's not so strange, as M185 is used on both Unifying-ready and non-Unifying-ready mice
+_D('Wireless Mouse M185/M235/M310', codename='M185/M235/M310', protocol=4.5, wpid='4055',
 				settings=[
 							_FS.lowres_smooth_scroll(),
 							_FS.pointer_speed(),
