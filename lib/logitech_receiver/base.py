@@ -216,8 +216,9 @@ def _read(handle, timeout):
 				(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
 				"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 		if report_id & 0xF0 == 0x00:
-			if _log.isEnabledFor(_DEBUG):
-				_log.debug("(%s) => r[%02X %s] ignoring unknown report", handle, report_id, _strhex(data[1:]))
+# These all should be normal HID reports that shouldn't really be reported in debugging
+#			if _log.isEnabledFor(_DEBUG):
+#				_log.debug("(%s) => r[%02X %s] ignoring unknown report", handle, report_id, _strhex(data[1:]))
 			return
 		devnumber = ord(data[1:2])
 
