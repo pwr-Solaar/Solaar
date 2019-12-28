@@ -573,7 +573,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 		paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
 	pairings = receiver.pairings(False) 
 	if ( pairings and pairings >= 0 ) :
-		paired_text += '\n<small>%s</small>' % _('This receiver has %d pairing(s) remaing.') % pairings
+		paired_text += '\n<small>%s</small>' % _('This receiver has %d pairing(s) remaining.') % pairings
 
 
 	panel._count.set_markup(paired_text)
