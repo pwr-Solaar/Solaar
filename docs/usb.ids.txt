@@ -9,8 +9,8 @@
 #	The latest version can be obtained from
 #		http://www.linux-usb.org/usb.ids
 #
-# Version: 2013.05.24
-# Date:    2013-05-24 20:34:03
+# Version: 2019.11.05
+# Date:    2019-11-05 20:34:06
 #
 
 # Vendors, devices and interfaces. Please keep sorted.
@@ -24,6 +24,7 @@
 	0082  Acer Aspire 5672 Webcam
 	0200  WingMan Extreme Joystick
 	0203  M2452 Keyboard
+	0242  Chillstream for Xbox 360
 	0301  M4848 Mouse
 	0401  HP PageScan
 	0402  NEC PageScan
@@ -40,16 +41,25 @@
 	080f  Webcam C120
 	0810  QuickCam Pro
 	0819  Webcam C210
+	081a  Webcam C260
 	081b  Webcam C310
 	081d  HD Webcam C510
 	0820  QuickCam VC
 	0821  HD Webcam C910
+	0823  HD Webcam B910
 	0825  Webcam C270
+	0826  HD Webcam C525
 	0828  HD Webcam B990
+	082b  Webcam C170
+	082c  HD Webcam C615
 	082d  HD Pro Webcam C920
 	0830  QuickClip
+	0836  B525 HD Webcam
+	0837  BCC950 ConferenceCam
 	0840  QuickCam Express
+	0843  Webcam C930e
 	0850  QuickCam Web
+	085c  C922 Pro Stream Webcam
 	0870  QuickCam Express
 	0890  QuickCam Traveler
 	0892  OrbiCam
@@ -147,14 +157,25 @@
 	0a0b  ClearChat Pro USB
 	0a0c  Clear Chat Comfort USB Headset
 	0a13  Z-5 Speakers
+	0a14  USB Headset
+	0a15  G35 Headset
 	0a17  G330 Headset
 	0a1f  G930
+	0a29  H600 [Wireless Headset]
+	0a37  USB Headset H540
+	0a38  Headset H340
+	0a44  Headset H390
+	0a45  960 Headset
+	0a4d  G430 Surround Sound Gaming Headset
+	0a5b  G933 Wireless Headset Dongle
+	0a66  [G533 Wireless Headset Dongle]
 	0b02  C-UV35 [Bluetooth Mini-Receiver] (HID proxy mode)
 	8801  Video Camera
+	b014  Bluetooth Mouse M336/M337/M535
 	b305  BT Mini-Receiver
 	bfe4  Premium Optical Wheel Mouse
 	c000  N43 [Pilot Mouse]
-	c001  N48/M-BB48 [FirstMouse Plus]
+	c001  N48/M-BB48/M-UK96A [FirstMouse Plus]
 	c002  M-BA47 [MouseMan Plus]
 	c003  MouseMan
 	c004  WingMan Gaming Mouse
@@ -212,20 +233,32 @@
 	c061  RX1500 Laser Mouse
 	c062  M-UAS144 [LS1 Laser Mouse]
 	c063  DELL Laser Mouse
+	c064  M110 corded optical mouse (M-B0001)
+	c066  G9x Laser Mouse
 	c068  G500 Laser Mouse
-	c069  M500 Laser Mouse
+	c069  M-U0007 [Corded Mouse M500]
 	c06a  USB Optical Mouse
 	c06b  G700 Wireless Gaming Mouse
 	c06c  Optical Mouse
+	c077  M105 Optical Mouse
+	c07c  M-R0017 [G700s Rechargeable Gaming Mouse]
+	c07d  G502 Mouse
+	c07e  G402 Gaming Mouse
+	c080  G303 Gaming Mouse
+	c083  G403 Prodigy Gaming Mouse
+	c084  G203 Gaming Mouse
 	c101  UltraX Media Remote
-	c110  Harmony 785/885 Remote
+	c110  Harmony 785/880/885 Remote
 	c111  Harmony 525 Remote
 	c112  Harmony 890 Remote
 	c11f  Harmony 900/1100 Remote
 	c121  Harmony One Remote
-	c122  Harmony 700 Remote
-	c124  Harmony 300 Remote
+	c122  Harmony 650/700 Remote
+	c124  Harmony 300/350 Remote
 	c125  Harmony 200 Remote
+	c126  Harmony Link
+	c129  Harmony Hub
+	c12b  Harmony Touch/Ultimate Remote
 	c201  WingMan Extreme Joystick with Throttle
 	c202  WingMan Formula
 	c207  WingMan Extreme Digital 3D
@@ -241,9 +274,9 @@
 	c213  J-UH16 (Freedom 2.4 Cordless Joystick)
 	c214  ATK3 (Attack III Joystick)
 	c215  Extreme 3D Pro
-	c216  Dual Action Gamepad
-	c218  Logitech RumblePad 2 USB
-	c219  Cordless RumblePad 2
+	c216  F310 Gamepad [DirectInput Mode]
+	c218  F510 Gamepad [DirectInput Mode]
+	c219  F710 Gamepad [DirectInput Mode]
 	c21a  Precision Gamepad
 	c21c  G13 Advanced Gameboard
 	c21d  F310 Gamepad [XInput Mode]
@@ -255,12 +288,20 @@
 	c225  G11/G15 Keyboard / G keys
 	c226  G15 Refresh Keyboard
 	c227  G15 Refresh Keyboard
+	c228  G19 Gaming Keyboard
+	c229  G19 Gaming Keyboard Macro Interface
 	c22a  Gaming Keyboard G110
 	c22b  Gaming Keyboard G110 G-keys
 	c22d  G510 Gaming Keyboard
 	c22e  G510 Gaming Keyboard onboard audio
+	c231  G13 Virtual Mouse
 	c245  G400 Optical Mouse
 	c246  Gaming Mouse G300
+	c248  G105 Gaming Keyboard
+	c24a  G600 Gaming Mouse
+	c24c  G400s Optical Mouse
+	c24d  G710 Gaming Keyboard
+	c24e  G500s Laser Gaming Mouse
 	c281  WingMan Force
 	c283  WingMan Force 3D
 	c285  WingMan Strike Force 3D
@@ -276,13 +317,14 @@
 	c29c  Speed Force Wireless Wheel for Wii
 	c2a0  Wingman Force Feedback Mouse
 	c2a1  WingMan Force Feedback Mouse
+	c2ab  G13 Joystick
 	c301  iTouch Keyboard
 	c302  iTouch Pro Keyboard
 	c303  iTouch Keyboard
 	c305  Internet Keyboard
 	c307  Internet Keyboard
 	c308  Internet Navigator Keyboard
-	c309  Internet Keyboard
+	c309  Y-BF37 [Internet Navigator Keyboard]
 	c30a  iTouch Composite
 	c30b  NetPlay Keyboard
 	c30c  Internet Keys (X)
@@ -298,8 +340,14 @@
 	c318  Illuminated Keyboard
 	c31a  Comfort Wave 450
 	c31b  Compact Keyboard K300
-	c31c  Keyboard K120 for Business
+	c31c  Keyboard K120
 	c31d  Media Keyboard K200
+	c31f  Comfort Keyboard K290
+	c326  Washable Keyboard K310
+	c328  Corded Keyboard K280e
+	c332  G502 Proteus Spectrum Optical Mouse
+	c335  G910 Orion Spectrum Mechanical Keyboard
+	c33a  G413 Gaming Keyboard
 	c401  TrackMan Marble Wheel
 	c402  Marble Mouse (2-button)
 	c403  Turbo TrackMan Marble FX
@@ -332,12 +380,24 @@
 	c526  Nano Receiver
 	c529  Logitech Keyboard + Mice
 	c52b  Unifying Receiver
+	c52d  R700 Remote Presenter receiver
+	c52e  MK260 Wireless Combo Receiver
 	c52f  Unifying Receiver
+	c531  C-U0007 [Unifying Receiver]
 	c532  Unifying Receiver
+	c534  Unifying Receiver
+	c603  3Dconnexion Spacemouse Plus XT
+	c605  3Dconnexion CADman
+	c606  3Dconnexion Spacemouse Classic
+	c621  3Dconnexion Spaceball 5000
 	c623  3Dconnexion Space Traveller 3D Mouse
 	c625  3Dconnexion Space Pilot 3D Mouse
 	c626  3Dconnexion Space Navigator 3D Mouse
 	c627  3Dconnexion Space Explorer 3D Mouse
+	c628  3Dconnexion Space Navigator for Notebooks
+	c629  3Dconnexion SpacePilot Pro 3D Mouse
+	c62b  3Dconnexion Space Mouse Pro
+	c640  NuLOOQ navigator
 	c702  Cordless Presenter
 	c703  Elite Keyboard Y-RP20 + Mouse MX900 (Bluetooth)
 	c704  diNovo Wireless Desktop
@@ -360,5 +420,10 @@
 	c720  Bluetooth wireless hub
 	ca03  MOMO Racing
 	ca04  Formula Vibration Feedback Wheel
+	ca84  Cordless Controller for Xbox
+	ca88  Thunderpad for Xbox
+	ca8a  Precision Vibration Feedback Wheel for Xbox
+	caa3  DriveFX Racing Wheel
 	cab1  Cordless Keyboard for Wii HID Receiver
 	d001  QuickCam Pro
+	f301  Controller
