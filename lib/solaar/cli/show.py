@@ -166,6 +166,7 @@ def _print_device(dev):
 				print ('             %s, pos:%d, group:%1d, gmask:%d' % ( ', '.join(flags), k.pos, k.group, k.group_mask))
 	if dev.online:
 		battery = _hidpp20.get_battery(dev)
+		(voltage, charging, charge_sts, charge_lvl, charge_type) = _hidpp20.get_voltage(dev)
 		if battery is None:
 			battery = _hidpp10.get_battery(dev)
 		if battery is not None:
@@ -179,6 +180,8 @@ def _print_device(dev):
 			else:
 				text = 'N/A'
 			print ('     Battery: %s, %s.' % (text, status))
+		elif voltage:
+			print ('     Battery: %smV, %s.' % (voltage, 'Charging' if charging else 'Discharging'))
 		else:
 			print ('     Battery status unavailable.')
 	else:
