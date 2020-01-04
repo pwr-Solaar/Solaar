@@ -21,30 +21,37 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from solaar import NAME as _NAME
 
+
 #
 #
 #
+
 
 def _find_locale_path(lc_domain):
-	import os.path as _path
+    import os.path as _path
 
-	import sys as _sys
-	prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
-	src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
-	del _sys
+    import sys as _sys
 
-	from glob import glob as _glob
+    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), ".."))
+    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), "..", "share"))
+    del _sys
 
-	for location in prefix_share, src_share:
-		mo_files = _glob(_path.join(location, 'locale', '*', 'LC_MESSAGES', lc_domain + '.mo'))
-		if mo_files:
-			return _path.join(location, 'locale')
+    from glob import glob as _glob
 
-	# del _path
+    for location in prefix_share, src_share:
+        mo_files = _glob(
+            _path.join(location, "locale", "*", "LC_MESSAGES", lc_domain + ".mo")
+        )
+        if mo_files:
+            return _path.join(location, "locale")
+
+
+# del _path
 
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+
+locale.setlocale(locale.LC_ALL, "")
 language, encoding = locale.getlocale()
 del locale
 
@@ -58,9 +65,9 @@ _gettext.textdomain(_LOCALE_DOMAIN)
 _gettext.install(_LOCALE_DOMAIN)
 
 try:
-	unicode
-	_ = lambda x: _gettext.gettext(x).decode('UTF-8')
-	ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
+    unicode
+    _ = lambda x: _gettext.gettext(x).decode("UTF-8")
+    ngettext = lambda *x: _gettext.ngettext(*x).decode("UTF-8")
 except:
-	_ = _gettext.gettext
-	ngettext = _gettext.ngettext
+    _ = _gettext.gettext
+    ngettext = _gettext.ngettext

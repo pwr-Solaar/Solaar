@@ -21,50 +21,53 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import getLogger, DEBUG as _DEBUG
+
 _log = getLogger(__name__)
 del getLogger
 
 from threading import Thread as _Thread
 
 try:
-	from Queue import Queue as _Queue
+    from Queue import Queue as _Queue
 except ImportError:
-	from queue import Queue as _Queue
+    from queue import Queue as _Queue
+
 
 #
 #
 #
+
 
 class TaskRunner(_Thread):
-	def __init__(self, name):
-		super(TaskRunner, self).__init__(name=name)
-		self.daemon = True
-		self.queue = _Queue(16)
-		self.alive = False
+    def __init__(self, name):
+        super(TaskRunner, self).__init__(name=name)
+        self.daemon = True
+        self.queue = _Queue(16)
+        self.alive = False
 
-	def __call__(self, function, *args, **kwargs):
-		task = (function, args, kwargs)
-		self.queue.put(task)
+    def __call__(self, function, *args, **kwargs):
+        task = (function, args, kwargs)
+        self.queue.put(task)
 
-	def stop(self):
-		self.alive = False
-		self.queue.put(None)
+    def stop(self):
+        self.alive = False
+        self.queue.put(None)
 
-	def run(self):
-		self.alive = True
+    def run(self):
+        self.alive = True
 
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("started")
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug("started")
 
-		while self.alive:
-			task = self.queue.get()
-			if task:
-				function, args, kwargs = task
-				assert function
-				try:
-					function(*args, **kwargs)
-				except:
-					_log.exception("calling %s", function)
+        while self.alive:
+            task = self.queue.get()
+            if task:
+                function, args, kwargs = task
+                assert function
+                try:
+                    function(*args, **kwargs)
+                except:
+                    _log.exception("calling %s", function)
 
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("stopped")
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug("stopped")

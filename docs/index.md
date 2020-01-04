@@ -3,6 +3,10 @@ title: Solaar
 layout: default
 ---
 
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://pypi.org/project/solaar/"><img alt="PyPI" src="https://img.shields.io/pypi/v/solaar"></a>
+<a href="https://pepy.tech/project/solaar"><img alt="Downloads" src="https://pepy.tech/badge/solaar"></a>
+
 **Solaar** is a Linux device manager for Logitech's [Unifying][unifying], Lightspeed, and
 Nano receiver peripherals. It is able to pair/unpair devices with the
 receiver and for most devices show battery status.  Solaar can also control

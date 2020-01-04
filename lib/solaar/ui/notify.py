@@ -21,7 +21,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-
 from solaar.i18n import _
 
 #
@@ -29,131 +28,135 @@ from solaar.i18n import _
 #
 
 try:
-	import gi
-	gi.require_version('Notify', '0.7')
-	# this import is allowed to fail, in which case the entire feature is unavailable
-	from gi.repository import Notify
+    import gi
 
-	# assumed to be working since the import succeeded
-	# available = True
+    gi.require_version("Notify", "0.7")
+    # this import is allowed to fail, in which case the entire feature is unavailable
+    from gi.repository import Notify
 
-	# This is not working on Fedora 26. If fails with:
-	# ERROR [MainThread] solaar.ui.notify: showing <Notify.Notification object at 0x7f82c2484640 (NotifyNotification at 0x556fa0fc5a40)>
-	# File "./solaar/lib/solaar/ui/notify.py", line 145, in show
-	#   n.show()
-	# Error: g-io-error-quark: Error calling StartServiceByName for org.freedesktop.Notifications: Timeout was reached (24)
+    # assumed to be working since the import succeeded
+    # available = True
 
-	available = False
+    # This is not working on Fedora 26. If fails with:
+    # ERROR [MainThread] solaar.ui.notify: showing <Notify.Notification object at 0x7f82c2484640 (NotifyNotification at 0x556fa0fc5a40)>
+    # File "./solaar/lib/solaar/ui/notify.py", line 145, in show
+    #   n.show()
+    # Error: g-io-error-quark: Error calling StartServiceByName for org.freedesktop.Notifications: Timeout was reached (24)
+
+    available = False
 
 except (ValueError, ImportError):
-	available = False
+    available = False
 
 if available:
-	from logging import getLogger, INFO as _INFO
-	_log = getLogger(__name__)
-	del getLogger
+    from logging import getLogger, INFO as _INFO
 
-	from solaar import NAME
-	from . import icons as _icons
+    _log = getLogger(__name__)
+    del getLogger
 
-	# cache references to shown notifications here, so if another status comes
-	# while its notification is still visible we don't create another one
-	_notifications = {}
+    from solaar import NAME
+    from . import icons as _icons
 
-	def init():
-		"""Init the notifications system."""
-		global available
-		if available:
-			if not Notify.is_initted():
-				if _log.isEnabledFor(_INFO):
-					_log.info("starting desktop notifications")
-				try:
-					return Notify.init(NAME)
-				except:
-					_log.exception("initializing desktop notifications")
-					available = False
-		return available and Notify.is_initted()
+    # cache references to shown notifications here, so if another status comes
+    # while its notification is still visible we don't create another one
+    _notifications = {}
 
+    def init():
+        """Init the notifications system."""
+        global available
+        if available and not Notify.is_initted():
+            if _log.isEnabledFor(_INFO):
+                _log.info("starting desktop notifications")
+            try:
+                return Notify.init(NAME)
+            except:
+                _log.exception("initializing desktop notifications")
+                available = False
+        return available and Notify.is_initted()
 
-	def uninit():
-		if available and Notify.is_initted():
-			if _log.isEnabledFor(_INFO):
-				_log.info("stopping desktop notifications")
-			_notifications.clear()
-			Notify.uninit()
+    def uninit():
+        if available and Notify.is_initted():
+            if _log.isEnabledFor(_INFO):
+                _log.info("stopping desktop notifications")
+            _notifications.clear()
+            Notify.uninit()
 
+    # def toggle(action):
+    # 	if action.get_active():
+    # 		init()
+    # 	else:
+    # 		uninit()
+    # 	action.set_sensitive(available)
+    # 	return action.get_active()
 
-	# def toggle(action):
-	# 	if action.get_active():
-	# 		init()
-	# 	else:
-	# 		uninit()
-	# 	action.set_sensitive(available)
-	# 	return action.get_active()
+    def alert(reason, icon=None):
+        assert reason
 
+        if available and Notify.is_initted():
+            n = _notifications.get(NAME)
+            if n is None:
+                n = _notifications[NAME] = Notify.Notification()
 
-	def alert(reason, icon=None):
-		assert reason
+            # we need to use the filename here because the notifications daemon
+            # is an external application that does not know about our icon sets
+            icon_file = (
+                _icons.icon_file(NAME.lower())
+                if icon is None
+                else _icons.icon_file(icon)
+            )
 
-		if available and Notify.is_initted():
-			n = _notifications.get(NAME)
-			if n is None:
-				n = _notifications[NAME] = Notify.Notification()
+            n.update(NAME, reason, icon_file)
+            n.set_urgency(Notify.Urgency.NORMAL)
 
-			# we need to use the filename here because the notifications daemon
-			# is an external application that does not know about our icon sets
-			icon_file = _icons.icon_file(NAME.lower()) if icon is None \
-						else _icons.icon_file(icon)
+            try:
+                # if _log.isEnabledFor(_DEBUG):
+                # 	_log.debug("showing %s", n)
+                n.show()
+            except Exception:
+                _log.exception("showing %s", n)
 
-			n.update(NAME, reason, icon_file)
-			n.set_urgency(Notify.Urgency.NORMAL)
+    def show(dev, reason=None, icon=None):
+        """Show a notification with title and text."""
+        if available and Notify.is_initted():
+            summary = dev.name
 
-			try:
-				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("showing %s", n)
-				n.show()
-			except Exception:
-				_log.exception("showing %s", n)
+            # if a notification with same name is already visible, reuse it to avoid spamming
+            n = _notifications.get(summary)
+            if n is None:
+                n = _notifications[summary] = Notify.Notification()
 
+            if reason:
+                message = reason
+            elif dev.status is None:
+                message = _("unpaired")
+            elif bool(dev.status):
+                message = dev.status.to_string() or _("connected")
+            else:
+                message = _("offline")
 
-	def show(dev, reason=None, icon=None):
-		"""Show a notification with title and text."""
-		if available and Notify.is_initted():
-			summary = dev.name
+            # we need to use the filename here because the notifications daemon
+            # is an external application that does not know about our icon sets
+            icon_file = (
+                _icons.device_icon_file(dev.name, dev.kind)
+                if icon is None
+                else _icons.icon_file(icon)
+            )
 
-			# if a notification with same name is already visible, reuse it to avoid spamming
-			n = _notifications.get(summary)
-			if n is None:
-				n = _notifications[summary] = Notify.Notification()
+            n.update(summary, message, icon_file)
+            urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
+            n.set_urgency(urgency)
 
-			if reason:
-				message = reason
-			elif dev.status is None:
-				message = _("unpaired")
-			elif bool(dev.status):
-				message = dev.status.to_string() or _("connected")
-			else:
-				message = _("offline")
+            try:
+                # if _log.isEnabledFor(_DEBUG):
+                # 	_log.debug("showing %s", n)
+                n.show()
+            except Exception:
+                _log.exception("showing %s", n)
 
-			# we need to use the filename here because the notifications daemon
-			# is an external application that does not know about our icon sets
-			icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None \
-						else _icons.icon_file(icon)
-
-			n.update(summary, message, icon_file)
-			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
-			n.set_urgency(urgency)
-
-			try:
-				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("showing %s", n)
-				n.show()
-			except Exception:
-				_log.exception("showing %s", n)
 
 else:
-	init = lambda: False
-	uninit = lambda: None
-	# toggle = lambda action: False
-	alert = lambda reason: None
-	show = lambda dev, reason=None: None
+    init = lambda: False
+    uninit = lambda: None
+    # toggle = lambda action: False
+    alert = lambda reason: None
+    show = lambda dev, reason=None: None
