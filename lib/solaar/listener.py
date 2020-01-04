@@ -20,20 +20,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import time
-from logging import getLogger, INFO as _INFO
+from logging import INFO as _INFO, getLogger
 
-_log = getLogger(__name__)
-del getLogger
-
-from solaar.i18n import _
-from . import configuration
 from logitech_receiver import (
     Receiver,
     listener as _listener,
-    status as _status,
     notifications as _notifications,
+    status as _status,
 )
+from solaar.i18n import _
+from . import configuration
 
+_log = getLogger(__name__)
+del getLogger
 #
 #
 #

@@ -24,7 +24,7 @@ import importlib
 
 import solaar.cli as _cli
 import solaar.i18n as _i18n
-from solaar import __version__, NAME
+from solaar import NAME, __version__
 
 
 #

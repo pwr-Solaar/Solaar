@@ -22,8 +22,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from collections import namedtuple
 
 from .common import NamedInts as _NamedInts
-from .hidpp10 import REGISTERS as _R, DEVICE_KIND as _DK
-from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS
+from .hidpp10 import DEVICE_KIND as _DK, REGISTERS as _R
+from .settings_templates import FeatureSettings as _FS, RegisterSettings as _RS
 
 #
 #

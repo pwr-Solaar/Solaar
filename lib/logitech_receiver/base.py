@@ -22,18 +22,16 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import DEBUG as _DEBUG, getLogger
 from random import getrandbits as _random_bits
 from time import time as _timestamp
 
+import hidapi as _hid
+from . import hidpp10 as _hidpp10, hidpp20 as _hidpp20
+from .common import KwException as _KwException, pack as _pack, strhex as _strhex
+
 _log = getLogger(__name__)
 del getLogger
-
-from .common import strhex as _strhex, KwException as _KwException, pack as _pack
-from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
-import hidapi as _hid
-
 #
 #
 #

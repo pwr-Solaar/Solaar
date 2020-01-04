@@ -21,18 +21,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import getLogger  # , DEBUG as _DEBUG
 
-_log = getLogger(__name__)
-del getLogger
-
 from .common import (
-    strhex as _strhex,
+    FirmwareInfo as _FirmwareInfo,
+    NamedInts as _NamedInts,
     bytes2int as _bytes2int,
     int2bytes as _int2bytes,
-    NamedInts as _NamedInts,
-    FirmwareInfo as _FirmwareInfo,
+    strhex as _strhex,
 )
-from .hidpp20 import FIRMWARE_KIND, BATTERY_STATUS
+from .hidpp20 import BATTERY_STATUS, FIRMWARE_KIND
 
+_log = getLogger(__name__)
+del getLogger
 #
 # Constants - most of them as defined by the official Logitech HID++ 1.0
 # documentation, some of them guessed.

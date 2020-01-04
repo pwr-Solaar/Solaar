@@ -19,13 +19,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
-
-_log = getLogger(__name__)
-del getLogger
-
-from copy import copy as _copy
 import math
+from copy import copy as _copy
+from logging import DEBUG as _DEBUG, getLogger
 
 from .common import (
     NamedInt as _NamedInt,
@@ -34,6 +30,8 @@ from .common import (
     int2bytes as _int2bytes,
 )
 
+_log = getLogger(__name__)
+del getLogger
 #
 #
 #

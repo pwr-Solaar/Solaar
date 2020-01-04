@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from threading import Timer as _Timer
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from solaar.i18n import _

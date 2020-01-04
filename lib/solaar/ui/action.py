@@ -19,19 +19,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk, Gtk
 
 from solaar.i18n import _
-
-
-# from logging import getLogger
-# _log = getLogger(__name__)
-# del getLogger
-
-
-#
-#
-#
 
 
 def make(name, label, function, stock_id=None, *args):

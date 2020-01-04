@@ -51,11 +51,11 @@ except (ValueError, ImportError):
 if available:
     from logging import getLogger, INFO as _INFO
 
-    _log = getLogger(__name__)
-    del getLogger
-
     from solaar import NAME
     from . import icons as _icons
+
+    _log = getLogger(__name__)
+    del getLogger
 
     # cache references to shown notifications here, so if another status comes
     # while its notification is still visible we don't create another one

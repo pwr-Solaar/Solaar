@@ -31,11 +31,11 @@ except ImportError:
 
 from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 
-_log = getLogger(__name__)
-del getLogger
 
 from . import base as _base
 
+_log = getLogger(__name__)
+del getLogger
 
 #
 #

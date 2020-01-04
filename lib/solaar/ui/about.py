@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from gi.repository import Gtk
 
-from solaar import __version__, NAME
+from solaar import NAME, __version__
 from solaar.i18n import _
 
 #

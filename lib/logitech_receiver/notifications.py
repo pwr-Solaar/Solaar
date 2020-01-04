@@ -22,17 +22,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
+from logging import DEBUG as _DEBUG, INFO as _INFO, getLogger
+
+from . import hidpp10 as _hidpp10, hidpp20 as _hidpp20
+from .common import strhex as _strhex, unpack as _unpack
+from .i18n import _
+from .status import ALERT as _ALERT, KEYS as _K
 
 _log = getLogger(__name__)
 del getLogger
-
-from .i18n import _
-from .common import strhex as _strhex, unpack as _unpack
-from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
-from .status import KEYS as _K, ALERT as _ALERT
-
 _R = _hidpp10.REGISTERS
 _F = _hidpp20.FEATURE
 

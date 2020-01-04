@@ -24,14 +24,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 __version__ = "0.9"
 
 from hidapi.udev import (
-    enumerate,
-    open,
     close,
-    open_path,
-    monitor_glib,
-    read,
-    write,
+    enumerate,
     get_manufacturer,
     get_product,
     get_serial,
+    monitor_glib,
+    open,
+    open_path,
+    read,
+    write,
 )

@@ -19,23 +19,22 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
+from . import hidpp10 as _hidpp10, hidpp20 as _hidpp20
 from .common import (
+    NamedInts as _NamedInts,
     bytes2int as _bytes2int,
     int2bytes as _int2bytes,
-    NamedInts as _NamedInts,
     unpack as _unpack,
 )
 from .i18n import _
 from .settings import (
-    KIND as _KIND,
-    Setting as _Setting,
-    RegisterRW as _RegisterRW,
-    FeatureRW as _FeatureRW,
     BooleanValidator as _BooleanV,
     ChoicesValidator as _ChoicesV,
+    FeatureRW as _FeatureRW,
+    KIND as _KIND,
     RangeValidator as _RangeV,
+    RegisterRW as _RegisterRW,
+    Setting as _Setting,
 )
 
 _DK = _hidpp10.DEVICE_KIND

@@ -20,19 +20,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
-from logging import getLogger, INFO as _INFO
+from logging import INFO as _INFO, getLogger
+
+from . import base as _base, hidpp10 as _hidpp10, hidpp20 as _hidpp20
+from .common import strhex as _strhex
+from .descriptors import DEVICES as _DESCRIPTORS
+from .i18n import _
+from .settings_templates import check_feature_settings as _check_feature_settings
 
 _log = getLogger(__name__)
 del getLogger
-
-from .i18n import _
-from . import base as _base
-from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
-from .common import strhex as _strhex
-from .descriptors import DEVICES as _DESCRIPTORS
-from .settings_templates import check_feature_settings as _check_feature_settings
-
 _R = _hidpp10.REGISTERS
 
 

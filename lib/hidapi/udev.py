@@ -33,8 +33,12 @@ import os as _os
 from select import select as _select
 from time import sleep
 
-from pyudev import Context as _Context, Monitor as _Monitor, Device as _Device
-from pyudev import DeviceNotFoundError
+from pyudev import (
+    Context as _Context,
+    Device as _Device,
+    DeviceNotFoundError,
+    Monitor as _Monitor,
+)
 
 native_implementation = "udev"
 
