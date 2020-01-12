@@ -98,7 +98,7 @@ def _find_receiver(receivers, name):
 	assert name
 
 	for r in receivers:
-		if name in r.name.lower() or name == r.serial.lower():
+		if name in r.name.lower() or (r.serial is not None and name == r.serial.lower()):
 			return r
 
 
