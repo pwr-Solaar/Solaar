@@ -342,7 +342,7 @@ class Receiver(object):
 			self.serial = _strhex(serial_reply[1:5])
 			self.max_devices = ord(serial_reply[6:7])
 		else:
-			self.serial = 0
+			self.serial = None
 			self.max_devices = 6
 
 		if self.product_id == 'c539' or self.product_id == 'c53a' or self.product_id == 'c53f':
