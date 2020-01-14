@@ -182,96 +182,91 @@ _PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 1
 
 # Keyboards
 
-_D("Wireless Keyboard K230", protocol=2.0, wpid="400D")
-_D("Wireless Keyboard K270(unifying)", protocol=2.0, wpid="4003")
-_D(
-    "Wireless Keyboard MK270", protocol=2.0, wpid="4023", settings=[_FS.fn_swap()],
-)
-_D(
-    "Wireless Keyboard K270", protocol=1.0, registers=(_R.battery_status,),
-)
-_D(
-    "Wireless Keyboard MK320",
-    protocol=1.0,
-    wpid="200F",
-    registers=(_R.battery_status,),
-)
-_D("Wireless Keyboard MK330")
-_D(
-    "Wireless Compact Keyboard K340",
-    protocol=1.0,
-    wpid="2007",
-    registers=(_R.battery_status,),
-)
-_D(
-    "Wireless Wave Keyboard K350",
-    protocol=1.0,
-    wpid="200A",
-    registers=(_R.battery_status,),
-)
-_D(
-    "Wireless Keyboard K360", protocol=2.0, wpid="4004", settings=[_FS.fn_swap()],
-)
-_D(
-    "Wireless Keyboard K375s",
-    protocol=2.0,
-    wpid="4061",
-    settings=[_FS.k375s_fn_swap()],
-)
-_D(
-    "Wireless Touch Keyboard K400",
-    protocol=2.0,
-    wpid=("400E", "4024"),
-    settings=[_FS.fn_swap()],
-)
-_D(
-    "Wireless Touch Keyboard K400 Plus",
-    codename="K400 Plus",
-    protocol=2.0,
-    wpid="404D",
-    settings=[_FS.new_fn_swap()],
-)
-_D(
-    "Wireless Keyboard K520",
-    protocol=1.0,
-    wpid="2011",
-    registers=(_R.battery_status,),
-    settings=[_RS.fn_swap(),],
-)
-_D(
-    "Number Pad N545", protocol=1.0, wpid="2006", registers=(_R.battery_status,),
-)
-_D("Wireless Keyboard MK550")
-_D(
-    "Wireless Keyboard MK700",
-    protocol=1.0,
-    wpid="2008",
-    registers=(_R.battery_status,),
-    settings=[_RS.fn_swap(),],
-)
-_D(
-    "Wireless Solar Keyboard K750", protocol=2.0, wpid="4002", settings=[_FS.fn_swap()],
-)
-_D(
-    "Wireless Multi-Device Keyboard K780",
-    protocol=4.5,
-    wpid="405B",
-    settings=[_FS.new_fn_swap()],
-)
-_D(
-    "Wireless Illuminated Keyboard K800",
-    protocol=1.0,
-    wpid="2010",
-    registers=(_R.battery_status, _R.three_leds,),
-    settings=[_RS.fn_swap(), _RS.hand_detection(),],
-)
-_D(
-    "Illuminated Living-Room Keyboard K830",
-    protocol=2.0,
-    wpid="4032",
-    settings=[_FS.new_fn_swap()],
-)
-_D("Craft Advanced Keyboard", protocol=4.5, wpid="4066")
+_D('Wireless Keyboard K230', protocol=2.0, wpid='400D')
+_D('Wireless Keyboard K270(unifying)', protocol=2.0, wpid='4003')
+_D('Wireless Keyboard MK270', protocol=2.0, wpid='4023',
+			        settings=[
+							_FS.fn_swap()
+						],
+				)
+_D('Wireless Keyboard K270', protocol=1.0,
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Keyboard MK320', protocol=1.0, wpid='200F',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Keyboard MK330')
+_D('Wireless Compact Keyboard K340', protocol=1.0, wpid='2007',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Wave Keyboard K350', protocol=1.0, wpid='200A',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Keyboard K360', protocol=2.0, wpid='4004',
+				settings=[
+							_FS.fn_swap()
+						],
+				)
+_D('Wireless Keyboard K375s', protocol=2.0, wpid='4061',
+				settings=[
+							_FS.k375s_fn_swap()
+						],
+				)
+_D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
+				settings=[
+							_FS.fn_swap()
+						],
+				)
+_D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid='404D',
+                                settings=[
+                                                        _FS.new_fn_swap()
+                                                ],
+                                )
+_D('Wireless Keyboard K520', protocol=1.0, wpid='2011',
+				registers=(_R.battery_status, ),
+				settings=[
+							_RS.fn_swap(),
+						],
+				)
+_D('Number Pad N545', protocol=1.0, wpid='2006',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Keyboard MK550')
+_D('Wireless Keyboard MK700', protocol=1.0, wpid='2008',
+				registers=(_R.battery_status, ),
+				settings=[
+							_RS.fn_swap(),
+						],
+				)
+_D('Wireless Solar Keyboard K750', protocol=2.0, wpid='4002',
+				settings=[
+							_FS.fn_swap()
+						],
+				)
+_D('Wireless Multi-Device Keyboard K780', protocol=4.5, wpid='405B',
+				settings=[
+							_FS.new_fn_swap()
+						],
+				)
+_D('Wireless Illuminated Keyboard K800', protocol=1.0, wpid='2010',
+				registers=(_R.battery_status, _R.three_leds, ),
+				settings=[
+							_RS.fn_swap(),
+							_RS.hand_detection(),
+						],
+				)
+_D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E',
+				settings=[
+							_FS.fn_swap()
+						],
+				)
+_D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
+				settings=[
+							_FS.new_fn_swap()
+						],
+				)
+_D('Craft Advanced Keyboard', protocol=4.5, wpid='4066')
+
 
 # Mice
 

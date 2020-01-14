@@ -74,9 +74,13 @@ Keyboards (Unifying):
 | K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K780             | 4.5   | yes     | FN swap                                 |
 | K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
+| K800 [new ver]   | 4.5   | yes     | FN swap                                 |
 | K830 Illuminated | 2.0   | yes     | FN swap                                 |
 | TK820            | 2.0   | yes     | FN swap                                 |
 | MK700            | 1.0   | yes     | FN swap, reprog keys                    |
+
+[new ver]: New version of K800 keyboard, with HID++ 4.5 and WPID 0x406E
+
 
 Mice (Unifying):
 
