@@ -3,47 +3,9 @@ title: Supported Devices
 layout: page
 ---
 
-# Supported devices
+# Supported devices and receivers
 
-**Solaar** will detect all devices paired with your receiver, and at the very
-least display some basic information about them.
-
-At this moment, all [Unifying][unifying] receivers are supported (devices with
-USB ID `046d:c52b` or `046d:c532`), but only some newer Nano receivers (devices
-with USB ID `046d:c52f`, `046d:c52b`, and `046d:c534`). Note that Linux incorrectly states that
-some Nano receivers are Unifying receivers.
-
-For some devices, extra settings (usually not available through the standard
-Linux system configuration) are supported:
-
-* The [K750 Solar Keyboard][K750] is also queried for its solar charge status.
-  Pressing the `Light-Check` button on the keyboard will pop-up the application
-  window and display the current lighting value (Lux) as reported by the
-  keyboard, similar to Logitech's *Solar.app* for Windows.
-
-* The state of the `FN` key can be toggled on some keyboards ([K360][K360],
-  [MK700][K700], [K750][K750], [K800][K800] and [K830][K830]). It changes the
-  way the function keys (`F1`..`F12`) work, i.e. whether holding `FN` while
-  pressing the function keys will generate the standard `Fx` keycodes or the
-  special function (yellow icons) keycodes.
-
-* The DPI can be changed on the [Performance MX Mouse][P_MX].
-
-* Smooth scrolling (higher sensitivity on vertical scrolling with the wheel) can
-  be toggled on the [M705 Marathon Mouse][M705], [M510 Wireless Mouse][M510],
-  [M325][M325] and [G700s][G700s].
-
-
-# Supported features
-
-These tables list all known Logitech [Unifying][unifying] devices, and to what
-degree their features are supported by Solaar. If your device is not listed here
-at all, it is very unlikely Solaar would be able to support it.
-
-The information in these tables is incomplete, based on what devices myself and
-other users have been able to test Solaar with. If your device works with
-Solaar, but its supported features are not specified here, I would love to hear
-about it.
+These tables list Logitech receivers and devices and to what degree their features are supported by Solaar.  The information in these tables is incomplete, based on what devices users have been able to test Solaar with. If your device works with Solaar, but its supported features are not specified here, please open an issue on the [Solaar github repository][solaar] with the pleasant news.
 
 
 The HID++ column specifies the device's HID++ version.
@@ -55,79 +17,108 @@ For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
 The reprog(rammable) keys feature is currently not fully supported by Solaar.
-You are able to read this feature using solaar-cli, but it is not possible to
-assign different keys.
+You are able to read this feature using command-line interface of Solaar, but it is not possible to assign different keys.
 
 
-Keyboards (Unifying):
+### Receivers:
 
-| Device           | HID++ | Battery | Other supported features                |
-|------------------|-------|---------|-----------------------------------------|
-| K230             | 2.0   | yes     |                                         |
-| K270             | 1.0   | yes     |                                         |
-| K270             | 2.0   | yes     | reprog keys                             |
-| K340             | 1.0   | yes     |                                         |
-| K350             | 1.0   | yes     |                                         |
-| K360             | 2.0   | yes     | FN swap, reprog keys                    |
-| K400 Touch       | 2.0   | yes     | FN swap                                 |
-| K400 Plus        | 2.0   |         | FN swap                                 |
-| K750 Solar       | 2.0   | yes     | FN swap, Lux reading, light button      |
-| K780             | 4.5   | yes     | FN swap                                 |
-| K800 Illuminated | 1.0   | yes     | FN swap, reprog keys                    |
-| K800 [new ver]   | 4.5   | yes     | FN swap                                 |
-| K830 Illuminated | 2.0   | yes     | FN swap                                 |
-| TK820            | 2.0   | yes     | FN swap                                 |
-| MK700            | 1.0   | yes     | FN swap, reprog keys                    |
-
-[new ver]: New version of K800 keyboard, with HID++ 4.5 and WPID 0x406E
+| USB ID    | Kind       | Max Paired Devices |
+------------|------------|--------------------|
+| 046d:c52b | Unifying   | 6                  |
+| 046d:c52f | Nano       | 2(?)               |
+| 046d:c532 | Unifying   | 6                  |
+| 064d:c534 | Nano(?)    | 2                  |
+| 064d:c539 | Lightspeed | 6                  |
+| 064d:c53a | Lightspeed | 6                  |
+| 064d:c53f | Lightspeed | 6                  |
 
 
-Mice (Unifying):
+### Keyboards (Unifying):
 
-| Device           | HID++ | Battery | DPI   | Other supported features        |
-|------------------|-------|---------|-------|---------------------------------|
-| M317             |       |         |       |                                 |
-| M325             | 2.0   | yes     | 1000  | smooth scrolling                |
-| M345             | 2.0   | yes     | -     | smooth scrolling                |
-| M350             | 1.0   | yes     |       |                                 |
-| M505             | 1.0   | yes     |       | smooth scrolling                |
-| M510             | 1.0   | yes     |       | smooth scrolling                |
-| M515 Couch       | 2.0   | yes     | -     | smooth scrolling                |
-| M525             | 2.0   | yes     | -     | smooth scrolling                |
-| M560             | 2.0   | yes     | -     | smooth scrolling                |
-| M585             | 4.5   | yes     | -     |                                 |
-| M590             | 4.5   | yes     | -     |                                 |
-| M600 Touch       | 2.0   | yes     |       |                                 |
-| M705 Marathon    | 1.0   | yes     | -     | smooth scrolling                |
-| T400 Zone Touch  | 2.0   | yes     |       | smooth scrolling                |
-| T620 Touch       | 2.0   | yes     |       |                                 |
-| Performance MX   | 1.0   | yes     | R/W   | smooth scrolling                |
-| Anywhere MX      | 1.0   | yes     | R/W   | smooth scrolling                |
-| Anywhere MX 2    | 4.5   | yes     | R/W   | smooth scrolling                |
-| MX Master        | 4.5   | yes     | R/W   | smart shift                     |
-| Cube             | 2.0   | yes     |       |                                 |
+| Device           | WPID | HID++ | Battery | Other supported features                |
+|------------------|------|-------|---------|-----------------------------------------|
+| K230             | 400D | 2.0   | yes     |                                         |
+| K270             | 4003 | 2.0   | yes     |                                         |
+| K340             | 2007 | 1.0   | yes     |                                         |
+| K350             | 200A | 1.0   | yes     |                                         |
+| K360             | 4004 | 2.0   | yes     | FN swap, reprog keys                    |
+| K375s            | 4071 |       |         | FN swap                                 |
+| K400 Touch       | 400E | 2.0   | yes     | FN swap                                 |
+| K400 Touch       | 4024 | 2.0   | yes     | FN swap                                 |
+| K400 Plus        | 404D | 2.0   |         | FN swap                                 |
+| K520 		   | 2011 | 1.0   | yes     | FN swap                                 |
+| K750 Solar       | 4002 | 2.0   | yes     | FN swap, Lux reading, light button      |
+| K780             | 405B | 4.5   | yes     | FN swap                                 |
+| K800 Illuminated | 2010 | 1.0   | yes     | FN swap, reprog keys, LEDs              |
+| K800 (new ver)   | 406E | 4.5   | yes     | FN swap                                 |
+| K830 Illuminated | 4032 | 2.0   | yes     | FN swap                                 |
+| N545             | 2006 |       | yes     | 	 				      |
+| TK820            |      | 2.0   | yes     | FN swap                                 |
+| Craft            | 4066 | 4.5   |         | 	       	      			      |
+
+* The [K750 Solar Keyboard][K750] can be queried for its solar charge status.
+  Pressing the `Light-Check` button on the keyboard will pop-up the application
+  window and display the current lighting value (Lux) as reported by the
+  keyboard, similar to Logitech's *Solar.app* for Windows.
+
+* FN swap changes the way the function keys (`F1`..`F12`) work, i.e., whether holding `FN` while pressing the function keys will generate the standard `Fx` keycodes or the special function (yellow icons) keycodes.
 
 
-Mice (Nano):
+### Mice (Unifying):
 
-| Device           | HID++ | Battery | DPI   | Other supported features        |
-|------------------|-------|---------|-------|---------------------------------|
-| G700s            | 1.0   | yes     | -     | smooth scrolling                |
-| G700             | 1.0   | yes     | -     | smooth scrolling                |
-| V450 Nano        | 1.0   | yes     | -     | smooth scrolling                |
-| V550 Nano        | 1.0   | yes     | -     | smooth scrolling                |
-| VX Nano          | 1.0   | yes     | -     | smooth scrolling                |
-| M175             |       | yes     |       |                                 |
-| M185 (old)       | 4.5   | yes     | R/W   | smooth scrolling (note)         |
-| M185 (new)       | 4.5   | no      | R/W   | smooth scrolling (note)         |
-| M187             | 2.0   | yes     |       |                                 |
-| M215             | 1.0   | yes     |       |                                 |
-| M235             | 4.5   | yes     |       |                                 |
-| M305             | 1.0   | yes     |       |                                 |
-| M310             | 1.0   | yes     |       |                                 |
-| M315             |       | yes     |       |                                 |
-| M330             | ?.?   | yes     | ?     | smooth scrolling                |
-| MX 1100          | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
+|------------------|------|-------|---------|-------|---------------------------------|
+| M150             | 4022 | 2.0   |         |       |                                 |
+| M185             | 4055 | 4.5   |         | R/W   | smooth scrolling                |
+| M310             | 4031 | 2.0   | yes     |       |                                 |
+| M310             | 4055 | 4.5   |         | R/W   | smooth scrolling                |
+| M317             |      |       |         |       |                                 |
+| M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                |
+| M345             | 4017 | 2.0   | yes     | -     | smooth scrolling                |
+| M350             | 101C | 1.0   | yes     |       |                                 |
+| M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling|
+| M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling|
+| M510             | 4051 | 2.0   | yes     |       | smooth scrolling                |
+| M515 Couch       | 4007 | 2.0   | yes     | -     | smooth scrolling                |
+| M525             | 4013 | 2.0   | yes     | -     | smooth scrolling                |
+| M560             |      | 2.0   | yes     | -     | smooth scrolling                |
+| M585             | 406B | 4.5   | yes     | R/W   | smooth scrolling                |
+| M590             | 406B | 4.5   | yes     | R/W   | smooth scrolling                |
+| M600 Touch       | 401A | 2.0   | yes     |       |                                 |
+| M705 Marathon    | 101B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| M705 Marathon    | 406D | 4.5   | yes     | R/W   | smooth scrolling                |
+| T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                |
+| T620 Touch       |      | 2.0   | yes     |       |                                 |
+| Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
+| Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
+| Anywhere MX 2    | 404A | 4.5   | yes     | R/W   | smooth scrolling                |
+| MX Master        | 4041 | 4.5   | yes     | R/W   | smooth scrolling, smart shift   |
+| MX Master 25     | 4069 | 4.5   | yes     | R/W   | smooth scrolling, smart shift   |
+| Cube             |      | 2.0   | yes     |       |                                 |
+
+
+### Mice (Nano):
+
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
+|------------------|------|-------|---------|-------|---------------------------------|
+| G7               | 1002 | 1.0   | yes     | -     |				      |
+| G700             | 1023 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| G700s            | 102A | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| V450 Nano        | 1011 | 1.0   | yes     | -     | smooth scrolling                |
+| V550 Nano        | 1013 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| VX Nano          | 100B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| VX Nano          | 100F | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| M175             | 4008 |       | yes     |       |                                 |
+| M185 (old)       | 4038 | 4.5   | yes     | R/W   | smooth scrolling (note)         |
+| M185 (new)       | 4054 | 4.5   | no      | R/W   | smooth scrolling (note)         |
+| M187             | 4019 | 2.0   | yes     |       |                                 |
+| M215             | 1020 | 1.0   | yes     |       |                                 |
+| M235             | 4055 | 4.5   | yes     | R/W   | smooth scrolling 		      |
+| M305             | 101F | 1.0   | yes     |       | side scrolling                  |
+| M310             | 1024 | 1.0   | yes     |       |                                 |
+| M315             |      |       | yes     |       |                                 |
+| M330             |      | ?.?   | yes     | ?     | smooth scrolling                |
+| MX 1100          | 1014 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 
 (old): M185 with P/N: 810-003496
 
@@ -137,46 +128,55 @@ Mice (Nano):
 setting is useful only to disable smooth scrolling.
 
 
-Mice (Mini):
+### Mice (Mini):
 
-| Device           | HID++ | Battery | DPI   | Other supported features        |
-|------------------|-------|---------|-------|---------------------------------|
-| MX610            | 1.0   | yes     |       |                                 |
-| MX610 lefthanded | 1.0   | yes     |       |                                 |
-| V400             | 1.0   | yes     |       |                                 |
-| V450             | 1.0   | yes     |       |                                 |
-| VX Revolution    | 1.0   | yes     |       |                                 |
-| MX Air           | 1.0   | yes     |       |                                 |
-| MX Revolution    | 1.0   | yes     |       |                                 |
-
-
-Trackballs (Unifying):
-
-| Device            | HID++ | Battery | DPI   | Other supported features        |
-|-------------------|-------|---------|-------|---------------------------------|
-| M570 Trackball    | 1.0   | yes     | -     |                                 |
-| MX Ergo Trackball | 4.5   | yes     | -     |                                 |
-
-Touchpads (Unifying):
-
-| Device           | HID++ | Battery | DPI   | Other supported features        |
-|------------------|-------|---------|-------|---------------------------------|
-| Wireless Touch   | 2.0   | yes     |       |                                 |
-| T650 Touchpad    | 2.0   | yes     |       | smooth scrolling                |
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
+|------------------|------|-------|---------|-------|---------------------------------|
+| MX610            | 1001 | 1.0   | yes     |       |                                 |
+| MX610 lefthanded | 1004 | 1.0   | yes     |       |                                 |
+| MX620            | 100A | 1.0   | yes     |       |                                 |
+| MX620            | 1016 | 1.0   | yes     |       |                                 |
+| V400             | 1003 | 1.0   | yes     |       |                                 |
+| V450             | 1005 | 1.0   | yes     |       |                                 |
+| VX Revolution    | 1006 | 1.0   | yes     |       |                                 |
+| VX Revolution    | 100D | 1.0   | yes     |       |                                 |
+| MX Air           | 1007 | 1.0   | yes     |       |                                 |
+| MX Air           | 100E | 1.0   | yes     |       |                                 |
+| MX Revolution    | 1008 | 1.0   | yes     |       |                                 |
+| MX Revolution    | 100C | 1.0   | yes     |       |                                 |
 
 
-Mouse-Keyboard combos:
+### Trackballs (Unifying):
 
-| Device           | HID++ | Battery | Other supported features                |
-|------------------|-------|---------|-----------------------------------------|
-| MK220            | 2.0   | yes     |                                         |
-| MK270            | 2.0   | yes     | reprog keys                             |
-| MK330            |       |         |                                         |
-| MK520            | M2/K1 | yes     | FN swap, reprog keys                    |
-| MK550            |       |         |                                         |
-| MK710            | 1.0   | yes     | FN swap, reprog keys                    |
+| Device            | WPID | HID++ | Battery | DPI   | Other supported features        |
+|-------------------|------|-------|---------|-------|---------------------------------|
+| M570 Trackball    |      | 1.0   | yes     | -     |                                 |
+| MX Ergo Trackball |      | 4.5   | yes     | -     |                                 |
+
+### Touchpads (Unifying):
+
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
+|------------------|------|-------|---------|-------|---------------------------------|
+| Wireless Touch   | 4011 | 2.0   | yes     |       |                                 |
+| T650 Touchpad    | 4101 | 2.0   | yes     |       | smooth scrolling                |
 
 
+### Mice and Keyboards sold as combos:
+
+| Device           | WPID | HID++ | Battery | Other supported features                |
+|------------------|------|-------|---------|-----------------------------------------|
+| MK220            |      | 2.0   | yes     |                                         |
+| MK270            | 4023 | 2.0   | yes     | reprog keys                             |
+| MK320		   | 200F | 	  | 	    | 	     				      |
+| MK330            |      |       |         |                                         |
+| MK520            |      | M2/K1 | yes     | FN swap, reprog keys                    |
+| MK550            |      |       |         |                                         |
+| MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |
+| MK710            |      | 1.0   | yes     | FN swap, reprog keys                    |
+
+
+[solaar]: https://github.com/pwr-Solaar/Solaar
+[logitech]: https://www.logitech.com
 [unifying]: https://en.wikipedia.org/wiki/Logitech_Unifying_receiver
 [G700s]: https://gaming.logitech.com/en-us/product/g700s-rechargeable-wireless-gaming-mouse
 [K360]: http://logitech.com/product/keyboard-k360
