@@ -194,40 +194,59 @@ def _print_device(dev):
                 if wheel_status:
                     print("            Wheel Reports: %s" % wheel_status)
 
-	if dev.online and dev.keys:
-		print ('     Has %d reprogrammable keys:' % len(dev.keys))
-		for k in dev.keys:
-			flags = _special_keys.KEY_FLAG.flag_names(k.flags)
-			# TODO: add here additional variants for other REPROG_CONTROLS
-			if dev.keys.keyversion == 1:
-				print ('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.task, ', '.join(flags)))
-			if dev.keys.keyversion == 4:
-				print ('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.task, k.remapped))
-				print ('             %s, pos:%d, group:%1d, gmask:%d' % ( ', '.join(flags), k.pos, k.group, k.group_mask))
-	if dev.online:
-		battery = _hidpp20.get_battery(dev)
-		if battery is None:
-			battery = _hidpp10.get_battery(dev)
-		if battery is not None:
-			from logitech_receiver.common import NamedInt as _NamedInt
-			level, status = battery
-			if level is not None:
-				if isinstance(level, _NamedInt):
-					text = str(level)
-				else:
-					text = '%d%%' % level
-			else:
-				text = 'N/A'
-			print ('     Battery: %s, %s.' % (text, status))
-		else:
-			battery_voltage = _hidpp20.get_voltage(dev)
-			if battery_voltage :
-				(voltage, charging, charge_sts, charge_lvl, charge_type) = battery_voltage
-				print ('     Battery: %smV, %s.' % (voltage, 'Charging' if charging else 'Discharging'))
-			else:
-				print ('     Battery status unavailable.')
-	else:
-		print ('     Battery: unknown (device is offline).')
+    if dev.online and dev.keys:
+        print("     Has %d reprogrammable keys:" % len(dev.keys))
+        for k in dev.keys:
+            flags = _special_keys.KEY_FLAG.flag_names(k.flags)
+            # TODO: add here additional variants for other REPROG_CONTROLS
+            if dev.keys.keyversion == 1:
+                print(
+                    "        %2d: %-26s => %-27s   %s"
+                    % (k.index, k.key, k.task, ", ".join(flags))
+                )
+            if dev.keys.keyversion == 4:
+                print(
+                    "        %2d: %-26s, default: %-27s => %-26s"
+                    % (k.index, k.key, k.task, k.remapped)
+                )
+                print(
+                    "             %s, pos:%d, group:%1d, gmask:%d"
+                    % (", ".join(flags), k.pos, k.group, k.group_mask)
+                )
+    if dev.online:
+        battery = _hidpp20.get_battery(dev)
+        if battery is None:
+            battery = _hidpp10.get_battery(dev)
+        if battery is not None:
+            from logitech_receiver.common import NamedInt as _NamedInt
+
+            level, status = battery
+            if level is not None:
+                if isinstance(level, _NamedInt):
+                    text = str(level)
+                else:
+                    text = "%d%%" % level
+            else:
+                text = "N/A"
+            print("     Battery: %s, %s." % (text, status))
+        else:
+            battery_voltage = _hidpp20.get_voltage(dev)
+            if battery_voltage:
+                (
+                    voltage,
+                    charging,
+                    charge_sts,
+                    charge_lvl,
+                    charge_type,
+                ) = battery_voltage
+                print(
+                    "     Battery: %smV, %s."
+                    % (voltage, "Charging" if charging else "Discharging")
+                )
+            else:
+                print("     Battery status unavailable.")
+    else:
+        print("     Battery: unknown (device is offline).")
 
 
 def run(receivers, args, find_receiver, find_device):
