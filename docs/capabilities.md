@@ -26,9 +26,11 @@ Only some connections between receivers and devices are possible.  In should be 
 
 Solaar uses the HID++ protocol to pair devices to receivers and unpair devices from receivers.  Solaar also uses the HID++ protocol to display features of receivers and devices.  Solaar can modify some of the features of devices.  Solaar currently only displays some features and can modify even fewer.
 
-Solaar does not do anything beyond using the HID++ protocol to change the behavior of receivers and devices.  In particular, Solaar cannot change how the operating system turns the keycodes that a keyboard produces into characters that are sent to programs.  That is the province of HID device drivers and other software (such as X11).  Solaar also does not keep track of the state of a device between invocations and thus cannot restore a device to a previously-known state when Solaar is restarted.
+Solaar does not do anything beyond using the HID++ protocol to change the behavior of receivers and devices.  In particular, Solaar cannot change how the operating system turns the keycodes that a keyboard produces into characters that are sent to programs.  That is the province of HID device drivers and other software (such as X11).
 
-Querying a device for its current state can require quite a few HID++ interactions.  These interactions can slow down the device, so Solaar tries to internally cache information about devices.  If the device state is changed by some other means, even sometimes by another invocation of Solaar this cached information may become incorrect.  Currently there is no way to force an update of the cached information besides terminating Solaar and starting it again.
+Solaar does keep track of the changeable state of a device between invocations and restores the device to its previously-known state when the device is re-connected.
+
+Querying a device for its current state can require quite a few HID++ interactions.  These interactions can slow down the device, so Solaar tries to internally cache information about devices.  If the device state is changed by some other means, even sometimes by another invocation of Solaar, this cached information may become incorrect.  Currently there is no way to force an update of the cached information besides terminating Solaar and starting it again.
 
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
