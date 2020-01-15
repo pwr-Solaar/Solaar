@@ -5,10 +5,10 @@ layout: page
 
 # Supported devices and receivers
 
-These tables list Logitech receivers and devices and to what degree their features are supported by Solaar.  The information in these tables is incomplete, based on what devices users have been able to test Solaar with. If your device works with Solaar, but its supported features are not specified here, please open an issue on the [Solaar github repository][solaar] with the pleasant news.
+These tables list Logitech receivers and devices and to what degree their features are supported by Solaar.  The information in these tables is incomplete, based on what devices users have been able to test Solaar with.  If your device works with Solaar, but its supported features are not correctly specified here, please open an issue on the [Solaar github repository][solaar] with the pleasant news.
 
 
-The HID++ column specifies the device's HID++ version.
+The HID++ column specifies the device's HID++ version.  Some devices report version 4.5, but that is the same as version 2.0 as listed here.
 
 The Battery column specifies if Solaar is able to read the device's battery
 level.
@@ -24,13 +24,24 @@ You are able to read this feature using command-line interface of Solaar, but it
 
 | USB ID    | Kind       | Max Paired Devices |
 ------------|------------|--------------------|
+| 046d:c517 | Nano       | 1                  |
+| 046d:c518 | Nano       | 1                  |
+| 046d:c51a | Nano       | 1                  |
+| 046d:c51b | Nano       | 1                  |
+| 046d:c521 | Nano       | 1                  |
+| 046d:c525 | Nano       | 1                  |
+| 046d:c526 | Nano       | 1                  |
 | 046d:c52b | Unifying   | 6                  |
-| 046d:c52f | Nano       | 2(?)               |
+| 046d:c52e | Nano       | 1                  |
+| 046d:c52f | Nano       | 1                  |
+| 046d:c531 | Nano       | 1                  |
 | 046d:c532 | Unifying   | 6                  |
-| 064d:c534 | Nano(?)    | 2                  |
-| 064d:c539 | Lightspeed | 6                  |
-| 064d:c53a | Lightspeed | 6                  |
-| 064d:c53f | Lightspeed | 6                  |
+| 064d:c534 | Nano       | 2                  |
+| 064d:c539 | Lightspeed | 1                  |
+| 064d:c53a | Lightspeed | 1                  |
+| 064d:c53f | Lightspeed | 1                  |
+| 17ef:6042 | Nano       | 1                  |
+
 
 
 ### Keyboards (Unifying):
@@ -46,15 +57,15 @@ You are able to read this feature using command-line interface of Solaar, but it
 | K400 Touch       | 400E | 2.0   | yes     | FN swap                                 |
 | K400 Touch       | 4024 | 2.0   | yes     | FN swap                                 |
 | K400 Plus        | 404D | 2.0   |         | FN swap                                 |
-| K520 		   | 2011 | 1.0   | yes     | FN swap                                 |
+| K520             | 2011 | 1.0   | yes     | FN swap                                 |
 | K750 Solar       | 4002 | 2.0   | yes     | FN swap, Lux reading, light button      |
-| K780             | 405B | 4.5   | yes     | FN swap                                 |
+| K780             | 405B | 2.0   | yes     | FN swap                                 |
 | K800 Illuminated | 2010 | 1.0   | yes     | FN swap, reprog keys, LEDs              |
-| K800 (new ver)   | 406E | 4.5   | yes     | FN swap                                 |
+| K800 (new ver)   | 406E | 2.0   | yes     | FN swap                                 |
 | K830 Illuminated | 4032 | 2.0   | yes     | FN swap                                 |
-| N545             | 2006 |       | yes     | 	 				      |
+| N545             | 2006 |       | yes     |                                         |
 | TK820            |      | 2.0   | yes     | FN swap                                 |
-| Craft            | 4066 | 4.5   |         | 	       	      			      |
+| Craft            | 4066 | 2.0   |         |                                         |
 
 * The [K750 Solar Keyboard][K750] can be queried for its solar charge status.
   Pressing the `Light-Check` button on the keyboard will pop-up the application
@@ -69,9 +80,9 @@ You are able to read this feature using command-line interface of Solaar, but it
 | Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
 |------------------|------|-------|---------|-------|---------------------------------|
 | M150             | 4022 | 2.0   |         |       |                                 |
-| M185             | 4055 | 4.5   |         | R/W   | smooth scrolling                |
+| M185             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
 | M310             | 4031 | 2.0   | yes     |       |                                 |
-| M310             | 4055 | 4.5   |         | R/W   | smooth scrolling                |
+| M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
 | M317             |      |       |         |       |                                 |
 | M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                |
 | M345             | 4017 | 2.0   | yes     | -     | smooth scrolling                |
@@ -82,18 +93,18 @@ You are able to read this feature using command-line interface of Solaar, but it
 | M515 Couch       | 4007 | 2.0   | yes     | -     | smooth scrolling                |
 | M525             | 4013 | 2.0   | yes     | -     | smooth scrolling                |
 | M560             |      | 2.0   | yes     | -     | smooth scrolling                |
-| M585             | 406B | 4.5   | yes     | R/W   | smooth scrolling                |
-| M590             | 406B | 4.5   | yes     | R/W   | smooth scrolling                |
+| M585             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
+| M590             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
 | M600 Touch       | 401A | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 101B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| M705 Marathon    | 406D | 4.5   | yes     | R/W   | smooth scrolling                |
+| M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                |
 | T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       |      | 2.0   | yes     |       |                                 |
 | Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
 | Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
-| Anywhere MX 2    | 404A | 4.5   | yes     | R/W   | smooth scrolling                |
-| MX Master        | 4041 | 4.5   | yes     | R/W   | smooth scrolling, smart shift   |
-| MX Master 25     | 4069 | 4.5   | yes     | R/W   | smooth scrolling, smart shift   |
+| Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                |
+| MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
+| MX Master 25     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
 | Cube             |      | 2.0   | yes     |       |                                 |
 
 
@@ -101,7 +112,7 @@ You are able to read this feature using command-line interface of Solaar, but it
 
 | Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
 |------------------|------|-------|---------|-------|---------------------------------|
-| G7               | 1002 | 1.0   | yes     | -     |				      |
+| G7               | 1002 | 1.0   | yes     | -     |                                 |
 | G700             | 1023 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 | G700s            | 102A | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 | V450 Nano        | 1011 | 1.0   | yes     | -     | smooth scrolling                |
@@ -109,11 +120,11 @@ You are able to read this feature using command-line interface of Solaar, but it
 | VX Nano          | 100B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 | VX Nano          | 100F | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 | M175             | 4008 |       | yes     |       |                                 |
-| M185 (old)       | 4038 | 4.5   | yes     | R/W   | smooth scrolling (note)         |
-| M185 (new)       | 4054 | 4.5   | no      | R/W   | smooth scrolling (note)         |
+| M185 (old)       | 4038 | 2.0   | yes     | R/W   | smooth scrolling (note)         |
+| M185 (new)       | 4054 | 2.0   | no      | R/W   | smooth scrolling (note)         |
 | M187             | 4019 | 2.0   | yes     |       |                                 |
 | M215             | 1020 | 1.0   | yes     |       |                                 |
-| M235             | 4055 | 4.5   | yes     | R/W   | smooth scrolling 		      |
+| M235             | 4055 | 2.0   | yes     | R/W   | smooth scrolling                |
 | M305             | 101F | 1.0   | yes     |       | side scrolling                  |
 | M310             | 1024 | 1.0   | yes     |       |                                 |
 | M315             |      |       | yes     |       |                                 |
@@ -151,7 +162,7 @@ setting is useful only to disable smooth scrolling.
 | Device            | WPID | HID++ | Battery | DPI   | Other supported features        |
 |-------------------|------|-------|---------|-------|---------------------------------|
 | M570 Trackball    |      | 1.0   | yes     | -     |                                 |
-| MX Ergo Trackball |      | 4.5   | yes     | -     |                                 |
+| MX Ergo Trackball |      | 2.0   | yes     | -     |                                 |
 
 ### Touchpads (Unifying):
 
@@ -167,7 +178,7 @@ setting is useful only to disable smooth scrolling.
 |------------------|------|-------|---------|-----------------------------------------|
 | MK220            |      | 2.0   | yes     |                                         |
 | MK270            | 4023 | 2.0   | yes     | reprog keys                             |
-| MK320		   | 200F | 	  | 	    | 	     				      |
+| MK320            | 200F |       |         |                                         |
 | MK330            |      |       |         |                                         |
 | MK520            |      | M2/K1 | yes     | FN swap, reprog keys                    |
 | MK550            |      |       |         |                                         |
