@@ -92,7 +92,7 @@ def _process_device_notification(device, status, n):
 	# HID++ 1.0 requests, should never get here
 	assert n.sub_id & 0x80 == 0
 
-	# 0x40 to 0x7F appear to be HID++ 1.0 notifications
+	# 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
 	if n.sub_id >= 0x40:
 		return _process_hidpp10_notification(device, status, n)
 
@@ -184,6 +184,11 @@ def _process_hidpp10_notification(device, status, n):
 		else:
 			_log.warn("%s: connection notification with unknown protocol %02X: %s", device.number, n.address, n)
 
+		return True
+
+	if n.sub_id == 0x42:
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: ignoring DJ connection: %s", device, n)
 		return True
 
 	if n.sub_id == 0x49:

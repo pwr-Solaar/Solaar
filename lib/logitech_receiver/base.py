@@ -189,6 +189,17 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
 		return reply[1:]
 
 
+# sanity checks on  message and report incorrect sizes when debugging
+def debug_message(data) :
+	assert isinstance(data, bytes), (repr(data), type(data))
+	report_id = ord(data[:1])
+	assert ((report_id & 0xF0 == 0) or
+			(report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE) or
+			(report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE) or
+			(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
+			"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
+
+
 def _read(handle, timeout):
 	"""Read an incoming packet from the receiver.
 
@@ -208,17 +219,11 @@ def _read(handle, timeout):
 		raise NoReceiver(reason=reason)
 
 	if data:
-		assert isinstance(data, bytes), (repr(data), type(data))
+		debug_message(data)
 		report_id = ord(data[:1])
-		assert ((report_id & 0xF0 == 0) or
-				(report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE) or
-				(report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE) or
-				(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
-				"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 		if report_id & 0xF0 == 0x00:
-# These all should be normal HID reports that shouldn't really be reported in debugging
-#			if _log.isEnabledFor(_DEBUG):
-#				_log.debug("(%s) => r[%02X %s] ignoring unknown report", handle, report_id, _strhex(data[1:]))
+			if _log.isEnabledFor(_DEBUG):
+				_log.debug("(%s) => r[%02X %s] ignoring unknown report", handle, report_id, _strhex(data[1:]))
 			return
 		devnumber = ord(data[1:2])
 
@@ -247,14 +252,8 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 			raise NoReceiver(reason=reason)
 
 		if data:
-			assert isinstance(data, bytes), (repr(data), type(data))
+			debug_message(data)
 			report_id = ord(data[:1])
-			if _log.isEnabledFor(_DEBUG):
-				assert ((report_id & 0xF0 == 0) or
-						(report_id == 0x10 and len(data) == _SHORT_MESSAGE_SIZE) or
-						(report_id == 0x11 and len(data) == _LONG_MESSAGE_SIZE) or
-						(report_id == 0x20 and len(data) == _MEDIUM_MESSAGE_SIZE)), \
-						"unexpected message size: report_id %02X message %s" % (report_id, _strhex(data))
 			if notifications_hook and report_id & 0xF0:
 				n = make_notification(ord(data[1:2]), data[2:])
 				if n:
@@ -267,9 +266,15 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 def make_notification(devnumber, data):
 	"""Guess if this is a notification (and not just a request reply), and
 	return a Notification tuple if it is."""
+
 	sub_id = ord(data[:1])
 	if sub_id & 0x80 == 0x80:
 		# this is either a HID++1.0 register r/w, or an error reply
+		return
+
+	# regular keyboard key press reports and mouse movement reports are not notifications
+	# it would be better to check for report_id 0x20 but that information is not sent here
+	if ( len(data) == _MEDIUM_MESSAGE_SIZE-2  and  ( sub_id==0x02 or sub_id==0x01 ) ) :
 		return
 
 	address = ord(data[1:2])
