@@ -28,7 +28,9 @@ Solaar uses the HID++ protocol to pair devices to receivers and unpair devices f
 
 Solaar does not do anything beyond using the HID++ protocol to change the behavior of receivers and devices.  In particular, Solaar cannot change how the operating system turns the keycodes that a keyboard produces into characters that are sent to programs.  That is the province of HID device drivers and other software (such as X11).
 
-Solaar does keep track of the changeable state of a device between invocations and restores the device to its previously-known state when the device is re-connected.
+Logitech receivers and devices have firmware in them.  Some of the firmware can be updated using Logitch software in Windows.  For example, there are security issues with some Logitech receivers and devices and Logitech has firmware updates to alleviate some of these problems.  Some Logitech firmware can also be updated in Linux using `fwupdmgr`.  WARNING: Updating firmware can cause a piece of hardware to to become permanently non-functional if something goes wrong with the update or the update installs the wrong firmware.
+
+Solaar does keep track of some of the changeable state of a device between invocations and restores the device to its previously-known state when the device is re-connected.
 
 Querying a device for its current state can require quite a few HID++ interactions.  These interactions can slow down the device, so Solaar tries to internally cache information about devices.  If the device state is changed by some other means, even sometimes by another invocation of Solaar, this cached information may become incorrect.  Currently there is no way to force an update of the cached information besides terminating Solaar and starting it again.
 
