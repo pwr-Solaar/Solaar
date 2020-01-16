@@ -19,7 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger # , DEBUG as _DEBUG
+from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
 del getLogger
 
@@ -232,7 +232,7 @@ def _create_info_panel():
 
 def _create_tree(model):
 	tree = Gtk.TreeView()
-	tree.set_size_request(240, 0)
+	tree.set_size_request(330, 0) # enough width for simple setups
 	tree.set_headers_visible(False)
 	tree.set_show_expanders(False)
 	tree.set_level_indentation(20)
@@ -251,7 +251,6 @@ def _create_tree(model):
 	icon_column = Gtk.TreeViewColumn('Icon', icon_cell_renderer)
 	icon_column.add_attribute(icon_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
 	icon_column.add_attribute(icon_cell_renderer, 'icon-name', _COLUMN.ICON)
-	icon_column.set_fixed_width(1)
 	tree.append_column(icon_column)
 
 	name_cell_renderer = Gtk.CellRendererText()
@@ -276,7 +275,6 @@ def _create_tree(model):
 	battery_column = Gtk.TreeViewColumn('status icon', battery_cell_renderer)
 	battery_column.add_attribute(battery_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
 	battery_column.add_attribute(battery_cell_renderer, 'icon-name', _COLUMN.STATUS_ICON)
-	battery_column.set_fixed_width(1)
 	tree.append_column(battery_column)
 
 	return tree
@@ -302,7 +300,7 @@ def _create_window_layout():
 	tree_panel.pack_start(_details, False, False, 0)
 
 	panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
-	panel.pack_start(tree_panel, False, False, 0)
+	panel.pack_start(tree_panel, True, True, 0)
 	panel.pack_start(_info, True, True, 0)
 	panel.pack_start(_empty, True, True, 0)
 
@@ -349,6 +347,9 @@ def _create():
 	geometry.max_height = 600
 	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE | Gdk.WindowHints.MAX_SIZE)
 	window.set_position(Gtk.WindowPosition.CENTER)
+
+	style = window.get_style_context()
+	style.add_class('solaar')
 
 	return window
 
@@ -401,8 +402,8 @@ def _receiver_row(receiver_path, receiver=None):
 		status_icon = None
 		row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
 		assert len(row_data) == len(_TREE_SEPATATOR)
-		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("new receiver row %s", row_data)
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("new receiver row %s", row_data)
 		item = _model.append(None, row_data)
 		if _TREE_SEPATATOR:
 			_model.append(None, _TREE_SEPATATOR)
@@ -434,8 +435,8 @@ def _device_row(receiver_path, device_number, device=None):
 		status_icon = None
 		row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device)
 		assert len(row_data) == len(_TREE_SEPATATOR)
-		# if _log.isEnabledFor(_DEBUG):
-		# 	_log.debug("new device row %s at index %d", row_data, new_child_index)
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("new device row %s at index %d", row_data, new_child_index)
 		item = _model.insert(receiver_row, new_child_index, row_data)
 
 	return item or None
