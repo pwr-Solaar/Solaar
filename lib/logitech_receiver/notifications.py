@@ -32,6 +32,7 @@ from .common import strhex as _strhex, unpack as _unpack
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .status import KEYS as _K, ALERT as _ALERT
+from .base import DJ_NOTIFICATION_LENGTH as _DJ_NOTIFICATION_LENGTH
 
 _R = _hidpp10.REGISTERS
 _F = _hidpp20.FEATURE
@@ -94,7 +95,10 @@ def _process_device_notification(device, status, n):
 
 	# 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
 	if n.sub_id >= 0x40:
-		return _process_hidpp10_notification(device, status, n)
+		if len(n.data) == _DJ_NOTIFICATION_LENGTH :
+			return _process_dj_notification(device, status, n)
+		else:
+			return _process_hidpp10_notification(device, status, n)
 
 	# At this point, we need to know the device's protocol, otherwise it's
 	# possible to not know how to handle it.
@@ -113,6 +117,30 @@ def _process_device_notification(device, status, n):
 		return False
 
 	return _process_feature_notification(device, status, n, feature)
+
+
+def  _process_dj_notification(device, status, n) :
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("%s (%s) DJ notification %s", device, device.protocol, n)
+
+	if n.sub_id == 0x40:
+		# do all DJ paired notifications also show up as HID++ 1.0 notifications?
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: ignoring DJ unpaired: %s", device, n)
+		return True
+
+	if n.sub_id == 0x41:
+		# do all DJ paired notifications also show up as HID++ 1.0 notifications?
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: ignoring DJ paired: %s", device, n)
+		return True
+
+	if n.sub_id == 0x42:
+		if _log.isEnabledFor(_INFO):
+			_log.info("%s: ignoring DJ connection: %s", device, n)
+		return True
+
+	_log.warn("%s: unrecognized DJ %s", device, n)
 
 
 def _process_hidpp10_custom_notification(device, status, n):
@@ -184,11 +212,6 @@ def _process_hidpp10_notification(device, status, n):
 		else:
 			_log.warn("%s: connection notification with unknown protocol %02X: %s", device.number, n.address, n)
 
-		return True
-
-	if n.sub_id == 0x42:
-		if _log.isEnabledFor(_INFO):
-			_log.info("%s: ignoring DJ connection: %s", device, n)
 		return True
 
 	if n.sub_id == 0x49:
