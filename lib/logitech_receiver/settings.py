@@ -42,7 +42,7 @@ KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04)
 class Setting(object):
 	"""A setting descriptor.
 	Needs to be instantiated for each specific device."""
-	__slots__ = ('name', 'label', 'description', 'kind', 'persister', 'device_kind',
+	__slots__ = ('name', 'label', 'description', 'kind', 'device_kind',
 					'_rw', '_validator', '_device', '_value')
 
 	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None):
@@ -57,7 +57,6 @@ class Setting(object):
 
 		assert kind is None or kind & validator.kind != 0
 		self.kind = kind or validator.kind
-		self.persister = None
 
 	def __call__(self, device):
 		assert not hasattr(self, '_value')
@@ -94,26 +93,29 @@ class Setting(object):
 		assert hasattr(self, '_value')
 		assert hasattr(self, '_device')
 
-		if self._value is None and self.persister:
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: settings read %r from %s", self.name, self._value, self._device)
+
+		if self._value is None and self._device.persister:
 			# We haven't read a value from the device yet,
 			# maybe we have something in the configuration.
-			self._value = self.persister.get(self.name)
+			self._value = self._device.persister.get(self.name)
 
 		if cached and self._value is not None:
-			if self.persister and self.name not in self.persister:
+			if self._device.persister and self.name not in self._device.persister:
 				# If this is a new device (or a new setting for an old device),
 				# make sure to save its current value for the next time.
-				self.persister[self.name] = self._value
+				self._device.persister[self.name] = self._value
 			return self._value
 
 		if self._device.online:
 			reply = self._rw.read(self._device)
 			if reply:
 				self._value = self._validator.validate_read(reply)
-			if self.persister and self.name not in self.persister:
+			if self._device.persister and self.name not in self._device.persister:
 				# Don't update the persister if it already has a value,
 				# otherwise the first read might overwrite the value we wanted.
-				self.persister[self.name] = self._value
+				self._device.persister[self.name] = self._value
 			return self._value
 
 	def write(self, value):
@@ -122,15 +124,15 @@ class Setting(object):
 		assert value is not None
 
 		if _log.isEnabledFor(_DEBUG):
-			_log.debug("%s: write %r to %s", self.name, value, self._device)
+			_log.debug("%s: settings write %r to %s", self.name, value, self._device)
 
 		if self._device.online:
 			# Remember the value we're trying to set, even if the write fails.
 			# This way even if the device is offline or some other error occurs,
 			# the last value we've tried to write is remembered in the configuration.
 			self._value = value
-			if self.persister:
-				self.persister[self.name] = value
+			if self._device.persister:
+				self._device.persister[self.name] = value
 
 			current_value = None
 			if self._validator.needs_current_value:
@@ -140,7 +142,7 @@ class Setting(object):
 			data_bytes = self._validator.prepare_write(value, current_value)
 			if data_bytes is not None:
 				if _log.isEnabledFor(_DEBUG):
-					_log.debug("%s: prepare write(%s) => %r", self.name, value, data_bytes)
+					_log.debug("%s: settings prepare write(%s) => %r", self.name, value, data_bytes)
 
 				reply = self._rw.write(self._device, data_bytes)
 				if not reply:
