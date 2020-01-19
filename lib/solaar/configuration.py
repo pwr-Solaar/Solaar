@@ -127,7 +127,4 @@ def attach_to(device):
 		_load()
 
 	persister = _device_entry(device)
-	for s in device.settings:
-		if s.persister is None:
-			s.persister = persister
-		assert s.persister == persister
+	device.persister = persister

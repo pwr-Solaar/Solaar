@@ -30,12 +30,12 @@ from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS
 
 from collections import namedtuple
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-				('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings'))
+				('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister'))
 del namedtuple
 
 DEVICES = {}
 
-def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None, settings=None):
+def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None, settings=None, persister=None):
 	assert name
 
 	if kind is None:
@@ -72,7 +72,7 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 
 	device_descriptor = _DeviceDescriptor(name=name, kind=kind,
 					wpid=wpid, codename=codename, protocol=protocol,
-					registers=registers, settings=settings)
+					registers=registers, settings=settings, persister=persister)
 
 	assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
 	DEVICES[codename] = device_descriptor
