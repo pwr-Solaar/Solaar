@@ -85,6 +85,7 @@ You are able to read this feature using command-line interface of Solaar, but it
 | M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
 | M317             |      |       |         |       |                                 |
 | M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                |
+| M330             |      | 2.0   | yes     | 1000  | smooth scrolling                |
 | M345             | 4017 | 2.0   | yes     | -     | smooth scrolling                |
 | M350             | 101C | 1.0   | yes     |       |                                 |
 | M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling|
