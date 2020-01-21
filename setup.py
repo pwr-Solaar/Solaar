@@ -67,8 +67,7 @@ battery status.
 			'License :: DFSG approved',
 			'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
 			'Natural Language :: English',
-			'Programming Language :: Python :: 2.7',
-			'Programming Language :: Python :: 3.2',
+			'Programming Language :: Python :: 3 :: Only',
 			'Operating System :: POSIX :: Linux',
 			'Topic :: Utilities',
 			],
@@ -79,6 +78,7 @@ battery status.
 		#        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-appindicator3-0.1
 		# os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
+		python_requires='>=3.2',
 		install_requires=['pyudev (>= 0.13)', ],
 		package_dir={'': 'lib'},
 		packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
