@@ -12,12 +12,12 @@ and `hid-logitech-hidpp` loaded.   Also, the `udev` package must be installed
 and the daemon running.  If you have a recent Linux distribution (2017+), you are
 most likely good to go.
 
-Solaar requires Python 2.7.3 or 3.2+ (either version should work),
-and the `python-pyudev`/`python3-pyudev` package. 
+Solaar requires Python 3.2+
+and the `python3-pyudev` package. 
 
 To run the GUI, solaar also requires Gtk3, and its GObject
 Introspection bindings. The Debian/Ubuntu package names are
-`python-gi`/`python3-gi` and `gir1.2-gtk-3.0`; if you're using another
+`python3-gi` and `gir1.2-gtk-3.0`; if you're using another
 distribution the required packages are most likely named something similar.
 If the desktop notifications bindings are also installed (`gir1.2-notify-0.7`),
 you will also get desktop notifications when devices come online/go offline.
