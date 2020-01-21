@@ -7,7 +7,7 @@ layout: page
 [**Solaar**][solaar] reports on and controls [Logitech][logitech] devices (keyboards, mice, and trackballs) that connect to your computer via a Logitech USB receiver (a very small piece of hardware that plugs into one of your USB ports) and communicate with the receiver using Logitech's HID++ protocol.  Solaar is designed to detect all devices paired with your receivers, and at the very least display some basic information about them.
 
 At this moment, all [Unifying][unifying] receivers are supported (devices with
-USB ID `046d:c52b` or `046d:c532`) as are several Lightspeed Receivers, but only some newer Nano receivers (devices with USB ID `046d:c52f`, and `046d:c534`) are supported. Note that Linux incorrectly states that some Nano receivers are Unifying receivers.
+USB ID `046d:c52b` or `046d:c532`) as are several Lightspeed Receivers and a dozen Nano receivers.  
 
 ## HID++
 
