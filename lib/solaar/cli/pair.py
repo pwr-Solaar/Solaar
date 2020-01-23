@@ -57,8 +57,12 @@ def run(receivers, args, find_receiver, _ignore):
 			assert n
 			if n.devnumber == 0xFF:
 				_notifications.process(receiver, n)
-			elif n.sub_id == 0x41 and n.address == 0x04:
+			elif n.sub_id == 0x41: # allow for other protocols! (was and n.address == 0x04)
 				if n.devnumber not in known_devices:
+					receiver.status.new_device = receiver[n.devnumber]
+				elif receiver.re_pairs:
+		                        # unfortunately this breaks encapsulation but the nice way tries to unpair
+					del receiver._devices[n.devnumber] # get rid of information on device re-paired away
 					receiver.status.new_device = receiver[n.devnumber]
 
 	timeout = 20  # seconds
