@@ -195,6 +195,9 @@ class ReceiverListener(_listener.EventsListener):
 		if not device_ready:
 			time.sleep(0.01)
 
+		if n.sub_id == 0x40 and not already_known:
+                        return # disconnecting something that is not known - nothing to do
+
 		if n.sub_id == 0x41 and not already_known:
 			dev = self.receiver.register_new_device(n.devnumber, n)
 		else:
