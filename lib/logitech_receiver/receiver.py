@@ -490,18 +490,25 @@ class Receiver(object):
 				del self._devices[key]
 			return
 
-		action = 0x03
-		reply = self.write_register(_R.receiver_pairing, action, key)
-		if reply:
-			# invalidate the device
+		if self.re_pairs:
+			# invalidate the device, but these receivers don't unpair per se
 			dev.online = False
 			dev.wpid = None
 			if key in self._devices:
 				del self._devices[key]
-			_log.warn("%s unpaired device %s", self, dev)
+			_log.warn("%s removed device %s", self, dev)
 		else:
-			_log.error("%s failed to unpair device %s", self, dev)
-			raise IndexError(key)
+			reply = self.write_register(_R.receiver_pairing, 0x03, key)
+			if reply:
+				# invalidate the device
+				dev.online = False
+				dev.wpid = None
+				if key in self._devices:
+					del self._devices[key]
+				_log.warn("%s unpaired device %s", self, dev)
+			else:
+				_log.error("%s failed to unpair device %s", self, dev)
+				raise IndexError(key)
 
 	def __len__(self):
 		return len([d for d in self._devices.values() if d is not None])

@@ -61,8 +61,7 @@ def run(receivers, args, find_receiver, _ignore):
 				if n.devnumber not in known_devices:
 					receiver.status.new_device = receiver[n.devnumber]
 				elif receiver.re_pairs:
-		                        # unfortunately this breaks encapsulation but the nice way tries to unpair
-					del receiver._devices[n.devnumber] # get rid of information on device re-paired away
+					del receiver[n.devnumber] # get rid of information on device re-paired away
 					receiver.status.new_device = receiver[n.devnumber]
 
 	timeout = 20  # seconds
