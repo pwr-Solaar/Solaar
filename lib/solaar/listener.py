@@ -198,8 +198,17 @@ class ReceiverListener(_listener.EventsListener):
 		if n.sub_id == 0x40 and not already_known:
 			return # disconnecting something that is not known - nothing to do
 
-		if n.sub_id == 0x41 and not already_known:
-			dev = self.receiver.register_new_device(n.devnumber, n)
+		if n.sub_id == 0x41:
+			if not already_known:
+				dev = self.receiver.register_new_device(n.devnumber, n)
+			elif self.receiver.status.lock_open and self.receiver.re_pairs:
+				dev = self.receiver[n.devnumber]
+				del self.receiver[n.devnumber] # get rid of information on device re-paired away
+				self._status_changed(dev) # signal that this device has changed
+				dev = self.receiver.register_new_device(n.devnumber, n)
+				self.receiver.status.new_device = self.receiver[n.devnumber]
+			else:
+				dev = self.receiver[n.devnumber]
 		else:
 			dev = self.receiver[n.devnumber]
 
