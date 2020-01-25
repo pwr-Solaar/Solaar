@@ -105,3 +105,11 @@ ALL = (
 		LIGHTSPEED_RECEIVER_C53a,
 		LIGHTSPEED_RECEIVER_C53f,
 	)
+
+def product_information(usb_id):
+	if isinstance(usb_id,str):
+		usb_id = int(usb_id,16)
+	for r in ALL:
+		if usb_id == r.get('product_id'):
+			return r
+	return { }
