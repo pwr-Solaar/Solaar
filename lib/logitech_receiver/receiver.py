@@ -33,6 +33,7 @@ from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
 from .descriptors import DEVICES as _DESCRIPTORS
 from .settings_templates import check_feature_settings as _check_feature_settings
+from .base_usb import product_information as _product_information
 
 _R = _hidpp10.REGISTERS
 
@@ -345,14 +346,10 @@ class Receiver(object):
 			self.serial = None
 			self.max_devices = 6
 
-		if self.product_id == 'c539' or self.product_id == 'c53a' or self.product_id == 'c53f':
-			self.name = 'Lightspeed Receiver'
-		elif self.max_devices == 6:
-			self.name = 'Unifying Receiver'
-		elif self.max_devices < 6:
-			self.name = 'Nano Receiver'
-		else:
-			raise Exception("unknown receiver type", self.max_devices)
+		product_info = _product_information(self.product_id)
+		if not product_info:
+			raise Exception("unknown receiver type", self.product_id)
+		self.name = product_info.get('name','')
 		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
 
 		# TODO _properly_ figure out which receivers do and which don't support unpairing
