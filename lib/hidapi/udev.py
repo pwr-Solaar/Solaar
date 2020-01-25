@@ -78,7 +78,13 @@ def exit():
 	return True
 
 
-def _match(action, device, vendor_id=None, product_id=None, interface_number=None, hid_driver=None):
+# The filter is used to determine whether this is a device of interest to Solaar
+def _match(action, device, filter):
+	vendor_id=filter.get('vendor_id')
+	product_id=filter.get('product_id')
+	interface_number=filter.get('usb_interface')
+	hid_driver=filter.get('hid_driver')
+
 	usb_device = device.find_parent('usb', 'usb_device')
 	# print ("* parent", action, device, "usb:", usb_device)
 	if not usb_device:
@@ -164,7 +170,7 @@ def monitor_glib(callback, *device_filters):
 				# print ("***", action, device)
 				if action == 'add':
 					for filter in filters:
-						d_info = _match(action, device, *filter)
+						d_info = _match(action, device, filter)
 						if d_info:
 							GLib.idle_add(cb, action, d_info)
 							break
@@ -189,7 +195,7 @@ def monitor_glib(callback, *device_filters):
 	m.start()
 
 
-def enumerate(vendor_id=None, product_id=None, interface_number=None, hid_driver=None):
+def enumerate(usb_id):
 	"""Enumerate the HID Devices.
 
 	List all the HID devices attached to the system, optionally filtering by
@@ -197,8 +203,9 @@ def enumerate(vendor_id=None, product_id=None, interface_number=None, hid_driver
 
 	:returns: a list of matching ``DeviceInfo`` tuples.
 	"""
+
 	for dev in _Context().list_devices(subsystem='hidraw'):
-		dev_info = _match('add', dev, vendor_id, product_id, interface_number, hid_driver)
+		dev_info = _match('add', dev, usb_id)
 		if dev_info:
 			yield dev_info
 

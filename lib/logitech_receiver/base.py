@@ -83,7 +83,7 @@ from .base_usb import ALL as _RECEIVER_USB_IDS
 def receivers():
 	"""List all the Linux devices exposed by the UR attached to the machine."""
 	for receiver_usb_id in _RECEIVER_USB_IDS:
-		for d in _hid.enumerate(*receiver_usb_id):
+		for d in _hid.enumerate(receiver_usb_id):
 			yield d
 
 
