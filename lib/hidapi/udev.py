@@ -92,6 +92,8 @@ def _match(action, device, filter):
 
 	vid = usb_device.get('ID_VENDOR_ID')
 	pid = usb_device.get('ID_MODEL_ID')
+	if vid is None or pid is None:
+		return # there are reports that sometimes the usb_device isn't set up right so be defensive
 	if not ((vendor_id is None or vendor_id == int(vid, 16)) and
 			(product_id is None or product_id == int(pid, 16))):
 		return
