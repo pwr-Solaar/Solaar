@@ -26,11 +26,29 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 _DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
 
-# each tuple contains (vendor_id, product_id, usb interface number, hid driver)
-_unifying_receiver = lambda product_id: (0x046d, product_id, 2, _DRIVER)
-_nano_receiver = lambda product_id: (0x046d, product_id, 1, _DRIVER)
-_lenovo_receiver = lambda product_id: (0x17ef, product_id, 1, _DRIVER)
-_lightspeed_receiver = lambda product_id: (0x046d, product_id, 2, _DRIVER)
+_unifying_receiver = lambda product_id: {'vendor_id':0x046d,
+					 'product_id':product_id, 
+					 'usb_interface':2,
+					 'hid_driver':_DRIVER,
+					 'name':'Unifying Receiver'}
+
+_nano_receiver = lambda product_id: {'vendor_id':0x046d,
+				     'product_id':product_id,
+				     'usb_interface':1,
+				     'hid_driver':_DRIVER,
+				     'name':'Nano Receiver'}
+
+_lenovo_receiver = lambda product_id: {'vendor_id':0x17ef, 
+				       'product_id':product_id, 
+				       'usb_interface':1, 
+				       'hid_driver':_DRIVER, 
+				       'name':'Nano Receiver'}
+
+_lightspeed_receiver = lambda product_id: {'vendor_id':0x046d,
+					   'product_id':product_id,
+					   'usb_interface':2,
+					   'hid_driver':_DRIVER,
+					   'name':'Lightspeed Receiver'}
 
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B    = _unifying_receiver(0xc52b)
@@ -81,3 +99,11 @@ ALL = (
 		LIGHTSPEED_RECEIVER_C53a,
 		LIGHTSPEED_RECEIVER_C53f,
 	)
+
+def product_information(usb_id):
+	if isinstance(usb_id,str):
+		usb_id = int(usb_id,16)
+	for r in ALL:
+		if usb_id == r.get('product_id'):
+			return r
+	return { }
