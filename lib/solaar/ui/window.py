@@ -304,11 +304,13 @@ def _create_window_layout():
 	panel.pack_start(_info, True, True, 0)
 	panel.pack_start(_empty, True, True, 0)
 
+	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
+	bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.SPREAD)
+	quit_button = _new_button(_("Quit") + ' ' + NAME, 
+					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_justquit)
+	bottom_buttons_box.add(quit_button)
 	about_button = _new_button(_("About") + ' ' + NAME, 'help-about',
 					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
-
-	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
-	bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
 	bottom_buttons_box.add(about_button)
 
 	# solaar_version = Gtk.Label()
@@ -352,6 +354,10 @@ def _create():
 	style.add_class('solaar')
 
 	return window
+
+def _justquit(self):
+	import sys
+	sys.exit()
 
 #
 # window updates
