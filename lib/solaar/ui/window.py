@@ -304,11 +304,10 @@ def _create_window_layout():
 	panel.pack_start(_info, True, True, 0)
 	panel.pack_start(_empty, True, True, 0)
 
-	about_button = _new_button(_("About") + ' ' + NAME, 'help-about',
-					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
-
 	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
 	bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
+	about_button = _new_button(_("About") + ' ' + NAME, 'help-about',
+					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
 	bottom_buttons_box.add(about_button)
 
 	# solaar_version = Gtk.Label()
@@ -327,7 +326,7 @@ def _create_window_layout():
 	return vbox
 
 
-def _create():
+def _create(delete_action):
 	window = Gtk.Window()
 	window.set_title(NAME)
 	window.set_role('status-window')
@@ -335,7 +334,7 @@ def _create():
 	# window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 	# window.set_skip_taskbar_hint(True)
 	# window.set_skip_pager_hint(True)
-	window.connect('delete-event', _hide)
+	window.connect('delete-event', delete_action)
 
 	vbox = _create_window_layout()
 	window.add(vbox)
@@ -727,7 +726,7 @@ _empty = None
 _window = None
 
 
-def init(tray_only):
+def init(show_window,hide_on_close):
 	Gtk.Window.set_default_icon_name(NAME.lower())
 	Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
 
@@ -737,12 +736,12 @@ def init(tray_only):
 	_details = _create_details_panel()
 	_info = _create_info_panel()
 	_empty = _create_empty_panel()
-	_window = _create()
-	if (not tray_only) : 
+	_window = _create(_hide if hide_on_close else destroy)
+	if show_window:
 		_window.present()
 
 
-def destroy():
+def destroy(_ignore1=None, _ignore2=None):
 	global _model, _tree, _details, _info, _empty, _window
 	w, _window = _window, None
 	w.destroy()

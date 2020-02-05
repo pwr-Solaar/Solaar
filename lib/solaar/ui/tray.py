@@ -458,10 +458,10 @@ def init(_quit_handler):
 
 def destroy():
 	global _icon, _menu, _devices_info
-	assert _icon is not None
-	i, _icon = _icon, None
-	_destroy(i)
-	i = None
+	if _icon is not None:
+		i, _icon = _icon, None
+		_destroy(i)
+		i = None
 
 	_icon = None
 	_menu = None

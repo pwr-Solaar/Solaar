@@ -86,7 +86,7 @@ def ui_async(function, *args, **kwargs):
 from . import notify, tray, window
 
 
-def _startup(app, startup_hook, tray_only):
+def _startup(app, startup_hook, use_tray, show_window):
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
 
@@ -96,8 +96,9 @@ def _startup(app, startup_hook, tray_only):
 	_task_runner.start()
 
 	notify.init()
-	tray.init(lambda _ignore: window.destroy())
-	window.init(tray_only)
+	if use_tray:
+		tray.init(lambda _ignore: window.destroy())
+	window.init(show_window, use_tray)
 
 	startup_hook()
 
@@ -133,12 +134,13 @@ def _shutdown(app, shutdown_hook):
 	notify.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, tray_only, args=None):
+def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
+	assert use_tray or show_window, 'need either tray or visible window'
 	# from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
 	APP_ID = 'io.github.pwr.solaar'
 	application = Gtk.Application.new(APP_ID, 0) # _ApplicationFlags.HANDLES_COMMAND_LINE)
 
-	application.connect('startup', lambda app, startup_hook:_startup(app,startup_hook,tray_only), startup_hook)
+	application.connect('startup', lambda app, startup_hook:_startup(app,startup_hook,use_tray,show_window), startup_hook)
 	application.connect('command-line', _command_line)
 	application.connect('activate', _activate)
 	application.connect('shutdown', _shutdown, shutdown_hook)
