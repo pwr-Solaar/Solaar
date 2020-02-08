@@ -94,6 +94,7 @@ NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 NANO_RECEIVER_C531        = _nano_receiver(0xc531)
 NANO_RECEIVER_C534        = _nano_receiver_max2(0xc534)
+NANO_RECEIVER_C537        = _nano_receiver(0xc537)
 NANO_RECEIVER_6042        = _lenovo_receiver(0x6042)
 
 # Lightspeed receivers
@@ -118,6 +119,7 @@ ALL = (
 		NANO_RECEIVER_C52e,
 		NANO_RECEIVER_C531,
 		NANO_RECEIVER_C534,
+		NANO_RECEIVER_C537,
 		NANO_RECEIVER_6042,
 		LIGHTSPEED_RECEIVER_C539,
 		LIGHTSPEED_RECEIVER_C53a,

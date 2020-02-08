@@ -33,6 +33,7 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c51a", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c521", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c525", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c534", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c537", GOTO="solaar_apply"
 
 # Lightspeed receivers
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c539", GOTO="solaar_apply"
