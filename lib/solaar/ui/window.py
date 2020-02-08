@@ -572,6 +572,9 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 		paired_text += '\n\n<small>%s</small>' % ngettext('Up to %(max_count)s device can be paired to this receiver.', 'Up to %(max_count)s devices can be paired to this receiver.', receiver.max_devices) % { 'max_count': receiver.max_devices }
 	elif(devices_count > 0):
 		paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
+	pairings = receiver.remaining_pairings(False) 
+	if ( pairings is not None and pairings >= 0 ) :
+		paired_text += '\n<small>%s</small>' % _('This receiver has %d pairing(s) remaining.') % pairings
 
 	panel._count.set_markup(paired_text)
 

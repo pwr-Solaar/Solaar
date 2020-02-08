@@ -25,6 +25,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 _DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
+# max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
+# may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False
+## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
+# re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
+## currently only one receiver is so marked - should there be more?
 
 _unifying_receiver = lambda product_id: {
 	'vendor_id':0x046d,
@@ -40,6 +45,17 @@ _nano_receiver = lambda product_id: {
 	'usb_interface':1,
 	'hid_driver':_DRIVER,
 	'name':'Nano Receiver'
+}
+
+_nano_receiver_max2 = lambda product_id: {
+	'vendor_id':0x046d,
+	'product_id':product_id,
+	'usb_interface':1,
+	'hid_driver':_DRIVER,
+	'name':'Nano Receiver',
+	'max_devices': 2,
+	'may_unpair': False,
+	're_pairs': True 
 }
 
 _lenovo_receiver = lambda product_id: {
@@ -75,7 +91,7 @@ NANO_RECEIVER_C525        = _nano_receiver(0xc525)
 NANO_RECEIVER_C526        = _nano_receiver(0xc526)
 NANO_RECEIVER_C52e        = _nano_receiver(0xc52e)
 NANO_RECEIVER_C531        = _nano_receiver(0xc531)
-NANO_RECEIVER_C534        = _nano_receiver(0xc534)
+NANO_RECEIVER_C534        = _nano_receiver_max2(0xc534)
 NANO_RECEIVER_6042        = _lenovo_receiver(0x6042)
 
 # Lightspeed receivers

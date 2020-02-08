@@ -334,29 +334,31 @@ class Receiver(object):
 		self.path = device_info.path
 		# USB product id, used for some Nano receivers
 		self.product_id = device_info.product_id
-
-		# read the serial immediately, so we can find out max_devices
-		# this will tell us if it's a Unifying or Nano receiver
-		if self.product_id != 'c534':
-			serial_reply = self.read_register(_R.receiver_info, 0x03)
-			assert serial_reply
-			self.serial = _strhex(serial_reply[1:5])
-			self.max_devices = ord(serial_reply[6:7])
-		else:
-			self.serial = None
-			self.max_devices = 6
-
 		product_info = _product_information(self.product_id)
 		if not product_info:
 			raise Exception("unknown receiver type", self.product_id)
-		self.name = product_info.get('name','')
-		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
 
-		# TODO _properly_ figure out which receivers do and which don't support unpairing
-		self.may_unpair = self.write_register(_R.receiver_pairing) is None
+		# read the serial immediately, so we can find out max_devices
+		# this will tell us if it's a Unifying or Nano receiver
+		serial_reply = self.read_register(_R.receiver_info, 0x03)
+		if serial_reply :
+			self.serial = _strhex(serial_reply[1:5])
+			self.max_devices = ord(serial_reply[6:7])
+			# TODO _properly_ figure out which receivers do and which don't support unpairing
+			# This code supposes that receivers that don't unpair support a pairing request for device index 0
+			self.may_unpair = self.write_register(_R.receiver_pairing) is None
+		else: # handle receivers that don't have a serial number specially (i.e., c534)
+			self.serial = None
+			self.max_devices = product_info.get('max_devices',1)
+			self.may_unpair = product_info.get('may_unpair',False)
+
+		self.name = product_info.get('name','')
+		self.re_pairs = product_info.get('re_pairs',False)
+		self._str = '<%s(%s,%s%s)>' % (self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
 
 		self._firmware = None
 		self._devices = {}
+		self._remaining_pairings = None
 
 	def close(self):
 		handle, self.handle = self.handle, None
@@ -371,6 +373,15 @@ class Receiver(object):
 		if self._firmware is None and self.handle:
 			self._firmware = _hidpp10.get_firmware(self)
 		return self._firmware
+
+	# how many pairings remain (None for unknown, -1 for unlimited)
+	def remaining_pairings(self,cache=True):
+		if self._remaining_pairings is None or not cache :
+			ps = self.read_register(_R.receiver_connection)
+			if ps is not None:
+				ps = ord(ps[2:3])
+				self._remaining_pairings = ps-5 if ps >= 5 else -1
+		return self._remaining_pairings
 
 	def enable_notifications(self, enable=True):
 		"""Enable or disable device (dis)connection notifications on this
