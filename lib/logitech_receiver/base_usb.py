@@ -44,7 +44,9 @@ _nano_receiver = lambda product_id: {
 	'product_id':product_id,
 	'usb_interface':1,
 	'hid_driver':_DRIVER,
-	'name':'Nano Receiver'
+	'name':'Nano Receiver',
+	'may_unpair': False,
+	're_pairs': True 
 }
 
 _nano_receiver_max2 = lambda product_id: {
