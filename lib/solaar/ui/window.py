@@ -306,6 +306,10 @@ def _create_window_layout():
 
 	bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
 	bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
+	bottom_buttons_box.set_spacing(20)
+	quit_button = _new_button(_("Quit") + ' ' + NAME,  'application-exit', 
+					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=destroy)
+	bottom_buttons_box.add(quit_button)
 	about_button = _new_button(_("About") + ' ' + NAME, 'help-about',
 					icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
 	bottom_buttons_box.add(about_button)
