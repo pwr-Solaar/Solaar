@@ -211,6 +211,7 @@ def _process_feature_notification(device, status, n, feature):
 	if feature == _F.BATTERY_STATUS:
 		if n.address == 0x00:
 			discharge_level = ord(n.data[:1])
+			discharge_level = None if discharge_level == 0 else discharge_level
 			discharge_next_level = ord(n.data[1:2])
 			battery_status = ord(n.data[2:3])
 			status.set_battery_info(discharge_level, _hidpp20.BATTERY_STATUS[battery_status])

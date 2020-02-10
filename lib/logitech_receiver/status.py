@@ -191,7 +191,7 @@ class DeviceStatus(dict):
 		changed = old_level != level or old_status != status or old_charging != charging
 		alert, reason = ALERT.NONE, None
 
-		if _hidpp20.BATTERY_OK(status) and level > _BATTERY_ATTENTION_LEVEL:
+		if _hidpp20.BATTERY_OK(status) and ( level is None or level > _BATTERY_ATTENTION_LEVEL ):
 			self[KEYS.ERROR] = None
 		else:
 			_log.warn("%s: battery %d%%, ALERT %s", self._device, level, status)

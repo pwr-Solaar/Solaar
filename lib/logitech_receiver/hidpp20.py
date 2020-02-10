@@ -520,6 +520,7 @@ def get_battery(device):
 	battery = feature_request(device, FEATURE.BATTERY_STATUS)
 	if battery:
 		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
+		discharge = None if discharge == 0 else discharge
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
 						device.number, discharge, dischargeNext, status, BATTERY_STATUS[status])
