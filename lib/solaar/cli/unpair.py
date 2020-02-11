@@ -27,6 +27,10 @@ def run(receivers, args, find_receiver, find_device):
 	device_name = args.device.lower()
 	dev = find_device(receivers, device_name)
 
+	if not dev.receiver.may_unpair :
+		print('Receiver for %s [%s:%s] does not unpair' % (dev.name,dev.wpid,dev.serial))
+		return
+
 	# query these now, it's last chance to get them
 	try:
 		number, codename, wpid, serial  = dev.number, dev.codename, dev.wpid, dev.serial
