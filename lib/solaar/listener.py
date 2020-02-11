@@ -201,7 +201,7 @@ class ReceiverListener(_listener.EventsListener):
 		if n.sub_id == 0x41:
 			if not already_known:
 				dev = self.receiver.register_new_device(n.devnumber, n)
-			elif self.receiver.status.lock_open and self.receiver.re_pairs:
+			elif self.receiver.status.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
 				dev = self.receiver[n.devnumber]
 				del self.receiver[n.devnumber] # get rid of information on device re-paired away
 				self._status_changed(dev) # signal that this device has changed
