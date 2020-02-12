@@ -46,6 +46,11 @@ def _create_parser():
 						'a substring of a device\'s name, or "all" (the default)')
 	sp.set_defaults(action='show')
 
+	sp = subparsers.add_parser('probe', help='probe a receiver (debugging use only)')
+	sp.add_argument('receiver', nargs='?',
+					help='select a certain receiver when more than one is present')
+	sp.set_defaults(action='probe')
+
 	sp = subparsers.add_parser('config', help='read/write device-specific settings',
 								epilog='Please note that configuration only works on active devices.')
 	sp.add_argument('device',
