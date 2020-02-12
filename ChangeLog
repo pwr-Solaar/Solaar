@@ -1,3 +1,18 @@
+39791be440a34984d2875cd645f75be759b708a7 11 February 2020:
+  * Treat battery level of 0 as unknown
+  * Fix bug on devices with no serial number
+  * Add --tray option to start without main window visible
+  * Drop support for python2, and use python3 throughout
+  * Fix bug in remembering features discovered from device reports
+  * Show icons in main window device list
+  * Count offline devices when determining whether pairing is possible
+  * Update French, Dutch, and German translations
+  * Better icons for battery levels
+  * Support DPI, Backlight 2, Battery Voltage features
+  * Support M585, M590, M330, MX Master 2s and 3, new M310, new K800, craft keyboard
+  * Documentation improvements
+  * Clean up directory structure and remove unused files
+
 1.0.1:
   * Updated the repo url.
   * Fixed typo which was crashing the application.
