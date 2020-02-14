@@ -35,15 +35,7 @@ try:
 	from gi.repository import Notify
 
 	# assumed to be working since the import succeeded
-	# available = True
-
-	# This is not working on Fedora 26. If fails with:
-	# ERROR [MainThread] solaar.ui.notify: showing <Notify.Notification object at 0x7f82c2484640 (NotifyNotification at 0x556fa0fc5a40)>
-	# File "./solaar/lib/solaar/ui/notify.py", line 145, in show
-	#   n.show()
-	# Error: g-io-error-quark: Error calling StartServiceByName for org.freedesktop.Notifications: Timeout was reached (24)
-
-	available = False
+	available = True
 
 except (ValueError, ImportError):
 	available = False
