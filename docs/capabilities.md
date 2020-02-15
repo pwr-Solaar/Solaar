@@ -45,7 +45,7 @@ receivers.  For Unifying receivers, pairing adds a new paired device, but
 only if there is an open slot on the receiver.  So these receivers need to
 be able to unpair devices that they have been paired with or else they will
 not have any open slots for pairing.  Some other receivers, like the
-receiver with USB ID `046d:c532`, can only pair with particular kinds of
+Nano receiver with USB ID `046d:c534`, can only pair with particular kinds of
 devices and pairing a new device replaces whatever device of that kind was
 previously paired to the receiver.  These receivers cannot unpair.  Further,
 some receivers can pair an unlimited number of times but others can only
