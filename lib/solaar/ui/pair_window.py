@@ -201,9 +201,14 @@ def create(receiver):
 	assistant.set_resizable(False)
 	assistant.set_role('pair-device')
 
+	page_text = _("If the device is already turned on, turn if off and on again.")
+	if receiver.remaining_pairings():
+		page_text += _("\n\nThis receiver has %d pairing(s) remaining.")%receiver.remaining_pairings()
+		page_text += _("\nCancelling at this point will not use up a pairing.")
+
 	page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS,
 					_("Turn on the device you want to pair."), 'preferences-desktop-peripherals',
-					_("If the device is already turned on,\nturn if off and on again."))
+					page_text)
 	spinner = Gtk.Spinner()
 	spinner.set_visible(True)
 	page_intro.pack_end(spinner, True, True, 24)
