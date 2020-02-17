@@ -569,7 +569,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
 	if(receiver.max_devices > 0):
 		paired_text += '\n\n<small>%s</small>' % ngettext('Up to %(max_count)s device can be paired to this receiver.', 'Up to %(max_count)s devices can be paired to this receiver.', receiver.max_devices) % { 'max_count': receiver.max_devices }
-	elif(devices_count > 0):
+	elif devices_count > 0:
 		paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
 	pairings = receiver.remaining_pairings(False) 
 	if ( pairings is not None and pairings >= 0 ) :
@@ -594,12 +594,16 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 	# b._insecure.set_visible(False)
 	buttons._unpair.set_visible(False)
 
-	may_pair = ( receiver.may_unpair or receiver.re_pairs ) and not is_pairing and \
-		( receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0 )
-	if may_pair and not receiver.re_pairs and devices_count >= receiver.max_devices:
-		paired_devices = tuple(n for n in range(1, receiver.max_devices+1) if n in receiver)
-		may_pair &= len(paired_devices) < receiver.max_devices
-	buttons._pair.set_sensitive(may_pair)
+	if ( receiver.may_unpair or receiver.re_pairs ) and not is_pairing and \
+	   ( receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0 ):
+		if not receiver.re_pairs and devices_count >= receiver.max_devices:
+			paired_devices = tuple(n for n in range(1, receiver.max_devices+1) if n in receiver)
+			buttons._pair.set_sensitive(len(paired_devices) < receiver.max_devices)
+		else:
+			buttons._pair.set_sensitive(True)
+	else:
+		buttons._pair.set_sensitive(False)
+
 	buttons._pair.set_visible(True)
 
 

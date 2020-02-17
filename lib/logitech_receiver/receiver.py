@@ -336,10 +336,9 @@ class Receiver(object):
 		self.product_id = device_info.product_id
 		product_info = _product_information(self.product_id)
 		if not product_info:
-			raise Exception("unknown receiver type", self.product_id)
+			raise Exception("Unknown receiver type", self.product_id)
 
 		# read the serial immediately, so we can find out max_devices
-		# this will tell us if it's a Unifying or Nano receiver
 		serial_reply = self.read_register(_R.receiver_info, 0x03)
 		if serial_reply :
 			self.serial = _strhex(serial_reply[1:5])
@@ -376,7 +375,7 @@ class Receiver(object):
 
 	# how many pairings remain (None for unknown, -1 for unlimited)
 	def remaining_pairings(self,cache=True):
-		if self._remaining_pairings is None or not cache :
+		if self._remaining_pairings is None or not cache:
 			ps = self.read_register(_R.receiver_connection)
 			if ps is not None:
 				ps = ord(ps[2:3])
