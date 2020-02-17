@@ -1,7 +1,23 @@
-39791be440a34984d2875cd645f75be759b708a7 11 February 2020:
+07 March 2020:
+  * Support c537 nano receiver
+  * Add logind signals for suspend/resume.
+  * Remove solaar-gnome3 package
+  * Ignore features for devices that don't follow feature specification
+  * Add probe command to command-line interface to dump receiver registers
+  * Don't terminate on malformed or unknown messages
+  * Create fewer internal notifications for messages from devices
+  * Add a button to the main window to terminate (quit) Solaar
+  * Set up nano receivers as receivers with no unpairing and with re-pairing
+  * Set up c534 as receiver with max 2 pairings, no unpairing, re-pairing
+  * Better support receivers that do not unpair or when pairing replace existing pairings
+  * Add information about receiver pairing to receiver data structure
+  * Better support devices that only allow a limited number of total re-pairings
+  * Add --window option to control main window visibility and tray usage
+  * Ignore receiver if USB id is not retrieved
+  * Fix bug with double deleting when devices are disconnected
+  * Determine some receiver information from data structure for USB ids
   * Treat battery level of 0 as unknown
   * Fix bug on devices with no serial number
-  * Add --tray option to start without main window visible
   * Drop support for python2, and use python3 throughout
   * Fix bug in remembering features discovered from device reports
   * Show icons in main window device list
