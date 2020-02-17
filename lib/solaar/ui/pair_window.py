@@ -202,7 +202,7 @@ def create(receiver):
 	assistant.set_role('pair-device')
 
 	page_text = _("If the device is already turned on, turn if off and on again.")
-	if receiver.remaining_pairings():
+	if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
 		page_text += _("\n\nThis receiver has %d pairing(s) remaining.")%receiver.remaining_pairings()
 		page_text += _("\nCancelling at this point will not use up a pairing.")
 
