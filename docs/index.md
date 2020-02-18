@@ -3,27 +3,41 @@ title: Solaar
 layout: default
 ---
 
-**Solaar** is a Linux manager for Logitech's peripherals that connect via a USB 
-[Unifying][unifying], Lightspeed, or Nano receiver.  It is able to pair/unpair devices with 
-receivers and for most devices show battery status.  Solaar can also control
-some of the changeable features of the devices, such as smooth scrolling or
-function key behavior.  Solaar does not work with Logitech peripherals that
+**Solaar** is a Linux manager for Logitech's devices that connect via a USB 
+[Unifying][unifying], Lightspeed, or Nano receiver.  
+Solaar does not work with Logitech peripherals that
 use Bluetooth or peripherals from other companies.
 
 Solaar can be used as a GUI application or via its command-line interface.
-Both are able to list the devices paired to a receiver,
-show detailed info for each device, and
-pair/unpair supported devices with the receiver.
+Both interfaces are able to list the devices paired to a receiver and
+show information about each device, including battery status for devices that support this feature.
+Solaar's GUI normally uses an icon in the system tray and starts with its main window hidden.
+If Solaar is invoked with the `--window=show` option Solaar starts with its main window visible.
+If solaar is invoked with the `--window=only` option Solaar does not set up an icon in the
+system tray and also starts with its main window showing.
+For more information on Solaar's command-line interface use the help option,
+as in `solaar --help`.
+
+Solaar is able to pair and unpair devices with 
+receivers as supported by the receiver.  Solaar can also control
+some of the changeable features of devices, such as smooth scrolling or
+function key behavior.  
 For more information on the capabilities of Solaar see
 [docs/capabilities.md](https://pwr-solaar.github.io/Solaar/capabilities).
 
-Solaar does not process normal input from the peripherals.  It is thus unable
+Solaar does not process normal input from the devices.  Solaar is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
 by Linux drivers or other software.
 
 Solaar has progressed past version 1.0.  Problems with earlier versions should
 not be reported as bugs.  Instead upgrade to a recent version or manually install
 the current version from [GitHub](https://github.com/pwr-Solaar/Solaar).
+Some of the capabilities of Solaar have been developed by observing the behavior of
+Logitech receivers and devices and generalizing from these observations.
+If your Logitech receiver or device behaves in a strange way this may be caused by
+an incorrect behavior generalization.
+Please report such experiences by creating an issue in 
+[the Solaar repository](https://.../...Solaar...).
 
 [unifying]: https://en.wikipedia.org/wiki/Logitech_Unifying_receiver
 

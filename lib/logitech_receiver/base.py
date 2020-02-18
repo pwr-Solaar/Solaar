@@ -207,12 +207,7 @@ def check_message(data) :
 			return True
 		else:
 			_log.warn("unexpected message size: report_id %02X message %s" % (report_id, _strhex(data)))
-			return False
-	else:
-# don't even bother to log other messages
-#		if _log.isEnabledFor(_DEBUG):
-#			_log.debug("ignoring message with unknown report id: %02X message %s", report_id, _strhex(data))
-		return False
+	return False
 
 
 def _read(handle, timeout):
