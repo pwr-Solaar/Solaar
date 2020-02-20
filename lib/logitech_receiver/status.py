@@ -223,7 +223,7 @@ class DeviceStatus(dict):
 			# broadcasting it's battery status anyway, it will just take a little while.
 			# However, when the device has just been detected, it will not show
 			# any battery status for a while (broadcasts happen every 90 seconds).
-			if battery is None and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
+			if battery is None and d.features and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
 				d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
 				return
 
@@ -261,7 +261,8 @@ class DeviceStatus(dict):
 
 					# Devices lose configuration when they are turned off,
 					# make sure they're up-to-date.
-					# _log.debug("%s settings %s", d, d.settings)
+					if _log.isEnabledFor(_DEBUG):
+						_log.debug("%s pushing device settings %s", d, d.settings)
 					for s in d.settings:
 						s.apply()
 
