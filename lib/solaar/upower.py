@@ -31,7 +31,7 @@ _suspend_callback = None
 def _suspend():
 	if _suspend_callback:
 		if _log.isEnabledFor(_INFO):
-			_log.info("received suspend event from UPower")
+			_log.info("received suspend event")
 		_suspend_callback()
 
 
@@ -39,9 +39,11 @@ _resume_callback = None
 def _resume():
 	if _resume_callback:
 		if _log.isEnabledFor(_INFO):
-			_log.info("received resume event from UPower")
+			_log.info("received resume event")
 		_resume_callback()
 
+def _suspend_or_resume(suspend):
+	_suspend() if suspend else _resume()
 
 def watch(on_resume_callback=None, on_suspend_callback=None):
 	"""Register callback for suspend/resume events.
@@ -56,6 +58,8 @@ try:
 
 	_UPOWER_BUS = 'org.freedesktop.UPower'
 	_UPOWER_INTERFACE = 'org.freedesktop.UPower'
+	_LOGIND_BUS = 'org.freedesktop.login1.Manager'
+	_LOGIND_INTERFACE = 'org.freedesktop.login1'
 
 	# integration into the main GLib loop
 	from dbus.mainloop.glib import DBusGMainLoop
@@ -69,6 +73,9 @@ try:
 
 	bus.add_signal_receiver(_resume, signal_name='Resuming',
 					dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
+
+	bus.add_signal_receiver(_suspend_or_resume,'PrepareForSleep',
+					_LOGIND_BUS, _LOGIND_INTERFACE)
 
 	if _log.isEnabledFor(_INFO):
 		_log.info("connected to system dbus, watching for suspend/resume events")
