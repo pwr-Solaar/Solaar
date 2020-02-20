@@ -34,8 +34,8 @@ DIST_DIR="$PWD/dist"
 # Build a python sdist package, then unpack and create .orig and source dir.
 #
 
-P_NAME="$(python2.7 setup.py --name)"
-P_VERSION="$(python2.7 setup.py --version)"
+P_NAME="$(python3 setup.py --name)"
+P_VERSION="$(python3 setup.py --version)"
 SDIST_FILE="$DIST_DIR/$P_NAME-$P_VERSION.tar.gz"
 ORIG_FILE="$DIST_DIR/${P_NAME}_${P_VERSION}.orig.tar.gz"
 
@@ -48,7 +48,7 @@ fi
 export TMPDIR="$(/bin/mktemp --directory --tmpdir debbuild-$P_NAME-$P_VERSION-$USER-XXXXXX)"
 
 ./tools/po-compile.sh
-python2.7 setup.py sdist --formats=gztar --quiet
+python3 setup.py sdist --formats=gztar --quiet
 /bin/tar --extract --gunzip --file "$SDIST_FILE" --directory "$DIST_DIR"
 test -d "$BUILD_DIR"
 

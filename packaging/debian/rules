@@ -9,10 +9,10 @@ PREFIX = /usr
 
 %:
 	# Adding the required helpers
-	dh $@ --with=python2
+	dh $@ --with=python3
 
 override_dh_auto_install:
 	dh_auto_install -- --prefix=$(PREFIX) --install-lib=$(PREFIX)/share/solaar/lib
 
-override_dh_python2:
-	dh_python2 $(PREFIX)/share/solaar/lib
+override_dh_python3:
+	dh_python3 $(PREFIX)/share/solaar/lib
