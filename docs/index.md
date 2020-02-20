@@ -37,7 +37,7 @@ Logitech receivers and devices and generalizing from these observations.
 If your Logitech receiver or device behaves in a strange way this may be caused by
 an incorrect behavior generalization.
 Please report such experiences by creating an issue in 
-[the Solaar repository](https://.../...Solaar...).
+[the Solaar repository](https://github.com/pwr-Solaar/Solaar/issues).
 
 [unifying]: https://en.wikipedia.org/wiki/Logitech_Unifying_receiver
 
