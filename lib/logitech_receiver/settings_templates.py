@@ -19,6 +19,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from logging import getLogger, DEBUG as _DEBUG
+_log = getLogger(__name__)
+del getLogger
 
 from .i18n import _
 from . import hidpp10 as _hidpp10
@@ -391,7 +394,14 @@ def check_feature_settings(device, already_known):
 			# Convert user-visible settings name for FeatureSettings
 			field_name = name.replace('-', '_')
 		feature = getattr(FeatureSettings, field_name)()
-		already_known.append(feature(device))
+
+		try:
+			detected = feature(device)
+			if _log.isEnabledFor(_DEBUG):
+			    _log.debug("check_feature[%s] detected %s", featureId, detected)
+			already_known.append(detected)
+		except Exception as reason:
+			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
 	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
 	check_feature(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL)
