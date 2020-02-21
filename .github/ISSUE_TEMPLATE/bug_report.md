@@ -9,7 +9,7 @@ assignees: ''
 
 **Information**
 <!-- Do not bother opening an issue for version 0.9.2 or older, it is extremely outdated. Please update to the latest one and see if your issue persists. -->
-- Solaar version:
+- Solaar version (`git describe --tags` if cloned from Solaar repository):
 - Distribution:
 - Kernel version (ex. `uname -srmo`): `KERNEL VERSION HERE`
 - Output of `solaar show`:
