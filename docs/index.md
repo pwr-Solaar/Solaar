@@ -64,17 +64,16 @@ Pre-built packages are available for a few Linux distros.
 
 * Arch `solaar` package in the [community repository][arch]
 * Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
-* Ubuntu/Kubuntu 16.04+: use the `solaar-gnome3` and/or `solaar` package from [universe repository][universe repository]
-* Ubuntu/Kubuntu stable packages: use `solaar-gnome3` and/or `solaar`  package from [Solaar stable ppa][ppa2]
-* Ubuntu/Kubuntu git build packages: use `solaar-gnome3` and/or `solaar`  package from [Solaar git ppa][ppa1]
+* Ubuntu/Kubuntu 16.04+: use the `solaar` package from [universe repository][universe repository]
+* Ubuntu/Kubuntu stable packages: use the `solaar` package from [Solaar stable ppa][ppa2]
+* Ubuntu/Kubuntu git build packages: use the `solaar` package from [Solaar git ppa][ppa1]
 * a [Fedora package][fedora], courtesy of Eric Smith
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 * a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 * an [Ubuntu/Kubuntu git and stable ppa][ppa3], courtesy of [gogo][ppa4]
 
-The `solaar` package uses a standard system tray implementation; to ensure
-integration with *gnome-shell* or *Unity*, install `solaar-gnome3`.
+The `solaar` package uses a standard system tray implementation; `solaar-gnome3` is no longer required for `gnome` or `unity` integration.
 
 [ppa4]: https://launchpad.net/~trebelnik-stefina
 [ppa3]: https://launchpad.net/~solaar-unifying
