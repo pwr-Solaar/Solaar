@@ -106,7 +106,7 @@ def main():
 		if args.restart_on_wake_up:
 			_upower.watch(listener.start_all, listener.stop_all)
 		else:
-			_upower.watch(listener.ping_all)
+			_upower.watch(lambda: listener.ping_all(True))
 
 		# main UI event loop
 		ui.run_loop(listener.start_all, listener.stop_all, args.window!='only', args.window!='hide')
