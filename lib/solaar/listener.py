@@ -291,12 +291,16 @@ def stop_all():
 		for l in listeners:
 			l.join()
 
-
-def ping_all():
+# ping all devices to find out whether they are connected
+# after a resume, the device may have been off
+# so mark its saved status to ensure that the status is pushed to the device when it comes back
+def ping_all(resuming = False):
 	for l in _all_listeners.values():
 		count = l.receiver.count()
 		if count:
 			for dev in l.receiver:
+				if resuming:
+					dev.status._active = False
 				dev.ping()
 				l._status_changed(dev)
 				count -= 1
