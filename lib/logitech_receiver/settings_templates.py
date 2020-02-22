@@ -373,7 +373,7 @@ del _SETTINGS_LIST
 
 def check_feature_settings(device, already_known):
 	"""Try to auto-detect device settings by the HID++ 2.0 features they have."""
-	if device.features is None:
+	if device.features is None or not device.online:
 		return
 	if device.protocol and device.protocol < 2.0:
 		return
