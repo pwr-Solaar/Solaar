@@ -58,8 +58,8 @@ try:
 
 	_UPOWER_BUS = 'org.freedesktop.UPower'
 	_UPOWER_INTERFACE = 'org.freedesktop.UPower'
-	_LOGIND_BUS = 'org.freedesktop.login1.Manager'
-	_LOGIND_INTERFACE = 'org.freedesktop.login1'
+	_LOGIND_BUS = 'org.freedesktop.login1'
+	_LOGIND_INTERFACE = 'org.freedesktop.login1.Manager'
 
 	# integration into the main GLib loop
 	from dbus.mainloop.glib import DBusGMainLoop
@@ -75,7 +75,7 @@ try:
 					dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
 
 	bus.add_signal_receiver(_suspend_or_resume,'PrepareForSleep',
-					_LOGIND_BUS, _LOGIND_INTERFACE)
+					dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 
 	if _log.isEnabledFor(_INFO):
 		_log.info("connected to system dbus, watching for suspend/resume events")
