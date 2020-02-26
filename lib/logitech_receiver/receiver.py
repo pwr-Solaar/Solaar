@@ -478,6 +478,9 @@ class Receiver(object):
 		return self.register_new_device(key)
 
 	def __delitem__(self, key):
+		self._unpair_device(self, key, False)
+
+	def _unpair_device(self, key, force=False):
 		key = int(key)
 
 		if self._devices.get(key) is None:
@@ -489,7 +492,7 @@ class Receiver(object):
 				del self._devices[key]
 			return
 
-		if self.re_pairs:
+		if self.re_pairs and not force:
 			# invalidate the device, but these receivers don't unpair per se
 			dev.online = False
 			dev.wpid = None
