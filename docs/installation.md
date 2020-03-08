@@ -52,7 +52,7 @@ automatically (make sure to run it as your regular desktop user, it will switch
 to root when necessary), or you can do all the required steps by hand, as the
 root user:
 
-1. Copy `rules.d/42-logitech-unifying-receiver.rules` from Solaar to
+1. Copy `rules.d/42-logitech-unify-permissions.rules` from Solaar to
    `/etc/udev/rules.d/`. The `udev` daemon will automatically pick up this file
    using inotify.
 
