@@ -155,17 +155,23 @@ try:
 	if _log.isEnabledFor(_DEBUG):
 		_log.debug("using AppIndicator3")
 
+	# Defense against AppIndicator3 bug that treats files in current directory as icon files
+	# https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
+	def _icon_file(icon_name):
+		icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name,_TRAY_ICON_SIZE,0)
+		return icon_info.get_filename() if icon_info else icon_name
+
 	def _create(menu):
 		theme_paths = Gtk.IconTheme.get_default().get_search_path()
 
 		ind = AppIndicator3.Indicator.new_with_path(
 						'indicator-solaar',
-						_icons.TRAY_INIT,
+						_icon_file(_icons.TRAY_INIT),
 						AppIndicator3.IndicatorCategory.HARDWARE,
 						':'.join(theme_paths))
 		ind.set_title(NAME)
 		ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-		ind.set_attention_icon_full(_icons.TRAY_ATTENTION, '')
+		ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '')
 		# ind.set_label(NAME, NAME)
 
 		ind.set_menu(menu)
@@ -194,7 +200,7 @@ try:
 			description = '\n'.join(tooltip_lines).rstrip('\n')
 
 		# icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
-		_icon.set_icon_full(tray_icon_name, description)
+		_icon.set_icon_full(_icon_file(tray_icon_name), description)
 
 
 	def _update_menu_icon(image_widget, icon_name):
