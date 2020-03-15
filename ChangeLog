@@ -1,4 +1,6 @@
-07 March 2020:
+15 March 2020 687a28d2c21dbdc2e64ebb46eec1a0df6e44a859:
+  * Look up tray icon filenames to get around a bug in libappindicator.
+  * Make the default behavior be to show the main window at startup.
   * Support c537 nano receiver
   * Add logind signals for suspend/resume.
   * Remove solaar-gnome3 package
@@ -22,7 +24,7 @@
   * Fix bug in remembering features discovered from device reports
   * Show icons in main window device list
   * Count offline devices when determining whether pairing is possible
-  * Update French, Dutch, and German translations
+  * Update French, Dutch, German, and Croation translations
   * Better icons for battery levels
   * Support DPI, Backlight 2, Battery Voltage features
   * Support M585, M590, M330, MX Master 2s and 3, new M310, new K800, craft keyboard
