@@ -48,7 +48,7 @@ def _parse_arguments():
 							help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
 	arg_parser.add_argument('--restart-on-wake-up', action='store_true',
 							help='restart Solaar on sleep wake-up (experimental)')
-	arg_parser.add_argument('-w', '--window', choices=('hide','show','only'), help='start with window hidden / showing / only (no tray icon)')
+	arg_parser.add_argument('-w', '--window', choices=('show','hide','only'), help='start with window showing / hidden / only (no tray icon)')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	arg_parser.add_argument('--help-actions', action='store_true',
 							help='print help for the optional actions')
@@ -62,7 +62,7 @@ def _parse_arguments():
 		return
 
 	if args.window is None:
-		args.window = 'hide'
+		args.window = 'show' # default behaviour is to show main window
 
 	import logging
 	if args.debug > 0:

@@ -12,7 +12,8 @@ Solaar can be used as a GUI application or via its command-line interface.
 Both interfaces are able to list the devices paired to a receiver and
 show information about each device, including battery status for devices that support this feature.
 Solaar's GUI normally uses an icon in the system tray and starts with its main window hidden.
-If Solaar is invoked with the `--window=show` option Solaar starts with its main window visible.
+If Solaar is invoked with the `--window=show` option (the default) Solaar starts with its main window visible.
+If Solaar is invoked with the `--window=hide` option Solaar starts with its main window hidden.
 If solaar is invoked with the `--window=only` option Solaar does not set up an icon in the
 system tray and also starts with its main window showing.
 For more information on Solaar's command-line interface use the help option,
