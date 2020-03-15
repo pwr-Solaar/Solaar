@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Solaar
+Comment=Logitech Unifying Receiver peripherals manager
+Comment[fr]=Gestionnaire de périphériques pour les récepteurs Logitech Unifying
+Comment[hr]=Upravitelj Logitechovih uređaja povezanih putem Unifying i Nano prijemnika
+Comment[ru]=Управление приёмником Logitech Unifying Receiver
+Exec=solaar --window=hide
+Icon=solaar
+StartupNotify=true
+Terminal=false
+Type=Application
+Keywords=logitech;unifying;receiver;mouse;keyboard;
+Categories=Utility;GTK;
+#Categories=Utility;GTK;Settings;HardwareSettings;

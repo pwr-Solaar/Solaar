@@ -42,7 +42,7 @@ def _data_files():
 		yield _dirname(mo), [mo]
 
 	yield 'share/applications', ['share/applications/solaar.desktop']
-	yield autostart_path, ['share/applications/solaar.desktop']
+	yield autostart_path, ['share/autostart/solaar.desktop']
 
 	del _dirname
 
