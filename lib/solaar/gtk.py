@@ -36,7 +36,7 @@ def _require(module, os_package):
 		return importlib.import_module(module)
 	except ImportError:
 		import sys
-		sys.exit("%s: missing required package '%s'" % (NAME, os_package))
+		sys.exit("%s: missing required system package %s" % (NAME, os_package))
 
 
 def _parse_arguments():
@@ -81,7 +81,7 @@ def _parse_arguments():
 
 
 def main():
-	_require('pyudev', 'python-pyudev')
+	_require('pyudev', 'python3-pyudev')
 
 	# handle ^C in console
 	import signal
@@ -93,7 +93,7 @@ def main():
 		# if any argument, run comandline and exit
 		return _cli.run(args.action, args.hidraw_path)
 
-	gi = _require('gi', 'python-gi')
+	gi = _require('gi', 'python3-gi or python3-gobject')
 	gi.require_version('Gtk', '3.0')
 	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
 

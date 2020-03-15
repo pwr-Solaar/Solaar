@@ -14,17 +14,18 @@ most likely good to go.
 
 Solaar requires Python 3.2+
 and the `python3-pyudev` package. 
-
 To run the GUI, solaar also requires Gtk3, and its GObject
 Introspection bindings. The Debian/Ubuntu package names are
-`python3-gi` and `gir1.2-gtk-3.0`; if you're using another
+`python3-gi` and `gir1.2-gtk-3.0`;
+in Fedora you only need `python3-gobject`;
+if you're using another
 distribution the required packages are most likely named something similar.
-If the desktop notifications bindings are also installed (`gir1.2-notify-0.7`),
+
+If the desktop notifications bindings are also installed
+(`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also get desktop notifications when devices come online/go offline.
-
 For gnome-shell/Unity support, you also need to have `gir1.2-appindicator3-0.1`
-installed.
-
+installed in Debian/Ubuntu.
 
 ### Downloading
 
