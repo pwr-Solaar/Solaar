@@ -79,17 +79,11 @@ echo -e '\nPlease read RELEASE.md before continuing.\n'
 
 read -p 'Are you sure you want to proceed? (y/n) ' -n 1 -r < /dev/tty
 echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo 'Release aborted.'
-    exit 1
-fi
+[[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
 read -p 'Are you *really* sure you want to proceed? (y/n) ' -n 1 -r < /dev/tty
 echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo 'Release aborted.'
-    exit 1
-fi
+[[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
 # Check for uncomitted changes
 git diff --quiet HEAD >/dev/null
