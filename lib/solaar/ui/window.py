@@ -525,8 +525,9 @@ def _update_details(button):
 					yield (_("Serial"), '...')
 
 			if read_all:
-				for fw in list(device.firmware):
-					yield ('  ' + _(str(fw.kind)), (fw.name + ' ' + fw.version).strip())
+				if device.firmware:
+					for fw in list(device.firmware):
+						yield ('  ' + _(str(fw.kind)), (fw.name + ' ' + fw.version).strip())
 			elif device.kind is None or device.online:
 				yield ('  %s' % _("Firmware"), '...')
 
