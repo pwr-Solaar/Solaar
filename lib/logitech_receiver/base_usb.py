@@ -84,7 +84,7 @@ UNIFYING_RECEIVER_C532    = _unifying_receiver(0xc532)
 NANO_RECEIVER_ADVANCED    = _nano_receiver(0xc52f)
 
 # Nano receivers that don't support the Unifying protocol
-NANO_RECEIVER_C517        = _nano_receiver(0xc517)
+NANO_RECEIVER_C517        = _nano_receiver_max2(0xc517)
 NANO_RECEIVER_C518        = _nano_receiver(0xc518)
 NANO_RECEIVER_C51A        = _nano_receiver(0xc51a)
 NANO_RECEIVER_C51B        = _nano_receiver(0xc51b)
