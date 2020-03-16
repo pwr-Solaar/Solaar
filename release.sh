@@ -74,7 +74,8 @@ else
     echo "Local branch: $branch"
     echo "Remote branch: $remote_branch"
 fi
-echo
+
+echo -e '\nPlease read RELEASE.md before continuing.\n'
 
 read -p 'Are you sure you want to proceed? (y/n) ' -n 1 -r < /dev/tty
 echo
