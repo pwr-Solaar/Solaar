@@ -34,8 +34,9 @@ def _print_receiver(receiver):
 	print ('  Device path  :', receiver.path)
 	print ('  USB id       : 046d:%s' % receiver.product_id)
 	print ('  Serial       :', receiver.serial)
-	for f in receiver.firmware:
-		print ('    %-11s: %s' % (f.kind, f.version))
+	if receiver.firmware:
+		for f in receiver.firmware:
+			print ('    %-11s: %s' % (f.kind, f.version))
 
 	print ('  Has', paired_count, 'paired device(s) out of a maximum of %d.' % receiver.max_devices)
 	if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0 :
