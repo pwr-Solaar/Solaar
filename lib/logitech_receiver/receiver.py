@@ -478,7 +478,7 @@ class Receiver(object):
 		return self.register_new_device(key)
 
 	def __delitem__(self, key):
-		self._unpair_device(self, key, False)
+		self._unpair_device(key, False)
 
 	def _unpair_device(self, key, force=False):
 		key = int(key)
