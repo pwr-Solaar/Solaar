@@ -152,6 +152,10 @@ _D('Wireless Keyboard MK270', protocol=2.0, wpid='4023',
 _D('Wireless Keyboard K270', protocol=1.0,
 				registers=(_R.battery_status, ),
 				)
+_D('Wireless Keyboard MK300', protocol=1.0, wpid='8521',
+				registers=(_R.battery_status, ),
+				)
+
 _D('Wireless Keyboard MK320', protocol=1.0, wpid='200F',
 				registers=(_R.battery_status, ),
 				)
@@ -225,8 +229,11 @@ _D('Illuminated Living-Room Keyboard K830', protocol=2.0, wpid='4032',
 							_FS.new_fn_swap()
 						],
 				)
-_D('Craft Advanced Keyboard', protocol=4.5, wpid='4066')
+_D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066')
 
+_D('Wireless Keyboard S510', codename='S510', protocol=1.0, wpid='3622',
+				registers=(_R.battery_status, ),
+				)
 
 # Mice
 
@@ -361,6 +368,12 @@ _D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A',
 							_RS.smooth_scroll(),
 							_RS.side_scroll(),
 						],
+				)
+_D('LX5 Cordless Mouse', codename='LX5', protocol=1.0, wpid='5612',
+				registers=(_R.battery_status, ),
+				)
+_D('Wireless Mouse M30', codename='M30', protocol=1.0, wpid='6822',
+				registers=(_R.battery_status, ),
 				)
 
 # Trackballs
