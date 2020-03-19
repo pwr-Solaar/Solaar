@@ -60,6 +60,17 @@ _nano_receiver_max2 = lambda product_id: {
 	're_pairs': True 
 }
 
+_nano_receiver_maxn = lambda product_id, max: {
+	'vendor_id':0x046d,
+	'product_id':product_id,
+	'usb_interface':1,
+	'hid_driver':_DRIVER,
+	'name':'Nano Receiver',
+	'max_devices': max,
+	'may_unpair': False,
+	're_pairs': True 
+}
+
 _lenovo_receiver = lambda product_id: {
 	'vendor_id':0x17ef, 
 	'product_id':product_id, 
@@ -84,7 +95,7 @@ UNIFYING_RECEIVER_C532    = _unifying_receiver(0xc532)
 NANO_RECEIVER_ADVANCED    = _nano_receiver(0xc52f)
 
 # Nano receivers that don't support the Unifying protocol
-NANO_RECEIVER_C517        = _nano_receiver_max2(0xc517)
+NANO_RECEIVER_C517        = _nano_receiver_maxn(0xc517,6)
 NANO_RECEIVER_C518        = _nano_receiver(0xc518)
 NANO_RECEIVER_C51A        = _nano_receiver(0xc51a)
 NANO_RECEIVER_C51B        = _nano_receiver(0xc51b)
