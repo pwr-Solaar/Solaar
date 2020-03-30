@@ -75,7 +75,7 @@ battery status.
 		platforms=['linux'],
 
 		# sudo apt install python-gi python3-gi \
-		#        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-appindicator3-0.1
+		#        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-ayatanaappindicator3-0.1
 		# os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
 
 		python_requires='>=3.2',

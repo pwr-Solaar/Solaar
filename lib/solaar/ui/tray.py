@@ -146,14 +146,23 @@ def _scroll(tray_icon, event, direction=None):
 try:
 	import gi
 	try:
-		gi.require_version('AppIndicator3', '0.1')
+		gi.require_version('AyatanaAppIndicator3', '0.1')
+		ayatana_appindicator_found = True
 	except ValueError:
-		# Treat unavailable versions the same as unavailable packages
-		raise ImportError
-	from gi.repository import AppIndicator3
+		try:
+			gi.require_version('AppIndicator3', '0.1')
+			ayatana_appindicator_found = False
+		except ValueError:
+			# treat unavailable versions the same as unavailable packages
+			raise ImportError
+
+	if ayatana_appindicator_found:
+		from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+	else:
+		from gi.repository import AppIndicator3
 
 	if _log.isEnabledFor(_DEBUG):
-		_log.debug("using AppIndicator3")
+		_log.debug("using %sAppIndicator3" % ('Ayatana ' if ayatana_appindicator_found else ''))
 
 	# Defense against AppIndicator3 bug that treats files in current directory as icon files
 	# https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
