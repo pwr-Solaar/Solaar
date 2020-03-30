@@ -269,6 +269,8 @@ except ImportError:
 
 		if count > 0:
 			GLib.timeout_add(1000, _blink, count - 1)
+		else:
+			_icon_before_attention = None
 
 	def attention(reason=None):
 		global _icon_before_attention
