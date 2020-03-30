@@ -211,7 +211,7 @@ try:
 
 
 	def attention(reason=None):
-		if _icon.get_status != AppIndicator3.IndicatorStatus.ATTENTION:
+		if _icon.get_status() != AppIndicator3.IndicatorStatus.ATTENTION:
 			_icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '')
 			_icon.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
 			GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
