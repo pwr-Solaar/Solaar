@@ -196,8 +196,8 @@ try:
 			# there may be a receiver, but no peripherals
 			tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
 
-			tooltip_lines = _generate_tooltip_lines()
-			description = '\n'.join(tooltip_lines).rstrip('\n')
+			description_lines = _generate_description_lines()
+			description = '\n'.join(description_lines).rstrip('\n')
 
 		# icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
 		_icon.set_icon_full(_icon_file(tray_icon_name), description)
@@ -285,6 +285,14 @@ except ImportError:
 def _generate_tooltip_lines():
 	if not _devices_info:
 		yield '<b>%s</b>: ' % NAME + _("no receiver")
+		return
+
+	yield from _generate_description_lines()
+
+
+def _generate_description_lines():
+	if not _devices_info:
+		yield _("no receiver")
 		return
 
 	for _ignore, number, name, status in _devices_info:
