@@ -14,11 +14,11 @@ Vcs-browser: http://github.com/pwr/Solaar
 Package: solaar
 Architecture: all
 Depends: ${misc:Depends}, ${debconf:Depends}, udev (>= 175), passwd | adduser,
- ${python:Depends}, python3-pyudev (>= 0.13), python-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
+ ${python:Depends}, python3-pyudev (>= 0.13), python3-gi (>= 3.2), gir1.2-gtk-3.0 (>= 3.4),
  ${solaar:Desktop-Icon-Theme}
 Recommends: gir1.2-notify-0.7, consolekit (>= 0.4.3) | systemd (>= 44),
- python-dbus (>= 1.1.0), upower
-Suggests: gir1.2-appindicator3-0.1
+ python3-dbus (>= 1.1.0), upower
+Suggests: gir1.2-ayatanaappindicator3-0.1 | gir1.2-appindicator3-0.1
 Description: Logitech Unifying Receiver peripherals manager for Linux
  Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
  It is able to pair/unpair devices to the receiver, and for some devices read

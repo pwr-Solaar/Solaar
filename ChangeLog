@@ -1,3 +1,6 @@
+1.0.2-rc2:
+  * Add support for Ayatana AppIndicator
+
 1.0.2-rc1:
   * Look up tray icon filenames to get around a bug in libappindicator.
   * Make the default behavior be to show the main window at startup.

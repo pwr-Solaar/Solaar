@@ -24,8 +24,11 @@ distribution the required packages are most likely named something similar.
 If the desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also get desktop notifications when devices come online/go offline.
-For gnome-shell/Unity support, you also need to have `gir1.2-appindicator3-0.1`
-installed in Debian/Ubuntu.
+For GNOME Shell/Budgie Desktop/KDE/XFCE support, you also need to have
+`gir1.2-ayatanaappindicator3-0.1` installed in Debian/Ubuntu. Although it is
+recommended to install and use `gir1.2-ayatanaappindicator3-0.1` if it is
+available, you can also use `gir1.2-appindicator3-0.1` if necessary (e.g.,
+for Unity in Ubuntu).
 
 ### Downloading
 
