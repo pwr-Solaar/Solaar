@@ -18,6 +18,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
 
 from logging import getLogger, DEBUG as _DEBUG
 _log = getLogger(__name__)
@@ -167,6 +168,8 @@ try:
 	# Defense against AppIndicator3 bug that treats files in current directory as icon files
 	# https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
 	def _icon_file(icon_name):
+		if not os.path.isfile(icon_name):
+			return icon_name
 		icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name,_TRAY_ICON_SIZE,0)
 		return icon_info.get_filename() if icon_info else icon_name
 
