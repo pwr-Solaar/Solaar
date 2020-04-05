@@ -3,7 +3,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import errno as _errno
 
 from logging import INFO as _INFO
+from logging import WARNING as _WARNING
 from logging import getLogger
+from typing import Optional
 
 import hidapi as _hid
 import solaar.configuration as _configuration
@@ -80,6 +82,9 @@ class Device(object):
         # displayed in the UI and caching it here helps.
         self._polling_rate = None
         self._power_switch = None
+
+        # See `add_notification_handler`
+        self._notification_handlers = {}
 
         self.handle = None
         self.path = None
@@ -357,7 +362,7 @@ class Device(object):
             raise _base.NoSuchDevice(number=index, receiver=receiver, error='Unknown 27Mhz device number')
         return kind
 
-    def enable_notifications(self, enable=True):
+    def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
         receiver."""
         if not bool(self.receiver) or self.protocol >= 2.0:
@@ -381,6 +386,35 @@ class Device(object):
         if _log.isEnabledFor(_INFO):
             _log.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits if ok else None
+
+    def add_notification_handler(self, id: str, fn):
+        """Adds the notification handling callback `fn` to this device under name `id`.
+        If a callback has already been registered under this name, it's replaced with
+        the argument.
+        The callback will be invoked whenever the device emits an event message, and
+        the resulting notification hasn't been handled by another handler on this device
+        (order is not guaranteed, so handlers should not overlap in functionality).
+        The callback should have type `(PairedDevice, Notification) -> Optional[bool]`.
+        It should return `None` if it hasn't handled the notification, return `True`
+        if it did so successfully and return `False` if an error should be reported
+        (malformed notification, etc).
+        """
+        self._notification_handlers[id] = fn
+
+    def remove_notification_handler(self, id: str):
+        """Unregisters the notification handler under name `id`."""
+
+        if id not in self._notification_handlers and _log.isEnabledFor(_WARNING):
+            _log.warn(f'Tried to remove nonexistent notification handler {id} from device {self}.')
+        else:
+            del self._notification_handlers[id]
+
+    def handle_notification(self, n) -> Optional[bool]:
+        for h in self._notification_handlers.values():
+            ret = h(self, n)
+            if ret is not None:
+                return ret
+        return None
 
     def request(self, request_id, *params, no_reply=False):
         return _base.request(self.handle or self.receiver.handle, self.number, request_id, *params, no_reply=no_reply)

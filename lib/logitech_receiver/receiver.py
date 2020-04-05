@@ -109,7 +109,7 @@ class Receiver(object):
                 self._remaining_pairings = ps - 5 if ps >= 5 else -1
         return self._remaining_pairings
 
-    def enable_notifications(self, enable=True):
+    def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
         receiver."""
         if not self.handle:
