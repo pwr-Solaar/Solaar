@@ -17,7 +17,7 @@ and the `python3-pyudev` package.
 To run the GUI, solaar also requires Gtk3, and its GObject
 Introspection bindings. The Debian/Ubuntu package names are
 `python3-gi` and `gir1.2-gtk-3.0`;
-in Fedora you only need `python3-gobject`;
+in Fedora you need  `gtk3` and `python3-gobject`;
 if you're using another
 distribution the required packages are most likely named something similar.
 
