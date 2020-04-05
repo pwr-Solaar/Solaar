@@ -103,6 +103,12 @@ def _process_device_notification(device, status, n):
     # HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
+    # Allow the device object to handle the notification using custom
+    # per-device state.
+    handling_ret = device.handle_notification(n)
+    if handling_ret is not None:
+        return handling_ret
+
     # 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
     if n.sub_id >= 0x40:
         if len(n.data) == _DJ_NOTIFICATION_LENGTH:

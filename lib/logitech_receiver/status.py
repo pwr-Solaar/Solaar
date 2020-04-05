@@ -290,7 +290,7 @@ class DeviceStatus(dict):
                     # get cleared when the device is turned off (but not when the device
                     # goes idle, and we can't tell the difference right now).
                     if d.protocol < 2.0:
-                        self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
+                        self[KEYS.NOTIFICATION_FLAGS] = d.enable_connection_notifications()
 
                     # If we've been inactive for a long time, forget anything
                     # about the battery. (This is probably unnecessary.)

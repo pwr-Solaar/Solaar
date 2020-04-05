@@ -80,7 +80,7 @@ class ReceiverListener(_listener.EventsListener):
     def has_started(self):
         if _log.isEnabledFor(_INFO):
             _log.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
-        notification_flags = self.receiver.enable_notifications()
+        notification_flags = self.receiver.enable_connection_notifications()
         self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = notification_flags
         self.receiver.notify_devices()
         self._status_changed(self.receiver)  # , _status.ALERT.NOTIFICATION)
