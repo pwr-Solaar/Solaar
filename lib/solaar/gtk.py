@@ -31,10 +31,12 @@ import solaar.cli as _cli
 #
 #
 
-def _require(module, os_package):
+def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
 	try:
+		if gi is not None:
+			gi.require_version(gi_package,gi_version)
 		return importlib.import_module(module)
-	except ImportError:
+	except (ImportError, ValueError):
 		import sys
 		sys.exit("%s: missing required system package %s" % (NAME, os_package))
 
@@ -94,8 +96,7 @@ def main():
 		return _cli.run(args.action, args.hidraw_path)
 
 	gi = _require('gi', 'python3-gi or python3-gobject')
-	gi.require_version('Gtk', '3.0')
-	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0')
+	_require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
 	try:
 		import solaar.ui as ui
