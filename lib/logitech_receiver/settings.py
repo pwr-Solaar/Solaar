@@ -60,7 +60,8 @@ class Setting(object):
 
 	def __call__(self, device):
 		assert not hasattr(self, '_value')
-		assert self.device_kind is None or device.kind in self.device_kind
+		# combined keyboards and touchpads (e.g., K400) break this assertion so don't use it
+		# assert self.device_kind is None or device.kind in self.device_kind
 		p = device.protocol
 		if p == 1.0:
 			# HID++ 1.0 devices do not support features
