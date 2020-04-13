@@ -61,23 +61,21 @@ and their features, see [docs/devices.md](https://pwr-solaar.github.io/Solaar/de
 
 ## Pre-built packages
 
-Pre-built packages are available for a few Linux distros.
+Pre-built packages are available for a few Linux distros.  Solaar has progressed beyond version 1.0 but some distros or repositories version 0.9.2, which is very old. Installing the current version will provide significant improvements.
 
 * Arch `solaar` package in the [community repository][arch]
 * Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
 * Ubuntu/Kubuntu 16.04+: use the `solaar` package from [universe repository][universe repository]
-* Ubuntu/Kubuntu stable packages: use the `solaar` package from [Solaar stable ppa][ppa2]
-* Ubuntu/Kubuntu git build packages: use the `solaar` package from [Solaar git ppa][ppa1]
+* Ubuntu/Kubuntu stable packages: use the `solaar` package from [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
+* Ubuntu/Kubuntu git build packages: use the `solaar` package from [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
 * a [Fedora package][fedora], courtesy of Eric Smith
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 * a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
-* an [Ubuntu/Kubuntu git and stable ppa][ppa3], courtesy of [gogo][ppa4]
 
 The `solaar` package uses a standard system tray implementation; `solaar-gnome3` is no longer required for `gnome` or `unity` integration.
 
 [ppa4]: https://launchpad.net/~trebelnik-stefina
-[ppa3]: https://launchpad.net/~solaar-unifying
 [ppa2]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
 [ppa1]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/ppa
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
@@ -87,7 +85,6 @@ The `solaar` package uses a standard system tray implementation; `solaar-gnome3`
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [opensuse]: http://software.opensuse.org/package/Solaar
 [universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
-
 
 ## Manual installation
 
