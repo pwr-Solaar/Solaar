@@ -120,6 +120,11 @@ def battery(level=None, charging=False):
 	# 	_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
 	return icon_name
 
+# return first res where val >= guard
+# _first_res(val,((guard,res),...))
+def _first_res(val,pairs):
+	return next((res for guard,res in pairs if val >= guard),None)
+
 def _battery_icon_name(level, charging):
 	_init_icon_paths()
 
@@ -135,7 +140,7 @@ def _battery_icon_name(level, charging):
 	if _has_mint_icons:
 		if level == 100 and charging:
 			return 'battery-full-charged-symbolic'
-		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
+		level_name = _first_res(level,((90,'full'), (50,'good'), (20,'low'), (5,'caution'), (0,'empty')))
 		return 'battery-%s%s-symbolic' % (level_name, '-charging' if charging else '')
 
 	if _has_gpm_icons:
@@ -146,7 +151,7 @@ def _battery_icon_name(level, charging):
 	if _has_oxygen_icons:
 		if level_approx == 100 and charging:
 			return 'battery-charging'
-		level_name = ('low', 'caution', '040', '060', '080', '100')[level_approx // 20]
+		level_name = _first_res(level,((90,'100'), (75,'080'), (55,'060'), (35,'040'), (15,'low'), (0,'caution')))
 		return 'battery%s-%s' % ('-charging' if charging else '', level_name)
 
 	if _has_elementary_icons:
@@ -159,7 +164,7 @@ def _battery_icon_name(level, charging):
 			return 'battery-full-charged'
 		if level_approx == 0 and charging:
 			return 'battery-caution-charging'
-		level_name = ('empty', 'caution', 'low', 'good', 'good', 'full')[level_approx // 20]
+		level_name = _first_res(level,((90,'full'), (50,'good'), (20,'low'), (5,'caution'), (0,'empty')))
 		return 'battery-%s%s' % (level_name, '-charging' if charging else '')
 
 	# fallback... most likely will fail
