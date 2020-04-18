@@ -8,27 +8,9 @@ except ImportError:
 
 autostart_path = '/etc/xdg/autostart'
 
-import sys
-backup_path_0 = sys.path[0]
-sys.path[0] = backup_path_0 + '/lib'
 #from solaar import NAME, __version__
 __version__ = '1.0.2-rc1'
 NAME = 'Solaar'
-
-sys.path[0] = backup_path_0
-
-if 'install' in sys.argv:
-	# naively guess where the autostart .desktop file should be installed
-	if '--prefix' in sys.argv or any(x.startswith('--prefix=') for x in sys.argv) or '--home' in sys.argv:
-		autostart_path = 'etc/xdg/autostart'
-	elif '--user' in sys.argv:
-		from os import environ
-		from os import path
-		xdg_config_home = environ.get('XDG_CONFIG_HOME', path.expanduser(path.join('~', '.config')))
-		autostart_path = path.join(xdg_config_home, 'autostart')
-		del environ, path, xdg_config_home
-
-del sys, backup_path_0
 
 
 def _data_files():
