@@ -5,6 +5,7 @@ layout: page
 
 # Manual installation
 
+
 ### Requirements
 
 You should have a reasonably new kernel (4.0+), with kernel modules `hid-logitech-dj`
@@ -30,6 +31,7 @@ recommended to install and use `gir1.2-ayatanaappindicator3-0.1` if it is
 available, you can also use `gir1.2-appindicator3-0.1` if necessary (e.g.,
 for Unity in Ubuntu).
 
+
 ### Downloading
 
 Clone solaar from GitHub via `git clone https://github.com/pwr-Solaar/Solaar.git`
@@ -45,39 +47,25 @@ If you are running a security-enhanced Linux (RedHat or Fedora)
 you may have to turn off enforcing mode.
 
 
-### Installation
+### Installing Solaar's udev Rule
 
-Normally USB devices are not accessible for r/w by regular users, so you will
-need to do a one-time udev rule installation to allow access to the Logitech
-Unifying Receiver.
+Solaar needs to write to the receiver's HID device.
+To be able to do this without running as root requires udev rule
+that gives seated users write access to the HID devices for Logitech receivers.
 
-You can run the `rules.d/install.sh` script from Solaar to do this installation
-automatically (make sure to run it as your regular desktop user, it will switch
-to root when necessary), or you can do all the required steps by hand, as the
-root user:
+You can install this rule by copying, as root, 
+`rules.d/42-logitech-unify-permissions.rules` from Solaar to
+`/etc/udev/rules.d`.
+The udev daemon will automatically pick up this file using inotify.
 
-1. Copy `rules.d/42-logitech-unify-permissions.rules` from Solaar to
-   `/etc/udev/rules.d/`. The `udev` daemon will automatically pick up this file
-   using inotify.
+For this rule to set up the correct permissions for your receiver
+you will then need to either physically remove the receiver and
+re-insert it or reboot your computer.
 
-   By default, the rule allows all members of the `plugdev` group to have
-   read/write access to the Unifying Receiver device. (standard Debian/Ubuntu
-   group for pluggable devices). It may need changes, specific to your
-   particular system's configuration. If in doubt, replacing `GROUP="plugdev"`
-   with `GROUP="<your username>"` should just work.
-
-2. Physically remove the Unifying Receiver and re-insert it.
-
-   This is necessary because if the receiver is already plugged-in, it already
-   has a `/dev/hidrawX` device node, but with the old (`root:root`) permissions.
-   Plugging it again will re-create the device node with the right permissions.
-
-3. Make sure your desktop users are part of the `plugdev` group, by running
-   `gpasswd -a <desktop username> plugdev`. If these users were not assigned to the
-   group before, they must re-login for the changes to take effect.
+Then solaar can be run without using sudo.
 
 
-Then solaar can be run from the download directory without using sudo.
+### Installing Solaar
 
 Python programs are usually installed using [pip][pip].
 The pip instructions for solaar are in `setup.py`, the standard place to put such instructions.
@@ -91,6 +79,23 @@ because this runs arbitrary code as root and because this can override existing 
 that other users or even the system depend on.  If you want to install solaar to /usr/local run
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
 (The umask is needed so that the created files and directories can be read and executed by everyone.)
+This will also install the udev rule and the Solaar autostart desktop file.
 Then solaar can be run as /usr/local/bin/solaar.
 
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
+
+
+
+### Running Solaar at Startup
+
+Solaar is run automatically at user login using a desktop file,
+which may have been installed at `/etc/xdg/autostart/solaar.desktop`.
+If you manually install Solaar you may need to modify this automatic starting of Solaar.
+
+
+### Using PyPI
+
+As an alternative to downloading and installing you can install a recent release 
+(but not the current git version) of Solaar from PyPI.  
+Just run `pip install --user solaar` or `sudo pip install solaar`.
+The `--user` install will not install the Solaar udev rule or the Solaar autostart file.
