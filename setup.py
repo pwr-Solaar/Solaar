@@ -39,7 +39,6 @@ It is able to pair/unpair devices to the receiver, and for some devices read
 battery status.
 '''.strip(),
 		author='Daniel Pavel',
-		author_email='daniel.pavel@gmail.com',
 		license='GPLv2',
 		url='http://pwr-solaar.github.io/Solaar/',
 		classifiers=[
