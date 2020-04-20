@@ -96,6 +96,23 @@ no way to force an update of the cached information besides terminating
 Solaar and starting it again.
 
 
+## Battery Icons
+
+For many devices, Solaar shows the approximate battery level via icons that
+show up in both main Solaar window and the system tray.  Solaar used to use
+several heuristics to determine which icon names to use for this purpose,
+but as more and more battery icon schemes have been developed this has
+become impossible to do well.  Solaar now only uses the eleven standard
+battery icon names `battery-{full,good,low,critical,empty}[-charging]` and
+`battery-missing`.  To use different icons from you have to change (part of)
+your GTK icon theme.
+
+Solaar is not using the symbolic versions of these icons because of a bug
+external to Solaar that results in these icons not changing to the
+foreground colour in the system tray.  This can leave these icons nearly
+invisible in dark themes.
+
+
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com
 [unifying]: https://en.wikipedia.org/wiki/Logitech_Unifying_receiver
