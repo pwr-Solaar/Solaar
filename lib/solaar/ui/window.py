@@ -783,7 +783,6 @@ def update(device, need_popup=False):
 		# receiver
 		is_alive = bool(device)
 		item = _receiver_row(device.path, device if is_alive else None)
-		assert item
 
 		if is_alive and item:
 			was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
