@@ -1,5 +1,23 @@
-1.0.2-rc2:
-  * Add support for Ayatana AppIndicator
+1.0.2rc2:
+  * Pip installs udev rule and solaar autostart when not doing --user install
+  * Use only standard icons for battery levels.  Symbolic icons do not change to white in dark themes because of problems external to Solaar.
+  * Better reporting of battery levels when charging for some devices.
+  * Add information on K600 TV, M350 WIPD 4080, and MX Keys
+  * Remove assertion requiring receivers to still be in window when they are updated.
+  * Augment long description of Solaar showing up in repositories.
+  * Update installation directions.
+  * Install udev rule as well as autostart file when doing system install.
+  * Add support for Ayatana AppIndicator.
+  * Use setuptools icon directory on system installs when not using pip.
+  * Add receiver C517 and several older devices.
+  * Improved translations for polish.
+  * Bypass bug in appindicator when solaar is file in current directory.
+  * Don't check that device kind matches feature kind.
+  * Better determination of icons for battery levels.
+  * Use Ayatana AppIndicator if available.
+  * Improve error reporting when required system packages are not install.
+  * Better tooltip description
+  * Add release script to help when creating releases
 
 1.0.2-rc1:
   * Look up tray icon filenames to get around a bug in libappindicator.
