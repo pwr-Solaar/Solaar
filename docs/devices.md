@@ -105,7 +105,7 @@ You are able to read this feature using command-line interface of Solaar, but it
 | Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
 | Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                |
 | MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
-| MX Master 25     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
+| MX Master 2S     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
 | Cube             |      | 2.0   | yes     |       |                                 |
 
 
