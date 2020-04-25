@@ -110,7 +110,14 @@ your GTK icon theme.
 Solaar is not using the symbolic versions of these icons because of a bug
 external to Solaar that results in these icons not changing to the
 foreground colour in the system tray.  This can leave these icons nearly
-invisible in dark themes.
+invisible in dark themes.  It would be useful to be able to switch to
+symbolic icons via GTK styling (using something like
+`.solaar * { -gtk-icon-style: symbolic; }` in the user's gtk.css)
+but most or all current system tray implementations do not allow for this.
+
+As a temporary hack setting the SOLAAR_TRAY_BATTERY_ICON_SYBOLIC environment
+variable will cause Solaar to use symbolic icons for battery levels in the
+system tray.
 
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
