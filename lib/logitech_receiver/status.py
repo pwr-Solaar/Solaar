@@ -176,8 +176,16 @@ class DeviceStatus(dict):
 
 		if level is None:
 			# Some notifications may come with no battery level info, just
-			# charging state info, so assume the level is unchanged.
-			level = self.get(KEYS.BATTERY_LEVEL)
+			# charging state info, so do our best to infer a level (even if it is just the last level)
+			# It is not always possible to do this well
+			if status == _hidpp20.BATTERY_STATUS.full:
+				level = _hidpp10.BATTERY_APPOX.full
+			elif status in (_hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.recharging):
+				level = _hidpp10.BATTERY_APPOX.good
+			elif status == _hidpp20.BATTERY_STATUS.slow_recharge:
+				level = _hidpp10.BATTERY_APPOX.low
+			else:
+				level = self.get(KEYS.BATTERY_LEVEL)
 		else:
 			assert isinstance(level, int)
 
@@ -185,7 +193,8 @@ class DeviceStatus(dict):
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
 		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
 
-		charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.slow_recharge)
+		charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full,
+				      _hidpp20.BATTERY_STATUS.full, _hidpp20.BATTERY_STATUS.slow_recharge)
 		old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
 		changed = old_level != level or old_status != status or old_charging != charging
