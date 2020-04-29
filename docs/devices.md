@@ -5,10 +5,14 @@ layout: page
 
 # Supported devices and receivers
 
-These tables list Logitech receivers and devices and to what degree their features are supported by Solaar.  The information in these tables is incomplete, based on what devices users have been able to test Solaar with.  If your device works with Solaar, but its supported features are not correctly specified here, please open an issue on the [Solaar github repository][solaar] with the pleasant news.
+These tables list Logitech receivers and devices and to what degree their
+features are supported by Solaar.  The information in these tables is
+incomplete, based on what devices users have been able to test Solaar with.
 
-
-The HID++ column specifies the device's HID++ version.  Some devices report version 4.5, but that is the same as version 2.0 as listed here.
+The HID++ column specifies the device's HID++ version.  Some devices report
+version 4.5, but that is the same as version 2.0 as listed here.   
+For devices what support HID++ 2.0 or greater, Solaar is able to discover 
+the features the device supports.
 
 The Battery column specifies if Solaar is able to read the device's battery
 level.
@@ -17,7 +21,13 @@ For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
 The reprog(rammable) keys feature is currently not fully supported by Solaar.
-You are able to read this feature using command-line interface of Solaar, but it is not possible to assign different keys.
+You are able to read this feature using command-line interface of Solaar, 
+but it is not possible to assign different keys.
+
+
+If your device works with Solaar, but its supported features are not
+correctly specified here, please open an issue on the [Solaar github
+repository][solaar] with the pleasant news.
 
 
 ### Receivers:
@@ -58,11 +68,13 @@ You are able to read this feature using command-line interface of Solaar, but it
 | K400 Touch       | 4024 | 2.0   | yes     | FN swap                                 |
 | K400 Plus        | 404D | 2.0   |         | FN swap                                 |
 | K520             | 2011 | 1.0   | yes     | FN swap                                 |
+| K600 TV          | 4078 | 2.0   | yes     | FN swap                                 |
 | K750 Solar       | 4002 | 2.0   | yes     | FN swap, Lux reading, light button      |
 | K780             | 405B | 2.0   | yes     | FN swap                                 |
 | K800 Illuminated | 2010 | 1.0   | yes     | FN swap, reprog keys, LEDs              |
 | K800 (new ver)   | 406E | 2.0   | yes     | FN swap                                 |
 | K830 Illuminated | 4032 | 2.0   | yes     | FN swap                                 |
+| MX Keys          | 408A | 2.0   | yes     |                                         |
 | N545             | 2006 |       | yes     |                                         |
 | TK820            |      | 2.0   | yes     | FN swap                                 |
 | Craft            | 4066 | 2.0   |         |                                         |
@@ -88,6 +100,7 @@ You are able to read this feature using command-line interface of Solaar, but it
 | M330             |      | 2.0   | yes     | 1000  | smooth scrolling                |
 | M345             | 4017 | 2.0   | yes     | -     | smooth scrolling                |
 | M350             | 101C | 1.0   | yes     |       |                                 |
+| M350             | 4080 | 2.0   |         |       |                                 |
 | M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling|
 | M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling|
 | M510             | 4051 | 2.0   | yes     |       | smooth scrolling                |
