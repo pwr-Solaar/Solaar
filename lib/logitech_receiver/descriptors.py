@@ -273,7 +273,7 @@ _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M350', protocol=1.0, wpid='101C',
 				registers=(_R.battery_charge, ),
 				)
-_D('Wireless Mouse Pebble M350', protocol=2.0, wpid='4080')
+_D('Wireless Mouse Pebble M350', codename='Pebble', protocol=2.0, wpid='4080')
 _D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
 				registers=(_R.battery_charge, ),
 				settings=[
