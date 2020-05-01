@@ -12,3 +12,4 @@ Type=Application
 Keywords=logitech;unifying;receiver;mouse;keyboard;
 Categories=Utility;GTK;
 #Categories=Utility;GTK;Settings;HardwareSettings;
+X-GNOME-UsesNotifications=true

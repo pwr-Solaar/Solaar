@@ -32,7 +32,7 @@ try:
 	import gi
 	gi.require_version('Notify', '0.7')
 	# this import is allowed to fail, in which case the entire feature is unavailable
-	from gi.repository import Notify
+	from gi.repository import Notify, GLib
 
 	# assumed to be working since the import succeeded
 	available = True
@@ -99,6 +99,7 @@ if available:
 
 			n.update(NAME, reason, icon_file)
 			n.set_urgency(Notify.Urgency.NORMAL)
+			n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
 
 			try:
 				# if _log.isEnabledFor(_DEBUG):
@@ -135,6 +136,7 @@ if available:
 			n.update(summary, message, icon_file)
 			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
 			n.set_urgency(urgency)
+			n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
 
 			try:
 				# if _log.isEnabledFor(_DEBUG):
