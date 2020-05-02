@@ -40,7 +40,7 @@ done
 version=$(sed '/^__version__/!d' setup.py | cut -d\' -f2)
 
 prerelease=false
-echo $version | grep '.*-rc.*' >/dev/null
+echo $version | grep '.*rc.*' >/dev/null
 [ $? -eq 0 ] && prerelease=true
 
 ref=$(git symbolic-ref HEAD)
