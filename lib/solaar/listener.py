@@ -343,4 +343,13 @@ def _process_receiver_event(action, device_info):
 			_start(device_info)
 		except OSError:
 			# permission error, ignore this path for now
-			_error_callback('permissions', device_info.path)
+			# If receiver has extended ACL but not writable then it is for another seat.
+			# (It would be easier to use pylibacl but adding the pylibacl dependencies
+			# for this special case is not good.)
+			try: 
+				import subprocess, re
+				output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path])
+				if not re.search(b'user:.+:',output) :
+					_error_callback('permissions', device_info.path)
+			except:
+				_error_callback('permissions', device_info.path)

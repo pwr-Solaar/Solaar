@@ -1,3 +1,6 @@
+New:
+  * Don't complain for receivers that are for other seats
+
 1.0.2rc2: 
   * Remove packaging directory tree as it is not maintained
   * Pip installs udev rule and solaar autostart when doing install without --user flag
