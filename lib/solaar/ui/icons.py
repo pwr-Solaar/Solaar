@@ -95,7 +95,8 @@ def _init_icon_paths():
 def battery(level=None, charging=False):
 	icon_name = _battery_icon_name(level, charging)
 	if not _default_theme.has_icon(icon_name):
-		_log.warning("icon %s not found in current theme", icon_name);
+		_log.warning("icon %s not found in current theme", icon_name)
+		return TRAY_OKAY # use Solaar icon if battery icon not available
 	elif _log.isEnabledFor(_DEBUG):
 		_log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
 	return icon_name
