@@ -1,6 +1,7 @@
 1.0.2rc2:
   * Remove packaging directory tree as it is not maintained
   * Pip installs udev rule and solaar autostart when not doing --user install
+  * Don't complain for receivers that are for other seats
   * Use Solaar icon instead of a missing battery icon
   * Use only standard icons for battery levels.  Symbolic icons do not change to white in dark themes because of problems external to Solaar.
   * Better reporting of battery levels when charging for some devices.
