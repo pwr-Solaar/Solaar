@@ -203,9 +203,6 @@ try:
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
 
-			# get around system tray icons not having styling and not having css class
-			tray_icon_name = tray_icon_name + ( "-symbolic" if "SOLAAR_TRAY_BATTERY_ICON_SYBOLIC" in os.environ else "" )
-
 			description =  '%s: %s' % (name, device_status.to_string())
 		else:
 			# there may be a receiver, but no peripherals
@@ -263,9 +260,6 @@ except ImportError:
 			battery_level = device_status.get(_K.BATTERY_LEVEL)
 			battery_charging = device_status.get(_K.BATTERY_CHARGING)
 			tray_icon_name = _icons.battery(battery_level, battery_charging)
-
-			# get around system tray icons not having styling and not having css class
-			tray_icon_name = tray_icon_name + ( "-symbolic" if "SOLAAR_TRAY_BATTERY_ICON_SYBOLIC" in os.environ else "" )
 		else:
 			# there may be a receiver, but no peripherals
 			tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_ATTENTION
