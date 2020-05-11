@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.1\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2019-07-27 07:22+0200\n"
+        "POT-Creation-Date: 2020-05-11 07:36+0200\n"
         "PO-Revision-Date: 2013-07-17 20:27+0100\n"
         "Last-Translator: Daniel Pavel <daniel.pavel@gmail.com>\n"
         "Language-Team: none\n"
@@ -86,7 +86,7 @@ msgstr  "prea multe periferice"
 msgid   "Bootloader"
 msgstr  ""
 
-#: lib/logitech_receiver/i18n.py:50 lib/solaar/ui/window.py:528
+#: lib/logitech_receiver/i18n.py:50 lib/solaar/ui/window.py:532
 msgid   "Firmware"
 msgstr  ""
 
@@ -98,109 +98,117 @@ msgstr  ""
 msgid   "Other"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:67
+#: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is closed"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:67
+#: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is open"
 msgstr  ""
 
-#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:132
+#: lib/logitech_receiver/notifications.py:178 lib/solaar/ui/notify.py:125
 msgid   "unpaired"
 msgstr  "deconectat(ă)"
 
-#: lib/logitech_receiver/notifications.py:195
+#: lib/logitech_receiver/notifications.py:229
 msgid   "powered on"
 msgstr  "a pornit"
 
-#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:614
+#: lib/logitech_receiver/receiver.py:108 lib/solaar/ui/window.py:626
 msgid   "unknown"
 msgstr  "necunoscută"
 
-#: lib/logitech_receiver/settings_templates.py:119
+#: lib/logitech_receiver/settings_templates.py:122
 msgid   "Smooth Scrolling"
 msgstr  "Derulare fină"
 
-#: lib/logitech_receiver/settings_templates.py:120
-#: lib/logitech_receiver/settings_templates.py:125
-#: lib/logitech_receiver/settings_templates.py:129
+#: lib/logitech_receiver/settings_templates.py:123
+#: lib/logitech_receiver/settings_templates.py:128
+#: lib/logitech_receiver/settings_templates.py:132
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
 msgstr  "Senzitivitate crescută la derularea verticală cu rotița."
 
-#: lib/logitech_receiver/settings_templates.py:121
+#: lib/logitech_receiver/settings_templates.py:124
 msgid   "HID++ Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:122
+#: lib/logitech_receiver/settings_templates.py:125
 msgid   "HID++ mode for vertical scroll with the wheel."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:124
+#: lib/logitech_receiver/settings_templates.py:127
 msgid   "High Resolution Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:126
+#: lib/logitech_receiver/settings_templates.py:129
 msgid   "High Resolution Wheel Invert"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:127
+#: lib/logitech_receiver/settings_templates.py:130
 msgid   "High-sensitivity wheel invert mode for vertical scroll."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:128
+#: lib/logitech_receiver/settings_templates.py:131
 msgid   "Wheel Resolution"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:130
+#: lib/logitech_receiver/settings_templates.py:133
 msgid   "Side Scrolling"
 msgstr  "Derulare orizontală"
 
-#: lib/logitech_receiver/settings_templates.py:131
+#: lib/logitech_receiver/settings_templates.py:134
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:133
+#: lib/logitech_receiver/settings_templates.py:136
 msgid   "Sensitivity (DPI)"
 msgstr  "Sentivitivate (PPI)"
 
-#: lib/logitech_receiver/settings_templates.py:134
+#: lib/logitech_receiver/settings_templates.py:137
 msgid   "Sensitivity (Pointer Speed)"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:135
+#: lib/logitech_receiver/settings_templates.py:138
 msgid   "Swap Fx function"
 msgstr  "Inversează funcțiile Fx"
 
-#: lib/logitech_receiver/settings_templates.py:136
+#: lib/logitech_receiver/settings_templates.py:139
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
 msgstr  "Când este activ, tastele F1..F12 vor opera funcțiile speciale,\n"
         "și trebuie să țineți apăsată tasta FN pentru a folosi funcțiile lor "
         "standard."
 
-#: lib/logitech_receiver/settings_templates.py:139
+#: lib/logitech_receiver/settings_templates.py:142
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
 msgstr  "Când nu este activ, tastele F1..F12 vor opera functiile standard,\n"
         "și trebuie să țineți apăsată tasta FN pentru a folosi funcțiile lor "
         "speciale."
 
-#: lib/logitech_receiver/settings_templates.py:141
+#: lib/logitech_receiver/settings_templates.py:144
 msgid   "Hand Detection"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:142
+#: lib/logitech_receiver/settings_templates.py:145
 msgid   "Turn on illumination when the hands hover over the keyboard."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:143
+#: lib/logitech_receiver/settings_templates.py:146
+msgid   "Backlight"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:147
+msgid   "Turn illumination on or off on keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:149
 msgid   "Smart Shift"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:144
+#: lib/logitech_receiver/settings_templates.py:150
 msgid   "Automatically switch the mouse wheel between ratchet and freespin "
         "mode.\n"
         "The mouse wheel is always free at 0, and always locked at 50"
@@ -210,7 +218,7 @@ msgstr  ""
 msgid   "No paired devices."
 msgstr  "Nici un periferic contectat."
 
-#: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:569
+#: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:573
 #, python-format
 msgid   "%(count)s paired device."
 msgid_plural    "%(count)s paired devices."
@@ -233,12 +241,12 @@ msgstr  ""
 msgid   "Lighting: %(level)s lux"
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:203
+#: lib/logitech_receiver/status.py:212
 #, python-format
 msgid   "Battery: %(level)s (%(status)s)"
 msgstr  ""
 
-#: lib/logitech_receiver/status.py:205
+#: lib/logitech_receiver/status.py:214
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  ""
@@ -294,7 +302,7 @@ msgstr  "Testare"
 msgid   "Logitech documentation"
 msgstr  "Documentație Logitech"
 
-#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:309
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:313
 msgid   "About"
 msgstr  "Despre"
 
@@ -311,12 +319,12 @@ msgstr  "Prelucrez"
 msgid   "Read/write operation failed."
 msgstr  "Operațiunea a eșuat."
 
-#: lib/solaar/ui/notify.py:134
+#: lib/solaar/ui/notify.py:127
 msgid   "connected"
 msgstr  "conectat(ă)"
 
-#: lib/solaar/ui/notify.py:136 lib/solaar/ui/tray.py:295
-#: lib/solaar/ui/tray.py:300 lib/solaar/ui/window.py:650
+#: lib/solaar/ui/notify.py:129 lib/solaar/ui/tray.py:326
+#: lib/solaar/ui/tray.py:331 lib/solaar/ui/window.py:662
 msgid   "offline"
 msgstr  "inactivă"
 
@@ -358,29 +366,39 @@ msgstr  "Legătura fără fir nu este criptată"
 msgid   "%(receiver_name)s: pair new device"
 msgstr  ""
 
-#: lib/solaar/ui/pair_window.py:205
+#: lib/solaar/ui/pair_window.py:204
+msgid   "If the device is already turned on, turn if off and on again."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:206
+#, python-format
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing(s) remaining."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:207
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:210
 msgid   "Turn on the device you want to pair."
 msgstr  "Porniți dispozitivul pe care doriți să-l conectați."
 
-#: lib/solaar/ui/pair_window.py:206
-msgid   "If the device is already turned on,\n"
-        "turn if off and on again."
-msgstr  "Dacă dispozitivul este deja pornit,\n"
-        "opriți-l și porniți-l din nou."
-
-#: lib/solaar/ui/tray.py:55
+#: lib/solaar/ui/tray.py:56
 msgid   "No Logitech receiver found"
 msgstr  "Nu am găsit nici un receptor Logitech"
 
-#: lib/solaar/ui/tray.py:62
+#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:310
 msgid   "Quit"
 msgstr  "Ieșire"
 
-#: lib/solaar/ui/tray.py:279
+#: lib/solaar/ui/tray.py:305 lib/solaar/ui/tray.py:313
 msgid   "no receiver"
 msgstr  "nici un receptor"
 
-#: lib/solaar/ui/tray.py:298
+#: lib/solaar/ui/tray.py:329
 msgid   "no status"
 msgstr  "stare necunoscută"
 
@@ -412,57 +430,57 @@ msgstr  "Conectează periferic"
 msgid   "Select a device"
 msgstr  "Selectați un dispozitiv"
 
-#: lib/solaar/ui/window.py:501
+#: lib/solaar/ui/window.py:504
 msgid   "Path"
 msgstr  "Cale"
 
-#: lib/solaar/ui/window.py:503
+#: lib/solaar/ui/window.py:506
 msgid   "USB id"
 msgstr  "USB"
 
-#: lib/solaar/ui/window.py:506 lib/solaar/ui/window.py:508
-#: lib/solaar/ui/window.py:520 lib/solaar/ui/window.py:522
+#: lib/solaar/ui/window.py:509 lib/solaar/ui/window.py:511
+#: lib/solaar/ui/window.py:523 lib/solaar/ui/window.py:525
 msgid   "Serial"
 msgstr  "Serial"
 
-#: lib/solaar/ui/window.py:512
+#: lib/solaar/ui/window.py:515
 msgid   "Index"
 msgstr  "Index"
 
-#: lib/solaar/ui/window.py:513
+#: lib/solaar/ui/window.py:516
 msgid   "Wireless PID"
 msgstr  "Cod WPID"
 
-#: lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:518
 msgid   "Protocol"
 msgstr  "Protocol"
 
-#: lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:518
 msgid   "Unknown"
 msgstr  "Necunoscut"
 
-#: lib/solaar/ui/window.py:517
+#: lib/solaar/ui/window.py:520
 #, python-format
 msgid   "%(rate)d ms (%(rate_hz)dHz)"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:517
+#: lib/solaar/ui/window.py:520
 msgid   "Polling rate"
 msgstr  "Rată acces"
 
-#: lib/solaar/ui/window.py:532
+#: lib/solaar/ui/window.py:536
 msgid   "none"
 msgstr  "nici una"
 
-#: lib/solaar/ui/window.py:533
+#: lib/solaar/ui/window.py:537
 msgid   "Notifications"
 msgstr  "Notificări"
 
-#: lib/solaar/ui/window.py:569
+#: lib/solaar/ui/window.py:573
 msgid   "No device paired."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:572
+#: lib/solaar/ui/window.py:576
 #, python-format
 msgid   "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
@@ -470,28 +488,33 @@ msgstr[0]       ""
 msgstr[1]       ""
 msgstr[2]       ""
 
-#: lib/solaar/ui/window.py:574
+#: lib/solaar/ui/window.py:578
 msgid   "Only one device can be paired to this receiver."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:624 lib/solaar/ui/window.py:809
+#: lib/solaar/ui/window.py:581
+#, python-format
+msgid   "This receiver has %d pairing(s) remaining."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:636 lib/solaar/ui/window.py:822
 #, python-format
 msgid   "%(battery_percent)d%%"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:627
+#: lib/solaar/ui/window.py:639
 msgid   "charging"
 msgstr  "se încarcă"
 
-#: lib/solaar/ui/window.py:629
+#: lib/solaar/ui/window.py:641
 msgid   "last known"
 msgstr  "ultima valoare"
 
-#: lib/solaar/ui/window.py:636
+#: lib/solaar/ui/window.py:648
 msgid   "not encrypted"
 msgstr  "ne-criptată"
 
-#: lib/solaar/ui/window.py:638
+#: lib/solaar/ui/window.py:650
 msgid   "The wireless link between this device and its receiver is not "
         "encrypted.\n"
         "\n"
@@ -504,56 +527,61 @@ msgid   "The wireless link between this device and its receiver is not "
         "within range."
 msgstr  "Legătura fără fir nu este criptată."
 
-#: lib/solaar/ui/window.py:645
+#: lib/solaar/ui/window.py:657
 msgid   "encrypted"
 msgstr  "criptată"
 
-#: lib/solaar/ui/window.py:647
+#: lib/solaar/ui/window.py:659
 msgid   "The wireless link between this device and its receiver is encrypted."
 msgstr  "Legătura fără fir este criptată."
 
-#: lib/solaar/ui/window.py:660
+#: lib/solaar/ui/window.py:672
 #, python-format
 msgid   "%(light_level)d lux"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:807
+#: lib/solaar/ui/window.py:820
 #, python-format
 msgid   "%(battery_level)s"
 msgstr  ""
 
-#~ msgid        "Only one device can be paired to this receiver"
-#~ msgstr       "Acest receptor suportă un singur periferic conectat"
-
-#~ msgid        "paired devices"
-#~ msgstr       "periferice conectate"
-
-#~ msgid        "Up to %d devices can be paired to this receiver"
-#~ msgstr       "Acest receptor suportă maxim %d periferice conectate"
-
-#~ msgid        "No device paired"
-#~ msgstr       "Nici un periferic conectat"
-
-#~ msgid        "pair new device"
-#~ msgstr       "conectează periferic nou"
-
-#~ msgid        "Found a new device"
-#~ msgstr       "Periferic nou detectat"
-
-#~ msgid        "lux"
-#~ msgstr       "lucși"
-
-#~ msgid        " paired devices."
-#~ msgstr       " periferice contectate."
-
-#~ msgid        "1 paired device."
-#~ msgstr       "Un periferic contectat."
-
-#~ msgid        "pairing lock is "
-#~ msgstr       "lacătul de contectare este "
+#~ msgid        "closed"
+#~ msgstr       "închis"
 
 #~ msgid        "open"
 #~ msgstr       "deschis"
 
-#~ msgid        "closed"
-#~ msgstr       "închis"
+#~ msgid        "pairing lock is "
+#~ msgstr       "lacătul de contectare este "
+
+#~ msgid        "1 paired device."
+#~ msgstr       "Un periferic contectat."
+
+#~ msgid        " paired devices."
+#~ msgstr       " periferice contectate."
+
+#~ msgid        "lux"
+#~ msgstr       "lucși"
+
+#~ msgid        "Found a new device"
+#~ msgstr       "Periferic nou detectat"
+
+#~ msgid        "pair new device"
+#~ msgstr       "conectează periferic nou"
+
+#~ msgid        "No device paired"
+#~ msgstr       "Nici un periferic conectat"
+
+#~ msgid        "Up to %d devices can be paired to this receiver"
+#~ msgstr       "Acest receptor suportă maxim %d periferice conectate"
+
+#~ msgid        "paired devices"
+#~ msgstr       "periferice conectate"
+
+#~ msgid        "Only one device can be paired to this receiver"
+#~ msgstr       "Acest receptor suportă un singur periferic conectat"
+
+#~ msgid        "If the device is already turned on,\n"
+#~      "turn if off and on again."
+#~ msgstr       "Dacă dispozitivul este deja pornit,\n"
+#~      "opriți-l și porniți-l din nou."
