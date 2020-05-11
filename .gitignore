@@ -5,6 +5,7 @@ __pycache__/
 *.mo
 
 /lib/Solaar.egg-info/
+/lib/solaar.egg-info/
 /build/
 /sdist/
 /dist/
