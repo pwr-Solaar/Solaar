@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2019-07-27 07:07+0200\n"
+        "POT-Creation-Date: 2020-05-11 07:36+0200\n"
         "PO-Revision-Date: 2016-12-21 00:12+0200\n"
         "Last-Translator: Dmitry Ryazantcev <DJm00n@mail.ru>\n"
         "Language-Team: Russian <git@vger.kernel.org>\n"
@@ -87,7 +87,7 @@ msgstr  "слишком много устройств"
 msgid   "Bootloader"
 msgstr  "Загрузчик"
 
-#: lib/logitech_receiver/i18n.py:50 lib/solaar/ui/window.py:528
+#: lib/logitech_receiver/i18n.py:50 lib/solaar/ui/window.py:532
 msgid   "Firmware"
 msgstr  "Прошивка"
 
@@ -99,65 +99,65 @@ msgstr  "Оборудование"
 msgid   "Other"
 msgstr  "Другое"
 
-#: lib/logitech_receiver/notifications.py:67
+#: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is closed"
 msgstr  "сопряжение заблокировано"
 
-#: lib/logitech_receiver/notifications.py:67
+#: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is open"
 msgstr  "сопряжение разблокировано"
 
-#: lib/logitech_receiver/notifications.py:150 lib/solaar/ui/notify.py:132
+#: lib/logitech_receiver/notifications.py:178 lib/solaar/ui/notify.py:125
 msgid   "unpaired"
 msgstr  "не сопряжено"
 
-#: lib/logitech_receiver/notifications.py:195
+#: lib/logitech_receiver/notifications.py:229
 msgid   "powered on"
 msgstr  "включено"
 
-#: lib/logitech_receiver/receiver.py:107 lib/solaar/ui/window.py:614
+#: lib/logitech_receiver/receiver.py:108 lib/solaar/ui/window.py:626
 msgid   "unknown"
 msgstr  "неизвестно"
 
-#: lib/logitech_receiver/settings_templates.py:119
+#: lib/logitech_receiver/settings_templates.py:122
 msgid   "Smooth Scrolling"
 msgstr  "Плавная прокрутка"
 
-#: lib/logitech_receiver/settings_templates.py:120
-#: lib/logitech_receiver/settings_templates.py:125
-#: lib/logitech_receiver/settings_templates.py:129
+#: lib/logitech_receiver/settings_templates.py:123
+#: lib/logitech_receiver/settings_templates.py:128
+#: lib/logitech_receiver/settings_templates.py:132
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
 msgstr  "Режим высокой чувствительности для вертикальной прокрутки колесом."
 
-#: lib/logitech_receiver/settings_templates.py:121
+#: lib/logitech_receiver/settings_templates.py:124
 msgid   "HID++ Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:122
+#: lib/logitech_receiver/settings_templates.py:125
 msgid   "HID++ mode for vertical scroll with the wheel."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:124
+#: lib/logitech_receiver/settings_templates.py:127
 msgid   "High Resolution Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:126
+#: lib/logitech_receiver/settings_templates.py:129
 msgid   "High Resolution Wheel Invert"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:127
+#: lib/logitech_receiver/settings_templates.py:130
 msgid   "High-sensitivity wheel invert mode for vertical scroll."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:128
+#: lib/logitech_receiver/settings_templates.py:131
 msgid   "Wheel Resolution"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:130
+#: lib/logitech_receiver/settings_templates.py:133
 msgid   "Side Scrolling"
 msgstr  "Горизонтальная прокрутка"
 
-#: lib/logitech_receiver/settings_templates.py:131
+#: lib/logitech_receiver/settings_templates.py:134
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
@@ -165,45 +165,53 @@ msgstr  "Когда отключено, нажатие на колесо сбо�
         "пользовательские события нажатия, вместо стандартных\n"
         "событий горизонтальной прокрутки."
 
-#: lib/logitech_receiver/settings_templates.py:133
+#: lib/logitech_receiver/settings_templates.py:136
 msgid   "Sensitivity (DPI)"
 msgstr  "Чувствительность (DPI)"
 
-#: lib/logitech_receiver/settings_templates.py:134
+#: lib/logitech_receiver/settings_templates.py:137
 msgid   "Sensitivity (Pointer Speed)"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:135
+#: lib/logitech_receiver/settings_templates.py:138
 msgid   "Swap Fx function"
 msgstr  "Сменить поведение Fx"
 
-#: lib/logitech_receiver/settings_templates.py:136
+#: lib/logitech_receiver/settings_templates.py:139
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
 msgstr  "Если включено,  то кнопки F1..F12 будут активировать\n"
         "их дополнительную функцию и вы должны будете зажать\n"
         "кнопку FN для активации их стандартной функции."
 
-#: lib/logitech_receiver/settings_templates.py:139
+#: lib/logitech_receiver/settings_templates.py:142
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
 msgstr  "Если выключено,  то кнопки F1..F12 будут активировать\n"
         "их стандартную функцию и вы должны будете зажать\n"
         "кнопку FN для активации их дополнительной функции."
 
-#: lib/logitech_receiver/settings_templates.py:141
+#: lib/logitech_receiver/settings_templates.py:144
 msgid   "Hand Detection"
 msgstr  "Обнаружение рук"
 
-#: lib/logitech_receiver/settings_templates.py:142
+#: lib/logitech_receiver/settings_templates.py:145
 msgid   "Turn on illumination when the hands hover over the keyboard."
 msgstr  "Включать подсветку, когда руки над клавиатурой."
 
-#: lib/logitech_receiver/settings_templates.py:143
+#: lib/logitech_receiver/settings_templates.py:146
+msgid   "Backlight"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:147
+msgid   "Turn illumination on or off on keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:149
 msgid   "Smart Shift"
 msgstr  "Smart Shift"
 
-#: lib/logitech_receiver/settings_templates.py:144
+#: lib/logitech_receiver/settings_templates.py:150
 msgid   "Automatically switch the mouse wheel between ratchet and freespin "
         "mode.\n"
         "The mouse wheel is always free at 0, and always locked at 50"
@@ -215,7 +223,7 @@ msgstr  "Автоматически переключать режим колес
 msgid   "No paired devices."
 msgstr  "Нет сопряженных устройств."
 
-#: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:569
+#: lib/logitech_receiver/status.py:100 lib/solaar/ui/window.py:573
 #, python-format
 msgid   "%(count)s paired device."
 msgid_plural    "%(count)s paired devices."
@@ -238,12 +246,12 @@ msgstr  "Батарея: %(percent)d%%"
 msgid   "Lighting: %(level)s lux"
 msgstr  "Освещенность: %(level)s lux"
 
-#: lib/logitech_receiver/status.py:203
+#: lib/logitech_receiver/status.py:212
 #, python-format
 msgid   "Battery: %(level)s (%(status)s)"
 msgstr  "Батарея: %(level)s (%(status)s)"
 
-#: lib/logitech_receiver/status.py:205
+#: lib/logitech_receiver/status.py:214
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  "Батарея: %(percent)d%% (%(status)s)"
@@ -299,7 +307,7 @@ msgstr  "Тестирование"
 msgid   "Logitech documentation"
 msgstr  "Документация Logitech"
 
-#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:309
+#: lib/solaar/ui/action.py:68 lib/solaar/ui/window.py:313
 msgid   "About"
 msgstr  "О программе"
 
@@ -316,12 +324,12 @@ msgstr  "Работает"
 msgid   "Read/write operation failed."
 msgstr  "Операция чтения/записи не удалась."
 
-#: lib/solaar/ui/notify.py:134
+#: lib/solaar/ui/notify.py:127
 msgid   "connected"
 msgstr  "соединено"
 
-#: lib/solaar/ui/notify.py:136 lib/solaar/ui/tray.py:295
-#: lib/solaar/ui/tray.py:300 lib/solaar/ui/window.py:650
+#: lib/solaar/ui/notify.py:129 lib/solaar/ui/tray.py:326
+#: lib/solaar/ui/tray.py:331 lib/solaar/ui/window.py:662
 msgid   "offline"
 msgstr  "нет соединения"
 
@@ -362,29 +370,39 @@ msgstr  "Беспроводное соединение не зашифрован
 msgid   "%(receiver_name)s: pair new device"
 msgstr  "%(receiver_name)s: новое сопряженное устройство"
 
-#: lib/solaar/ui/pair_window.py:205
+#: lib/solaar/ui/pair_window.py:204
+msgid   "If the device is already turned on, turn if off and on again."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:206
+#, python-format
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing(s) remaining."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:207
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:210
 msgid   "Turn on the device you want to pair."
 msgstr  "Включите устройство, с которым вы хотите создать сопряжение."
 
-#: lib/solaar/ui/pair_window.py:206
-msgid   "If the device is already turned on,\n"
-        "turn if off and on again."
-msgstr  "Если устройство уже включено,\n"
-        "выключите и включите его снова."
-
-#: lib/solaar/ui/tray.py:55
+#: lib/solaar/ui/tray.py:56
 msgid   "No Logitech receiver found"
 msgstr  "Приёмник Logitech не найден"
 
-#: lib/solaar/ui/tray.py:62
+#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:310
 msgid   "Quit"
 msgstr  "Выйти"
 
-#: lib/solaar/ui/tray.py:279
+#: lib/solaar/ui/tray.py:305 lib/solaar/ui/tray.py:313
 msgid   "no receiver"
 msgstr  "нет приёмника"
 
-#: lib/solaar/ui/tray.py:298
+#: lib/solaar/ui/tray.py:329
 msgid   "no status"
 msgstr  "нет статуса"
 
@@ -416,57 +434,57 @@ msgstr  "Новое сопряженное устройство"
 msgid   "Select a device"
 msgstr  "Выбор устройства"
 
-#: lib/solaar/ui/window.py:501
+#: lib/solaar/ui/window.py:504
 msgid   "Path"
 msgstr  "Путь"
 
-#: lib/solaar/ui/window.py:503
+#: lib/solaar/ui/window.py:506
 msgid   "USB id"
 msgstr  "Идент. USB"
 
-#: lib/solaar/ui/window.py:506 lib/solaar/ui/window.py:508
-#: lib/solaar/ui/window.py:520 lib/solaar/ui/window.py:522
+#: lib/solaar/ui/window.py:509 lib/solaar/ui/window.py:511
+#: lib/solaar/ui/window.py:523 lib/solaar/ui/window.py:525
 msgid   "Serial"
 msgstr  "Серийный ном."
 
-#: lib/solaar/ui/window.py:512
+#: lib/solaar/ui/window.py:515
 msgid   "Index"
 msgstr  "Номер"
 
-#: lib/solaar/ui/window.py:513
+#: lib/solaar/ui/window.py:516
 msgid   "Wireless PID"
 msgstr  "Беспров. PID"
 
-#: lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:518
 msgid   "Protocol"
 msgstr  "Протокол"
 
-#: lib/solaar/ui/window.py:515
+#: lib/solaar/ui/window.py:518
 msgid   "Unknown"
 msgstr  "Неизвестен"
 
-#: lib/solaar/ui/window.py:517
+#: lib/solaar/ui/window.py:520
 #, python-format
 msgid   "%(rate)d ms (%(rate_hz)dHz)"
 msgstr  "%(rate)d мс (%(rate_hz)dГц)"
 
-#: lib/solaar/ui/window.py:517
+#: lib/solaar/ui/window.py:520
 msgid   "Polling rate"
 msgstr  "Част. опроса"
 
-#: lib/solaar/ui/window.py:532
+#: lib/solaar/ui/window.py:536
 msgid   "none"
 msgstr  "нет"
 
-#: lib/solaar/ui/window.py:533
+#: lib/solaar/ui/window.py:537
 msgid   "Notifications"
 msgstr  "Уведомления"
 
-#: lib/solaar/ui/window.py:569
+#: lib/solaar/ui/window.py:573
 msgid   "No device paired."
 msgstr  "Нет сопряженных устройств."
 
-#: lib/solaar/ui/window.py:572
+#: lib/solaar/ui/window.py:576
 #, python-format
 msgid   "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
@@ -477,28 +495,33 @@ msgstr[1]       "До %(max_count)s устройств может быть со�
 msgstr[2]       "До %(max_count)s устройств может быть сопряжено с этим "
         "приёмником."
 
-#: lib/solaar/ui/window.py:574
+#: lib/solaar/ui/window.py:578
 msgid   "Only one device can be paired to this receiver."
 msgstr  "Только одно устройство может быть сопряжено с этим приёмником."
 
-#: lib/solaar/ui/window.py:624 lib/solaar/ui/window.py:809
+#: lib/solaar/ui/window.py:581
+#, python-format
+msgid   "This receiver has %d pairing(s) remaining."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:636 lib/solaar/ui/window.py:822
 #, python-format
 msgid   "%(battery_percent)d%%"
 msgstr  "%(battery_percent)d%%"
 
-#: lib/solaar/ui/window.py:627
+#: lib/solaar/ui/window.py:639
 msgid   "charging"
 msgstr  "заряжается"
 
-#: lib/solaar/ui/window.py:629
+#: lib/solaar/ui/window.py:641
 msgid   "last known"
 msgstr  "последнее известное"
 
-#: lib/solaar/ui/window.py:636
+#: lib/solaar/ui/window.py:648
 msgid   "not encrypted"
 msgstr  "не зашифровано"
 
-#: lib/solaar/ui/window.py:638
+#: lib/solaar/ui/window.py:650
 msgid   "The wireless link between this device and its receiver is not "
         "encrypted.\n"
         "\n"
@@ -520,21 +543,26 @@ msgstr  "Беспроводное соединение между этим ус�
         "т.к. вводимый текст может быть \"подслушан\"  незаметно кем-то еще в "
         "радиусе передачи."
 
-#: lib/solaar/ui/window.py:645
+#: lib/solaar/ui/window.py:657
 msgid   "encrypted"
 msgstr  "зашифровано"
 
-#: lib/solaar/ui/window.py:647
+#: lib/solaar/ui/window.py:659
 msgid   "The wireless link between this device and its receiver is encrypted."
 msgstr  "Беспроводное соединение между этим устройством и приёмником "
         "зашифровано."
 
-#: lib/solaar/ui/window.py:660
+#: lib/solaar/ui/window.py:672
 #, python-format
 msgid   "%(light_level)d lux"
 msgstr  "%(light_level)d люкс"
 
-#: lib/solaar/ui/window.py:807
+#: lib/solaar/ui/window.py:820
 #, python-format
 msgid   "%(battery_level)s"
 msgstr  "%(battery_level)s"
+
+#~ msgid        "If the device is already turned on,\n"
+#~      "turn if off and on again."
+#~ msgstr       "Если устройство уже включено,\n"
+#~      "выключите и включите его снова."
