@@ -40,6 +40,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
 		import sys
 		sys.exit("%s: missing required system package %s" % (NAME, os_package))
 
+prefer_symbolic_battery_icons = False
 
 def _parse_arguments():
 	import argparse
@@ -51,6 +52,7 @@ def _parse_arguments():
 	arg_parser.add_argument('--restart-on-wake-up', action='store_true',
 							help='restart Solaar on sleep wake-up (experimental)')
 	arg_parser.add_argument('-w', '--window', choices=('show','hide','only'), help='start with window showing / hidden / only (no tray icon)')
+	arg_parser.add_argument('-b', '--battery-icons', choices=('regular','symbolic'), help='prefer regular / symbolic icons')
 	arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
 	arg_parser.add_argument('--help-actions', action='store_true',
 							help='print help for the optional actions')
@@ -65,6 +67,9 @@ def _parse_arguments():
 
 	if args.window is None:
 		args.window = 'show' # default behaviour is to show main window
+
+	global prefer_symbolic_battery_icons
+	prefer_symbolic_battery_icons = True if args.battery_icons == 'symbolic' else False
 
 	import logging
 	if args.debug > 0:

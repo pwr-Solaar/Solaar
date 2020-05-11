@@ -102,23 +102,13 @@ For many devices, Solaar shows the approximate battery level via icons that
 show up in both main Solaar window and the system tray.  Solaar used to use
 several heuristics to determine which icon names to use for this purpose,
 but as more and more battery icon schemes have been developed this has
-become impossible to do well.  Solaar now only uses the eleven standard
+become impossible to do well.  Solaar now uses the eleven standard
 battery icon names `battery-{full,good,low,critical,empty}[-charging]` and
-`battery-missing`.  To use different icons from you have to change (part of)
-your GTK icon theme.
+`battery-missing`.  
 
-Solaar is not using the symbolic versions of these icons because of a bug
-external to Solaar that results in these icons not changing to the
-foreground colour in the system tray.  This can leave these icons nearly
-invisible in dark themes.  It would be useful to be able to switch to
-symbolic icons via GTK styling (using something like
-`.solaar * { -gtk-icon-style: symbolic; }` in the user's gtk.css)
-but most or all current system tray implementations do not allow for this.
-
-As a temporary hack setting the SOLAAR_TRAY_BATTERY_ICON_SYBOLIC environment
-variable will cause Solaar to use symbolic icons for battery levels in the
-system tray.
-
+Solaar will use the symbolic versions of these icons if started with the
+option `--battery-icons=symbolic`.  Because of bugs external to Solaar 
+these symbolic icons may be nearly invisible in dark themes.  
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com
