@@ -100,7 +100,7 @@ def feature_choices_dynamic(name, feature, choices_callback,
 		setting = feature_choices(name, feature, choices,
 						read_function_id, write_function_id,
 						bytes_count=bytes_count,
-						label=None, description=None, device_kind=None)
+						label=label, description=description, device_kind=device_kind)
 		return setting(device)
 	return instantiate
 
