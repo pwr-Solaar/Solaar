@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.2rc2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-11 07:36+0200\n"
-"PO-Revision-Date: 2020-05-14 06:54+0200\n"
+"PO-Revision-Date: 2020-05-14 16:42+0200\n"
 "Last-Translator: David Geiger <david.david@mageialinux-online.org>\n"
 "Language-Team: Language: fr\n"
 "Language: fr\n"
@@ -223,7 +223,7 @@ msgid ""
 "The mouse wheel is always free at 0, and always locked at 50"
 msgstr ""
 "Commute automatiquement la molette de la souris entre le mode cliquet et "
-"lemode libre.\n"
+"le mode libre.\n"
 "La molette de la souris est toujours libre à 0, et toujours verrouillée à 50"
 
 #: lib/logitech_receiver/status.py:99
@@ -333,7 +333,7 @@ msgstr "En fonctionnement"
 
 #: lib/solaar/ui/config_panel.py:123
 msgid "Read/write operation failed."
-msgstr "Les opérations de lecture/écriture ont échoué."
+msgstr "Les opérations de lecture/écriture ont échouées."
 
 #: lib/solaar/ui/notify.py:127
 msgid "connected"
