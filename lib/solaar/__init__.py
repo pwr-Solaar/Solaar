@@ -19,5 +19,5 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__version__ = '1.0.2rc2'
+__version__ = '1.0.2rc3'
 NAME = 'Solaar'
