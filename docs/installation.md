@@ -64,7 +64,7 @@ you can just go to the solaar directory and run `bin/solaar` for the GUI
 or `bin/solaar <command> <arguments>` for the CLI.
 
 Otherwise you will need to run Solaar as root via
-and `sudo bin/solaar` for the GUI
+`sudo bin/solaar` for the GUI
 or `sudo bin/solaar <command> <arguments>` for the CLI.
 
 
@@ -100,7 +100,7 @@ If you install Solaar yourself you may need to create or modify this file.
 
 ## Using PyPI
 
-As an alternative to downloading and installing you can install a recent release 
+As an alternative to downloading and installing you can install the most recent release 
 (but not the current github version) of Solaar from PyPI.  
 Just run `pip install --user solaar` or `sudo pip install solaar`.
-The `--user` install will not install the Solaar udev rule or the Solaar autostart file.
+The `--user` flag will not install the Solaar udev rule or the Solaar autostart file.
