@@ -61,19 +61,25 @@ and their features, see [docs/devices.md](https://pwr-solaar.github.io/Solaar/de
 
 ## Pre-built packages
 
-Pre-built packages are available for a few Linux distros.  Solaar has progressed beyond version 1.0 but some distros or repositories version 0.9.2, which is very old. Installing the current version will provide significant improvements.
+Pre-built packages are available for a few Linux distros.
 
-* Arch `solaar` package in the [community repository][arch]
+Solaar has progressed beyond version 1.0 but some distros or repositories
+version 0.9.2, which is very old. Installing the current version will
+provide significant improvements.  If a recent version of Solaar is not
+available from the standard repositories for your distribution you can try
+one of these packages.
+
+* Arch solaar package in the [community repository][arch]
 * Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
-* Ubuntu/Kubuntu 16.04+: use the `solaar` package from [universe repository][universe repository]
-* Ubuntu/Kubuntu stable packages: use the `solaar` package from [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
-* Ubuntu/Kubuntu git build packages: use the `solaar` package from [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
+* Ubuntu/Kubuntu 16.04+: use the solaar package from [universe repository][universe repository]
+* Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
+* Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
 * a [Fedora package][fedora], courtesy of Eric Smith
 * a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 * a [Mageia package][mageia], courtesy of David Geiger
 * an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 
-The `solaar` package uses a standard system tray implementation; `solaar-gnome3` is no longer required for `gnome` or `unity` integration.
+Solaar uses a standard system tray implementation; solaar-gnome3 is no longer required for gnome or unity integration.
 
 [ppa4]: https://launchpad.net/~trebelnik-stefina
 [ppa2]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
