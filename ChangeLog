@@ -1,5 +1,8 @@
-New:
-  * Don't complain for receivers that are for other seats
+1.0.2rc3:
+  * Don't produce error dialog for inaccessible receivers with access control lists.
+  * Add option --battery-icons=symbolic to use symbolic icons if available.
+  * Update French translation
+  * Update installation documentation
 
 1.0.2rc2: 
   * Remove packaging directory tree as it is not maintained
