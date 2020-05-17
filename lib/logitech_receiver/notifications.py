@@ -152,7 +152,7 @@ def _process_hidpp10_custom_notification(device, status, n):
 		assert n.data[-1:] == b'\x00'
 		data = chr(n.address).encode() + n.data
 		charge, status_text = _hidpp10.parse_battery_status(n.sub_id, data)
-		status.set_battery_info(charge, status_text)
+		status.set_battery_info(charge, status_text, None)
 		return True
 
 	if n.sub_id == _R.keyboard_illumination:
@@ -242,7 +242,7 @@ def _process_feature_notification(device, status, n, feature):
 			discharge_level = None if discharge_level == 0 else discharge_level
 			discharge_next_level = ord(n.data[1:2])
 			battery_status = ord(n.data[2:3])
-			status.set_battery_info(discharge_level, _hidpp20.BATTERY_STATUS[battery_status])
+			status.set_battery_info(discharge_level, _hidpp20.BATTERY_STATUS[battery_status], discharge_next_level)
 		else:
 			_log.warn("%s: unknown BATTERY %s", device, n)
 		return True
@@ -277,12 +277,12 @@ def _process_feature_notification(device, status, n, feature):
 
 			if n.address == 0x00:
 				status[_K.LIGHT_LEVEL] = None
-				status.set_battery_info(charge, status_text)
+				status.set_battery_info(charge, status_text, None)
 			elif n.address == 0x10:
 				status[_K.LIGHT_LEVEL] = lux
 				if lux > 200:
 					status_text = _hidpp20.BATTERY_STATUS.recharging
-				status.set_battery_info(charge, status_text)
+				status.set_battery_info(charge, status_text, None)
 			elif n.address == 0x20:
 				if _log.isEnabledFor(_DEBUG):
 					_log.debug("%s: Light Check button pressed", device)

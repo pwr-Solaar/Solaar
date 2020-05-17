@@ -47,6 +47,7 @@ KEYS = _NamedInts(
 				LINK_ENCRYPTED=5,
 				NOTIFICATION_FLAGS=6,
 				ERROR=7,
+				BATTERY_NEXT_LEVEL=8,
 			)
 
 # If the battery charge is under this percentage, trigger an attention event
@@ -170,7 +171,7 @@ class DeviceStatus(dict):
 		return bool(self._active)
 	__nonzero__ = __bool__
 
-	def set_battery_info(self, level, status, timestamp=None):
+	def set_battery_info(self, level, status, nextLevel=None, timestamp=None):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s: battery %s, %s", self._device, level, status)
 
@@ -192,6 +193,7 @@ class DeviceStatus(dict):
 		# TODO: this is also executed when pressing Fn+F7 on K800.
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
 		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
+		self[KEYS.BATTERY_NEXT_LEVEL] = nextLevel
 
 		charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full,
 				      _hidpp20.BATTERY_STATUS.full, _hidpp20.BATTERY_STATUS.slow_recharge)
@@ -237,8 +239,8 @@ class DeviceStatus(dict):
 				return
 
 			if battery is not None:
-				level, status = battery
-				self.set_battery_info(level, status)
+				level, status, nextLevel = battery
+				self.set_battery_info(level, status, nextLevel)
 			elif KEYS.BATTERY_STATUS in self:
 				self[KEYS.BATTERY_STATUS] = None
 				self[KEYS.BATTERY_CHARGING] = None

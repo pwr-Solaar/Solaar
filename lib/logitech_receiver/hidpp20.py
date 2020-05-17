@@ -524,7 +524,7 @@ def get_battery(device):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("device %d battery %d%% charged, next level %d%% charge, status %d = %s",
 						device.number, discharge, dischargeNext, status, BATTERY_STATUS[status])
-		return discharge, BATTERY_STATUS[status]
+		return discharge, BATTERY_STATUS[status], dischargeNext
 
 
 def get_voltage(device):

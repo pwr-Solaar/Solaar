@@ -618,6 +618,8 @@ def _update_device_panel(device, panel, buttons, full=False):
 	panel.set_sensitive(is_online)
 
 	battery_level = device.status.get(_K.BATTERY_LEVEL)
+	battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
+
 	if battery_level is None:
 		icon_name = _icons.battery()
 		panel._battery._icon.set_sensitive(False)
@@ -634,6 +636,11 @@ def _update_device_panel(device, panel, buttons, full=False):
 			text = _(str(battery_level))
 		else:
 			text = _("%(battery_percent)d%%") % { 'battery_percent': battery_level }
+		if battery_next_level is not None:
+			if isinstance(battery_next_level, _NamedInt):
+				text += "<small> (" +_("next ") + _(str(battery_next_level)) + ")</small>"
+			else:
+				text += "<small> (" + _("next ") + ( "%d%%" % battery_next_level ) + ")</small>"
 		if is_online:
 			if charging:
 				text += ' <small>(%s)</small>' % _("charging")
