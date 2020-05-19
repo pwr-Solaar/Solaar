@@ -23,6 +23,8 @@ Solaar is able to pair and unpair devices with
 receivers as supported by the receiver.  Solaar can also control
 some of the changeable features of devices, such as smooth scrolling or
 function key behavior.  
+For more information on how to use Solaar see
+[docs/usage.md](https://pwr-solaar.github.io/Solaar/usage).
 For more information on the capabilities of Solaar see
 [docs/capabilities.md](https://pwr-solaar.github.io/Solaar/capabilities).
 
