@@ -49,6 +49,7 @@ repository][solaar] with the pleasant news.
 | 064d:c534 | Nano       | 2                  |
 | 064d:c539 | Lightspeed | 1                  |
 | 064d:c53a | Lightspeed | 1                  |
+| 064d:c53d | Lightspeed | 1                  |
 | 064d:c53f | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
