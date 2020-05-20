@@ -38,6 +38,7 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c537", GOTO="solaar_apply"
 # Lightspeed receivers
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c539", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53a", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53d", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53f", GOTO="solaar_apply"
 
 # Lenovo nano receiver
