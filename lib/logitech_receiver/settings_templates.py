@@ -109,11 +109,11 @@ def feature_range(name, feature, min_value, max_value,
 					write_function_id=_FeatureRW.default_write_fnid,
 					rw=None,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
 	if rw is None:
 		rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind, persister=persister)
 
 #
 # common strings for settings
@@ -149,6 +149,10 @@ _BACKLIGHT = ('backlight', _("Backlight"),
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"),
 							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
+                            
+_CHANGE_HOST = ('change-host', _("Change Host"),
+							_("Automatically switch the device host\n"
+							"The hose vary between 0 an 2"))
 #
 #
 #
@@ -225,6 +229,34 @@ def _feature_hires_smooth_resolution():
 					true_value=0x02, mask=0x02,
 					label=_HIRES_RES[1], description=_HIRES_RES[2],
 					device_kind=(_DK.mouse, _DK.trackball))
+
+def _feature_change_host():
+	class _ChangeHostRW(_FeatureRW):
+		def __init__(self, feature):
+			super(_ChangeHostRW, self).__init__(feature)
+
+		def read(self, device):
+			return  b'\x02'
+			#value = super(_ChangeHostRW, self).read(device)
+			#if value == None:
+			#	return 0
+			#else:
+			#	return _int2bytes(value[1])
+
+		def write(self, device, data_bytes):
+			return super(_ChangeHostRW, self).write(device, data_bytes)
+
+	ret = feature_range(_CHANGE_HOST[0], _F.CHANGE_HOST, 0x00, 0x02,
+					read_function_id=0x00,
+					write_function_id=0x10,
+					bytes_count=1,
+					rw=_ChangeHostRW(_F.CHANGE_HOST),
+					label=_CHANGE_HOST[1], 
+					description=_CHANGE_HOST[2],
+					device_kind=(_DK.mouse, _DK.keyboard),
+					persister=False)
+	return ret
+
 
 def _feature_smart_shift():
 	_MIN_SMART_SHIFT_VALUE = 0
@@ -327,6 +359,7 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'backlight',
 					'typing_illumination',
 					'smart_shift',
+					'change_host',
 					])
 del namedtuple
 
@@ -346,6 +379,7 @@ RegisterSettings = _SETTINGS_LIST(
 				backlight=None,
 				typing_illumination=None,
 				smart_shift=None,
+				change_host=None,
 			)
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
@@ -363,6 +397,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				backlight=_feature_backlight2,
 				typing_illumination=None,
 				smart_shift=_feature_smart_shift,
+				change_host=_feature_change_host,
 			)
 
 del _SETTINGS_LIST
@@ -413,4 +448,5 @@ def check_feature_settings(device, already_known):
 	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
+	check_feature(_CHANGE_HOST[0],   _F.CHANGE_HOST)
 	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
