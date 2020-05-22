@@ -1,10 +1,10 @@
 title: Solaar
-description: Linux Device manager for the Logitech Unifying Receiver.
-tagline: Linux Device manager for the Logitech Unifying Receiver.
+description: Linux Device Manager for Logitech Unifying Receivers and Paired Devices.
+tagline: Linux Device Manager for Logitech Unifying Receivers and Paired Devices.
 owner: pwr-Solaar
 owner_url: https://github.com/pwr-Solaar
 repository: pwr-Solaar/Solaar
-version: 1.0.2rc3
+version: 1.0.2
 show_downloads: false
 encoding: utf-8
 theme: jekyll-theme-slate

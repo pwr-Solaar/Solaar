@@ -1,3 +1,6 @@
+1.0.2:
+  * Add usage document
+
 1.0.2rc3:
   * Don't produce error dialog for inaccessible receivers with access control lists.
   * Add option --battery-icons=symbolic to use symbolic icons if available.
