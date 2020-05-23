@@ -187,7 +187,15 @@ _D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid
 							_FS.disable_caps_lock(),
 							_FS.disable_scroll_lock(),
 							_FS.disable_insert(),
-							_FS.disable_win()
+							_FS.disable_win(),
+							_FS.tap_to_click_left(),
+							_FS.tap_to_click_right(),
+							_FS.tap_to_click_drag(),
+							_FS.tap_to_click_double(),
+							_FS.pinch_to_zoom(),
+							_FS.touchpad_vertical_scroll(),
+							_FS.touchpad_horizontal_scroll(),
+							_FS.touchpad_inverted_scroll()
                         ],
                 )
 _D('Wireless Keyboard K520', protocol=1.0, wpid='2011',

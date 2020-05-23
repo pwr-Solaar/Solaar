@@ -37,6 +37,7 @@ from .settings import (
 				Setting as _Setting,
 				RegisterRW as _RegisterRW,
 				FeatureRW as _FeatureRW,
+				NewFeatureRW as _NewFeatureRW,
 				BooleanValidator as _BooleanV,
 				ChoicesValidator as _ChoicesV,
 				RangeValidator as _RangeV,
@@ -78,6 +79,18 @@ def feature_toggle(name, feature,
 					label=None, description=None, device_kind=None):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
+	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+
+def feature_prefixed_toggle(name, feature, prefix,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					true_value=_BooleanV.default_true,
+					false_value=_BooleanV.default_false,
+					mask=_BooleanV.default_mask,
+					label=None, description=None, device_kind=None):
+	# prefix length = 2 bytes; value length = 2 bytes
+	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
+	rw = _NewFeatureRW(feature, prefix, true_value, read_function_id, write_function_id)
 	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 def feature_choices(name, feature, choices,
@@ -135,6 +148,14 @@ _SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
 							"instead of the standard side-scrolling events."))
 _DPI = ('dpi', _("Sensitivity (DPI)"), None)
 _POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
+_TOUCHPAD_VERTICAL_SCROLL = ('touchpad-vertical-scroll', _("Vertical Scrolling"),
+							_("Enables scrolling vertically by swiping up and down\n"
+							"on the touchpad with two fingers."))
+_TOUCHPAD_HORIZONTAL_SCROLL = ('touchpad-horizontal-scroll', _("Horizontal Scrolling"),
+							_("Enables scrolling horizontally by swiping left and right\n"
+							"on the touchpad with two fingers."))
+_TOUCHPAD_INVERTED_SCROLL = ('touchpad-inverted-scroll', _("Inverted Scrolling"),
+							_("Inverts the direction of the touchpad scrolling."))
 _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 							_("When set, the F1..F12 keys will activate their special function,\n"
 						 	"and you must hold the FN key to activate their standard function.")
@@ -149,6 +170,16 @@ _DISABLE_INSERT = ('disable-insert', _("Disable Insert"), _("When set, pressing 
 									"will produce no effect."))
 _DISABLE_WIN = ('disable-win', _("Disable Win"), _("When set, pressing the Windows key\n"
 									"will produce no effect."))
+_TAP_TO_CLICK_LEFT = ('tap-to-click-left', _("Tap to click (left)"), _("Allows performing left clicks by tapping the touchpad\n"
+									"with one finger"))
+_TAP_TO_CLICK_RIGHT = ('tap-to-click-right', _("Tap to click (right)"), _("Allows performing right clicks by tapping the touchpad\n"
+									"with two fingers"))
+_TAP_TO_CLICK_DRAG = ('tap-to-click-drag', _("Tap to click (drag)"), _("Allows dragging by double-tapping the touchpad\n"
+									"with one finger and holding the second tap while moving it"))
+_TAP_TO_CLICK_DOUBLE = ('tap-to-click-double', _("Tap to click (double)"), _("Allows (left) double-clicking by double-tapping the touchpad\n"
+									"with one finger"))
+_PINCH_TO_ZOOM = ('pinch-to-zoom', _("Pinch to zoom"), _("If set, enables zooming in and out by pinching and spreading two fingers\n"
+									"on the touchpad."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
 _BACKLIGHT = ('backlight', _("Backlight"),
@@ -221,6 +252,51 @@ def _feature_disable_insert():
 
 def _feature_disable_win():
 	return __feature_disable_keys(_DISABLE_WIN, 0x10)
+
+def __feature_tap_to_click(k, value):
+	return feature_prefixed_toggle(k[0], _F.GESTURE_2, 0x0001,
+					true_value=value,
+					label=k[1], description=k[2],
+					read_function_id=0x10,
+					write_function_id=0x20,
+					device_kind=(_DK.touchpad,))
+
+def _feature_tap_to_click_left():
+	return __feature_tap_to_click(_TAP_TO_CLICK_LEFT, 0x01)
+
+def _feature_tap_to_click_right():
+	return __feature_tap_to_click(_TAP_TO_CLICK_RIGHT, 0x02)
+
+def _feature_tap_to_click_drag():
+	return __feature_tap_to_click(_TAP_TO_CLICK_DRAG, 0x04)
+
+def _feature_tap_to_click_double():
+	return __feature_tap_to_click(_TAP_TO_CLICK_DOUBLE, 0x08)
+
+def _feature_pinch_to_zoom():
+	return feature_prefixed_toggle(_PINCH_TO_ZOOM[0], _F.GESTURE_2, 0x0101,
+					true_value=0x04,
+					label=_PINCH_TO_ZOOM[1], description=_PINCH_TO_ZOOM[2],
+					read_function_id=0x10,
+					write_function_id=0x20,
+					device_kind=(_DK.touchpad,))
+
+def __feature_touchpad_scroll(k, value):
+	return feature_prefixed_toggle(k[0], _F.GESTURE_2, 0x0001,
+					true_value=value,
+					label=k[1], description=k[2],
+					read_function_id=0x10,
+					write_function_id=0x20,
+					device_kind=(_DK.touchpad,))
+
+def _feature_touchpad_horizontal_scroll():
+	return __feature_touchpad_scroll(_TOUCHPAD_HORIZONTAL_SCROLL, 0x20)
+
+def _feature_touchpad_vertical_scroll():
+	return __feature_touchpad_scroll(_TOUCHPAD_VERTICAL_SCROLL, 0x40)
+
+def _feature_touchpad_inverted_scroll():
+	return __feature_touchpad_scroll(_TOUCHPAD_INVERTED_SCROLL, 0x10)
 
 # FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
@@ -346,6 +422,14 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'disable_scroll_lock',
 					'disable_insert',
 					'disable_win',
+					'tap_to_click_left',
+					'tap_to_click_right',
+					'tap_to_click_drag',
+					'tap_to_click_double',
+					'pinch_to_zoom',
+					'touchpad_horizontal_scroll',
+					'touchpad_vertical_scroll',
+					'touchpad_inverted_scroll',
 					'smooth_scroll',
 					'hi_res_scroll',
 					'lowres_smooth_scroll',
@@ -369,6 +453,14 @@ RegisterSettings = _SETTINGS_LIST(
 				disable_scroll_lock=None,
 				disable_insert=None,
 				disable_win=None,
+				tap_to_click_left=None,
+				tap_to_click_right=None,
+				tap_to_click_drag=None,
+				tap_to_click_double=None,
+				pinch_to_zoom=None,
+				touchpad_vertical_scroll=None,
+				touchpad_horizontal_scroll=None,
+				touchpad_inverted_scroll=None,
 				smooth_scroll=_register_smooth_scroll,
 				hi_res_scroll=None,
 				lowres_smooth_scroll=None,
@@ -390,6 +482,14 @@ FeatureSettings =  _SETTINGS_LIST(
 				disable_scroll_lock=_feature_disable_scroll_lock,
 				disable_insert=_feature_disable_insert,
 				disable_win=_feature_disable_win,
+				tap_to_click_left=_feature_tap_to_click_left,
+				tap_to_click_right=_feature_tap_to_click_right,
+				tap_to_click_drag=_feature_tap_to_click_drag,
+				tap_to_click_double=_feature_tap_to_click_double,
+				pinch_to_zoom=_feature_pinch_to_zoom,
+				touchpad_vertical_scroll=_feature_touchpad_vertical_scroll,
+				touchpad_horizontal_scroll=_feature_touchpad_horizontal_scroll,
+				touchpad_inverted_scroll=_feature_touchpad_inverted_scroll,
 				smooth_scroll=None,
 				hi_res_scroll=_feature_hi_res_scroll,
 				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
@@ -442,18 +542,26 @@ def check_feature_settings(device, already_known):
 		except Exception as reason:
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
-	check_feature(_HI_RES_SCROLL[0],       _F.HI_RES_SCROLLING)
-	check_feature(_LOW_RES_SCROLL[0],      _F.LOWRES_WHEEL)
-	check_feature(_HIRES_INV[0],           _F.HIRES_WHEEL, "hires_smooth_invert")
-	check_feature(_HIRES_RES[0],           _F.HIRES_WHEEL, "hires_smooth_resolution")
-	check_feature(_FN_SWAP[0],             _F.FN_INVERSION)
-	check_feature(_FN_SWAP[0],             _F.NEW_FN_INVERSION, 'new_fn_swap')
-	check_feature(_FN_SWAP[0],             _F.K375S_FN_INVERSION, 'k375s_fn_swap')
-	check_feature(_DISABLE_CAPS_LOCK[0],   _F.KEYBOARD_DISABLE_KEYS, 'disable_caps_lock')
-	check_feature(_DISABLE_SCROLL_LOCK[0], _F.KEYBOARD_DISABLE_KEYS, 'disable_scroll_lock')
-	check_feature(_DISABLE_INSERT[0],      _F.KEYBOARD_DISABLE_KEYS, 'disable_insert')
-	check_feature(_DISABLE_WIN[0],         _F.KEYBOARD_DISABLE_KEYS, 'disable_win')
-	check_feature(_DPI[0],                 _F.ADJUSTABLE_DPI)
-	check_feature(_POINTER_SPEED[0],       _F.POINTER_SPEED)
-	check_feature(_SMART_SHIFT[0],         _F.SMART_SHIFT)
-	check_feature(_BACKLIGHT[0],           _F.BACKLIGHT2)
+	check_feature(_HI_RES_SCROLL[0],              _F.HI_RES_SCROLLING)
+	check_feature(_LOW_RES_SCROLL[0],             _F.LOWRES_WHEEL)
+	check_feature(_HIRES_INV[0],                  _F.HIRES_WHEEL, "hires_smooth_invert")
+	check_feature(_HIRES_RES[0],                  _F.HIRES_WHEEL, "hires_smooth_resolution")
+	check_feature(_FN_SWAP[0],                    _F.FN_INVERSION)
+	check_feature(_FN_SWAP[0],                    _F.NEW_FN_INVERSION, 'new_fn_swap')
+	check_feature(_FN_SWAP[0],                    _F.K375S_FN_INVERSION, 'k375s_fn_swap')
+	check_feature(_DISABLE_CAPS_LOCK[0],          _F.KEYBOARD_DISABLE_KEYS, 'disable_caps_lock')
+	check_feature(_DISABLE_SCROLL_LOCK[0],        _F.KEYBOARD_DISABLE_KEYS, 'disable_scroll_lock')
+	check_feature(_DISABLE_INSERT[0],             _F.KEYBOARD_DISABLE_KEYS, 'disable_insert')
+	check_feature(_DISABLE_WIN[0],                _F.KEYBOARD_DISABLE_KEYS, 'disable_win')
+	check_feature(_TAP_TO_CLICK_LEFT[0],          _F.GESTURE_2, 'tap_to_click_left')
+	check_feature(_TAP_TO_CLICK_RIGHT[0],         _F.GESTURE_2, 'tap_to_click_right')
+	check_feature(_TAP_TO_CLICK_DRAG[0],          _F.GESTURE_2, 'tap_to_click_drag')
+	check_feature(_TAP_TO_CLICK_DOUBLE[0],        _F.GESTURE_2, 'tap_to_click_double')
+	check_feature(_PINCH_TO_ZOOM[0],              _F.GESTURE_2, 'pinch_to_zoom')
+	check_feature(_TOUCHPAD_VERTICAL_SCROLL[0],   _F.GESTURE_2, 'touchpad_vertical_scroll')
+	check_feature(_TOUCHPAD_HORIZONTAL_SCROLL[0], _F.GESTURE_2, 'touchpad_horizontal_scroll')
+	check_feature(_TOUCHPAD_INVERTED_SCROLL[0],   _F.GESTURE_2, 'touchpad_inverted_scroll')
+	check_feature(_DPI[0],                        _F.ADJUSTABLE_DPI)
+	check_feature(_POINTER_SPEED[0],              _F.POINTER_SPEED)
+	check_feature(_SMART_SHIFT[0],                _F.SMART_SHIFT)
+	check_feature(_BACKLIGHT[0],                  _F.BACKLIGHT2)

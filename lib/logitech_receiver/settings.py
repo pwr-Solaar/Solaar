@@ -211,6 +211,33 @@ class FeatureRW(object):
 		assert self.feature is not None
 		return device.feature_request(self.feature, self.write_fnid, data_bytes)
 
+class NewFeatureRW(object):
+
+	__slots__ = ('feature', 'read_fnid', 'write_fnid', 'prefix', 'key')
+
+	kind = _NamedInt(0x02, 'feature')
+	default_read_fnid = 0x10
+	default_write_fnid = 0x20
+
+	def __init__(self, feature, prefix, key, read_fnid=default_read_fnid, write_fnid=default_write_fnid):
+		assert isinstance(feature, _NamedInt)
+		self.prefix = prefix & 0xFFFF
+		self.key = key
+		self.feature = feature
+		self.read_fnid = read_fnid
+		self.write_fnid = write_fnid
+
+	def read(self, device):
+		# Reading requires passing some parameters
+		value = device.feature_request(self.feature, self.read_fnid,
+					((self.prefix << 16) + 0xFFFF).to_bytes(4, 'big'))
+		return value
+
+	def write(self, device, data_byte):
+		assert self.feature is not None
+		return device.feature_request(self.feature, self.write_fnid,
+					((self.prefix << 16) + (self.key << 8) + data_byte).to_bytes(4, 'big'))
+
 #
 # value validators
 # handle the conversion from read bytes, to setting value, and back
