@@ -182,10 +182,14 @@ _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 						],
 				)
 _D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid='404D',
-                                settings=[
-                                                        _FS.new_fn_swap()
-                                                ],
-                                )
+				settings=[
+							_FS.new_fn_swap(),
+							_FS.disable_caps_lock(),
+							_FS.disable_scroll_lock(),
+							_FS.disable_insert(),
+							_FS.disable_win()
+                        ],
+                )
 _D('Wireless Keyboard K520', protocol=1.0, wpid='2011',
 				registers=(_R.battery_status, ),
 				settings=[

@@ -141,6 +141,14 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	+ '\n\n' +
 						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
 						 	"and you must hold the FN key to activate their special function."))
+_DISABLE_CAPS_LOCK = ('disable-caps-lock', _("Disable Caps Lock"), _("When set, pressing the Caps Lock key\n"
+									"will produce no effect."))
+_DISABLE_SCROLL_LOCK = ('disable-scroll-lock', _("Disable Scroll Lock"), _("When set, pressing the Scroll Lock key\n"
+									"will produce no effect."))
+_DISABLE_INSERT = ('disable-insert', _("Disable Insert"), _("When set, pressing the Insert key\n"
+									"will produce no effect."))
+_DISABLE_WIN = ('disable-win', _("Disable Win"), _("When set, pressing the Windows key\n"
+									"will produce no effect."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
 _BACKLIGHT = ('backlight', _("Backlight"),
@@ -179,7 +187,6 @@ def _register_dpi(register=_R.mouse_dpi, choices=None):
 					label=_DPI[1], description=_DPI[2],
 					device_kind=(_DK.mouse, _DK.trackball))
 
-
 def _feature_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
@@ -194,6 +201,26 @@ def _feature_k375s_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.K375S_FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
+
+def __feature_disable_keys(k, value):
+	return feature_toggle(k[0], _F.KEYBOARD_DISABLE_KEYS,
+					true_value=value, mask=value,
+					label=k[1], description=k[2],
+					read_function_id=0x10,
+					write_function_id=0x20,
+					device_kind=(_DK.keyboard,))
+
+def _feature_disable_caps_lock():
+	return __feature_disable_keys(_DISABLE_CAPS_LOCK, 0x01)
+
+def _feature_disable_scroll_lock():
+	return __feature_disable_keys(_DISABLE_SCROLL_LOCK, 0x04)
+
+def _feature_disable_insert():
+	return __feature_disable_keys(_DISABLE_INSERT, 0x08)
+
+def _feature_disable_win():
+	return __feature_disable_keys(_DISABLE_WIN, 0x10)
 
 # FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
@@ -315,6 +342,10 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'fn_swap',
 					'new_fn_swap',
 					'k375s_fn_swap',
+					'disable_caps_lock',
+					'disable_scroll_lock',
+					'disable_insert',
+					'disable_win',
 					'smooth_scroll',
 					'hi_res_scroll',
 					'lowres_smooth_scroll',
@@ -334,6 +365,10 @@ RegisterSettings = _SETTINGS_LIST(
 				fn_swap=_register_fn_swap,
 				new_fn_swap=None,
 				k375s_fn_swap=None,
+				disable_caps_lock=None,
+				disable_scroll_lock=None,
+				disable_insert=None,
+				disable_win=None,
 				smooth_scroll=_register_smooth_scroll,
 				hi_res_scroll=None,
 				lowres_smooth_scroll=None,
@@ -351,6 +386,10 @@ FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
 				new_fn_swap=_feature_new_fn_swap,
 				k375s_fn_swap=_feature_k375s_fn_swap,
+				disable_caps_lock=_feature_disable_caps_lock,
+				disable_scroll_lock=_feature_disable_scroll_lock,
+				disable_insert=_feature_disable_insert,
+				disable_win=_feature_disable_win,
 				smooth_scroll=None,
 				hi_res_scroll=_feature_hi_res_scroll,
 				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
@@ -403,14 +442,18 @@ def check_feature_settings(device, already_known):
 		except Exception as reason:
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
-	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
-	check_feature(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL)
-	check_feature(_HIRES_INV[0],     _F.HIRES_WHEEL, "hires_smooth_invert")
-	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
-	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
-	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
-	check_feature(_FN_SWAP[0],       _F.K375S_FN_INVERSION, 'k375s_fn_swap')
-	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
-	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
-	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
-	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
+	check_feature(_HI_RES_SCROLL[0],       _F.HI_RES_SCROLLING)
+	check_feature(_LOW_RES_SCROLL[0],      _F.LOWRES_WHEEL)
+	check_feature(_HIRES_INV[0],           _F.HIRES_WHEEL, "hires_smooth_invert")
+	check_feature(_HIRES_RES[0],           _F.HIRES_WHEEL, "hires_smooth_resolution")
+	check_feature(_FN_SWAP[0],             _F.FN_INVERSION)
+	check_feature(_FN_SWAP[0],             _F.NEW_FN_INVERSION, 'new_fn_swap')
+	check_feature(_FN_SWAP[0],             _F.K375S_FN_INVERSION, 'k375s_fn_swap')
+	check_feature(_DISABLE_CAPS_LOCK[0],   _F.KEYBOARD_DISABLE_KEYS, 'disable_caps_lock')
+	check_feature(_DISABLE_SCROLL_LOCK[0], _F.KEYBOARD_DISABLE_KEYS, 'disable_scroll_lock')
+	check_feature(_DISABLE_INSERT[0],      _F.KEYBOARD_DISABLE_KEYS, 'disable_insert')
+	check_feature(_DISABLE_WIN[0],         _F.KEYBOARD_DISABLE_KEYS, 'disable_win')
+	check_feature(_DPI[0],                 _F.ADJUSTABLE_DPI)
+	check_feature(_POINTER_SPEED[0],       _F.POINTER_SPEED)
+	check_feature(_SMART_SHIFT[0],         _F.SMART_SHIFT)
+	check_feature(_BACKLIGHT[0],           _F.BACKLIGHT2)
