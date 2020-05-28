@@ -71,6 +71,7 @@ class PairedDevice(object):
 		self._keys = None
 		self._registers = None
 		self._settings = None
+		self._feature_settings_checked = False
 
 		# Misc stuff that's irrelevant to any functionality, but may be
 		# displayed in the UI and caching it here helps.
@@ -251,8 +252,8 @@ class PairedDevice(object):
 				self._settings = [s(self) for s in self.descriptor.settings]
 			else:
 				self._settings = []
-
-		_check_feature_settings(self, self._settings)
+		if not self._feature_settings_checked:
+			self._feature_settings_checked =_check_feature_settings(self, self._settings)
 		return self._settings
 
 	def enable_notifications(self, enable=True):

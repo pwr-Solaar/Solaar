@@ -371,12 +371,13 @@ del _SETTINGS_LIST
 #
 #
 
+# Returns True if device was queried to find features, False otherwise
 def check_feature_settings(device, already_known):
 	"""Try to auto-detect device settings by the HID++ 2.0 features they have."""
 	if device.features is None or not device.online:
-		return
+		return False
 	if device.protocol and device.protocol < 2.0:
-		return
+		return False
 
 	def check_feature(name, featureId, field_name=None):
 		"""
@@ -414,3 +415,4 @@ def check_feature_settings(device, already_known):
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
 	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
+	return True
