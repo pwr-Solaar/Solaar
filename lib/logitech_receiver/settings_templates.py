@@ -78,7 +78,7 @@ def feature_toggle(name, feature,
 					label=None, description=None, device_kind=None):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
 
 def feature_choices(name, feature, choices,
 					read_function_id, write_function_id,
@@ -87,7 +87,7 @@ def feature_choices(name, feature, choices,
 	assert choices
 	validator = _ChoicesV(choices, bytes_count=bytes_count)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, feature=feature, kind=_KIND.choice, label=label, description=description, device_kind=device_kind)
 
 def feature_choices_dynamic(name, feature, choices_callback,
 					read_function_id, write_function_id,
@@ -113,7 +113,7 @@ def feature_range(name, feature, min_value, max_value,
 	validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
 	if rw is None:
 		rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, feature=feature, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
 
 #
 # common strings for settings
