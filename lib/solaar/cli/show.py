@@ -24,6 +24,7 @@ from logitech_receiver import (
 				hidpp10 as _hidpp10,
 				hidpp20 as _hidpp20,
 				special_keys as _special_keys,
+				settings_templates as _settings_templates
 			)
 
 
@@ -91,6 +92,9 @@ def _print_device(dev):
 
 	if dev.online and dev.features:
 		print ('     Supports %d HID++ 2.0 features:' % len(dev.features))
+		dev.persister = None  # Give the device a fake persister
+		dev_settings = []
+		_settings_templates.check_feature_settings(dev, dev_settings)
 		for index, feature in enumerate(dev.features):
 			feature = dev.features[index]
 			flags = dev.request(0x0000, feature.bytes(2))
@@ -122,7 +126,7 @@ def _print_device(dev):
 						print("            HID++ notification")
 					else:
 						print("            HID notification")
-			if feature == _hidpp20.FEATURE.MOUSE_POINTER:
+			elif feature == _hidpp20.FEATURE.MOUSE_POINTER:
 				mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
 				if mouse_pointer:
 					print("            DPI: %s" % mouse_pointer['dpi'])
@@ -141,7 +145,7 @@ def _print_device(dev):
 					print("            Roller type: %s" % vertical_scrolling_info['roller'])
 					print("            Ratchet per turn: %s" % vertical_scrolling_info['ratchet'])
 					print("            Scroll lines: %s" % vertical_scrolling_info['lines'])
-			if feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
+			elif feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
 				scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(dev)
 				if scrolling_mode:
 					print("            Hi-res scrolling enabled")
@@ -149,14 +153,19 @@ def _print_device(dev):
 					print("            Hi-res scrolling disabled")
 				if scrolling_resolution:
 					print("            Hi-res scrolling multiplier: %s" % scrolling_resolution)
-			if feature == _hidpp20.FEATURE.POINTER_SPEED:
+			elif feature == _hidpp20.FEATURE.POINTER_SPEED:
 				pointer_speed = _hidpp20.get_pointer_speed_info(dev)
 				if pointer_speed:
 					print("            Pointer Speed: %s" % pointer_speed)
-			if feature == _hidpp20.FEATURE.LOWRES_WHEEL:
-				wheel_status = _hidpp20.get_lowres_wheel_status(dev)
-				if wheel_status:
-					print("            Wheel Reports: %s" % wheel_status)
+#			elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
+#				wheel_status = _hidpp20.get_lowres_wheel_status(dev)
+#				if wheel_status:
+#					print("            Wheel Reports: %s" % wheel_status)
+			else: 
+				for setting in dev_settings:
+					if setting.feature == feature:
+						v = setting.read(False)
+						print("            %s: %s" % (setting.label, v) )
 
 	if dev.online and dev.keys:
 		print ('     Has %d reprogrammable keys:' % len(dev.keys))
