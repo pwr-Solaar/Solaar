@@ -42,15 +42,16 @@ KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04)
 class Setting(object):
 	"""A setting descriptor.
 	Needs to be instantiated for each specific device."""
-	__slots__ = ('name', 'label', 'description', 'kind', 'device_kind',
+	__slots__ = ('name', 'label', 'description', 'kind', 'device_kind', 'feature', 
 					'_rw', '_validator', '_device', '_value')
 
-	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None):
+	def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None, feature=None):
 		assert name
 		self.name = name
 		self.label = label or name
 		self.description = description
 		self.device_kind = device_kind
+		self.feature = feature
 
 		self._rw = rw
 		self._validator = validator
