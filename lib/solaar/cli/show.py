@@ -70,6 +70,7 @@ def _print_device(dev):
 	assert dev
 	# check if the device is online
 	dev.ping()
+	dev_settings = dev.settings  # make sure that device settings are available
 
 	print ('  %d: %s' % (dev.number, dev.name))
 	print ('     Codename     :', dev.codename)
@@ -101,8 +102,6 @@ def _print_device(dev):
 	if dev.online and dev.features:
 		print ('     Supports %d HID++ 2.0 features:' % len(dev.features))
 		dev.persister = None  # Give the device a fake persister
-		dev_settings = []
-		_settings_templates.check_feature_settings(dev, dev_settings)
 		for index, feature in enumerate(dev.features):
 			feature = dev.features[index]
 			flags = dev.request(0x0000, feature.bytes(2))

@@ -227,6 +227,10 @@ class PairedDevice(object):
 				self._polling_rate = ord(pair_info[2:3])
 			else:
 				self._polling_rate = 0
+		if self._settings and self.features and _hidpp20.FEATURE.REPORT_RATE in self.features:
+			for setting in self._settings:
+				if setting.feature == _hidpp20.FEATURE.REPORT_RATE:
+					self._polling_rate = setting.read(False)
 		return self._polling_rate
 
 	@property

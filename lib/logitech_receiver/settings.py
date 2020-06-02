@@ -98,13 +98,13 @@ class Setting(object):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s: settings read %r from %s", self.name, self._value, self._device)
 
-		if self._value is None and self._device.persister:
+		if self._value is None and getattr(self._device,'persister',None):
 			# We haven't read a value from the device yet,
 			# maybe we have something in the configuration.
 			self._value = self._device.persister.get(self.name)
 
 		if cached and self._value is not None:
-			if self._device.persister and self.name not in self._device.persister:
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
 				# If this is a new device (or a new setting for an old device),
 				# make sure to save its current value for the next time.
 				self._device.persister[self.name] = self._value
@@ -114,7 +114,7 @@ class Setting(object):
 			reply = self._rw.read(self._device)
 			if reply:
 				self._value = self._validator.validate_read(reply)
-			if self._device.persister and self.name not in self._device.persister:
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
 				# Don't update the persister if it already has a value,
 				# otherwise the first read might overwrite the value we wanted.
 				self._device.persister[self.name] = self._value

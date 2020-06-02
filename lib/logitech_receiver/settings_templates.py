@@ -193,6 +193,7 @@ _HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
 							_("High-sensitivity wheel invert mode for vertical scroll."))
 _HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
+_REPORT_RATE = ('report_rate', _("Polling Rate (ms)"), _("Frequency of device polling, in milliseconds"))
 _FN_SWAP = ('fn-swap', _("Swap Fx function"), _("When set, the F1..F12 keys will activate their special function,\n"
 						 	"and you must hold the FN key to activate their standard function.")
 						 	+ '\n\n' +
@@ -349,7 +350,7 @@ def _feature_adjustable_dpi_choices(device):
 	return _NamedInts.list(dpi_list)
 
 def _feature_adjustable_dpi():
-	"""Pointer Speed feature"""
+	"""Adjustable DPI Feature"""
 	# Assume sensorIdx 0 (there is only one sensor)
 	# [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
 	# [3] setSensorDpi(sensorIdx, dpi)
@@ -359,6 +360,33 @@ def _feature_adjustable_dpi():
 					write_function_id=0x30,
 					bytes_count=3,
 					label=_DPI[1], description=_DPI[2],
+					device_kind=(_DK.mouse, _DK.trackball))
+
+# Implemented based on code in libratrag
+# NB: Changing report rate can only be done in host mode, so making this a one-choice choice for now
+#def _feature_report_rate_choices(device):
+#	reply = device.feature_request(_F.REPORT_RATE, 0x00)
+#	assert reply, 'Oops, report rate choices cannot be retrieved!'
+#	rate_list = []
+#	rate_flags = _bytes2int(reply[0:1])
+#	for i in range(0,8):
+#		if (rate_flags >> i) & 0x01:
+#			rate_list.append(i+1)
+#	return _NamedInts.list(rate_list)
+def _feature_report_rate_choices(device):
+	reply = device.feature_request(_F.REPORT_RATE, 0x10)
+	assert reply, 'Oops, report rate choices cannot be retrieved!'
+	rate_list = [_bytes2int(reply[0:1])]
+	return _NamedInts.list(rate_list)
+
+def _feature_report_rate():
+	"""Report Rate feature"""
+	return feature_choices_dynamic(_REPORT_RATE[0], _F.REPORT_RATE,
+					_feature_report_rate_choices,
+					read_function_id=0x10,
+					write_function_id=0x20,
+					bytes_count=1,
+					label=_REPORT_RATE[1], description=_REPORT_RATE[2],
 					device_kind=(_DK.mouse, _DK.trackball))
 
 def _feature_pointer_speed():
@@ -447,6 +475,7 @@ _SETTINGS_TABLE = [
 	_S( _BACKLIGHT[0], _F.BACKLIGHT2, _feature_backlight2 ),
 	_S( _REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys ),
 	_S( _DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys ),
+	_S( _REPORT_RATE[0], _F.REPORT_RATE, _feature_report_rate ),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST',[s[4] for s in _SETTINGS_TABLE])
