@@ -195,9 +195,9 @@ CHARGE_STATUS = _NamedInts(
 				error=0x07)
 
 CHARGE_LEVEL = _NamedInts(
-				average=0x00,
-				full=0x01,
-				critical=0x02)
+				average=50,
+				full=90,
+				critical=5)
 
 CHARGE_TYPE = _NamedInts(
 				standard=0x00,
@@ -513,10 +513,7 @@ def get_name(device):
 
 
 def get_battery(device):
-	"""Reads a device's battery level.
-
-	:raises FeatureNotSupported: if the device does not support this feature.
-	"""
+	"""Reads a device's battery level."""
 	battery = feature_request(device, FEATURE.BATTERY_STATUS)
 	if battery:
 		discharge, dischargeNext, status = _unpack('!BBB', battery[:3])

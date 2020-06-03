@@ -229,6 +229,12 @@ class DeviceStatus(dict):
 				battery = _hidpp10.get_battery(d)
 			else:
 				battery = _hidpp20.get_battery(d)
+				if battery is None:
+					v = _hidpp20.get_voltage(d)
+					if v is not None:
+						_, charging, status, level, _ = v
+						status = _hidpp20.BATTERY_STATUS.recharging if status == _hidpp20.BATTERY_STATUS.recharging else _hidpp20.BATTERY_STATUS.discharging
+						battery = ( level, status, None )
 
 			# Really unnecessary, if the device has SOLAR_DASHBOARD it should be
 			# broadcasting it's battery status anyway, it will just take a little while.
