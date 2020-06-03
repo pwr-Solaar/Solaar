@@ -635,7 +635,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 		if isinstance(battery_level, _NamedInt):
 			text = _(str(battery_level))
 		else:
-			text = _("%(battery_percent)d%%") % { 'battery_percent': battery_level }
+			text = "%(battery_percent)d%%" % { 'battery_percent': battery_level }
 		if battery_next_level is not None:
 			if isinstance(battery_next_level, _NamedInt):
 				text += "<small> (" +_("next ") + _(str(battery_next_level)) + ")</small>"
@@ -824,9 +824,9 @@ def update(device, need_popup=False):
 				_model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
 			else:
 				if isinstance(battery_level, _NamedInt):
-					status_text = _("%(battery_level)s") % { 'battery_level': _(str(battery_level)) }
+					status_text = _(str(battery_level))
 				else:
-					status_text = _("%(battery_percent)d%%") % { 'battery_percent': battery_level }
+					status_text = "%(battery_percent)d%%" % { 'battery_percent': battery_level }
 				_model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
 				charging = device.status.get(_K.BATTERY_CHARGING)
