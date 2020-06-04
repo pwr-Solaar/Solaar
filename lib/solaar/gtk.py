@@ -21,6 +21,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import importlib
+import os.path
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -136,6 +137,16 @@ def main():
 
     gi = _require('gi', 'python3-gi or python3-gobject')
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
+
+    udev_file = '42-logitech-unify-permissions.rules'
+    if not os.path.isfile('/etc/udev/rules.d/' + udev_file) and not os.path.isfile('/lib/udev/rules.d/' + udev_file):
+        print(_i18n._('Solaar depends on a udev file that is not present'))
+        print(
+            _i18n._(
+                'For more information see the Solaar installation directions\n'
+                'at https://pwr-solaar.github.io/Solaar/installation'
+            )
+        )
 
     try:
         import solaar.ui as ui
