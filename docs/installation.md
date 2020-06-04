@@ -44,7 +44,7 @@ for Unity in Ubuntu).
 ### Installing Solaar's udev Rule
 
 Solaar needs to write to the receiver's HID device.
-To be able to do this without running as root requires udev rule
+To be able to do this without running as root requires a udev rule
 that gives seated users write access to the HID devices for Logitech receivers.
 
 You can install this rule by copying, as root,
@@ -84,23 +84,25 @@ because this runs arbitrary code as root and because this can override existing 
 that other users or even the system depend on.  If you want to install solaar to /usr/local run
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
 (The umask is needed so that the created files and directories can be read and executed by everyone.)
-This will also install the udev rule and the Solaar autostart desktop file.
 Then solaar can be run as /usr/local/bin/solaar.
+This will not install the udev rule.
 
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
 
 
 ## Running Solaar at Startup
 
-Solaar is run automatically at user login via the desktop file
+Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
 `/etc/xdg/autostart/solaar.desktop`.
 
-If you install Solaar yourself you may need to create or modify this file.
+If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.
 
 
 ## Using PyPI
 
 As an alternative to downloading and installing you can install the most recent release
 (but not the current github version) of Solaar from PyPI.
-Just run `pip install --user solaar` or `sudo pip install solaar`.
-The `--user` flag will not install the Solaar udev rule or the Solaar autostart file.
+Just run `pip install --user solaar`.
+This will not install the Solaar udev rule, which you will need to copy from
+`~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
+to `/etc/udev/rules.d`.

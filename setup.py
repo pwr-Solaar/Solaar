@@ -7,8 +7,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-autostart_path = '/etc/xdg/autostart'
-
 # from solaar import NAME, __version__
 __version__ = '1.0.2'
 NAME = 'Solaar'
@@ -25,8 +23,7 @@ def _data_files():
         yield _dirname(mo), [mo]
 
     yield 'share/applications', ['share/applications/solaar.desktop']
-    yield autostart_path, ['share/autostart/solaar.desktop']
-    yield '/etc/udev/rules.d', ['rules.d/42-logitech-unify-permissions.rules']
+    yield 'share/solaar/udev-rules.d', ['rules.d/42-logitech-unify-permissions.rules']
 
     del _dirname
 
