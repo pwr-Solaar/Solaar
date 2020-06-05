@@ -14,7 +14,9 @@ Solaar also has a main window.  To show the main window if it is not visible
 click on the icon in the system tray to bring up the Solaar menu and then
 click on a receiver or device in the menu.
 
-Here is an example of the Solaar icon (in the system tray) and the Solaar menu:
+Here is an image of the Solaar menu and the Solaar icon (here the battery
+symbol in the system tray at the left of the image ). The Solaar icon can
+also be other battery icons or versions of the Logitech Unifying icon.
 
 ![Solaar-menu](Solaar-menu.png)
 
