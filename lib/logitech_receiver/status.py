@@ -48,6 +48,7 @@ KEYS = _NamedInts(
 				NOTIFICATION_FLAGS=6,
 				ERROR=7,
 				BATTERY_NEXT_LEVEL=8,
+				BATTERY_VOLTAGE=9,
 			)
 
 # If the battery charge is under this percentage, trigger an attention event
@@ -171,7 +172,7 @@ class DeviceStatus(dict):
 		return bool(self._active)
 	__nonzero__ = __bool__
 
-	def set_battery_info(self, level, status, nextLevel=None, timestamp=None):
+	def set_battery_info(self, level, status, nextLevel=None, voltage=None, timestamp=None):
 		if _log.isEnabledFor(_DEBUG):
 			_log.debug("%s: battery %s, %s", self._device, level, status)
 
@@ -194,6 +195,8 @@ class DeviceStatus(dict):
 		old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
 		old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
 		self[KEYS.BATTERY_NEXT_LEVEL] = nextLevel
+		if voltage is not None:
+			self[KEYS.BATTERY_VOLTAGE] = voltage
 
 		charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full,
 				      _hidpp20.BATTERY_STATUS.full, _hidpp20.BATTERY_STATUS.slow_recharge)
@@ -220,6 +223,7 @@ class DeviceStatus(dict):
 			_hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
 			self.changed(active=True, alert=alert, reason=reason, timestamp=timestamp)
 
+	# Retrieve and regularize battery status
 	def read_battery(self, timestamp=None):
 		if self._active:
 			d = self._device
@@ -227,14 +231,17 @@ class DeviceStatus(dict):
 
 			if d.protocol < 2.0:
 				battery = _hidpp10.get_battery(d)
-			else:
-				battery = _hidpp20.get_battery(d)
-				if battery is None:
-					v = _hidpp20.get_voltage(d)
-					if v is not None:
-						_, charging, status, level, _ = v
-						status = _hidpp20.BATTERY_STATUS.recharging if status == _hidpp20.BATTERY_STATUS.recharging else _hidpp20.BATTERY_STATUS.discharging
-						battery = ( level, status, None )
+				self.set_battery_keys(battery)
+				return
+
+			battery = _hidpp20.get_battery(d)
+			if battery is None:
+				v = _hidpp20.get_voltage(d)
+				if v is not None:
+					voltage, charging, _ignore, level, _ignore = v
+					status = _hidpp20.BATTERY_STATUS.recharging if charging else _hidpp20.BATTERY_STATUS.discharging
+					self.set_battery_keys( (level, status, None), voltage)
+					return
 
 			# Really unnecessary, if the device has SOLAR_DASHBOARD it should be
 			# broadcasting it's battery status anyway, it will just take a little while.
@@ -243,14 +250,16 @@ class DeviceStatus(dict):
 			if battery is None and d.features and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
 				d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
 				return
+			self.set_battery_keys(battery)
 
-			if battery is not None:
-				level, status, nextLevel = battery
-				self.set_battery_info(level, status, nextLevel)
-			elif KEYS.BATTERY_STATUS in self:
-				self[KEYS.BATTERY_STATUS] = None
-				self[KEYS.BATTERY_CHARGING] = None
-				self.changed()
+	def set_battery_keys(self, battery, voltage=None) :
+		if battery is not None:
+			level, status, nextLevel = battery
+			self.set_battery_info(level, status, nextLevel, voltage)
+		elif KEYS.BATTERY_STATUS in self:
+			self[KEYS.BATTERY_STATUS] = None
+			self[KEYS.BATTERY_CHARGING] = None
+			self.changed()
 
 	def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
 		assert self._changed_callback
