@@ -346,9 +346,7 @@ def _create(delete_action):
 	geometry = Gdk.Geometry()
 	geometry.min_width = 600
 	geometry.min_height = 320
-	geometry.max_width = 1000
-	geometry.max_height = 600
-	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE | Gdk.WindowHints.MAX_SIZE)
+	window.set_geometry_hints(vbox, geometry, Gdk.WindowHints.MIN_SIZE)
 	window.set_position(Gtk.WindowPosition.CENTER)
 
 	style = window.get_style_context()
