@@ -247,6 +247,14 @@ def _process_feature_notification(device, status, n, feature):
 			_log.warn("%s: unknown BATTERY %s", device, n)
 		return True
 
+	if feature == _F.BATTERY_VOLTAGE:
+		if n.address == 0x00:
+			level, status, voltage, _ignore, _ignore =_hidpp20.decipher_voltage(n.data)
+			status.set_battery_info(level, status, None, voltage)
+		else:
+			_log.warn("%s: unknown VOLTAGE %s", device, n)
+		return True
+
 	# TODO: what are REPROG_CONTROLS_V{2,3}?
 	if feature == _F.REPROG_CONTROLS:
 		if n.address == 0x00:

@@ -188,8 +188,8 @@ def _print_device(dev):
 		else:
 			battery_voltage = _hidpp20.get_voltage(dev)
 			if battery_voltage :
-				(voltage, charging, charge_sts, charge_lvl, charge_type) = battery_voltage
-				print ('     Battery: %smV, %s.' % (voltage, 'Charging' if charging else 'Discharging'))
+				(level, status, voltage, charge_sts, charge_type) = battery_voltage
+				print ('     Battery: %smV, %s, %s.' % (voltage, status, level))
 			else:
 				print ('     Battery status unavailable.')
 	else:

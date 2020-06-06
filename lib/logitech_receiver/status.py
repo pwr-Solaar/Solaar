@@ -238,8 +238,7 @@ class DeviceStatus(dict):
 			if battery is None:
 				v = _hidpp20.get_voltage(d)
 				if v is not None:
-					voltage, charging, _ignore, level, _ignore = v
-					status = _hidpp20.BATTERY_STATUS.recharging if charging else _hidpp20.BATTERY_STATUS.discharging
+					level, status, voltage, _ignore, _ignore = v
 					self.set_battery_keys( (level, status, None), voltage)
 					return
 
