@@ -527,32 +527,38 @@ def get_battery(device):
 def get_voltage(device):
 	battery_voltage = feature_request(device, FEATURE.BATTERY_VOLTAGE)
 	if battery_voltage:
-		voltage, flags = _unpack('>HB', battery_voltage[:3])
-		charging = False
+		return decipher_voltage(battery_voltage)
+
+
+# modified to be much closer to battery reports
+def decipher_voltage(voltage_report):
+	voltage, flags = _unpack('>HB', voltage_report[:3])
+	status = BATTERY_STATUS.discharging
+	charge_sts = ERROR.unknown
+	charge_lvl = CHARGE_LEVEL.average
+	charge_type = CHARGE_TYPE.standard
+
+	if flags & (1 << 7):
+		status = BATTERY_STATUS.recharging
+		charge_sts = CHARGE_STATUS[flags & 0x03]
+	if charge_sts is None:
 		charge_sts = ERROR.unknown
-		charge_lvl = CHARGE_LEVEL.average
-		charge_type = CHARGE_TYPE.standard
+	elif charge_sts == CHARGE_STATUS.full:
+		charge_lvl = CHARGE_LEVEL.full
+		status = BATTERY_STATUS.full
+	if (flags & (1 << 3)):
+		charge_type = CHARGE_TYPE.fast
+	elif (flags & (1 << 4)):
+		charge_type = CHARGE_TYPE.slow
+		status = BATTERY_STATUS.slow_recharge
+	elif (flags & (1 << 5)):
+		charge_lvl = CHARGE_LEVEL.critical
 
-		if flags & (1 << 7):
-			charging = True
-			charge_sts = CHARGE_STATUS[flags & 0x03]
+	if _log.isEnabledFor(_DEBUG):
+		_log.debug("device %d, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s",
+				device.number, voltage, status, (flags & 0x03), charge_sts, charge_lvl, charge_type)
 
-		if charge_sts is None:
-			charge_sts = ERROR.unknown
-		elif charge_sts == CHARGE_STATUS.full:
-			charge_lvl = CHARGE_LEVEL.full
-
-		if (flags & (1 << 3)):
-			charge_type = CHARGE_TYPE.fast
-		elif (flags & (1 << 4)):
-			charge_type = CHARGE_TYPE.slow
-		elif (flags & (1 << 5)):
-			charge_lvl = CHARGE_LEVEL.critical
-
-		if _log.isEnabledFor(_DEBUG):
-			_log.debug("device %d, battery voltage %d mV, charging = %d, charge status %d = %s, charge level %s, charge type %s",
-					device.number, voltage, charging, (flags & 0x03), charge_sts, charge_lvl, charge_type)
-		return voltage, charging, charge_sts, charge_lvl, charge_type
+	return charge_lvl, status, voltage, charge_sts, charge_type
 
 
 def get_keys(device):
