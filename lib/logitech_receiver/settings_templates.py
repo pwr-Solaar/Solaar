@@ -26,19 +26,25 @@ del getLogger
 from .i18n import _
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from . import special_keys as _special_keys
 from .common import (
 				bytes2int as _bytes2int,
 				int2bytes as _int2bytes,
+				NamedInt as _NamedInt,
 				NamedInts as _NamedInts,
 				unpack as _unpack,
+				ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4,
 			)
 from .settings import (
 				KIND as _KIND,
 				Setting as _Setting,
+				Settings as _Settings,
 				RegisterRW as _RegisterRW,
 				FeatureRW as _FeatureRW,
+				FeatureRWMap as _FeatureRWMap,
 				BooleanValidator as _BooleanV,
 				ChoicesValidator as _ChoicesV,
+				ChoicesMapValidator as _ChoicesMapV,
 				RangeValidator as _RangeV,
 			)
 
@@ -104,6 +110,34 @@ def feature_choices_dynamic(name, feature, choices_callback,
 		return setting(device)
 	return instantiate
 
+# maintain a mapping from keys (NamedInts) to one of a list of choices (NamedInts), default is first one
+# the setting is stored as a JSON-compatible object mapping the key int (as a string) to the choice int
+# extra_default is an extra value that comes from the device that also means the default
+def feature_map_choices(name, feature, choicesmap,
+					read_function_id, write_function_id,
+					key_bytes_count=None, skip_bytes_count=None, value_bytes_count=None,
+					label=None, description=None, device_kind=None, extra_default=None):
+	assert choicesmap
+	validator = _ChoicesMapV(choicesmap, key_bytes_count=key_bytes_count, skip_bytes_count=skip_bytes_count, value_bytes_count=value_bytes_count, extra_default=extra_default )
+	rw = _FeatureRWMap(feature, read_function_id, write_function_id, key_bytes=key_bytes_count)
+	return _Settings(name, rw, validator, feature=feature, kind=_KIND.map_choice, label=label, description=description, device_kind=device_kind)
+
+def feature_map_choices_dynamic(name, feature, choices_callback,
+					read_function_id, write_function_id,
+					key_bytes_count=None, skip_bytes_count=None, value_bytes_count=None,
+					label=None, description=None, device_kind=None, extra_default=None):
+	# Proxy that obtains choices dynamically from a device
+	def instantiate(device):
+		choices = choices_callback(device)
+		if not choices: # no choices, so don't create a Setting
+			return None
+		setting = feature_map_choices(name, feature, choices,
+						read_function_id, write_function_id,
+						key_bytes_count=key_bytes_count, skip_bytes_count=skip_bytes_count, value_bytes_count=value_bytes_count,
+						label=label, description=description, device_kind=device_kind, extra_default=extra_default)
+		return setting(device)
+	return instantiate
+
 def feature_range(name, feature, min_value, max_value,
 					read_function_id=_FeatureRW.default_read_fnid,
 					write_function_id=_FeatureRW.default_write_fnid,
@@ -149,6 +183,8 @@ _BACKLIGHT = ('backlight', _("Backlight"),
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"),
 							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key"))
+
 #
 #
 #
@@ -306,6 +342,42 @@ def _feature_pointer_speed():
 					bytes_count=2,
 					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
 					device_kind=(_DK.mouse, _DK.trackball))
+
+# the keys for the choice map are Logitech controls (from special_keys)
+# each choice value is a NamedInt with the string from a task (to be shown to the user)
+# and the integer being the control number for that task (to be written to the device)
+def _feature_reprogrammable_keys_choices(device):
+	count = device.feature_request(_F.REPROG_CONTROLS_V4)
+	assert count, 'Oops, reprogrammable key count cannot be retrieved!'
+	count = ord(count[:1]) # the number of key records
+	keys = [None] * count
+	groups = [ [] for i in range(0,9) ]
+	choices = {}
+	for i in range(0,count):  # get the data for each key record on device
+		keydata = device.feature_request(_F.REPROG_CONTROLS_V4, 0x10, i)
+		key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
+		action =_NamedInt(key, str(_special_keys.TASK[key_task]))
+		keys[i] = ( _special_keys.CONTROL[key], action, flags, gmask )
+		groups[group].append(action)
+	for k in keys:
+		if k[2] & _special_keys.KEY_FLAG.reprogrammable:
+			key_choices = [ k[1] ] # it should always be possible to map the key to itself
+			for g in range(1,9):
+				if k[3] & 2**(g-1):
+					for gm in groups[g]:
+						if int(gm) != int(k[0]): # don't put itself in twice
+							key_choices.append(gm)
+			choices[k[0]] = key_choices
+	return choices
+
+def _feature_reprogrammable_keys():
+	return feature_map_choices_dynamic(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4,
+					_feature_reprogrammable_keys_choices,
+					read_function_id=0x20, write_function_id=0x30,
+					key_bytes_count=2, skip_bytes_count=1, value_bytes_count=2,
+					label=_REPROGRAMMABLE_KEYS[1], description=_REPROGRAMMABLE_KEYS[2],
+				        device_kind=(_DK.keyboard,), extra_default=0)
+
 #
 #
 #
@@ -327,6 +399,7 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'backlight',
 					'typing_illumination',
 					'smart_shift',
+					'reprogrammable_keys',
 					])
 del namedtuple
 
@@ -346,6 +419,7 @@ RegisterSettings = _SETTINGS_LIST(
 				backlight=None,
 				typing_illumination=None,
 				smart_shift=None,
+				reprogrammable_keys=None,
 			)
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
@@ -363,6 +437,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				backlight=_feature_backlight2,
 				typing_illumination=None,
 				smart_shift=_feature_smart_shift,
+				reprogrammable_keys=_feature_reprogrammable_keys,
 			)
 
 del _SETTINGS_LIST
@@ -400,7 +475,8 @@ def check_feature_settings(device, already_known):
 			detected = feature(device)
 			if _log.isEnabledFor(_DEBUG):
 			    _log.debug("check_feature[%s] detected %s", featureId, detected)
-			already_known.append(detected)
+			if detected:
+				already_known.append(detected)
 		except Exception as reason:
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
@@ -415,4 +491,5 @@ def check_feature_settings(device, already_known):
 	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
 	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
+	check_feature(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4)
 	return True
