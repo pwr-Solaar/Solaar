@@ -119,7 +119,7 @@ def run(receivers, args, find_receiver, find_device):
 			raise Exception("can't interpret '%s' as integer" % args.value)
 
 	else:
-		raise NotImplemented
+		raise Exception("NotImplemented")
 
 	result = setting.write(value)
 	if result is None:

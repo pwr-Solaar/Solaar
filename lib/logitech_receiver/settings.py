@@ -19,7 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
 
@@ -37,7 +37,7 @@ from .common import (
 #
 #
 
-KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04)
+KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A)
 
 class Setting(object):
 	"""A setting descriptor.
@@ -171,6 +171,125 @@ class Setting(object):
 		return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind, self.name)
 	__unicode__ = __repr__ = __str__
 
+
+class Settings(Setting):
+	"""A setting descriptor for multiple choices, being a map from keys to values.
+	Needs to be instantiated for each specific device."""
+
+	def read(self, cached=True):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: settings read %r from %s", self.name, self._value, self._device)
+
+		if self._value is None and getattr(self._device,'persister',None):
+			# We haven't read a value from the device yet,
+			# maybe we have something in the configuration.
+			self._value = self._device.persister.get(self.name)
+
+		if cached and self._value is not None:
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
+				# If this is a new device (or a new setting for an old device),
+				# make sure to save its current value for the next time.
+				self._device.persister[self.name] = self._value
+			return self._value
+
+		if self._device.online:
+			reply_map = dict()
+			for key, value in self._validator.choices.items():
+				reply = self._rw.read(self._device, key)
+				if reply:
+					# keys are ints, because that is what the device uses,
+					# encoded into strings because JSON requires strings as keys
+					reply_map[str(int(key))] = self._validator.validate_read(reply,key)
+			self._value = reply_map
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
+				# Don't update the persister if it already has a value,
+				# otherwise the first read might overwrite the value we wanted.
+				self._device.persister[self.name] = self._value
+			return self._value
+
+	def read_key(self, key, cached=True):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+		assert key is not None
+
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: settings read %r key %r from %s", self.name, self._value, key, self._device)
+
+		if self._value is None and getattr(self._device,'persister',None):
+			self._value = self._device.persister.get(self.name)
+
+		if cached and self._value is not None:
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
+				self._device.persister[self.name] = self._value
+			return self._value[str(int(key))]
+
+		if self._device.online:
+			reply = self._rw.read(self._device, key)
+			if reply:
+				self._value[str(int(key))] = self._validator.validate_read(reply,key)
+			if getattr(self._device,'persister',None) and self.name not in self._device.persister:
+				self._device.persister[self.name] = self._value
+			return self._value[str(int(key))]
+
+	def write(self, map):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+		assert map is not None
+
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: settings write %r to %s", self.name, map, self._device)
+
+		if self._device.online:
+			# Remember the value we're trying to set, even if the write fails.
+			# This way even if the device is offline or some other error occurs,
+			# the last value we've tried to write is remembered in the configuration.
+			self._value = map
+			if self._device.persister:
+				self._device.persister[self.name] = map
+
+			for key, value in map.items():
+				data_bytes = self._validator.prepare_write(int(key), value)
+				if data_bytes is not None:
+					if _log.isEnabledFor(_DEBUG):
+						_log.debug("%s: settings prepare map write(%s,%s) => %r", self.name, key, value, data_bytes)
+					reply = self._rw.write(self._device, int(key), data_bytes)
+					if not reply:
+						return None
+
+			return map
+
+	def write_key_value(self, key, value):
+		assert hasattr(self, '_value')
+		assert hasattr(self, '_device')
+		assert key is not None
+		assert value is not None
+
+		if _log.isEnabledFor(_DEBUG):
+			_log.debug("%s: settings write key %r value %r to %s", self.name, key, value, self._device)
+
+		if self._device.online:
+			# Remember the value we're trying to set, even if the write fails.
+			# This way even if the device is offline or some other error occurs,
+			# the last value we've tried to write is remembered in the configuration.
+			self._value[str(key)] = value
+			if self._device.persister:
+				self._device.persister[self.name] = self._value
+
+			data_bytes = self._validator.prepare_write(int(key), value)
+			if data_bytes is not None:
+				if _log.isEnabledFor(_DEBUG):
+					_log.debug("%s: settings prepare key value write(%s,%s) => %r", self.name, key, value, data_bytes)
+				reply = self._rw.write(self._device, int(key), data_bytes)
+				if not reply:
+					# tell whomever is calling that the write failed
+					return None
+
+			return value
+
+
 #
 # read/write low-level operators
 #
@@ -211,6 +330,31 @@ class FeatureRW(object):
 	def write(self, device, data_bytes):
 		assert self.feature is not None
 		return device.feature_request(self.feature, self.write_fnid, data_bytes)
+
+
+class FeatureRWMap(FeatureRW):
+	kind = _NamedInt(0x02, 'feature')
+	default_read_fnid = 0x00
+	default_write_fnid = 0x10
+	default_key_bytes = 1
+
+	def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, key_bytes=default_key_bytes):
+		assert isinstance(feature, _NamedInt)
+		self.feature = feature
+		self.read_fnid = read_fnid
+		self.write_fnid = write_fnid
+		self.key_bytes = key_bytes
+
+	def read(self, device, key):
+		assert self.feature is not None
+		key_bytes = _int2bytes(key, self.key_bytes)
+		return device.feature_request(self.feature, self.read_fnid, key_bytes)
+
+	def write(self, device, key, data_bytes):
+		assert self.feature is not None
+		key_bytes = _int2bytes(key, self.key_bytes)
+		return device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes)
+
 
 #
 # value validators
@@ -371,6 +515,53 @@ class ChoicesValidator(object):
 			raise ValueError("invalid choice %r" % new_value)
 		assert isinstance(choice, _NamedInt)
 		return choice.bytes(self._bytes_count)
+
+class ChoicesMapValidator(ChoicesValidator):	    
+	kind = KIND.map_choice
+
+	def __init__(self, choices_map, key_bytes_count=None, skip_bytes_count=None, value_bytes_count=None, extra_default=None):
+		assert choices_map is not None
+		assert isinstance(choices_map, dict)
+		max_key_bits = 0
+		max_value_bits = 0
+		for key, choices in choices_map.items():
+			assert isinstance(key, _NamedInt)
+			assert isinstance(choices, list)
+			max_key_bits = max(max_key_bits, key.bit_length())
+			for key_value in choices:
+				assert isinstance(key_value, _NamedInt)
+				max_value_bits = max(max_value_bits, key_value.bit_length())
+		self.choices = choices_map
+		self.needs_current_value = False
+		self.extra_default=extra_default
+
+		self._key_bytes_count = (max_key_bits+7) // 8
+		if key_bytes_count:
+			assert self._key_bytes_count <= key_bytes_count
+			self._key_bytes_count = key_bytes_count
+		self._value_bytes_count = (max_value_bits+7) // 8
+		if value_bytes_count:
+			assert self._value_bytes_count <= value_bytes_count
+			self._value_bytes_count = value_bytes_count
+		self._skip_bytes_count = skip_bytes_count if skip_bytes_count is not None else 0
+		self._bytes_count = self._key_bytes_count + self._skip_bytes_count + self._value_bytes_count
+
+	def validate_read(self, reply_bytes, key):
+		start = self._key_bytes_count + self._skip_bytes_count
+		end = start + self._value_bytes_count
+		reply_value = _bytes2int(reply_bytes[start:end])
+		# reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
+		if self.extra_default is not None and self.extra_default==reply_value:
+			return self.choices[key][0]
+		assert reply_value in self.choices[key], "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
+		return reply_value
+
+	def prepare_write(self, key, new_value):
+		choices = self.choices[key]
+		if new_value not in choices and new_value != self.extra_default:
+			raise ValueError("invalid choice %r" % new_value)
+		return _int2bytes(new_value, self._skip_bytes_count + self._value_bytes_count)
+
 
 class RangeValidator(object):
 	__slots__ = ('min_value', 'max_value', 'flag', '_bytes_count', 'needs_current_value')
