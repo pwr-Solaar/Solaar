@@ -51,6 +51,21 @@ def _write_async(setting, value, sbox):
 
 	_ui_async(_do_write, setting, value, sbox)
 
+
+def  _write_async_key_value(setting, key, value, sbox):
+	_ignore, failed, spinner, control = sbox.get_children()
+	control.set_sensitive(False)
+	failed.set_visible(False)
+	spinner.set_visible(True)
+	spinner.start()
+
+	def _do_write_key_value(s, k, v, sb):
+		v = setting.write_key_value(k, v)
+		GLib.idle_add(_update_setting_item, sb, {k: v}, True, priority=99)
+
+	_ui_async(_do_write_key_value, setting, key, value, sbox)
+
+
 #
 #
 #
@@ -74,6 +89,47 @@ def _create_choice_control(setting):
 	for entry in setting.choices:
 		c.append(str(entry), str(entry))
 	c.connect('changed', _combo_notify, setting)
+	return c
+
+def _create_map_choice_control(setting):
+	def _map_value_notify_key(cbbox, s):
+		setting, valueBox = s
+		key_choice = int(cbbox.get_active_id())
+		if cbbox.get_sensitive():
+			valueBox.remove_all()
+			_map_populate_value_box(valueBox, setting, key_choice)
+
+	def _map_value_notify_value(cbbox, s):
+		setting, keyBox = s
+		key_choice = keyBox.get_active_id()
+		if key_choice is not None and cbbox.get_sensitive() and cbbox.get_active_id():
+			if setting._value.get(key_choice) != int(cbbox.get_active_id()):
+				setting._value[key_choice] = int(cbbox.get_active_id())
+				_write_async_key_value(setting, key_choice, setting._value[key_choice], cbbox.get_parent().get_parent())
+
+	def _map_populate_value_box(valueBox, setting, key_choice):
+		choices = None
+		choices = setting.choices[key_choice]
+		current = setting._value.get(str(key_choice)) # just in case the persisted value is missing some keys
+		if choices:
+			# TODO i18n text entries
+			for choice in choices:
+				valueBox.append(str(int(choice)), str(choice))
+			if current is not None:
+				valueBox.set_active_id(str(int(current)))
+
+	c = Gtk.HBox(homogeneous=False, spacing=6)
+	keyBox = Gtk.ComboBoxText()
+	valueBox = Gtk.ComboBoxText()
+	c.pack_start(keyBox, False, False, 0)
+	c.pack_end(valueBox, False, False, 0)
+	# TODO i18n text entries
+	for entry in setting.choices:
+		keyBox.append(str(int(entry)), str(entry))
+	keyBox.set_active(0)
+	keyBox.connect('changed', _map_value_notify_key, (setting,valueBox))
+	_map_populate_value_box(valueBox, setting, int(keyBox.get_active_id()))
+	valueBox.connect('changed', _map_value_notify_value, (setting,keyBox))
 	return c
 
 def _create_slider_control(setting):
@@ -131,8 +187,11 @@ def _create_sbox(s):
 	elif s.kind == _SETTING_KIND.range:
 		control = _create_slider_control(s)
 		sbox.pack_end(control, True, True, 0)
+	elif s.kind == _SETTING_KIND.map_choice:
+		control = _create_map_choice_control(s)
+		sbox.pack_end(control, True, True, 0)
 	else:
-		raise NotImplemented
+		raise Exception("NotImplemented")
 
 	control.set_sensitive(False)  # the first read will enable it
 	sbox.pack_end(spinner, False, False, 0)
@@ -149,11 +208,10 @@ def _create_sbox(s):
 
 
 def _update_setting_item(sbox, value, is_online=True):
-	_ignore, failed, spinner, control = sbox.get_children()
+	_ignore, failed, spinner, control = sbox.get_children() # depends on box layout
 	spinner.set_visible(False)
 	spinner.stop()
 
-	# print ("update", control, "with new value", value)
 	if value is None:
 		control.set_sensitive(False)
 		failed.set_visible(is_online)
@@ -166,8 +224,12 @@ def _update_setting_item(sbox, value, is_online=True):
 		control.set_active_id(str(value))
 	elif isinstance(control, Gtk.Scale):
 		control.set_value(int(value))
+	elif isinstance(control, Gtk.HBox):
+		kbox, vbox = control.get_children() # depends on box layout
+		if value.get(kbox.get_active_id()):
+			vbox.set_active_id(str(value.get(kbox.get_active_id())))
 	else:
-		raise NotImplemented
+		raise Exception("NotImplemented")
 	control.set_sensitive(True)
 
 #
