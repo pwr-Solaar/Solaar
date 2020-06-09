@@ -233,7 +233,7 @@ class FeatureCallError(_KwException):
 
 class FeaturesArray(object):
 	"""A sequence of features supported by a HID++ 2.0 device."""
-	__slots__ = ('supported', 'device', 'features')
+	__slots__ = ('supported', 'device', 'features', 'non_features')
 	assert FEATURE.ROOT == 0x0000
 
 	def __init__(self, device):
@@ -241,6 +241,7 @@ class FeaturesArray(object):
 		self.device = device
 		self.supported = True
 		self.features = None
+		self.non_features = set()
 
 	def __del__(self):
 		self.supported = False
@@ -312,6 +313,8 @@ class FeaturesArray(object):
 		"""Tests whether the list contains given Feature ID"""
 		if self._check():
 			ivalue = int(featureId)
+			if ivalue in self.non_features:
+				return False;
 
 			may_have = False
 			for f in self.features:
@@ -327,6 +330,9 @@ class FeaturesArray(object):
 					if index:
 						self.features[index] = FEATURE[ivalue]
 						return True
+					else:
+						self.non_features.add(ivalue)
+						return False
 
 	def index(self, featureId):
 		"""Gets the Feature Index for a given Feature ID"""
