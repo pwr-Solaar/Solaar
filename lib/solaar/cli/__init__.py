@@ -165,4 +165,5 @@ def run(cli_args=None, hidraw_path=None):
 		tb_last = extract_tb(_sys.exc_info()[2])[-1]
 		_sys.exit('%s: assertion failed: %s line %d' % (NAME.lower(), tb_last[0], tb_last[1]))
 	except Exception as e:
-		_sys.exit('%s: error: %s' % (NAME.lower(), e))
+		from traceback import format_exc
+		_sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
