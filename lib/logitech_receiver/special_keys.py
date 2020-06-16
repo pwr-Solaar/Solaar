@@ -18,6 +18,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Reprogrammable keys information
+# Mostly from Logitech documentation, but with some edits for better Lunix compatability
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -86,7 +87,7 @@ CONTROL = _NamedInts(
 	RECORD=0x003B,
 	INTERNET_REFRESH=0x003C,
 	ROTATE_RIGHT=0x003D,
-	SEARCH=0x003E,
+	Search=0x003E,		# SEARCH
 	SHUFFLE=0x003F,
 	SLEEP=0x0040,
 	INTERNET_STOP=0x0041,
@@ -106,18 +107,18 @@ CONTROL = _NamedInts(
 	CONTEXTUAL_MENU=0x004F,
 	LEFT_CLICK=0x0050,
 	RIGHT_CLICK=0x0051,
-	MIDDLE_BUTTON=0x0052,
-	BACK_AS_BUTTON_4=0x0053,
-	BACK_AS_HID=0x0054,
+	Middle_Button=0x0052,		# MIDDLE_BUTTON
+	Back_Button=0x0053,		# BACK_AS_BUTTON_4
+    	Back=0x0054,			# BACK_AS_HID
 	BACK_AS_ALT_WIN_ARROW=0x0055,
-	FORWARD_AS_BUTTON_5=0x0056,
+	Forward_Button=0x0056,		# FORWARD_AS_BUTTON_5
 	FORWARD_AS_HID=0x0057,
 	FORWARD_AS_ALT_WIN_ARROW=0x0058,
 	BUTTON_6=0x0059,
 	LEFT_SCROLL_AS_BUTTON_7=0x005A,
-	LEFT_SCROLL_AS_AC_PAN=0x005B,
+	Left_Tilt=0x005B,		# LEFT_SCROLL_AS_AC_PAN
 	RIGHT_SCROLL_AS_BUTTON_8=0x005C,
-	RIGHT_SCROLL_AS_AC_PAN=0x005D,
+	Right_Tilt=0x005D,		# RIGHT_SCROLL_AS_AC_PAN
 	BUTTON_9=0x005E,
 	BUTTON_10=0x005F,
 	BUTTON_11=0x0060,
@@ -134,7 +135,7 @@ CONTROL = _NamedInts(
 	BUTTON_22=0x006B,
 	BUTTON_23=0x006C,
 	BUTTON_24=0x006D,
-	SHOW_DESKTOP=0x006E,
+	Show_Desktop=0x006E,	# Show_Desktop
 	Lock_PC=0x006F,
 	FN_F1=0x0070,
 	FN_F2=0x0071,
@@ -168,12 +169,12 @@ CONTROL = _NamedInts(
 	MAC_DASHBOARD=0x008D,
 	WIN7_SNAP_LEFT=0x008E,
 	WIN7_SNAP_RIGHT=0x008F,
-	WIN7_MINIMIZE_AS_WIN_ARROW=0x0090,
-	WIN7_MAXIMIZE_AS_WIN_ARROW=0x0091,
+	Minimize_Window=0x0090,		# WIN7_MINIMIZE_AS_WIN_ARROW
+	Maximize_Window=0x0091,		# WIN7_MAXIMIZE_AS_WIN_ARROW
 	WIN7_STRETCH_UP=0x0092,
 	WIN7_MONITOR_SWITCH_AS_WIN_SHIFT_LEFTARROW=0x0093,
 	WIN7_MONITOR_SWITCH_AS_WIN_SHIFT_RIGHTARROW=0x0094,
-	WIN7_SHOW_PRESENTATION_MODE=0x0095,
+	Switch_Screen=0x0095,		# WIN7_SHOW_PRESENTATION_MODE
 	WIN7_SHOW_MOBILITY_CENTER=0x0096,
 	ANALOG_HSCROLL=0x0097,
 	METRO_APPSWITCH=0x009F,
@@ -190,6 +191,8 @@ CONTROL = _NamedInts(
 	ZOOMOUT=0x00AB,
 	BACK_HSCROLL=0x00AC,
 	SHOW_DESKTOP_HPP=0x00AE,
+	Thumb_Button=0x00C3,		# from MX Master
+    	Top_Button=0x00C4,		# from MX Master
 )
 CONTROL._fallback = lambda x: 'unknown:%04X' % x
 
@@ -244,7 +247,7 @@ TASK = _NamedInts(
 	RecordMediaPlayer=0x002A,
 	BrowserRefresh=0x002B,
 	RotateRight=0x002C,
-	SearchForFiles=0x002D,
+	Search_Files=0x002D,		# SearchForFiles
 	MM_SHUFFLE=0x002E,
 	Sleep=0x002F, # also known as StandBySet
 	BrowserStop=0x0030,
@@ -257,16 +260,16 @@ TASK = _NamedInts(
 	ZoomBtnResetSet=0x0037,
 	LeftClick=0x0038,
 	RightClick=0x0039,
-	MiddleMouseButton=0x003A,
+	Mouse_Middle_Button=0x003A,	# MiddleMouseButton
 	Back=0x003B,
-	BackEx=0x003C,
+	Mouse_Back_Button=0x003C,		# BackEx
 	BrowserForward=0x003D,
-	BrowserForwardEx=0x003E,
-	HorzScrollLeftSet=0x003F,
-	HorzScrollRightSet=0x0040,
+	Mouse_Forward_Button=0x003E,	# BrowserForwardEx
+	Mouse_Scroll_Left_Button_=0x003F,	# HorzScrollLeftSet
+	Mouse_Scroll_Right_Button=0x0040,	# HorzScrollRightSet
 	QuickSwitch=0x0041,
 	BatteryStatus=0x0042,
-	ShowDesktop=0x0043,
+	Show_Desktop=0x0043,		# ShowDesktop
 	WindowsLock=0x0044,
 	FileLauncher=0x0045,
 	FolderLauncher=0x0046,
@@ -333,6 +336,10 @@ TASK = _NamedInts(
 	Win8ShowDesktopWin7Back=0x008E, # also known as ShowDesktop
 	MetroApplicationSwitch=0x0090, # also known as MetroStartScreen
 	ShowUI=0x0092,
+	Switch_Screen=0x0093,		# from K400
+	Maximize_Window=0x0095,		# from K400
+	Mouse_Thumb_Button=0x00A9,	# from MX Master
+	Toggle_Free_Spin=0x009D,	# from MX Master
 )
 TASK._fallback = lambda x: 'unknown:%04X' % x
 # hidpp 4.5 info from https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
