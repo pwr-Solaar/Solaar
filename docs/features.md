@@ -44,7 +44,7 @@ Feature                                | ID       | Status             | Notes
 `REPROG_CONTROLS_V2`                   | `0x1B01` | :x:                |
 `REPROG_CONTROLS_V2_2`                 | `0x1B02` | :x:                |
 `REPROG_CONTROLS_V3`                   | `0x1B03` | :x:                |
-`REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys()`, only listing
+`REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys()`, _feature_reprogrammable_keys()
 `REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
 `PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :x:                |
 `WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :x:                | status reporting from device
@@ -72,12 +72,12 @@ Feature                                | ID       | Status             | Notes
 `ENCRYPTION`                           | `0x4100` | :x:                |
 `LOCK_KEY_STATE`                       | `0x4220` | :x:                |
 `SOLAR_DASHBOARD`                      | `0x4301` | :x:                |
-`KEYBOARD_LAYOUT`                      | `0x4520` | :x:                |
+`KEYBOARD_LAYOUT`                      | `0x4520` | :x:                | read only
 `KEYBOARD_DISABLE`                     | `0x4521` | :x:                |
 `KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | :x:                |
 `DUALPLATFORM`                         | `0x4530` | :x:                |
 `MULTIPLATFORM`                        | `0x4531` | :x:                |
-`KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                |
+`KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                | read only
 `CROWN`                                | `0x4600` | :x:                |
 `TOUCHPAD_FW_ITEMS`                    | `0x6010` | :x:                |
 `TOUCHPAD_SW_ITEMS`                    | `0x6011` | :x:                |

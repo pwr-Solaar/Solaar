@@ -195,6 +195,7 @@ setting is useful only to disable smooth scrolling.
 | MK270            | 4023 | 2.0   | yes     | reprog keys                             |
 | MK320            | 200F |       |         |                                         |
 | MK330            |      |       |         |                                         |
+| MK345            | 4023 | 2.0   | yes     | reprog keys                             |
 | MK520            |      | M2/K1 | yes     | FN swap, reprog keys                    |
 | MK550            |      |       |         |                                         |
 | MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |
