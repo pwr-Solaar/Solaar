@@ -552,7 +552,7 @@ class ChoicesMapValidator(ChoicesValidator):
 		reply_value = _bytes2int(reply_bytes[start:end])
 		# reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
 		if self.extra_default is not None and self.extra_default==reply_value:
-			return self.choices[key][0]
+			return int(self.choices[key][0])
 		assert reply_value in self.choices[key], "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
 		return reply_value
 
