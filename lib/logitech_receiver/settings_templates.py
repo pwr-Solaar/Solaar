@@ -38,11 +38,13 @@ from .common import (
 from .settings import (
 				KIND as _KIND,
 				Setting as _Setting,
+				BitFieldSetting as _BitFieldSetting,
 				Settings as _Settings,
 				RegisterRW as _RegisterRW,
 				FeatureRW as _FeatureRW,
 				FeatureRWMap as _FeatureRWMap,
 				BooleanValidator as _BooleanV,
+				BitFieldValidator as _BitFieldV,
 				ChoicesValidator as _ChoicesV,
 				ChoicesMapValidator as _ChoicesMapV,
 				RangeValidator as _RangeV,
@@ -86,6 +88,30 @@ def feature_toggle(name, feature,
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
 	return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
 
+def feature_bitfield_toggle(name, feature, options,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					label=None, description=None, device_kind=None):
+	assert options
+	validator = _BitFieldV(options)
+	rw = _FeatureRW(feature, read_function_id, write_function_id)
+	return _BitFieldSetting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
+
+def feature_bitfield_toggle_dynamic(name, feature, options_callback,
+					read_function_id=_FeatureRW.default_read_fnid,
+					write_function_id=_FeatureRW.default_write_fnid,
+					label=None, description=None, device_kind=None):
+		def instantiate(device):
+			options = options_callback(device)
+			setting = feature_bitfield_toggle(name, feature, options,
+					read_function_id=read_function_id,
+					write_function_id=write_function_id,
+					label=label,
+					description=description, device_kind=device_kind)
+			return setting(device)
+		instantiate._rw_kind = _FeatureRW.kind
+		return instantiate
+
 def feature_choices(name, feature, choices,
 					read_function_id, write_function_id,
 					bytes_count=None,
@@ -108,6 +134,7 @@ def feature_choices_dynamic(name, feature, choices_callback,
 						bytes_count=bytes_count,
 						label=label, description=description, device_kind=device_kind)
 		return setting(device)
+	instantiate._rw_kind = _FeatureRW.kind
 	return instantiate
 
 # maintain a mapping from keys (NamedInts) to one of a list of choices (NamedInts), default is first one
@@ -136,6 +163,7 @@ def feature_map_choices_dynamic(name, feature, choices_callback,
 						key_bytes_count=key_bytes_count, skip_bytes_count=skip_bytes_count, value_bytes_count=value_bytes_count,
 						label=label, description=description, device_kind=device_kind, extra_default=extra_default)
 		return setting(device)
+	instantiate._rw_kind = _FeatureRWMap.kind
 	return instantiate
 
 def feature_range(name, feature, min_value, max_value,
@@ -175,6 +203,7 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"),
 						 	+ '\n\n' +
 						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
 						 	"and you must hold the FN key to activate their special function."))
+_DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"), _("Disable specific keyboard keys."))
 _HAND_DETECTION = ('hand-detection', _("Hand Detection"),
 							_("Turn on illumination when the hands hover over the keyboard."))
 _BACKLIGHT = ('backlight', _("Backlight"),
@@ -246,6 +275,7 @@ def _feature_lowres_smooth_scroll():
 	return feature_toggle(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL,
 					label=_LOW_RES_SCROLL[1], description=_LOW_RES_SCROLL[2],
 					device_kind=(_DK.mouse, _DK.trackball))
+
 def _feature_hires_smooth_invert():
 	return feature_toggle(_HIRES_INV[0], _F.HIRES_WHEEL,
 					read_function_id=0x10,
@@ -379,6 +409,18 @@ def _feature_reprogrammable_keys():
 					label=_REPROGRAMMABLE_KEYS[1], description=_REPROGRAMMABLE_KEYS[2],
 				        device_kind=(_DK.keyboard,), extra_default=0)
 
+
+def _feature_disable_keyboard_keys_key_list(device):
+	mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS)[0]
+	options = [_special_keys.DISABLE[1 << i] for i in range(8) if mask & (1 << i)]
+	return options
+
+def _feature_disable_keyboard_keys():
+	return feature_bitfield_toggle_dynamic(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS,
+		_feature_disable_keyboard_keys_key_list,
+		read_function_id=0x10, write_function_id=0x20,
+		label=_DISABLE_KEYS[1], description=_DISABLE_KEYS[2], device_kind=(_DK.keyboard,))
+
 #
 #
 #
@@ -401,6 +443,7 @@ _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
 					'typing_illumination',
 					'smart_shift',
 					'reprogrammable_keys',
+					'disable_keyboard_keys',
 					])
 del namedtuple
 
@@ -421,6 +464,7 @@ RegisterSettings = _SETTINGS_LIST(
 				typing_illumination=None,
 				smart_shift=None,
 				reprogrammable_keys=None,
+				disable_keyboard_keys=None,
 			)
 FeatureSettings =  _SETTINGS_LIST(
 				fn_swap=_feature_fn_swap,
@@ -439,6 +483,7 @@ FeatureSettings =  _SETTINGS_LIST(
 				typing_illumination=None,
 				smart_shift=_feature_smart_shift,
 				reprogrammable_keys=_feature_reprogrammable_keys,
+				disable_keyboard_keys=_feature_disable_keyboard_keys,
 			)
 
 del _SETTINGS_LIST
@@ -479,6 +524,7 @@ def check_feature_settings(device, already_known):
 			if detected:
 				already_known.append(detected)
 		except Exception as reason:
+			raise reason
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
 	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
@@ -493,4 +539,5 @@ def check_feature_settings(device, already_known):
 	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
 	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
 	check_feature(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4)
+	check_feature(_DISABLE_KEYS[0],  _F.KEYBOARD_DISABLE_KEYS, 'disable_keyboard_keys')
 	return True
