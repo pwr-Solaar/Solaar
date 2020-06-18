@@ -178,41 +178,33 @@ def feature_range(name, feature, min_value, max_value,
 	return _Setting(name, rw, validator, feature=feature, kind=_KIND.range, label=label, description=description, device_kind=device_kind)
 
 #
-# common strings for settings
-#
+# common strings for settings - name, string to display in main window, tool tip for main window
+#  
 
-_SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"),
+_HAND_DETECTION = ('hand-detection', _("Hand Detection"), _("Turn on illumination when the hands hover over the keyboard."))
+_SMOOTH_SCROLL = ('smooth-scroll', _("Smooth Scrolling"), _("High-sensitivity mode for vertical scroll with the wheel."))
+_SIDE_SCROLL = ('side-scroll', _("Side Scrolling"), _("When disabled, pushing the wheel sideways sends custom button events\n"
+                                                      "instead of the standard side-scrolling events."))
+_HI_RES_SCROLL = ('hi-res-scroll', _("High Resolution Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
 _LOW_RES_SCROLL = ('lowres-smooth-scroll', _("HID++ Scrolling"),
 							_("HID++ mode for vertical scroll with the wheel."))
-
-_HI_RES_SCROLL = ('hi-res-scroll', _("High Resolution Scrolling"),
-							_("High-sensitivity mode for vertical scroll with the wheel."))
 _HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
 							_("High-sensitivity wheel invert mode for vertical scroll."))
 _HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
-_SIDE_SCROLL = ('side-scroll', _("Side Scrolling"),
-							_("When disabled, pushing the wheel sideways sends custom button events\n"
-							"instead of the standard side-scrolling events."))
-_DPI = ('dpi', _("Sensitivity (DPI)"), None)
-_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
-_FN_SWAP = ('fn-swap', _("Swap Fx function"),
-							_("When set, the F1..F12 keys will activate their special function,\n"
+_FN_SWAP = ('fn-swap', _("Swap Fx function"), _("When set, the F1..F12 keys will activate their special function,\n"
 						 	"and you must hold the FN key to activate their standard function.")
 						 	+ '\n\n' +
 						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
 						 	"and you must hold the FN key to activate their special function."))
-_DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"), _("Disable specific keyboard keys."))
-_HAND_DETECTION = ('hand-detection', _("Hand Detection"),
-							_("Turn on illumination when the hands hover over the keyboard."))
-_BACKLIGHT = ('backlight', _("Backlight"),
-				   _("Turn illumination on or off on keyboard."))
-
-_SMART_SHIFT = ('smart-shift', _("Smart Shift"),
-							_("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
+_DPI = ('dpi', _("Sensitivity (DPI)"), None)
+_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
+_SMART_SHIFT = ('smart-shift', _("Smart Shift"), _("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
+_BACKLIGHT = ('backlight', _("Backlight"), _("Turn illumination on or off on keyboard."))
 _REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key"))
+_DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"), _("Disable specific keyboard keys."))
 
 #
 #
@@ -426,65 +418,32 @@ def _feature_disable_keyboard_keys():
 #
 
 from collections import namedtuple
-_SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [
-					'fn_swap',
-					'new_fn_swap',
-					'k375s_fn_swap',
-					'smooth_scroll',
-					'hi_res_scroll',
-					'lowres_smooth_scroll',
-					'hires_smooth_invert',
-					'hires_smooth_resolution',
-					'side_scroll',
-					'dpi',
-					'pointer_speed',
-					'hand_detection',
-					'backlight',
-					'typing_illumination',
-					'smart_shift',
-					'reprogrammable_keys',
-					'disable_keyboard_keys',
-					])
-del namedtuple
 
-RegisterSettings = _SETTINGS_LIST(
-				fn_swap=_register_fn_swap,
-				new_fn_swap=None,
-				k375s_fn_swap=None,
-				smooth_scroll=_register_smooth_scroll,
-				hi_res_scroll=None,
-				lowres_smooth_scroll=None,
-				hires_smooth_invert=None,
-				hires_smooth_resolution=None,
-				side_scroll=_register_side_scroll,
-				dpi=_register_dpi,
-				pointer_speed=None,
-				hand_detection=_register_hand_detection,
-				backlight=None,
-				typing_illumination=None,
-				smart_shift=None,
-				reprogrammable_keys=None,
-				disable_keyboard_keys=None,
-			)
-FeatureSettings =  _SETTINGS_LIST(
-				fn_swap=_feature_fn_swap,
-				new_fn_swap=_feature_new_fn_swap,
-				k375s_fn_swap=_feature_k375s_fn_swap,
-				smooth_scroll=None,
-				hi_res_scroll=_feature_hi_res_scroll,
-				lowres_smooth_scroll=_feature_lowres_smooth_scroll,
-				hires_smooth_invert=_feature_hires_smooth_invert,
-				hires_smooth_resolution=_feature_hires_smooth_resolution,
-				side_scroll=None,
-				dpi=_feature_adjustable_dpi,
-				pointer_speed=_feature_pointer_speed,
-				hand_detection=None,
-				backlight=_feature_backlight2,
-				typing_illumination=None,
-				smart_shift=_feature_smart_shift,
-				reprogrammable_keys=_feature_reprogrammable_keys,
-				disable_keyboard_keys=_feature_disable_keyboard_keys,
-			)
+def _S(name, featureID=None, featureFn=None, registerFn=None, identifier=None):
+	return ( name, featureID, featureFn, registerFn, identifier if identifier else name.replace('-','_') )
+
+_SETTINGS_TABLE = [
+	_S( _HAND_DETECTION[0], registerFn=_register_hand_detection ),
+	_S( _SMOOTH_SCROLL[0], registerFn=_register_smooth_scroll ),
+	_S( _SIDE_SCROLL[0], registerFn=_register_side_scroll ),
+	_S( _HI_RES_SCROLL[0], _F.HI_RES_SCROLLING, _feature_hi_res_scroll ),
+	_S( _LOW_RES_SCROLL[0], _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll ),
+	_S( _HIRES_INV[0], _F.HIRES_WHEEL, _feature_hires_smooth_invert ),
+	_S( _HIRES_RES[0], _F.HIRES_WHEEL, _feature_hires_smooth_resolution ),
+	_S( _FN_SWAP[0], _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap ),
+	_S( _FN_SWAP[0], _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap' ),
+	_S( _FN_SWAP[0], _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap' ),
+	_S( _DPI[0], _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi ),
+	_S( _POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed ),
+	_S( _SMART_SHIFT[0], _F.SMART_SHIFT, _feature_smart_shift ),
+	_S( _BACKLIGHT[0], _F.BACKLIGHT2, _feature_backlight2 ),
+	_S( _REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys ),
+	_S( _DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys ),
+]
+
+_SETTINGS_LIST = namedtuple('_SETTINGS_LIST',[s[4] for s in _SETTINGS_TABLE])
+RegisterSettings = _SETTINGS_LIST._make([s[3] for s in _SETTINGS_TABLE])
+FeatureSettings = _SETTINGS_LIST._make([s[2] for s in _SETTINGS_TABLE])
 
 del _SETTINGS_LIST
 
@@ -500,25 +459,19 @@ def check_feature_settings(device, already_known):
 	if device.protocol and device.protocol < 2.0:
 		return False
 
-	def check_feature(name, featureId, field_name=None):
+	def check_feature(name, featureId, featureFn):
 		"""
-		:param name: user-visible setting name.
-		:param featureId: the numeric Feature ID for this setting.
-		:param field_name: override the FeatureSettings name if it is
-		different from the user-visible setting name. Useful if there
-		are multiple features for the same setting.
+		:param name: name for the setting
+		:param featureId: the numeric Feature ID for this setting implementation
+		:param featureFn: the function for this setting implementation
 		"""
 		if not featureId in device.features:
 			return
 		if any(s.name == name for s in already_known):
 			return
-		if not field_name:
-			# Convert user-visible settings name for FeatureSettings
-			field_name = name.replace('-', '_')
-		feature = getattr(FeatureSettings, field_name)()
 
 		try:
-			detected = feature(device)
+			detected = featureFn()(device)
 			if _log.isEnabledFor(_DEBUG):
 			    _log.debug("check_feature[%s] detected %s", featureId, detected)
 			if detected:
@@ -526,17 +479,7 @@ def check_feature_settings(device, already_known):
 		except Exception as reason:
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
-	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
-	check_feature(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL)
-	check_feature(_HIRES_INV[0],     _F.HIRES_WHEEL, "hires_smooth_invert")
-	check_feature(_HIRES_RES[0],     _F.HIRES_WHEEL, "hires_smooth_resolution")
-	check_feature(_FN_SWAP[0],       _F.FN_INVERSION)
-	check_feature(_FN_SWAP[0],       _F.NEW_FN_INVERSION, 'new_fn_swap')
-	check_feature(_FN_SWAP[0],       _F.K375S_FN_INVERSION, 'k375s_fn_swap')
-	check_feature(_DPI[0],           _F.ADJUSTABLE_DPI)
-	check_feature(_POINTER_SPEED[0], _F.POINTER_SPEED)
-	check_feature(_SMART_SHIFT[0],   _F.SMART_SHIFT)
-	check_feature(_BACKLIGHT[0],   	 _F.BACKLIGHT2)
-	check_feature(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4)
-	check_feature(_DISABLE_KEYS[0],  _F.KEYBOARD_DISABLE_KEYS, 'disable_keyboard_keys')
+	for name, featureId, featureFn, _, _ in _SETTINGS_TABLE :
+		if featureId and featureFn:
+			check_feature(name, featureId, featureFn)
 	return True
