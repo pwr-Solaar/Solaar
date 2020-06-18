@@ -377,3 +377,12 @@ KEY_FLAG = _NamedInts(
 	is_FN=0x02,
 	mse=0x01
 )
+
+DISABLE = _NamedInts(
+	Caps_Lock=0x01,
+	Num_Lock=0x02,
+	Scroll_Lock=0x04,
+	Insert=0x08,
+	Win=0x10, # aka Super
+)
+DISABLE._fallback = lambda x: 'unknown:%02X' % x

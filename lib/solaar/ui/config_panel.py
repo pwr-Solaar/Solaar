@@ -190,6 +190,20 @@ def _create_sbox(s):
 	elif s.kind == _SETTING_KIND.map_choice:
 		control = _create_map_choice_control(s)
 		sbox.pack_end(control, True, True, 0)
+	elif s.kind == _SETTING_KIND.multiple_toggle:
+		# ugly temporary hack!
+		choices = {k : [False, True] for k in s._validator.options}
+		class X:
+			def __init__(self, obj, ext):
+				self.obj = obj
+				self.ext = ext
+			def __getattr__(self, attr):
+				try:
+					return self.ext[attr]
+				except KeyError:
+					return getattr(self.obj, attr)
+		control = _create_map_choice_control(X(s, {'choices': choices}))
+		sbox.pack_end(control, True, True, 0)
 	else:
 		raise Exception("NotImplemented")
 

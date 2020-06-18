@@ -54,11 +54,12 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
 
 	if protocol is not None:
 		# ? 2.0 devices should not have any registers
+		_kind = lambda s : s._rw.kind if hasattr(s, '_rw') else s._rw_kind
 		if protocol < 2.0:
-			assert settings is None or all(s._rw.kind == 1 for s in settings)
+			assert settings is None or all(_kind(s) == 1 for s in settings)
 		else:
 			assert registers is None
-			assert settings is None or all(s._rw.kind == 2 for s in settings)
+			assert settings is None or all(_kind(s) == 2 for s in settings)
 
 		if wpid:
 			for w in wpid if isinstance(wpid, tuple) else (wpid, ):
@@ -183,8 +184,10 @@ _D('Wireless Touch Keyboard K400', protocol=2.0, wpid=('400E', '4024'),
 				)
 _D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid='404D',
                                 settings=[
-                                                        _FS.new_fn_swap()
-                                                ],
+											_FS.new_fn_swap(),
+											_FS.reprogrammable_keys(),
+											_FS.disable_keyboard_keys(),
+                                    ],
                                 )
 _D('Wireless Keyboard K520', protocol=1.0, wpid='2011',
 				registers=(_R.battery_status, ),
