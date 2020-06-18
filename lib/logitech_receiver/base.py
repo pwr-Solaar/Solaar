@@ -277,9 +277,9 @@ def make_notification(devnumber, data):
 		# this is either a HID++1.0 register r/w, or an error reply
 		return
 
-	# regular keyboard key press reports and mouse movement reports are not notifications
+	# DJ input records are not notifications
 	# it would be better to check for report_id 0x20 but that information is not sent here
-	if len(data) == _MEDIUM_MESSAGE_SIZE-2 and (sub_id==0x02 or sub_id==0x01):
+	if len(data) == _MEDIUM_MESSAGE_SIZE-2 and (sub_id < 0x10):
 		return
 
 	address = ord(data[1:2])
