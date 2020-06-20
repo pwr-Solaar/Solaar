@@ -272,21 +272,4 @@ FirmwareInfo = namedtuple('FirmwareInfo', [
 				'version',
 				'extras'])
 
-"""Reprogrammable keys information."""
-ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', [
-				'index',
-				'key',
-				'task',
-				'flags'])
-
-ReprogrammableKeyInfoV4 = namedtuple('ReprogrammableKeyInfoV4', [
-				'index',
-				'key',
-				'task',
-				'flags',
-				'pos',
-				'group',
-				'group_mask',
-				'remapped'])
-
 del namedtuple

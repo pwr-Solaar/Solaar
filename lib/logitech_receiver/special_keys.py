@@ -191,6 +191,9 @@ CONTROL = _NamedInts(
 	ZOOMOUT=0x00AB,
 	BACK_HSCROLL=0x00AC,
 	SHOW_DESKTOP_HPP=0x00AE,
+	APP_SWITCH_GESTURE=0x00C3,	# from MX Vertical
+	SMART_SHIFT=0x00C4,		# from MX Vertical
+	LED_TOGGLE=0x013B,		# from MX Vertical
 	Fn_Left_Click=0x00B7,		# from K400 Plus
 	Yellow_Left_Click_Key=0x00B8,	# from K400 Plus
     	Screen_Capture=0x00BF,		# from Craft Keyboard
@@ -352,6 +355,9 @@ TASK = _NamedInts(
 	Win8ShowDesktopWin7Back=0x008E, # also known as ShowDesktop
 	MetroApplicationSwitch=0x0090, # also known as MetroStartScreen
 	ShowUI=0x0092,
+	GestureButton=0x009C,		# from MX Vertical
+	SmartShift=0x009D,		# from MX Vertical
+	LedToggle=0x00DD,		# from MX Vertical
 	Switch_Screen=0x0093,		# from K400 Plus
 	Maximize_Window=0x0095,		# from K400 Plus
 	Screen_Capture=0x009B,		# from Craft Keyboard
@@ -377,6 +383,23 @@ KEY_FLAG = _NamedInts(
 	is_FN=0x02,
 	mse=0x01
 )
+
+MAPPING_FLAG = _NamedInts(
+	rawXY_diverted=0x10,
+	persistently_diverted=0x04,
+	diverted=0x01
+)
+
+CID_GROUP = _NamedInts(
+	g8=0x80,
+	g7=0x40,
+	g6=0x20,
+	g5=0x10,
+	g4=0x08,
+	g3=0x04,
+	g2=0x02,
+	g1=0x01
+ )
 
 DISABLE = _NamedInts(
 	Caps_Lock=0x01,

@@ -33,7 +33,6 @@ from .common import (
 				NamedInt as _NamedInt,
 				NamedInts as _NamedInts,
 				unpack as _unpack,
-				ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4,
 			)
 from .settings import (
 				KIND as _KIND,
