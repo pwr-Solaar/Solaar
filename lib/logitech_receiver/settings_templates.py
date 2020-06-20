@@ -524,7 +524,6 @@ def check_feature_settings(device, already_known):
 			if detected:
 				already_known.append(detected)
 		except Exception as reason:
-			raise reason
 			_log.error("check_feature[%s] inconsistent feature %s", featureId, reason)
 
 	check_feature(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING)
