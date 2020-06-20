@@ -250,6 +250,7 @@ class PairedDevice(object):
 		if self._settings is None:
 			if self.descriptor and self.descriptor.settings:
 				self._settings = [s(self) for s in self.descriptor.settings]
+				self._settings = [s for s in self._settings if s is not None]
 			else:
 				self._settings = []
 		if not self._feature_settings_checked:
