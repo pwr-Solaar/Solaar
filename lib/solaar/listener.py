@@ -20,7 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import time
 
-from logging import getLogger, INFO as _INFO
+from logging import getLogger, INFO as _INFO, WARNING as _WARNING
 _log = getLogger(__name__)
 del getLogger
 
@@ -182,7 +182,10 @@ class ReceiverListener(_listener.EventsListener):
 			return
 
 		# a device notification
-		assert 0 < n.devnumber <= self.receiver.max_devices
+		if not(0 < n.devnumber <= self.receiver.max_devices):
+			if _log.isEnabledFor(_WARNING):
+				_log.warning(_("Unexpected device number (%s) in notification %s." % (n.devnumber, n)))
+			return
 		already_known = n.devnumber in self.receiver
 
 		# FIXME: hacky fix for kernel/hardware race condition
