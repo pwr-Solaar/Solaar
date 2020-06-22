@@ -187,8 +187,8 @@ _SIDE_SCROLL = ('side-scroll', _("Side Scrolling"), _("When disabled, pushing th
                                                       "instead of the standard side-scrolling events."))
 _HI_RES_SCROLL = ('hi-res-scroll', _("High Resolution Scrolling"),
 							_("High-sensitivity mode for vertical scroll with the wheel."))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _("HID++ Scrolling"),
-							_("HID++ mode for vertical scroll with the wheel."))
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _("HID++ Scrolling"), _("HID++ mode for vertical scroll with the wheel.") + '\n' +
+							_("Effectively turns off wheel scrolling in Linux."))
 _HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
 							_("High-sensitivity wheel invert mode for vertical scroll."))
 _HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
@@ -199,11 +199,12 @@ _FN_SWAP = ('fn-swap', _("Swap Fx function"), _("When set, the F1..F12 keys will
 						 	_("When unset, the F1..F12 keys will activate their standard function,\n"
 						 	"and you must hold the FN key to activate their special function."))
 _DPI = ('dpi', _("Sensitivity (DPI)"), None)
-_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
+_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), _("Speed multiplier for mouse (256 is normal multiplier)."))
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"), _("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
 _BACKLIGHT = ('backlight', _("Backlight"), _("Turn illumination on or off on keyboard."))
-_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key or button"))
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key or button.") + "\n" +
+						_("Changing important actions (such as for the left mouse button) can result in an unusable system."))
 _DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"), _("Disable specific keyboard keys."))
 
 #
