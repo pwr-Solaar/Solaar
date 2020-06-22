@@ -84,17 +84,16 @@ but it still can be unpaired if its receiver allows unpairing.
 
 ![Solaar-main-window-offline](Solaar-main-window-offline.png)
 
-#### Reprogramming key and button actions
+#### Remapping key and button actions
 
-For many devices Solaar can reprogram some of their keys or buttons to
+For many devices Solaar can remap some of their keys or buttons to
 perform a different action.  (This actually changes the information that the
 device sends when the key or button is activated.)  Only some keys on some
-devices can be reprogrammed and they can only be reprogrammed to a limited
-number of actions.  The reprogramming is done in Solaar by selecting a key
+devices can be remapped and they can only be remapped to a limited
+number of actions.  The remapping is done in Solaar by selecting a key
 or button in the left-hand box on the ``Action'' setting line and then
 selecting the action to be performed in the right-hand box.  The default
-action is always the shown first in the list.  If the key or button has not
-been reprogrammed the action box will be blank.  As with all settings,
+action is always the shown first in the list.  As with all settings,
 Solaar will remembers past action settings and restore them on the device
 from then on.
 
@@ -102,6 +101,10 @@ from then on.
 
 The names of the keys, buttons, and actions are mostly taken from Logitech
 documentation and may not be completely obvious.
+
+It is possible to end up with an unusable system, for example by having no
+way to do a mouse left click, so exercise caution when remapping keys or
+buttons that are needed to operate your system.
 
 
 ## Solaar command line interface
