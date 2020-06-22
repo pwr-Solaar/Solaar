@@ -203,7 +203,7 @@ _POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), None)
 _SMART_SHIFT = ('smart-shift', _("Smart Shift"), _("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
 							"The mouse wheel is always free at 0, and always locked at 50"))
 _BACKLIGHT = ('backlight', _("Backlight"), _("Turn illumination on or off on keyboard."))
-_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key"))
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _("Actions"), _("Change the action for the key or button"))
 _DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"), _("Disable specific keyboard keys."))
 
 #
@@ -368,6 +368,7 @@ def _feature_pointer_speed():
 # the keys for the choice map are Logitech controls (from special_keys)
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
 # and the integer being the control number for that task (to be written to the device)
+# Solaar only remaps keys (controlled by key gmask and group), not other key reprogramming
 def _feature_reprogrammable_keys_choices(device):
 	count = device.feature_request(_F.REPROG_CONTROLS_V4)
 	assert count, 'Oops, reprogrammable key count cannot be retrieved!'
@@ -382,9 +383,10 @@ def _feature_reprogrammable_keys_choices(device):
 		keys[i] = ( _special_keys.CONTROL[key], action, flags, gmask )
 		groups[group].append(action)
 	for k in keys:
-		if k[2] & _special_keys.KEY_FLAG.reprogrammable:
+		# if k[2] & _special_keys.KEY_FLAG.reprogrammable:  # this flag is only to show in UI, ignore in Solaar
+		if k[3]: # only keys with a non-zero gmask are remappable
 			key_choices = [ k[1] ] # it should always be possible to map the key to itself
-			for g in range(1,9): # group 0 and gmask 0 (k[3]) don't appear to work, don't consider group 0
+			for g in range(1,9): # group 0 and gmask 0 (k[3]) does not indicate remappability so don't consider group 0
 				if ( k[3]==0 if g==0 else k[3] & 2**(g-1) ):
 					for gm in groups[g]:
 						if int(gm) != int(k[0]): # don't put itself in twice
