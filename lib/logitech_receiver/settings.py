@@ -508,7 +508,7 @@ class BooleanValidator(object):
 			tv = _bytes2int(true_value)
 			fv = _bytes2int(false_value)
 			mv = _bytes2int(mask)
-			assert tv & fv == 0
+			assert tv != fv # true and false might be something other than bit values
 			assert tv & mv == tv
 			assert fv & mv == fv
 			self.needs_current_value = any(m != b'\xFF' for m in mask)

@@ -243,14 +243,19 @@ def _feature_fn_swap():
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
 
+# this might not be correct for this feature
 def _feature_new_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.NEW_FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
 					device_kind=(_DK.keyboard,))
 
+
+# ignore the capabilities part of the feature - all devices should be able to swap Fn state
+# just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
 	return feature_toggle(_FN_SWAP[0], _F.K375S_FN_INVERSION,
 					label=_FN_SWAP[1], description=_FN_SWAP[2],
+					true_value=b'\xFF\x01', false_value=b'\xFF\x00',
 					device_kind=(_DK.keyboard,))
 
 # FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
