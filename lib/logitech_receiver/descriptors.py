@@ -356,6 +356,8 @@ _D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5,wpid='40
 						],
 				)
 
+_D('Wireless Mouse MX Vertical', codename='MX Vertical', protocol=4.5, wpid='407B')
+
 _D('G7 Cordless Laser Mouse', codename='G7', protocol=1.0, wpid='1002',
 				registers=(_R.battery_status, ),
 				)
