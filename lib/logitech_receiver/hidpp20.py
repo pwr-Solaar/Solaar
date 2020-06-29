@@ -653,3 +653,12 @@ def get_hires_wheel(device):
 		ratchet = (ratchet_mode & 0x01) != 0
 
 		return multi, has_invert, has_ratchet, inv, res, target, ratchet
+
+def get_new_fn_inversion(device):
+	state = feature_request(device, FEATURE.NEW_FN_INVERSION, 0x00)
+
+	if state:
+		inverted, default_inverted = _unpack('!BB', state[:2])
+		inverted = (inverted & 0x01) != 0 
+		default_inverted = (default_inverted & 0x01) != 0
+		return inverted, default_inverted

@@ -67,7 +67,7 @@ Feature                                | ID       | Status             | Notes
 `SURFACE_TUNING`                       | `0x2240` | :x:                |
 `HYBRID_TRACKING`                      | `0x2400` | :x:                |
 `FN_INVERSION`                         | `0x40A0` | :heavy_check_mark: | `_feature_fn_swap`
-`NEW_FN_INVERSION`                     | `0x40A2` | :heavy_check_mark: | `_feature_new_fn_swap`
+`NEW_FN_INVERSION`                     | `0x40A2` | :heavy_check_mark: | `get_new_fn_inversion`, `_feature_new_fn_swap`
 `K375S_FN_INVERSION`                   | `0x40A3` | :heavy_check_mark: | `_feature_k375s_fn_swap`
 `ENCRYPTION`                           | `0x4100` | :x:                |
 `LOCK_KEY_STATE`                       | `0x4220` | :x:                |

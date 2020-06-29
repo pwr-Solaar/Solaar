@@ -165,15 +165,18 @@ def _print_device(dev):
 				pointer_speed = _hidpp20.get_pointer_speed_info(dev)
 				if pointer_speed:
 					print("            Pointer Speed: %s" % pointer_speed)
-#			elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
-#				wheel_status = _hidpp20.get_lowres_wheel_status(dev)
-#				if wheel_status:
-#					print("            Wheel Reports: %s" % wheel_status)
-			else: 
-				for setting in dev_settings:
-					if setting.feature == feature:
-						v = setting.read(False)
-						print("            %s: %s" % (setting.label, v) )
+			elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
+				wheel_status = _hidpp20.get_lowres_wheel_status(dev)
+				if wheel_status:
+					print("            Wheel Reports: %s" % wheel_status)
+			elif feature == _hidpp20.FEATURE.NEW_FN_INVERSION:
+				inverted, default_inverted = _hidpp20.get_new_fn_inversion(dev)
+				print("            Fn-swap:", "enabled" if inverted else "disabled")
+				print("            Fn-swap default:", "enabled" if default_inverted else "disabled")
+			for setting in dev_settings:
+				if setting.feature == feature:
+					v = setting.read(False)
+					print("            %s: %s" % (setting.label, v) )
 
 	if dev.online and dev.keys:
 		print ('     Has %d reprogrammable keys:' % len(dev.keys))
