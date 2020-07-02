@@ -21,18 +21,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from time import time as _timestamp
 
+from logitech_receiver import base as _base
+from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import notifications as _notifications
+from logitech_receiver import status as _status
 from logitech_receiver.common import strhex as _strhex
-
-from logitech_receiver import (
-    base as _base,
-    hidpp10 as _hidpp10,
-    status as _status,
-    notifications as _notifications,
-)
+from solaar.cli.show import _print_receiver
 
 _R = _hidpp10.REGISTERS
-
-from solaar.cli.show import _print_receiver
 
 
 def run(receivers, args, find_receiver, _ignore):

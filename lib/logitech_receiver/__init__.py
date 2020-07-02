@@ -33,6 +33,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
+from . import listener, status
+from .base import DeviceUnreachable, NoReceiver, NoSuchDevice
+from .common import strhex
+from .hidpp20 import FeatureCallError, FeatureNotSupported
+from .receiver import PairedDevice, Receiver
+
 _DEBUG = logging.DEBUG
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.root.level)
@@ -43,11 +49,3 @@ _log.setLevel(logging.root.level)
 del logging
 
 __version__ = '0.9'
-
-from .common import strhex
-from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
-from .receiver import Receiver, PairedDevice
-from .hidpp20 import FeatureNotSupported, FeatureCallError
-
-from . import listener
-from . import status

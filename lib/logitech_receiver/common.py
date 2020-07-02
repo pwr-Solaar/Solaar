@@ -22,7 +22,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from binascii import hexlify as _hexlify
+from collections import namedtuple
 from struct import pack, unpack
+
 try:
     unicode
     # if Python2, unicode_literals will mess our first (un)pack() argument
@@ -278,7 +280,6 @@ class KwException(Exception):
             return self.args[0][k]
 
 
-from collections import namedtuple
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo',
                           ['kind', 'name', 'version', 'extras'])

@@ -19,23 +19,27 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gdk, GLib, Gtk
 from gi.repository.GObject import TYPE_PYOBJECT
-
+from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver.common import NamedInt as _NamedInt
+from logitech_receiver.common import NamedInts as _NamedInts
+from logitech_receiver.status import KEYS as _K
 from solaar import NAME
 from solaar.i18n import _, ngettext
 # from solaar import __version__ as VERSION
 from solaar.ui import ui_async as _ui_async
-from logitech_receiver import hidpp10 as _hidpp10
-from logitech_receiver.common import NamedInts as _NamedInts, NamedInt as _NamedInt
-from logitech_receiver.status import KEYS as _K
+
+from . import action as _action
 from . import config_panel as _config_panel
-from . import action as _action, icons as _icons
+from . import icons as _icons
 from .about import show_window as _show_about_window
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 # constants

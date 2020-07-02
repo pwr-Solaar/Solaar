@@ -22,9 +22,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import importlib
 
-from solaar import __version__, NAME
-import solaar.i18n as _i18n
 import solaar.cli as _cli
+import solaar.i18n as _i18n
+
+from solaar import NAME, __version__
 
 #
 #

@@ -18,22 +18,25 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
-
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 from time import time as _timestamp
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 from gi.repository.Gdk import ScrollDirection
-
+from logitech_receiver.status import KEYS as _K
 from solaar import NAME
 from solaar.i18n import _
-from logitech_receiver.status import KEYS as _K
+
 from . import icons as _icons
-from .window import popup as _window_popup, toggle as _window_toggle
+from .window import popup as _window_popup
+from .window import toggle as _window_toggle
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 # constants

@@ -21,9 +21,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import sys
-from select import select as _select
 import time
+
 from binascii import hexlify, unhexlify
+from select import select as _select
+from threading import Lock
+
 import hidapi as _hid
 
 #
@@ -59,7 +62,6 @@ except:
 #
 #
 
-from threading import Lock
 print_lock = Lock()
 del Lock
 

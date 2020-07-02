@@ -19,9 +19,15 @@
 
 import os as _os
 import os.path as _path
-from json import load as _json_load, dump as _json_save
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
+from json import dump as _json_save
+from json import load as _json_load
+from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
+from logging import getLogger
+
+from solaar import __version__
+
 _log = getLogger(__name__)
 del getLogger
 
@@ -29,7 +35,6 @@ _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(
     _path.join('~', '.config'))
 _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
-from solaar import __version__
 _KEY_VERSION = '_version'
 _KEY_NAME = '_name'
 _configuration = {}

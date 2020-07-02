@@ -19,36 +19,35 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
+from collections import namedtuple
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 
-from .i18n import _
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
-from .common import (
-    bytes2int as _bytes2int,
-    int2bytes as _int2bytes,
-    NamedInt as _NamedInt,
-    NamedInts as _NamedInts,
-    unpack as _unpack,
-    ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4,
-)
-from .settings import (
-    KIND as _KIND,
-    Setting as _Setting,
-    BitFieldSetting as _BitFieldSetting,
-    Settings as _Settings,
-    RegisterRW as _RegisterRW,
-    FeatureRW as _FeatureRW,
-    FeatureRWMap as _FeatureRWMap,
-    BooleanValidator as _BooleanV,
-    BitFieldValidator as _BitFieldV,
-    ChoicesValidator as _ChoicesV,
-    ChoicesMapValidator as _ChoicesMapV,
-    RangeValidator as _RangeV,
-)
+from .common import NamedInt as _NamedInt
+from .common import NamedInts as _NamedInts
+from .common import ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4
+from .common import bytes2int as _bytes2int
+from .common import int2bytes as _int2bytes
+from .common import unpack as _unpack
+from .i18n import _
+from .settings import KIND as _KIND
+from .settings import BitFieldSetting as _BitFieldSetting
+from .settings import BitFieldValidator as _BitFieldV
+from .settings import BooleanValidator as _BooleanV
+from .settings import ChoicesMapValidator as _ChoicesMapV
+from .settings import ChoicesValidator as _ChoicesV
+from .settings import FeatureRW as _FeatureRW
+from .settings import FeatureRWMap as _FeatureRWMap
+from .settings import RangeValidator as _RangeV
+from .settings import RegisterRW as _RegisterRW
+from .settings import Setting as _Setting
+from .settings import Settings as _Settings
+
+_log = getLogger(__name__)
+del getLogger
 
 _DK = _hidpp10.DEVICE_KIND
 _R = _hidpp10.REGISTERS
@@ -669,8 +668,6 @@ def _feature_disable_keyboard_keys():
 #
 #
 #
-
-from collections import namedtuple
 
 
 def _S(name, featureID=None, featureFn=None, registerFn=None, identifier=None):

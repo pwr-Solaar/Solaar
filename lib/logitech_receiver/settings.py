@@ -19,19 +19,20 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
-_log = getLogger(__name__)
-del getLogger
-
-from copy import copy as _copy
 import math
 
-from .common import (
-    NamedInt as _NamedInt,
-    NamedInts as _NamedInts,
-    bytes2int as _bytes2int,
-    int2bytes as _int2bytes,
-)
+from copy import copy as _copy
+from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
+from logging import getLogger
+
+from .common import NamedInt as _NamedInt
+from .common import NamedInts as _NamedInts
+from .common import bytes2int as _bytes2int
+from .common import int2bytes as _int2bytes
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #

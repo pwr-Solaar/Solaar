@@ -19,9 +19,10 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logitech_receiver import (hidpp10 as _hidpp10, hidpp20 as _hidpp20,
-                               special_keys as _special_keys,
-                               settings_templates as _settings_templates)
+from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp20 as _hidpp20
+from logitech_receiver import settings_templates as _settings_templates
+from logitech_receiver import special_keys as _special_keys
 from logitech_receiver.common import NamedInt as _NamedInt
 
 
