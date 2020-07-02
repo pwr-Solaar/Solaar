@@ -45,22 +45,32 @@ def run(receivers, args, find_receiver, _ignore):
     register = receiver.read_register(_R.notifications)
     print('    Notification Register %#04x: %s' % (_R.notifications % 0x100, '0x' + _strhex(register) if register else 'None'))
     register = receiver.read_register(_R.receiver_connection)
-    print('    Connection State      %#04x: %s' %
-          (_R.receiver_connection % 0x100, '0x' + _strhex(register) if register else 'None'))
+    print(
+        '    Connection State      %#04x: %s' %
+        (_R.receiver_connection % 0x100, '0x' + _strhex(register) if register else 'None')
+    )
     register = receiver.read_register(_R.devices_activity)
-    print('    Device Activity       %#04x: %s' %
-          (_R.devices_activity % 0x100, '0x' + _strhex(register) if register else 'None'))
+    print(
+        '    Device Activity       %#04x: %s' %
+        (_R.devices_activity % 0x100, '0x' + _strhex(register) if register else 'None')
+    )
 
     for device in range(0, 6):
         for sub_reg in [0x0, 0x10, 0x20, 0x30]:
             register = receiver.read_register(_R.receiver_info, sub_reg + device)
-            print('    Pairing Register %#04x %#04x: %s' %
-                  (_R.receiver_info % 0x100, sub_reg + device, '0x' + _strhex(register) if register else 'None'))
+            print(
+                '    Pairing Register %#04x %#04x: %s' %
+                (_R.receiver_info % 0x100, sub_reg + device, '0x' + _strhex(register) if register else 'None')
+            )
         register = receiver.read_register(_R.receiver_info, 0x40 + device)
-        print('    Pairing Name     %#04x %#02x: %s' %
-              (_R.receiver_info % 0x100, 0x40 + device, register[2:2 + ord(register[1:2])] if register else 'None'))
+        print(
+            '    Pairing Name     %#04x %#02x: %s' %
+            (_R.receiver_info % 0x100, 0x40 + device, register[2:2 + ord(register[1:2])] if register else 'None')
+        )
 
     for sub_reg in range(0, 5):
         register = receiver.read_register(_R.firmware, sub_reg)
-        print('    Firmware         %#04x %#04x: %s' %
-              (_R.firmware % 0x100, sub_reg, '0x' + _strhex(register) if register else 'None'))
+        print(
+            '    Firmware         %#04x %#04x: %s' %
+            (_R.firmware % 0x100, sub_reg, '0x' + _strhex(register) if register else 'None')
+        )

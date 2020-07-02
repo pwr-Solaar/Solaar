@@ -191,11 +191,13 @@ def _process_hidpp10_notification(device, status, n):
 
     # wireless link notification
     if n.sub_id == 0x41:
-        protocol_name = ('Bluetooth' if n.address == 0x01 else '27 MHz' if n.address == 0x02 else 'QUAD or eQUAD'
-                         if n.address == 0x03 else 'eQUAD step 4 DJ' if n.address == 0x04 else 'DFU Lite' if n.address ==
-                         0x05 else 'eQUAD step 4 Lite' if n.address == 0x06 else 'eQUAD step 4 Gaming' if n.address ==
-                         0x07 else 'eQUAD step 4 for gamepads' if n.address == 0x08 else 'eQUAD nano Lite' if n.address ==
-                         0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None)
+        protocol_name = (
+            'Bluetooth' if n.address == 0x01 else '27 MHz' if n.address == 0x02 else
+            'QUAD or eQUAD' if n.address == 0x03 else 'eQUAD step 4 DJ' if n.address == 0x04 else 'DFU Lite' if n.address ==
+            0x05 else 'eQUAD step 4 Lite' if n.address == 0x06 else 'eQUAD step 4 Gaming' if n.address ==
+            0x07 else 'eQUAD step 4 for gamepads' if n.address == 0x08 else 'eQUAD nano Lite' if n.address ==
+            0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None
+        )
         if protocol_name:
             if _log.isEnabledFor(_DEBUG):
                 wpid = _strhex(n.data[2:3] + n.data[1:2])
@@ -207,8 +209,10 @@ def _process_hidpp10_notification(device, status, n):
             if _log.isEnabledFor(_DEBUG):
                 sw_present = bool(flags & 0x10)
                 has_payload = bool(flags & 0x80)
-                _log.debug('%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device,
-                           protocol_name, sw_present, link_encrypted, link_established, has_payload)
+                _log.debug(
+                    '%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, protocol_name,
+                    sw_present, link_encrypted, link_established, has_payload
+                )
             status[_K.LINK_ENCRYPTED] = link_encrypted
             status.changed(active=link_established)
         else:

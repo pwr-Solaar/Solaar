@@ -38,17 +38,19 @@ del getLogger
 
 DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, trackball=0x08, touchpad=0x09)
 
-POWER_SWITCH_LOCATION = _NamedInts(base=0x01,
-                                   top_case=0x02,
-                                   edge_of_top_right_corner=0x03,
-                                   top_left_corner=0x05,
-                                   bottom_left_corner=0x06,
-                                   top_right_corner=0x07,
-                                   bottom_right_corner=0x08,
-                                   top_edge=0x09,
-                                   right_edge=0x0A,
-                                   left_edge=0x0B,
-                                   bottom_edge=0x0C)
+POWER_SWITCH_LOCATION = _NamedInts(
+    base=0x01,
+    top_case=0x02,
+    edge_of_top_right_corner=0x03,
+    top_left_corner=0x05,
+    bottom_left_corner=0x06,
+    top_right_corner=0x07,
+    bottom_right_corner=0x08,
+    top_edge=0x09,
+    right_edge=0x0A,
+    left_edge=0x0B,
+    bottom_edge=0x0C
+)
 
 # Some flags are used both by devices and receivers. The Logitech documentation
 # mentions that the first and last (third) byte are used for devices while the
@@ -72,18 +74,20 @@ NOTIFICATION_FLAG = _NamedInts(
     wireless=0x000100,  # notify when the device wireless goes on/off-line
 )
 
-ERROR = _NamedInts(invalid_SubID__command=0x01,
-                   invalid_address=0x02,
-                   invalid_value=0x03,
-                   connection_request_failed=0x04,
-                   too_many_devices=0x05,
-                   already_exists=0x06,
-                   busy=0x07,
-                   unknown_device=0x08,
-                   resource_error=0x09,
-                   request_unavailable=0x0A,
-                   unsupported_parameter_value=0x0B,
-                   wrong_pin_code=0x0C)
+ERROR = _NamedInts(
+    invalid_SubID__command=0x01,
+    invalid_address=0x02,
+    invalid_value=0x03,
+    connection_request_failed=0x04,
+    too_many_devices=0x05,
+    already_exists=0x06,
+    busy=0x07,
+    unknown_device=0x08,
+    resource_error=0x09,
+    request_unavailable=0x0A,
+    unsupported_parameter_value=0x0B,
+    wrong_pin_code=0x0C
+)
 
 PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
 
@@ -167,8 +171,10 @@ def parse_battery_status(register, reply):
     if register == REGISTERS.battery_charge:
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
-        status_text = (BATTERY_STATUS.discharging if status_byte == 0x30 else BATTERY_STATUS.recharging
-                       if status_byte == 0x50 else BATTERY_STATUS.full if status_byte == 0x90 else None)
+        status_text = (
+            BATTERY_STATUS.discharging if status_byte == 0x30 else
+            BATTERY_STATUS.recharging if status_byte == 0x50 else BATTERY_STATUS.full if status_byte == 0x90 else None
+        )
         return charge, status_text, None
 
     if register == REGISTERS.battery_status:
@@ -179,7 +185,8 @@ def parse_battery_status(register, reply):
             else BATTERY_APPOX.low if status_byte == 3  # low
             else BATTERY_APPOX.critical if status_byte == 1  # critical
             # pure 'charging' notifications may come without a status
-            else BATTERY_APPOX.empty)
+            else BATTERY_APPOX.empty
+        )
 
         charging_byte = ord(reply[1:2])
         if charging_byte == 0x00:

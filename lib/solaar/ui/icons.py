@@ -64,7 +64,8 @@ def _look_for_application_icons():
     del _sys
 
     share_solaar = [prefix_share] + list(
-        _path.join(x, 'solaar') for x in [src_share, local_share, setuptools_share, repo_share] + data_dirs.split(':'))
+        _path.join(x, 'solaar') for x in [src_share, local_share, setuptools_share, repo_share] + data_dirs.split(':')
+    )
     for location in share_solaar:
         location = _path.join(location, 'icons')
         if _log.isEnabledFor(_DEBUG):

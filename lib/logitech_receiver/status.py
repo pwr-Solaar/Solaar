@@ -102,10 +102,12 @@ class ReceiverStatus(dict):
 
     def __str__(self):
         count = len(self._receiver)
-        return (_('No paired devices.')
-                if count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', count) % {
-                    'count': count
-                })
+        return (
+            _('No paired devices.')
+            if count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', count) % {
+                'count': count
+            }
+        )
 
     __unicode__ = __str__
 
@@ -209,8 +211,10 @@ class DeviceStatus(dict):
         if voltage is not None:
             self[KEYS.BATTERY_VOLTAGE] = voltage
 
-        charging = status in (_hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full,
-                              _hidpp20.BATTERY_STATUS.full, _hidpp20.BATTERY_STATUS.slow_recharge)
+        charging = status in (
+            _hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.full,
+            _hidpp20.BATTERY_STATUS.slow_recharge
+        )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
         changed = old_level != level or old_status != status or old_charging != charging

@@ -49,12 +49,9 @@ del namedtuple
 
 
 def _ghost(device):
-    return _GHOST_DEVICE(receiver=device.receiver,
-                         number=device.number,
-                         name=device.name,
-                         kind=device.kind,
-                         status=None,
-                         online=False)
+    return _GHOST_DEVICE(
+        receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, status=None, online=False
+    )
 
 
 #
@@ -146,11 +143,15 @@ class ReceiverListener(_listener.EventsListener):
         assert device is not None
         if _log.isEnabledFor(_INFO):
             if device.kind is None:
-                _log.info('status_changed %s: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
-                          alert, reason or '')
+                _log.info(
+                    'status_changed %s: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
+                    alert, reason or ''
+                )
             else:
-                _log.info('status_changed %s: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
-                          'online' if device.online else 'offline', device.status, alert, reason or '')
+                _log.info(
+                    'status_changed %s: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
+                    'online' if device.online else 'offline', device.status, alert, reason or ''
+                )
 
         if device.kind is None:
             assert device == self.receiver

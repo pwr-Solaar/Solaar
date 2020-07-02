@@ -91,8 +91,10 @@ def unpair(window, device):
     assert device
     assert device.kind is not None
 
-    qdialog = Gtk.MessageDialog(window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
-                                _('Unpair') + ' ' + device.name + ' ?')
+    qdialog = Gtk.MessageDialog(
+        window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
+        _('Unpair') + ' ' + device.name + ' ?'
+    )
     qdialog.set_icon_name('remove')
     qdialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
     qdialog.add_button(_('Unpair'), Gtk.ResponseType.ACCEPT)

@@ -266,10 +266,12 @@ class PairedDevice(object):
             return False
 
         if enable:
-            set_flag_bits = (_hidpp10.NOTIFICATION_FLAG.battery_status
-                             | _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
-                             | _hidpp10.NOTIFICATION_FLAG.wireless
-                             | _hidpp10.NOTIFICATION_FLAG.software_present)
+            set_flag_bits = (
+                _hidpp10.NOTIFICATION_FLAG.battery_status
+                | _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
+                | _hidpp10.NOTIFICATION_FLAG.wireless
+                | _hidpp10.NOTIFICATION_FLAG.software_present
+            )
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
@@ -361,8 +363,9 @@ class Receiver(object):
 
         self.name = product_info.get('name', '')
         self.re_pairs = product_info.get('re_pairs', False)
-        self._str = '<%s(%s,%s%s)>' % (self.name.replace(
-            ' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle)
+        self._str = '<%s(%s,%s%s)>' % (
+            self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
+        )
 
         self._firmware = None
         self._devices = {}
@@ -398,9 +401,11 @@ class Receiver(object):
             return False
 
         if enable:
-            set_flag_bits = (_hidpp10.NOTIFICATION_FLAG.battery_status
-                             | _hidpp10.NOTIFICATION_FLAG.wireless
-                             | _hidpp10.NOTIFICATION_FLAG.software_present)
+            set_flag_bits = (
+                _hidpp10.NOTIFICATION_FLAG.battery_status
+                | _hidpp10.NOTIFICATION_FLAG.wireless
+                | _hidpp10.NOTIFICATION_FLAG.software_present
+            )
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)

@@ -489,14 +489,16 @@ TASK = _NamedInts(
 )
 TASK._fallback = lambda x: 'unknown:%04X' % x
 # hidpp 4.5 info from https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
-KEY_FLAG = _NamedInts(virtual=0x80,
-                      persistently_divertable=0x40,
-                      divertable=0x20,
-                      reprogrammable=0x10,
-                      FN_sensitive=0x08,
-                      nonstandard=0x04,
-                      is_FN=0x02,
-                      mse=0x01)
+KEY_FLAG = _NamedInts(
+    virtual=0x80,
+    persistently_divertable=0x40,
+    divertable=0x20,
+    reprogrammable=0x10,
+    FN_sensitive=0x08,
+    nonstandard=0x04,
+    is_FN=0x02,
+    mse=0x01
+)
 
 DISABLE = _NamedInts(
     Caps_Lock=0x01,

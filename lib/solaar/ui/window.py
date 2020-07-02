@@ -168,12 +168,14 @@ def _create_buttons_box():
     bb = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
     bb.set_layout(Gtk.ButtonBoxStyle.END)
 
-    bb._details = _new_button(None,
-                              'dialog-information',
-                              _SMALL_BUTTON_ICON_SIZE,
-                              tooltip=_('Show Technical Details'),
-                              toggle=True,
-                              clicked=_update_details)
+    bb._details = _new_button(
+        None,
+        'dialog-information',
+        _SMALL_BUTTON_ICON_SIZE,
+        tooltip=_('Show Technical Details'),
+        toggle=True,
+        clicked=_update_details
+    )
     bb.add(bb._details)
     bb.set_child_secondary(bb._details, True)
     bb.set_child_non_homogeneous(bb._details, True)
@@ -319,10 +321,9 @@ def _create_window_layout():
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_('Quit') + ' ' + NAME, 'application-exit', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_('About') + ' ' + NAME,
-                               'help-about',
-                               icon_size=_SMALL_BUTTON_ICON_SIZE,
-                               clicked=_show_about_window)
+    about_button = _new_button(
+        _('About') + ' ' + NAME, 'help-about', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window
+    )
     bottom_buttons_box.add(about_button)
 
     # solaar_version = Gtk.Label()
@@ -447,8 +448,9 @@ def _device_row(receiver_path, device_number, device=None):
         icon_name = _icons.device_icon_name(device.name, device.kind)
         status_text = None
         status_icon = None
-        row_data = (receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon,
-                    device)
+        row_data = (
+            receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
+        )
         assert len(row_data) == len(_TREE_SEPATATOR)
         if _log.isEnabledFor(_DEBUG):
             _log.debug('new device row %s at index %d', row_data, new_child_index)
@@ -533,10 +535,12 @@ def _update_details(button):
                 hid_version = device.protocol
                 yield (_('Protocol'), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
                 if read_all and device.polling_rate:
-                    yield (_('Polling rate'), _('%(rate)d ms (%(rate_hz)dHz)') % {
-                        'rate': device.polling_rate,
-                        'rate_hz': 1000 // device.polling_rate
-                    })
+                    yield (
+                        _('Polling rate'), _('%(rate)d ms (%(rate_hz)dHz)') % {
+                            'rate': device.polling_rate,
+                            'rate_hz': 1000 // device.polling_rate
+                        }
+                    )
 
                 if read_all or not device.online:
                     yield (_('Serial'), device.serial)
@@ -589,17 +593,19 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
     devices_count = len(receiver)
 
-    paired_text = _('No device paired.') if devices_count == 0 else ngettext('%(count)s paired device.',
-                                                                             '%(count)s paired devices.', devices_count) % {
-                                                                                 'count': devices_count
-                                                                             }
+    paired_text = _(
+        'No device paired.'
+    ) if devices_count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', devices_count) % {
+        'count': devices_count
+    }
 
     if (receiver.max_devices > 0):
-        paired_text += '\n\n<small>%s</small>' % ngettext('Up to %(max_count)s device can be paired to this receiver.',
-                                                          'Up to %(max_count)s devices can be paired to this receiver.',
-                                                          receiver.max_devices) % {
-                                                              'max_count': receiver.max_devices
-                                                          }
+        paired_text += '\n\n<small>%s</small>' % ngettext(
+            'Up to %(max_count)s device can be paired to this receiver.',
+            'Up to %(max_count)s devices can be paired to this receiver.', receiver.max_devices
+        ) % {
+            'max_count': receiver.max_devices
+        }
     elif devices_count > 0:
         paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
     pairings = receiver.remaining_pairings(False)
@@ -684,12 +690,15 @@ def _update_device_panel(device, panel, buttons, full=False):
             panel._secure._text.set_text(_('not encrypted'))
             panel._secure._icon.set_from_icon_name('security-low', _INFO_ICON_SIZE)
             panel._secure.set_tooltip_text(
-                _('The wireless link between this device and its receiver is not encrypted.\n'
-                  '\n'
-                  'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
-                  '\n'
-                  'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
-                  'because typed text can be sniffed inconspicuously by 3rd parties within range.'))
+                _(
+                    'The wireless link between this device and its receiver is not encrypted.\n'
+                    '\n'
+                    'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
+                    '\n'
+                    'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
+                    'because typed text can be sniffed inconspicuously by 3rd parties within range.'
+                )
+            )
         else:
             panel._secure._text.set_text(_('encrypted'))
             panel._secure._icon.set_from_icon_name('security-high', _INFO_ICON_SIZE)
