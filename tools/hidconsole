@@ -6,17 +6,18 @@ from __future__ import absolute_import
 
 
 def init_paths():
-	"""Make the app work in the source tree."""
-	import sys
-	import os.path as _path
+    """Make the app work in the source tree."""
+    import sys
+    import os.path as _path
 
-	src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..', 'lib'))
-	init_py = _path.join(src_lib, 'hidapi', '__init__.py')
-	if _path.exists(init_py):
-		sys.path[0] = src_lib
+    src_lib = _path.normpath(
+        _path.join(_path.realpath(sys.path[0]), '..', 'lib'))
+    init_py = _path.join(src_lib, 'hidapi', '__init__.py')
+    if _path.exists(init_py):
+        sys.path[0] = src_lib
 
 
 if __name__ == '__main__':
-	init_paths()
-	from hidapi import hidconsole
-	hidconsole.main()
+    init_paths()
+    from hidapi import hidconsole
+    hidconsole.main()

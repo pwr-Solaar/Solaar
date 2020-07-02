@@ -22,22 +22,24 @@ from __future__ import absolute_import, unicode_literals
 
 
 def init_paths():
-	"""Make the app work in the source tree."""
-	import sys
-	import os.path as _path
+    """Make the app work in the source tree."""
+    import sys
+    import os.path as _path
 
-	prefix = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..'))
-	src_lib = _path.join(prefix, 'lib')
-	share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
-	for location in src_lib, share_lib:
-		init_py = _path.join(location, 'solaar', '__init__.py')
-		if _path.exists(init_py):
-			sys.path[0] = location
-			break
+    prefix = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..'))
+    src_lib = _path.join(prefix, 'lib')
+    share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
+    for location in src_lib, share_lib:
+        init_py = _path.join(location, 'solaar', '__init__.py')
+        if _path.exists(init_py):
+            sys.path[0] = location
+            break
 
 
 if __name__ == '__main__':
-	print ('WARNING: solaar-cli is deprecated; use solaar with the usual arguments')
-	init_paths()
-	import solaar.cli
-	solaar.cli.run()
+    print(
+        'WARNING: solaar-cli is deprecated; use solaar with the usual arguments'
+    )
+    init_paths()
+    import solaar.cli
+    solaar.cli.run()
