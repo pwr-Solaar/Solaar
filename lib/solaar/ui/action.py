@@ -67,10 +67,7 @@ def make_toggle(name, label, function, stock_id=None, *args):
 #     action.set_sensitive(notify.available)
 # toggle_notifications = make_toggle('notifications', 'Notifications', _toggle_notifications)
 
-about = make('help-about',
-             _('About') + ' ' + NAME,
-             _show_about_window,
-             stock_id=Gtk.STOCK_ABOUT)
+about = make('help-about', _('About') + ' ' + NAME, _show_about_window, stock_id=Gtk.STOCK_ABOUT)
 
 #
 #
@@ -94,8 +91,7 @@ def unpair(window, device):
     assert device
     assert device.kind is not None
 
-    qdialog = Gtk.MessageDialog(window, 0, Gtk.MessageType.QUESTION,
-                                Gtk.ButtonsType.NONE,
+    qdialog = Gtk.MessageDialog(window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
                                 _('Unpair') + ' ' + device.name + ' ?')
     qdialog.set_icon_name('remove')
     qdialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)

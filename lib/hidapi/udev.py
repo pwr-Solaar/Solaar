@@ -95,8 +95,7 @@ def _match(action, device, filter):
     pid = usb_device.get('ID_MODEL_ID')
     if vid is None or pid is None:
         return  # there are reports that sometimes the usb_device isn't set up right so be defensive
-    if not ((vendor_id is None or vendor_id == int(vid, 16)) and
-            (product_id is None or product_id == int(pid, 16))):
+    if not ((vendor_id is None or vendor_id == int(vid, 16)) and (product_id is None or product_id == int(pid, 16))):
         return
 
     if action == 'add':
@@ -115,11 +114,9 @@ def _match(action, device, filter):
         intf_device = device.find_parent('usb', 'usb_interface')
         # print ("*** usb interface", action, device, "usb_interface:", intf_device)
         if interface_number is None:
-            usb_interface = None if intf_device is None else intf_device.attributes.asint(
-                'bInterfaceNumber')
+            usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
         else:
-            usb_interface = None if intf_device is None else intf_device.attributes.asint(
-                'bInterfaceNumber')
+            usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
             if usb_interface is None or interface_number != usb_interface:
                 return
 
@@ -186,18 +183,15 @@ def monitor_glib(callback, *device_filters):
 
     try:
         # io_add_watch_full may not be available...
-        GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN,
-                               _process_udev_event, callback, device_filters)
+        GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
         # print ("did io_add_watch_full")
     except AttributeError:
         try:
             # and the priority parameter appeared later in the API
-            GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN,
-                              _process_udev_event, callback, device_filters)
+            GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, device_filters)
             # print ("did io_add_watch with priority")
         except Exception:
-            GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback,
-                              device_filters)
+            GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, device_filters)
             # print ("did io_add_watch")
 
     m.start()
@@ -288,9 +282,7 @@ def write(device_handle, data):
         else:
             break
     if bytes_written != len(data):
-        raise IOError(
-            _errno.EIO,
-            'written %d bytes out of expected %d' % (bytes_written, len(data)))
+        raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
@@ -311,13 +303,11 @@ def read(device_handle, bytes_count, timeout_ms=-1):
     """
     assert device_handle
     timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
-    rlist, wlist, xlist = _select([device_handle], [], [device_handle],
-                                  timeout)
+    rlist, wlist, xlist = _select([device_handle], [], [device_handle], timeout)
 
     if xlist:
         assert xlist == [device_handle]
-        raise IOError(_errno.EIO,
-                      'exception on file descriptor %d' % device_handle)
+        raise IOError(_errno.EIO, 'exception on file descriptor %d' % device_handle)
 
     if rlist:
         assert rlist == [device_handle]

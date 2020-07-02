@@ -16,5 +16,4 @@ def print_event(action, device):
     print('~~~~ device [%s] %s' % (action, device))
 
 
-hidapi.monitor(print_event, DEVICE_UNIFYING_RECEIVER,
-               DEVICE_UNIFYING_RECEIVER_2, DEVICE_NANO_RECEIVER)
+hidapi.monitor(print_event, DEVICE_UNIFYING_RECEIVER, DEVICE_UNIFYING_RECEIVER_2, DEVICE_NANO_RECEIVER)

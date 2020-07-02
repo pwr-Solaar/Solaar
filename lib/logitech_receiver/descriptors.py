@@ -32,28 +32,18 @@ from .settings_templates import RegisterSettings as _RS
 #
 
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
-                               ('name', 'kind', 'wpid', 'codename', 'protocol',
-                                'registers', 'settings', 'persister'))
+                               ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister'))
 del namedtuple
 
 DEVICES = {}
 
 
-def _D(name,
-       codename=None,
-       kind=None,
-       wpid=None,
-       protocol=None,
-       registers=None,
-       settings=None,
-       persister=None):
+def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None, settings=None, persister=None):
     assert name
 
     if kind is None:
-        kind = (_DK.mouse if 'Mouse' in name else
-                _DK.keyboard if 'Keyboard' in name else _DK.numpad
-                if 'Number Pad' in name else _DK.touchpad if 'Touchpad' in
-                name else _DK.trackball if 'Trackball' in name else None)
+        kind = (_DK.mouse if 'Mouse' in name else _DK.keyboard if 'Keyboard' in name else _DK.numpad if 'Number Pad' in name
+                else _DK.touchpad if 'Touchpad' in name else _DK.trackball if 'Trackball' in name else None)
     assert kind is not None, 'descriptor for %s does not have kind set' % name
 
     # heuristic: the codename is the last word in the device name
@@ -73,17 +63,12 @@ def _D(name,
         if wpid:
             for w in wpid if isinstance(wpid, tuple) else (wpid, ):
                 if protocol > 1.0:
-                    assert w[0:1] == '4', '%s has protocol %0.1f, wpid %s' % (
-                        name, protocol, w)
+                    assert w[0:1] == '4', '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
                 else:
                     if w[0:1] == '1':
-                        assert kind == _DK.mouse, '%s has protocol %0.1f, wpid %s' % (
-                            name, protocol, w)
+                        assert kind == _DK.mouse, '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
                     elif w[0:1] == '2':
-                        assert kind in (
-                            _DK.keyboard,
-                            _DK.numpad), '%s has protocol %0.1f, wpid %s' % (
-                                name, protocol, w)
+                        assert kind in (_DK.keyboard, _DK.numpad), '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
 
     device_descriptor = _DeviceDescriptor(name=name,
                                           kind=kind,
@@ -94,8 +79,7 @@ def _D(name,
                                           settings=settings,
                                           persister=persister)
 
-    assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (
-        DEVICES[codename], )
+    assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
     DEVICES[codename] = device_descriptor
 
     if wpid:
@@ -103,8 +87,7 @@ def _D(name,
             wpid = (wpid, )
 
         for w in wpid:
-            assert w not in DEVICES, 'duplicate wpid in device descriptors: %s' % (
-                DEVICES[w], )
+            assert w not in DEVICES, 'duplicate wpid in device descriptors: %s' % (DEVICES[w], )
             DEVICES[w] = device_descriptor
 
 
@@ -112,8 +95,7 @@ def _D(name,
 #
 #
 
-_PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str(
-    (x - 0x80) * 100))
+_PERFORMANCE_MX_DPIS = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
 
 #
 #
@@ -349,12 +331,9 @@ _D(
 )
 _D('Wireless Mouse M315')
 _D('Wireless Mouse M317')
-_D('Wireless Mouse M325',
-   protocol=2.0,
-   wpid='400A',
-   settings=[
-       _FS.hi_res_scroll(),
-   ])
+_D('Wireless Mouse M325', protocol=2.0, wpid='400A', settings=[
+    _FS.hi_res_scroll(),
+])
 _D('Wireless Mouse M345', protocol=2.0, wpid='4017')
 _D(
     'Wireless Mouse M350',
@@ -384,13 +363,9 @@ _D(
         _RS.side_scroll(),
     ],
 )
-_D('Wireless Mouse M510',
-   codename='M510v2',
-   protocol=2.0,
-   wpid='4051',
-   settings=[
-       _FS.lowres_smooth_scroll(),
-   ])
+_D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051', settings=[
+    _FS.lowres_smooth_scroll(),
+])
 _D('Couch Mouse M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M525', protocol=2.0, wpid='4013')
 _D(
@@ -486,10 +461,7 @@ _D(
     ],
 )
 
-_D('Wireless Mouse MX Vertical',
-   codename='MX Vertical',
-   protocol=4.5,
-   wpid='407B')
+_D('Wireless Mouse MX Vertical', codename='MX Vertical', protocol=4.5, wpid='407B')
 
 _D(
     'G7 Cordless Laser Mouse',

@@ -67,8 +67,7 @@ CONTROL = _NamedInts(
     MINIMIZE_AS_WIN_M=0x0027,
     MEDIA_PLAYER=0x0028,
     MEDIA_CENTER_LOGI=0x0029,
-    MEDIA_CENTER_MSFT=
-    0x002A,  # Should not be used as it is not reprogrammable under Windows
+    MEDIA_CENTER_MSFT=0x002A,  # Should not be used as it is not reprogrammable under Windows
     CUSTOM_MENU=0x002B,
     MESSENGER=0x002C,
     MY_DOCUMENTS=0x002D,
@@ -237,8 +236,7 @@ CONTROL = _NamedInts(
     F_Lock=0x00DE,
     Switch_Highlight=0x00DF,
     Mission_Control__Task_View=0x00E0,  # Switch_Workspaces on Craft Keyboard
-    Dashboard_Launchpad__Action_Center=
-    0x00E1,  # Application_Launcher on Craft Keyboard
+    Dashboard_Launchpad__Action_Center=0x00E1,  # Application_Launcher on Craft Keyboard
     Backlight_Down=0x00E2,
     Backlight_Up=0x00E3,
     Previous_Fn=0x00E4,  # Reprogrammable_Previous_Track / on Craft Keyboard
@@ -463,8 +461,7 @@ TASK = _NamedInts(
     Fast_Backward=0x00BD,
     Switch_Highlighting=0x00BE,
     Mission_Control__Task_View=0x00BF,  # Switch_Workspace on Craft Keyboard
-    Dashboard_Launchpad__Action_Center=
-    0x00C0,  # Application_Launcher on Craft Keyboard
+    Dashboard_Launchpad__Action_Center=0x00C0,  # Application_Launcher on Craft Keyboard
     Backlight_Down=0x00C1,  # Backlight_Down_FW_internal_function
     Backlight_Up=0x00C2,  # Backlight_Up_FW_internal_function
     Right_Click__App_Contextual_Menu=0x00C3,  # Context_Menu on Craft Keyboard

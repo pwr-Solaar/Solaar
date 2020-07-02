@@ -48,47 +48,26 @@ prefer_symbolic_battery_icons = False
 def _parse_arguments():
     import argparse
     arg_parser = argparse.ArgumentParser(prog=NAME.lower())
-    arg_parser.add_argument(
-        '-d',
-        '--debug',
-        action='count',
-        default=0,
-        help=
-        'print logging messages, for debugging purposes (may be repeated for extra verbosity)'
-    )
-    arg_parser.add_argument(
-        '-D',
-        '--hidraw',
-        action='store',
-        dest='hidraw_path',
-        metavar='PATH',
-        help=
-        'unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2'
-    )
-    arg_parser.add_argument(
-        '--restart-on-wake-up',
-        action='store_true',
-        help='restart Solaar on sleep wake-up (experimental)')
-    arg_parser.add_argument(
-        '-w',
-        '--window',
-        choices=('show', 'hide', 'only'),
-        help='start with window showing / hidden / only (no tray icon)')
-    arg_parser.add_argument('-b',
-                            '--battery-icons',
-                            choices=('regular', 'symbolic'),
-                            help='prefer regular / symbolic icons')
-    arg_parser.add_argument('-V',
-                            '--version',
-                            action='version',
-                            version='%(prog)s ' + __version__)
-    arg_parser.add_argument('--help-actions',
-                            action='store_true',
-                            help='print help for the optional actions')
-    arg_parser.add_argument('action',
-                            nargs=argparse.REMAINDER,
-                            choices=_cli.actions,
-                            help='optional actions to perform')
+    arg_parser.add_argument('-d',
+                            '--debug',
+                            action='count',
+                            default=0,
+                            help='print logging messages, for debugging purposes (may be repeated for extra verbosity)')
+    arg_parser.add_argument('-D',
+                            '--hidraw',
+                            action='store',
+                            dest='hidraw_path',
+                            metavar='PATH',
+                            help='unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2')
+    arg_parser.add_argument('--restart-on-wake-up', action='store_true', help='restart Solaar on sleep wake-up (experimental)')
+    arg_parser.add_argument('-w',
+                            '--window',
+                            choices=('show', 'hide', 'only'),
+                            help='start with window showing / hidden / only (no tray icon)')
+    arg_parser.add_argument('-b', '--battery-icons', choices=('regular', 'symbolic'), help='prefer regular / symbolic icons')
+    arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
+    arg_parser.add_argument('--help-actions', action='store_true', help='print help for the optional actions')
+    arg_parser.add_argument('action', nargs=argparse.REMAINDER, choices=_cli.actions, help='optional actions to perform')
 
     args = arg_parser.parse_args()
 
@@ -106,17 +85,14 @@ def _parse_arguments():
     if args.debug > 0:
         log_level = logging.WARNING - 10 * args.debug
         log_format = '%(asctime)s,%(msecs)03d %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
-        logging.basicConfig(level=max(log_level, logging.DEBUG),
-                            format=log_format,
-                            datefmt='%H:%M:%S')
+        logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format, datefmt='%H:%M:%S')
     else:
         logging.root.addHandler(logging.NullHandler())
         logging.root.setLevel(logging.ERROR)
 
     if not args.action:
         if logging.root.isEnabledFor(logging.INFO):
-            logging.info('language %s (%s), translations path %s',
-                         _i18n.language, _i18n.encoding, _i18n.path)
+            logging.info('language %s (%s), translations path %s', _i18n.language, _i18n.encoding, _i18n.path)
 
     return args
 

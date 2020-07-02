@@ -35,9 +35,7 @@ def _create():
 
     about.set_program_name(NAME)
     about.set_version(__version__)
-    about.set_comments(
-        _('Shows status of devices connected\nthrough wireless Logitech receivers.'
-          ))
+    about.set_comments(_('Shows status of devices connected\nthrough wireless Logitech receivers.'))
 
     about.set_logo_icon_name(NAME.lower())
 
@@ -46,8 +44,7 @@ def _create():
 
     about.set_authors(('Daniel Pavel http://github.com/pwr', ))
     try:
-        about.add_credit_section(_('GUI design'),
-                                 ('Julien Gascard', 'Daniel Pavel'))
+        about.add_credit_section(_('GUI design'), ('Julien Gascard', 'Daniel Pavel'))
         about.add_credit_section(_('Testing'), (
             'Douglas Wagner',
             'Julien Gascard',

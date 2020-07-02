@@ -65,35 +65,16 @@ def register_toggle(name,
                     label=None,
                     description=None,
                     device_kind=None):
-    validator = _BooleanV(true_value=true_value,
-                          false_value=false_value,
-                          mask=mask)
+    validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _RegisterRW(register)
-    return _Setting(name,
-                    rw,
-                    validator,
-                    label=label,
-                    description=description,
-                    device_kind=device_kind)
+    return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
 
 
-def register_choices(name,
-                     register,
-                     choices,
-                     kind=_KIND.choice,
-                     label=None,
-                     description=None,
-                     device_kind=None):
+def register_choices(name, register, choices, kind=_KIND.choice, label=None, description=None, device_kind=None):
     assert choices
     validator = _ChoicesV(choices)
     rw = _RegisterRW(register)
-    return _Setting(name,
-                    rw,
-                    validator,
-                    kind=kind,
-                    label=label,
-                    description=description,
-                    device_kind=device_kind)
+    return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
 
 
 def feature_toggle(name,
@@ -106,17 +87,9 @@ def feature_toggle(name,
                    label=None,
                    description=None,
                    device_kind=None):
-    validator = _BooleanV(true_value=true_value,
-                          false_value=false_value,
-                          mask=mask)
+    validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _FeatureRW(feature, read_function_id, write_function_id)
-    return _Setting(name,
-                    rw,
-                    validator,
-                    feature=feature,
-                    label=label,
-                    description=description,
-                    device_kind=device_kind)
+    return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
 
 
 def feature_bitfield_toggle(name,
@@ -139,15 +112,14 @@ def feature_bitfield_toggle(name,
                             device_kind=device_kind)
 
 
-def feature_bitfield_toggle_dynamic(
-        name,
-        feature,
-        options_callback,
-        read_function_id=_FeatureRW.default_read_fnid,
-        write_function_id=_FeatureRW.default_write_fnid,
-        label=None,
-        description=None,
-        device_kind=None):
+def feature_bitfield_toggle_dynamic(name,
+                                    feature,
+                                    options_callback,
+                                    read_function_id=_FeatureRW.default_read_fnid,
+                                    write_function_id=_FeatureRW.default_write_fnid,
+                                    label=None,
+                                    description=None,
+                                    device_kind=None):
     def instantiate(device):
         options = options_callback(device)
         setting = feature_bitfield_toggle(name,
@@ -235,10 +207,7 @@ def feature_map_choices(name,
                              skip_bytes_count=skip_bytes_count,
                              value_bytes_count=value_bytes_count,
                              extra_default=extra_default)
-    rw = _FeatureRWMap(feature,
-                       read_function_id,
-                       write_function_id,
-                       key_bytes=key_bytes_count)
+    rw = _FeatureRWMap(feature, read_function_id, write_function_id, key_bytes=key_bytes_count)
     return _Settings(name,
                      rw,
                      validator,
@@ -312,49 +281,33 @@ def feature_range(name,
 # common strings for settings - name, string to display in main window, tool tip for main window
 #
 
-_HAND_DETECTION = (
-    'hand-detection', _('Hand Detection'),
-    _('Turn on illumination when the hands hover over the keyboard.'))
-_SMOOTH_SCROLL = (
-    'smooth-scroll', _('Smooth Scrolling'),
-    _('High-sensitivity mode for vertical scroll with the wheel.'))
-_SIDE_SCROLL = (
-    'side-scroll', _('Side Scrolling'),
-    _('When disabled, pushing the wheel sideways sends custom button events\n'
-      'instead of the standard side-scrolling events.'))
-_HI_RES_SCROLL = (
-    'hi-res-scroll', _('High Resolution Scrolling'),
-    _('High-sensitivity mode for vertical scroll with the wheel.'))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'),
-                   _('HID++ mode for vertical scroll with the wheel.') + '\n' +
+_HAND_DETECTION = ('hand-detection', _('Hand Detection'), _('Turn on illumination when the hands hover over the keyboard.'))
+_SMOOTH_SCROLL = ('smooth-scroll', _('Smooth Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.'))
+_SIDE_SCROLL = ('side-scroll', _('Side Scrolling'),
+                _('When disabled, pushing the wheel sideways sends custom button events\n'
+                  'instead of the standard side-scrolling events.'))
+_HI_RES_SCROLL = ('hi-res-scroll', _('High Resolution Scrolling'),
+                  _('High-sensitivity mode for vertical scroll with the wheel.'))
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'), _('HID++ mode for vertical scroll with the wheel.') + '\n' +
                    _('Effectively turns off wheel scrolling in Linux.'))
 _HIRES_INV = ('hires-smooth-invert', _('High Resolution Wheel Invert'),
               _('High-sensitivity wheel invert mode for vertical scroll.'))
-_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'),
-              _('High-sensitivity mode for vertical scroll with the wheel.'))
-_FN_SWAP = (
-    'fn-swap', _('Swap Fx function'),
-    _('When set, the F1..F12 keys will activate their special function,\n'
-      'and you must hold the FN key to activate their standard function.') +
-    '\n\n' +
-    _('When unset, the F1..F12 keys will activate their standard function,\n'
-      'and you must hold the FN key to activate their special function.'))
+_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'), _('High-sensitivity mode for vertical scroll with the wheel.'))
+_FN_SWAP = ('fn-swap', _('Swap Fx function'),
+            _('When set, the F1..F12 keys will activate their special function,\n'
+              'and you must hold the FN key to activate their standard function.') + '\n\n' +
+            _('When unset, the F1..F12 keys will activate their standard function,\n'
+              'and you must hold the FN key to activate their special function.'))
 _DPI = ('dpi', _('Sensitivity (DPI)'), None)
 _POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
                   _('Speed multiplier for mouse (256 is normal multiplier).'))
-_SMART_SHIFT = (
-    'smart-shift', _('Smart Shift'),
-    _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
-      'The mouse wheel is always free at 0, and always locked at 50'))
-_BACKLIGHT = ('backlight', _('Backlight'),
-              _('Turn illumination on or off on keyboard.'))
-_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _(
-    'Actions'
-), _('Change the action for the key or button.') + '\n' + _(
-    'Changing important actions (such as for the left mouse button) can result in an unusable system.'
-))
-_DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'),
-                 _('Disable specific keyboard keys.'))
+_SMART_SHIFT = ('smart-shift', _('Smart Shift'),
+                _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
+                  'The mouse wheel is always free at 0, and always locked at 50'))
+_BACKLIGHT = ('backlight', _('Backlight'), _('Turn illumination on or off on keyboard.'))
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Actions'), _('Change the action for the key or button.') + '\n' +
+                        _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
+_DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 
 #
 #
@@ -374,9 +327,7 @@ def _register_hand_detection(register=_R.keyboard_hand_detection,
                            device_kind=(_DK.keyboard, ))
 
 
-def _register_fn_swap(register=_R.keyboard_fn_swap,
-                      true_value=b'\x00\x01',
-                      mask=b'\x00\x01'):
+def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
     return register_toggle(_FN_SWAP[0],
                            register,
                            true_value=true_value,
@@ -386,9 +337,7 @@ def _register_fn_swap(register=_R.keyboard_fn_swap,
                            device_kind=(_DK.keyboard, ))
 
 
-def _register_smooth_scroll(register=_R.mouse_button_flags,
-                            true_value=0x40,
-                            mask=0x40):
+def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
     return register_toggle(_SMOOTH_SCROLL[0],
                            register,
                            true_value=true_value,
@@ -398,9 +347,7 @@ def _register_smooth_scroll(register=_R.mouse_button_flags,
                            device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _register_side_scroll(register=_R.mouse_button_flags,
-                          true_value=0x02,
-                          mask=0x02):
+def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
     return register_toggle(_SIDE_SCROLL[0],
                            register,
                            true_value=true_value,
@@ -525,8 +472,7 @@ def _feature_smart_shift():
             if threshold == _MAX_SMART_SHIFT_VALUE:
                 threshold = 255
 
-            data = _int2bytes(mode,
-                              count=1) + _int2bytes(threshold, count=1) * 2
+            data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1) * 2
             return super(_SmartShiftRW, self).write(device, data)
 
     return feature_range(_SMART_SHIFT[0],
@@ -607,20 +553,15 @@ def _feature_reprogrammable_keys_choices(device):
     choices = {}
     for i in range(0, count):  # get the data for each key record on device
         keydata = device.feature_request(_F.REPROG_CONTROLS_V4, 0x10, i)
-        key, key_task, flags, pos, group, gmask = _unpack(
-            '!HHBBBB', keydata[:8])
+        key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
         action = _NamedInt(key, str(_special_keys.TASK[key_task]))
         keys[i] = (_special_keys.CONTROL[key], action, flags, gmask)
         groups[group].append(action)
     for k in keys:
         # if k[2] & _special_keys.KEY_FLAG.reprogrammable:  # this flag is only to show in UI, ignore in Solaar
         if k[3]:  # only keys with a non-zero gmask are remappable
-            key_choices = [
-                k[1]
-            ]  # it should always be possible to map the key to itself
-            for g in range(
-                    1, 9
-            ):  # group 0 and gmask 0 (k[3]) does not indicate remappability so don't consider group 0
+            key_choices = [k[1]]  # it should always be possible to map the key to itself
+            for g in range(1, 9):  # group 0 and gmask 0 (k[3]) does not indicate remappability so don't consider group 0
                 if (k[3] == 0 if g == 0 else k[3] & 2**(g - 1)):
                     for gm in groups[g]:
                         if int(gm) != int(k[0]):  # don't put itself in twice
@@ -647,22 +588,19 @@ def _feature_reprogrammable_keys():
 
 def _feature_disable_keyboard_keys_key_list(device):
     mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS)[0]
-    options = [
-        _special_keys.DISABLE[1 << i] for i in range(8) if mask & (1 << i)
-    ]
+    options = [_special_keys.DISABLE[1 << i] for i in range(8) if mask & (1 << i)]
     return options
 
 
 def _feature_disable_keyboard_keys():
-    return feature_bitfield_toggle_dynamic(
-        _DISABLE_KEYS[0],
-        _F.KEYBOARD_DISABLE_KEYS,
-        _feature_disable_keyboard_keys_key_list,
-        read_function_id=0x10,
-        write_function_id=0x20,
-        label=_DISABLE_KEYS[1],
-        description=_DISABLE_KEYS[2],
-        device_kind=(_DK.keyboard, ))
+    return feature_bitfield_toggle_dynamic(_DISABLE_KEYS[0],
+                                           _F.KEYBOARD_DISABLE_KEYS,
+                                           _feature_disable_keyboard_keys_key_list,
+                                           read_function_id=0x10,
+                                           write_function_id=0x20,
+                                           label=_DISABLE_KEYS[1],
+                                           description=_DISABLE_KEYS[2],
+                                           device_kind=(_DK.keyboard, ))
 
 
 #
@@ -671,8 +609,7 @@ def _feature_disable_keyboard_keys():
 
 
 def _S(name, featureID=None, featureFn=None, registerFn=None, identifier=None):
-    return (name, featureID, featureFn, registerFn,
-            identifier if identifier else name.replace('-', '_'))
+    return (name, featureID, featureFn, registerFn, identifier if identifier else name.replace('-', '_'))
 
 
 _SETTINGS_TABLE = [
@@ -683,29 +620,15 @@ _SETTINGS_TABLE = [
     _S(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll),
     _S(_HIRES_INV[0], _F.HIRES_WHEEL, _feature_hires_smooth_invert),
     _S(_HIRES_RES[0], _F.HIRES_WHEEL, _feature_hires_smooth_resolution),
-    _S(_FN_SWAP[0],
-       _F.FN_INVERSION,
-       _feature_fn_swap,
-       registerFn=_register_fn_swap),
-    _S(_FN_SWAP[0],
-       _F.NEW_FN_INVERSION,
-       _feature_new_fn_swap,
-       identifier='new_fn_swap'),
-    _S(_FN_SWAP[0],
-       _F.K375S_FN_INVERSION,
-       _feature_k375s_fn_swap,
-       identifier='k375s_fn_swap'),
-    _S(_DPI[0],
-       _F.ADJUSTABLE_DPI,
-       _feature_adjustable_dpi,
-       registerFn=_register_dpi),
+    _S(_FN_SWAP[0], _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
+    _S(_FN_SWAP[0], _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
+    _S(_FN_SWAP[0], _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
+    _S(_DPI[0], _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
     _S(_POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed),
     _S(_SMART_SHIFT[0], _F.SMART_SHIFT, _feature_smart_shift),
     _S(_BACKLIGHT[0], _F.BACKLIGHT2, _feature_backlight2),
-    _S(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4,
-       _feature_reprogrammable_keys),
-    _S(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS,
-       _feature_disable_keyboard_keys),
+    _S(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
+    _S(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])
@@ -741,13 +664,11 @@ def check_feature_settings(device, already_known):
         try:
             detected = featureFn()(device)
             if _log.isEnabledFor(_DEBUG):
-                _log.debug('check_feature[%s] detected %s', featureId,
-                           detected)
+                _log.debug('check_feature[%s] detected %s', featureId, detected)
             if detected:
                 already_known.append(detected)
         except Exception as reason:
-            _log.error('check_feature[%s] inconsistent feature %s', featureId,
-                       reason)
+            _log.error('check_feature[%s] inconsistent feature %s', featureId, reason)
 
     for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
         if featureId and featureFn:

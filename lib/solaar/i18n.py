@@ -33,18 +33,14 @@ def _find_locale_path(lc_domain):
     import os.path as _path
 
     import sys as _sys
-    prefix_share = _path.normpath(
-        _path.join(_path.realpath(_sys.path[0]), '..'))
-    src_share = _path.normpath(
-        _path.join(_path.realpath(_sys.path[0]), '..', 'share'))
+    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
+    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
     del _sys
 
     from glob import glob as _glob
 
     for location in prefix_share, src_share:
-        mo_files = _glob(
-            _path.join(location, 'locale', '*', 'LC_MESSAGES',
-                       lc_domain + '.mo'))
+        mo_files = _glob(_path.join(location, 'locale', '*', 'LC_MESSAGES', lc_domain + '.mo'))
         if mo_files:
             return _path.join(location, 'locale')
 

@@ -36,12 +36,7 @@ del getLogger
 # documentation, some of them guessed.
 #
 
-DEVICE_KIND = _NamedInts(keyboard=0x01,
-                         mouse=0x02,
-                         numpad=0x03,
-                         presenter=0x04,
-                         trackball=0x08,
-                         touchpad=0x09)
+DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, trackball=0x08, touchpad=0x09)
 
 POWER_SWITCH_LOCATION = _NamedInts(base=0x01,
                                    top_case=0x02,
@@ -70,12 +65,10 @@ POWER_SWITCH_LOCATION = _NamedInts(base=0x01,
 NOTIFICATION_FLAG = _NamedInts(
     battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
     keyboard_sleep_raw=0x020000,  # system control keys such as Sleep
-    keyboard_multimedia_raw=
-    0x010000,  # consumer controls such as Mute and Calculator
+    keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
     # reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
     software_present=0x000800,  # .. no idea
-    keyboard_illumination=
-    0x000200,  # illumination brightness level changes (by pressing keys)
+    keyboard_illumination=0x000200,  # illumination brightness level changes (by pressing keys)
     wireless=0x000100,  # notify when the device wireless goes on/off-line
 )
 
@@ -92,10 +85,7 @@ ERROR = _NamedInts(invalid_SubID__command=0x01,
                    unsupported_parameter_value=0x0B,
                    wrong_pin_code=0x0C)
 
-PAIRING_ERRORS = _NamedInts(device_timeout=0x01,
-                            device_not_supported=0x02,
-                            too_many_devices=0x03,
-                            sequence_timeout=0x06)
+PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
 
 BATTERY_APPOX = _NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 """Known registers.
@@ -129,16 +119,14 @@ REGISTERS = _NamedInts(
 
 
 def read_register(device, register_number, *params):
-    assert device, 'tried to read register %02X from invalid device %s' % (
-        register_number, device)
+    assert device, 'tried to read register %02X from invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8100 | (int(register_number) & 0x2FF)
     return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-    assert device, 'tried to write register %02X to invalid device %s' % (
-        register_number, device)
+    assert device, 'tried to write register %02X to invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8000 | (int(register_number) & 0x2FF)
     return device.request(request_id, *value)
@@ -179,9 +167,8 @@ def parse_battery_status(register, reply):
     if register == REGISTERS.battery_charge:
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
-        status_text = (BATTERY_STATUS.discharging if status_byte == 0x30 else
-                       BATTERY_STATUS.recharging if status_byte == 0x50 else
-                       BATTERY_STATUS.full if status_byte == 0x90 else None)
+        status_text = (BATTERY_STATUS.discharging if status_byte == 0x30 else BATTERY_STATUS.recharging
+                       if status_byte == 0x50 else BATTERY_STATUS.full if status_byte == 0x90 else None)
         return charge, status_text, None
 
     if register == REGISTERS.battery_status:
@@ -202,8 +189,7 @@ def parse_battery_status(register, reply):
         elif charging_byte & 0x22 == 0x22:
             status_text = BATTERY_STATUS.full
         else:
-            _log.warn('could not parse 0x07 battery status: %02X (level %02X)',
-                      charging_byte, status_byte)
+            _log.warn('could not parse 0x07 battery status: %02X (level %02X)', charging_byte, status_byte)
             status_text = None
 
         if charging_byte & 0x03 and status_byte == 0:
@@ -321,6 +307,5 @@ def set_notification_flags(device, *flag_bits):
 
     flag_bits = sum(int(b) for b in flag_bits)
     assert flag_bits & 0x00FFFFFF == flag_bits
-    result = write_register(device, REGISTERS.notifications,
-                            _int2bytes(flag_bits, 3))
+    result = write_register(device, REGISTERS.notifications, _int2bytes(flag_bits, 3))
     return result is not None

@@ -76,24 +76,14 @@ try:
     bus = dbus.SystemBus()
     assert bus
 
-    bus.add_signal_receiver(_suspend,
-                            signal_name='Sleeping',
-                            dbus_interface=_UPOWER_INTERFACE,
-                            bus_name=_UPOWER_BUS)
+    bus.add_signal_receiver(_suspend, signal_name='Sleeping', dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
 
-    bus.add_signal_receiver(_resume,
-                            signal_name='Resuming',
-                            dbus_interface=_UPOWER_INTERFACE,
-                            bus_name=_UPOWER_BUS)
+    bus.add_signal_receiver(_resume, signal_name='Resuming', dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
 
-    bus.add_signal_receiver(_suspend_or_resume,
-                            'PrepareForSleep',
-                            dbus_interface=_LOGIND_INTERFACE,
-                            bus_name=_LOGIND_BUS)
+    bus.add_signal_receiver(_suspend_or_resume, 'PrepareForSleep', dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 
     if _log.isEnabledFor(_INFO):
-        _log.info(
-            'connected to system dbus, watching for suspend/resume events')
+        _log.info('connected to system dbus, watching for suspend/resume events')
 
 except Exception:
     # Either:

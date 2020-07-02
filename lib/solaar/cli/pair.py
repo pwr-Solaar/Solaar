@@ -39,15 +39,12 @@ def run(receivers, args, find_receiver, _ignore):
         receiver = receivers[0]
 
     assert receiver
-    receiver.status = _status.ReceiverStatus(receiver,
-                                             lambda *args, **kwargs: None)
+    receiver.status = _status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
     # check if it's necessary to set the notification flags
     old_notification_flags = _hidpp10.get_notification_flags(receiver) or 0
     if not (old_notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless):
-        _hidpp10.set_notification_flags(
-            receiver,
-            old_notification_flags | _hidpp10.NOTIFICATION_FLAG.wireless)
+        _hidpp10.set_notification_flags(receiver, old_notification_flags | _hidpp10.NOTIFICATION_FLAG.wireless)
 
     # get all current devices
     known_devices = [dev.number for dev in receiver]
@@ -61,17 +58,14 @@ def run(receivers, args, find_receiver, _ignore):
                 if n.devnumber not in known_devices:
                     receiver.status.new_device = receiver[n.devnumber]
                 elif receiver.re_pairs:
-                    del receiver[
-                        n.
-                        devnumber]  # get rid of information on device re-paired away
+                    del receiver[n.devnumber]  # get rid of information on device re-paired away
                     receiver.status.new_device = receiver[n.devnumber]
 
     timeout = 20  # seconds
     receiver.handle = _HandleWithNotificationHook(receiver.handle)
 
     receiver.set_lock(False, timeout=timeout)
-    print('Pairing: turn your new device on (timing out in', timeout,
-          'seconds).')
+    print('Pairing: turn your new device on (timing out in', timeout, 'seconds).')
 
     # the lock-open notification may come slightly later, wait for it a bit
     pairing_start = _timestamp()
@@ -91,8 +85,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     if receiver.status.new_device:
         dev = receiver.status.new_device
-        print('Paired device %d: %s (%s) [%s:%s]' %
-              (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
+        print('Paired device %d: %s (%s) [%s:%s]' % (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
     else:
         error = receiver.status.get(_status.KEYS.ERROR)
         if error:

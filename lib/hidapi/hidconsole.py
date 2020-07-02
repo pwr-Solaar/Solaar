@@ -72,8 +72,7 @@ def _print(marker, data, scroll=False):
         s = marker + ' ' + data
     else:
         hexs = strhex(data)
-        s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4],
-                                              hexs[4:8], hexs[8:], repr(data))
+        s = '%s (% 8.3f) [%s %s %s %s] %s' % (marker, t, hexs[0:2], hexs[2:4], hexs[4:8], hexs[8:], repr(data))
 
     with print_lock:
         # allow only one thread at a time to write to the console, otherwise
@@ -130,23 +129,17 @@ def _validate_input(line, hidpp=False):
             _error('Invalid HID++ request: first byte must be 0x10 or 0x11')
             return None
         if data[1:2] not in b'\xFF\x01\x02\x03\x04\x05\x06':
-            _error(
-                'Invalid HID++ request: second byte must be 0xFF or one of 0x01..0x06'
-            )
+            _error('Invalid HID++ request: second byte must be 0xFF or one of 0x01..0x06')
             return None
         if data[:1] == b'\x10':
             if len(data) > 7:
-                _error(
-                    'Invalid HID++ request: maximum length of a 0x10 request is 7 bytes'
-                )
+                _error('Invalid HID++ request: maximum length of a 0x10 request is 7 bytes')
                 return None
             while len(data) < 7:
                 data = (data + b'\x00' * 7)[:7]
         elif data[:1] == b'\x11':
             if len(data) > 20:
-                _error(
-                    'Invalid HID++ request: maximum length of a 0x11 request is 20 bytes'
-                )
+                _error('Invalid HID++ request: maximum length of a 0x11 request is 20 bytes')
                 return None
             while len(data) < 20:
                 data = (data + b'\x00' * 20)[:20]
@@ -172,15 +165,13 @@ def _open(args):
         sys.exit('!! Failed to open %s, aborting.' % device)
 
     print('.. Opened handle %r, vendor %r product %r serial %r.' %
-          (handle, _hid.get_manufacturer(handle), _hid.get_product(handle),
-           _hid.get_serial(handle)))
+          (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle)))
     if args.hidpp:
         if _hid.get_manufacturer(handle) != b'Logitech':
             sys.exit('!! Only Logitech devices support the HID++ protocol.')
         print('.. HID++ validation enabled.')
     else:
-        if (_hid.get_manufacturer(handle) == b'Logitech'
-                and b'Receiver' in _hid.get_product(handle)):
+        if (_hid.get_manufacturer(handle) == b'Logitech' and b'Receiver' in _hid.get_product(handle)):
             args.hidpp = True
             print('.. Logitech receiver detected, HID++ validation enabled.')
 
@@ -195,17 +186,12 @@ def _open(args):
 def _parse_arguments():
     import argparse
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument(
-        '--history', help='history file (default ~/.hidconsole-history)')
-    arg_parser.add_argument('--hidpp',
-                            action='store_true',
-                            help='ensure input data is a valid HID++ request')
-    arg_parser.add_argument(
-        'device',
-        nargs='?',
-        help='linux device to connect to (/dev/hidrawX); '
-        'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver'
-    )
+    arg_parser.add_argument('--history', help='history file (default ~/.hidconsole-history)')
+    arg_parser.add_argument('--hidpp', action='store_true', help='ensure input data is a valid HID++ request')
+    arg_parser.add_argument('device',
+                            nargs='?',
+                            help='linux device to connect to (/dev/hidrawX); '
+                            'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver')
     return arg_parser.parse_args()
 
 
@@ -214,15 +200,12 @@ def main():
     handle = _open(args)
 
     if interactive:
-        print(
-            '.. Press ^C/^D to exit, or type hex bytes to write to the device.'
-        )
+        print('.. Press ^C/^D to exit, or type hex bytes to write to the device.')
 
         import readline
         if args.history is None:
             import os.path
-            args.history = os.path.join(os.path.expanduser('~'),
-                                        '.hidconsole-history')
+            args.history = os.path.join(os.path.expanduser('~'), '.hidconsole-history')
         try:
             readline.read_history_file(args.history)
         except Exception:
@@ -237,8 +220,7 @@ def main():
 
         if interactive:
             # move the cursor at the bottom of the screen
-            sys.stdout.write(
-                '\033[300B')  # move cusor at most 300 lines down, don't scroll
+            sys.stdout.write('\033[300B')  # move cusor at most 300 lines down, don't scroll
 
         while t.is_alive():
             line = read_packet(prompt)

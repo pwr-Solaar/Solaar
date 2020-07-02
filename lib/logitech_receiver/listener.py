@@ -142,8 +142,7 @@ class EventsListener(_threading.Thread):
     Incoming packets will be passed to the callback function in sequence.
     """
     def __init__(self, receiver, notifications_callback):
-        super(EventsListener, self).__init__(name=self.__class__.__name__ +
-                                             ':' + receiver.path.split('/')[2])
+        super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
 
         self.daemon = True
         self._active = False
@@ -158,8 +157,7 @@ class EventsListener(_threading.Thread):
         self._active = True
 
         # replace the handle with a threaded one
-        self.receiver.handle = _ThreadedHandle(self, self.receiver.path,
-                                               self.receiver.handle)
+        self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
         # get the right low-level handle for this thread
         ihandle = int(self.receiver.handle)
         if _log.isEnabledFor(_INFO):

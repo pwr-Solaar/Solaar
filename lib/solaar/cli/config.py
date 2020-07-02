@@ -29,11 +29,9 @@ def _print_setting(s, verbose=True):
         if s.description:
             print('#', s.description.replace('\n', ' '))
         if s.kind == _settings.KIND.toggle:
-            print(
-                '#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
+            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
         elif s.choices:
-            print('#   possible values: one of [',
-                  ', '.join(str(v) for v in s.choices),
+            print('#   possible values: one of [', ', '.join(str(v) for v in s.choices),
                   '], or higher/lower/highest/max/lowest/min')
         else:
             # wtf?
@@ -90,8 +88,7 @@ def run(receivers, args, find_receiver, find_device):
             elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
                 value = False
             else:
-                raise Exception("don't know how to interpret '%s' as boolean" %
-                                value)
+                raise Exception("don't know how to interpret '%s' as boolean" % value)
 
     elif setting.choices:
         value = args.value.lower()
@@ -99,25 +96,20 @@ def run(receivers, args, find_receiver, find_device):
         if value in ('higher', 'lower'):
             old_value = setting.read()
             if old_value is None:
-                raise Exception("could not read current value of '%s'" %
-                                setting.name)
+                raise Exception("could not read current value of '%s'" % setting.name)
 
             if value == 'lower':
                 lower_values = setting.choices[:old_value]
-                value = lower_values[
-                    -1] if lower_values else setting.choices[:][0]
+                value = lower_values[-1] if lower_values else setting.choices[:][0]
             elif value == 'higher':
                 higher_values = setting.choices[old_value + 1:]
-                value = higher_values[
-                    0] if higher_values else setting.choices[:][-1]
+                value = higher_values[0] if higher_values else setting.choices[:][-1]
         elif value in ('highest', 'max'):
             value = setting.choices[:][-1]
         elif value in ('lowest', 'min'):
             value = setting.choices[:][0]
         elif value not in setting.choices:
-            raise Exception(
-                "possible values for '%s' are: [%s]" %
-                (setting.name, ', '.join(str(v) for v in setting.choices)))
+            raise Exception("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
             value = setting.choices[value]
 
     elif setting.kind == _settings.KIND.range:
@@ -131,6 +123,5 @@ def run(receivers, args, find_receiver, find_device):
 
     result = setting.write(value)
     if result is None:
-        raise Exception("failed to set '%s' = '%s' [%r]" %
-                        (setting.name, str(value), value))
+        raise Exception("failed to set '%s' = '%s' [%r]" % (setting.name, str(value), value))
     _print_setting(setting, False)

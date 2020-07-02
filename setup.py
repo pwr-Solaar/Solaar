@@ -19,9 +19,7 @@ def _data_files():
 
     yield 'share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')
     yield 'share/solaar/icons', _glob('share/solaar/icons/light_*.png')
-    yield 'share/icons/hicolor/scalable/apps', [
-        'share/solaar/icons/solaar.svg'
-    ]
+    yield 'share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']
 
     for mo in _glob('share/locale/*/LC_MESSAGES/solaar.mo'):
         yield _dirname(mo), [mo]
@@ -67,9 +65,7 @@ battery status, and show and modify some of the modifiable features of devices.
         'pyudev (>= 0.13)',
     ],
     package_dir={'': 'lib'},
-    packages=[
-        'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'
-    ],
+    packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
     scripts=_glob('bin/*'),
 )
