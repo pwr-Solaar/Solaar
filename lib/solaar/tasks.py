@@ -20,11 +20,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import DEBUG as _DEBUG
+from logging import getLogger
+from threading import Thread as _Thread
+
 _log = getLogger(__name__)
 del getLogger
-
-from threading import Thread as _Thread
 
 try:
     from Queue import Queue as _Queue

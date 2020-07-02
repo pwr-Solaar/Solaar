@@ -19,16 +19,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 from time import time as _timestamp
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
-
-from .i18n import _, ngettext
-from .common import NamedInts as _NamedInts, NamedInt as _NamedInt
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from .common import NamedInt as _NamedInt
+from .common import NamedInts as _NamedInts
+from .i18n import _, ngettext
+
+_log = getLogger(__name__)
+del getLogger
 
 _R = _hidpp10.REGISTERS
 

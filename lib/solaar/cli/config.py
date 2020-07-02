@@ -19,8 +19,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from solaar import configuration as _configuration
 from logitech_receiver import settings as _settings
+from solaar import configuration as _configuration
 
 
 def _print_setting(s, verbose=True):

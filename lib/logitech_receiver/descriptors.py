@@ -19,15 +19,18 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .common import NamedInts as _NamedInts
-from .hidpp10 import REGISTERS as _R, DEVICE_KIND as _DK
-from .settings_templates import RegisterSettings as _RS, FeatureSettings as _FS
-
-#
-#
-#
-
 from collections import namedtuple
+
+from .common import NamedInts as _NamedInts
+from .hidpp10 import DEVICE_KIND as _DK
+from .hidpp10 import REGISTERS as _R
+from .settings_templates import FeatureSettings as _FS
+from .settings_templates import RegisterSettings as _RS
+
+#
+#
+#
+
 _DeviceDescriptor = namedtuple('_DeviceDescriptor',
                                ('name', 'kind', 'wpid', 'codename', 'protocol',
                                 'registers', 'settings', 'persister'))

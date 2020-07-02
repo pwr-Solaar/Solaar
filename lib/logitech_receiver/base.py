@@ -22,17 +22,23 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import time as _timestamp
+from collections import namedtuple
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 from random import getrandbits as _random_bits
+from time import time as _timestamp
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
+import hidapi as _hid
 
-from .common import strhex as _strhex, KwException as _KwException, pack as _pack
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
-import hidapi as _hid
+from .base_usb import ALL as _RECEIVER_USB_IDS
+from .common import KwException as _KwException
+from .common import pack as _pack
+from .common import strhex as _strhex
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #
@@ -85,8 +91,6 @@ class DeviceUnreachable(_KwException):
 #
 #
 #
-
-from .base_usb import ALL as _RECEIVER_USB_IDS
 
 
 def receivers():
@@ -305,7 +309,6 @@ def make_notification(devnumber, data):
         return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 
-from collections import namedtuple
 _HIDPP_Notification = namedtuple('_HIDPP_Notification',
                                  ('devnumber', 'sub_id', 'address', 'data'))
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (

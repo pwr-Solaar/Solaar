@@ -18,22 +18,30 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import time
 
-from logging import getLogger, INFO as _INFO, WARNING as _WARNING
+from collections import namedtuple
+from logging import INFO as _INFO
+from logging import WARNING as _WARNING
+from logging import getLogger
+
+from logitech_receiver import Receiver
+from logitech_receiver import base as _base
+from logitech_receiver import listener as _listener
+from logitech_receiver import notifications as _notifications
+from logitech_receiver import status as _status
+from solaar.i18n import _
+
+from . import configuration
+
 _log = getLogger(__name__)
 del getLogger
 
-from solaar.i18n import _
-from . import configuration
-from logitech_receiver import (Receiver, listener as _listener, status as
-                               _status, notifications as _notifications)
-
 #
 #
 #
 
-from collections import namedtuple
 _GHOST_DEVICE = namedtuple(
     '_GHOST_DEVICE',
     ('receiver', 'number', 'name', 'kind', 'status', 'online'))
@@ -323,7 +331,6 @@ def ping_all(resuming=False):
                     break
 
 
-from logitech_receiver import base as _base
 _status_callback = None
 _error_callback = None
 

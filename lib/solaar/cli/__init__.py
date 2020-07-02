@@ -22,11 +22,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import argparse as _argparse
 import sys as _sys
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 
 from solaar import NAME
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #

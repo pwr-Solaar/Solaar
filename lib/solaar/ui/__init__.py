@@ -19,13 +19,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
-_log = getLogger(__name__)
-del getLogger
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 
 from gi.repository import GLib, Gtk
-
+from logitech_receiver.status import ALERT
 from solaar.i18n import _
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #
@@ -88,7 +90,7 @@ def ui_async(function, *args, **kwargs):
 #
 #
 
-from . import notify, tray, window
+from . import notify, tray, window  # isort:skip  # noqa: E402
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -160,8 +162,6 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
 #
 #
 #
-
-from logitech_receiver.status import ALERT
 
 
 def _status_changed(device, alert, reason):

@@ -21,15 +21,20 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logging import getLogger, DEBUG as _DEBUG
+from logging import DEBUG as _DEBUG
+from logging import getLogger
+
+from . import special_keys
+from .common import FirmwareInfo as _FirmwareInfo
+from .common import KwException as _KwException
+from .common import NamedInts as _NamedInts
+from .common import ReprogrammableKeyInfo as _ReprogrammableKeyInfo
+from .common import ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4
+from .common import pack as _pack
+from .common import unpack as _unpack
+
 _log = getLogger(__name__)
 del getLogger
-
-from .common import (FirmwareInfo as _FirmwareInfo, ReprogrammableKeyInfo as
-                     _ReprogrammableKeyInfo, ReprogrammableKeyInfoV4 as
-                     _ReprogrammableKeyInfoV4, KwException as _KwException,
-                     NamedInts as _NamedInts, pack as _pack, unpack as _unpack)
-from . import special_keys
 
 #
 #

@@ -27,17 +27,21 @@ necessary.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os as _os
 import errno as _errno
-from time import sleep
-from select import select as _select
-from pyudev import Context as _Context, Monitor as _Monitor, Device as _Device
-from pyudev import DeviceNotFoundError
-
-native_implementation = 'udev'
+import os as _os
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
+from select import select as _select
+from time import sleep
+
+from pyudev import Context as _Context
+from pyudev import Device as _Device
+from pyudev import DeviceNotFoundError
+from pyudev import Monitor as _Monitor
+
+native_implementation = 'udev'
+
 DeviceInfo = namedtuple('DeviceInfo', [
     'path',
     'vendor_id',

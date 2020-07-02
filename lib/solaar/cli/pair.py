@@ -21,12 +21,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from time import time as _timestamp
 
-from logitech_receiver import (
-    base as _base,
-    hidpp10 as _hidpp10,
-    status as _status,
-    notifications as _notifications,
-)
+from logitech_receiver import base as _base
+from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import notifications as _notifications
+from logitech_receiver import status as _status
 
 
 def run(receivers, args, find_receiver, _ignore):

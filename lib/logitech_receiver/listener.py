@@ -20,6 +20,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import threading as _threading
+
+from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
+from logging import getLogger
+
+from . import base as _base
+
 # from time import time as _timestamp
 
 # for both Python 2 and 3
@@ -28,11 +35,8 @@ try:
 except ImportError:
     from queue import Queue as _Queue
 
-from logging import getLogger, DEBUG as _DEBUG, INFO as _INFO
 _log = getLogger(__name__)
 del getLogger
-
-from . import base as _base
 
 #
 #

@@ -19,6 +19,9 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import gettext as _gettext
+import locale
+
 from solaar import NAME as _NAME
 
 #
@@ -48,15 +51,12 @@ def _find_locale_path(lc_domain):
     # del _path
 
 
-import locale
 locale.setlocale(locale.LC_ALL, '')
 language, encoding = locale.getlocale()
 del locale
 
 _LOCALE_DOMAIN = _NAME.lower()
 path = _find_locale_path(_LOCALE_DOMAIN)
-
-import gettext as _gettext
 
 _gettext.bindtextdomain(_LOCALE_DOMAIN, path)
 _gettext.textdomain(_LOCALE_DOMAIN)
