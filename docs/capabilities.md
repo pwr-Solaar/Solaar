@@ -104,11 +104,11 @@ several heuristics to determine which icon names to use for this purpose,
 but as more and more battery icon schemes have been developed this has
 become impossible to do well.  Solaar now uses the eleven standard
 battery icon names `battery-{full,good,low,critical,empty}[-charging]` and
-`battery-missing`.  
+`battery-missing`.
 
 Solaar will use the symbolic versions of these icons if started with the
-option `--battery-icons=symbolic`.  Because of bugs external to Solaar 
-these symbolic icons may be nearly invisible in dark themes.  
+option `--battery-icons=symbolic`.  Because of bugs external to Solaar
+these symbolic icons may be nearly invisible in dark themes.
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com

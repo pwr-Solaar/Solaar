@@ -108,7 +108,7 @@ def _continuous_read(handle, timeout=2000):
         try:
             reply = _hid.read(handle, 128, timeout)
         except OSError as e:
-            _error("Read failed, aborting: " + str(e), True)
+            _error('Read failed, aborting: ' + str(e), True)
             break
         assert reply is not None
         if reply:
@@ -119,25 +119,25 @@ def _validate_input(line, hidpp=False):
     try:
         data = unhexlify(line.encode('ascii'))
     except Exception as e:
-        _error("Invalid input: " + str(e))
+        _error('Invalid input: ' + str(e))
         return None
 
     if hidpp:
         if len(data) < 4:
-            _error("Invalid HID++ request: need at least 4 bytes")
+            _error('Invalid HID++ request: need at least 4 bytes')
             return None
         if data[:1] not in b'\x10\x11':
-            _error("Invalid HID++ request: first byte must be 0x10 or 0x11")
+            _error('Invalid HID++ request: first byte must be 0x10 or 0x11')
             return None
         if data[1:2] not in b'\xFF\x01\x02\x03\x04\x05\x06':
             _error(
-                "Invalid HID++ request: second byte must be 0xFF or one of 0x01..0x06"
+                'Invalid HID++ request: second byte must be 0xFF or one of 0x01..0x06'
             )
             return None
         if data[:1] == b'\x10':
             if len(data) > 7:
                 _error(
-                    "Invalid HID++ request: maximum length of a 0x10 request is 7 bytes"
+                    'Invalid HID++ request: maximum length of a 0x10 request is 7 bytes'
                 )
                 return None
             while len(data) < 7:
@@ -145,7 +145,7 @@ def _validate_input(line, hidpp=False):
         elif data[:1] == b'\x11':
             if len(data) > 20:
                 _error(
-                    "Invalid HID++ request: maximum length of a 0x11 request is 20 bytes"
+                    'Invalid HID++ request: maximum length of a 0x11 request is 20 bytes'
                 )
                 return None
             while len(data) < 20:
@@ -162,27 +162,27 @@ def _open(args):
                 device = d.path
                 break
         if not device:
-            sys.exit("!! No HID++ receiver found.")
+            sys.exit('!! No HID++ receiver found.')
     if not device:
-        sys.exit("!! Device path required.")
+        sys.exit('!! Device path required.')
 
-    print(".. Opening device", device)
+    print('.. Opening device', device)
     handle = _hid.open_path(device)
     if not handle:
-        sys.exit("!! Failed to open %s, aborting." % device)
+        sys.exit('!! Failed to open %s, aborting.' % device)
 
-    print(".. Opened handle %r, vendor %r product %r serial %r." %
+    print('.. Opened handle %r, vendor %r product %r serial %r.' %
           (handle, _hid.get_manufacturer(handle), _hid.get_product(handle),
            _hid.get_serial(handle)))
     if args.hidpp:
         if _hid.get_manufacturer(handle) != b'Logitech':
-            sys.exit("!! Only Logitech devices support the HID++ protocol.")
-        print(".. HID++ validation enabled.")
+            sys.exit('!! Only Logitech devices support the HID++ protocol.')
+        print('.. HID++ validation enabled.')
     else:
         if (_hid.get_manufacturer(handle) == b'Logitech'
                 and b'Receiver' in _hid.get_product(handle)):
             args.hidpp = True
-            print(".. Logitech receiver detected, HID++ validation enabled.")
+            print('.. Logitech receiver detected, HID++ validation enabled.')
 
     return handle
 
@@ -196,15 +196,15 @@ def _parse_arguments():
     import argparse
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
-        '--history', help="history file (default ~/.hidconsole-history)")
+        '--history', help='history file (default ~/.hidconsole-history)')
     arg_parser.add_argument('--hidpp',
                             action='store_true',
-                            help="ensure input data is a valid HID++ request")
+                            help='ensure input data is a valid HID++ request')
     arg_parser.add_argument(
         'device',
         nargs='?',
-        help="linux device to connect to (/dev/hidrawX); "
-        "may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver"
+        help='linux device to connect to (/dev/hidrawX); '
+        'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver'
     )
     return arg_parser.parse_args()
 
@@ -215,7 +215,7 @@ def main():
 
     if interactive:
         print(
-            ".. Press ^C/^D to exit, or type hex bytes to write to the device."
+            '.. Press ^C/^D to exit, or type hex bytes to write to the device.'
         )
 
         import readline
@@ -264,12 +264,12 @@ def main():
                     time.sleep(0.700)
     except EOFError:
         if interactive:
-            print("")
+            print('')
         else:
             time.sleep(1)
 
     finally:
-        print(".. Closing handle %r" % handle)
+        print('.. Closing handle %r' % handle)
         _hid.close(handle)
         if interactive:
             readline.write_history_file(args.history)

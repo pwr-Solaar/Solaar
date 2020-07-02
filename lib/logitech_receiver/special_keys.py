@@ -271,7 +271,7 @@ CONTROL = _NamedInts(
     MultiPlatform_App_Switch_2=0x0100,  # MultiPlatform_App_Switch
     Fn_Inversion__Hot_Key=0x0101,
     LeftAndRightClick=0x0102,
-    LED_TOGGLE=0x013B,  # 
+    LED_TOGGLE=0x013B,  #
 )
 CONTROL._fallback = lambda x: 'unknown:%04X' % x
 
@@ -486,7 +486,7 @@ TASK = _NamedInts(
     App_Switch=0x00D5,
     Fn_Inversion=0x00D6,
     LeftAndRightClick=0x00D7,
-    LedToggle=0x00DD,  # 
+    LedToggle=0x00DD,  #
 )
 TASK._fallback = lambda x: 'unknown:%04X' % x
 # hidpp 4.5 info from https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html

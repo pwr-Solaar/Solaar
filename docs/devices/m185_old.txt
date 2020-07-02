@@ -18,12 +18,12 @@ Unifying Receiver
           Firmware: RQM 65.00.B0003
      The power switch is located on the base.
      Supports 22 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: RESET                  {0020}   
-         5: BATTERY STATUS         {1000}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: RESET                  {0020}
+         5: BATTERY STATUS         {1000}
          6: unknown:1810           {1810}   internal, hidden
          7: unknown:1830           {1830}   internal, hidden
          8: unknown:1802           {1802}   internal, hidden
@@ -31,21 +31,20 @@ Unifying Receiver
         10: unknown:1890           {1890}   internal, hidden
         11: unknown:18A0           {18A0}   internal, hidden
         12: unknown:18B1           {18B1}   internal, hidden
-        13: REPROG CONTROLS V4     {1B04}   
-        14: WIRELESS DEVICE STATUS {1D4B}   
+        13: REPROG CONTROLS V4     {1B04}
+        14: WIRELESS DEVICE STATUS {1D4B}
         15: unknown:1DF0           {1DF0}   hidden
         16: unknown:1DF3           {1DF3}   internal, hidden
         17: unknown:1E00           {1E00}   hidden
         18: unknown:1EB0           {1EB0}   internal, hidden
         19: unknown:1F03           {1F03}   internal, hidden
-        20: LOWRES WHEEL           {2130}   
-        21: POINTER SPEED          {2205}   
+        20: LOWRES WHEEL           {2130}
+        21: POINTER SPEED          {2205}
      Has 3 reprogrammable keys:
-         0: LEFT CLICK                , default: LeftClick                   => LEFT CLICK                
+         0: LEFT CLICK                , default: LeftClick                   => LEFT CLICK
              mse, reprogrammable, pos:0, group:1, gmask:1
-         1: RIGHT CLICK               , default: RightClick                  => RIGHT CLICK               
+         1: RIGHT CLICK               , default: RightClick                  => RIGHT CLICK
              mse, reprogrammable, pos:0, group:1, gmask:1
-         2: MIDDLE BUTTON             , default: MiddleMouseButton           => MIDDLE BUTTON             
+         2: MIDDLE BUTTON             , default: MiddleMouseButton           => MIDDLE BUTTON
              divertable, mse, reprogrammable, pos:0, group:2, gmask:3
      Battery: 5%, discharging.
-

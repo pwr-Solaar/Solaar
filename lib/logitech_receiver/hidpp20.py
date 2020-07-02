@@ -268,7 +268,7 @@ class FeaturesArray(object):
                     count = self.device.request(fs_index << 8)
                     if count is None:
                         _log.warn(
-                            "FEATURE_SET found, but failed to read features count"
+                            'FEATURE_SET found, but failed to read features count'
                         )
                         # most likely the device is unavailable
                         return False
@@ -348,7 +348,7 @@ class FeaturesArray(object):
                     self.features[index] = FEATURE[ivalue]
                     return index
 
-        raise ValueError("%r not in list" % featureId)
+        raise ValueError('%r not in list' % featureId)
 
     def __iter__(self):
         if self._check():
@@ -530,7 +530,7 @@ def get_name(device):
                 name += fragment[:name_length - len(name)]
             else:
                 _log.error(
-                    "failed to read whole name of %s (expected %d chars)",
+                    'failed to read whole name of %s (expected %d chars)',
                     device, name_length)
                 return None
 
@@ -545,7 +545,7 @@ def get_battery(device):
         discharge = None if discharge == 0 else discharge
         if _log.isEnabledFor(_DEBUG):
             _log.debug(
-                "device %d battery %d%% charged, next level %d%% charge, status %d = %s",
+                'device %d battery %d%% charged, next level %d%% charge, status %d = %s',
                 device.number, discharge, dischargeNext, status,
                 BATTERY_STATUS[status])
         return discharge, BATTERY_STATUS[status], dischargeNext
@@ -583,7 +583,7 @@ def decipher_voltage(voltage_report):
 
     if _log.isEnabledFor(_DEBUG):
         _log.debug(
-            "device %d, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s",
+            'device %d, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
             device.number, voltage, status, (flags & 0x03), charge_sts,
             charge_lvl, charge_type)
 

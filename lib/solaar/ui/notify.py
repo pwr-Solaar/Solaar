@@ -57,18 +57,18 @@ if available:
         if available:
             if not Notify.is_initted():
                 if _log.isEnabledFor(_INFO):
-                    _log.info("starting desktop notifications")
+                    _log.info('starting desktop notifications')
                 try:
                     return Notify.init(NAME)
                 except:
-                    _log.exception("initializing desktop notifications")
+                    _log.exception('initializing desktop notifications')
                     available = False
         return available and Notify.is_initted()
 
     def uninit():
         if available and Notify.is_initted():
             if _log.isEnabledFor(_INFO):
-                _log.info("stopping desktop notifications")
+                _log.info('stopping desktop notifications')
             _notifications.clear()
             Notify.uninit()
 
@@ -95,14 +95,14 @@ if available:
 
             n.update(NAME, reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
-            n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
+            n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
 
             try:
                 # if _log.isEnabledFor(_DEBUG):
                 # 	_log.debug("showing %s", n)
                 n.show()
             except Exception:
-                _log.exception("showing %s", n)
+                _log.exception('showing %s', n)
 
     def show(dev, reason=None, icon=None):
         """Show a notification with title and text."""
@@ -117,11 +117,11 @@ if available:
             if reason:
                 message = reason
             elif dev.status is None:
-                message = _("unpaired")
+                message = _('unpaired')
             elif bool(dev.status):
-                message = dev.status.to_string() or _("connected")
+                message = dev.status.to_string() or _('connected')
             else:
-                message = _("offline")
+                message = _('offline')
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
@@ -131,14 +131,14 @@ if available:
             n.update(summary, message, icon_file)
             urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
             n.set_urgency(urgency)
-            n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
+            n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
 
             try:
                 # if _log.isEnabledFor(_DEBUG):
                 # 	_log.debug("showing %s", n)
                 n.show()
             except Exception:
-                _log.exception("showing %s", n)
+                _log.exception('showing %s', n)
 
 else:
     init = lambda: False

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from glob import glob as _glob
+
 try:
     from setuptools import setup
 except ImportError:

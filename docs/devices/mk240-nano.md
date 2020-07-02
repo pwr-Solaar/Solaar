@@ -18,16 +18,16 @@ Unifying Receiver (NOTE: NOT claimed to be supporting Unifying from the package 
      Serial number: 4BBBBA4A
           Firmware: RQK 49.00.B0029
      Supports 18 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: BATTERY STATUS         {1000}   
-         5: REPROG CONTROLS        {1B00}   
-         6: WIRELESS DEVICE STATUS {1D4B}   
-         7: FN INVERSION           {40A0}   
-         8: ENCRYPTION             {4100}   
-         9: KEYBOARD LAYOUT        {4520}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY STATUS         {1000}
+         5: REPROG CONTROLS        {1B00}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: FN INVERSION           {40A0}
+         8: ENCRYPTION             {4100}
+         9: KEYBOARD LAYOUT        {4520}
         10: unknown:1810           {1810}   internal, hidden
         11: unknown:1830           {1830}   internal, hidden
         12: unknown:1890           {1890}   internal, hidden
@@ -59,15 +59,15 @@ Unifying Receiver (NOTE: NOT claimed to be supporting Unifying from the package 
      Serial number: 00000000
           Firmware: RQM 38.00.B0044
      Supports 18 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: BATTERY STATUS         {1000}   
-         5: REPROG CONTROLS        {1B00}   
-         6: WIRELESS DEVICE STATUS {1D4B}   
-         7: VERTICAL SCROLLING     {2100}   
-         8: MOUSE POINTER          {2200}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY STATUS         {1000}
+         5: REPROG CONTROLS        {1B00}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: VERTICAL SCROLLING     {2100}
+         8: MOUSE POINTER          {2200}
          9: unknown:1810           {1810}   internal, hidden
         10: unknown:1830           {1830}   internal, hidden
         11: unknown:1850           {1850}   internal, hidden
@@ -92,36 +92,36 @@ Dj Api Version : 2, 50, 25
 接收器(Receiver)
 Name : 無線接收器(Wireless Receiver)
 ModelId : 0x46dc534
-Serial Number : 
+Serial Number :
 Handle : 0xff000001
 Wireless Status : 0x3
 Firmware version : 029.001.00016
-Bootloader version : 
+Bootloader version :
 Dfu Status : 0x1
 Is Dfu Cancellable : Yes
 Max Device Capacity : 6
 
     滑鼠(Mouse)
-    Name :  
+    Name :
     ModelId : 0x0
     Serial Number : 4022-00-00-00-00
     Handle : 0x2000003
     Wireless Status : 0x0
     Firmware version : 038.000.00044
-    Bootloader version : 
+    Bootloader version :
     Dfu Status : 0x1
     Is Dfu Cancellable : No
     Battery Status : 0x2
     Parent Handle : 0xff000001
 
     鍵盤(Keyboard)
-    Name :  
+    Name :
     ModelId : 0x0
     Serial Number : 4023-4B-BB-BA-4A
     Handle : 0x1000002
     Wireless Status : 0x0
     Firmware version : 049.000.00029
-    Bootloader version : 
+    Bootloader version :
     Dfu Status : 0x1
     Is Dfu Cancellable : No
     Battery Status : 0x2

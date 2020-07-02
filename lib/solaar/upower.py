@@ -35,7 +35,7 @@ _suspend_callback = None
 def _suspend():
     if _suspend_callback:
         if _log.isEnabledFor(_INFO):
-            _log.info("received suspend event")
+            _log.info('received suspend event')
         _suspend_callback()
 
 
@@ -45,7 +45,7 @@ _resume_callback = None
 def _resume():
     if _resume_callback:
         if _log.isEnabledFor(_INFO):
-            _log.info("received resume event")
+            _log.info('received resume event')
         _resume_callback()
 
 
@@ -93,11 +93,11 @@ try:
 
     if _log.isEnabledFor(_INFO):
         _log.info(
-            "connected to system dbus, watching for suspend/resume events")
+            'connected to system dbus, watching for suspend/resume events')
 
 except:
     # Either:
     # - the dbus library is not available
     # - the system dbus is not running
-    _log.warn("failed to register suspend/resume callbacks")
+    _log.warn('failed to register suspend/resume callbacks')
     pass

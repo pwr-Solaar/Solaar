@@ -96,6 +96,6 @@ def run(receivers, args, find_receiver, _ignore):
     else:
         error = receiver.status.get(_status.KEYS.ERROR)
         if error:
-            raise Exception("pairing failed: %s" % error)
+            raise Exception('pairing failed: %s' % error)
         else:
             print('Paired a device')  # this is better than an error

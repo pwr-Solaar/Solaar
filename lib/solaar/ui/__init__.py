@@ -43,18 +43,18 @@ GLib.threads_init()
 
 
 def _error_dialog(reason, object):
-    _log.error("error: %s %s", reason, object)
+    _log.error('error: %s %s', reason, object)
 
     if reason == 'permissions':
-        title = _("Permissions error")
-        text = _("Found a Logitech Receiver (%s), but did not have permission to open it.") % object + \
+        title = _('Permissions error')
+        text = _('Found a Logitech Receiver (%s), but did not have permission to open it.') % object + \
           '\n\n' + \
           _("If you've just installed Solaar, try removing the receiver and plugging it back in.")
     elif reason == 'unpair':
-        title = _("Unpairing failed")
-        text = _("Failed to unpair %{device} from %{receiver}.").format(device=object.name, receiver=object.receiver.name) + \
+        title = _('Unpairing failed')
+        text = _('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) + \
           '\n\n' + \
-          _("The receiver returned an error, with no further details.")
+          _('The receiver returned an error, with no further details.')
     else:
         raise Exception("ui.error_dialog: don't know how to handle (%s, %s)",
                         reason, object)
@@ -95,7 +95,7 @@ from . import notify, tray, window  # isort:skip  # noqa: E402
 
 def _startup(app, startup_hook, use_tray, show_window):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("startup registered=%s, remote=%s", app.get_is_registered(),
+        _log.debug('startup registered=%s, remote=%s', app.get_is_registered(),
                    app.get_is_remote())
 
     from solaar.tasks import TaskRunner as _TaskRunner
@@ -113,7 +113,7 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 def _activate(app):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("activate")
+        _log.debug('activate')
     if app.get_windows():
         window.popup()
     else:
@@ -122,14 +122,14 @@ def _activate(app):
 
 def _command_line(app, command_line):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("command_line %s", command_line.get_arguments())
+        _log.debug('command_line %s', command_line.get_arguments())
 
     return 0
 
 
 def _shutdown(app, shutdown_hook):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("shutdown")
+        _log.debug('shutdown')
 
     shutdown_hook()
 
@@ -167,7 +167,7 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
 def _status_changed(device, alert, reason):
     assert device is not None
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("status changed: %s (%s) %s", device, alert, reason)
+        _log.debug('status changed: %s (%s) %s', device, alert, reason)
 
     tray.update(device)
     if alert & ALERT.ATTENTION:

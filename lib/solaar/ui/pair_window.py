@@ -70,7 +70,7 @@ def _create_page(assistant, kind, header=None, icon_name=None, text=None):
 def _check_lock_state(assistant, receiver, count=2):
     if not assistant.is_drawable():
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("assistant %s destroyed, bailing out", assistant)
+            _log.debug('assistant %s destroyed, bailing out', assistant)
         return False
 
     if receiver.status.get(_K.ERROR):
@@ -99,7 +99,7 @@ def _check_lock_state(assistant, receiver, count=2):
 def _prepare(assistant, page, receiver):
     index = assistant.get_current_page()
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("prepare %s %d %s", assistant, index, page)
+        _log.debug('prepare %s %d %s', assistant, index, page)
 
     if index == 0:
         if receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
@@ -119,7 +119,7 @@ def _prepare(assistant, page, receiver):
 
 def _finish(assistant, receiver):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("finish %s", assistant)
+        _log.debug('finish %s', assistant)
     assistant.destroy()
     receiver.status.new_device = None
     if receiver.status.lock_open:
@@ -130,23 +130,23 @@ def _finish(assistant, receiver):
 
 def _pairing_failed(assistant, receiver, error):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("%s fail: %s", receiver, error)
+        _log.debug('%s fail: %s', receiver, error)
 
     assistant.commit()
 
-    header = _("Pairing failed") + ': ' + _(str(error)) + '.'
+    header = _('Pairing failed') + ': ' + _(str(error)) + '.'
     if 'timeout' in str(error):
         text = _(
-            "Make sure your device is within range, and has a decent battery charge."
+            'Make sure your device is within range, and has a decent battery charge.'
         )
     elif str(error) == 'device not supported':
         text = _(
-            "A new device was detected, but it is not compatible with this receiver."
+            'A new device was detected, but it is not compatible with this receiver.'
         )
     elif 'many' in str(error):
-        text = _("The receiver only supports %d paired device(s).")
+        text = _('The receiver only supports %d paired device(s).')
     else:
-        text = _("No further details are available about the error.")
+        text = _('No further details are available about the error.')
     _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header,
                  'dialog-error', text)
 
@@ -157,11 +157,11 @@ def _pairing_failed(assistant, receiver, error):
 def _pairing_succeeded(assistant, receiver, device):
     assert device
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("%s success: %s", receiver, device)
+        _log.debug('%s success: %s', receiver, device)
 
     page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 
-    header = Gtk.Label(_("Found a new device:"))
+    header = Gtk.Label(_('Found a new device:'))
     header.set_alignment(0.5, 0)
     page.pack_start(header, False, False, 0)
 
@@ -190,7 +190,7 @@ def _pairing_succeeded(assistant, receiver, device):
                                                  Gtk.IconSize.MENU), False,
                     False, 0)
                 hbox.pack_start(
-                    Gtk.Label(_("The wireless link is not encrypted") + '!'),
+                    Gtk.Label(_('The wireless link is not encrypted') + '!'),
                     False, False, 0)
                 hbox.show_all()
             else:
@@ -219,14 +219,14 @@ def create(receiver):
     assistant.set_role('pair-device')
 
     page_text = _(
-        "If the device is already turned on, turn if off and on again.")
+        'If the device is already turned on, turn if off and on again.')
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        page_text += _("\n\nThis receiver has %d pairing(s) remaining."
+        page_text += _('\n\nThis receiver has %d pairing(s) remaining.'
                        ) % receiver.remaining_pairings()
-        page_text += _("\nCancelling at this point will not use up a pairing.")
+        page_text += _('\nCancelling at this point will not use up a pairing.')
 
     page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS,
-                              _("Turn on the device you want to pair."),
+                              _('Turn on the device you want to pair.'),
                               'preferences-desktop-peripherals', page_text)
     spinner = Gtk.Spinner()
     spinner.set_visible(True)

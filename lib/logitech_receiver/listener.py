@@ -67,7 +67,7 @@ class _ThreadedHandle(object):
     def _open(self):
         handle = _base.open_path(self.path)
         if handle is None:
-            _log.error("%r failed to open new handle", self)
+            _log.error('%r failed to open new handle', self)
         else:
             # if _log.isEnabledFor(_DEBUG):
             # 	_log.debug("%r opened new handle %d", self, handle)
@@ -80,7 +80,7 @@ class _ThreadedHandle(object):
             self._local = None
             handles, self._handles = self._handles, []
             if _log.isEnabledFor(_DEBUG):
-                _log.debug("%r closing %s", self, handles)
+                _log.debug('%r closing %s', self, handles)
             for h in handles:
                 _base.close(h)
 
@@ -163,7 +163,7 @@ class EventsListener(_threading.Thread):
         # get the right low-level handle for this thread
         ihandle = int(self.receiver.handle)
         if _log.isEnabledFor(_INFO):
-            _log.info("started with %s (%d)", self.receiver, ihandle)
+            _log.info('started with %s (%d)', self.receiver, ihandle)
 
         self.has_started()
 
@@ -178,7 +178,7 @@ class EventsListener(_threading.Thread):
                     # _log.debug("read next notification")
                     n = _base.read(ihandle, _EVENT_READ_TIMEOUT)
                 except _base.NoReceiver:
-                    _log.warning("receiver disconnected")
+                    _log.warning('receiver disconnected')
                     self.receiver.close()
                     break
 
@@ -194,7 +194,7 @@ class EventsListener(_threading.Thread):
                 try:
                     self._notifications_callback(n)
                 except:
-                    _log.exception("processing %s", n)
+                    _log.exception('processing %s', n)
 
             # elif self.tick_period:
             # 	idle_reads -= 1

@@ -36,7 +36,7 @@ def _create():
     about.set_program_name(NAME)
     about.set_version(__version__)
     about.set_comments(
-        _("Shows status of devices connected\nthrough wireless Logitech receivers."
+        _('Shows status of devices connected\nthrough wireless Logitech receivers.'
           ))
 
     about.set_logo_icon_name(NAME.lower())
@@ -46,25 +46,25 @@ def _create():
 
     about.set_authors(('Daniel Pavel http://github.com/pwr', ))
     try:
-        about.add_credit_section(_("GUI design"),
+        about.add_credit_section(_('GUI design'),
                                  ('Julien Gascard', 'Daniel Pavel'))
-        about.add_credit_section(_("Testing"), (
+        about.add_credit_section(_('Testing'), (
             'Douglas Wagner',
             'Julien Gascard',
             'Peter Wu http://www.lekensteyn.nl/logitech-unifying.html',
         ))
-        about.add_credit_section(_("Logitech documentation"), (
+        about.add_credit_section(_('Logitech documentation'), (
             'Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',
             'Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28',
         ))
     except TypeError:
         # gtk3 < ~3.6.4 has incorrect gi bindings
         import logging
-        logging.exception("failed to fully create the about dialog")
+        logging.exception('failed to fully create the about dialog')
     except:
         # the Gtk3 version may be too old, and the function does not exist
         import logging
-        logging.exception("failed to fully create the about dialog")
+        logging.exception('failed to fully create the about dialog')
 
     about.set_translator_credits('\n'.join((
         'gogo (croatian)',

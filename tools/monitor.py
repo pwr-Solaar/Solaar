@@ -13,7 +13,7 @@ sys.path += (sys.path[0] + '/../lib', )
 
 
 def print_event(action, device):
-    print("~~~~ device [%s] %s" % (action, device))
+    print('~~~~ device [%s] %s' % (action, device))
 
 
 hidapi.monitor(print_event, DEVICE_UNIFYING_RECEIVER,
