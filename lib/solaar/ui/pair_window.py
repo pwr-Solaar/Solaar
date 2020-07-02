@@ -208,8 +208,10 @@ def create(receiver):
         page_text += _('\n\nThis receiver has %d pairing(s) remaining.') % receiver.remaining_pairings()
         page_text += _('\nCancelling at this point will not use up a pairing.')
 
-    page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, _('Turn on the device you want to pair.'),
-                              'preferences-desktop-peripherals', page_text)
+    page_intro = _create_page(
+        assistant, Gtk.AssistantPageType.PROGRESS, _('Turn on the device you want to pair.'),
+        'preferences-desktop-peripherals', page_text
+    )
     spinner = Gtk.Spinner()
     spinner.set_visible(True)
     page_intro.pack_end(spinner, True, True, 24)

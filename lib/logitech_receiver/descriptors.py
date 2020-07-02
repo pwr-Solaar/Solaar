@@ -31,8 +31,9 @@ from .settings_templates import RegisterSettings as _RS
 #
 #
 
-_DeviceDescriptor = namedtuple('_DeviceDescriptor',
-                               ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister'))
+_DeviceDescriptor = namedtuple(
+    '_DeviceDescriptor', ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister')
+)
 del namedtuple
 
 DEVICES = {}
@@ -42,8 +43,10 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
     assert name
 
     if kind is None:
-        kind = (_DK.mouse if 'Mouse' in name else _DK.keyboard if 'Keyboard' in name else _DK.numpad if 'Number Pad' in name
-                else _DK.touchpad if 'Touchpad' in name else _DK.trackball if 'Trackball' in name else None)
+        kind = (
+            _DK.mouse if 'Mouse' in name else _DK.keyboard if 'Keyboard' in name else _DK.numpad
+            if 'Number Pad' in name else _DK.touchpad if 'Touchpad' in name else _DK.trackball if 'Trackball' in name else None
+        )
     assert kind is not None, 'descriptor for %s does not have kind set' % name
 
     # heuristic: the codename is the last word in the device name
@@ -70,14 +73,16 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
                     elif w[0:1] == '2':
                         assert kind in (_DK.keyboard, _DK.numpad), '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
 
-    device_descriptor = _DeviceDescriptor(name=name,
-                                          kind=kind,
-                                          wpid=wpid,
-                                          codename=codename,
-                                          protocol=protocol,
-                                          registers=registers,
-                                          settings=settings,
-                                          persister=persister)
+    device_descriptor = _DeviceDescriptor(
+        name=name,
+        kind=kind,
+        wpid=wpid,
+        codename=codename,
+        protocol=protocol,
+        registers=registers,
+        settings=settings,
+        persister=persister
+    )
 
     assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
     DEVICES[codename] = device_descriptor
@@ -293,24 +298,28 @@ _D(
 
 _D('Wireless Mouse M150', protocol=2.0, wpid='4022')
 _D('Wireless Mouse M175', protocol=2.0, wpid='4008')
-_D('Wireless Mouse M185 new',
-   codename='M185n',
-   protocol=4.5,
-   wpid='4054',
-   settings=[
-       _FS.lowres_smooth_scroll(),
-       _FS.pointer_speed(),
-   ])
+_D(
+    'Wireless Mouse M185 new',
+    codename='M185n',
+    protocol=4.5,
+    wpid='4054',
+    settings=[
+        _FS.lowres_smooth_scroll(),
+        _FS.pointer_speed(),
+    ]
+)
 # Apparently Logitech uses wpid 4055 for three different mice
 # That's not so strange, as M185 is used on both Unifying-ready and non-Unifying-ready mice
-_D('Wireless Mouse M185/M235/M310',
-   codename='M185/M235/M310',
-   protocol=4.5,
-   wpid='4055',
-   settings=[
-       _FS.lowres_smooth_scroll(),
-       _FS.pointer_speed(),
-   ])
+_D(
+    'Wireless Mouse M185/M235/M310',
+    codename='M185/M235/M310',
+    protocol=4.5,
+    wpid='4055',
+    settings=[
+        _FS.lowres_smooth_scroll(),
+        _FS.pointer_speed(),
+    ]
+)
 _D('Wireless Mouse M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse M187', protocol=2.0, wpid='4019')
 _D('Wireless Mouse M215', protocol=1.0, wpid='1020')
@@ -390,15 +399,17 @@ _D(
         _RS.side_scroll(),
     ],
 )
-_D('Marathon Mouse M705 (M-R0073)',
-   codename='M705 (M-R0073)',
-   protocol=4.5,
-   wpid='406D',
-   settings=[
-       _FS.hires_smooth_invert(),
-       _FS.hires_smooth_resolution(),
-       _FS.pointer_speed(),
-   ])
+_D(
+    'Marathon Mouse M705 (M-R0073)',
+    codename='M705 (M-R0073)',
+    protocol=4.5,
+    wpid='406D',
+    settings=[
+        _FS.hires_smooth_invert(),
+        _FS.hires_smooth_resolution(),
+        _FS.pointer_speed(),
+    ]
+)
 _D('Zone Touch Mouse T400')
 _D('Touch Mouse T620', protocol=2.0)
 _D('Logitech Cube', kind=_DK.mouse, protocol=2.0)

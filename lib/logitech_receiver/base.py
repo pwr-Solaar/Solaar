@@ -287,20 +287,22 @@ def make_notification(devnumber, data):
 
     address = ord(data[1:2])
     if (
-            # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
+        # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
         (sub_id >= 0x40) or  # noqa: E131
-            # custom HID++1.0 battery events, where SubId is 0x07/0x0D
+        # custom HID++1.0 battery events, where SubId is 0x07/0x0D
         (sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00') or
-            # custom HID++1.0 illumination event, where SubId is 0x17
+        # custom HID++1.0 illumination event, where SubId is 0x17
         (sub_id == 0x17 and len(data) == 5) or
-            # HID++ 2.0 feature notifications have the SoftwareID 0
-        (address & 0x0F == 0x00)):  # noqa: E129
+        # HID++ 2.0 feature notifications have the SoftwareID 0
+        (address & 0x0F == 0x00)
+    ):  # noqa: E129
         return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 
 _HIDPP_Notification = namedtuple('_HIDPP_Notification', ('devnumber', 'sub_id', 'address', 'data'))
-_HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address,
-                                                                              _strhex(self.data))
+_HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (
+    self.devnumber, self.sub_id, self.address, _strhex(self.data)
+)
 _HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 DJ_NOTIFICATION_LENGTH = _MEDIUM_MESSAGE_SIZE - 4  # to allow easy distinguishing of DJ notifications
 del namedtuple
@@ -374,15 +376,19 @@ def request(handle, devnumber, request_id, *params):
                     #     raise NoSuchDevice(number=devnumber, request=request_id)
 
                     if _log.isEnabledFor(_DEBUG):
-                        _log.debug('(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
-                                   _hidpp10.ERROR[error])
+                        _log.debug(
+                            '(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
+                            _hidpp10.ERROR[error]
+                        )
                     return
 
                 if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
                     # a HID++ 2.0 feature call returned with an error
                     error = ord(reply_data[3:4])
-                    _log.error('(%s) device %d error on feature request {%04X}: %d = %s', handle, devnumber, request_id, error,
-                               _hidpp20.ERROR[error])
+                    _log.error(
+                        '(%s) device %d error on feature request {%04X}: %d = %s', handle, devnumber, request_id, error,
+                        _hidpp20.ERROR[error]
+                    )
                     raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                 if reply_data[:2] == request_data[:2]:
@@ -423,8 +429,10 @@ def request(handle, devnumber, request_id, *params):
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
-    _log.warn('timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]', delta, timeout, devnumber, request_id,
-              _strhex(params))
+    _log.warn(
+        'timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]', delta, timeout, devnumber, request_id,
+        _strhex(params)
+    )
     # raise DeviceUnreachable(number=devnumber, request=request_id)
 
 

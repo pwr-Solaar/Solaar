@@ -45,15 +45,19 @@ def _create():
     about.set_authors(('Daniel Pavel http://github.com/pwr', ))
     try:
         about.add_credit_section(_('GUI design'), ('Julien Gascard', 'Daniel Pavel'))
-        about.add_credit_section(_('Testing'), (
-            'Douglas Wagner',
-            'Julien Gascard',
-            'Peter Wu http://www.lekensteyn.nl/logitech-unifying.html',
-        ))
-        about.add_credit_section(_('Logitech documentation'), (
-            'Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',
-            'Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28',
-        ))
+        about.add_credit_section(
+            _('Testing'), (
+                'Douglas Wagner',
+                'Julien Gascard',
+                'Peter Wu http://www.lekensteyn.nl/logitech-unifying.html',
+            )
+        )
+        about.add_credit_section(
+            _('Logitech documentation'), (
+                'Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',
+                'Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28',
+            )
+        )
     except TypeError:
         # gtk3 < ~3.6.4 has incorrect gi bindings
         import logging
@@ -63,16 +67,18 @@ def _create():
         import logging
         logging.exception('failed to fully create the about dialog')
 
-    about.set_translator_credits('\n'.join((
-        'gogo (croatian)',
-        'Papoteur, David Geiger, Damien Lallement (français)',
-        'Michele Olivo (italiano)',
-        'Adrian Piotrowicz (polski)',
-        'Drovetto, JrBenito (Portuguese-BR)',
-        'Daniel Pavel (română)',
-        'Daniel Zippert, Emelie Snecker (svensk)',
-        'Dimitriy Ryazantcev (Russian)',
-    )))
+    about.set_translator_credits(
+        '\n'.join((
+            'gogo (croatian)',
+            'Papoteur, David Geiger, Damien Lallement (français)',
+            'Michele Olivo (italiano)',
+            'Adrian Piotrowicz (polski)',
+            'Drovetto, JrBenito (Portuguese-BR)',
+            'Daniel Pavel (română)',
+            'Daniel Zippert, Emelie Snecker (svensk)',
+            'Dimitriy Ryazantcev (Russian)',
+        ))
+    )
 
     about.set_website('http://pwr-solaar.github.io/Solaar/')
     about.set_website_label(NAME)

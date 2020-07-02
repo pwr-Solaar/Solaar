@@ -57,14 +57,16 @@ _F = _hidpp20.FEATURE
 #
 
 
-def register_toggle(name,
-                    register,
-                    true_value=_BooleanV.default_true,
-                    false_value=_BooleanV.default_false,
-                    mask=_BooleanV.default_mask,
-                    label=None,
-                    description=None,
-                    device_kind=None):
+def register_toggle(
+    name,
+    register,
+    true_value=_BooleanV.default_true,
+    false_value=_BooleanV.default_false,
+    mask=_BooleanV.default_mask,
+    label=None,
+    description=None,
+    device_kind=None
+):
     validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _RegisterRW(register)
     return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
@@ -77,109 +79,114 @@ def register_choices(name, register, choices, kind=_KIND.choice, label=None, des
     return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
 
 
-def feature_toggle(name,
-                   feature,
-                   read_function_id=_FeatureRW.default_read_fnid,
-                   write_function_id=_FeatureRW.default_write_fnid,
-                   true_value=_BooleanV.default_true,
-                   false_value=_BooleanV.default_false,
-                   mask=_BooleanV.default_mask,
-                   label=None,
-                   description=None,
-                   device_kind=None):
+def feature_toggle(
+    name,
+    feature,
+    read_function_id=_FeatureRW.default_read_fnid,
+    write_function_id=_FeatureRW.default_write_fnid,
+    true_value=_BooleanV.default_true,
+    false_value=_BooleanV.default_false,
+    mask=_BooleanV.default_mask,
+    label=None,
+    description=None,
+    device_kind=None
+):
     validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _FeatureRW(feature, read_function_id, write_function_id)
     return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
 
 
-def feature_bitfield_toggle(name,
-                            feature,
-                            options,
-                            read_function_id=_FeatureRW.default_read_fnid,
-                            write_function_id=_FeatureRW.default_write_fnid,
-                            label=None,
-                            description=None,
-                            device_kind=None):
+def feature_bitfield_toggle(
+    name,
+    feature,
+    options,
+    read_function_id=_FeatureRW.default_read_fnid,
+    write_function_id=_FeatureRW.default_write_fnid,
+    label=None,
+    description=None,
+    device_kind=None
+):
     assert options
     validator = _BitFieldV(options)
     rw = _FeatureRW(feature, read_function_id, write_function_id)
-    return _BitFieldSetting(name,
-                            rw,
-                            validator,
-                            feature=feature,
-                            label=label,
-                            description=description,
-                            device_kind=device_kind)
+    return _BitFieldSetting(
+        name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind
+    )
 
 
-def feature_bitfield_toggle_dynamic(name,
-                                    feature,
-                                    options_callback,
-                                    read_function_id=_FeatureRW.default_read_fnid,
-                                    write_function_id=_FeatureRW.default_write_fnid,
-                                    label=None,
-                                    description=None,
-                                    device_kind=None):
+def feature_bitfield_toggle_dynamic(
+    name,
+    feature,
+    options_callback,
+    read_function_id=_FeatureRW.default_read_fnid,
+    write_function_id=_FeatureRW.default_write_fnid,
+    label=None,
+    description=None,
+    device_kind=None
+):
     def instantiate(device):
         options = options_callback(device)
-        setting = feature_bitfield_toggle(name,
-                                          feature,
-                                          options,
-                                          read_function_id=read_function_id,
-                                          write_function_id=write_function_id,
-                                          label=label,
-                                          description=description,
-                                          device_kind=device_kind)
+        setting = feature_bitfield_toggle(
+            name,
+            feature,
+            options,
+            read_function_id=read_function_id,
+            write_function_id=write_function_id,
+            label=label,
+            description=description,
+            device_kind=device_kind
+        )
         return setting(device)
 
     instantiate._rw_kind = _FeatureRW.kind
     return instantiate
 
 
-def feature_choices(name,
-                    feature,
-                    choices,
-                    read_function_id,
-                    write_function_id,
-                    bytes_count=None,
-                    label=None,
-                    description=None,
-                    device_kind=None):
+def feature_choices(
+    name,
+    feature,
+    choices,
+    read_function_id,
+    write_function_id,
+    bytes_count=None,
+    label=None,
+    description=None,
+    device_kind=None
+):
     assert choices
     validator = _ChoicesV(choices, bytes_count=bytes_count)
     rw = _FeatureRW(feature, read_function_id, write_function_id)
-    return _Setting(name,
-                    rw,
-                    validator,
-                    feature=feature,
-                    kind=_KIND.choice,
-                    label=label,
-                    description=description,
-                    device_kind=device_kind)
+    return _Setting(
+        name, rw, validator, feature=feature, kind=_KIND.choice, label=label, description=description, device_kind=device_kind
+    )
 
 
-def feature_choices_dynamic(name,
-                            feature,
-                            choices_callback,
-                            read_function_id,
-                            write_function_id,
-                            bytes_count=None,
-                            label=None,
-                            description=None,
-                            device_kind=None):
+def feature_choices_dynamic(
+    name,
+    feature,
+    choices_callback,
+    read_function_id,
+    write_function_id,
+    bytes_count=None,
+    label=None,
+    description=None,
+    device_kind=None
+):
     # Proxy that obtains choices dynamically from a device
     def instantiate(device):
         # Obtain choices for this feature
         choices = choices_callback(device)
-        setting = feature_choices(name,
-                                  feature,
-                                  choices,
-                                  read_function_id,
-                                  write_function_id,
-                                  bytes_count=bytes_count,
-                                  label=label,
-                                  description=description,
-                                  device_kind=device_kind)
+        setting = feature_choices(
+            name,
+            feature,
+            choices,
+            read_function_id,
+            write_function_id,
+            bytes_count=bytes_count,
+            label=label,
+            description=description,
+            device_kind=device_kind
+        )
         return setting(device)
 
     instantiate._rw_kind = _FeatureRW.kind
@@ -189,92 +196,99 @@ def feature_choices_dynamic(name,
 # maintain a mapping from keys (NamedInts) to one of a list of choices (NamedInts), default is first one
 # the setting is stored as a JSON-compatible object mapping the key int (as a string) to the choice int
 # extra_default is an extra value that comes from the device that also means the default
-def feature_map_choices(name,
-                        feature,
-                        choicesmap,
-                        read_function_id,
-                        write_function_id,
-                        key_bytes_count=None,
-                        skip_bytes_count=None,
-                        value_bytes_count=None,
-                        label=None,
-                        description=None,
-                        device_kind=None,
-                        extra_default=None):
+def feature_map_choices(
+    name,
+    feature,
+    choicesmap,
+    read_function_id,
+    write_function_id,
+    key_bytes_count=None,
+    skip_bytes_count=None,
+    value_bytes_count=None,
+    label=None,
+    description=None,
+    device_kind=None,
+    extra_default=None
+):
     assert choicesmap
-    validator = _ChoicesMapV(choicesmap,
-                             key_bytes_count=key_bytes_count,
-                             skip_bytes_count=skip_bytes_count,
-                             value_bytes_count=value_bytes_count,
-                             extra_default=extra_default)
+    validator = _ChoicesMapV(
+        choicesmap,
+        key_bytes_count=key_bytes_count,
+        skip_bytes_count=skip_bytes_count,
+        value_bytes_count=value_bytes_count,
+        extra_default=extra_default
+    )
     rw = _FeatureRWMap(feature, read_function_id, write_function_id, key_bytes=key_bytes_count)
-    return _Settings(name,
-                     rw,
-                     validator,
-                     feature=feature,
-                     kind=_KIND.map_choice,
-                     label=label,
-                     description=description,
-                     device_kind=device_kind)
+    return _Settings(
+        name,
+        rw,
+        validator,
+        feature=feature,
+        kind=_KIND.map_choice,
+        label=label,
+        description=description,
+        device_kind=device_kind
+    )
 
 
-def feature_map_choices_dynamic(name,
-                                feature,
-                                choices_callback,
-                                read_function_id,
-                                write_function_id,
-                                key_bytes_count=None,
-                                skip_bytes_count=None,
-                                value_bytes_count=None,
-                                label=None,
-                                description=None,
-                                device_kind=None,
-                                extra_default=None):
+def feature_map_choices_dynamic(
+    name,
+    feature,
+    choices_callback,
+    read_function_id,
+    write_function_id,
+    key_bytes_count=None,
+    skip_bytes_count=None,
+    value_bytes_count=None,
+    label=None,
+    description=None,
+    device_kind=None,
+    extra_default=None
+):
     # Proxy that obtains choices dynamically from a device
     def instantiate(device):
         choices = choices_callback(device)
         if not choices:  # no choices, so don't create a Setting
             return None
-        setting = feature_map_choices(name,
-                                      feature,
-                                      choices,
-                                      read_function_id,
-                                      write_function_id,
-                                      key_bytes_count=key_bytes_count,
-                                      skip_bytes_count=skip_bytes_count,
-                                      value_bytes_count=value_bytes_count,
-                                      label=label,
-                                      description=description,
-                                      device_kind=device_kind,
-                                      extra_default=extra_default)
+        setting = feature_map_choices(
+            name,
+            feature,
+            choices,
+            read_function_id,
+            write_function_id,
+            key_bytes_count=key_bytes_count,
+            skip_bytes_count=skip_bytes_count,
+            value_bytes_count=value_bytes_count,
+            label=label,
+            description=description,
+            device_kind=device_kind,
+            extra_default=extra_default
+        )
         return setting(device)
 
     instantiate._rw_kind = _FeatureRWMap.kind
     return instantiate
 
 
-def feature_range(name,
-                  feature,
-                  min_value,
-                  max_value,
-                  read_function_id=_FeatureRW.default_read_fnid,
-                  write_function_id=_FeatureRW.default_write_fnid,
-                  rw=None,
-                  bytes_count=None,
-                  label=None,
-                  description=None,
-                  device_kind=None):
+def feature_range(
+    name,
+    feature,
+    min_value,
+    max_value,
+    read_function_id=_FeatureRW.default_read_fnid,
+    write_function_id=_FeatureRW.default_write_fnid,
+    rw=None,
+    bytes_count=None,
+    label=None,
+    description=None,
+    device_kind=None
+):
     validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
     if rw is None:
         rw = _FeatureRW(feature, read_function_id, write_function_id)
-    return _Setting(name,
-                    rw,
-                    validator,
-                    feature=feature,
-                    kind=_KIND.range,
-                    label=label,
-                    description=description,
-                    device_kind=device_kind)
+    return _Setting(
+        name, rw, validator, feature=feature, kind=_KIND.range, label=label, description=description, device_kind=device_kind
+    )
 
 
 #
@@ -283,30 +297,50 @@ def feature_range(name,
 
 _HAND_DETECTION = ('hand-detection', _('Hand Detection'), _('Turn on illumination when the hands hover over the keyboard.'))
 _SMOOTH_SCROLL = ('smooth-scroll', _('Smooth Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.'))
-_SIDE_SCROLL = ('side-scroll', _('Side Scrolling'),
-                _('When disabled, pushing the wheel sideways sends custom button events\n'
-                  'instead of the standard side-scrolling events.'))
-_HI_RES_SCROLL = ('hi-res-scroll', _('High Resolution Scrolling'),
-                  _('High-sensitivity mode for vertical scroll with the wheel.'))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'), _('HID++ mode for vertical scroll with the wheel.') + '\n' +
-                   _('Effectively turns off wheel scrolling in Linux.'))
-_HIRES_INV = ('hires-smooth-invert', _('High Resolution Wheel Invert'),
-              _('High-sensitivity wheel invert mode for vertical scroll.'))
+_SIDE_SCROLL = (
+    'side-scroll', _('Side Scrolling'),
+    _(
+        'When disabled, pushing the wheel sideways sends custom button events\n'
+        'instead of the standard side-scrolling events.'
+    )
+)
+_HI_RES_SCROLL = (
+    'hi-res-scroll', _('High Resolution Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.')
+)
+_LOW_RES_SCROLL = (
+    'lowres-smooth-scroll', _('HID++ Scrolling'),
+    _('HID++ mode for vertical scroll with the wheel.') + '\n' + _('Effectively turns off wheel scrolling in Linux.')
+)
+_HIRES_INV = (
+    'hires-smooth-invert', _('High Resolution Wheel Invert'), _('High-sensitivity wheel invert mode for vertical scroll.')
+)
 _HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'), _('High-sensitivity mode for vertical scroll with the wheel.'))
-_FN_SWAP = ('fn-swap', _('Swap Fx function'),
-            _('When set, the F1..F12 keys will activate their special function,\n'
-              'and you must hold the FN key to activate their standard function.') + '\n\n' +
-            _('When unset, the F1..F12 keys will activate their standard function,\n'
-              'and you must hold the FN key to activate their special function.'))
+_FN_SWAP = (
+    'fn-swap', _('Swap Fx function'),
+    _(
+        'When set, the F1..F12 keys will activate their special function,\n'
+        'and you must hold the FN key to activate their standard function.'
+    ) + '\n\n' + _(
+        'When unset, the F1..F12 keys will activate their standard function,\n'
+        'and you must hold the FN key to activate their special function.'
+    )
+)
 _DPI = ('dpi', _('Sensitivity (DPI)'), None)
-_POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
-                  _('Speed multiplier for mouse (256 is normal multiplier).'))
-_SMART_SHIFT = ('smart-shift', _('Smart Shift'),
-                _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
-                  'The mouse wheel is always free at 0, and always locked at 50'))
+_POINTER_SPEED = (
+    'pointer_speed', _('Sensitivity (Pointer Speed)'), _('Speed multiplier for mouse (256 is normal multiplier).')
+)
+_SMART_SHIFT = (
+    'smart-shift', _('Smart Shift'),
+    _(
+        'Automatically switch the mouse wheel between ratchet and freespin mode.\n'
+        'The mouse wheel is always free at 0, and always locked at 50'
+    )
+)
 _BACKLIGHT = ('backlight', _('Backlight'), _('Turn illumination on or off on keyboard.'))
-_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Actions'), _('Change the action for the key or button.') + '\n' +
-                        _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
+_REPROGRAMMABLE_KEYS = (
+    'reprogrammable-keys', _('Actions'), _('Change the action for the key or button.') + '\n' +
+    _('Changing important actions (such as for the left mouse button) can result in an unusable system.')
+)
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 
 #
@@ -314,135 +348,143 @@ _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific
 #
 
 
-def _register_hand_detection(register=_R.keyboard_hand_detection,
-                             true_value=b'\x00\x00\x00',
-                             false_value=b'\x00\x00\x30',
-                             mask=b'\x00\x00\xFF'):
-    return register_toggle(_HAND_DETECTION[0],
-                           register,
-                           true_value=true_value,
-                           false_value=false_value,
-                           label=_HAND_DETECTION[1],
-                           description=_HAND_DETECTION[2],
-                           device_kind=(_DK.keyboard, ))
+def _register_hand_detection(
+    register=_R.keyboard_hand_detection, true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF'
+):
+    return register_toggle(
+        _HAND_DETECTION[0],
+        register,
+        true_value=true_value,
+        false_value=false_value,
+        label=_HAND_DETECTION[1],
+        description=_HAND_DETECTION[2],
+        device_kind=(_DK.keyboard, )
+    )
 
 
 def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
-    return register_toggle(_FN_SWAP[0],
-                           register,
-                           true_value=true_value,
-                           mask=mask,
-                           label=_FN_SWAP[1],
-                           description=_FN_SWAP[2],
-                           device_kind=(_DK.keyboard, ))
+    return register_toggle(
+        _FN_SWAP[0],
+        register,
+        true_value=true_value,
+        mask=mask,
+        label=_FN_SWAP[1],
+        description=_FN_SWAP[2],
+        device_kind=(_DK.keyboard, )
+    )
 
 
 def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
-    return register_toggle(_SMOOTH_SCROLL[0],
-                           register,
-                           true_value=true_value,
-                           mask=mask,
-                           label=_SMOOTH_SCROLL[1],
-                           description=_SMOOTH_SCROLL[2],
-                           device_kind=(_DK.mouse, _DK.trackball))
+    return register_toggle(
+        _SMOOTH_SCROLL[0],
+        register,
+        true_value=true_value,
+        mask=mask,
+        label=_SMOOTH_SCROLL[1],
+        description=_SMOOTH_SCROLL[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
-    return register_toggle(_SIDE_SCROLL[0],
-                           register,
-                           true_value=true_value,
-                           mask=mask,
-                           label=_SIDE_SCROLL[1],
-                           description=_SIDE_SCROLL[2],
-                           device_kind=(_DK.mouse, _DK.trackball))
+    return register_toggle(
+        _SIDE_SCROLL[0],
+        register,
+        true_value=true_value,
+        mask=mask,
+        label=_SIDE_SCROLL[1],
+        description=_SIDE_SCROLL[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _register_dpi(register=_R.mouse_dpi, choices=None):
-    return register_choices(_DPI[0],
-                            register,
-                            choices,
-                            label=_DPI[1],
-                            description=_DPI[2],
-                            device_kind=(_DK.mouse, _DK.trackball))
+    return register_choices(
+        _DPI[0], register, choices, label=_DPI[1], description=_DPI[2], device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_fn_swap():
-    return feature_toggle(_FN_SWAP[0],
-                          _F.FN_INVERSION,
-                          label=_FN_SWAP[1],
-                          description=_FN_SWAP[2],
-                          device_kind=(_DK.keyboard, ))
+    return feature_toggle(
+        _FN_SWAP[0], _F.FN_INVERSION, label=_FN_SWAP[1], description=_FN_SWAP[2], device_kind=(_DK.keyboard, )
+    )
 
 
 # this might not be correct for this feature
 def _feature_new_fn_swap():
-    return feature_toggle(_FN_SWAP[0],
-                          _F.NEW_FN_INVERSION,
-                          label=_FN_SWAP[1],
-                          description=_FN_SWAP[2],
-                          device_kind=(_DK.keyboard, ))
+    return feature_toggle(
+        _FN_SWAP[0], _F.NEW_FN_INVERSION, label=_FN_SWAP[1], description=_FN_SWAP[2], device_kind=(_DK.keyboard, )
+    )
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
-    return feature_toggle(_FN_SWAP[0],
-                          _F.K375S_FN_INVERSION,
-                          label=_FN_SWAP[1],
-                          description=_FN_SWAP[2],
-                          true_value=b'\xFF\x01',
-                          false_value=b'\xFF\x00',
-                          device_kind=(_DK.keyboard, ))
+    return feature_toggle(
+        _FN_SWAP[0],
+        _F.K375S_FN_INVERSION,
+        label=_FN_SWAP[1],
+        description=_FN_SWAP[2],
+        true_value=b'\xFF\x01',
+        false_value=b'\xFF\x00',
+        device_kind=(_DK.keyboard, )
+    )
 
 
 # FIXME: This will enable all supported backlight settings,
 # we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
-    return feature_toggle(_BACKLIGHT[0],
-                          _F.BACKLIGHT2,
-                          label=_BACKLIGHT[1],
-                          description=_BACKLIGHT[2],
-                          device_kind=(_DK.keyboard, ))
+    return feature_toggle(
+        _BACKLIGHT[0], _F.BACKLIGHT2, label=_BACKLIGHT[1], description=_BACKLIGHT[2], device_kind=(_DK.keyboard, )
+    )
 
 
 def _feature_hi_res_scroll():
-    return feature_toggle(_HI_RES_SCROLL[0],
-                          _F.HI_RES_SCROLLING,
-                          label=_HI_RES_SCROLL[1],
-                          description=_HI_RES_SCROLL[2],
-                          device_kind=(_DK.mouse, _DK.trackball))
+    return feature_toggle(
+        _HI_RES_SCROLL[0],
+        _F.HI_RES_SCROLLING,
+        label=_HI_RES_SCROLL[1],
+        description=_HI_RES_SCROLL[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_lowres_smooth_scroll():
-    return feature_toggle(_LOW_RES_SCROLL[0],
-                          _F.LOWRES_WHEEL,
-                          label=_LOW_RES_SCROLL[1],
-                          description=_LOW_RES_SCROLL[2],
-                          device_kind=(_DK.mouse, _DK.trackball))
+    return feature_toggle(
+        _LOW_RES_SCROLL[0],
+        _F.LOWRES_WHEEL,
+        label=_LOW_RES_SCROLL[1],
+        description=_LOW_RES_SCROLL[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_hires_smooth_invert():
-    return feature_toggle(_HIRES_INV[0],
-                          _F.HIRES_WHEEL,
-                          read_function_id=0x10,
-                          write_function_id=0x20,
-                          true_value=0x04,
-                          mask=0x04,
-                          label=_HIRES_INV[1],
-                          description=_HIRES_INV[2],
-                          device_kind=(_DK.mouse, _DK.trackball))
+    return feature_toggle(
+        _HIRES_INV[0],
+        _F.HIRES_WHEEL,
+        read_function_id=0x10,
+        write_function_id=0x20,
+        true_value=0x04,
+        mask=0x04,
+        label=_HIRES_INV[1],
+        description=_HIRES_INV[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_hires_smooth_resolution():
-    return feature_toggle(_HIRES_RES[0],
-                          _F.HIRES_WHEEL,
-                          read_function_id=0x10,
-                          write_function_id=0x20,
-                          true_value=0x02,
-                          mask=0x02,
-                          label=_HIRES_RES[1],
-                          description=_HIRES_RES[2],
-                          device_kind=(_DK.mouse, _DK.trackball))
+    return feature_toggle(
+        _HIRES_RES[0],
+        _F.HIRES_WHEEL,
+        read_function_id=0x10,
+        write_function_id=0x20,
+        true_value=0x02,
+        mask=0x02,
+        label=_HIRES_RES[1],
+        description=_HIRES_RES[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_smart_shift():
@@ -475,15 +517,17 @@ def _feature_smart_shift():
             data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1) * 2
             return super(_SmartShiftRW, self).write(device, data)
 
-    return feature_range(_SMART_SHIFT[0],
-                         _F.SMART_SHIFT,
-                         _MIN_SMART_SHIFT_VALUE,
-                         _MAX_SMART_SHIFT_VALUE,
-                         bytes_count=1,
-                         rw=_SmartShiftRW(_F.SMART_SHIFT),
-                         label=_SMART_SHIFT[1],
-                         description=_SMART_SHIFT[2],
-                         device_kind=(_DK.mouse, _DK.trackball))
+    return feature_range(
+        _SMART_SHIFT[0],
+        _F.SMART_SHIFT,
+        _MIN_SMART_SHIFT_VALUE,
+        _MAX_SMART_SHIFT_VALUE,
+        bytes_count=1,
+        rw=_SmartShiftRW(_F.SMART_SHIFT),
+        label=_SMART_SHIFT[1],
+        description=_SMART_SHIFT[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_adjustable_dpi_choices(device):
@@ -514,30 +558,34 @@ def _feature_adjustable_dpi():
     # Assume sensorIdx 0 (there is only one sensor)
     # [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
     # [3] setSensorDpi(sensorIdx, dpi)
-    return feature_choices_dynamic(_DPI[0],
-                                   _F.ADJUSTABLE_DPI,
-                                   _feature_adjustable_dpi_choices,
-                                   read_function_id=0x20,
-                                   write_function_id=0x30,
-                                   bytes_count=3,
-                                   label=_DPI[1],
-                                   description=_DPI[2],
-                                   device_kind=(_DK.mouse, _DK.trackball))
+    return feature_choices_dynamic(
+        _DPI[0],
+        _F.ADJUSTABLE_DPI,
+        _feature_adjustable_dpi_choices,
+        read_function_id=0x20,
+        write_function_id=0x30,
+        bytes_count=3,
+        label=_DPI[1],
+        description=_DPI[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 def _feature_pointer_speed():
     """Pointer Speed feature"""
     # min and max values taken from usb traces of Win software
-    return feature_range(_POINTER_SPEED[0],
-                         _F.POINTER_SPEED,
-                         0x002e,
-                         0x01ff,
-                         read_function_id=0x0,
-                         write_function_id=0x10,
-                         bytes_count=2,
-                         label=_POINTER_SPEED[1],
-                         description=_POINTER_SPEED[2],
-                         device_kind=(_DK.mouse, _DK.trackball))
+    return feature_range(
+        _POINTER_SPEED[0],
+        _F.POINTER_SPEED,
+        0x002e,
+        0x01ff,
+        read_function_id=0x0,
+        write_function_id=0x10,
+        bytes_count=2,
+        label=_POINTER_SPEED[1],
+        description=_POINTER_SPEED[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
 
 
 # the keys for the choice map are Logitech controls (from special_keys)
@@ -572,18 +620,20 @@ def _feature_reprogrammable_keys_choices(device):
 
 
 def _feature_reprogrammable_keys():
-    return feature_map_choices_dynamic(_REPROGRAMMABLE_KEYS[0],
-                                       _F.REPROG_CONTROLS_V4,
-                                       _feature_reprogrammable_keys_choices,
-                                       read_function_id=0x20,
-                                       write_function_id=0x30,
-                                       key_bytes_count=2,
-                                       skip_bytes_count=1,
-                                       value_bytes_count=2,
-                                       label=_REPROGRAMMABLE_KEYS[1],
-                                       description=_REPROGRAMMABLE_KEYS[2],
-                                       device_kind=(_DK.keyboard, ),
-                                       extra_default=0)
+    return feature_map_choices_dynamic(
+        _REPROGRAMMABLE_KEYS[0],
+        _F.REPROG_CONTROLS_V4,
+        _feature_reprogrammable_keys_choices,
+        read_function_id=0x20,
+        write_function_id=0x30,
+        key_bytes_count=2,
+        skip_bytes_count=1,
+        value_bytes_count=2,
+        label=_REPROGRAMMABLE_KEYS[1],
+        description=_REPROGRAMMABLE_KEYS[2],
+        device_kind=(_DK.keyboard, ),
+        extra_default=0
+    )
 
 
 def _feature_disable_keyboard_keys_key_list(device):
@@ -593,14 +643,16 @@ def _feature_disable_keyboard_keys_key_list(device):
 
 
 def _feature_disable_keyboard_keys():
-    return feature_bitfield_toggle_dynamic(_DISABLE_KEYS[0],
-                                           _F.KEYBOARD_DISABLE_KEYS,
-                                           _feature_disable_keyboard_keys_key_list,
-                                           read_function_id=0x10,
-                                           write_function_id=0x20,
-                                           label=_DISABLE_KEYS[1],
-                                           description=_DISABLE_KEYS[2],
-                                           device_kind=(_DK.keyboard, ))
+    return feature_bitfield_toggle_dynamic(
+        _DISABLE_KEYS[0],
+        _F.KEYBOARD_DISABLE_KEYS,
+        _feature_disable_keyboard_keys_key_list,
+        read_function_id=0x10,
+        write_function_id=0x20,
+        label=_DISABLE_KEYS[1],
+        description=_DISABLE_KEYS[2],
+        device_kind=(_DK.keyboard, )
+    )
 
 
 #

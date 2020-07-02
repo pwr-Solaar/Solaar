@@ -42,17 +42,19 @@ from pyudev import Monitor as _Monitor
 
 native_implementation = 'udev'
 
-DeviceInfo = namedtuple('DeviceInfo', [
-    'path',
-    'vendor_id',
-    'product_id',
-    'serial',
-    'release',
-    'manufacturer',
-    'product',
-    'interface',
-    'driver',
-])
+DeviceInfo = namedtuple(
+    'DeviceInfo', [
+        'path',
+        'vendor_id',
+        'product_id',
+        'serial',
+        'release',
+        'manufacturer',
+        'product',
+        'interface',
+        'driver',
+    ]
+)
 del namedtuple
 
 #
@@ -121,29 +123,33 @@ def _match(action, device, filter):
                 return
 
         attrs = usb_device.attributes
-        d_info = DeviceInfo(path=device.device_node,
-                            vendor_id=vid[-4:],
-                            product_id=pid[-4:],
-                            serial=hid_device.get('HID_UNIQ'),
-                            release=attrs.get('bcdDevice'),
-                            manufacturer=attrs.get('manufacturer'),
-                            product=attrs.get('product'),
-                            interface=usb_interface,
-                            driver=hid_driver_name)
+        d_info = DeviceInfo(
+            path=device.device_node,
+            vendor_id=vid[-4:],
+            product_id=pid[-4:],
+            serial=hid_device.get('HID_UNIQ'),
+            release=attrs.get('bcdDevice'),
+            manufacturer=attrs.get('manufacturer'),
+            product=attrs.get('product'),
+            interface=usb_interface,
+            driver=hid_driver_name
+        )
         return d_info
 
     elif action == 'remove':
         # print (dict(device), dict(usb_device))
 
-        d_info = DeviceInfo(path=device.device_node,
-                            vendor_id=vid[-4:],
-                            product_id=pid[-4:],
-                            serial=None,
-                            release=None,
-                            manufacturer=None,
-                            product=None,
-                            interface=None,
-                            driver=None)
+        d_info = DeviceInfo(
+            path=device.device_node,
+            vendor_id=vid[-4:],
+            product_id=pid[-4:],
+            serial=None,
+            release=None,
+            manufacturer=None,
+            product=None,
+            interface=None,
+            driver=None
+        )
         return d_info
 
 

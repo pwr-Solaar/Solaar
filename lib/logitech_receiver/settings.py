@@ -167,8 +167,9 @@ class Setting(object):
     def __str__(self):
         if hasattr(self, '_value'):
             assert hasattr(self, '_device')
-            return '<Setting([%s:%s] %s:%s=%s)>' % (self._rw.kind, self._validator.kind, self._device.codename, self.name,
-                                                    self._value)
+            return '<Setting([%s:%s] %s:%s=%s)>' % (
+                self._rw.kind, self._validator.kind, self._device.codename, self.name, self._value
+            )
         return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind, self.name)
 
     __unicode__ = __repr__ = __str__
@@ -531,8 +532,10 @@ class BooleanValidator(object):
                 return True
             if reply_value == self.false_value:
                 return False
-            _log.warn('BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
-                      self.mask)
+            _log.warn(
+                'BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
+                self.mask
+            )
             return False
 
         count = len(self.mask)
@@ -701,8 +704,8 @@ class ChoicesMapValidator(ChoicesValidator):
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
-        assert reply_value in self.choices[key], '%s: failed to validate read value %02X' % (self.__class__.__name__,
-                                                                                             reply_value)
+        assert reply_value in self.choices[
+            key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return reply_value
 
     def prepare_write(self, key, new_value):

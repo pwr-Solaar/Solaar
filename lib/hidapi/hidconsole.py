@@ -80,11 +80,13 @@ def _print(marker, data, scroll=False):
 
         if interactive and scroll:
             # scroll the entire screen above the current line up by 1 line
-            sys.stdout.write('\033[s'  # save cursor position
-                             '\033[S'  # scroll up
-                             '\033[A'  # cursor up
-                             '\033[L'  # insert 1 line
-                             '\033[G')  # move cursor to column 1
+            sys.stdout.write(
+                '\033[s'  # save cursor position
+                '\033[S'  # scroll up
+                '\033[A'  # cursor up
+                '\033[L'  # insert 1 line
+                '\033[G'
+            )  # move cursor to column 1
         sys.stdout.write(s)
         if interactive and scroll:
             # restore cursor position
@@ -164,8 +166,10 @@ def _open(args):
     if not handle:
         sys.exit('!! Failed to open %s, aborting.' % device)
 
-    print('.. Opened handle %r, vendor %r product %r serial %r.' %
-          (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle)))
+    print(
+        '.. Opened handle %r, vendor %r product %r serial %r.' %
+        (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle))
+    )
     if args.hidpp:
         if _hid.get_manufacturer(handle) != b'Logitech':
             sys.exit('!! Only Logitech devices support the HID++ protocol.')
@@ -188,10 +192,12 @@ def _parse_arguments():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--history', help='history file (default ~/.hidconsole-history)')
     arg_parser.add_argument('--hidpp', action='store_true', help='ensure input data is a valid HID++ request')
-    arg_parser.add_argument('device',
-                            nargs='?',
-                            help='linux device to connect to (/dev/hidrawX); '
-                            'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver')
+    arg_parser.add_argument(
+        'device',
+        nargs='?',
+        help='linux device to connect to (/dev/hidrawX); '
+        'may be omitted if --hidpp is given, in which case it looks for the first Logitech receiver'
+    )
     return arg_parser.parse_args()
 
 

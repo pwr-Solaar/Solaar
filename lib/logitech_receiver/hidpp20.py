@@ -160,26 +160,23 @@ FEATURE._fallback = lambda x: 'unknown:%04X' % x
 
 FEATURE_FLAG = _NamedInts(internal=0x20, hidden=0x40, obsolete=0x80)
 
-DEVICE_KIND = _NamedInts(keyboard=0x00,
-                         remote_control=0x01,
-                         numpad=0x02,
-                         mouse=0x03,
-                         touchpad=0x04,
-                         trackball=0x05,
-                         presenter=0x06,
-                         receiver=0x07)
+DEVICE_KIND = _NamedInts(
+    keyboard=0x00, remote_control=0x01, numpad=0x02, mouse=0x03, touchpad=0x04, trackball=0x05, presenter=0x06, receiver=0x07
+)
 
 FIRMWARE_KIND = _NamedInts(Firmware=0x00, Bootloader=0x01, Hardware=0x02, Other=0x03)
 
 BATTERY_OK = lambda status: status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
 
-BATTERY_STATUS = _NamedInts(discharging=0x00,
-                            recharging=0x01,
-                            almost_full=0x02,
-                            full=0x03,
-                            slow_recharge=0x04,
-                            invalid_battery=0x05,
-                            thermal_error=0x06)
+BATTERY_STATUS = _NamedInts(
+    discharging=0x00,
+    recharging=0x01,
+    almost_full=0x02,
+    full=0x03,
+    slow_recharge=0x04,
+    invalid_battery=0x05,
+    thermal_error=0x06
+)
 
 CHARGE_STATUS = _NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
 
@@ -187,15 +184,17 @@ CHARGE_LEVEL = _NamedInts(average=50, full=90, critical=5)
 
 CHARGE_TYPE = _NamedInts(standard=0x00, fast=0x01, slow=0x02)
 
-ERROR = _NamedInts(unknown=0x01,
-                   invalid_argument=0x02,
-                   out_of_range=0x03,
-                   hardware_error=0x04,
-                   logitech_internal=0x05,
-                   invalid_feature_index=0x06,
-                   invalid_function=0x07,
-                   busy=0x08,
-                   unsupported=0x09)
+ERROR = _NamedInts(
+    unknown=0x01,
+    invalid_argument=0x02,
+    out_of_range=0x03,
+    hardware_error=0x04,
+    logitech_internal=0x05,
+    invalid_feature_index=0x06,
+    invalid_function=0x07,
+    busy=0x08,
+    unsupported=0x09
+)
 
 #
 #
@@ -388,8 +387,9 @@ class KeysArray(object):
                         self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
                     if self.keyversion == 4:
                         try:
-                            mapped_data = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key & 0xff00,
-                                                          key & 0xff)
+                            mapped_data = feature_request(
+                                self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key & 0xff00, key & 0xff
+                            )
                             if mapped_data:
                                 remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
                                 # if key not mapped map it to itself for display
@@ -401,8 +401,9 @@ class KeysArray(object):
                             # remap_flag = 0
 
                         remapped_text = special_keys.CONTROL[remapped]
-                        self.keys[index] = _ReprogrammableKeyInfoV4(index, ctrl_id_text, ctrl_task_text, flags, pos, group,
-                                                                    gmask, remapped_text)
+                        self.keys[index] = _ReprogrammableKeyInfoV4(
+                            index, ctrl_id_text, ctrl_task_text, flags, pos, group, gmask, remapped_text
+                        )
 
             return self.keys[index]
 
@@ -517,8 +518,10 @@ def get_battery(device):
         discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
         discharge = None if discharge == 0 else discharge
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('device %d battery %d%% charged, next level %d%% charge, status %d = %s', device.number, discharge,
-                       dischargeNext, status, BATTERY_STATUS[status])
+            _log.debug(
+                'device %d battery %d%% charged, next level %d%% charge, status %d = %s', device.number, discharge,
+                dischargeNext, status, BATTERY_STATUS[status]
+            )
         return discharge, BATTERY_STATUS[status], dischargeNext
 
 
@@ -553,8 +556,10 @@ def decipher_voltage(voltage_report):
         charge_lvl = CHARGE_LEVEL.critical
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('device ???, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
-                   voltage, status, (flags & 0x03), charge_sts, charge_lvl, charge_type)
+        _log.debug(
+            'device ???, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
+            voltage, status, (flags & 0x03), charge_sts, charge_lvl, charge_type
+        )
 
     return charge_lvl, status, voltage, charge_sts, charge_type
 
@@ -587,8 +592,9 @@ def get_vertical_scrolling_info(device):
     vertical_scrolling_info = feature_request(device, FEATURE.VERTICAL_SCROLLING)
     if vertical_scrolling_info:
         roller, ratchet, lines = _unpack('!BBB', vertical_scrolling_info[:3])
-        roller_type = ('reserved', 'standard', 'reserved', '3G', 'micro', 'normal touch pad', 'inverted touch pad',
-                       'reserved')[roller]
+        roller_type = (
+            'reserved', 'standard', 'reserved', '3G', 'micro', 'normal touch pad', 'inverted touch pad', 'reserved'
+        )[roller]
         return {'roller': roller_type, 'ratchet': ratchet, 'lines': lines}
 
 

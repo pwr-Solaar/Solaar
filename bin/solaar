@@ -36,8 +36,10 @@ def init_paths():
             sys.path[0].encode(sys.getfilesystemencoding())
 
     except UnicodeError:
-        sys.stderr.write('ERROR: Solaar cannot recognize encoding of filesystem path, '
-                         'this may happen because non UTF-8 characters in the pathname.\n')
+        sys.stderr.write(
+            'ERROR: Solaar cannot recognize encoding of filesystem path, '
+            'this may happen because non UTF-8 characters in the pathname.\n'
+        )
         sys.exit(1)
 
     prefix = _path.normpath(_path.join(_path.realpath(decoded_path), '..'))

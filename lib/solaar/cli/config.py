@@ -31,8 +31,10 @@ def _print_setting(s, verbose=True):
         if s.kind == _settings.KIND.toggle:
             print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
         elif s.choices:
-            print('#   possible values: one of [', ', '.join(str(v) for v in s.choices),
-                  '], or higher/lower/highest/max/lowest/min')
+            print(
+                '#   possible values: one of [', ', '.join(str(v) for v in s.choices),
+                '], or higher/lower/highest/max/lowest/min'
+            )
         else:
             # wtf?
             pass
