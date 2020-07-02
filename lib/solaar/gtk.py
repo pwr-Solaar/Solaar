@@ -129,7 +129,8 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     args = _parse_arguments()
-    if not args: return
+    if not args:
+        return
     if args.action:
         # if any argument, run comandline and exit
         return _cli.run(args.action, args.hidraw_path)
@@ -149,9 +150,8 @@ def main():
             _upower.watch(lambda: listener.ping_all(True))
 
         # main UI event loop
-        ui.run_loop(listener.start_all, listener.stop_all,
-                    args.window != 'only', args.window != 'hide')
-    except Exception as e:
+        ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
+    except Exception:
         import sys
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))

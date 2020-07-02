@@ -81,7 +81,7 @@ class PairedDevice(object):
         self._power_switch = None
 
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
+        #     _log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
 
         if link_notification is not None:
             self.online = not bool(ord(link_notification.data[0:1]) & 0x40)
@@ -156,7 +156,7 @@ class PairedDevice(object):
             self.online = self._protocol is not None
 
             # if _log.isEnabledFor(_DEBUG):
-            # 	_log.debug("device %d protocol %s", self.number, self._protocol)
+            #     _log.debug("device %d protocol %s", self.number, self._protocol)
         return self._protocol or 0
 
     @property
@@ -169,7 +169,7 @@ class PairedDevice(object):
                 codename = codename[2:2 + codename_length]
                 self._codename = codename.decode('ascii')
                 # if _log.isEnabledFor(_DEBUG):
-                #	 _log.debug("device %d codename %s", self.number, self._codename)
+                #     _log.debug("device %d codename %s", self.number, self._codename)
             else:
                 self._codename = '? (%s)' % self.wpid
         return self._codename
@@ -276,7 +276,7 @@ class PairedDevice(object):
 
     def enable_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
-		receiver."""
+        receiver."""
         if not bool(self.receiver) or self.protocol >= 2.0:
             return False
 
@@ -350,8 +350,8 @@ class PairedDevice(object):
 class Receiver(object):
     """A Unifying Receiver instance.
 
-	The paired devices are available through the sequence interface.
-	"""
+    The paired devices are available through the sequence interface.
+    """
     number = 0xFF
     kind = None
 
@@ -414,7 +414,7 @@ class Receiver(object):
 
     def enable_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
-		receiver."""
+        receiver."""
         if not self.handle:
             return False
 
@@ -482,7 +482,7 @@ class Receiver(object):
         return 0 if count is None else ord(count[1:2])
 
     # def has_devices(self):
-    # 	return len(self) > 0 or self.count() > 0
+    #     return len(self) > 0 or self.count() > 0
 
     def request(self, request_id, *params):
         if bool(self):
@@ -579,8 +579,8 @@ class Receiver(object):
     def open(self, device_info):
         """Opens a Logitech Receiver found attached to the machine, by Linux device path.
 
-		:returns: An open file handle for the found receiver, or ``None``.
-		"""
+        :returns: An open file handle for the found receiver, or ``None``.
+        """
         try:
             handle = _base.open_path(device_info.path)
             if handle:
@@ -589,5 +589,5 @@ class Receiver(object):
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
                 raise
-        except:
+        except Exception:
             _log.exception('open %s', device_info)

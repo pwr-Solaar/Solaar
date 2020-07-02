@@ -415,7 +415,7 @@ def _device_selected(selection):
     model, item = selection.get_selected()
     device = model.get_value(item, _COLUMN.DEVICE) if item else None
     # if _log.isEnabledFor(_DEBUG):
-    # 	_log.debug("window tree selected device %s", device)
+    #     _log.debug("window tree selected device %s", device)
     if device:
         _update_info_panel(device, full=True)
     else:
@@ -666,8 +666,8 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
     # b._insecure.set_visible(False)
     buttons._unpair.set_visible(False)
 
-    if ( receiver.may_unpair or receiver.re_pairs ) and not is_pairing and \
-       ( receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0 ):
+    if (receiver.may_unpair or receiver.re_pairs) and not is_pairing and \
+       (receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0):
         if not receiver.re_pairs and devices_count >= receiver.max_devices:
             paired_devices = tuple(n
                                    for n in range(1, receiver.max_devices + 1)
@@ -727,7 +727,7 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._text.set_markup(text)
 
     if is_online:
-        not_secure = device.status.get(_K.LINK_ENCRYPTED) == False
+        not_secure = device.status.get(_K.LINK_ENCRYPTED) is False
         if not_secure:
             panel._secure._text.set_text(_('not encrypted'))
             panel._secure._icon.set_from_icon_name('security-low',

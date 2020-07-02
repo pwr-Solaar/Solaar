@@ -139,11 +139,12 @@ def _find_device(receivers, name):
     if len(name) == 1:
         try:
             number = int(name)
-        except:
+        except Exception:
             pass
         else:
             assert not (number < 0)
-            if number > 6: number = None
+            if number > 6:
+                number = None
 
     for r in receivers:
         if number and number <= r.max_devices:
@@ -168,7 +169,7 @@ def run(cli_args=None, hidraw_path=None):
         args = _cli_parser.parse_args()
         # Python 3 has an undocumented 'feature' that breaks parsing empty args
         # http://bugs.python.org/issue16308
-        if not 'cmd' in args:
+        if 'cmd' not in args:
             _cli_parser.print_usage(_sys.stderr)
             _sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
             _sys.exit(2)
@@ -183,11 +184,10 @@ def run(cli_args=None, hidraw_path=None):
         from importlib import import_module
         m = import_module('.' + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)
-    except AssertionError as e:
+    except AssertionError:
         from traceback import extract_tb
         tb_last = extract_tb(_sys.exc_info()[2])[-1]
-        _sys.exit('%s: assertion failed: %s line %d' %
-                  (NAME.lower(), tb_last[0], tb_last[1]))
-    except Exception as e:
+        _sys.exit('%s: assertion failed: %s line %d' % (NAME.lower(), tb_last[0], tb_last[1]))
+    except Exception:
         from traceback import format_exc
         _sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))

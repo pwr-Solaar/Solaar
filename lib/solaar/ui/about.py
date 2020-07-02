@@ -61,7 +61,7 @@ def _create():
         # gtk3 < ~3.6.4 has incorrect gi bindings
         import logging
         logging.exception('failed to fully create the about dialog')
-    except:
+    except Exception:
         # the Gtk3 version may be too old, and the function does not exist
         import logging
         logging.exception('failed to fully create the about dialog')

@@ -72,9 +72,9 @@ _PING_TIMEOUT = DEFAULT_TIMEOUT * 2
 
 class NoReceiver(_KwException):
     """Raised when trying to talk through a previously open handle, when the
-	receiver is no longer available. Should only happen if the receiver is
-	physically disconnected from the machine, or its kernel driver module is
-	unloaded."""
+    receiver is no longer available. Should only happen if the receiver is
+    physically disconnected from the machine, or its kernel driver module is
+    unloaded."""
     pass
 
 
@@ -113,24 +113,24 @@ def notify_on_receivers_glib(callback):
 def open_path(path):
     """Checks if the given Linux device path points to the right UR device.
 
-	:param path: the Linux device path.
+    :param path: the Linux device path.
 
-	The UR physical device may expose multiple linux devices with the same
-	interface, so we have to check for the right one. At this moment the only
-	way to distinguish betheen them is to do a test ping on an invalid
-	(attached) device number (i.e., 0), expecting a 'ping failed' reply.
+    The UR physical device may expose multiple linux devices with the same
+    interface, so we have to check for the right one. At this moment the only
+    way to distinguish betheen them is to do a test ping on an invalid
+    (attached) device number (i.e., 0), expecting a 'ping failed' reply.
 
-	:returns: an open receiver handle if this is the right Linux device, or
-	``None``.
-	"""
+    :returns: an open receiver handle if this is the right Linux device, or
+    ``None``.
+    """
     return _hid.open_path(path)
 
 
 def open():
     """Opens the first Logitech Unifying Receiver found attached to the machine.
 
-	:returns: An open file handle for the found receiver, or ``None``.
-	"""
+    :returns: An open file handle for the found receiver, or ``None``.
+    """
     for rawdevice in receivers():
         handle = open_path(rawdevice.path)
         if handle:
@@ -147,7 +147,7 @@ def close(handle):
                 handle.close()
             # _log.info("closed receiver handle %r", handle)
             return True
-        except:
+        except Exception:
             # _log.exception("closing receiver handle %r", handle)
             pass
 
@@ -157,16 +157,16 @@ def close(handle):
 def write(handle, devnumber, data):
     """Writes some data to the receiver, addressed to a certain device.
 
-	:param handle: an open UR handle.
-	:param devnumber: attached device number.
-	:param data: data to send, up to 5 bytes.
+    :param handle: an open UR handle.
+    :param devnumber: attached device number.
+    :param data: data to send, up to 5 bytes.
 
-	The first two (required) bytes of data must be the SubId and address.
+    The first two (required) bytes of data must be the SubId and address.
 
-	:raises NoReceiver: if the receiver is no longer available, i.e. has
-	been physically removed from the machine, or the kernel driver has been
-	unloaded. The handle will be closed automatically.
-	"""
+    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    been physically removed from the machine, or the kernel driver has been
+    unloaded. The handle will be closed automatically.
+    """
     # the data is padded to either 5 or 18 bytes
     assert data is not None
     assert isinstance(data, bytes), (repr(data), type(data))
@@ -190,17 +190,17 @@ def write(handle, devnumber, data):
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
     """Read some data from the receiver. Usually called after a write (feature
-	call), to get the reply.
+    call), to get the reply.
 
-	:param: handle open handle to the receiver
-	:param: timeout how long to wait for a reply, in seconds
+    :param: handle open handle to the receiver
+    :param: timeout how long to wait for a reply, in seconds
 
-	:returns: a tuple of (devnumber, message data), or `None`
+    :returns: a tuple of (devnumber, message data), or `None`
 
-	:raises NoReceiver: if the receiver is no longer available, i.e. has
-	been physically removed from the machine, or the kernel driver has been
-	unloaded. The handle will be closed automatically.
-	"""
+    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    been physically removed from the machine, or the kernel driver has been
+    unloaded. The handle will be closed automatically.
+    """
     reply = _read(handle, timeout)
     if reply:
         return reply[1:]
@@ -222,12 +222,12 @@ def check_message(data):
 def _read(handle, timeout):
     """Read an incoming packet from the receiver.
 
-	:returns: a tuple of (report_id, devnumber, data), or `None`.
+    :returns: a tuple of (report_id, devnumber, data), or `None`.
 
-	:raises NoReceiver: if the receiver is no longer available, i.e. has
-	been physically removed from the machine, or the kernel driver has been
-	unloaded. The handle will be closed automatically.
-	"""
+    :raises NoReceiver: if the receiver is no longer available, i.e. has
+    been physically removed from the machine, or the kernel driver has been
+    unloaded. The handle will be closed automatically.
+    """
     try:
         # convert timeout to milliseconds, the hidapi expects it
         timeout = int(timeout * 1000)
@@ -257,8 +257,8 @@ def _read(handle, timeout):
 def _skip_incoming(handle, ihandle, notifications_hook):
     """Read anything already in the input buffer.
 
-	Used by request() and ping() before their write.
-	"""
+    Used by request() and ping() before their write.
+    """
 
     while True:
         try:
@@ -272,7 +272,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 
         if data:
             if check_message(data):  # only process messages that pass check
-                report_id = ord(data[:1])
+                # report_id = ord(data[:1])
                 if notifications_hook:
                     n = make_notification(ord(data[1:2]), data[2:])
                     if n:
@@ -284,7 +284,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
 
 def make_notification(devnumber, data):
     """Guess if this is a notification (and not just a request reply), and
-	return a Notification tuple if it is."""
+    return a Notification tuple if it is."""
 
     sub_id = ord(data[:1])
     if sub_id & 0x80 == 0x80:
@@ -299,13 +299,13 @@ def make_notification(devnumber, data):
     address = ord(data[1:2])
     if (
             # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
-        (sub_id >= 0x40) or
+        (sub_id >= 0x40) or  # noqa: E131
             # custom HID++1.0 battery events, where SubId is 0x07/0x0D
         (sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b'\x00') or
             # custom HID++1.0 illumination event, where SubId is 0x17
         (sub_id == 0x17 and len(data) == 5) or
             # HID++ 2.0 feature notifications have the SoftwareID 0
-        (address & 0x0F == 0x00)):
+        (address & 0x0F == 0x00)):  # noqa: E129
         return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 
@@ -325,14 +325,14 @@ del namedtuple
 def request(handle, devnumber, request_id, *params):
     """Makes a feature call to a device and waits for a matching reply.
 
-	This function will wait for a matching reply indefinitely.
+    This function will wait for a matching reply indefinitely.
 
-	:param handle: an open UR handle.
-	:param devnumber: attached device number.
-	:param request_id: a 16-bit integer.
-	:param params: parameters for the feature call, 3 to 16 bytes.
-	:returns: the reply data, or ``None`` if some error occurred.
-	"""
+    :param handle: an open UR handle.
+    :param devnumber: attached device number.
+    :param request_id: a 16-bit integer.
+    :param params: parameters for the feature call, 3 to 16 bytes.
+    :returns: the reply data, or ``None`` if some error occurred.
+    """
 
     # import inspect as _inspect
     # print ('\n  '.join(str(s) for s in _inspect.stack()))
@@ -357,7 +357,7 @@ def request(handle, devnumber, request_id, *params):
     else:
         params = b''
     # if _log.isEnabledFor(_DEBUG):
-    # 	_log.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
+    #     _log.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
     request_data = _pack('!H', request_id) + params
 
     ihandle = int(handle)
@@ -380,12 +380,12 @@ def request(handle, devnumber, request_id, *params):
                     error = ord(reply_data[3:4])
 
                     # if error == _hidpp10.ERROR.resource_error: # device unreachable
-                    # 	_log.warn("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
-                    # 	raise DeviceUnreachable(number=devnumber, request=request_id)
+                    #     _log.warn("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
+                    #     raise DeviceUnreachable(number=devnumber, request=request_id)
 
                     # if error == _hidpp10.ERROR.unknown_device: # unknown device
-                    # 	_log.error("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
-                    # 	raise NoSuchDevice(number=devnumber, request=request_id)
+                    #     _log.error("(%s) device %d error on request {%04X}: unknown device", handle, devnumber, request_id)
+                    #     raise NoSuchDevice(number=devnumber, request=request_id)
 
                     if _log.isEnabledFor(_DEBUG):
                         _log.debug(
@@ -437,13 +437,13 @@ def request(handle, devnumber, request_id, *params):
                 if n:
                     notifications_hook(n)
                 # elif _log.isEnabledFor(_DEBUG):
-                # 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+                #     _log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
             # elif _log.isEnabledFor(_DEBUG):
-            # 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+            #     _log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
         delta = _timestamp() - request_started
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
+        #     _log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
     _log.warn('timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]',
               delta, timeout, devnumber, request_id, _strhex(params))
@@ -453,8 +453,8 @@ def request(handle, devnumber, request_id, *params):
 def ping(handle, devnumber):
     """Check if a device is connected to the receiver.
 
-	:returns: The HID protocol supported by the device, as a floating point number, if the device is active.
-	"""
+    :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
+    """
     if _log.isEnabledFor(_DEBUG):
         _log.debug('(%s) pinging device %d', handle, devnumber)
 
@@ -514,7 +514,7 @@ def ping(handle, devnumber):
                 if n:
                     notifications_hook(n)
                 # elif _log.isEnabledFor(_DEBUG):
-                # 	_log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
+                #     _log.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
         delta = _timestamp() - request_started
 

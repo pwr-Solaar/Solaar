@@ -55,7 +55,7 @@ def _suspend_or_resume(suspend):
 
 def watch(on_resume_callback=None, on_suspend_callback=None):
     """Register callback for suspend/resume events.
-	They are called only if the system DBus is running, and the UPower daemon is available."""
+    They are called only if the system DBus is running, and the UPower daemon is available."""
     global _resume_callback, _suspend_callback
     _suspend_callback = on_suspend_callback
     _resume_callback = on_resume_callback
@@ -95,7 +95,7 @@ try:
         _log.info(
             'connected to system dbus, watching for suspend/resume events')
 
-except:
+except Exception:
     # Either:
     # - the dbus library is not available
     # - the system dbus is not running

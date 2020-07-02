@@ -84,7 +84,7 @@ def run(receivers, args, find_receiver, find_device):
         value = args.value
         try:
             value = bool(int(value))
-        except:
+        except Exception:
             if value.lower() in ('true', 'yes', 'on', 't', 'y'):
                 value = True
             elif value.lower() in ('false', 'no', 'off', 'f', 'n'):

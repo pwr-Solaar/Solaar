@@ -23,7 +23,6 @@ import math
 
 from copy import copy as _copy
 from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
 from logging import getLogger
 
 from .common import NamedInt as _NamedInt
@@ -47,7 +46,7 @@ KIND = _NamedInts(toggle=0x01,
 
 class Setting(object):
     """A setting descriptor.
-	Needs to be instantiated for each specific device."""
+    Needs to be instantiated for each specific device."""
     __slots__ = ('name', 'label', 'description', 'kind', 'device_kind',
                  'feature', '_rw', '_validator', '_device', '_value')
 
@@ -196,7 +195,7 @@ class Setting(object):
 
 class Settings(Setting):
     """A setting descriptor for multiple choices, being a map from keys to values.
-	Needs to be instantiated for each specific device."""
+    Needs to be instantiated for each specific device."""
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -220,7 +219,7 @@ class Settings(Setting):
 
         if self._device.online:
             reply_map = {}
-            for key, value in self._validator.choices.items():
+            for key in self._validator.choices:
                 reply = self._rw.read(self._device, key)
                 if reply:
                     # keys are ints, because that is what the device uses,
@@ -327,7 +326,7 @@ class Settings(Setting):
 
 class BitFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one bit each, being a map from options to booleans.
-	Needs to be instantiated for each specific device."""
+    Needs to be instantiated for each specific device."""
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -666,7 +665,7 @@ class BitFieldValidator(object):
         r = _bytes2int(reply_bytes[:self.byte_count])
         value = {str(int(k)): False for k in self.options}
         m = 1
-        for i in range(8 * self.byte_count):
+        for _ in range(8 * self.byte_count):
             if m in self.options:
                 value[str(int(m))] = bool(r & m)
             m <<= 1
@@ -686,9 +685,9 @@ class ChoicesValidator(object):
 
     kind = KIND.choice
     """Translates between NamedInts and a byte sequence.
-	:param choices: a list of NamedInts
-	:param bytes_count: the size of the derived byte sequence. If None, it
-	will be calculated from the choices."""
+    :param choices: a list of NamedInts
+    :param bytes_count: the size of the derived byte sequence. If None, it
+    will be calculated from the choices."""
     def __init__(self, choices, bytes_count=None):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
@@ -790,10 +789,10 @@ class RangeValidator(object):
 
     kind = KIND.range
     """Translates between integers and a byte sequence.
-	:param min_value: minimum accepted value (inclusive)
-	:param max_value: maximum accepted value (inclusive)
-	:param bytes_count: the size of the derived byte sequence. If None, it
-	will be calculated from the range."""
+    :param min_value: minimum accepted value (inclusive)
+    :param max_value: maximum accepted value (inclusive)
+    :param bytes_count: the size of the derived byte sequence. If None, it
+    will be calculated from the range."""
     def __init__(self, min_value, max_value, bytes_count=None):
         assert max_value > min_value
         self.min_value = min_value

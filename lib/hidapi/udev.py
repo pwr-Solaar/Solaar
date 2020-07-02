@@ -63,19 +63,19 @@ del namedtuple
 
 def init():
     """This function is a no-op, and exists only to match the native hidapi
-	implementation.
+    implementation.
 
-	:returns: ``True``.
-	"""
+    :returns: ``True``.
+    """
     return True
 
 
 def exit():
     """This function is a no-op, and exists only to match the native hidapi
-	implementation.
+    implementation.
 
-	:returns: ``True``.
-	"""
+    :returns: ``True``.
+    """
     return True
 
 
@@ -157,12 +157,12 @@ def monitor_glib(callback, *device_filters):
 
     # already existing devices
     # for device in c.list_devices(subsystem='hidraw'):
-    # 	# print (device, dict(device), dict(device.attributes))
-    # 	for filter in device_filters:
-    # 		d_info = _match('add', device, *filter)
-    # 		if d_info:
-    # 			GLib.idle_add(callback, 'add', d_info)
-    # 			break
+    #     # print (device, dict(device), dict(device.attributes))
+    #     for filter in device_filters:
+    #         d_info = _match('add', device, *filter)
+    #         if d_info:
+    #             GLib.idle_add(callback, 'add', d_info)
+    #             break
 
     m = _Monitor.from_netlink(c)
     m.filter_by(subsystem='hidraw')
@@ -195,7 +195,7 @@ def monitor_glib(callback, *device_filters):
             GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN,
                               _process_udev_event, callback, device_filters)
             # print ("did io_add_watch with priority")
-        except:
+        except Exception:
             GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback,
                               device_filters)
             # print ("did io_add_watch")
@@ -206,11 +206,11 @@ def monitor_glib(callback, *device_filters):
 def enumerate(usb_id):
     """Enumerate the HID Devices.
 
-	List all the HID devices attached to the system, optionally filtering by
-	vendor_id, product_id, and/or interface_number.
+    List all the HID devices attached to the system, optionally filtering by
+    vendor_id, product_id, and/or interface_number.
 
-	:returns: a list of matching ``DeviceInfo`` tuples.
-	"""
+    :returns: a list of matching ``DeviceInfo`` tuples.
+    """
 
     for dev in _Context().list_devices(subsystem='hidraw'):
         dev_info = _match('add', dev, usb_id)
@@ -221,10 +221,10 @@ def enumerate(usb_id):
 def open(vendor_id, product_id, serial=None):
     """Open a HID device by its Vendor ID, Product ID and optional serial number.
 
-	If no serial is provided, the first device with the specified IDs is opened.
+    If no serial is provided, the first device with the specified IDs is opened.
 
-	:returns: an opaque device handle, or ``None``.
-	"""
+    :returns: an opaque device handle, or ``None``.
+    """
     for device in enumerate(vendor_id, product_id):
         if serial is None or serial == device.serial:
             return open_path(device.path)
@@ -233,11 +233,11 @@ def open(vendor_id, product_id, serial=None):
 def open_path(device_path):
     """Open a HID device by its path name.
 
-	:param device_path: the path of a ``DeviceInfo`` tuple returned by
-	enumerate().
+    :param device_path: the path of a ``DeviceInfo`` tuple returned by
+    enumerate().
 
-	:returns: an opaque device handle, or ``None``.
-	"""
+    :returns: an opaque device handle, or ``None``.
+    """
     assert device_path
     assert device_path.startswith('/dev/hidraw')
     return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
@@ -246,8 +246,8 @@ def open_path(device_path):
 def close(device_handle):
     """Close a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	"""
+    :param device_handle: a device handle returned by open() or open_path().
+    """
     assert device_handle
     _os.close(device_handle)
 
@@ -255,24 +255,24 @@ def close(device_handle):
 def write(device_handle, data):
     """Write an Output report to a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	:param data: the data bytes to send including the report number as the
-	first byte.
+    :param device_handle: a device handle returned by open() or open_path().
+    :param data: the data bytes to send including the report number as the
+    first byte.
 
-	The first byte of data[] must contain the Report ID. For
-	devices which only support a single report, this must be set
-	to 0x0. The remaining bytes contain the report data. Since
-	the Report ID is mandatory, calls to hid_write() will always
-	contain one more byte than the report contains. For example,
-	if a hid report is 16 bytes long, 17 bytes must be passed to
-	hid_write(), the Report ID (or 0x0, for devices with a
-	single report), followed by the report data (16 bytes). In
-	this example, the length passed in would be 17.
+    The first byte of data[] must contain the Report ID. For
+    devices which only support a single report, this must be set
+    to 0x0. The remaining bytes contain the report data. Since
+    the Report ID is mandatory, calls to hid_write() will always
+    contain one more byte than the report contains. For example,
+    if a hid report is 16 bytes long, 17 bytes must be passed to
+    hid_write(), the Report ID (or 0x0, for devices with a
+    single report), followed by the report data (16 bytes). In
+    this example, the length passed in would be 17.
 
-	write() will send the data on the first OUT endpoint, if
-	one exists. If it does not, it will send the data through
-	the Control Endpoint (Endpoint 0).
-	"""
+    write() will send the data on the first OUT endpoint, if
+    one exists. If it does not, it will send the data through
+    the Control Endpoint (Endpoint 0).
+    """
     assert device_handle
     assert data
     assert isinstance(data, bytes), (repr(data), type(data))
@@ -296,19 +296,19 @@ def write(device_handle, data):
 def read(device_handle, bytes_count, timeout_ms=-1):
     """Read an Input report from a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	:param bytes_count: maximum number of bytes to read.
-	:param timeout_ms: can be -1 (default) to wait for data indefinitely, 0 to
-	read whatever is in the device's input buffer, or a positive integer to
-	wait that many milliseconds.
+    :param device_handle: a device handle returned by open() or open_path().
+    :param bytes_count: maximum number of bytes to read.
+    :param timeout_ms: can be -1 (default) to wait for data indefinitely, 0 to
+    read whatever is in the device's input buffer, or a positive integer to
+    wait that many milliseconds.
 
-	Input reports are returned to the host through the INTERRUPT IN endpoint.
-	The first byte will contain the Report number if the device uses numbered
-	reports.
+    Input reports are returned to the host through the INTERRUPT IN endpoint.
+    The first byte will contain the Report number if the device uses numbered
+    reports.
 
-	:returns: the data packet read, an empty bytes string if a timeout was
-	reached, or None if there was an error while reading.
-	"""
+    :returns: the data packet read, an empty bytes string if a timeout was
+    reached, or None if there was an error while reading.
+    """
     assert device_handle
     timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
     rlist, wlist, xlist = _select([device_handle], [], [device_handle],
@@ -339,24 +339,24 @@ _DEVICE_STRINGS = {
 def get_manufacturer(device_handle):
     """Get the Manufacturer String from a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	"""
+    :param device_handle: a device handle returned by open() or open_path().
+    """
     return get_indexed_string(device_handle, 0)
 
 
 def get_product(device_handle):
     """Get the Product String from a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	"""
+    :param device_handle: a device handle returned by open() or open_path().
+    """
     return get_indexed_string(device_handle, 1)
 
 
 def get_serial(device_handle):
     """Get the serial number from a HID device.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	"""
+    :param device_handle: a device handle returned by open() or open_path().
+    """
     serial = get_indexed_string(device_handle, 2)
     if serial is not None:
         return ''.join(hex(ord(c)) for c in serial)
@@ -365,13 +365,13 @@ def get_serial(device_handle):
 def get_indexed_string(device_handle, index):
     """Get a string from a HID device, based on its string index.
 
-	Note: currently not working in the ``hidraw`` native implementation.
+    Note: currently not working in the ``hidraw`` native implementation.
 
-	:param device_handle: a device handle returned by open() or open_path().
-	:param index: the index of the string to get.
-	:returns: the value corresponding to index, or None if no value found
-	:rtype: bytes or NoneType
-	"""
+    :param device_handle: a device handle returned by open() or open_path().
+    :param index: the index of the string to get.
+    :returns: the value corresponding to index, or None if no value found
+    :rtype: bytes or NoneType
+    """
     try:
         key = _DEVICE_STRINGS[index]
     except KeyError:

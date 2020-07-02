@@ -75,7 +75,7 @@ def _write_async_key_value(setting, key, value, sbox):
 def _create_toggle_control(setting):
     def _switch_notify(switch, _ignore, s):
         if switch.get_sensitive():
-            _write_async(s, switch.get_active() == True, switch.get_parent())
+            _write_async(s, switch.get_active() is True, switch.get_parent())
 
     c = Gtk.Switch()
     c.connect('notify::active', _switch_notify, setting)
@@ -312,8 +312,8 @@ def update(device, is_online=None):
 
 def clean(device):
     """Remove the controls for a given device serial.
-	Needed after the device has been unpaired.
-	"""
+    Needed after the device has been unpaired.
+    """
     assert _box is not None
     device_id = (device.receiver.path, device.number)
     for k in list(_items.keys()):

@@ -47,14 +47,12 @@ def _error_dialog(reason, object):
 
     if reason == 'permissions':
         title = _('Permissions error')
-        text = _('Found a Logitech Receiver (%s), but did not have permission to open it.') % object + \
-          '\n\n' + \
-          _("If you've just installed Solaar, try removing the receiver and plugging it back in.")
+        text = (_('Found a Logitech Receiver (%s), but did not have permission to open it.') % object + '\n\n' +
+                _("If you've just installed Solaar, try removing the receiver and plugging it back in."))
     elif reason == 'unpair':
         title = _('Unpairing failed')
-        text = _('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) + \
-          '\n\n' + \
-          _('The receiver returned an error, with no further details.')
+        text = (_('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) +
+                '\n\n' + _('The receiver returned an error, with no further details.'))
     else:
         raise Exception("ui.error_dialog: don't know how to handle (%s, %s)",
                         reason, object)

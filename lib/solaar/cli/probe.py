@@ -19,12 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from time import time as _timestamp
-
-from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
-from logitech_receiver import notifications as _notifications
-from logitech_receiver import status as _status
 from logitech_receiver.common import strhex as _strhex
 from solaar.cli.show import _print_receiver
 

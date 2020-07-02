@@ -194,7 +194,8 @@ CONTROL = _NamedInts(
     Fn_Left_Click=0x00B7,  # from K400 Plus
     # https://docs.google.com/document/u/0/d/1YvXICgSe8BcBAuMr4Xu_TutvAxaa-RnGfyPFWBWzhkc/export?format=docx
     # Extract to csv.  Eliminate extra linefeeds and spaces.
-    # awk -F, '/0x/{gsub(" \\+ ","_",$2); gsub("/","__",$2); gsub(" -","_Down",$2); gsub(" \\+","_Up",$2); gsub("[()\"-]","",$2); gsub(" ","_",$2); printf("\t%s=0x%04X,\n", $2, $1)}' < controls.cvs
+    # awk -F, '/0x/{gsub(" \\+ ","_",$2); gsub("/","__",$2); gsub(" -","_Down",$2);
+    # gsub(" \\+","_Up",$2); gsub("[()\"-]","",$2); gsub(" ","_",$2); printf("\t%s=0x%04X,\n", $2, $1)}' < controls.cvs
     Second_Left_Click=0x00B8,  # Second_LClick / on K400 Plus
     Fn_Second_Left_Click=0x00B9,  # Fn_Second_LClick
     MultiPlatform_App_Switch=0x00BA,
@@ -415,7 +416,8 @@ TASK = _NamedInts(
     ShowUI=0x0092,
     # https://docs.google.com/document/d/1Dpx_nWRQAZox_zpZ8SNc9nOkSDE9svjkghOCbzopabc/edit
     # Extract to csv.  Eliminate extra linefeeds and spaces. Turn / into __ and space into _
-    # awk -F, '/0x/{gsub(" \\+ ","_",$2);  gsub("_-","_Down",$2); gsub("_\\+","_Up",$2); gsub("[()\"-]","",$2); gsub(" ","_",$2); printf("\t%s=0x%04X,\n", $2, $1)}' < tasks.csv > tasks.py
+    # awk -F, '/0x/{gsub(" \\+ ","_",$2);  gsub("_-","_Down",$2); gsub("_\\+","_Up",$2);
+    # gsub("[()\"-]","",$2); gsub(" ","_",$2); printf("\t%s=0x%04X,\n", $2, $1)}' < tasks.csv > tasks.py
     Switch_Presentation__Switch_Screen=0x0093,  # on K400 Plus
     Minimize_Window=0x0094,
     Maximize_Window=0x0095,  # on K400 Plus

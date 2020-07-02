@@ -219,7 +219,7 @@ def icon_file(name, size=_LARGE_SIZE):
     if theme_icon:
         file_name = theme_icon.get_filename()
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("icon %s(%d) => %s", name, size, file_name)
+        #     _log.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
 
     _log.warn('icon %s(%d) not found in current theme', name, size)
