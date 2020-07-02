@@ -1,0 +1,21 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v3.1.0
+  hooks:
+  - id: check-ast
+  - id: check-builtin-literals
+  - id: check-merge-conflict
+  - id: check-yaml
+  - id: check-toml
+  - id: debug-statements
+  - id: double-quote-string-fixer
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+- repo: https://github.com/pre-commit/mirrors-yapf
+  rev: v0.30.0
+  hooks:
+  - id: yapf
+- repo: https://github.com/pre-commit/mirrors-isort
+  rev: v4.3.21
+  hooks:
+  - id: isort
