@@ -56,7 +56,7 @@ def _create_menu(quit_handler):
 
     # per-device menu entries will be generated as-needed
 
-    no_receiver = Gtk.MenuItem.new_with_label(_("No Logitech receiver found"))
+    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech receiver found'))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
@@ -65,7 +65,7 @@ def _create_menu(quit_handler):
     menu.append(about.create_menu_item())
     menu.append(
         make('application-exit',
-             _("Quit"),
+             _('Quit'),
              quit_handler,
              stock_id=Gtk.STOCK_QUIT).create_menu_item())
     del about, make
@@ -149,7 +149,7 @@ def _scroll(tray_icon, event, direction=None):
 
     _picked_device = candidate or _picked_device
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("scroll: picked %s", _picked_device)
+        _log.debug('scroll: picked %s', _picked_device)
     _update_tray_icon()
 
 
@@ -172,7 +172,7 @@ try:
         from gi.repository import AppIndicator3
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("using %sAppIndicator3" %
+        _log.debug('using %sAppIndicator3' %
                    ('Ayatana ' if ayatana_appindicator_found else ''))
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
@@ -238,7 +238,7 @@ try:
 except ImportError:
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("using StatusIcon")
+        _log.debug('using StatusIcon')
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
@@ -302,7 +302,7 @@ except ImportError:
 
 def _generate_tooltip_lines():
     if not _devices_info:
-        yield '<b>%s</b>: ' % NAME + _("no receiver")
+        yield '<b>%s</b>: ' % NAME + _('no receiver')
         return
 
     yield from _generate_description_lines()
@@ -310,7 +310,7 @@ def _generate_tooltip_lines():
 
 def _generate_description_lines():
     if not _devices_info:
-        yield _("no receiver")
+        yield _('no receiver')
         return
 
     for _ignore, number, name, status in _devices_info:
@@ -323,13 +323,13 @@ def _generate_description_lines():
             if status:
                 yield '\t%s' % p
             else:
-                yield '\t%s <small>(' % p + _("offline") + ')</small>'
+                yield '\t%s <small>(' % p + _('offline') + ')</small>'
         else:
             if status:
                 yield '<b>%s</b> <small>(' % name + _(
-                    "no status") + ')</small>'
+                    'no status') + ')</small>'
             else:
-                yield '<b>%s</b> <small>(' % name + _("offline") + ')</small>'
+                yield '<b>%s</b> <small>(' % name + _('offline') + ')</small>'
         yield ''
 
 
@@ -350,7 +350,7 @@ def _pick_device_with_lowest_battery():
             picked_level = level or 0
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("picked device with lowest battery: %s", picked)
+        _log.debug('picked device with lowest battery: %s', picked)
 
     return picked
 

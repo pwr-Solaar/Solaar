@@ -106,8 +106,8 @@ class ReceiverStatus(dict):
 
     def __str__(self):
         count = len(self._receiver)
-        return (_("No paired devices.") if count == 0 else ngettext(
-            "%(count)s paired device.", "%(count)s paired devices.", count) % {
+        return (_('No paired devices.') if count == 0 else ngettext(
+            '%(count)s paired device.', '%(count)s paired devices.', count) % {
                 'count': count
             })
 
@@ -161,11 +161,11 @@ class DeviceStatus(dict):
             battery_level = self.get(KEYS.BATTERY_LEVEL)
             if battery_level is not None:
                 if isinstance(battery_level, _NamedInt):
-                    yield _("Battery: %(level)s") % {
+                    yield _('Battery: %(level)s') % {
                         'level': _(str(battery_level))
                     }
                 else:
-                    yield _("Battery: %(percent)d%%") % {
+                    yield _('Battery: %(percent)d%%') % {
                         'percent': battery_level
                     }
 
@@ -178,7 +178,7 @@ class DeviceStatus(dict):
             light_level = self.get(KEYS.LIGHT_LEVEL)
             if light_level is not None:
                 if comma: yield ', '
-                yield _("Lighting: %(level)s lux") % {'level': light_level}
+                yield _('Lighting: %(level)s lux') % {'level': light_level}
 
         return ''.join(i for i in _items())
 
@@ -198,7 +198,7 @@ class DeviceStatus(dict):
                          voltage=None,
                          timestamp=None):
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("%s: battery %s, %s", self._device, level, status)
+            _log.debug('%s: battery %s, %s', self._device, level, status)
 
         if level is None:
             # Some notifications may come with no battery level info, just
@@ -239,19 +239,19 @@ class DeviceStatus(dict):
                                             level > _BATTERY_ATTENTION_LEVEL):
             self[KEYS.ERROR] = None
         else:
-            _log.warn("%s: battery %d%%, ALERT %s", self._device, level,
+            _log.warn('%s: battery %d%%, ALERT %s', self._device, level,
                       status)
             if self.get(KEYS.ERROR) != status:
                 self[KEYS.ERROR] = status
                 # only show the notification once
                 alert = ALERT.NOTIFICATION | ALERT.ATTENTION
             if isinstance(level, _NamedInt):
-                reason = _("Battery: %(level)s (%(status)s)") % {
+                reason = _('Battery: %(level)s (%(status)s)') % {
                     'level': _(level),
                     'status': _(status)
                 }
             else:
-                reason = _("Battery: %(percent)d%% (%(status)s)") % {
+                reason = _('Battery: %(percent)d%% (%(status)s)') % {
                     'percent': level,
                     'status': status.name
                 }
@@ -336,7 +336,7 @@ class DeviceStatus(dict):
                     # Devices lose configuration when they are turned off,
                     # make sure they're up-to-date.
                     if _log.isEnabledFor(_DEBUG):
-                        _log.debug("%s pushing device settings %s", d,
+                        _log.debug('%s pushing device settings %s', d,
                                    d.settings)
                     for s in d.settings:
                         s.apply()

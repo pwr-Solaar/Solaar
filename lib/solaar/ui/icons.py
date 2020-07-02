@@ -54,7 +54,7 @@ def _look_for_application_icons():
 
     import sys as _sys
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("sys.path[0] = %s", _sys.path[0])
+        _log.debug('sys.path[0] = %s', _sys.path[0])
     prefix_share = _path.normpath(
         _path.join(_path.realpath(_sys.path[0]), '..'))
     src_share = _path.normpath(
@@ -75,7 +75,7 @@ def _look_for_application_icons():
     for location in share_solaar:
         location = _path.join(location, 'icons')
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("looking for icons in %s", location)
+            _log.debug('looking for icons in %s', location)
 
         if _path.exists(_path.join(location, TRAY_ATTENTION + '.svg')):
             yield location
@@ -97,7 +97,7 @@ def _init_icon_paths():
     for p in _look_for_application_icons():
         _default_theme.prepend_search_path(p)
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("icon theme paths: %s", _default_theme.get_search_path())
+        _log.debug('icon theme paths: %s', _default_theme.get_search_path())
 
     if gtk.prefer_symbolic_battery_icons:
         if _default_theme.has_icon('battery-good-symbolic'):
@@ -105,9 +105,9 @@ def _init_icon_paths():
             _use_symbolic_icons = True
             return
         else:
-            _log.warning("failed to detect symbolic icons")
+            _log.warning('failed to detect symbolic icons')
     if not _default_theme.has_icon('battery-good'):
-        _log.warning("failed to detect icons")
+        _log.warning('failed to detect icons')
 
 
 #
@@ -118,10 +118,10 @@ def _init_icon_paths():
 def battery(level=None, charging=False):
     icon_name = _battery_icon_name(level, charging)
     if not _default_theme.has_icon(icon_name):
-        _log.warning("icon %s not found in current theme", icon_name)
+        _log.warning('icon %s not found in current theme', icon_name)
         return TRAY_OKAY  # use Solaar icon if battery icon not available
     elif _log.isEnabledFor(_DEBUG):
-        _log.debug("battery icon for %s:%s = %s", level, charging, icon_name)
+        _log.debug('battery icon for %s:%s = %s', level, charging, icon_name)
     return icon_name
 
 
@@ -222,4 +222,4 @@ def icon_file(name, size=_LARGE_SIZE):
         # 	_log.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
 
-    _log.warn("icon %s(%d) not found in current theme", name, size)
+    _log.warn('icon %s(%d) not found in current theme', name, size)

@@ -7,7 +7,7 @@
   * Update French translation
   * Update installation documentation
 
-1.0.2rc2: 
+1.0.2rc2:
   * Remove packaging directory tree as it is not maintained
   * Pip installs udev rule and solaar autostart when doing install without --user flag
   * Use Solaar icon instead of a missing battery icon

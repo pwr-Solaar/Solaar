@@ -47,14 +47,14 @@ def _load():
             with open(_file_path, 'r') as config_file:
                 loaded_configuration = _json_load(config_file)
         except:
-            _log.error("failed to load from %s", _file_path)
+            _log.error('failed to load from %s', _file_path)
 
         # loaded_configuration.update(_configuration)
         _configuration.clear()
         _configuration.update(loaded_configuration)
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("load => %s", _configuration)
+        _log.debug('load => %s', _configuration)
 
     _cleanup(_configuration)
     _configuration[_KEY_VERSION] = __version__
@@ -71,7 +71,7 @@ def save():
         try:
             _os.makedirs(dirname)
         except:
-            _log.error("failed to create %s", dirname)
+            _log.error('failed to create %s', dirname)
             return False
 
     _cleanup(_configuration)
@@ -85,10 +85,10 @@ def save():
                        sort_keys=True)
 
         if _log.isEnabledFor(_INFO):
-            _log.info("saved %s to %s", _configuration, _file_path)
+            _log.info('saved %s to %s', _configuration, _file_path)
         return True
     except:
-        _log.error("failed to save to %s", _file_path)
+        _log.error('failed to save to %s', _file_path)
 
 
 def _cleanup(d):

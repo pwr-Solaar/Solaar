@@ -113,4 +113,3 @@ Solaar also has a command line interface that can do most of what can be
 done using the Solaar main window.  For more information on the Solaar
 command line interface, run `solaar --help` to see the Solaar commands and
 then `solaar <command> --help` to see the arguments to any of the commands.
-

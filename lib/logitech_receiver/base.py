@@ -176,13 +176,13 @@ def write(handle, devnumber, data):
     else:
         wdata = _pack('!BB5s', 0x10, devnumber, data)
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[:1]),
+        _log.debug('(%s) <= w[%02X %02X %s %s]', handle, ord(wdata[:1]),
                    devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
     try:
         _hid.write(int(handle), wdata)
     except Exception as reason:
-        _log.error("write failed, assuming handle %r no longer available",
+        _log.error('write failed, assuming handle %r no longer available',
                    handle)
         close(handle)
         raise NoReceiver(reason=reason)
@@ -214,7 +214,7 @@ def check_message(data):
         if report_lengths.get(report_id) == len(data):
             return True
         else:
-            _log.warn("unexpected message size: report_id %02X message %s" %
+            _log.warn('unexpected message size: report_id %02X message %s' %
                       (report_id, _strhex(data)))
     return False
 
@@ -233,7 +233,7 @@ def _read(handle, timeout):
         timeout = int(timeout * 1000)
         data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
     except Exception as reason:
-        _log.error("read failed, assuming handle %r no longer available",
+        _log.error('read failed, assuming handle %r no longer available',
                    handle)
         close(handle)
         raise NoReceiver(reason=reason)
@@ -243,7 +243,7 @@ def _read(handle, timeout):
         devnumber = ord(data[1:2])
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("(%s) => r[%02X %02X %s %s]", handle, report_id,
+            _log.debug('(%s) => r[%02X %02X %s %s]', handle, report_id,
                        devnumber, _strhex(data[2:4]), _strhex(data[4:]))
 
         return report_id, devnumber, data[2:]
@@ -265,7 +265,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             # read whatever is already in the buffer, if any
             data = _hid.read(ihandle, _MAX_READ_SIZE, 0)
         except Exception as reason:
-            _log.error("read failed, assuming receiver %s no longer available",
+            _log.error('read failed, assuming receiver %s no longer available',
                        handle)
             close(handle)
             raise NoReceiver(reason=reason)
@@ -389,7 +389,7 @@ def request(handle, devnumber, request_id, *params):
 
                     if _log.isEnabledFor(_DEBUG):
                         _log.debug(
-                            "(%s) device 0x%02X error on request {%04X}: %d = %s",
+                            '(%s) device 0x%02X error on request {%04X}: %d = %s',
                             handle, devnumber, request_id, error,
                             _hidpp10.ERROR[error])
                     return
@@ -399,7 +399,7 @@ def request(handle, devnumber, request_id, *params):
                     # a HID++ 2.0 feature call returned with an error
                     error = ord(reply_data[3:4])
                     _log.error(
-                        "(%s) device %d error on feature request {%04X}: %d = %s",
+                        '(%s) device %d error on feature request {%04X}: %d = %s',
                         handle, devnumber, request_id, error,
                         _hidpp20.ERROR[error])
                     raise _hidpp20.FeatureCallError(number=devnumber,
@@ -445,7 +445,7 @@ def request(handle, devnumber, request_id, *params):
         # if _log.isEnabledFor(_DEBUG):
         # 	_log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
-    _log.warn("timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]",
+    _log.warn('timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]',
               delta, timeout, devnumber, request_id, _strhex(params))
     # raise DeviceUnreachable(number=devnumber, request=request_id)
 
@@ -456,7 +456,7 @@ def ping(handle, devnumber):
 	:returns: The HID protocol supported by the device, as a floating point number, if the device is active.
 	"""
     if _log.isEnabledFor(_DEBUG):
-        _log.debug("(%s) pinging device %d", handle, devnumber)
+        _log.debug('(%s) pinging device %d', handle, devnumber)
 
     # import inspect as _inspect
     # print ('\n  '.join(str(s) for s in _inspect.stack()))
@@ -504,7 +504,7 @@ def ping(handle, devnumber):
 
                     if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
                         _log.error(
-                            "(%s) device %d error on ping request: unknown device",
+                            '(%s) device %d error on ping request: unknown device',
                             handle, devnumber)
                         raise NoSuchDevice(number=devnumber,
                                            request=request_id)
@@ -518,6 +518,6 @@ def ping(handle, devnumber):
 
         delta = _timestamp() - request_started
 
-    _log.warn("(%s) timeout (%0.2f/%0.2f) on device %d ping", handle, delta,
+    _log.warn('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta,
               _PING_TIMEOUT, devnumber)
     # raise DeviceUnreachable(number=devnumber, request=request_id)

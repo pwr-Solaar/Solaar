@@ -56,7 +56,7 @@ class TaskRunner(_Thread):
         self.alive = True
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("started")
+            _log.debug('started')
 
         while self.alive:
             task = self.queue.get()
@@ -66,7 +66,7 @@ class TaskRunner(_Thread):
                 try:
                     function(*args, **kwargs)
                 except:
-                    _log.exception("calling %s", function)
+                    _log.exception('calling %s', function)
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug("stopped")
+            _log.debug('stopped')

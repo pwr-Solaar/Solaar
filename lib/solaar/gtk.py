@@ -39,7 +39,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
         return importlib.import_module(module)
     except (ImportError, ValueError):
         import sys
-        sys.exit("%s: missing required system package %s" % (NAME, os_package))
+        sys.exit('%s: missing required system package %s' % (NAME, os_package))
 
 
 prefer_symbolic_battery_icons = False
@@ -115,7 +115,7 @@ def _parse_arguments():
 
     if not args.action:
         if logging.root.isEnabledFor(logging.INFO):
-            logging.info("language %s (%s), translations path %s",
+            logging.info('language %s (%s), translations path %s',
                          _i18n.language, _i18n.encoding, _i18n.path)
 
     return args

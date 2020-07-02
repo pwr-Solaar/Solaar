@@ -18,18 +18,18 @@ Unifying Receiver
           Firmware: RQK 35.00.B0017
      The power switch is located on the top case.
      Supports 12 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: BATTERY STATUS         {1000}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY STATUS         {1000}
          5: unknown:1820           {1820}   hidden
-         6: REPROG CONTROLS        {1B00}   
-         7: WIRELESS DEVICE STATUS {1D4B}   
+         6: REPROG CONTROLS        {1B00}
+         7: WIRELESS DEVICE STATUS {1D4B}
          8: unknown:1DF0           {1DF0}   hidden
          9: unknown:1DF3           {1DF3}   hidden
-        10: ENCRYPTION             {4100}   
-        11: KEYBOARD LAYOUT        {4520}   
+        10: ENCRYPTION             {4100}
+        11: KEYBOARD LAYOUT        {4520}
      Has 8 reprogrammable keys:
          0: Play/Pause                 => Play/Pause                    nonstandard
          1: Mute                       => Mute                          nonstandard
@@ -40,4 +40,3 @@ Unifying Receiver
          6: SLEEP                      => Sleep                         nonstandard, reprogrammable
          7: Calculator                 => Calculator                    nonstandard, reprogrammable
      Battery: 90%, discharging.
-

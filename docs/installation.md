@@ -22,7 +22,7 @@ and its daemon running.  If you have a recent Linux distribution, you are
 most likely good to go.
 
 Solaar requires Python 3.2+
-and the `python3-pyudev` package. 
+and the `python3-pyudev` package.
 To run the GUI, solaar also requires Gtk3, and its GObject
 introspection bindings.
 The Debian/Ubuntu packages that need to be installed are
@@ -47,7 +47,7 @@ Solaar needs to write to the receiver's HID device.
 To be able to do this without running as root requires udev rule
 that gives seated users write access to the HID devices for Logitech receivers.
 
-You can install this rule by copying, as root, 
+You can install this rule by copying, as root,
 `rules.d/42-logitech-unify-permissions.rules` from Solaar to
 `/etc/udev/rules.d`.
 The udev daemon will automatically pick up this file using inotify.
@@ -100,7 +100,7 @@ If you install Solaar yourself you may need to create or modify this file.
 
 ## Using PyPI
 
-As an alternative to downloading and installing you can install the most recent release 
-(but not the current github version) of Solaar from PyPI.  
+As an alternative to downloading and installing you can install the most recent release
+(but not the current github version) of Solaar from PyPI.
 Just run `pip install --user solaar` or `sudo pip install solaar`.
 The `--user` flag will not install the Solaar udev rule or the Solaar autostart file.

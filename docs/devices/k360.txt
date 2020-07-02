@@ -58,19 +58,19 @@ Total number of HID++ 2.0 features: 12
      Firmware   : RQK 36.00.B0007
    The power switch is located on the top case
    Supports 13 HID++ 2.0 features:
-       0: ROOT                   {0000}   
-       1: FEATURE SET            {0001}   
-       2: DEVICE FW VERSION      {0003}   
-       3: DEVICE NAME            {0005}   
-       4: BATTERY STATUS         {1000}   
+       0: ROOT                   {0000}
+       1: FEATURE SET            {0001}
+       2: DEVICE FW VERSION      {0003}
+       3: DEVICE NAME            {0005}
+       4: BATTERY STATUS         {1000}
        5: unknown:1820           {1820}   hidden
-       6: REPROG CONTROLS        {1B00}   
-       7: WIRELESS DEVICE STATUS {1D4B}   
+       6: REPROG CONTROLS        {1B00}
+       7: WIRELESS DEVICE STATUS {1D4B}
        8: unknown:1DF0           {1DF0}   hidden
        9: unknown:1DF3           {1DF3}   hidden
-      10: FN INVERSION           {40A0}   
-      11: ENCRYPTION             {4100}   
-      12: KEYBOARD LAYOUT        {4520}   
+      10: FN INVERSION           {40A0}
+      11: ENCRYPTION             {4100}
+      12: KEYBOARD LAYOUT        {4520}
    Has 18 reprogrammable keys:
        0: MY HOME                    => HomePage                      FN sensitive, is FN, reprogrammable
        1: Mail                       => Mail                          FN sensitive, is FN, reprogrammable

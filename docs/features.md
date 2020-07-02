@@ -121,7 +121,7 @@ lib/logitech_receiver/hidpp20.py
 
 In most cases it should suffice to only implement the settable feature
 interface for each setting in the feature.  That will add one or more
-widgets in the Solaar main window to show and change the setting, 
+widgets in the Solaar main window to show and change the setting,
 will permit storing and restoring changed settings, and
 will output the feature settings in `solaar show`.
 
@@ -183,11 +183,11 @@ the setting name (from the common strings),
 the feature ID (if any),
 the feature implementation (if any),
 the register implementation (if any).
-and 
+and
 the identifier for the setting implementation if different from the setting name.
 The identifier is used in descriptors.py to say that a device has the register or feature implementation.
 The identifier can be the same as the setting name if there is only one implementation for the setting.
-This table is used to generate the data structures for describing devices in descriptors.py 
+This table is used to generate the data structures for describing devices in descriptors.py
 and is also used to auto-discover feature implementations.
 ```
 _S( _POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed ),

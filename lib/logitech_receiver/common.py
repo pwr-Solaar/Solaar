@@ -107,7 +107,7 @@ class NamedInts(object):
     def __init__(self, **kwargs):
         def _readable_name(n):
             if not is_string(n):
-                raise TypeError("expected (unicode) string, got " +
+                raise TypeError('expected (unicode) string, got ' +
                                 str(type(n)))
             return n.replace('__', '/').replace('_', ' ')
 

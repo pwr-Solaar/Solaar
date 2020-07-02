@@ -184,11 +184,11 @@ def _create_sbox(s):
     sbox.pack_start(Gtk.Label(s.label), False, False, 0)
 
     spinner = Gtk.Spinner()
-    spinner.set_tooltip_text(_("Working") + '...')
+    spinner.set_tooltip_text(_('Working') + '...')
 
     failed = Gtk.Image.new_from_icon_name('dialog-warning',
                                           Gtk.IconSize.SMALL_TOOLBAR)
-    failed.set_tooltip_text(_("Read/write operation failed."))
+    failed.set_tooltip_text(_('Read/write operation failed.'))
 
     if s.kind == _SETTING_KIND.toggle:
         control = _create_toggle_control(s)
@@ -220,7 +220,7 @@ def _create_sbox(s):
         control = _create_map_choice_control(X(s, {'choices': choices}))
         sbox.pack_end(control, True, True, 0)
     else:
-        raise Exception("NotImplemented")
+        raise Exception('NotImplemented')
 
     control.set_sensitive(False)  # the first read will enable it
     sbox.pack_end(spinner, False, False, 0)
@@ -259,7 +259,7 @@ def _update_setting_item(sbox, value, is_online=True):
         if value.get(kbox.get_active_id()):
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     else:
-        raise Exception("NotImplemented")
+        raise Exception('NotImplemented')
     control.set_sensitive(True)
 
 

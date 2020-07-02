@@ -113,12 +113,12 @@ def _receivers(dev_path=None):
         try:
             r = Receiver.open(dev_info)
             if _log.isEnabledFor(_DEBUG):
-                _log.debug("[%s] => %s", dev_info.path, r)
+                _log.debug('[%s] => %s', dev_info.path, r)
             if r:
                 yield r
         except Exception as e:
             _log.exception('opening ' + str(dev_info))
-            _sys.exit("%s: error: %s" % (NAME, str(e)))
+            _sys.exit('%s: error: %s' % (NAME, str(e)))
 
 
 def _find_receiver(receivers, name):

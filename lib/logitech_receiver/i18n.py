@@ -35,30 +35,30 @@ except:
 
 _DUMMY = (
     # approximative battery levels
-    _("empty"),
-    _("critical"),
-    _("low"),
-    _("good"),
-    _("full"),
+    _('empty'),
+    _('critical'),
+    _('low'),
+    _('good'),
+    _('full'),
 
     # battery charging statuses
-    _("discharging"),
-    _("recharging"),
-    _("almost full"),
-    _("charged"),
-    _("slow recharge"),
-    _("invalid battery"),
-    _("thermal error"),
+    _('discharging'),
+    _('recharging'),
+    _('almost full'),
+    _('charged'),
+    _('slow recharge'),
+    _('invalid battery'),
+    _('thermal error'),
 
     # pairing errors
-    _("device timeout"),
-    _("device not supported"),
-    _("too many devices"),
-    _("sequence timeout"),
+    _('device timeout'),
+    _('device not supported'),
+    _('too many devices'),
+    _('sequence timeout'),
 
     # firmware kinds
-    _("Firmware"),
-    _("Bootloader"),
-    _("Hardware"),
-    _("Other"),
+    _('Firmware'),
+    _('Bootloader'),
+    _('Hardware'),
+    _('Other'),
 )

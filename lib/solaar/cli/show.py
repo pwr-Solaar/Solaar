@@ -124,79 +124,79 @@ def _print_device(dev):
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
-                    print("            Multiplier: %s" % multi)
+                    print('            Multiplier: %s' % multi)
                     if has_invert:
-                        print("            Has invert")
+                        print('            Has invert')
                         if inv:
-                            print("              Inverse wheel motion")
+                            print('              Inverse wheel motion')
                         else:
-                            print("              Normal wheel motion")
+                            print('              Normal wheel motion')
                     if has_switch:
-                        print("            Has ratchet switch")
+                        print('            Has ratchet switch')
                         if ratchet:
-                            print("              Normal wheel mode")
+                            print('              Normal wheel mode')
                         else:
-                            print("              Free wheel mode")
+                            print('              Free wheel mode')
                     if res:
-                        print("            High resolution mode")
+                        print('            High resolution mode')
                     else:
-                        print("            Low resolution mode")
+                        print('            Low resolution mode')
                     if target:
-                        print("            HID++ notification")
+                        print('            HID++ notification')
                     else:
-                        print("            HID notification")
+                        print('            HID notification')
             elif feature == _hidpp20.FEATURE.MOUSE_POINTER:
                 mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
                 if mouse_pointer:
-                    print("            DPI: %s" % mouse_pointer['dpi'])
-                    print("            Acceleration: %s" %
+                    print('            DPI: %s' % mouse_pointer['dpi'])
+                    print('            Acceleration: %s' %
                           mouse_pointer['acceleration'])
                     if mouse_pointer['suggest_os_ballistics']:
-                        print("            Use OS ballistics")
+                        print('            Use OS ballistics')
                     else:
-                        print("            Override OS ballistics")
+                        print('            Override OS ballistics')
                     if mouse_pointer['suggest_vertical_orientation']:
-                        print("            Provide vertical tuning, trackball")
+                        print('            Provide vertical tuning, trackball')
                     else:
-                        print("            No vertical tuning, standard mice")
+                        print('            No vertical tuning, standard mice')
             if feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(
                     dev)
                 if vertical_scrolling_info:
-                    print("            Roller type: %s" %
+                    print('            Roller type: %s' %
                           vertical_scrolling_info['roller'])
-                    print("            Ratchet per turn: %s" %
+                    print('            Ratchet per turn: %s' %
                           vertical_scrolling_info['ratchet'])
-                    print("            Scroll lines: %s" %
+                    print('            Scroll lines: %s' %
                           vertical_scrolling_info['lines'])
             elif feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
                 scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(
                     dev)
                 if scrolling_mode:
-                    print("            Hi-res scrolling enabled")
+                    print('            Hi-res scrolling enabled')
                 else:
-                    print("            Hi-res scrolling disabled")
+                    print('            Hi-res scrolling disabled')
                 if scrolling_resolution:
-                    print("            Hi-res scrolling multiplier: %s" %
+                    print('            Hi-res scrolling multiplier: %s' %
                           scrolling_resolution)
             elif feature == _hidpp20.FEATURE.POINTER_SPEED:
                 pointer_speed = _hidpp20.get_pointer_speed_info(dev)
                 if pointer_speed:
-                    print("            Pointer Speed: %s" % pointer_speed)
+                    print('            Pointer Speed: %s' % pointer_speed)
             elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
                 wheel_status = _hidpp20.get_lowres_wheel_status(dev)
                 if wheel_status:
-                    print("            Wheel Reports: %s" % wheel_status)
+                    print('            Wheel Reports: %s' % wheel_status)
             elif feature == _hidpp20.FEATURE.NEW_FN_INVERSION:
                 inverted, default_inverted = _hidpp20.get_new_fn_inversion(dev)
-                print("            Fn-swap:",
-                      "enabled" if inverted else "disabled")
-                print("            Fn-swap default:",
-                      "enabled" if default_inverted else "disabled")
+                print('            Fn-swap:',
+                      'enabled' if inverted else 'disabled')
+                print('            Fn-swap default:',
+                      'enabled' if default_inverted else 'disabled')
             for setting in dev_settings:
                 if setting.feature == feature:
                     v = setting.read(False)
-                    print("            %s: %s" % (setting.label, v))
+                    print('            %s: %s' % (setting.label, v))
 
     if dev.online and dev.keys:
         print('     Has %d reprogrammable keys:' % len(dev.keys))

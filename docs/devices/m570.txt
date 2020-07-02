@@ -22,4 +22,3 @@ Unifying Receiver
      The power switch is located on the base.
      Notifications: battery status (0x100000).
      Battery: 100%, discharging.
-

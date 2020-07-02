@@ -16,22 +16,22 @@ Unifying Receiver
           Firmware: RQM 29.00.B0010
      The power switch is located on the base.
      Supports 16 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
          4: unknown:1850           {1850}   hidden
          5: unknown:1860           {1860}   hidden
-         6: BATTERY STATUS         {1000}   
-         7: WIRELESS DEVICE STATUS {1D4B}   
+         6: BATTERY STATUS         {1000}
+         7: WIRELESS DEVICE STATUS {1D4B}
          8: unknown:1DF3           {1DF3}   hidden
-         9: REPROG CONTROLS        {1B00}   
+         9: REPROG CONTROLS        {1B00}
         10: unknown:1DF0           {1DF0}   hidden
         11: unknown:1E00           {1E00}   hidden
         12: unknown:1E80           {1E80}   hidden
         13: unknown:1F03           {1F03}   hidden
-        14: VERTICAL SCROLLING     {2100}   
-        15: MOUSE POINTER          {2200}   
+        14: VERTICAL SCROLLING     {2100}
+        15: MOUSE POINTER          {2200}
      Has 3 reprogrammable keys:
          0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
          1: RIGHT CLICK                => RightClick                    mse, reprogrammable
@@ -47,20 +47,20 @@ Unifying Receiver
      Serial number: 5BB1D72E
           Firmware: RQK 37.00.B0011
      Supports 14 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: FEATURE INFO           {0002}   
-         3: DEVICE FW VERSION      {0003}   
-         4: DEVICE NAME            {0005}   
-         5: BATTERY STATUS         {1000}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+         4: DEVICE NAME            {0005}
+         5: BATTERY STATUS         {1000}
          6: unknown:1820           {1820}   hidden
-         7: REPROG CONTROLS        {1B00}   
-         8: REPROG CONTROLS V2     {1B01}   
-         9: WIRELESS DEVICE STATUS {1D4B}   
+         7: REPROG CONTROLS        {1B00}
+         8: REPROG CONTROLS V2     {1B01}
+         9: WIRELESS DEVICE STATUS {1D4B}
         10: unknown:1DF0           {1DF0}   hidden
         11: unknown:1DF3           {1DF3}   hidden
-        12: ENCRYPTION             {4100}   
-        13: KEYBOARD LAYOUT        {4520}   
+        12: ENCRYPTION             {4100}
+        13: KEYBOARD LAYOUT        {4520}
      Has 12 reprogrammable keys:
          0: FN F1                      => Do Nothing One                is FN, reprogrammable
          1: FN F2                      => Do Nothing One                is FN, reprogrammable
@@ -75,4 +75,3 @@ Unifying Receiver
         10: Volume Down                => Volume Down                   is FN
         11: Volume Up                  => Volume Up                     is FN
      Battery: 90%, discharging.
-

@@ -314,48 +314,48 @@ def feature_range(name,
 #
 
 _HAND_DETECTION = (
-    'hand-detection', _("Hand Detection"),
-    _("Turn on illumination when the hands hover over the keyboard."))
+    'hand-detection', _('Hand Detection'),
+    _('Turn on illumination when the hands hover over the keyboard.'))
 _SMOOTH_SCROLL = (
-    'smooth-scroll', _("Smooth Scrolling"),
-    _("High-sensitivity mode for vertical scroll with the wheel."))
+    'smooth-scroll', _('Smooth Scrolling'),
+    _('High-sensitivity mode for vertical scroll with the wheel.'))
 _SIDE_SCROLL = (
-    'side-scroll', _("Side Scrolling"),
-    _("When disabled, pushing the wheel sideways sends custom button events\n"
-      "instead of the standard side-scrolling events."))
+    'side-scroll', _('Side Scrolling'),
+    _('When disabled, pushing the wheel sideways sends custom button events\n'
+      'instead of the standard side-scrolling events.'))
 _HI_RES_SCROLL = (
-    'hi-res-scroll', _("High Resolution Scrolling"),
-    _("High-sensitivity mode for vertical scroll with the wheel."))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _("HID++ Scrolling"),
-                   _("HID++ mode for vertical scroll with the wheel.") + '\n' +
-                   _("Effectively turns off wheel scrolling in Linux."))
-_HIRES_INV = ('hires-smooth-invert', _("High Resolution Wheel Invert"),
-              _("High-sensitivity wheel invert mode for vertical scroll."))
-_HIRES_RES = ('hires-smooth-resolution', _("Wheel Resolution"),
-              _("High-sensitivity mode for vertical scroll with the wheel."))
+    'hi-res-scroll', _('High Resolution Scrolling'),
+    _('High-sensitivity mode for vertical scroll with the wheel.'))
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'),
+                   _('HID++ mode for vertical scroll with the wheel.') + '\n' +
+                   _('Effectively turns off wheel scrolling in Linux.'))
+_HIRES_INV = ('hires-smooth-invert', _('High Resolution Wheel Invert'),
+              _('High-sensitivity wheel invert mode for vertical scroll.'))
+_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'),
+              _('High-sensitivity mode for vertical scroll with the wheel.'))
 _FN_SWAP = (
-    'fn-swap', _("Swap Fx function"),
-    _("When set, the F1..F12 keys will activate their special function,\n"
-      "and you must hold the FN key to activate their standard function.") +
+    'fn-swap', _('Swap Fx function'),
+    _('When set, the F1..F12 keys will activate their special function,\n'
+      'and you must hold the FN key to activate their standard function.') +
     '\n\n' +
-    _("When unset, the F1..F12 keys will activate their standard function,\n"
-      "and you must hold the FN key to activate their special function."))
-_DPI = ('dpi', _("Sensitivity (DPI)"), None)
-_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"),
-                  _("Speed multiplier for mouse (256 is normal multiplier)."))
+    _('When unset, the F1..F12 keys will activate their standard function,\n'
+      'and you must hold the FN key to activate their special function.'))
+_DPI = ('dpi', _('Sensitivity (DPI)'), None)
+_POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
+                  _('Speed multiplier for mouse (256 is normal multiplier).'))
 _SMART_SHIFT = (
-    'smart-shift', _("Smart Shift"),
-    _("Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-      "The mouse wheel is always free at 0, and always locked at 50"))
-_BACKLIGHT = ('backlight', _("Backlight"),
-              _("Turn illumination on or off on keyboard."))
+    'smart-shift', _('Smart Shift'),
+    _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
+      'The mouse wheel is always free at 0, and always locked at 50'))
+_BACKLIGHT = ('backlight', _('Backlight'),
+              _('Turn illumination on or off on keyboard.'))
 _REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _(
-    "Actions"
-), _("Change the action for the key or button.") + "\n" + _(
-    "Changing important actions (such as for the left mouse button) can result in an unusable system."
+    'Actions'
+), _('Change the action for the key or button.') + '\n' + _(
+    'Changing important actions (such as for the left mouse button) can result in an unusable system.'
 ))
-_DISABLE_KEYS = ('disable-keyboard-keys', _("Disable keys"),
-                 _("Disable specific keyboard keys."))
+_DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'),
+                 _('Disable specific keyboard keys.'))
 
 #
 #
@@ -741,12 +741,12 @@ def check_feature_settings(device, already_known):
         try:
             detected = featureFn()(device)
             if _log.isEnabledFor(_DEBUG):
-                _log.debug("check_feature[%s] detected %s", featureId,
+                _log.debug('check_feature[%s] detected %s', featureId,
                            detected)
             if detected:
                 already_known.append(detected)
         except Exception as reason:
-            _log.error("check_feature[%s] inconsistent feature %s", featureId,
+            _log.error('check_feature[%s] inconsistent feature %s', featureId,
                        reason)
 
     for name, featureId, featureFn, _, _ in _SETTINGS_TABLE:

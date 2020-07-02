@@ -202,7 +202,7 @@ def parse_battery_status(register, reply):
         elif charging_byte & 0x22 == 0x22:
             status_text = BATTERY_STATUS.full
         else:
-            _log.warn("could not parse 0x07 battery status: %02X (level %02X)",
+            _log.warn('could not parse 0x07 battery status: %02X (level %02X)',
                       charging_byte, status_byte)
             status_text = None
 

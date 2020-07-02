@@ -15,16 +15,16 @@ Unifying Receiver
      Serial number: 00000000
           Firmware: RQK 49.00.B0029
      Supports 18 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: BATTERY STATUS         {1000}   
-         5: REPROG CONTROLS        {1B00}   
-         6: WIRELESS DEVICE STATUS {1D4B}   
-         7: FN INVERSION           {40A0}   
-         8: ENCRYPTION             {4100}   
-         9: KEYBOARD LAYOUT        {4520}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY STATUS         {1000}
+         5: REPROG CONTROLS        {1B00}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: FN INVERSION           {40A0}
+         8: ENCRYPTION             {4100}
+         9: KEYBOARD LAYOUT        {4520}
         10: unknown:1810           {1810}   internal, hidden
         11: unknown:1830           {1830}   internal, hidden
         12: unknown:1890           {1890}   internal, hidden
@@ -47,8 +47,8 @@ Unifying Receiver
         10: Volume Up                  => Volume Up                     is FN, FN sensitive
      Battery: 30%, discharging.
 
-  2: Wireless Mouse  
-     Codename     :  
+  2: Wireless Mouse
+     Codename     :
      Kind         : mouse
      Wireless PID : 4022
      Protocol     : HID++ 2.0
@@ -56,15 +56,15 @@ Unifying Receiver
      Serial number: 00000000
           Firmware: RQM 38.00.B0044
      Supports 18 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: BATTERY STATUS         {1000}   
-         5: REPROG CONTROLS        {1B00}   
-         6: WIRELESS DEVICE STATUS {1D4B}   
-         7: VERTICAL SCROLLING     {2100}   
-         8: MOUSE POINTER          {2200}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY STATUS         {1000}
+         5: REPROG CONTROLS        {1B00}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: VERTICAL SCROLLING     {2100}
+         8: MOUSE POINTER          {2200}
          9: unknown:1810           {1810}   internal, hidden
         10: unknown:1830           {1830}   internal, hidden
         11: unknown:1850           {1850}   internal, hidden
@@ -79,4 +79,3 @@ Unifying Receiver
          1: RIGHT CLICK                => RightClick                    mse, reprogrammable
          2: MIDDLE BUTTON              => MiddleMouseButton             mse, reprogrammable
      Battery: 30%, discharging.
-
