@@ -55,23 +55,16 @@ def _look_for_application_icons():
     import sys as _sys
     if _log.isEnabledFor(_DEBUG):
         _log.debug('sys.path[0] = %s', _sys.path[0])
-    prefix_share = _path.normpath(
-        _path.join(_path.realpath(_sys.path[0]), '..'))
-    src_share = _path.normpath(
-        _path.join(_path.realpath(_sys.path[0]), '..', 'share'))
-    local_share = _environ.get(
-        'XDG_DATA_HOME', _path.expanduser(_path.join('~', '.local', 'share')))
+    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
+    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
+    local_share = _environ.get('XDG_DATA_HOME', _path.expanduser(_path.join('~', '.local', 'share')))
     data_dirs = _environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
-    repo_share = _path.normpath(
-        _path.join(_path.dirname(__file__), '..', '..', '..', 'share'))
-    setuptools_share = _path.normpath(
-        _path.join(_path.dirname(__file__), '..', '..', 'share'))
+    repo_share = _path.normpath(_path.join(_path.dirname(__file__), '..', '..', '..', 'share'))
+    setuptools_share = _path.normpath(_path.join(_path.dirname(__file__), '..', '..', 'share'))
     del _sys
 
     share_solaar = [prefix_share] + list(
-        _path.join(x, 'solaar')
-        for x in [src_share, local_share, setuptools_share, repo_share] +
-        data_dirs.split(':'))
+        _path.join(x, 'solaar') for x in [src_share, local_share, setuptools_share, repo_share] + data_dirs.split(':'))
     for location in share_solaar:
         location = _path.join(location, 'icons')
         if _log.isEnabledFor(_DEBUG):
@@ -137,10 +130,8 @@ def _battery_icon_name(level, charging):
     if level is None or level < 0:
         return 'battery-missing' + ('-symbolic' if _use_symbolic_icons else '')
 
-    level_name = _first_res(level, ((90, 'full'), (50, 'good'), (20, 'low'),
-                                    (5, 'caution'), (0, 'empty')))
-    return 'battery-%s%s%s' % (level_name, '-charging' if charging else '',
-                               '-symbolic' if _use_symbolic_icons else '')
+    level_name = _first_res(level, ((90, 'full'), (50, 'good'), (20, 'low'), (5, 'caution'), (0, 'empty')))
+    return 'battery-%s%s%s' % (level_name, '-charging' if charging else '', '-symbolic' if _use_symbolic_icons else '')
 
 
 #

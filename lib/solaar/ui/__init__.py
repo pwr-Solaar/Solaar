@@ -54,14 +54,12 @@ def _error_dialog(reason, object):
         text = (_('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) +
                 '\n\n' + _('The receiver returned an error, with no further details.'))
     else:
-        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)",
-                        reason, object)
+        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
 
     assert title
     assert text
 
-    m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR,
-                          Gtk.ButtonsType.CLOSE, text)
+    m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
     m.set_title(title)
     m.run()
     m.destroy()
@@ -93,8 +91,7 @@ from . import notify, tray, window  # isort:skip  # noqa: E402
 
 def _startup(app, startup_hook, use_tray, show_window):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('startup registered=%s, remote=%s', app.get_is_registered(),
-                   app.get_is_remote())
+        _log.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
 
     from solaar.tasks import TaskRunner as _TaskRunner
     global _task_runner
@@ -144,12 +141,9 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
     assert use_tray or show_window, 'need either tray or visible window'
     # from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
     APP_ID = 'io.github.pwr.solaar'
-    application = Gtk.Application.new(
-        APP_ID, 0)  # _ApplicationFlags.HANDLES_COMMAND_LINE)
+    application = Gtk.Application.new(APP_ID, 0)  # _ApplicationFlags.HANDLES_COMMAND_LINE)
 
-    application.connect(
-        'startup', lambda app, startup_hook: _startup(
-            app, startup_hook, use_tray, show_window), startup_hook)
+    application.connect('startup', lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
     application.connect('command-line', _command_line)
     application.connect('activate', _activate)
     application.connect('shutdown', _shutdown, shutdown_hook)

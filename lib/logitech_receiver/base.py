@@ -50,12 +50,7 @@ _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
 
 # mapping from report_id to message length
-report_lengths = {
-    0x10: _SHORT_MESSAGE_SIZE,
-    0x11: _LONG_MESSAGE_SIZE,
-    0x20: _MEDIUM_MESSAGE_SIZE,
-    0x21: _MAX_READ_SIZE
-}
+report_lengths = {0x10: _SHORT_MESSAGE_SIZE, 0x11: _LONG_MESSAGE_SIZE, 0x20: _MEDIUM_MESSAGE_SIZE, 0x21: _MAX_READ_SIZE}
 """Default timeout on read (in seconds)."""
 DEFAULT_TIMEOUT = 4
 # the receiver itself should reply very fast, within 500ms
@@ -176,14 +171,12 @@ def write(handle, devnumber, data):
     else:
         wdata = _pack('!BB5s', 0x10, devnumber, data)
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('(%s) <= w[%02X %02X %s %s]', handle, ord(wdata[:1]),
-                   devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
+        _log.debug('(%s) <= w[%02X %02X %s %s]', handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
     try:
         _hid.write(int(handle), wdata)
     except Exception as reason:
-        _log.error('write failed, assuming handle %r no longer available',
-                   handle)
+        _log.error('write failed, assuming handle %r no longer available', handle)
         close(handle)
         raise NoReceiver(reason=reason)
 
@@ -214,8 +207,7 @@ def check_message(data):
         if report_lengths.get(report_id) == len(data):
             return True
         else:
-            _log.warn('unexpected message size: report_id %02X message %s' %
-                      (report_id, _strhex(data)))
+            _log.warn('unexpected message size: report_id %02X message %s' % (report_id, _strhex(data)))
     return False
 
 
@@ -233,8 +225,7 @@ def _read(handle, timeout):
         timeout = int(timeout * 1000)
         data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
     except Exception as reason:
-        _log.error('read failed, assuming handle %r no longer available',
-                   handle)
+        _log.error('read failed, assuming handle %r no longer available', handle)
         close(handle)
         raise NoReceiver(reason=reason)
 
@@ -243,8 +234,7 @@ def _read(handle, timeout):
         devnumber = ord(data[1:2])
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('(%s) => r[%02X %02X %s %s]', handle, report_id,
-                       devnumber, _strhex(data[2:4]), _strhex(data[4:]))
+            _log.debug('(%s) => r[%02X %02X %s %s]', handle, report_id, devnumber, _strhex(data[2:4]), _strhex(data[4:]))
 
         return report_id, devnumber, data[2:]
 
@@ -265,8 +255,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             # read whatever is already in the buffer, if any
             data = _hid.read(ihandle, _MAX_READ_SIZE, 0)
         except Exception as reason:
-            _log.error('read failed, assuming receiver %s no longer available',
-                       handle)
+            _log.error('read failed, assuming receiver %s no longer available', handle)
             close(handle)
             raise NoReceiver(reason=reason)
 
@@ -309,10 +298,9 @@ def make_notification(devnumber, data):
         return _HIDPP_Notification(devnumber, sub_id, address, data[2:])
 
 
-_HIDPP_Notification = namedtuple('_HIDPP_Notification',
-                                 ('devnumber', 'sub_id', 'address', 'data'))
-_HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (
-    self.devnumber, self.sub_id, self.address, _strhex(self.data))
+_HIDPP_Notification = namedtuple('_HIDPP_Notification', ('devnumber', 'sub_id', 'address', 'data'))
+_HIDPP_Notification.__str__ = lambda self: 'Notification(%d,%02X,%02X,%s)' % (self.devnumber, self.sub_id, self.address,
+                                                                              _strhex(self.data))
 _HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 DJ_NOTIFICATION_LENGTH = _MEDIUM_MESSAGE_SIZE - 4  # to allow easy distinguishing of DJ notifications
 del namedtuple
@@ -352,8 +340,7 @@ def request(handle, devnumber, request_id, *params):
         timeout *= 2
 
     if params:
-        params = b''.join(
-            _pack('B', p) if isinstance(p, int) else p for p in params)
+        params = b''.join(_pack('B', p) if isinstance(p, int) else p for p in params)
     else:
         params = b''
     # if _log.isEnabledFor(_DEBUG):
@@ -375,8 +362,7 @@ def request(handle, devnumber, request_id, *params):
         if reply:
             report_id, reply_devnumber, reply_data = reply
             if reply_devnumber == devnumber:
-                if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[
-                        1:3] == request_data[:2]:
+                if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2]:
                     error = ord(reply_data[3:4])
 
                     # if error == _hidpp10.ERROR.resource_error: # device unreachable
@@ -388,24 +374,16 @@ def request(handle, devnumber, request_id, *params):
                     #     raise NoSuchDevice(number=devnumber, request=request_id)
 
                     if _log.isEnabledFor(_DEBUG):
-                        _log.debug(
-                            '(%s) device 0x%02X error on request {%04X}: %d = %s',
-                            handle, devnumber, request_id, error,
-                            _hidpp10.ERROR[error])
+                        _log.debug('(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
+                                   _hidpp10.ERROR[error])
                     return
 
-                if reply_data[:1] == b'\xFF' and reply_data[
-                        1:3] == request_data[:2]:
+                if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
                     # a HID++ 2.0 feature call returned with an error
                     error = ord(reply_data[3:4])
-                    _log.error(
-                        '(%s) device %d error on feature request {%04X}: %d = %s',
-                        handle, devnumber, request_id, error,
-                        _hidpp20.ERROR[error])
-                    raise _hidpp20.FeatureCallError(number=devnumber,
-                                                    request=request_id,
-                                                    error=error,
-                                                    params=params)
+                    _log.error('(%s) device %d error on feature request {%04X}: %d = %s', handle, devnumber, request_id, error,
+                               _hidpp20.ERROR[error])
+                    raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                 if reply_data[:2] == request_data[:2]:
                     if request_id & 0xFE00 == 0x8200:
@@ -445,8 +423,8 @@ def request(handle, devnumber, request_id, *params):
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
-    _log.warn('timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]',
-              delta, timeout, devnumber, request_id, _strhex(params))
+    _log.warn('timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]', delta, timeout, devnumber, request_id,
+              _strhex(params))
     # raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
@@ -486,13 +464,11 @@ def ping(handle, devnumber):
         if reply:
             report_id, reply_devnumber, reply_data = reply
             if reply_devnumber == devnumber:
-                if reply_data[:2] == request_data[:2] and reply_data[
-                        4:5] == request_data[-1:]:
+                if reply_data[:2] == request_data[:2] and reply_data[4:5] == request_data[-1:]:
                     # HID++ 2.0+ device, currently connected
                     return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
-                if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[
-                        1:3] == request_data[:2]:
+                if report_id == 0x10 and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2]:
                     assert reply_data[-1:] == b'\x00'
                     error = ord(reply_data[3:4])
 
@@ -503,11 +479,8 @@ def ping(handle, devnumber):
                         return
 
                     if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
-                        _log.error(
-                            '(%s) device %d error on ping request: unknown device',
-                            handle, devnumber)
-                        raise NoSuchDevice(number=devnumber,
-                                           request=request_id)
+                        _log.error('(%s) device %d error on ping request: unknown device', handle, devnumber)
+                        raise NoSuchDevice(number=devnumber, request=request_id)
 
             if notifications_hook:
                 n = make_notification(reply_devnumber, reply_data)
@@ -518,6 +491,5 @@ def ping(handle, devnumber):
 
         delta = _timestamp() - request_started
 
-    _log.warn('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta,
-              _PING_TIMEOUT, devnumber)
+    _log.warn('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta, _PING_TIMEOUT, devnumber)
     # raise DeviceUnreachable(number=devnumber, request=request_id)

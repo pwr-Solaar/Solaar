@@ -106,20 +106,15 @@ def _create_map_choice_control(setting):
     def _map_value_notify_value(cbbox, s):
         setting, keyBox = s
         key_choice = keyBox.get_active_id()
-        if key_choice is not None and cbbox.get_sensitive(
-        ) and cbbox.get_active_id():
+        if key_choice is not None and cbbox.get_sensitive() and cbbox.get_active_id():
             if setting._value.get(key_choice) != int(cbbox.get_active_id()):
                 setting._value[key_choice] = int(cbbox.get_active_id())
-                _write_async_key_value(setting, key_choice,
-                                       setting._value[key_choice],
-                                       cbbox.get_parent().get_parent())
+                _write_async_key_value(setting, key_choice, setting._value[key_choice], cbbox.get_parent().get_parent())
 
     def _map_populate_value_box(valueBox, setting, key_choice):
         choices = None
         choices = setting.choices[key_choice]
-        current = setting._value.get(
-            str(key_choice
-                ))  # just in case the persisted value is missing some keys
+        current = setting._value.get(str(key_choice))  # just in case the persisted value is missing some keys
         if choices:
             # TODO i18n text entries
             for choice in choices:
@@ -155,12 +150,10 @@ def _create_slider_control(setting):
             self.gtk_range.set_round_digits(0)
             self.gtk_range.set_digits(0)
             self.gtk_range.set_increments(1, 5)
-            self.gtk_range.connect('value-changed', lambda _, c: c._changed(),
-                                   self)
+            self.gtk_range.connect('value-changed', lambda _, c: c._changed(), self)
 
         def _write(self):
-            _write_async(self.setting, int(self.gtk_range.get_value()),
-                         self.gtk_range.get_parent())
+            _write_async(self.setting, int(self.gtk_range.get_value()), self.gtk_range.get_parent())
             self.timer.cancel()
 
         def _changed(self):
@@ -186,8 +179,7 @@ def _create_sbox(s):
     spinner = Gtk.Spinner()
     spinner.set_tooltip_text(_('Working') + '...')
 
-    failed = Gtk.Image.new_from_icon_name('dialog-warning',
-                                          Gtk.IconSize.SMALL_TOOLBAR)
+    failed = Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.SMALL_TOOLBAR)
     failed.set_tooltip_text(_('Read/write operation failed.'))
 
     if s.kind == _SETTING_KIND.toggle:
@@ -237,8 +229,7 @@ def _create_sbox(s):
 
 
 def _update_setting_item(sbox, value, is_online=True):
-    _ignore, failed, spinner, control = sbox.get_children(
-    )  # depends on box layout
+    _ignore, failed, spinner, control = sbox.get_children()  # depends on box layout
     spinner.set_visible(False)
     spinner.stop()
 

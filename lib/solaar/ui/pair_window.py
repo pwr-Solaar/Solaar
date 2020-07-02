@@ -87,8 +87,7 @@ def _check_lock_state(assistant, receiver, count=2):
         if count > 0:
             # the actual device notification may arrive after the lock was paired,
             # so have a little patience
-            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant,
-                             receiver, count - 1)
+            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver, count - 1)
         else:
             _pairing_failed(assistant, receiver, 'failed to open pairing lock')
         return False
@@ -107,12 +106,10 @@ def _prepare(assistant, page, receiver):
             assert receiver.status.get(_K.ERROR) is None
             spinner = page.get_children()[-1]
             spinner.start()
-            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant,
-                             receiver)
+            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
             assistant.set_page_complete(page, True)
         else:
-            GLib.idle_add(_pairing_failed, assistant, receiver,
-                          'the pairing lock did not open')
+            GLib.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
     else:
         assistant.remove_page(0)
 
@@ -136,19 +133,14 @@ def _pairing_failed(assistant, receiver, error):
 
     header = _('Pairing failed') + ': ' + _(str(error)) + '.'
     if 'timeout' in str(error):
-        text = _(
-            'Make sure your device is within range, and has a decent battery charge.'
-        )
+        text = _('Make sure your device is within range, and has a decent battery charge.')
     elif str(error) == 'device not supported':
-        text = _(
-            'A new device was detected, but it is not compatible with this receiver.'
-        )
+        text = _('A new device was detected, but it is not compatible with this receiver.')
     elif 'many' in str(error):
         text = _('The receiver only supports %d paired device(s).')
     else:
         text = _('No further details are available about the error.')
-    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header,
-                 'dialog-error', text)
+    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
 
     assistant.next_page()
     assistant.commit()
@@ -204,24 +196,19 @@ def create(receiver):
     assert receiver.kind is None
 
     assistant = Gtk.Assistant()
-    assistant.set_title(
-        _('%(receiver_name)s: pair new device') %
-        {'receiver_name': receiver.name})
+    assistant.set_title(_('%(receiver_name)s: pair new device') % {'receiver_name': receiver.name})
     assistant.set_icon_name('list-add')
 
     assistant.set_size_request(400, 240)
     assistant.set_resizable(False)
     assistant.set_role('pair-device')
 
-    page_text = _(
-        'If the device is already turned on, turn if off and on again.')
+    page_text = _('If the device is already turned on, turn if off and on again.')
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        page_text += _('\n\nThis receiver has %d pairing(s) remaining.'
-                       ) % receiver.remaining_pairings()
+        page_text += _('\n\nThis receiver has %d pairing(s) remaining.') % receiver.remaining_pairings()
         page_text += _('\nCancelling at this point will not use up a pairing.')
 
-    page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS,
-                              _('Turn on the device you want to pair.'),
+    page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, _('Turn on the device you want to pair.'),
                               'preferences-desktop-peripherals', page_text)
     spinner = Gtk.Spinner()
     spinner.set_visible(True)

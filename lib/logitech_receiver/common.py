@@ -107,15 +107,11 @@ class NamedInts(object):
     def __init__(self, **kwargs):
         def _readable_name(n):
             if not is_string(n):
-                raise TypeError('expected (unicode) string, got ' +
-                                str(type(n)))
+                raise TypeError('expected (unicode) string, got ' + str(type(n)))
             return n.replace('__', '/').replace('_', ' ')
 
         # print (repr(kwargs))
-        values = {
-            k: NamedInt(v, _readable_name(k))
-            for (k, v) in kwargs.items()
-        }
+        values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
         self.__dict__ = values
         self._values = sorted(list(values.values()))
         self._indexed = {int(v): v for v in self._values}
@@ -129,15 +125,8 @@ class NamedInts(object):
         return NamedInts(**values)
 
     @classmethod
-    def range(cls,
-              from_value,
-              to_value,
-              name_generator=lambda x: str(x),
-              step=1):
-        values = {
-            name_generator(x): x
-            for x in range(from_value, to_value + 1, step)
-        }
+    def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):
+        values = {name_generator(x): x for x in range(from_value, to_value + 1, step)}
         return NamedInts(**values)
 
     def flag_names(self, value):
@@ -169,13 +158,10 @@ class NamedInts(object):
             if index.start is None and index.stop is None:
                 return self._values[:]
 
-            v_start = int(self._values[0]) if index.start is None else int(
-                index.start)
-            v_stop = (self._values[-1] +
-                      1) if index.stop is None else int(index.stop)
+            v_start = int(self._values[0]) if index.start is None else int(index.start)
+            v_stop = (self._values[-1] + 1) if index.stop is None else int(index.stop)
 
-            if v_start > v_stop or v_start > self._values[
-                    -1] or v_stop <= self._values[0]:
+            if v_start > v_stop or v_start > self._values[-1] or v_stop <= self._values[0]:
                 return []
 
             if v_start <= self._values[0] and v_stop > self._values[-1]:
@@ -282,14 +268,11 @@ class KwException(Exception):
 
 
 """Firmware information."""
-FirmwareInfo = namedtuple('FirmwareInfo',
-                          ['kind', 'name', 'version', 'extras'])
+FirmwareInfo = namedtuple('FirmwareInfo', ['kind', 'name', 'version', 'extras'])
 """Reprogrammable keys information."""
-ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo',
-                                   ['index', 'key', 'task', 'flags'])
+ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', ['index', 'key', 'task', 'flags'])
 
-ReprogrammableKeyInfoV4 = namedtuple('ReprogrammableKeyInfoV4', [
-    'index', 'key', 'task', 'flags', 'pos', 'group', 'group_mask', 'remapped'
-])
+ReprogrammableKeyInfoV4 = namedtuple('ReprogrammableKeyInfoV4',
+                                     ['index', 'key', 'task', 'flags', 'pos', 'group', 'group_mask', 'remapped'])
 
 del namedtuple
