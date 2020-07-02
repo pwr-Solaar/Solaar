@@ -28,61 +28,74 @@ del getLogger
 #
 
 _suspend_callback = None
+
+
 def _suspend():
-	if _suspend_callback:
-		if _log.isEnabledFor(_INFO):
-			_log.info("received suspend event")
-		_suspend_callback()
+    if _suspend_callback:
+        if _log.isEnabledFor(_INFO):
+            _log.info("received suspend event")
+        _suspend_callback()
 
 
 _resume_callback = None
+
+
 def _resume():
-	if _resume_callback:
-		if _log.isEnabledFor(_INFO):
-			_log.info("received resume event")
-		_resume_callback()
+    if _resume_callback:
+        if _log.isEnabledFor(_INFO):
+            _log.info("received resume event")
+        _resume_callback()
+
 
 def _suspend_or_resume(suspend):
-	_suspend() if suspend else _resume()
+    _suspend() if suspend else _resume()
+
 
 def watch(on_resume_callback=None, on_suspend_callback=None):
-	"""Register callback for suspend/resume events.
+    """Register callback for suspend/resume events.
 	They are called only if the system DBus is running, and the UPower daemon is available."""
-	global _resume_callback, _suspend_callback
-	_suspend_callback = on_suspend_callback
-	_resume_callback = on_resume_callback
+    global _resume_callback, _suspend_callback
+    _suspend_callback = on_suspend_callback
+    _resume_callback = on_resume_callback
 
 
 try:
-	import dbus
+    import dbus
 
-	_UPOWER_BUS = 'org.freedesktop.UPower'
-	_UPOWER_INTERFACE = 'org.freedesktop.UPower'
-	_LOGIND_BUS = 'org.freedesktop.login1'
-	_LOGIND_INTERFACE = 'org.freedesktop.login1.Manager'
+    _UPOWER_BUS = 'org.freedesktop.UPower'
+    _UPOWER_INTERFACE = 'org.freedesktop.UPower'
+    _LOGIND_BUS = 'org.freedesktop.login1'
+    _LOGIND_INTERFACE = 'org.freedesktop.login1.Manager'
 
-	# integration into the main GLib loop
-	from dbus.mainloop.glib import DBusGMainLoop
-	DBusGMainLoop(set_as_default=True)
+    # integration into the main GLib loop
+    from dbus.mainloop.glib import DBusGMainLoop
+    DBusGMainLoop(set_as_default=True)
 
-	bus = dbus.SystemBus()
-	assert bus
+    bus = dbus.SystemBus()
+    assert bus
 
-	bus.add_signal_receiver(_suspend, signal_name='Sleeping',
-					dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
+    bus.add_signal_receiver(_suspend,
+                            signal_name='Sleeping',
+                            dbus_interface=_UPOWER_INTERFACE,
+                            bus_name=_UPOWER_BUS)
 
-	bus.add_signal_receiver(_resume, signal_name='Resuming',
-					dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
+    bus.add_signal_receiver(_resume,
+                            signal_name='Resuming',
+                            dbus_interface=_UPOWER_INTERFACE,
+                            bus_name=_UPOWER_BUS)
 
-	bus.add_signal_receiver(_suspend_or_resume,'PrepareForSleep',
-					dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
+    bus.add_signal_receiver(_suspend_or_resume,
+                            'PrepareForSleep',
+                            dbus_interface=_LOGIND_INTERFACE,
+                            bus_name=_LOGIND_BUS)
 
-	if _log.isEnabledFor(_INFO):
-		_log.info("connected to system dbus, watching for suspend/resume events")
+    if _log.isEnabledFor(_INFO):
+        _log.info(
+            "connected to system dbus, watching for suspend/resume events")
 
 except:
-	# Either:
-	# - the dbus library is not available
-	# - the system dbus is not running
-	_log.warn("failed to register suspend/resume callbacks")
-	pass
+    # Either:
+    # - the dbus library is not available
+    # - the system dbus is not running
+    _log.warn("failed to register suspend/resume callbacks")
+    pass

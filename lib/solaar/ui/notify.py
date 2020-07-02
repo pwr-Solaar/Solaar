@@ -21,7 +21,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-
 from solaar.i18n import _
 
 #
@@ -29,125 +28,121 @@ from solaar.i18n import _
 #
 
 try:
-	import gi
-	gi.require_version('Notify', '0.7')
-	# this import is allowed to fail, in which case the entire feature is unavailable
-	from gi.repository import Notify, GLib
+    import gi
+    gi.require_version('Notify', '0.7')
+    # this import is allowed to fail, in which case the entire feature is unavailable
+    from gi.repository import Notify, GLib
 
-	# assumed to be working since the import succeeded
-	available = True
+    # assumed to be working since the import succeeded
+    available = True
 
 except (ValueError, ImportError):
-	available = False
+    available = False
 
 if available:
-	from logging import getLogger, INFO as _INFO
-	_log = getLogger(__name__)
-	del getLogger
+    from logging import getLogger, INFO as _INFO
+    _log = getLogger(__name__)
+    del getLogger
 
-	from solaar import NAME
-	from . import icons as _icons
+    from solaar import NAME
+    from . import icons as _icons
 
-	# cache references to shown notifications here, so if another status comes
-	# while its notification is still visible we don't create another one
-	_notifications = {}
+    # cache references to shown notifications here, so if another status comes
+    # while its notification is still visible we don't create another one
+    _notifications = {}
 
-	def init():
-		"""Init the notifications system."""
-		global available
-		if available:
-			if not Notify.is_initted():
-				if _log.isEnabledFor(_INFO):
-					_log.info("starting desktop notifications")
-				try:
-					return Notify.init(NAME)
-				except:
-					_log.exception("initializing desktop notifications")
-					available = False
-		return available and Notify.is_initted()
+    def init():
+        """Init the notifications system."""
+        global available
+        if available:
+            if not Notify.is_initted():
+                if _log.isEnabledFor(_INFO):
+                    _log.info("starting desktop notifications")
+                try:
+                    return Notify.init(NAME)
+                except:
+                    _log.exception("initializing desktop notifications")
+                    available = False
+        return available and Notify.is_initted()
 
+    def uninit():
+        if available and Notify.is_initted():
+            if _log.isEnabledFor(_INFO):
+                _log.info("stopping desktop notifications")
+            _notifications.clear()
+            Notify.uninit()
 
-	def uninit():
-		if available and Notify.is_initted():
-			if _log.isEnabledFor(_INFO):
-				_log.info("stopping desktop notifications")
-			_notifications.clear()
-			Notify.uninit()
+    # def toggle(action):
+    # 	if action.get_active():
+    # 		init()
+    # 	else:
+    # 		uninit()
+    # 	action.set_sensitive(available)
+    # 	return action.get_active()
 
+    def alert(reason, icon=None):
+        assert reason
 
-	# def toggle(action):
-	# 	if action.get_active():
-	# 		init()
-	# 	else:
-	# 		uninit()
-	# 	action.set_sensitive(available)
-	# 	return action.get_active()
+        if available and Notify.is_initted():
+            n = _notifications.get(NAME)
+            if n is None:
+                n = _notifications[NAME] = Notify.Notification()
 
+            # we need to use the filename here because the notifications daemon
+            # is an external application that does not know about our icon sets
+            icon_file = _icons.icon_file(NAME.lower()) if icon is None \
+               else _icons.icon_file(icon)
 
-	def alert(reason, icon=None):
-		assert reason
+            n.update(NAME, reason, icon_file)
+            n.set_urgency(Notify.Urgency.NORMAL)
+            n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
 
-		if available and Notify.is_initted():
-			n = _notifications.get(NAME)
-			if n is None:
-				n = _notifications[NAME] = Notify.Notification()
+            try:
+                # if _log.isEnabledFor(_DEBUG):
+                # 	_log.debug("showing %s", n)
+                n.show()
+            except Exception:
+                _log.exception("showing %s", n)
 
-			# we need to use the filename here because the notifications daemon
-			# is an external application that does not know about our icon sets
-			icon_file = _icons.icon_file(NAME.lower()) if icon is None \
-						else _icons.icon_file(icon)
+    def show(dev, reason=None, icon=None):
+        """Show a notification with title and text."""
+        if available and Notify.is_initted():
+            summary = dev.name
 
-			n.update(NAME, reason, icon_file)
-			n.set_urgency(Notify.Urgency.NORMAL)
-			n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
+            # if a notification with same name is already visible, reuse it to avoid spamming
+            n = _notifications.get(summary)
+            if n is None:
+                n = _notifications[summary] = Notify.Notification()
 
-			try:
-				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("showing %s", n)
-				n.show()
-			except Exception:
-				_log.exception("showing %s", n)
+            if reason:
+                message = reason
+            elif dev.status is None:
+                message = _("unpaired")
+            elif bool(dev.status):
+                message = dev.status.to_string() or _("connected")
+            else:
+                message = _("offline")
 
+            # we need to use the filename here because the notifications daemon
+            # is an external application that does not know about our icon sets
+            icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None \
+               else _icons.icon_file(icon)
 
-	def show(dev, reason=None, icon=None):
-		"""Show a notification with title and text."""
-		if available and Notify.is_initted():
-			summary = dev.name
+            n.update(summary, message, icon_file)
+            urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
+            n.set_urgency(urgency)
+            n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
 
-			# if a notification with same name is already visible, reuse it to avoid spamming
-			n = _notifications.get(summary)
-			if n is None:
-				n = _notifications[summary] = Notify.Notification()
-
-			if reason:
-				message = reason
-			elif dev.status is None:
-				message = _("unpaired")
-			elif bool(dev.status):
-				message = dev.status.to_string() or _("connected")
-			else:
-				message = _("offline")
-
-			# we need to use the filename here because the notifications daemon
-			# is an external application that does not know about our icon sets
-			icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None \
-						else _icons.icon_file(icon)
-
-			n.update(summary, message, icon_file)
-			urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
-			n.set_urgency(urgency)
-			n.set_hint("desktop-entry", GLib.Variant('s', NAME.lower()))
-
-			try:
-				# if _log.isEnabledFor(_DEBUG):
-				# 	_log.debug("showing %s", n)
-				n.show()
-			except Exception:
-				_log.exception("showing %s", n)
+            try:
+                # if _log.isEnabledFor(_DEBUG):
+                # 	_log.debug("showing %s", n)
+                n.show()
+            except Exception:
+                _log.exception("showing %s", n)
 
 else:
-	init = lambda: False
-	uninit = lambda: None
-	# toggle = lambda action: False
-	alert = lambda reason: None
-	show = lambda dev, reason=None: None
+    init = lambda: False
+    uninit = lambda: None
+    # toggle = lambda action: False
+    alert = lambda reason: None
+    show = lambda dev, reason=None: None

@@ -16,7 +16,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 """Low-level interface for devices connected through a Logitech Universal
 Receiver (UR).
 
@@ -43,9 +42,7 @@ _log.setLevel(logging.root.level)
 
 del logging
 
-
 __version__ = '0.9'
-
 
 from .common import strhex
 from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
