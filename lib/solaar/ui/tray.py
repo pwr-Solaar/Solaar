@@ -42,7 +42,7 @@ del getLogger
 # constants
 #
 
-_TRAY_ICON_SIZE = 32  #  pixels
+_TRAY_ICON_SIZE = 32  # pixels
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _RECEIVER_SEPARATOR = ('~', None, None, None)
 
@@ -103,7 +103,7 @@ def _scroll(tray_icon, event, direction=None):
     _last_scroll = now
 
     # if _log.isEnabledFor(_DEBUG):
-    # 	_log.debug("scroll direction %s", direction)
+    #     _log.debug("scroll direction %s", direction)
 
     global _picked_device
     candidate = None

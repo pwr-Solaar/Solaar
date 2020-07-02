@@ -20,6 +20,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from hidapi.udev import close, enumerate, get_manufacturer, get_product, get_serial, monitor_glib, open, open_path, read, write
+from hidapi.udev import close  # noqa: F401
+from hidapi.udev import enumerate  # noqa: F401
+from hidapi.udev import get_manufacturer  # noqa: F401
+from hidapi.udev import get_product  # noqa: F401
+from hidapi.udev import get_serial  # noqa: F401
+from hidapi.udev import monitor_glib  # noqa: F401
+from hidapi.udev import open  # noqa: F401
+from hidapi.udev import open_path  # noqa: F401
+from hidapi.udev import read  # noqa: F401
+from hidapi.udev import write  # noqa: F401
 
 __version__ = '0.9'

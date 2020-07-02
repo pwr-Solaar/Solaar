@@ -60,7 +60,7 @@ if available:
                     _log.info('starting desktop notifications')
                 try:
                     return Notify.init(NAME)
-                except:
+                except Exception:
                     _log.exception('initializing desktop notifications')
                     available = False
         return available and Notify.is_initted()
@@ -73,12 +73,12 @@ if available:
             Notify.uninit()
 
     # def toggle(action):
-    # 	if action.get_active():
-    # 		init()
-    # 	else:
-    # 		uninit()
-    # 	action.set_sensitive(available)
-    # 	return action.get_active()
+    #     if action.get_active():
+    #         init()
+    #     else:
+    #         uninit()
+    #     action.set_sensitive(available)
+    #     return action.get_active()
 
     def alert(reason, icon=None):
         assert reason
@@ -90,8 +90,7 @@ if available:
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.icon_file(NAME.lower()) if icon is None \
-               else _icons.icon_file(icon)
+            icon_file = _icons.icon_file(NAME.lower()) if icon is None else _icons.icon_file(icon)
 
             n.update(NAME, reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
@@ -99,7 +98,7 @@ if available:
 
             try:
                 # if _log.isEnabledFor(_DEBUG):
-                # 	_log.debug("showing %s", n)
+                #     _log.debug("showing %s", n)
                 n.show()
             except Exception:
                 _log.exception('showing %s', n)
@@ -125,8 +124,7 @@ if available:
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None \
-               else _icons.icon_file(icon)
+            icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None else _icons.icon_file(icon)
 
             n.update(summary, message, icon_file)
             urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
@@ -135,7 +133,7 @@ if available:
 
             try:
                 # if _log.isEnabledFor(_DEBUG):
-                # 	_log.debug("showing %s", n)
+                #     _log.debug("showing %s", n)
                 n.show()
             except Exception:
                 _log.exception('showing %s', n)

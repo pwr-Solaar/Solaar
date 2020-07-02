@@ -88,8 +88,8 @@ def attach_to(device, changed_callback):
 
 class ReceiverStatus(dict):
     """The 'runtime' status of a receiver, mostly about the pairing process --
-	is the pairing lock open or closed, any pairing errors, etc.
-	"""
+    is the pairing lock open or closed, any pairing errors, etc.
+    """
     def __init__(self, receiver, changed_callback):
         assert receiver
         self._receiver = receiver
@@ -118,17 +118,17 @@ class ReceiverStatus(dict):
         self._changed_callback(self._receiver, alert=alert, reason=reason)
 
     # def poll(self, timestamp):
-    # 	r = self._receiver
-    # 	assert r
+    #     r = self._receiver
+    #     assert r
     #
-    # 	if _log.isEnabledFor(_DEBUG):
-    # 		_log.debug("polling status of %s", r)
+    #     if _log.isEnabledFor(_DEBUG):
+    #         _log.debug("polling status of %s", r)
     #
-    # 	# make sure to read some stuff that may be read later by the UI
-    # 	r.serial, r.firmware, None
+    #     # make sure to read some stuff that may be read later by the UI
+    #     r.serial, r.firmware, None
     #
-    # 	# get an update of the notification flags
-    # 	# self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
+    #     # get an update of the notification flags
+    #     # self[KEYS.NOTIFICATION_FLAGS] = _hidpp10.get_notification_flags(r)
 
 
 #
@@ -138,9 +138,9 @@ class ReceiverStatus(dict):
 
 class DeviceStatus(dict):
     """Holds the 'runtime' status of a peripheral -- things like
-	active/inactive, battery charge, lux, etc. It updates them mostly by
-	processing incoming notification events from the device itself.
-	"""
+    active/inactive, battery charge, lux, etc. It updates them mostly by
+    processing incoming notification events from the device itself.
+    """
     def __init__(self, device, changed_callback):
         assert device
         self._device = device
@@ -177,7 +177,8 @@ class DeviceStatus(dict):
 
             light_level = self.get(KEYS.LIGHT_LEVEL)
             if light_level is not None:
-                if comma: yield ', '
+                if comma:
+                    yield ', '
                 yield _('Lighting: %(level)s lux') % {'level': light_level}
 
         return ''.join(i for i in _items())
@@ -352,7 +353,7 @@ class DeviceStatus(dict):
                     if battery is not None:
                         self[KEYS.BATTERY_LEVEL] = battery
 
-        if self.updated == 0 and active == True:
+        if self.updated == 0 and active is True:
             # if the device is active on the very first status notification,
             # (meaning just when the program started or a new receiver was just
             # detected), pop-up a notification about it
@@ -360,40 +361,40 @@ class DeviceStatus(dict):
         self.updated = timestamp
 
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
+        #     _log.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
         self._changed_callback(d, alert, reason)
 
     # def poll(self, timestamp):
-    # 	d = self._device
-    # 	if not d:
-    # 		_log.error("polling status of invalid device")
-    # 		return
+    #     d = self._device
+    #     if not d:
+    #         _log.error("polling status of invalid device")
+    #         return
     #
-    # 	if self._active:
-    # 		if _log.isEnabledFor(_DEBUG):
-    # 			_log.debug("polling status of %s", d)
+    #     if self._active:
+    #         if _log.isEnabledFor(_DEBUG):
+    #             _log.debug("polling status of %s", d)
     #
-    # 		# read these from the device, the UI may need them later
-    # 		d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None
+    #         # read these from the device, the UI may need them later
+    #         d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None
     #
-    # 		# make sure we know all the features of the device
-    # 		# if d.features:
-    # 		# 	d.features[:]
+    #         # make sure we know all the features of the device
+    #         # if d.features:
+    #         #     d.features[:]
     #
-    # 		# devices may go out-of-range while still active, or the computer
-    # 		# may go to sleep and wake up without the devices available
-    # 		if timestamp - self.updated > _STATUS_TIMEOUT:
-    # 			if d.ping():
-    # 				timestamp = self.updated = _timestamp()
-    # 			else:
-    # 				self.changed(active=False, reason='out of range')
+    #         # devices may go out-of-range while still active, or the computer
+    #         # may go to sleep and wake up without the devices available
+    #         if timestamp - self.updated > _STATUS_TIMEOUT:
+    #             if d.ping():
+    #                 timestamp = self.updated = _timestamp()
+    #             else:
+    #                 self.changed(active=False, reason='out of range')
     #
-    # 		# if still active, make sure we know the battery level
-    # 		if KEYS.BATTERY_LEVEL not in self:
-    # 			self.read_battery(timestamp)
+    #         # if still active, make sure we know the battery level
+    #         if KEYS.BATTERY_LEVEL not in self:
+    #             self.read_battery(timestamp)
     #
-    # 	elif timestamp - self.updated > _STATUS_TIMEOUT:
-    # 		if d.ping():
-    # 			self.changed(active=True)
-    # 		else:
-    # 			self.updated = _timestamp()
+    #     elif timestamp - self.updated > _STATUS_TIMEOUT:
+    #         if d.ping():
+    #             self.changed(active=True)
+    #         else:
+    #             self.updated = _timestamp()

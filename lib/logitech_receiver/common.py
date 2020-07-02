@@ -26,20 +26,20 @@ from collections import namedtuple
 from struct import pack, unpack
 
 try:
-    unicode
+    unicode  # noqa: F821
     # if Python2, unicode_literals will mess our first (un)pack() argument
     _pack_str = pack
     _unpack_str = unpack
     pack = lambda x, *args: _pack_str(str(x), *args)
     unpack = lambda x, *args: _unpack_str(str(x), *args)
 
-    is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)
+    is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)  # noqa: F821
     # no easy way to distinguish between b'' and '' :(
     # or (isinstance(d, str) \
-    # 	and not any((chr(k) in d for k in range(0x00, 0x1F))) \
-    # 	and not any((chr(k) in d for k in range(0x80, 0xFF))) \
-    # 	)
-except:
+    #     and not any((chr(k) in d for k in range(0x00, 0x1F))) \
+    #     and not any((chr(k) in d for k in range(0x80, 0xFF))) \
+    #     )
+except Exception:
     # this is certanly Python 3
     # In Py3, unicode and str are equal (the unicode object does not exist)
     is_string = lambda d: isinstance(d, str)
@@ -52,8 +52,8 @@ except:
 class NamedInt(int):
     """An reqular Python integer with an attached name.
 
-	Caution: comparison with strings will also match this NamedInt's name
-	(case-insensitive)."""
+    Caution: comparison with strings will also match this NamedInt's name
+    (case-insensitive)."""
     def __new__(cls, value, name):
         assert is_string(name)
         obj = int.__new__(cls, value)
@@ -92,16 +92,16 @@ class NamedInt(int):
 class NamedInts(object):
     """An ordered set of NamedInt values.
 
-	Indexing can be made by int or string, and will return the corresponding
-	NamedInt if it exists in this set, or `None`.
+    Indexing can be made by int or string, and will return the corresponding
+    NamedInt if it exists in this set, or `None`.
 
-	Extracting slices will return all present NamedInts in the given interval
-	(extended slices are not supported).
+    Extracting slices will return all present NamedInts in the given interval
+    (extended slices are not supported).
 
-	Assigning a string to an indexed int will create a new NamedInt in this set;
-	if the value already exists in the set (int or string), ValueError will be
-	raised.
-	"""
+    Assigning a string to an indexed int will create a new NamedInt in this set;
+    if the value already exists in the set (int or string), ValueError will be
+    raised.
+    """
     __slots__ = ('__dict__', '_values', '_indexed', '_fallback')
 
     def __init__(self, **kwargs):
@@ -119,7 +119,8 @@ class NamedInts(object):
         self.__dict__ = values
         self._values = sorted(list(values.values()))
         self._indexed = {int(v): v for v in self._values}
-        # assert len(values) == len(self._indexed), "(%d) %r\n=> (%d) %r" % (len(values), values, len(self._indexed), self._indexed)
+        # assert len(values) == len(self._indexed)
+        # "(%d) %r\n=> (%d) %r" % (len(values), values, len(self._indexed), self._indexed)
         self._fallback = None
 
     @classmethod
@@ -237,8 +238,8 @@ def strhex(x):
 
 def bytes2int(x):
     """Convert a bytes string to an int.
-	The bytes are assumed to be in most-significant-first order.
-	"""
+    The bytes are assumed to be in most-significant-first order.
+    """
     assert isinstance(x, bytes)
     assert len(x) < 9
     qx = (b'\x00' * 8) + x
@@ -249,9 +250,9 @@ def bytes2int(x):
 
 def int2bytes(x, count=None):
     """Convert an int to a bytes representation.
-	The bytes are ordered in most-significant-first order.
-	If 'count' is not given, the necessary number of bytes is computed.
-	"""
+    The bytes are ordered in most-significant-first order.
+    If 'count' is not given, the necessary number of bytes is computed.
+    """
     assert isinstance(x, int)
     result = pack('!Q', x)
     assert isinstance(result, bytes)
@@ -268,8 +269,8 @@ def int2bytes(x, count=None):
 
 class KwException(Exception):
     """An exception that remembers all arguments passed to the constructor.
-	They can be later accessed by simple member access.
-	"""
+    They can be later accessed by simple member access.
+    """
     def __init__(self, **kwargs):
         super(KwException, self).__init__(kwargs)
 

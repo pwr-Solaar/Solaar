@@ -70,7 +70,7 @@ def _ghost(device):
 
 class ReceiverListener(_listener.EventsListener):
     """Keeps the status of a Receiver.
-	"""
+    """
     def __init__(self, receiver, status_changed_callback):
         super(ReceiverListener, self).__init__(receiver,
                                                self._notifications_handler)
@@ -90,7 +90,7 @@ class ReceiverListener(_listener.EventsListener):
         self.receiver.status[
             _status.KEYS.NOTIFICATION_FLAGS] = notification_flags
         self.receiver.notify_devices()
-        self._status_changed(self.receiver)  #, _status.ALERT.NOTIFICATION)
+        self._status_changed(self.receiver)  # , _status.ALERT.NOTIFICATION)
 
     def has_stopped(self):
         r, self.receiver = self.receiver, None
@@ -106,46 +106,46 @@ class ReceiverListener(_listener.EventsListener):
         if r:
             try:
                 r.close()
-            except:
+            except Exception:
                 _log.exception('closing receiver %s' % r.path)
-        self.status_changed_callback(r)  #, _status.ALERT.NOTIFICATION)
+        self.status_changed_callback(r)  # , _status.ALERT.NOTIFICATION)
 
     # def tick(self, timestamp):
-    # 	if not self.tick_period:
-    # 		raise Exception("tick() should not be called without a tick_period: %s", self)
+    #     if not self.tick_period:
+    #         raise Exception("tick() should not be called without a tick_period: %s", self)
     #
-    # 	# not necessary anymore, we're now using udev monitor to watch for receiver status
-    # 	# if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
-    # 	# 	# if we missed a couple of polls, most likely the computer went into
-    # 	# 	# sleep, and we have to reinitialize the receiver again
-    # 	# 	_log.warn("%s: possible sleep detected, closing this listener", self.receiver)
-    # 	# 	self.stop()
-    # 	# 	return
+    #     # not necessary anymore, we're now using udev monitor to watch for receiver status
+    #     # if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
+    #     #     # if we missed a couple of polls, most likely the computer went into
+    #     #     # sleep, and we have to reinitialize the receiver again
+    #     #     _log.warn("%s: possible sleep detected, closing this listener", self.receiver)
+    #     #     self.stop()
+    #     #     return
     #
-    # 	self._last_tick = timestamp
+    #     self._last_tick = timestamp
     #
-    # 	try:
-    # 		# read these in case they haven't been read already
-    # 		# self.receiver.serial, self.receiver.firmware
-    # 		if self.receiver.status.lock_open:
-    # 			# don't mess with stuff while pairing
-    # 			return
+    #     try:
+    #         # read these in case they haven't been read already
+    #         # self.receiver.serial, self.receiver.firmware
+    #         if self.receiver.status.lock_open:
+    #             # don't mess with stuff while pairing
+    #             return
     #
-    # 		self.receiver.status.poll(timestamp)
+    #         self.receiver.status.poll(timestamp)
     #
-    # 		# Iterating directly through the reciver would unnecessarily probe
-    # 		# all possible devices, even unpaired ones.
-    # 		# Checking for each device number in turn makes sure only already
-    # 		# known devices are polled.
-    # 		# This is okay because we should have already known about them all
-    # 		# long before the first poll() happents, through notifications.
-    # 		for number in range(1, 6):
-    # 			if number in self.receiver:
-    # 				dev = self.receiver[number]
-    # 				if dev and dev.status is not None:
-    # 					dev.status.poll(timestamp)
-    # 	except Exception as e:
-    # 		_log.exception("polling", e)
+    #         # Iterating directly through the reciver would unnecessarily probe
+    #         # all possible devices, even unpaired ones.
+    #         # Checking for each device number in turn makes sure only already
+    #         # known devices are polled.
+    #         # This is okay because we should have already known about them all
+    #         # long before the first poll() happents, through notifications.
+    #         for number in range(1, 6):
+    #             if number in self.receiver:
+    #                 dev = self.receiver[number]
+    #                 if dev and dev.status is not None:
+    #                     dev.status.poll(timestamp)
+    #     except Exception as e:
+    #         _log.exception("polling", e)
 
     def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
         assert device is not None
@@ -184,7 +184,7 @@ class ReceiverListener(_listener.EventsListener):
     def _notifications_handler(self, n):
         assert self.receiver
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("%s: handling %s", self.receiver, n)
+        #     _log.debug("%s: handling %s", self.receiver, n)
         if n.devnumber == 0xFF:
             # a receiver notification
             _notifications.process(self.receiver, n)
@@ -370,10 +370,11 @@ def _process_receiver_event(action, device_info):
             # (It would be easier to use pylibacl but adding the pylibacl dependencies
             # for this special case is not good.)
             try:
-                import subprocess, re
+                import subprocess
+                import re
                 output = subprocess.check_output(
                     ['/usr/bin/getfacl', '-p', device_info.path])
                 if not re.search(b'user:.+:', output):
                     _error_callback('permissions', device_info.path)
-            except:
+            except Exception:
                 _error_callback('permissions', device_info.path)

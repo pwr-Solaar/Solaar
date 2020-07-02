@@ -41,7 +41,8 @@ del getLogger
 #
 
 # <FeaturesSupported.xml sed '/LD_FID_/{s/.*LD_FID_/\t/;s/"[ \t]*Id="/=/;s/" \/>/,/p}' | sort -t= -k2
-# additional features names taken from https://github.com/cvuchener/hidpp and https://github.com/Logitech/cpg-docs/tree/master/hidpp20
+# additional features names taken from https://github.com/cvuchener/hidpp and
+# https://github.com/Logitech/cpg-docs/tree/master/hidpp20
 """Possible features available on a Logitech device.
 
 A particular device might not support all these features, and may support other
@@ -414,8 +415,8 @@ class KeysArray(object):
                                     remapped = key
                         except Exception:
                             remapped = key
-                            remap_key = key
-                            remap_flag = 0
+                            # remap_key = key
+                            # remap_flag = 0
 
                         remapped_text = special_keys.CONTROL[remapped]
                         self.keys[index] = _ReprogrammableKeyInfoV4(
@@ -463,8 +464,8 @@ def feature_request(device, feature, function=0x00, *params):
 def get_firmware(device):
     """Reads a device's firmware info.
 
-	:returns: a list of FirmwareInfo tuples, ordered by firmware layer.
-	"""
+    :returns: a list of FirmwareInfo tuples, ordered by firmware layer.
+    """
     count = feature_request(device, FEATURE.DEVICE_FW_VERSION)
     if count:
         count = ord(count[:1])
@@ -493,31 +494,31 @@ def get_firmware(device):
 
                 fw.append(fw_info)
                 # if _log.isEnabledFor(_DEBUG):
-                # 	_log.debug("device %d firmware %s", devnumber, fw_info)
+                #     _log.debug("device %d firmware %s", devnumber, fw_info)
         return tuple(fw)
 
 
 def get_kind(device):
     """Reads a device's type.
 
-	:see DEVICE_KIND:
-	:returns: a string describing the device type, or ``None`` if the device is
-	not available or does not support the ``DEVICE_NAME`` feature.
-	"""
+    :see DEVICE_KIND:
+    :returns: a string describing the device type, or ``None`` if the device is
+    not available or does not support the ``DEVICE_NAME`` feature.
+    """
     kind = feature_request(device, FEATURE.DEVICE_NAME, 0x20)
     if kind:
         kind = ord(kind[:1])
         # if _log.isEnabledFor(_DEBUG):
-        # 	_log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
+        #     _log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
         return DEVICE_KIND[kind]
 
 
 def get_name(device):
     """Reads a device's name.
 
-	:returns: a string with the device name, or ``None`` if the device is not
-	available or does not support the ``DEVICE_NAME`` feature.
-	"""
+    :returns: a string with the device name, or ``None`` if the device is not
+    available or does not support the ``DEVICE_NAME`` feature.
+    """
     name_length = feature_request(device, FEATURE.DEVICE_NAME)
     if name_length:
         name_length = ord(name_length[:1])
@@ -582,10 +583,8 @@ def decipher_voltage(voltage_report):
         charge_lvl = CHARGE_LEVEL.critical
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug(
-            'device %d, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
-            device.number, voltage, status, (flags & 0x03), charge_sts,
-            charge_lvl, charge_type)
+        _log.debug('device ???, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
+                   voltage, status, (flags & 0x03), charge_sts, charge_lvl, charge_type)
 
     return charge_lvl, status, voltage, charge_sts, charge_type
 
@@ -635,10 +634,9 @@ def get_hi_res_scrolling_info(device):
 def get_pointer_speed_info(device):
     pointer_speed_info = feature_request(device, FEATURE.POINTER_SPEED)
     if pointer_speed_info:
-        pointer_speed_hi, pointer_speed_lo = _unpack('!BB',
-                                                     pointer_speed_info[:2])
-        #if pointer_speed_lo > 0:
-        #	pointer_speed_lo = pointer_speed_lo
+        pointer_speed_hi, pointer_speed_lo = _unpack('!BB', pointer_speed_info[:2])
+        # if pointer_speed_lo > 0:
+        #     pointer_speed_lo = pointer_speed_lo
         return pointer_speed_hi + pointer_speed_lo / 256
 
 

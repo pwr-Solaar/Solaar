@@ -9,7 +9,7 @@ except ImportError:
 
 autostart_path = '/etc/xdg/autostart'
 
-#from solaar import NAME, __version__
+# from solaar import NAME, __version__
 __version__ = '1.0.2'
 NAME = 'Solaar'
 

@@ -46,7 +46,7 @@ def _load():
         try:
             with open(_file_path, 'r') as config_file:
                 loaded_configuration = _json_load(config_file)
-        except:
+        except Exception:
             _log.error('failed to load from %s', _file_path)
 
         # loaded_configuration.update(_configuration)
@@ -70,7 +70,7 @@ def save():
     if not _path.isdir(dirname):
         try:
             _os.makedirs(dirname)
-        except:
+        except Exception:
             _log.error('failed to create %s', dirname)
             return False
 
@@ -87,7 +87,7 @@ def save():
         if _log.isEnabledFor(_INFO):
             _log.info('saved %s to %s', _configuration, _file_path)
         return True
-    except:
+    except Exception:
         _log.error('failed to save to %s', _file_path)
 
 

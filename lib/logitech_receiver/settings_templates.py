@@ -28,7 +28,6 @@ from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
-from .common import ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import unpack as _unpack
@@ -449,7 +448,8 @@ def _feature_k375s_fn_swap():
                           device_kind=(_DK.keyboard, ))
 
 
-# FIXME: This will enable all supported backlight settings, we should allow the users to select which settings they want to enable.
+# FIXME: This will enable all supported backlight settings,
+# we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
     return feature_toggle(_BACKLIGHT[0],
                           _F.BACKLIGHT2,
@@ -729,11 +729,11 @@ def check_feature_settings(device, already_known):
 
     def check_feature(name, featureId, featureFn):
         """
-		:param name: name for the setting
-		:param featureId: the numeric Feature ID for this setting implementation
-		:param featureFn: the function for this setting implementation
-		"""
-        if not featureId in device.features:
+        :param name: name for the setting
+        :param featureId: the numeric Feature ID for this setting implementation
+        :param featureFn: the function for this setting implementation
+        """
+        if featureId not in device.features:
             return
         if any(s.name == name for s in already_known):
             return
@@ -749,7 +749,7 @@ def check_feature_settings(device, already_known):
             _log.error('check_feature[%s] inconsistent feature %s', featureId,
                        reason)
 
-    for name, featureId, featureFn, _, _ in _SETTINGS_TABLE:
+    for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
         if featureId and featureFn:
             check_feature(name, featureId, featureFn)
     return True

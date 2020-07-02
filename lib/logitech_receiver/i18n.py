@@ -24,10 +24,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import gettext as _gettext
 
 try:
-    unicode
+    unicode  # noqa: F821
     _ = lambda x: _gettext.gettext(x).decode('UTF-8')
     ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
-except:
+except Exception:
     _ = _gettext.gettext
     ngettext = _gettext.ngettext
 

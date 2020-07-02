@@ -65,7 +65,7 @@ class TaskRunner(_Thread):
                 assert function
                 try:
                     function(*args, **kwargs)
-                except:
+                except Exception:
                     _log.exception('calling %s', function)
 
         if _log.isEnabledFor(_DEBUG):

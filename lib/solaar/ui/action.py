@@ -60,11 +60,11 @@ def make_toggle(name, label, function, stock_id=None, *args):
 #
 
 # def _toggle_notifications(action):
-# 	if action.get_active():
-# 		notify.init('Solaar')
-# 	else:
-# 		notify.uninit()
-# 	action.set_sensitive(notify.available)
+#     if action.get_active():
+#         notify.init('Solaar')
+#     else:
+#         notify.uninit()
+#     action.set_sensitive(notify.available)
 # toggle_notifications = make_toggle('notifications', 'Notifications', _toggle_notifications)
 
 about = make('help-about',
@@ -109,6 +109,6 @@ def unpair(window, device):
 
         try:
             del receiver[device_number]
-        except:
+        except Exception:
             # _log.exception("unpairing %s", device)
             error_dialog('unpair', device)
