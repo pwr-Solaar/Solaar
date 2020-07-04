@@ -22,10 +22,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import importlib
 
+from logging import INFO as _INFO
+from logging import getLogger
+
 import solaar.cli as _cli
 import solaar.i18n as _i18n
 
 from solaar import NAME, __version__
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #
@@ -100,12 +106,26 @@ def _parse_arguments():
     return args
 
 
+# On first SIGINT, dump threads to stderr; on second, exit
+def _handlesigint(signal, stack):
+    import signal
+    import sys
+    import faulthandler
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    if _log.isEnabledFor(_INFO):
+        faulthandler.dump_traceback()
+
+    sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
+
+
 def main():
     _require('pyudev', 'python3-pyudev')
 
     # handle ^C in console
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGINT, _handlesigint)
 
     args = _parse_arguments()
     if not args:
