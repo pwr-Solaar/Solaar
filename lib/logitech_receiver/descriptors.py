@@ -368,7 +368,7 @@ _D(
     wpid='1025',
     registers=(_R.battery_status, ),
     settings=[
-        _RS.smooth_scroll(),
+        # _RS.smooth_scroll(),	# writing the bit to the register doesn't cause an error, but the bit doesn't turn on
         _RS.side_scroll(),
     ],
 )
