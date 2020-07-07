@@ -1,3 +1,45 @@
+1.0.3rc1:
+  * Remove deprecated solaar-cli application.
+  * Don't install udev or autostart files from python (or pip).
+  * Solaar needs Python 3.6+ and probably needs kernel 5.2+
+  * Handle exceptions on dynamic settings when device is not connected.
+  * Fix inifinite loop on some low-level write errors
+  * Add support for EX100 keyboard/mouse and receiver (046d:c517)
+  * Add two settings for THUMB_WHEEL feature - inversion and reporting via HID++
+  * Update German translation
+  * Use REPORT RATE feature when available to determine polling rate.
+  * Improve config command speed when not printing all settings
+  * Improve config command handling and checking of arguments
+  * Add setting for CHANGE_HOST feature
+  * Add argument to settings for values that are not to persist
+  * Add argument to settings to not wait for reply when writing a value to device
+  * Add argument to not wait for reply from request to device
+  * Add settings for MULTIPLATFORM and DUALPLATFORM features
+  * Remove Logitech documents from documentation directory
+  * Change config command to not read all settings when only printing or showing one
+  * Display hosts info in 'solaar show' if device supports it
+  * Remove non-working smooth-scrool from M510 v1
+  * Add yapf and flake8 code style checks
+  * Fix feature k375s Fn inversion
+  * Update controls (keys and buttons) and tasks (actions)
+  * Improved way to specify feature settings.
+  * Don't abort on device notifications with unexpected device numbers, just warn.
+  * Keep track of non-features so as not to ask device multiple times.
+  * Implement KEYBOARD DISABLE KEYS feature.
+  * Don't create notifications for DJ device activity reports.
+  * Update a few special keys and actions.
+  * Add keyed choice settings in configuration panel.
+  * Support remappable keys from reprogrammable keys v4 feature.
+  * Add setting class for keyed choice.
+  * Only check for features once per device.
+  * Use settings interface to show feature values in `solaar show` if no special code for feature.
+  * Remove maximum window size.
+  * Process battery voltage notifications.
+  * Display battery voltage information in main window if regular battery information not available.
+  * Show next battery level where available.
+  * Update list of implemented features and provide information on how to implement features.
+  * Add c53d as a Lightspeed receiver.
+
 1.0.2:
   * Add usage document
 
