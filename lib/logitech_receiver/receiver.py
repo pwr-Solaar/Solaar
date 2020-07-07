@@ -97,8 +97,6 @@ class PairedDevice(object):
                 self.wpid = _strhex(pair_info[3:5])
                 kind = ord(pair_info[7:8]) & 0x0F
                 self._kind = _hidpp10.DEVICE_KIND[kind]
-                self._polling_rate = ord(pair_info[2:3])
-
             else:
                 # unifying protocol not supported, must be a Nano receiver
                 device_info = self.receiver.read_register(_R.receiver_info, 0x04)
@@ -107,7 +105,6 @@ class PairedDevice(object):
                     raise _base.NoSuchDevice(number=number, receiver=receiver, error='read Nano wpid')
 
                 self.wpid = _strhex(device_info[3:5])
-                self._polling_rate = 0
                 self._power_switch = '(' + _('unknown') + ')'
 
         # the wpid is necessary to properly identify wireless link on/off notifications
@@ -178,7 +175,6 @@ class PairedDevice(object):
             if pair_info:
                 kind = ord(pair_info[7:8]) & 0x0F
                 self._kind = _hidpp10.DEVICE_KIND[kind]
-                self._polling_rate = ord(pair_info[2:3])
             elif self.online and self.protocol >= 2.0:
                 self._kind = _hidpp20.get_kind(self)
         return self._kind or '?'
@@ -229,6 +225,9 @@ class PairedDevice(object):
                 self._polling_rate = ord(pair_info[2:3])
             else:
                 self._polling_rate = 0
+        if self.online and self.protocol >= 2.0 and self.features and _hidpp20.FEATURE.REPORT_RATE in self.features:
+            rate = _hidpp20.get_polling_rate(self)
+            self._polling_rate = rate if rate is not None else self._polling_rate
         return self._polling_rate
 
     @property
