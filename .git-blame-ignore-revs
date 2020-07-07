@@ -2,6 +2,8 @@
 72a8d311bce64b1536c08e754d22bb91efb66460
 # isort bulk change
 e6369e0c3c240715a0a2daede6c3b225ed63cf60
+# pre-commit bulk change
+33521558ed7007c24b24127f1448c2c23ecbfb35
 # flake8 bulk change
 627185079f65c9cc471194b7927c833682e4a7a3
 # yapf style update
