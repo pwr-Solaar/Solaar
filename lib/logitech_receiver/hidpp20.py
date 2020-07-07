@@ -684,3 +684,10 @@ def set_host_name(device, name):
             hn = name[:min(14, name.find('.'))] if name.find('.') >= 0 else name
             response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, hn)
             return response
+
+
+def get_polling_rate(device):
+    state = feature_request(device, FEATURE.REPORT_RATE, 0x10)
+    if state:
+        rate = _unpack('!B', state[:1])[0]
+        return rate
