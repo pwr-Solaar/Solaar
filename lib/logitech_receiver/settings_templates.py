@@ -82,8 +82,8 @@ def register_choices(name, register, choices, kind=_KIND.choice, label=None, des
 def feature_toggle(
     name,
     feature,
-    read_function_id=_FeatureRW.default_read_fnid,
-    write_function_id=_FeatureRW.default_write_fnid,
+    read_fnid=_FeatureRW.default_read_fnid,
+    write_fnid=_FeatureRW.default_write_fnid,
     true_value=_BooleanV.default_true,
     false_value=_BooleanV.default_false,
     mask=_BooleanV.default_mask,
@@ -92,7 +92,7 @@ def feature_toggle(
     device_kind=None
 ):
     validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
-    rw = _FeatureRW(feature, read_function_id, write_function_id)
+    rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
     return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
 
 
@@ -100,15 +100,15 @@ def feature_bitfield_toggle(
     name,
     feature,
     options,
-    read_function_id=_FeatureRW.default_read_fnid,
-    write_function_id=_FeatureRW.default_write_fnid,
+    read_fnid=_FeatureRW.default_read_fnid,
+    write_fnid=_FeatureRW.default_write_fnid,
     label=None,
     description=None,
     device_kind=None
 ):
     assert options
     validator = _BitFieldV(options)
-    rw = _FeatureRW(feature, read_function_id, write_function_id)
+    rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
     return _BitFieldSetting(
         name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind
     )
@@ -118,8 +118,8 @@ def feature_bitfield_toggle_dynamic(
     name,
     feature,
     options_callback,
-    read_function_id=_FeatureRW.default_read_fnid,
-    write_function_id=_FeatureRW.default_write_fnid,
+    read_fnid=_FeatureRW.default_read_fnid,
+    write_fnid=_FeatureRW.default_write_fnid,
     label=None,
     description=None,
     device_kind=None
@@ -130,8 +130,8 @@ def feature_bitfield_toggle_dynamic(
             name,
             feature,
             options,
-            read_function_id=read_function_id,
-            write_function_id=write_function_id,
+            read_fnid=read_fnid,
+            write_fnid=write_fnid,
             label=label,
             description=description,
             device_kind=device_kind
@@ -142,51 +142,21 @@ def feature_bitfield_toggle_dynamic(
     return instantiate
 
 
-def feature_choices(
-    name,
-    feature,
-    choices,
-    read_function_id,
-    write_function_id,
-    bytes_count=None,
-    label=None,
-    description=None,
-    device_kind=None
-):
+def feature_choices(name, feature, choices, **kwargs):
     assert choices
-    validator = _ChoicesV(choices, bytes_count=bytes_count)
-    rw = _FeatureRW(feature, read_function_id, write_function_id)
-    return _Setting(
-        name, rw, validator, feature=feature, kind=_KIND.choice, label=label, description=description, device_kind=device_kind
-    )
+    validator = _ChoicesV(choices, **kwargs)
+    rw = _FeatureRW(feature, **kwargs)
+    return _Setting(name, rw, validator, kind=_KIND.choice, **kwargs)
 
 
-def feature_choices_dynamic(
-    name,
-    feature,
-    choices_callback,
-    read_function_id,
-    write_function_id,
-    bytes_count=None,
-    label=None,
-    description=None,
-    device_kind=None
-):
+def feature_choices_dynamic(name, feature, choices_callback, **kwargs):
     # Proxy that obtains choices dynamically from a device
     def instantiate(device):
         # Obtain choices for this feature
         choices = choices_callback(device)
-        setting = feature_choices(
-            name,
-            feature,
-            choices,
-            read_function_id,
-            write_function_id,
-            bytes_count=bytes_count,
-            label=label,
-            description=description,
-            device_kind=device_kind
-        )
+        if not choices:  # no choices, so don't create a setting
+            return None
+        setting = feature_choices(name, feature, choices, **kwargs)
         return setting(device)
 
     instantiate._rw_kind = _FeatureRW.kind
@@ -195,75 +165,20 @@ def feature_choices_dynamic(
 
 # maintain a mapping from keys (NamedInts) to one of a list of choices (NamedInts), default is first one
 # the setting is stored as a JSON-compatible object mapping the key int (as a string) to the choice int
-# extra_default is an extra value that comes from the device that also means the default
-def feature_map_choices(
-    name,
-    feature,
-    choicesmap,
-    read_function_id,
-    write_function_id,
-    key_bytes_count=None,
-    skip_bytes_count=None,
-    value_bytes_count=None,
-    label=None,
-    description=None,
-    device_kind=None,
-    extra_default=None
-):
+def feature_map_choices(name, feature, choicesmap, **kwargs):
     assert choicesmap
-    validator = _ChoicesMapV(
-        choicesmap,
-        key_bytes_count=key_bytes_count,
-        skip_bytes_count=skip_bytes_count,
-        value_bytes_count=value_bytes_count,
-        extra_default=extra_default
-    )
-    rw = _FeatureRWMap(feature, read_function_id, write_function_id, key_bytes=key_bytes_count)
-    return _Settings(
-        name,
-        rw,
-        validator,
-        feature=feature,
-        kind=_KIND.map_choice,
-        label=label,
-        description=description,
-        device_kind=device_kind
-    )
+    validator = _ChoicesMapV(choicesmap, **kwargs)
+    rw = _FeatureRWMap(feature, **kwargs)
+    return _Settings(name, rw, validator, kind=_KIND.map_choice, **kwargs)
 
 
-def feature_map_choices_dynamic(
-    name,
-    feature,
-    choices_callback,
-    read_function_id,
-    write_function_id,
-    key_bytes_count=None,
-    skip_bytes_count=None,
-    value_bytes_count=None,
-    label=None,
-    description=None,
-    device_kind=None,
-    extra_default=None
-):
+def feature_map_choices_dynamic(name, feature, choices_callback, **kwargs):
     # Proxy that obtains choices dynamically from a device
     def instantiate(device):
         choices = choices_callback(device)
         if not choices:  # no choices, so don't create a Setting
             return None
-        setting = feature_map_choices(
-            name,
-            feature,
-            choices,
-            read_function_id,
-            write_function_id,
-            key_bytes_count=key_bytes_count,
-            skip_bytes_count=skip_bytes_count,
-            value_bytes_count=value_bytes_count,
-            label=label,
-            description=description,
-            device_kind=device_kind,
-            extra_default=extra_default
-        )
+        setting = feature_map_choices(name, feature, choices, **kwargs)
         return setting(device)
 
     instantiate._rw_kind = _FeatureRWMap.kind
@@ -275,8 +190,8 @@ def feature_range(
     feature,
     min_value,
     max_value,
-    read_function_id=_FeatureRW.default_read_fnid,
-    write_function_id=_FeatureRW.default_write_fnid,
+    read_fnid=_FeatureRW.default_read_fnid,
+    write_fnid=_FeatureRW.default_write_fnid,
     rw=None,
     bytes_count=None,
     label=None,
@@ -285,7 +200,7 @@ def feature_range(
 ):
     validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
     if rw is None:
-        rw = _FeatureRW(feature, read_function_id, write_function_id)
+        rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
     return _Setting(
         name, rw, validator, feature=feature, kind=_KIND.range, label=label, description=description, device_kind=device_kind
     )
@@ -342,10 +257,22 @@ _REPROGRAMMABLE_KEYS = (
     _('Changing important actions (such as for the left mouse button) can result in an unusable system.')
 )
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
+_PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 
 #
-#
-#
+# Keyword arguments for setting template functions:
+#  label, description - label and tooltip to be shown in GUI
+#  device_kind - the kinds of devices that setting is suitable for (NOT CURRENTLY USED)
+#  read_fnid, write_fnid - default 0x00 and 0x10 function numbers (times 16) to read and write setting
+#  bytes_count - default 1 - number of bytes for the data (ignoring the key)
+# only for boolean settings
+#  true_value, false_value,  mask - integer or byte strings for boolean settings
+# only for map choices
+#  key_bytes_count - default 1 - number of bytes in the key
+#  extra_default - extra value that cannot be set but means same as default value
+# only for choices and map choices
+#  read_skip_bytes_count - default 0 - number of bytes to ignore before the data when reading
+#  write_prefix_bytes - default None - bytes to put before the data writing
 
 
 def _register_hand_detection(
@@ -463,8 +390,8 @@ def _feature_hires_smooth_invert():
     return feature_toggle(
         _HIRES_INV[0],
         _F.HIRES_WHEEL,
-        read_function_id=0x10,
-        write_function_id=0x20,
+        read_fnid=0x10,
+        write_fnid=0x20,
         true_value=0x04,
         mask=0x04,
         label=_HIRES_INV[1],
@@ -477,8 +404,8 @@ def _feature_hires_smooth_resolution():
     return feature_toggle(
         _HIRES_RES[0],
         _F.HIRES_WHEEL,
-        read_function_id=0x10,
-        write_function_id=0x20,
+        read_fnid=0x10,
+        write_fnid=0x20,
         true_value=0x02,
         mask=0x02,
         label=_HIRES_RES[1],
@@ -562,8 +489,8 @@ def _feature_adjustable_dpi():
         _DPI[0],
         _F.ADJUSTABLE_DPI,
         _feature_adjustable_dpi_choices,
-        read_function_id=0x20,
-        write_function_id=0x30,
+        read_fnid=0x20,
+        write_fnid=0x30,
         bytes_count=3,
         label=_DPI[1],
         description=_DPI[2],
@@ -579,8 +506,8 @@ def _feature_pointer_speed():
         _F.POINTER_SPEED,
         0x002e,
         0x01ff,
-        read_function_id=0x0,
-        write_function_id=0x10,
+        read_fnid=0x0,
+        write_fnid=0x10,
         bytes_count=2,
         label=_POINTER_SPEED[1],
         description=_POINTER_SPEED[2],
@@ -624,15 +551,16 @@ def _feature_reprogrammable_keys():
         _REPROGRAMMABLE_KEYS[0],
         _F.REPROG_CONTROLS_V4,
         _feature_reprogrammable_keys_choices,
-        read_function_id=0x20,
-        write_function_id=0x30,
+        read_fnid=0x20,
+        write_fnid=0x30,
         key_bytes_count=2,
-        skip_bytes_count=1,
-        value_bytes_count=2,
+        bytes_count=2,
+        read_skip_bytes_count=1,
+        write_prefix_bytes=b'\x00',
+        extra_default=0,
         label=_REPROGRAMMABLE_KEYS[1],
         description=_REPROGRAMMABLE_KEYS[2],
         device_kind=(_DK.keyboard, ),
-        extra_default=0
     )
 
 
@@ -647,10 +575,79 @@ def _feature_disable_keyboard_keys():
         _DISABLE_KEYS[0],
         _F.KEYBOARD_DISABLE_KEYS,
         _feature_disable_keyboard_keys_key_list,
-        read_function_id=0x10,
-        write_function_id=0x20,
+        read_fnid=0x10,
+        write_fnid=0x20,
         label=_DISABLE_KEYS[1],
         description=_DISABLE_KEYS[2],
+        device_kind=(_DK.keyboard, )
+    )
+
+
+# muultiplatform OS bits
+OSS = [('Linux', 0x0400), ('MacOS', 0x2000), ('Windows', 0x0100), ('iOS', 0x4000), ('Android', 0x1000), ('WebOS', 0x8000),
+       ('Chrome', 0x0800), ('WinEmb', 0x0200), ('Tizen', 0x0001)]
+
+
+def _feature_multiplatform_choices(device):
+    def _str_os_versions(low, high):
+        def _str_os_version(version):
+            if version == 0:
+                return ''
+            elif version & 0xFF:
+                return str(version >> 8) + '.' + str(version & 0xFF)
+            else:
+                return str(version >> 8)
+
+        return '' if low == 0 and high == 0 else ' ' + _str_os_version(low) + '-' + _str_os_version(high)
+
+    infos = device.feature_request(_F.MULTIPLATFORM)
+    assert infos, 'Oops, multiplatform count cannot be retrieved!'
+    flags, _ignore, num_descriptors = _unpack('!BBB', infos[:3])
+    if not (flags & 0x02):  # can't set platform so don't create setting
+        return []
+    descriptors = []
+    for index in range(0, num_descriptors):
+        descriptor = device.feature_request(_F.MULTIPLATFORM, 0x10, index)
+        platform, _ignore, os_flags, low, high = _unpack('!BBHHH', descriptor[:8])
+        descriptors.append((platform, os_flags, low, high))
+    choices = _NamedInts()
+    for os_name, os_bit in OSS:
+        for platform, os_flags, low, high in descriptors:
+            os = os_name + _str_os_versions(low, high)
+            if os_bit & os_flags and platform not in choices and os not in choices:
+                choices[platform] = os
+    return choices
+
+
+def _feature_multiplatform():
+    return feature_choices_dynamic(
+        _PLATFORM[0],
+        _F.MULTIPLATFORM,
+        _feature_multiplatform_choices,
+        read_fnid=0x00,
+        read_skip_bytes_count=6,
+        write_fnid=0x30,
+        write_prefix_bytes=b'\xff',
+        label=_PLATFORM[1],
+        description=_PLATFORM[2],
+        device_kind=(_DK.keyboard, )
+    )
+
+
+PLATFORMS = _NamedInts()
+PLATFORMS[0x00] = 'iOS, MacOS'
+PLATFORMS[0x01] = 'Android, Windows'
+
+
+def _feature_dualplatform():
+    return feature_choices(
+        _PLATFORM[0],
+        _F.DUALPLATFORM,
+        PLATFORMS,
+        read_fnid=0x10,
+        write_fnid=0x20,
+        label=_PLATFORM[1],
+        description=_PLATFORM[2],
         device_kind=(_DK.keyboard, )
     )
 
@@ -681,6 +678,8 @@ _SETTINGS_TABLE = [
     _S(_BACKLIGHT[0], _F.BACKLIGHT2, _feature_backlight2),
     _S(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
     _S(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
+    _S(_PLATFORM[0], _F.MULTIPLATFORM, _feature_multiplatform),
+    _S(_PLATFORM[0], _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform')
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])

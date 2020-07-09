@@ -45,7 +45,7 @@ class Setting(object):
     Needs to be instantiated for each specific device."""
     __slots__ = ('name', 'label', 'description', 'kind', 'device_kind', 'feature', '_rw', '_validator', '_device', '_value')
 
-    def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None, feature=None):
+    def __init__(self, name, rw, validator, kind=None, label=None, description=None, device_kind=None, feature=None, **kwargs):
         assert name
         self.name = name
         self.label = label or name
@@ -434,7 +434,7 @@ class FeatureRW(object):
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
-    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid):
+    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, **kwargs):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
@@ -453,23 +453,30 @@ class FeatureRWMap(FeatureRW):
     kind = _NamedInt(0x02, 'feature')
     default_read_fnid = 0x00
     default_write_fnid = 0x10
-    default_key_bytes = 1
+    default_key_bytes_count = 1
 
-    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, key_bytes=default_key_bytes):
+    def __init__(
+        self,
+        feature,
+        read_fnid=default_read_fnid,
+        write_fnid=default_write_fnid,
+        key_bytes_count=default_key_bytes_count,
+        **kwargs
+    ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
-        self.key_bytes = key_bytes
+        self.key_bytes_count = key_bytes_count
 
     def read(self, device, key):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_bytes)
+        key_bytes = _int2bytes(key, self.key_bytes_count)
         return device.feature_request(self.feature, self.read_fnid, key_bytes)
 
     def write(self, device, key, data_bytes):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_bytes)
+        key_bytes = _int2bytes(key, self.key_bytes_count)
         return device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes)
 
 
@@ -488,7 +495,7 @@ class BooleanValidator(object):
     # mask specifies all the affected bits in the value
     default_mask = 0xFF
 
-    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask):
+    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask, **kwargs):
         if isinstance(true_value, int):
             assert isinstance(false_value, int)
             if mask is None:
@@ -593,7 +600,7 @@ class BitFieldValidator(object):
 
     kind = KIND.multiple_toggle
 
-    def __init__(self, options, byte_count=None):
+    def __init__(self, options, byte_count=None, **kwargs):
         assert (isinstance(options, list))
         self.options = options
         self.byte_count = (max(x.bit_length() for x in options) + 7) // 8
@@ -621,14 +628,12 @@ class BitFieldValidator(object):
 
 
 class ChoicesValidator(object):
-    __slots__ = ('choices', 'flag', '_bytes_count', 'needs_current_value')
-
     kind = KIND.choice
     """Translates between NamedInts and a byte sequence.
     :param choices: a list of NamedInts
     :param bytes_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
-    def __init__(self, choices, bytes_count=None):
+    def __init__(self, choices, bytes_count=None, read_skip_bytes_count=None, write_prefix_bytes=b'', **_ignore):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
         assert len(choices) > 2
@@ -641,9 +646,13 @@ class ChoicesValidator(object):
             assert self._bytes_count <= bytes_count
             self._bytes_count = bytes_count
         assert self._bytes_count < 8
+        self._read_skip_bytes_count = read_skip_bytes_count if read_skip_bytes_count else 0
+        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
+        assert self._bytes_count + self._read_skip_bytes_count <= 14
+        assert self._bytes_count + len(self._write_prefix_bytes) <= 14
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[:self._bytes_count])
+        reply_value = _bytes2int(reply_bytes[self._read_skip_bytes_count:self._read_skip_bytes_count + self._bytes_count])
         valid_value = self.choices[reply_value]
         assert valid_value is not None, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return valid_value
@@ -664,13 +673,22 @@ class ChoicesValidator(object):
         if choice is None:
             raise ValueError('invalid choice %r' % new_value)
         assert isinstance(choice, _NamedInt)
-        return choice.bytes(self._bytes_count)
+        return self._write_prefix_bytes + choice.bytes(self._bytes_count)
 
 
 class ChoicesMapValidator(ChoicesValidator):
     kind = KIND.map_choice
 
-    def __init__(self, choices_map, key_bytes_count=None, skip_bytes_count=None, value_bytes_count=None, extra_default=None):
+    def __init__(
+        self,
+        choices_map,
+        key_bytes_count=None,
+        bytes_count=None,
+        read_skip_bytes_count=0,
+        write_prefix_bytes=b'',
+        extra_default=None,
+        **kwargs
+    ):
         assert choices_map is not None
         assert isinstance(choices_map, dict)
         max_key_bits = 0
@@ -682,24 +700,25 @@ class ChoicesMapValidator(ChoicesValidator):
             for key_value in choices:
                 assert isinstance(key_value, _NamedInt)
                 max_value_bits = max(max_value_bits, key_value.bit_length())
-        self.choices = choices_map
-        self.needs_current_value = False
-        self.extra_default = extra_default
-
         self._key_bytes_count = (max_key_bits + 7) // 8
         if key_bytes_count:
             assert self._key_bytes_count <= key_bytes_count
             self._key_bytes_count = key_bytes_count
-        self._value_bytes_count = (max_value_bits + 7) // 8
-        if value_bytes_count:
-            assert self._value_bytes_count <= value_bytes_count
-            self._value_bytes_count = value_bytes_count
-        self._skip_bytes_count = skip_bytes_count if skip_bytes_count is not None else 0
-        self._bytes_count = self._key_bytes_count + self._skip_bytes_count + self._value_bytes_count
+        self._bytes_count = (max_value_bits + 7) // 8
+        if bytes_count:
+            assert self._bytes_count <= bytes_count
+            self._bytes_count = bytes_count
+        self.choices = choices_map
+        self.needs_current_value = False
+        self.extra_default = extra_default
+        self._read_skip_bytes_count = read_skip_bytes_count if read_skip_bytes_count else 0
+        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
+        assert self._bytes_count + self._read_skip_bytes_count + self._key_bytes_count <= 14
+        assert self._bytes_count + len(self._write_prefix_bytes) + self._key_bytes_count <= 14
 
     def validate_read(self, reply_bytes, key):
-        start = self._key_bytes_count + self._skip_bytes_count
-        end = start + self._value_bytes_count
+        start = self._key_bytes_count + self._read_skip_bytes_count
+        end = start + self._bytes_count
         reply_value = _bytes2int(reply_bytes[start:end])
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
@@ -712,7 +731,7 @@ class ChoicesMapValidator(ChoicesValidator):
         choices = self.choices[key]
         if new_value not in choices and new_value != self.extra_default:
             raise ValueError('invalid choice %r' % new_value)
-        return _int2bytes(new_value, self._skip_bytes_count + self._value_bytes_count)
+        return self._write_prefix_bytes + new_value.to_bytes(self._bytes_count, 'big')
 
 
 class RangeValidator(object):
@@ -724,7 +743,7 @@ class RangeValidator(object):
     :param max_value: maximum accepted value (inclusive)
     :param bytes_count: the size of the derived byte sequence. If None, it
     will be calculated from the range."""
-    def __init__(self, min_value, max_value, bytes_count=None):
+    def __init__(self, min_value, max_value, bytes_count=None, **kwargs):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
