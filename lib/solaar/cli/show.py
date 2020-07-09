@@ -172,6 +172,10 @@ def _print_device(dev):
                 inverted, default_inverted = _hidpp20.get_new_fn_inversion(dev)
                 print('            Fn-swap:', 'enabled' if inverted else 'disabled')
                 print('            Fn-swap default:', 'enabled' if default_inverted else 'disabled')
+            elif feature == _hidpp20.FEATURE.HOSTS_INFO:
+                host_names = _hidpp20.get_host_names(dev)
+                for host, (paired, name) in host_names.items():
+                    print('            Host %s (%s): %s' % (host, 'paired' if paired else 'unpaired', name))
             for setting in dev_settings:
                 if setting.feature == feature:
                     v = setting.read(False)
