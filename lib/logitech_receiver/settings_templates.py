@@ -54,19 +54,19 @@ def register_toggle(name, register,
 					true_value=_BooleanV.default_true,
 					false_value=_BooleanV.default_false,
 					mask=_BooleanV.default_mask,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _RegisterRW(register)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind, persister=persister)
 
 
 def register_choices(name, register, choices,
 					kind=_KIND.choice,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	assert choices
 	validator = _ChoicesV(choices)
 	rw = _RegisterRW(register)
-	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind, persister=persister)
 
 
 def feature_toggle(name, feature,
@@ -75,24 +75,24 @@ def feature_toggle(name, feature,
 					true_value=_BooleanV.default_true,
 					false_value=_BooleanV.default_false,
 					mask=_BooleanV.default_mask,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind, persister=persister)
 
 def feature_choices(name, feature, choices,
 					read_function_id, write_function_id,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	assert choices
 	validator = _ChoicesV(choices, bytes_count=bytes_count)
 	rw = _FeatureRW(feature, read_function_id, write_function_id)
-	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kind=device_kind)
+	return _Setting(name, rw, validator, kind=_KIND.choice, label=label, description=description, device_kind=device_kind, persister=persister)
 
 def feature_choices_dynamic(name, feature, choices_callback,
 					read_function_id, write_function_id,
 					bytes_count=None,
-					label=None, description=None, device_kind=None):
+					label=None, description=None, device_kind=None, persister=True):
 	# Proxy that obtains choices dynamically from a device
 	def instantiate(device):
 		# Obtain choices for this feature
@@ -100,7 +100,7 @@ def feature_choices_dynamic(name, feature, choices_callback,
 		setting = feature_choices(name, feature, choices,
 						read_function_id, write_function_id,
 						bytes_count=bytes_count,
-						label=label, description=description, device_kind=device_kind)
+						label=label, description=description, device_kind=device_kind, persister=True)
 		return setting(device)
 	return instantiate
 
@@ -230,18 +230,40 @@ def _feature_hires_smooth_resolution():
 					label=_HIRES_RES[1], description=_HIRES_RES[2],
 					device_kind=(_DK.mouse, _DK.trackball))
 
+def _feature_change_host_choices(device):
+	# [1] getSensorDpiList(sensorIdx)
+	reply = device.feature_request(_F.CHANGE_HOST, 0x10)
+	# Should not happen, but might happen when the user unplugs device while the
+	# query is being executed. TODO retry logic?
+	assert reply, 'Oops, Hodt list cannot be retrieved!'
+	dpi_list = []
+	step = None
+	for val in _unpack('!7H', reply[1:1+14]):
+		if val == 0:
+			break
+		if val >> 13 == 0b111:
+			assert step is None and len(dpi_list) == 1, \
+					'Invalid DPI list item: %r' % val
+			step = val & 0x1fff
+		else:
+			dpi_list.append(val)
+	if step:
+		assert len(dpi_list) == 2, 'Invalid DPI list range: %r' % dpi_list
+		dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
+	return _NamedInts.list(dpi_list)
+
 def _feature_change_host():
 	class _ChangeHostRW(_FeatureRW):
 		def __init__(self, feature):
 			super(_ChangeHostRW, self).__init__(feature)
 
 		def read(self, device):
-			return  b'\x02'
-			#value = super(_ChangeHostRW, self).read(device)
-			#if value == None:
-			#	return 0
-			#else:
-			#	return _int2bytes(value[1])
+			#return  b'\x02'
+			value = super(_ChangeHostRW, self).read(device)
+			if value == None:
+				return 0
+			else:
+				return _int2bytes(value[1])
 
 		def write(self, device, data_bytes):
 			return super(_ChangeHostRW, self).write(device, data_bytes)
