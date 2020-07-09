@@ -34,7 +34,7 @@ Feature                                | ID       | Status             | Notes
 `OOBSTATE`                             | `0x1805` | :x:                |
 `CONFIG_DEVICE_PROPS`                  | `0x1806` | :x:                |
 `CHANGE_HOST`                          | `0x1814` | :x:                |
-`HOSTS_INFO`                           | `0x1815` | :x:                |
+`HOSTS_INFO`                           | `0x1815` | :heavy_plus_sign:  | `get_host_names`, partial listing only
 `BACKLIGHT`                            | `0x1981` | :x:                |
 `BACKLIGHT2`                           | `0x1982` | :heavy_check_mark: | `_feature_backlight2`
 `BACKLIGHT3`                           | `0x1983` | :x:                |

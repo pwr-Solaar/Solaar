@@ -651,9 +651,36 @@ def get_hires_wheel(device):
 
 def get_new_fn_inversion(device):
     state = feature_request(device, FEATURE.NEW_FN_INVERSION, 0x00)
-
     if state:
         inverted, default_inverted = _unpack('!BB', state[:2])
         inverted = (inverted & 0x01) != 0
         default_inverted = (default_inverted & 0x01) != 0
         return inverted, default_inverted
+
+
+def get_host_names(device):
+    state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
+    host_names = {}
+    if state:
+        _ignore, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
+        for host in range(0, numHosts):
+            hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
+            _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
+            name = ''
+            remaining = nameLen
+            while remaining > 0:
+                name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
+                name += name_piece[2:2 + min(remaining, 14)].decode()
+                remaining = max(0, remaining - 14)
+            host_names[host] = (bool(status), name)
+    return host_names
+
+
+def set_host_name(device, name):
+    state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
+    if state:
+        flags = _unpack('!B', state[:1])[0]
+        if flags & 0x02:
+            hn = name[:min(14, name.find('.'))] if name.find('.') >= 0 else name
+            response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, hn)
+            return response
