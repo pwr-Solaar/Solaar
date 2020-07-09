@@ -75,8 +75,8 @@ Feature                                | ID       | Status             | Notes
 `KEYBOARD_LAYOUT`                      | `0x4520` | :x:                | read only
 `KEYBOARD_DISABLE_KEYS`                | `0x4521` | :heavy_check_mark: | `_feature_disable_keyboard_keys`
 `KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | :x:                |
-`DUALPLATFORM`                         | `0x4530` | :x:                | :wrench:
-`MULTIPLATFORM`                        | `0x4531` | :x:                | :wrench:
+`DUALPLATFORM`                         | `0x4530` | :heavy_check_mark: | `_feature_dualplatform`, untested
+`MULTIPLATFORM`                        | `0x4531` | :heavy_check_mark: | `_feature_multiplatform`
 `KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                | read only
 `CROWN`                                | `0x4600` | :x:                |
 `TOUCHPAD_FW_ITEMS`                    | `0x6010` | :x:                |
