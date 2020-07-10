@@ -7,27 +7,27 @@
      Serial number: 4D71FEE1
         Bootloader: BOT 25.00.B0005
           Firmware: MPK 01.00.B0018
-             Other: 
+             Other:
      The power switch is located on the edge of top right corner.
      Supports 31 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: WIRELESS DEVICE STATUS {1D4B}   
-         5: RESET                  {0020}   
-         6: unknown:0007           {0007}   
-         7: BATTERY STATUS         {1000}   
-         8: CHANGE HOST            {1814}   
-         9: unknown:1815           {1815}   
-        10: REPROG CONTROLS V4     {1B04}   
-        11: unknown:1C00           {1C00}   
-        12: NEW FN INVERSION       {40A2}   
-        13: ENCRYPTION             {4100}   
-        14: KEYBOARD DISABLE       {4521}   
-        15: unknown:4531           {4531}   
-        16: LOCK KEY STATE         {4220}   
-        17: unknown:00C2           {00C2}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: unknown:0007           {0007}
+         7: BATTERY STATUS         {1000}
+         8: CHANGE HOST            {1814}
+         9: unknown:1815           {1815}
+        10: REPROG CONTROLS V4     {1B04}
+        11: unknown:1C00           {1C00}
+        12: NEW FN INVERSION       {40A2}
+        13: ENCRYPTION             {4100}
+        14: KEYBOARD DISABLE       {4521}
+        15: unknown:4531           {4531}
+        16: LOCK KEY STATE         {4220}
+        17: unknown:00C2           {00C2}
         18: unknown:1803           {1803}   internal, hidden
         19: unknown:1806           {1806}   internal, hidden
         20: unknown:1805           {1805}   internal, hidden

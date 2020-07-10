@@ -23,30 +23,42 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import gettext as _gettext
 
-
 try:
-	unicode
-	_ = lambda x: _gettext.gettext(x).decode('UTF-8')
-	ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
-except:
-	_ = _gettext.gettext
-	ngettext = _gettext.ngettext
-
+    unicode  # noqa: F821
+    _ = lambda x: _gettext.gettext(x).decode('UTF-8')
+    ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
+except Exception:
+    _ = _gettext.gettext
+    ngettext = _gettext.ngettext
 
 # A few common strings, not always accessible as such in the code.
 
 _DUMMY = (
-		# approximative battery levels
-		_("empty"), _("critical"), _("low"), _("good"), _("full"),
+    # approximative battery levels
+    _('empty'),
+    _('critical'),
+    _('low'),
+    _('good'),
+    _('full'),
 
-		# battery charging statuses
-		_("discharging"), _("recharging"), _("almost full"), _("charged"),
-		_("slow recharge"), _("invalid battery"), _("thermal error"),
+    # battery charging statuses
+    _('discharging'),
+    _('recharging'),
+    _('almost full'),
+    _('charged'),
+    _('slow recharge'),
+    _('invalid battery'),
+    _('thermal error'),
 
-		# pairing errors
-		_("device timeout"), _("device not supported"), _("too many devices"), _("sequence timeout"),
+    # pairing errors
+    _('device timeout'),
+    _('device not supported'),
+    _('too many devices'),
+    _('sequence timeout'),
 
-		# firmware kinds
-		_("Firmware"), _("Bootloader"), _("Hardware"), _("Other"),
-
-	)
+    # firmware kinds
+    _('Firmware'),
+    _('Bootloader'),
+    _('Hardware'),
+    _('Other'),
+)

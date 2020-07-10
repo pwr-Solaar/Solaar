@@ -12,17 +12,17 @@
         Bootloader: DFU 00.02.B0003
      The power switch is located on the edge of top right corner.
      Supports 11 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: REPROG CONTROLS        {1B00}   
-         5: WIRELESS DEVICE STATUS {1D4B}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: REPROG CONTROLS        {1B00}
+         5: WIRELESS DEVICE STATUS {1D4B}
          6: unknown:1DF3           {1DF3}   hidden
-         7: FN INVERSION           {40A0}   
-         8: ENCRYPTION             {4100}   
-         9: SOLAR DASHBOARD        {4301}   
-        10: KEYBOARD LAYOUT        {4520}   
+         7: FN INVERSION           {40A0}
+         8: ENCRYPTION             {4100}
+         9: SOLAR DASHBOARD        {4301}
+        10: KEYBOARD LAYOUT        {4520}
      Has 12 reprogrammable keys:
          0: MY HOME                    => HomePage                      FN sensitive, is FN, reprogrammable
          1: Mail                       => Email                         FN sensitive, is FN, reprogrammable

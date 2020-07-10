@@ -80,4 +80,3 @@ Unifying Receiver
          7: unknown:00D7              , default: unknown:00B4                => unknown:00D7
              divertable, virtual, pos:0, group:3, gmask:0
      Battery: 50%, discharging.
-

@@ -111,4 +111,3 @@ Unifying Receiver
         23: unknown:0034              , default: Do Nothing One              => unknown:0034
              nonstandard, pos:0, group:0, gmask:0
      Battery: 0%, full.
-

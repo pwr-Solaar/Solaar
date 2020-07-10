@@ -16,22 +16,19 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 """Generic Human Interface Device API."""
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-__version__ = '0.9'
+from hidapi.udev import close  # noqa: F401
+from hidapi.udev import enumerate  # noqa: F401
+from hidapi.udev import get_manufacturer  # noqa: F401
+from hidapi.udev import get_product  # noqa: F401
+from hidapi.udev import get_serial  # noqa: F401
+from hidapi.udev import monitor_glib  # noqa: F401
+from hidapi.udev import open  # noqa: F401
+from hidapi.udev import open_path  # noqa: F401
+from hidapi.udev import read  # noqa: F401
+from hidapi.udev import write  # noqa: F401
 
-from hidapi.udev import (
-				enumerate,
-				open,
-				close,
-				open_path,
-				monitor_glib,
-				read,
-				write,
-				get_manufacturer,
-				get_product,
-				get_serial,
-			)
+__version__ = '0.9'

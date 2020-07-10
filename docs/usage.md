@@ -14,7 +14,9 @@ Solaar also has a main window.  To show the main window if it is not visible
 click on the icon in the system tray to bring up the Solaar menu and then
 click on a receiver or device in the menu.
 
-Here is an example of the Solaar icon (in the system tray) and the Solaar menu:
+Here is an image of the Solaar menu and the Solaar icon (here the battery
+symbol in the system tray at the left of the image ). The Solaar icon can
+also be other battery icons or versions of the Logitech Unifying icon.
 
 ![Solaar-menu](Solaar-menu.png)
 
@@ -44,6 +46,8 @@ Clicking on "About Solaar" pops up a window with information on Solaar.
 Clicking on the lightbulb (or similar icon) displays detailed information
 about the selected receiver or device (mostly only useful for debugging).
 
+### Pairing and unpairing devices
+
 When a receiver is selected in the main window you can pair a new device by
 clicking on the "Pair new device" button.
 Then turn on the device and it should pair with the receiver if that is possible.
@@ -62,6 +66,8 @@ When a device is selected you can unpair the device if your receiver supports
 unpairing.  To unpair the device, just click on the "Unpair" button and
 confirm in the window that pops up.
 
+### Viewing and changing device settings
+
 When a device is selected you can see the approximate battery level of the
 device, if that is reported by the device, and the status of the link
 between the device and its receiver.
@@ -78,6 +84,28 @@ but it still can be unpaired if its receiver allows unpairing.
 
 ![Solaar-main-window-offline](Solaar-main-window-offline.png)
 
+#### Remapping key and button actions
+
+For many devices Solaar can remap some of their keys or buttons to
+perform a different action.  (This actually changes the information that the
+device sends when the key or button is activated.)  Only some keys on some
+devices can be remapped and they can only be remapped to a limited
+number of actions.  The remapping is done in Solaar by selecting a key
+or button in the left-hand box on the ``Action'' setting line and then
+selecting the action to be performed in the right-hand box.  The default
+action is always the shown first in the list.  As with all settings,
+Solaar will remembers past action settings and restore them on the device
+from then on.
+
+![Solaar-main-window-actions](Solaar-main-window-button-actions.png)
+
+The names of the keys, buttons, and actions are mostly taken from Logitech
+documentation and may not be completely obvious.
+
+It is possible to end up with an unusable system, for example by having no
+way to do a mouse left click, so exercise caution when remapping keys or
+buttons that are needed to operate your system.
+
 
 ## Solaar command line interface
 
@@ -85,4 +113,3 @@ Solaar also has a command line interface that can do most of what can be
 done using the Solaar main window.  For more information on the Solaar
 command line interface, run `solaar --help` to see the Solaar commands and
 then `solaar <command> --help` to see the arguments to any of the commands.
-

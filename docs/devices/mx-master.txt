@@ -19,24 +19,24 @@ Unifying Receiver
         Bootloader: BOT 18.00.B0012
           Firmware: MPM 11.00.B0012
           Firmware: MPM 11.00.B0012
-             Other: 
+             Other:
      The power switch is located on the base.
      Supports 29 HID++ 2.0 features:
-         0: ROOT                   {0000}   
-         1: FEATURE SET            {0001}   
-         2: DEVICE FW VERSION      {0003}   
-         3: DEVICE NAME            {0005}   
-         4: WIRELESS DEVICE STATUS {1D4B}   
-         5: RESET                  {0020}   
-         6: BATTERY STATUS         {1000}   
-         7: CHANGE HOST            {1814}   
-         8: REPROG CONTROLS V4     {1B04}   
-         9: ADJUSTABLE DPI         {2201}   
-        10: VERTICAL SCROLLING     {2100}   
-        11: SMART SHIFT            {2110}   
-        12: HIRES WHEEL            {2121}   
-        13: GESTURE 2              {6501}   
-        14: DFUCONTROL 2           {00C1}   
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+         7: CHANGE HOST            {1814}
+         8: REPROG CONTROLS V4     {1B04}
+         9: ADJUSTABLE DPI         {2201}
+        10: VERTICAL SCROLLING     {2100}
+        11: SMART SHIFT            {2110}
+        12: HIRES WHEEL            {2121}
+        13: GESTURE 2              {6501}
+        14: DFUCONTROL 2           {00C1}
         15: unknown:1813           {1813}   internal, hidden
         16: unknown:1830           {1830}   internal, hidden
         17: unknown:1890           {1890}   internal, hidden

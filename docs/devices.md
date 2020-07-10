@@ -10,8 +10,8 @@ features are supported by Solaar.  The information in these tables is
 incomplete, based on what devices users have been able to test Solaar with.
 
 The HID++ column specifies the device's HID++ version.  Some devices report
-version 4.5, but that is the same as version 2.0 as listed here.   
-For devices what support HID++ 2.0 or greater, Solaar is able to discover 
+version 4.5, but that is the same as version 2.0 as listed here.
+For devices what support HID++ 2.0 or greater, Solaar is able to discover
 the features the device supports.
 
 The Battery column specifies if Solaar is able to read the device's battery
@@ -21,7 +21,7 @@ For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
 The reprog(rammable) keys feature is currently not fully supported by Solaar.
-You are able to read this feature using command-line interface of Solaar, 
+You are able to read this feature using command-line interface of Solaar,
 but it is not possible to assign different keys.
 
 
@@ -49,6 +49,7 @@ repository][solaar] with the pleasant news.
 | 064d:c534 | Nano       | 2                  |
 | 064d:c539 | Lightspeed | 1                  |
 | 064d:c53a | Lightspeed | 1                  |
+| 064d:c53d | Lightspeed | 1                  |
 | 064d:c53f | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
@@ -194,6 +195,7 @@ setting is useful only to disable smooth scrolling.
 | MK270            | 4023 | 2.0   | yes     | reprog keys                             |
 | MK320            | 200F |       |         |                                         |
 | MK330            |      |       |         |                                         |
+| MK345            | 4023 | 2.0   | yes     | reprog keys                             |
 | MK520            |      | M2/K1 | yes     | FN swap, reprog keys                    |
 | MK550            |      |       |         |                                         |
 | MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |

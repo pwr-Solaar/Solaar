@@ -16,7 +16,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 """Low-level interface for devices connected through a Logitech Universal
 Receiver (UR).
 
@@ -34,23 +33,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
+from . import listener, status  # noqa: F401
+from .base import DeviceUnreachable, NoReceiver, NoSuchDevice  # noqa: F401
+from .common import strhex  # noqa: F401
+from .hidpp20 import FeatureCallError, FeatureNotSupported  # noqa: F401
+from .receiver import PairedDevice, Receiver  # noqa: F401
+
 _DEBUG = logging.DEBUG
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.root.level)
 # if logging.root.level > logging.DEBUG:
-# 	_log.addHandler(logging.NullHandler())
-# 	_log.propagate = 0
+#     _log.addHandler(logging.NullHandler())
+#     _log.propagate = 0
 
 del logging
 
-
 __version__ = '0.9'
-
-
-from .common import strhex
-from .base import NoReceiver, NoSuchDevice, DeviceUnreachable
-from .receiver import Receiver, PairedDevice
-from .hidpp20 import FeatureNotSupported, FeatureCallError
-
-from . import listener
-from . import status

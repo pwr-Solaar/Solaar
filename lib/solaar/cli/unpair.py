@@ -21,19 +21,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 
 def run(receivers, args, find_receiver, find_device):
-	assert receivers
-	assert args.device
+    assert receivers
+    assert args.device
 
-	device_name = args.device.lower()
-	dev = find_device(receivers, device_name)
+    device_name = args.device.lower()
+    dev = find_device(receivers, device_name)
 
-	if not dev.receiver.may_unpair:
-		print('Receiver for %s [%s:%s] does not unpair, but attempting anyway' % (dev.name,dev.wpid,dev.serial))
+    if not dev.receiver.may_unpair:
+        print('Receiver for %s [%s:%s] does not unpair, but attempting anyway' % (dev.name, dev.wpid, dev.serial))
 
-	try:
-		# query these now, it's last chance to get them
-		number, codename, wpid, serial  = dev.number, dev.codename, dev.wpid, dev.serial
-		dev.receiver._unpair_device(number, True) # force an unpair
-		print ('Unpaired %d: %s (%s) [%s:%s]' % (number, dev.name, codename, wpid, serial))
-	except Exception as e:
-		raise Exception('failed to unpair device %s: %s' % (dev.name, e))
+    try:
+        # query these now, it's last chance to get them
+        number, codename, wpid, serial = dev.number, dev.codename, dev.wpid, dev.serial
+        dev.receiver._unpair_device(number, True)  # force an unpair
+        print('Unpaired %d: %s (%s) [%s:%s]' % (number, dev.name, codename, wpid, serial))
+    except Exception as e:
+        raise Exception('failed to unpair device %s: %s' % (dev.name, e))
