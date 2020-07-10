@@ -694,6 +694,23 @@ del _SETTINGS_LIST
 #
 
 
+def check_feature(device, name, featureId, featureFn):
+    """
+    :param name: name for the setting
+    :param featureId: the numeric Feature ID for this setting implementation
+    :param featureFn: the function for this setting implementation
+    """
+    if featureId not in device.features:
+        return
+    try:
+        detected = featureFn()(device)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('check_feature[%s] detected %s', featureId, detected)
+        return detected
+    except Exception as reason:
+        _log.error('check_feature[%s] inconsistent feature %s', featureId, reason)
+
+
 # Returns True if device was queried to find features, False otherwise
 def check_feature_settings(device, already_known):
     """Try to auto-detect device settings by the HID++ 2.0 features they have."""
@@ -701,28 +718,16 @@ def check_feature_settings(device, already_known):
         return False
     if device.protocol and device.protocol < 2.0:
         return False
-
-    def check_feature(name, featureId, featureFn):
-        """
-        :param name: name for the setting
-        :param featureId: the numeric Feature ID for this setting implementation
-        :param featureFn: the function for this setting implementation
-        """
-        if featureId not in device.features:
-            return
-        if any(s.name == name for s in already_known):
-            return
-
-        try:
-            detected = featureFn()(device)
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('check_feature[%s] detected %s', featureId, detected)
-            if detected:
-                already_known.append(detected)
-        except Exception as reason:
-            _log.error('check_feature[%s] inconsistent feature %s', featureId, reason)
-
     for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
         if featureId and featureFn:
-            check_feature(name, featureId, featureFn)
+            if not any(s.name == name for s in already_known):
+                setting = check_feature(device, name, featureId, featureFn)
+                if setting:
+                    already_known.append(setting)
     return True
+
+
+def check_feature_setting(device, setting_name):
+    for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
+        if name == setting_name and featureId and featureFn:
+            return check_feature(device, name, featureId, featureFn)
