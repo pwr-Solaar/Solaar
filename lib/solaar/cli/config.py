@@ -91,33 +91,39 @@ def run(receivers, args, find_receiver, find_device):
             else:
                 raise Exception("don't know how to interpret '%s' as boolean" % value)
 
-    elif setting.choices:
-        value = args.value.lower()
-
-        if value in ('higher', 'lower'):
-            old_value = setting.read()
-            if old_value is None:
-                raise Exception("could not read current value of '%s'" % setting.name)
-
-            if value == 'lower':
-                lower_values = setting.choices[:old_value]
-                value = lower_values[-1] if lower_values else setting.choices[:][0]
-            elif value == 'higher':
-                higher_values = setting.choices[old_value + 1:]
-                value = higher_values[0] if higher_values else setting.choices[:][-1]
-        elif value in ('highest', 'max'):
-            value = setting.choices[:][-1]
-        elif value in ('lowest', 'min'):
-            value = setting.choices[:][0]
-        elif value not in setting.choices:
-            raise Exception("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
-            value = setting.choices[value]
-
     elif setting.kind == _settings.KIND.range:
         try:
             value = int(args.value)
         except ValueError:
             raise Exception("can't interpret '%s' as integer" % args.value)
+
+    elif setting.kind == _settings.KIND.choice:
+        value = args.value
+        lvalue = value.lower()
+        try:
+            ivalue = int(value)
+        except ValueError:
+            ivalue = None
+        if value in setting.choices:
+            value = setting.choices[value]
+        elif ivalue is not None and ivalue >= 0 and ivalue < len(setting.choices):
+            value = setting.choices[ivalue]
+        elif lvalue in ('higher', 'lower'):
+            old_value = setting.read()
+            if old_value is None:
+                raise Exception("could not read current value of '%s'" % setting.name)
+            if lvalue == 'lower':
+                lower_values = setting.choices[:old_value]
+                value = lower_values[-1] if lower_values else setting.choices[:][0]
+            elif lvalue == 'higher':
+                higher_values = setting.choices[old_value + 1:]
+                value = higher_values[0] if higher_values else setting.choices[:][-1]
+        elif lvalue in ('highest', 'max', 'first'):
+            value = setting.choices[:][-1]
+        elif lvalue in ('lowest', 'min', 'last'):
+            value = setting.choices[:][0]
+        elif value not in setting.choices:
+            raise Exception("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
 
     else:
         raise Exception('NotImplemented')
