@@ -89,13 +89,16 @@ def run(receivers, args, find_receiver, find_device):
             elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
                 value = False
             else:
-                raise Exception("don't know how to interpret '%s' as boolean" % value)
+                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
 
     elif setting.kind == _settings.KIND.range:
         try:
             value = int(args.value)
         except ValueError:
-            raise Exception("can't interpret '%s' as integer" % args.value)
+            raise Exception("%s: can't interpret '%s' as integer" % (setting.name, args.value))
+        min, max = setting.range
+        if value < min or value > max:
+            raise Exception("%s: value '%s' out of bounds" % (setting.name, args.value))
 
     elif setting.kind == _settings.KIND.choice:
         value = args.value
@@ -111,7 +114,7 @@ def run(receivers, args, find_receiver, find_device):
         elif lvalue in ('higher', 'lower'):
             old_value = setting.read()
             if old_value is None:
-                raise Exception("could not read current value of '%s'" % setting.name)
+                raise Exception("%s: could not read current value'" % setting.name)
             if lvalue == 'lower':
                 lower_values = setting.choices[:old_value]
                 value = lower_values[-1] if lower_values else setting.choices[:][0]
@@ -123,12 +126,12 @@ def run(receivers, args, find_receiver, find_device):
         elif lvalue in ('lowest', 'min', 'last'):
             value = setting.choices[:][0]
         elif value not in setting.choices:
-            raise Exception("possible values for '%s' are: [%s]" % (setting.name, ', '.join(str(v) for v in setting.choices)))
+            raise Exception('%s: possible values are [%s]' % (setting.name, ', '.join(str(v) for v in setting.choices)))
 
     else:
         raise Exception('NotImplemented')
 
     result = setting.write(value)
     if result is None:
-        raise Exception("failed to set '%s' = '%s' [%r]" % (setting.name, str(value), value))
+        raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
     _print_setting(setting, False)
