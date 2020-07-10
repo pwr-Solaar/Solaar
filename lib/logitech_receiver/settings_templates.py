@@ -258,21 +258,23 @@ _REPROGRAMMABLE_KEYS = (
 )
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
+_CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
 
 #
 # Keyword arguments for setting template functions:
-#  label, description - label and tooltip to be shown in GUI
+#  label='', description='' - label and tooltip to be shown in GUI
+#  persist=True - whether to store the values and reapply them from now on
 #  device_kind - the kinds of devices that setting is suitable for (NOT CURRENTLY USED)
-#  read_fnid, write_fnid - default 0x00 and 0x10 function numbers (times 16) to read and write setting
-#  bytes_count - default 1 - number of bytes for the data (ignoring the key)
+#  read_fnid=0x00, write_fnid=0x10 - default 0x00 and 0x10 function numbers (times 16) to read and write setting
+#  bytes_count=1 - number of bytes for the data (ignoring the key, if any)
 # only for boolean settings
-#  true_value, false_value,  mask - integer or byte strings for boolean settings
+#  true_value=0x01, false_value=0x00,  mask=0xFF - integer or byte strings for boolean settings
 # only for map choices
-#  key_bytes_count - default 1 - number of bytes in the key
+#  key_bytes_count=1 - number of bytes in the key
 #  extra_default - extra value that cannot be set but means same as default value
 # only for choices and map choices
-#  read_skip_bytes_count - default 0 - number of bytes to ignore before the data when reading
-#  write_prefix_bytes - default None - bytes to put before the data writing
+#  read_skip_bytes_count=0 - number of bytes to ignore before the data when reading
+#  write_prefix_bytes=b'' - bytes to put before the data writing
 
 
 def _register_hand_detection(
@@ -629,8 +631,7 @@ def _feature_multiplatform():
         write_fnid=0x30,
         write_prefix_bytes=b'\xff',
         label=_PLATFORM[1],
-        description=_PLATFORM[2],
-        device_kind=(_DK.keyboard, )
+        description=_PLATFORM[2]
     )
 
 
@@ -649,6 +650,38 @@ def _feature_dualplatform():
         label=_PLATFORM[1],
         description=_PLATFORM[2],
         device_kind=(_DK.keyboard, )
+    )
+
+
+def _feature_change_host_choices(device):
+    infos = device.feature_request(_F.CHANGE_HOST)
+    assert infos, 'Oops, host count cannot be retrieved!'
+    numHosts, currentHost = _unpack('!BB', infos[:2])
+    hostNames = _hidpp20.get_host_names(device)
+    hostNames = hostNames if hostNames is not None else {}
+    if currentHost not in hostNames or hostNames[currentHost][1] == '':
+        import socket  # find name of current host and use it
+        hostNames[currentHost] = (True, socket.gethostname().partition('.')[0])
+    choices = _NamedInts()
+    for host in range(0, numHosts):
+        _ignore, hostName = hostNames.get(host, (False, ''))
+        duplicated = any(host != otherHost and hostName == otherName for otherHost, (_ignore, otherName) in hostNames.items())
+        choices[host] = (str(host) + ':' + hostName if duplicated else hostName) if hostName else str(host)
+    return choices
+
+
+def _feature_change_host():
+    return feature_choices_dynamic(
+        _CHANGE_HOST[0],
+        _F.CHANGE_HOST,
+        _feature_change_host_choices,
+        persist=False,
+        no_reply=True,
+        read_fnid=0x00,
+        read_skip_bytes_count=1,
+        write_fnid=0x10,
+        label=_CHANGE_HOST[1],
+        description=_CHANGE_HOST[2]
     )
 
 
@@ -679,7 +712,8 @@ _SETTINGS_TABLE = [
     _S(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
     _S(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
     _S(_PLATFORM[0], _F.MULTIPLATFORM, _feature_multiplatform),
-    _S(_PLATFORM[0], _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform')
+    _S(_PLATFORM[0], _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
+    _S(_CHANGE_HOST[0], _F.CHANGE_HOST, _feature_change_host),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])
@@ -706,8 +740,9 @@ def check_feature(device, name, featureId, featureFn):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('check_feature[%s] detected %s', featureId, detected)
         return detected
-    except Exception as reason:
-        _log.error('check_feature[%s] inconsistent feature %s', featureId, reason)
+    except Exception:
+        from traceback import format_exc
+        _log.error('check_feature[%s] inconsistent feature %s', featureId, format_exc())
 
 
 # Returns True if device was queried to find features, False otherwise
