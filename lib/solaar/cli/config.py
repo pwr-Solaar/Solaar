@@ -20,6 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logitech_receiver import settings as _settings
+from logitech_receiver import settings_templates as _settings_templates
 from solaar import configuration as _configuration
 
 
@@ -55,12 +56,12 @@ def run(receivers, args, find_receiver, find_device):
     if not dev.ping():
         raise Exception('%s is offline' % dev.name)
 
-    if not dev.settings:
-        raise Exception('no settings for %s' % dev.name)
-
-    _configuration.attach_to(dev)
-
-    if not args.setting:
+    if not args.setting:  # print all settings, so first set them all up
+        if not dev.settings:
+            raise Exception('no settings for %s' % dev.name)
+        _configuration.attach_to(dev)
+        for s in dev.settings:
+            s.apply()
         print(dev.name, '(%s) [%s:%s]' % (dev.codename, dev.wpid, dev.serial))
         for s in dev.settings:
             print('')
@@ -68,13 +69,11 @@ def run(receivers, args, find_receiver, find_device):
         return
 
     setting_name = args.setting.lower()
-    setting = None
-    for s in dev.settings:
-        if setting_name == s.name.lower():
-            setting = s
-            break
+    setting = _settings_templates.check_feature_setting(dev, setting_name)
     if setting is None:
         raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
+    _configuration.attach_to(dev)
+    setting.apply()
 
     if args.value is None:
         _print_setting(setting)
