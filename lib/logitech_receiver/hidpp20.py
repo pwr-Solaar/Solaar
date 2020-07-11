@@ -435,11 +435,11 @@ class KeysArray(object):
 #
 
 
-def feature_request(device, feature, function=0x00, *params):
+def feature_request(device, feature, function=0x00, *params, no_reply=False):
     if device.online and device.features:
         if feature in device.features:
             feature_index = device.features.index(int(feature))
-            return device.request((feature_index << 8) + (function & 0xFF), *params)
+            return device.request((feature_index << 8) + (function & 0xFF), *params, no_reply=no_reply)
 
 
 def get_firmware(device):
