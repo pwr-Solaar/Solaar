@@ -1,0 +1,2 @@
+Documentation on HID++ can be found in the Google drive directory
+https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28

@@ -33,7 +33,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_RESET`                         | `0x1802` | :x:                |
 `OOBSTATE`                             | `0x1805` | :x:                |
 `CONFIG_DEVICE_PROPS`                  | `0x1806` | :x:                |
-`CHANGE_HOST`                          | `0x1814` | :x:                |
+`CHANGE_HOST`                          | `0x1814` | :x:                | :wrench:
 `HOSTS_INFO`                           | `0x1815` | :heavy_plus_sign:  | `get_host_names`, partial listing only
 `BACKLIGHT`                            | `0x1981` | :x:                |
 `BACKLIGHT2`                           | `0x1982` | :heavy_check_mark: | `_feature_backlight2`
@@ -46,7 +46,7 @@ Feature                                | ID       | Status             | Notes
 `REPROG_CONTROLS_V3`                   | `0x1B03` | :x:                |
 `REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys`, _feature_reprogrammable_keys
 `REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
-`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :x:                |
+`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :x:                | :wrench:
 `WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :x:                | status reporting from device
 `REMAINING_PAIRING`                    | `0x1DF0` | :x:                |
 `FIRMWARE_PROPERTIES`                  | `0x1F1F` | :x:                |
@@ -75,8 +75,8 @@ Feature                                | ID       | Status             | Notes
 `KEYBOARD_LAYOUT`                      | `0x4520` | :x:                | read only
 `KEYBOARD_DISABLE_KEYS`                | `0x4521` | :heavy_check_mark: | `_feature_disable_keyboard_keys`
 `KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | :x:                |
-`DUALPLATFORM`                         | `0x4530` | :x:                |
-`MULTIPLATFORM`                        | `0x4531` | :x:                |
+`DUALPLATFORM`                         | `0x4530` | :x:                | :wrench:
+`MULTIPLATFORM`                        | `0x4531` | :x:                | :wrench:
 `KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                | read only
 `CROWN`                                | `0x4600` | :x:                |
 `TOUCHPAD_FW_ITEMS`                    | `0x6010` | :x:                |
@@ -110,7 +110,7 @@ Feature                                | ID       | Status             | Notes
 `EQUALIZER`                            | `0x8310` | :x:                |
 `HEADSET_OUT`                          | `0x8320` | :x:                |
 
-"read only" in the notes column means that the state of the feature can be read, but not set.
+"read only" in the notes column means that the feature is a read-only feature and cannot be changed.
 
 # Implementing a feature
 
