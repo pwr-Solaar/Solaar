@@ -428,17 +428,18 @@ class RegisterRW(object):
 
 
 class FeatureRW(object):
-    __slots__ = ('feature', 'read_fnid', 'write_fnid')
+    __slots__ = ('feature', 'read_fnid', 'write_fnid', 'no_reply')
 
     kind = _NamedInt(0x02, 'feature')
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
-    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, **kwargs):
+    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, no_reply=False, **kwargs):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
+        self.no_reply = no_reply
 
     def read(self, device):
         assert self.feature is not None
@@ -446,7 +447,8 @@ class FeatureRW(object):
 
     def write(self, device, data_bytes):
         assert self.feature is not None
-        return device.feature_request(self.feature, self.write_fnid, data_bytes)
+        reply = device.feature_request(self.feature, self.write_fnid, data_bytes, no_reply=self.no_reply)
+        return reply if not self.no_reply else True
 
 
 class FeatureRWMap(FeatureRW):
@@ -461,13 +463,15 @@ class FeatureRWMap(FeatureRW):
         read_fnid=default_read_fnid,
         write_fnid=default_write_fnid,
         key_bytes_count=default_key_bytes_count,
-        **kwargs
+        no_reply=False,
+        **_ignore
     ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
         self.key_bytes_count = key_bytes_count
+        self.no_reply = no_reply
 
     def read(self, device, key):
         assert self.feature is not None
@@ -477,7 +481,8 @@ class FeatureRWMap(FeatureRW):
     def write(self, device, key, data_bytes):
         assert self.feature is not None
         key_bytes = _int2bytes(key, self.key_bytes_count)
-        return device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes)
+        reply = device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes, no_reply=self.no_reply)
+        return reply if not self.no_reply else True
 
 
 #
