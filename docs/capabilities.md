@@ -65,7 +65,8 @@ Solaar uses the HID++ protocol to pair devices to receivers and unpair
 devices from receivers.  Solaar also uses the HID++ protocol to display
 features of receivers and devices.  Solaar can modify some of the features
 of devices.  Solaar currently only displays some features and can modify
-even fewer.
+even fewer.  For more information on HID++ features and their support in
+Solaar see [docs/features.md](https://pwr-solaar.github.io/Solaar/features).
 
 Solaar does not do anything beyond using the HID++ protocol to change the
 behavior of receivers and devices.  In particular, Solaar cannot change how
@@ -86,6 +87,7 @@ Solaar does keep track of some of the changeable state of a device between
 invocations.  When Solaar starts it restores on-line devices to their
 previously-known state.  Also, while running Solaar restores devices to
 their previously-known state when the device comes on line.
+This information is stored in the file `~/.config/solaar/config.json`.
 
 Querying a device for its current state can require quite a few HID++
 interactions.  These interactions can temporarily slow down the device, so

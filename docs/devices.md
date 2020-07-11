@@ -20,14 +20,29 @@ level.
 For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
-The reprog(rammable) keys feature is currently not fully supported by Solaar.
-You are able to read this feature using command-line interface of Solaar,
-but it is not possible to assign different keys.
-
-
 If your device works with Solaar, but its supported features are not
 correctly specified here, please open an issue on the [Solaar github
 repository][solaar] with the pleasant news.
+
+### Adding new receivers and devices
+
+Adding a new receiver requires knowing whether the receiver is a regular
+Unifying receiver, a nano receiver, or a lightspeed receiver.  Add a line to
+../lib/logitech_receiver/base_usb.py defining the receiver as one of these.
+If the receiver has an unusual number of pairing slots then this also needs
+to be specified.  Then add the receiver to the tuple of receivers (ALL).
+
+To let Solaar read and write to the receiver information on it needs to be
+added to rules.d/42-logitech-unify-permissions.rules.  Add a new line to
+that file with the vendor and product ids, just like the other lines in the
+file.  Then this file has to be copied into /etc/udev/rules.d
+
+Most new devices do not need to be known to Solaar to work.  However, an
+entry in lib/logitech-receiver/descriptors.py can provide a better name for
+the device and a feature list can speed up Solaar startup a bit.  The
+arguments to the _D function are the device's long name, its short name
+(codename), its HID++ protocol version, its wireless product ID (wpid), and
+a tuple of known feature settings (from lib/logitech/settings_templates.py).
 
 
 ### Receivers:

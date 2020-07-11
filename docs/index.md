@@ -101,8 +101,12 @@ See [docs/installation.md](https://pwr-solaar.github.io/Solaar/installation) for
 
 ## Known Issues
 
-- KDE/Kubuntu: if some icons appear broken in the application, make sure you've
-  properly configured the Gtk theme and icon theme in KDE's control panel.
+- The icon in the system tray can show up as 'black on black' in dark
+  distributions.  This is due to problems in many system tray
+  implementations.  Changing to a different theme may help.
+
+- If some icons appear broken in the application, make sure you've properly
+  configured the Gtk theme and icon theme in your control panel.
 
 - Running the command-line application while the GUI
   application is also running *may* occasionally cause either of them to become
