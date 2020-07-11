@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Information**
-<!-- Do not bother opening an issue for version 1.0 or older.  Please update to the latest version and see if your issue persists. -->
+<!-- Do not bother opening an issue for a version older than 1.0.1.  Please update to the latest version and see if your issue persists. -->
 - Solaar version (`solaar --version` or `git describe --tags` if cloned from this repository):
 - Distribution:
 - Kernel version (ex. `uname -srmo`): `KERNEL VERSION HERE`
