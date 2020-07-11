@@ -312,16 +312,14 @@ del namedtuple
 #
 
 
-def request(handle, devnumber, request_id, *params):
+# a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
+def request(handle, devnumber, request_id, *params, no_reply=False):
     """Makes a feature call to a device and waits for a matching reply.
-
-    This function will wait for a matching reply indefinitely.
-
     :param handle: an open UR handle.
     :param devnumber: attached device number.
     :param request_id: a 16-bit integer.
     :param params: parameters for the feature call, 3 to 16 bytes.
-    :returns: the reply data, or ``None`` if some error occurred.
+    :returns: the reply data, or ``None`` if some error occurred. or no reply expected
     """
 
     # import inspect as _inspect
@@ -353,6 +351,9 @@ def request(handle, devnumber, request_id, *params):
     notifications_hook = getattr(handle, 'notifications_hook', None)
     _skip_incoming(handle, ihandle, notifications_hook)
     write(ihandle, devnumber, request_data)
+
+    if no_reply:
+        return None
 
     # we consider timeout from this point
     request_started = _timestamp()

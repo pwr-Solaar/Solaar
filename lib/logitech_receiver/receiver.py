@@ -284,15 +284,15 @@ class PairedDevice(object):
             _log.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits if ok else None
 
-    def request(self, request_id, *params):
-        return _base.request(self.receiver.handle, self.number, request_id, *params)
+    def request(self, request_id, *params, no_reply=False):
+        return _base.request(self.receiver.handle, self.number, request_id, *params, no_reply=no_reply)
 
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register
 
-    def feature_request(self, feature, function=0x00, *params):
+    def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
-            return _hidpp20.feature_request(self, feature, function, *params)
+            return _hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
