@@ -8,8 +8,8 @@ assignees: ''
 ---
 
 **Information**
-<!-- Do not bother opening an issue for version 0.9.2 or older, it is extremely outdated. Please update to the latest one and see if your issue persists. -->
-- Solaar version (`git describe --tags` if cloned from Solaar repository):
+<!-- Do not bother opening an issue for version 1.0 or older.  Please update to the latest version and see if your issue persists. -->
+- Solaar version (`solaar --version` or `git describe --tags` if cloned from this repository):
 - Distribution:
 - Kernel version (ex. `uname -srmo`): `KERNEL VERSION HERE`
 - Output of `solaar show`:
