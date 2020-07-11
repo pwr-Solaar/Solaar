@@ -73,9 +73,9 @@ def run(receivers, args, find_receiver, find_device):
     if setting is None:
         raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
     _configuration.attach_to(dev)
-    setting.apply()
 
     if args.value is None:
+        setting.apply()
         _print_setting(setting)
         return
 
@@ -125,7 +125,7 @@ def run(receivers, args, find_receiver, find_device):
             value = setting.choices[:][-1]
         elif lvalue in ('lowest', 'min', 'last'):
             value = setting.choices[:][0]
-        elif value not in setting.choices:
+        else:
             raise Exception('%s: possible values are [%s]' % (setting.name, ', '.join(str(v) for v in setting.choices)))
 
     else:
@@ -134,4 +134,3 @@ def run(receivers, args, find_receiver, find_device):
     result = setting.write(value)
     if result is None:
         raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
-    _print_setting(setting, False)
