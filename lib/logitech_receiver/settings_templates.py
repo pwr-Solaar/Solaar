@@ -665,8 +665,7 @@ def _feature_change_host_choices(device):
     choices = _NamedInts()
     for host in range(0, numHosts):
         _ignore, hostName = hostNames.get(host, (False, ''))
-        duplicated = any(host != otherHost and hostName == otherName for otherHost, (_ignore, otherName) in hostNames.items())
-        choices[host] = (str(host) + ':' + hostName if duplicated else hostName) if hostName else str(host)
+        choices[host] = str(host + 1) + ':' + hostName if hostName else str(host + 1)
     return choices
 
 

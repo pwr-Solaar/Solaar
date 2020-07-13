@@ -31,7 +31,7 @@ def _print_setting(s, verbose=True):
             print('#', s.description.replace('\n', ' '))
         if s.kind == _settings.KIND.toggle:
             print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
-        elif s.choices:
+        elif s.kind == _settings.KIND.choice:
             print(
                 '#   possible values: one of [', ', '.join(str(v) for v in s.choices),
                 '], or higher/lower/highest/max/lowest/min'
@@ -90,6 +90,7 @@ def run(receivers, args, find_receiver, find_device):
                 value = False
             else:
                 raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+        print('Setting %s to %s' % (setting.name, value))
 
     elif setting.kind == _settings.KIND.range:
         try:
@@ -99,6 +100,7 @@ def run(receivers, args, find_receiver, find_device):
         min, max = setting.range
         if value < min or value > max:
             raise Exception("%s: value '%s' out of bounds" % (setting.name, args.value))
+        print('Setting %s to %s' % (setting.name, value))
 
     elif setting.kind == _settings.KIND.choice:
         value = args.value
@@ -127,6 +129,7 @@ def run(receivers, args, find_receiver, find_device):
             value = setting.choices[:][0]
         else:
             raise Exception('%s: possible values are [%s]' % (setting.name, ', '.join(str(v) for v in setting.choices)))
+        print('Setting %s to %r' % (setting.name, value))
 
     else:
         raise Exception('NotImplemented')
