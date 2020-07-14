@@ -283,6 +283,7 @@ def write(device_handle, data):
             bytes_written = _os.write(device_handle, data)
             retrycount += 1
         except IOError as e:
+            print('udev.py: error %s on write to %s' % (e.errno, device_handle))
             if e.errno == _errno.EPIPE:
                 sleep(0.1)
         else:

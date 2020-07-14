@@ -732,6 +732,8 @@ def check_feature(device, name, featureId, featureFn):
     :param featureId: the numeric Feature ID for this setting implementation
     :param featureFn: the function for this setting implementation
     """
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('check_feature[%s]', featureId)
     if featureId not in device.features:
         return
     try:
