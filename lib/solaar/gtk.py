@@ -111,11 +111,16 @@ def _handlesigint(signal, stack):
     import signal
     import sys
     import faulthandler
+    import datetime
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     if _log.isEnabledFor(_INFO):
+        print('\n%s     Keyboard interrupt' % datetime.datetime.now())
         faulthandler.dump_traceback()
+        signal.signal(signal.SIGINT, _handlesigint)
+        return
 
+    faulthandler.dump_traceback()
     sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
 
 
