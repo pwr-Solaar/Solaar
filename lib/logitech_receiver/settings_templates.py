@@ -227,7 +227,8 @@ _LOW_RES_SCROLL = (
     _('HID++ mode for vertical scroll with the wheel.') + '\n' + _('Effectively turns off wheel scrolling in Linux.')
 )
 _HIRES_INV = (
-    'hires-smooth-invert', _('High Resolution Wheel Invert'), _('High-sensitivity wheel invert mode for vertical scroll.')
+    'hires-smooth-invert', _('High Resolution Wheel Invert'),
+    _('High-sensitivity wheel invert direction for vertical scroll.')
 )
 _HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'), _('High-sensitivity mode for vertical scroll with the wheel.'))
 _FN_SWAP = (
@@ -259,6 +260,11 @@ _REPROGRAMMABLE_KEYS = (
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
+_THUMB_SCROLL_MODE = (
+    'thumb-scroll-mode', _('HID++ Thumb Scrolling'),
+    _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' + _('Effectively turns off thumb scrolling in Linux.')
+)
+_THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
 
 #
 # Keyword arguments for setting template functions:
@@ -684,6 +690,36 @@ def _feature_change_host():
     )
 
 
+def _feature_thumb_mode():
+    return feature_toggle(
+        _THUMB_SCROLL_MODE[0],
+        _F.THUMB_WHEEL,
+        read_fnid=0x10,
+        write_fnid=0x20,
+        true_value=b'\x01\x00',
+        false_value=b'\x00\x00',
+        mask=b'\x01\x00',
+        label=_THUMB_SCROLL_MODE[1],
+        description=_THUMB_SCROLL_MODE[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
+
+
+def _feature_thumb_invert():
+    return feature_toggle(
+        _THUMB_SCROLL_INVERT[0],
+        _F.THUMB_WHEEL,
+        read_fnid=0x10,
+        write_fnid=0x20,
+        true_value=b'\x00\x01',
+        false_value=b'\x00\x00',
+        mask=b'\x00\x01',
+        label=_THUMB_SCROLL_INVERT[1],
+        description=_THUMB_SCROLL_INVERT[2],
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
+
+
 #
 #
 #
@@ -713,6 +749,8 @@ _SETTINGS_TABLE = [
     _S(_PLATFORM[0], _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM[0], _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
     _S(_CHANGE_HOST[0], _F.CHANGE_HOST, _feature_change_host),
+    _S(_THUMB_SCROLL_MODE[0], _F.THUMB_WHEEL, _feature_thumb_mode),
+    _S(_THUMB_SCROLL_INVERT[0], _F.THUMB_WHEEL, _feature_thumb_invert),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])
