@@ -59,7 +59,7 @@ Feature                                | ID       | Status             | Notes
 `HI_RES_SCROLLING`                     | `0x2120` | :heavy_check_mark: | `get_hi_res_scrolling_info`, `_feature_hi_res_scroll`
 `HIRES_WHEEL`                          | `0x2121` | :heavy_check_mark: | `get_hires_wheel`, `_feature_hires_smooth_invert`, `_feature_hires_smooth_resolution`
 `LOWRES_WHEEL`                         | `0x2130` | :heavy_check_mark: | `get_lowres_wheel_status`, `_feature_lowres_smooth_scroll`
-`THUMB_WHEEL`                          | `0x2150` | :x:                |
+`THUMB_WHEEL`                          | `0x2150` | :heavy_check_mark: | `_feature_thumb_mode`, `_feature_thumb_invert`
 `MOUSE_POINTER`                        | `0x2200` | :heavy_check_mark: | `get_mouse_pointer_info`, read only
 `ADJUSTABLE_DPI`                       | `0x2201` | :heavy_check_mark: | `_feature_adjustable_dpi`
 `POINTER_SPEED`                        | `0x2205` | :heavy_check_mark: | `get_pointer_speed_info`, `_feature_pointer_speed`
