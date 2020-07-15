@@ -656,7 +656,7 @@ class ChoicesValidator(object):
     def __init__(self, choices, bytes_count=None, read_skip_bytes_count=None, write_prefix_bytes=b'', **_ignore):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
-        assert len(choices) > 2
+        assert len(choices) > 1
         self.choices = choices
         self.needs_current_value = False
 
