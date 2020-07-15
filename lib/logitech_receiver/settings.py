@@ -175,8 +175,8 @@ class Setting(object):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: apply %s (%s)', self.name, self._value, self._device)
 
-        value = self.read(self.persist)  # Don't use old value if setting doesn't persist
-        if value is not None:
+        value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
+        if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             self.write(value)
 
     def __str__(self):
