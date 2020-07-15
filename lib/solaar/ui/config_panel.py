@@ -238,6 +238,7 @@ def _update_setting_item(sbox, value, is_online=True):
         failed.set_visible(is_online)
         return
 
+    control.set_sensitive(False)
     failed.set_visible(False)
     if isinstance(control, Gtk.Switch):
         control.set_active(value)
