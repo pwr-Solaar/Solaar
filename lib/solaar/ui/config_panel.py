@@ -242,7 +242,7 @@ def _update_setting_item(sbox, value, is_online=True):
     if isinstance(control, Gtk.Switch):
         control.set_active(value)
     elif isinstance(control, Gtk.ComboBoxText):
-        control.set_active_id(str(value))
+        control.set_active_id(str(int(value)))
     elif isinstance(control, Gtk.Scale):
         control.set_value(int(value))
     elif isinstance(control, Gtk.HBox):
