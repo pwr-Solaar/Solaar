@@ -146,7 +146,7 @@ def feature_choices(name, feature, choices, **kwargs):
     assert choices
     validator = _ChoicesV(choices, **kwargs)
     rw = _FeatureRW(feature, **kwargs)
-    return _Setting(name, rw, validator, kind=_KIND.choice, **kwargs)
+    return _Setting(name, rw, validator, feature=feature, kind=_KIND.choice, **kwargs)
 
 
 def feature_choices_dynamic(name, feature, choices_callback, **kwargs):
@@ -169,7 +169,7 @@ def feature_map_choices(name, feature, choicesmap, **kwargs):
     assert choicesmap
     validator = _ChoicesMapV(choicesmap, **kwargs)
     rw = _FeatureRWMap(feature, **kwargs)
-    return _Settings(name, rw, validator, kind=_KIND.map_choice, **kwargs)
+    return _Settings(name, rw, validator, feature=feature, kind=_KIND.map_choice, **kwargs)
 
 
 def feature_map_choices_dynamic(name, feature, choices_callback, **kwargs):
