@@ -22,7 +22,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import settings_templates as _settings_templates
-from logitech_receiver import special_keys as _special_keys
 from logitech_receiver.common import NamedInt as _NamedInt
 
 
@@ -191,13 +190,14 @@ def _print_device(dev):
     if dev.online and dev.keys:
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
-            flags = _special_keys.KEY_FLAG.flag_names(k.flags)
             # TODO: add here additional variants for other REPROG_CONTROLS
             if dev.keys.keyversion == 1:
-                print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.task, ', '.join(flags)))
+                print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
             if dev.keys.keyversion == 4:
-                print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.task, k.remapped))
-                print('             %s, pos:%d, group:%1d, gmask:%d' % (', '.join(flags), k.pos, k.group, k.group_mask))
+                print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
+                gmask_fmt = ','.join(k.group_mask)
+                gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
+                print('             %s, pos:%d, group:%1d, group mask:%s' % (', '.join(k.flags), k.pos, k.group, gmask_fmt))
     if dev.online:
         battery = _hidpp20.get_battery(dev)
         if battery is None:

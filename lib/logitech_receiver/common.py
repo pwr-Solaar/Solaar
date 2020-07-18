@@ -40,7 +40,7 @@ try:
     #     and not any((chr(k) in d for k in range(0x80, 0xFF))) \
     #     )
 except Exception:
-    # this is certanly Python 3
+    # this is certainly Python 3
     # In Py3, unicode and str are equal (the unicode object does not exist)
     is_string = lambda d: isinstance(d, str)
 
@@ -50,7 +50,7 @@ except Exception:
 
 
 class NamedInt(int):
-    """An reqular Python integer with an attached name.
+    """A regular Python integer with an attached name.
 
     Caution: comparison with strings will also match this NamedInt's name
     (case-insensitive)."""
@@ -269,11 +269,5 @@ class KwException(Exception):
 
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', ['kind', 'name', 'version', 'extras'])
-"""Reprogrammable keys information."""
-ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', ['index', 'key', 'task', 'flags'])
-
-ReprogrammableKeyInfoV4 = namedtuple(
-    'ReprogrammableKeyInfoV4', ['index', 'key', 'task', 'flags', 'pos', 'group', 'group_mask', 'remapped']
-)
 
 del namedtuple
