@@ -26,7 +26,6 @@ from logging import getLogger
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
-from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
@@ -528,29 +527,12 @@ def _feature_pointer_speed():
 # and the integer being the control number for that task (to be written to the device)
 # Solaar only remaps keys (controlled by key gmask and group), not other key reprogramming
 def _feature_reprogrammable_keys_choices(device):
-    count = device.feature_request(_F.REPROG_CONTROLS_V4)
-    assert count, 'Oops, reprogrammable key count cannot be retrieved!'
-    count = ord(count[:1])  # the number of key records
-    keys = [None] * count
-    groups = [[] for i in range(0, 9)]
     choices = {}
-    for i in range(0, count):  # get the data for each key record on device
-        keydata = device.feature_request(_F.REPROG_CONTROLS_V4, 0x10, i)
-        key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
-        action = _NamedInt(key, str(_special_keys.TASK[key_task]))
-        keys[i] = (_special_keys.CONTROL[key], action, flags, gmask)
-        groups[group].append(action)
-    for k in keys:
-        # if k[2] & _special_keys.KEY_FLAG.reprogrammable:  # this flag is only to show in UI, ignore in Solaar
-        if k[3]:  # only keys with a non-zero gmask are remappable
-            key_choices = [k[1]]  # it should always be possible to map the key to itself
-            for g in range(1, 9):  # group 0 and gmask 0 (k[3]) does not indicate remappability so don't consider group 0
-                if (k[3] == 0 if g == 0 else k[3] & 2**(g - 1)):
-                    for gm in groups[g]:
-                        if int(gm) != int(k[0]):  # don't put itself in twice
-                            key_choices.append(gm)
-            if len(key_choices) > 1:
-                choices[k[0]] = key_choices
+    for k in device.keys:
+        tgts = k.remappable_to
+        if len(tgts) > 1:
+            choices[k.key] = tgts
+
     return choices
 
 
