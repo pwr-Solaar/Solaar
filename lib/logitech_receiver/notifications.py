@@ -160,8 +160,8 @@ def _process_hidpp10_custom_notification(device, status, n):
         # message layout: 10 ix <register> <xx> <yy> <zz> <00>
         assert n.data[-1:] == b'\x00'
         data = chr(n.address).encode() + n.data
-        charge, status_text = _hidpp10.parse_battery_status(n.sub_id, data)
-        status.set_battery_info(charge, status_text, None)
+        charge, status_text, next_charge = _hidpp10.parse_battery_status(n.sub_id, data)
+        status.set_battery_info(charge, status_text, next_charge)
         return True
 
     if n.sub_id == _R.keyboard_illumination:
@@ -201,6 +201,9 @@ def _process_hidpp10_notification(device, status, n):
         if protocol_name:
             if _log.isEnabledFor(_DEBUG):
                 wpid = _strhex(n.data[2:3] + n.data[1:2])
+                # workaround for short EX100 wpids
+                if protocol_name == '27 MHz':
+                    wpid = _strhex(n.data[2:3]) + '00'
                 assert wpid == device.wpid, '%s wpid mismatch, got %s' % (device, wpid)
 
             flags = ord(n.data[:1]) & 0xF0

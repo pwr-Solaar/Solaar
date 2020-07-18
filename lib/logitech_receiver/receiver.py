@@ -88,6 +88,14 @@ class PairedDevice(object):
             self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
             # assert link_notification.address == (0x04 if unifying else 0x03)
             kind = ord(link_notification.data[0:1]) & 0x0F
+            # fix EX100 wpid
+            if receiver.ex100_wpid_fix:  # EX100 receiver
+                self.wpid = _strhex(link_notification.data[2:3]) + '00'
+                # workaround for EX100 switched kind
+                if self.wpid == '3F00':
+                    kind = 2
+                if self.wpid == '6500':
+                    kind = 1
             self._kind = _hidpp10.DEVICE_KIND[kind]
         else:
             # force a reading of the wpid
@@ -97,6 +105,20 @@ class PairedDevice(object):
                 self.wpid = _strhex(pair_info[3:5])
                 kind = ord(pair_info[7:8]) & 0x0F
                 self._kind = _hidpp10.DEVICE_KIND[kind]
+            elif receiver.ex100_wpid_fix:
+                # ex100 receiver, fill fake device_info with known wpid's
+                # accordingly to drivers/hid/hid-logitech-dj.c
+                # index 1 or 2 always mouse, index 3 always the keyboard,
+                # index 4 is used for an optional separate numpad
+                if number == 1:  # mouse
+                    self.wpid = '3F00'
+                    self._kind = _hidpp10.DEVICE_KIND[2]
+                elif number == 3:  # keyboard
+                    self.wpid = '6500'
+                    self._kind = _hidpp10.DEVICE_KIND[1]
+                else:  # unknown device number on EX100
+                    _log.error('failed to set fake EX100 wpid for device %d of %s', number, receiver)
+                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='Unknown EX100 device')
             else:
                 # unifying protocol not supported, must be a Nano receiver
                 device_info = self.receiver.read_register(_R.receiver_info, 0x04)
@@ -365,6 +387,7 @@ class Receiver(object):
         self._str = '<%s(%s,%s%s)>' % (
             self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
         )
+        self.ex100_wpid_fix = product_info.get('ex100_wpid_fix', False)
 
         self._firmware = None
         self._devices = {}

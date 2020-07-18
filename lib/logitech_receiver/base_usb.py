@@ -27,6 +27,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 ## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
+# ex100_wpid_fix enable workarounds for EX100 and possible other old 27Mhz receivers
 
 _DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
@@ -86,6 +87,18 @@ _lightspeed_receiver = lambda product_id: {
     'name': 'Lightspeed Receiver'
 }
 
+_ex100_receiver = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'usb_interface': 1,
+    'hid_driver': _DRIVER,  # noqa: F821
+    'name': 'EX100 Receiver 27 Mhz',
+    'max_devices': 4,
+    'may_unpair': False,
+    're_pairs': True,
+    'ex100_wpid_fix': True
+}
+
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
 UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
@@ -93,8 +106,10 @@ UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
 # Nano receviers that support the Unifying protocol
 NANO_RECEIVER_ADVANCED = _nano_receiver(0xc52f)
 
+# ex100 old style receiver pre-unifyimg protocol
+EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
+
 # Nano receivers that don't support the Unifying protocol
-NANO_RECEIVER_C517 = _nano_receiver_maxn(0xc517, 6)
 NANO_RECEIVER_C518 = _nano_receiver(0xc518)
 NANO_RECEIVER_C51A = _nano_receiver(0xc51a)
 NANO_RECEIVER_C51B = _nano_receiver(0xc51b)
@@ -119,7 +134,7 @@ ALL = (
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
     NANO_RECEIVER_ADVANCED,
-    NANO_RECEIVER_C517,
+    EX100_27MHZ_RECEIVER_C517,
     NANO_RECEIVER_C518,
     NANO_RECEIVER_C51A,
     NANO_RECEIVER_C51B,

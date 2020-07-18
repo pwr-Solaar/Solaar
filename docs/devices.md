@@ -49,7 +49,7 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 
 | USB ID    | Kind       | Max Paired Devices |
 ------------|------------|--------------------|
-| 046d:c517 | Nano       | 1                  |
+| 046d:c517 | 27Mhz old  | 2-4?               |
 | 046d:c518 | Nano       | 1                  |
 | 046d:c51a | Nano       | 1                  |
 | 046d:c51b | Nano       | 1                  |
@@ -68,7 +68,8 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 | 064d:c53f | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
-
+* The receiver with usb Id 046d:c517 is old, 27 MHz receiver, supporting only
+  subset of HID++ 1.0 protocol. Only hardware pairing supported.
 
 ### Keyboards (Unifying):
 
@@ -215,7 +216,10 @@ setting is useful only to disable smooth scrolling.
 | MK550            |      |       |         |                                         |
 | MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |
 | MK710            |      | 1.0   | yes     | FN swap, reprog keys                    |
+| EX100 keyboard   | 6500 | 1.0   | yes     |                                         |
+| EX100 mouse      | 3f00 | 1.0   | yes     |                                         |
 
+* The EX100 is old, pre-unifying set, supporting only part of HID++ 1.0 features
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com

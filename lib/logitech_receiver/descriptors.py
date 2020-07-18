@@ -293,6 +293,13 @@ _D(
     wpid='3622',
     registers=(_R.battery_status, ),
 )
+_D(
+    'Wireless Keyboard EX100',
+    codename='EX100',
+    protocol=1.0,
+    wpid='6500',
+    registers=(_R.battery_status, ),
+)
 
 # Mice
 
@@ -522,6 +529,14 @@ _D(
     protocol=1.0,
     wpid='6822',
     registers=(_R.battery_status, ),
+)
+_D(
+    'Wireless Mouse EX100',
+    codename='EX100m',
+    protocol=1.0,
+    wpid='3F00',
+    registers=(_R.battery_status, ),
+    # settings=[ _RS.smooth_scroll(), ], # command accepted, but no change in whell action
 )
 
 # Trackballs

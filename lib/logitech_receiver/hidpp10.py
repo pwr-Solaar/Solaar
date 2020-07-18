@@ -64,14 +64,26 @@ POWER_SWITCH_LOCATION = _NamedInts(
 # - the rest work only on devices as far as we can tell right now
 # In the future would be useful to have separate enums for receiver and device notification flags,
 # but right now we don't know enough.
+# additional flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
 NOTIFICATION_FLAG = _NamedInts(
+    numpad_numerical_keys=0x800000,
+    f_lock_status=0x400000,
+    roller_H=0x200000,
     battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
+    mouse_extra_buttons=0x080000,
+    roller_V=0x040000,
     keyboard_sleep_raw=0x020000,  # system control keys such as Sleep
     keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
     # reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
+    reserved5=0x008000,
+    reserved4=0x004000,
+    reserved3=0x002000,
+    reserved2=0x001000,
     software_present=0x000800,  # .. no idea
+    reserved1=0x000400,
     keyboard_illumination=0x000200,  # illumination brightness level changes (by pressing keys)
     wireless=0x000100,  # notify when the device wireless goes on/off-line
+    mx_air_3d_gesture=0x000001,
 )
 
 ERROR = _NamedInts(
@@ -115,6 +127,25 @@ REGISTERS = _NamedInts(
     # apply to both
     notifications=0x00,
     firmware=0xF1,
+)
+# Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
+DEVICE_FEATURES = _NamedInts(
+    reserved1=0x010000,
+    special_buttons=0x020000,
+    enhanced_key_usage=0x040000,
+    fast_fw_rev=0x080000,
+    reserved2=0x100000,
+    reserved3=0x200000,
+    scroll_accel=0x400000,
+    buttons_control_resolution=0x800000,
+    inhibit_lock_key_sound=0x000001,
+    reserved4=0x000002,
+    mx_air_3d_engine=0x000004,
+    host_control_leds=0x000008,
+    reserved5=0x000010,
+    reserved6=0x000020,
+    reserved7=0x000040,
+    reserved8=0x000080,
 )
 
 #
@@ -316,3 +347,19 @@ def set_notification_flags(device, *flag_bits):
     assert flag_bits & 0x00FFFFFF == flag_bits
     result = write_register(device, REGISTERS.notifications, _int2bytes(flag_bits, 3))
     return result is not None
+
+
+def get_device_features(device):
+    assert device
+
+    # Avoid a call if the device is not online,
+    # or the device does not support registers.
+    if device.kind is not None:
+        # peripherals with protocol >= 2.0 don't support registers
+        if device.protocol and device.protocol >= 2.0:
+            return
+
+    flags = read_register(device, REGISTERS.mouse_button_flags)
+    if flags is not None:
+        assert len(flags) == 3
+        return _bytes2int(flags)
