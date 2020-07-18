@@ -499,7 +499,9 @@ KEY_FLAG = _NamedInts(
     is_FN=0x02,
     mse=0x01
 )
-
+MAPPING_FLAG = _NamedInts(rawXY_diverted=0x10, persistently_diverted=0x04, diverted=0x01)
+CID_GROUP_BIT = _NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
+CID_GROUP = _NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
 DISABLE = _NamedInts(
     Caps_Lock=0x01,
     Num_Lock=0x02,

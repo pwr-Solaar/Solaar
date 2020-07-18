@@ -22,14 +22,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
+from logging import ERROR as _ERROR
+from logging import WARNING as _WARNING
 from logging import getLogger
+from typing import List
 
 from . import special_keys
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import KwException as _KwException
+from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
-from .common import ReprogrammableKeyInfo as _ReprogrammableKeyInfo
-from .common import ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4
 from .common import pack as _pack
 from .common import unpack as _unpack
 
@@ -143,7 +145,7 @@ FEATURE = _NamedInts(
     BRIGHTNESS_CONTROL=0x8040,
     REPORT_RATE=0x8060,
     COLOR_LED_EFFECTS=0x8070,
-    RGB_EFFECTS=0X8071,
+    RGB_EFFECTS=0x8071,
     PER_KEY_LIGHTING=0x8080,
     PER_KEY_LIGHTING_V2=0x8081,
     MODE_STATUS=0x8090,
@@ -357,53 +359,274 @@ class FeaturesArray(object):
 #
 
 
+class ReprogrammableKey(object):
+    """Information about a control present on a device with the `REPROG_CONTROLS` feature.
+    Ref: https://lekensteyn.nl/files/logitech/logitech_hidpp_2.0_specification_draft_2012-06-04.pdf
+    Read-only properties:
+    - index {int} -- index in the control ID table
+    - key {_NamedInt} -- the name of this control
+    - default_task {_NamedInt} -- the native function of this control
+    - flags {List[str]} -- flags set on the control
+    """
+    def __init__(self, device, index, cid, tid, flags):
+        self._device = device
+        self.index = index
+        self._cid = cid
+        self._tid = tid
+        self._flags = flags
+
+    @property
+    def key(self) -> _NamedInt:
+        return special_keys.CONTROL[self._cid]
+
+    @property
+    def default_task(self) -> _NamedInt:
+        """NOTE: This NamedInt is a bit mixed up, because its value is the Control ID
+        while the name is the Control ID's native task. But this makes more sense
+        than presenting details of controls vs tasks in the interface. The same
+        convention applies to `mapped_to`, `remappable_to`, `remap` in `ReprogrammableKeyV4`."""
+        task = str(special_keys.TASK[self._tid])
+        return _NamedInt(self._cid, task)
+
+    @property
+    def flags(self) -> List[str]:
+        return special_keys.KEY_FLAG.flag_names(self._flags)
+
+
+class ReprogrammableKeyV4(ReprogrammableKey):
+    """Information about a control present on a device with the `REPROG_CONTROLS_V4` feature.
+    Ref: https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
+    Contains all the functionality of `ReprogrammableKey` plus remapping keys and /diverting/ them
+    in order to handle keypresses in a custom way.
+
+    Additional read-only properties:
+    - pos {int} -- position of this control on the device; 1-16 for FN-keys, otherwise 0
+    - group {int} -- the group this control belongs to; other controls with this group in their
+    `group_mask` can be remapped to this control
+    - group_mask {List[str]} -- this control can be remapped to any control ID in these groups
+    - rawXY_reportable {bool} -- whether the control can be diverted to report raw XY events
+    - mapped_to {_NamedInt} -- which action this control is mapped to; usually itself
+    - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
+    - mapping_flags {List[str]} -- mapping flags set on the control
+    """
+    def __init__(self, device, index, cid, tid, flags, pos, group, gmask, rawxy):
+        ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
+        self.pos = pos
+        self.group = group
+        self._gmask = gmask
+        self.rawXY_reportable = rawxy
+        self._mapping_flags = None
+        self._mapped_to = None
+
+    @property
+    def group_mask(self):
+        return special_keys.CID_GROUP_BIT.flag_names(self._gmask)
+
+    @property
+    def mapped_to(self) -> _NamedInt:
+        if self._mapped_to is None:
+            self._getCidReporting()
+        self._device.keys._ensure_all_keys_queried()
+        task = str(special_keys.TASK[self._device.keys.cid_to_tid[self._mapped_to]])
+        return _NamedInt(self._mapped_to, task)
+
+    @property
+    def remappable_to(self) -> List[_NamedInt]:
+        # this flag is only to show in UI, ignore in Solaar
+        # if special_keys.KEY_FLAG.reprogrammable not in self.flags:
+        #     return []
+
+        self._device.keys._ensure_all_keys_queried()
+        ret = []
+        if self.group_mask != []:  # only keys with a non-zero gmask are remappable
+            ret = [self.default_task]  # it should always be possible to map the key to itself
+            for g in self.group_mask:
+                g = special_keys.CID_GROUP[str(g)]
+                for tgt_cid in self._device.keys.group_cids[g]:
+                    tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
+                    tgt_task = _NamedInt(tgt_cid, tgt_task)
+                    if tgt_task != self.default_task:  # don't put itself in twice
+                        ret.append(tgt_task)
+
+        return ret
+
+    @property
+    def mapping_flags(self) -> List[str]:
+        if self._mapping_flags is None:
+            self._getCidReporting()
+        return special_keys.MAPPING_FLAG.flag_names(self._mapping_flags)
+
+    def set_diverted(self, value: bool):
+        """If set, the control is diverted temporarily and reports presses as HID++ events
+        until a HID++ configuration reset occurs."""
+        self._setCidReporting(divert=value)
+
+    def set_persistently_diverted(self, value: bool):
+        """If set, the control is diverted permanently and reports presses as HID++ events."""
+        self._setCidReporting(persist=value)
+
+    def set_rawXY_reporting(self, value: bool):
+        """If set, the mouse reports all its raw XY events while this control is pressed
+        as HID++ events. Gets cleared on a HID++ configuration reset."""
+        self._setCidReporting(rawXY=value)
+
+    def remap(self, to: _NamedInt):
+        """Remaps this control to another action."""
+        self._setCidReporting(remap=int(to))
+
+    def _getCidReporting(self):
+        try:
+            mapped_data = feature_request(
+                self._device,
+                FEATURE.REPROG_CONTROLS_V4,
+                0x20,
+                *tuple(_pack('!H', self._cid)),
+            )
+            if mapped_data:
+                cid, mapping_flags, mapped_to = _unpack('!HBH', mapped_data[:5])
+                if cid != self._cid and _log.isEnabledFor(_WARNING):
+                    _log.warn(
+                        f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
+                        f'with a different control ID ({cid}) than requested ({self._cid}).'
+                    )
+                self._mapping_flags = mapping_flags
+                self._mapped_to = mapped_to if mapped_to != 0 else self._cid
+            else:
+                raise FeatureCallError('No reply from device.')
+        except Exception:
+            if _log.isEnabledFor(_ERROR):
+                _log.error(f'Exception in _getCidReporting on device {self._device}: ', exc_info=1)
+            # Clear flags and set mapping target to self as fallback
+            self._mapping_flags = 0
+            self._mapped_to = self._cid
+
+    def _setCidReporting(self, divert=None, persist=None, rawXY=None, remap=0):
+        """Sends a `setCidReporting` request with the given parameters to the control. Raises
+        an exception if the parameters are invalid.
+        """
+        if rawXY:
+            # We need diversion to report raw XY, so divert temporarily
+            # (since XY reporting is also temporary)
+            divert = True
+
+        if divert is not None and special_keys.KEY_FLAG.divertable not in self.flags:
+            raise FeatureNotSupported(f'Tried to divert non-divertable control {self.key} on device {self._device}.')
+        if persist is not None and special_keys.KEY_FLAG.persistently_divertable not in self.flags:
+            raise FeatureNotSupported(
+                'Tried to persistently divert non-persistently-divertable control {self.key} on device {self._device}.'
+            )
+        if rawXY is not None and not self.rawXY_reportable:
+            raise FeatureNotSupported(
+                f'Tried to request raw XY reports from control {self.key} with no raw XY capability on device {self._device}.'
+            )
+        if remap != 0 and remap not in self.remappable_to:
+            raise FeatureNotSupported(
+                f'Tried to remap control {self.key} to a control ID {remap} which it is not remappable to ' +
+                f'on device {self._device}.'
+            )
+
+        mkbit = lambda v: 1 if v else 0
+        isset = lambda v: mkbit(v is not None)
+
+        pkt = tuple(
+            _pack(
+                '!HBH',
+                self._cid,
+                (isset(rawXY) << 5)
+                | (mkbit(rawXY) << 4)
+                | (isset(persist) << 3)
+                | (mkbit(persist) << 2)
+                | (isset(divert) << 1)
+                | mkbit(divert),
+                remap,
+            )
+        )
+        ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
+        if _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
+            _log.warn(
+                f"REPROG_CONTROLS_v4 endpoint setCidReporting on device {self._device} should echo request packet, but didn't."
+            )
+
+        # update knowledge of mapping
+        self._getCidReporting()
+
+
 class KeysArray(object):
     """A sequence of key mappings supported by a HID++ 2.0 device."""
-    __slots__ = ('device', 'keys', 'keyversion')
+
+    __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids')
 
     def __init__(self, device, count):
         assert device is not None
         self.device = device
-        self.keyversion = 0
+        if FEATURE.REPROG_CONTROLS in self.device.features:
+            self.keyversion = 1
+        elif FEATURE.REPROG_CONTROLS_V4 in self.device.features:
+            self.keyversion = 4
+        else:
+            if _log.isEnabledFor(_ERROR):
+                _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
+            self.keyversion = None
         self.keys = [None] * count
+        """The mapping from Control IDs to their native Task IDs.
+        For example, Control "Left Button" is mapped to Task "Left Click".
+        When remapping controls, we point the control we want to remap
+        at a target Control ID rather than a target Task ID. This has the
+        effect of performing the native task of the target control,
+        even if the target itself is also remapped. So remapping
+        is not recursive."""
+        self.cid_to_tid = {}
+        """The mapping from Control ID groups to Controls IDs that belong to it.
+        A key k can only be remapped to targets in groups within k.group_mask."""
+        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
+
+    def _query_key(self, index: int):
+        """Queries the device for a given key and stores it in self.keys."""
+        if index < 0 or index >= len(self.keys):
+            raise IndexError(index)
+
+        # TODO: add here additional variants for other REPROG_CONTROLS
+        if self.keyversion == 1:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+            if keydata:
+                cid, tid, flags = _unpack('!HHB', keydata[:5])
+                self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
+                self.cid_to_tid[cid] = tid
+        elif self.keyversion == 4:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
+            if keydata:
+                cid, tid, flags, pos, group, gmask, rawxy = _unpack('!HHBBBBB', keydata[:9])
+                self.keys[index] = ReprogrammableKeyV4(
+                    self.device,
+                    index,
+                    cid,
+                    tid,
+                    flags,
+                    pos,
+                    group,
+                    gmask,
+                    (rawxy & 0x1) == 0x1,
+                )
+                self.cid_to_tid[cid] = tid
+                if group != 0:  # 0 = does not belong to a group
+                    self.group_cids[special_keys.CID_GROUP[group]].append(cid)
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+
+    def _ensure_all_keys_queried(self):
+        """The retrieval of key information is lazy, but for certain functionality
+        we need to know all keys. This function makes sure that's the case."""
+        for (i, k) in enumerate(self.keys):
+            if k is None:
+                self._query_key(i)
 
     def __getitem__(self, index):
         if isinstance(index, int):
             if index < 0 or index >= len(self.keys):
                 raise IndexError(index)
 
-            # TODO: add here additional variants for other REPROG_CONTROLS
             if self.keys[index] is None:
-                keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
-                self.keyversion = 1
-                if keydata is None:
-                    keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
-                    self.keyversion = 4
-                if keydata:
-                    key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
-                    ctrl_id_text = special_keys.CONTROL[key]
-                    ctrl_task_text = special_keys.TASK[key_task]
-                    if self.keyversion == 1:
-                        self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
-                    if self.keyversion == 4:
-                        try:
-                            mapped_data = feature_request(
-                                self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key & 0xff00, key & 0xff
-                            )
-                            if mapped_data:
-                                remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
-                                # if key not mapped map it to itself for display
-                                if remapped == 0:
-                                    remapped = key
-                        except Exception:
-                            remapped = key
-                            # remap_key = key
-                            # remap_flag = 0
-
-                        remapped_text = special_keys.CONTROL[remapped]
-                        self.keys[index] = _ReprogrammableKeyInfoV4(
-                            index, ctrl_id_text, ctrl_task_text, flags, pos, group, gmask, remapped_text
-                        )
+                self._query_key(index)
 
             return self.keys[index]
 
@@ -566,8 +789,10 @@ def decipher_voltage(voltage_report):
 
 def get_keys(device):
     # TODO: add here additional variants for other REPROG_CONTROLS
-    count = feature_request(device, FEATURE.REPROG_CONTROLS)
-    if count is None:
+    count = None
+    if FEATURE.REPROG_CONTROLS in device.features:
+        count = feature_request(device, FEATURE.REPROG_CONTROLS)
+    elif FEATURE.REPROG_CONTROLS_V4 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
     if count:
         return KeysArray(device, ord(count[:1]))

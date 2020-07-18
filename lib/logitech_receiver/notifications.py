@@ -24,6 +24,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
+from logging import WARNING as _WARNING
 from logging import getLogger
 
 from . import hidpp10 as _hidpp10
@@ -270,8 +271,22 @@ def _process_feature_notification(device, status, n, feature):
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: reprogrammable key: %s', device, n)
         else:
-            _log.warn('%s: unknown REPROGRAMMABLE KEYS %s', device, n)
+            _log.warn('%s: unknown REPROG_CONTROLS %s', device, n)
         return True
+
+    if feature == _F.REPROG_CONTROLS_V4:
+        if n.address == 0x00:
+            if _log.isEnabledFor(_DEBUG):
+                cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
+                _log.debug('%s: diverted controls pressed: %i, %i, %i, %i', device, cid1, cid2, cid3, cid4)
+            return True
+        elif n.address == 0x10:
+            if _log.isEnabledFor(_DEBUG):
+                dx, dy = _unpack('!hh', n.data[:4])
+                _log.debug('%s: rawXY dx=%i dy=%i', device, dx, dy)
+            return True
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
 
     if feature == _F.WIRELESS_DEVICE_STATUS:
         if n.address == 0x00:
