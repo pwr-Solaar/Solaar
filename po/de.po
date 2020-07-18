@@ -124,7 +124,7 @@ msgstr  "Handerkennung"
 #: lib/logitech_receiver/settings_templates.py:213
 msgid   "Turn on illumination when the hands hover over the keyboard."
 msgstr  "Schaltet die Beleuchtung ein, wenn sich die Hand über der Tastatur "
-        "befinden."
+        "befindet."
 
 #: lib/logitech_receiver/settings_templates.py:214
 #: lib/logitech_receiver/settings_templates.py:223
@@ -155,7 +155,7 @@ msgstr  "Hochaufgelöstes Scrollen"
 
 #: lib/logitech_receiver/settings_templates.py:226
 msgid   "HID++ Scrolling"
-msgstr  "HID++ Scrollen"
+msgstr  "HID++-Scrollen"
 
 #: lib/logitech_receiver/settings_templates.py:227
 msgid   "Effectively turns off wheel scrolling in Linux."
@@ -171,8 +171,8 @@ msgstr  "Hochauflösendes Mausrad umkehren"
 
 #: lib/logitech_receiver/settings_templates.py:230
 msgid   "High-sensitivity wheel invert mode for vertical scroll."
-msgstr  "Modus für hochauflösendes vertikales Scrollen mit dem Mausrad "
-        "invertieren."
+msgstr  "Modus für hochauflösendes vertikales Scrollen mit invertiertem "
+        "Mausrad. "
 
 #: lib/logitech_receiver/settings_templates.py:232
 msgid   "Wheel Resolution"
@@ -254,15 +254,15 @@ msgstr  "Bestimmte Tastatur-Tasten abschalten."
 
 #: lib/logitech_receiver/settings_templates.py:260
 msgid   "Change keys to match OS."
-msgstr  "Ändert Tasten so, dass Sie zum OS passen."
+msgstr  "Ändert Tasten so, dass Sie zum BS passen."
 
 #: lib/logitech_receiver/settings_templates.py:260
 msgid   "Set OS"
-msgstr  "OS auswählen"
+msgstr  "BS auswählen"
 
 #: lib/logitech_receiver/settings_templates.py:261
 msgid   "Change Host"
-msgstr  "Anderen Host wählen"
+msgstr  "Anderen Empfänger wählen"
 
 #: lib/logitech_receiver/settings_templates.py:261
 msgid   "Switch connection to a different host"
