@@ -96,6 +96,13 @@ def _print_device(dev):
                 print('     Notifications: %s (0x%06X).' % (', '.join(notification_names), notification_flags))
             else:
                 print('     Notifications: (none).')
+        device_features = _hidpp10.get_device_features(dev)
+        if device_features is not None:
+            if device_features:
+                device_features_names = _hidpp10.DEVICE_FEATURES.flag_names(device_features)
+                print('     Features: %s (0x%06X)' % (', '.join(device_features_names), device_features))
+            else:
+                print('     Features: (none)')
 
     if dev.online and dev.features:
         print('     Supports %d HID++ 2.0 features:' % len(dev.features))
