@@ -280,8 +280,8 @@ def write(device_handle, data):
     bytes_written = 0
     while (retrycount < 3):
         try:
-            bytes_written = _os.write(device_handle, data)
             retrycount += 1
+            bytes_written = _os.write(device_handle, data)
         except IOError as e:
             if e.errno == _errno.EPIPE:
                 sleep(0.1)
