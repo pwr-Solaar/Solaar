@@ -16,12 +16,13 @@ Clone solaar from GitHub via `git clone https://github.com/pwr-Solaar/Solaar.git
 Installing Solaar from a repository should have set up all these requirements
 so in this situation you should be able to skip this section.
 
-Solaar needs a reasonably new kernel (5.0+ should work fine), with kernel modules `hid-logitech-dj`
+Solaar needs a reasonably new kernel (5.2+ should work fine and recent CentOS distributions are likely to work),
+with kernel modules `hid-logitech-dj`
 and `hid-logitech-hidpp` loaded.   Also, the `udev` package must be installed
 and its daemon running.  If you have a recent Linux distribution, you are
 most likely good to go.
 
-Solaar requires Python 3.2+
+Solaar requires Python 3.6+
 and the `python3-pyudev` package.
 To run the GUI, solaar also requires Gtk3, and its GObject
 introspection bindings.
