@@ -271,11 +271,18 @@ class PairedDevice(object):
     @property
     def settings(self):
         if self._settings is None:
+            self._settings = []
             if self.descriptor and self.descriptor.settings:
-                self._settings = [s(self) for s in self.descriptor.settings]
-                self._settings = [s for s in self._settings if s is not None]
-            else:
                 self._settings = []
+                for s in self.descriptor.settings:
+                    try:
+                        setting = s(self)
+                    except Exception as e:
+                        # Do nothing if the device is offline
+                        if self.online:
+                            raise e
+                    if setting is not None:
+                        self._settings.append(setting)
         if not self._feature_settings_checked:
             self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
