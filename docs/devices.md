@@ -20,10 +20,6 @@ level.
 For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
-If your device works with Solaar, but its supported features are not
-correctly specified here, please open an issue on the [Solaar github
-repository][solaar] with the pleasant news.
-
 ### Adding new receivers and devices
 
 Adding a new receiver requires knowing whether the receiver is a regular
@@ -129,6 +125,7 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 | M600 Touch       | 401A | 2.0   | yes     |       |                                 |
 | M705 Marathon    | 101B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
 | M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                |
+| M720 Triathlon   | 405E | 2.0   | yes     | -     |                                 |
 | T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                |
 | T620 Touch       |      | 2.0   | yes     |       |                                 |
 | Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
