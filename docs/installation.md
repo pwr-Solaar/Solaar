@@ -57,6 +57,9 @@ For this rule to set up the correct permissions for your receiver
 you will then need to either physically remove the receiver and
 re-insert it or reboot your computer.
 
+You only need to install Solaar's udev rule if it is not already installed
+on your system or you have a receiver that is not in the installed rule.
+
 
 ## Running from the Download Directories
 
@@ -68,6 +71,8 @@ Otherwise you will need to run Solaar as root via
 `sudo bin/solaar` for the GUI
 or `sudo bin/solaar <command> <arguments>` for the CLI.
 
+Warning:  Running Solaar as root may result in problems with the Solaar icon in the system tray.
+
 
 ## Installing Solaar
 
@@ -77,8 +82,7 @@ The pip instructions for solaar are in `setup.py`, the standard place to put suc
 To install solaar for yourself only run `pip install --user .` from the solaar directory.
 This tells pip to install into your `.local` directory, but does not install Solaar's udev rule.
 (See above for installing the udev rule.)
-You can then run solaar as `sudo ~/.local/bin/solaar` (or just `~/.local/bin/solaar`
-if the udev rule has been installed).
+Once the udev rule has been installed you can then run Solaar as `~/.local/bin/solaar`.
 
 Installing python programs to system directories using pip is generally frowned on both
 because this runs arbitrary code as root and because this can override existing python libraries
@@ -86,7 +90,7 @@ that other users or even the system depend on.  If you want to install solaar to
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
 (The umask is needed so that the created files and directories can be read and executed by everyone.)
 Then solaar can be run as /usr/local/bin/solaar.
-This will not install the udev rule.
+You will also have to install the udev rule.
 
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
 
@@ -99,11 +103,11 @@ Distributions can cause Solaar can be run automatically at user login by install
 If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.
 
 
-## Using PyPI
+## Installing from PyPI
 
 As an alternative to downloading and installing you can install the most recent release
 (but not the current github version) of Solaar from PyPI.
 Just run `pip install --user solaar`.
 This will not install the Solaar udev rule, which you will need to copy from
 `~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
-to `/etc/udev/rules.d`.
+to `/etc/udev/rules.d` as root.
