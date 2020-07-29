@@ -95,6 +95,13 @@ You will also have to install the udev rule.
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
 
 
+## Solaar in other languages
+
+If you want to have Solaar's user messages in some other language you need to run
+`tools/po-compile.sh` to create the translation files before running or installing Solaar
+and set the LANGUAGE environment variable appropriately when running Solaar.
+
+
 ## Running Solaar at Startup
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
