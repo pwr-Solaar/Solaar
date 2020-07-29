@@ -1,3 +1,7 @@
+1.0.3rc2:
+  * Fix bug handling DJ pairing notifications.
+  * Add Norwegian Bokmål translation>
+
 1.0.3rc1:
   * Remove deprecated solaar-cli application.
   * Don't install udev or autostart files from python (or pip).
