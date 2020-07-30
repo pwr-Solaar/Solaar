@@ -296,8 +296,13 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('wireless status: %s', n)
-            if n.data[0:3] == b'\x01\x01\x01':
-                status.changed(active=True, alert=_ALERT.NOTIFICATION, reason='powered on')
+            reason = 'powered on' if n.data[2] == 1 else None
+            if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
+                # only show a user notification if the device can change hosts
+                # as we want to notify when a device changes to this host
+                # but the only indication we get is this notification
+                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
+                status.changed(active=True, alert=alert, reason=reason)
             else:
                 _log.warn('%s: unknown WIRELESS %s', device, n)
         else:
