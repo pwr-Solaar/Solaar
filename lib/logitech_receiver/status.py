@@ -318,11 +318,16 @@ class DeviceStatus(dict):
                     if battery is not None:
                         self[KEYS.BATTERY_LEVEL] = battery
 
-        if self.updated == 0 and active is True:
-            # if the device is active on the very first status notification,
-            # (meaning just when the program started or a new receiver was just
-            # detected), pop-up a notification about it
-            alert |= ALERT.NOTIFICATION
+        # A device that is not active on the first status notification
+        # but becomes active afterwards does not produce a pop-up notification
+        # so don't produce one here.  This cuts off pop-ups when Solaar starts,
+        # which can be problematic if Solaar is autostarted.
+        ## if self.updated == 0 and active is True:
+        ## if the device is active on the very first status notification,
+        ## (meaning just when the program started or a new receiver was just
+        ## detected), pop up a notification about it
+        ##    alert |= ALERT.NOTIFICATION
+
         self.updated = timestamp
 
         # if _log.isEnabledFor(_DEBUG):
