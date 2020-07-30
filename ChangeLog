@@ -1,6 +1,12 @@
+1.0.3:
+  * Clean up documentation files.
+  * Update documentation on installation.
+  * Update Swedish and French translations.
+  * Add Norwegtian Nynorsk and Danish translations.
+
 1.0.3rc2:
   * Fix bug handling DJ pairing notifications.
-  * Add Norwegian Bokmål translation>
+  * Add Norwegian Bokmål translation.
 
 1.0.3rc1:
   * Remove deprecated solaar-cli application.
