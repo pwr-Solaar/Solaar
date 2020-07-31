@@ -186,7 +186,7 @@ class ReceiverListener(_listener.EventsListener):
         # a device notification
         if not (0 < n.devnumber <= self.receiver.max_devices):
             if _log.isEnabledFor(_WARNING):
-                _log.warning(_('Unexpected device number (%s) in notification %s.' % (n.devnumber, n)))
+                _log.warning('Unexpected device number (%s) in notification %s.', n.devnumber, n)
             return
         already_known = n.devnumber in self.receiver
 
