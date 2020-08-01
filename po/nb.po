@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.3rc1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-29 02:12+0200\n"
-"PO-Revision-Date: 2020-07-29 11:44+0200\n"
+"PO-Revision-Date: 2020-08-01 10:58+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: none\n"
 "Language: nb\n"
@@ -40,11 +40,11 @@ msgstr "full"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "discharging"
-msgstr "lader ut"
+msgstr "utlading"
 
 #: lib/logitech_receiver/i18n.py:46
 msgid "recharging"
-msgstr "lader"
+msgstr "opplading"
 
 #: lib/logitech_receiver/i18n.py:47
 msgid "almost full"
@@ -84,7 +84,7 @@ msgstr "sekvens timeout"
 
 #: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:555
 msgid "Firmware"
-msgstr "Fastware"
+msgstr "Fastvare"
 
 #: lib/logitech_receiver/i18n.py:61
 msgid "Bootloader"
@@ -219,7 +219,7 @@ msgid ""
 "The mouse wheel is always free at 0, and always locked at 50"
 msgstr ""
 "Bytt mushjulet automatisk mellom sperre- og frispinnmodus.\n"
-"Musehjulet er alltid fritt på 0, og låses alltid på 50"
+"Mushjulet er alltid fritt på 0, og låses alltid på 50"
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Backlight"
@@ -242,8 +242,8 @@ msgid ""
 "Changing important actions (such as for the left mouse button) can result in "
 "an unusable system."
 msgstr ""
-"Endring av viktige handlinger (for eksempel venstre museknapp) kan resultere "
-"i et ubrukbart system."
+"Endring av viktige handlinger (for eksempel venstre musknapp) kan resultere i "
+"et ubrukbart system."
 
 #: lib/logitech_receiver/settings_templates.py:260
 msgid "Disable keys"
@@ -255,7 +255,7 @@ msgstr "Slå av spesifikke tastaturtaster."
 
 #: lib/logitech_receiver/settings_templates.py:261
 msgid "Change keys to match OS."
-msgstr "Endre taster så de stememr med OS."
+msgstr "Endre taster så de stemmer med OS."
 
 #: lib/logitech_receiver/settings_templates.py:261
 msgid "Set OS"
@@ -353,8 +353,7 @@ msgstr "Rettighetsfeil"
 #: lib/solaar/ui/__init__.py:51
 #, python-format
 msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Fant en Logitech-mottaker (%s), men har ikke rettigheter til å åpne den."
+msgstr "Fant en Logitech-mottaker (%s), men mangler rettigheter til å åpne den."
 
 #: lib/solaar/ui/__init__.py:52
 msgid ""
@@ -435,8 +434,7 @@ msgstr ""
 
 #: lib/solaar/ui/pair_window.py:138
 msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr ""
-"En ny enhet ble påvist, men den er ikke kompatibel med denne mottakeren."
+msgstr "En ny enhet ble påvist, men den er ukompatibel med denne mottakeren."
 
 #: lib/solaar/ui/pair_window.py:140
 #, python-format
@@ -453,12 +451,12 @@ msgstr "Fant ny enhet:"
 
 #: lib/solaar/ui/pair_window.py:181
 msgid "The wireless link is not encrypted"
-msgstr "Den trådløse koblingen er ikke kryptert"
+msgstr "Den trådløse koblingen er ukryptert"
 
 #: lib/solaar/ui/pair_window.py:199
 #, python-format
 msgid "%(receiver_name)s: pair new device"
-msgstr "%(receiver_name)s: par ny deviceenhet"
+msgstr "%(receiver_name)s: par ny enhet"
 
 #: lib/solaar/ui/pair_window.py:206
 msgid "If the device is already turned on, turn if off and on again."
@@ -611,7 +609,7 @@ msgstr "sist kjent"
 
 #: lib/solaar/ui/window.py:690
 msgid "not encrypted"
-msgstr "ikke kryptert"
+msgstr "ukryptert"
 
 #: lib/solaar/ui/window.py:694
 msgid ""
@@ -624,7 +622,7 @@ msgid ""
 "numpads),\n"
 "because typed text can be sniffed inconspicuously by 3rd parties within range."
 msgstr ""
-"Den trådløse koblingen mellom denne enheten og mottakeren er ikke kryptert.\n"
+"Den trådløse koblingen mellom denne enheten og mottakeren er ukryptert.\n"
 "\n"
 "For pekeenheter (mus, styrekuler, styreflater) er dette en mindre "
 "sikkerhetsproblem.\n"
