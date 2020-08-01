@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 0.9.1\n"
+"Project-Id-Version: solaar 1.0.3rc1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-07-29 22:07+0200\n"
 "PO-Revision-Date: 2020-07-29 22:09+0200\n"
@@ -42,11 +42,11 @@ msgstr "full"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "discharging"
-msgstr "laddar ur"
+msgstr "urladdning"
 
 #: lib/logitech_receiver/i18n.py:46
 msgid "recharging"
-msgstr "laddar"
+msgstr "uppladdning"
 
 #: lib/logitech_receiver/i18n.py:47
 msgid "almost full"
@@ -357,7 +357,7 @@ msgstr "Behörighetsfel"
 #, python-format
 msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
 msgstr ""
-"En Logitech mottagare hittades (%s), men behörighet att använda den saknas."
+"En Logitech mottagare hittades (%s), fast saknar behörighet till att öppna den."
 
 #: lib/solaar/ui/__init__.py:52
 msgid ""
@@ -436,7 +436,7 @@ msgstr "Se till så att enheten är inom räckhåll, och har tillräckligt ladda
 
 #: lib/solaar/ui/pair_window.py:138
 msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "En ny enhet upptäcktes, men är inte kompatibel med mottagaren."
+msgstr "En ny enhet upptäcktes, fast den är ukompatibel med denna mottakeren."
 
 #: lib/solaar/ui/pair_window.py:140
 #, python-format
