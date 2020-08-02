@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.0.3rc1\n"
+"Project-Id-Version: solaar 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-29 02:12+0200\n"
-"PO-Revision-Date: 2020-08-01 10:58+0200\n"
+"POT-Creation-Date: 2020-08-02 21:04+0200\n"
+"PO-Revision-Date: 2020-08-02 21:21+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: none\n"
 "Language: nb\n"
@@ -114,7 +114,7 @@ msgstr "uparet"
 msgid "powered on"
 msgstr "påslått"
 
-#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:661
+#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:664
 msgid "unknown"
 msgstr "ukjent"
 
@@ -187,7 +187,7 @@ msgid ""
 "and you must hold the FN key to activate their standard function."
 msgstr ""
 "Hvis aktivert, vil F1–F12-tastene aktivere sin spesialfunksjon,\n"
-"og du må holde FN tasten nede for å aktivere deres standardfunksjon."
+"og du må holde FN-tasten nede for å aktivere deres standardfunksjon."
 
 #: lib/logitech_receiver/settings_templates.py:240
 msgid ""
@@ -195,7 +195,7 @@ msgid ""
 "and you must hold the FN key to activate their special function."
 msgstr ""
 "Hvis deaktivert, vil F1–F12-tastene aktivere sin standardfunksjon,\n"
-"og du må holde FN tasten nede for å aktivere deres spesialfunksjon."
+"og du må holde FN-tasten nede for å aktivere deres spesialfunksjon."
 
 #: lib/logitech_receiver/settings_templates.py:244
 msgid "Sensitivity (DPI)"
@@ -223,7 +223,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Backlight"
-msgstr "Bakgrunnsbelysning"
+msgstr "Bakbelysning"
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Turn illumination on or off on keyboard."
@@ -242,8 +242,8 @@ msgid ""
 "Changing important actions (such as for the left mouse button) can result in "
 "an unusable system."
 msgstr ""
-"Endring av viktige handlinger (for eksempel venstre musknapp) kan resultere i "
-"et ubrukbart system."
+"Endring av viktige handlinger (for eksempel venstre musknapp) kan resultere "
+"i et ubrukbart system."
 
 #: lib/logitech_receiver/settings_templates.py:260
 msgid "Disable keys"
@@ -341,11 +341,6 @@ msgstr ""
 msgid "The receiver was unplugged."
 msgstr "Mottakeren ble fjernet."
 
-#: lib/solaar/listener.py:189
-#, python-format
-msgid "Unexpected device number (%s) in notification %s."
-msgstr "Uventet enhetsnummer (%s) i varsel %s."
-
 #: lib/solaar/ui/__init__.py:49
 msgid "Permissions error"
 msgstr "Rettighetsfeil"
@@ -418,7 +413,7 @@ msgid "connected"
 msgstr "tilkoblet"
 
 #: lib/solaar/ui/notify.py:123 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:708
+#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:711
 msgid "offline"
 msgstr "avslått"
 
@@ -437,9 +432,8 @@ msgid "A new device was detected, but it is not compatible with this receiver."
 msgstr "En ny enhet ble påvist, men den er ukompatibel med denne mottakeren."
 
 #: lib/solaar/ui/pair_window.py:140
-#, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Mottakeren kan kun støtte %d parede enhet(er)."
+msgid "More paired devices than receiver can support."
+msgstr "Fler parede enheter enn mottakeren kan støtte."
 
 #: lib/solaar/ui/pair_window.py:142
 msgid "No further details are available about the error."
@@ -462,18 +456,26 @@ msgstr "%(receiver_name)s: par ny enhet"
 msgid "If the device is already turned on, turn if off and on again."
 msgstr "Hvis enheten allerede er slått på, slå den av og på igjen."
 
-#: lib/solaar/ui/pair_window.py:208
+#: lib/solaar/ui/pair_window.py:209
 #, python-format
 msgid ""
 "\n"
 "\n"
-"This receiver has %d pairing(s) remaining."
-msgstr ""
+"This receiver has %d pairing remaining."
+msgid_plural ""
+"\n"
+"\n"
+"This receiver has %d pairings remaining."
+msgstr[0] ""
+"\n"
+"\n"
+"Denne mottakeren har %d gjenstående paring."
+msgstr[1] ""
 "\n"
 "\n"
 "Denne mottakeren har %d gjenstående paringer."
 
-#: lib/solaar/ui/pair_window.py:209
+#: lib/solaar/ui/pair_window.py:212
 msgid ""
 "\n"
 "Cancelling at this point will not use up a pairing."
@@ -481,7 +483,7 @@ msgstr ""
 "\n"
 "Kansellering nå vil ikke bruke opp en paring."
 
-#: lib/solaar/ui/pair_window.py:212
+#: lib/solaar/ui/pair_window.py:215
 msgid "Turn on the device you want to pair."
 msgstr "Slå på enheten du ønsker å pare."
 
@@ -535,7 +537,7 @@ msgstr "Sti"
 
 #: lib/solaar/ui/window.py:524
 msgid "USB id"
-msgstr "USB id"
+msgstr "USB-id"
 
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 #: lib/solaar/ui/window.py:546 lib/solaar/ui/window.py:548
@@ -548,7 +550,7 @@ msgstr "Indeks"
 
 #: lib/solaar/ui/window.py:534
 msgid "Wireless PID"
-msgstr "Trådløs PID"
+msgstr "Trådløs-PID"
 
 #: lib/solaar/ui/window.py:536
 msgid "Protocol"
@@ -590,28 +592,30 @@ msgstr[1] "Inntil %(max_count)s enheter kan bli paret med denne mottakeren."
 msgid "Only one device can be paired to this receiver."
 msgstr "Kun én enhet kan pares med denne mottakeren."
 
-#: lib/solaar/ui/window.py:613
+#: lib/solaar/ui/window.py:614
 #, python-format
-msgid "This receiver has %d pairing(s) remaining."
-msgstr "Denne mottakeren har %d gjenstående paring(er)."
+msgid "This receiver has %d pairing remaining."
+msgid_plural "This receiver has %d pairings remaining."
+msgstr[0] "Denne mottakeren har %d gjenstående paring."
+msgstr[1] "Denne mottakeren har %d gjenstående paringer."
 
-#: lib/solaar/ui/window.py:676 lib/solaar/ui/window.py:678
+#: lib/solaar/ui/window.py:679 lib/solaar/ui/window.py:681
 msgid "next "
 msgstr "neste "
 
-#: lib/solaar/ui/window.py:681
+#: lib/solaar/ui/window.py:684
 msgid "charging"
 msgstr "lader"
 
-#: lib/solaar/ui/window.py:683
+#: lib/solaar/ui/window.py:686
 msgid "last known"
 msgstr "sist kjent"
 
-#: lib/solaar/ui/window.py:690
+#: lib/solaar/ui/window.py:693
 msgid "not encrypted"
 msgstr "ukryptert"
 
-#: lib/solaar/ui/window.py:694
+#: lib/solaar/ui/window.py:697
 msgid ""
 "The wireless link between this device and its receiver is not encrypted.\n"
 "\n"
@@ -620,7 +624,8 @@ msgid ""
 "\n"
 "It is, however, a major security issue for text-input devices (keyboards, "
 "numpads),\n"
-"because typed text can be sniffed inconspicuously by 3rd parties within range."
+"because typed text can be sniffed inconspicuously by 3rd parties within "
+"range."
 msgstr ""
 "Den trådløse koblingen mellom denne enheten og mottakeren er ukryptert.\n"
 "\n"
@@ -632,15 +637,33 @@ msgstr ""
 "fordi maskinskrevet tekst kan bli sniffet ubemerket av tredjeparter innen "
 "rekkevidde."
 
-#: lib/solaar/ui/window.py:703
+#: lib/solaar/ui/window.py:706
 msgid "encrypted"
 msgstr "kryptert"
 
-#: lib/solaar/ui/window.py:705
+#: lib/solaar/ui/window.py:708
 msgid "The wireless link between this device and its receiver is encrypted."
 msgstr "Den trådløse tilkoblingen mellom enheten og mottakeren er kryptert."
 
-#: lib/solaar/ui/window.py:718
+#: lib/solaar/ui/window.py:721
 #, python-format
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lux"
+
+#~ msgid "This receiver has %d pairing(s) remaining."
+#~ msgstr "Denne mottakeren har %d gjenstående paring(er)."
+
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "This receiver has %d pairing(s) remaining."
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Denne mottakeren har %d gjenstående paringer."
+
+#~ msgid "The receiver only supports %d paired device(s)."
+#~ msgstr "Mottakeren kan kun støtte %d parede enhet(er)."
+
+#~ msgid "Unexpected device number (%s) in notification %s."
+#~ msgstr "Uventet enhetsnummer (%s) i varsel %s."
