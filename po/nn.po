@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.0.3rc2\n"
+"Project-Id-Version: solaar 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-01 21:34+0200\n"
-"PO-Revision-Date: 2020-08-01 21:34+0200\n"
+"POT-Creation-Date: 2020-08-02 23:00+0200\n"
+"PO-Revision-Date: 2020-08-02 23:35+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: nn\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
 
 #: lib/logitech_receiver/i18n.py:38
 msgid "empty"
@@ -113,7 +114,7 @@ msgstr "uparet"
 msgid "powered on"
 msgstr "påslått"
 
-#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:661
+#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:664
 msgid "unknown"
 msgstr "ukjend"
 
@@ -222,7 +223,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Backlight"
-msgstr "Bakgrunnsbelysning"
+msgstr "Bakbelysning"
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Turn illumination on or off on keyboard."
@@ -340,11 +341,6 @@ msgstr ""
 msgid "The receiver was unplugged."
 msgstr "Mottakaren vart fjerna."
 
-#: lib/solaar/listener.py:189
-#, python-format
-msgid "Unexpected device number (%s) in notification %s."
-msgstr "Uventa einingsnummer (%s) i varsel %s."
-
 #: lib/solaar/ui/__init__.py:49
 msgid "Permissions error"
 msgstr "Rettighetsfeil"
@@ -417,7 +413,7 @@ msgid "connected"
 msgstr "tilkopla"
 
 #: lib/solaar/ui/notify.py:123 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:708
+#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:711
 msgid "offline"
 msgstr "avslått"
 
@@ -437,9 +433,8 @@ msgstr ""
 "Ei ny eining vart påvist, men ho er ikkje kompatibel med denne mottakaren."
 
 #: lib/solaar/ui/pair_window.py:140
-#, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Mottakaren kan kun støtte %d para eining(er)."
+msgid "More paired devices than receiver can support."
+msgstr "Fleir para einingar enn mottakaren kan støtte."
 
 #: lib/solaar/ui/pair_window.py:142
 msgid "No further details are available about the error."
@@ -462,18 +457,26 @@ msgstr "%(receiver_name)s: par ny eining"
 msgid "If the device is already turned on, turn if off and on again."
 msgstr "Viss eininga allereie er slått på, slå ho av og på igjen."
 
-#: lib/solaar/ui/pair_window.py:208
+#: lib/solaar/ui/pair_window.py:209
 #, python-format
 msgid ""
 "\n"
 "\n"
-"This receiver has %d pairing(s) remaining."
-msgstr ""
+"This receiver has %d pairing remaining."
+msgid_plural ""
 "\n"
 "\n"
-"Denne mottakaren har %d gjenståande paringar."
+"This receiver has %d pairings remaining."
+msgstr[0] ""
+"\n"
+"\n"
+"Denne mottakaren har %d gjenståande paring."
+msgstr[1] ""
+"\n"
+"\n"
+"Denne mottakaren har %d gjenståande paringer."
 
-#: lib/solaar/ui/pair_window.py:209
+#: lib/solaar/ui/pair_window.py:212
 msgid ""
 "\n"
 "Cancelling at this point will not use up a pairing."
@@ -481,7 +484,7 @@ msgstr ""
 "\n"
 "Kansellering no vil ikkje bruka opp ein paring."
 
-#: lib/solaar/ui/pair_window.py:212
+#: lib/solaar/ui/pair_window.py:215
 msgid "Turn on the device you want to pair."
 msgstr "Slå på eininga du ynsker å pare."
 
@@ -535,7 +538,7 @@ msgstr "Sti"
 
 #: lib/solaar/ui/window.py:524
 msgid "USB id"
-msgstr "USB id"
+msgstr "USB-id"
 
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 #: lib/solaar/ui/window.py:546 lib/solaar/ui/window.py:548
@@ -548,7 +551,7 @@ msgstr "Indeks"
 
 #: lib/solaar/ui/window.py:534
 msgid "Wireless PID"
-msgstr "Trådlaus PID"
+msgstr "Trådlaus-PID"
 
 #: lib/solaar/ui/window.py:536
 msgid "Protocol"
@@ -590,28 +593,30 @@ msgstr[1] "Inntil %(max_count)s einingar kan bli para med denne mottakaren."
 msgid "Only one device can be paired to this receiver."
 msgstr "Berre éi eining kan parast med denne mottakaren."
 
-#: lib/solaar/ui/window.py:613
+#: lib/solaar/ui/window.py:614
 #, python-format
-msgid "This receiver has %d pairing(s) remaining."
-msgstr "Denne mottakaren har %d gjenståande paring(er)."
+msgid "This receiver has %d pairing remaining."
+msgid_plural "This receiver has %d pairings remaining."
+msgstr[0] "Denne mottakaren har %d gjenståande paring."
+msgstr[1] "Denne mottakaren har %d gjenståande paringer."
 
-#: lib/solaar/ui/window.py:676 lib/solaar/ui/window.py:678
+#: lib/solaar/ui/window.py:679 lib/solaar/ui/window.py:681
 msgid "next "
 msgstr "neste "
 
-#: lib/solaar/ui/window.py:681
+#: lib/solaar/ui/window.py:684
 msgid "charging"
 msgstr "lader"
 
-#: lib/solaar/ui/window.py:683
+#: lib/solaar/ui/window.py:686
 msgid "last known"
 msgstr "sist kjend"
 
-#: lib/solaar/ui/window.py:690
+#: lib/solaar/ui/window.py:693
 msgid "not encrypted"
 msgstr "ikkje kryptert"
 
-#: lib/solaar/ui/window.py:694
+#: lib/solaar/ui/window.py:697
 msgid ""
 "The wireless link between this device and its receiver is not encrypted.\n"
 "\n"
@@ -620,7 +625,8 @@ msgid ""
 "\n"
 "It is, however, a major security issue for text-input devices (keyboards, "
 "numpads),\n"
-"because typed text can be sniffed inconspicuously by 3rd parties within range."
+"because typed text can be sniffed inconspicuously by 3rd parties within "
+"range."
 msgstr ""
 "Den trådlause koplinga mellom denne eininga og mottakaren er ukryptert.\n"
 "\n"
@@ -632,15 +638,33 @@ msgstr ""
 "fordi maskinskriven tekst kan bli sniffa umerka av tredjepartar innan "
 "rekkevidde."
 
-#: lib/solaar/ui/window.py:703
+#: lib/solaar/ui/window.py:706
 msgid "encrypted"
 msgstr "kryptert"
 
-#: lib/solaar/ui/window.py:705
+#: lib/solaar/ui/window.py:708
 msgid "The wireless link between this device and its receiver is encrypted."
 msgstr "Den trådlause tilkoplinga mellom eininga og mottakaren er kryptert."
 
-#: lib/solaar/ui/window.py:718
+#: lib/solaar/ui/window.py:721
 #, python-format
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lux"
+
+#~ msgid "This receiver has %d pairing(s) remaining."
+#~ msgstr "Denne mottakaren har %d gjenståande paring(er)."
+
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "This receiver has %d pairing(s) remaining."
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Denne mottakaren har %d gjenståande paringar."
+
+#~ msgid "The receiver only supports %d paired device(s)."
+#~ msgstr "Mottakaren kan kun støtte %d para eining(er)."
+
+#~ msgid "Unexpected device number (%s) in notification %s."
+#~ msgstr "Uventa einingsnummer (%s) i varsel %s."
