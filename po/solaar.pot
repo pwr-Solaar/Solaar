@@ -5,12 +5,12 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: solaar 1.0.3rc1\n"
+msgstr  "Project-Id-Version: solaar 1.0.3\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2020-07-29 12:37+0200\n"
+        "POT-Creation-Date: 2020-08-02 21:30+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-        "Language-Team: none\n"
+        "Language-Team: LANGUAGE <LL@li.org>\n"
         "Language: \n"
         "MIME-Version: 1.0\n"
         "Content-Type: text/plain; charset=UTF-8\n"
@@ -113,7 +113,7 @@ msgstr  ""
 msgid   "powered on"
 msgstr  ""
 
-#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:661
+#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:664
 msgid   "unknown"
 msgstr  ""
 
@@ -323,11 +323,6 @@ msgstr  ""
 msgid   "The receiver was unplugged."
 msgstr  ""
 
-#: lib/solaar/listener.py:189
-#, python-format
-msgid   "Unexpected device number (%s) in notification %s."
-msgstr  ""
-
 #: lib/solaar/ui/__init__.py:49
 msgid   "Permissions error"
 msgstr  ""
@@ -395,7 +390,7 @@ msgid   "connected"
 msgstr  ""
 
 #: lib/solaar/ui/notify.py:123 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:708
+#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:711
 msgid   "offline"
 msgstr  ""
 
@@ -414,8 +409,7 @@ msgid   "A new device was detected, but it is not compatible with this "
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:140
-#, python-format
-msgid   "The receiver only supports %d paired device(s)."
+msgid   "More paired devices than receiver can support."
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:142
@@ -439,19 +433,23 @@ msgstr  ""
 msgid   "If the device is already turned on, turn if off and on again."
 msgstr  ""
 
-#: lib/solaar/ui/pair_window.py:208
+#: lib/solaar/ui/pair_window.py:209
 #, python-format
 msgid   "\n"
         "\n"
-        "This receiver has %d pairing(s) remaining."
-msgstr  ""
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       ""
+msgstr[1]       ""
 
-#: lib/solaar/ui/pair_window.py:209
+#: lib/solaar/ui/pair_window.py:212
 msgid   "\n"
         "Cancelling at this point will not use up a pairing."
 msgstr  ""
 
-#: lib/solaar/ui/pair_window.py:212
+#: lib/solaar/ui/pair_window.py:215
 msgid   "Turn on the device you want to pair."
 msgstr  ""
 
@@ -560,28 +558,30 @@ msgstr[1]       ""
 msgid   "Only one device can be paired to this receiver."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:613
+#: lib/solaar/ui/window.py:614
 #, python-format
-msgid   "This receiver has %d pairing(s) remaining."
-msgstr  ""
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       ""
+msgstr[1]       ""
 
-#: lib/solaar/ui/window.py:676 lib/solaar/ui/window.py:678
+#: lib/solaar/ui/window.py:679 lib/solaar/ui/window.py:681
 msgid   "next "
 msgstr  ""
 
-#: lib/solaar/ui/window.py:681
+#: lib/solaar/ui/window.py:684
 msgid   "charging"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:683
+#: lib/solaar/ui/window.py:686
 msgid   "last known"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:690
+#: lib/solaar/ui/window.py:693
 msgid   "not encrypted"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:694
+#: lib/solaar/ui/window.py:697
 msgid   "The wireless link between this device and its receiver is not "
         "encrypted.\n"
         "\n"
@@ -594,15 +594,15 @@ msgid   "The wireless link between this device and its receiver is not "
         "within range."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:703
+#: lib/solaar/ui/window.py:706
 msgid   "encrypted"
 msgstr  ""
 
-#: lib/solaar/ui/window.py:705
+#: lib/solaar/ui/window.py:708
 msgid   "The wireless link between this device and its receiver is encrypted."
 msgstr  ""
 
-#: lib/solaar/ui/window.py:718
+#: lib/solaar/ui/window.py:721
 #, python-format
 msgid   "%(light_level)d lux"
 msgstr  ""
