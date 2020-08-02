@@ -3,8 +3,11 @@ title: List of HID++ 2.0 features
 layout: page
 ---
 
-# Feature status
-See functions in hidpp20.py and settings_templates.py
+# List of HID++ 2.0 features
+
+## Feature status
+
+See functions in `hidpp20.py` and `settings_templates.py`
 
 Feature                                | ID       | Status             | Notes
 ---------------------------------------|----------|:------------------:|------
@@ -17,7 +20,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_GROUPS`                        | `0x0006` | :x:                |
 `DEVICE_FRIENDLY_NAME`                 | `0x0007` | :x:                |
 `KEEP_ALIVE`                           | `0x0008` | :x:                |
-`RESET`                                | `0x0020` | :x:                | aka "Config Change"
+`RESET`                                | `0x0020` | :x:                | aka “Config Change”
 `CRYPTO_ID`                            | `0x0021` | :x:                |
 `TARGET_SOFTWARE`                      | `0x0030` | :x:                |
 `WIRELESS_SIGNAL_STRENGTH`             | `0x0080` | :x:                |
@@ -110,9 +113,9 @@ Feature                                | ID       | Status             | Notes
 `EQUALIZER`                            | `0x8310` | :x:                |
 `HEADSET_OUT`                          | `0x8320` | :x:                |
 
-"read only" in the notes column means that the feature is a read-only feature and cannot be changed.
+A “read only” note means the feature is a read-only feature and cannot be changed.
 
-# Implementing a feature
+## Implementing a feature
 
 Features are implemented as settable features in
 lib/logitech_receiver/settings_templates.py
@@ -134,8 +137,10 @@ should be a valid Python identifier.  (Some older settings have dashes.)
 The label is displayed in the Solaar main window and the description is used as a tooltip there.
 The label and description should be specified as translatable strings.
 
-```
-_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), _("How fast the pointer moves"))
+```python
+_POINTER_SPEED = ('pointer_speed',
+		_("Sensitivity (Pointer Speed)"),
+		_("How fast the pointer moves"))
 ```
 
 Implement a register interface for the setting (if you are very brave and
@@ -159,23 +164,27 @@ and which kinds of devices can have this setting.
 (This last is no longer used because keyboards with integrated pointers only
 report that they are keyboards.)
 The values to be used need to be determined from documentation of the
-feature or from reverse-engineering behaviour of Logitech software under
+feature or from reverse-engineering behavior of Logitech software under
 Windows or MacOS.
 
-```
+```python
 def _feature_pointer_speed():
 	"""Pointer Speed feature"""
-	return feature_range(_POINTER_SPEED[0], _F.POINTER_SPEED, 0x002e, 0x01ff,
-					read_function_id=0x0,
-					write_function_id=0x10,
-					bytes_count=2,
-					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
-					device_kind=(_DK.mouse, _DK.trackball))
+	return feature_range(_POINTER_SPEED[0],
+			_F.POINTER_SPEED,
+			0x002e,
+			0x01ff,
+			read_function_id=0x0,
+			write_function_id=0x10,
+			bytes_count=2,
+			label=_POINTER_SPEED[1],
+			description=_POINTER_SPEED[2],
+			device_kind=(_DK.mouse, _DK.trackball))
 ```
 
 Settings that are toggles or choices work very similarly.
 Settings where the choices are determined from the device
-need an auxiliary function to receive and decipher the permissable choices.
+need an auxiliary function to receive and decipher the permissible choices.
 See `_feature_adjustable_dpi_choices` for an example.
 
 Add an element to _SETTINGS_TABLE with
@@ -189,6 +198,7 @@ The identifier is used in descriptors.py to say that a device has the register o
 The identifier can be the same as the setting name if there is only one implementation for the setting.
 This table is used to generate the data structures for describing devices in descriptors.py
 and is also used to auto-discover feature implementations.
-```
+
+```python
 _S( _POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed ),
 ```
