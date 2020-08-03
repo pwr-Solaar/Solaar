@@ -40,7 +40,7 @@ msgstr "fuld"
 
 #: lib/logitech_receiver/i18n.py:45
 msgid "discharging"
-msgstr "udladning"
+msgstr "afladning"
 
 #: lib/logitech_receiver/i18n.py:46
 msgid "recharging"
@@ -52,7 +52,7 @@ msgstr "næsten fuld"
 
 #: lib/logitech_receiver/i18n.py:48
 msgid "charged"
-msgstr "opladet"
+msgstr "opladt"
 
 #: lib/logitech_receiver/i18n.py:49
 msgid "slow recharge"
@@ -84,7 +84,7 @@ msgstr "sekvens timeout"
 
 #: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:555
 msgid "Firmware"
-msgstr "Fastvare"
+msgstr "Firmware"
 
 #: lib/logitech_receiver/i18n.py:61
 msgid "Bootloader"
@@ -92,7 +92,7 @@ msgstr "Opstartsindlæser"
 
 #: lib/logitech_receiver/i18n.py:62
 msgid "Hardware"
-msgstr "Maskinevare"
+msgstr "Hardware"
 
 #: lib/logitech_receiver/i18n.py:63
 msgid "Other"
@@ -112,7 +112,7 @@ msgstr "uparret"
 
 #: lib/logitech_receiver/notifications.py:238
 msgid "powered on"
-msgstr "tænd"
+msgstr "tændt"
 
 #: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:661
 msgid "unknown"
@@ -124,7 +124,7 @@ msgstr "Hånddetektion"
 
 #: lib/logitech_receiver/settings_templates.py:213
 msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "Slå på belysning når hænderne er over tastaturet."
+msgstr "Tænd belysning når hænderne er over tastaturet."
 
 #: lib/logitech_receiver/settings_templates.py:214
 #: lib/logitech_receiver/settings_templates.py:223
