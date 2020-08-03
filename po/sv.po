@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.0.3rc1\n"
+"Project-Id-Version: solaar 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-29 22:07+0200\n"
-"PO-Revision-Date: 2020-07-29 22:09+0200\n"
+"POT-Creation-Date: 2020-08-02 23:01+0200\n"
+"PO-Revision-Date: 2020-08-03 03:10+0200\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team: none\n"
 "Language: sv\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-Basepath: /pwr/Solaar/po\n"
 "X-Poedit-SearchPath-0: /pwr/Solaar/po\n"
 
@@ -116,7 +116,7 @@ msgstr "inte parkopplad"
 msgid "powered on"
 msgstr "påslagen"
 
-#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:661
+#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:664
 msgid "unknown"
 msgstr "okänd"
 
@@ -187,7 +187,7 @@ msgid ""
 "When set, the F1..F12 keys will activate their special function,\n"
 "and you must hold the FN key to activate their standard function."
 msgstr ""
-"Vid aktivering, kommer F1-12 tangenterna få sina specialfunktioner,\n"
+"Vid aktivering, kommer F1–12-tangenterna få sina specialfunktioner,\n"
 "och du behöver trycka ned FN-tangenten för att komma åt dess normala "
 "funktioner."
 
@@ -196,7 +196,7 @@ msgid ""
 "When unset, the F1..F12 keys will activate their standard function,\n"
 "and you must hold the FN key to activate their special function."
 msgstr ""
-"Vid avaktivering, kommer F1-12 tangenterna få sina standardfunktioner,\n"
+"Vid avaktivering, kommer F1–12-tangenterna få sina standardfunktioner,\n"
 "och du behöver trycka ned FN-tangenten för att komma åt dess "
 "spesicalfunktioner."
 
@@ -226,7 +226,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Backlight"
-msgstr "Bakgrundsbelysning"
+msgstr "Bakbelysning"
 
 #: lib/logitech_receiver/settings_templates.py:255
 msgid "Turn illumination on or off on keyboard."
@@ -344,11 +344,6 @@ msgstr ""
 msgid "The receiver was unplugged."
 msgstr "Mottagaren kopplades ur."
 
-#: lib/solaar/listener.py:189
-#, python-format
-msgid "Unexpected device number (%s) in notification %s."
-msgstr "Oväntat enhetsnummer (%s) i meddelandet %s."
-
 #: lib/solaar/ui/__init__.py:49
 msgid "Permissions error"
 msgstr "Behörighetsfel"
@@ -357,7 +352,8 @@ msgstr "Behörighetsfel"
 #, python-format
 msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
 msgstr ""
-"En Logitech mottagare hittades (%s), fast saknar behörighet till att öppna den."
+"En Logitech mottagare hittades (%s), fast saknar behörighet till att öppna "
+"den."
 
 #: lib/solaar/ui/__init__.py:52
 msgid ""
@@ -422,7 +418,7 @@ msgid "connected"
 msgstr "ansluten"
 
 #: lib/solaar/ui/notify.py:123 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:708
+#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:711
 msgid "offline"
 msgstr "avstängd"
 
@@ -432,16 +428,16 @@ msgstr "Parkoppling misslyckades"
 
 #: lib/solaar/ui/pair_window.py:136
 msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr "Se till så att enheten är inom räckhåll, och har tillräckligt laddat batteri."
+msgstr ""
+"Se till så att enheten är inom räckhåll, och har tillräckligt laddat batteri."
 
 #: lib/solaar/ui/pair_window.py:138
 msgid "A new device was detected, but it is not compatible with this receiver."
 msgstr "En ny enhet upptäcktes, fast den är ukompatibel med denna mottakeren."
 
 #: lib/solaar/ui/pair_window.py:140
-#, python-format
-msgid "The receiver only supports %d paired device(s)."
-msgstr "Mottagaren klarar bara %d parkopplad(e) enhet(er)."
+msgid "More paired devices than receiver can support."
+msgstr "Fler parade enheter än mottagaren kan stödja."
 
 #: lib/solaar/ui/pair_window.py:142
 msgid "No further details are available about the error."
@@ -464,18 +460,26 @@ msgstr "%(receiver_name)s: koppla ihop enhet"
 msgid "If the device is already turned on, turn if off and on again."
 msgstr "Om enheten redan är påslagen, stäng av og slå den på igen."
 
-#: lib/solaar/ui/pair_window.py:208
+#: lib/solaar/ui/pair_window.py:209
 #, python-format
 msgid ""
 "\n"
 "\n"
-"This receiver has %d pairing(s) remaining."
-msgstr ""
+"This receiver has %d pairing remaining."
+msgid_plural ""
 "\n"
 "\n"
-"Denna mottagare har %d parning(er) kvar."
+"This receiver has %d pairings remaining."
+msgstr[0] ""
+"\n"
+"\n"
+"Denna mottagare har %d parning kvar."
+msgstr[1] ""
+"\n"
+"\n"
+"Denna mottagare har %d parningar kvar."
 
-#: lib/solaar/ui/pair_window.py:209
+#: lib/solaar/ui/pair_window.py:212
 msgid ""
 "\n"
 "Cancelling at this point will not use up a pairing."
@@ -483,7 +487,7 @@ msgstr ""
 "\n"
 "Om du avbryter vid detta tillfälle kommer inte en parning att användas."
 
-#: lib/solaar/ui/pair_window.py:212
+#: lib/solaar/ui/pair_window.py:215
 msgid "Turn on the device you want to pair."
 msgstr "Sätt på enheten du vill parkoppla."
 
@@ -537,7 +541,7 @@ msgstr "Sökväg"
 
 #: lib/solaar/ui/window.py:524
 msgid "USB id"
-msgstr "USB id"
+msgstr "USB-id"
 
 #: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
 #: lib/solaar/ui/window.py:546 lib/solaar/ui/window.py:548
@@ -550,7 +554,7 @@ msgstr "Index"
 
 #: lib/solaar/ui/window.py:534
 msgid "Wireless PID"
-msgstr "Trådlös PID"
+msgstr "Trådlös-PID"
 
 #: lib/solaar/ui/window.py:536
 msgid "Protocol"
@@ -592,28 +596,30 @@ msgstr[1] "Upp till %(max_count)s enheter kan kopplas till denna mottagare."
 msgid "Only one device can be paired to this receiver."
 msgstr "Endast en enhet kan kopplas ihop med denna mottagare."
 
-#: lib/solaar/ui/window.py:613
+#: lib/solaar/ui/window.py:614
 #, python-format
-msgid "This receiver has %d pairing(s) remaining."
-msgstr "Denna mottagare har %d parning(er) kvar."
+msgid "This receiver has %d pairing remaining."
+msgid_plural "This receiver has %d pairings remaining."
+msgstr[0] "Denna mottagare har %d parning kvar."
+msgstr[1] "Denna mottagare har %d parningar kvar."
 
-#: lib/solaar/ui/window.py:676 lib/solaar/ui/window.py:678
+#: lib/solaar/ui/window.py:679 lib/solaar/ui/window.py:681
 msgid "next "
 msgstr "nästa "
 
-#: lib/solaar/ui/window.py:681
+#: lib/solaar/ui/window.py:684
 msgid "charging"
 msgstr "laddar"
 
-#: lib/solaar/ui/window.py:683
+#: lib/solaar/ui/window.py:686
 msgid "last known"
 msgstr "senast kända"
 
-#: lib/solaar/ui/window.py:690
+#: lib/solaar/ui/window.py:693
 msgid "not encrypted"
 msgstr "okrypterad"
 
-#: lib/solaar/ui/window.py:694
+#: lib/solaar/ui/window.py:697
 msgid ""
 "The wireless link between this device and its receiver is not encrypted.\n"
 "\n"
@@ -636,63 +642,19 @@ msgstr ""
 "allvarlig, eftersom skriven text obemärkt kan fångas upp av tredje part som\n"
 "befinner sig inom enhetens räckhåll."
 
-#: lib/solaar/ui/window.py:703
+#: lib/solaar/ui/window.py:706
 msgid "encrypted"
 msgstr "krypterad"
 
-#: lib/solaar/ui/window.py:705
+#: lib/solaar/ui/window.py:708
 msgid "The wireless link between this device and its receiver is encrypted."
-msgstr "Den trådlösa anslutningen mellan den här enheten och dess mottagare är krypterad."
+msgstr "Den trådlösa anslutningen mellan den här enheten och dess mottagare är "
+"krypterad."
 
-#: lib/solaar/ui/window.py:718
+#: lib/solaar/ui/window.py:721
 #, python-format
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lux"
-
-#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
-#~ msgstr "Inverteringsläge med hög känslighet för vertikal rullning."
-
-#~ msgid "%(battery_percent)d%%"
-#~ msgstr "%(battery_percent)d%%"
-
-#~ msgid "%(battery_level)s"
-#~ msgstr "%(battery_level)s"
-
-#~ msgid "closed"
-#~ msgstr "inaktiverat"
-
-#~ msgid "open"
-#~ msgstr "aktiverat"
-
-#~ msgid "pairing lock is "
-#~ msgstr "parkopplingsläget är "
-
-#~ msgid "1 paired device."
-#~ msgstr "1 parkopplad enhet."
-
-#~ msgid " paired devices."
-#~ msgstr "parkopplade enheter."
-
-#~ msgid "lux"
-#~ msgstr "lux"
-
-#~ msgid "Found a new device"
-#~ msgstr "Ny enhet har hittats"
-
-#~ msgid "pair new device"
-#~ msgstr "parkoppla ny enhet"
-
-#~ msgid "No device paired"
-#~ msgstr "Inga enheter parkopplade"
-
-#~ msgid "Up to %d devices can be paired to this receiver"
-#~ msgstr "Upp till %d enheter kan parkopplas till mottagaren"
-
-#~ msgid "paired devices"
-#~ msgstr "parkopplade enheter"
-
-#~ msgid "Only one device can be paired to this receiver"
-#~ msgstr "Bara en enhet kan parkopplas till den här mottagaren"
 
 #~ msgid ""
 #~ "If the device is already turned on,\n"
@@ -700,3 +662,66 @@ msgstr "%(light_level)d lux"
 #~ msgstr ""
 #~ "Om enheten redan är igång,\n"
 #~ "stäng av den och sätt på den igen."
+
+#~ msgid "Only one device can be paired to this receiver"
+#~ msgstr "Bara en enhet kan parkopplas till den här mottagaren"
+
+#~ msgid "paired devices"
+#~ msgstr "parkopplade enheter"
+
+#~ msgid "Up to %d devices can be paired to this receiver"
+#~ msgstr "Upp till %d enheter kan parkopplas till mottagaren"
+
+#~ msgid "No device paired"
+#~ msgstr "Inga enheter parkopplade"
+
+#~ msgid "pair new device"
+#~ msgstr "parkoppla ny enhet"
+
+#~ msgid "Found a new device"
+#~ msgstr "Ny enhet har hittats"
+
+#~ msgid "lux"
+#~ msgstr "lux"
+
+#~ msgid " paired devices."
+#~ msgstr "parkopplade enheter."
+
+#~ msgid "1 paired device."
+#~ msgstr "1 parkopplad enhet."
+
+#~ msgid "pairing lock is "
+#~ msgstr "parkopplingsläget är "
+
+#~ msgid "open"
+#~ msgstr "aktiverat"
+
+#~ msgid "closed"
+#~ msgstr "inaktiverat"
+
+#~ msgid "%(battery_level)s"
+#~ msgstr "%(battery_level)s"
+
+#~ msgid "%(battery_percent)d%%"
+#~ msgstr "%(battery_percent)d%%"
+
+#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
+#~ msgstr "Inverteringsläge med hög känslighet för vertikal rullning."
+
+#~ msgid "This receiver has %d pairing(s) remaining."
+#~ msgstr "Denna mottagare har %d parning(er) kvar."
+
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "This receiver has %d pairing(s) remaining."
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Denna mottagare har %d parning(er) kvar."
+
+#~ msgid "The receiver only supports %d paired device(s)."
+#~ msgstr "Mottagaren klarar bara %d parkopplad(e) enhet(er)."
+
+#~ msgid "Unexpected device number (%s) in notification %s."
+#~ msgstr "Oväntat enhetsnummer (%s) i meddelandet %s."
