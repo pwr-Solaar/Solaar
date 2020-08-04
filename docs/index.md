@@ -25,8 +25,9 @@ Solaar is able to pair and unpair devices with
 receivers as supported by the receiver. Solaar can also control
 some changeable features of devices, such as smooth scrolling or
 function key behavior. For more information on how to use Solaar see
-[the usage page](usage), and for more information on the capabilities see
-[the capabilities page](capabilities).
+[the usage page](https://pwr-solaar.github.io/Solaar/usage),
+and for more information on the capabilities see
+[the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
 
 Solaar does not process normal input from the devices. It is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
@@ -56,7 +57,7 @@ generally cannot be paired with Unifying receivers.
 
 For some devices, extra settings (usually not available through the standard
 Linux system configuration) are supported. For a list of supported devices
-and their features, see [the devices page](devices).
+and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/devices).
 
 [logo]: assets/solaar.svg
 
@@ -71,7 +72,7 @@ available from the standard repositories for your distribution you can try
 one of these packages.
 
 - Arch solaar package in the [community repository][arch]
-- Debian 7 (Wheezy) or higher: packages in this [repository](debian)
+- Debian 7 (Wheezy) or higher: packages in this [repository](https://pwr-solaar.github.io/Solaar/debian)
 - Ubuntu/Kubuntu 16.04+: use the solaar package from [universe repository][universe repository]
 - Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
@@ -95,7 +96,8 @@ Solaar uses a standard system tray implementation; solaar-gnome3 is no longer re
 
 ## Manual installation
 
-See [the installation page](installation) for the step-by-step procedure for manual installation.
+See [the installation page](https://pwr-solaar.github.io/Solaar/installation)
+for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
