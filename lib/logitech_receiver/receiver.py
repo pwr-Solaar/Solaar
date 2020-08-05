@@ -553,7 +553,7 @@ class Receiver(object):
                 _log.warn('%s unpaired device %s', self, dev)
             else:
                 _log.error('%s failed to unpair device %s', self, dev)
-                raise IndexError(key)
+                raise Exception('failed to unpair device %s: %s' % (dev.name, key))
 
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
