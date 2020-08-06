@@ -259,8 +259,8 @@ def _process_feature_notification(device, status, n, feature):
 
     if feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            level, status, voltage, _ignore, _ignore = _hidpp20.decipher_voltage(n.data)
-            status.set_battery_info(level, status, None, voltage)
+            battery_level, battery_status, battery_voltage, _ignore, _ignore = _hidpp20.decipher_voltage(n.data)
+            status.set_battery_info(battery_level, battery_status, None, battery_voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
         return True
