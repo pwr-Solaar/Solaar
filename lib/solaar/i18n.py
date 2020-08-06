@@ -47,7 +47,11 @@ def _find_locale_path(lc_domain):
     # del _path
 
 
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except Exception:
+    pass
+
 language, encoding = locale.getlocale()
 del locale
 
