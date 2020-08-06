@@ -208,8 +208,7 @@ class DeviceStatus(dict):
         old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
         old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
         self[KEYS.BATTERY_NEXT_LEVEL] = nextLevel
-        if voltage is not None:
-            self[KEYS.BATTERY_VOLTAGE] = voltage
+        old_voltage, self[KEYS.BATTERY_VOLTAGE] = self.get(KEYS.BATTERY_VOLTAGE), voltage
 
         charging = status in (
             _hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.full,
@@ -217,7 +216,7 @@ class DeviceStatus(dict):
         )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
-        changed = old_level != level or old_status != status or old_charging != charging
+        changed = old_level != level or old_status != status or old_charging != charging or old_voltage != voltage
         alert, reason = ALERT.NONE, None
 
         if _hidpp20.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
@@ -273,6 +272,7 @@ class DeviceStatus(dict):
         elif KEYS.BATTERY_STATUS in self:
             self[KEYS.BATTERY_STATUS] = None
             self[KEYS.BATTERY_CHARGING] = None
+            self[KEYS.BATTERY_VOLTAGE] = None
             self.changed()
 
     def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
@@ -293,11 +293,12 @@ class DeviceStatus(dict):
                         self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
 
                     # If we've been inactive for a long time, forget anything
-                    # about the battery.
+                    # about the battery. (This is probably unnecessary.)
                     if self.updated > 0 and timestamp - self.updated > _LONG_SLEEP:
                         self[KEYS.BATTERY_LEVEL] = None
                         self[KEYS.BATTERY_STATUS] = None
                         self[KEYS.BATTERY_CHARGING] = None
+                        self[KEYS.BATTERY_VOLTAGE] = None
 
                     # Devices lose configuration when they are turned off,
                     # make sure they're up-to-date.
@@ -306,8 +307,8 @@ class DeviceStatus(dict):
                     for s in d.settings:
                         s.apply()
 
-                    if self.get(KEYS.BATTERY_LEVEL) is None:
-                        self.read_battery(timestamp)
+                    # battery information may have changed so try to read it now
+                    self.read_battery(timestamp)
             else:
                 if was_active:
                     battery = self.get(KEYS.BATTERY_LEVEL)
