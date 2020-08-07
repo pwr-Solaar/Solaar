@@ -198,6 +198,9 @@ def _print_device(dev):
                 gmask_fmt = ','.join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
                 print('             %s, pos:%d, group:%1d, group mask:%s' % (', '.join(k.flags), k.pos, k.group, gmask_fmt))
+                report_fmt = ', '.join(k.mapping_flags)
+                report_fmt = report_fmt if report_fmt else 'default'
+                print('             reporting: %s' % (report_fmt))
     if dev.online:
         battery = _hidpp20.get_battery(dev)
         if battery is None:

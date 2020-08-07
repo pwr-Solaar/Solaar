@@ -361,12 +361,12 @@ class FeaturesArray(object):
 
 class ReprogrammableKey(object):
     """Information about a control present on a device with the `REPROG_CONTROLS` feature.
-    Ref: https://lekensteyn.nl/files/logitech/logitech_hidpp_2.0_specification_draft_2012-06-04.pdf
+    Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
     Read-only properties:
     - index {int} -- index in the control ID table
     - key {_NamedInt} -- the name of this control
     - default_task {_NamedInt} -- the native function of this control
-    - flags {List[str]} -- flags set on the control
+    - flags {List[str]} -- capabilities and desired software handling of the control
     """
     def __init__(self, device, index, cid, tid, flags):
         self._device = device
@@ -395,7 +395,8 @@ class ReprogrammableKey(object):
 
 class ReprogrammableKeyV4(ReprogrammableKey):
     """Information about a control present on a device with the `REPROG_CONTROLS_V4` feature.
-    Ref: https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
+    Ref (v2): https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
+    Ref (v4): https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
     Contains all the functionality of `ReprogrammableKey` plus remapping keys and /diverting/ them
     in order to handle keypresses in a custom way.
 
@@ -404,17 +405,15 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - group {int} -- the group this control belongs to; other controls with this group in their
     `group_mask` can be remapped to this control
     - group_mask {List[str]} -- this control can be remapped to any control ID in these groups
-    - rawXY_reportable {bool} -- whether the control can be diverted to report raw XY events
     - mapped_to {_NamedInt} -- which action this control is mapped to; usually itself
     - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
-    def __init__(self, device, index, cid, tid, flags, pos, group, gmask, rawxy):
+    def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
         ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
         self.pos = pos
         self.group = group
         self._gmask = gmask
-        self.rawXY_reportable = rawxy
         self._mapping_flags = None
         self._mapped_to = None
 
@@ -459,16 +458,19 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     def set_diverted(self, value: bool):
         """If set, the control is diverted temporarily and reports presses as HID++ events
         until a HID++ configuration reset occurs."""
-        self._setCidReporting(divert=value)
+        flags = {special_keys.MAPPING_FLAG.diverted: value}
+        self._setCidReporting(flags=flags)
 
     def set_persistently_diverted(self, value: bool):
         """If set, the control is diverted permanently and reports presses as HID++ events."""
-        self._setCidReporting(persist=value)
+        flags = {special_keys.MAPPING_FLAG.persistently_diverted: value}
+        self._setCidReporting(flags=flags)
 
     def set_rawXY_reporting(self, value: bool):
         """If set, the mouse reports all its raw XY events while this control is pressed
         as HID++ events. Gets cleared on a HID++ configuration reset."""
-        self._setCidReporting(rawXY=value)
+        flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
+        self._setCidReporting(flags=flags)
 
     def remap(self, to: _NamedInt):
         """Remaps this control to another action."""
@@ -483,16 +485,20 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 *tuple(_pack('!H', self._cid)),
             )
             if mapped_data:
-                cid, mapping_flags, mapped_to = _unpack('!HBH', mapped_data[:5])
+                cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
                 if cid != self._cid and _log.isEnabledFor(_WARNING):
                     _log.warn(
                         f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
                         f'with a different control ID ({cid}) than requested ({self._cid}).'
                     )
-                self._mapping_flags = mapping_flags
                 self._mapped_to = mapped_to if mapped_to != 0 else self._cid
+                if len(mapped_data) > 5:
+                    mapping_flags_2, = _unpack('!B', mapped_data[5:6])
+                else:
+                    mapping_flags_2 = 0
+                self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
-                raise FeatureCallError('No reply from device.')
+                raise FeatureCallError(msg='No reply from device.')
         except Exception:
             if _log.isEnabledFor(_ERROR):
                 _log.error(f'Exception in _getCidReporting on device {self._device}: ', exc_info=1)
@@ -500,45 +506,59 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             self._mapping_flags = 0
             self._mapped_to = self._cid
 
-    def _setCidReporting(self, divert=None, persist=None, rawXY=None, remap=0):
+    def _setCidReporting(self, flags=None, remap=0):
         """Sends a `setCidReporting` request with the given parameters to the control. Raises
         an exception if the parameters are invalid.
+
+        Parameters:
+        - flags {Dict[_NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
+        - remap {int} -- which control ID to remap to; or 0 to keep current mapping
         """
-        if rawXY:
+        flags = flags if flags else {}  # See flake8 B006
+
+        if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
             # We need diversion to report raw XY, so divert temporarily
             # (since XY reporting is also temporary)
-            divert = True
+            flags[special_keys.MAPPING_FLAG.diverted] = True
 
-        if divert is not None and special_keys.KEY_FLAG.divertable not in self.flags:
-            raise FeatureNotSupported(f'Tried to divert non-divertable control {self.key} on device {self._device}.')
-        if persist is not None and special_keys.KEY_FLAG.persistently_divertable not in self.flags:
-            raise FeatureNotSupported(
-                'Tried to persistently divert non-persistently-divertable control {self.key} on device {self._device}.'
-            )
-        if rawXY is not None and not self.rawXY_reportable:
-            raise FeatureNotSupported(
-                f'Tried to request raw XY reports from control {self.key} with no raw XY capability on device {self._device}.'
-            )
+        if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
+            flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
+
+        # The capability required to set a given reporting flag.
+        FLAG_TO_CAPABILITY = {
+            special_keys.MAPPING_FLAG.diverted: special_keys.KEY_FLAG.divertable,
+            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
+            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
+            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
+            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY
+        }
+
+        bfield = 0
+        for f, v in flags.items():
+            if v and FLAG_TO_CAPABILITY[f] not in self.flags:
+                raise FeatureNotSupported(
+                    msg=f'Tried to set mapping flag "{f}" on control "{self.key}" ' +
+                    f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
+                )
+
+            bfield |= int(f) if v else 0
+            bfield |= int(f) << 1  # The 'Xvalid' bit
+
         if remap != 0 and remap not in self.remappable_to:
             raise FeatureNotSupported(
-                f'Tried to remap control {self.key} to a control ID {remap} which it is not remappable to ' +
+                msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to ' +
                 f'on device {self._device}.'
             )
-
-        mkbit = lambda v: 1 if v else 0
-        isset = lambda v: mkbit(v is not None)
 
         pkt = tuple(
             _pack(
                 '!HBH',
                 self._cid,
-                (isset(rawXY) << 5)
-                | (mkbit(rawXY) << 4)
-                | (isset(persist) << 3)
-                | (mkbit(persist) << 2)
-                | (isset(divert) << 1)
-                | mkbit(divert),
+                bfield & 0xff,
                 remap,
+                # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append
+                # another byte `(bfield >> 8) & 0xff` here. But older devices
+                # might behave oddly given that byte, so we don't send it.
             )
         )
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
@@ -595,18 +615,9 @@ class KeysArray(object):
         elif self.keyversion == 4:
             keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
             if keydata:
-                cid, tid, flags, pos, group, gmask, rawxy = _unpack('!HHBBBBB', keydata[:9])
-                self.keys[index] = ReprogrammableKeyV4(
-                    self.device,
-                    index,
-                    cid,
-                    tid,
-                    flags,
-                    pos,
-                    group,
-                    gmask,
-                    (rawxy & 0x1) == 0x1,
-                )
+                cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
+                flags = flags1 | (flags2 << 8)
+                self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
                 self.cid_to_tid[cid] = tid
                 if group != 0:  # 0 = does not belong to a group
                     self.group_cids[special_keys.CID_GROUP[group]].append(cid)
