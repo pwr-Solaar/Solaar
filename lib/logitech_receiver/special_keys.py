@@ -488,8 +488,13 @@ TASK = _NamedInts(
     LedToggle=0x00DD,  #
 )
 TASK._fallback = lambda x: 'unknown:%04X' % x
-# hidpp 4.5 info from https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
+# Capabilities and desired software handling for a control
+# Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
+# We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
 KEY_FLAG = _NamedInts(
+    analytics_key_events=0x400,
+    force_raw_XY=0x200,
+    raw_XY=0x100,
     virtual=0x80,
     persistently_divertable=0x40,
     divertable=0x20,
@@ -499,7 +504,15 @@ KEY_FLAG = _NamedInts(
     is_FN=0x02,
     mse=0x01
 )
-MAPPING_FLAG = _NamedInts(rawXY_diverted=0x10, persistently_diverted=0x04, diverted=0x01)
+# Flags describing the reporting method of a control
+# We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
+MAPPING_FLAG = _NamedInts(
+    analytics_key_events_reporting=0x100,
+    force_raw_XY_diverted=0x40,
+    raw_XY_diverted=0x10,
+    persistently_diverted=0x04,
+    diverted=0x01
+)
 CID_GROUP_BIT = _NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
 CID_GROUP = _NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
 DISABLE = _NamedInts(

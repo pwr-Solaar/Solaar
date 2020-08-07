@@ -285,6 +285,10 @@ def _process_feature_notification(device, status, n, feature):
                 dx, dy = _unpack('!hh', n.data[:4])
                 _log.debug('%s: rawXY dx=%i dy=%i', device, dx, dy)
             return True
+        elif n.address == 0x20:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: received analyticsKeyEvents', device)
+            return True
         elif _log.isEnabledFor(_WARNING):
             _log.warn('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
 
