@@ -62,20 +62,18 @@ def register_toggle(
     true_value=_BooleanV.default_true,
     false_value=_BooleanV.default_false,
     mask=_BooleanV.default_mask,
-    label=None,
-    description=None,
     device_kind=None
 ):
     validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _RegisterRW(register)
-    return _Setting(name, rw, validator, label=label, description=description, device_kind=device_kind)
+    return _Setting(name, rw, validator, device_kind=device_kind)
 
 
-def register_choices(name, register, choices, kind=_KIND.choice, label=None, description=None, device_kind=None):
+def register_choices(name, register, choices, kind=_KIND.choice, device_kind=None):
     assert choices
     validator = _ChoicesV(choices)
     rw = _RegisterRW(register)
-    return _Setting(name, rw, validator, kind=kind, label=label, description=description, device_kind=device_kind)
+    return _Setting(name, rw, validator, kind=kind, device_kind=device_kind)
 
 
 def feature_toggle(
@@ -86,13 +84,11 @@ def feature_toggle(
     true_value=_BooleanV.default_true,
     false_value=_BooleanV.default_false,
     mask=_BooleanV.default_mask,
-    label=None,
-    description=None,
     device_kind=None
 ):
     validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
     rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _Setting(name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind)
+    return _Setting(name, rw, validator, feature=feature, device_kind=device_kind)
 
 
 def feature_bitfield_toggle(
@@ -101,16 +97,12 @@ def feature_bitfield_toggle(
     options,
     read_fnid=_FeatureRW.default_read_fnid,
     write_fnid=_FeatureRW.default_write_fnid,
-    label=None,
-    description=None,
     device_kind=None
 ):
     assert options
     validator = _BitFieldV(options)
     rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _BitFieldSetting(
-        name, rw, validator, feature=feature, label=label, description=description, device_kind=device_kind
-    )
+    return _BitFieldSetting(name, rw, validator, feature=feature, device_kind=device_kind)
 
 
 def feature_bitfield_toggle_dynamic(
@@ -119,21 +111,12 @@ def feature_bitfield_toggle_dynamic(
     options_callback,
     read_fnid=_FeatureRW.default_read_fnid,
     write_fnid=_FeatureRW.default_write_fnid,
-    label=None,
-    description=None,
     device_kind=None
 ):
     def instantiate(device):
         options = options_callback(device)
         setting = feature_bitfield_toggle(
-            name,
-            feature,
-            options,
-            read_fnid=read_fnid,
-            write_fnid=write_fnid,
-            label=label,
-            description=description,
-            device_kind=device_kind
+            name, feature, options, read_fnid=read_fnid, write_fnid=write_fnid, device_kind=device_kind
         )
         return setting(device)
 
@@ -193,16 +176,12 @@ def feature_range(
     write_fnid=_FeatureRW.default_write_fnid,
     rw=None,
     bytes_count=None,
-    label=None,
-    description=None,
     device_kind=None
 ):
     validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
     if rw is None:
         rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _Setting(
-        name, rw, validator, feature=feature, kind=_KIND.range, label=label, description=description, device_kind=device_kind
-    )
+    return _Setting(name, rw, validator, feature=feature, kind=_KIND.range, device_kind=device_kind)
 
 
 #
@@ -267,7 +246,6 @@ _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Inve
 
 #
 # Keyword arguments for setting template functions:
-#  label='', description='' - label and tooltip to be shown in GUI
 #  persist=True - whether to store the values and reapply them from now on
 #  device_kind - the kinds of devices that setting is suitable for (NOT CURRENTLY USED)
 #  read_fnid=0x00, write_fnid=0x10 - default 0x00 and 0x10 function numbers (times 16) to read and write setting
@@ -286,137 +264,77 @@ def _register_hand_detection(
     register=_R.keyboard_hand_detection, true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF'
 ):
     return register_toggle(
-        _HAND_DETECTION[0],
-        register,
-        true_value=true_value,
-        false_value=false_value,
-        label=_HAND_DETECTION[1],
-        description=_HAND_DETECTION[2],
-        device_kind=(_DK.keyboard, )
+        _HAND_DETECTION, register, true_value=true_value, false_value=false_value, device_kind=(_DK.keyboard, )
     )
 
 
 def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
-    return register_toggle(
-        _FN_SWAP[0],
-        register,
-        true_value=true_value,
-        mask=mask,
-        label=_FN_SWAP[1],
-        description=_FN_SWAP[2],
-        device_kind=(_DK.keyboard, )
-    )
+    return register_toggle(_FN_SWAP, register, true_value=true_value, mask=mask, device_kind=(_DK.keyboard, ))
 
 
 def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
-    return register_toggle(
-        _SMOOTH_SCROLL[0],
-        register,
-        true_value=true_value,
-        mask=mask,
-        label=_SMOOTH_SCROLL[1],
-        description=_SMOOTH_SCROLL[2],
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    return register_toggle(_SMOOTH_SCROLL, register, true_value=true_value, mask=mask, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
-    return register_toggle(
-        _SIDE_SCROLL[0],
-        register,
-        true_value=true_value,
-        mask=mask,
-        label=_SIDE_SCROLL[1],
-        description=_SIDE_SCROLL[2],
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    return register_toggle(_SIDE_SCROLL, register, true_value=true_value, mask=mask, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _register_dpi(register=_R.mouse_dpi, choices=None):
-    return register_choices(
-        _DPI[0], register, choices, label=_DPI[1], description=_DPI[2], device_kind=(_DK.mouse, _DK.trackball)
-    )
+    return register_choices(_DPI, register, choices, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_fn_swap():
-    return feature_toggle(
-        _FN_SWAP[0], _F.FN_INVERSION, label=_FN_SWAP[1], description=_FN_SWAP[2], device_kind=(_DK.keyboard, )
-    )
+    return feature_toggle(_FN_SWAP, _F.FN_INVERSION, device_kind=(_DK.keyboard, ))
 
 
 # this might not be correct for this feature
 def _feature_new_fn_swap():
-    return feature_toggle(
-        _FN_SWAP[0], _F.NEW_FN_INVERSION, label=_FN_SWAP[1], description=_FN_SWAP[2], device_kind=(_DK.keyboard, )
-    )
+    return feature_toggle(_FN_SWAP, _F.NEW_FN_INVERSION, device_kind=(_DK.keyboard, ))
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
     return feature_toggle(
-        _FN_SWAP[0],
-        _F.K375S_FN_INVERSION,
-        label=_FN_SWAP[1],
-        description=_FN_SWAP[2],
-        true_value=b'\xFF\x01',
-        false_value=b'\xFF\x00',
-        device_kind=(_DK.keyboard, )
+        _FN_SWAP, _F.K375S_FN_INVERSION, true_value=b'\xFF\x01', false_value=b'\xFF\x00', device_kind=(_DK.keyboard, )
     )
 
 
 # FIXME: This will enable all supported backlight settings,
 # we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
-    return feature_toggle(
-        _BACKLIGHT[0], _F.BACKLIGHT2, label=_BACKLIGHT[1], description=_BACKLIGHT[2], device_kind=(_DK.keyboard, )
-    )
+    return feature_toggle(_BACKLIGHT, _F.BACKLIGHT2, device_kind=(_DK.keyboard, ))
 
 
 def _feature_hi_res_scroll():
-    return feature_toggle(
-        _HI_RES_SCROLL[0],
-        _F.HI_RES_SCROLLING,
-        label=_HI_RES_SCROLL[1],
-        description=_HI_RES_SCROLL[2],
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    return feature_toggle(_HI_RES_SCROLL, _F.HI_RES_SCROLLING, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_lowres_smooth_scroll():
-    return feature_toggle(
-        _LOW_RES_SCROLL[0],
-        _F.LOWRES_WHEEL,
-        label=_LOW_RES_SCROLL[1],
-        description=_LOW_RES_SCROLL[2],
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    return feature_toggle(_LOW_RES_SCROLL, _F.LOWRES_WHEEL, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_hires_smooth_invert():
     return feature_toggle(
-        _HIRES_INV[0],
+        _HIRES_INV,
         _F.HIRES_WHEEL,
         read_fnid=0x10,
         write_fnid=0x20,
         true_value=0x04,
         mask=0x04,
-        label=_HIRES_INV[1],
-        description=_HIRES_INV[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
 
 def _feature_hires_smooth_resolution():
     return feature_toggle(
-        _HIRES_RES[0],
+        _HIRES_RES,
         _F.HIRES_WHEEL,
         read_fnid=0x10,
         write_fnid=0x20,
         true_value=0x02,
         mask=0x02,
-        label=_HIRES_RES[1],
-        description=_HIRES_RES[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
@@ -452,14 +370,12 @@ def _feature_smart_shift():
             return super(_SmartShiftRW, self).write(device, data)
 
     return feature_range(
-        _SMART_SHIFT[0],
+        _SMART_SHIFT,
         _F.SMART_SHIFT,
         _MIN_SMART_SHIFT_VALUE,
         _MAX_SMART_SHIFT_VALUE,
         bytes_count=1,
         rw=_SmartShiftRW(_F.SMART_SHIFT),
-        label=_SMART_SHIFT[1],
-        description=_SMART_SHIFT[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
@@ -493,14 +409,12 @@ def _feature_adjustable_dpi():
     # [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
     # [3] setSensorDpi(sensorIdx, dpi)
     return feature_choices_dynamic(
-        _DPI[0],
+        _DPI,
         _F.ADJUSTABLE_DPI,
         _feature_adjustable_dpi_choices,
         read_fnid=0x20,
         write_fnid=0x30,
         bytes_count=3,
-        label=_DPI[1],
-        description=_DPI[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
@@ -509,15 +423,13 @@ def _feature_pointer_speed():
     """Pointer Speed feature"""
     # min and max values taken from usb traces of Win software
     return feature_range(
-        _POINTER_SPEED[0],
+        _POINTER_SPEED,
         _F.POINTER_SPEED,
         0x002e,
         0x01ff,
         read_fnid=0x0,
         write_fnid=0x10,
         bytes_count=2,
-        label=_POINTER_SPEED[1],
-        description=_POINTER_SPEED[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
@@ -538,7 +450,7 @@ def _feature_reprogrammable_keys_choices(device):
 
 def _feature_reprogrammable_keys():
     return feature_map_choices_dynamic(
-        _REPROGRAMMABLE_KEYS[0],
+        _REPROGRAMMABLE_KEYS,
         _F.REPROG_CONTROLS_V4,
         _feature_reprogrammable_keys_choices,
         read_fnid=0x20,
@@ -548,8 +460,6 @@ def _feature_reprogrammable_keys():
         read_skip_bytes_count=1,
         write_prefix_bytes=b'\x00',
         extra_default=0,
-        label=_REPROGRAMMABLE_KEYS[1],
-        description=_REPROGRAMMABLE_KEYS[2],
         device_kind=(_DK.keyboard, ),
     )
 
@@ -562,13 +472,11 @@ def _feature_disable_keyboard_keys_key_list(device):
 
 def _feature_disable_keyboard_keys():
     return feature_bitfield_toggle_dynamic(
-        _DISABLE_KEYS[0],
+        _DISABLE_KEYS,
         _F.KEYBOARD_DISABLE_KEYS,
         _feature_disable_keyboard_keys_key_list,
         read_fnid=0x10,
         write_fnid=0x20,
-        label=_DISABLE_KEYS[1],
-        description=_DISABLE_KEYS[2],
         device_kind=(_DK.keyboard, )
     )
 
@@ -611,15 +519,13 @@ def _feature_multiplatform_choices(device):
 
 def _feature_multiplatform():
     return feature_choices_dynamic(
-        _PLATFORM[0],
+        _PLATFORM,
         _F.MULTIPLATFORM,
         _feature_multiplatform_choices,
         read_fnid=0x00,
         read_skip_bytes_count=6,
         write_fnid=0x30,
-        write_prefix_bytes=b'\xff',
-        label=_PLATFORM[1],
-        description=_PLATFORM[2]
+        write_prefix_bytes=b'\xff'
     )
 
 
@@ -630,14 +536,7 @@ PLATFORMS[0x01] = 'Android, Windows'
 
 def _feature_dualplatform():
     return feature_choices(
-        _PLATFORM[0],
-        _F.DUALPLATFORM,
-        PLATFORMS,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        label=_PLATFORM[1],
-        description=_PLATFORM[2],
-        device_kind=(_DK.keyboard, )
+        _PLATFORM, _F.DUALPLATFORM, PLATFORMS, read_fnid=0x10, write_fnid=0x20, device_kind=(_DK.keyboard, )
     )
 
 
@@ -659,45 +558,39 @@ def _feature_change_host_choices(device):
 
 def _feature_change_host():
     return feature_choices_dynamic(
-        _CHANGE_HOST[0],
+        _CHANGE_HOST,
         _F.CHANGE_HOST,
         _feature_change_host_choices,
         persist=False,
         no_reply=True,
         read_fnid=0x00,
         read_skip_bytes_count=1,
-        write_fnid=0x10,
-        label=_CHANGE_HOST[1],
-        description=_CHANGE_HOST[2]
+        write_fnid=0x10
     )
 
 
 def _feature_thumb_mode():
     return feature_toggle(
-        _THUMB_SCROLL_MODE[0],
+        _THUMB_SCROLL_MODE,
         _F.THUMB_WHEEL,
         read_fnid=0x10,
         write_fnid=0x20,
         true_value=b'\x01\x00',
         false_value=b'\x00\x00',
         mask=b'\x01\x00',
-        label=_THUMB_SCROLL_MODE[1],
-        description=_THUMB_SCROLL_MODE[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
 
 def _feature_thumb_invert():
     return feature_toggle(
-        _THUMB_SCROLL_INVERT[0],
+        _THUMB_SCROLL_INVERT,
         _F.THUMB_WHEEL,
         read_fnid=0x10,
         write_fnid=0x20,
         true_value=b'\x00\x01',
         false_value=b'\x00\x00',
         mask=b'\x00\x01',
-        label=_THUMB_SCROLL_INVERT[1],
-        description=_THUMB_SCROLL_INVERT[2],
         device_kind=(_DK.mouse, _DK.trackball)
     )
 
@@ -708,31 +601,31 @@ def _feature_thumb_invert():
 
 
 def _S(name, featureID=None, featureFn=None, registerFn=None, identifier=None):
-    return (name, featureID, featureFn, registerFn, identifier if identifier else name.replace('-', '_'))
+    return (name[0], featureID, featureFn, registerFn, identifier if identifier else name[0].replace('-', '_'))
 
 
 _SETTINGS_TABLE = [
-    _S(_HAND_DETECTION[0], registerFn=_register_hand_detection),
-    _S(_SMOOTH_SCROLL[0], registerFn=_register_smooth_scroll),
-    _S(_SIDE_SCROLL[0], registerFn=_register_side_scroll),
-    _S(_HI_RES_SCROLL[0], _F.HI_RES_SCROLLING, _feature_hi_res_scroll),
-    _S(_LOW_RES_SCROLL[0], _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll),
-    _S(_HIRES_INV[0], _F.HIRES_WHEEL, _feature_hires_smooth_invert),
-    _S(_HIRES_RES[0], _F.HIRES_WHEEL, _feature_hires_smooth_resolution),
-    _S(_FN_SWAP[0], _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
-    _S(_FN_SWAP[0], _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
-    _S(_FN_SWAP[0], _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
-    _S(_DPI[0], _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
-    _S(_POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed),
-    _S(_SMART_SHIFT[0], _F.SMART_SHIFT, _feature_smart_shift),
-    _S(_BACKLIGHT[0], _F.BACKLIGHT2, _feature_backlight2),
-    _S(_REPROGRAMMABLE_KEYS[0], _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
-    _S(_DISABLE_KEYS[0], _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
-    _S(_PLATFORM[0], _F.MULTIPLATFORM, _feature_multiplatform),
-    _S(_PLATFORM[0], _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
-    _S(_CHANGE_HOST[0], _F.CHANGE_HOST, _feature_change_host),
-    _S(_THUMB_SCROLL_MODE[0], _F.THUMB_WHEEL, _feature_thumb_mode),
-    _S(_THUMB_SCROLL_INVERT[0], _F.THUMB_WHEEL, _feature_thumb_invert),
+    _S(_HAND_DETECTION, registerFn=_register_hand_detection),
+    _S(_SMOOTH_SCROLL, registerFn=_register_smooth_scroll),
+    _S(_SIDE_SCROLL, registerFn=_register_side_scroll),
+    _S(_HI_RES_SCROLL, _F.HI_RES_SCROLLING, _feature_hi_res_scroll),
+    _S(_LOW_RES_SCROLL, _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll),
+    _S(_HIRES_INV, _F.HIRES_WHEEL, _feature_hires_smooth_invert),
+    _S(_HIRES_RES, _F.HIRES_WHEEL, _feature_hires_smooth_resolution),
+    _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
+    _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
+    _S(_FN_SWAP, _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
+    _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
+    _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
+    _S(_SMART_SHIFT, _F.SMART_SHIFT, _feature_smart_shift),
+    _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
+    _S(_REPROGRAMMABLE_KEYS, _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
+    _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
+    _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
+    _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
+    _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
+    _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
+    _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])

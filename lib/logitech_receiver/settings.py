@@ -47,23 +47,11 @@ class Setting(object):
         'name', 'label', 'description', 'kind', 'device_kind', 'feature', 'persist', '_rw', '_validator', '_device', '_value'
     )
 
-    def __init__(
-        self,
-        name,
-        rw,
-        validator,
-        kind=None,
-        label=None,
-        description=None,
-        device_kind=None,
-        feature=None,
-        persist=True,
-        **kwargs
-    ):
+    def __init__(self, name, rw, validator, kind=None, device_kind=None, feature=None, persist=True, **kwargs):
         assert name
-        self.name = name
-        self.label = label or name
-        self.description = description
+        self.name = name[0]
+        self.label = name[1]
+        self.description = name[2]
         self.device_kind = device_kind
         self.feature = feature
         self.persist = persist
