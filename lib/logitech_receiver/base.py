@@ -449,7 +449,7 @@ def ping(handle, devnumber):
     # print ('\n  '.join(str(s) for s in _inspect.stack()))
 
     assert devnumber != 0xFF
-    assert devnumber > 0x00
+    assert devnumber >= 0x00
     assert devnumber < 0x0F
 
     # randomize the SoftwareId and mark byte to be able to identify the ping

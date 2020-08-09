@@ -154,21 +154,21 @@ DEVICE_FEATURES = _NamedInts(
 
 
 def read_register(device, register_number, *params):
-    assert device, 'tried to read register %02X from invalid device %s' % (register_number, device)
+    assert device is not None, 'tried to read register %02X from invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8100 | (int(register_number) & 0x2FF)
     return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-    assert device, 'tried to write register %02X to invalid device %s' % (register_number, device)
+    assert device is not None, 'tried to write register %02X to invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8000 | (int(register_number) & 0x2FF)
     return device.request(request_id, *value)
 
 
 def get_battery(device):
-    assert device
+    assert device is not None
     assert device.kind is not None
     if not device.online:
         return
@@ -239,7 +239,7 @@ def parse_battery_status(register, reply):
 
 
 def get_firmware(device):
-    assert device
+    assert device is not None
 
     firmware = [None, None, None]
 
@@ -275,7 +275,7 @@ def get_firmware(device):
 
 
 def set_3leds(device, battery_level=None, charging=None, warning=None):
-    assert device
+    assert device is not None
     assert device.kind is not None
     if not device.online:
         return
@@ -318,7 +318,7 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 
 
 def get_notification_flags(device):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.
@@ -334,7 +334,7 @@ def get_notification_flags(device):
 
 
 def set_notification_flags(device, *flag_bits):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.
@@ -350,7 +350,7 @@ def set_notification_flags(device, *flag_bits):
 
 
 def get_device_features(device):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.

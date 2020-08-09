@@ -65,7 +65,7 @@ def _battery_text(level):
 
 
 def _print_device(dev):
-    assert dev
+    assert dev is not None
     # check if the device is online
     dev.ping()
 

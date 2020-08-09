@@ -151,6 +151,7 @@ def _find_device(receivers, name):
 
 
 def run(cli_args=None, hidraw_path=None):
+
     if cli_args:
         action = cli_args[0]
         args = _cli_parser.parse_args(cli_args)

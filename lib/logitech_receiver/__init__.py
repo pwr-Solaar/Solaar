@@ -37,7 +37,8 @@ from . import listener, status  # noqa: F401
 from .base import DeviceUnreachable, NoReceiver, NoSuchDevice  # noqa: F401
 from .common import strhex  # noqa: F401
 from .hidpp20 import FeatureCallError, FeatureNotSupported  # noqa: F401
-from .receiver import PairedDevice, Receiver  # noqa: F401
+from .receiver import Receiver  # noqa: F401
+from .device import Device  # noqa: F401
 
 _DEBUG = logging.DEBUG
 _log = logging.getLogger(__name__)
