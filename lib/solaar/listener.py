@@ -237,9 +237,12 @@ class ReceiverListener(_listener.EventsListener):
             # the receiver changed status as well
             self._status_changed(self.receiver)
 
-        assert dev
-        assert dev.status is not None
-        _notifications.process(dev, n)
+        if dev.status is None:
+            # notification before device status set up - don't process it
+            _log.warn('%s before device %s has status', n, dev)
+        else:
+            _notifications.process(dev, n)
+
         if self.receiver.status.lock_open and not already_known:
             # this should be the first notification after a device was paired
             assert n.sub_id == 0x41 and n.address == 0x04
