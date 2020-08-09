@@ -238,7 +238,7 @@ class FeaturesArray(object):
     def _check(self):
         # print (self.device, "check", self.supported, self.features, self.device.protocol)
         if self.supported:
-            assert self.device
+            assert self.device is not None
             if self.features is not None:
                 return True
 
