@@ -21,9 +21,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp20 as _hidpp20
+from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
-from logitech_receiver import receiver as _receiver
 
 
 def _print_receiver(receiver):

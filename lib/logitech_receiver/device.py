@@ -22,6 +22,7 @@ _R = _hidpp10.REGISTERS
 #
 #
 
+
 class Device(object):
 
     read_register = _hidpp10.read_register
@@ -76,8 +77,7 @@ class Device(object):
         if receiver:
             if link_notification is not None:
                 self.online = not bool(ord(link_notification.data[0:1]) & 0x40)
-                self.wpid = _strhex(link_notification.data[2:3]
-                        + link_notification.data[1:2])
+                self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
                 # assert link_notification.address == (0x04
                 # if unifying else 0x03)
                 kind = ord(link_notification.data[0:1]) & 0x0F
@@ -118,8 +118,7 @@ class Device(object):
                     device_info = self.receiver.read_register(_R.receiver_info, 0x04)
                     if device_info is None:
                         _log.error('failed to read Nano wpid for device %d of %s', number, receiver)
-                        raise _base.NoSuchDevice(number=number,
-                                receiver=receiver, error='read Nano wpid')
+                        raise _base.NoSuchDevice(number=number, receiver=receiver, error='read Nano wpid')
 
                     self.wpid = _strhex(device_info[3:5])
                     self._power_switch = '(' + _('unknown') + ')'
@@ -322,7 +321,6 @@ class Device(object):
     def request(self, request_id, *params, no_reply=False):
         return _base.request(self.handle, self.number, request_id, *params, no_reply=no_reply)
 
-
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
             return _hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
@@ -352,8 +350,8 @@ class Device(object):
     __bool__ = __nonzero__ = lambda self: self.wpid is not None and self.number in self.receiver
 
     def __str__(self):
-        return '<Device(%d,%s,%s,%s)>' % (self.number,
-                self.wpid or self.product_id,
-                self.name or self.codename or '?', self.serial)
+        return '<Device(%d,%s,%s,%s)>' % (
+            self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
+        )
 
     __unicode__ = __repr__ = __str__
