@@ -128,13 +128,20 @@ class Device(object):
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            for dev in _hid.enumerate({'vendor_id': 0x046d, 'product_id': int(self.receiver.product_id, 16)}):
-                if dev.serial and dev.serial.startswith(self.wpid):
+            serial = self.serial
+            for dev in _hid.enumerate({
+                'vendor_id': 0x046d,
+                'product_id': int(self.receiver.product_id, 16),
+                'usb_interface': 2
+            }):
+                self.handle = _hid.open_path(dev.path)
+                if serial == self.serial and dev.serial.startswith(self.wpid):
                     self.path = dev.path
-                    self.handle = _hid.open_path(dev.path)
                     break
+                else:
+                    _hid.close(self.handle)
+                    self.handle = None
 
-            assert self.handle
             self.descriptor = _DESCRIPTORS.get(self.wpid)
             if self.descriptor is None:
                 # Last chance to correctly identify the device; many Nano
@@ -167,7 +174,7 @@ class Device(object):
     @property
     def protocol(self):
         if not self._protocol and self.online:
-            self._protocol = _base.ping(self.handle, self.number)
+            self._protocol = _base.ping(self.handle or self.receiver.handle, self.number)
             # if the ping failed, the peripheral is (almost) certainly offline
             self.online = self._protocol is not None
 
@@ -218,7 +225,7 @@ class Device(object):
 
     @property
     def serial(self):
-        if not self._serial and self.receiver:
+        if self.receiver:
             serial = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
             if serial:
                 ps = ord(serial[9:10]) & 0x0F
@@ -319,7 +326,7 @@ class Device(object):
         return flag_bits if ok else None
 
     def request(self, request_id, *params, no_reply=False):
-        return _base.request(self.handle, self.number, request_id, *params, no_reply=no_reply)
+        return _base.request(self.handle or self.receiver.handle, self.number, request_id, *params, no_reply=no_reply)
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
@@ -327,7 +334,7 @@ class Device(object):
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle, self.number)
+        protocol = _base.ping(self.handle or self.receiver.handle, self.number)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol
