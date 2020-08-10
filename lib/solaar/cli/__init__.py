@@ -109,6 +109,7 @@ def _receivers(dev_path=None):
             _log.exception('opening ' + str(dev_info))
             _sys.exit('%s: error: %s' % (NAME, str(e)))
 
+
 def _wired_devices(dev_path=None):
     from logitech_receiver import Device
     from logitech_receiver.base import wired_devices

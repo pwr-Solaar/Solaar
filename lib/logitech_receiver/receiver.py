@@ -24,12 +24,11 @@ import errno as _errno
 from logging import INFO as _INFO
 from logging import getLogger
 
-from .device import Device
-
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from .base_usb import product_information as _product_information
 from .common import strhex as _strhex
+from .device import Device
 
 _log = getLogger(__name__)
 del getLogger
