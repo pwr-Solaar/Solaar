@@ -99,6 +99,12 @@ _ex100_receiver = lambda product_id: {
     'ex100_wpid_fix': True
 }
 
+_wired_device = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'usb_interface': 2
+}
+
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
 UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
@@ -130,7 +136,16 @@ LIGHTSPEED_RECEIVER_C53d = _lightspeed_receiver(0xc53d)
 LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
 
-del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver
+# Wired devices
+WIRED_DEVICE_C081 = _wired_device(0xc081)
+WIRED_DEVICE_C082 = _wired_device(0xc082)
+WIRED_DEVICE_C086 = _wired_device(0xc086)
+WIRED_DEVICE_C087 = _wired_device(0xc087)
+WIRED_DEVICE_C088 = _wired_device(0xc088)
+WIRED_DEVICE_C090 = _wired_device(0xc090)
+WIRED_DEVICE_C091 = _wired_device(0xc091)
+
+del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device
 
 ALL = (
     UNIFYING_RECEIVER_C52B,
@@ -156,6 +171,15 @@ ALL = (
     LIGHTSPEED_RECEIVER_C541,
 )
 
+WIRED_DEVICES = (
+    WIRED_DEVICE_C081,
+    WIRED_DEVICE_C082,
+    WIRED_DEVICE_C086,
+    WIRED_DEVICE_C087,
+    WIRED_DEVICE_C088,
+    WIRED_DEVICE_C090,
+    WIRED_DEVICE_C091,
+)
 
 def product_information(usb_id):
     if isinstance(usb_id, str):

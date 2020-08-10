@@ -28,11 +28,8 @@ from .device import Device
 
 from . import base as _base
 from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
 from .base_usb import product_information as _product_information
 from .common import strhex as _strhex
-from .descriptors import DEVICES as _DESCRIPTORS
-from .i18n import _
 
 _log = getLogger(__name__)
 del getLogger
