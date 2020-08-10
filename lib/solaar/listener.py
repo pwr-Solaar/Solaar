@@ -206,7 +206,7 @@ class ReceiverListener(_listener.EventsListener):
         if n.sub_id == 0x41 and len(n.data) > _base._SHORT_MESSAGE_SIZE - 4:
             # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
             if _log.isEnabledFor(_INFO):
-                _log.info('ignoring DJ pairing notification', n)
+                _log.info('ignoring DJ pairing notification %s', n)
             return
         elif n.sub_id == 0x41:
             if not already_known:
