@@ -33,6 +33,7 @@ import hidapi as _hid
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base_usb import ALL as _RECEIVER_USB_IDS
+from .base_usb import WIRED_DEVICES as _WIRED_DEVICE_IDS
 from .common import KwException as _KwException
 from .common import pack as _pack
 from .common import strhex as _strhex
@@ -94,6 +95,10 @@ def receivers():
         for d in _hid.enumerate(receiver_usb_id):
             yield d
 
+def wired_devices():
+    for device_usb_id in _WIRED_DEVICE_IDS:
+        for dev in _hid.enumerate(device_usb_id):
+            yield dev
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""

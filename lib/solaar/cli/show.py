@@ -23,6 +23,7 @@ from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
+from logitech_receiver import receiver as _receiver
 
 
 def _print_receiver(receiver):
@@ -64,16 +65,16 @@ def _battery_text(level):
         return '%d%%' % level
 
 
-def _print_device(dev):
+def _print_device(dev, num=None):
     assert dev is not None
     # check if the device is online
     dev.ping()
 
-    print('  %d: %s' % (dev.number, dev.name))
+    print('  %d: %s' % (num or dev.number, dev.name))
     print('     Device path  :', dev.path)
+    print('     USB id       : 046d:%s' % (dev.wpid or dev.product_id))
     print('     Codename     :', dev.codename)
     print('     Kind         :', dev.kind)
-    print('     Wireless PID :', dev.wpid)
     if dev.protocol:
         print('     Protocol     : HID++ %1.1f' % dev.protocol)
     else:
@@ -222,31 +223,38 @@ def _print_device(dev):
         print('     Battery: unknown (device is offline).')
 
 
-def run(receivers, args, find_receiver, find_device):
-    assert receivers
+def run(devices, args, find_receiver, find_device):
+    assert devices
     assert args.device
 
     device_name = args.device.lower()
 
     if device_name == 'all':
-        for r in receivers:
-            _print_receiver(r)
-            count = r.count()
-            if count:
-                for dev in r:
-                    print('')
-                    _print_device(dev)
-                    count -= 1
-                    if not count:
-                        break
-            print('')
+        dev_num = 1
+        for d in devices:
+            if isinstance(d, _receiver.Receiver):
+                _print_receiver(d)
+                count = d.count()
+                if count:
+                    for dev in d:
+                        print('')
+                        _print_device(dev)
+                        count -= 1
+                        if not count:
+                            break
+                print('')
+            else:
+                if dev_num == 1:
+                    print('Wired Devices')
+                _print_device(d, num=dev_num)
+                dev_num += 1
         return
 
-    dev = find_receiver(receivers, device_name)
+    dev = find_receiver(devices, device_name)
     if dev:
         _print_receiver(dev)
         return
 
-    dev = find_device(receivers, device_name)
+    dev = find_device(devices, device_name)
     assert dev
     _print_device(dev)
