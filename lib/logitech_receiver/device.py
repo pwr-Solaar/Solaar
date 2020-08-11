@@ -128,14 +128,8 @@ class Device(object):
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            for dev in _hid.enumerate({'vendor_id': 0x046d, 'product_id': int(self.receiver.product_id, 16)}):
-                if dev.serial:
-                    split = dev.serial.split('-')
-                    hidraw_serial = ''.join(split[1:]).upper()
-                    if self.serial == hidraw_serial and split[0] == self.wpid:
-                        self.path = dev.path
-                        self.handle = _hid.open_path(dev.path)
-                        break
+            self.path = _hid.find_paired_node(receiver.phys, number)
+            self.handle = _hid.open_path(self.path) if self.path else None
 
             self.descriptor = _DESCRIPTORS.get(self.wpid)
             if self.descriptor is None:

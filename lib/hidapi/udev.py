@@ -48,6 +48,7 @@ DeviceInfo = namedtuple(
         'vendor_id',
         'product_id',
         'serial',
+        'phys',
         'release',
         'manufacturer',
         'product',
@@ -127,6 +128,7 @@ def _match(action, device, filter):
             path=device.device_node,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
+            phys=hid_device.get('HID_PHYS'),
             serial=hid_device.get('HID_UNIQ'),
             release=attrs.get('bcdDevice'),
             manufacturer=attrs.get('manufacturer'),
@@ -143,6 +145,7 @@ def _match(action, device, filter):
             path=device.device_node,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
+            phys=None,
             serial=None,
             release=None,
             manufacturer=None,
@@ -151,6 +154,15 @@ def _match(action, device, filter):
             driver=None
         )
         return d_info
+
+
+def find_paired_node(receiver_phys, index):
+    for dev in _Context().list_devices(subsystem='hidraw'):
+        phys = dev.find_parent('hid').get('HID_PHYS')
+        if phys and '{}:{}'.format(receiver_phys, index) == phys:
+            return dev.device_node
+
+    return None
 
 
 def monitor_glib(callback, *device_filters):

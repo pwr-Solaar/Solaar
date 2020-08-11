@@ -53,6 +53,7 @@ class Receiver(object):
         self.handle = handle
         assert device_info
         self.path = device_info.path
+        self.phys = device_info.phys
         # USB product id, used for some Nano receivers
         self.product_id = device_info.product_id
         product_info = _product_information(self.product_id)
