@@ -159,6 +159,7 @@ class Device(object):
             self.path = info.path
             self.handle = _hid.open_path(self.path)
             self.product_id = info.product_id
+            self._serial = ''.join(info.serial.split('-')).upper()
 
         if self._protocol is not None:
             self.features = None if self._protocol < 2.0 else _hidpp20.FeaturesArray(self)
