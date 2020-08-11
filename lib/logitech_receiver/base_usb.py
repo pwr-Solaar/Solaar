@@ -133,13 +133,13 @@ LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
 
 # Wired devices
-WIRED_DEVICE_C081 = _wired_device(0xc081)
-WIRED_DEVICE_C082 = _wired_device(0xc082)
-WIRED_DEVICE_C086 = _wired_device(0xc086)
-WIRED_DEVICE_C087 = _wired_device(0xc087)
-WIRED_DEVICE_C088 = _wired_device(0xc088)
-WIRED_DEVICE_C090 = _wired_device(0xc090)
-WIRED_DEVICE_C091 = _wired_device(0xc091)
+WIRED_DEVICE_C081 = _wired_device(0xc081)  # G900
+WIRED_DEVICE_C082 = _wired_device(0xc082)  # G403
+WIRED_DEVICE_C086 = _wired_device(0xc086)  # G903
+WIRED_DEVICE_C087 = _wired_device(0xc087)  # G703
+WIRED_DEVICE_C088 = _wired_device(0xc088)  # GPro
+WIRED_DEVICE_C090 = _wired_device(0xc090)  # G703 Hero
+WIRED_DEVICE_C091 = _wired_device(0xc091)  # G903 Hero
 
 del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device
 

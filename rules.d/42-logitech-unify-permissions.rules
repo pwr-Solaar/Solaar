@@ -43,6 +43,15 @@ ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53f", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c545", GOTO="solaar_apply"
 ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c541", GOTO="solaar_apply"
 
+# Logitech wired devices
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c081", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c082", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c086", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c087", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c088", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c090", GOTO="solaar_apply"
+ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c091", GOTO="solaar_apply"
+
 # Lenovo nano receiver
 ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="6042", GOTO="solaar_apply"
 
@@ -50,9 +59,6 @@ ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="6042", GOTO="solaar_apply"
 GOTO="solaar_end"
 
 LABEL="solaar_apply"
-
-# don't apply to the paired peripherals, just the receivers
-DRIVERS=="logitech-djdevice|logitech-hidpp-device", GOTO="solaar_end"
 
 # Allow any seated user to access the receiver.
 # uaccess: modern ACL-enabled udev
