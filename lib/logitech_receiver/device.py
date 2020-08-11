@@ -128,19 +128,14 @@ class Device(object):
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            serial = self.serial
-            for dev in _hid.enumerate({
-                'vendor_id': 0x046d,
-                'product_id': int(self.receiver.product_id, 16),
-                'usb_interface': 2
-            }):
-                self.handle = _hid.open_path(dev.path)
-                if serial == self.serial and dev.serial.startswith(self.wpid):
-                    self.path = dev.path
-                    break
-                else:
-                    _hid.close(self.handle)
-                    self.handle = None
+            for dev in _hid.enumerate({'vendor_id': 0x046d, 'product_id': int(self.receiver.product_id, 16)}):
+                if dev.serial:
+                    split = dev.serial.split('-')
+                    hidraw_serial = ''.join(split[1:]).upper()
+                    if self.serial == hidraw_serial and split[0] == self.wpid:
+                        self.path = dev.path
+                        self.handle = _hid.open_path(dev.path)
+                        break
 
             self.descriptor = _DESCRIPTORS.get(self.wpid)
             if self.descriptor is None:
@@ -225,7 +220,7 @@ class Device(object):
 
     @property
     def serial(self):
-        if self.receiver:
+        if not self._serial and self.receiver:
             serial = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
             if serial:
                 ps = ord(serial[9:10]) & 0x0F
