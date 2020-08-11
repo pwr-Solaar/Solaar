@@ -185,13 +185,11 @@ def run(cli_args=None, hidraw_path=None):
 
     try:
         c = list(_receivers(hidraw_path))
+        if action == 'show':
+            c += list(_wired_devices(hidraw_path))
+
         if not c:
-            if action != 'show':
-                raise Exception('Logitech receiver not found')
-            else:
-                c += list(_wired_devices(hidraw_path))
-                if not c:
-                    raise Exception('No devices found')
+            raise Exception('No devices found')
 
         from importlib import import_module
         m = import_module('.' + action, package=__name__)
