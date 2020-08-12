@@ -898,17 +898,18 @@ def get_host_names(device):
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     host_names = {}
     if state:
-        _ignore, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
-        for host in range(0, numHosts):
-            hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
-            _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
-            name = ''
-            remaining = nameLen
-            while remaining > 0:
-                name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
-                name += name_piece[2:2 + min(remaining, 14)].decode()
-                remaining = max(0, remaining - 14)
-            host_names[host] = (bool(status), name)
+        capability_flags, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
+        if capability_flags & 0x01:  # device can get host names
+            for host in range(0, numHosts):
+                hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
+                _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
+                name = ''
+                remaining = nameLen
+                while remaining > 0:
+                    name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
+                    name += name_piece[2:2 + min(remaining, 14)].decode()
+                    remaining = max(0, remaining - 14)
+                host_names[host] = (bool(status), name)
     return host_names
 
 
