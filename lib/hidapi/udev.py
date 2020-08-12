@@ -34,6 +34,7 @@ import os as _os
 from collections import namedtuple
 from select import select as _select
 from time import sleep
+from time import time as _timestamp
 
 from pyudev import Context as _Context
 from pyudev import Device as _Device
@@ -154,7 +155,7 @@ def _match(action, device, filter):
         return d_info
 
 
-def find_paired_node(receiver_path, index):
+def find_paired_node(receiver_path, index, timeout):
     """Find the node of a device paired with a receiver"""
     context = _Context()
     receiver_phys = _Devices.from_device_file(context, receiver_path).find_parent('hid').get('HID_PHYS')
@@ -163,10 +164,14 @@ def find_paired_node(receiver_path, index):
         return None
 
     phys = f'{receiver_phys}:{index}'
-    for dev in context.list_devices(subsystem='hidraw'):
-        dev_phys = dev.find_parent('hid').get('HID_PHYS')
-        if dev_phys and dev_phys == phys:
-            return dev.device_node
+    timeout += _timestamp()
+    delta = _timestamp()
+    while delta < timeout:
+        for dev in context.list_devices(subsystem='hidraw'):
+            dev_phys = dev.find_parent('hid').get('HID_PHYS')
+            if dev_phys and dev_phys == phys:
+                return dev.device_node
+        delta = _timestamp()
 
     return None
 
