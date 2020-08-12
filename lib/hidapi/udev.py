@@ -38,6 +38,7 @@ from time import sleep
 from pyudev import Context as _Context
 from pyudev import Device as _Device
 from pyudev import DeviceNotFoundError
+from pyudev import Devices as _Devices
 from pyudev import Monitor as _Monitor
 
 native_implementation = 'udev'
@@ -48,7 +49,6 @@ DeviceInfo = namedtuple(
         'vendor_id',
         'product_id',
         'serial',
-        'phys',
         'release',
         'manufacturer',
         'product',
@@ -128,7 +128,6 @@ def _match(action, device, filter):
             path=device.device_node,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
-            phys=hid_device.get('HID_PHYS'),
             serial=hid_device.get('HID_UNIQ'),
             release=attrs.get('bcdDevice'),
             manufacturer=attrs.get('manufacturer'),
@@ -145,7 +144,6 @@ def _match(action, device, filter):
             path=device.device_node,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
-            phys=None,
             serial=None,
             release=None,
             manufacturer=None,
@@ -156,10 +154,18 @@ def _match(action, device, filter):
         return d_info
 
 
-def find_paired_node(receiver_phys, index):
-    for dev in _Context().list_devices(subsystem='hidraw'):
-        phys = dev.find_parent('hid').get('HID_PHYS')
-        if phys and '{}:{}'.format(receiver_phys, index) == phys:
+def find_paired_node(receiver_path, index):
+    """Find the node of a device paired with a receiver"""
+    context = _Context()
+    receiver_phys = _Devices.from_device_file(context, receiver_path).find_parent('hid').get('HID_PHYS')
+
+    if not receiver_phys:
+        return None
+
+    phys = f'{receiver_phys}:{index}'
+    for dev in context.list_devices(subsystem='hidraw'):
+        dev_phys = dev.find_parent('hid').get('HID_PHYS')
+        if dev_phys and dev_phys == phys:
             return dev.device_node
 
     return None

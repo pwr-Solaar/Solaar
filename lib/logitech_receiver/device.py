@@ -128,7 +128,7 @@ class Device(object):
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            self.path = _hid.find_paired_node(receiver.phys, number)
+            self.path = _hid.find_paired_node(receiver.path, number)
             self.handle = _hid.open_path(self.path) if self.path else None
 
             self.descriptor = _DESCRIPTORS.get(self.wpid)
