@@ -62,6 +62,7 @@ a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
 | 064d:c53d | Lightspeed | 1                  |
 | 064d:c53f | Lightspeed | 1                  |
 | 064d:c545 | Lightspeed | 1                  |
+| 064d:c541 | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
 * The receiver with USB Id 046d:c517 is an old 27 MHz receiver, supporting only
