@@ -550,7 +550,8 @@ class Receiver(object):
                 dev.wpid = None
                 if key in self._devices:
                     del self._devices[key]
-                _log.warn('%s unpaired device %s', self, dev)
+                if _log.isEnabledFor(_INFO):
+                    _log.info('%s unpaired device %s', self, dev)
             else:
                 _log.error('%s failed to unpair device %s', self, dev)
                 raise Exception('failed to unpair device %s: %s' % (dev.name, key))

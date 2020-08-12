@@ -164,7 +164,8 @@ class ReceiverListener(_listener.EventsListener):
             # Device was unpaired, and isn't valid anymore.
             # We replace it with a ghost so that the UI has something to work
             # with while cleaning up.
-            _log.warn('device %s was unpaired, ghosting', device)
+            if _log.isEnabledFor(_INFO):
+                _log.info('device %s was unpaired, ghosting', device)
             device = _ghost(device)
 
         self.status_changed_callback(device, alert, reason)
