@@ -128,7 +128,7 @@ class Device(object):
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            self.path = _hid.find_paired_node(receiver.path, number)
+            self.path = _hid.find_paired_node(receiver.path, number, _base.DEFAULT_TIMEOUT)
             self.handle = _hid.open_path(self.path) if self.path else None
 
             self.descriptor = _DESCRIPTORS.get(self.wpid)
@@ -280,7 +280,7 @@ class Device(object):
                 for s in self.descriptor.settings:
                     try:
                         setting = s(self)
-                    except Exception as e: # Do nothing if the device is offline
+                    except Exception as e:  # Do nothing if the device is offline
                         setting = None
                         if self.online:
                             raise e
