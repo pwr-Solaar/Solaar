@@ -676,4 +676,6 @@ def check_feature_settings(device, already_known):
 def check_feature_setting(device, setting_name):
     for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
         if name == setting_name and featureId and featureFn:
-            return check_feature(device, name, featureId, featureFn)
+            feature = check_feature(device, name, featureId, featureFn)
+            if feature:
+                return feature
