@@ -31,7 +31,6 @@ from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import unpack as _unpack
 from .i18n import _
-from .settings import KIND as _KIND
 from .settings import BitFieldSetting as _BitFieldSetting
 from .settings import BitFieldValidator as _BitFieldV
 from .settings import BooleanValidator as _BooleanV
@@ -52,291 +51,164 @@ _R = _hidpp10.REGISTERS
 _F = _hidpp20.FEATURE
 
 #
-# pre-defined basic setting descriptors
-#
-
-
-def register_toggle(
-    name,
-    register,
-    true_value=_BooleanV.default_true,
-    false_value=_BooleanV.default_false,
-    mask=_BooleanV.default_mask,
-    device_kind=None
-):
-    validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
-    rw = _RegisterRW(register)
-    return _Setting(name, rw, validator, device_kind=device_kind)
-
-
-def register_choices(name, register, choices, kind=_KIND.choice, device_kind=None):
-    assert choices
-    validator = _ChoicesV(choices)
-    rw = _RegisterRW(register)
-    return _Setting(name, rw, validator, kind=kind, device_kind=device_kind)
-
-
-def feature_toggle(
-    name,
-    feature,
-    read_fnid=_FeatureRW.default_read_fnid,
-    write_fnid=_FeatureRW.default_write_fnid,
-    true_value=_BooleanV.default_true,
-    false_value=_BooleanV.default_false,
-    mask=_BooleanV.default_mask,
-    device_kind=None
-):
-    validator = _BooleanV(true_value=true_value, false_value=false_value, mask=mask)
-    rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _Setting(name, rw, validator, feature=feature, device_kind=device_kind)
-
-
-def feature_bitfield_toggle(
-    name,
-    feature,
-    options,
-    read_fnid=_FeatureRW.default_read_fnid,
-    write_fnid=_FeatureRW.default_write_fnid,
-    device_kind=None
-):
-    assert options
-    validator = _BitFieldV(options)
-    rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _BitFieldSetting(name, rw, validator, feature=feature, device_kind=device_kind)
-
-
-def feature_bitfield_toggle_dynamic(
-    name,
-    feature,
-    options_callback,
-    read_fnid=_FeatureRW.default_read_fnid,
-    write_fnid=_FeatureRW.default_write_fnid,
-    device_kind=None
-):
-    def instantiate(device):
-        options = options_callback(device)
-        setting = feature_bitfield_toggle(
-            name, feature, options, read_fnid=read_fnid, write_fnid=write_fnid, device_kind=device_kind
-        )
-        return setting(device)
-
-    instantiate._rw_kind = _FeatureRW.kind
-    return instantiate
-
-
-def feature_choices(name, feature, choices, **kwargs):
-    assert choices
-    validator = _ChoicesV(choices, **kwargs)
-    rw = _FeatureRW(feature, **kwargs)
-    return _Setting(name, rw, validator, feature=feature, kind=_KIND.choice, **kwargs)
-
-
-def feature_choices_dynamic(name, feature, choices_callback, **kwargs):
-    # Proxy that obtains choices dynamically from a device
-    def instantiate(device):
-        # Obtain choices for this feature
-        choices = choices_callback(device)
-        if not choices:  # no choices, so don't create a setting
-            return None
-        setting = feature_choices(name, feature, choices, **kwargs)
-        return setting(device)
-
-    instantiate._rw_kind = _FeatureRW.kind
-    return instantiate
-
-
-# maintain a mapping from keys (NamedInts) to one of a list of choices (NamedInts), default is first one
-# the setting is stored as a JSON-compatible object mapping the key int (as a string) to the choice int
-def feature_map_choices(name, feature, choicesmap, **kwargs):
-    assert choicesmap
-    validator = _ChoicesMapV(choicesmap, **kwargs)
-    rw = _FeatureRWMap(feature, **kwargs)
-    return _Settings(name, rw, validator, feature=feature, kind=_KIND.map_choice, **kwargs)
-
-
-def feature_map_choices_dynamic(name, feature, choices_callback, **kwargs):
-    # Proxy that obtains choices dynamically from a device
-    def instantiate(device):
-        choices = choices_callback(device)
-        if not choices:  # no choices, so don't create a Setting
-            return None
-        setting = feature_map_choices(name, feature, choices, **kwargs)
-        return setting(device)
-
-    instantiate._rw_kind = _FeatureRWMap.kind
-    return instantiate
-
-
-def feature_range(
-    name,
-    feature,
-    min_value,
-    max_value,
-    read_fnid=_FeatureRW.default_read_fnid,
-    write_fnid=_FeatureRW.default_write_fnid,
-    rw=None,
-    bytes_count=None,
-    device_kind=None
-):
-    validator = _RangeV(min_value, max_value, bytes_count=bytes_count)
-    if rw is None:
-        rw = _FeatureRW(feature, read_fnid=read_fnid, write_fnid=write_fnid)
-    return _Setting(name, rw, validator, feature=feature, kind=_KIND.range, device_kind=device_kind)
-
-
-#
 # common strings for settings - name, string to display in main window, tool tip for main window
 #
 
+# yapf: disable
 _HAND_DETECTION = ('hand-detection', _('Hand Detection'), _('Turn on illumination when the hands hover over the keyboard.'))
 _SMOOTH_SCROLL = ('smooth-scroll', _('Smooth Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.'))
-_SIDE_SCROLL = (
-    'side-scroll', _('Side Scrolling'),
-    _(
-        'When disabled, pushing the wheel sideways sends custom button events\n'
-        'instead of the standard side-scrolling events.'
-    )
-)
-_HI_RES_SCROLL = (
-    'hi-res-scroll', _('High Resolution Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.')
-)
-_LOW_RES_SCROLL = (
-    'lowres-smooth-scroll', _('HID++ Scrolling'),
-    _('HID++ mode for vertical scroll with the wheel.') + '\n' + _('Effectively turns off wheel scrolling in Linux.')
-)
-_HIRES_INV = (
-    'hires-smooth-invert', _('High Resolution Wheel Invert'),
-    _('High-sensitivity wheel invert direction for vertical scroll.')
-)
-_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'), _('High-sensitivity mode for vertical scroll with the wheel.'))
-_FN_SWAP = (
-    'fn-swap', _('Swap Fx function'),
-    _(
-        'When set, the F1..F12 keys will activate their special function,\n'
-        'and you must hold the FN key to activate their standard function.'
-    ) + '\n\n' + _(
-        'When unset, the F1..F12 keys will activate their standard function,\n'
-        'and you must hold the FN key to activate their special function.'
-    )
-)
+_SIDE_SCROLL = ('side-scroll', _('Side Scrolling'),
+                _('When disabled, pushing the wheel sideways sends custom button events\n'
+                  'instead of the standard side-scrolling events.'))
+_HI_RES_SCROLL = ('hi-res-scroll', _('High Resolution Scrolling'),
+                  _('High-sensitivity mode for vertical scroll with the wheel.'))
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'),
+                   _('HID++ mode for vertical scroll with the wheel.') + '\n' +
+                   _('Effectively turns off wheel scrolling in Linux.'))
+_HIRES_INV = ('hires-smooth-invert', _('High Resolution Wheel Invert'),
+              _('High-sensitivity wheel invert direction for vertical scroll.'))
+_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'),
+              _('High-sensitivity mode for vertical scroll with the wheel.'))
+_FN_SWAP = ('fn-swap', _('Swap Fx function'),
+            _('When set, the F1..F12 keys will activate their special function,\n'
+              'and you must hold the FN key to activate their standard function.') + '\n\n' +
+            _('When unset, the F1..F12 keys will activate their standard function,\n'
+              'and you must hold the FN key to activate their special function.'))
 _DPI = ('dpi', _('Sensitivity (DPI)'), None)
-_POINTER_SPEED = (
-    'pointer_speed', _('Sensitivity (Pointer Speed)'), _('Speed multiplier for mouse (256 is normal multiplier).')
-)
-_SMART_SHIFT = (
-    'smart-shift', _('Smart Shift'),
-    _(
-        'Automatically switch the mouse wheel between ratchet and freespin mode.\n'
-        'The mouse wheel is always free at 0, and always locked at 50'
-    )
-)
+_POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
+                  _('Speed multiplier for mouse (256 is normal multiplier).'))
+_SMART_SHIFT = ('smart-shift', _('Smart Shift'),
+                _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
+                  'The mouse wheel is always free at 0, and always locked at 50'))
 _BACKLIGHT = ('backlight', _('Backlight'), _('Turn illumination on or off on keyboard.'))
-_REPROGRAMMABLE_KEYS = (
-    'reprogrammable-keys', _('Actions'), _('Change the action for the key or button.') + '\n' +
-    _('Changing important actions (such as for the left mouse button) can result in an unusable system.')
-)
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Actions'),
+                        _('Change the action for the key or button.') + '\n' +
+                        _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
-_THUMB_SCROLL_MODE = (
-    'thumb-scroll-mode', _('HID++ Thumb Scrolling'),
-    _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' + _('Effectively turns off thumb scrolling in Linux.')
-)
+_THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
+                      _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' +
+                      _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
+# yapf: enable
 
+# Setting template functions need to set up the setting itself, the validator, and the reader/writer.
+# The reader/writer is responsible for reading raw values from the device and writing values to it.
+# The validator is responsible for turning read raw values into Python data and Python data into raw values to be written.
+# The setting keeps everything together and provides control.
 #
-# Keyword arguments for setting template functions:
-#  persist=True - whether to store the values and reapply them from now on
-#  device_kind - the kinds of devices that setting is suitable for (NOT CURRENTLY USED)
-#  read_fnid=0x00, write_fnid=0x10 - default 0x00 and 0x10 function numbers (times 16) to read and write setting
-#  bytes_count=1 - number of bytes for the data (ignoring the key, if any)
-# only for boolean settings
-#  true_value=0x01, false_value=0x00,  mask=0xFF - integer or byte strings for boolean settings
-# only for map choices
-#  key_bytes_count=1 - number of bytes in the key
-#  extra_default - extra value that cannot be set but means same as default value
-# only for choices and map choices
-#  read_skip_bytes_count=0 - number of bytes to ignore before the data when reading
-#  write_prefix_bytes=b'' - bytes to put before the data writing
+# The _Setting class is for settings with simple values (booleans, numbers in a range, and symbolic choices).
+# Its positional arguments are the strings for the setting and the reader/writer.
+# The validator keyword (or third) argument is the validator, if the validator does not depend on information from the device.
+# The callback keyword argument is a function that given a device as argument returns the validator or None.
+# If the callback function returns None the setting is not created for the device.
+# Either a validator or callback must be specified, but not both.
+# The device_kind keyword argument (default None) says what kinds of devices can use the setting.
+# (This argument is currently not used because keyboards with integrated trackpads break its abstraction.)
+# The persist keyword argument (default True) says whether to store the value and apply it when setting up the device.
+#
+# There are two simple reader/writers - _RegisterRW and _FeatureRW.
+# _RegisterRW is for register-based settings and takes the register name as argument.
+# _FeatureRW is for feature-based settings and takes the feature name as positional argument plus the following:
+#   read_fnid is the feature function (times 16) to read the value (default 0x00),
+#   write_fnid is the feature function (times 16) to write the value (default 0x10),
+#   no_reply is whether to wait for a reply (default false) (USE WITH EXTREME CAUTION).
+#
+# There are three simple validators - _BooleanV, _RangeV, and _ChoicesV
+# _BooleanV is for boolean values.  It takes three keyword arguments that can be integers or byte strings:
+#   true_value is the raw value for true (default 0x01),
+#   false_value is the raw value for false (default 0x00),
+#   mask is used to keep only some bits from a sequence of bits.
+# _RangeV is for an integer in a range.  It takes three keyword arguments:
+#   min_value is the minimum value for the setting,
+#   max_value is the maximum value for the setting,
+#   byte_count is number of bytes that the value is stored in (defaults to size of max_value).
+# _ChoicesV is for symbolic choices.  It takes one positional and three keyword arguments:
+#   the positional argument is a list of named integers that are the valid choices,
+#   byte_count is the number of bytes for the integer (default size of largest choice integer),
+#   read_skip_byte_count is the number of bytes to ignore at the beginning of the read value (default 0),
+#   write_prefix_bytes is a byte string to write before the value (default empty).
+#
+# The _Settings class is for settings that are maps from keys to values.
+# The _BitFieldSetting class is for settings that have multiple boolean values packed into a bit field.
+# They have has same arguments as the _Setting class.
+#
+# _ChoicesMapV validator is for map settings that map onto symbolic choices.   It takes four keyword arguments:
+#   the positional argument is the choices map
+#   byte_count is as for _ChoicesV,
+#   read_skip_byte_count is as for _ChoicesV,
+#   write_prefix_bytes is as for _ChoicesV,
+#   key_byte_count is the number of bytes for the key integer (default size of largest key),
+#   extra_default is an extra raw value that is used as a default value (default None).
+# _BitFieldV validator is for bit field settings.  It takes one positional and one keyword argument
+#   the positional argument is the number of bits in the bit field
+#   byte_count is the size of the bit field (default size of the bit field)
 
 
-def _register_hand_detection(
-    register=_R.keyboard_hand_detection, true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF'
-):
-    return register_toggle(
-        _HAND_DETECTION, register, true_value=true_value, false_value=false_value, device_kind=(_DK.keyboard, )
-    )
+def _register_hand_detection():
+    validator = _BooleanV(true_value=b'\x00\x00\x00', false_value=b'\x00\x00\x30', mask=b'\x00\x00\xFF')
+    return _Setting(_HAND_DETECTION, _RegisterRW(_R.keyboard_hand_detection), validator, device_kind=(_DK.keyboard, ))
 
 
-def _register_fn_swap(register=_R.keyboard_fn_swap, true_value=b'\x00\x01', mask=b'\x00\x01'):
-    return register_toggle(_FN_SWAP, register, true_value=true_value, mask=mask, device_kind=(_DK.keyboard, ))
+def _register_fn_swap():
+    validator = _BooleanV(true_value=b'\x00\x01', mask=b'\x00\x01')
+    return _Setting(_FN_SWAP, _RegisterRW(_R.keyboard_fn_swap), validator, device_kind=(_DK.keyboard, ))
 
 
-def _register_smooth_scroll(register=_R.mouse_button_flags, true_value=0x40, mask=0x40):
-    return register_toggle(_SMOOTH_SCROLL, register, true_value=true_value, mask=mask, device_kind=(_DK.mouse, _DK.trackball))
+def _register_smooth_scroll():
+    validator = _BooleanV(true_value=0x40, mask=0x40)
+    return _Setting(_SMOOTH_SCROLL, _RegisterRW(_R.mouse_button_flags), validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _register_side_scroll(register=_R.mouse_button_flags, true_value=0x02, mask=0x02):
-    return register_toggle(_SIDE_SCROLL, register, true_value=true_value, mask=mask, device_kind=(_DK.mouse, _DK.trackball))
+def _register_side_scroll():
+    validator = _BooleanV(true_value=0x02, mask=0x02)
+    return _Setting(_SIDE_SCROLL, _RegisterRW(_R.mouse_button_flags), validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _register_dpi(register=_R.mouse_dpi, choices=None):
-    return register_choices(_DPI, register, choices, device_kind=(_DK.mouse, _DK.trackball))
+def _register_dpi(choices=None):
+    return _Setting(_DPI, _RegisterRW(_R.mouse_dpi), _ChoicesV(choices), device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_fn_swap():
-    return feature_toggle(_FN_SWAP, _F.FN_INVERSION, device_kind=(_DK.keyboard, ))
+    return _Setting(_FN_SWAP, _FeatureRW(_F.FN_INVERSION), _BooleanV(), device_kind=(_DK.keyboard, ))
 
 
-# this might not be correct for this feature
 def _feature_new_fn_swap():
-    return feature_toggle(_FN_SWAP, _F.NEW_FN_INVERSION, device_kind=(_DK.keyboard, ))
+    return _Setting(_FN_SWAP, _FeatureRW(_F.NEW_FN_INVERSION), _BooleanV(), device_kind=(_DK.keyboard, ))
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
-    return feature_toggle(
-        _FN_SWAP, _F.K375S_FN_INVERSION, true_value=b'\xFF\x01', false_value=b'\xFF\x00', device_kind=(_DK.keyboard, )
-    )
+    validator = _BooleanV(true_value=b'\xFF\x01', false_value=b'\xFF\x00')
+    return _Setting(_FN_SWAP, _FeatureRW(_F.K375S_FN_INVERSION), validator, device_kind=(_DK.keyboard, ))
 
 
 # FIXME: This will enable all supported backlight settings,
 # we should allow the users to select which settings they want to enable.
 def _feature_backlight2():
-    return feature_toggle(_BACKLIGHT, _F.BACKLIGHT2, device_kind=(_DK.keyboard, ))
+    return _Setting(_BACKLIGHT, _FeatureRW(_F.BACKLIGHT2), _BooleanV(), device_kind=(_DK.keyboard, ))
 
 
 def _feature_hi_res_scroll():
-    return feature_toggle(_HI_RES_SCROLL, _F.HI_RES_SCROLLING, device_kind=(_DK.mouse, _DK.trackball))
+    return _Setting(_HI_RES_SCROLL, _FeatureRW(_F.HI_RES_SCROLLING), _BooleanV(), device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_lowres_smooth_scroll():
-    return feature_toggle(_LOW_RES_SCROLL, _F.LOWRES_WHEEL, device_kind=(_DK.mouse, _DK.trackball))
+    return _Setting(_LOW_RES_SCROLL, _FeatureRW(_F.LOWRES_WHEEL), _BooleanV(), device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_hires_smooth_invert():
-    return feature_toggle(
-        _HIRES_INV,
-        _F.HIRES_WHEEL,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        true_value=0x04,
-        mask=0x04,
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    rw = _FeatureRW(_F.HIRES_WHEEL, read_fnid=0x10, write_fnid=0x20)
+    validator = _BooleanV(true_value=0x04, mask=0x04)
+    return _Setting(_HIRES_INV, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_hires_smooth_resolution():
-    return feature_toggle(
-        _HIRES_RES,
-        _F.HIRES_WHEEL,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        true_value=0x02,
-        mask=0x02,
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    rw = _FeatureRW(_F.HIRES_WHEEL, read_fnid=0x10, write_fnid=0x20)
+    validator = _BooleanV(true_value=0x02, mask=0x02)
+    return _Setting(_HIRES_RES, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_smart_shift():
@@ -361,26 +233,17 @@ def _feature_smart_shift():
             threshold = _bytes2int(data_bytes)
             # Freespin at minimum
             mode = 1 if threshold == _MIN_SMART_SHIFT_VALUE else 2
-
             # Ratchet at maximum
             if threshold == _MAX_SMART_SHIFT_VALUE:
                 threshold = 255
-
             data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1) * 2
             return super(_SmartShiftRW, self).write(device, data)
 
-    return feature_range(
-        _SMART_SHIFT,
-        _F.SMART_SHIFT,
-        _MIN_SMART_SHIFT_VALUE,
-        _MAX_SMART_SHIFT_VALUE,
-        bytes_count=1,
-        rw=_SmartShiftRW(_F.SMART_SHIFT),
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    validator = _RangeV(_MIN_SMART_SHIFT_VALUE, _MAX_SMART_SHIFT_VALUE, 1)
+    return _Setting(_SMART_SHIFT, _SmartShiftRW(_F.SMART_SHIFT), validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _feature_adjustable_dpi_choices(device):
+def _feature_adjustable_dpi_callback(device):
     # [1] getSensorDpiList(sensorIdx)
     reply = device.feature_request(_F.ADJUSTABLE_DPI, 0x10)
     # Should not happen, but might happen when the user unplugs device while the
@@ -400,7 +263,7 @@ def _feature_adjustable_dpi_choices(device):
     if step:
         assert len(dpi_list) == 2, 'Invalid DPI list range: %r' % dpi_list
         dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
-    return _NamedInts.list(dpi_list)
+    return _ChoicesV(_NamedInts.list(dpi_list), byte_count=3) if dpi_list else None
 
 
 def _feature_adjustable_dpi():
@@ -408,77 +271,49 @@ def _feature_adjustable_dpi():
     # Assume sensorIdx 0 (there is only one sensor)
     # [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
     # [3] setSensorDpi(sensorIdx, dpi)
-    return feature_choices_dynamic(
-        _DPI,
-        _F.ADJUSTABLE_DPI,
-        _feature_adjustable_dpi_choices,
-        read_fnid=0x20,
-        write_fnid=0x30,
-        bytes_count=3,
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    rw = _FeatureRW(_F.ADJUSTABLE_DPI, read_fnid=0x20, write_fnid=0x30)
+    return _Setting(_DPI, rw, callback=_feature_adjustable_dpi_callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_pointer_speed():
     """Pointer Speed feature"""
     # min and max values taken from usb traces of Win software
-    return feature_range(
-        _POINTER_SPEED,
-        _F.POINTER_SPEED,
-        0x002e,
-        0x01ff,
-        read_fnid=0x0,
-        write_fnid=0x10,
-        bytes_count=2,
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    validator = _RangeV(0x002e, 0x01ff, 2)
+    rw = _FeatureRW(_F.POINTER_SPEED)
+    return _Setting(_POINTER_SPEED, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 # the keys for the choice map are Logitech controls (from special_keys)
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
 # and the integer being the control number for that task (to be written to the device)
 # Solaar only remaps keys (controlled by key gmask and group), not other key reprogramming
-def _feature_reprogrammable_keys_choices(device):
+def _feature_reprogrammable_keys_callback(device):
     choices = {}
     for k in device.keys:
         tgts = k.remappable_to
         if len(tgts) > 1:
             choices[k.key] = tgts
-
-    return choices
+    if not choices:
+        return None
+    return _ChoicesMapV(
+        choices, key_byte_count=2, byte_count=2, read_skip_byte_count=1, write_prefix_bytes=b'\x00', extra_default=0
+    )
 
 
 def _feature_reprogrammable_keys():
-    return feature_map_choices_dynamic(
-        _REPROGRAMMABLE_KEYS,
-        _F.REPROG_CONTROLS_V4,
-        _feature_reprogrammable_keys_choices,
-        read_fnid=0x20,
-        write_fnid=0x30,
-        key_bytes_count=2,
-        bytes_count=2,
-        read_skip_bytes_count=1,
-        write_prefix_bytes=b'\x00',
-        extra_default=0,
-        device_kind=(_DK.keyboard, ),
-    )
+    rw = _FeatureRWMap(_F.REPROG_CONTROLS_V4, read_fnid=0x20, write_fnid=0x30, key_byte_count=2)
+    return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
-def _feature_disable_keyboard_keys_key_list(device):
+def _feature_disable_keyboard_keys_callback(device):
     mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS)[0]
     options = [_special_keys.DISABLE[1 << i] for i in range(8) if mask & (1 << i)]
-    return options
+    return _BitFieldV(options) if options else None
 
 
 def _feature_disable_keyboard_keys():
-    return feature_bitfield_toggle_dynamic(
-        _DISABLE_KEYS,
-        _F.KEYBOARD_DISABLE_KEYS,
-        _feature_disable_keyboard_keys_key_list,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        device_kind=(_DK.keyboard, )
-    )
+    rw = _FeatureRW(_F.KEYBOARD_DISABLE_KEYS, read_fnid=0x10, write_fnid=0x20)
+    return _BitFieldSetting(_DISABLE_KEYS, rw, callback=_feature_disable_keyboard_keys_callback, device_kind=(_DK.keyboard, ))
 
 
 # muultiplatform OS bits
@@ -486,7 +321,7 @@ OSS = [('Linux', 0x0400), ('MacOS', 0x2000), ('Windows', 0x0100), ('iOS', 0x4000
        ('Chrome', 0x0800), ('WinEmb', 0x0200), ('Tizen', 0x0001)]
 
 
-def _feature_multiplatform_choices(device):
+def _feature_multiplatform_callback(device):
     def _str_os_versions(low, high):
         def _str_os_version(version):
             if version == 0:
@@ -514,19 +349,12 @@ def _feature_multiplatform_choices(device):
             os = os_name + _str_os_versions(low, high)
             if os_bit & os_flags and platform not in choices and os not in choices:
                 choices[platform] = os
-    return choices
+    return _ChoicesV(choices, read_skip_byte_count=6, write_prefix_bytes=b'\xff') if choices else None
 
 
 def _feature_multiplatform():
-    return feature_choices_dynamic(
-        _PLATFORM,
-        _F.MULTIPLATFORM,
-        _feature_multiplatform_choices,
-        read_fnid=0x00,
-        read_skip_bytes_count=6,
-        write_fnid=0x30,
-        write_prefix_bytes=b'\xff'
-    )
+    rw = _FeatureRW(_F.MULTIPLATFORM, read_fnid=0x00, write_fnid=0x30)
+    return _Setting(_PLATFORM, rw, callback=_feature_multiplatform_callback)
 
 
 PLATFORMS = _NamedInts()
@@ -535,12 +363,12 @@ PLATFORMS[0x01] = 'Android, Windows'
 
 
 def _feature_dualplatform():
-    return feature_choices(
-        _PLATFORM, _F.DUALPLATFORM, PLATFORMS, read_fnid=0x10, write_fnid=0x20, device_kind=(_DK.keyboard, )
-    )
+    validator = _ChoicesV(PLATFORMS)
+    rw = _FeatureRW(_F.DUALPLATFORM, read_fnid=0x00, write_fnid=0x20)
+    return _Setting(_PLATFORM, rw, validator)
 
 
-def _feature_change_host_choices(device):
+def _feature_change_host_callback(device):
     infos = device.feature_request(_F.CHANGE_HOST)
     assert infos, 'Oops, host count cannot be retrieved!'
     numHosts, currentHost = _unpack('!BB', infos[:2])
@@ -553,46 +381,24 @@ def _feature_change_host_choices(device):
     for host in range(0, numHosts):
         _ignore, hostName = hostNames.get(host, (False, ''))
         choices[host] = str(host + 1) + ':' + hostName if hostName else str(host + 1)
-    return choices
+    return _ChoicesV(choices, read_skip_byte_count=1) if choices else None
 
 
 def _feature_change_host():
-    return feature_choices_dynamic(
-        _CHANGE_HOST,
-        _F.CHANGE_HOST,
-        _feature_change_host_choices,
-        persist=False,
-        no_reply=True,
-        read_fnid=0x00,
-        read_skip_bytes_count=1,
-        write_fnid=0x10
-    )
+    rw = _FeatureRW(_F.CHANGE_HOST, read_fnid=0x00, write_fnid=0x10, no_reply=True)
+    return _Setting(_CHANGE_HOST, rw, callback=_feature_change_host_callback, persist=False)
 
 
 def _feature_thumb_mode():
-    return feature_toggle(
-        _THUMB_SCROLL_MODE,
-        _F.THUMB_WHEEL,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        true_value=b'\x01\x00',
-        false_value=b'\x00\x00',
-        mask=b'\x01\x00',
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    rw = _FeatureRW(_F.THUMB_WHEEL, read_fnid=0x10, write_fnid=0x20)
+    validator = _BooleanV(true_value=b'\x01\x00', false_value=b'\x00\x00', mask=b'\x01\x00')
+    return _Setting(_THUMB_SCROLL_MODE, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_thumb_invert():
-    return feature_toggle(
-        _THUMB_SCROLL_INVERT,
-        _F.THUMB_WHEEL,
-        read_fnid=0x10,
-        write_fnid=0x20,
-        true_value=b'\x00\x01',
-        false_value=b'\x00\x00',
-        mask=b'\x00\x01',
-        device_kind=(_DK.mouse, _DK.trackball)
-    )
+    rw = _FeatureRW(_F.THUMB_WHEEL, read_fnid=0x10, write_fnid=0x20)
+    validator = _BooleanV(true_value=b'\x00\x01', false_value=b'\x00\x00', mask=b'\x00\x01')
+    return _Setting(_THUMB_SCROLL_INVERT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 #

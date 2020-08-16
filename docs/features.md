@@ -119,7 +119,7 @@ A “read only” note means the feature is a read-only feature and cannot be ch
 
 Features are implemented as settable features in
 lib/logitech_receiver/settings_templates.py
-Some features also have direct implementation in
+some features also have direct implementation in
 lib/logitech_receiver/hidpp20.py
 
 In most cases it should suffice to only implement the settable feature
@@ -143,62 +143,72 @@ _POINTER_SPEED = ('pointer_speed',
 		_("How fast the pointer moves"))
 ```
 
-Implement a register interface for the setting (if you are very brave and
-some devices have a register interface for the setting).
+Next implement an interface for the setting by creating
+a reader/writer, a validator, and a setting instance for it.
+Most settings use device features and thus need feature interfaces.
+Some settings use device register and thus need register interfaces.
+Only implement a register interface for the setting if you are very brave and
+you have access to a device that has a register interface for the setting.
 Register interfaces cannot be auto-discovered and need to be stated in descriptors.py
 for each device with the register interface.
 
-Implement a feature interface for the setting.  There are several possible kinds of
-feature interfaces, ranging from simple toggles, to ranges, to fixed lists, to
-dynamic choices, to maps of dynamic choices, each created by a macro function.
-Pointer speed is a setting
-whose values are integers in a range so `feature_range` is used.
-The arguments to this macro are
-the name of the setting (use the name from the common strings tuple),
-the HID++ 2.0 feature ID for the setting (from the FEATURE structure in hidpp20.py),
-the minimum and maximum values for the setting,
-the HID++ 2.0 function IDs to read and write the setting (left-shifted four bits),
-the byte size of the setting value,
-a label and description for the setting (from the common strings tuple),
-and which kinds of devices can have this setting.
-(This last is no longer used because keyboards with integrated pointers only
+The reader/writer instance is responsible for reading raw values
+from the device and writing values to it.
+There are different classes for feature interfaces and register interfaces.
+Pointer speed is a feature so the _FeatureRW reader/writer is used.
+Reader/writers take the register or feature ID and the command numbers for reading and writing,
+plus other arguments for complex interfaces.
+
+The validator instance is responsible for turning read raw values into Python data
+and Python data into raw values to be written and validating that the Python data is
+acceptable for the setting.
+There are several possible kinds of Python data for setting interfaces,
+ranging from simple toggles, to ranges, to fixed lists, to
+dynamic choices, to maps of dynamic choices.
+Pointer speed is a setting whose values are integers in a range so a _RangeV validator is used.
+The arguments to this class are the
+the minimum and maximum values for the value
+and the byte size of the value on the device.
+Settings that are toggles or choices work similarly,
+but their validators have different arguments.
+Map settings have more complicated validators.
+
+The setting instance keeps everything together and provides control.
+It takes the strings for the setting, the reader/writer, the validator, and
+which kinds of devices can have this setting.
+(This last is no longer used because keyboards with integrated trackpads only
 report that they are keyboards.)
-The values to be used need to be determined from documentation of the
-feature or from reverse-engineering behavior of Logitech software under
-Windows or MacOS.
 
 ```python
 def _feature_pointer_speed():
-	"""Pointer Speed feature"""
-	return feature_range(_POINTER_SPEED[0],
-			_F.POINTER_SPEED,
-			0x002e,
-			0x01ff,
-			read_function_id=0x0,
-			write_function_id=0x10,
-			bytes_count=2,
-			label=_POINTER_SPEED[1],
-			description=_POINTER_SPEED[2],
-			device_kind=(_DK.mouse, _DK.trackball))
+    """Pointer Speed feature"""
+    # min and max values taken from usb traces of Win software
+    validator = _RangeV(0x002e, 0x01ff, 2)
+    rw = _FeatureRW(_F.POINTER_SPEED)
+    return _Setting(_POINTER_SPEED, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 ```
 
-Settings that are toggles or choices work very similarly.
-Settings where the choices are determined from the device
+Settings where the acceptable values are determined from the device
 need an auxiliary function to receive and decipher the permissible choices.
 See `_feature_adjustable_dpi_choices` for an example.
 
-Add an element to _SETTINGS_TABLE with
-the setting name (from the common strings),
+Finally, add an element to _SETTINGS_TABLE with
+the common strings for the setting,
 the feature ID (if any),
 the feature implementation (if any),
 the register implementation (if any).
 and
 the identifier for the setting implementation if different from the setting name.
 The identifier is used in descriptors.py to say that a device has the register or feature implementation.
-The identifier can be the same as the setting name if there is only one implementation for the setting.
 This table is used to generate the data structures for describing devices in descriptors.py
 and is also used to auto-discover feature implementations.
 
 ```python
-_S( _POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed ),
+_S( _POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed ),
 ```
+
+The values to be used need to be determined from documentation of the
+feature or from reverse-engineering behavior of Logitech software under
+Windows or MacOS.
+For more information on implementing feature settings
+see the comments in lib/logitech_receiver/settings_templates.py.
