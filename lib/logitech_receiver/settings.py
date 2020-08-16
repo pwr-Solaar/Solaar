@@ -44,23 +44,25 @@ class Setting(object):
     """A setting descriptor.
     Needs to be instantiated for each specific device."""
     __slots__ = (
-        'name', 'label', 'description', 'kind', 'device_kind', 'feature', 'persist', '_rw', '_validator', '_device', '_value'
+        'name', 'label', 'description', 'kind', 'device_kind', 'feature', 'persist', '_rw', '_validator', '_callback',
+        '_device', '_value'
     )
 
-    def __init__(self, name, rw, validator, kind=None, device_kind=None, feature=None, persist=True, **kwargs):
+    def __init__(self, name, rw, validator=None, callback=None, kind=None, device_kind=None, feature=None, persist=True):
         assert name
         self.name = name[0]
         self.label = name[1]
         self.description = name[2]
         self.device_kind = device_kind
-        self.feature = feature
+        self.feature = getattr(rw, 'feature', None)
         self.persist = persist
-
         self._rw = rw
+        assert (validator and not callback) or (not validator and callback)
         self._validator = validator
+        self._callback = callback
 
-        assert kind is None or kind & validator.kind != 0
-        self.kind = kind or validator.kind
+        assert kind is None or validator is None or kind & validator.kind != 0
+        self.kind = kind or getattr(validator, 'kind', None)
 
     def __call__(self, device):
         assert not hasattr(self, '_value')
@@ -73,8 +75,13 @@ class Setting(object):
         elif p >= 2.0:
             # HID++ 2.0 devices do not support registers
             assert self._rw.kind == FeatureRW.kind
-
         o = _copy(self)
+        if o._callback:
+            o._validator = o._callback(device)
+            if o._validator is None:
+                return None
+            assert o.kind is None or o.kind & o._validator.kind != 0
+            o.kind = o.kind or o._validator.kind
         o._value = None
         o._device = device
         return o
@@ -84,7 +91,7 @@ class Setting(object):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
 
-        return self._validator.choices if self._validator.kind & KIND.choice else None
+        return self._validator.choices if self._validator and self._validator.kind & KIND.choice else None
 
     @property
     def range(self):
@@ -171,9 +178,9 @@ class Setting(object):
         if hasattr(self, '_value'):
             assert hasattr(self, '_device')
             return '<Setting([%s:%s] %s:%s=%s)>' % (
-                self._rw.kind, self._validator.kind, self._device.codename, self.name, self._value
+                self._rw.kind, self._validator.kind if self._validator else None, self._device.codename, self.name, self._value
             )
-        return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind, self.name)
+        return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind if self._validator else None, self.name)
 
     __unicode__ = __repr__ = __str__
 
@@ -438,7 +445,7 @@ class FeatureRW(object):
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
-    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, no_reply=False, **kwargs):
+    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, no_reply=False):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
@@ -459,32 +466,31 @@ class FeatureRWMap(FeatureRW):
     kind = _NamedInt(0x02, 'feature')
     default_read_fnid = 0x00
     default_write_fnid = 0x10
-    default_key_bytes_count = 1
+    default_key_byte_count = 1
 
     def __init__(
         self,
         feature,
         read_fnid=default_read_fnid,
         write_fnid=default_write_fnid,
-        key_bytes_count=default_key_bytes_count,
-        no_reply=False,
-        **_ignore
+        key_byte_count=default_key_byte_count,
+        no_reply=False
     ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
-        self.key_bytes_count = key_bytes_count
+        self.key_byte_count = key_byte_count
         self.no_reply = no_reply
 
     def read(self, device, key):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_bytes_count)
+        key_bytes = _int2bytes(key, self.key_byte_count)
         return device.feature_request(self.feature, self.read_fnid, key_bytes)
 
     def write(self, device, key, data_bytes):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_bytes_count)
+        key_bytes = _int2bytes(key, self.key_byte_count)
         reply = device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
@@ -504,7 +510,7 @@ class BooleanValidator(object):
     # mask specifies all the affected bits in the value
     default_mask = 0xFF
 
-    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask, **kwargs):
+    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask):
         if isinstance(true_value, int):
             assert isinstance(false_value, int)
             if mask is None:
@@ -609,7 +615,7 @@ class BitFieldValidator(object):
 
     kind = KIND.multiple_toggle
 
-    def __init__(self, options, byte_count=None, **kwargs):
+    def __init__(self, options, byte_count=None):
         assert (isinstance(options, list))
         self.options = options
         self.byte_count = (max(x.bit_length() for x in options) + 7) // 8
@@ -640,9 +646,9 @@ class ChoicesValidator(object):
     kind = KIND.choice
     """Translates between NamedInts and a byte sequence.
     :param choices: a list of NamedInts
-    :param bytes_count: the size of the derived byte sequence. If None, it
+    :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
-    def __init__(self, choices, bytes_count=None, read_skip_bytes_count=None, write_prefix_bytes=b'', **_ignore):
+    def __init__(self, choices, byte_count=None, read_skip_byte_count=None, write_prefix_bytes=b''):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
         assert len(choices) > 1
@@ -650,18 +656,18 @@ class ChoicesValidator(object):
         self.needs_current_value = False
 
         max_bits = max(x.bit_length() for x in choices)
-        self._bytes_count = (max_bits // 8) + (1 if max_bits % 8 else 0)
-        if bytes_count:
-            assert self._bytes_count <= bytes_count
-            self._bytes_count = bytes_count
-        assert self._bytes_count < 8
-        self._read_skip_bytes_count = read_skip_bytes_count if read_skip_bytes_count else 0
+        self._byte_count = (max_bits // 8) + (1 if max_bits % 8 else 0)
+        if byte_count:
+            assert self._byte_count <= byte_count
+            self._byte_count = byte_count
+        assert self._byte_count < 8
+        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
-        assert self._bytes_count + self._read_skip_bytes_count <= 14
-        assert self._bytes_count + len(self._write_prefix_bytes) <= 14
+        assert self._byte_count + self._read_skip_byte_count <= 14
+        assert self._byte_count + len(self._write_prefix_bytes) <= 14
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[self._read_skip_bytes_count:self._read_skip_bytes_count + self._bytes_count])
+        reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count:self._read_skip_byte_count + self._byte_count])
         valid_value = self.choices[reply_value]
         assert valid_value is not None, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return valid_value
@@ -682,7 +688,7 @@ class ChoicesValidator(object):
         if choice is None:
             raise ValueError('invalid choice %r' % new_value)
         assert isinstance(choice, _NamedInt)
-        return self._write_prefix_bytes + choice.bytes(self._bytes_count)
+        return self._write_prefix_bytes + choice.bytes(self._byte_count)
 
 
 class ChoicesMapValidator(ChoicesValidator):
@@ -691,12 +697,11 @@ class ChoicesMapValidator(ChoicesValidator):
     def __init__(
         self,
         choices_map,
-        key_bytes_count=None,
-        bytes_count=None,
-        read_skip_bytes_count=0,
+        key_byte_count=None,
+        byte_count=None,
+        read_skip_byte_count=0,
         write_prefix_bytes=b'',
-        extra_default=None,
-        **kwargs
+        extra_default=None
     ):
         assert choices_map is not None
         assert isinstance(choices_map, dict)
@@ -709,25 +714,25 @@ class ChoicesMapValidator(ChoicesValidator):
             for key_value in choices:
                 assert isinstance(key_value, _NamedInt)
                 max_value_bits = max(max_value_bits, key_value.bit_length())
-        self._key_bytes_count = (max_key_bits + 7) // 8
-        if key_bytes_count:
-            assert self._key_bytes_count <= key_bytes_count
-            self._key_bytes_count = key_bytes_count
-        self._bytes_count = (max_value_bits + 7) // 8
-        if bytes_count:
-            assert self._bytes_count <= bytes_count
-            self._bytes_count = bytes_count
+        self._key_byte_count = (max_key_bits + 7) // 8
+        if key_byte_count:
+            assert self._key_byte_count <= key_byte_count
+            self._key_byte_count = key_byte_count
+        self._byte_count = (max_value_bits + 7) // 8
+        if byte_count:
+            assert self._byte_count <= byte_count
+            self._byte_count = byte_count
         self.choices = choices_map
         self.needs_current_value = False
         self.extra_default = extra_default
-        self._read_skip_bytes_count = read_skip_bytes_count if read_skip_bytes_count else 0
+        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
-        assert self._bytes_count + self._read_skip_bytes_count + self._key_bytes_count <= 14
-        assert self._bytes_count + len(self._write_prefix_bytes) + self._key_bytes_count <= 14
+        assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
+        assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
     def validate_read(self, reply_bytes, key):
-        start = self._key_bytes_count + self._read_skip_bytes_count
-        end = start + self._bytes_count
+        start = self._key_byte_count + self._read_skip_byte_count
+        end = start + self._byte_count
         reply_value = _bytes2int(reply_bytes[start:end])
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
@@ -740,32 +745,32 @@ class ChoicesMapValidator(ChoicesValidator):
         choices = self.choices[key]
         if new_value not in choices and new_value != self.extra_default:
             raise ValueError('invalid choice %r' % new_value)
-        return self._write_prefix_bytes + new_value.to_bytes(self._bytes_count, 'big')
+        return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
 
 class RangeValidator(object):
-    __slots__ = ('min_value', 'max_value', 'flag', '_bytes_count', 'needs_current_value')
+    __slots__ = ('min_value', 'max_value', 'flag', '_byte_count', 'needs_current_value')
 
     kind = KIND.range
     """Translates between integers and a byte sequence.
     :param min_value: minimum accepted value (inclusive)
     :param max_value: maximum accepted value (inclusive)
-    :param bytes_count: the size of the derived byte sequence. If None, it
+    :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the range."""
-    def __init__(self, min_value, max_value, bytes_count=None, **kwargs):
+    def __init__(self, min_value, max_value, byte_count=None):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
         self.needs_current_value = False
 
-        self._bytes_count = math.ceil(math.log(max_value + 1, 256))
-        if bytes_count:
-            assert self._bytes_count <= bytes_count
-            self._bytes_count = bytes_count
-        assert self._bytes_count < 8
+        self._byte_count = math.ceil(math.log(max_value + 1, 256))
+        if byte_count:
+            assert self._byte_count <= byte_count
+            self._byte_count = byte_count
+        assert self._byte_count < 8
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[:self._bytes_count])
+        reply_value = _bytes2int(reply_bytes[:self._byte_count])
         assert reply_value >= self.min_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         assert reply_value <= self.max_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return reply_value
@@ -773,4 +778,4 @@ class RangeValidator(object):
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError('invalid choice %r' % new_value)
-        return _int2bytes(new_value, self._bytes_count)
+        return _int2bytes(new_value, self._byte_count)
