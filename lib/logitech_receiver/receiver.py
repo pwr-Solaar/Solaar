@@ -277,8 +277,8 @@ class PairedDevice(object):
                 for s in self.descriptor.settings:
                     try:
                         setting = s(self)
-                    except Exception as e:
-                        # Do nothing if the device is offline
+                    except Exception as e:  # Do nothing if the device is offline
+                        setting = None
                         if self.online:
                             raise e
                     if setting is not None:
