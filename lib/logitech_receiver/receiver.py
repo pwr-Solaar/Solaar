@@ -46,6 +46,10 @@ _R = _hidpp10.REGISTERS
 
 
 class PairedDevice(object):
+
+    read_register = _hidpp10.read_register
+    write_register = _hidpp10.write_register
+
     def __init__(self, receiver, number, link_notification=None):
         assert receiver
         self.receiver = receiver
@@ -138,9 +142,9 @@ class PairedDevice(object):
         # also it gets set to None on this object when the device is unpaired
         assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-        for dev in _hid.enumerate({'vendor_id': 0x046d}):
-            if dev.product_id == self.receiver.product_id and dev.serial \
-                    and dev.serial.startswith(self.wpid):
+        for dev in _hid.enumerate({'vendor_id': 0x046d, \
+                'product_id': int(self.receiver.product_id, 16)}):
+            if dev.serial and dev.serial.startswith(self.wpid):
                 self.path = dev.path
                 self.handle = _hid.open_path(dev.path)
                 break
@@ -173,7 +177,7 @@ class PairedDevice(object):
     @property
     def protocol(self):
         if self._protocol is None and self.online is not False:
-            self._protocol = _base.ping(self.receiver.handle, self.number)
+            self._protocol = _base.ping(self.handle, self.number)
             # if the ping failed, the peripheral is (almost) certainly offline
             self.online = self._protocol is not None
 
@@ -325,10 +329,8 @@ class PairedDevice(object):
         return flag_bits if ok else None
 
     def request(self, request_id, *params, no_reply=False):
-        return _base.request(self.receiver.handle, self.number, request_id, *params, no_reply=no_reply)
+        return _base.request(self.handle, self.number, request_id, *params, no_reply=no_reply)
 
-    read_register = _hidpp10.read_register
-    write_register = _hidpp10.write_register
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
@@ -336,7 +338,7 @@ class PairedDevice(object):
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.receiver.handle, self.number)
+        protocol = _base.ping(self.handle, self.number)
         self.online = protocol is not None
         if protocol is not None:
             self._protocol = protocol
