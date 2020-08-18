@@ -24,6 +24,8 @@ import errno as _errno
 from logging import INFO as _INFO
 from logging import getLogger
 
+import hidapi as _hid
+
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -80,6 +82,8 @@ class PairedDevice(object):
         self._polling_rate = None
         self._power_switch = None
 
+        self.handle = None
+
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
 
@@ -132,6 +136,12 @@ class PairedDevice(object):
         # the wpid is necessary to properly identify wireless link on/off notifications
         # also it gets set to None on this object when the device is unpaired
         assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
+
+        for dev in _hid.enumerate({'vendor_id': 0x046d}):
+            if dev.product_id == self.receiver.product_id and dev.serial \
+                    and dev.serial.startswith(self.wpid):
+                self.handle = _hid.open_path(dev.path)
+                break
 
         self.descriptor = _DESCRIPTORS.get(self.wpid)
         if self.descriptor is None:
