@@ -70,6 +70,7 @@ def _print_device(dev):
     dev.ping()
 
     print('  %d: %s' % (dev.number, dev.name))
+    print('     Device path  :', dev.path)
     print('     Codename     :', dev.codename)
     print('     Kind         :', dev.kind)
     print('     Wireless PID :', dev.wpid)

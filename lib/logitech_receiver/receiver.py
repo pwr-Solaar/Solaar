@@ -83,6 +83,7 @@ class PairedDevice(object):
         self._power_switch = None
 
         self.handle = None
+        self.path = None
 
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("new PairedDevice(%s, %s, %s)", receiver, number, link_notification)
@@ -140,6 +141,7 @@ class PairedDevice(object):
         for dev in _hid.enumerate({'vendor_id': 0x046d}):
             if dev.product_id == self.receiver.product_id and dev.serial \
                     and dev.serial.startswith(self.wpid):
+                self.path = dev.path
                 self.handle = _hid.open_path(dev.path)
                 break
 
