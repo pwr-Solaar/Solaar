@@ -381,6 +381,8 @@ class Receiver(object):
         if serial_reply:
             self.serial = _strhex(serial_reply[1:5])
             self.max_devices = ord(serial_reply[6:7])
+            if self.max_devices <= 0 or self.max_devices > 6:
+                self.max_devices = product_info.get('max_devices', 1)
             # TODO _properly_ figure out which receivers do and which don't support unpairing
             # This code supposes that receivers that don't unpair support a pairing request for device index 0
             self.may_unpair = self.write_register(_R.receiver_pairing) is None
