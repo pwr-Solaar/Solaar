@@ -236,6 +236,14 @@ def _print_device(dev, num=None):
                 report_fmt = ', '.join(k.mapping_flags)
                 report_fmt = report_fmt if report_fmt else 'default'
                 print('             reporting: %s' % (report_fmt))
+    if dev.online and dev.remap_keys:
+        print('     Has %d persistent remappable keys:' % len(dev.remap_keys))
+        for k in dev.remap_keys:
+            if k:
+                print(
+                    '        %2d: %-26s => code %x actionId %x modifiers %x status %x' %
+                    (k.index, k.key, k.actionId, k.hidUsage, k.modifierMask, k.cidStatus)
+                )
     if dev.online and dev.gestures:
         print(
             '     Has %d gesture(s), %d param(s) and %d spec(s):' %
