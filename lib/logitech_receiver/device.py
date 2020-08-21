@@ -74,6 +74,7 @@ class Device:
 
         self._firmware = None
         self._keys = None
+        self._remap_keys = None
         self._gestures = None
         self._gestures_lock = _threading.Lock()
         self._registers = None
@@ -293,6 +294,13 @@ class Device:
             if self.online and self.protocol >= 2.0:
                 self._keys = _hidpp20.get_keys(self) or ()
         return self._keys
+
+    @property
+    def remap_keys(self):
+        if self._remap_keys is None:
+            if self.online and self.protocol >= 2.0:
+                self._remap_keys = _hidpp20.get_remap_keys(self) or ()
+        return self._remap_keys
 
     @property
     def gestures(self):
