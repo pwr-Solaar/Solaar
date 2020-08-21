@@ -35,6 +35,7 @@ from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
+from .common import int2bytes as _int2bytes
 from .common import pack as _pack
 from .common import unpack as _unpack
 
@@ -561,12 +562,73 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             _log.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
+class PersistentRemappableAction():
+    def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
+        self._device = device
+        self.index = index
+        self._cid = cid
+        self.actionId = actionId
+        self.remapped = remapped
+        self._modifierMask = modifierMask
+        self.cidStatus = cidStatus
+
+    @property
+    def key(self) -> _NamedInt:
+        return special_keys.CONTROL[self._cid]
+
+    @property
+    def actionType(self) -> _NamedInt:
+        return special_keys.ACTIONID[self._actionId]
+
+    @property
+    def action(self):
+        if self.actionId == special_keys.ACTIONID.Empty:
+            return None
+        elif self.actionId == special_keys.ACTIONID.Key:
+            return 'Key: ' + str(self.modifiers) + str(self.remapped)
+        elif self.actionId == special_keys.ACTIONID.Mouse:
+            return 'Mouse Button'
+        elif self.actionId == special_keys.ACTIONID.Xdisp:
+            return 'X Displacement'
+        elif self.actionId == special_keys.ACTIONID.Ydisp:
+            return 'Y Displacement'
+        elif self.actionId == special_keys.ACTIONID.Vscroll:
+            return 'Vertical Scroll'
+        elif self.actionId == special_keys.ACTIONID.Hscroll:
+            return 'Horizontal Scroll'
+        elif self.actionId == special_keys.ACTIONID.Consumer:
+            return 'Consumer: ' + str(self.remapped)
+        elif self.actionId == special_keys.ACTIONID.Internal:
+            return 'Internal Action'
+        elif self.actionId == special_keys.ACTIONID.Internal:
+            return 'Power'
+        else:
+            return 'Unknown'
+
+    @property
+    def modifiers(self):
+        return special_keys.modifiers[self._modifierMask]
+
+    @property
+    def data_bytes(self):
+        return _int2bytes(self.actionId, 1) + _int2bytes(self.remapped, 2) + _int2bytes(self._modifierMask, 1)
+
+    def remap(self, data_bytes):
+        cid = _int2bytes(self._cid, 2)
+        if _bytes2int(data_bytes) == special_keys.KEYS_Default:  # map back to default
+            feature_request(self._device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x50, cid, 0xFF)
+            self._device.remap_keys._query_key(self.index)
+            return self._device.remap_keys.keys[self.index].data_bytes
+        else:
+            self._actionId, self._code, self._modifierMask = _unpack('!BHB', data_bytes)
+            self.cidStatus = 0x01
+            feature_request(self._device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
+            return True
+
+
 class KeysArray:
     """A sequence of key mappings supported by a HID++ 2.0 device."""
-
-    __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids', 'lock')
-
-    def __init__(self, device, count):
+    def __init__(self, device, count, version):
         assert device is not None
         self.device = device
         self.lock = _threading.Lock()
@@ -579,17 +641,6 @@ class KeysArray:
                 _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
             self.keyversion = None
         self.keys = [None] * count
-        """The mapping from Control IDs to their native Task IDs.
-        For example, Control "Left Button" is mapped to Task "Left Click".
-        When remapping controls, we point the control we want to remap
-        at a target Control ID rather than a target Task ID. This has the
-        effect of performing the native task of the target control,
-        even if the target itself is also remapped. So remapping
-        is not recursive."""
-        self.cid_to_tid = {}
-        """The mapping from Control ID groups to Controls IDs that belong to it.
-        A key k can only be remapped to targets in groups within k.group_mask."""
-        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
 
     def _query_key(self, index: int):
         """Queries the device for a given key and stores it in self.keys."""
@@ -649,6 +700,92 @@ class KeysArray:
 
     def __len__(self):
         return len(self.keys)
+
+
+class KeysArrayV1(KeysArray):
+    def __init__(self, device, count, version=1):
+        super().__init__(device, count, version)
+        """The mapping from Control IDs to their native Task IDs.
+        For example, Control "Left Button" is mapped to Task "Left Click".
+        When remapping controls, we point the control we want to remap
+        at a target Control ID rather than a target Task ID. This has the
+        effect of performing the native task of the target control,
+        even if the target itself is also remapped. So remapping
+        is not recursive."""
+        self.cid_to_tid = {}
+        """The mapping from Control ID groups to Controls IDs that belong to it.
+        A key k can only be remapped to targets in groups within k.group_mask."""
+        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
+
+    def _query_key(self, index: int):
+        if index < 0 or index >= len(self.keys):
+            raise IndexError(index)
+        keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+        if keydata:
+            cid, tid, flags = _unpack('!HHB', keydata[:5])
+            self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
+            self.cid_to_tid[cid] = tid
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+
+
+class KeysArrayV4(KeysArrayV1):
+    def __init__(self, device, count):
+        super().__init__(device, count, 4)
+
+    def _query_key(self, index: int):
+        if index < 0 or index >= len(self.keys):
+            raise IndexError(index)
+        keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
+        if keydata:
+            cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
+            flags = flags1 | (flags2 << 8)
+            self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
+            self.cid_to_tid[cid] = tid
+            if group != 0:  # 0 = does not belong to a group
+                self.group_cids[special_keys.CID_GROUP[group]].append(cid)
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+
+
+# we are only interested in the current host, so use 0xFF for the host throughout
+class KeysArrayPersistent(KeysArray):
+    def __init__(self, device, count):
+        super().__init__(device, count, 5)
+        self._capabilities = None
+
+    @property
+    def capabilities(self):
+        if self._capabilities is None and self.device.online:
+            capabilities = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x00)
+            assert capabilities, 'Oops, persistent remappable key capabilities cannot be retrieved!'
+            self._capabilities = _unpack('!H', capabilities[:2])[0]  # flags saying what the mappings are possible
+        return self._capabilities
+
+    def _query_key(self, index: int):
+        if index < 0 or index >= len(self.keys):
+            raise IndexError(index)
+        keydata = feature_request(self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xff)
+        if keydata:
+            key = _unpack('!H', keydata[:2])[0]
+            try:
+                mapped_data = feature_request(
+                    self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xff00, key & 0xff, 0xff
+                )
+                if mapped_data:
+                    _ignore, _ignore, actionId, remapped, modifiers, status = _unpack('!HBBHBB', mapped_data[:8])
+            except Exception:
+                actionId = remapped = modifiers = status = 0
+            actionId = special_keys.ACTIONID[actionId]
+            if actionId == special_keys.ACTIONID.Key:
+                remapped = special_keys.USB_HID_KEYCODES[remapped]
+            elif actionId == special_keys.ACTIONID.Mouse:
+                remapped = special_keys.MOUSE_BUTTONS[remapped]
+            elif actionId == special_keys.ACTIONID.Consumer:
+                remapped = special_keys.HID_CONSUMERCODES[remapped]
+            self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 # Gesture Ids for feature GESTURE_2
@@ -1209,10 +1346,17 @@ def get_keys(device):
     count = None
     if FEATURE.REPROG_CONTROLS_V2 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V2)
+        return KeysArrayV1(device, ord(count[:1]))
     elif FEATURE.REPROG_CONTROLS_V4 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
+        return KeysArrayV4(device, ord(count[:1]))
+    return None
+
+
+def get_remap_keys(device):
+    count = feature_request(device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x10)
     if count:
-        return KeysArray(device, ord(count[:1]))
+        return KeysArrayPersistent(device, ord(count[:1]))
 
 
 def get_gestures(device):
