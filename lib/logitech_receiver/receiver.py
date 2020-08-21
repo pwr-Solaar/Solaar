@@ -39,7 +39,6 @@ _IR = _hidpp10.INFO_SUBREGISTERS
 #
 #
 
-
 class Receiver:
     """A Unifying Receiver instance.
 
