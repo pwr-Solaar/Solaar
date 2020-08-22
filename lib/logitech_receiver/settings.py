@@ -209,7 +209,9 @@ class Settings(Setting):
         if self._device.online:
             reply_map = {}
             for key in self._validator.choices:
-                reply = self._rw.read(self._device, key)
+                key_bytes = self._validator.prepare_key(key)
+                print('READ CHOICES', key, key_bytes.hex())
+                reply = self._rw.read(self._device, key_bytes)
                 if reply:
                     # keys are ints, because that is what the device uses,
                     # encoded into strings because JSON requires strings as keys
@@ -567,9 +569,9 @@ class FeatureRWMap(FeatureRW):
         self.key_byte_count = key_byte_count
         self.no_reply = no_reply
 
-    def read(self, device, key):
+    def read(self, device, key_bytes):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_byte_count)
+        print('FeatureRWMap READ', self.feature, self.read_fnid, key_bytes)
         return device.feature_request(self.feature, self.read_fnid, key_bytes)
 
     def write(self, device, key, data_bytes):
@@ -866,8 +868,9 @@ class ChoicesMapValidator(ChoicesValidator):
     def __init__(
         self,
         choices_map,
-        key_byte_count=None,
-        byte_count=None,
+        key_byte_count=0,
+        key_postfix_bytes=b'',
+        byte_count=0,
         read_skip_byte_count=0,
         write_prefix_bytes=b'',
         extra_default=None,
@@ -892,9 +895,11 @@ class ChoicesMapValidator(ChoicesValidator):
         if byte_count:
             assert self._byte_count <= byte_count
             self._byte_count = byte_count
+
         self.choices = choices_map
         self.needs_current_value = False
         self.extra_default = extra_default
+        self._key_postfix_bytes = key_postfix_bytes
         self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
         self.activate = activate
@@ -908,9 +913,16 @@ class ChoicesMapValidator(ChoicesValidator):
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
-        assert reply_value in self.choices[
-            key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+        if reply_value not in self.choices[key]:
+            print('INVALID', key, reply_value)
+
+
+##        assert reply_value in self.choices[
+##            key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return reply_value
+
+    def prepare_key(self, key):
+        return key.to_bytes(self._key_byte_count, 'big') + self._key_postfix_bytes
 
     def prepare_write(self, key, new_value):
         choices = self.choices[key]

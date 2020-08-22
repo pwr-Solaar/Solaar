@@ -106,6 +106,11 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel HID++ Scrolling'),
                       _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('Invert thumb wheel scroll direction.'))
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/touchpad behaviour.'))
+_PERSISTENT_REMAPPABLE_KEYS = (
+    'persistent-remappable-keys', _('Persistent Key or Button'),
+    _('Change the mapping for the key or button.') + '\n' +
+    _('Changing important keys or buttons (such as for the left mouse button) can result in an unusable system.')
+)
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
@@ -193,7 +198,6 @@ _GESTURE2_PARAMS_LABELS_SUB = {
 }
 
 _DISABLE_KEYS_LABEL_SUB = _('Disables the %s key.')
-
 # yapf: enable
 
 # Setting template functions need to set up the setting itself, the validator, and the reader/writer.
@@ -670,6 +674,38 @@ def _feature_thumb_invert():
     return _Setting(_THUMB_SCROLL_INVERT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
+## needs generalization
+## Only interested in current host, so use 0xFF for it
+def _feature_persistent_remappable_keys_choices(device):
+    capabilities = device.feature_request(_F.PERSISTENT_REMAPPABLE_ACTION, 0x00)
+    assert capabilities, 'Oops, persistent remappable key capabilities cannot be retrieved!'
+    capabilities = _unpack('!H', capabilities[:2])[0]  # flags saying what the mappings are possible
+    if not capabilities & 0x0001:  # can sent USB HID key codes - needs generalization
+        return None
+    count = device.feature_request(_F.PERSISTENT_REMAPPABLE_ACTION, 0x10)
+    assert count, 'Oops, persistent remappable key count cannot be retrieved!'
+    count = ord(count[:1])  # the number of key records
+    print('PERSISTENT COUNT', count)
+    choices = {}
+    for i in range(0, count):  # get the data for each key record on device
+        keydata = device.feature_request(_F.PERSISTENT_REMAPPABLE_ACTION, 0x20, i, 0xFF)
+        key = _unpack('!H', keydata[:2])[0]
+        print('PERSISTENT KEY', i, keydata[:2].hex())
+        actiondata = device.feature_request(_F.PERSISTENT_REMAPPABLE_ACTION, 0x30, key >> 8, key & 0xFF, 0xFF)
+        _ignore, _ignore, actionId, code, mask, status = _unpack('!HBBHBB', actiondata[:8])
+        key = _special_keys.CONTROL[key]
+        # more needed here
+        choices[key] = _special_keys.KEYS  # needs generalization
+    return _ChoicesMapV(
+        choices, key_byte_count=2, key_postfix_bytes=b'\xFF', byte_count=3, read_skip_byte_count=1, extra_default=0
+    ) if choices else None
+
+
+def _feature_persistent_remappable_keys():
+    rw = _FeatureRWMap(_F.PERSISTENT_REMAPPABLE_ACTION, read_fnid=0x30, write_fnid=0x40, key_byte_count=2)
+    return _Settings(_PERSISTENT_REMAPPABLE_KEYS, rw, callback=_feature_persistent_remappable_keys_choices)
+
+
 def _feature_gesture2_gestures_callback(device):
     options = [g for g in _hidpp20.get_gestures(device).gestures.values() if g.can_be_enabled or g.default_enabled]
     return _BitFieldOMV(options) if options else None
@@ -746,6 +782,7 @@ _SETTINGS_TABLE = [
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
+    _S(_PERSISTENT_REMAPPABLE_KEYS, _F.PERSISTENT_REMAPPABLE_ACTION, _feature_persistent_remappable_keys),
     _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gestures),
     _S(_GESTURE2_PARAMS, _F.GESTURE_2, _feature_gesture2_params),
 ]

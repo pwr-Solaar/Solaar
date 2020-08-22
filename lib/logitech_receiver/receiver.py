@@ -39,6 +39,7 @@ _R = _hidpp10.REGISTERS
 #
 #
 
+
 class Receiver(object):
     """A Unifying Receiver instance.
 

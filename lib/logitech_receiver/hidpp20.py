@@ -636,6 +636,7 @@ class KeysArray(object):
     def __len__(self):
         return len(self.keys)
 
+
 class KeysArrayV1(KeysArray):
     def __init__(self, device, count, version=1):
         super().__init__(device, count, version)
