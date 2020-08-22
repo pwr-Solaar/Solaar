@@ -658,10 +658,12 @@ def _update_device_panel(device, panel, buttons, full=False):
 
     if battery_level is None:
         icon_name = _icons.battery()
-        panel._battery._icon.set_sensitive(False)
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
-        panel._battery._text.set_sensitive(True)
+        panel._battery._icon.set_sensitive(False)
+        panel._battery._text.set_sensitive(is_online)
+        panel._battery._label.set_text(_('Battery'))
         panel._battery._text.set_markup('<small>%s</small>' % _('unknown'))
+        panel._battery.set_tooltip_text(_('Battery information unknown.'))
     else:
         charging = device.status.get(_K.BATTERY_CHARGING)
         icon_name = _icons.battery(battery_level, charging)
@@ -669,16 +671,23 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._icon.set_sensitive(True)
 
         if battery_voltage is not None:
+            panel._battery._label.set_text(_('Battery Voltage'))
             text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+            tooltip_text = _('Voltage reported by battery')
         elif isinstance(battery_level, _NamedInt):
+            panel._battery._label.set_text(_('Battery Level'))
             text = _(str(battery_level))
+            tooltip_text = _('Approximate level reported by battery')
         else:
+            panel._battery._label.set_text(_('Battery Level'))
             text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
+            tooltip_text = _('Approximate level reported by battery')
         if battery_next_level is not None:
             if isinstance(battery_next_level, _NamedInt):
-                text += '<small> (' + _('next ') + _(str(battery_next_level)) + ')</small>'
+                text += '<small> (' + _('next reported ') + _(str(battery_next_level)) + ')</small>'
             else:
-                text += '<small> (' + _('next ') + ('%d%%' % battery_next_level) + ')</small>'
+                text += '<small> (' + _('next reported ') + ('%d%%' % battery_next_level) + ')</small>'
+            tooltip_text = tooltip_text + _(' and next level to be reported.')
         if is_online:
             if charging:
                 text += ' <small>(%s)</small>' % _('charging')
@@ -686,6 +695,7 @@ def _update_device_panel(device, panel, buttons, full=False):
             text += ' <small>(%s)</small>' % _('last known')
         panel._battery._text.set_sensitive(is_online)
         panel._battery._text.set_markup(text)
+        panel._battery.set_tooltip_text(tooltip_text)
 
     if is_online:
         not_secure = device.status.get(_K.LINK_ENCRYPTED) is False
