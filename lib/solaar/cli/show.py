@@ -255,10 +255,7 @@ def _print_device(dev, num=None):
     if dev.online and dev.remap_keys:
         print('     Has %d persistent remappable keys:' % len(dev.remap_keys))
         for k in dev.remap_keys:
-            print(
-                '        %2d: %4d %-26s => %s%s' %
-                (k.index, int(k.key), k.key, k.action, ' (remapped)' if k.cidStatus else '')
-            )
+            print('        %2d: %-26s => %s%s' % (k.index, k.key, k.action, ' (remapped)' if k.cidStatus else ''))
     if dev.online and dev.gestures:
         print(
             '     Has %d gesture(s), %d param(s) and %d spec(s):' %

@@ -449,9 +449,7 @@ class ReprogrammableKeys(_Settings):
                 tgts = k.remappable_to
                 if len(tgts) > 1:
                     choices[k.key] = tgts
-            if not choices:
-                return None
-            return cls(choices, key_byte_count=2, byte_count=2, extra_default=0)
+            return cls(choices, key_byte_count=2, byte_count=2, extra_default=0) if choices else None
 
 
 class DivertKeys(_Settings):
@@ -1044,6 +1042,48 @@ class MRKeyLED(_Setting):
             return b'\x00'
 
 
+
+## Only implemented for devices that can produce HID and Consumer Key Codes
+## Only interested in current host, so use 0xFF for it
+class PersistentRemappableAction(_Settings):
+    name = 'persistent-remappable-keys'
+    label = _('Persistent Key/Button Mapping')
+    description = (
+        _('Permanently change the mapping for the key or button.') + '\n' +
+        _('Changing important keys or buttons (such as for the left mouse button) can result in an unusable system.')
+    )
+    persist = False  # This setting is persistent in the device so no need to persist it here
+    feature = _F.PERSISTENT_REMAPPABLE_ACTION
+    keys_universe = _special_keys.CONTROL
+    choices_universe = _special_keys.KEYS
+
+    class rw_class:
+        def __init__(self, feature):
+            self.feature = feature
+            self.kind = _FeatureRW.kind
+
+        def read(self, device, key):
+            ks = device.remap_keys[device.remap_keys.index(key)]
+            return b'\x00\x00' + ks.data_bytes
+
+        def write(self, device, key, data_bytes):
+            ks = device.remap_keys[device.remap_keys.index(key)]
+            v = ks.remap(data_bytes)
+            return v
+
+    class validator_class(_ChoicesMapV):
+        @classmethod
+        def build(cls, setting_class, device):
+            remap_keys = device.remap_keys
+            if not remap_keys or not device.remap_keys.capabilities & 0x0041 == 0x0041:  # HID and Consumer Key Codes
+                return None
+            choices = {}
+            for k in remap_keys:
+                key = _special_keys.CONTROL[k.key]
+                choices[key] = _special_keys.KEYS
+            return cls(choices, key_byte_count=2, byte_count=4) if choices else None
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1071,13 +1111,14 @@ SETTINGS = [
     NewFnSwap,  # simple
     K375sFnSwap,  # working
     ReprogrammableKeys,  # working
+    PersistentRemappableAction,
     DivertKeys,  # working
     DisableKeyboardKeys,  # working
     DivertCrown,  # working
     CrownSmooth,  # working
     DivertGkeys,  # working
     MKeyLEDs,  # working
-    MRKeyLED,
+    MRKeyLED, # working
     Multiplatform,  # working
     DualPlatform,  # simple
     ChangeHost,  # working

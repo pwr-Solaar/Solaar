@@ -443,7 +443,6 @@ class Settings(Setting):
                     _log.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, value, data_bytes)
                 reply = self._rw.write(self._device, int(key), data_bytes)
                 if not reply:
-                    # tell whomever is calling that the write failed
                     return None
             return value
 
@@ -978,8 +977,9 @@ class ChoicesMapValidator(ChoicesValidator):
     def __init__(
         self,
         choices_map,
-        key_byte_count=None,
-        byte_count=None,
+        key_byte_count=0,
+        key_postfix_bytes=b'',
+        byte_count=0,
         read_skip_byte_count=0,
         write_prefix_bytes=b'',
         extra_default=None,
@@ -1005,10 +1005,12 @@ class ChoicesMapValidator(ChoicesValidator):
         if byte_count:
             assert self._byte_count <= byte_count
             self._byte_count = byte_count
+
         self.choices = choices_map
         self.needs_current_value = False
         self.extra_default = extra_default
-        self._read_skip_byte_count = read_skip_byte_count
+        self._key_postfix_bytes = key_postfix_bytes
+        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
         self.activate = activate
         self.mask = mask
@@ -1029,9 +1031,13 @@ class ChoicesMapValidator(ChoicesValidator):
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
-        assert reply_value in self.choices[
-            key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+        if reply_value not in self.choices[key]:
+            assert reply_value in self.choices[
+                key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
         return reply_value
+
+    def prepare_key(self, key):
+        return key.to_bytes(self._key_byte_count, 'big') + self._key_postfix_bytes
 
     def prepare_write(self, key, new_value):
         choices = self.choices.get(key)
