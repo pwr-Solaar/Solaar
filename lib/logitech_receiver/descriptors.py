@@ -625,7 +625,7 @@ _D(
     codename='VX Revolution',
     kind=_DK.mouse,
     protocol=1.0,
-    wpid=('1006', '100D'),
+    wpid=('1006', '100D', '0612'),  # WPID 0612 from Issue #921
     registers=(_R.battery_charge, ),
 )
 _D(
