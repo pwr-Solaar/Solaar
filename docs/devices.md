@@ -65,8 +65,12 @@ a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
 | 064d:c541 | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
-* The receiver with USB Id 046d:c517 is an old 27 MHz receiver, supporting only
-  subset of HID++ 1.0 protocol. Only hardware pairing supported.
+Some Nano receivers are only partly supported
+as they do not fully implement the HID++ 1.0 protocol.
+
+The receiver with USB Id 046d:c517 is an old 27 MHz receiver, supporting only
+subset of HID++ 1.0 protocol. Only hardware pairing is supported.
+
 
 ### Keyboards (Unifying)
 
