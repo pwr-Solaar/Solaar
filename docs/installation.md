@@ -41,9 +41,9 @@ for Unity in Ubuntu).
 
 ### Installing Solaar's udev rule
 
-Solaar needs to write to the receiver's HID device.
+Solaar needs to write to HID devices for receivers and devices.
 To be able to do this without running as root requires a udev rule
-that gives seated users write access to the HID devices for Logitech receivers.
+that gives seated users write access to the HID devices for Logitech receiver and devices.
 
 You can install this rule by copying, as root,
 `rules.d/42-logitech-unify-permissions.rules` from Solaar to
@@ -59,7 +59,7 @@ on your system or you have a receiver that is not in the installed rule.
 
 ## Running from the Download Directories
 
-If Solaar's udev rule is installed,
+If the latest Solaar udev rule is installed,
 you can just go to the solaar directory and run `bin/solaar` for the GUI
 or `bin/solaar <command> <arguments>` for the CLI.
 
