@@ -279,11 +279,13 @@ class Settings(Setting):
             # Remember the value we're trying to set, even if the write fails.
             # This way even if the device is offline or some other error occurs,
             # the last value we've tried to write is remembered in the configuration.
-            self._value[str(key)] = value
-            if self.persist and self._device.persister:
-                self._device.persister[self.name] = self._value
-
-            data_bytes = self._validator.prepare_write(int(key), value)
+            try:
+                data_bytes = self._validator.prepare_write(int(key), value)
+                self._value[str(key)] = value
+                if self.persist and self._device.persister:
+                    self._device.persister[self.name] = self._value
+            except ValueError:
+                data_bytes = value = None
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, value, data_bytes)
@@ -291,7 +293,6 @@ class Settings(Setting):
                 if not reply:
                     # tell whomever is calling that the write failed
                     return None
-
             return value
 
 
