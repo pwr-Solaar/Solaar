@@ -131,7 +131,7 @@ def _process_device_notification(device, status, n):
 
 def _process_dj_notification(device, status, n):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s (%s) DJ notification %s', device, device.protocol, n)
+        _log.debug('%s (%s) DJ %s', device, device.protocol, n)
 
     if n.sub_id == 0x40:
         # do all DJ paired notifications also show up as HID++ 1.0 notifications?
@@ -146,8 +146,10 @@ def _process_dj_notification(device, status, n):
         return True
 
     if n.sub_id == 0x42:
+        connected = not n.address & 0x01
         if _log.isEnabledFor(_INFO):
-            _log.info('%s: ignoring DJ connection: %s', device, n)
+            _log.info('%s: DJ connection: %s %s', device, connected, n)
+        status.changed(active=connected, alert=_ALERT.NONE, reason=_('connected') if connected else _('disconnected'))
         return True
 
     _log.warn('%s: unrecognized DJ %s', device, n)
