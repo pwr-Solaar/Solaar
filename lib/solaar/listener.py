@@ -230,7 +230,7 @@ class ReceiverListener(_listener.EventsListener):
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
             if _log.isEnabledFor(_INFO):
-                _log.info('%s triggered new device %s (%s)', n, dev, dev.kind)
+                _log.info('connection %s for %s (%s)', n, dev, dev.kind)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
