@@ -79,17 +79,8 @@ class Device(object):
             if link_notification is not None:
                 self.online = not bool(ord(link_notification.data[0:1]) & 0x40)
                 self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
-                # assert link_notification.address == (0x04
-                # if unifying else 0x03)
+                # assert link_notification.address == (0x04 if unifying else 0x03)
                 kind = ord(link_notification.data[0:1]) & 0x0F
-                # fix EX100 wpid
-                if receiver.ex100_wpid_fix:  # EX100 receiver
-                    self.wpid = _strhex(link_notification.data[2:3]) + '00'
-                    # workaround for EX100 switched kind
-                    if self.wpid == '3F00':
-                        kind = 2
-                    if self.wpid == '6500':
-                        kind = 1
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
                 # force a reading of the wpid

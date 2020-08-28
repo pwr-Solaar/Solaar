@@ -202,13 +202,9 @@ def _process_hidpp10_notification(device, status, n):
             0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None
         )
         if protocol_name:
-            if _log.isEnabledFor(_DEBUG):
-                wpid = _strhex(n.data[2:3] + n.data[1:2])
-                # workaround for short EX100 wpids
-                if protocol_name == '27 MHz':
-                    wpid = _strhex(n.data[2:3]) + '00'
-                assert wpid == device.wpid, '%s wpid mismatch, got %s' % (device, wpid)
-
+            wpid = _strhex(n.data[2:3] + n.data[1:2])
+            if wpid != device.wpid:
+                _log.warn('%s wpid mismatch, got %s', device, wpid)
             flags = ord(n.data[:1]) & 0xF0
             link_encrypted = bool(flags & 0x20)
             link_established = not (flags & 0x40)
