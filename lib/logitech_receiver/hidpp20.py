@@ -664,6 +664,246 @@ class KeysArray(object):
         return len(self.keys)
 
 
+# Gesture Ids for feature GESTURE_2
+GESTURE = _NamedInts(
+    Tap1Finger=1,  # task Left_Click
+    Tap2Finger=2,  # task Right_Click
+    Tap3Finger=3,
+    Click1Finger=4,  # task Left_Click
+    Click2Finger=5,  # task Right_Click
+    Click3Finger=6,
+    DoubleTap1Finger=10,
+    DoubleTap2Finger=11,
+    DoubleTap3Finger=12,
+    Track1Finger=20,  # action MovePointer
+    TrackingAcceleration=21,
+    TapDrag1Finger=30,  # action Drag
+    TapDrag2Finger=31,  # action SecondaryDrag
+    Drag3Finger=32,
+    TapGestures=33,  # group all tap gestures under a single UI setting
+    FnClickGestureSuppression=34,  # suppresses Tap and Edge gestures, toggled by Fn+Click
+    Scroll1Finger=40,  # action ScrollOrPageXY / ScrollHorizontal
+    Scroll2Finger=41,  # action ScrollOrPageXY / ScrollHorizontal
+    Scroll2FingerHoriz=42,  # action ScrollHorizontal
+    Scroll2FingerVert=43,  # action WheelScrolling
+    Scroll2FingerStateless=44,
+    NaturalScrolling=45,  # affects native HID wheel reporting by gestures, not when diverted
+    Thumbwheel=46,  # action WheelScrolling
+    VScrollInertia=48,
+    VScrollBallistics=49,
+    Swipe2FingerHoriz=50,  # action PageScreen
+    Swipe3FingerHoriz=51,  # action PageScreen
+    Swipe4FingerHoriz=52,  # action PageScreen
+    Swipe3FingerVert=53,
+    Swipe4FingerVert=54,
+    LeftEdgeSwipe1Finger=60,
+    RightEdgeSwipe1Finger=61,
+    BottomEdgeSwipe1Finger=62,
+    TopEdgeSwipe1Finger=63,
+    LeftEdgeSwipe1Finger2=64,  # task HorzScrollNoRepeatSet
+    RightEdgeSwipe1Finger2=65,  # task 122 ??
+    BottomEdgeSwipe1Finger2=66,  #
+    TopEdgeSwipe1Finger2=67,  # task 121 ??
+    LeftEdgeSwipe2Finger=70,
+    RightEdgeSwipe2Finger=71,
+    BottomEdgeSwipe2Finger=72,
+    TopEdgeSwipe2Finger=73,
+    Zoom2Finger=80,  # action Zoom
+    Zoom2FingerPinch=81,  # ZoomBtnInSet
+    Zoom2FingerSpread=82,  # ZoomBtnOutSet
+    Zoom3Finger=83,
+    Zoom2FingerStateless=84,  # action Zoom
+    TwoFingersPresent=85,
+    Rotate2Finger=87,
+    Finger1=90,
+    Finger2=91,
+    Finger3=92,
+    Finger4=93,
+    Finger5=94,
+    Finger6=95,
+    Finger7=96,
+    Finger8=97,
+    Finger9=98,
+    Finger10=99,
+    DeviceSpecificRawData=100,
+)
+GESTURE._fallback = lambda x: 'unknown:%04X' % x
+
+# Param Ids for feature GESTURE_2
+PARAM = _NamedInts(
+    ExtraCapabilities=1,  # not suitable for use
+    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
+    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
+    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
+)
+PARAM._fallback = lambda x: 'unknown:%04X' % x
+
+# Spec Ids for feature GESTURE_2
+SPEC = _NamedInts(
+    DVI_field_width=1,
+    field_widths=1,
+    period_unit=3,
+    resolution=4,
+    multiplier=5,
+    sensor_size=6,
+    finger_width_and_height=7,
+    finger_major_minor_axis=8,
+    finger_force=9,
+    zone=10
+)
+SPEC._fallback = lambda x: 'unknown:%04X' % x
+
+# Action Ids for feature GESTURE_2
+ACTION_ID = _NamedInts(
+    MovePointer=1,
+    ScrollHorizontal=2,
+    WheelScrolling=3,
+    ScrollVertial=4,
+    ScrollOrPageXY=5,
+    ScrollOrPageHorizontal=6,
+    PageScreen=7,
+    Drag=8,
+    SecondaryDrag=9,
+    Zoom=10,
+    ScrollHorizontalOnly=11,
+    ScrollVerticalOnly=12
+)
+ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
+
+
+class Gesture(object):
+    enable_index = 0
+
+    def __init__(self, low, high):
+        self.id = low
+        self.gesture = GESTURE[low]
+        self.can_be_enabled = high & 0x01
+        self.can_be_diverted = high & 0x02
+        self.show_in_ui = high & 0x04
+        self.desired_software_default = high & 0x08
+        self.persistent = high & 0x10
+        self.default_enabled = high & 0x20
+        self.enable_index = None
+        if self.can_be_enabled or self.default_enabled:
+            self.enable_index = Gesture.enable_index
+            Gesture.enable_index += 1
+
+    def enable_offset_mask(self):  # offset and mask to enable or disable
+        if self.enable_index is not None:
+            offset = self.enable_index >> 3  # 8 gestures per byte
+            mask = 0x1 << (self.enable_index % 8)
+            return (offset, mask)
+        else:
+            return (None, None)
+
+    def enabled(self, device):  # is the gesture enabled?
+        offset, mask = self.enable_offset_mask()
+        if offset is not None:
+            result = feature_request(device, FEATURE.GESTURE_2, 0x10, offset, 0x01, mask)
+            return bool(result[0] & mask) if result else None
+
+    def set(self, device, enable):  # enable or disable the gesture
+        if not self.can_be_enabled:
+            return None
+        offset, mask = self.enable_offset_mask()
+        if offset is not None:
+            reply = feature_request(device, FEATURE.GESTURE_2, 0x20, offset, 0x01, mask, mask if enable else 0x00)
+            return reply
+
+    # allow a gesture to be used as a settings reader/writer to enable and disable the gesture
+    read = enabled
+    write = set
+
+
+class Param(object):
+    param_index = 0
+
+    def __init__(self, low, high):
+        self.id = low
+        self.param = PARAM(low)
+        self.size = high & 0x0F
+        self.show_in_ui = bool(high & 0x1F)
+        self._value = None
+        self.index = Param.param_index
+        Param.param_index += 1
+
+    def value(self, device):
+        return self._value if self._value is not None else self.read(device)
+
+    def read(self, device):  # returns the bytes for the parameter
+        result = feature_request(device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
+        if result:
+            self._value = result[:self.size]
+            return self._value
+
+    def write(self, device, bytes):
+        self._value = bytes
+        return feature_request(device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
+
+
+class Gestures(object):
+    """Information about the gestures that a device supports.
+    Right now only some information fields are supported.
+    WARNING: Assumes that parameters are always global, which is not the case.
+    """
+    def __init__(self, device):
+        self.device = device
+        self.gestures = {}
+        self.params = {}
+        index = 0
+        field_high = 0x00
+        while field_high != 0x01:  # end of fields
+            # retrieve the next eight fields
+            fields = feature_request(device, FEATURE.GESTURE_2, 0x00, index >> 8, index & 0xFF)
+            if not fields:
+                break
+            for offset in range(8):
+                field_high = fields[offset * 2]
+                field_low = fields[offset * 2 + 1]
+                if _log.isEnabledFor(_DEBUG):
+                    _log.debug('gesture: %2x %2x', field_high, field_low)
+                if field_high == 0x1:  # end of fields
+                    break
+                elif field_high & 0x80:
+                    gesture = Gesture(field_low, field_high)
+                    self.gestures[gesture.gesture] = gesture
+                elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
+                    param = Param(field_low, field_high)
+                    self.params[param.param] = param
+                elif field_high == 0x04:
+                    if field_low != 0x00:
+                        _log.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
+                else:
+                    _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
+                index += 1
+
+    def gesture(self, gesture):
+        return self.gestures.get(gesture, None)
+
+    def gesture_enabled(self, gesture):  # is the gesture enabled?
+        g = self.gestures.get(gesture, None)
+        return g.enabled(self.device) if g else None
+
+    def enable_gesture(self, gesture):
+        g = self.gestures.get(gesture, None)
+        return g.set(self.device, True) if g else None
+
+    def disable_gesture(self, gesture):
+        g = self.gestures.get(gesture, None)
+        return g.set(self.device, False) if g else None
+
+    def param(self, param):
+        return self.params.get(param, None)
+
+    def get_param(self, param):
+        g = self.params.get(param, None)
+        return g.get(self.device) if g else None
+
+    def set_param(self, param, value):
+        g = self.params.get(param, None)
+        return g.set(self.device, value) if g else None
+
+
 #
 #
 #
@@ -807,6 +1047,11 @@ def get_keys(device):
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
     if count:
         return KeysArray(device, ord(count[:1]))
+
+
+def get_gestures(device):
+    if FEATURE.GESTURE_2 in device.features:
+        return Gestures(device)
 
 
 def get_mouse_pointer_info(device):
