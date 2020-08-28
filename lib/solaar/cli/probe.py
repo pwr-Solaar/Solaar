@@ -31,7 +31,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     if args.receiver:
         receiver_name = args.receiver.lower()
-        receiver = find_receiver(receiver_name)
+        receiver = find_receiver(receivers, receiver_name)
         if not receiver:
             raise Exception("no receiver found matching '%s'" % receiver_name)
     else:
