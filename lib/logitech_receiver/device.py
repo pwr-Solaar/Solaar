@@ -58,6 +58,7 @@ class Device(object):
 
         self._firmware = None
         self._keys = None
+        self._gestures = None
         self._registers = None
         self._settings = None
         self._feature_settings_checked = False
@@ -261,6 +262,13 @@ class Device(object):
             if self.online and self.protocol >= 2.0:
                 self._keys = _hidpp20.get_keys(self) or ()
         return self._keys
+
+    @property
+    def gestures(self):
+        if not self._gestures:
+            if self.online and self.protocol >= 2.0:
+                self._gestures = _hidpp20.get_gestures(self) or ()
+        return self._gestures
 
     @property
     def registers(self):
