@@ -33,6 +33,8 @@ from .common import unpack as _unpack
 from .i18n import _
 from .settings import BitFieldSetting as _BitFieldSetting
 from .settings import BitFieldValidator as _BitFieldV
+from .settings import BitFieldWithOffsetAndMaskSetting as _BitFieldOMSetting
+from .settings import BitFieldWithOffsetAndMaskValidator as _BitFieldOMV
 from .settings import BooleanValidator as _BooleanV
 from .settings import ChoicesMapValidator as _ChoicesMapV
 from .settings import ChoicesValidator as _ChoicesV
@@ -91,6 +93,7 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
                       _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' +
                       _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
+_GESTURE2_GESTURES = ('gesture2-gestures', _('Touchpad gestures'), _('Tweaks the touchpad behaviour.'))
 # yapf: enable
 
 # Setting template functions need to set up the setting itself, the validator, and the reader/writer.
@@ -401,6 +404,18 @@ def _feature_thumb_invert():
     return _Setting(_THUMB_SCROLL_INVERT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
+def _feature_gesture2_gesture_callback(device):
+    options = [g for g in _hidpp20.get_gestures(device).gestures.values() if g.can_be_enabled or g.default_enabled]
+    return _BitFieldOMV(options) if options else None
+
+
+def _feature_gesture2_gesture():
+    rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x10, write_fnid=0x20)
+    return _BitFieldOMSetting(
+        _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gesture_callback, device_kind=(_DK.touchpad, )
+    )
+
+
 #
 #
 #
@@ -432,6 +447,7 @@ _SETTINGS_TABLE = [
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
     _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
+    _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gesture),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])

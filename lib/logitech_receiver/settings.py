@@ -101,23 +101,26 @@ class Setting(object):
         if self._validator.kind == KIND.range:
             return (self._validator.min_value, self._validator.max_value)
 
-    def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
-
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
-
-        if self.persist and self._value is None and self._device.persister:
+    def _pre_read(self, cached, key=None):
+        if self.persist and self._value is None and getattr(self._device, 'persister', None):
             # We haven't read a value from the device yet,
             # maybe we have something in the configuration.
             self._value = self._device.persister.get(self.name)
-
         if cached and self._value is not None:
-            if self.persist and self._device.persister and self.name not in self._device.persister:
+            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # If this is a new device (or a new setting for an old device),
                 # make sure to save its current value for the next time.
                 self._device.persister[self.name] = self._value
+
+    def read(self, cached=True):
+        assert hasattr(self, '_value')
+        assert hasattr(self, '_device')
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+
+        self._pre_read(cached)
+
+        if cached and self._value is not None:
             return self._value
 
         if self._device.online:
@@ -130,6 +133,13 @@ class Setting(object):
                 self._device.persister[self.name] = self._value
             return self._value
 
+    def _pre_write(self):
+        # Remember the value we're trying to set, even if the write fails.
+        # This way even if the device is offline or some other error occurs,
+        # the last value we've tried to write is remembered in the configuration.
+        if self.persist and self._device.persister:
+            self._device.persister[self.name] = self._value
+
     def write(self, value):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -139,12 +149,8 @@ class Setting(object):
             _log.debug('%s: settings write %r to %s', self.name, value, self._device)
 
         if self._device.online:
-            # Remember the value we're trying to set, even if the write fails.
-            # This way even if the device is offline or some other error occurs,
-            # the last value we've tried to write is remembered in the configuration.
             self._value = value
-            if self.persist and self._device.persister:
-                self._device.persister[self.name] = value
+            self._pre_write()
 
             current_value = None
             if self._validator.needs_current_value:
@@ -191,20 +197,12 @@ class Settings(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
-        if self.persist and self._value is None and getattr(self._device, 'persister', None):
-            # We haven't read a value from the device yet,
-            # maybe we have something in the configuration.
-            self._value = self._device.persister.get(self.name)
+        self._pre_read(cached)
 
         if cached and self._value is not None:
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                # If this is a new device (or a new setting for an old device),
-                # make sure to save its current value for the next time.
-                self._device.persister[self.name] = self._value
             return self._value
 
         if self._device.online:
@@ -226,16 +224,11 @@ class Settings(Setting):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
-
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
 
-        if self._value is None and getattr(self._device, 'persister', None):
-            self._value = self._device.persister.get(self.name)
-
+        self._pre_read(cached)
         if cached and self._value is not None:
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                self._device.persister[self.name] = self._value
             return self._value[str(int(key))]
 
         if self._device.online:
@@ -255,13 +248,8 @@ class Settings(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
 
         if self._device.online:
-            # Remember the value we're trying to set, even if the write fails.
-            # This way even if the device is offline or some other error occurs,
-            # the last value we've tried to write is remembered in the configuration.
             self._value = map
-            if self.persist and self._device.persister:
-                self._device.persister[self.name] = map
-
+            self._pre_write()
             for key, value in map.items():
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
@@ -270,7 +258,6 @@ class Settings(Setting):
                     reply = self._rw.write(self._device, int(key), data_bytes)
                     if not reply:
                         return None
-
             return map
 
     def write_key_value(self, key, value):
@@ -283,14 +270,10 @@ class Settings(Setting):
             _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
-            # Remember the value we're trying to set, even if the write fails.
-            # This way even if the device is offline or some other error occurs,
-            # the last value we've tried to write is remembered in the configuration.
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
                 self._value[str(key)] = value
-                if self.persist and self._device.persister:
-                    self._device.persister[self.name] = self._value
+                self._pre_write()
             except ValueError:
                 data_bytes = value = None
             if data_bytes is not None:
@@ -309,25 +292,17 @@ class BitFieldSetting(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
-        if self._value is None and getattr(self._device, 'persister', None):
-            # We haven't read a value from the device yet,
-            # maybe we have something in the configuration.
-            self._value = self._device.persister.get(self.name)
+        self._pre_read(cached)
 
         if cached and self._value is not None:
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                # If this is a new device (or a new setting for an old device),
-                # make sure to save its current value for the next time.
-                self._device.persister[self.name] = self._value
             return self._value
 
         if self._device.online:
             reply_map = {}
-            reply = self._rw.read(self._device)
+            reply = self._do_read()
             if reply:
                 # keys are ints, because that is what the device uses,
                 # encoded into strings because JSON requires strings as keys
@@ -339,29 +314,31 @@ class BitFieldSetting(Setting):
                 self._device.persister[self.name] = self._value
             return self._value
 
+    def _do_read(self):
+        return self._rw.read(self._device)
+
     def read_key(self, key, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
-
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
 
-        if self._value is None and getattr(self._device, 'persister', None):
-            self._value = self._device.persister.get(self.name)
+        self._pre_read(cached)
 
         if cached and self._value is not None:
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                self._device.persister[self.name] = self._value
             return self._value[str(int(key))]
 
         if self._device.online:
-            reply = self._rw.read(self._device, key)
+            reply = self._do_read_key(key)
             if reply:
                 self._value = self._validator.validate_read(reply)
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value
             return self._value[str(int(key))]
+
+    def _do_read_key(self, key):
+        return self._rw.read(self._device, key)
 
     def write(self, map):
         assert hasattr(self, '_value')
@@ -372,19 +349,18 @@ class BitFieldSetting(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
 
         if self._device.online:
-            # Remember the value we're trying to set, even if the write fails.
-            # This way even if the device is offline or some other error occurs,
-            # the last value we've tried to write is remembered in the configuration.
             self._value = map
-            if self.persist and self._device.persister:
-                self._device.persister[self.name] = map
+            self._pre_write()
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare map write(%s) => %r', self.name, self._value, data_bytes)
-                reply = self._rw.write(self._device, data_bytes)
-                if not reply:
-                    return None
+                # if prepare_write returns a list, write one item at a time
+                seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
+                for b in seq:
+                    reply = self._rw.write(self._device, b)
+                    if not reply:
+                        return None
             return map
 
     def write_key_value(self, key, value):
@@ -397,24 +373,34 @@ class BitFieldSetting(Setting):
             _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
-            # Remember the value we're trying to set, even if the write fails.
-            # This way even if the device is offline or some other error occurs,
-            # the last value we've tried to write is remembered in the configuration.
             value = bool(value)
             self._value[str(key)] = value
-            if self.persist and self._device.persister:
-                self._device.persister[self.name] = self._value
+            self._pre_write()
 
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, str(value), data_bytes)
-                reply = self._rw.write(self._device, data_bytes)
-                if not reply:
-                    # tell whomever is calling that the write failed
-                    return None
+                # if prepare_write returns a list, write one item at a time
+                seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
+                for b in seq:
+                    reply = self._rw.write(self._device, b)
+                    if not reply:
+                        return None
 
             return value
+
+
+class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
+    """A setting descriptor for a set of choices represented by one bit each,
+    each one having an offset, being a map from options to booleans.
+    Needs to be instantiated for each specific device."""
+    def _do_read(self):
+        return {r: self._rw.read(self._device, r) for r in self._validator.prepare_read()}
+
+    def _do_read_key(self, key):
+        r = self._validator.prepare_read_key(key)
+        return {r: self._rw.read(self._device, r)}
 
 
 #
@@ -452,9 +438,9 @@ class FeatureRW(object):
         self.write_fnid = write_fnid
         self.no_reply = no_reply
 
-    def read(self, device):
+    def read(self, device, data_bytes=b''):
         assert self.feature is not None
-        return device.feature_request(self.feature, self.read_fnid)
+        return device.feature_request(self.feature, self.read_fnid, data_bytes)
 
     def write(self, device, data_bytes):
         assert self.feature is not None
@@ -640,6 +626,89 @@ class BitFieldValidator(object):
             if v:
                 w |= int(k)
         return _int2bytes(w, self.byte_count)
+
+    def all_options(self):
+        return self.options
+
+
+class BitFieldWithOffsetAndMaskValidator(object):
+    __slots__ = ('byte_count', 'options', '_option_from_key', '_mask_from_offset', '_option_from_offset_mask')
+
+    kind = KIND.multiple_toggle
+    sep = 0x01
+
+    def __init__(self, options, byte_count=None):
+        assert (isinstance(options, list))
+        self.options = options
+        # to retrieve the options efficiently:
+        self._option_from_key = {}
+        self._mask_from_offset = {}
+        self._option_from_offset_mask = {}
+        for opt in options:
+            self._option_from_key[opt.gesture] = opt
+            try:
+                self._mask_from_offset[opt.offset] |= opt.mask
+            except KeyError:
+                self._mask_from_offset[opt.offset] = opt.mask
+            try:
+                mask_to_opt = self._option_from_offset_mask[opt.offset]
+            except KeyError:
+                mask_to_opt = {}
+                self._option_from_offset_mask[opt.offset] = mask_to_opt
+            mask_to_opt[opt.mask] = opt
+        self.byte_count = (max(x.mask.bit_length() for x in options) + 7) // 8
+        if byte_count:
+            assert (isinstance(byte_count, int) and byte_count >= self.byte_count)
+            self.byte_count = byte_count
+
+    def prepare_read(self):
+        r = []
+        for offset, mask in self._mask_from_offset.items():
+            b = (offset << (8 * (self.byte_count + 1)))
+            b |= (self.sep << (8 * self.byte_count)) | mask
+            r.append(_int2bytes(b, self.byte_count + 2))
+        return r
+
+    def prepare_read_key(self, key):
+        option = self._option_from_key.get(key, None)
+        if option is None:
+            return None
+        b = option.offset << (8 * (self.byte_count + 1))
+        b |= (self.sep << (8 * self.byte_count)) | option.mask
+        return _int2bytes(b, self.byte_count + 2)
+
+    def validate_read(self, reply_bytes_dict):
+        values = {str(int(k)): False for k in self.options}
+        for query, b in reply_bytes_dict.items():
+            offset = _bytes2int(query[0:1])
+            b += (self.byte_count - len(b)) * b'\x00'
+            value = _bytes2int(b[:self.byte_count])
+            mask_to_opt = self._option_from_offset_mask.get(offset, {})
+            m = 1
+            for _ in range(8 * self.byte_count):
+                if m in mask_to_opt:
+                    values[str(int(mask_to_opt[m]))] = bool(value & m)
+                m <<= 1
+        return values
+
+    def prepare_write(self, new_value):
+        assert (isinstance(new_value, dict))
+        w = {}
+        for k, v in new_value.items():
+            option = self._option_from_key[int(k)]
+            if option.offset not in w:
+                w[option.offset] = 0
+            if v:
+                w[option.offset] |= option.mask
+        return [
+            _int2bytes((offset << (8 * (2 * self.byte_count + 1)))
+                       | (self.sep << (16 * self.byte_count))
+                       | (self._mask_from_offset[offset] << (8 * self.byte_count))
+                       | value, 2 * self.byte_count + 2) for offset, value in w.items()
+        ]
+
+    def all_options(self):
+        return [int(opt) if isinstance(opt, int) else opt.as_int() for opt in self.options]
 
 
 class ChoicesValidator(object):
