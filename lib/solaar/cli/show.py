@@ -206,9 +206,9 @@ def _print_device(dev, num=None):
     if dev.online and dev.gestures:
         print('     Has %d gestures and %d param:' % (len(dev.gestures.gestures), len(dev.gestures.params)))
         for k in dev.gestures.gestures.values():
-            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.enable_index, k.enabled(dev)))
+            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
         for k in dev.gestures.params.values():
-            print('        %-26s Value (%4s): %s' % (k.param, k.index, k.value(dev)))
+            print('        %-26s Value   (%4s): %s' % (k.param, k.index, k.value()))
     if dev.online:
         battery = _hidpp20.get_battery(dev)
         if battery is None:

@@ -725,6 +725,7 @@ GESTURE = _NamedInts(
     Finger8=97,
     Finger9=98,
     Finger10=99,
+    DeviceSpecificRawData=100,
 )
 GESTURE._fallback = lambda x: 'unknown:%04X' % x
 
@@ -771,9 +772,11 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
 class Gesture(object):
-    enable_index = 0
 
-    def __init__(self, low, high):
+    index = {}
+
+    def __init__(self, device, low, high):
+        self._device = device
         self.id = low
         self.gesture = GESTURE[low]
         self.can_be_enabled = high & 0x01
@@ -782,32 +785,42 @@ class Gesture(object):
         self.desired_software_default = high & 0x08
         self.persistent = high & 0x10
         self.default_enabled = high & 0x20
-        self.enable_index = None
+        self.index = None
         if self.can_be_enabled or self.default_enabled:
-            self.enable_index = Gesture.enable_index
-            Gesture.enable_index += 1
+            self.index = Gesture.index.get(device, 0)
+            Gesture.index[device] = self.index + 1
+        self.offset, self.mask = self._offset_mask()
 
-    def enable_offset_mask(self):  # offset and mask to enable or disable
-        if self.enable_index is not None:
-            offset = self.enable_index >> 3  # 8 gestures per byte
-            mask = 0x1 << (self.enable_index % 8)
+    def _offset_mask(self):  # offset and mask
+        if self.index is not None:
+            offset = self.index >> 3  # 8 gestures per byte
+            mask = 0x1 << (self.index % 8)
             return (offset, mask)
         else:
             return (None, None)
 
-    def enabled(self, device):  # is the gesture enabled?
-        offset, mask = self.enable_offset_mask()
-        if offset is not None:
-            result = feature_request(device, FEATURE.GESTURE_2, 0x10, offset, 0x01, mask)
-            return bool(result[0] & mask) if result else None
+    def enabled(self):  # is the gesture enabled?
+        if self.offset is not None:
+            result = feature_request(self._device, FEATURE.GESTURE_2, 0x10, self.offset, 0x01, self.mask)
+            return bool(result[0] & self.mask) if result else None
 
-    def set(self, device, enable):  # enable or disable the gesture
+    def set(self, enable):  # enable or disable the gesture
         if not self.can_be_enabled:
             return None
-        offset, mask = self.enable_offset_mask()
-        if offset is not None:
-            reply = feature_request(device, FEATURE.GESTURE_2, 0x20, offset, 0x01, mask, mask if enable else 0x00)
+        if self.offset is not None:
+            reply = feature_request(
+                self._device, FEATURE.GESTURE_2, 0x20, self.offset, 0x01, self.mask, self.mask if enable else 0x00
+            )
             return reply
+
+    def as_int(self):
+        return self.gesture
+
+    def __int__(self):
+        return self.id
+
+    def __repr__(self):
+        return f'<Gesture {self.gesture} offset={self.offset} mask={self.mask}>'
 
     # allow a gesture to be used as a settings reader/writer to enable and disable the gesture
     read = enabled
@@ -817,27 +830,28 @@ class Gesture(object):
 class Param(object):
     param_index = 0
 
-    def __init__(self, low, high):
+    def __init__(self, device, low, high):
+        self._device = device
         self.id = low
-        self.param = PARAM(low)
+        self.param = PARAM[low]
         self.size = high & 0x0F
         self.show_in_ui = bool(high & 0x1F)
         self._value = None
         self.index = Param.param_index
         Param.param_index += 1
 
-    def value(self, device):
-        return self._value if self._value is not None else self.read(device)
+    def value(self):
+        return self._value if self._value is not None else self.read()
 
-    def read(self, device):  # returns the bytes for the parameter
-        result = feature_request(device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
+    def read(self):  # returns the bytes for the parameter
+        result = feature_request(self._device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
         if result:
             self._value = result[:self.size]
             return self._value
 
-    def write(self, device, bytes):
+    def write(self, bytes):
         self._value = bytes
-        return feature_request(device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
+        return feature_request(self._device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
 
 
 class Gestures(object):
@@ -862,10 +876,10 @@ class Gestures(object):
                 if field_high == 0x1:  # end of fields
                     break
                 elif field_high & 0x80:
-                    gesture = Gesture(field_low, field_high)
+                    gesture = Gesture(device, field_low, field_high)
                     self.gestures[gesture.gesture] = gesture
                 elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
-                    param = Param(field_low, field_high)
+                    param = Param(device, field_low, field_high)
                     self.params[param.param] = param
                 elif field_high == 0x04:
                     if field_low != 0x00:
@@ -873,6 +887,7 @@ class Gestures(object):
                 else:
                     _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
                 index += 1
+        device._gestures = self
 
     def gesture(self, gesture):
         return self.gestures.get(gesture, None)

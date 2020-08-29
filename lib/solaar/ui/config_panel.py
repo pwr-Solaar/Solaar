@@ -167,6 +167,46 @@ def _create_slider_control(setting):
     return control.gtk_range
 
 
+def _create_multiple_toggle_control(setting):
+    def _toggle_notify(control, _, setting):
+        if control.get_sensitive():
+            key = control._setting_key
+            new_state = control.get_active()
+            if setting._value[key] != new_state:
+                setting._value[key] = new_state
+                _write_async_key_value(setting, key, new_state, control.get_parent().get_parent().get_parent().get_parent())
+
+    def _toggle_display(lb):
+        lb._showing = not lb._showing
+        if not lb._showing:
+            for c in lb.get_children()[1:]:
+                lb._hidden_rows.append(c)
+                lb.remove(c)
+        else:
+            for c in lb._hidden_rows:
+                lb.add(c)
+            lb._hidden_rows = []
+
+    lb = Gtk.ListBox()
+    lb._hidden_rows = []
+    lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
+    lb.set_selection_mode(Gtk.SelectionMode.NONE)
+    btn = Gtk.Button('? / ?')
+    lb.add(btn)
+    lb._showing = True
+    for k in setting._validator.all_options():
+        h = Gtk.HBox(homogeneous=False, spacing=0)
+        lbl = Gtk.Label(k)
+        control = Gtk.Switch()
+        control._setting_key = str(int(k))
+        control.connect('notify::active', _toggle_notify, setting)
+        h.pack_start(lbl, False, False, 0)
+        h.pack_end(control, False, False, 0)
+        lb.add(h)
+    btn.connect('clicked', lambda _: lb._toggle_display())
+    return lb
+
+
 #
 #
 #
@@ -195,22 +235,9 @@ def _create_sbox(s):
         control = _create_map_choice_control(s)
         sbox.pack_end(control, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_toggle:
-        # ugly temporary hack!
-        choices = {k: [False, True] for k in s._validator.options}
-
-        class X:
-            def __init__(self, obj, ext):
-                self.obj = obj
-                self.ext = ext
-
-            def __getattr__(self, attr):
-                try:
-                    return self.ext[attr]
-                except KeyError:
-                    return getattr(self.obj, attr)
-
-        control = _create_map_choice_control(X(s, {'choices': choices}))
-        sbox.pack_end(control, True, True, 0)
+        control = _create_multiple_toggle_control(s)
+        sbox.get_children()[0].set_valign(Gtk.Align.START)
+        sbox.pack_end(control, False, False, 0)
     else:
         raise Exception('NotImplemented')
 
@@ -222,6 +249,7 @@ def _create_sbox(s):
         sbox.set_tooltip_text(s.description)
 
     sbox.show_all()
+
     spinner.start()  # the first read will stop it
     failed.set_visible(False)
 
@@ -250,6 +278,19 @@ def _update_setting_item(sbox, value, is_online=True):
         kbox, vbox = control.get_children()  # depends on box layout
         if value.get(kbox.get_active_id()):
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
+    elif isinstance(control, Gtk.ListBox):
+        hidden = getattr(control, '_hidden_rows', [])
+        total = len(control.get_children()) + len(hidden) - 1
+        active = 0
+        for ch in control.get_children()[1:] + hidden:
+            elem = ch.get_children()[0].get_children()[-1]
+            v = value.get(elem._setting_key, None)
+            if v is not None:
+                elem.set_active(v)
+            if elem.get_active():
+                active += 1
+        control.get_children()[0].get_children()[0].set_label(f'{active} / {total}')
+
     else:
         raise Exception('NotImplemented')
     control.set_sensitive(True)
