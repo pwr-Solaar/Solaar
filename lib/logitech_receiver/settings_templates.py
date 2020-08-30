@@ -93,7 +93,7 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
                       _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' +
                       _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
-_GESTURE2_GESTURES = ('gesture2-gestures', _('Touchpad gestures'), _('Tweaks the touchpad behaviour.'))
+_GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweaks the mouse/touchpad behaviour.'))
 # yapf: enable
 
 # Setting template functions need to set up the setting itself, the validator, and the reader/writer.
@@ -412,7 +412,7 @@ def _feature_gesture2_gesture_callback(device):
 def _feature_gesture2_gesture():
     rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x10, write_fnid=0x20)
     return _BitFieldOMSetting(
-        _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gesture_callback, device_kind=(_DK.touchpad, )
+        _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gesture_callback, device_kind=(_DK.touchpad, _DK.mouse)
     )
 
 
