@@ -32,6 +32,7 @@ from .common import FirmwareInfo as _FirmwareInfo
 from .common import KwException as _KwException
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
+from .common import bytes2int as _bytes2int
 from .common import pack as _pack
 from .common import unpack as _unpack
 
@@ -854,6 +855,33 @@ class Param(object):
         return feature_request(self._device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
 
 
+class Spec:
+    def __init__(self, device, low, high):
+        self._device = device
+        self.id = low
+        self.spec = SPEC[low]
+        self.byte_count = high & 0x0F
+        self._value = None
+
+    @property
+    def value(self):
+        if self._value is None:
+            self._value = self.read()
+        return self._value
+
+    def read(self):
+        try:
+            value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
+        except FeatureCallError:
+            # I don't know if this should happen, but I get an error
+            # with spec 5
+            return None
+        return _bytes2int(value[:self.byte_count])
+
+    def __repr__(self):
+        return f'[{self.spec}={self.value}]'
+
+
 class Gestures(object):
     """Information about the gestures that a device supports.
     Right now only some information fields are supported.
@@ -863,6 +891,7 @@ class Gestures(object):
         self.device = device
         self.gestures = {}
         self.params = {}
+        self.specs = {}
         index = 0
         field_high = 0x00
         while field_high != 0x01:  # end of fields
@@ -884,6 +913,10 @@ class Gestures(object):
                 elif field_high == 0x04:
                     if field_low != 0x00:
                         _log.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
+                elif field_high & 0xF0 == 0x40:
+                    spec = Spec(device, field_low, field_high)
+                    self.specs[spec.spec] = spec
+                    print(spec)
                 else:
                     _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
                 index += 1

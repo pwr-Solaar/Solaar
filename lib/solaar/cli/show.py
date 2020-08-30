@@ -204,11 +204,16 @@ def _print_device(dev, num=None):
                 report_fmt = report_fmt if report_fmt else 'default'
                 print('             reporting: %s' % (report_fmt))
     if dev.online and dev.gestures:
-        print('     Has %d gestures and %d param:' % (len(dev.gestures.gestures), len(dev.gestures.params)))
+        print(
+            '     Has %d gesture(s), %d param(s) and %d spec(s):' %
+            (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
+        )
         for k in dev.gestures.gestures.values():
             print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
         for k in dev.gestures.params.values():
             print('        %-26s Value   (%4s): %s' % (k.param, k.index, k.value()))
+        for k in dev.gestures.specs.values():
+            print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
         battery = _hidpp20.get_battery(dev)
         if battery is None:
