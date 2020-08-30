@@ -838,17 +838,31 @@ class Param(object):
         self.size = high & 0x0F
         self.show_in_ui = bool(high & 0x1F)
         self._value = None
+        self._default_value = None
         self.index = Param.param_index
         Param.param_index += 1
 
+    @property
     def value(self):
         return self._value if self._value is not None else self.read()
 
     def read(self):  # returns the bytes for the parameter
         result = feature_request(self._device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
         if result:
-            self._value = result[:self.size]
+            self._value = _bytes2int(result[:self.size])
             return self._value
+
+    @property
+    def default_value(self):
+        if self._default_value is None:
+            self._default_value = self._read_default()
+        return self._default_value
+
+    def _read_default(self):
+        result = feature_request(self._device, FEATURE.GESTURE_2, 0x60, self.index, 0xFF)
+        if result:
+            self._default_value = _bytes2int(result[:self.size])
+            return self._default_value
 
     def write(self, bytes):
         self._value = bytes
@@ -916,7 +930,6 @@ class Gestures(object):
                 elif field_high & 0xF0 == 0x40:
                     spec = Spec(device, field_low, field_high)
                     self.specs[spec.spec] = spec
-                    print(spec)
                 else:
                     _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
                 index += 1

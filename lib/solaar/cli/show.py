@@ -211,7 +211,7 @@ def _print_device(dev, num=None):
         for k in dev.gestures.gestures.values():
             print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
         for k in dev.gestures.params.values():
-            print('        %-26s Value   (%4s): %s' % (k.param, k.index, k.value()))
+            print('        %-26s Value   (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
         for k in dev.gestures.specs.values():
             print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
