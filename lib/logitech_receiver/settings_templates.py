@@ -40,6 +40,8 @@ from .settings import ChoicesMapValidator as _ChoicesMapV
 from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
 from .settings import FeatureRWMap as _FeatureRWMap
+from .settings import LongSettings as _LongSettings
+from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import RangeValidator as _RangeV
 from .settings import RegisterRW as _RegisterRW
 from .settings import Setting as _Setting
@@ -94,6 +96,7 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
                       _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweaks the mouse/touchpad behaviour.'))
+_GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Changes numerical parameters of a mouse/touchpad.'))
 # yapf: enable
 
 # Setting template functions need to set up the setting itself, the validator, and the reader/writer.
@@ -404,15 +407,31 @@ def _feature_thumb_invert():
     return _Setting(_THUMB_SCROLL_INVERT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _feature_gesture2_gesture_callback(device):
+def _feature_gesture2_gestures_callback(device):
     options = [g for g in _hidpp20.get_gestures(device).gestures.values() if g.can_be_enabled or g.default_enabled]
     return _BitFieldOMV(options) if options else None
 
 
-def _feature_gesture2_gesture():
+def _feature_gesture2_gestures():
     rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x10, write_fnid=0x20)
     return _BitFieldOMSetting(
-        _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gesture_callback, device_kind=(_DK.touchpad, _DK.mouse)
+        _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gestures_callback, device_kind=(_DK.touchpad, _DK.mouse)
+    )
+
+
+def _feature_gesture2_params_callback(device):
+    params = _hidpp20.get_gestures(device).params.values()
+    items = [i for i in params if i.sub_params]
+    if not items:
+        return None
+    sub_items = {i: i.sub_params for i in items}
+    return _MultipleRangeV(items, sub_items)
+
+
+def _feature_gesture2_params():
+    rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x70, write_fnid=0x80)
+    return _LongSettings(
+        _GESTURE2_PARAMS, rw, callback=_feature_gesture2_params_callback, device_kind=(_DK.touchpad, _DK.mouse)
     )
 
 
@@ -447,7 +466,8 @@ _SETTINGS_TABLE = [
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
     _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
-    _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gesture),
+    _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gestures),
+    _S(_GESTURE2_PARAMS, _F.GESTURE_2, _feature_gesture2_params),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])
