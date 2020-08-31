@@ -219,6 +219,8 @@ _D(
         _FS.new_fn_swap(),
         _FS.reprogrammable_keys(),
         _FS.disable_keyboard_keys(),
+        _FS.gesture2_gestures(),
+        _FS.gesture2_params(),
     ],
 )
 _D(
@@ -476,6 +478,7 @@ _D(
     settings=[
         _FS.hires_smooth_invert(),
         _FS.hires_smooth_resolution(),
+        _FS.gesture2_gestures(),
     ],
 )
 
