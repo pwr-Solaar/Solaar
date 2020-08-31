@@ -197,18 +197,18 @@ def _create_multiple_toggle_control(setting):
         lb._showing = not lb._showing
         if not lb._showing:
             for c in lb.get_children():
-                lb._hidden_rows.append(c)
-                lb.remove(c)
+                c.hide()
+            lb.hide()
         else:
-            for c in lb._hidden_rows:
-                lb.add(c)
-            lb._hidden_rows = []
+            lb.show()
+            for c in lb.get_children():
+                c.show_all()
 
     lb = Gtk.ListBox()
-    lb._hidden_rows = []
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
     lb._showing = True
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
+    lb.set_no_show_all(True)
     btn = Gtk.Button('? / ?')
     for k in setting._validator.all_options():
         h = Gtk.HBox(homogeneous=False, spacing=0)
@@ -230,6 +230,7 @@ def _create_multiple_toggle_control(setting):
         lbl.set_alignment(0.0, 0.5)
         lbl.set_margin_left(30)
         lb.add(h)
+    lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
 
     hbox = Gtk.HBox(homogeneous=False, spacing=60)
@@ -264,19 +265,19 @@ def _create_multiple_range_control(setting):
         lb._showing = not lb._showing
         if not lb._showing:
             for c in lb.get_children():
-                lb._hidden_rows.append(c)
-                lb.remove(c)
+                c.hide()
+            lb.hide()
         else:
-            for c in lb._hidden_rows:
-                lb.add(c)
-            lb._hidden_rows = []
+            lb.show()
+            for c in lb.get_children():
+                c.show_all()
 
     lb = Gtk.ListBox()
-    lb._hidden_rows = []
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
     btn = Gtk.Button('...')
     lb._showing = True
+    lb.set_no_show_all(True)
     for item in setting._validator.items:
         lbl_text = str(item)
         lbl_tooltip = None
@@ -322,6 +323,7 @@ def _create_multiple_range_control(setting):
             h._setting_sub_item = sub_item
         item_lb._setting_item = item
         lb.add(item_lb)
+    lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
     btn.set_alignment(1.0, 0.5)
     hbox = Gtk.HBox(homogeneous=False, spacing=6)
@@ -421,11 +423,10 @@ def _update_setting_item(sbox, value, is_online=True):
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     elif isinstance(control, Gtk.ListBox):
         if control.kind == _SETTING_KIND.multiple_toggle:
-            hidden = getattr(control, '_hidden_rows', [])
-            total = len(control.get_children()) + len(hidden)
+            total = len(control.get_children())
             active = 0
             to_join = []
-            for ch in control.get_children() + hidden:
+            for ch in control.get_children():
                 elem = ch.get_children()[0].get_children()[-1]
                 v = value.get(elem._setting_key, None)
                 if v is not None:
@@ -438,10 +439,9 @@ def _update_setting_item(sbox, value, is_online=True):
             btn.set_label(f'{active} / {total}')
             btn.set_tooltip_text(b)
         elif control.kind == _SETTING_KIND.multiple_range:
-            hidden = getattr(control, '_hidden_rows', [])
             b = ''
             n = 0
-            for ch in control.get_children()[1:] + hidden:
+            for ch in control.get_children()[1:]:
                 # item
                 item = ch.get_children()[0]._setting_item
                 v = value.get(str(int(item)), None)
