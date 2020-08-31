@@ -46,6 +46,7 @@ from .settings import RangeValidator as _RangeV
 from .settings import RegisterRW as _RegisterRW
 from .settings import Setting as _Setting
 from .settings import Settings as _Settings
+from .special_keys import DISABLE as _DKEY
 
 _log = getLogger(__name__)
 del getLogger
@@ -53,6 +54,9 @@ del getLogger
 _DK = _hidpp10.DEVICE_KIND
 _R = _hidpp10.REGISTERS
 _F = _hidpp20.FEATURE
+
+_GG = _hidpp20.GESTURE
+_GP = _hidpp20.PARAM
 
 #
 # common strings for settings - name, string to display in main window, tool tip for main window
@@ -97,6 +101,90 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweaks the mouse/touchpad behaviour.'))
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Changes numerical parameters of a mouse/touchpad.'))
+
+
+_GESTURE2_GESTURES_LABELS = {
+    _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
+    _GG['Tap2Finger']: (_('Double tap'), _('Performs a right click.')),
+    _GG['Tap3Finger']: (_('Triple tap'), None),
+    _GG['Click1Finger']: (None, None),
+    _GG['Click2Finger']: (None, None),
+    _GG['Click3Finger']: (None, None),
+    _GG['DoubleTap1Finger']: (_('Double tap'), _('Performs a double click.')),
+    _GG['DoubleTap2Finger']: (_('Double tap with two fingers'), None),
+    _GG['DoubleTap3Finger']: (_('Double tap with three fingers'), None),
+    _GG['Track1Finger']: (None, None),
+    _GG['TrackingAcceleration']: (None, None),
+    _GG['TapDrag1Finger']: (_('Tap and drag'), _('Drags items by dragging the finger after double tapping.')),
+    _GG['TapDrag2Finger']: (_('Tap and drag with two fingers'),
+                            _('Drags items by dragging the fingers after double tapping.')),
+    _GG['Drag3Finger']: (_('Tap and drag with three fingers'), None),
+    _GG['TapGestures']: (None, None),
+    _GG['FnClickGestureSuppression']: (_('Suppress tap and edge gestures'),
+                                       _('Disables tap and edge gestures (equivalent to pressing Fn+LeftClick).')),
+    _GG['Scroll1Finger']: (_('Scroll with one finger'), _('Scrolls.')),
+    _GG['Scroll2Finger']: (_('Scroll with two fingers'), _('Scrolls.')),
+    _GG['Scroll2FingerHoriz']: (_('Scroll horizontally with two fingers'), _('Scrolls horizontally.')),
+    _GG['Scroll2FingerVert']: (_('Scroll vertically with two fingers'), _('Scrolls vertically.')),
+    _GG['Scroll2FingerStateless']: (_('Scroll with two fingers'), _('Scrolls.')),
+    _GG['NaturalScrolling']: (_('Natural scrolling'), _('Inverts the scrolling direction.')),
+    _GG['Thumbwheel']: (_('Thumbwheel'), _('Enables the thumbwheel.')),
+    _GG['VScrollInertia']: (None, None),
+    _GG['VScrollBallistics']: (None, None),
+    _GG['Swipe2FingerHoriz']: (None, None),
+    _GG['Swipe3FingerHoriz']: (None, None),
+    _GG['Swipe4FingerHoriz']: (None, None),
+    _GG['Swipe3FingerVert']: (None, None),
+    _GG['Swipe4FingerVert']: (None, None),
+    _GG['LeftEdgeSwipe1Finger']: (None, None),
+    _GG['RightEdgeSwipe1Finger']: (None, None),
+    _GG['BottomEdgeSwipe1Finger']: (None, None),
+    _GG['TopEdgeSwipe1Finger']: (_('Swipe from the top edge'), None),
+    _GG['LeftEdgeSwipe1Finger2']: (_('Swipe from the left edge'), None),
+    _GG['RightEdgeSwipe1Finger2']: (_('Swipe from the right edge'), None),
+    _GG['BottomEdgeSwipe1Finger2']: (_('Swipe from the bottom edge'), None),
+    _GG['TopEdgeSwipe1Finger2']: (_('Swipe from the top edge'), None),
+    _GG['LeftEdgeSwipe2Finger']: (_('Swipe two fingers from the left edge'), None),
+    _GG['RightEdgeSwipe2Finger']: (_('Swipe two fingers from the right edge'), None),
+    _GG['BottomEdgeSwipe2Finger']: (_('Swipe two fingers from the bottom edge'), None),
+    _GG['TopEdgeSwipe2Finger']: (_('Swipe two fingers from the top edge'), None),
+    _GG['Zoom2Finger']: (_('Zoom with two fingers.'), _('Pinch to zoom out; spread to zoom in.')),
+    _GG['Zoom2FingerPinch']: (_('Pinch to zoom out.'), _('Pinch to zoom out.')),
+    _GG['Zoom2FingerSpread']: (_('Spread to zoom in.'), _('Spread to zoom in.')),
+    _GG['Zoom3Finger']: (_('Zoom with three fingers.'), None),
+    _GG['Zoom2FingerStateless']: (_('Zoom with two fingers'), _('Pinch to zoom out; spread to zoom in.')),
+    _GG['TwoFingersPresent']: (None, None),
+    _GG['Rotate2Finger']: (None, None),
+    _GG['Finger1']: (None, None),
+    _GG['Finger2']: (None, None),
+    _GG['Finger3']: (None, None),
+    _GG['Finger4']: (None, None),
+    _GG['Finger5']: (None, None),
+    _GG['Finger6']: (None, None),
+    _GG['Finger7']: (None, None),
+    _GG['Finger8']: (None, None),
+    _GG['Finger9']: (None, None),
+    _GG['Finger10']: (None, None),
+    _GG['DeviceSpecificRawData']: (None, None),
+}
+
+_GESTURE2_PARAMS_LABELS = {
+    _GP['ExtraCapabilities']: (None, None),  # not supported
+    _GP['PixelZone']: ('Pixel zone', None),  # TO DO: replace None with a short description
+    _GP['RatioZone']: ('Ratio zone', None),  # TO DO: replace None with a short description
+    _GP['ScaleFactor']: ('Scale factor', 'Sets the cursor speed.'),
+}
+
+_GESTURE2_PARAMS_LABELS_SUB = {
+    'left': (_('Left'), _('Left-most coordinate.')),
+    'top': (_('top'), _('Top-most coordinate.')),
+    'width': (_('width'), _('Width.')),
+    'height': (_('height'), _('Height.')),
+    'scale': (_('Scale'), _('Cursor speed.')),
+}
+
+_DISABLE_KEYS_LABEL_SUB = _('Disables the %s key.')
+
 # yapf: enable
 
 # Setting template functions need to set up the setting itself, the validator, and the reader/writer.
@@ -319,7 +407,9 @@ def _feature_disable_keyboard_keys_callback(device):
 
 def _feature_disable_keyboard_keys():
     rw = _FeatureRW(_F.KEYBOARD_DISABLE_KEYS, read_fnid=0x10, write_fnid=0x20)
-    return _BitFieldSetting(_DISABLE_KEYS, rw, callback=_feature_disable_keyboard_keys_callback, device_kind=(_DK.keyboard, ))
+    s = _BitFieldSetting(_DISABLE_KEYS, rw, callback=_feature_disable_keyboard_keys_callback, device_kind=(_DK.keyboard, ))
+    s._labels = {k: (None, _DISABLE_KEYS_LABEL_SUB % k) for k in _DKEY}
+    return s
 
 
 # muultiplatform OS bits
@@ -414,9 +504,11 @@ def _feature_gesture2_gestures_callback(device):
 
 def _feature_gesture2_gestures():
     rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x10, write_fnid=0x20)
-    return _BitFieldOMSetting(
+    s = _BitFieldOMSetting(
         _GESTURE2_GESTURES, rw, callback=_feature_gesture2_gestures_callback, device_kind=(_DK.touchpad, _DK.mouse)
     )
+    s._labels = _GESTURE2_GESTURES_LABELS
+    return s
 
 
 def _feature_gesture2_params_callback(device):
@@ -430,9 +522,15 @@ def _feature_gesture2_params_callback(device):
 
 def _feature_gesture2_params():
     rw = _FeatureRW(_F.GESTURE_2, read_fnid=0x70, write_fnid=0x80)
-    return _LongSettings(
-        _GESTURE2_PARAMS, rw, callback=_feature_gesture2_params_callback, device_kind=(_DK.touchpad, _DK.mouse)
-    )
+    s = _LongSettings(_GESTURE2_PARAMS, rw, callback=_feature_gesture2_params_callback, device_kind=(_DK.touchpad, _DK.mouse))
+
+    class ParamWrapper:
+        def get(self, name, default=None):
+            return _GESTURE2_PARAMS_LABELS.get(name.param, default)
+
+    s._labels = ParamWrapper()
+    s._labels_sub = _GESTURE2_PARAMS_LABELS_SUB
+    return s
 
 
 #

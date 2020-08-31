@@ -212,7 +212,16 @@ def _create_multiple_toggle_control(setting):
     btn = Gtk.Button('? / ?')
     for k in setting._validator.all_options():
         h = Gtk.HBox(homogeneous=False, spacing=0)
-        lbl = Gtk.Label(k)
+        lbl_text = str(k)
+        lbl_tooltip = None
+        if hasattr(setting, '_labels'):
+            l1, l2 = setting._labels.get(k, (None, None))
+            if l1:
+                lbl_text = l1
+            if l2:
+                lbl_tooltip = l2
+        lbl = Gtk.Label(lbl_text)
+        h.set_tooltip_text(lbl_tooltip or ' ')
         control = Gtk.Switch()
         control._setting_key = str(int(k))
         control.connect('notify::active', _toggle_notify, setting)
@@ -269,13 +278,31 @@ def _create_multiple_range_control(setting):
     btn = Gtk.Button('...')
     lb._showing = True
     for item in setting._validator.items:
-        item_lbl = Gtk.Label(item)
+        lbl_text = str(item)
+        lbl_tooltip = None
+        if hasattr(setting, '_labels'):
+            l1, l2 = setting._labels.get(item, (None, None))
+            if l1:
+                lbl_text = l1
+            if l2:
+                lbl_tooltip = l2
+        item_lbl = Gtk.Label(lbl_text)
         lb.add(item_lbl)
+        lb.set_tooltip_text(lbl_tooltip or ' ')
         item_lb = Gtk.ListBox()
         item_lb.set_selection_mode(Gtk.SelectionMode.NONE)
         for sub_item in setting._validator.sub_items[item]:
             h = Gtk.HBox(homogeneous=False, spacing=20)
-            sub_item_lbl = Gtk.Label(sub_item)
+            lbl_text = str(sub_item)
+            lbl_tooltip = None
+            if hasattr(setting, '_labels_sub'):
+                l1, l2 = setting._labels_sub.get(str(sub_item), (None, None))
+                if l1:
+                    lbl_text = l1
+                if l2:
+                    lbl_tooltip = l2
+            sub_item_lbl = Gtk.Label(lbl_text)
+            h.set_tooltip_text(lbl_tooltip or ' ')
             h.pack_start(sub_item_lbl, False, False, 0)
             sub_item_lbl.set_margin_left(30)
             sub_item_lbl.set_alignment(0.0, 0.5)
