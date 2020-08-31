@@ -776,7 +776,7 @@ SUB_PARAM = {   # (byte count, minimum, maximum)
 # Spec Ids for feature GESTURE_2
 SPEC = _NamedInts(
     DVI_field_width=1,
-    field_widths=1,
+    field_widths=2,
     period_unit=3,
     resolution=4,
     multiplier=5,
