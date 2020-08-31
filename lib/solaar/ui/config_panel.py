@@ -21,7 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from threading import Timer as _Timer
 
-from gi.repository import GLib, Gtk
+from gi.repository import Gdk, GLib, Gtk
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from solaar.i18n import _
 from solaar.ui import ui_async as _ui_async
@@ -230,6 +230,7 @@ def _create_multiple_toggle_control(setting):
         lbl.set_alignment(0.0, 0.5)
         lbl.set_margin_left(30)
         lb.add(h)
+    _disable_listbox_highlight_bg(lb)
     lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
 
@@ -275,9 +276,9 @@ def _create_multiple_range_control(setting):
     lb = Gtk.ListBox()
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
-    btn = Gtk.Button('...')
     lb._showing = True
     lb.set_no_show_all(True)
+    btn = Gtk.Button('...')
     for item in setting._validator.items:
         lbl_text = str(item)
         lbl_tooltip = None
@@ -322,7 +323,9 @@ def _create_multiple_range_control(setting):
             item_lb.add(h)
             h._setting_sub_item = sub_item
         item_lb._setting_item = item
+        _disable_listbox_highlight_bg(item_lb)
         lb.add(item_lb)
+    _disable_listbox_highlight_bg(lb)
     lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
     btn.set_alignment(1.0, 0.5)
@@ -477,6 +480,13 @@ def _get_failed_spinner_control(sbox):
         failed = children[0].get_children()[0].get_children()[1]
         spinner = children[0].get_children()[0].get_children()[2]
     return failed, spinner, control
+
+
+def _disable_listbox_highlight_bg(lb):
+    colour = Gdk.RGBA()
+    colour.parse('rgba(0,0,0,0)')
+    for child in lb.get_children():
+        child.override_background_color(Gtk.StateFlags.PRELIGHT, colour)
 
 
 #
