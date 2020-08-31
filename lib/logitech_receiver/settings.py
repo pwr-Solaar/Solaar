@@ -37,7 +37,7 @@ del getLogger
 #
 #
 
-KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10)
+KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10, multiple_range=0x40)
 
 
 class Setting(object):
@@ -286,6 +286,103 @@ class Settings(Setting):
             return value
 
 
+class LongSettings(Setting):
+    """A setting descriptor for multiple choices, being a map from keys to values.
+    Allows multiple write requests, if the options don't fit in 16 bytes.
+    The validator must return a list.
+    Needs to be instantiated for each specific device."""
+    def read(self, cached=True):
+        assert hasattr(self, '_value')
+        assert hasattr(self, '_device')
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+
+        self._pre_read(cached)
+
+        if cached and self._value is not None:
+            return self._value
+
+        if self._device.online:
+            reply_map = {}
+            # Reading one item at a time. This can probably be optimised
+            for item in self._validator.items:
+                r = self._validator.prepare_read_item(item)
+                reply = self._rw.read(self._device, r)
+                if reply:
+                    # keys are ints, because that is what the device uses,
+                    # encoded into strings because JSON requires strings as keys
+                    reply_map[str(int(item))] = self._validator.validate_read_item(reply, item)
+            self._value = reply_map
+            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+                # Don't update the persister if it already has a value,
+                # otherwise the first read might overwrite the value we wanted.
+                self._device.persister[self.name] = self._value
+            return self._value
+
+    def read_item(self, item, cached=True):
+        assert hasattr(self, '_value')
+        assert hasattr(self, '_device')
+        assert item is not None
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('%s: settings read %r item %r from %s', self.name, self._value, item, self._device)
+
+        self._pre_read(cached)
+        if cached and self._value is not None:
+            return self._value[str(int(item))]
+
+        if self._device.online:
+            r = self._validator.prepare_read_item(item)
+            reply = self._rw.read(self._device, r)
+            if reply:
+                self._value[str(int(item))] = self._validator.validate_read_item(reply, item)
+            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+                self._device.persister[self.name] = self._value
+            return self._value[str(int(item))]
+
+    def write(self, map):
+        assert hasattr(self, '_value')
+        assert hasattr(self, '_device')
+        assert map is not None
+
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('%s: settings write %r to %s', self.name, map, self._device)
+        if self._device.online:
+            self._value = map
+            self._pre_write()
+            for item, value in map.items():
+                data_bytes_list = self._validator.prepare_write(self._value)
+                if data_bytes_list is not None:
+                    for data_bytes in data_bytes_list:
+                        if data_bytes is not None:
+                            if _log.isEnabledFor(_DEBUG):
+                                _log.debug('%s: settings prepare map write(%s,%s) => %r', self.name, item, value, data_bytes)
+                            reply = self._rw.write(self._device, data_bytes)
+                            if not reply:
+                                return None
+            return map
+
+    def write_item_value(self, item, value):
+        assert hasattr(self, '_value')
+        assert hasattr(self, '_device')
+        assert item is not None
+        assert value is not None
+
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('%s: settings write item %r value %r to %s', self.name, item, value, self._device)
+
+        if self._device.online:
+            data_bytes = self._validator.prepare_write_item(item, value)
+            self._value[str(int(item))] = value
+            self._pre_write()
+            if data_bytes is not None:
+                if _log.isEnabledFor(_DEBUG):
+                    _log.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
+                reply = self._rw.write(self._device, data_bytes)
+                if not reply:
+                    return None
+            return value
+
+
 class BitFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one bit each, being a map from options to booleans.
     Needs to be instantiated for each specific device."""
@@ -347,7 +444,6 @@ class BitFieldSetting(Setting):
 
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
-
         if self._device.online:
             self._value = map
             self._pre_write()
@@ -639,13 +735,15 @@ class BitFieldWithOffsetAndMaskValidator(object):
 
     def __init__(self, options, byte_count=None):
         assert (isinstance(options, list))
+        # each element of options must have .offset and .mask,
+        # and its int representation must be its id (not its index)
         self.options = options
         # to retrieve the options efficiently:
         self._option_from_key = {}
         self._mask_from_offset = {}
         self._option_from_offset_mask = {}
         for opt in options:
-            self._option_from_key[opt.gesture] = opt
+            self._option_from_key[int(opt)] = opt
             try:
                 self._mask_from_offset[opt.offset] |= opt.mask
             except KeyError:
@@ -848,3 +946,73 @@ class RangeValidator(object):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError('invalid choice %r' % new_value)
         return _int2bytes(new_value, self._byte_count)
+
+
+class MultipleRangeValidator:
+
+    kind = KIND.multiple_range
+
+    def __init__(self, items, sub_items):
+        assert isinstance(items, list)  # each element must have .index and its __int__ must return its id (not its index)
+        assert isinstance(sub_items, dict)
+        # sub_items: items -> class with .minimum, .maximum, .length (in bytes), .id (a string) and .widget (e.g. 'Scale')
+        self.items = items
+        self._item_from_id = {int(k): k for k in items}
+        self.sub_items = sub_items
+
+    def prepare_read_item(self, item):
+        return _int2bytes((self._item_from_id[int(item)].index << 1) | 0xFF, 2)
+
+    def validate_read_item(self, reply_bytes, item):
+        item = self._item_from_id[int(item)]
+        start = 0
+        value = {}
+        for sub_item in self.sub_items[item]:
+            r = reply_bytes[start:start + sub_item.length]
+            if len(r) < sub_item.length:
+                r += b'\x00' * (sub_item.length - len(value))
+            v = _bytes2int(r)
+            if not (sub_item.minimum < v < sub_item.maximum):
+                _log.warn(
+                    f'{self.__class__.__name__}: failed to validate read value for {item}.{sub_item}: ' +
+                    f'{v} not in [{sub_item.minimum}..{sub_item.maximum}]'
+                )
+            value[str(sub_item)] = v
+            start += sub_item.length
+        return value
+
+    def prepare_write(self, value):
+        seq = []
+        w = b''
+        for item in value.keys():
+            _item = self._item_from_id[int(item)]
+            b = _int2bytes(_item.index, 1)
+            for sub_item in self.sub_items[_item]:
+                try:
+                    v = value[str(int(item))][str(sub_item)]
+                except KeyError:
+                    return None
+                if not (sub_item.minimum <= v <= sub_item.maximum):
+                    raise ValueError(
+                        f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]'
+                    )
+                b += _int2bytes(v, sub_item.length)
+            if len(w) + len(b) > 15:
+                seq.append(b + b'\xFF')
+                w = b''
+            w += b
+        seq.append(w + b'\xFF')
+        return seq
+
+    def prepare_write_item(self, item, value):
+        _item = self._item_from_id[int(item)]
+        w = _int2bytes(_item.index, 1)
+        for sub_item in self.sub_items[_item]:
+            try:
+                v = value[str(sub_item)]
+            except KeyError:
+                return None
+            if not (sub_item.minimum <= v <= sub_item.maximum):
+                raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
+            w += _int2bytes(v, sub_item.length)
+        return w + b'\xFF'

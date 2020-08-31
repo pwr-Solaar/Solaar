@@ -739,6 +739,40 @@ PARAM = _NamedInts(
 )
 PARAM._fallback = lambda x: 'unknown:%04X' % x
 
+
+class SubParam:
+    __slots__ = ('id', 'length', 'minimum', 'maximum', 'widget')
+
+    def __init__(self, id, length, minimum=None, maximum=None, widget=None):
+        self.id = id
+        self.length = length
+        self.minimum = minimum if minimum is not None else 0
+        self.maximum = maximum if maximum is not None else ((1 << 8 * length) - 1)
+        self.widget = widget if widget is not None else 'Scale'
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return self.id
+
+
+SUB_PARAM = {   # (byte count, minimum, maximum)
+    PARAM['ExtraCapabilities']: None,  # ignore
+    PARAM['PixelZone']: (  # TODO: replace min and max with the correct values
+        SubParam('left', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('bottom', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('width', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('height', 2, 0x0000, 0xFFFF, 'SpinButton')),
+    PARAM['RatioZone']: (  # TODO: replace min and max with the correct values
+        SubParam('left', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('bottom', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('width', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('height', 1, 0x00, 0xFF, 'SpinButton')),
+    PARAM['ScaleFactor']: (
+        SubParam('scale', 2, 0x002E, 0x01FF, 'Scale'), )
+}
+
 # Spec Ids for feature GESTURE_2
 SPEC = _NamedInts(
     DVI_field_width=1,
@@ -774,7 +808,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 class Gesture(object):
 
-    index = {}
+    gesture_index = {}
 
     def __init__(self, device, low, high):
         self._device = device
@@ -788,8 +822,8 @@ class Gesture(object):
         self.default_enabled = high & 0x20
         self.index = None
         if self.can_be_enabled or self.default_enabled:
-            self.index = Gesture.index.get(device, 0)
-            Gesture.index[device] = self.index + 1
+            self.index = Gesture.gesture_index.get(device, 0)
+            Gesture.gesture_index[device] = self.index + 1
         self.offset, self.mask = self._offset_mask()
 
     def _offset_mask(self):  # offset and mask
@@ -829,7 +863,7 @@ class Gesture(object):
 
 
 class Param(object):
-    param_index = 0
+    param_index = {}
 
     def __init__(self, device, low, high):
         self._device = device
@@ -839,8 +873,12 @@ class Param(object):
         self.show_in_ui = bool(high & 0x1F)
         self._value = None
         self._default_value = None
-        self.index = Param.param_index
-        Param.param_index += 1
+        self.index = Param.param_index.get(device, 0)
+        Param.param_index[device] = self.index + 1
+
+    @property
+    def sub_params(self):
+        return SUB_PARAM.get(self.id, None)
 
     @property
     def value(self):
@@ -867,6 +905,12 @@ class Param(object):
     def write(self, bytes):
         self._value = bytes
         return feature_request(self._device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
+
+    def __str__(self):
+        return str(self.param)
+
+    def __int__(self):
+        return self.id
 
 
 class Spec:
@@ -1108,6 +1152,8 @@ def get_keys(device):
 
 
 def get_gestures(device):
+    if getattr(device, '_gestures', None) is not None:
+        return device._gestures
     if FEATURE.GESTURE_2 in device.features:
         return Gestures(device)
 

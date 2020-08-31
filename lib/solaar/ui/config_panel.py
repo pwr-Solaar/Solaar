@@ -40,7 +40,7 @@ def _read_async(setting, force_read, sbox, device_is_online):
 
 
 def _write_async(setting, value, sbox):
-    _ignore, failed, spinner, control = sbox.get_children()
+    failed, spinner, control = _get_failed_spinner_control(sbox)
     control.set_sensitive(False)
     failed.set_visible(False)
     spinner.set_visible(True)
@@ -54,7 +54,7 @@ def _write_async(setting, value, sbox):
 
 
 def _write_async_key_value(setting, key, value, sbox):
-    _ignore, failed, spinner, control = sbox.get_children()
+    failed, spinner, control = _get_failed_spinner_control(sbox)
     control.set_sensitive(False)
     failed.set_visible(False)
     spinner.set_visible(True)
@@ -65,6 +65,20 @@ def _write_async_key_value(setting, key, value, sbox):
         GLib.idle_add(_update_setting_item, sb, {k: v}, True, priority=99)
 
     _ui_async(_do_write_key_value, setting, key, value, sbox)
+
+
+def _write_async_item_value(setting, item, value, sbox):
+    failed, spinner, control = _get_failed_spinner_control(sbox)
+    control.set_sensitive(False)
+    failed.set_visible(False)
+    spinner.set_visible(True)
+    spinner.start()
+
+    def _do_write_item_value(s, k, v, sb):
+        v = setting.write_item_value(k, v)
+        GLib.idle_add(_update_setting_item, sb, {k: v}, True, priority=99)
+
+    _ui_async(_do_write_item_value, setting, item, value, sbox)
 
 
 #
@@ -174,12 +188,15 @@ def _create_multiple_toggle_control(setting):
             new_state = control.get_active()
             if setting._value[key] != new_state:
                 setting._value[key] = new_state
-                _write_async_key_value(setting, key, new_state, control.get_parent().get_parent().get_parent().get_parent())
+                p = control
+                for _ in range(5):
+                    p = p.get_parent()
+                _write_async_key_value(setting, key, new_state, p)
 
     def _toggle_display(lb):
         lb._showing = not lb._showing
         if not lb._showing:
-            for c in lb.get_children()[1:]:
+            for c in lb.get_children():
                 lb._hidden_rows.append(c)
                 lb.remove(c)
         else:
@@ -192,19 +209,94 @@ def _create_multiple_toggle_control(setting):
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
     btn = Gtk.Button('? / ?')
-    lb.add(btn)
     lb._showing = True
     for k in setting._validator.all_options():
-        h = Gtk.HBox(homogeneous=False, spacing=0)
+        h = Gtk.HBox(homogeneous=True, spacing=0)
         lbl = Gtk.Label(k)
         control = Gtk.Switch()
         control._setting_key = str(int(k))
         control.connect('notify::active', _toggle_notify, setting)
-        h.pack_start(lbl, False, False, 0)
-        h.pack_end(control, False, False, 0)
+        h.pack_start(lbl, True, True, 0)
+        h.pack_end(control, True, True, 0)
         lb.add(h)
     btn.connect('clicked', lambda _: lb._toggle_display())
-    return lb
+
+    hbox = Gtk.HBox(homogeneous=False, spacing=6)
+    hbox.pack_end(btn, True, True, 0)
+    vbox = Gtk.VBox(homogeneous=False, spacing=6)
+    vbox.pack_start(hbox, True, True, 0)
+    vbox.pack_end(lb, True, True, 0)
+    return vbox
+
+
+def _create_multiple_range_control(setting):
+    def _write(control, setting, item, sub_item):
+        control._timer.cancel()
+        delattr(control, '_timer')
+        new_state = int(control.get_value())
+        if setting._value[str(int(item))][str(sub_item)] != new_state:
+            setting._value[str(int(item))][str(sub_item)] = new_state
+            p = control
+            for _i in range(7):
+                p = p.get_parent()
+            _write_async_item_value(setting, str(int(item)), setting._value[str(int(item))], p)
+
+    def _changed(control, setting, item, sub_item):
+        if control.get_sensitive():
+            if hasattr(control, '_timer'):
+                control._timer.cancel()
+            control._timer = _Timer(0.5, lambda: GLib.idle_add(_write, control, setting, item, sub_item))
+            control._timer.start()
+
+    def _toggle_display(lb):
+        lb._showing = not lb._showing
+        if not lb._showing:
+            for c in lb.get_children():
+                lb._hidden_rows.append(c)
+                lb.remove(c)
+        else:
+            for c in lb._hidden_rows:
+                lb.add(c)
+            lb._hidden_rows = []
+
+    lb = Gtk.ListBox()
+    lb._hidden_rows = []
+    lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
+    lb.set_selection_mode(Gtk.SelectionMode.NONE)
+    btn = Gtk.Button('???')
+    lb._showing = True
+    for item in setting._validator.items:
+        item_lbl = Gtk.Label(item)
+        lb.add(item_lbl)
+        item_lb = Gtk.ListBox()
+        item_lb.set_selection_mode(Gtk.SelectionMode.NONE)
+        for sub_item in setting._validator.sub_items[item]:
+            h = Gtk.HBox(homogeneous=True, spacing=0)
+            sub_item_lbl = Gtk.Label(sub_item)
+            h.pack_start(sub_item_lbl, True, True, 0)
+            if sub_item.widget == 'Scale':
+                control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, sub_item.minimum, sub_item.maximum, 1)
+                control.set_round_digits(0)
+                control.set_digits(0)
+            elif sub_item.widget == 'SpinButton':
+                control = Gtk.SpinButton.new_with_range(sub_item.minimum, sub_item.maximum, 1)
+                control.set_digits(0)
+            else:
+                raise NotImplementedError
+            h.pack_end(control, True, True, 0)
+            control.connect('value-changed', _changed, setting, item, sub_item)
+            item_lb.add(h)
+            h._setting_sub_item = sub_item
+        item_lb._setting_item = item
+        lb.add(item_lb)
+    btn.connect('clicked', lambda _: lb._toggle_display())
+
+    hbox = Gtk.HBox(homogeneous=False, spacing=6)
+    hbox.pack_end(btn, True, True, 0)
+    vbox = Gtk.VBox(homogeneous=False, spacing=6)
+    vbox.pack_start(hbox, True, True, 0)
+    vbox.pack_end(lb, True, True, 0)
+    return vbox
 
 
 #
@@ -214,7 +306,8 @@ def _create_multiple_toggle_control(setting):
 
 def _create_sbox(s):
     sbox = Gtk.HBox(homogeneous=False, spacing=6)
-    sbox.pack_start(Gtk.Label(s.label), False, False, 0)
+    label = Gtk.Label(s.label)
+    sbox.pack_start(label, False, False, 0)
 
     spinner = Gtk.Spinner()
     spinner.set_tooltip_text(_('Working') + '...')
@@ -235,15 +328,28 @@ def _create_sbox(s):
         control = _create_map_choice_control(s)
         sbox.pack_end(control, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_toggle:
-        control = _create_multiple_toggle_control(s)
-        sbox.get_children()[0].set_valign(Gtk.Align.START)
-        sbox.pack_end(control, False, False, 0)
+        vbox = _create_multiple_toggle_control(s)
+        control = vbox.get_children()[1]
+        sbox.remove(label)
+        vbox.get_children()[0].pack_start(label, True, True, 0)
+        sbox.pack_start(vbox, True, True, 0)
+    elif s.kind == _SETTING_KIND.multiple_range:
+        vbox = _create_multiple_range_control(s)
+        control = vbox.get_children()[1]
+        sbox.remove(label)
+        vbox.get_children()[0].pack_start(label, True, True, 0)
+        sbox.pack_start(vbox, True, True, 0)
     else:
         raise Exception('NotImplemented')
-
     control.set_sensitive(False)  # the first read will enable it
-    sbox.pack_end(spinner, False, False, 0)
-    sbox.pack_end(failed, False, False, 0)
+    control.kind = s.kind
+
+    if s.kind in [_SETTING_KIND.multiple_toggle, _SETTING_KIND.multiple_range]:
+        vbox.get_children()[0].pack_end(spinner, False, False, 0)
+        vbox.get_children()[0].pack_end(failed, False, False, 0)
+    else:
+        sbox.pack_end(spinner, False, False, 0)
+        sbox.pack_end(failed, False, False, 0)
 
     if s.description:
         sbox.set_tooltip_text(s.description)
@@ -257,7 +363,7 @@ def _create_sbox(s):
 
 
 def _update_setting_item(sbox, value, is_online=True):
-    _ignore, failed, spinner, control = sbox.get_children()  # depends on box layout
+    failed, spinner, control = _get_failed_spinner_control(sbox)
     spinner.set_visible(False)
     spinner.stop()
 
@@ -279,21 +385,63 @@ def _update_setting_item(sbox, value, is_online=True):
         if value.get(kbox.get_active_id()):
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     elif isinstance(control, Gtk.ListBox):
-        hidden = getattr(control, '_hidden_rows', [])
-        total = len(control.get_children()) + len(hidden) - 1
-        active = 0
-        for ch in control.get_children()[1:] + hidden:
-            elem = ch.get_children()[0].get_children()[-1]
-            v = value.get(elem._setting_key, None)
-            if v is not None:
-                elem.set_active(v)
-            if elem.get_active():
-                active += 1
-        control.get_children()[0].get_children()[0].set_label(f'{active} / {total}')
-
+        if control.kind == _SETTING_KIND.multiple_toggle:
+            hidden = getattr(control, '_hidden_rows', [])
+            total = len(control.get_children()) + len(hidden)
+            active = 0
+            to_join = []
+            for ch in control.get_children() + hidden:
+                elem = ch.get_children()[0].get_children()[-1]
+                v = value.get(elem._setting_key, None)
+                if v is not None:
+                    elem.set_active(v)
+                if elem.get_active():
+                    active += 1
+                to_join.append(elem.get_parent().get_children()[0].get_text() + ': ' + str(elem.get_active()))
+            b = ', '.join(to_join)
+            btn = control.get_parent().get_children()[0].get_children()[-1]
+            btn.set_label(f'{active} / {total}')
+            btn.set_tooltip_text(b)
+        elif control.kind == _SETTING_KIND.multiple_range:
+            hidden = getattr(control, '_hidden_rows', [])
+            b = ''
+            n = 0
+            for ch in control.get_children()[1:] + hidden:
+                # item
+                item = ch.get_children()[0]._setting_item
+                v = value.get(str(int(item)), None)
+                if v is not None:
+                    b += str(item) + ': ('
+                    to_join = []
+                    for c in ch.get_children()[0].get_children():
+                        # sub-item
+                        row = c.get_children()[0]
+                        sub_item = row._setting_sub_item
+                        elem = row.get_children()[-1]
+                        elem.set_value(v[str(sub_item)])
+                        n += 1
+                        to_join.append(str(sub_item) + f'={v[str(sub_item)]}')
+                    b += ', '.join(to_join) + ') '
+                btn = control.get_parent().get_children()[0].get_children()[-1]
+                btn.set_label(f'{n} value' + ('s' if n != 1 else ''))  # TODO: i18n, singular/plural
+                btn.set_tooltip_text(b)
+        else:
+            raise NotImplementedError
     else:
         raise Exception('NotImplemented')
     control.set_sensitive(True)
+
+
+def _get_failed_spinner_control(sbox):
+    children = sbox.get_children()
+    if len(children) == 4:
+        _ignore, failed, spinner, control = sbox.get_children()  # depends on box layout
+    else:
+        assert len(children) == 1
+        control = children[0].get_children()[-1]
+        failed = children[0].get_children()[0].get_children()[1]
+        spinner = children[0].get_children()[0].get_children()[2]
+    return failed, spinner, control
 
 
 #
