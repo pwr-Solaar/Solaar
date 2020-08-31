@@ -559,13 +559,6 @@ def _update_details(button):
                 flag_names = ('(%s)' % _('none'), ) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
                 yield (_('Notifications'), ('\n%15s' % ' ').join(flag_names))
 
-            if hasattr(device, 'gestures'):
-                specs = device.gestures.specs
-                if specs:
-                    yield ('Gesture specs', '')
-                    for s in specs.values():
-                        yield ('  %s' % s.spec, s.value)
-
         def _set_details(text):
             _details._text.set_markup(text)
 
