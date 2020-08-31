@@ -207,22 +207,25 @@ def _create_multiple_toggle_control(setting):
     lb = Gtk.ListBox()
     lb._hidden_rows = []
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
+    lb._showing = True
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
     btn = Gtk.Button('? / ?')
-    lb._showing = True
     for k in setting._validator.all_options():
-        h = Gtk.HBox(homogeneous=True, spacing=0)
+        h = Gtk.HBox(homogeneous=False, spacing=0)
         lbl = Gtk.Label(k)
         control = Gtk.Switch()
         control._setting_key = str(int(k))
         control.connect('notify::active', _toggle_notify, setting)
-        h.pack_start(lbl, True, True, 0)
-        h.pack_end(control, True, True, 0)
+        h.pack_start(lbl, False, False, 0)
+        h.pack_end(control, False, False, 0)
+        lbl.set_alignment(0.0, 0.5)
+        lbl.set_margin_left(30)
         lb.add(h)
     btn.connect('clicked', lambda _: lb._toggle_display())
 
-    hbox = Gtk.HBox(homogeneous=False, spacing=6)
-    hbox.pack_end(btn, True, True, 0)
+    hbox = Gtk.HBox(homogeneous=False, spacing=60)
+    hbox.pack_end(btn, False, False, 0)
+    btn.set_alignment(1.0, 0.5)
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
     vbox.pack_start(hbox, True, True, 0)
     vbox.pack_end(lb, True, True, 0)
@@ -263,7 +266,7 @@ def _create_multiple_range_control(setting):
     lb._hidden_rows = []
     lb._toggle_display = (lambda l: (lambda: _toggle_display(l)))(lb)
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
-    btn = Gtk.Button('???')
+    btn = Gtk.Button('...')
     lb._showing = True
     for item in setting._validator.items:
         item_lbl = Gtk.Label(item)
@@ -271,28 +274,31 @@ def _create_multiple_range_control(setting):
         item_lb = Gtk.ListBox()
         item_lb.set_selection_mode(Gtk.SelectionMode.NONE)
         for sub_item in setting._validator.sub_items[item]:
-            h = Gtk.HBox(homogeneous=True, spacing=0)
+            h = Gtk.HBox(homogeneous=False, spacing=20)
             sub_item_lbl = Gtk.Label(sub_item)
-            h.pack_start(sub_item_lbl, True, True, 0)
+            h.pack_start(sub_item_lbl, False, False, 0)
+            sub_item_lbl.set_margin_left(30)
+            sub_item_lbl.set_alignment(0.0, 0.5)
             if sub_item.widget == 'Scale':
                 control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, sub_item.minimum, sub_item.maximum, 1)
                 control.set_round_digits(0)
                 control.set_digits(0)
+                h.pack_end(control, True, True, 0)
             elif sub_item.widget == 'SpinButton':
                 control = Gtk.SpinButton.new_with_range(sub_item.minimum, sub_item.maximum, 1)
                 control.set_digits(0)
+                h.pack_end(control, False, False, 0)
             else:
                 raise NotImplementedError
-            h.pack_end(control, True, True, 0)
             control.connect('value-changed', _changed, setting, item, sub_item)
             item_lb.add(h)
             h._setting_sub_item = sub_item
         item_lb._setting_item = item
         lb.add(item_lb)
     btn.connect('clicked', lambda _: lb._toggle_display())
-
+    btn.set_alignment(1.0, 0.5)
     hbox = Gtk.HBox(homogeneous=False, spacing=6)
-    hbox.pack_end(btn, True, True, 0)
+    hbox.pack_end(btn, False, False, 0)
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
     vbox.pack_start(hbox, True, True, 0)
     vbox.pack_end(lb, True, True, 0)
@@ -331,13 +337,15 @@ def _create_sbox(s):
         vbox = _create_multiple_toggle_control(s)
         control = vbox.get_children()[1]
         sbox.remove(label)
-        vbox.get_children()[0].pack_start(label, True, True, 0)
+        vbox.get_children()[0].pack_start(label, False, False, 0)
+        label.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_range:
         vbox = _create_multiple_range_control(s)
         control = vbox.get_children()[1]
         sbox.remove(label)
-        vbox.get_children()[0].pack_start(label, True, True, 0)
+        vbox.get_children()[0].pack_start(label, False, False, 0)
+        label.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     else:
         raise Exception('NotImplemented')
