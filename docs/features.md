@@ -93,7 +93,7 @@ Feature                                | ID       | Status             | Notes
 `TOUCHMOUSE_RAW_POINTS`                | `0x6110` | :x:                |
 `TOUCHMOUSE_6120`                      | `0x6120` | :x:                |
 `GESTURE`                              | `0x6500` | :x:                |
-`GESTURE_2`                            | `0x6501` | :x:                |
+`GESTURE_2`                            | `0x6501` | :wrench:           | `_feature_gesture2_gestures`, `_feature_gesture2_params`
 `GKEY`                                 | `0x8010` | :x:                |
 `MKEYS`                                | `0x8020` | :x:                |
 `MR`                                   | `0x8030` | :x:                |

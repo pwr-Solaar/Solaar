@@ -84,7 +84,7 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 | K375s            | 4071 |       |         | FN swap                                 |
 | K400 Touch       | 400E | 2.0   | yes     | FN swap                                 |
 | K400 Touch       | 4024 | 2.0   | yes     | FN swap                                 |
-| K400 Plus        | 404D | 2.0   |         | FN swap                                 |
+| K400 Plus        | 404D | 2.0   |         | FN swap, disable keys, touchpad gestures|
 | K520             | 2011 | 1.0   | yes     | FN swap                                 |
 | K600 TV          | 4078 | 2.0   | yes     | FN swap                                 |
 | K750 Solar       | 4002 | 2.0   | yes     | FN swap, Lux reading, light button      |
@@ -106,38 +106,38 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 
 ### Mice (Unifying)
 
-| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
-|------------------|------|-------|---------|-------|---------------------------------|
-| M150             | 4022 | 2.0   |         |       |                                 |
-| M185             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
-| M310             | 4031 | 2.0   | yes     |       |                                 |
-| M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
-| M317             |      |       |         |       |                                 |
-| M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                |
-| M330             |      | 2.0   | yes     | 1000  | smooth scrolling                |
-| M345             | 4017 | 2.0   | yes     | –     | smooth scrolling                |
-| M350             | 101C | 1.0   | yes     |       |                                 |
-| M350             | 4080 | 2.0   |         |       |                                 |
-| M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling|
-| M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling|
-| M510             | 4051 | 2.0   | yes     |       | smooth scrolling                |
-| M515 Couch       | 4007 | 2.0   | yes     | –     | smooth scrolling                |
-| M525             | 4013 | 2.0   | yes     | –     | smooth scrolling                |
-| M560             |      | 2.0   | yes     | –     | smooth scrolling                |
-| M585             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
-| M590             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
-| M600 Touch       | 401A | 2.0   | yes     |       |                                 |
-| M705 Marathon    | 101B | 1.0   | yes     | –     | smooth scrolling, side scrolling|
-| M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                |
-| M720 Triathlon   | 405E | 2.0   | yes     | –     |                                 |
-| T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                |
-| T620 Touch       |      | 2.0   | yes     |       |                                 |
-| Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
-| Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
-| Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                |
-| MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
-| MX Master 2S     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
-| Cube             |      | 2.0   | yes     |       |                                 |
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features                |
+|------------------|------|-------|---------|-------|-----------------------------------------|
+| M150             | 4022 | 2.0   |         |       |                                         |
+| M185             | 4055 | 2.0   |         | R/W   | smooth scrolling                        |
+| M310             | 4031 | 2.0   | yes     |       |                                         |
+| M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                        |
+| M317             |      |       |         |       |                                         |
+| M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                        |
+| M330             |      | 2.0   | yes     | 1000  | smooth scrolling                        |
+| M345             | 4017 | 2.0   | yes     | –     | smooth scrolling                        |
+| M350             | 101C | 1.0   | yes     |       |                                         |
+| M350             | 4080 | 2.0   |         |       |                                         |
+| M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling        |
+| M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling        |
+| M510             | 4051 | 2.0   | yes     |       | smooth scrolling                        |
+| M515 Couch       | 4007 | 2.0   | yes     | –     | smooth scrolling                        |
+| M525             | 4013 | 2.0   | yes     | –     | smooth scrolling                        |
+| M560             |      | 2.0   | yes     | –     | smooth scrolling                        |
+| M585             | 406B | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M590             | 406B | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M600 Touch       | 401A | 2.0   | yes     |       |                                         |
+| M705 Marathon    | 101B | 1.0   | yes     | –     | smooth scrolling, side scrolling        |
+| M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M720 Triathlon   | 405E | 2.0   | yes     | –     |                                         |
+| T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                        |
+| T620 Touch       |      | 2.0   | yes     |       |                                         |
+| Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling        |
+| Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling        |
+| Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                        |
+| MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift           |
+| MX Master 2S     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift, gestures |
+| Cube             |      | 2.0   | yes     |       |                                         |
 
 ### Mice (Nano)
 
