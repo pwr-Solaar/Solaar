@@ -144,7 +144,7 @@ def _create_device_panel():
     p.pack_start(p._lux, False, False, 0)
 
     p._config = _config_panel.create()
-    p.pack_end(p._config, False, False, 4)
+    p.pack_end(p._config, True, True, 4)
 
     return p
 
