@@ -320,7 +320,7 @@ del namedtuple
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False):
+def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -388,8 +388,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False):
                             '(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
                             _hidpp10.ERROR[error]
                         )
-                    return
-
+                    return _hidpp10.ERROR[error] if return_error else None
                 if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
                     # a HID++ 2.0 feature call returned with an error
                     error = ord(reply_data[3:4])
