@@ -19,6 +19,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import strhex as _strhex
 from solaar.cli.show import _print_receiver
@@ -42,35 +43,66 @@ def run(receivers, args, find_receiver, _ignore):
     _print_receiver(receiver)
 
     print('  Register Dump')
-    register = receiver.read_register(_R.notifications)
-    print('    Notification Register %#04x: %s' % (_R.notifications % 0x100, '0x' + _strhex(register) if register else 'None'))
-    register = receiver.read_register(_R.receiver_connection)
-    print(
-        '    Connection State      %#04x: %s' %
-        (_R.receiver_connection % 0x100, '0x' + _strhex(register) if register else 'None')
-    )
-    register = receiver.read_register(_R.devices_activity)
-    print(
-        '    Device Activity       %#04x: %s' %
-        (_R.devices_activity % 0x100, '0x' + _strhex(register) if register else 'None')
-    )
+    rgst = receiver.read_register(_R.notifications)
+    print('    Notifications         %#04x: %s' % (_R.notifications % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
+    rgst = receiver.read_register(_R.receiver_connection)
+    print('    Connection State      %#04x: %s' % (_R.receiver_connection % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
+    rgst = receiver.read_register(_R.devices_activity)
+    print('    Device Activity       %#04x: %s' % (_R.devices_activity % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
 
+    for sub_reg in range(0, 6):
+        rgst = receiver.read_register(_R.receiver_info, sub_reg)
+        print(
+            '    Pairing Register %#04x %#04x: %s' %
+            (_R.receiver_info % 0x100, sub_reg, '0x' + _strhex(rgst) if rgst else 'None')
+        )
     for device in range(0, 6):
-        for sub_reg in [0x0, 0x10, 0x20, 0x30]:
-            register = receiver.read_register(_R.receiver_info, sub_reg + device)
+        for sub_reg in [0x10, 0x20, 0x30]:
+            rgst = receiver.read_register(_R.receiver_info, sub_reg + device)
             print(
                 '    Pairing Register %#04x %#04x: %s' %
-                (_R.receiver_info % 0x100, sub_reg + device, '0x' + _strhex(register) if register else 'None')
+                (_R.receiver_info % 0x100, sub_reg + device, '0x' + _strhex(rgst) if rgst else 'None')
             )
-        register = receiver.read_register(_R.receiver_info, 0x40 + device)
+        rgst = receiver.read_register(_R.receiver_info, 0x40 + device)
         print(
             '    Pairing Name     %#04x %#02x: %s' %
-            (_R.receiver_info % 0x100, 0x40 + device, register[2:2 + ord(register[1:2])] if register else 'None')
+            (_R.receiver_info % 0x100, 0x40 + device, rgst[2:2 + ord(rgst[1:2])] if rgst else 'None')
         )
 
     for sub_reg in range(0, 5):
-        register = receiver.read_register(_R.firmware, sub_reg)
+        rgst = receiver.read_register(_R.firmware, sub_reg)
         print(
             '    Firmware         %#04x %#04x: %s' %
-            (_R.firmware % 0x100, sub_reg, '0x' + _strhex(register) if register else 'None')
+            (_R.firmware % 0x100, sub_reg, '0x' + _strhex(rgst) if rgst is not None else 'None')
         )
+
+    print('')
+    for reg in range(0, 0xFF):
+        last = None
+        for sub in range(0, 0xFF):
+            rgst = _base.request(receiver.handle, 0xFF, 0x8100 | reg, sub, return_error=True)
+            if isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_address:
+                break
+            elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
+                continue
+            else:
+                if not isinstance(last, int) and not isinstance(rgst, int) and last != rgst:
+                    print(
+                        '    Register Short   %#04x %#04x: %s' %
+                        (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
+                    )
+            last = rgst
+        last = None
+        for sub in range(0, 0xFF):
+            rgst = _base.request(receiver.handle, 0xFF, 0x8100 | (0x200 + reg), sub, return_error=True)
+            if isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_address:
+                break
+            elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
+                continue
+            else:
+                if not isinstance(last, int) and not isinstance(rgst, int) and last != rgst:
+                    print(
+                        '    Register Long    %#04x %#04x: %s' %
+                        (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
+                    )
+            last = rgst
