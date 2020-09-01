@@ -42,6 +42,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     _print_receiver(receiver)
 
+    print('')
     print('  Register Dump')
     rgst = receiver.read_register(_R.notifications)
     print('    Notifications         %#04x: %s' % (_R.notifications % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
@@ -86,7 +87,7 @@ def run(receivers, args, find_receiver, _ignore):
             elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
                 continue
             else:
-                if not isinstance(last, int) and not isinstance(rgst, int) and last != rgst:
+                if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         '    Register Short   %#04x %#04x: %s' %
                         (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
@@ -100,7 +101,7 @@ def run(receivers, args, find_receiver, _ignore):
             elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
                 continue
             else:
-                if not isinstance(last, int) and not isinstance(rgst, int) and last != rgst:
+                if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         '    Register Long    %#04x %#04x: %s' %
                         (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
