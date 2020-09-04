@@ -80,7 +80,7 @@ def _create():
         ))
     )
 
-    about.set_website('http://pwr-solaar.github.io/Solaar/')
+    about.set_website('https://pwr-solaar.github.io/Solaar')
     about.set_website_label(NAME)
 
     about.connect('response', lambda x, y: x.hide())
