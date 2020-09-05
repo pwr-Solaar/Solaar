@@ -176,6 +176,27 @@ def find_paired_node(receiver_path, index, timeout):
     return None
 
 
+def find_paired_node_wpid(receiver_path, index):
+    """Find the node of a device paired with a receiver, get wpid from udev"""
+    context = _Context()
+    receiver_phys = _Devices.from_device_file(context, receiver_path).find_parent('hid').get('HID_PHYS')
+
+    if not receiver_phys:
+        return None
+
+    phys = f'{receiver_phys}:{index}'
+    for dev in context.list_devices(subsystem='hidraw'):
+        dev_phys = dev.find_parent('hid').get('HID_PHYS')
+        if dev_phys and dev_phys == phys:
+            # get hid id like 0003:0000046D:00000065
+            hid_id = dev.find_parent('hid').get('HID_ID')
+            # get wpid - last 4 symbols
+            udev_wpid = hid_id[-4:]
+            return udev_wpid
+
+    return None
+
+
 def monitor_glib(callback, *device_filters):
     from gi.repository import GLib
 

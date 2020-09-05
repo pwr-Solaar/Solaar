@@ -211,8 +211,8 @@ setting is useful only to disable smooth scrolling.
 | MK550            |      |       |         |                                         |
 | MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |
 | MK710            |      | 1.0   | yes     | FN swap, reprog keys                    |
-| EX100 keyboard   | 6500 | 1.0   | yes     |                                         |
-| EX100 mouse      | 3f00 | 1.0   | yes     |                                         |
+| EX100 keyboard   | 0065 | 1.0   | yes     |                                         |
+| EX100 mouse      | 003f | 1.0   | yes     |                                         |
 
 * The EX100 is old, preunifying set, supporting only part of HID++ 1.0 features
 

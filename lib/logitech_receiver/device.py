@@ -81,9 +81,13 @@ class Device(object):
                 self.wpid = _strhex(link_notification.data[2:3] + link_notification.data[1:2])
                 # assert link_notification.address == (0x04 if unifying else 0x03)
                 kind = ord(link_notification.data[0:1]) & 0x0F
+                # get 27Mhz wpid and set kind based on index
+                if receiver.ex100_27mhz_wpid_fix:  # 27 Mhz receiver
+                    self.wpid = '00' + _strhex(link_notification.data[2:3])
+                    kind = self.get_kind_from_index(number, receiver)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
-                # force a reading of the wpid
+                # Not a notification, force a reading of the wpid
                 pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + number - 1)
                 if pair_info:
                     # may be either a Unifying receiver, or an Unifying-ready
@@ -91,20 +95,14 @@ class Device(object):
                     self.wpid = _strhex(pair_info[3:5])
                     kind = ord(pair_info[7:8]) & 0x0F
                     self._kind = _hidpp10.DEVICE_KIND[kind]
-                elif receiver.ex100_wpid_fix:
-                    # ex100 receiver, fill fake device_info with known wpid's
-                    # accordingly to drivers/hid/hid-logitech-dj.c
-                    # index 1 or 2 always mouse, index 3 always the keyboard,
-                    # index 4 is used for an optional separate numpad
-                    if number == 1:  # mouse
-                        self.wpid = '3F00'
-                        self._kind = _hidpp10.DEVICE_KIND[2]
-                    elif number == 3:  # keyboard
-                        self.wpid = '6500'
-                        self._kind = _hidpp10.DEVICE_KIND[1]
-                    else:  # unknown device number on EX100
-                        _log.error('failed to set fake EX100 wpid for device %d of %s', number, receiver)
-                        raise _base.NoSuchDevice(number=number, receiver=receiver, error='Unknown EX100 device')
+                elif receiver.ex100_27mhz_wpid_fix:
+                    # 27Mhz receiver, fill extracting WPID from udev path
+                    self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
+                    if not self.wpid:
+                        _log.error('Unable to get wpid from udev for device %d of %s', number, receiver)
+                        raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
+                    kind = self.get_kind_from_index(number, receiver)
+                    self._kind = _hidpp10.DEVICE_KIND[kind]
                 else:
                     # unifying protocol not supported, must be a Nano receiver
                     device_info = self.receiver.read_register(_R.receiver_info, 0x04)
@@ -288,6 +286,25 @@ class Device(object):
         if not self._feature_settings_checked:
             self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
+
+    def get_kind_from_index(self, index, receiver):
+        """Get device kind from 27Mhz device index"""
+        # accordingly to drivers/hid/hid-logitech-dj.c
+        # index 1 or 2 always mouse, index 3 always the keyboard,
+        # index 4 is used for an optional separate numpad
+
+        if index == 1:  # mouse
+            kind = 2
+        elif index == 2:  # mouse
+            kind = 2
+        elif index == 3:  # keyboard
+            kind = 1
+        elif index == 4:  # numpad
+            kind = 3
+        else:  # unknown device number on 27Mhz receiver
+            _log.error('failed to calculate device kind for device %d of %s', index, receiver)
+            raise _base.NoSuchDevice(number=index, receiver=receiver, error='Unknown 27Mhz device number')
+        return kind
 
     def enable_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this

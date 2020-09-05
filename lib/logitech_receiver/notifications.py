@@ -203,6 +203,9 @@ def _process_hidpp10_notification(device, status, n):
         )
         if protocol_name:
             wpid = _strhex(n.data[2:3] + n.data[1:2])
+            # workaround for short EX100 and other 27 MHz wpids
+            if protocol_name == '27 MHz':
+                wpid = '00' + _strhex(n.data[2:3])
             if wpid != device.wpid:
                 _log.warn('%s wpid mismatch, got %s', device, wpid)
             flags = ord(n.data[:1]) & 0xF0
