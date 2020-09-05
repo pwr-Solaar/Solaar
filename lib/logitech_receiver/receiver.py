@@ -79,7 +79,7 @@ class Receiver(object):
         self._str = '<%s(%s,%s%s)>' % (
             self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
         )
-        self.ex100_wpid_fix = product_info.get('ex100_wpid_fix', False)
+        self.ex100_27mhz_wpid_fix = product_info.get('ex100_27mhz_wpid_fix', False)
 
         self._firmware = None
         self._devices = {}

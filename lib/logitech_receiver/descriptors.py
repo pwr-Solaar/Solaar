@@ -169,7 +169,7 @@ _D(
 _D(
     'Wireless Keyboard MK300',
     protocol=1.0,
-    wpid='8521',
+    wpid='0068',
     registers=(_R.battery_status, ),
 )
 
@@ -292,14 +292,14 @@ _D(
     'Wireless Keyboard S510',
     codename='S510',
     protocol=1.0,
-    wpid='3622',
+    wpid='0056',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Keyboard EX100',
     codename='EX100',
     protocol=1.0,
-    wpid='6500',
+    wpid='0065',
     registers=(_R.battery_status, ),
 )
 
@@ -523,21 +523,21 @@ _D(
     'LX5 Cordless Mouse',
     codename='LX5',
     protocol=1.0,
-    wpid='5612',
+    wpid='0036',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Mouse M30',
     codename='M30',
     protocol=1.0,
-    wpid='6822',
+    wpid='0085',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Mouse EX100',
     codename='EX100m',
     protocol=1.0,
-    wpid='3F00',
+    wpid='003F',
     registers=(_R.battery_status, ),
     # settings=[ _RS.smooth_scroll(), ], # command accepted, but no change in whell action
 )
