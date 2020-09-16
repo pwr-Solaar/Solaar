@@ -246,7 +246,7 @@ class ReceiverListener(_listener.EventsListener):
 
         if self.receiver.status.lock_open and not already_known:
             # this should be the first notification after a device was paired
-            assert n.sub_id == 0x41 and n.address == 0x04
+            assert n.sub_id == 0x41, 'first notification was not a connection notification'
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: pairing detected new device', self.receiver)
             self.receiver.status.new_device = dev
