@@ -73,8 +73,8 @@ _HI_RES_SCROLL = ('hi-res-scroll', _('High Resolution Scrolling'),
 _LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'),
                    _('HID++ mode for vertical scroll with the wheel.') + '\n' +
                    _('Effectively turns off wheel scrolling in Linux.'))
-_HIRES_INV = ('hires-smooth-invert', _('High Resolution Wheel Invert'),
-              _('High-sensitivity wheel invert direction for vertical scroll.'))
+_HIRES_INV = ('hires-smooth-invert', _('Wheel Invert Direction'),
+              _('Invert direction for vertical scroll with wheel.'))
 _HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'),
               _('High-sensitivity mode for vertical scroll with the wheel.'))
 _FN_SWAP = ('fn-swap', _('Swap Fx function'),
@@ -82,7 +82,7 @@ _FN_SWAP = ('fn-swap', _('Swap Fx function'),
               'and you must hold the FN key to activate their standard function.') + '\n\n' +
             _('When unset, the F1..F12 keys will activate their standard function,\n'
               'and you must hold the FN key to activate their special function.'))
-_DPI = ('dpi', _('Sensitivity (DPI)'), None)
+_DPI = ('dpi', _('Sensitivity (DPI)'), _('Mouse sensitivity to movement'))
 _POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
                   _('Speed multiplier for mouse (256 is normal multiplier).'))
 _SMART_SHIFT = ('smart-shift', _('Smart Shift'),
