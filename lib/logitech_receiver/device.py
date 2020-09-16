@@ -119,7 +119,15 @@ class Device(object):
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
             self.path = _hid.find_paired_node(receiver.path, number, _base.DEFAULT_TIMEOUT)
-            self.handle = _hid.open_path(self.path) if self.path else None
+            try:
+                self.handle = _hid.open_path(self.path) if self.path else None
+            except Exception:  # maybe the device wasn't set up
+                try:
+                    import time
+                    time.sleep(1)
+                    self.handle = _hid.open_path(self.path)
+                except Exception:  # give up
+                    self.handle = None
 
             self.descriptor = _DESCRIPTORS.get(self.wpid)
             if self.descriptor is None:
