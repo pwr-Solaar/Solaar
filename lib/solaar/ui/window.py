@@ -518,8 +518,8 @@ def _update_details(button):
             # If read_all is False, only return stuff that is ~100% already
             # cached, and involves no HID++ calls.
 
+            yield (_('Path'), device.path)
             if device.kind is None:
-                yield (_('Path'), device.path)
                 # 046d is the Logitech vendor id
                 yield (_('USB id'), '046d:' + device.product_id)
 
