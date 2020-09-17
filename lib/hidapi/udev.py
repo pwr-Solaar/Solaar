@@ -55,6 +55,7 @@ DeviceInfo = namedtuple(
         'product',
         'interface',
         'driver',
+        'isDevice',
     ]
 )
 del namedtuple
@@ -89,6 +90,7 @@ def _match(action, device, filter):
     product_id = filter.get('product_id')
     interface_number = filter.get('usb_interface')
     hid_driver = filter.get('hid_driver')
+    isDevice = filter.get('isDevice')
 
     usb_device = device.find_parent('usb', 'usb_device')
     # print ("* parent", action, device, "usb:", usb_device)
@@ -134,7 +136,8 @@ def _match(action, device, filter):
             manufacturer=attrs.get('manufacturer'),
             product=attrs.get('product'),
             interface=usb_interface,
-            driver=hid_driver_name
+            driver=hid_driver_name,
+            isDevice=isDevice
         )
         return d_info
 
@@ -150,7 +153,8 @@ def _match(action, device, filter):
             manufacturer=None,
             product=None,
             interface=None,
-            driver=None
+            driver=None,
+            isDevice=isDevice
         )
         return d_info
 
