@@ -99,7 +99,7 @@ _ex100_receiver = lambda product_id: {
     'ex100_27mhz_wpid_fix': True
 }
 
-_wired_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'usb_interface': 2}
+_wired_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'usb_interface': 2, 'isDevice': True}
 
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)

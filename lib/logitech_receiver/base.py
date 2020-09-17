@@ -104,7 +104,7 @@ def wired_devices():
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    _hid.monitor_glib(callback, *_RECEIVER_USB_IDS)
+    _hid.monitor_glib(callback, *_RECEIVER_USB_IDS, *_WIRED_DEVICE_IDS)
 
 
 #

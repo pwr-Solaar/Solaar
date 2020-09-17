@@ -431,6 +431,9 @@ def _device_row(receiver_path, device_number, device=None):
     assert device_number is not None
 
     receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
+    if receiver_row and device_number == 0:  # wired device, receiver row is device row
+        return receiver_row
+
     item = _model.iter_children(receiver_row)
     new_child_index = 0
     while item:
@@ -448,9 +451,10 @@ def _device_row(receiver_path, device_number, device=None):
         icon_name = _icons.device_icon_name(device.name, device.kind)
         status_text = None
         status_icon = None
-        row_data = (
-            receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
+        codename = device.codename if device.codename and device.codename[0] != '?' else (
+            device.name.split()[0] if device.name.split() else device.codename
         )
+        row_data = (receiver_path, device_number, bool(device.online), codename, icon_name, status_text, status_icon, device)
         assert len(row_data) == len(_TREE_SEPATATOR)
         if _log.isEnabledFor(_DEBUG):
             _log.debug('new device row %s at index %d', row_data, new_child_index)
@@ -531,7 +535,10 @@ def _update_details(button):
             else:
                 # yield ('Codename', device.codename)
                 yield (_('Index'), device.number)
-                yield (_('Wireless PID'), device.wpid)
+                if device.wpid:
+                    yield (_('Wireless PID'), device.wpid)
+                if device.product_id:
+                    yield (_('USB id'), '046d:' + device.product_id)
                 hid_version = device.protocol
                 yield (_('Protocol'), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
                 if read_all and device.polling_rate:
@@ -652,6 +659,9 @@ def _update_device_panel(device, panel, buttons, full=False):
     is_online = bool(device.online)
     panel.set_sensitive(is_online)
 
+    if device.status.get(_K.BATTERY_LEVEL) is None:
+        device.status.read_battery(device)
+
     battery_level = device.status.get(_K.BATTERY_LEVEL)
     battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
     battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
@@ -734,7 +744,7 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._lux.set_visible(False)
 
     buttons._pair.set_visible(False)
-    buttons._unpair.set_sensitive(device.receiver.may_unpair)
+    buttons._unpair.set_sensitive(device.receiver.may_unpair if device.receiver else False)
     buttons._unpair.set_visible(True)
 
     panel.set_visible(True)
@@ -839,14 +849,14 @@ def update(device, need_popup=False):
 
     selected_device_id = _find_selected_device_id()
 
-    if device.kind is None:
+    if device.kind is None:  # receiver
         # receiver
         is_alive = bool(device)
         item = _receiver_row(device.path, device if is_alive else None)
 
         if is_alive and item:
             was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
-            is_pairing = bool(device.status.lock_open)
+            is_pairing = (not device.isDevice) and bool(device.status.lock_open)
             _model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else _CAN_SET_ROW_NONE)
 
             if selected_device_id == (device.path, 0):
@@ -860,44 +870,45 @@ def update(device, need_popup=False):
             _model.remove(item)
 
     else:
-        # peripheral
-        is_paired = bool(device)
-        assert device.receiver
-        assert device.number is not None and device.number > 0, 'invalid device number' + str(device.number)
-        item = _device_row(device.receiver.path, device.number, device if is_paired else None)
+        path = device.receiver.path if device.receiver else device.path
+        assert device.number is not None and device.number >= 0, 'invalid device number' + str(device.number)
+        item = _device_row(path, device.number, device if bool(device) else None)
 
-        if is_paired and item:
-            was_online = _model.get_value(item, _COLUMN.ACTIVE)
-            is_online = bool(device.online)
-            _model.set_value(item, _COLUMN.ACTIVE, is_online)
-
-            battery_level = device.status.get(_K.BATTERY_LEVEL)
-            battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
-            if battery_level is None:
-                _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
-                _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
-            else:
-                if battery_voltage is not None:
-                    status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
-                elif isinstance(battery_level, _NamedInt):
-                    status_text = _(str(battery_level))
-                else:
-                    status_text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
-                _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
-
-                charging = device.status.get(_K.BATTERY_CHARGING)
-                icon_name = _icons.battery(battery_level, charging)
-                _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
-
-            if selected_device_id is None or need_popup:
-                select(device.receiver.path, device.number)
-            elif selected_device_id == (device.receiver.path, device.number):
-                full_update = need_popup or was_online != is_online
-                _update_info_panel(device, full=full_update)
-
+        if bool(device) and item:
+            update_device(device, item, selected_device_id, need_popup)
         elif item:
             _model.remove(item)
             _config_panel.clean(device)
 
     # make sure all rows are visible
     _tree.expand_all()
+
+
+def update_device(device, item, selected_device_id, need_popup):
+    was_online = _model.get_value(item, _COLUMN.ACTIVE)
+    is_online = bool(device.online)
+    _model.set_value(item, _COLUMN.ACTIVE, is_online)
+
+    battery_level = device.status.get(_K.BATTERY_LEVEL)
+    battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
+    if battery_level is None:
+        _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
+        _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
+    else:
+        if battery_voltage is not None:
+            status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+        elif isinstance(battery_level, _NamedInt):
+            status_text = _(str(battery_level))
+        else:
+            status_text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
+        _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
+
+        charging = device.status.get(_K.BATTERY_CHARGING)
+        icon_name = _icons.battery(battery_level, charging)
+        _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
+
+    if selected_device_id is None or need_popup:
+        select(device.receiver.path if device.receiver else device.path, device.number)
+    elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
+        full_update = need_popup or was_online != is_online
+        _update_info_panel(device, full=full_update)
