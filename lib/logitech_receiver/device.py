@@ -31,6 +31,7 @@ class Device(object):
     def __init__(self, receiver, number, link_notification=None, info=None):
         assert receiver or info
         self.receiver = receiver
+        self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
 
         if receiver:
             assert number > 0 and number <= receiver.max_devices

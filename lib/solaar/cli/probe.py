@@ -22,7 +22,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import strhex as _strhex
-from solaar.cli.show import _print_receiver
+from solaar.cli.show import _print_device, _print_receiver
 
 _R = _hidpp10.REGISTERS
 
@@ -38,7 +38,11 @@ def run(receivers, args, find_receiver, _ignore):
     else:
         receiver = receivers[0]
 
-    assert receiver
+    assert receiver is not None
+
+    if receiver.isDevice:
+        _print_device(receiver, 1)
+        return
 
     _print_receiver(receiver)
 
