@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import errno as _errno
+
 from logging import INFO as _INFO
 from logging import getLogger
 
@@ -31,6 +33,7 @@ class Device(object):
     def __init__(self, receiver, number, link_notification=None, info=None):
         assert receiver or info
         self.receiver = receiver
+        self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
 
         if receiver:
@@ -153,6 +156,7 @@ class Device(object):
             self.handle = _hid.open_path(self.path)
             self.product_id = info.product_id
             self._serial = ''.join(info.serial.split('-')).upper()
+            self.online = True
 
         if self._protocol is not None:
             self.features = None if self._protocol < 2.0 else _hidpp20.FeaturesArray(self)
@@ -182,7 +186,7 @@ class Device(object):
                 # if _log.isEnabledFor(_DEBUG):
                 #     _log.debug("device %d codename %s", self.number, self._codename)
             else:
-                self._codename = '? (%s)' % self.wpid
+                self._codename = '? (%s)' % (self.wpid or self.product_id)
         return self._codename
 
     @property
@@ -190,7 +194,7 @@ class Device(object):
         if not self._name:
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self.codename or ('Unknown device %s' % self.wpid)
+        return self._name or self.codename or ('Unknown device %s' % (self.wpid or self.product_id))
 
     @property
     def kind(self):
@@ -369,7 +373,10 @@ class Device(object):
     def __hash__(self):
         return self.wpid.__hash__()
 
-    __bool__ = __nonzero__ = lambda self: self.wpid is not None and self.number in self.receiver
+    def __bool__(self):
+        return self.wpid is not None and self.number in self.receiver if self.receiver else self.handle is not None
+
+    __nonzero__ = __bool__
 
     def __str__(self):
         return '<Device(%d,%s,%s,%s)>' % (
@@ -377,3 +384,29 @@ class Device(object):
         )
 
     __unicode__ = __repr__ = __str__
+
+    def notify_devices(self):  # no need to notify, as there are none
+        pass
+
+    @classmethod
+    def open(self, device_info):
+        """Opens a Logitech Device found attached to the machine, by Linux device path.
+        :returns: An open file handle for the found receiver, or ``None``.
+        """
+        try:
+            handle = _base.open_path(device_info.path)
+            if handle:
+                return Device(None, 0, info=device_info)
+        except OSError as e:
+            _log.exception('open %s', device_info)
+            if e.errno == _errno.EACCES:
+                raise
+        except Exception:
+            _log.exception('open %s', device_info)
+
+    def close(self):
+        handle, self.handle = self.handle, None
+        return (handle and _base.close(handle))
+
+    def __del__(self):
+        self.close()

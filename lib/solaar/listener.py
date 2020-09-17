@@ -26,14 +26,15 @@ from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 
-from logitech_receiver import Receiver
+from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
 from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
-from solaar.i18n import _
 
 from . import configuration
+
+# from solaar.i18n import _
 
 _log = getLogger(__name__)
 del getLogger
@@ -94,7 +95,7 @@ class ReceiverListener(_listener.EventsListener):
         # make sure to clean up in _all_listeners
         _all_listeners.pop(r.path, None)
 
-        r.status = _('The receiver was unplugged.')
+        # this causes problems but what is it doing (pfps) - r.status = _('The receiver was unplugged.')
         if r:
             try:
                 r.close()
@@ -159,7 +160,7 @@ class ReceiverListener(_listener.EventsListener):
             self.status_changed_callback(device, alert, reason)
             return
 
-        assert device.receiver == self.receiver
+        # not true for wired devices - assert device.receiver == self.receiver
         if not device:
             # Device was unpaired, and isn't valid anymore.
             # We replace it with a ghost so that the UI has something to work
@@ -270,11 +271,19 @@ _all_listeners = {}
 
 def _start(device_info):
     assert _status_callback
-    receiver = Receiver.open(device_info)
+    isDevice = device_info.isDevice
+    if not isDevice:
+        receiver = Receiver.open(device_info)
+    else:
+        receiver = Device.open(device_info)
+        configuration.attach_to(receiver)
+
     if receiver:
         rl = ReceiverListener(receiver, _status_callback)
         rl.start()
         _all_listeners[device_info.path] = rl
+        if isDevice:  # (wired) devices start as active
+            receiver.status.changed(True)
         return rl
 
     _log.warn('failed to open %s', device_info)
@@ -287,6 +296,8 @@ def start_all():
     if _log.isEnabledFor(_INFO):
         _log.info('starting receiver listening threads')
     for device_info in _base.receivers():
+        _process_receiver_event('add', device_info)
+    for device_info in _base.wired_devices():
         _process_receiver_event('add', device_info)
 
 

@@ -509,7 +509,7 @@ def create():
 def update(device, is_online=None):
     assert _box is not None
     assert device
-    device_id = (device.receiver.path, device.number)
+    device_id = (device.receiver.path if device.receiver else device.path, device.number)
     if is_online is None:
         is_online = bool(device.online)
 
@@ -541,7 +541,7 @@ def clean(device):
     Needed after the device has been unpaired.
     """
     assert _box is not None
-    device_id = (device.receiver.path, device.number)
+    device_id = (device.receiver.path if device.receiver else device.path, device.number)
     for k in list(_items.keys()):
         if k[0:2] == device_id:
             _box.remove(_items[k])

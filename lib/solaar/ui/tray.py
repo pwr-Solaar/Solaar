@@ -351,28 +351,29 @@ def _pick_device_with_lowest_battery():
 
 def _add_device(device):
     assert device
-    assert device.receiver
-    receiver_path = device.receiver.path
-    assert receiver_path
+    # not true for wired devices - assert device.receiver
+    receiver_path = device.receiver.path if device.receiver is not None else device.path
+    # not true for wired devices - assert receiver_path
 
-    index = None
+    index = 0
     for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
         if path == receiver_path:
             # the first entry matching the receiver serial should be for the receiver itself
             index = idx + 1
             break
-    assert index is not None
+    # assert index is not None
 
-    # proper ordering (according to device.number) for a receiver's devices
-    while True:
-        path, number, _ignore, _ignore = _devices_info[index]
-        if path == _RECEIVER_SEPARATOR[0]:
-            break
-        assert path == receiver_path
-        assert number != device.number
-        if number > device.number:
-            break
-        index = index + 1
+    if device.receiver:
+        # proper ordering (according to device.number) for a receiver's devices
+        while True:
+            path, number, _ignore, _ignore = _devices_info[index]
+            if path == _RECEIVER_SEPARATOR[0]:
+                break
+            assert path == receiver_path
+            assert number != device.number
+            if number > device.number:
+                break
+            index = index + 1
 
     new_device_info = (receiver_path, device.number, device.name, device.status)
     assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
@@ -381,7 +382,7 @@ def _add_device(device):
     # label_prefix = b'\xE2\x94\x84 '.decode('utf-8')
     label_prefix = '   '
 
-    new_menu_item = Gtk.ImageMenuItem.new_with_label(label_prefix + device.name)
+    new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else '') + device.name)
     new_menu_item.set_image(Gtk.Image())
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver_path, device.number)
@@ -519,7 +520,7 @@ def update(device=None):
         else:
             # peripheral
             is_paired = bool(device)
-            receiver_path = device.receiver.path
+            receiver_path = device.receiver.path if device.receiver is not None else device.path
             index = None
             for idx, (path, number, _ignore, _ignore) in enumerate(_devices_info):
                 if path == receiver_path and number == device.number:
@@ -529,9 +530,8 @@ def update(device=None):
                 if index is None:
                     index = _add_device(device)
                 _update_menu_item(index, device)
-            else:
-                # was just unpaired
-                if index:
+            else:  # was just unpaired or unplugged
+                if index is not None:
                     _remove_device(index)
 
         menu_items = _menu.get_children()
