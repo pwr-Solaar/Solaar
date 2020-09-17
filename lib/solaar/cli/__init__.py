@@ -152,10 +152,13 @@ def _find_device(receivers, name):
                 number = None
 
     for r in receivers:
-        if number and number <= r.max_devices:
-            dev = r[number]
-            if dev:
-                return dev
+        if not r.isDevice:  # look for nth device of receiver
+            if number and number <= r.max_devices:
+                dev = r[number]
+                if dev:
+                    return dev
+        else:  # wired device, make a device list from it
+            r = [r]
 
         for dev in r:
             if (
@@ -185,7 +188,7 @@ def run(cli_args=None, hidraw_path=None):
 
     try:
         c = list(_receivers(hidraw_path))
-        if action == 'show':
+        if action == 'show' or action == 'probe' or action == 'config':
             c += list(_wired_devices(hidraw_path))
 
         if not c:

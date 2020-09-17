@@ -53,6 +53,7 @@ class Receiver(object):
         self.handle = handle
         assert device_info
         self.path = device_info.path
+        self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         # USB product id, used for some Nano receivers
         self.product_id = device_info.product_id
         product_info = _product_information(self.product_id)
