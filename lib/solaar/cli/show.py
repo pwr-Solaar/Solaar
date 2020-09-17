@@ -24,6 +24,7 @@ from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
+from logitech_receiver.common import strhex as _strhex
 
 
 def _print_receiver(receiver):
@@ -63,6 +64,24 @@ def _battery_text(level):
         return str(level)
     else:
         return '%d%%' % level
+
+
+def _battery_line(dev):
+    battery = _hidpp20.get_battery(dev)
+    if battery is None:
+        battery = _hidpp10.get_battery(dev)
+    if battery is not None:
+        level, status, nextLevel = battery
+        text = _battery_text(level)
+        nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
+        print('     Battery: %s, %s%s.' % (text, status, nextText))
+    else:
+        battery_voltage = _hidpp20.get_voltage(dev)
+        if battery_voltage:
+            (level, status, voltage, charge_sts, charge_type) = battery_voltage
+            print('     Battery: %smV, %s, %s.' % (voltage, status, level))
+        else:
+            print('     Battery status unavailable.')
 
 
 def _print_device(dev, num=None):
@@ -122,17 +141,9 @@ def _print_device(dev, num=None):
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
                     print('            Multiplier: %s' % multi)
                     if has_invert:
-                        print('            Has invert')
-                        if inv:
-                            print('              Inverse wheel motion')
-                        else:
-                            print('              Normal wheel motion')
+                        print('            Has invert:', 'Inverse wheel motion' if inv else 'Normal wheel motion')
                     if has_switch:
-                        print('            Has ratchet switch')
-                        if ratchet:
-                            print('              Normal wheel mode')
-                        else:
-                            print('              Free wheel mode')
+                        print('            Has ratchet switch:', 'Normal wheel mode' if ratchet else 'Free wheel mode')
                     if res:
                         print('            High resolution mode')
                     else:
@@ -184,6 +195,18 @@ def _print_device(dev, num=None):
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():
                     print('            Host %s (%s): %s' % (host, 'paired' if paired else 'unpaired', name))
+            elif feature == _hidpp20.FEATURE.DEVICE_NAME:
+                print('            Name: %s' % _hidpp20.get_name(dev))
+                print('            Kind: %s' % _hidpp20.get_kind(dev))
+            elif feature == _hidpp20.FEATURE.DEVICE_FW_VERSION:
+                for fw in _hidpp20.get_firmware(dev):
+                    extras = _strhex(fw.extras) if fw.extras else ''
+                    print('            Firmware: %s %s %s %s' % (fw.kind, fw.name, fw.version, extras))
+            elif feature == _hidpp20.FEATURE.REPORT_RATE:
+                print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
+            elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:
+                print('', end='       ')
+                _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
                     v = setting.read(False)
@@ -215,21 +238,7 @@ def _print_device(dev, num=None):
         for k in dev.gestures.specs.values():
             print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
-        battery = _hidpp20.get_battery(dev)
-        if battery is None:
-            battery = _hidpp10.get_battery(dev)
-        if battery is not None:
-            level, status, nextLevel = battery
-            text = _battery_text(level)
-            nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
-            print('     Battery: %s, %s%s.' % (text, status, nextText))
-        else:
-            battery_voltage = _hidpp20.get_voltage(dev)
-            if battery_voltage:
-                (level, status, voltage, charge_sts, charge_type) = battery_voltage
-                print('     Battery: %smV, %s, %s.' % (voltage, status, level))
-            else:
-                print('     Battery status unavailable.')
+        _battery_line(dev)
     else:
         print('     Battery: unknown (device is offline).')
 
