@@ -6,6 +6,7 @@ from logging import INFO as _INFO
 from logging import getLogger
 
 import hidapi as _hid
+import solaar.configuration as _configuration
 
 from . import base as _base
 from . import hidpp10 as _hidpp10
@@ -59,6 +60,14 @@ class Device(object):
         self._protocol = None
         # serial number (an 8-char hex string)
         self._serial = None
+        # unit id (distinguishes within a model - the same as serial)
+        self._unitId = None
+        # model id (contains identifiers for the transports of the device)
+        self._modelId = None
+        # map from transports to product identifiers
+        self._tid_map = None
+        # persister holds settings
+        self._persister = None
 
         self._firmware = None
         self._keys = None
@@ -197,6 +206,29 @@ class Device(object):
         return self._name or self.codename or ('Unknown device %s' % (self.wpid or self.product_id))
 
     @property
+    def unitId(self):
+        if not self._unitId:
+            if self.online and self.protocol >= 2.0:
+                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+                if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                    _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        return self._unitId
+
+    @property
+    def modelId(self):
+        if not self._modelId:
+            if self.online and self.protocol >= 2.0:
+                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+        return self._modelId
+
+    @property
+    def tid_map(self):
+        if not self._tid_map:
+            if self.online and self.protocol >= 2.0:
+                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+        return self._tid_map
+
+    @property
     def kind(self):
         if not self._kind:
             pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + self.number - 1) if self.receiver else None
@@ -285,7 +317,7 @@ class Device(object):
     def settings(self):
         if self._settings is None:
             self._settings = []
-            if self.descriptor and self.descriptor.settings:
+            if self.descriptor and self.descriptor.settings and self.persister:
                 self._settings = []
                 for s in self.descriptor.settings:
                     try:
@@ -299,6 +331,12 @@ class Device(object):
         if not self._feature_settings_checked:
             self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
+
+    @property
+    def persister(self):
+        if not self._persister:
+            self._persister = _configuration.persister(self)
+        return self._persister
 
     def get_kind_from_index(self, index, receiver):
         """Get device kind from 27Mhz device index"""
