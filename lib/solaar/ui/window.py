@@ -143,6 +143,8 @@ def _create_device_panel():
     p._lux = _status_line(_('Lighting'))
     p.pack_start(p._lux, False, False, 0)
 
+    p.pack_start(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL), False, False, 0)  # spacer
+
     p._config = _config_panel.create()
     p.pack_end(p._config, True, True, 4)
 
