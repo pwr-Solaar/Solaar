@@ -65,7 +65,7 @@ and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/d
 
 Prebuilt packages are available for some Linux distros.
 
-Solaar has progressed beyond version 1.0 but some distros or repositories
+Solaar has progressed beyond version 1.0 but some distros or repositories provide
 version 0.9.2, which is very old. Installing the current version will
 provide significant improvements. If a recent version of Solaar is not
 available from the standard repositories for your distribution you can try
