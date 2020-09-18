@@ -36,6 +36,8 @@ _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
 _KEY_VERSION = '_version'
 _KEY_NAME = '_name'
+_KEY_MODEL_ID = '_modelId'
+_KEY_UNIT_ID = '_unitId'
 _configuration = {}
 
 
@@ -96,38 +98,37 @@ def _cleanup(d):
             _cleanup(value)
 
 
-def _device_key(device):
-    return '%s:%s' % (device.wpid, device.serial)
-
-
 class _DeviceEntry(dict):
-    def __init__(self, *args, **kwargs):
-        super(_DeviceEntry, self).__init__(*args, **kwargs)
+    def __init__(self, device, **kwargs):
+        super(_DeviceEntry, self).__init__(**kwargs)
+        self[_KEY_NAME] = device.name
+        if device.modelId:
+            self[_KEY_MODEL_ID] = device.modelId
+        if device.unitId:
+            self[_KEY_UNIT_ID] = device.unitId
 
     def __setitem__(self, key, value):
         super(_DeviceEntry, self).__setitem__(key, value)
         save()
 
 
-def _device_entry(device):
+def persister(device):
     if not _configuration:
         _load()
 
-    device_key = _device_key(device)
-    c = _configuration.get(device_key) or {}
+    wpid = device.wpid if device.wpid else device.tid_map.get('wpid') if device.tid_map else None
+    wpid = wpid if wpid else device.modelId  # use entire modelId if device doesn't have a wpid
+    serial = device.serial if device.wpid and device.serial else device.unitId
+    key = '%s:%s' % (wpid, serial)
+
+    c = _configuration.get(key) or {}
 
     if not isinstance(c, _DeviceEntry):
-        c[_KEY_NAME] = device.name
-        c = _DeviceEntry(c)
-        _configuration[device_key] = c
+        c = _DeviceEntry(device, **c)
+        _configuration[key] = c
 
     return c
 
 
 def attach_to(device):
-    """Apply the last saved configuration to a device."""
-    if not _configuration:
-        _load()
-
-    persister = _device_entry(device)
-    device.persister = persister
+    pass
