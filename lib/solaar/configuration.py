@@ -36,6 +36,8 @@ _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
 _KEY_VERSION = '_version'
 _KEY_NAME = '_name'
+_KEY_MODEL_ID = '_modelId'
+_KEY_UNIT_ID = '_unitId'
 _configuration = {}
 
 
@@ -82,8 +84,8 @@ def save():
         if _log.isEnabledFor(_INFO):
             _log.info('saved %s to %s', _configuration, _file_path)
         return True
-    except Exception:
-        _log.error('failed to save to %s', _file_path)
+    except Exception as e:
+        _log.error('failed to save to %s: %s', _file_path, e)
 
 
 def _cleanup(d):
@@ -96,38 +98,56 @@ def _cleanup(d):
             _cleanup(value)
 
 
-def _device_key(device):
-    return '%s:%s' % (device.wpid, device.serial)
-
-
 class _DeviceEntry(dict):
-    def __init__(self, *args, **kwargs):
-        super(_DeviceEntry, self).__init__(*args, **kwargs)
+    def __init__(self, device, **kwargs):
+        super(_DeviceEntry, self).__init__(**kwargs)
+        self[_KEY_NAME] = device.name
+        self.update(device)
 
     def __setitem__(self, key, value):
         super(_DeviceEntry, self).__setitem__(key, value)
         save()
 
+    def update(self, device):
+        if device.modelId:
+            self[_KEY_MODEL_ID] = device.modelId
+        if device.unitId:
+            self[_KEY_UNIT_ID] = device.unitId
 
-def _device_entry(device):
+
+def persister(device):
     if not _configuration:
         _load()
 
-    device_key = _device_key(device)
-    c = _configuration.get(device_key) or {}
+    entry = {}
+    key = None
+    if device.wpid:  # connected via receiver
+        entry = _configuration.get('%s:%s' % (device.wpid, device.serial), {})
+    if entry or device.protocol == 1.0:  # found entry or create entry for old-style devices
+        key = '%s:%s' % (device.wpid, device.serial)
+    elif not entry and device.modelId:  # online new-style device so look for modelId and unitId
+        for k, c in _configuration.items():
+            if isinstance(c, dict) and c.get(_KEY_MODEL_ID) == device.modelId and c.get(_KEY_UNIT_ID) == device.unitId:
+                entry = c  # use the entry that matches modelId and unitId
+                key = k
+                break
+        if device.wpid and entry:  # move entry to wpid:serial
+            del _configuration[key]
+            key = '%s:%s' % (device.wpid, device.serial)
+            _configuration[key] = entry
+        elif device.wpid and not entry:  # create now with wpid:serial
+            key = '%s:%s' % (device.wpid, device.serial)
+        else:  # create now with modelId:unitId
+            key = '%s:%s' % (device.modelId, device.unitId)
+    else:  # defer until more is known (i.e., device comes on line)
+        return
 
-    if not isinstance(c, _DeviceEntry):
-        c[_KEY_NAME] = device.name
-        c = _DeviceEntry(c)
-        _configuration[device_key] = c
+    if key and not isinstance(entry, _DeviceEntry):
+        entry = _DeviceEntry(device, **entry)
+        _configuration[key] = entry
 
-    return c
+    return entry
 
 
 def attach_to(device):
-    """Apply the last saved configuration to a device."""
-    if not _configuration:
-        _load()
-
-    persister = _device_entry(device)
-    device.persister = persister
+    pass
