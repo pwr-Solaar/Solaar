@@ -405,6 +405,9 @@ def _device_selected(selection):
 
 def _receiver_row(receiver_path, receiver=None):
     assert receiver_path
+    r = _model.get_iter_first()
+    while r:
+        r = _model.iter_next(r)
 
     item = _model.get_iter_first()
     while item:
@@ -433,21 +436,25 @@ def _device_row(receiver_path, device_number, device=None):
     assert device_number is not None
 
     receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
-    if receiver_row and device_number == 0:  # wired device, receiver row is device row
-        return receiver_row
 
-    item = _model.iter_children(receiver_row)
-    new_child_index = 0
-    while item:
-        assert _model.get_value(item, _COLUMN.PATH) == receiver_path
-        item_number = _model.get_value(item, _COLUMN.NUMBER)
-        if item_number == device_number:
-            return item
-        if item_number > device_number:
-            item = None
-            break
-        new_child_index += 1
-        item = _model.iter_next(item)
+    if device_number == 0:  # direct-connected device, receiver row is device row
+        if receiver_row:
+            return receiver_row
+        item = None
+        new_child_index = 0
+    else:
+        item = _model.iter_children(receiver_row)
+        new_child_index = 0
+        while item:
+            assert _model.get_value(item, _COLUMN.PATH) == receiver_path
+            item_number = _model.get_value(item, _COLUMN.NUMBER)
+            if item_number == device_number:
+                return item
+            if item_number > device_number:
+                item = None
+                break
+            new_child_index += 1
+            item = _model.iter_next(item)
 
     if not item and device:
         icon_name = _icons.device_icon_name(device.name, device.kind)
@@ -527,7 +534,7 @@ def _update_details(button):
             yield (_('Path'), device.path)
             if device.kind is None:
                 # 046d is the Logitech vendor id
-                yield (_('USB id'), '046d:' + device.product_id)
+                yield (_('USB ID'), '046d:' + device.product_id)
 
                 if read_all:
                     yield (_('Serial'), device.serial)
@@ -540,7 +547,7 @@ def _update_details(button):
                 if device.wpid:
                     yield (_('Wireless PID'), device.wpid)
                 if device.product_id:
-                    yield (_('USB id'), '046d:' + device.product_id)
+                    yield (_('Product ID'), '046d:' + device.product_id)
                 hid_version = device.protocol
                 yield (_('Protocol'), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
                 if read_all and device.polling_rate:
@@ -555,6 +562,8 @@ def _update_details(button):
                     yield (_('Serial'), device.serial)
                 else:
                     yield (_('Serial'), '...')
+                if read_all and device.unitId and device.unitId != device.serial:
+                    yield (_('Unit ID'), device.unitId)
 
             if read_all:
                 if device.firmware:
