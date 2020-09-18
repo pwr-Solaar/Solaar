@@ -64,43 +64,44 @@ _GP = _hidpp20.PARAM
 
 # yapf: disable
 _HAND_DETECTION = ('hand-detection', _('Hand Detection'), _('Turn on illumination when the hands hover over the keyboard.'))
-_SMOOTH_SCROLL = ('smooth-scroll', _('Smooth Scrolling'), _('High-sensitivity mode for vertical scroll with the wheel.'))
+_SMOOTH_SCROLL = ('smooth-scroll', _('Scroll Wheel Smooth Scrolling'),
+                  _('High-sensitivity mode for vertical scroll with the wheel.'))
 _SIDE_SCROLL = ('side-scroll', _('Side Scrolling'),
                 _('When disabled, pushing the wheel sideways sends custom button events\n'
                   'instead of the standard side-scrolling events.'))
-_HI_RES_SCROLL = ('hi-res-scroll', _('High Resolution Scrolling'),
+_HI_RES_SCROLL = ('hi-res-scroll', _('Scroll Wheel High Resolution'),
                   _('High-sensitivity mode for vertical scroll with the wheel.'))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('HID++ Scrolling'),
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('Scroll Wheel HID++ Scrolling'),
                    _('HID++ mode for vertical scroll with the wheel.') + '\n' +
                    _('Effectively turns off wheel scrolling in Linux.'))
-_HIRES_INV = ('hires-smooth-invert', _('Wheel Invert Direction'),
+_HIRES_INV = ('hires-smooth-invert', _('Scroll Wheel Direction'),
               _('Invert direction for vertical scroll with wheel.'))
-_HIRES_RES = ('hires-smooth-resolution', _('Wheel Resolution'),
+_HIRES_RES = ('hires-smooth-resolution', _('Scroll Wheel Resolution'),
               _('High-sensitivity mode for vertical scroll with the wheel.'))
 _FN_SWAP = ('fn-swap', _('Swap Fx function'),
             _('When set, the F1..F12 keys will activate their special function,\n'
               'and you must hold the FN key to activate their standard function.') + '\n\n' +
             _('When unset, the F1..F12 keys will activate their standard function,\n'
               'and you must hold the FN key to activate their special function.'))
-_DPI = ('dpi', _('Sensitivity (DPI)'), _('Mouse sensitivity to movement'))
+_DPI = ('dpi', _('Sensitivity (DPI)'), _('Mouse movement sensitivity'))
 _POINTER_SPEED = ('pointer_speed', _('Sensitivity (Pointer Speed)'),
                   _('Speed multiplier for mouse (256 is normal multiplier).'))
-_SMART_SHIFT = ('smart-shift', _('Smart Shift'),
+_SMART_SHIFT = ('smart-shift', _('Scroll Wheel Rachet'),
                 _('Automatically switch the mouse wheel between ratchet and freespin mode.\n'
-                  'The mouse wheel is always free at 0, and always locked at 50'))
+                  'The mouse wheel is always free at 0, and always ratcheted at 50'))
 _BACKLIGHT = ('backlight', _('Backlight'), _('Turn illumination on or off on keyboard.'))
-_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Actions'),
+_REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Key/Button Actions'),
                         _('Change the action for the key or button.') + '\n' +
                         _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
-_THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('HID++ Thumb Scrolling'),
+_THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel HID++ Scrolling'),
                       _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' +
                       _('Effectively turns off thumb scrolling in Linux.'))
-_THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Scroll Invert'), _('Invert thumb scroll direction.'))
-_GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweaks the mouse/touchpad behaviour.'))
-_GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Changes numerical parameters of a mouse/touchpad.'))
+_THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('Invert thumb wheel scroll direction.'))
+_GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/touchpad behaviour.'))
+_GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
 
 
 _GESTURE2_GESTURES_LABELS = {
@@ -542,6 +543,7 @@ def _S(name, featureID=None, featureFn=None, registerFn=None, identifier=None):
     return (name[0], featureID, featureFn, registerFn, identifier if identifier else name[0].replace('-', '_'))
 
 
+# The order of settings here is the order they are displayed in the GUI
 _SETTINGS_TABLE = [
     _S(_HAND_DETECTION, registerFn=_register_hand_detection),
     _S(_SMOOTH_SCROLL, registerFn=_register_smooth_scroll),
@@ -550,20 +552,20 @@ _SETTINGS_TABLE = [
     _S(_LOW_RES_SCROLL, _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll),
     _S(_HIRES_INV, _F.HIRES_WHEEL, _feature_hires_smooth_invert),
     _S(_HIRES_RES, _F.HIRES_WHEEL, _feature_hires_smooth_resolution),
+    _S(_SMART_SHIFT, _F.SMART_SHIFT, _feature_smart_shift),
+    _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
+    _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
+    _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
+    _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
     _S(_FN_SWAP, _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
-    _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
     _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
-    _S(_SMART_SHIFT, _F.SMART_SHIFT, _feature_smart_shift),
-    _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_REPROGRAMMABLE_KEYS, _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
-    _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
-    _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
     _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gestures),
     _S(_GESTURE2_PARAMS, _F.GESTURE_2, _feature_gesture2_params),
 ]
