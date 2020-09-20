@@ -476,8 +476,9 @@ def _feature_change_host_callback(device):
         hostNames[currentHost] = (True, socket.gethostname().partition('.')[0])
     choices = _NamedInts()
     for host in range(0, numHosts):
-        _ignore, hostName = hostNames.get(host, (False, ''))
-        choices[host] = str(host + 1) + ':' + hostName if hostName else str(host + 1)
+        paired, hostName = hostNames.get(host, (True, ''))
+        if paired:
+            choices[host] = str(host + 1) + ':' + hostName if hostName else str(host + 1)
     return _ChoicesV(choices, read_skip_byte_count=1) if choices else None
 
 
