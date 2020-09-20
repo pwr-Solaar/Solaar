@@ -103,8 +103,10 @@ if available:
             except Exception:
                 _log.exception('showing %s', n)
 
-    def show(dev, reason=None, icon=None):
-        """Show a notification with title and text."""
+    def show(dev, reason=None, icon=None, progress=None):
+        """Show a notification with title and text.
+        Optionally displays the `progress` integer value
+        in [0, 100] as a progress bar."""
         if available and Notify.is_initted():
             summary = dev.name
 
@@ -130,6 +132,8 @@ if available:
             urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
             n.set_urgency(urgency)
             n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
+            if progress:
+                n.set_hint('value', GLib.Variant('i', progress))
 
             try:
                 # if _log.isEnabledFor(_DEBUG):
