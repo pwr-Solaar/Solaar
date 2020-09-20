@@ -482,7 +482,15 @@ _D(
     ],
 )
 
-_D('Wireless Mouse MX Vertical', codename='MX Vertical', protocol=4.5, wpid='407B')
+_D(
+    'Wireless Mouse MX Vertical',
+    codename='MX Vertical',
+    protocol=4.5,
+    wpid='407B',
+    settings=[
+        _FS.mx_vertical_dpi_sliding(),
+    ],
+)
 
 _D(
     'G7 Cordless Laser Mouse',
