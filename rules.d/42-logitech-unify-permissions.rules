@@ -1,57 +1,14 @@
 # This rule was added by Solaar.
 #
-# Allows non-root users to have raw access the Logitech Unifying USB Receiver
-# device. For development purposes, allowing users to write to the receiver is
-# potentially dangerous (e.g. perform firmware updates).
+# Allows non-root users to have raw access to Logitech devices.
+# Allowing users to write to the device is potentially dangerous
+# because they could perform firmware updates.
 
 ACTION != "add", GOTO="solaar_end"
 SUBSYSTEM != "hidraw", GOTO="solaar_end"
 
-# official Unifying receivers
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52b", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c532", GOTO="solaar_apply"
-
-# Nano receiver, "Unifying Ready"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52f", GOTO="solaar_apply"
-
-# classic Nano receiver -- VX Nano mouse
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c526", GOTO="solaar_apply"
-
-# classic Nano receiver -- MK220/MK320 mouse and keyboard combo
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c52e", GOTO="solaar_apply"
-
-# classic? Nano receiver -- V220 wireless mouse
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c51b", GOTO="solaar_apply"
-
-# G-Series receiver -- G-Series mouse
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c531", GOTO="solaar_apply"
-
-# other Nano receivers known to Solaar
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c517", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c518", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c51a", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c521", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c525", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c534", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c537", GOTO="solaar_apply"
-
-# Lightspeed receivers
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c539", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53a", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53d", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c53f", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c545", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c541", GOTO="solaar_apply"
-
-# Logitech wired devices
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c081", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c082", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c086", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c087", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c088", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c090", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c091", GOTO="solaar_apply"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c08d", GOTO="solaar_apply"
+# Logitech receivers and direct-connected devices
+ATTRS{idVendor}=="046d", GOTO="solaar_apply"
 
 # Lenovo nano receiver
 ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="6042", GOTO="solaar_apply"
