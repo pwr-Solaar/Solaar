@@ -141,6 +141,7 @@ WIRED_DEVICE_C088 = _wired_device(0xc088)  # GPro
 WIRED_DEVICE_C090 = _wired_device(0xc090)  # G703 Hero
 WIRED_DEVICE_C091 = _wired_device(0xc091)  # G903 Hero
 WIRED_DEVICE_C08d = _wired_device(0xc08d)  # G502 Hero
+WIRED_DEVICE_C08a = _wired_device(0xc08a)  # MX Vertical
 
 del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device
 
@@ -177,6 +178,7 @@ WIRED_DEVICES = (
     WIRED_DEVICE_C090,
     WIRED_DEVICE_C091,
     WIRED_DEVICE_C08d,
+    WIRED_DEVICE_C08a,
 )
 
 
