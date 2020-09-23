@@ -117,7 +117,7 @@ def _wired_devices(dev_path=None):
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            d = Device(None, 0, info=dev_info)
+            d = Device.open(dev_info)
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('[%s] => %s', dev_info.path, d)
             if d is not None:

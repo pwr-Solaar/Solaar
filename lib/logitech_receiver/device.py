@@ -11,10 +11,10 @@ import hidapi as _hid
 import solaar.configuration as _configuration
 
 from . import base as _base
+from . import descriptors as _descriptors
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
-from .descriptors import DEVICES as _DESCRIPTORS
 from .i18n import _
 from .settings_templates import check_feature_settings as _check_feature_settings
 
@@ -51,7 +51,8 @@ class Device(object):
         # the Wireless PID is unique per device model
         self.wpid = None
         self.descriptor = None
-
+        # Bluetooth connections need long messages
+        self.bluetooth = False
         # mouse, keyboard, etc (see _hidpp10.DEVICE_KIND)
         self._kind = None
         # Unifying peripherals report a codename.
@@ -127,7 +128,6 @@ class Device(object):
                     if device_info is None:
                         _log.error('failed to read Nano wpid for device %d of %s', number, receiver)
                         raise _base.NoSuchDevice(number=number, receiver=receiver, error='read Nano wpid')
-
                     self.wpid = _strhex(device_info[3:5])
                     self._power_switch = '(' + _('unknown') + ')'
 
@@ -147,7 +147,7 @@ class Device(object):
                 except Exception:  # give up
                     self.handle = None
 
-            self.descriptor = _DESCRIPTORS.get(self.wpid)
+            self.descriptor = _descriptors.get_wpid(self.wpid)
             if self.descriptor is None:
                 # Last chance to correctly identify the device; many Nano
                 # receivers do not support this call.
@@ -156,21 +156,24 @@ class Device(object):
                     codename_length = ord(codename[1:2])
                     codename = codename[2:2 + codename_length]
                     self._codename = codename.decode('ascii')
-                    self.descriptor = _DESCRIPTORS.get(self._codename)
-
-            if self.descriptor:
-                self._name = self.descriptor.name
-                self._protocol = self.descriptor.protocol
-                if self._codename is None:
-                    self._codename = self.descriptor.codename
-                if self._kind is None:
-                    self._kind = self.descriptor.kind
+                    self.descriptor = _descriptors.get_codename(self._codename)
         else:
             self.path = info.path
             self.handle = _hid.open_path(self.path)
-            self.product_id = info.product_id
-            self._serial = ''.join(info.serial.split('-')).upper()
             self.online = True
+            self.product_id = info.product_id
+            self.bluetooth = info.bus_id == 0x0005
+            self.descriptor = _descriptors.get_btid(self.product_id
+                                                    ) if self.bluetooth else _descriptors.get_usbid(self.product_id)
+
+        if self.descriptor:
+            self._name = self.descriptor.name
+            if self.descriptor.protocol:
+                self._protocol = self.descriptor.protocol
+            if self._codename is None:
+                self._codename = self.descriptor.codename
+            if self._kind is None:
+                self._kind = self.descriptor.kind
 
         if self._protocol is not None:
             self.features = None if self._protocol < 2.0 else _hidpp20.FeaturesArray(self)
@@ -181,7 +184,7 @@ class Device(object):
     @property
     def protocol(self):
         if not self._protocol and self.online:
-            self._protocol = _base.ping(self.handle or self.receiver.handle, self.number)
+            self._protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
             # if the ping failed, the peripheral is (almost) certainly offline
             self.online = self._protocol is not None
 
@@ -417,7 +420,14 @@ class Device(object):
         return None
 
     def request(self, request_id, *params, no_reply=False):
-        return _base.request(self.handle or self.receiver.handle, self.number, request_id, *params, no_reply=no_reply)
+        return _base.request(
+            self.handle or self.receiver.handle,
+            self.number,
+            request_id,
+            *params,
+            no_reply=no_reply,
+            long_message=self.bluetooth
+        )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
@@ -425,7 +435,7 @@ class Device(object):
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle or self.receiver.handle, self.number)
+        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol

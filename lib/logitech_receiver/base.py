@@ -156,7 +156,7 @@ def close(handle):
     return False
 
 
-def write(handle, devnumber, data):
+def write(handle, devnumber, data, long_message=False):
     """Writes some data to the receiver, addressed to a certain device.
 
     :param handle: an open UR handle.
@@ -173,7 +173,7 @@ def write(handle, devnumber, data):
     assert data is not None
     assert isinstance(data, bytes), (repr(data), type(data))
 
-    if len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
+    if long_message or len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b'\x82':
         wdata = _pack('!BB18s', 0x11, devnumber, data)
     else:
         wdata = _pack('!BB5s', 0x10, devnumber, data)
@@ -232,7 +232,7 @@ def _read(handle, timeout):
         timeout = int(timeout * 1000)
         data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
     except Exception as reason:
-        _log.error('read failed, assuming handle %r no longer available', handle)
+        _log.warn('read failed, assuming handle %r no longer available', handle)
         close(handle)
         raise NoReceiver(reason=reason)
 
@@ -320,7 +320,7 @@ del namedtuple
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False):
+def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -357,7 +357,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
     ihandle = int(handle)
     notifications_hook = getattr(handle, 'notifications_hook', None)
     _skip_incoming(handle, ihandle, notifications_hook)
-    write(ihandle, devnumber, request_data)
+    write(ihandle, devnumber, request_data, long_message)
 
     if no_reply:
         return None
@@ -443,7 +443,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
     # raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
-def ping(handle, devnumber):
+def ping(handle, devnumber, long_message=False):
     """Check if a device is connected to the receiver.
 
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
@@ -467,7 +467,7 @@ def ping(handle, devnumber):
     ihandle = int(handle)
     notifications_hook = getattr(handle, 'notifications_hook', None)
     _skip_incoming(handle, ihandle, notifications_hook)
-    write(ihandle, devnumber, request_data)
+    write(ihandle, devnumber, request_data, long_message)
 
     # we consider timeout from this point
     request_started = _timestamp()
