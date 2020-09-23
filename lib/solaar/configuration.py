@@ -137,7 +137,7 @@ def persister(device):
             _configuration[key] = entry
         elif device.wpid and not entry:  # create now with wpid:serial
             key = '%s:%s' % (device.wpid, device.serial)
-        else:  # create now with modelId:unitId
+        elif not entry:  # create now with modelId:unitId
             key = '%s:%s' % (device.modelId, device.unitId)
     else:  # defer until more is known (i.e., device comes on line)
         return

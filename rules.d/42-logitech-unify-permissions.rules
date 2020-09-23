@@ -7,12 +7,14 @@
 ACTION != "add", GOTO="solaar_end"
 SUBSYSTEM != "hidraw", GOTO="solaar_end"
 
-# Logitech receivers and direct-connected devices
+# USB-connected Logitech receivers and devices
 ATTRS{idVendor}=="046d", GOTO="solaar_apply"
 
 # Lenovo nano receiver
 ATTRS{idVendor}=="17ef", ATTRS{idProduct}=="6042", GOTO="solaar_apply"
 
+# Bluetooth-connected Logitech devices
+KERNELS == "0005:046D:*", GOTO="solaar_apply"
 
 GOTO="solaar_end"
 

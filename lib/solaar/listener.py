@@ -324,16 +324,22 @@ def stop_all():
 # so mark its saved status to ensure that the status is pushed to the device when it comes back
 def ping_all(resuming=False):
     for l in _all_listeners.values():
-        count = l.receiver.count()
-        if count:
-            for dev in l.receiver:
-                if resuming:
-                    dev.status._active = False
-                dev.ping()
-                l._status_changed(dev)
-                count -= 1
-                if not count:
-                    break
+        if l.receiver.isDevice:
+            if resuming:
+                l.receiver.status._active = False
+            l.receiver.ping()
+            l._status_changed(l.receiver)
+        else:
+            count = l.receiver.count()
+            if count:
+                for dev in l.receiver:
+                    if resuming:
+                        dev.status._active = False
+                    dev.ping()
+                    l._status_changed(dev)
+                    count -= 1
+                    if not count:
+                        break
 
 
 _status_callback = None
