@@ -22,6 +22,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from .descriptors import DEVICES as _DEVICES
+
 # max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
 # may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False
 ## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
@@ -99,8 +101,6 @@ _ex100_receiver = lambda product_id: {
     'ex100_27mhz_wpid_fix': True
 }
 
-_wired_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'usb_interface': 2, 'isDevice': True}
-
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
 UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
@@ -132,19 +132,6 @@ LIGHTSPEED_RECEIVER_C53d = _lightspeed_receiver(0xc53d)
 LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
 
-# Wired devices
-WIRED_DEVICE_C081 = _wired_device(0xc081)  # G900
-WIRED_DEVICE_C082 = _wired_device(0xc082)  # G403
-WIRED_DEVICE_C086 = _wired_device(0xc086)  # G903
-WIRED_DEVICE_C087 = _wired_device(0xc087)  # G703
-WIRED_DEVICE_C088 = _wired_device(0xc088)  # GPro
-WIRED_DEVICE_C090 = _wired_device(0xc090)  # G703 Hero
-WIRED_DEVICE_C091 = _wired_device(0xc091)  # G903 Hero
-WIRED_DEVICE_C08d = _wired_device(0xc08d)  # G502 Hero
-WIRED_DEVICE_C08a = _wired_device(0xc08a)  # MX Vertical
-
-del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device
-
 ALL = (
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
@@ -169,17 +156,25 @@ ALL = (
     LIGHTSPEED_RECEIVER_C541,
 )
 
-WIRED_DEVICES = (
-    WIRED_DEVICE_C081,
-    WIRED_DEVICE_C082,
-    WIRED_DEVICE_C086,
-    WIRED_DEVICE_C087,
-    WIRED_DEVICE_C088,
-    WIRED_DEVICE_C090,
-    WIRED_DEVICE_C091,
-    WIRED_DEVICE_C08d,
-    WIRED_DEVICE_C08a,
-)
+_wired_device = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'bus_id': 0x3,
+    'usb_interface': 2,
+    'isDevice': True
+}
+
+_bt_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'bus_id': 0x5, 'isDevice': True}
+
+WIRED_DEVICES = []
+
+for _ignore, d in _DEVICES.items():
+    if d.usbid:
+        WIRED_DEVICES.append(_wired_device(d.usbid))
+    if d.btid:
+        WIRED_DEVICES.append(_bt_device(d.btid))
+
+del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device, _bt_device
 
 
 def product_information(usb_id):
