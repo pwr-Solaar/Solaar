@@ -523,9 +523,9 @@ _D(
     ],
 )
 
-_D('Wireless Mouse MX Master 3', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
+_D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
 
-_D('Wireless Mouse MX Vertical', codename='MX Vertical', protocol=4.5, wpid='407B', btid=0xb020, usbid=0xc08a)
+_D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407B', btid=0xb020, usbid=0xc08a)
 
 _D(
     'G7 Cordless Laser Mouse',

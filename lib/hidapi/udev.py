@@ -55,6 +55,7 @@ DeviceInfo = namedtuple(
         'product',
         'interface',
         'driver',
+        'bus_id',
         'isDevice',
     ]
 )
@@ -91,23 +92,22 @@ def _match(action, device, filter):
     interface_number = filter.get('usb_interface')
     hid_driver = filter.get('hid_driver')
     isDevice = filter.get('isDevice')
+    bus_id = filter.get('bus_id')
 
-    usb_device = device.find_parent('usb', 'usb_device')
-    # print ("* parent", action, device, "usb:", usb_device)
-    if not usb_device:
+    hid_device = device.find_parent('hid')
+    if not hid_device:
         return
+    hid_id = hid_device.get('HID_ID')
+    if not hid_id:
+        return  # there are reports that sometimes the id isn't set up right so be defensive
+    bid, vid, pid = hid_id.split(':')
 
-    vid = usb_device.get('ID_VENDOR_ID')
-    pid = usb_device.get('ID_MODEL_ID')
-    if vid is None or pid is None:
-        return  # there are reports that sometimes the usb_device isn't set up right so be defensive
     if not ((vendor_id is None or vendor_id == int(vid, 16)) and (product_id is None or product_id == int(pid, 16))):
+        return
+    if not (bus_id is None or bus_id == int(bid, 16)):
         return
 
     if action == 'add':
-        hid_device = device.find_parent('hid')
-        if not hid_device:
-            return
         hid_driver_name = hid_device.get('DRIVER')
         # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
         if hid_driver:
@@ -126,17 +126,18 @@ def _match(action, device, filter):
             if usb_interface is None or interface_number != usb_interface:
                 return
 
-        attrs = usb_device.attributes
+        attrs = intf_device.attributes if intf_device else None
         d_info = DeviceInfo(
             path=device.device_node,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
             serial=hid_device.get('HID_UNIQ'),
-            release=attrs.get('bcdDevice'),
-            manufacturer=attrs.get('manufacturer'),
-            product=attrs.get('product'),
+            release=attrs.get('bcdDevice') if attrs else None,
+            manufacturer=attrs.get('manufacturer') if attrs else None,
+            product=attrs.get('product') if attrs else None,
             interface=usb_interface,
             driver=hid_driver_name,
+            bus_id=bus_id,
             isDevice=isDevice
         )
         return d_info
@@ -154,6 +155,7 @@ def _match(action, device, filter):
             product=None,
             interface=None,
             driver=None,
+            bus_id=None,
             isDevice=isDevice
         )
         return d_info
