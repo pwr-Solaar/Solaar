@@ -7,12 +7,13 @@ layout: page
 
 Under normal usage Solaar creates an icon in your system tray. This icon is
 usually a battery icon showing the approximate battery level for your device
-with the lowest known battery level. If there are no battery information,
+with the lowest known battery level. If there are no devices with battery information,
 then the icon is one of the Solaar icons.
 
-Solaar also has a main window. When it is invisible,
+Solaar also has a main window.  When the main window is invisible,
 click on the icon in the system tray to bring up the menu, and then
-click on a receiver or device in the menu.
+click on a receiver or device in the menu to see information about
+that receiver or device.
 
 The following is an image of the Solaar menu and the icon (the battery
 symbol is in the system tray at the left of the image). The icon can
@@ -49,11 +50,14 @@ about the selected receiver or device (useful for debugging).
 When a receiver is selected in the main window, you can pair a new device by
 clicking on the “Pair new device” button.
 Then turn on the device and it should pair with the receiver if that is possible.
+For multi-host devices first select the host position that you want.
+Some Lightspeed devices may pair by pressing a special pairing button.
 
 ![Solaar-main-window-receiver](Solaar-main-window-receiver.png)
 
 Some receivers can only pair with certain kinds of devices, other receivers
-pair a new device by replacing an existing paired device of the same kind, and even other receivers can only pair a limited number of times.
+pair a new device by replacing an existing paired device of the same kind,
+and even other receivers can only pair a limited number of times.
 A receiver with the Unifying logo should be able to pair with any device
 with the Unifying logo. If there are no open pairing slots, however, you may
 not be able to pair a new device. In this case to pair a new device you
@@ -110,3 +114,37 @@ Solaar also has a command line interface that can do most of what can be
 done using the main window. For more information on the
 command line interface, run `solaar --help` to see the commands and
 then `solaar <command> --help` to see the arguments to any of the commands.
+
+## Solaar settings
+
+Solaar supports the following settings:
+
+Setting                          | Description
+---------------------------------|------------
+Hand Detection			 | Turn on backlight when your hands hover over the keyboard
+Scroll Wheel Smooth Scrolling	 | Higher-speed vertical scrolling
+Side Scrolling	    		 | When off, side scrolling sends custom button events
+Scroll Wheel High Resolution	 | Higher-speed vertical scrolling
+Scroll Wheel HID++ Scrolling	 | When on, vertical scrolling uses HID++ events
+Scroll Wheel Direction		 | Reverse direction of vertical scrolling
+Scroll Wheel Resolution		 | Higher-speed vertical scrolling
+Scroll Wheel Rachet		 | Shift wheel ratchet on and off based on wheel speed
+Thumb Wheel HID++ Scrolling	 | When on, thumb-wheel scrolling uses HID++ events
+Thumb Wheel Direction		 | Reverse direction of thumb-wheel scrolling
+Sensitivity (DPI)		 | Mouse movement sensitivity
+Sensitivity (Pointer Speed)	 | Mouse movement sensitivity
+Backlight   			 | Turn on backlight
+Swap Fx function		 | Change Fn keys to normally do their special action
+Key/Button Actions   		 | Change what a key or button does
+Disable keys			 | Disable one or more keys
+Set OS				 | Change keys to match OS
+Change Host			 | Connect to a different host
+Gestures			 | Turn on and off various (mostly touchpad) gestures
+Gesture params			 | Modify parameters for gestures
+
+HID++ events are mostly not processed by Linux input drivers.
+Settings that involve sending HID++ events exist so that they can be
+turned off under Linux.
+
+Different Logitech devices may implement the same functionality in different ways,
+thus the different settings that do the same thing.

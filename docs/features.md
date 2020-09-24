@@ -36,7 +36,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_RESET`                         | `0x1802` | :x:                |
 `OOBSTATE`                             | `0x1805` | :x:                |
 `CONFIG_DEVICE_PROPS`                  | `0x1806` | :x:                |
-`CHANGE_HOST`                          | `0x1814` | :wrench:           |
+`CHANGE_HOST`                          | `0x1814` | :heavy_check_mark: |
 `HOSTS_INFO`                           | `0x1815` | :heavy_plus_sign:  | `get_host_names`, partial listing only
 `BACKLIGHT`                            | `0x1981` | :x:                |
 `BACKLIGHT2`                           | `0x1982` | :heavy_check_mark: | `_feature_backlight2`
@@ -50,7 +50,7 @@ Feature                                | ID       | Status             | Notes
 `REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys`, _feature_reprogrammable_keys
 `REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
 `PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :wrench:           |
-`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :x:                | status reporting from device
+`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :heavy_plus_sign:  | status reporting from device
 `REMAINING_PAIRING`                    | `0x1DF0` | :x:                |
 `FIRMWARE_PROPERTIES`                  | `0x1F1F` | :x:                |
 `ADC_MEASUREMENT`                      | `0x1F20` | :x:                |
@@ -93,7 +93,7 @@ Feature                                | ID       | Status             | Notes
 `TOUCHMOUSE_RAW_POINTS`                | `0x6110` | :x:                |
 `TOUCHMOUSE_6120`                      | `0x6120` | :x:                |
 `GESTURE`                              | `0x6500` | :x:                |
-`GESTURE_2`                            | `0x6501` | :wrench:           | `_feature_gesture2_gestures`, `_feature_gesture2_params`
+`GESTURE_2`                            | `0x6501` | :heavy_plus_sign:  | `_feature_gesture2_gestures`, `_feature_gesture2_params`
 `GKEY`                                 | `0x8010` | :x:                |
 `MKEYS`                                | `0x8020` | :x:                |
 `MR`                                   | `0x8030` | :x:                |
@@ -104,7 +104,7 @@ Feature                                | ID       | Status             | Notes
 `PER_KEY_LIGHTING`                     | `0x8080` | :x:                |
 `PER_KEY_LIGHTING_V2`                  | `0x8081` | :x:                |
 `MODE_STATUS`                          | `0x8090` | :x:                |
-`ONBOARD_PROFILES`                     | `0x8100` | :x:                |
+`ONBOARD_PROFILES`                     | `0x8100` | :x:                | in progress
 `MOUSE_BUTTON_SPY`                     | `0x8110` | :x:                |
 `LATENCY_MONITORING`                   | `0x8111` | :x:                |
 `GAMING_ATTACHMENTS`                   | `0x8120` | :x:                |
