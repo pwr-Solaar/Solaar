@@ -106,6 +106,8 @@ _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/tou
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
+_DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
+                 _('Make the crown send HID++ events (which are normally ignored in Linux).'))
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
@@ -684,6 +686,11 @@ def _feature_gesture2_params():
     return s
 
 
+def _feature_divert_crown():
+    rw = _FeatureRW(_F.CROWN, read_fnid=0x10, write_fnid=0x20)
+    return _Setting(_DIVERT_CROWN, rw, _BooleanV(true_value=0x02, false_value=0x01, mask=0xff), device_kind=(_DK.keyboard, ))
+
+
 #
 #
 #
@@ -707,13 +714,14 @@ _SETTINGS_TABLE = [
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
     _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
     _S(_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_dpi_sliding),
+    _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
     _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
     _S(_FN_SWAP, _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
-    _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
     _S(_REPROGRAMMABLE_KEYS, _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
+    _S(_DIVERT_CROWN, _F.CROWN, _feature_divert_crown),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
