@@ -505,6 +505,7 @@ _D(
     codename='MX Master',
     protocol=4.5,
     wpid='4041',
+    btid=0xb012,
     settings=[
         _FS.hires_smooth_invert(),
         _FS.hires_smooth_resolution(),
@@ -516,6 +517,7 @@ _D(
     codename='MX Master 2S',
     protocol=4.5,
     wpid='4069',
+    btid=0xb019,
     settings=[
         _FS.hires_smooth_invert(),
         _FS.hires_smooth_resolution(),
