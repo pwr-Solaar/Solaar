@@ -8,15 +8,21 @@ layout: page
 [**Solaar**][solaar] reports on and controls [Logitech][logitech] devices
 (keyboards, mice, and trackballs) that connect to your computer via a
 Logitech USB receiver (a very small piece of hardware that plugs into one of
-your USB ports) and communicate with the receiver using Logitech's HID++
-protocol. It is designed to detect all devices paired with your
+your USB ports)
+It is designed to detect all devices paired with your
 receivers, and at the very least display some basic information about them.
-
 At this moment, all [Unifying][unifying] receivers are supported (devices
 with USB ID `046d:c52b` or `046d:c532`) as are several Lightspeed Receivers
 and a dozen Nano receivers.
 
+Solaar also reports on and controls some Logitech devices that connect to your
+computer using a USB cable or via Bluetooth.
+At this moment only a few devices types that connect via a USB cable or Bluetooth
+are supported in Solaar as information needs to be added to Solaar for each device type.
+
 ## HID++
+
+The devices that Solaar handles use Logitech's HID++ protocol.
 
 HID++ is a Logitech-proprietary protocol that extends the standard HID
 protocol for interfacing with keyboards, mice, and so on. It allows
@@ -36,10 +42,12 @@ Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
 same to software as some M310 mice.)
 
-The software identity of a receiver can be determined by its USB id
+The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software
-identity of a device can be determined by its Wireless PID as reported by
-Solaar.
+identity of a device that connects to a receiver can be determined by
+its Wireless PID as reported by Solaar.  The software identity of devices that
+connect via a USB cable or via bluetooth can be determined by their USB or
+Bluetooth product ID.
 
 Even something as fundamental as pairing works differently for different
 receivers. For Unifying receivers, pairing adds a new paired device, but
@@ -64,7 +72,7 @@ that they were bought with.
 Solaar uses the HID++ protocol to pair devices to receivers and unpair
 devices from receivers, and also uses the HID++ protocol to display
 features of receivers and devices. Currently it only displays some
-features, but can modify even fewer. For more information on HID++ features
+features, and can modify even fewer. For a list of HID++ features
 and their support see [the features page](features).
 
 Solaar does not do anything beyond using the HID++ protocol to change the
@@ -82,7 +90,7 @@ WARNING: Updating firmware can cause a piece of hardware to become
 permanently non-functional if something goes wrong with the update or the
 update installs the wrong firmware.
 
-Solaar does keep track of some changeable state of a device between
+Solaar does keep track of some changeable settings of a device between
 invocations. When it starts, it restores on-line devices to their
 previously-known state, and while running it restores devices to
 their previously-known state when the device itself comes on line.

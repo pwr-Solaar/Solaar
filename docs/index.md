@@ -3,33 +3,34 @@ title: Solaar
 layout: default
 ---
 
-**Solaar** is a Linux manager for Logitech's devices that connect via USB
-[Unifying][unifying], Lightspeed, or Nano receivers.
-It does not work with Logitech peripherals that
-use Bluetooth or peripherals from other companies.
+**Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
+that connect wirelessly to a USB [Unifying][unifying], Lightspeed, or Nano receiver,
+connect directly via a USB cable, or connect via Bluetooth.
+Solaar does not work with peripherals from other companies.
 
 Solaar can be used as a GUI application or via its command-line interface.
-Both interfaces are able to list the devices paired to a receiver and
-show information about each device, including battery status for devices that support this feature.
-Solaar's GUI normally uses an icon in the system tray and starts with its main window hidden.
-The program can be invoked in several ways
+Both interfaces are able to list the connected devices and
+show information about each device, often including battery status.
+Solaar is able to pair and unpair devices with
+receivers as supported by the device and receiver.
+Solaar can also control some changeable features of devices,
+such as smooth scrolling or function key behavior.
+For more information on how to use Solaar see
+[the usage page](https://pwr-solaar.github.io/Solaar/usage),
+and for more information on its capabilities see
+[the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
 
-- `--window=show` (the default) starts with its main window visible
-- `--window=hide` starts with its main window hidden
-- `--window=only` do not use the system tray, but start with main window visible
+Solaar's GUI normally uses an icon in the system tray and starts with its main window visible.
+The GUI can be started in several ways
+
+- `--window=show` (the default) starts with its main window visible,
+- `--window=hide` starts with its main window hidden,
+- `--window=only` do not use the system tray, and start with main window visible.
 
 For more information on Solaar's command-line interface use the help option,
 as in `solaar --help`.
 
-Solaar is able to pair and unpair devices with
-receivers as supported by the receiver. Solaar can also control
-some changeable features of devices, such as smooth scrolling or
-function key behavior. For more information on how to use Solaar see
-[the usage page](https://pwr-solaar.github.io/Solaar/usage),
-and for more information on the capabilities see
-[the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
-
-Solaar does not process normal input from the devices. It is thus unable
+Solaar does not process normal input from devices. It is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
 by Linux drivers or other software.
 
@@ -45,18 +46,26 @@ Please report such experiences by creating an issue in
 
 [unifying]: https://en.wikipedia.org/wiki/Logitech_Unifying_receiver
 
+
 ## Supported Devices
 
 Solaar will detect all devices paired with your Unifying, Lightspeed, or Nano
 receiver, and at the very least display some basic information about them.
-It can pair and unpair a Logitech device showing the Unifying logo (Solaar's version of the [logo][logo])
-with any Unifying receiver and can pair and unpair devices with Lightspeed receivers.
+Solaar will detect some Logitech devices that connect via a USB cable or Bluetooth.
+
+Solaar can pair and unpair a Logitech device showing the Unifying logo
+(Solaar's version of the [logo][logo])
+with any Unifying receiver and
+can pair and unpair Lightspeed devices with Lightspeed receivers for the same model.
 Solaar can pair some Logitech devices with Logitech Nano receivers but not all Logitech
-devices can be paired with Nano receivers. Logitech devices without a Unifying logo
+devices can be paired with Nano receivers.
+Logitech devices without a Unifying logo
 generally cannot be paired with Unifying receivers.
 
-For some devices, extra settings (usually not available through the standard
-Linux system configuration) are supported. For a list of supported devices
+Solaar does not handle connecting or disconnecting via Bluetooth,
+which is done using the usual Bluetooth mechanisms.
+
+For a partial list of supported devices
 and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/devices).
 
 [logo]: assets/solaar.svg
@@ -104,6 +113,9 @@ for the step-by-step procedure for manual installation.
 - The icon in the system tray can show up as 'black on black' in dark
   distributions. This is due to problems in many system tray
   implementations. Changing to a different theme may help.
+
+- Sometimes the system tray icon does not show up.  The cause of this is unknown.
+  Either wait a while and try again or try with the `--window=hide` option.
 
 - If some icons appear broken in the application, make sure you've properly
   configured the Gtk theme and icon theme in your control panel.

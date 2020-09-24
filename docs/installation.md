@@ -22,7 +22,7 @@ most likely good to go.
 
 Solaar requires Python 3.6+
 and the `python3-pyudev` package.
-To run the GUI, solaar also requires Gtk3, and its GObject
+To run the GUI Solaar also requires Gtk3, and its GObject
 introspection bindings.
 The Debian/Ubuntu packages that need to be installed are
 `python3-gi` and `gir1.2-gtk-3.0`;
@@ -30,9 +30,9 @@ in Fedora you need `gtk3` and `python3-gobject`;
 if you're using another
 distribution the required packages are most likely named something similar.
 
-If the desktop notifications bindings are also installed
+If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
-you will also get desktop notifications when devices come online/go offline.
+you will also see desktop notifications when devices come online/go offline.
 For GNOME Shell/Budgie Desktop/KDE/XFCE support, you also need to have
 `gir1.2-ayatanaappindicator3-0.1` installed in Debian/Ubuntu. Although it is
 recommended to install and use `gir1.2-ayatanaappindicator3-0.1` if it is
@@ -48,14 +48,16 @@ that gives seated users write access to the HID devices for Logitech receiver an
 You can install this rule by copying, as root,
 `rules.d/42-logitech-unify-permissions.rules` from Solaar to
 `/etc/udev/rules.d`.
-The udev daemon will automatically pick up this file using inotify.
+You will probably also have to tell udev to reload its rule via
+`sudo udevadm control --reload-rules`.
 
-For this rule to set up the correct permissions for your receiver
-you will then need to either physically remove the receiver and
-re-insert it or reboot your computer.
+For this rule to set up the correct permissions for your receivers and devices
+you will then need to either disconnect your receivers and
+any USB-connected or Bluetooth-connected devices and
+re-connect them or reboot your computer.
 
 You only need to install Solaar's udev rule if it is not already installed
-on your system or you have a receiver that is not in the installed rule.
+on your system or the rule has changed.
 
 ## Running from the Download Directories
 

@@ -5,9 +5,10 @@ layout: page
 
 # Supported devices and receivers
 
-These tables list Logitech receivers and devices and to what degree their
+These tables provide a partial list of supported Logitech receivers and
+devices and to what degree their
 features are supported by Solaar. The information in these tables is
-incomplete, based on what devices users have been able to test Solaar with.
+based on what devices users have been able to test Solaar with.
 
 The HID++ column specifies the device's HID++ version. Some devices report
 version 4.5, but that is the same as version 2.0 as listed here.
@@ -40,11 +41,15 @@ arguments to the _D function are the device's long name, its short name
 (codename), its HID++ protocol version, its wireless product ID (wpid), and
 a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
 
+If a device connects via a USB cable or via Bluetooth its USB or Bluetooth product ID
+has to be added in `lib/logitech/descriptors.py`.
+
+
 ### Receivers
 
 | USB ID    | Kind       | Max Paired Devices |
 ------------|------------|--------------------|
-| 046d:c517 | 27MHz old  | 2-4?               |
+| 046d:c517 | 27MHz old  | 4                  |
 | 046d:c518 | Nano       | 1                  |
 | 046d:c51a | Nano       | 1                  |
 | 046d:c51b | Nano       | 1                  |
@@ -214,7 +219,7 @@ setting is useful only to disable smooth scrolling.
 | EX100 keyboard   | 0065 | 1.0   | yes     |                                         |
 | EX100 mouse      | 003f | 1.0   | yes     |                                         |
 
-* The EX100 is old, preunifying set, supporting only part of HID++ 1.0 features
+* The EX100 is an old, preunifying receiver and device set, supporting only part of HID++ 1.0 features
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com
