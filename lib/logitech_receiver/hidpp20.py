@@ -647,6 +647,7 @@ class KeysArray(object):
             return [self.__getitem__(i) for i in range(*indices)]
 
     def index(self, value):
+        self._ensure_all_keys_queried()
         for index, k in enumerate(self.keys):
             if k is not None and int(value) == int(k.key):
                 return index

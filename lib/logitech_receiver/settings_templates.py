@@ -21,7 +21,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import namedtuple
 from logging import DEBUG as _DEBUG
-from logging import ERROR as _ERROR
 from logging import getLogger
 
 from solaar.ui import notify as _notify
@@ -105,10 +104,8 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel HID++ Scrolling'),
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('Invert thumb wheel scroll direction.'))
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/touchpad behaviour.'))
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
-_MX_VERTICAL_DPI_SLIDING = (
-    'mx-vertical-dpi-sliding', _('DPI Sliding'),
-    _('Modify the DPI by sliding the mouse horizontally while holding the DPI button.')
-)
+_DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Ajustment'),
+                _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
@@ -344,18 +341,24 @@ def _feature_smart_shift():
     return _Setting(_SMART_SHIFT, _SmartShiftRW(_F.SMART_SHIFT), validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _feature_mx_vertical_dpi_sliding():
-    """Implements the ability to smoothly modify the DPI on an MX Vertical mouse
-    by sliding it horizontally while holding the DPI button."""
+def _feature_dpi_sliding_callback(device):
+    # need _F.REPROG_CONTROLS_V4 feature and a DPI Switch that can send raw XY
+    # and _F.ADJUSTABLE_DPI so that the DPI can be adjusted
+    if _F.ADJUSTABLE_DPI in device.features:
+        key_index = device.keys.index(_special_keys.CONTROL.DPI_Switch)
+        if key_index is not None and 'raw XY' in device.keys[key_index].flags:
+            return _BooleanV()
+
+
+def _feature_dpi_sliding():
+    """Implements the ability to smoothly modify the DPI
+    by sliding a mouse horizontally while holding the DPI button."""
     class _DpiSlidingRW(object):
         def __init__(self):
-            # HACK: pretend to be FeatureRW because every setting must have this kind
-            # on devices with HID++ 2.0 or greater
+            # HACK: pretend to be FeatureRW because every setting must have this kind on HID++ 2.0 devices
             self.kind = _FeatureRW.kind
 
         def read(self, device):
-            assert device.codename == 'MX Vertical'
-
             # HACK: the validator requires raw bytes so we pretend the device sent some
             return b'\x01' if '_mxVerticalDpiState' in device.__dict__ else b'\x00'
 
@@ -404,8 +407,9 @@ def _feature_mx_vertical_dpi_sliding():
 
             def setNewDpi(self, newDpiIdx):
                 newDpi = self.dpiChoices[newDpiIdx]
-                # TODO this doesn't update the value of this setting in the UI
                 self.dpiSetting.write(newDpi)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(self.device, refresh=True)  # update main window
                 self.dpiSlots[self.dpiSlotChosen] = newDpiIdx
 
             def displayNewDpi(self, newDpiIdx):
@@ -453,18 +457,18 @@ def _feature_mx_vertical_dpi_sliding():
                         self.displayNewDpi(newMovingDpiIdx)
 
         def write(self, device, data_bytes):
-            assert device.codename == 'MX Vertical'
-
             if bool(data_bytes):  # Enable DPI sliding
                 # Enable HID++ events on sliding the mouse while DPI button held
-                device.keys[5].set_rawXY_reporting(True)
-
+                DPI_key_index = device.keys.index(_special_keys.CONTROL.DPI_Switch)
+                DPI_key = device.keys[DPI_key_index] if DPI_key_index is not None else None
+                if DPI_key and 'raw XY' in DPI_key.flags:
+                    DPI_key.set_rawXY_reporting(True)
                 # Store our variables in the device object
                 device._mxVerticalDpiState = self.MxVerticalDpiState(device)
 
                 def handler(device, n):
                     """Called on notification events from the mouse."""
-                    if n.sub_id <= 0xf and device.features[n.sub_id] == _F.REPROG_CONTROLS_V4:
+                    if device.features[n.sub_id] == _F.REPROG_CONTROLS_V4:
                         state = device._mxVerticalDpiState
                         if n.address == 0x00:
                             cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
@@ -478,15 +482,14 @@ def _feature_mx_vertical_dpi_sliding():
                 try:
                     device.remove_notification_handler('mx-vertical-dpi-handler')
                     del device._mxVerticalDpiState
-                    device.keys[5].set_rawXY_reporting(False)
+                    DPI_key = device.keys[device.keys.index(_special_keys.CONTROL.DPI_Switch)]
+                    DPI_key.set_rawXY_reporting(False)
                 except Exception:
-                    if _log.isEnabledFor(_ERROR):
-                        # TODO
-                        _log.exception('')
+                    _log.error('cannot disable DPI sliding on %s', device)
 
             return True
 
-    return _Setting(_MX_VERTICAL_DPI_SLIDING, _DpiSlidingRW(), _BooleanV(), device_kind=(_DK.mouse, ))
+    return _Setting(_DPI_SLIDING, _DpiSlidingRW(), callback=_feature_dpi_sliding_callback, device_kind=(_DK.mouse, ))
 
 
 def _feature_adjustable_dpi_callback(device):
@@ -707,6 +710,7 @@ _SETTINGS_TABLE = [
     _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
     _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
+    _S(_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_dpi_sliding),
     _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
@@ -719,7 +723,6 @@ _SETTINGS_TABLE = [
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
     _S(_GESTURE2_GESTURES, _F.GESTURE_2, _feature_gesture2_gestures),
     _S(_GESTURE2_PARAMS, _F.GESTURE_2, _feature_gesture2_params),
-    _S(_MX_VERTICAL_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_mx_vertical_dpi_sliding),
 ]
 
 _SETTINGS_LIST = namedtuple('_SETTINGS_LIST', [s[4] for s in _SETTINGS_TABLE])
