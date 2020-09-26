@@ -840,7 +840,7 @@ def destroy(_ignore1=None, _ignore2=None):
     _model = None
 
 
-def update(device, need_popup=False):
+def update(device, need_popup=False, refresh=False):
     if _window is None:
         return
 
@@ -877,7 +877,7 @@ def update(device, need_popup=False):
         item = _device_row(path, device.number, device if bool(device) else None)
 
         if bool(device) and item:
-            update_device(device, item, selected_device_id, need_popup)
+            update_device(device, item, selected_device_id, need_popup, full=refresh)
         elif item:
             _model.remove(item)
             _config_panel.clean(device)
@@ -886,7 +886,7 @@ def update(device, need_popup=False):
     _tree.expand_all()
 
 
-def update_device(device, item, selected_device_id, need_popup):
+def update_device(device, item, selected_device_id, need_popup, full=False):
     was_online = _model.get_value(item, _COLUMN.ACTIVE)
     is_online = bool(device.online)
     _model.set_value(item, _COLUMN.ACTIVE, is_online)
@@ -912,5 +912,5 @@ def update_device(device, item, selected_device_id, need_popup):
     if selected_device_id is None or need_popup:
         select(device.receiver.path if device.receiver else device.path, device.number)
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
-        full_update = need_popup or was_online != is_online
+        full_update = full or was_online != is_online
         _update_info_panel(device, full=full_update)
