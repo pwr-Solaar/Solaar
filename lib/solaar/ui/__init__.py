@@ -160,7 +160,7 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
 #
 
 
-def _status_changed(device, alert, reason):
+def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
     if _log.isEnabledFor(_DEBUG):
         _log.debug('status changed: %s (%s) %s', device, alert, reason)
@@ -170,11 +170,11 @@ def _status_changed(device, alert, reason):
         tray.attention(reason)
 
     need_popup = alert & ALERT.SHOW_WINDOW
-    window.update(device, need_popup)
+    window.update(device, need_popup, refresh)
 
     if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
         notify.show(device, reason)
 
 
-def status_changed(device, alert=ALERT.NONE, reason=None):
-    GLib.idle_add(_status_changed, device, alert, reason)
+def status_changed(device, alert=ALERT.NONE, reason=None, refresh=False):
+    GLib.idle_add(_status_changed, device, alert, reason, refresh)
