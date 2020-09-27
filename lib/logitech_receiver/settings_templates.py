@@ -386,12 +386,13 @@ def _feature_dpi_sliding():
                 self.movingDpiIdx = None
                 '''
                 This setting abides by the following FSM.
-                When the button is pressed, we go into `pressed` state.
-                If the state is `pressed` and the mouse moves far enough,
-                we begin accumulating displacement. Then when it's released,
+                When the button is pressed, we go into `pressed` state and
+                begin accumulating displacement.
+                If the button is released in this state we swap DPI slots.
+                If the state is `pressed` and the mouse moves enough to switch DPI
+                we go into the `moved` state.
+                When the button is released in this state
                 the DPI is set according to the total displacement.
-                If the button is released quickly while still in 'pressed',
-                we just swap DPI slots.
 
                      release
                     +---------------------------------------------+
@@ -399,10 +400,10 @@ def _feature_dpi_sliding():
                     v                       moved                 |
                  +------+ press +---------+ enough +-------+      |
                  | idle |------>| pressed |------->| moved |------+
-                 +------+       +---------+        +-------+ move |
-                    ^     release    |                 ^----------+
-                    +----------------+                 accumulate
-                     switch DPI slots                  displacement
+                 +------+       +---------+        +-------+
+                    ^     release    |     ^       ^
+                    +----------------+     accumulate
+                     switch DPI slots      displacement
                 '''
 
             def setNewDpi(self, newDpiIdx):
@@ -421,6 +422,7 @@ def _feature_dpi_sliding():
                 if self.fsmState == 'idle':
                     if _special_keys.CONTROL.DPI_Switch in cids:
                         self.fsmState = 'pressed'
+                        self.dx = 0.
                 elif self.fsmState == 'pressed':
                     if _special_keys.CONTROL.DPI_Switch not in cids:
                         # Swap DPI slots
@@ -437,21 +439,17 @@ def _feature_dpi_sliding():
             def handle_move_event(self, dx, dy):
                 currDpiIdx = self.dpiSlots[self.dpiSlotChosen]
                 currDpi = self.dpiChoices[currDpiIdx]
-                # This yields a more-or-less DPI-independent total dx of 33.3/cm
-                dx = float(dx) / float(currDpi) * 100.
+                # This multiplier yields a more-or-less DPI-independent total dx of about 5/cm
+                # The multiplier could be configurable to allow adjusting dx
+                dx = float(dx) / float(currDpi) * 15.
+                self.dx += dx
                 if self.fsmState == 'pressed':
-                    if abs(dx) > .1:
+                    if abs(self.dx) >= 1.:
                         self.fsmState = 'moved'
-                        self.dx = 0.
                         self.movingDpiIdx = currDpiIdx
                 elif self.fsmState == 'moved':
-                    self.dx += dx
-
                     currIdx = self.dpiSlots[self.dpiSlotChosen]
-                    # NOTE(Vtec234): For ultimate power-usage, the '15' should be configurable
-                    # to allow adjusting the DPI-changing speed
-                    idxDiff = int(self.dx / 15.)
-                    newMovingDpiIdx = min(max(currIdx + idxDiff, 0), len(self.dpiChoices) - 1)
+                    newMovingDpiIdx = min(max(currIdx + int(self.dx), 0), len(self.dpiChoices) - 1)
                     if newMovingDpiIdx != self.movingDpiIdx:
                         self.movingDpiIdx = newMovingDpiIdx
                         self.displayNewDpi(newMovingDpiIdx)
