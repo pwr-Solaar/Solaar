@@ -1111,7 +1111,7 @@ def get_battery(device):
         discharge = None if discharge == 0 else discharge
         if _log.isEnabledFor(_DEBUG):
             _log.debug(
-                'device %d battery %d%% charged, next level %d%% charge, status %d = %s', device.number, discharge,
+                'device %d battery %s%% charged, next level %s%% charge, status %s = %s', device.number, discharge,
                 dischargeNext, status, BATTERY_STATUS[status]
             )
         return discharge, BATTERY_STATUS[status], dischargeNext
