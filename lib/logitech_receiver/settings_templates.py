@@ -466,7 +466,7 @@ def _feature_dpi_sliding():
 
                 def handler(device, n):
                     """Called on notification events from the mouse."""
-                    if device.features[n.sub_id] == _F.REPROG_CONTROLS_V4:
+                    if n.sub_id < 0x40 and device.features[n.sub_id] == _F.REPROG_CONTROLS_V4:
                         state = device._mxVerticalDpiState
                         if n.address == 0x00:
                             cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
