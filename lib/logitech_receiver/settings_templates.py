@@ -408,9 +408,11 @@ def _feature_dpi_sliding():
 
             def displayNewDpi(self, newDpiIdx):
                 if _notify.available:
-                    reason = f'DPI {self.dpiChoices[newDpiIdx]} [min {self.dpiChoices[0]}, max {self.dpiChoices[-1]}]'
-                    asPercentage = int(float(newDpiIdx) / float(len(self.dpiChoices) - 1) * 100.)
-                    _notify.show(self.device, reason=reason, progress=asPercentage)
+                    reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
+                    # if there is a progress percentage then the reason isn't shown
+                    # asPercentage = int(float(newDpiIdx) / float(len(self.dpiChoices) - 1) * 100.)
+                    # _notify.show(self.device, reason=reason, progress=asPercentage)
+                    _notify.show(self.device, reason=reason)
 
             def handle_keys_event(self, cids):
                 if self.fsmState == 'idle':
