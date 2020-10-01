@@ -156,11 +156,11 @@ ALL = (
     LIGHTSPEED_RECEIVER_C541,
 )
 
-_wired_device = lambda product_id: {
+_wired_device = lambda product_id, interface: {
     'vendor_id': 0x046d,
     'product_id': product_id,
     'bus_id': 0x3,
-    'usb_interface': 2,
+    'usb_interface': interface,
     'isDevice': True
 }
 
@@ -170,7 +170,7 @@ WIRED_DEVICES = []
 
 for _ignore, d in _DEVICES.items():
     if d.usbid:
-        WIRED_DEVICES.append(_wired_device(d.usbid))
+        WIRED_DEVICES.append(_wired_device(d.usbid, d.interface if d.interface else 2))
     if d.btid:
         WIRED_DEVICES.append(_bt_device(d.btid))
 
