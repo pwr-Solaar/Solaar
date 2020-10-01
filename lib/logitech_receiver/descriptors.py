@@ -33,7 +33,7 @@ from .settings_templates import RegisterSettings as _RS
 
 _DeviceDescriptor = namedtuple(
     '_DeviceDescriptor',
-    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister', 'usbid', 'btid')
+    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister', 'usbid', 'interface', 'btid')
 )
 del namedtuple
 
@@ -51,7 +51,8 @@ def _D(
     settings=None,
     persister=None,
     usbid=None,
-    btid=None
+    interface=None,
+    btid=None,
 ):
     assert name
 
@@ -96,6 +97,7 @@ def _D(
         settings=settings,
         persister=persister,
         usbid=usbid,
+        interface=interface,
         btid=btid
     )
 
@@ -555,6 +557,8 @@ _D(
     codename='G700s',
     protocol=1.0,
     wpid='102A',
+    usbid=0xc07c,
+    interface=1,
     registers=(
         _R.battery_status,
         _R.three_leds,
