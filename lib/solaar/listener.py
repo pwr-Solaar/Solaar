@@ -239,7 +239,7 @@ class ReceiverListener(_listener.EventsListener):
             # the receiver changed status as well
             self._status_changed(self.receiver)
 
-        if dev.status is None:
+        if not hasattr(dev, 'status') or dev.status is None:
             # notification before device status set up - don't process it
             _log.warn('%s before device %s has status', n, dev)
         else:
