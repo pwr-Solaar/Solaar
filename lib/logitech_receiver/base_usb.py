@@ -164,6 +164,14 @@ _wired_device = lambda product_id: {
     'isDevice': True
 }
 
+_wired_device = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'bus_id': 0x3,
+    'usb_interface': 1,
+    'isDevice': True
+}
+
 _bt_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'bus_id': 0x5, 'isDevice': True}
 
 WIRED_DEVICES = []

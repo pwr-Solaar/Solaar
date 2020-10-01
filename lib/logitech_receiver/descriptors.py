@@ -555,6 +555,7 @@ _D(
     codename='G700s',
     protocol=1.0,
     wpid='102A',
+    usbid=0xc07c,
     registers=(
         _R.battery_status,
         _R.three_leds,
