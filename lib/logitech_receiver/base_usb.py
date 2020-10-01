@@ -161,13 +161,6 @@ _wired_device = lambda product_id: {
     'product_id': product_id,
     'bus_id': 0x3,
     'usb_interface': 2,
-    'isDevice': True
-}
-
-_wired_device = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'bus_id': 0x3,
     'usb_interface': 1,
     'isDevice': True
 }
