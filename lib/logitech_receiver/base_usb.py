@@ -17,6 +17,13 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+## According to Logitech, they use the following product IDs (as of September 2020)
+## USB product IDs for receivers: 0xC526 - 0xC5xx
+## Wireless PIDs for hidpp10 devices: 0x2006 - 0x2019
+## Wireless PIDs for hidpp20 devices: 0x4002 - 0x4097, 0x4101 - 0x4102
+## USB product IDs for hidpp20 devices: 0xC07D - 0xC093, 0xC32B - 0xC344
+## Bluetooth product IDs (for hidpp20 devices): 0xB012 - 0xB0xx, 0xB32A - 0xB3xx
+
 # USB ids of Logitech wireless receivers.
 # Only receivers supporting the HID++ protocol can go in here.
 
@@ -166,15 +173,26 @@ _wired_device = lambda product_id, interface: {
 
 _bt_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'bus_id': 0x5, 'isDevice': True}
 
-WIRED_DEVICES = []
+DEVICES = []
 
 for _ignore, d in _DEVICES.items():
     if d.usbid:
-        WIRED_DEVICES.append(_wired_device(d.usbid, d.interface if d.interface else 2))
+        DEVICES.append(_wired_device(d.usbid, d.interface if d.interface else 2))
     if d.btid:
-        WIRED_DEVICES.append(_bt_device(d.btid))
+        DEVICES.append(_bt_device(d.btid))
 
-del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver, _wired_device, _bt_device
+
+def other_device_check(bus_id, vendor_id, product_id):
+    """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
+    This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
+    if vendor_id != 0x46d:  # Logitech
+        return
+    if bus_id == 0x3:  # USB
+        if (product_id >= 0xC07D and product_id <= 0xC093 or product_id >= 0xC32B and product_id <= 0xC344):
+            return _wired_device(product_id, 2)
+    elif bus_id == 0x5:  # Bluetooth
+        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB32A and product_id <= 0xB3FF):
+            return _bt_device(product_id)
 
 
 def product_information(usb_id):
@@ -184,3 +202,6 @@ def product_information(usb_id):
         if usb_id == r.get('product_id'):
             return r
     return {}
+
+
+del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver

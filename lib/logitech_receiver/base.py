@@ -33,7 +33,8 @@ import hidapi as _hid
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base_usb import ALL as _RECEIVER_USB_IDS
-from .base_usb import WIRED_DEVICES as _WIRED_DEVICE_IDS
+from .base_usb import DEVICES as _DEVICE_IDS
+from .base_usb import other_device_check as _other_device_check
 from .common import KwException as _KwException
 from .common import pack as _pack
 from .common import strhex as _strhex
@@ -89,22 +90,46 @@ class DeviceUnreachable(_KwException):
 #
 
 
+def match(record, bus_id, vendor_id, product_id):
+    return ((record.get('bus_id') is None or record.get('bus_id') == bus_id)
+            and (record.get('vendor_id') is None or record.get('vendor_id') == vendor_id)
+            and (record.get('product_id') is None or record.get('product_id') == product_id))
+
+
+def filter_receivers(bus_id, vendor_id, product_id):
+    """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
+    for record in _RECEIVER_USB_IDS:  # known receivers
+        if match(record, bus_id, vendor_id, product_id):
+            return record
+
+
 def receivers():
-    """List all the Linux devices exposed by the UR attached to the machine."""
-    for receiver_usb_id in _RECEIVER_USB_IDS:
-        for d in _hid.enumerate(receiver_usb_id):
-            yield d
+    """Enumerate all the receivers attached to the machine."""
+    for dev in _hid.enumerate(filter_receivers):
+        yield dev
+
+
+def filter_devices(bus_id, vendor_id, product_id):
+    """Check that this product is of interest and if so return the device record for further checking"""
+    for record in _DEVICE_IDS:  # known devices
+        if match(record, bus_id, vendor_id, product_id):
+            return record
+    return _other_device_check(bus_id, vendor_id, product_id)  # USB and BT devices unknown to Solaar
 
 
 def wired_devices():
-    for device_usb_id in _WIRED_DEVICE_IDS:
-        for dev in _hid.enumerate(device_usb_id):
-            yield dev
+    """Enumerate all the USB-connected and Bluetooth devices attached to the machine."""
+    for dev in _hid.enumerate(filter_devices):
+        yield dev
+
+
+def filter_either(bus_id, vendor_id, product_id):
+    return filter_receivers(bus_id, vendor_id, product_id) or filter_devices(bus_id, vendor_id, product_id)
 
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    _hid.monitor_glib(callback, *_RECEIVER_USB_IDS, *_WIRED_DEVICE_IDS)
+    return _hid.monitor_glib(callback, filter_either)
 
 
 #
