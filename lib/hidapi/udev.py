@@ -404,8 +404,7 @@ def get_serial(device_handle):
     :param device_handle: a device handle returned by open() or open_path().
     """
     serial = get_indexed_string(device_handle, 2)
-    if serial is not None:
-        return ''.join(hex(ord(c)) for c in serial)
+    return serial
 
 
 def get_indexed_string(device_handle, index):
