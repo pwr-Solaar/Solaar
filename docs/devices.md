@@ -29,20 +29,19 @@ Unifying receiver, a nano receiver, or a lightspeed receiver. Add a line to
 If the receiver has an unusual number of pairing slots, then this also needs
 to be specified. Then add the receiver to the tuple of receivers (ALL).
 
-To let Solaar read and write to the receiver information on it needs to be
-added to `rules.d/42-logitech-unify-permissions.rules`. Add a new line to
-that file with the vendor and product ids, just like the other lines in the
-file. Then this file has to be copied into `/etc/udev/rules.d`.
-
 Most new devices do not need to be known to Solaar to work. However, an
 entry in `lib/logitech-receiver/descriptors.py` can provide a better name for
 the device and a feature list can speed up Solaar startup a bit. The
 arguments to the _D function are the device's long name, its short name
 (codename), its HID++ protocol version, its wireless product ID (wpid), and
 a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
+If the device can connect via a USB cable its USB product ID should be included.
+If the device can connect via Bluetooth its Bluetooth product ID should be included.
 
-If a device connects via a USB cable or via Bluetooth its USB or Bluetooth product ID
-has to be added in `lib/logitech/descriptors.py`.
+Some Logitech devices are not suited for use in Solaar.  If the device only
+connects via a USB cable Solaar might not be able to do much or anything
+with the device so it may not be useful to add it to Solaar.  One example is
+the MX518 Gaming Mouse.
 
 
 ### Receivers
