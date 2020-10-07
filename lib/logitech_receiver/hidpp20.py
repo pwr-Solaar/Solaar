@@ -1100,7 +1100,30 @@ def get_name(device):
                 _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
                 return None
 
-        return name.decode('ascii')
+        return name.decode('utf-8')
+
+
+def get_friendly_name(device):
+    """Reads a device's friendly name.
+
+    :returns: a string with the device name, or ``None`` if the device is not
+    available or does not support the ``DEVICE_NAME`` feature.
+    """
+    name_length = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME)
+    if name_length:
+        name_length = ord(name_length[:1])
+
+        name = b''
+        while len(name) < name_length:
+            fragment = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME, 0x10, len(name))
+            if fragment:
+                initial_null = 0 if fragment[0] else 1  # initial null actually seen on a device
+                name += fragment[initial_null:name_length + initial_null - len(name)]
+            else:
+                _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                return None
+
+        return name.decode('utf-8')
 
 
 def get_battery(device):
