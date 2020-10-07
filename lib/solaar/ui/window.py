@@ -460,10 +460,9 @@ def _device_row(receiver_path, device_number, device=None):
         icon_name = _icons.device_icon_name(device.name, device.kind)
         status_text = None
         status_icon = None
-        codename = device.codename if device.codename and device.codename[0] != '?' else (
-            device.name.split()[0] if device.name.split() else device.codename
+        row_data = (
+            receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
         )
-        row_data = (receiver_path, device_number, bool(device.online), codename, icon_name, status_text, status_icon, device)
         assert len(row_data) == len(_TREE_SEPATATOR)
         if _log.isEnabledFor(_DEBUG):
             _log.debug('new device row %s at index %d', row_data, new_child_index)

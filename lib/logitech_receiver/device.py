@@ -195,16 +195,17 @@ class Device(object):
     @property
     def codename(self):
         if not self._codename:
-            codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1) if self.receiver else None
-            if codename:
-                codename_length = ord(codename[1:2])
-                codename = codename[2:2 + codename_length]
-                self._codename = codename.decode('ascii')
-                # if _log.isEnabledFor(_DEBUG):
-                #     _log.debug("device %d codename %s", self.number, self._codename)
-            else:
-                self._codename = '? (%s)' % (self.wpid or self.product_id)
-        return self._codename
+            if self.online and self.protocol >= 2.0:
+                self._codename = _hidpp20.get_friendly_name(self)
+            elif self.receiver:
+                codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
+                if codename:
+                    codename_length = ord(codename[1:2])
+                    codename = codename[2:2 + codename_length]
+                    self._codename = codename.decode('utf-8')
+                elif self.protocol < 2.0:
+                    self._codename = '? (%s)' % (self.wpid or self.product_id)
+        return self._codename if self._codename else '?? (%s)' % (self.wpid or self.product_id)
 
     @property
     def name(self):
