@@ -1,3 +1,6 @@
+1.0.4:
+  * Update pt_BR translation
+
 1.0.4rc1:
   * Support USB and BT connected devices that are not in descriptors.py
   * Use FRIENDLY NAME for codename if needed and available.
