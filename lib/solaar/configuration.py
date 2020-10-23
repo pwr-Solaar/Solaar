@@ -114,6 +114,14 @@ class _DeviceEntry(dict):
         if device.unitId:
             self[_KEY_UNIT_ID] = device.unitId
 
+    def get_sensitivity(self, name):
+        return self.get('_sensitive', {}).get(name, False)
+
+    def set_sensitivity(self, name, value):
+        sensitives = self.get('_sensitive', {})
+        sensitives[name] = value
+        self['_sensitive'] = sensitives
+
 
 def persister(device):
     if not _configuration:
