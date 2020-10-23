@@ -22,13 +22,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from logging import DEBUG as _DEBUG
 from logging import getLogger
 
-import gi
+import gi  # isort:skip
+gi.require_version('Gtk', '3.0')  # NOQA: E402
 
-from gi.repository import GLib, Gtk
-from logitech_receiver.status import ALERT
-from solaar.i18n import _
-
-gi.require_version('Gtk', '3.0')
+from gi.repository import GLib, Gtk  # NOQA: E402 # isort:skip
+from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
+from solaar.i18n import _  # NOQA: E402 # isort:skip
 
 _log = getLogger(__name__)
 del getLogger
