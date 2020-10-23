@@ -31,12 +31,12 @@ from solaar.ui import ui_async as _ui_async
 #
 
 
-def _read_async(setting, force_read, sbox, device_is_online):
-    def _do_read(s, force, sb, online):
+def _read_async(setting, force_read, sbox, device_is_online, sensitive):
+    def _do_read(s, force, sb, online, sensitive):
         v = s.read(not force)
-        GLib.idle_add(_update_setting_item, sb, v, online, priority=99)
+        GLib.idle_add(_update_setting_item, sb, v, online, sensitive, priority=99)
 
-    _ui_async(_do_read, setting, force_read, sbox, device_is_online)
+    _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
 
 def _write_async(setting, value, sbox):
@@ -181,7 +181,7 @@ def _create_slider_control(setting):
     return control.gtk_range
 
 
-def _create_multiple_toggle_control(setting):
+def _create_multiple_toggle_control(setting, change):
     def _toggle_notify(control, _, setting):
         if control.get_sensitive():
             key = control._setting_key
@@ -234,7 +234,8 @@ def _create_multiple_toggle_control(setting):
     lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
 
-    hbox = Gtk.HBox(homogeneous=False, spacing=60)
+    hbox = Gtk.HBox(homogeneous=False, spacing=6)
+    hbox.pack_end(change, False, False, 0)
     hbox.pack_end(btn, False, False, 0)
     btn.set_alignment(1.0, 0.5)
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
@@ -243,7 +244,7 @@ def _create_multiple_toggle_control(setting):
     return vbox
 
 
-def _create_multiple_range_control(setting):
+def _create_multiple_range_control(setting, change):
     def _write(control, setting, item, sub_item):
         control._timer.cancel()
         delattr(control, '_timer')
@@ -330,6 +331,7 @@ def _create_multiple_range_control(setting):
     btn.connect('clicked', lambda _: lb._toggle_display())
     btn.set_alignment(1.0, 0.5)
     hbox = Gtk.HBox(homogeneous=False, spacing=6)
+    hbox.pack_end(change, False, False, 0)
     hbox.pack_end(btn, False, False, 0)
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
     vbox.pack_start(hbox, True, True, 0)
@@ -342,10 +344,28 @@ def _create_multiple_range_control(setting):
 #
 
 
-def _create_sbox(s):
+# clicking on the lock icon changes the sensitivity of the setting
+def _change_click(eb, button, arg):
+    control, device, name = arg
+    sensitive = not control.get_sensitive()
+    control.set_sensitive(sensitive)
+    icon = eb.get_children()[0]
+    _change_icon(sensitive, icon)
+    if device.persister:  # remember the new setting sensitivity
+        device.persister.set_sensitivity(name, sensitive)
+    return True
+
+
+def _change_icon(allowed, icon):
+    icon.set_from_icon_name('changes-allow' if allowed else 'changes-prevent', Gtk.IconSize.LARGE_TOOLBAR)
+    icon.set_tooltip_text(_('Click to prevent changes.') if allowed else _('Click to allow changes.'))
+
+
+def _create_sbox(s, device):
     sbox = Gtk.HBox(homogeneous=False, spacing=6)
-    label = Gtk.Label(s.label)
-    sbox.pack_start(label, False, False, 0)
+    lbl = Gtk.Label(s.label)
+    label = Gtk.EventBox()
+    label.add(lbl)
 
     spinner = Gtk.Spinner()
     spinner.set_tooltip_text(_('Working') + '...')
@@ -353,41 +373,45 @@ def _create_sbox(s):
     failed = Gtk.Image.new_from_icon_name('dialog-warning', Gtk.IconSize.SMALL_TOOLBAR)
     failed.set_tooltip_text(_('Read/write operation failed.'))
 
+    change_icon = Gtk.Image.new_from_icon_name('changes-prevent', Gtk.IconSize.LARGE_TOOLBAR)
+    _change_icon(False, change_icon)
+    change = Gtk.EventBox()
+    change.add(change_icon)
+
     if s.kind == _SETTING_KIND.toggle:
         control = _create_toggle_control(s)
-        sbox.pack_end(control, False, False, 0)
     elif s.kind == _SETTING_KIND.choice:
         control = _create_choice_control(s)
-        sbox.pack_end(control, False, False, 0)
     elif s.kind == _SETTING_KIND.range:
         control = _create_slider_control(s)
-        sbox.pack_end(control, True, True, 0)
     elif s.kind == _SETTING_KIND.map_choice:
         control = _create_map_choice_control(s)
-        sbox.pack_end(control, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_toggle:
-        vbox = _create_multiple_toggle_control(s)
+        vbox = _create_multiple_toggle_control(s, change)
         control = vbox.get_children()[1]
-        sbox.remove(label)
-        vbox.get_children()[0].pack_start(label, False, False, 0)
-        label.set_alignment(0.0, 0.5)
+        lbl.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_range:
-        vbox = _create_multiple_range_control(s)
+        vbox = _create_multiple_range_control(s, change)
         control = vbox.get_children()[1]
-        sbox.remove(label)
-        vbox.get_children()[0].pack_start(label, False, False, 0)
-        label.set_alignment(0.0, 0.5)
+        lbl.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     else:
         raise Exception('NotImplemented')
     control.set_sensitive(False)  # the first read will enable it
     control.kind = s.kind
 
+    change.set_sensitive(True)
+    change.connect('button-press-event', _change_click, (control, device, s.name))
+
     if s.kind in [_SETTING_KIND.multiple_toggle, _SETTING_KIND.multiple_range]:
+        vbox.get_children()[0].pack_start(label, False, False, 0)
         vbox.get_children()[0].pack_end(spinner, False, False, 0)
         vbox.get_children()[0].pack_end(failed, False, False, 0)
     else:
+        sbox.pack_start(label, False, False, 0)
+        sbox.pack_end(change, False, False, 0)
+        sbox.pack_end(control, s.kind == _SETTING_KIND.range, s.kind == _SETTING_KIND.range, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
 
@@ -402,13 +426,14 @@ def _create_sbox(s):
     return sbox
 
 
-def _update_setting_item(sbox, value, is_online=True):
+def _update_setting_item(sbox, value, is_online=True, sensitive=True):
     failed, spinner, control = _get_failed_spinner_control(sbox)
     spinner.set_visible(False)
     spinner.stop()
 
     if value is None:
         control.set_sensitive(False)
+        _change_icon(False, _get_change(sbox))
         failed.set_visible(is_online)
         return
 
@@ -438,7 +463,7 @@ def _update_setting_item(sbox, value, is_online=True):
                     active += 1
                 to_join.append(elem.get_parent().get_children()[0].get_text() + ': ' + str(elem.get_active()))
             b = ', '.join(to_join)
-            btn = control.get_parent().get_children()[0].get_children()[-1]
+            btn = control.get_parent().get_children()[0].get_children()[-2]
             btn.set_label(f'{active} / {total}')
             btn.set_tooltip_text(b)
         elif control.kind == _SETTING_KIND.multiple_range:
@@ -460,26 +485,46 @@ def _update_setting_item(sbox, value, is_online=True):
                         n += 1
                         to_join.append(str(sub_item) + f'={v[str(sub_item)]}')
                     b += ', '.join(to_join) + ') '
-                btn = control.get_parent().get_children()[0].get_children()[-1]
+                btn = control.get_parent().get_children()[0].get_children()[3]
                 btn.set_label(f'{n} value' + ('s' if n != 1 else ''))  # TODO: i18n, singular/plural
                 btn.set_tooltip_text(b)
         else:
             raise NotImplementedError
     else:
         raise Exception('NotImplemented')
-    control.set_sensitive(True)
+
+    control.set_sensitive(sensitive)
+    _change_icon(sensitive, _get_change(sbox))
 
 
 def _get_failed_spinner_control(sbox):
     children = sbox.get_children()
-    if len(children) == 4:
-        _ignore, failed, spinner, control = sbox.get_children()  # depends on box layout
+    if len(children) == 5:
+        _ignore, failed, spinner, control, _ignore = sbox.get_children()  # depends on box layout
     else:
         assert len(children) == 1
         control = children[0].get_children()[-1]
         failed = children[0].get_children()[0].get_children()[1]
         spinner = children[0].get_children()[0].get_children()[2]
     return failed, spinner, control
+
+
+def _get_label(sbox):
+    children = sbox.get_children()
+    if len(children) == 5:
+        return children[0].get_children()[0]
+    else:
+        assert len(children) == 1
+        return children[0].get_children()[0].get_children()[0].get_children()[0]
+
+
+def _get_change(sbox):
+    children = sbox.get_children()
+    if len(children) == 5:
+        return children[-1].get_children()[0]
+    else:
+        assert len(children) == 1
+        return children[0].get_children()[0].get_children()[-1].get_children()[0]
 
 
 def _disable_listbox_highlight_bg(lb):
@@ -528,10 +573,11 @@ def update(device, is_online=None):
         if k in _items:
             sbox = _items[k]
         else:
-            sbox = _items[k] = _create_sbox(s)
+            sbox = _items[k] = _create_sbox(s, device)
             _box.pack_start(sbox, False, False, 0)
 
-        _read_async(s, False, sbox, is_online)
+        sensitive = device.persister.get_sensitivity(s.name) if device.persister else True
+        _read_async(s, False, sbox, is_online, sensitive)
 
     _box.set_visible(True)
 
