@@ -104,7 +104,7 @@ _THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel HID++ Scrolling'),
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('Invert thumb wheel scroll direction.'))
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/touchpad behaviour.'))
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
-_DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Ajustment'),
+_DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
 
 _GESTURE2_GESTURES_LABELS = {
