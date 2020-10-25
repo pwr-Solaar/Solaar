@@ -3,6 +3,8 @@ title: Rule Processing of HID++ Notifications
 layout: page
 ---
 
+Rule processing is an experimental feature.  Significant changes might be made in response to problems.
+
 Note that rule processing is only available when running under X11.
 
 Logitech devices that use HID++ version 2.0 or greater produce feature-based

@@ -1,3 +1,25 @@
+1.0.5rc2:
+  * Solaar config command can set keyed settings.
+  * Add setting for polling rate
+  * Use long HID++ messages for all 2.0 requests
+  * Update German, Italian, and Polish translations
+  * Solaar config command no longer selects paired but unconnected devices
+  * Show HID++ 1.0 remaining pairings value in solaar show for devices that support it
+  * Add option to not use battery icons in system tray.
+  * Update Polish and Dutch translation.
+  * Add Czech translation.
+  * Remove information on SUSE package as it is very old.
+  * Turn GKEY notifications into Gn key keypresses that can trigger rules.
+  * Push device settings to devices after suspend when device is immediately active.
+  * Reduce unneccessary saving of configuration file.
+  * Better handling of disconnected devices.
+  * Implement GUI to edit rules.
+  * Implement rule-base processing of HID++ feature notifications (depends on X11).
+  * Add settings for diversion of crown and remappable keys.
+  * Access widgets by name instead of by index.
+  * Implement UNIFIED_BATTERY feature and use in battery reports.
+  * Add a clickable lock icon that determines where each setting can be changed.
+
 1.0.4:
   * Update pt_BR translation
 

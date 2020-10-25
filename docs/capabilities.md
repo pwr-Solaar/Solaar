@@ -114,6 +114,8 @@ depends on X11, this capability is only when running under X11.
 
 Users can edit rules using a GUI by clicking on the `Edit Rule` button in the Solaar main window.
 
+Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
+
 
 ## Battery Icons
 
