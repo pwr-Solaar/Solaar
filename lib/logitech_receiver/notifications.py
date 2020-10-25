@@ -29,7 +29,7 @@ from logging import getLogger
 
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
-from .base import DJ_NOTIFICATION_LENGTH as _DJ_NOTIFICATION_LENGTH
+from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import strhex as _strhex
 from .common import unpack as _unpack
 from .i18n import _
@@ -111,7 +111,7 @@ def _process_device_notification(device, status, n):
 
     # 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
     if n.sub_id >= 0x40:
-        if len(n.data) == _DJ_NOTIFICATION_LENGTH:
+        if n.report_id == _DJ_MESSAGE_ID:
             return _process_dj_notification(device, status, n)
         else:
             return _process_hidpp10_notification(device, status, n)
