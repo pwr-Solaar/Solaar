@@ -72,9 +72,13 @@ confirm in the window that pops up.
 When a device is selected you can see the approximate battery level of the
 device, if that is reported by the device, and the status of the link
 between the device and its receiver.
-You can also see some settings of the device and change
-some of these. Changing settings is performed by clicking on buttons or
-moving sliders.
+
+You can also see and change the settings of devices.
+Changing settings is performed by clicking on buttons,
+moving sliders, or selecting from alternatives.
+
+Device setings now have a clickable lock icon that determines whether the
+setting can be changed.  These locks are not (yet) shown in the images.
 
 ![Solaar-main-window-keyboard](Solaar-main-window-keyboard.png)
 
