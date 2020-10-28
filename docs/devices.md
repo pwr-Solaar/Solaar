@@ -60,13 +60,13 @@ the MX518 Gaming Mouse.
 | 046d:c52f | Nano       | 1                  |
 | 046d:c531 | Nano       | 1                  |
 | 046d:c532 | Unifying   | 6                  |
-| 064d:c534 | Nano       | 2                  |
-| 064d:c539 | Lightspeed | 1                  |
-| 064d:c53a | Lightspeed | 1                  |
-| 064d:c53d | Lightspeed | 1                  |
-| 064d:c53f | Lightspeed | 1                  |
-| 064d:c545 | Lightspeed | 1                  |
-| 064d:c541 | Lightspeed | 1                  |
+| 046d:c534 | Nano       | 2                  |
+| 046d:c539 | Lightspeed | 1                  |
+| 046d:c53a | Lightspeed | 1                  |
+| 046d:c53d | Lightspeed | 1                  |
+| 046d:c53f | Lightspeed | 1                  |
+| 046d:c545 | Lightspeed | 1                  |
+| 046d:c541 | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
 Some Nano receivers are only partly supported
