@@ -27,6 +27,7 @@ from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 
+from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
@@ -285,50 +286,6 @@ def _process_feature_notification(device, status, n, feature):
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
         return True
 
-    # TODO: what are REPROG_CONTROLS_V{2,3}?
-    if feature == _F.REPROG_CONTROLS:
-        if n.address == 0x00:
-            if _log.isEnabledFor(_INFO):
-                _log.info('%s: reprogrammable key: %s', device, n)
-        else:
-            _log.warn('%s: unknown REPROG_CONTROLS %s', device, n)
-        return True
-
-    if feature == _F.REPROG_CONTROLS_V4:
-        if n.address == 0x00:
-            if _log.isEnabledFor(_DEBUG):
-                cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
-                _log.debug('%s: diverted controls pressed: %i, %i, %i, %i', device, cid1, cid2, cid3, cid4)
-            return True
-        elif n.address == 0x10:
-            if _log.isEnabledFor(_DEBUG):
-                dx, dy = _unpack('!hh', n.data[:4])
-                _log.debug('%s: rawXY dx=%i dy=%i', device, dx, dy)
-            return True
-        elif n.address == 0x20:
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('%s: received analyticsKeyEvents', device)
-            return True
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
-
-    if feature == _F.WIRELESS_DEVICE_STATUS:
-        if n.address == 0x00:
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('wireless status: %s', n)
-            reason = 'powered on' if n.data[2] == 1 else None
-            if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
-                # only show a user notification if the device can change hosts
-                # as we want to notify when a device changes to this host
-                # but the only indication we get is this notification
-                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
-                status.changed(active=True, alert=alert, reason=reason)
-            else:
-                _log.warn('%s: unknown WIRELESS %s', device, n)
-        else:
-            _log.warn('%s: unknown WIRELESS %s', device, n)
-        return True
-
     if feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
             charge, lux, adc = _unpack('!BHH', n.data[:5])
@@ -360,6 +317,23 @@ def _process_feature_notification(device, status, n, feature):
             _log.warn('%s: SOLAR CHARGE not GOOD? %s', device, n)
         return True
 
+    if feature == _F.WIRELESS_DEVICE_STATUS:
+        if n.address == 0x00:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('wireless status: %s', n)
+            reason = 'powered on' if n.data[2] == 1 else None
+            if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
+                # only show a user notification if the device can change hosts
+                # as we want to notify when a device changes to this host
+                # but the only indication we get is this notification
+                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
+                status.changed(active=True, alert=alert, reason=reason)
+            else:
+                _log.warn('%s: unknown WIRELESS %s', device, n)
+        else:
+            _log.warn('%s: unknown WIRELESS %s', device, n)
+        return True
+
     if feature == _F.TOUCHMOUSE_RAW_POINTS:
         if n.address == 0x00:
             if _log.isEnabledFor(_INFO):
@@ -372,24 +346,46 @@ def _process_feature_notification(device, status, n, feature):
                 _log.info('%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s', device, button_down, mouse_lifted)
         else:
             _log.warn('%s: unknown TOUCH MOUSE %s', device, n)
-        return True
 
-    if feature == _F.HIRES_WHEEL:
+    # TODO: what are REPROG_CONTROLS_V{2,3}?
+    elif feature == _F.REPROG_CONTROLS:
+        if n.address == 0x00:
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: reprogrammable key: %s', device, n)
+        else:
+            _log.warn('%s: unknown REPROG_CONTROLS %s', device, n)
+
+    elif feature == _F.REPROG_CONTROLS_V4:
+        if n.address == 0x00:
+            if _log.isEnabledFor(_DEBUG):
+                cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
+                _log.debug('%s: diverted controls pressed: %i, %i, %i, %i', device, cid1, cid2, cid3, cid4)
+        elif n.address == 0x10:
+            if _log.isEnabledFor(_DEBUG):
+                dx, dy = _unpack('!hh', n.data[:4])
+                _log.debug('%s: rawXY dx=%i dy=%i', device, dx, dy)
+        elif n.address == 0x20:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: received analyticsKeyEvents', device)
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
+
+    elif feature == _F.HIRES_WHEEL:
         if (n.address == 0x00):
             if _log.isEnabledFor(_INFO):
                 flags, delta_v = _unpack('>bh', n.data[:3])
                 high_res = (flags & 0x10) != 0
                 periods = flags & 0x0f
                 _log.info('%s: WHEEL: res: %d periods: %d delta V:%-3d', device, high_res, periods, delta_v)
-            return True
         elif (n.address == 0x10):
             if _log.isEnabledFor(_INFO):
                 flags = ord(n.data[:1])
                 ratchet = flags & 0x01
                 _log.info('%s: WHEEL: ratchet: %d', device, ratchet)
-            return True
         else:
             _log.warn('%s: unknown WHEEL %s', device, n)
-        return True
 
-    _log.warn('%s: unrecognized %s for feature %s (index %02X)', device, n, feature, n.sub_id)
+    _diversion.process_notification(device, status, n, feature)
+
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('%s: unrecognized %s for feature %s (index %02X)', device, n, feature, n.sub_id)
