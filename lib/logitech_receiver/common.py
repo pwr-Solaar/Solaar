@@ -270,4 +270,6 @@ class KwException(Exception):
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', ['kind', 'name', 'version', 'extras'])
 
+BATTERY_APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
+
 del namedtuple

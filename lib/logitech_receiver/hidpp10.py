@@ -21,6 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import getLogger  # , DEBUG as _DEBUG
 
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
@@ -102,8 +103,6 @@ ERROR = _NamedInts(
 )
 
 PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
-
-BATTERY_APPOX = _NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 """Known registers.
 Devices usually have a (small) sub-set of these. Some registers are only
 applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
@@ -211,12 +210,12 @@ def parse_battery_status(register, reply):
     if register == REGISTERS.battery_status:
         status_byte = ord(reply[:1])
         charge = (
-            BATTERY_APPOX.full if status_byte == 7  # full
-            else BATTERY_APPOX.good if status_byte == 5  # good
-            else BATTERY_APPOX.low if status_byte == 3  # low
-            else BATTERY_APPOX.critical if status_byte == 1  # critical
+            _BATTERY_APPROX.full if status_byte == 7  # full
+            else _BATTERY_APPROX.good if status_byte == 5  # good
+            else _BATTERY_APPROX.low if status_byte == 3  # low
+            else _BATTERY_APPROX.critical if status_byte == 1  # critical
             # pure 'charging' notifications may come without a status
-            else BATTERY_APPOX.empty
+            else _BATTERY_APPROX.empty
         )
 
         charging_byte = ord(reply[1:2])
@@ -284,17 +283,17 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
         return
 
     if battery_level is not None:
-        if battery_level < BATTERY_APPOX.critical:
+        if battery_level < _BATTERY_APPROX.critical:
             # 1 orange, and force blink
             v1, v2 = 0x22, 0x00
             warning = True
-        elif battery_level < BATTERY_APPOX.low:
+        elif battery_level < _BATTERY_APPROX.low:
             # 1 orange
             v1, v2 = 0x22, 0x00
-        elif battery_level < BATTERY_APPOX.good:
+        elif battery_level < _BATTERY_APPROX.good:
             # 1 green
             v1, v2 = 0x20, 0x00
-        elif battery_level < BATTERY_APPOX.full:
+        elif battery_level < _BATTERY_APPROX.full:
             # 2 greens
             v1, v2 = 0x20, 0x02
         else:

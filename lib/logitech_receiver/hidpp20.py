@@ -28,6 +28,7 @@ from logging import getLogger
 from typing import List
 
 from . import special_keys
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import KwException as _KwException
 from .common import NamedInt as _NamedInt
@@ -72,6 +73,7 @@ FEATURE = _NamedInts(
     DFU=0x00D0,
     BATTERY_STATUS=0x1000,
     BATTERY_VOLTAGE=0x1001,
+    UNIFIED_BATTERY=0x1004,
     CHARGING_CONTROL=0x1010,
     LED_CONTROL=0x1300,
     GENERIC_TEST=0x1800,
@@ -1131,14 +1133,31 @@ def get_battery(device):
     """Reads a device's battery level."""
     battery = feature_request(device, FEATURE.BATTERY_STATUS)
     if battery:
-        discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
+        discharge, next, status = _unpack('!BBB', battery[:3])
         discharge = None if discharge == 0 else discharge
+        status = BATTERY_STATUS[status]
         if _log.isEnabledFor(_DEBUG):
-            _log.debug(
-                'device %d battery %s%% charged, next level %s%% charge, status %s = %s', device.number, discharge,
-                dischargeNext, status, BATTERY_STATUS[status]
-            )
-        return discharge, BATTERY_STATUS[status], dischargeNext
+            _log.debug('device %d battery %s%% charged, next %s%%, status %s', device.number, discharge, next, status)
+        return discharge, status, next
+    else:
+        battery = feature_request(device, FEATURE.UNIFIED_BATTERY, 0x10)
+        if battery:
+            return decipher_unified_battery(battery)
+
+
+def decipher_unified_battery(report):
+    discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
+    status = BATTERY_STATUS[status]
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('battery %s%% charged, level %s, charging %s', discharge, status)
+    level = (
+        _BATTERY_APPROX.full if level == 8  # full
+        else _BATTERY_APPROX.good if level == 4  # good
+        else _BATTERY_APPROX.low if level == 2  # low
+        else _BATTERY_APPROX.critical if level == 1  # critical
+        else _BATTERY_APPROX.empty
+    )
+    return discharge if discharge else level, status, None
 
 
 def get_voltage(device):

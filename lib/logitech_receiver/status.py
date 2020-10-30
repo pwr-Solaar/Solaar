@@ -25,6 +25,7 @@ from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .i18n import _, ngettext
@@ -194,11 +195,11 @@ class DeviceStatus(dict):
             # charging state info, so do our best to infer a level (even if it is just the last level)
             # It is not always possible to do this well
             if status == _hidpp20.BATTERY_STATUS.full:
-                level = _hidpp10.BATTERY_APPOX.full
+                level = _BATTERY_APPROX.full
             elif status in (_hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.recharging):
-                level = _hidpp10.BATTERY_APPOX.good
+                level = _BATTERY_APPROX.good
             elif status == _hidpp20.BATTERY_STATUS.slow_recharge:
-                level = _hidpp10.BATTERY_APPOX.low
+                level = _BATTERY_APPROX.low
             else:
                 level = self.get(KEYS.BATTERY_LEVEL)
         else:
