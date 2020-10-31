@@ -868,7 +868,8 @@ class ChoicesMapValidator(ChoicesValidator):
         byte_count=None,
         read_skip_byte_count=0,
         write_prefix_bytes=b'',
-        extra_default=None
+        extra_default=None,
+        activate=0
     ):
         assert choices_map is not None
         assert isinstance(choices_map, dict)
@@ -894,6 +895,7 @@ class ChoicesMapValidator(ChoicesValidator):
         self.extra_default = extra_default
         self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
+        self.activate = activate
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
@@ -912,6 +914,7 @@ class ChoicesMapValidator(ChoicesValidator):
         choices = self.choices[key]
         if new_value not in choices and new_value != self.extra_default:
             raise ValueError('invalid choice %r' % new_value)
+        new_value = new_value | self.activate
         return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
 

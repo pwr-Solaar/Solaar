@@ -28,6 +28,7 @@ from solaar.ui import notify as _notify
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
+from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
@@ -95,6 +96,8 @@ _BACKLIGHT = ('backlight', _('Backlight'), _('Turn illumination on or off on key
 _REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Key/Button Actions'),
                         _('Change the action for the key or button.') + '\n' +
                         _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
+_DIVERT_KEYS = ('divert-keys', _('Key/Button Diversion'),
+                _('Divert the key or button to report using HID++ notifications.'))
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
@@ -552,6 +555,21 @@ def _feature_reprogrammable_keys():
     return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
+def _feature_divert_keys_callback(device):
+    choices = {}
+    for k in device.keys:
+        if 'divertable' in k.flags:
+            choices[k.key] = [_NamedInt(0x00, 'Regular'), _NamedInt(0x01, 'Diverted')]
+    if not choices:
+        return None
+    return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, activate=0x02)
+
+
+def _feature_divert_keys():
+    rw = _FeatureRWMap(_F.REPROG_CONTROLS_V4, read_fnid=0x20, write_fnid=0x30, key_byte_count=2)
+    return _Settings(_DIVERT_KEYS, rw, callback=_feature_divert_keys_callback, device_kind=(_DK.keyboard, ))
+
+
 def _feature_disable_keyboard_keys_callback(device):
     mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS)[0]
     options = [_special_keys.DISABLE[1 << i] for i in range(8) if mask & (1 << i)]
@@ -720,6 +738,7 @@ _SETTINGS_TABLE = [
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
     _S(_FN_SWAP, _F.K375S_FN_INVERSION, _feature_k375s_fn_swap, identifier='k375s_fn_swap'),
     _S(_REPROGRAMMABLE_KEYS, _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
+    _S(_DIVERT_KEYS, _F.REPROG_CONTROLS_V4, _feature_divert_keys),
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
     _S(_DIVERT_CROWN, _F.CROWN, _feature_divert_crown),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
