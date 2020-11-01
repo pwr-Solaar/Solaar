@@ -125,7 +125,9 @@ def _process_device_notification(device, status, n):
         return _process_hidpp10_custom_notification(device, status, n)
 
     # assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
-    assert device.features
+    if not device.features:
+        _log.warn('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
+        return False
     try:
         feature = device.features[n.sub_id]
     except IndexError:
