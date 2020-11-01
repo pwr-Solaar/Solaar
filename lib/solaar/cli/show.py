@@ -208,8 +208,10 @@ def _print_device(dev, num=None):
                 for fw in _hidpp20.get_firmware(dev):
                     extras = _strhex(fw.extras) if fw.extras else ''
                     print('            Firmware: %s %s %s %s' % (fw.kind, fw.name, fw.version, extras))
-                unitId, modelId, tid_map = _hidpp20.get_ids(dev)
-                print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
+                ids = _hidpp20.get_ids(dev)
+                if ids:
+                    unitId, modelId, tid_map = ids
+                    print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
             elif feature == _hidpp20.FEATURE.REPORT_RATE:
                 print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
             elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:

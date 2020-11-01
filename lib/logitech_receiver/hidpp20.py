@@ -1054,16 +1054,17 @@ def get_firmware(device):
 def get_ids(device):
     """Reads a device's ids (unit and model numbers)"""
     ids = feature_request(device, FEATURE.DEVICE_FW_VERSION)
-    unitId = ids[1:5]
-    modelId = ids[7:13]
-    transport_bits = ord(ids[6:7])
-    offset = 0
-    tid_map = {}
-    for transport, flag in [('btid', 0x1), ('btleid', 0x02), ('wpid', 0x04), ('usbid', 0x08)]:
-        if transport_bits & flag:
-            tid_map[transport] = modelId[offset:offset + 2].hex().upper()
-            offset = offset + 2
-    return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
+    if ids:
+        unitId = ids[1:5]
+        modelId = ids[7:13]
+        transport_bits = ord(ids[6:7])
+        offset = 0
+        tid_map = {}
+        for transport, flag in [('btid', 0x1), ('btleid', 0x02), ('wpid', 0x04), ('usbid', 0x08)]:
+            if transport_bits & flag:
+                tid_map[transport] = modelId[offset:offset + 2].hex().upper()
+                offset = offset + 2
+        return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
 
 
 def get_kind(device):
