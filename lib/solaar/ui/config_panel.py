@@ -23,7 +23,7 @@ from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
 from logitech_receiver.settings import KIND as _SETTING_KIND
-from solaar.i18n import _
+from solaar.i18n import _, ngettext
 from solaar.ui import ui_async as _ui_async
 
 #
@@ -209,6 +209,7 @@ def _create_multiple_toggle_control(setting, change):
     lb._showing = True
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
     lb.set_no_show_all(True)
+    lb._label_control_pairs = []
     btn = Gtk.Button('? / ?')
     for k in setting._validator.all_options():
         h = Gtk.HBox(homogeneous=False, spacing=0)
@@ -230,6 +231,7 @@ def _create_multiple_toggle_control(setting, change):
         lbl.set_alignment(0.0, 0.5)
         lbl.set_margin_left(30)
         lb.add(h)
+        lb._label_control_pairs.append((lbl, control))
     _disable_listbox_highlight_bg(lb)
     lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
@@ -241,6 +243,7 @@ def _create_multiple_toggle_control(setting, change):
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
     vbox.pack_start(hbox, True, True, 0)
     vbox.pack_end(lb, True, True, 0)
+    vbox._header, vbox._button, vbox._control = hbox, btn, lb
     return vbox
 
 
@@ -279,6 +282,7 @@ def _create_multiple_range_control(setting, change):
     lb.set_selection_mode(Gtk.SelectionMode.NONE)
     lb._showing = True
     lb.set_no_show_all(True)
+    lb._items = []
     btn = Gtk.Button('...')
     for item in setting._validator.items:
         lbl_text = str(item)
@@ -294,6 +298,7 @@ def _create_multiple_range_control(setting, change):
         lb.set_tooltip_text(lbl_tooltip or ' ')
         item_lb = Gtk.ListBox()
         item_lb.set_selection_mode(Gtk.SelectionMode.NONE)
+        item_lb._sub_items = []
         for sub_item in setting._validator.sub_items[item]:
             h = Gtk.HBox(homogeneous=False, spacing=20)
             lbl_text = str(sub_item)
@@ -323,9 +328,12 @@ def _create_multiple_range_control(setting, change):
             control.connect('value-changed', _changed, setting, item, sub_item)
             item_lb.add(h)
             h._setting_sub_item = sub_item
+            h._label, h._control = sub_item_lbl, control
+            item_lb._sub_items.append(h)
         item_lb._setting_item = item
         _disable_listbox_highlight_bg(item_lb)
         lb.add(item_lb)
+        lb._items.append(item_lb)
     _disable_listbox_highlight_bg(lb)
     lb._toggle_display()
     btn.connect('clicked', lambda _: lb._toggle_display())
@@ -336,6 +344,7 @@ def _create_multiple_range_control(setting, change):
     vbox = Gtk.VBox(homogeneous=False, spacing=6)
     vbox.pack_start(hbox, True, True, 0)
     vbox.pack_end(lb, True, True, 0)
+    vbox._header, vbox._button, vbox._control = hbox, btn, lb
     return vbox
 
 
@@ -388,12 +397,12 @@ def _create_sbox(s, device):
         control = _create_map_choice_control(s)
     elif s.kind == _SETTING_KIND.multiple_toggle:
         vbox = _create_multiple_toggle_control(s, change)
-        control = vbox.get_children()[1]
+        control = vbox._control
         lbl.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     elif s.kind == _SETTING_KIND.multiple_range:
         vbox = _create_multiple_range_control(s, change)
-        control = vbox.get_children()[1]
+        control = vbox._control
         lbl.set_alignment(0.0, 0.5)
         sbox.pack_start(vbox, True, True, 0)
     else:
@@ -405,15 +414,23 @@ def _create_sbox(s, device):
     change.connect('button-press-event', _change_click, (control, device, s.name))
 
     if s.kind in [_SETTING_KIND.multiple_toggle, _SETTING_KIND.multiple_range]:
-        vbox.get_children()[0].pack_start(label, False, False, 0)
-        vbox.get_children()[0].pack_end(spinner, False, False, 0)
-        vbox.get_children()[0].pack_end(failed, False, False, 0)
+        vbox._header.pack_start(label, False, False, 0)
+        vbox._header.pack_end(spinner, False, False, 0)
+        vbox._header.pack_end(failed, False, False, 0)
+        sbox._button = vbox._button
     else:
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
         sbox.pack_end(control, s.kind == _SETTING_KIND.range, s.kind == _SETTING_KIND.range, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
+    sbox._label = label
+    sbox._lbl = lbl
+    sbox._spinner = spinner
+    sbox._failed = failed
+    sbox._change = change
+    sbox._change_icon = change_icon
+    sbox._control = control
 
     if s.description:
         sbox.set_tooltip_text(s.description)
@@ -433,7 +450,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
 
     if value is None:
         control.set_sensitive(False)
-        _change_icon(False, _get_change(sbox))
+        _change_icon(False, sbox._change_icon)
         failed.set_visible(is_online)
         return
 
@@ -451,80 +468,50 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     elif isinstance(control, Gtk.ListBox):
         if control.kind == _SETTING_KIND.multiple_toggle:
-            total = len(control.get_children())
+            total = len(control._label_control_pairs)
             active = 0
             to_join = []
-            for ch in control.get_children():
-                elem = ch.get_children()[0].get_children()[-1]
+            for lbl, elem in control._label_control_pairs:
                 v = value.get(elem._setting_key, None)
                 if v is not None:
                     elem.set_active(v)
                 if elem.get_active():
                     active += 1
-                to_join.append(elem.get_parent().get_children()[0].get_text() + ': ' + str(elem.get_active()))
+                to_join.append(lbl.get_text() + ': ' + str(elem.get_active()))
             b = ', '.join(to_join)
-            btn = control.get_parent().get_children()[0].get_children()[-2]
-            btn.set_label(f'{active} / {total}')
-            btn.set_tooltip_text(b)
+            sbox._button.set_label(f'{active} / {total}')
+            sbox._button.set_tooltip_text(b)
         elif control.kind == _SETTING_KIND.multiple_range:
             b = ''
             n = 0
-            for ch in control.get_children()[1:]:
+            for ch in control._items:
                 # item
-                item = ch.get_children()[0]._setting_item
+                item = ch._setting_item
                 v = value.get(str(int(item)), None)
                 if v is not None:
                     b += str(item) + ': ('
                     to_join = []
-                    for c in ch.get_children()[0].get_children():
+                    for c in ch._sub_items:
                         # sub-item
-                        row = c.get_children()[0]
-                        sub_item = row._setting_sub_item
-                        elem = row.get_children()[-1]
-                        elem.set_value(v[str(sub_item)])
+                        sub_item = c._setting_sub_item
+                        c._control.set_value(v[str(sub_item)])
                         n += 1
                         to_join.append(str(sub_item) + f'={v[str(sub_item)]}')
                     b += ', '.join(to_join) + ') '
-                btn = control.get_parent().get_children()[0].get_children()[3]
-                btn.set_label(f'{n} value' + ('s' if n != 1 else ''))  # TODO: i18n, singular/plural
-                btn.set_tooltip_text(b)
+                lbl_text = ngettext('%d value', '%d values', n) % n
+                sbox._button.set_label(lbl_text)
+                sbox._button.set_tooltip_text(b)
         else:
             raise NotImplementedError
     else:
         raise Exception('NotImplemented')
 
     control.set_sensitive(sensitive)
-    _change_icon(sensitive, _get_change(sbox))
+    _change_icon(sensitive, sbox._change_icon)
 
 
 def _get_failed_spinner_control(sbox):
-    children = sbox.get_children()
-    if len(children) == 5:
-        _ignore, failed, spinner, control, _ignore = sbox.get_children()  # depends on box layout
-    else:
-        assert len(children) == 1
-        control = children[0].get_children()[-1]
-        failed = children[0].get_children()[0].get_children()[1]
-        spinner = children[0].get_children()[0].get_children()[2]
-    return failed, spinner, control
-
-
-def _get_label(sbox):
-    children = sbox.get_children()
-    if len(children) == 5:
-        return children[0].get_children()[0]
-    else:
-        assert len(children) == 1
-        return children[0].get_children()[0].get_children()[0].get_children()[0]
-
-
-def _get_change(sbox):
-    children = sbox.get_children()
-    if len(children) == 5:
-        return children[-1].get_children()[0]
-    else:
-        assert len(children) == 1
-        return children[0].get_children()[0].get_children()[-1].get_children()[0]
+    return sbox._failed, sbox._spinner, sbox._control
 
 
 def _disable_listbox_highlight_bg(lb):
