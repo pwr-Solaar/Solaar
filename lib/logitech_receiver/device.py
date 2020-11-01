@@ -218,23 +218,29 @@ class Device(object):
     def unitId(self):
         if not self._unitId:
             if self.online and self.protocol >= 2.0:
-                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
-                if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                    _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+                ids = _hidpp20.get_ids(self)
+                if ids:
+                    self._unitId, self._modelId, self._tid_map = ids
+                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
         return self._unitId
 
     @property
     def modelId(self):
         if not self._modelId:
             if self.online and self.protocol >= 2.0:
-                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+                ids = _hidpp20.get_ids(self)
+                if ids:
+                    self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
         return self._modelId
 
     @property
     def tid_map(self):
         if not self._tid_map:
             if self.online and self.protocol >= 2.0:
-                self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+                ids = _hidpp20.get_ids(self)
+                if ids:
+                    self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
         return self._tid_map
 
     @property
