@@ -94,7 +94,7 @@ def run(receivers, args, find_receiver, _ignore):
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         '    Register Short   %#04x %#04x: %s' %
-                        (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
+                        (reg, sub, '0x' + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst
         last = None
@@ -108,6 +108,6 @@ def run(receivers, args, find_receiver, _ignore):
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         '    Register Long    %#04x %#04x: %s' %
-                        (reg, sub, str(rgst) if isinstance(rgst, int) else '0x' + _strhex(rgst))
+                        (reg, sub, '0x' + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst
