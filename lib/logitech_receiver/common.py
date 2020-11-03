@@ -153,6 +153,7 @@ class NamedInts(object):
         elif is_string(index):
             if index in self.__dict__:
                 return self.__dict__[index]
+            return (next((x for x in self._values if str(x) == index), None))
 
         elif isinstance(index, slice):
             if index.start is None and index.stop is None:
@@ -203,7 +204,7 @@ class NamedInts(object):
         if isinstance(value, int):
             return value in self._indexed
         elif is_string(value):
-            return value in self.__dict__
+            return value in self.__dict__ or value in self._values
 
     def __iter__(self):
         for v in self._values:
