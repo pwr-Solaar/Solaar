@@ -388,7 +388,11 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
 
     ihandle = int(handle)
     notifications_hook = getattr(handle, 'notifications_hook', None)
-    _skip_incoming(handle, ihandle, notifications_hook)
+    try:
+        _skip_incoming(handle, ihandle, notifications_hook)
+    except NoReceiver:
+        _log.warn('device or receiver disconnected')
+        return None
     write(ihandle, devnumber, request_data, long_message)
 
     if no_reply:
@@ -498,7 +502,12 @@ def ping(handle, devnumber, long_message=False):
 
     ihandle = int(handle)
     notifications_hook = getattr(handle, 'notifications_hook', None)
-    _skip_incoming(handle, ihandle, notifications_hook)
+    try:
+        _skip_incoming(handle, ihandle, notifications_hook)
+    except NoReceiver:
+        _log.warn('device or receiver disconnected')
+        return
+
     write(ihandle, devnumber, request_data, long_message)
 
     # we consider timeout from this point
