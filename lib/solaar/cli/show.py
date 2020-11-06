@@ -281,7 +281,7 @@ def run(devices, args, find_receiver, find_device):
         return
 
     dev = find_receiver(devices, device_name)
-    if dev:
+    if dev and not dev.isDevice:
         _print_receiver(dev)
         return
 
