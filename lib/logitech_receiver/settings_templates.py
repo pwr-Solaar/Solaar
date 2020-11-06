@@ -560,6 +560,8 @@ def _feature_divert_keys_callback(device):
     for k in device.keys:
         if 'divertable' in k.flags:
             choices[k.key] = [_NamedInt(0x00, 'Regular'), _NamedInt(0x01, 'Diverted')]
+    if device.wpid == '4055':  # this device appears to lie about its diversion capabilities
+        return None
     if not choices:
         return None
     return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, activate=0x02)
