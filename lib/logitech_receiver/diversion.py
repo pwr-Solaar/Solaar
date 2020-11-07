@@ -168,8 +168,10 @@ _thread.start_new_thread(display.record_enable_context, (context, key_press_hand
 # A crown_start_press test is true for the start of a CROWN press.
 # A crown_stop_press test is true for the end of a CROWN press.
 # A crown_pressed test is true for a CROWN notification with the Crown pressed.
-# A thumb_wheel_up test is the rotation amount of a THUMB WHEEL upward rotation.
-# A thumb_wheel_down test is the rotation amount of a THUMB WHEEL downward rotation.
+# A thumb_wheel_up test is the rotation amount of a THUMB_WHEEL upward rotation.
+# A thumb_wheel_down test is the rotation amount of a THUMB_WHEEL downward rotation.
+# lowres_wheel_up, lowres_wheel_down, hires_wheel_up, hires_wheel_down are the same but for LOWRES_WHEEL and HIRES_WHEEL.
+# True and False tests return True and False, respectively.
 #
 # A KeyPress action takes X11 key symbols and simulates a chorded keypress on the keyboard.
 # Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
@@ -204,9 +206,14 @@ TESTS = {
     'crown_start_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6],
     'crown_end_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6],
     'crown_pressed': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6],
-    'thumb_wheel_up': lambda f, r, d: _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) < 0 and signed(d[0:2]),
-    'thumb_wheel_down': lambda f, r, d: _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) > 0 and signed(d[0:2]),
+    'thumb_wheel_up': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) < 0 and signed(d[0:2]),
+    'thumb_wheel_down': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) > 0 and signed(d[0:2]),
+    'lowres_wheel_up': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
+    'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
+    'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
+    'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
     'False': lambda f, r, d: False,
+    'True': lambda f, r, d: True,
 }
 
 COMPONENTS = {}
@@ -456,7 +463,7 @@ class KeyPress(Action):
         # print("KeyPress", self.key_symbols, current)
         if _log.isEnabledFor(_INFO):
             _log.info(
-                'rule KeyPress action: %s, modifiers %s %s', self.key_symbols, current,
+                'KeyPress action: %s, modifiers %s %s', self.key_symbols, current,
                 [(hex(k.vk) if isinstance(k, _keyboard.KeyCode) else k) for k in self.keys]
             )
         self.keyDown(self.keys, current)
@@ -495,9 +502,9 @@ class MouseScroll(Action):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        #        print("MOUSESCROLL", self.amounts, last_result, amounts)
+        # print("MOUSESCROLL", self.amounts, last_result, amounts)
         if _log.isEnabledFor(_INFO):
-            _log.info('rule MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
+            _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         mouse.scroll(*amounts)
         return None
 
@@ -518,7 +525,7 @@ class Execute(Action):
     def evaluate(self, feature, notification, device, status, last_result):
         import subprocess
         if _log.isEnabledFor(_INFO):
-            _log.info('rule Execute action: %s', self.args)
+            _log.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
         return None
 
