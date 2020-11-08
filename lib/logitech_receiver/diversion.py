@@ -115,13 +115,9 @@ def key_press_handler(reply):
         if event.type == X.KeyPress:
             mod = modifier_code(event.detail)
             current_key_modifiers = event.state | 1 << mod if mod is not None else event.state
-            # if mod is not None:
-            # print("press", event.detail, current_key_modifiers)
         elif event.type == X.KeyRelease:
             mod = modifier_code(event.detail)
             current_key_modifiers = event.state & ~(1 << mod) if mod is not None else event.state
-            # if mod is not None:
-            # print("release", event.detail, current_key_modifiers)
 
 
 _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
@@ -232,11 +228,13 @@ class RuleComponent(object):
 
 
 class Rule(RuleComponent):
-    def __init__(self, args):
+    def __init__(self, args, source=None):
         self.components = [self.compile(a) for a in args]
+        self.source = source
 
     def __str__(self):
-        return 'Rule[' + ', '.join([c.__str__() for c in self.components]) + ']'
+        source = '(' + self.source + ')' if self.source else ''
+        return 'Rule%s[%s]' % (source, ', '.join([c.__str__() for c in self.components]))
 
     def evaluate(self, feature, notification, device, status, last_result):
         result = True
@@ -460,7 +458,6 @@ class KeyPress(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = current_key_modifiers
-        # print("KeyPress", self.key_symbols, current)
         if _log.isEnabledFor(_INFO):
             _log.info(
                 'KeyPress action: %s, modifiers %s %s', self.key_symbols, current,
@@ -476,11 +473,9 @@ class KeyPress(Action):
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable
 # class KeyDown(KeyPress):
 #    def evaluate(self, feature, notification, device, status, last_result):
-#        print('KEYDOWN', [(hex(k.vk) if isinstance(k, _keyboard.KeyCode) else k) for k in self.keys], current_key_modifiers)
 #        super().keyDown(self.keys, current_key_modifiers)
 # class KeyUp(KeyPress):
 #    def evaluate(self, feature, notification, device, status, last_result):
-#        print('KEYUP', [(hex(k.vk) if isinstance(k, _keyboard.KeyCode) else k) for k in self.keys], current_key_modifiers)
 #        super().keyUp(self.keys, current_key_modifiers)
 
 
@@ -502,7 +497,6 @@ class MouseScroll(Action):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        # print("MOUSESCROLL", self.amounts, last_result, amounts)
         if _log.isEnabledFor(_INFO):
             _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         mouse.scroll(*amounts)
@@ -612,7 +606,7 @@ def _load_config_rule_file():
             with open(_file_path, 'r') as config_file:
                 loaded_rules = []
                 for loaded_rule in _yaml_safe_load_all(config_file):
-                    rule = Rule(loaded_rule)
+                    rule = Rule(loaded_rule, source=_file_path)
                     if _log.isEnabledFor(_INFO):
                         _log.info('load rule: %s', rule)
                     loaded_rules.append(rule)
