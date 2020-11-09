@@ -20,6 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
+import threading as _threading  # threads should acquire receiver locks before device locks
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -51,6 +52,7 @@ class Receiver(object):
 
     def __init__(self, handle, device_info):
         assert handle
+        self.lock = _threading.RLock()
         self.handle = handle
         assert device_info
         self.path = device_info.path
@@ -91,9 +93,10 @@ class Receiver(object):
         self._remaining_pairings = None
 
     def close(self):
-        handle, self.handle = self.handle, None
-        self._devices.clear()
-        return (handle and _base.close(handle))
+        with self.lock:
+            handle, self.handle = self.handle, None
+            self._devices.clear()
+            return (handle and _base.close(handle))
 
     def __del__(self):
         self.close()
@@ -119,24 +122,24 @@ class Receiver(object):
         if not self.handle:
             return False
 
-        if enable:
-            set_flag_bits = (
-                _hidpp10.NOTIFICATION_FLAG.battery_status
-                | _hidpp10.NOTIFICATION_FLAG.wireless
-                | _hidpp10.NOTIFICATION_FLAG.software_present
-            )
-        else:
-            set_flag_bits = 0
-        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
-        if ok is None:
-            _log.warn('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
-            return None
-
-        flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
-        return flag_bits
+        with self.lock:
+            if enable:
+                set_flag_bits = (
+                    _hidpp10.NOTIFICATION_FLAG.battery_status
+                    | _hidpp10.NOTIFICATION_FLAG.wireless
+                    | _hidpp10.NOTIFICATION_FLAG.software_present
+                )
+            else:
+                set_flag_bits = 0
+            ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+            if ok is None:
+                _log.warn('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
+                return None
+            flag_bits = _hidpp10.get_notification_flags(self)
+            flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
+            return flag_bits
 
     def notify_devices(self):
         """Scan all devices."""
@@ -145,32 +148,31 @@ class Receiver(object):
                 _log.warn('%s: failed to trigger device link notifications', self)
 
     def register_new_device(self, number, notification=None):
-        if self._devices.get(number) is not None:
-            raise IndexError('%s: device number %d already registered' % (self, number))
-
-        assert notification is None or notification.devnumber == number
-        assert notification is None or notification.sub_id == 0x41
-
-        try:
-            dev = Device(self, number, notification)
-            assert dev.wpid
-            if _log.isEnabledFor(_INFO):
-                _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
-            self._devices[number] = dev
-            return dev
-        except _base.NoSuchDevice:
-            _log.exception('register_new_device')
-
+        with self.lock:
+            if self._devices.get(number) is not None:
+                raise IndexError('%s: device number %d already registered' % (self, number))
+            assert notification is None or notification.devnumber == number
+            assert notification is None or notification.sub_id == 0x41
+            try:
+                dev = Device(self, number, notification)
+                assert dev.wpid
+                if _log.isEnabledFor(_INFO):
+                    _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
+                self._devices[number] = dev
+                return dev
+            except _base.NoSuchDevice:
+                _log.exception('register_new_device')
+            self._devices[number] = None
         _log.warning('%s: looked for device %d, not found', self, number)
-        self._devices[number] = None
 
     def set_lock(self, lock_closed=True, device=0, timeout=0):
         if self.handle:
-            action = 0x02 if lock_closed else 0x01
-            reply = self.write_register(_R.receiver_pairing, action, device, timeout)
-            if reply:
-                return True
-            _log.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
+            with self.lock:
+                action = 0x02 if lock_closed else 0x01
+                reply = self.write_register(_R.receiver_pairing, action, device, timeout)
+                if reply:
+                    return True
+                _log.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -211,40 +213,38 @@ class Receiver(object):
         return self.register_new_device(key)
 
     def __delitem__(self, key):
-        self._unpair_device(key, False)
+        with self.lock:
+            self._unpair_device(key, False)
 
     def _unpair_device(self, key, force=False):
         key = int(key)
-
-        if self._devices.get(key) is None:
-            raise IndexError(key)
-
-        dev = self._devices[key]
-        if not dev:
-            if key in self._devices:
-                del self._devices[key]
-            return
-
-        if self.re_pairs and not force:
-            # invalidate the device, but these receivers don't unpair per se
-            dev.online = False
-            dev.wpid = None
-            if key in self._devices:
-                del self._devices[key]
-            _log.warn('%s removed device %s', self, dev)
-        else:
-            reply = self.write_register(_R.receiver_pairing, 0x03, key)
-            if reply:
-                # invalidate the device
-                dev.online = False
-                dev.wpid = None
-                if key in self._devices:
-                    del self._devices[key]
-                if _log.isEnabledFor(_INFO):
-                    _log.info('%s unpaired device %s', self, dev)
-            else:
-                _log.error('%s failed to unpair device %s', self, dev)
-                raise Exception('failed to unpair device %s: %s' % (dev.name, key))
+        with self.lock:
+            if self._devices.get(key) is None:
+                raise IndexError(key)
+            dev = self._devices[key]
+            with dev.lock:
+                if not dev:
+                    if key in self._devices:
+                        del self._devices[key]
+                        return
+                    if self.re_pairs and not force:  # invalidate the device, but these receivers don't unpair per se
+                        dev.online = False
+                        dev.wpid = None
+                        if key in self._devices:
+                            del self._devices[key]
+                            _log.warn('%s removed device %s', self, dev)
+                else:
+                    reply = self.write_register(_R.receiver_pairing, 0x03, key)
+                    if reply:  # invalidate the device
+                        dev.online = False
+                        dev.wpid = None
+                        if key in self._devices:
+                            del self._devices[key]
+                            if _log.isEnabledFor(_INFO):
+                                _log.info('%s unpaired device %s', self, dev)
+                    else:
+                        _log.error('%s failed to unpair device %s', self, dev)
+                        raise Exception('failed to unpair device %s: %s' % (dev.name, key))
 
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
@@ -252,7 +252,6 @@ class Receiver(object):
     def __contains__(self, dev):
         if isinstance(dev, int):
             return self._devices.get(dev) is not None
-
         return self.__contains__(dev.number)
 
     def __eq__(self, other):

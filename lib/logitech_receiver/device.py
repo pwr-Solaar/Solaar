@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
+import threading as _threading  # threads should acquire receiver locks before device locks
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -35,6 +36,8 @@ class Device(object):
 
     def __init__(self, receiver, number, link_notification=None, info=None):
         assert receiver or info
+        self.lock = _threading.RLock()  # most setting of values doesn't need a lock if the value will always be the same
+
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
@@ -187,7 +190,6 @@ class Device(object):
             self._protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
             # if the ping failed, the peripheral is (almost) certainly offline
             self.online = self._protocol is not None
-
             # if _log.isEnabledFor(_DEBUG):
             #     _log.debug("device %d protocol %s", self.number, self._protocol)
         return self._protocol or 0
@@ -312,16 +314,18 @@ class Device(object):
 
     @property
     def keys(self):
-        if not self._keys:
-            if self.online and self.protocol >= 2.0:
-                self._keys = _hidpp20.get_keys(self) or ()
+        with self.lock:  # ensure that only one keys object is created
+            if not self._keys:
+                if self.online and self.protocol >= 2.0:
+                    self._keys = _hidpp20.get_keys(self) or ()
         return self._keys
 
     @property
     def gestures(self):
-        if not self._gestures:
-            if self.online and self.protocol >= 2.0:
-                self._gestures = _hidpp20.get_gestures(self) or ()
+        with self.lock:  # ensure that only one gestures object is created
+            if not self._gestures:
+                if self.online and self.protocol >= 2.0:
+                    self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
 
     @property
@@ -335,26 +339,28 @@ class Device(object):
 
     @property
     def settings(self):
-        if not self._settings:
-            self._settings = []
-            if self.persister and self.descriptor and self.descriptor.settings:
-                for s in self.descriptor.settings:
-                    try:
-                        setting = s(self)
-                    except Exception as e:  # Do nothing if the device is offline
-                        setting = None
-                        if self.online:
-                            raise e
-                    if setting is not None:
-                        self._settings.append(setting)
-        if not self._feature_settings_checked:
-            self._feature_settings_checked = _check_feature_settings(self, self._settings)
+        with self.lock:  # ensure that only one settings object is created
+            if not self._settings:
+                self._settings = []
+                if self.persister and self.descriptor and self.descriptor.settings:
+                    for s in self.descriptor.settings:
+                        try:
+                            setting = s(self)
+                        except Exception as e:  # Do nothing if the device is offline
+                            setting = None
+                            if self.online:
+                                raise e
+                            if setting is not None:
+                                self._settings.append(setting)
+            if not self._feature_settings_checked:
+                self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
 
     @property
     def persister(self):
-        if not self._persister:
-            self._persister = _configuration.persister(self)
+        with self.lock:  # ensure that only one persister object is created
+            if not self._persister:
+                self._persister = _configuration.persister(self)
         return self._persister
 
     def get_kind_from_index(self, index, receiver):
@@ -379,27 +385,26 @@ class Device(object):
     def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
         receiver."""
-        if not bool(self.receiver) or self.protocol >= 2.0:
-            return False
-
-        if enable:
-            set_flag_bits = (
-                _hidpp10.NOTIFICATION_FLAG.battery_status
-                | _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
-                | _hidpp10.NOTIFICATION_FLAG.wireless
-                | _hidpp10.NOTIFICATION_FLAG.software_present
-            )
-        else:
-            set_flag_bits = 0
-        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
-        if not ok:
-            _log.warn('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
-
-        flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
-        return flag_bits if ok else None
+        with self.lock:
+            if not bool(self.receiver) or self.protocol >= 2.0:
+                return False
+            if enable:
+                set_flag_bits = (
+                    _hidpp10.NOTIFICATION_FLAG.battery_status
+                    | _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
+                    | _hidpp10.NOTIFICATION_FLAG.wireless
+                    | _hidpp10.NOTIFICATION_FLAG.software_present
+                )
+            else:
+                set_flag_bits = 0
+            ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+            if not ok:
+                _log.warn('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
+            flag_bits = _hidpp10.get_notification_flags(self)
+            flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
+            return flag_bits if ok else None
 
     def add_notification_handler(self, id: str, fn):
         """Adds the notification handling callback `fn` to this device under name `id`.
@@ -413,15 +418,16 @@ class Device(object):
         if it did so successfully and return `False` if an error should be reported
         (malformed notification, etc).
         """
-        self._notification_handlers[id] = fn
+        with self.lock:
+            self._notification_handlers[id] = fn
 
     def remove_notification_handler(self, id: str):
         """Unregisters the notification handler under name `id`."""
-
-        if id not in self._notification_handlers and _log.isEnabledFor(_INFO):
-            _log.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
-        else:
-            del self._notification_handlers[id]
+        with self.lock:
+            if id not in self._notification_handlers and _log.isEnabledFor(_INFO):
+                _log.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
+            else:
+                del self._notification_handlers[id]
 
     def handle_notification(self, n) -> Optional[bool]:
         for h in self._notification_handlers.values():
@@ -500,8 +506,9 @@ class Device(object):
             _log.exception('open %s', device_info)
 
     def close(self):
-        handle, self.handle = self.handle, None
-        return (handle and _base.close(handle))
+        with self.lock:
+            handle, self.handle = self.handle, None
+            return (handle and _base.close(handle))
 
     def __del__(self):
         self.close()
