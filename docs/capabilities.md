@@ -104,6 +104,14 @@ of the program, this cached information may become incorrect. Currently there is
 no way to force an update of the cached information besides restarting the
 program.
 
+
+## Rule-based Processing of HID++ Feature Notifications
+
+Solaar can process HID++ Feature Notifications from devices to, for example,
+change the speed of some thumb wheels.  For more information on this capability of Solaar see
+[the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
+
 ## Battery Icons
 
 For many devices, Solaar shows the approximate battery level via icons that
