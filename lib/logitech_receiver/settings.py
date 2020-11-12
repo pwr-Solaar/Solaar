@@ -133,14 +133,14 @@ class Setting(object):
                 self._device.persister[self.name] = self._value
             return self._value
 
-    def _pre_write(self):
+    def _pre_write(self, save=True):
         # Remember the value we're trying to set, even if the write fails.
         # This way even if the device is offline or some other error occurs,
         # the last value we've tried to write is remembered in the configuration.
-        if self.persist and self._device.persister:
+        if self.persist and self._device.persister and save:
             self._device.persister[self.name] = self._value
 
-    def write(self, value):
+    def write(self, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert value is not None
@@ -149,8 +149,9 @@ class Setting(object):
             _log.debug('%s: settings write %r to %s', self.name, value, self._device)
 
         if self._device.online:
-            self._value = value
-            self._pre_write()
+            if self._value != value:
+                self._value = value
+                self._pre_write(save)
 
             current_value = None
             if self._validator.needs_current_value:
@@ -178,7 +179,7 @@ class Setting(object):
 
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
-            self.write(value)
+            self.write(value, save=False)
 
     def __str__(self):
         if hasattr(self, '_value'):
@@ -239,7 +240,7 @@ class Settings(Setting):
                 self._device.persister[self.name] = self._value
             return self._value[str(int(key))]
 
-    def write(self, map):
+    def write(self, map, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert map is not None
@@ -249,7 +250,7 @@ class Settings(Setting):
 
         if self._device.online:
             self._value = map
-            self._pre_write()
+            self._pre_write(save)
             for key, value in map.items():
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
@@ -272,6 +273,7 @@ class Settings(Setting):
         if self._device.online:
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
+                # always need to write to configuration because dictionary is shared and could have changed
                 self._value[str(key)] = value
                 self._pre_write()
             except ValueError:
@@ -339,7 +341,7 @@ class LongSettings(Setting):
                 self._device.persister[self.name] = self._value
             return self._value[str(int(item))]
 
-    def write(self, map):
+    def write(self, map, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert map is not None
@@ -348,7 +350,7 @@ class LongSettings(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self._value = map
-            self._pre_write()
+            self._pre_write(save)
             for item, value in map.items():
                 data_bytes_list = self._validator.prepare_write(self._value)
                 if data_bytes_list is not None:
@@ -437,7 +439,7 @@ class BitFieldSetting(Setting):
     def _do_read_key(self, key):
         return self._rw.read(self._device, key)
 
-    def write(self, map):
+    def write(self, map, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert map is not None
@@ -446,7 +448,7 @@ class BitFieldSetting(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self._value = map
-            self._pre_write()
+            self._pre_write(save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
