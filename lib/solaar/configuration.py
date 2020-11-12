@@ -101,7 +101,8 @@ def _cleanup(d):
 class _DeviceEntry(dict):
     def __init__(self, device, **kwargs):
         super(_DeviceEntry, self).__init__(**kwargs)
-        self[_KEY_NAME] = device.name
+        if self.get(_KEY_NAME) != device.name:
+            self[_KEY_NAME] = device.name
         self.update(device)
 
     def __setitem__(self, key, value):
@@ -109,9 +110,9 @@ class _DeviceEntry(dict):
         save()
 
     def update(self, device):
-        if device.modelId:
+        if device.modelId and device.modelId != self.get(_KEY_MODEL_ID):
             self[_KEY_MODEL_ID] = device.modelId
-        if device.unitId:
+        if device.unitId and device.unitId != self.get(_KEY_UNIT_ID):
             self[_KEY_UNIT_ID] = device.unitId
 
     def get_sensitivity(self, name):
@@ -119,8 +120,9 @@ class _DeviceEntry(dict):
 
     def set_sensitivity(self, name, value):
         sensitives = self.get('_sensitive', {})
-        sensitives[name] = value
-        self['_sensitive'] = sensitives
+        if sensitives.get(name) != value:
+            sensitives[name] = value
+            self['_sensitive'] = sensitives
 
 
 def persister(device):
