@@ -17,8 +17,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Map diverted feature notifications to keyboard and mouse input
-
 import os as _os
 import os.path as _path
 
@@ -123,64 +121,7 @@ def key_press_handler(reply):
 _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
 # display.record_free_context(context)  when should this be done??
 
-# Solaar processes feature notifications from devices by evaluating a rule (usually consisting of a
-# sequence of sub-rules) on them.
-#
-# A rule is a sequence of conditions, actions, and sub-rules.
-#
-# Rules are evaluated by evaluating each of their components in order.
-# A rule evaluation is terminated early if a condition component evaluates to false or
-# the last evaluated sub-component of a component is an action.
-# A Rule is false if its last evaluated component evaluates to a false value.
-#
-# Not conditions are true if their component evaluates to a false value.
-# Or conditions are evaluated by evaluating each of their components in order.
-# An Or condition is terminated early if a component evaluates to true or
-# the last evaluated sub-component of a component is an action.
-# A Or condition is true if its last evaluated component evaluates to a true value.
-# And conditions are evaluted the same as rules.
-#
-# Process conditions are true if the name of the active process starts with their argument.
-# Feature conditions are if true if the name of the feature of the current notification is their argument.
-# Report conditions are if true if the report number in the current notification is their argument.
-# Modifiers conditions are true if the current keyboard modifiers are their arguments.
-# The permissable modifiers are 'Shift', 'Control', 'Alt', and 'Super'.
-# Key conditions are true if the Logitech name of the last key down is their argument.
-# Test conditions are true if their test evaluates to true on the feature, report, and data of the current notification.
-# Test conditions can return a number instead of a boolean.
-#
-# Test conditions consisting of a list of three or four integers use the first two to select bytes of the data.
-# Three-element test conditions are true if the selected bytes bit-wise anded with its third element is non-zero.
-# The value of these test conditions is the result of the and.
-# Four-element test conditions are true if the selected bytes form a signed integer between the third and fourth elements.
-# The value of test test condition is the signed value of the selected bytes if that is non-zero otherwise True.
-#
-# The other test conditions are mnemonic shorthands for meaningful feature, report, and data combinations.
-# A crown_right test is the rotation amount of a CROWN right rotation.
-# A crown_left test is the rotation amount of a CROWN left rotation.
-# A crown_right_ratchet test is the ratchet amount of a CROWN right ratchet rotation.
-# A crown_left_ratchet test is the ratchet amount of a CROWN left ratchet rotation.
-# A crown_tap test is true for a CROWN tap.
-# A crown_start_press test is true for the start of a CROWN press.
-# A crown_stop_press test is true for the end of a CROWN press.
-# A crown_pressed test is true for a CROWN notification with the Crown pressed.
-# A thumb_wheel_up test is the rotation amount of a THUMB_WHEEL upward rotation.
-# A thumb_wheel_down test is the rotation amount of a THUMB_WHEEL downward rotation.
-# lowres_wheel_up, lowres_wheel_down, hires_wheel_up, hires_wheel_down are the same but for LOWRES_WHEEL and HIRES_WHEEL.
-# True and False tests return True and False, respectively.
-#
-# A KeyPress action takes X11 key symbols and simulates a chorded keypress on the keyboard.
-# Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
-# A MouseScroll action takes two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
-# If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
-# An Execute actions takes a program and arguments and executes it asynchronously.
-#
-# Solaar reads rules from a configuration file (normally ~/.config/solaar/divert.yaml).
-# This file contains zero or more documents, each a rule.
-# Rule components are one-element dictionaries with key the component name (with initial Captial letter).
-# If a component has multiple arguments they are written as a sequence.
-# Solaar constructs the rule that it uses to process feature notifications from these rules (if any)
-# followed by some built-in rules.
+# See docs/rules.md for documentation
 
 keyboard = _keyboard.Controller()
 mouse = _mouse.Controller()
@@ -264,7 +205,7 @@ class Not(Condition):
         self.component = self.compile(op)
 
     def __str__(self):
-        return 'NOT: ' + str(self.component)
+        return 'Not: ' + str(self.component)
 
     def evaluate(self, feature, notification, device, status, last_result):
         result = self.component.evaluate(feature, notification, device, status, last_result)
@@ -294,7 +235,7 @@ class And(Condition):
         self.components = [self.compile(a) for a in args]
 
     def __str__(self):
-        return 'AND: [' + ', '.join(str(c) for c in self.components) + ']'
+        return 'And: [' + ', '.join(str(c) for c in self.components) + ']'
 
     def evaluate(self, feature, notification, device, status, last_result):
         result = True
@@ -314,7 +255,7 @@ class Process(Condition):
             _log.warn('rule Process argument not a string: %s', process)
 
     def __str__(self):
-        return 'PROCESS: ' + str(self.process)
+        return 'Process: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
         return active_process_name.startswith(self.process) if isinstance(self.process, str) else False
@@ -328,7 +269,7 @@ class Feature(Condition):
         self.feature = _F[feature]
 
     def __str__(self):
-        return 'FEATURE: ' + str(self.feature)
+        return 'Feature: ' + str(self.feature)
 
     def evaluate(self, feature, notification, device, status, last_result):
         return feature == self.feature
@@ -342,7 +283,7 @@ class Report(Condition):
         self.report = report
 
     def __str__(self):
-        return 'REPORT: ' + str(self.report)
+        return 'Report: ' + str(self.report)
 
     def evaluate(self, report, notification, device, status, last_result):
         return (notification.address >> 4) == self.report
@@ -363,7 +304,7 @@ class Modifiers(Condition):
                 _log.warn('unknown rule Modifier value: %s', k)
 
     def __str__(self):
-        return 'MODIFIERS: ' + str(self.desired)
+        return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.desired == (current_key_modifiers & MODIFIER_MASK)
@@ -378,7 +319,7 @@ class Key(Condition):
             self.key = 0
 
     def __str__(self):
-        return 'KEY: ' + (str(self.key) if self.key else 'None')
+        return 'Key: ' + (str(self.key) if self.key else 'None')
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.key and self.key == key_down
@@ -414,7 +355,7 @@ class Test(Condition):
             _log.warn('rule Test argument not valid %s', test)
 
     def __str__(self):
-        return 'TEST: ' + str(self.test)
+        return 'Test: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.function(feature, notification.address, notification.data)
@@ -573,7 +514,7 @@ rules = Rule([
         {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioLowerVolume'}]}
     ]},
     {'Rule': [  # Thumb wheel does horizontal movement, doubled if control key not pressed
-        {'Feature': 'THUMB_WHEEL'},  # with control modifier on mouse scrolling sometimes does something different!
+        {'Feature': 'THUMB WHEEL'},  # with control modifier on mouse scrolling sometimes does something different!
         {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_up'}, {'MouseScroll': [-1, 0]}]},
         {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_down'}, {'MouseScroll': [-1, 0]}]},
         {'Rule': [{'Or': [{'Test': 'thumb_wheel_up'}, {'Test': 'thumb_wheel_down'}]}, {'MouseScroll': [-2, 0]}]}
@@ -596,7 +537,7 @@ def process_notification(device, status, notification, feature):
 
 
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))
-_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'divert.yaml')
+_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'rules.yaml')
 
 
 def _load_config_rule_file():
@@ -611,7 +552,7 @@ def _load_config_rule_file():
                         _log.info('load rule: %s', rule)
                     loaded_rules.append(rule)
                 if _log.isEnabledFor(_INFO):
-                    _log.info('loaded %d rules from %s', len(loaded_rules), config_file)
+                    _log.info('loaded %d rules from %s', len(loaded_rules), config_file.name)
                 loaded_rules.extend(rules.components)
                 rules = Rule(loaded_rules)
         except Exception as e:

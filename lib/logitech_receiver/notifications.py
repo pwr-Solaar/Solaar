@@ -388,4 +388,4 @@ def _process_feature_notification(device, status, n, feature):
     _diversion.process_notification(device, status, n, feature)
 
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s: unrecognized %s for feature %s (index %02X)', device, n, feature, n.sub_id)
+        _log.debug('%s: notification for feature %r, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
