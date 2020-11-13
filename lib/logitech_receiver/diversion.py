@@ -444,6 +444,33 @@ class MouseScroll(Action):
         return None
 
 
+class MouseClick(Action):
+    def __init__(self, args):
+        if len(args) == 1 and isinstance(args[0], list):
+            args = args[0]
+        if not isinstance(args, list):
+            args = [args]
+        self.button = str(args[0]) if len(args) >= 0 else 'unknown'
+        if not hasattr(_mouse.Button, self.button):
+            _log.warn('rule MouseClick action: button %s not known', self.button)
+            self.button = 'unknown'
+        count = args[1] if len(args) >= 1 else 1
+        try:
+            self.count = int(count)
+        except ValueError | TypeError:
+            _log.warn('rule MouseClick action: count %s should be an integer', count)
+            self.count = 1
+
+    def __str__(self):
+        return 'MouseClick: %s (%d)' % (self.button, self.count)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_INFO):
+            _log.info('MouseClick action: %d %s' % (self.count, self.button))
+        mouse.click(getattr(_mouse.Button, self.button), self.count)
+        return None
+
+
 class Execute(Action):
     def __init__(self, args):
         if isinstance(args, str):
@@ -478,6 +505,7 @@ COMPONENTS = {
     'Test': Test,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
+    'MouseClick': MouseClick,
     'Execute': Execute,
 }
 

@@ -91,6 +91,7 @@ A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded 
 Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
+A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
 An `Execute` actions takes a program and arguments and executes it asynchronously.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
