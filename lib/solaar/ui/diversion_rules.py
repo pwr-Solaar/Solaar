@@ -21,7 +21,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import defaultdict
 from contextlib import contextmanager as contextlib_contextmanager
-from logging import INFO as _INFO
 from logging import getLogger
 from shlex import quote as shlex_quote
 
@@ -32,7 +31,6 @@ from logitech_receiver import diversion as _DIV
 from logitech_receiver.special_keys import CONTROL as _CONTROL
 from pynput import mouse as _mouse
 from solaar.i18n import _
-from yaml import dump as _yaml_dump
 
 _log = getLogger(__name__)
 del getLogger
@@ -154,7 +152,7 @@ class DiversionDialog:
             if response == Gtk.ResponseType.NO:
                 w.hide()
             elif response == Gtk.ResponseType.YES:
-                self._save_yaml_file(_DIV._file_path)
+                self._save_yaml_file()
                 w.hide()
             else:
                 # don't close
@@ -172,21 +170,11 @@ class DiversionDialog:
         self.view.set_model(self.model)
         self.view.expand_all()
 
-    def _save_yaml_file(self, file_name):
-        rules = [r.data()['Rule'] for r in _DIV.rules.components if r.source == file_name]
-        if len(rules) == 1:
-            rules = rules[0]
-        if rules:
-            if _log.isEnabledFor(_INFO):
-                _log.info('saving %d rule(s) to %s', len(rules), file_name)
-            try:
-                with open(file_name, 'w') as f:
-                    _yaml_dump(rules, f, default_flow_style=False)
-                self.dirty = False
-                self.save_btn.set_sensitive(False)
-                self.discard_btn.set_sensitive(False)
-            except Exception as e:
-                _log.error('failed to save to %s\n%s', file_name, e)
+    def _save_yaml_file(self):
+        if _DIV._save_config_rule_file():
+            self.dirty = False
+            self.save_btn.set_sensitive(False)
+            self.discard_btn.set_sensitive(False)
 
     def _create_top_panel(self):
         sw = Gtk.ScrolledWindow()
@@ -205,7 +193,7 @@ class DiversionDialog:
         vbox = Gtk.VBox(spacing=20)
         self.save_btn = Gtk.Button(_('Save changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
         self.discard_btn = Gtk.Button(_('Discard changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
-        self.save_btn.connect('clicked', lambda *_args: self._save_yaml_file(_DIV._file_path))
+        self.save_btn.connect('clicked', lambda *_args: self._save_yaml_file())
         self.discard_btn.connect('clicked', lambda *_args: self._reload_yaml_file())
         vbox.pack_start(self.save_btn, False, False, 0)
         vbox.pack_start(self.discard_btn, False, False, 0)

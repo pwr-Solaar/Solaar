@@ -33,6 +33,8 @@ from Xlib import X
 from Xlib.display import Display
 from Xlib.ext import record
 from Xlib.protocol import rq
+from yaml import add_representer as _yaml_add_representer
+from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
 from .common import unpack as _unpack
@@ -618,6 +620,51 @@ _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'rules.yaml')
 rules = built_in_rules
 
 
+def _save_config_rule_file(file_name=_file_path):
+    # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
+    class inline_list(list):
+        pass
+
+    def blockseq_rep(dumper, data):
+        return dumper.represent_sequence(u'tag:yaml.org,2002:seq', data, flow_style=True)
+
+    _yaml_add_representer(inline_list, blockseq_rep)
+
+    def convert(elem):
+        if isinstance(elem, list):
+            if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
+                # All diversion classes that expect a list of scalars also support a single scalar without a list
+                return elem[0]
+            if all(isinstance(c, (int, str, float)) for c in elem):
+                return inline_list([convert(c) for c in elem])
+            return [convert(c) for c in elem]
+        if isinstance(elem, dict):
+            return {k: convert(v) for k, v in elem.items()}
+        return elem
+
+    # YAML format settings
+    dump_settings = {
+        'encoding': 'utf-8',
+        'explicit_start': True,
+        'explicit_end': True,
+        'default_flow_style': False
+        # 'version': (1, 3),  # it would be printed for every rule
+    }
+    # Save only user-defined rules
+    rules_to_save = sum([r.data()['Rule'] for r in rules.components if r.source == file_name], [])
+    if rules_to_save:
+        if _log.isEnabledFor(_INFO):
+            _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
+        try:
+            with open(file_name, 'w') as f:
+                f.write('%YAML 1.3\n')  # Write version manually
+                _yaml_dump_all(convert([r['Rule'] for r in rules_to_save]), f, **dump_settings)
+        except Exception as e:
+            _log.error('failed to save to %s\n%s', file_name, e)
+            return False
+    return True
+
+
 def _load_config_rule_file():
     global rules
     loaded_rules = []
@@ -634,8 +681,7 @@ def _load_config_rule_file():
                     _log.info('loaded %d rules from %s', len(loaded_rules), config_file.name)
         except Exception as e:
             _log.error('failed to load from %s\n%s', _file_path, e)
-    loaded_rules.append(built_in_rules)
-    rules = Rule(loaded_rules)
+    rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
 
 
 _load_config_rule_file()
