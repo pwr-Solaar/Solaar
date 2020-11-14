@@ -190,22 +190,22 @@ class DiversionDialog:
         sw.add(view)
         sw.set_size_request(0, 600)
 
-        vbox = Gtk.VBox(spacing=20)
+        button_box = Gtk.HBox(spacing=20)
         self.save_btn = Gtk.Button(_('Save changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
         self.discard_btn = Gtk.Button(_('Discard changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
         self.save_btn.connect('clicked', lambda *_args: self._save_yaml_file())
         self.discard_btn.connect('clicked', lambda *_args: self._reload_yaml_file())
-        vbox.pack_start(self.save_btn, False, False, 0)
-        vbox.pack_start(self.discard_btn, False, False, 0)
-        vbox.set_halign(Gtk.Align.CENTER)
-        vbox.set_valign(Gtk.Align.CENTER)
-        vbox.set_size_request(200, 0)
+        button_box.pack_start(self.save_btn, False, False, 0)
+        button_box.pack_start(self.discard_btn, False, False, 0)
+        button_box.set_halign(Gtk.Align.CENTER)
+        button_box.set_valign(Gtk.Align.CENTER)
+        button_box.set_size_request(0, 50)
 
-        hbox = Gtk.HBox()
-        hbox.pack_start(sw, True, True, 0)
-        hbox.pack_start(vbox, False, False, 0)
+        vbox = Gtk.VBox()
+        vbox.pack_start(button_box, False, False, 0)
+        vbox.pack_start(sw, True, True, 0)
 
-        return hbox, view
+        return vbox, view
 
     def _create_model(self):
         model = Gtk.TreeStore(RuleComponentWrapper)
