@@ -1146,7 +1146,7 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('KeyPress')
+        return _('Key press')
 
     @classmethod
     def right_label(cls, component):
@@ -1195,7 +1195,7 @@ class MouseScrollUI(ActionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('MouseScroll')
+        return _('Mouse scroll')
 
     @classmethod
     def right_label(cls, component):
@@ -1243,7 +1243,7 @@ class MouseClickUI(ActionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('MouseClick')
+        return _('Mouse click')
 
     @classmethod
     def right_label(cls, component):
