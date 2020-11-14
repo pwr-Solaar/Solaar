@@ -844,7 +844,7 @@ class ProcessUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
-        self.field.set_size_request(300, 0)
+        self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
@@ -878,13 +878,11 @@ class FeatureUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.field = CompletionEntry(
-            self.FEATURES_WITH_DIVERSION, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True
+            self.FEATURES_WITH_DIVERSION, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
         )
-        self.field.set_size_request(200, 0)
+        self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
-        self.label = Gtk.Label(halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True)
         self.widgets[self.field] = (0, 0, 1, 1)
-        self.widgets[self.label] = (0, 1, 1, 1)
 
     def show(self, component):
         super().show(component)
@@ -893,10 +891,6 @@ class FeatureUI(ConditionUI):
 
     def collect_value(self):
         return self.field.get_text().strip()
-
-    def _on_update(self, *args):
-        super()._on_update(*args)
-        self.label.set_text('%04X' % int(self.component.feature) if self.component.feature is not None else 'None')
 
     @classmethod
     def left_label(cls, component):
@@ -982,10 +976,10 @@ class KeyUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.label = Gtk.Label(halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True)
+        self.field = CompletionEntry(
+            self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
+        )
         self.field.connect('changed', self._on_update)
-        self.widgets[self.label] = (0, 1, 1, 1)
         self.widgets[self.field] = (0, 0, 1, 1)
 
     def show(self, component):
@@ -995,10 +989,6 @@ class KeyUI(ConditionUI):
 
     def collect_value(self):
         return self.field.get_text()
-
-    def _on_update(self, *args):
-        super()._on_update(*args)
-        self.label.set_text('%04X' % int(self.component.key))
 
     @classmethod
     def left_label(cls, component):
@@ -1015,11 +1005,10 @@ class TestUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.field = field = CompletionEntry(
-            _DIV.TESTS, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
-        )
+        self.field = CompletionEntry(_DIV.TESTS, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
-        self.widgets[field] = (0, 0, 1, 1)
+        self.widgets[self.field] = (0, 0, 1, 1)
 
     def show(self, component):
         super().show(component)
@@ -1055,30 +1044,35 @@ class KeyPressUI(ActionUI):
     def create_widgets(self):
         self.widgets = {}
         self.fields = []
+        self.del_btns = []
         self.add_btn = Gtk.Button(_('Add key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.del_btn = Gtk.Button(
-            _('Delete last key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True
-        )
         self.add_btn.connect('clicked', self._clicked_add)
-        self.del_btn.connect('clicked', self._clicked_del)
         self.widgets[self.add_btn] = (1, 0, 1, 1)
-        self.widgets[self.del_btn] = (0, 0, 1, 1)
 
     def _create_field(self):
         field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        field.set_size_request(200, 0)
+        field.set_size_request(220, 0)
         field.connect('changed', self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 0, 1, 1)
         return field
 
-    def _clicked_add(self, *_args):
+    def _create_del_btn(self):
+        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True)
+        self.del_btns.append(btn)
+        self.widgets[btn] = (len(self.del_btns) - 1, 1, 1, 1)
+        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        return btn
+
+    def _clicked_add(self, _btn):
         self.component.__init__(self.collect_value() + [''])
         self.show(self.component)
         self.fields[len(self.component.key_symbols) - 1].grab_focus()
 
-    def _clicked_del(self, *_args):
-        self.component.__init__(self.collect_value()[:-1])
+    def _clicked_del(self, _btn, pos):
+        v = self.collect_value()
+        v.pop(pos)
+        self.component.__init__(v)
         self.show(self.component)
         self._on_update_callback()
 
@@ -1086,17 +1080,18 @@ class KeyPressUI(ActionUI):
         n = len(component.key_symbols)
         while len(self.fields) < n:
             self._create_field()
+            self._create_del_btn()
         self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
-        self.widgets[self.del_btn] = (n + 1, 1, 1, 1)
         super().show(component)
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
                 field.set_text(component.key_symbols[i])
             field.show_all()
+            self.del_btns[i].show()
         for i in range(n, len(self.fields)):
-            self.fields[i].set_visible(False)
-        self.del_btn.set_visible(n >= 1)
+            self.fields[i].hide()
+            self.del_btns[i].hide()
         self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
 
     def collect_value(self):
