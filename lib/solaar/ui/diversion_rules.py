@@ -53,8 +53,6 @@ class RuleComponentWrapper(GObject.GObject):
 
     def display_left(self):
         if isinstance(self.component, _DIV.Rule):
-            if self.level == -1:
-                return _('Diverson rules')
             if self.level == 0:
                 return _('Built-in rules') if not self.editable else _('User-defined rules')
             if self.level == 1:
@@ -84,7 +82,7 @@ class DiversionDialog:
     def __init__(self):
 
         window = Gtk.Window()
-        window.set_title(_('Diversion settings'))
+        window.set_title(_('Solaar Rule Editor'))
         window.connect('delete-event', self._closing)
         vbox = Gtk.VBox()
 

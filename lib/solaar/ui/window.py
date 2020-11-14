@@ -328,7 +328,7 @@ def _create_window_layout():
         _('About') + ' ' + NAME, 'help-about', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window
     )
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Diversion rules'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(_('Rule Editor'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
