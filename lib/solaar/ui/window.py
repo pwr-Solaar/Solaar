@@ -37,6 +37,7 @@ from . import action as _action
 from . import config_panel as _config_panel
 from . import icons as _icons
 from .about import show_window as _show_about_window
+from .diversion_rules import show_window as _show_diversion_window
 
 _log = getLogger(__name__)
 del getLogger
@@ -327,6 +328,8 @@ def _create_window_layout():
         _('About') + ' ' + NAME, 'help-about', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window
     )
     bottom_buttons_box.add(about_button)
+    diversion_button = _new_button(_('Diversion rules'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    bottom_buttons_box.add(diversion_button)
 
     # solaar_version = Gtk.Label()
     # solaar_version.set_markup('<small>' + NAME + ' v' + VERSION + '</small>')
