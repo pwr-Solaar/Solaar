@@ -162,6 +162,7 @@ class DiversionDialog:
     def _reload_yaml_file(self):
         self.discard_btn.set_sensitive(False)
         self.save_btn.set_sensitive(False)
+        self.dirty = False
         for c in self.bottom_panel.get_children():
             self.bottom_panel.remove(c)
         _DIV._load_config_rule_file()
