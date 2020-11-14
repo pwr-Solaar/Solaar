@@ -259,7 +259,7 @@ class DiversionDialog:
         grid.set_column_spacing(10)
         grid.set_halign(Gtk.Align.CENTER)
         grid.set_valign(Gtk.Align.CENTER)
-        grid.set_size_request(0, 200)
+        grid.set_size_request(0, 120)
         return grid
 
     def on_update(self):
@@ -1090,7 +1090,6 @@ class KeyPressUI(ActionUI):
 
     def _create_field(self):
         field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        field.set_size_request(220, 0)
         field.connect('changed', self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 0, 1, 1)
@@ -1134,6 +1133,7 @@ class KeyPressUI(ActionUI):
             field = self.fields[i]
             with self.ignore_changes():
                 field.set_text(component.key_symbols[i])
+            field.set_size_request(int(0.3 * self.panel.get_toplevel().get_size()[0]), 0)
             field.show_all()
             self.del_btns[i].show()
         for i in range(n, len(self.fields)):
