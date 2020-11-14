@@ -314,7 +314,7 @@ class DiversionDialog:
         if state & Gdk.ModifierType.CONTROL_MASK:
             if can_delete and e.keyval in [Gdk.KEY_x, Gdk.KEY_X]:
                 self._menu_do_cut(None, m, it)
-            elif can_copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and _rule_component_clipboard is not None:
+            elif can_copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and c is not None:
                 self._menu_do_copy(None, m, it)
             elif can_insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
                 self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
@@ -400,7 +400,7 @@ class DiversionDialog:
                 menu.append(Gtk.SeparatorMenuItem(visible=True))
             if can_delete:
                 menu.append(self._menu_cut(m, it))
-            if can_copy and _rule_component_clipboard is not None:
+            if can_copy and c is not None:
                 menu.append(self._menu_copy(m, it))
             if can_insert and _rule_component_clipboard is not None:
                 p = self._menu_paste(m, it)
