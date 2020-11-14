@@ -190,8 +190,16 @@ class DiversionDialog:
         sw.set_size_request(0, 600)
 
         button_box = Gtk.HBox(spacing=20)
-        self.save_btn = Gtk.Button(_('Save changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
-        self.discard_btn = Gtk.Button(_('Discard changes'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, sensitive=False)
+        self.save_btn = Gtk.Button.new_from_icon_name('document-save', Gtk.IconSize.BUTTON)
+        self.save_btn.set_label('Save changes')
+        self.save_btn.set_always_show_image(True)
+        self.save_btn.set_sensitive(False)
+        self.save_btn.set_valign(Gtk.Align.CENTER)
+        self.discard_btn = Gtk.Button.new_from_icon_name('document-revert', Gtk.IconSize.BUTTON)
+        self.discard_btn.set_label('Discard changes')
+        self.discard_btn.set_always_show_image(True)
+        self.discard_btn.set_sensitive(False)
+        self.discard_btn.set_valign(Gtk.Align.CENTER)
         self.save_btn.connect('clicked', lambda *_args: self._save_yaml_file())
         self.discard_btn.connect('clicked', lambda *_args: self._reload_yaml_file())
         button_box.pack_start(self.save_btn, False, False, 0)
@@ -295,6 +303,7 @@ class DiversionDialog:
             Ctrl + V                paste below (or here if empty)
             Ctrl + Shift + V        paste above
             *                       flatten
+            Ctrl + S                save changes
         '''
         state = e.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
         m, it = v.get_selection().get_selected()
@@ -332,7 +341,9 @@ class DiversionDialog:
                 menu.show_all()
                 rect = self.view.get_cell_area(m.get_path(it), self.view.get_column(1))
                 menu.popup_at_rect(self.window.get_window(), rect, Gdk.Gravity.WEST, Gdk.Gravity.CENTER, e)
-        elif state & Gdk.ModifierType.CONTROL_MASK == 0:
+            elif self.dirty and e.keyval in [Gdk.KEY_s, Gdk.KEY_S]:
+                self._save_yaml_file()
+        else:
             if can_wrap:
                 if e.keyval == Gdk.KEY_exclam:
                     self._menu_do_negate(None, m, it)
