@@ -28,6 +28,7 @@ import Xlib.XK
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
+from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.special_keys import CONTROL as _CONTROL
 from pynput import mouse as _mouse
 from solaar.i18n import _
@@ -889,7 +890,8 @@ class FeatureUI(ConditionUI):
         self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
-        CompletionEntry.add_completion_to_entry(self.field.get_child(), self.FEATURES_WITH_DIVERSION)
+        all_features = [str(f) for f in _ALL_FEATURES]
+        CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 0, 1, 1)
 
     def show(self, component):
