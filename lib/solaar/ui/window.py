@@ -330,6 +330,7 @@ def _create_window_layout():
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(_('Diversion rules'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
     bottom_buttons_box.add(diversion_button)
+    bottom_buttons_box.set_child_secondary(diversion_button, True)
 
     # solaar_version = Gtk.Label()
     # solaar_version.set_markup('<small>' + NAME + ' v' + VERSION + '</small>')
