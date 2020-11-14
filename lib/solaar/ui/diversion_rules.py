@@ -1255,13 +1255,9 @@ class ExecuteUI(ActionUI):
         self.widgets = {}
         self.fields = []
         self.add_btn = Gtk.Button(_('Add argument'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.del_btn = Gtk.Button(
-            _('Delete last argument'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True
-        )
+        self.del_btns = []
         self.add_btn.connect('clicked', self._clicked_add)
-        self.del_btn.connect('clicked', self._clicked_del)
         self.widgets[self.add_btn] = (1, 0, 1, 1)
-        self.widgets[self.del_btn] = (0, 0, 1, 1)
 
     def _create_field(self):
         field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
@@ -1271,13 +1267,23 @@ class ExecuteUI(ActionUI):
         self.widgets[field] = (len(self.fields) - 1, 0, 1, 1)
         return field
 
+    def _create_del_btn(self):
+        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True)
+        btn.set_size_request(150, 0)
+        self.del_btns.append(btn)
+        self.widgets[btn] = (len(self.del_btns) - 1, 1, 1, 1)
+        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        return btn
+
     def _clicked_add(self, *_args):
         self.component.__init__(self.collect_value() + [''])
         self.show(self.component)
         self.fields[len(self.component.args) - 1].grab_focus()
 
-    def _clicked_del(self, *_args):
-        self.component.__init__(self.collect_value()[:-1])
+    def _clicked_del(self, _btn, pos):
+        v = self.collect_value()
+        v.pop(pos)
+        self.component.__init__(v)
         self.show(self.component)
         self._on_update_callback()
 
@@ -1285,16 +1291,17 @@ class ExecuteUI(ActionUI):
         n = len(component.args)
         while len(self.fields) < n:
             self._create_field()
+            self._create_del_btn()
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
                 field.set_text(component.args[i])
+            self.del_btns[i].show()
         self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
-        self.widgets[self.del_btn] = (n + 1, 1, 1, 1)
         super().show(component)
         for i in range(n, len(self.fields)):
-            self.fields[i].set_visible(False)
-        self.del_btn.set_visible(n >= 1)
+            self.fields[i].hide()
+            self.del_btns[i].hide()
         self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
 
     def collect_value(self):
