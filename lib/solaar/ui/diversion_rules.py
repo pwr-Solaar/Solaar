@@ -676,15 +676,19 @@ class DiversionDialog:
 class CompletionEntry(Gtk.Entry):
     def __init__(self, values, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.liststore = Gtk.ListStore(str)
+        CompletionEntry.add_completion_to_entry(self, values)
+
+    @classmethod
+    def add_completion_to_entry(cls, entry, values):
+        entry.liststore = Gtk.ListStore(str)
         for v in sorted(values, key=str.casefold):
-            self.liststore.append((v, ))
-        self.completion = Gtk.EntryCompletion()
-        self.completion.set_model(self.liststore)
+            entry.liststore.append((v, ))
+        entry.completion = Gtk.EntryCompletion()
+        entry.completion.set_model(entry.liststore)
         norm = lambda s: s.replace('_', '').replace(' ', '').lower()
-        self.completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
-        self.completion.set_text_column(0)
-        self.set_completion(self.completion)
+        entry.completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
+        entry.completion.set_text_column(0)
+        entry.set_completion(entry.completion)
 
 
 class RuleComponentUI:
@@ -877,20 +881,29 @@ class FeatureUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.field = CompletionEntry(
-            self.FEATURES_WITH_DIVERSION, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
-        )
+        self.field = Gtk.ComboBoxText.new_with_entry()
+        self.field.append('', '')
+        for feature in self.FEATURES_WITH_DIVERSION:
+            self.field.append(feature, feature)
+        self.field.set_valign(Gtk.Align.CENTER)
+        self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
+        CompletionEntry.add_completion_to_entry(self.field.get_child(), self.FEATURES_WITH_DIVERSION)
         self.widgets[self.field] = (0, 0, 1, 1)
 
     def show(self, component):
         super().show(component)
         with self.ignore_changes():
-            self.field.set_text(str(component.feature))
+            self.field.set_active_id(str(component.feature) if component.feature else '')
 
     def collect_value(self):
-        return self.field.get_text().strip()
+        return (self.field.get_active_text() or '').strip()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        icon = 'dialog-warning' if not self.component.feature else ''
+        self.field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -979,6 +992,7 @@ class KeyUI(ConditionUI):
         self.field = CompletionEntry(
             self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
         )
+        self.field.set_size_request(600, 0)
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
@@ -989,6 +1003,11 @@ class KeyUI(ConditionUI):
 
     def collect_value(self):
         return self.field.get_text()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        icon = 'dialog-warning' if not self.component.key else ''
+        self.field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -1005,18 +1024,35 @@ class TestUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.field = CompletionEntry(_DIV.TESTS, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.field = Gtk.ComboBoxText.new_with_entry()
+        self.field.append('', '')
+        for t in _DIV.TESTS:
+            self.field.append(t, t)
+        self.field.set_valign(Gtk.Align.CENTER)
+        self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
+        CompletionEntry.add_completion_to_entry(self.field.get_child(), _DIV.TESTS)
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
     def show(self, component):
         super().show(component)
         with self.ignore_changes():
-            self.field.set_text(component.test)
+            self.field.set_active_id(component.test or '')
+            if component.test not in _DIV.TESTS:
+                self.field.get_child().set_text(component.test)
+                self._change_status_icon()
 
     def collect_value(self):
-        return self.field.get_text()
+        return (self.field.get_active_text() or '').strip()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        self._change_status_icon()
+
+    def _change_status_icon(self):
+        icon = 'dialog-warning' if self.component.test not in _DIV.TESTS else ''
+        self.field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -1076,6 +1112,14 @@ class KeyPressUI(ActionUI):
         self.show(self.component)
         self._on_update_callback()
 
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        for i, f in enumerate(self.fields):
+            if f.get_visible():
+                icon = 'dialog-warning' if i < len(self.component.key_symbols
+                                                   ) and self.component.key_symbols[i] not in self.KEY_NAMES else ''
+                f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
     def show(self, component):
         n = len(component.key_symbols)
         while len(self.fields) < n:
@@ -1095,7 +1139,7 @@ class KeyPressUI(ActionUI):
         self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
 
     def collect_value(self):
-        return [f.get_text() for f in self.fields if f.get_visible()]
+        return [f.get_text().strip() for f in self.fields if f.get_visible()]
 
     @classmethod
     def left_label(cls, component):
