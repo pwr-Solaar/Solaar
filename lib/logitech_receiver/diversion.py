@@ -60,7 +60,7 @@ def active_program():
         window = disp_prog.create_resource_object('window', window_id)
         window_pid = window.get_full_property(NET_WM_PID, 0).value[0]
         return psutil.Process(window_pid).name()
-    except Xlib.error.XError:  # simplify dealing with BadWindow
+    except (Xlib.error.XError, AttributeError):  # simplify dealing with BadWindow
         return None
 
 
@@ -187,6 +187,9 @@ class Rule(RuleComponent):
                 return result
         return result
 
+    def data(self):
+        return {'Rule': [c.data() for c in self.components]}
+
 
 class Condition(RuleComponent):
     def __init__(self, *args):
@@ -201,6 +204,8 @@ class Condition(RuleComponent):
 
 class Not(Condition):
     def __init__(self, op):
+        if isinstance(op, list) and len(op) == 1:
+            op = op[0]
         self.op = op
         self.component = self.compile(op)
 
@@ -210,6 +215,9 @@ class Not(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         result = self.component.evaluate(feature, notification, device, status, last_result)
         return None if result is None else not result
+
+    def data(self):
+        return {'Not': self.component.data()}
 
 
 class Or(Condition):
@@ -229,6 +237,9 @@ class Or(Condition):
                 return result
         return result
 
+    def data(self):
+        return {'Or': [c.data() for c in self.components]}
+
 
 class And(Condition):
     def __init__(self, args):
@@ -247,18 +258,25 @@ class And(Condition):
                 return result
         return result
 
+    def data(self):
+        return {'And': [c.data() for c in self.components]}
+
 
 class Process(Condition):
     def __init__(self, process):
         self.process = process
         if not isinstance(process, str):
             _log.warn('rule Process argument not a string: %s', process)
+            self.process = str(process)
 
     def __str__(self):
         return 'Process: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
         return active_process_name.startswith(self.process) if isinstance(self.process, str) else False
+
+    def data(self):
+        return {'Process': str(self.process)}
 
 
 class Feature(Condition):
@@ -274,6 +292,9 @@ class Feature(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         return feature == self.feature
 
+    def data(self):
+        return {'Feature': str(self.feature)}
+
 
 class Report(Condition):
     def __init__(self, report):
@@ -288,6 +309,9 @@ class Report(Condition):
     def evaluate(self, report, notification, device, status, last_result):
         return (notification.address >> 4) == self.report
 
+    def data(self):
+        return {'Report': self.report}
+
 
 MODIFIERS = {'Shift': 0x01, 'Control': 0x04, 'Alt': 0x08, 'Super': 0x40}
 MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + MODIFIERS['Super']
@@ -297,9 +321,11 @@ class Modifiers(Condition):
     def __init__(self, modifiers):
         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
         self.desired = 0
+        self.modifiers = []
         for k in modifiers:
             if k in MODIFIERS:
                 self.desired += MODIFIERS.get(k, 0)
+                self.modifiers.append(k)
             else:
                 _log.warn('unknown rule Modifier value: %s', k)
 
@@ -308,6 +334,9 @@ class Modifiers(Condition):
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.desired == (current_key_modifiers & MODIFIER_MASK)
+
+    def data(self):
+        return {'Modifiers': [str(m) for m in self.modifiers]}
 
 
 class Key(Condition):
@@ -323,6 +352,9 @@ class Key(Condition):
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.key and self.key == key_down
+
+    def data(self):
+        return {'Key': str(self.key)}
 
 
 def bit_test(start, end, bits):
@@ -359,6 +391,9 @@ class Test(Condition):
 
     def evaluate(self, feature, notification, device, status, last_result):
         return self.function(feature, notification.address, notification.data)
+
+    def data(self):
+        return {'Test': str(self.test)}
 
 
 class Action(RuleComponent):
@@ -410,6 +445,9 @@ class KeyPress(Action):
         self.keyUp(reversed(self.keys), current)
         return None
 
+    def data(self):
+        return {'KeyPress': [str(k) for k in self.key_symbols]}
+
 
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable
 # class KeyDown(KeyPress):
@@ -427,6 +465,7 @@ class MouseScroll(Action):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
             _log.warn('rule MouseScroll argument not two numbers %s', amounts)
+            amounts = [0, 0]
         self.amounts = amounts
 
     def __str__(self):
@@ -442,6 +481,9 @@ class MouseScroll(Action):
             _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         mouse.scroll(*amounts)
         return None
+
+    def data(self):
+        return {'MouseScroll': self.amounts[:]}
 
 
 class MouseClick(Action):
@@ -470,6 +512,9 @@ class MouseClick(Action):
         mouse.click(getattr(_mouse.Button, self.button), self.count)
         return None
 
+    def data(self):
+        return {'MouseClick': [self.button, self.count]}
+
 
 class Execute(Action):
     def __init__(self, args):
@@ -477,7 +522,7 @@ class Execute(Action):
             args = [args]
         if not (isinstance(args, list) and all(isinstance(arg), str) for arg in args):
             _log.warn('rule Execute argument not list of strings: %s', args)
-            self.args = None
+            self.args = []
         else:
             self.args = args
 
@@ -490,6 +535,9 @@ class Execute(Action):
             _log.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
         return None
+
+    def data(self):
+        return {'Execute': self.args[:]}
 
 
 COMPONENTS = {
@@ -510,7 +558,7 @@ COMPONENTS = {
 }
 
 
-rules = Rule([
+built_in_rules = Rule([
     ## Some malformed Rules for testing
     ##    Rule([Process(0), Feature(0), Modifiers(['XX', 0]), Modifiers('XXX'), Modifiers([0]),
     ##         KeyPress(['XXXXX', 0]), KeyPress(['XXXXXX']), KeyPress(0),
@@ -567,9 +615,12 @@ def process_notification(device, status, notification, feature):
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))
 _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'rules.yaml')
 
+rules = built_in_rules
+
 
 def _load_config_rule_file():
     global rules
+    loaded_rules = []
     if _path.isfile(_file_path):
         try:
             with open(_file_path, 'r') as config_file:
@@ -581,10 +632,10 @@ def _load_config_rule_file():
                     loaded_rules.append(rule)
                 if _log.isEnabledFor(_INFO):
                     _log.info('loaded %d rules from %s', len(loaded_rules), config_file.name)
-                loaded_rules.extend(rules.components)
-                rules = Rule(loaded_rules)
         except Exception as e:
             _log.error('failed to load from %s\n%s', _file_path, e)
+    loaded_rules.append(built_in_rules)
+    rules = Rule(loaded_rules)
 
 
 _load_config_rule_file()
