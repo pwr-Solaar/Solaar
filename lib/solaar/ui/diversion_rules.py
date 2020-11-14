@@ -897,7 +897,10 @@ class FeatureUI(ConditionUI):
     def show(self, component):
         super().show(component)
         with self.ignore_changes():
-            self.field.set_active_id(str(component.feature) if component.feature else '')
+            f = str(component.feature) if component.feature else ''
+            self.field.set_active_id(f)
+            if f not in self.FEATURES_WITH_DIVERSION:
+                self.field.get_child().set_text(f)
 
     def collect_value(self):
         return (self.field.get_active_text() or '').strip()
