@@ -60,6 +60,10 @@ battery status, and show and modify some of the modifiable features of devices.
     python_requires='>=3.6',
     install_requires=[
         'pyudev (>= 0.13)',
+        'PyYAML (>= 5.1)',
+        'python-xlib (>= 0.27)',
+        'pynput (>= 1.7.0)',
+        'psutil (>= 5.7.3)',
     ],
     package_dir={'': 'lib'},
     packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
