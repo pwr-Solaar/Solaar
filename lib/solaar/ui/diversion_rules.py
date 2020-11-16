@@ -313,7 +313,7 @@ class DiversionDialog:
         parent_it = m.iter_parent(it)
         parent_c = m[parent_it][0].component if wrapped.level > 0 else None
         can_wrap = wrapped.editable and wrapped.component is not None and wrapped.level >= 2
-        can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.component is not None
+        can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
         can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
         can_insert_only_rule = wrapped.editable and wrapped.level == 1
         can_flatten = wrapped.editable and not isinstance(parent_c, _DIV.Not) and isinstance(
