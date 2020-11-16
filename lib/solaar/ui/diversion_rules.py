@@ -760,10 +760,6 @@ class RuleComponentUI:
         for c in self.panel.get_children():
             self.panel.remove(c)
 
-    @classmethod
-    def _named_int_with_underscores(cls, s):
-        return str(s).replace('/', '__').replace(' ', '_')
-
 
 class UnsupportedRuleComponentUI(RuleComponentUI):
 
