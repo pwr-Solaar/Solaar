@@ -3,6 +3,8 @@ title: Rule Processing of HID++ Notifications
 layout: page
 ---
 
+Note that rule processing is only available when running under X11.
+
 Logitech devices that use HID++ version 2.0 or greater produce feature-based
 notifications that Solaar can process using a simple rule language.  For
 example, using rules Solaar can emulate an `XF86_MonBrightnessDown` key tap
