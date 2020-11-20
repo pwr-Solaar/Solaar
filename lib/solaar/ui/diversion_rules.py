@@ -24,10 +24,9 @@ from contextlib import contextmanager as contextlib_contextmanager
 from logging import getLogger
 from shlex import quote as shlex_quote
 
-import Xlib.XK
-
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
+from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.special_keys import CONTROL as _CONTROL
@@ -1086,7 +1085,7 @@ class ActionUI(RuleComponentUI):
 class KeyPressUI(ActionUI):
 
     CLASS = _DIV.KeyPress
-    KEY_NAMES = [k[3:] if k.startswith('XK_') else k for k, v in vars(Xlib.XK).items() if isinstance(v, int)]
+    KEY_NAMES = [k[3:] if k.startswith('XK_') else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
 
     def create_widgets(self):
         self.widgets = {}

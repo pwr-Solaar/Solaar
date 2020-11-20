@@ -25,12 +25,7 @@ from logging import getLogger
 
 import _thread
 import psutil
-import Xlib
 
-from Xlib import X
-from Xlib.display import Display
-from Xlib.ext import record
-from Xlib.protocol import rq
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
@@ -42,7 +37,21 @@ from .special_keys import CONTROL as _CONTROL
 _log = getLogger(__name__)
 del getLogger
 
-Xlib.XK.load_keysym_group('xf86')
+# many of the rule features require X11 so turn rule processing off if X11 is not available
+try:
+    import Xlib
+    from Xlib import X
+    from Xlib.display import Display
+    from Xlib.ext import record
+    from Xlib.protocol import rq
+    from Xlib import XK as _XK
+    _XK.load_keysym_group('xf86')
+    XK_KEYS = vars(_XK)
+    x11 = True
+except Exception:
+    _log.warn('Xlib not available - rules will not be activated')
+    XK_KEYS = {}
+    x11 = False
 
 # determine name of active process
 
@@ -118,7 +127,8 @@ def key_press_handler(reply):
             current_key_modifiers = event.state & ~(1 << mod) if mod is not None else event.state
 
 
-_thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
+if x11:
+    _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
 # display.record_free_context(context)  when should this be done??
 
 # See docs/rules.md for documentation
@@ -578,49 +588,46 @@ COMPONENTS = {
     'Execute': Execute,
 }
 
-
-built_in_rules = Rule([
-    ## Some malformed Rules for testing
-    ##    Rule([Process(0), Feature(0), Modifiers(['XX', 0]), Modifiers('XXX'), Modifiers([0]),
-    ##         KeyPress(['XXXXX', 0]), KeyPress(['XXXXXX']), KeyPress(0),
-    ##         MouseScroll(0), MouseScroll([0, 0, 0]), MouseScroll(['a', 0]),
-    ##         Rule(["XXXXXXX"])]),
-    ##    Rule([Feature(0)]),
-    ##    Rule([Modifiers(['XXXXXXXXX', 0])]),
-    ##    Rule([KeyPress(['XXXXXSSSSS', 0])]),
-    {'Rule': [  # Implement problematic keys for Craft and MX Master
-        {'Feature': 'REPROG_CONTROLS_V4'},
-        {'Report': 0x0},
-        {'Rule': [{'Key': 'Brightness Down'}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
-        {'Rule': [{'Key': 'Brightness Up'}, {'KeyPress': 'XF86_MonBrightnessUp'}]},
-    ]},
-    {'Rule': [  # In firefox, crown movements emits keys that move up and down if not pressed, rotate through tabs otherwise
-        {'Process': 'firefox'},
-        {'Feature': 'CROWN'},
-        {'Report': 0x0},
-        {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': ['Control_R', 'Tab']}]},
-        {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_left_ratchet'}, {'KeyPress': ['Control_R', 'Shift_R', 'Tab']}]},
-        {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'Down'}]},
-        Rule([Test('crown_left_ratchet'), KeyPress(['Up'])]),
-    ]},
-    {'Rule': [  # Otherwise, crown movements emit keys that modify volume if not pressed, move between tracks otherwise
-        {'Feature': 'CROWN'}, {'Report': 0x0},
-        {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioNext'}]},
-        {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioPrev'}]},
-        {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioRaiseVolume'}]},
-        {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioLowerVolume'}]}
-    ]},
-    {'Rule': [  # Thumb wheel does horizontal movement, doubled if control key not pressed
-        {'Feature': 'THUMB WHEEL'},  # with control modifier on mouse scrolling sometimes does something different!
-        {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_up'}, {'MouseScroll': [-1, 0]}]},
-        {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_down'}, {'MouseScroll': [-1, 0]}]},
-        {'Rule': [{'Or': [{'Test': 'thumb_wheel_up'}, {'Test': 'thumb_wheel_down'}]}, {'MouseScroll': [-2, 0]}]}
-    ]}
-])
+built_in_rules = Rule([])
+if x11:
+    built_in_rules = Rule([
+        {'Rule': [  # Implement problematic keys for Craft and MX Master
+            {'Feature': 'REPROG_CONTROLS_V4'},
+            {'Report': 0x0},
+            {'Rule': [{'Key': 'Brightness Down'}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
+            {'Rule': [{'Key': 'Brightness Up'}, {'KeyPress': 'XF86_MonBrightnessUp'}]},
+        ]},
+        {'Rule': [  # In firefox, crown emits keys that move up and down if not pressed, rotate through tabs otherwise
+            {'Process': 'firefox'},
+            {'Feature': 'CROWN'},
+            {'Report': 0x0},
+            {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': ['Control_R', 'Tab']}]},
+            {'Rule': [{'Test': 'crown_pressed'},
+                      {'Test': 'crown_left_ratchet'},
+                      {'KeyPress': ['Control_R', 'Shift_R', 'Tab']}]},
+            {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'Down'}]},
+            Rule([Test('crown_left_ratchet'), KeyPress(['Up'])]),
+        ]},
+        {'Rule': [  # Otherwise, crown movements emit keys that modify volume if not pressed, move between tracks otherwise
+            {'Feature': 'CROWN'}, {'Report': 0x0},
+            {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioNext'}]},
+            {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioPrev'}]},
+            {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioRaiseVolume'}]},
+            {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioLowerVolume'}]}
+        ]},
+        {'Rule': [  # Thumb wheel does horizontal movement, doubled if control key not pressed
+            {'Feature': 'THUMB WHEEL'},  # with control modifier on mouse scrolling sometimes does something different!
+            {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_up'}, {'MouseScroll': [-1, 0]}]},
+            {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_down'}, {'MouseScroll': [-1, 0]}]},
+            {'Rule': [{'Or': [{'Test': 'thumb_wheel_up'}, {'Test': 'thumb_wheel_down'}]}, {'MouseScroll': [-2, 0]}]}
+        ]}
+    ])
 
 
 # process a notification
 def process_notification(device, status, notification, feature):
+    if not x11:
+        return
     global keys_down, key_down
     key_down = None
     # need to keep track of keys that are down to find a new key down
