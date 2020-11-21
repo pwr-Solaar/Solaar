@@ -330,7 +330,7 @@ _D(
     settings=[_FS.new_fn_swap()],
 )
 _D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=0xB350)
-_D('MX Keys Keyboard', codename='MK Keys', protocol=4.5, wpid='408A', btid=0xB35B)
+_D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D(
     'Wireless Keyboard S510',
     codename='S510',
