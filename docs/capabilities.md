@@ -111,6 +111,8 @@ Solaar can process HID++ Feature Notifications from devices to, for example,
 change the speed of some thumb wheels.  For more information on this capability of Solaar see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
+Users can edit rules using a GUI by clicking on the `Edit Rule` button in the Solaar main window.
+
 
 ## Battery Icons
 
