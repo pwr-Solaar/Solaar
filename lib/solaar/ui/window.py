@@ -450,7 +450,11 @@ def _device_row(receiver_path, device_number, device=None):
         item = _model.iter_children(receiver_row)
         new_child_index = 0
         while item:
-            assert _model.get_value(item, _COLUMN.PATH) == receiver_path
+            if _model.get_value(item, _COLUMN.PATH) != receiver_path:
+                _log.warn(
+                    'path for device row %s different from path for receiver %s', _model.get_value(item, _COLUMN.PATH),
+                    receiver_path
+                )
             item_number = _model.get_value(item, _COLUMN.NUMBER)
             if item_number == device_number:
                 return item
