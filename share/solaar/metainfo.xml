@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.pwr_solaar.solaar</id>
+
+  <name>Solaar</name>
+  <summary>Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads.</summary>
+
+  <metadata_license>CC-BY-4.0</metadata_license>
+  <project_license>GPL-2.0-only</project_license>
+
+  <recommends>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </recommends>
+
+  <description>
+    <p>
+      <em>
+      </em>Solaar<em>
+    </em> is a Linux manager for many Logitech keyboards, mice, and trackpads that connect wirelessly to a USB, Lightspeed, or Nano receiver, connect directly via a USB cable, or connect via Bluetooth. Solaar does not work with peripherals from other companies.
+  </p>
+  <p>
+    Solaar can be used as a GUI application or via its command-line interface. Both interfaces are able to list the connected devices and show information about each device, often including battery status. Solaar is able to pair and unpair devices with receivers as supported by the device and receiver. Solaar can also control some changeable features of devices, such as smooth scrolling or function key behavior.
+  </p>
+  <p>
+    Solaar&apos;s GUI normally uses an icon in the system tray and starts with its main window visible.
+  </p>
+</description>
+
+<launchable type="desktop-id">solaar.desktop</launchable>
+<screenshots>
+  <screenshot type="default">
+    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-button-actions.png</image>
+  </screenshot>
+  <screenshot>
+    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-receiver.png</image>
+  </screenshot>
+  <screenshot>
+    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-menu.png</image>
+  </screenshot>
+</screenshots>
+</component>

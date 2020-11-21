@@ -29,6 +29,10 @@ The Debian/Ubuntu packages that need to be installed are
 in Fedora you need `gtk3` and `python3-gobject`;
 if you're using another
 distribution the required packages are most likely named something similar.
+The Solaar GUI also requires Python packages
+`PyYAML` (>= 5.1), `python-xlib` (>= 0.27), `pynput` (>= 1.7.0), and `pustil` (>= 5.7.3).
+These are best installed using `pip` via `pip install --user <package>`
+if they are not already available.
 
 If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
