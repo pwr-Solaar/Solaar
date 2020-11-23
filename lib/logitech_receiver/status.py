@@ -20,6 +20,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
 from logging import getLogger
 from time import time as _timestamp
 
@@ -303,8 +304,8 @@ class DeviceStatus(dict):
 
                     # Devices lose configuration when they are turned off,
                     # make sure they're up-to-date.
-                    if _log.isEnabledFor(_DEBUG):
-                        _log.debug('%s pushing device settings %s', d, d.settings)
+                    if _log.isEnabledFor(_INFO):
+                        _log.info('%s pushing device settings %s', d, d.settings)
                     for s in d.settings:
                         s.apply()
 
