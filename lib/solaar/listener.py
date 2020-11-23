@@ -323,11 +323,14 @@ def stop_all():
 # after a resume, the device may have been off
 # so mark its saved status to ensure that the status is pushed to the device when it comes back
 def ping_all(resuming=False):
+    if _log.isEnabledFor(_INFO):
+        _log.info('ping all devices%s', ' when resuming' if resuming else '')
     for l in _all_listeners.values():
         if l.receiver.isDevice:
             if resuming:
                 l.receiver.status._active = False
-            l.receiver.ping()
+            if l.receiver.ping():
+                l.receiver.status.changed(active=True)
             l._status_changed(l.receiver)
         else:
             count = l.receiver.count()
@@ -335,7 +338,8 @@ def ping_all(resuming=False):
                 for dev in l.receiver:
                     if resuming:
                         dev.status._active = False
-                    dev.ping()
+                    if dev.ping():
+                        dev.status.changed(active=True)
                     l._status_changed(dev)
                     count -= 1
                     if not count:
