@@ -30,7 +30,7 @@ in Fedora you need `gtk3` and `python3-gobject`;
 if you're using another
 distribution the required packages are most likely named something similar.
 The Solaar GUI also requires Python packages
-`PyYAML` (>= 5.1), `python-xlib` (>= 0.27), `pynput` (>= 1.7.0), and `pustil` (>= 5.7.3).
+`PyYAML` (>= 5.1), `python-xlib` (>= 0.27), `pynput` (>= 1.7.0), and `psutil` (>= 5.7.3).
 These are best installed using `pip` via `pip install --user <package>`
 if they are not already available.
 You may have to install the `gcc` and the Python development package (`python3-dev` or `python3-devel`,
