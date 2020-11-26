@@ -28,9 +28,9 @@ import Xlib.XK
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
+from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.special_keys import CONTROL as _CONTROL
-from pynput import mouse as _mouse
 from solaar.i18n import _
 
 _log = getLogger(__name__)
@@ -1218,7 +1218,7 @@ class MouseClickUI(ActionUI):
     CLASS = _DIV.MouseClick
     MIN_VALUE = 1
     MAX_VALUE = 9
-    BUTTONS = [b for b in dir(_mouse.Button) if not b.startswith('__')]
+    BUTTONS = list(_buttons.keys())
 
     def create_widgets(self):
         self.widgets = {}

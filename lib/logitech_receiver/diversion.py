@@ -27,8 +27,6 @@ import _thread
 import psutil
 import Xlib
 
-from pynput import keyboard as _keyboard
-from pynput import mouse as _mouse
 from Xlib import X
 from Xlib.display import Display
 from Xlib.ext import record
@@ -125,9 +123,6 @@ _thread.start_new_thread(display.record_enable_context, (context, key_press_hand
 
 # See docs/rules.md for documentation
 
-keyboard = _keyboard.Controller()
-mouse = _mouse.Controller()
-
 keys_down = []
 key_down = None
 
@@ -156,6 +151,8 @@ TESTS = {
 }
 
 COMPONENTS = {}
+
+displayt = Display()
 
 
 class RuleComponent(object):
@@ -411,7 +408,7 @@ class KeyPress(Action):
         if isinstance(keys, str):
             keys = [keys]
         self.key_symbols = keys
-        key_from_string = lambda s: s if isinstance(s, str) and len(s) == 1 else _keyboard.KeyCode._from_symbol(s)
+        key_from_string = lambda s: displayt.keysym_to_keycode(Xlib.XK.string_to_keysym(s))
         self.keys = [isinstance(k, str) and key_from_string(k) for k in keys]
         if not all(self.keys):
             _log.warn('rule KeyPress argument not sequence of key names %s', keys)
@@ -421,30 +418,26 @@ class KeyPress(Action):
         return 'KeyPress: ' + ' '.join(self.key_symbols)
 
     def needed(self, k, current_key_modifiers):
-        code = modifier_code(display.keysym_to_keycode(k.vk if isinstance(k, _keyboard.KeyCode) else k))
+        code = modifier_code(k)
         return not (code and current_key_modifiers & (1 << code))
 
     def keyDown(self, keys, modifiers):
         for k in keys:
             if self.needed(k, modifiers):
-                keyboard.press(k)
+                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, k)
 
     def keyUp(self, keys, modifiers):
         for k in keys:
             if self.needed(k, modifiers):
-                keyboard.release(k)
+                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, k)
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = current_key_modifiers
         if _log.isEnabledFor(_INFO):
-            _log.info(
-                'KeyPress action: %s, modifiers %s %s', self.key_symbols, current,
-                [(hex(k.vk) if isinstance(k, _keyboard.KeyCode) else k) for k in self.keys]
-            )
+            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
         self.keyDown(self.keys, current)
-        import time
-        time.sleep(0.1)
         self.keyUp(reversed(self.keys), current)
+        displayt.sync()
         return None
 
     def data(self):
@@ -458,6 +451,25 @@ class KeyPress(Action):
 # class KeyUp(KeyPress):
 #    def evaluate(self, feature, notification, device, status, last_result):
 #        super().keyUp(self.keys, current_key_modifiers)
+
+buttons = {
+    'unknown': None,
+    'left': 1,
+    'middle': 2,
+    'right': 3,
+    'scroll_up': 4,
+    'scroll_down': 5,
+    'scroll_left': 6,
+    'scroll_right': 7
+}
+for i in range(8, 31):
+    buttons['button%d' % i] = i
+
+
+def click(button, count):
+    for _ in range(count):
+        Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonPress, button)
+        Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonRelease, button)
 
 
 class MouseScroll(Action):
@@ -481,7 +493,12 @@ class MouseScroll(Action):
             amounts = [math.floor(last_result * a) for a in self.amounts]
         if _log.isEnabledFor(_INFO):
             _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
-        mouse.scroll(*amounts)
+        dx, dy = amounts
+        if dx:
+            click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
+        if dy:
+            click(button=buttons['scroll_up'] if dy > 0 else buttons['scroll_down'], count=abs(dy))
+        displayt.sync()
         return None
 
     def data(self):
@@ -494,11 +511,11 @@ class MouseClick(Action):
             args = args[0]
         if not isinstance(args, list):
             args = [args]
-        self.button = str(args[0]) if len(args) >= 0 else 'unknown'
-        if not hasattr(_mouse.Button, self.button):
+        self.button = str(args[0]) if len(args) >= 0 else None
+        if self.button not in buttons:
             _log.warn('rule MouseClick action: button %s not known', self.button)
-            self.button = 'unknown'
-        count = args[1] if len(args) >= 1 else 1
+            self.button = None
+        count = args[1] if len(args) >= 2 else 1
         try:
             self.count = int(count)
         except ValueError | TypeError:
@@ -511,7 +528,9 @@ class MouseClick(Action):
     def evaluate(self, feature, notification, device, status, last_result):
         if _log.isEnabledFor(_INFO):
             _log.info('MouseClick action: %d %s' % (self.count, self.button))
-        mouse.click(getattr(_mouse.Button, self.button), self.count)
+        if self.button and self.count:
+            click(buttons[self.button], self.count)
+        displayt.sync()
         return None
 
     def data(self):
