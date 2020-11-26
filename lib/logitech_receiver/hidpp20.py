@@ -1339,3 +1339,10 @@ def get_polling_rate(device):
     if state:
         rate = _unpack('!B', state[:1])[0]
         return rate
+
+
+def get_remaining_pairing(device):
+    result = feature_request(device, FEATURE.REMAINING_PAIRING, 0x0)
+    if result:
+        result = _unpack('!B', result[:1])[0]
+        return result
