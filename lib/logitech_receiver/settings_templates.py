@@ -564,7 +564,7 @@ def _feature_divert_keys_callback(device):
         return None
     if not choices:
         return None
-    return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, activate=0x02)
+    return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, mask=0x01, activate=0x02)
 
 
 def _feature_divert_keys():

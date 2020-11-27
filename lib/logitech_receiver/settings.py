@@ -871,6 +871,7 @@ class ChoicesMapValidator(ChoicesValidator):
         read_skip_byte_count=0,
         write_prefix_bytes=b'',
         extra_default=None,
+        mask=-1,
         activate=0
     ):
         assert choices_map is not None
@@ -898,13 +899,14 @@ class ChoicesMapValidator(ChoicesValidator):
         self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
         self.activate = activate
+        self.mask = mask
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
     def validate_read(self, reply_bytes, key):
         start = self._key_byte_count + self._read_skip_byte_count
         end = start + self._byte_count
-        reply_value = _bytes2int(reply_bytes[start:end])
+        reply_value = _bytes2int(reply_bytes[start:end]) & self.mask
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
