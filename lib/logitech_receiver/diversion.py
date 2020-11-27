@@ -518,7 +518,7 @@ class MouseClick(Action):
         count = args[1] if len(args) >= 2 else 1
         try:
             self.count = int(count)
-        except ValueError | TypeError:
+        except (ValueError, TypeError):
             _log.warn('rule MouseClick action: count %s should be an integer', count)
             self.count = 1
 
