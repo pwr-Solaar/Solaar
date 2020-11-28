@@ -53,13 +53,14 @@ except Exception:
     XK_KEYS = {}
     x11 = False
 
-# determine name of active process
+if x11:
+    # determine name of active process
+    disp_prog = Display()
+    NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
+    NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
+    root2 = disp_prog.screen().root
+    root2.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
 
-disp_prog = Display()
-NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
-NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
-root2 = disp_prog.screen().root
-root2.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
 active_process_name = None
 
 
@@ -82,28 +83,29 @@ def determine_active_program():
             active_process_name = active_program()
 
 
-_thread.start_new_thread(determine_active_program, ())
+if x11:
+    _thread.start_new_thread(determine_active_program, ())
 
 # determine current key modifiers
 # there must be a better way to do this
 
-display = Display()
-context = display.record_create_context(
-    0, [record.AllClients], [{
-        'core_requests': (0, 0),
-        'core_replies': (0, 0),
-        'ext_requests': (0, 0, 0, 0),
-        'ext_replies': (0, 0, 0, 0),
-        'delivered_events': (0, 0),
-        'device_events': (X.KeyPress, X.KeyRelease),
-        'errors': (0, 0),
-        'client_started': False,
-        'client_died': False,
-    }]
-)
-
-modifier_keycodes = display.get_modifier_mapping()
-current_key_modifiers = 0
+if x11:
+    display = Display()
+    context = display.record_create_context(
+        0, [record.AllClients], [{
+            'core_requests': (0, 0),
+            'core_replies': (0, 0),
+            'ext_requests': (0, 0, 0, 0),
+            'ext_replies': (0, 0, 0, 0),
+            'delivered_events': (0, 0),
+            'device_events': (X.KeyPress, X.KeyRelease),
+            'errors': (0, 0),
+            'client_started': False,
+            'client_died': False,
+        }]
+    )
+    modifier_keycodes = display.get_modifier_mapping()
+    current_key_modifiers = 0
 
 
 def modifier_code(keycode):
@@ -162,7 +164,8 @@ TESTS = {
 
 COMPONENTS = {}
 
-displayt = Display()
+if x11:
+    displayt = Display()
 
 
 class RuleComponent(object):
