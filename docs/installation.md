@@ -20,20 +20,17 @@ and `hid-logitech-hidpp` loaded. Also, the `udev` package must be installed
 and its daemon running. If you have a recent Linux distribution, you are
 most likely good to go.
 
-Solaar requires Python 3.6+
-and the `python3-pyudev` package.
-To run the GUI Solaar also requires Gtk3, its GObject
-introspection bindings.
+Solaar requires Python 3.6+ and the
+`python3-pyudev` package.
+The Solaar GUI requires the
+`python3-psutil`, `python3-xlib`, and `python3-pyyaml` packages.
+To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
 The Debian/Ubuntu packages that need to be installed are
 `python3-gi` and `gir1.2-gtk-3.0`;
 in Fedora you need `gtk3` and `python3-gobject`;
 if you're using another
 distribution the required packages are most likely named something similar.
-The Solaar GUI also requires Python packages
-`PyYAML` (>= 5.1), `python-xlib` (>= 0.27), and `psutil` (>= 5.7.3).
-These are best installed using `pip` via `pip install --user <package>`
-if they are not already available.
-You may have to install the `gcc` and the Python development package (`python3-dev` or `python3-devel`,
+You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
 
 If desktop notifications bindings are also installed
