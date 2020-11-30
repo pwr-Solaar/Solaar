@@ -37,7 +37,7 @@ del getLogger
 # documentation, some of them guessed.
 #
 
-DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, trackball=0x08, touchpad=0x09)
+DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, remote=0x07, trackball=0x08, touchpad=0x09)
 
 POWER_SWITCH_LOCATION = _NamedInts(
     base=0x01,

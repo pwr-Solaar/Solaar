@@ -169,6 +169,8 @@ def device_icon_set(name='_', kind=None):
                 names += ('input-mouse', 'input-tablet')
             elif str(kind) == 'trackball':
                 names += ('input-mouse', )
+            elif str(kind) == 'headset':
+                names += ('audio-headphones', 'audio-headset')
             names += ('input-' + str(kind), )
         # names += (name.replace(' ', '-'),)
 
