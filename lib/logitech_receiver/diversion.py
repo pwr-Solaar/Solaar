@@ -47,15 +47,15 @@ try:
     from Xlib import XK as _XK
     _XK.load_keysym_group('xf86')
     XK_KEYS = vars(_XK)
+    disp_prog = Display()
     x11 = True
 except Exception:
-    _log.warn('Xlib not available - rules will not be activated')
+    _log.warn('X11 not available - rules will not be activated')
     XK_KEYS = {}
     x11 = False
 
 if x11:
     # determine name of active process
-    disp_prog = Display()
     NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
     NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
     root2 = disp_prog.screen().root
@@ -713,4 +713,5 @@ def _load_config_rule_file():
     rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
 
 
-_load_config_rule_file()
+if x11:
+    _load_config_rule_file()
