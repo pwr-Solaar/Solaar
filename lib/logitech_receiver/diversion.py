@@ -135,7 +135,6 @@ if x11:
 
 # See docs/rules.md for documentation
 
-keys_down = []
 key_down = None
 
 
@@ -595,21 +594,17 @@ built_in_rules = Rule([])
 if x11:
     built_in_rules = Rule([
         {'Rule': [  # Implement problematic keys for Craft and MX Master
-            {'Feature': 'REPROG_CONTROLS_V4'},
-            {'Report': 0x0},
             {'Rule': [{'Key': 'Brightness Down'}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
             {'Rule': [{'Key': 'Brightness Up'}, {'KeyPress': 'XF86_MonBrightnessUp'}]},
         ]},
         {'Rule': [  # In firefox, crown emits keys that move up and down if not pressed, rotate through tabs otherwise
             {'Process': 'firefox'},
-            {'Feature': 'CROWN'},
-            {'Report': 0x0},
             {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': ['Control_R', 'Tab']}]},
             {'Rule': [{'Test': 'crown_pressed'},
                       {'Test': 'crown_left_ratchet'},
                       {'KeyPress': ['Control_R', 'Shift_R', 'Tab']}]},
             {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'Down'}]},
-            Rule([Test('crown_left_ratchet'), KeyPress(['Up'])]),
+            {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'Up'}]},
         ]},
         {'Rule': [  # Otherwise, crown movements emit keys that modify volume if not pressed, move between tracks otherwise
             {'Feature': 'CROWN'}, {'Report': 0x0},
@@ -626,12 +621,15 @@ if x11:
         ]}
     ])
 
+keys_down = []
+g_keys_down = 0x00
+
 
 # process a notification
 def process_notification(device, status, notification, feature):
     if not x11:
         return
-    global keys_down, key_down
+    global keys_down, g_keys_down, key_down
     key_down = None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
@@ -640,6 +638,13 @@ def process_notification(device, status, notification, feature):
             if key and key not in keys_down:
                 key_down = key
         keys_down = new_keys_down
+    # and also G keys down
+    elif feature == _F.GKEY and notification.address == 0x00:
+        new_g_keys_down, = _unpack('!B', notification.data[:1])
+        for i in range(1, 9):
+            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
+                key_down = _CONTROL['G' + str(i)]
+        g_keys_down = new_g_keys_down
     rules.evaluate(feature, notification, device, status, True)
 
 
