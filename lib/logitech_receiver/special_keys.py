@@ -271,6 +271,10 @@ CONTROL = _NamedInts(
     LeftAndRightClick=0x0102,
     LED_Toggle=0x013B,  #
 )
+
+for i in range(1, 7):  # add in G keys - these are not really Logitech Controls
+    CONTROL[0x1000 + i] = 'G' + str(i)
+
 CONTROL._fallback = lambda x: 'unknown:%04X' % x
 
 # <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'

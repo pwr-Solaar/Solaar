@@ -97,7 +97,7 @@ _REPROGRAMMABLE_KEYS = ('reprogrammable-keys', _('Key/Button Actions'),
                         _('Change the action for the key or button.') + '\n' +
                         _('Changing important actions (such as for the left mouse button) can result in an unusable system.'))
 _DIVERT_KEYS = ('divert-keys', _('Key/Button Diversion'),
-                _('Divert the key or button to report using HID++ notifications.'))
+                _('Make the key or button send HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
@@ -110,7 +110,9 @@ _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical 
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
 _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
-                 _('Make the crown send HID++ events (which are normally ignored in Linux).'))
+                 _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
+_DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
+                 _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
@@ -711,6 +713,18 @@ def _feature_divert_crown():
     return _Setting(_DIVERT_CROWN, rw, _BooleanV(true_value=0x02, false_value=0x01, mask=0xff), device_kind=(_DK.keyboard, ))
 
 
+def _feature_divert_gkeys():
+    class _DivertGkeysRW(_FeatureRW):
+        def __init__(self, feature):
+            super(_DivertGkeysRW, self).__init__(feature, write_fnid=0x20)
+
+        def read(self, device):  # no way to read, so just assume not diverted
+            return 0x00
+
+    rw = _DivertGkeysRW(_F.GKEY)
+    return _Setting(_DIVERT_GKEYS, rw, _BooleanV(true_value=0x01, false_value=0x00, mask=0xff), device_kind=(_DK.keyboard, ))
+
+
 #
 #
 #
@@ -743,6 +757,7 @@ _SETTINGS_TABLE = [
     _S(_DIVERT_KEYS, _F.REPROG_CONTROLS_V4, _feature_divert_keys),
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
     _S(_DIVERT_CROWN, _F.CROWN, _feature_divert_crown),
+    _S(_DIVERT_GKEYS, _F.GKEY, _feature_divert_gkeys),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
     _S(_CHANGE_HOST, _F.CHANGE_HOST, _feature_change_host),
