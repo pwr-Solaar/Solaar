@@ -43,7 +43,7 @@ msgstr  "casi llena"
 
 #: lib/logitech_receiver/i18n.py:43
 msgid   "charged"
-msgstr  ""
+msgstr  "cargado"
 
 #: lib/logitech_receiver/i18n.py:43
 msgid   "discharging"
@@ -99,11 +99,11 @@ msgstr  "Otros"
 
 #: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is closed"
-msgstr  ""
+msgstr  "el bloqueo de vinculación está cerrado"
 
 #: lib/logitech_receiver/notifications.py:68
 msgid   "pairing lock is open"
-msgstr  ""
+msgstr  "el bloqueo de vinculación está abierto"
 
 #: lib/logitech_receiver/notifications.py:178 lib/solaar/ui/notify.py:125
 msgid   "unpaired"
@@ -119,7 +119,7 @@ msgstr  "desconocido"
 
 #: lib/logitech_receiver/settings_templates.py:122
 msgid   "Smooth Scrolling"
-msgstr  "Desplazamiento Suave"
+msgstr  "Desplazamiento suave"
 
 #: lib/logitech_receiver/settings_templates.py:123
 #: lib/logitech_receiver/settings_templates.py:128
@@ -129,37 +129,37 @@ msgstr  "Modo de alta sensibilidad para desplazamiento vertical con la rueda."
 
 #: lib/logitech_receiver/settings_templates.py:124
 msgid   "HID++ Scrolling"
-msgstr  ""
+msgstr  "Desplazamiento HID++"
 
 #: lib/logitech_receiver/settings_templates.py:125
 msgid   "HID++ mode for vertical scroll with the wheel."
-msgstr  ""
+msgstr  "Modo HID++ para el desplazamiento vertical con la rueda."
 
 #: lib/logitech_receiver/settings_templates.py:127
 msgid   "High Resolution Scrolling"
-msgstr  ""
+msgstr  "Desplazamiento de alta resolución"
 
 #: lib/logitech_receiver/settings_templates.py:129
 msgid   "High Resolution Wheel Invert"
-msgstr  ""
+msgstr  "Invertir rueda en alta resolución "
 
 #: lib/logitech_receiver/settings_templates.py:130
 msgid   "High-sensitivity wheel invert mode for vertical scroll."
-msgstr  ""
+msgstr  "Modo inverso de alta resolución en la rueda para desplazamiento vertical."
 
 #: lib/logitech_receiver/settings_templates.py:131
 msgid   "Wheel Resolution"
-msgstr  ""
+msgstr  "Resolución de la rueda"
 
 #: lib/logitech_receiver/settings_templates.py:133
 msgid   "Side Scrolling"
-msgstr  "Desplazamiento Lateral"
+msgstr  "Desplazamiento lateral"
 
 #: lib/logitech_receiver/settings_templates.py:134
 msgid   "When disabled, pushing the wheel sideways sends custom button "
         "events\n"
         "instead of the standard side-scrolling events."
-msgstr  "Al desactivarse, apretar la rueda a los lados envía eventos de "
+msgstr  "Al desactivarse, presionar la rueda lateralmente envía eventos de "
         "botones personalizados\n"
         "en vez de los eventos estándar de desplazamiento lateral."
 
@@ -169,7 +169,7 @@ msgstr  "Sensibilidad (PPP)"
 
 #: lib/logitech_receiver/settings_templates.py:137
 msgid   "Sensitivity (Pointer Speed)"
-msgstr  ""
+msgstr  "Sensibilidad (Velocidad del puntero)"
 
 #: lib/logitech_receiver/settings_templates.py:138
 msgid   "Swap Fx function"
@@ -199,21 +199,23 @@ msgstr  "Encender la iluminación cuando las manos pasen sobre el teclado."
 
 #: lib/logitech_receiver/settings_templates.py:146
 msgid   "Backlight"
-msgstr  ""
+msgstr  "Retroiluminación"
 
 #: lib/logitech_receiver/settings_templates.py:147
 msgid   "Turn illumination on or off on keyboard."
-msgstr  ""
+msgstr  "Encencer o apagar la iluminación del teclado."
 
 #: lib/logitech_receiver/settings_templates.py:149
 msgid   "Smart Shift"
-msgstr  ""
+msgstr  "Cambio inteligente"
 
 #: lib/logitech_receiver/settings_templates.py:150
 msgid   "Automatically switch the mouse wheel between ratchet and freespin "
         "mode.\n"
         "The mouse wheel is always free at 0, and always locked at 50"
-msgstr  ""
+msgstr  "Cambia automáticamente el modo de la rueda del ratón entre bloqueado y "
+        "giro libre.\n"
+        "La rueda del ratón siempre está libre a 0 y siempre bloqueado a 50"
 
 #: lib/logitech_receiver/status.py:99
 msgid   "No paired devices."
@@ -223,48 +225,48 @@ msgstr  "Ningún dispositivo conectado."
 #, python-format
 msgid   "%(count)s paired device."
 msgid_plural    "%(count)s paired devices."
-msgstr[0]       ""
-msgstr[1]       ""
+msgstr[0]       "%(count)s dispositivo vinculado."
+msgstr[1]       "%(count)s dispositivos vinculados."
 
 #: lib/logitech_receiver/status.py:149
 #, python-format
 msgid   "Battery: %(level)s"
-msgstr  ""
+msgstr  "Batería: %(level)s"
 
 #: lib/logitech_receiver/status.py:151
 #, python-format
 msgid   "Battery: %(percent)d%%"
-msgstr  ""
+msgstr  "Batería: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:162
 #, python-format
 msgid   "Lighting: %(level)s lux"
-msgstr  ""
+msgstr  "Iluminación: %(level)s lux"
 
 #: lib/logitech_receiver/status.py:212
 #, python-format
 msgid   "Battery: %(level)s (%(status)s)"
-msgstr  ""
+msgstr  "Batería: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:214
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  ""
+msgstr  "Batería: %(percent)d%% (%(status)s)"
 
 #: lib/solaar/listener.py:96
 msgid   "The receiver was unplugged."
-msgstr  "El receptor fue desconectado."
+msgstr  "El receptor se desconectó."
 
 #: lib/solaar/ui/__init__.py:48
 msgid   "Permissions error"
-msgstr  "Error de permisos."
+msgstr  "Error de permisos"
 
 #: lib/solaar/ui/__init__.py:49
 #, python-format
 msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
         "it."
-msgstr  "Se encontró un receptor Logitech {%s}, pero no se obtuvieron los "
-        "permisos para abrirlo."
+msgstr  "Se encontró un receptor Logitech (%s), pero no tiene permisos para "
+        "abrirlo."
 
 #: lib/solaar/ui/__init__.py:51
 msgid   "If you've just installed Solaar, try removing the receiver and "
@@ -279,7 +281,7 @@ msgstr  "Desvinculación fallida"
 #: lib/solaar/ui/__init__.py:54
 #, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "Fallo al desvincular  %{device} de %{receiver}."
+msgstr  "Fallo al desvincular %{device} de %{receiver}."
 
 #: lib/solaar/ui/__init__.py:56
 msgid   "The receiver returned an error, with no further details."
@@ -293,7 +295,7 @@ msgstr  "Mostrar el estado de dispositivos conectados\n"
 
 #: lib/solaar/ui/about.py:48
 msgid   "GUI design"
-msgstr  "Diseño de interfaz gráfica"
+msgstr  "Diseño de la interfaz gráfica"
 
 #: lib/solaar/ui/about.py:49
 msgid   "Testing"
@@ -318,7 +320,7 @@ msgstr  "Funcionando"
 
 #: lib/solaar/ui/config_panel.py:123
 msgid   "Read/write operation failed."
-msgstr  "Operación de Lectura/Escritura fallida."
+msgstr  "Operación de lectura/escritura fallida."
 
 #: lib/solaar/ui/notify.py:127
 msgid   "connected"
@@ -331,13 +333,13 @@ msgstr  "desconectado"
 
 #: lib/solaar/ui/pair_window.py:133
 msgid   "Pairing failed"
-msgstr  "Vinculación fallida."
+msgstr  "Vinculación fallida"
 
 #: lib/solaar/ui/pair_window.py:135
 msgid   "Make sure your device is within range, and has a decent battery "
         "charge."
 msgstr  "Asegúrese de que su dispositivo esté dentro del alcance del "
-        "receptor, y que la batería tenga suficiente carga."
+        "receptor y que la batería tenga suficiente carga."
 
 #: lib/solaar/ui/pair_window.py:137
 msgid   "A new device was detected, but it is not compatible with this "
@@ -348,7 +350,7 @@ msgstr  "Se detectó un nuevo dispositivo, pero no es compatible con este "
 #: lib/solaar/ui/pair_window.py:139
 #, python-format
 msgid   "The receiver only supports %d paired device(s)."
-msgstr  "El receptor solo soporta %d dispositivo(s) vinculado(s)"
+msgstr  "El receptor solo soporta %d dispositivo(s) vinculado(s)."
 
 #: lib/solaar/ui/pair_window.py:141
 msgid   "No further details are available about the error."
@@ -356,7 +358,7 @@ msgstr  "No hay más detalles disponibles sobre este error."
 
 #: lib/solaar/ui/pair_window.py:155
 msgid   "Found a new device:"
-msgstr  ""
+msgstr  "Se encontró un nuevo dispositivo:"
 
 #: lib/solaar/ui/pair_window.py:180
 msgid   "The wireless link is not encrypted"
@@ -365,23 +367,26 @@ msgstr  "La conexión inalámbrica no está cifrada"
 #: lib/solaar/ui/pair_window.py:197
 #, python-format
 msgid   "%(receiver_name)s: pair new device"
-msgstr  ""
+msgstr  "%(receiver_name)s: vincular nuevo dispositivo"
 
 #: lib/solaar/ui/pair_window.py:204
 msgid   "If the device is already turned on, turn if off and on again."
-msgstr  ""
+msgstr  "Si el dispositivo ya está encendido, apáguelo y vuelva a encenderlo."
 
 #: lib/solaar/ui/pair_window.py:206
 #, python-format
 msgid   "\n"
         "\n"
         "This receiver has %d pairing(s) remaining."
-msgstr  ""
+msgstr  "\n"
+        "\n"
+        "Este receptor tiene %d vínculo(s) disponibles."
 
 #: lib/solaar/ui/pair_window.py:207
 msgid   "\n"
         "Cancelling at this point will not use up a pairing."
-msgstr  ""
+msgstr  "\n"
+        "Si cancela en este punto no se usará un vínculo."
 
 #: lib/solaar/ui/pair_window.py:210
 msgid   "Turn on the device you want to pair."
@@ -397,7 +402,7 @@ msgstr  "Salir"
 
 #: lib/solaar/ui/tray.py:305 lib/solaar/ui/tray.py:313
 msgid   "no receiver"
-msgstr  "Sin receptor"
+msgstr  "sin receptor"
 
 #: lib/solaar/ui/tray.py:329
 msgid   "no status"
@@ -413,7 +418,7 @@ msgstr  "Batería"
 
 #: lib/solaar/ui/window.py:134
 msgid   "Wireless Link"
-msgstr  "Enlace Inalámbrico"
+msgstr  "Enlace inalámbrico"
 
 #: lib/solaar/ui/window.py:138
 msgid   "Lighting"
@@ -450,7 +455,7 @@ msgstr  "Índice"
 
 #: lib/solaar/ui/window.py:516
 msgid   "Wireless PID"
-msgstr  "PID Inalámbrico"
+msgstr  "PID inalámbrico"
 
 #: lib/solaar/ui/window.py:518
 msgid   "Protocol"
@@ -463,7 +468,7 @@ msgstr  "Desconocido"
 #: lib/solaar/ui/window.py:520
 #, python-format
 msgid   "%(rate)d ms (%(rate_hz)dHz)"
-msgstr  ""
+msgstr  "%(rate)d ms (%(rate_hz)dHz)"
 
 #: lib/solaar/ui/window.py:520
 msgid   "Polling rate"
@@ -479,28 +484,28 @@ msgstr  "Notificaciones"
 
 #: lib/solaar/ui/window.py:573
 msgid   "No device paired."
-msgstr  ""
+msgstr  "No hay dispositivos vinculados."
 
 #: lib/solaar/ui/window.py:576
 #, python-format
 msgid   "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0]       ""
-msgstr[1]       ""
+msgstr[0]       "Se puede vincular hasta %(max_count)s dispositivo a este receptor."
+msgstr[1]       "Se pueden vincular hasta %(max_count)s dispositivos a este receptor."
 
 #: lib/solaar/ui/window.py:578
 msgid   "Only one device can be paired to this receiver."
-msgstr  ""
+msgstr  "Solo un dispositivo se puede vincular a este receptor."
 
 #: lib/solaar/ui/window.py:581
 #, python-format
 msgid   "This receiver has %d pairing(s) remaining."
-msgstr  ""
+msgstr  "Este receptor tiene %d vínculo(s) disponibles."
 
 #: lib/solaar/ui/window.py:636 lib/solaar/ui/window.py:822
 #, python-format
 msgid   "%(battery_percent)d%%"
-msgstr  ""
+msgstr  "%(battery_percent)d%%"
 
 #: lib/solaar/ui/window.py:639
 msgid   "charging"
@@ -548,50 +553,9 @@ msgstr  "La conexión inalámbrica entre el dispositivo y su receptor está "
 #: lib/solaar/ui/window.py:672
 #, python-format
 msgid   "%(light_level)d lux"
-msgstr  ""
+msgstr  "%(light_level)d lux"
 
 #: lib/solaar/ui/window.py:820
 #, python-format
 msgid   "%(battery_level)s"
-msgstr  ""
-
-#~ msgid        "closed"
-#~ msgstr       "cerrado"
-
-#~ msgid        "open"
-#~ msgstr       "abierto"
-
-#~ msgid        "pairing lock is "
-#~ msgstr       "el cierre de vinculación está"
-
-#~ msgid        "1 paired device."
-#~ msgstr       "1 dispositivo conectado."
-
-#~ msgid        " paired devices."
-#~ msgstr       " dispositivos conectados."
-
-#~ msgid        "lux"
-#~ msgstr       "lux"
-
-#~ msgid        "Found a new device"
-#~ msgstr       "Se encontró un nuevo dispositivo"
-
-#~ msgid        "pair new device"
-#~ msgstr       "vincular nuevo dispositivo"
-
-#~ msgid        "No device paired"
-#~ msgstr       "Ningún dispositivo vinculado"
-
-#~ msgid        "Up to %d devices can be paired to this receiver"
-#~ msgstr       "Hasta %d dispositivos pueden vincularse con este receptor"
-
-#~ msgid        "paired devices"
-#~ msgstr       "dispositivos vinculados"
-
-#~ msgid        "Only one device can be paired to this receiver"
-#~ msgstr       "Sólo puede vincularse un dispositivo con este receptor"
-
-#~ msgid        "If the device is already turned on,\n"
-#~      "turn if off and on again."
-#~ msgstr       "Si el dispositivo ya esta encendido,\n"
-#~      " apáguelo y vuelva a encenderlo"
+msgstr  "%(battery_level)s"
