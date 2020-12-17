@@ -116,8 +116,8 @@ _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
-    _GG['Tap2Finger']: (_('Double tap'), _('Performs a right click.')),
-    _GG['Tap3Finger']: (_('Triple tap'), None),
+    _GG['Tap2Finger']: (_('Single tap with two fingers'), _('Performs a right click.')),
+    _GG['Tap3Finger']: (_('Single tap with three fingers'), None),
     _GG['Click1Finger']: (None, None),
     _GG['Click2Finger']: (None, None),
     _GG['Click3Finger']: (None, None),
