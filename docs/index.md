@@ -88,7 +88,6 @@ one of these packages.
 - a [Fedora package][fedora], courtesy of Eric Smith
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
-- an [OpenSUSE rpm][opensuse], courtesy of Mathias Homann
 
 Solaar uses a standard system tray implementation; solaar-gnome3 is no longer required for gnome or unity integration.
 
@@ -100,7 +99,6 @@ Solaar uses a standard system tray implementation; solaar-gnome3 is no longer re
 [fedora]: https://apps.fedoraproject.org/packages/solaar
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
-[opensuse]: http://software.opensuse.org/package/Solaar
 [universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
 
 ## Manual installation
