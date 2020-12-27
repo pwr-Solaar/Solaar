@@ -43,7 +43,68 @@ def _print_setting(s, verbose=True):
     if value is None:
         print(s.name, '= ? (failed to read from device)')
     else:
-        print(s.name, '= %r' % value)
+        print(s.name, '= %s' % value)
+
+
+def to_int(s):
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
+
+def select_choice(value, choices, setting, key):
+    lvalue = value.lower()
+    ivalue = to_int(value)
+    val = None
+    for choice in choices:
+        if value == choice or ivalue is not None and ivalue == choice:
+            val = choice
+    if val is not None:
+        value = val
+    elif ivalue is not None and ivalue >= 0 and ivalue < len(choices):
+        value = choices[ivalue]
+    elif lvalue in ('higher', 'lower'):
+        old_value = setting.read() if key is None else setting.read_key(key)
+        if old_value is None:
+            raise Exception("%s: could not read current value'" % setting.name)
+        if lvalue == 'lower':
+            lower_values = choices[:old_value]
+            value = lower_values[-1] if lower_values else choices[:][0]
+        elif lvalue == 'higher':
+            higher_values = choices[old_value + 1:]
+            value = higher_values[0] if higher_values else choices[:][-1]
+    elif lvalue in ('highest', 'max', 'first'):
+        value = choices[:][-1]
+    elif lvalue in ('lowest', 'min', 'last'):
+        value = choices[:][0]
+    else:
+        raise Exception('%s: possible values are [%s]' % (setting.name, ', '.join(str(v) for v in choices)))
+    return value
+
+
+def select_toggle(value, setting):
+    try:
+        value = bool(int(value))
+    except Exception:
+        if value.lower() in ('true', 'yes', 'on', 't', 'y'):
+            value = True
+        elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
+            value = False
+        else:
+            raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+    return value
+
+
+def select_range(value, setting):
+    try:
+        value = int(value)
+    except ValueError:
+        raise Exception("%s: can't interpret '%s' as integer" % (setting.name, value))
+    min, max = setting.range
+    if value < min or value > max:
+        raise Exception("%s: value '%s' out of bounds" % (setting.name, value))
+    return value
 
 
 def run(receivers, args, find_receiver, find_device):
@@ -79,66 +140,80 @@ def run(receivers, args, find_receiver, find_device):
         raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
     _configuration.attach_to(dev)
 
-    if args.value is None:
+    if args.value_key is None:
         setting.apply()
         _print_setting(setting)
         return
 
     if setting.kind == _settings.KIND.toggle:
-        value = args.value
-        try:
-            value = bool(int(value))
-        except Exception:
-            if value.lower() in ('true', 'yes', 'on', 't', 'y'):
-                value = True
-            elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
-                value = False
-            else:
-                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+        value = select_toggle(args.value_key, setting)
         print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        result = setting.write(value)
 
     elif setting.kind == _settings.KIND.range:
-        try:
-            value = int(args.value)
-        except ValueError:
-            raise Exception("%s: can't interpret '%s' as integer" % (setting.name, args.value))
-        min, max = setting.range
-        if value < min or value > max:
-            raise Exception("%s: value '%s' out of bounds" % (setting.name, args.value))
+        value = select_range(args.value_key, setting)
         print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        result = setting.write(value)
 
     elif setting.kind == _settings.KIND.choice:
-        value = args.value
-        lvalue = value.lower()
-        try:
-            ivalue = int(value)
-        except ValueError:
-            ivalue = None
-        if value in setting.choices:
-            value = setting.choices[value]
-        elif ivalue is not None and ivalue >= 0 and ivalue < len(setting.choices):
-            value = setting.choices[ivalue]
-        elif lvalue in ('higher', 'lower'):
-            old_value = setting.read()
-            if old_value is None:
-                raise Exception("%s: could not read current value'" % setting.name)
-            if lvalue == 'lower':
-                lower_values = setting.choices[:old_value]
-                value = lower_values[-1] if lower_values else setting.choices[:][0]
-            elif lvalue == 'higher':
-                higher_values = setting.choices[old_value + 1:]
-                value = higher_values[0] if higher_values else setting.choices[:][-1]
-        elif lvalue in ('highest', 'max', 'first'):
-            value = setting.choices[:][-1]
-        elif lvalue in ('lowest', 'min', 'last'):
-            value = setting.choices[:][0]
-        else:
-            raise Exception('%s: possible values are [%s]' % (setting.name, ', '.join(str(v) for v in setting.choices)))
+        value = select_choice(args.value_key, setting.choices, setting, None)
         print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        result = setting.write(value)
+
+    elif setting.kind == _settings.KIND.map_choice:
+        key = args.value_key
+        ikey = to_int(key)
+        k = next((k for k in setting.choices.keys() if key == k), None)
+        if k is None and ikey is not None:
+            k = next((k for k in setting.choices.keys() if ikey == k), None)
+        if k is not None:
+            value = select_choice(args.extra_subkey, setting.choices[k], setting, key)
+        else:
+            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
+        print('Setting %s of %s key %r to %r' % (setting.name, dev.name, k, value))
+        result = setting.write_key_value(int(k), value)
+
+    elif setting.kind == _settings.KIND.multiple_toggle:
+        key = args.value_key
+        ikey = to_int(key)
+        k = next((k for k in setting._labels if key == k), None)
+        if k is None and ikey is not None:
+            k = next((k for k in setting._labels if ikey == k), None)
+        if k is not None:
+            value = select_toggle(args.extra_subkey, setting)
+        else:
+            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
+        print('Setting %s key %r to %r' % (setting.name, k, value))
+        result = setting.write_key_value(int(k), value)
+
+    elif setting.kind == _settings.KIND.multiple_range:
+        key = args.value_key
+        ikey = to_int(key)
+        if args.extra_subkey is None:
+            raise Exception('%s: setting needs a subkey' % (setting.name))
+        if args.extra2 is None or to_int(args.extra2) is None:
+            raise Exception('%s: setting needs an integer value, not %s' % (setting.name, args.extra2))
+        if not setting._value:  # ensure that there are values to look through
+            setting.read()
+        k = next((k for k in setting._value if key == k), None)
+        if k is None and ikey is not None:
+            k = next((k for k in setting._value if ikey == k), None)
+        item = setting._value[k]
+        if args.extra_subkey in item.keys():
+            item[args.extra_subkey] = to_int(args.extra2)
+        else:
+            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
+        print('Setting %s key %s parameter %s to %r' % (setting.name, k, args.extra_subkey, item[args.extra_subkey]))
+        result = setting.write_item_value(int(k), item)
+
+
+# KIND = _NamedInts(, multiple_toggle=0x10, multiple_range=0x40)
+# BitField; MultipleRange
+# disable_keyboard_keys, gesture2; gesture2_params
+# k400+ / craft, k400+; k400+
 
     else:
         raise Exception('NotImplemented')
 
-    result = setting.write(value)
     if result is None:
         raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))

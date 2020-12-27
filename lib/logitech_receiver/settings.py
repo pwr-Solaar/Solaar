@@ -271,6 +271,8 @@ class Settings(Setting):
             _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
+            if not self._value:
+                self.read()
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
                 # always need to write to configuration because dictionary is shared and could have changed
@@ -373,6 +375,8 @@ class LongSettings(Setting):
             _log.debug('%s: settings write item %r value %r to %s', self.name, item, value, self._device)
 
         if self._device.online:
+            if not self._value:
+                self.read()
             data_bytes = self._validator.prepare_write_item(item, value)
             self._value[str(int(item))] = value
             self._pre_write()
@@ -471,6 +475,8 @@ class BitFieldSetting(Setting):
             _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
+            if not self._value:
+                self.read()
             value = bool(value)
             self._value[str(key)] = value
             self._pre_write()
