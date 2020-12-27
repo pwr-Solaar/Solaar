@@ -68,7 +68,9 @@ def _create_parser():
         'or at least 3 characters of a device\'s name'
     )
     sp.add_argument('setting', nargs='?', help='device-specific setting; leave empty to list available settings')
-    sp.add_argument('value', nargs='?', help='new value for the setting')
+    sp.add_argument('value_key', nargs='?', help='new value for the setting or key for keyed settings')
+    sp.add_argument('extra_subkey', nargs='?', help='value for keyed or subkey for subkeyed settings')
+    sp.add_argument('extra2', nargs='?', help='value for subkeyed settings')
     sp.set_defaults(action='config')
 
     sp = subparsers.add_parser(
