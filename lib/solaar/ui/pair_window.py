@@ -203,7 +203,7 @@ def create(receiver):
     assistant.set_resizable(False)
     assistant.set_role('pair-device')
 
-    page_text = _('If the device is already turned on, turn if off and on again.')
+    page_text = _('If the device is already turned on, turn it off and on again.')
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
         page_text += ngettext(
             '\n\nThis receiver has %d pairing remaining.', '\n\nThis receiver has %d pairings remaining.',
