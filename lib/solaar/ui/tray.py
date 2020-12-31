@@ -25,6 +25,8 @@ from logging import DEBUG as _DEBUG
 from logging import getLogger
 from time import time as _timestamp
 
+import solaar.gtk as gtk
+
 from gi.repository import GLib, Gtk
 from gi.repository.Gdk import ScrollDirection
 from logitech_receiver.status import KEYS as _K
@@ -198,7 +200,7 @@ try:
         indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
     def _update_tray_icon():
-        if _picked_device:
+        if _picked_device and gtk.battery_icons_style != 'solaar':
             _ignore, _ignore, name, device_status = _picked_device
             battery_level = device_status.get(_K.BATTERY_LEVEL)
             battery_charging = device_status.get(_K.BATTERY_CHARGING)
@@ -251,7 +253,7 @@ except ImportError:
         tooltip = '\n'.join(tooltip_lines).rstrip('\n')
         _icon.set_tooltip_markup(tooltip)
 
-        if _picked_device:
+        if _picked_device and gtk.battery_icons_style != 'solaar':
             _ignore, _ignore, name, device_status = _picked_device
             battery_level = device_status.get(_K.BATTERY_LEVEL)
             battery_charging = device_status.get(_K.BATTERY_CHARGING)
