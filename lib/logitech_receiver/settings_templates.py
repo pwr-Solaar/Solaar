@@ -538,9 +538,9 @@ def _feature_report_rate_callback(device):
     assert reply, 'Oops, report rate choices cannot be retrieved!'
     rate_list = []
     rate_flags = _bytes2int(reply[0:1])
-    for i in range(0,8):
+    for i in range(0, 8):
         if (rate_flags >> i) & 0x01:
-            rate_list.append(i+1)
+            rate_list.append(i + 1)
     return _ChoicesV(_NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
