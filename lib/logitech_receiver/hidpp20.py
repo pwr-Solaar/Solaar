@@ -183,11 +183,7 @@ BATTERY_STATUS = _NamedInts(
     thermal_error=0x06
 )
 
-ONBOARD_MODES = _NamedInts(
-    MODE_NO_CHANGE=0x00,
-    MODE_ONBOARD=0x01,
-    MODE_HOST=0x02
-)
+ONBOARD_MODES = _NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
 
 CHARGE_STATUS = _NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
 
