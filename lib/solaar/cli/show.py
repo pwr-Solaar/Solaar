@@ -212,8 +212,13 @@ def _print_device(dev, num=None):
                 if ids:
                     unitId, modelId, tid_map = ids
                     print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
-            elif feature == _hidpp20.FEATURE.REPORT_RATE:
-                print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
+            elif feature == _hidpp20.FEATURE.ONBOARD_PROFILES:
+                if _hidpp20.get_onboard_mode(dev) == _hidpp20.ONBOARD_MODES.MODE_HOST:
+                    mode = 'Host'
+                else:
+                    mode = 'On-Board'
+                print('            Device Mode: %s' % mode)
+                _hidpp20.set_onboard_mode(dev, _hidpp20.ONBOARD_MODES.MODE_ONBOARD)
             elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:
                 print('', end='       ')
                 _battery_line(dev)
