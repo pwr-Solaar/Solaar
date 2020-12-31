@@ -79,7 +79,6 @@ def _look_for_application_icons():
 
 
 _default_theme = None
-_use_symbolic_icons = False
 
 
 def _init_icon_paths():
@@ -93,15 +92,14 @@ def _init_icon_paths():
     if _log.isEnabledFor(_DEBUG):
         _log.debug('icon theme paths: %s', _default_theme.get_search_path())
 
-    if gtk.prefer_symbolic_battery_icons:
-        if _default_theme.has_icon('battery-good-symbolic'):
-            global _use_symbolic_icons
-            _use_symbolic_icons = True
-            return
-        else:
+    if gtk.battery_icons_style == 'symbolic':
+        if not _default_theme.has_icon('battery-good-symbolic'):
             _log.warning('failed to detect symbolic icons')
-    if not _default_theme.has_icon('battery-good'):
-        _log.warning('failed to detect icons')
+            gtk.battery_icons_style = 'regular'
+    if gtk.battery_icons_style == 'regular':
+        if not _default_theme.has_icon('battery-good'):
+            _log.warning('failed to detect icons')
+            gtk.battery_icons_style = 'none'
 
 
 #
@@ -129,10 +127,12 @@ def _battery_icon_name(level, charging):
     _init_icon_paths()
 
     if level is None or level < 0:
-        return 'battery-missing' + ('-symbolic' if _use_symbolic_icons else '')
+        return 'battery-missing' + ('-symbolic' if gtk.battery_icons_style == 'symbolic' else '')
 
     level_name = _first_res(level, ((90, 'full'), (50, 'good'), (20, 'low'), (5, 'caution'), (0, 'empty')))
-    return 'battery-%s%s%s' % (level_name, '-charging' if charging else '', '-symbolic' if _use_symbolic_icons else '')
+    return 'battery-%s%s%s' % (
+        level_name, '-charging' if charging else '', '-symbolic' if gtk.battery_icons_style == 'symbolic' else ''
+    )
 
 
 #
