@@ -216,6 +216,12 @@ def _print_device(dev, num=None):
                 print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
             elif feature == _hidpp20.FEATURE.REMAINING_PAIRING:
                 print('            Remaining Pairings: %d' % _hidpp20.get_remaining_pairing(dev))
+            elif feature == _hidpp20.FEATURE.ONBOARD_PROFILES:
+                if _hidpp20.get_onboard_mode(dev) == _hidpp20.ONBOARD_MODES.MODE_HOST:
+                    mode = 'Host'
+                else:
+                    mode = 'On-Board'
+                print('            Device Mode: %s' % mode)
             elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:
                 print('', end='       ')
                 _battery_line(dev)

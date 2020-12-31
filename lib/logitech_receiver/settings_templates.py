@@ -81,6 +81,7 @@ _HIRES_INV = ('hires-smooth-invert', _('Scroll Wheel Direction'),
               _('Invert direction for vertical scroll with wheel.'))
 _HIRES_RES = ('hires-smooth-resolution', _('Scroll Wheel Resolution'),
               _('High-sensitivity mode for vertical scroll with the wheel.'))
+_REPORT_RATE = ('report_rate', _('Polling Rate (ms)'), _('Frequency of device polling, in milliseconds'))
 _FN_SWAP = ('fn-swap', _('Swap Fx function'),
             _('When set, the F1..F12 keys will activate their special function,\n'
               'and you must hold the FN key to activate their standard function.') + '\n\n' +
@@ -527,6 +528,28 @@ def _feature_adjustable_dpi():
     return _Setting(_DPI, rw, callback=_feature_adjustable_dpi_callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
+# Implemented based on code in libratrag
+def _feature_report_rate_callback(device):
+    # Host mode is required for report rate to be adjustable
+    if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
+        _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
+
+    reply = device.feature_request(_F.REPORT_RATE, 0x00)
+    assert reply, 'Oops, report rate choices cannot be retrieved!'
+    rate_list = []
+    rate_flags = _bytes2int(reply[0:1])
+    for i in range(0, 8):
+        if (rate_flags >> i) & 0x01:
+            rate_list.append(i + 1)
+    return _ChoicesV(_NamedInts.list(rate_list), byte_count=1) if rate_list else None
+
+
+def _feature_report_rate():
+    """Report Rate feature"""
+    rw = _FeatureRW(_F.REPORT_RATE, read_fnid=0x10, write_fnid=0x20)
+    return _Setting(_REPORT_RATE, rw, callback=_feature_report_rate_callback, device_kind=(_DK.mouse, ))
+
+
 def _feature_pointer_speed():
     """Pointer Speed feature"""
     # min and max values taken from usb traces of Win software
@@ -754,6 +777,7 @@ _SETTINGS_TABLE = [
     _S(_REPROGRAMMABLE_KEYS, _F.REPROG_CONTROLS_V4, _feature_reprogrammable_keys),
     _S(_DIVERT_KEYS, _F.REPROG_CONTROLS_V4, _feature_divert_keys),
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
+    _S(_REPORT_RATE, _F.REPORT_RATE, _feature_report_rate),
     _S(_DIVERT_CROWN, _F.CROWN, _feature_divert_crown),
     _S(_DIVERT_GKEYS, _F.GKEY, _feature_divert_gkeys),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
