@@ -183,6 +183,8 @@ BATTERY_STATUS = _NamedInts(
     thermal_error=0x06
 )
 
+ONBOARD_MODES = _NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
+
 CHARGE_STATUS = _NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
 
 CHARGE_LEVEL = _NamedInts(average=50, full=90, critical=5)
@@ -1332,6 +1334,19 @@ def set_host_name(device, name):
             hn = name[:min(14, name.find('.'))] if name.find('.') >= 0 else name
             response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, hn)
             return response
+
+
+def get_onboard_mode(device):
+    state = feature_request(device, FEATURE.ONBOARD_PROFILES, 0x20)
+
+    if state:
+        mode = _unpack('!B', state[:1])[0]
+        return mode
+
+
+def set_onboard_mode(device, mode):
+    state = feature_request(device, FEATURE.ONBOARD_PROFILES, 0x10, mode)
+    return state
 
 
 def get_polling_rate(device):
