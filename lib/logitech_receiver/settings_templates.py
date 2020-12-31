@@ -81,7 +81,7 @@ _HIRES_INV = ('hires-smooth-invert', _('Scroll Wheel Direction'),
               _('Invert direction for vertical scroll with wheel.'))
 _HIRES_RES = ('hires-smooth-resolution', _('Scroll Wheel Resolution'),
               _('High-sensitivity mode for vertical scroll with the wheel.'))
-_REPORT_RATE = ('report_rate', _("Polling Rate (ms)"), _("Frequency of device polling, in milliseconds"))
+_REPORT_RATE = ('report_rate', _('Polling Rate (ms)'), _('Frequency of device polling, in milliseconds'))
 _FN_SWAP = ('fn-swap', _('Swap Fx function'),
             _('When set, the F1..F12 keys will activate their special function,\n'
               'and you must hold the FN key to activate their standard function.') + '\n\n' +
