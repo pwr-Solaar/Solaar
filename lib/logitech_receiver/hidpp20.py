@@ -313,7 +313,7 @@ class FeaturesArray(object):
                 elif ivalue == int(f):
                     return True
 
-            if may_have:
+            if may_have and self.device:
                 reply = self.device.request(0x0000, _pack('!H', ivalue))
                 if reply:
                     index = ord(reply[0:1])
@@ -1315,8 +1315,11 @@ def get_host_names(device):
                 remaining = nameLen
                 while remaining > 0:
                     name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
-                    name += name_piece[2:2 + min(remaining, 14)].decode()
-                    remaining = max(0, remaining - 14)
+                    if name_piece:
+                        name += name_piece[2:2 + min(remaining, 14)].decode()
+                        remaining = max(0, remaining - 14)
+                    else:
+                        remaining = 0
                 host_names[host] = (bool(status), name)
     return host_names
 
