@@ -22,6 +22,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from hidapi.udev import close  # noqa: F401
 from hidapi.udev import enumerate  # noqa: F401
+from hidapi.udev import find_paired_node  # noqa: F401
+from hidapi.udev import find_paired_node_wpid  # noqa: F401
 from hidapi.udev import get_manufacturer  # noqa: F401
 from hidapi.udev import get_product  # noqa: F401
 from hidapi.udev import get_serial  # noqa: F401

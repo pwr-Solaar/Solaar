@@ -3,8 +3,11 @@ title: List of HID++ 2.0 features
 layout: page
 ---
 
-# Feature status
-See functions in hidpp20.py and settings_templates.py
+# List of HID++ 2.0 features
+
+## Feature status
+
+See functions in `hidpp20.py` and `settings_templates.py`
 
 Feature                                | ID       | Status             | Notes
 ---------------------------------------|----------|:------------------:|------
@@ -17,7 +20,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_GROUPS`                        | `0x0006` | :x:                |
 `DEVICE_FRIENDLY_NAME`                 | `0x0007` | :x:                |
 `KEEP_ALIVE`                           | `0x0008` | :x:                |
-`RESET`                                | `0x0020` | :x:                | aka "Config Change"
+`RESET`                                | `0x0020` | :x:                | aka “Config Change”
 `CRYPTO_ID`                            | `0x0021` | :x:                |
 `TARGET_SOFTWARE`                      | `0x0030` | :x:                |
 `WIRELESS_SIGNAL_STRENGTH`             | `0x0080` | :x:                |
@@ -33,7 +36,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_RESET`                         | `0x1802` | :x:                |
 `OOBSTATE`                             | `0x1805` | :x:                |
 `CONFIG_DEVICE_PROPS`                  | `0x1806` | :x:                |
-`CHANGE_HOST`                          | `0x1814` | :wrench:           |
+`CHANGE_HOST`                          | `0x1814` | :heavy_check_mark: |
 `HOSTS_INFO`                           | `0x1815` | :heavy_plus_sign:  | `get_host_names`, partial listing only
 `BACKLIGHT`                            | `0x1981` | :x:                |
 `BACKLIGHT2`                           | `0x1982` | :heavy_check_mark: | `_feature_backlight2`
@@ -47,7 +50,7 @@ Feature                                | ID       | Status             | Notes
 `REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys`, _feature_reprogrammable_keys
 `REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
 `PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :wrench:           |
-`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :x:                | status reporting from device
+`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :heavy_plus_sign:  | status reporting from device
 `REMAINING_PAIRING`                    | `0x1DF0` | :x:                |
 `FIRMWARE_PROPERTIES`                  | `0x1F1F` | :x:                |
 `ADC_MEASUREMENT`                      | `0x1F20` | :x:                |
@@ -90,7 +93,7 @@ Feature                                | ID       | Status             | Notes
 `TOUCHMOUSE_RAW_POINTS`                | `0x6110` | :x:                |
 `TOUCHMOUSE_6120`                      | `0x6120` | :x:                |
 `GESTURE`                              | `0x6500` | :x:                |
-`GESTURE_2`                            | `0x6501` | :x:                |
+`GESTURE_2`                            | `0x6501` | :heavy_plus_sign:  | `_feature_gesture2_gestures`, `_feature_gesture2_params`
 `GKEY`                                 | `0x8010` | :x:                |
 `MKEYS`                                | `0x8020` | :x:                |
 `MR`                                   | `0x8030` | :x:                |
@@ -101,7 +104,7 @@ Feature                                | ID       | Status             | Notes
 `PER_KEY_LIGHTING`                     | `0x8080` | :x:                |
 `PER_KEY_LIGHTING_V2`                  | `0x8081` | :x:                |
 `MODE_STATUS`                          | `0x8090` | :x:                |
-`ONBOARD_PROFILES`                     | `0x8100` | :x:                |
+`ONBOARD_PROFILES`                     | `0x8100` | :x:                | in progress
 `MOUSE_BUTTON_SPY`                     | `0x8110` | :x:                |
 `LATENCY_MONITORING`                   | `0x8111` | :x:                |
 `GAMING_ATTACHMENTS`                   | `0x8120` | :x:                |
@@ -110,13 +113,13 @@ Feature                                | ID       | Status             | Notes
 `EQUALIZER`                            | `0x8310` | :x:                |
 `HEADSET_OUT`                          | `0x8320` | :x:                |
 
-"read only" in the notes column means that the feature is a read-only feature and cannot be changed.
+A “read only” note means the feature is a read-only feature and cannot be changed.
 
-# Implementing a feature
+## Implementing a feature
 
 Features are implemented as settable features in
 lib/logitech_receiver/settings_templates.py
-Some features also have direct implementation in
+some features also have direct implementation in
 lib/logitech_receiver/hidpp20.py
 
 In most cases it should suffice to only implement the settable feature
@@ -134,61 +137,78 @@ should be a valid Python identifier.  (Some older settings have dashes.)
 The label is displayed in the Solaar main window and the description is used as a tooltip there.
 The label and description should be specified as translatable strings.
 
-```
-_POINTER_SPEED = ('pointer_speed', _("Sensitivity (Pointer Speed)"), _("How fast the pointer moves"))
+```python
+_POINTER_SPEED = ('pointer_speed',
+		_("Sensitivity (Pointer Speed)"),
+		_("How fast the pointer moves"))
 ```
 
-Implement a register interface for the setting (if you are very brave and
-some devices have a register interface for the setting).
+Next implement an interface for the setting by creating
+a reader/writer, a validator, and a setting instance for it.
+Most settings use device features and thus need feature interfaces.
+Some settings use device register and thus need register interfaces.
+Only implement a register interface for the setting if you are very brave and
+you have access to a device that has a register interface for the setting.
 Register interfaces cannot be auto-discovered and need to be stated in descriptors.py
 for each device with the register interface.
 
-Implement a feature interface for the setting.  There are several possible kinds of
-feature interfaces, ranging from simple toggles, to ranges, to fixed lists, to
-dynamic choices, to maps of dynamic choices, each created by a macro function.
-Pointer speed is a setting
-whose values are integers in a range so `feature_range` is used.
-The arguments to this macro are
-the name of the setting (use the name from the common strings tuple),
-the HID++ 2.0 feature ID for the setting (from the FEATURE structure in hidpp20.py),
-the minimum and maximum values for the setting,
-the HID++ 2.0 function IDs to read and write the setting (left-shifted four bits),
-the byte size of the setting value,
-a label and description for the setting (from the common strings tuple),
-and which kinds of devices can have this setting.
-(This last is no longer used because keyboards with integrated pointers only
+The reader/writer instance is responsible for reading raw values
+from the device and writing values to it.
+There are different classes for feature interfaces and register interfaces.
+Pointer speed is a feature so the _FeatureRW reader/writer is used.
+Reader/writers take the register or feature ID and the command numbers for reading and writing,
+plus other arguments for complex interfaces.
+
+The validator instance is responsible for turning read raw values into Python data
+and Python data into raw values to be written and validating that the Python data is
+acceptable for the setting.
+There are several possible kinds of Python data for setting interfaces,
+ranging from simple toggles, to ranges, to fixed lists, to
+dynamic choices, to maps of dynamic choices.
+Pointer speed is a setting whose values are integers in a range so a _RangeV validator is used.
+The arguments to this class are the
+the minimum and maximum values for the value
+and the byte size of the value on the device.
+Settings that are toggles or choices work similarly,
+but their validators have different arguments.
+Map settings have more complicated validators.
+
+The setting instance keeps everything together and provides control.
+It takes the strings for the setting, the reader/writer, the validator, and
+which kinds of devices can have this setting.
+(This last is no longer used because keyboards with integrated trackpads only
 report that they are keyboards.)
-The values to be used need to be determined from documentation of the
-feature or from reverse-engineering behaviour of Logitech software under
-Windows or MacOS.
 
-```
+```python
 def _feature_pointer_speed():
-	"""Pointer Speed feature"""
-	return feature_range(_POINTER_SPEED[0], _F.POINTER_SPEED, 0x002e, 0x01ff,
-					read_function_id=0x0,
-					write_function_id=0x10,
-					bytes_count=2,
-					label=_POINTER_SPEED[1], description=_POINTER_SPEED[2],
-					device_kind=(_DK.mouse, _DK.trackball))
+    """Pointer Speed feature"""
+    # min and max values taken from usb traces of Win software
+    validator = _RangeV(0x002e, 0x01ff, 2)
+    rw = _FeatureRW(_F.POINTER_SPEED)
+    return _Setting(_POINTER_SPEED, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 ```
 
-Settings that are toggles or choices work very similarly.
-Settings where the choices are determined from the device
-need an auxiliary function to receive and decipher the permissable choices.
+Settings where the acceptable values are determined from the device
+need an auxiliary function to receive and decipher the permissible choices.
 See `_feature_adjustable_dpi_choices` for an example.
 
-Add an element to _SETTINGS_TABLE with
-the setting name (from the common strings),
+Finally, add an element to _SETTINGS_TABLE with
+the common strings for the setting,
 the feature ID (if any),
 the feature implementation (if any),
 the register implementation (if any).
 and
 the identifier for the setting implementation if different from the setting name.
 The identifier is used in descriptors.py to say that a device has the register or feature implementation.
-The identifier can be the same as the setting name if there is only one implementation for the setting.
 This table is used to generate the data structures for describing devices in descriptors.py
 and is also used to auto-discover feature implementations.
+
+```python
+_S( _POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed ),
 ```
-_S( _POINTER_SPEED[0], _F.POINTER_SPEED, _feature_pointer_speed ),
-```
+
+The values to be used need to be determined from documentation of the
+feature or from reverse-engineering behavior of Logitech software under
+Windows or MacOS.
+For more information on implementing feature settings
+see the comments in lib/logitech_receiver/settings_templates.py.

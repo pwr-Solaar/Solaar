@@ -20,11 +20,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
 from logging import getLogger
 from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .i18n import _, ngettext
@@ -194,11 +196,11 @@ class DeviceStatus(dict):
             # charging state info, so do our best to infer a level (even if it is just the last level)
             # It is not always possible to do this well
             if status == _hidpp20.BATTERY_STATUS.full:
-                level = _hidpp10.BATTERY_APPOX.full
+                level = _BATTERY_APPROX.full
             elif status in (_hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.recharging):
-                level = _hidpp10.BATTERY_APPOX.good
+                level = _BATTERY_APPROX.good
             elif status == _hidpp20.BATTERY_STATUS.slow_recharge:
-                level = _hidpp10.BATTERY_APPOX.low
+                level = _BATTERY_APPROX.low
             else:
                 level = self.get(KEYS.BATTERY_LEVEL)
         else:
@@ -208,8 +210,7 @@ class DeviceStatus(dict):
         old_level, self[KEYS.BATTERY_LEVEL] = self.get(KEYS.BATTERY_LEVEL), level
         old_status, self[KEYS.BATTERY_STATUS] = self.get(KEYS.BATTERY_STATUS), status
         self[KEYS.BATTERY_NEXT_LEVEL] = nextLevel
-        if voltage is not None:
-            self[KEYS.BATTERY_VOLTAGE] = voltage
+        old_voltage, self[KEYS.BATTERY_VOLTAGE] = self.get(KEYS.BATTERY_VOLTAGE), voltage
 
         charging = status in (
             _hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.full,
@@ -217,7 +218,7 @@ class DeviceStatus(dict):
         )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
-        changed = old_level != level or old_status != status or old_charging != charging
+        changed = old_level != level or old_status != status or old_charging != charging or old_voltage != voltage
         alert, reason = ALERT.NONE, None
 
         if _hidpp20.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
@@ -273,6 +274,7 @@ class DeviceStatus(dict):
         elif KEYS.BATTERY_STATUS in self:
             self[KEYS.BATTERY_STATUS] = None
             self[KEYS.BATTERY_CHARGING] = None
+            self[KEYS.BATTERY_VOLTAGE] = None
             self.changed()
 
     def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
@@ -290,24 +292,25 @@ class DeviceStatus(dict):
                     # get cleared when the device is turned off (but not when the device
                     # goes idle, and we can't tell the difference right now).
                     if d.protocol < 2.0:
-                        self[KEYS.NOTIFICATION_FLAGS] = d.enable_notifications()
+                        self[KEYS.NOTIFICATION_FLAGS] = d.enable_connection_notifications()
 
                     # If we've been inactive for a long time, forget anything
-                    # about the battery.
+                    # about the battery. (This is probably unnecessary.)
                     if self.updated > 0 and timestamp - self.updated > _LONG_SLEEP:
                         self[KEYS.BATTERY_LEVEL] = None
                         self[KEYS.BATTERY_STATUS] = None
                         self[KEYS.BATTERY_CHARGING] = None
+                        self[KEYS.BATTERY_VOLTAGE] = None
 
                     # Devices lose configuration when they are turned off,
                     # make sure they're up-to-date.
-                    if _log.isEnabledFor(_DEBUG):
-                        _log.debug('%s pushing device settings %s', d, d.settings)
+                    if _log.isEnabledFor(_INFO):
+                        _log.info('%s pushing device settings %s', d, d.settings)
                     for s in d.settings:
                         s.apply()
 
-                    if self.get(KEYS.BATTERY_LEVEL) is None:
-                        self.read_battery(timestamp)
+                    # battery information may have changed so try to read it now
+                    self.read_battery(timestamp)
             else:
                 if was_active:
                     battery = self.get(KEYS.BATTERY_LEVEL)
@@ -317,11 +320,16 @@ class DeviceStatus(dict):
                     if battery is not None:
                         self[KEYS.BATTERY_LEVEL] = battery
 
-        if self.updated == 0 and active is True:
-            # if the device is active on the very first status notification,
-            # (meaning just when the program started or a new receiver was just
-            # detected), pop-up a notification about it
-            alert |= ALERT.NOTIFICATION
+        # A device that is not active on the first status notification
+        # but becomes active afterwards does not produce a pop-up notification
+        # so don't produce one here.  This cuts off pop-ups when Solaar starts,
+        # which can be problematic if Solaar is autostarted.
+        ## if self.updated == 0 and active is True:
+        ## if the device is active on the very first status notification,
+        ## (meaning just when the program started or a new receiver was just
+        ## detected), pop up a notification about it
+        ##    alert |= ALERT.NOTIFICATION
+
         self.updated = timestamp
 
         # if _log.isEnabledFor(_DEBUG):

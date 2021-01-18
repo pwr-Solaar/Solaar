@@ -22,14 +22,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
+from logging import ERROR as _ERROR
+from logging import WARNING as _WARNING
 from logging import getLogger
+from typing import List
 
 from . import special_keys
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import KwException as _KwException
+from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
-from .common import ReprogrammableKeyInfo as _ReprogrammableKeyInfo
-from .common import ReprogrammableKeyInfoV4 as _ReprogrammableKeyInfoV4
+from .common import bytes2int as _bytes2int
 from .common import pack as _pack
 from .common import unpack as _unpack
 
@@ -69,6 +73,7 @@ FEATURE = _NamedInts(
     DFU=0x00D0,
     BATTERY_STATUS=0x1000,
     BATTERY_VOLTAGE=0x1001,
+    UNIFIED_BATTERY=0x1004,
     CHARGING_CONTROL=0x1010,
     LED_CONTROL=0x1300,
     GENERIC_TEST=0x1800,
@@ -143,7 +148,7 @@ FEATURE = _NamedInts(
     BRIGHTNESS_CONTROL=0x8040,
     REPORT_RATE=0x8060,
     COLOR_LED_EFFECTS=0x8070,
-    RGB_EFFECTS=0X8071,
+    RGB_EFFECTS=0x8071,
     PER_KEY_LIGHTING=0x8080,
     PER_KEY_LIGHTING_V2=0x8081,
     MODE_STATUS=0x8090,
@@ -236,7 +241,7 @@ class FeaturesArray(object):
     def _check(self):
         # print (self.device, "check", self.supported, self.features, self.device.protocol)
         if self.supported:
-            assert self.device
+            assert self.device is not None
             if self.features is not None:
                 return True
 
@@ -308,7 +313,7 @@ class FeaturesArray(object):
                 elif ivalue == int(f):
                     return True
 
-            if may_have:
+            if may_have and self.device:
                 reply = self.device.request(0x0000, _pack('!H', ivalue))
                 if reply:
                     index = ord(reply[0:1])
@@ -357,53 +362,285 @@ class FeaturesArray(object):
 #
 
 
+class ReprogrammableKey(object):
+    """Information about a control present on a device with the `REPROG_CONTROLS` feature.
+    Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
+    Read-only properties:
+    - index {int} -- index in the control ID table
+    - key {_NamedInt} -- the name of this control
+    - default_task {_NamedInt} -- the native function of this control
+    - flags {List[str]} -- capabilities and desired software handling of the control
+    """
+    def __init__(self, device, index, cid, tid, flags):
+        self._device = device
+        self.index = index
+        self._cid = cid
+        self._tid = tid
+        self._flags = flags
+
+    @property
+    def key(self) -> _NamedInt:
+        return special_keys.CONTROL[self._cid]
+
+    @property
+    def default_task(self) -> _NamedInt:
+        """NOTE: This NamedInt is a bit mixed up, because its value is the Control ID
+        while the name is the Control ID's native task. But this makes more sense
+        than presenting details of controls vs tasks in the interface. The same
+        convention applies to `mapped_to`, `remappable_to`, `remap` in `ReprogrammableKeyV4`."""
+        task = str(special_keys.TASK[self._tid])
+        return _NamedInt(self._cid, task)
+
+    @property
+    def flags(self) -> List[str]:
+        return special_keys.KEY_FLAG.flag_names(self._flags)
+
+
+class ReprogrammableKeyV4(ReprogrammableKey):
+    """Information about a control present on a device with the `REPROG_CONTROLS_V4` feature.
+    Ref (v2): https://lekensteyn.nl/files/logitech/x1b04_specialkeysmsebuttons.html
+    Ref (v4): https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
+    Contains all the functionality of `ReprogrammableKey` plus remapping keys and /diverting/ them
+    in order to handle keypresses in a custom way.
+
+    Additional read-only properties:
+    - pos {int} -- position of this control on the device; 1-16 for FN-keys, otherwise 0
+    - group {int} -- the group this control belongs to; other controls with this group in their
+    `group_mask` can be remapped to this control
+    - group_mask {List[str]} -- this control can be remapped to any control ID in these groups
+    - mapped_to {_NamedInt} -- which action this control is mapped to; usually itself
+    - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
+    - mapping_flags {List[str]} -- mapping flags set on the control
+    """
+    def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
+        ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
+        self.pos = pos
+        self.group = group
+        self._gmask = gmask
+        self._mapping_flags = None
+        self._mapped_to = None
+
+    @property
+    def group_mask(self):
+        return special_keys.CID_GROUP_BIT.flag_names(self._gmask)
+
+    @property
+    def mapped_to(self) -> _NamedInt:
+        if self._mapped_to is None:
+            self._getCidReporting()
+        self._device.keys._ensure_all_keys_queried()
+        task = str(special_keys.TASK[self._device.keys.cid_to_tid[self._mapped_to]])
+        return _NamedInt(self._mapped_to, task)
+
+    @property
+    def remappable_to(self) -> List[_NamedInt]:
+        # this flag is only to show in UI, ignore in Solaar
+        # if special_keys.KEY_FLAG.reprogrammable not in self.flags:
+        #     return []
+
+        self._device.keys._ensure_all_keys_queried()
+        ret = []
+        if self.group_mask != []:  # only keys with a non-zero gmask are remappable
+            ret = [self.default_task]  # it should always be possible to map the key to itself
+            for g in self.group_mask:
+                g = special_keys.CID_GROUP[str(g)]
+                for tgt_cid in self._device.keys.group_cids[g]:
+                    tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
+                    tgt_task = _NamedInt(tgt_cid, tgt_task)
+                    if tgt_task != self.default_task:  # don't put itself in twice
+                        ret.append(tgt_task)
+
+        return ret
+
+    @property
+    def mapping_flags(self) -> List[str]:
+        if self._mapping_flags is None:
+            self._getCidReporting()
+        return special_keys.MAPPING_FLAG.flag_names(self._mapping_flags)
+
+    def set_diverted(self, value: bool):
+        """If set, the control is diverted temporarily and reports presses as HID++ events
+        until a HID++ configuration reset occurs."""
+        flags = {special_keys.MAPPING_FLAG.diverted: value}
+        self._setCidReporting(flags=flags)
+
+    def set_persistently_diverted(self, value: bool):
+        """If set, the control is diverted permanently and reports presses as HID++ events."""
+        flags = {special_keys.MAPPING_FLAG.persistently_diverted: value}
+        self._setCidReporting(flags=flags)
+
+    def set_rawXY_reporting(self, value: bool):
+        """If set, the mouse reports all its raw XY events while this control is pressed
+        as HID++ events. Gets cleared on a HID++ configuration reset."""
+        flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
+        self._setCidReporting(flags=flags)
+
+    def remap(self, to: _NamedInt):
+        """Remaps this control to another action."""
+        self._setCidReporting(remap=int(to))
+
+    def _getCidReporting(self):
+        try:
+            mapped_data = feature_request(
+                self._device,
+                FEATURE.REPROG_CONTROLS_V4,
+                0x20,
+                *tuple(_pack('!H', self._cid)),
+            )
+            if mapped_data:
+                cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
+                if cid != self._cid and _log.isEnabledFor(_WARNING):
+                    _log.warn(
+                        f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
+                        f'with a different control ID ({cid}) than requested ({self._cid}).'
+                    )
+                self._mapped_to = mapped_to if mapped_to != 0 else self._cid
+                if len(mapped_data) > 5:
+                    mapping_flags_2, = _unpack('!B', mapped_data[5:6])
+                else:
+                    mapping_flags_2 = 0
+                self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
+            else:
+                raise FeatureCallError(msg='No reply from device.')
+        except Exception:
+            if _log.isEnabledFor(_ERROR):
+                _log.error(f'Exception in _getCidReporting on device {self._device}: ', exc_info=1)
+            # Clear flags and set mapping target to self as fallback
+            self._mapping_flags = 0
+            self._mapped_to = self._cid
+
+    def _setCidReporting(self, flags=None, remap=0):
+        """Sends a `setCidReporting` request with the given parameters to the control. Raises
+        an exception if the parameters are invalid.
+
+        Parameters:
+        - flags {Dict[_NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
+        - remap {int} -- which control ID to remap to; or 0 to keep current mapping
+        """
+        flags = flags if flags else {}  # See flake8 B006
+
+        if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
+            # We need diversion to report raw XY, so divert temporarily
+            # (since XY reporting is also temporary)
+            flags[special_keys.MAPPING_FLAG.diverted] = True
+
+        if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
+            flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
+
+        # The capability required to set a given reporting flag.
+        FLAG_TO_CAPABILITY = {
+            special_keys.MAPPING_FLAG.diverted: special_keys.KEY_FLAG.divertable,
+            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
+            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
+            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
+            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY
+        }
+
+        bfield = 0
+        for f, v in flags.items():
+            if v and FLAG_TO_CAPABILITY[f] not in self.flags:
+                raise FeatureNotSupported(
+                    msg=f'Tried to set mapping flag "{f}" on control "{self.key}" ' +
+                    f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
+                )
+
+            bfield |= int(f) if v else 0
+            bfield |= int(f) << 1  # The 'Xvalid' bit
+
+        if remap != 0 and remap not in self.remappable_to:
+            raise FeatureNotSupported(
+                msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to ' +
+                f'on device {self._device}.'
+            )
+
+        pkt = tuple(
+            _pack(
+                '!HBH',
+                self._cid,
+                bfield & 0xff,
+                remap,
+                # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append
+                # another byte `(bfield >> 8) & 0xff` here. But older devices
+                # might behave oddly given that byte, so we don't send it.
+            )
+        )
+        ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
+        if _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
+            _log.warn(
+                f"REPROG_CONTROLS_v4 endpoint setCidReporting on device {self._device} should echo request packet, but didn't."
+            )
+
+        # update knowledge of mapping
+        self._getCidReporting()
+
+
 class KeysArray(object):
     """A sequence of key mappings supported by a HID++ 2.0 device."""
-    __slots__ = ('device', 'keys', 'keyversion')
+
+    __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids')
 
     def __init__(self, device, count):
         assert device is not None
         self.device = device
-        self.keyversion = 0
+        if FEATURE.REPROG_CONTROLS in self.device.features:
+            self.keyversion = 1
+        elif FEATURE.REPROG_CONTROLS_V4 in self.device.features:
+            self.keyversion = 4
+        else:
+            if _log.isEnabledFor(_ERROR):
+                _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
+            self.keyversion = None
         self.keys = [None] * count
+        """The mapping from Control IDs to their native Task IDs.
+        For example, Control "Left Button" is mapped to Task "Left Click".
+        When remapping controls, we point the control we want to remap
+        at a target Control ID rather than a target Task ID. This has the
+        effect of performing the native task of the target control,
+        even if the target itself is also remapped. So remapping
+        is not recursive."""
+        self.cid_to_tid = {}
+        """The mapping from Control ID groups to Controls IDs that belong to it.
+        A key k can only be remapped to targets in groups within k.group_mask."""
+        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
+
+    def _query_key(self, index: int):
+        """Queries the device for a given key and stores it in self.keys."""
+        if index < 0 or index >= len(self.keys):
+            raise IndexError(index)
+
+        # TODO: add here additional variants for other REPROG_CONTROLS
+        if self.keyversion == 1:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+            if keydata:
+                cid, tid, flags = _unpack('!HHB', keydata[:5])
+                self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
+                self.cid_to_tid[cid] = tid
+        elif self.keyversion == 4:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
+            if keydata:
+                cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
+                flags = flags1 | (flags2 << 8)
+                self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
+                self.cid_to_tid[cid] = tid
+                if group != 0:  # 0 = does not belong to a group
+                    self.group_cids[special_keys.CID_GROUP[group]].append(cid)
+        elif _log.isEnabledFor(_WARNING):
+            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+
+    def _ensure_all_keys_queried(self):
+        """The retrieval of key information is lazy, but for certain functionality
+        we need to know all keys. This function makes sure that's the case."""
+        for (i, k) in enumerate(self.keys):
+            if k is None:
+                self._query_key(i)
 
     def __getitem__(self, index):
         if isinstance(index, int):
             if index < 0 or index >= len(self.keys):
                 raise IndexError(index)
 
-            # TODO: add here additional variants for other REPROG_CONTROLS
             if self.keys[index] is None:
-                keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
-                self.keyversion = 1
-                if keydata is None:
-                    keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
-                    self.keyversion = 4
-                if keydata:
-                    key, key_task, flags, pos, group, gmask = _unpack('!HHBBBB', keydata[:8])
-                    ctrl_id_text = special_keys.CONTROL[key]
-                    ctrl_task_text = special_keys.TASK[key_task]
-                    if self.keyversion == 1:
-                        self.keys[index] = _ReprogrammableKeyInfo(index, ctrl_id_text, ctrl_task_text, flags)
-                    if self.keyversion == 4:
-                        try:
-                            mapped_data = feature_request(
-                                self.device, FEATURE.REPROG_CONTROLS_V4, 0x20, key & 0xff00, key & 0xff
-                            )
-                            if mapped_data:
-                                remap_key, remap_flag, remapped = _unpack('!HBH', mapped_data[:5])
-                                # if key not mapped map it to itself for display
-                                if remapped == 0:
-                                    remapped = key
-                        except Exception:
-                            remapped = key
-                            # remap_key = key
-                            # remap_flag = 0
-
-                        remapped_text = special_keys.CONTROL[remapped]
-                        self.keys[index] = _ReprogrammableKeyInfoV4(
-                            index, ctrl_id_text, ctrl_task_text, flags, pos, group, gmask, remapped_text
-                        )
+                self._query_key(index)
 
             return self.keys[index]
 
@@ -412,6 +649,7 @@ class KeysArray(object):
             return [self.__getitem__(i) for i in range(*indices)]
 
     def index(self, value):
+        self._ensure_all_keys_queried()
         for index, k in enumerate(self.keys):
             if k is not None and int(value) == int(k.key):
                 return index
@@ -428,6 +666,347 @@ class KeysArray(object):
 
     def __len__(self):
         return len(self.keys)
+
+
+# Gesture Ids for feature GESTURE_2
+GESTURE = _NamedInts(
+    Tap1Finger=1,  # task Left_Click
+    Tap2Finger=2,  # task Right_Click
+    Tap3Finger=3,
+    Click1Finger=4,  # task Left_Click
+    Click2Finger=5,  # task Right_Click
+    Click3Finger=6,
+    DoubleTap1Finger=10,
+    DoubleTap2Finger=11,
+    DoubleTap3Finger=12,
+    Track1Finger=20,  # action MovePointer
+    TrackingAcceleration=21,
+    TapDrag1Finger=30,  # action Drag
+    TapDrag2Finger=31,  # action SecondaryDrag
+    Drag3Finger=32,
+    TapGestures=33,  # group all tap gestures under a single UI setting
+    FnClickGestureSuppression=34,  # suppresses Tap and Edge gestures, toggled by Fn+Click
+    Scroll1Finger=40,  # action ScrollOrPageXY / ScrollHorizontal
+    Scroll2Finger=41,  # action ScrollOrPageXY / ScrollHorizontal
+    Scroll2FingerHoriz=42,  # action ScrollHorizontal
+    Scroll2FingerVert=43,  # action WheelScrolling
+    Scroll2FingerStateless=44,
+    NaturalScrolling=45,  # affects native HID wheel reporting by gestures, not when diverted
+    Thumbwheel=46,  # action WheelScrolling
+    VScrollInertia=48,
+    VScrollBallistics=49,
+    Swipe2FingerHoriz=50,  # action PageScreen
+    Swipe3FingerHoriz=51,  # action PageScreen
+    Swipe4FingerHoriz=52,  # action PageScreen
+    Swipe3FingerVert=53,
+    Swipe4FingerVert=54,
+    LeftEdgeSwipe1Finger=60,
+    RightEdgeSwipe1Finger=61,
+    BottomEdgeSwipe1Finger=62,
+    TopEdgeSwipe1Finger=63,
+    LeftEdgeSwipe1Finger2=64,  # task HorzScrollNoRepeatSet
+    RightEdgeSwipe1Finger2=65,  # task 122 ??
+    BottomEdgeSwipe1Finger2=66,  #
+    TopEdgeSwipe1Finger2=67,  # task 121 ??
+    LeftEdgeSwipe2Finger=70,
+    RightEdgeSwipe2Finger=71,
+    BottomEdgeSwipe2Finger=72,
+    TopEdgeSwipe2Finger=73,
+    Zoom2Finger=80,  # action Zoom
+    Zoom2FingerPinch=81,  # ZoomBtnInSet
+    Zoom2FingerSpread=82,  # ZoomBtnOutSet
+    Zoom3Finger=83,
+    Zoom2FingerStateless=84,  # action Zoom
+    TwoFingersPresent=85,
+    Rotate2Finger=87,
+    Finger1=90,
+    Finger2=91,
+    Finger3=92,
+    Finger4=93,
+    Finger5=94,
+    Finger6=95,
+    Finger7=96,
+    Finger8=97,
+    Finger9=98,
+    Finger10=99,
+    DeviceSpecificRawData=100,
+)
+GESTURE._fallback = lambda x: 'unknown:%04X' % x
+
+# Param Ids for feature GESTURE_2
+PARAM = _NamedInts(
+    ExtraCapabilities=1,  # not suitable for use
+    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
+    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
+    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
+)
+PARAM._fallback = lambda x: 'unknown:%04X' % x
+
+
+class SubParam:
+    __slots__ = ('id', 'length', 'minimum', 'maximum', 'widget')
+
+    def __init__(self, id, length, minimum=None, maximum=None, widget=None):
+        self.id = id
+        self.length = length
+        self.minimum = minimum if minimum is not None else 0
+        self.maximum = maximum if maximum is not None else ((1 << 8 * length) - 1)
+        self.widget = widget if widget is not None else 'Scale'
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return self.id
+
+
+SUB_PARAM = {   # (byte count, minimum, maximum)
+    PARAM['ExtraCapabilities']: None,  # ignore
+    PARAM['PixelZone']: (  # TODO: replace min and max with the correct values
+        SubParam('left', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('bottom', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('width', 2, 0x0000, 0xFFFF, 'SpinButton'),
+        SubParam('height', 2, 0x0000, 0xFFFF, 'SpinButton')),
+    PARAM['RatioZone']: (  # TODO: replace min and max with the correct values
+        SubParam('left', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('bottom', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('width', 1, 0x00, 0xFF, 'SpinButton'),
+        SubParam('height', 1, 0x00, 0xFF, 'SpinButton')),
+    PARAM['ScaleFactor']: (
+        SubParam('scale', 2, 0x002E, 0x01FF, 'Scale'), )
+}
+
+# Spec Ids for feature GESTURE_2
+SPEC = _NamedInts(
+    DVI_field_width=1,
+    field_widths=2,
+    period_unit=3,
+    resolution=4,
+    multiplier=5,
+    sensor_size=6,
+    finger_width_and_height=7,
+    finger_major_minor_axis=8,
+    finger_force=9,
+    zone=10
+)
+SPEC._fallback = lambda x: 'unknown:%04X' % x
+
+# Action Ids for feature GESTURE_2
+ACTION_ID = _NamedInts(
+    MovePointer=1,
+    ScrollHorizontal=2,
+    WheelScrolling=3,
+    ScrollVertial=4,
+    ScrollOrPageXY=5,
+    ScrollOrPageHorizontal=6,
+    PageScreen=7,
+    Drag=8,
+    SecondaryDrag=9,
+    Zoom=10,
+    ScrollHorizontalOnly=11,
+    ScrollVerticalOnly=12
+)
+ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
+
+
+class Gesture(object):
+
+    gesture_index = {}
+
+    def __init__(self, device, low, high):
+        self._device = device
+        self.id = low
+        self.gesture = GESTURE[low]
+        self.can_be_enabled = high & 0x01
+        self.can_be_diverted = high & 0x02
+        self.show_in_ui = high & 0x04
+        self.desired_software_default = high & 0x08
+        self.persistent = high & 0x10
+        self.default_enabled = high & 0x20
+        self.index = None
+        if self.can_be_enabled or self.default_enabled:
+            self.index = Gesture.gesture_index.get(device, 0)
+            Gesture.gesture_index[device] = self.index + 1
+        self.offset, self.mask = self._offset_mask()
+
+    def _offset_mask(self):  # offset and mask
+        if self.index is not None:
+            offset = self.index >> 3  # 8 gestures per byte
+            mask = 0x1 << (self.index % 8)
+            return (offset, mask)
+        else:
+            return (None, None)
+
+    def enabled(self):  # is the gesture enabled?
+        if self.offset is not None:
+            result = feature_request(self._device, FEATURE.GESTURE_2, 0x10, self.offset, 0x01, self.mask)
+            return bool(result[0] & self.mask) if result else None
+
+    def set(self, enable):  # enable or disable the gesture
+        if not self.can_be_enabled:
+            return None
+        if self.offset is not None:
+            reply = feature_request(
+                self._device, FEATURE.GESTURE_2, 0x20, self.offset, 0x01, self.mask, self.mask if enable else 0x00
+            )
+            return reply
+
+    def as_int(self):
+        return self.gesture
+
+    def __int__(self):
+        return self.id
+
+    def __repr__(self):
+        return f'<Gesture {self.gesture} offset={self.offset} mask={self.mask}>'
+
+    # allow a gesture to be used as a settings reader/writer to enable and disable the gesture
+    read = enabled
+    write = set
+
+
+class Param(object):
+    param_index = {}
+
+    def __init__(self, device, low, high):
+        self._device = device
+        self.id = low
+        self.param = PARAM[low]
+        self.size = high & 0x0F
+        self.show_in_ui = bool(high & 0x1F)
+        self._value = None
+        self._default_value = None
+        self.index = Param.param_index.get(device, 0)
+        Param.param_index[device] = self.index + 1
+
+    @property
+    def sub_params(self):
+        return SUB_PARAM.get(self.id, None)
+
+    @property
+    def value(self):
+        return self._value if self._value is not None else self.read()
+
+    def read(self):  # returns the bytes for the parameter
+        result = feature_request(self._device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
+        if result:
+            self._value = _bytes2int(result[:self.size])
+            return self._value
+
+    @property
+    def default_value(self):
+        if self._default_value is None:
+            self._default_value = self._read_default()
+        return self._default_value
+
+    def _read_default(self):
+        result = feature_request(self._device, FEATURE.GESTURE_2, 0x60, self.index, 0xFF)
+        if result:
+            self._default_value = _bytes2int(result[:self.size])
+            return self._default_value
+
+    def write(self, bytes):
+        self._value = bytes
+        return feature_request(self._device, FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
+
+    def __str__(self):
+        return str(self.param)
+
+    def __int__(self):
+        return self.id
+
+
+class Spec:
+    def __init__(self, device, low, high):
+        self._device = device
+        self.id = low
+        self.spec = SPEC[low]
+        self.byte_count = high & 0x0F
+        self._value = None
+
+    @property
+    def value(self):
+        if self._value is None:
+            self._value = self.read()
+        return self._value
+
+    def read(self):
+        try:
+            value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
+        except FeatureCallError:
+            # I don't know if this should happen, but I get an error
+            # with spec 5
+            return None
+        return _bytes2int(value[:self.byte_count])
+
+    def __repr__(self):
+        return f'[{self.spec}={self.value}]'
+
+
+class Gestures(object):
+    """Information about the gestures that a device supports.
+    Right now only some information fields are supported.
+    WARNING: Assumes that parameters are always global, which is not the case.
+    """
+    def __init__(self, device):
+        self.device = device
+        self.gestures = {}
+        self.params = {}
+        self.specs = {}
+        index = 0
+        field_high = 0x00
+        while field_high != 0x01:  # end of fields
+            # retrieve the next eight fields
+            fields = feature_request(device, FEATURE.GESTURE_2, 0x00, index >> 8, index & 0xFF)
+            if not fields:
+                break
+            for offset in range(8):
+                field_high = fields[offset * 2]
+                field_low = fields[offset * 2 + 1]
+                if field_high == 0x1:  # end of fields
+                    break
+                elif field_high & 0x80:
+                    gesture = Gesture(device, field_low, field_high)
+                    self.gestures[gesture.gesture] = gesture
+                elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
+                    param = Param(device, field_low, field_high)
+                    self.params[param.param] = param
+                elif field_high == 0x04:
+                    if field_low != 0x00:
+                        _log.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
+                elif field_high & 0xF0 == 0x40:
+                    spec = Spec(device, field_low, field_high)
+                    self.specs[spec.spec] = spec
+                else:
+                    _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
+                index += 1
+        device._gestures = self
+
+    def gesture(self, gesture):
+        return self.gestures.get(gesture, None)
+
+    def gesture_enabled(self, gesture):  # is the gesture enabled?
+        g = self.gestures.get(gesture, None)
+        return g.enabled(self.device) if g else None
+
+    def enable_gesture(self, gesture):
+        g = self.gestures.get(gesture, None)
+        return g.set(self.device, True) if g else None
+
+    def disable_gesture(self, gesture):
+        g = self.gestures.get(gesture, None)
+        return g.set(self.device, False) if g else None
+
+    def param(self, param):
+        return self.params.get(param, None)
+
+    def get_param(self, param):
+        g = self.params.get(param, None)
+        return g.get(self.device) if g else None
+
+    def set_param(self, param, value):
+        g = self.params.get(param, None)
+        return g.set(self.device, value) if g else None
 
 
 #
@@ -474,6 +1053,22 @@ def get_firmware(device):
         return tuple(fw)
 
 
+def get_ids(device):
+    """Reads a device's ids (unit and model numbers)"""
+    ids = feature_request(device, FEATURE.DEVICE_FW_VERSION)
+    if ids:
+        unitId = ids[1:5]
+        modelId = ids[7:13]
+        transport_bits = ord(ids[6:7])
+        offset = 0
+        tid_map = {}
+        for transport, flag in [('btid', 0x1), ('btleid', 0x02), ('wpid', 0x04), ('usbid', 0x08)]:
+            if transport_bits & flag:
+                tid_map[transport] = modelId[offset:offset + 2].hex().upper()
+                offset = offset + 2
+        return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
+
+
 def get_kind(device):
     """Reads a device's type.
 
@@ -508,21 +1103,61 @@ def get_name(device):
                 _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
                 return None
 
-        return name.decode('ascii')
+        return name.decode('utf-8')
+
+
+def get_friendly_name(device):
+    """Reads a device's friendly name.
+
+    :returns: a string with the device name, or ``None`` if the device is not
+    available or does not support the ``DEVICE_NAME`` feature.
+    """
+    name_length = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME)
+    if name_length:
+        name_length = ord(name_length[:1])
+
+        name = b''
+        while len(name) < name_length:
+            fragment = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME, 0x10, len(name))
+            if fragment:
+                initial_null = 0 if fragment[0] else 1  # initial null actually seen on a device
+                name += fragment[initial_null:name_length + initial_null - len(name)]
+            else:
+                _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                return None
+
+        return name.decode('utf-8')
 
 
 def get_battery(device):
     """Reads a device's battery level."""
     battery = feature_request(device, FEATURE.BATTERY_STATUS)
     if battery:
-        discharge, dischargeNext, status = _unpack('!BBB', battery[:3])
+        discharge, next, status = _unpack('!BBB', battery[:3])
         discharge = None if discharge == 0 else discharge
+        status = BATTERY_STATUS[status]
         if _log.isEnabledFor(_DEBUG):
-            _log.debug(
-                'device %d battery %d%% charged, next level %d%% charge, status %d = %s', device.number, discharge,
-                dischargeNext, status, BATTERY_STATUS[status]
-            )
-        return discharge, BATTERY_STATUS[status], dischargeNext
+            _log.debug('device %d battery %s%% charged, next %s%%, status %s', device.number, discharge, next, status)
+        return discharge, status, next
+    else:
+        battery = feature_request(device, FEATURE.UNIFIED_BATTERY, 0x10)
+        if battery:
+            return decipher_unified_battery(battery)
+
+
+def decipher_unified_battery(report):
+    discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
+    status = BATTERY_STATUS[status]
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('battery %s%% charged, level %s, charging %s', discharge, status)
+    level = (
+        _BATTERY_APPROX.full if level == 8  # full
+        else _BATTERY_APPROX.good if level == 4  # good
+        else _BATTERY_APPROX.low if level == 2  # low
+        else _BATTERY_APPROX.critical if level == 1  # critical
+        else _BATTERY_APPROX.empty
+    )
+    return discharge if discharge else level, status, None
 
 
 def get_voltage(device):
@@ -566,11 +1201,20 @@ def decipher_voltage(voltage_report):
 
 def get_keys(device):
     # TODO: add here additional variants for other REPROG_CONTROLS
-    count = feature_request(device, FEATURE.REPROG_CONTROLS)
-    if count is None:
+    count = None
+    if FEATURE.REPROG_CONTROLS in device.features:
+        count = feature_request(device, FEATURE.REPROG_CONTROLS)
+    elif FEATURE.REPROG_CONTROLS_V4 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
     if count:
         return KeysArray(device, ord(count[:1]))
+
+
+def get_gestures(device):
+    if getattr(device, '_gestures', None) is not None:
+        return device._gestures
+    if FEATURE.GESTURE_2 in device.features:
+        return Gestures(device)
 
 
 def get_mouse_pointer_info(device):
@@ -662,17 +1306,21 @@ def get_host_names(device):
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     host_names = {}
     if state:
-        _ignore, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
-        for host in range(0, numHosts):
-            hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
-            _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
-            name = ''
-            remaining = nameLen
-            while remaining > 0:
-                name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
-                name += name_piece[2:2 + min(remaining, 14)].decode()
-                remaining = max(0, remaining - 14)
-            host_names[host] = (bool(status), name)
+        capability_flags, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
+        if capability_flags & 0x01:  # device can get host names
+            for host in range(0, numHosts):
+                hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
+                _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
+                name = ''
+                remaining = nameLen
+                while remaining > 0:
+                    name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
+                    if name_piece:
+                        name += name_piece[2:2 + min(remaining, 14)].decode()
+                        remaining = max(0, remaining - 14)
+                    else:
+                        remaining = 0
+                host_names[host] = (bool(status), name)
     return host_names
 
 

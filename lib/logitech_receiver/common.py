@@ -40,7 +40,7 @@ try:
     #     and not any((chr(k) in d for k in range(0x80, 0xFF))) \
     #     )
 except Exception:
-    # this is certanly Python 3
+    # this is certainly Python 3
     # In Py3, unicode and str are equal (the unicode object does not exist)
     is_string = lambda d: isinstance(d, str)
 
@@ -50,7 +50,7 @@ except Exception:
 
 
 class NamedInt(int):
-    """An reqular Python integer with an attached name.
+    """A regular Python integer with an attached name.
 
     Caution: comparison with strings will also match this NamedInt's name
     (case-insensitive)."""
@@ -153,6 +153,7 @@ class NamedInts(object):
         elif is_string(index):
             if index in self.__dict__:
                 return self.__dict__[index]
+            return (next((x for x in self._values if str(x) == index), None))
 
         elif isinstance(index, slice):
             if index.start is None and index.stop is None:
@@ -203,7 +204,7 @@ class NamedInts(object):
         if isinstance(value, int):
             return value in self._indexed
         elif is_string(value):
-            return value in self.__dict__
+            return value in self.__dict__ or value in self._values
 
     def __iter__(self):
         for v in self._values:
@@ -269,11 +270,7 @@ class KwException(Exception):
 
 """Firmware information."""
 FirmwareInfo = namedtuple('FirmwareInfo', ['kind', 'name', 'version', 'extras'])
-"""Reprogrammable keys information."""
-ReprogrammableKeyInfo = namedtuple('ReprogrammableKeyInfo', ['index', 'key', 'task', 'flags'])
 
-ReprogrammableKeyInfoV4 = namedtuple(
-    'ReprogrammableKeyInfoV4', ['index', 'key', 'task', 'flags', 'pos', 'group', 'group_mask', 'remapped']
-)
+BATTERY_APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 
 del namedtuple

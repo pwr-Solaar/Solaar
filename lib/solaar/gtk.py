@@ -49,7 +49,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
         sys.exit('%s: missing required system package %s' % (NAME, os_package))
 
 
-prefer_symbolic_battery_icons = False
+battery_icons_style = 'regular'
 
 
 def _parse_arguments():
@@ -74,7 +74,12 @@ def _parse_arguments():
     arg_parser.add_argument(
         '-w', '--window', choices=('show', 'hide', 'only'), help='start with window showing / hidden / only (no tray icon)'
     )
-    arg_parser.add_argument('-b', '--battery-icons', choices=('regular', 'symbolic'), help='prefer regular / symbolic icons')
+    arg_parser.add_argument(
+        '-b',
+        '--battery-icons',
+        choices=('regular', 'symbolic', 'solaar'),
+        help='prefer regular battery / symbolic battery / solaar icons'
+    )
     arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
     arg_parser.add_argument('--help-actions', action='store_true', help='print help for the optional actions')
     arg_parser.add_argument('action', nargs=argparse.REMAINDER, choices=_cli.actions, help='optional actions to perform')
@@ -88,8 +93,8 @@ def _parse_arguments():
     if args.window is None:
         args.window = 'show'  # default behaviour is to show main window
 
-    global prefer_symbolic_battery_icons
-    prefer_symbolic_battery_icons = True if args.battery_icons == 'symbolic' else False
+    global battery_icons_style
+    battery_icons_style = args.battery_icons if args.battery_icons is not None else 'regular'
 
     import logging
     if args.debug > 0:

@@ -1,6 +1,48 @@
+1.0.4:
+  * Update pt_BR translation
+
+1.0.4rc1:
+  * Support USB and BT connected devices that are not in descriptors.py
+  * Use FRIENDLY NAME for codename if needed and available.
+  * Extract manufacturer and product ID from Udev HID information.
+  * Add Bluetooth and USB product IDs to device descriptors records.
+  * Support Bluetooth-connected devices.
+  * Add model ID and unit ID to device identification.
+  * Support changing DPI by pressing DPI Switch button and sliding horizontally
+  * Add device-specific notification handlers.
+  * Add MX Vertical USB information.
+  * Udev rule adds seat permissions for all Logitech devices.
+  * Support USB-connected devices in GUI.
+  * Make probe and config work for USB-connected devices.
+  * Improve strings and display for settings.
+  * Correctly handle non-unifying connection notifications.
+  * Update GUI strings for several settings.
+  * Better support for EX100 and devices that connect to it.
+  * Partial support for feature GESTURE_2.
+  * Simplify interface for settings.
+  * Use DJ connection notifications to set device active status
+  * Udev rule sets seat write permissions for hidraw nodes for device as well as receivers.
+  * Handle USB devices that use HID++ protocol in CLI.
+  * Use device hidraw nodes where possible.
+  * Handle receivers with serial numbers that don't provide number of pairings.
+  * Ignore exceptions when setting locale.
+  * Correctly discover settings that share a name.
+  * Don't show pop-up notifications at startup.
+  * Keep battery voltage updated in GUI.
+  * Add Portugese translation.
+  * Update several translations.
+  * Add Lightspeed receivers c545 and c541.
+  * Reimplement REPROG_CONTROLS data structure.
+
+1.0.3:
+  * Clean up documentation files.
+  * Update documentation on installation.
+  * Update Swedish and French translations.
+  * Add Norwegian Nynorsk and Danish translations.
+
 1.0.3rc2:
   * Fix bug handling DJ pairing notifications.
-  * Add Norwegian Bokmål translation>
+  * Add Norwegian Bokmål translation.
 
 1.0.3rc1:
   * Remove deprecated solaar-cli application.

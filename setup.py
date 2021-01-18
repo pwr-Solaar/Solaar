@@ -8,7 +8,7 @@ except ImportError:
     from distutils.core import setup
 
 # from solaar import NAME, __version__
-__version__ = '1.0.3rc2'
+__version__ = '1.0.4'
 NAME = 'Solaar'
 
 
@@ -24,6 +24,7 @@ def _data_files():
 
     yield 'share/applications', ['share/applications/solaar.desktop']
     yield 'share/solaar/udev-rules.d', ['rules.d/42-logitech-unify-permissions.rules']
+    yield 'share/metainfo', ['share/solaar/io.github.pwr_solaar.solaar.metainfo.xml']
 
     del _dirname
 
@@ -60,6 +61,9 @@ battery status, and show and modify some of the modifiable features of devices.
     python_requires='>=3.6',
     install_requires=[
         'pyudev (>= 0.13)',
+        'PyYAML (>= 5.1)',
+        'python-xlib (>= 0.27)',
+        'psutil (>= 5.6.0)',
     ],
     package_dir={'': 'lib'},
     packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],

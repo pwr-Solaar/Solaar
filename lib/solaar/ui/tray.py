@@ -25,6 +25,8 @@ from logging import DEBUG as _DEBUG
 from logging import getLogger
 from time import time as _timestamp
 
+import solaar.gtk as gtk
+
 from gi.repository import GLib, Gtk
 from gi.repository.Gdk import ScrollDirection
 from logitech_receiver.status import KEYS as _K
@@ -198,7 +200,7 @@ try:
         indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
     def _update_tray_icon():
-        if _picked_device:
+        if _picked_device and gtk.battery_icons_style != 'solaar':
             _ignore, _ignore, name, device_status = _picked_device
             battery_level = device_status.get(_K.BATTERY_LEVEL)
             battery_charging = device_status.get(_K.BATTERY_CHARGING)
@@ -251,7 +253,7 @@ except ImportError:
         tooltip = '\n'.join(tooltip_lines).rstrip('\n')
         _icon.set_tooltip_markup(tooltip)
 
-        if _picked_device:
+        if _picked_device and gtk.battery_icons_style != 'solaar':
             _ignore, _ignore, name, device_status = _picked_device
             battery_level = device_status.get(_K.BATTERY_LEVEL)
             battery_charging = device_status.get(_K.BATTERY_CHARGING)
@@ -351,28 +353,29 @@ def _pick_device_with_lowest_battery():
 
 def _add_device(device):
     assert device
-    assert device.receiver
-    receiver_path = device.receiver.path
-    assert receiver_path
+    # not true for wired devices - assert device.receiver
+    receiver_path = device.receiver.path if device.receiver is not None else device.path
+    # not true for wired devices - assert receiver_path
 
-    index = None
+    index = 0
     for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
         if path == receiver_path:
             # the first entry matching the receiver serial should be for the receiver itself
             index = idx + 1
             break
-    assert index is not None
+    # assert index is not None
 
-    # proper ordering (according to device.number) for a receiver's devices
-    while True:
-        path, number, _ignore, _ignore = _devices_info[index]
-        if path == _RECEIVER_SEPARATOR[0]:
-            break
-        assert path == receiver_path
-        assert number != device.number
-        if number > device.number:
-            break
-        index = index + 1
+    if device.receiver:
+        # proper ordering (according to device.number) for a receiver's devices
+        while True:
+            path, number, _ignore, _ignore = _devices_info[index]
+            if path == _RECEIVER_SEPARATOR[0]:
+                break
+            assert path == receiver_path
+            assert number != device.number
+            if number > device.number:
+                break
+            index = index + 1
 
     new_device_info = (receiver_path, device.number, device.name, device.status)
     assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
@@ -381,7 +384,7 @@ def _add_device(device):
     # label_prefix = b'\xE2\x94\x84 '.decode('utf-8')
     label_prefix = '   '
 
-    new_menu_item = Gtk.ImageMenuItem.new_with_label(label_prefix + device.name)
+    new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else '') + device.name)
     new_menu_item.set_image(Gtk.Image())
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver_path, device.number)
@@ -444,8 +447,9 @@ def _remove_receiver(receiver):
 
 
 def _update_menu_item(index, device):
-    assert device
-    assert device.status is not None
+    if not device or device.status is None:
+        _log.warn('updating an inactive device %s, assuming disconnected', device)
+        return None
 
     menu_items = _menu.get_children()
     menu_item = menu_items[index]
@@ -519,7 +523,7 @@ def update(device=None):
         else:
             # peripheral
             is_paired = bool(device)
-            receiver_path = device.receiver.path
+            receiver_path = device.receiver.path if device.receiver is not None else device.path
             index = None
             for idx, (path, number, _ignore, _ignore) in enumerate(_devices_info):
                 if path == receiver_path and number == device.number:
@@ -529,9 +533,8 @@ def update(device=None):
                 if index is None:
                     index = _add_device(device)
                 _update_menu_item(index, device)
-            else:
-                # was just unpaired
-                if index:
+            else:  # was just unpaired or unplugged
+                if index is not None:
                     _remove_device(index)
 
         menu_items = _menu.get_children()

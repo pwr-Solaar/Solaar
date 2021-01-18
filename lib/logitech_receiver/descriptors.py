@@ -32,14 +32,28 @@ from .settings_templates import RegisterSettings as _RS
 #
 
 _DeviceDescriptor = namedtuple(
-    '_DeviceDescriptor', ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister')
+    '_DeviceDescriptor',
+    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister', 'usbid', 'interface', 'btid')
 )
 del namedtuple
 
+DEVICES_WPID = {}
 DEVICES = {}
 
 
-def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None, settings=None, persister=None):
+def _D(
+    name,
+    codename=None,
+    kind=None,
+    wpid=None,
+    protocol=None,
+    registers=None,
+    settings=None,
+    persister=None,
+    usbid=None,
+    interface=None,
+    btid=None,
+):
     assert name
 
     if kind is None:
@@ -81,19 +95,48 @@ def _D(name, codename=None, kind=None, wpid=None, protocol=None, registers=None,
         protocol=protocol,
         registers=registers,
         settings=settings,
-        persister=persister
+        persister=persister,
+        usbid=usbid,
+        interface=interface,
+        btid=btid
     )
+
+    if usbid:
+        found = get_usbid(usbid)
+        assert found is None, 'duplicate usbid in device descriptors: %s' % (found, )
+    if btid:
+        found = get_btid(btid)
+        assert found is None, 'duplicate btid in device descriptors: %s' % (found, )
 
     assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
     DEVICES[codename] = device_descriptor
 
     if wpid:
-        if not isinstance(wpid, tuple):
-            wpid = (wpid, )
+        for w in wpid if isinstance(wpid, tuple) else (wpid, ):
+            assert w not in DEVICES_WPID, 'duplicate wpid in device descriptors: %s' % (DEVICES_WPID[w], )
+            DEVICES_WPID[w] = device_descriptor
 
-        for w in wpid:
-            assert w not in DEVICES, 'duplicate wpid in device descriptors: %s' % (DEVICES[w], )
-            DEVICES[w] = device_descriptor
+
+def get_wpid(wpid):
+    return DEVICES_WPID.get(wpid)
+
+
+def get_codename(codename):
+    return DEVICES.get(codename)
+
+
+def get_usbid(usbid):
+    if isinstance(usbid, str):
+        usbid = int(usbid, 16)
+    found = next((x for x in DEVICES.values() if x.usbid == usbid), None)
+    return found
+
+
+def get_btid(btid):
+    if isinstance(btid, str):
+        btid = int(btid, 16)
+    found = next((x for x in DEVICES.values() if x.btid == btid), None)
+    return found
 
 
 #
@@ -169,7 +212,7 @@ _D(
 _D(
     'Wireless Keyboard MK300',
     protocol=1.0,
-    wpid='8521',
+    wpid='0068',
     registers=(_R.battery_status, ),
 )
 
@@ -219,6 +262,8 @@ _D(
         _FS.new_fn_swap(),
         _FS.reprogrammable_keys(),
         _FS.disable_keyboard_keys(),
+        _FS.gesture2_gestures(),
+        _FS.gesture2_params(),
     ],
 )
 _D(
@@ -284,20 +329,20 @@ _D(
     wpid='4032',
     settings=[_FS.new_fn_swap()],
 )
-_D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066')
-
+_D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=0xB350)
+_D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D(
     'Wireless Keyboard S510',
     codename='S510',
     protocol=1.0,
-    wpid='3622',
+    wpid='0056',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Keyboard EX100',
     codename='EX100',
     protocol=1.0,
-    wpid='6500',
+    wpid='0065',
     registers=(_R.battery_status, ),
 )
 
@@ -462,6 +507,7 @@ _D(
     codename='MX Master',
     protocol=4.5,
     wpid='4041',
+    btid=0xb012,
     settings=[
         _FS.hires_smooth_invert(),
         _FS.hires_smooth_resolution(),
@@ -473,13 +519,17 @@ _D(
     codename='MX Master 2S',
     protocol=4.5,
     wpid='4069',
+    btid=0xb019,
     settings=[
         _FS.hires_smooth_invert(),
         _FS.hires_smooth_resolution(),
+        _FS.gesture2_gestures(),
     ],
 )
 
-_D('Wireless Mouse MX Vertical', codename='MX Vertical', protocol=4.5, wpid='407B')
+_D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
+
+_D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407B', btid=0xb020, usbid=0xc08a)
 
 _D(
     'G7 Cordless Laser Mouse',
@@ -507,6 +557,8 @@ _D(
     codename='G700s',
     protocol=1.0,
     wpid='102A',
+    usbid=0xc07c,
+    interface=1,
     registers=(
         _R.battery_status,
         _R.three_leds,
@@ -516,25 +568,35 @@ _D(
         _RS.side_scroll(),
     ],
 )
+
+_D('G403 Gaming Mouse', codename='G403', usbid=0xc082)
+_D('G502 Hero Gaming Mouse', codename='G502 Hero', usbid=0xc08d)
+_D('G703 Lightspeed Gaming Mouse', codename='G703', usbid=0xc087)
+_D('G703 Hero Gaming Mouse', codename='G703 Hero', usbid=0xc090)
+_D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)
+_D('G903 Lightspeed Gaming Mouse', codename='G903', usbid=0xc086)
+_D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
+_D('GPro Gaming Mouse', codename='GPro', usbid=0xc088)
+
 _D(
     'LX5 Cordless Mouse',
     codename='LX5',
     protocol=1.0,
-    wpid='5612',
+    wpid='0036',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Mouse M30',
     codename='M30',
     protocol=1.0,
-    wpid='6822',
+    wpid='0085',
     registers=(_R.battery_status, ),
 )
 _D(
     'Wireless Mouse EX100',
     codename='EX100m',
     protocol=1.0,
-    wpid='3F00',
+    wpid='003F',
     registers=(_R.battery_status, ),
     # settings=[ _RS.smooth_scroll(), ], # command accepted, but no change in whell action
 )
@@ -625,7 +687,7 @@ _D(
     codename='VX Revolution',
     kind=_DK.mouse,
     protocol=1.0,
-    wpid=('1006', '100D'),
+    wpid=('1006', '100D', '0612'),  # WPID 0612 from Issue #921
     registers=(_R.battery_charge, ),
 )
 _D(

@@ -21,9 +21,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp20 as _hidpp20
+from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
-from logitech_receiver import special_keys as _special_keys
 from logitech_receiver.common import NamedInt as _NamedInt
+from logitech_receiver.common import strhex as _strhex
 
 
 def _print_receiver(receiver):
@@ -65,15 +66,37 @@ def _battery_text(level):
         return '%d%%' % level
 
 
-def _print_device(dev):
-    assert dev
+def _battery_line(dev):
+    battery = _hidpp20.get_battery(dev)
+    if battery is None:
+        battery = _hidpp10.get_battery(dev)
+    if battery is not None:
+        level, status, nextLevel = battery
+        text = _battery_text(level)
+        nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
+        print('     Battery: %s, %s%s.' % (text, status, nextText))
+    else:
+        battery_voltage = _hidpp20.get_voltage(dev)
+        if battery_voltage:
+            (level, status, voltage, charge_sts, charge_type) = battery_voltage
+            print('     Battery: %smV, %s, %s.' % (voltage, status, level))
+        else:
+            print('     Battery status unavailable.')
+
+
+def _print_device(dev, num=None):
+    assert dev is not None
     # check if the device is online
     dev.ping()
 
-    print('  %d: %s' % (dev.number, dev.name))
+    print('  %d: %s' % (num or dev.number, dev.name))
+    print('     Device path  :', dev.path)
+    if dev.wpid:
+        print('     WPID         : %s' % dev.wpid)
+    if dev.product_id:
+        print('     USB id       : 046d:%s' % dev.product_id)
     print('     Codename     :', dev.codename)
     print('     Kind         :', dev.kind)
-    print('     Wireless PID :', dev.wpid)
     if dev.protocol:
         print('     Protocol     : HID++ %1.1f' % dev.protocol)
     else:
@@ -81,6 +104,10 @@ def _print_device(dev):
     if dev.polling_rate:
         print('     Polling rate :', dev.polling_rate, 'ms (%dHz)' % (1000 // dev.polling_rate))
     print('     Serial number:', dev.serial)
+    if dev.modelId:
+        print('     Model ID:     ', dev.modelId)
+    if dev.unitId:
+        print('     Unit ID:      ', dev.unitId)
     if dev.firmware:
         for fw in dev.firmware:
             print('       %11s:' % fw.kind, (fw.name + ' ' + fw.version).strip())
@@ -106,7 +133,6 @@ def _print_device(dev):
 
     if dev.online and dev.features:
         print('     Supports %d HID++ 2.0 features:' % len(dev.features))
-        dev.persister = None  # Give the device a fake persister
         dev_settings = []
         _settings_templates.check_feature_settings(dev, dev_settings)
         for index, feature in enumerate(dev.features):
@@ -121,17 +147,9 @@ def _print_device(dev):
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
                     print('            Multiplier: %s' % multi)
                     if has_invert:
-                        print('            Has invert')
-                        if inv:
-                            print('              Inverse wheel motion')
-                        else:
-                            print('              Normal wheel motion')
+                        print('            Has invert:', 'Inverse wheel motion' if inv else 'Normal wheel motion')
                     if has_switch:
-                        print('            Has ratchet switch')
-                        if ratchet:
-                            print('              Normal wheel mode')
-                        else:
-                            print('              Free wheel mode')
+                        print('            Has ratchet switch:', 'Normal wheel mode' if ratchet else 'Free wheel mode')
                     if res:
                         print('            High resolution mode')
                     else:
@@ -183,6 +201,22 @@ def _print_device(dev):
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():
                     print('            Host %s (%s): %s' % (host, 'paired' if paired else 'unpaired', name))
+            elif feature == _hidpp20.FEATURE.DEVICE_NAME:
+                print('            Name: %s' % _hidpp20.get_name(dev))
+                print('            Kind: %s' % _hidpp20.get_kind(dev))
+            elif feature == _hidpp20.FEATURE.DEVICE_FW_VERSION:
+                for fw in _hidpp20.get_firmware(dev):
+                    extras = _strhex(fw.extras) if fw.extras else ''
+                    print('            Firmware: %s %s %s %s' % (fw.kind, fw.name, fw.version, extras))
+                ids = _hidpp20.get_ids(dev)
+                if ids:
+                    unitId, modelId, tid_map = ids
+                    print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
+            elif feature == _hidpp20.FEATURE.REPORT_RATE:
+                print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
+            elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:
+                print('', end='       ')
+                _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
                     v = setting.read(False)
@@ -191,58 +225,66 @@ def _print_device(dev):
     if dev.online and dev.keys:
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
-            flags = _special_keys.KEY_FLAG.flag_names(k.flags)
             # TODO: add here additional variants for other REPROG_CONTROLS
             if dev.keys.keyversion == 1:
-                print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.task, ', '.join(flags)))
+                print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
             if dev.keys.keyversion == 4:
-                print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.task, k.remapped))
-                print('             %s, pos:%d, group:%1d, gmask:%d' % (', '.join(flags), k.pos, k.group, k.group_mask))
+                print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
+                gmask_fmt = ','.join(k.group_mask)
+                gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
+                print('             %s, pos:%d, group:%1d, group mask:%s' % (', '.join(k.flags), k.pos, k.group, gmask_fmt))
+                report_fmt = ', '.join(k.mapping_flags)
+                report_fmt = report_fmt if report_fmt else 'default'
+                print('             reporting: %s' % (report_fmt))
+    if dev.online and dev.gestures:
+        print(
+            '     Has %d gesture(s), %d param(s) and %d spec(s):' %
+            (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
+        )
+        for k in dev.gestures.gestures.values():
+            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
+        for k in dev.gestures.params.values():
+            print('        %-26s Value   (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
+        for k in dev.gestures.specs.values():
+            print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
-        battery = _hidpp20.get_battery(dev)
-        if battery is None:
-            battery = _hidpp10.get_battery(dev)
-        if battery is not None:
-            level, status, nextLevel = battery
-            text = _battery_text(level)
-            nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
-            print('     Battery: %s, %s%s.' % (text, status, nextText))
-        else:
-            battery_voltage = _hidpp20.get_voltage(dev)
-            if battery_voltage:
-                (level, status, voltage, charge_sts, charge_type) = battery_voltage
-                print('     Battery: %smV, %s, %s.' % (voltage, status, level))
-            else:
-                print('     Battery status unavailable.')
+        _battery_line(dev)
     else:
         print('     Battery: unknown (device is offline).')
 
 
-def run(receivers, args, find_receiver, find_device):
-    assert receivers
+def run(devices, args, find_receiver, find_device):
+    assert devices
     assert args.device
 
     device_name = args.device.lower()
 
     if device_name == 'all':
-        for r in receivers:
-            _print_receiver(r)
-            count = r.count()
-            if count:
-                for dev in r:
-                    print('')
-                    _print_device(dev)
-                    count -= 1
-                    if not count:
-                        break
-            print('')
+        dev_num = 1
+        for d in devices:
+            if isinstance(d, _receiver.Receiver):
+                _print_receiver(d)
+                count = d.count()
+                if count:
+                    for dev in d:
+                        print('')
+                        _print_device(dev)
+                        count -= 1
+                        if not count:
+                            break
+                print('')
+            else:
+                if dev_num == 1:
+                    print('Wired Devices')
+                _print_device(d, num=dev_num)
+                dev_num += 1
         return
 
-    dev = find_receiver(receivers, device_name)
-    if dev:
+    dev = find_receiver(devices, device_name)
+    if dev and not dev.isDevice:
         _print_receiver(dev)
         return
 
-    dev = find_device(receivers, device_name)
+    dev = find_device(devices, device_name)
     assert dev
     _print_device(dev)

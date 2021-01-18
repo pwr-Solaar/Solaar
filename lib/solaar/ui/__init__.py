@@ -22,9 +22,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from logging import DEBUG as _DEBUG
 from logging import getLogger
 
-from gi.repository import GLib, Gtk
-from logitech_receiver.status import ALERT
-from solaar.i18n import _
+import gi  # isort:skip
+gi.require_version('Gtk', '3.0')  # NOQA: E402
+
+from gi.repository import GLib, Gtk  # NOQA: E402 # isort:skip
+from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
+from solaar.i18n import _  # NOQA: E402 # isort:skip
 
 _log = getLogger(__name__)
 del getLogger
@@ -160,7 +163,7 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
 #
 
 
-def _status_changed(device, alert, reason):
+def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
     if _log.isEnabledFor(_DEBUG):
         _log.debug('status changed: %s (%s) %s', device, alert, reason)
@@ -170,11 +173,11 @@ def _status_changed(device, alert, reason):
         tray.attention(reason)
 
     need_popup = alert & ALERT.SHOW_WINDOW
-    window.update(device, need_popup)
+    window.update(device, need_popup, refresh)
 
     if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
         notify.show(device, reason)
 
 
-def status_changed(device, alert=ALERT.NONE, reason=None):
-    GLib.idle_add(_status_changed, device, alert, reason)
+def status_changed(device, alert=ALERT.NONE, reason=None, refresh=False):
+    GLib.idle_add(_status_changed, device, alert, reason, refresh)

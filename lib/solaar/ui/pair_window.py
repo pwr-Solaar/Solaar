@@ -24,7 +24,7 @@ from logging import getLogger
 
 from gi.repository import GLib, Gtk
 from logitech_receiver.status import KEYS as _K
-from solaar.i18n import _
+from solaar.i18n import _, ngettext
 
 from . import icons as _icons
 
@@ -137,7 +137,7 @@ def _pairing_failed(assistant, receiver, error):
     elif str(error) == 'device not supported':
         text = _('A new device was detected, but it is not compatible with this receiver.')
     elif 'many' in str(error):
-        text = _('The receiver only supports %d paired device(s).')
+        text = _('More paired devices than receiver can support.')
     else:
         text = _('No further details are available about the error.')
     _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
@@ -203,9 +203,12 @@ def create(receiver):
     assistant.set_resizable(False)
     assistant.set_role('pair-device')
 
-    page_text = _('If the device is already turned on, turn if off and on again.')
+    page_text = _('If the device is already turned on, turn it off and on again.')
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        page_text += _('\n\nThis receiver has %d pairing(s) remaining.') % receiver.remaining_pairings()
+        page_text += ngettext(
+            '\n\nThis receiver has %d pairing remaining.', '\n\nThis receiver has %d pairings remaining.',
+            receiver.remaining_pairings()
+        ) % receiver.remaining_pairings()
         page_text += _('\nCancelling at this point will not use up a pairing.')
 
     page_intro = _create_page(

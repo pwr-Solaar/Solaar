@@ -110,6 +110,23 @@ def _receivers(dev_path=None):
             _sys.exit('%s: error: %s' % (NAME, str(e)))
 
 
+def _wired_devices(dev_path=None):
+    from logitech_receiver import Device
+    from logitech_receiver.base import wired_devices
+    for dev_info in wired_devices():
+        if dev_path is not None and dev_path != dev_info.path:
+            continue
+        try:
+            d = Device.open(dev_info)
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('[%s] => %s', dev_info.path, d)
+            if d is not None:
+                yield d
+        except Exception as e:
+            _log.exception('opening ' + str(dev_info))
+            _sys.exit('%s: error: %s' % (NAME, str(e)))
+
+
 def _find_receiver(receivers, name):
     assert receivers
     assert name
@@ -135,10 +152,13 @@ def _find_device(receivers, name):
                 number = None
 
     for r in receivers:
-        if number and number <= r.max_devices:
-            dev = r[number]
-            if dev:
-                return dev
+        if not r.isDevice:  # look for nth device of receiver
+            if number and number <= r.max_devices:
+                dev = r[number]
+                if dev:
+                    return dev
+        else:  # wired device, make a device list from it
+            r = [r]
 
         for dev in r:
             if (
@@ -151,6 +171,7 @@ def _find_device(receivers, name):
 
 
 def run(cli_args=None, hidraw_path=None):
+
     if cli_args:
         action = cli_args[0]
         args = _cli_parser.parse_args(cli_args)
@@ -167,8 +188,11 @@ def run(cli_args=None, hidraw_path=None):
 
     try:
         c = list(_receivers(hidraw_path))
+        if action == 'show' or action == 'probe' or action == 'config':
+            c += list(_wired_devices(hidraw_path))
+
         if not c:
-            raise Exception('Logitech receiver not found')
+            raise Exception('No devices found')
 
         from importlib import import_module
         m = import_module('.' + action, package=__name__)

@@ -21,6 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import getLogger  # , DEBUG as _DEBUG
 
+from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
@@ -36,7 +37,7 @@ del getLogger
 # documentation, some of them guessed.
 #
 
-DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, trackball=0x08, touchpad=0x09)
+DEVICE_KIND = _NamedInts(keyboard=0x01, mouse=0x02, numpad=0x03, presenter=0x04, remote=0x07, trackball=0x08, touchpad=0x09)
 
 POWER_SWITCH_LOCATION = _NamedInts(
     base=0x01,
@@ -102,8 +103,6 @@ ERROR = _NamedInts(
 )
 
 PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
-
-BATTERY_APPOX = _NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 """Known registers.
 Devices usually have a (small) sub-set of these. Some registers are only
 applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
@@ -154,21 +153,21 @@ DEVICE_FEATURES = _NamedInts(
 
 
 def read_register(device, register_number, *params):
-    assert device, 'tried to read register %02X from invalid device %s' % (register_number, device)
+    assert device is not None, 'tried to read register %02X from invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8100 | (int(register_number) & 0x2FF)
     return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-    assert device, 'tried to write register %02X to invalid device %s' % (register_number, device)
+    assert device is not None, 'tried to write register %02X to invalid device %s' % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8000 | (int(register_number) & 0x2FF)
     return device.request(request_id, *value)
 
 
 def get_battery(device):
-    assert device
+    assert device is not None
     assert device.kind is not None
     if not device.online:
         return
@@ -211,12 +210,12 @@ def parse_battery_status(register, reply):
     if register == REGISTERS.battery_status:
         status_byte = ord(reply[:1])
         charge = (
-            BATTERY_APPOX.full if status_byte == 7  # full
-            else BATTERY_APPOX.good if status_byte == 5  # good
-            else BATTERY_APPOX.low if status_byte == 3  # low
-            else BATTERY_APPOX.critical if status_byte == 1  # critical
+            _BATTERY_APPROX.full if status_byte == 7  # full
+            else _BATTERY_APPROX.good if status_byte == 5  # good
+            else _BATTERY_APPROX.low if status_byte == 3  # low
+            else _BATTERY_APPROX.critical if status_byte == 1  # critical
             # pure 'charging' notifications may come without a status
-            else BATTERY_APPOX.empty
+            else _BATTERY_APPROX.empty
         )
 
         charging_byte = ord(reply[1:2])
@@ -239,7 +238,7 @@ def parse_battery_status(register, reply):
 
 
 def get_firmware(device):
-    assert device
+    assert device is not None
 
     firmware = [None, None, None]
 
@@ -275,7 +274,7 @@ def get_firmware(device):
 
 
 def set_3leds(device, battery_level=None, charging=None, warning=None):
-    assert device
+    assert device is not None
     assert device.kind is not None
     if not device.online:
         return
@@ -284,17 +283,17 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
         return
 
     if battery_level is not None:
-        if battery_level < BATTERY_APPOX.critical:
+        if battery_level < _BATTERY_APPROX.critical:
             # 1 orange, and force blink
             v1, v2 = 0x22, 0x00
             warning = True
-        elif battery_level < BATTERY_APPOX.low:
+        elif battery_level < _BATTERY_APPROX.low:
             # 1 orange
             v1, v2 = 0x22, 0x00
-        elif battery_level < BATTERY_APPOX.good:
+        elif battery_level < _BATTERY_APPROX.good:
             # 1 green
             v1, v2 = 0x20, 0x00
-        elif battery_level < BATTERY_APPOX.full:
+        elif battery_level < _BATTERY_APPROX.full:
             # 2 greens
             v1, v2 = 0x20, 0x02
         else:
@@ -318,7 +317,7 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
 
 
 def get_notification_flags(device):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.
@@ -334,7 +333,7 @@ def get_notification_flags(device):
 
 
 def set_notification_flags(device, *flag_bits):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.
@@ -350,7 +349,7 @@ def set_notification_flags(device, *flag_bits):
 
 
 def get_device_features(device):
-    assert device
+    assert device is not None
 
     # Avoid a call if the device is not online,
     # or the device does not support registers.

@@ -5,11 +5,12 @@ layout: page
 
 # Supported devices and receivers
 
-These tables list Logitech receivers and devices and to what degree their
-features are supported by Solaar.  The information in these tables is
-incomplete, based on what devices users have been able to test Solaar with.
+These tables provide a partial list of supported Logitech receivers and
+devices and to what degree their
+features are supported by Solaar. The information in these tables is
+based on what devices users have been able to test Solaar with.
 
-The HID++ column specifies the device's HID++ version.  Some devices report
+The HID++ column specifies the device's HID++ version. Some devices report
 version 4.5, but that is the same as version 2.0 as listed here.
 For devices what support HID++ 2.0 or greater, Solaar is able to discover
 the features the device supports.
@@ -20,32 +21,34 @@ level.
 For mice, the DPI column specifies if the mouse's sensitivity is fixed (`-`),
 can only be read (`R`), or can be read and changed by Solaar (`R/W`).
 
-### Adding new receivers and devices
+## Adding new receivers and devices
 
 Adding a new receiver requires knowing whether the receiver is a regular
-Unifying receiver, a nano receiver, or a lightspeed receiver.  Add a line to
-../lib/logitech_receiver/base_usb.py defining the receiver as one of these.
-If the receiver has an unusual number of pairing slots then this also needs
-to be specified.  Then add the receiver to the tuple of receivers (ALL).
+Unifying receiver, a nano receiver, or a lightspeed receiver. Add a line to
+`../lib/logitech_receiver/base_usb.py` defining the receiver as one of these.
+If the receiver has an unusual number of pairing slots, then this also needs
+to be specified. Then add the receiver to the tuple of receivers (ALL).
 
-To let Solaar read and write to the receiver information on it needs to be
-added to rules.d/42-logitech-unify-permissions.rules.  Add a new line to
-that file with the vendor and product ids, just like the other lines in the
-file.  Then this file has to be copied into /etc/udev/rules.d
-
-Most new devices do not need to be known to Solaar to work.  However, an
-entry in lib/logitech-receiver/descriptors.py can provide a better name for
-the device and a feature list can speed up Solaar startup a bit.  The
+Most new devices do not need to be known to Solaar to work. However, an
+entry in `lib/logitech-receiver/descriptors.py` can provide a better name for
+the device and a feature list can speed up Solaar startup a bit. The
 arguments to the _D function are the device's long name, its short name
 (codename), its HID++ protocol version, its wireless product ID (wpid), and
-a tuple of known feature settings (from lib/logitech/settings_templates.py).
+a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
+If the device can connect via a USB cable its USB product ID should be included.
+If the device can connect via Bluetooth its Bluetooth product ID should be included.
+
+Some Logitech devices are not suited for use in Solaar.  If the device only
+connects via a USB cable Solaar might not be able to do much or anything
+with the device so it may not be useful to add it to Solaar.  One example is
+the MX518 Gaming Mouse.
 
 
-### Receivers:
+### Receivers
 
 | USB ID    | Kind       | Max Paired Devices |
 ------------|------------|--------------------|
-| 046d:c517 | 27Mhz old  | 2-4?               |
+| 046d:c517 | 27MHz old  | 4                  |
 | 046d:c518 | Nano       | 1                  |
 | 046d:c51a | Nano       | 1                  |
 | 046d:c51b | Nano       | 1                  |
@@ -57,17 +60,23 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 | 046d:c52f | Nano       | 1                  |
 | 046d:c531 | Nano       | 1                  |
 | 046d:c532 | Unifying   | 6                  |
-| 064d:c534 | Nano       | 2                  |
-| 064d:c539 | Lightspeed | 1                  |
-| 064d:c53a | Lightspeed | 1                  |
-| 064d:c53d | Lightspeed | 1                  |
-| 064d:c53f | Lightspeed | 1                  |
+| 046d:c534 | Nano       | 2                  |
+| 046d:c539 | Lightspeed | 1                  |
+| 046d:c53a | Lightspeed | 1                  |
+| 046d:c53d | Lightspeed | 1                  |
+| 046d:c53f | Lightspeed | 1                  |
+| 046d:c545 | Lightspeed | 1                  |
+| 046d:c541 | Lightspeed | 1                  |
 | 17ef:6042 | Nano       | 1                  |
 
-* The receiver with usb Id 046d:c517 is old, 27 MHz receiver, supporting only
-  subset of HID++ 1.0 protocol. Only hardware pairing supported.
+Some Nano receivers are only partly supported
+as they do not fully implement the HID++ 1.0 protocol.
 
-### Keyboards (Unifying):
+The receiver with USB Id 046d:c517 is an old 27 MHz receiver, supporting only
+subset of HID++ 1.0 protocol. Only hardware pairing is supported.
+
+
+### Keyboards (Unifying)
 
 | Device           | WPID | HID++ | Battery | Other supported features                |
 |------------------|------|-------|---------|-----------------------------------------|
@@ -79,7 +88,7 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 | K375s            | 4071 |       |         | FN swap                                 |
 | K400 Touch       | 400E | 2.0   | yes     | FN swap                                 |
 | K400 Touch       | 4024 | 2.0   | yes     | FN swap                                 |
-| K400 Plus        | 404D | 2.0   |         | FN swap                                 |
+| K400 Plus        | 404D | 2.0   |         | FN swap, disable keys, touchpad gestures|
 | K520             | 2011 | 1.0   | yes     | FN swap                                 |
 | K600 TV          | 4078 | 2.0   | yes     | FN swap                                 |
 | K750 Solar       | 4002 | 2.0   | yes     | FN swap, Lux reading, light button      |
@@ -97,56 +106,54 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
   window and display the current lighting value (Lux) as reported by the
   keyboard, similar to Logitech's *Solar.app* for Windows.
 
-* FN swap changes the way the function keys (`F1`..`F12`) work, i.e., whether holding `FN` while pressing the function keys will generate the standard `Fx` keycodes or the special function (yellow icons) keycodes.
+* FN swap changes the way the function keys (`F1`–`F12`) work, i.e., whether holding `FN` while pressing the function keys will generate the standard `Fx` keycodes or the special function (yellow icons) keycodes.
 
+### Mice (Unifying)
 
-### Mice (Unifying):
+| Device           | WPID | HID++ | Battery | DPI   | Other supported features                |
+|------------------|------|-------|---------|-------|-----------------------------------------|
+| M150             | 4022 | 2.0   |         |       |                                         |
+| M185             | 4055 | 2.0   |         | R/W   | smooth scrolling                        |
+| M310             | 4031 | 2.0   | yes     |       |                                         |
+| M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                        |
+| M317             |      |       |         |       |                                         |
+| M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                        |
+| M330             |      | 2.0   | yes     | 1000  | smooth scrolling                        |
+| M345             | 4017 | 2.0   | yes     | –     | smooth scrolling                        |
+| M350             | 101C | 1.0   | yes     |       |                                         |
+| M350             | 4080 | 2.0   |         |       |                                         |
+| M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling        |
+| M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling        |
+| M510             | 4051 | 2.0   | yes     |       | smooth scrolling                        |
+| M515 Couch       | 4007 | 2.0   | yes     | –     | smooth scrolling                        |
+| M525             | 4013 | 2.0   | yes     | –     | smooth scrolling                        |
+| M560             |      | 2.0   | yes     | –     | smooth scrolling                        |
+| M585             | 406B | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M590             | 406B | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M600 Touch       | 401A | 2.0   | yes     |       |                                         |
+| M705 Marathon    | 101B | 1.0   | yes     | –     | smooth scrolling, side scrolling        |
+| M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                        |
+| M720 Triathlon   | 405E | 2.0   | yes     | –     |                                         |
+| T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                        |
+| T620 Touch       |      | 2.0   | yes     |       |                                         |
+| Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling        |
+| Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling        |
+| Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                        |
+| MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift           |
+| MX Master 2S     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift, gestures |
+| Cube             |      | 2.0   | yes     |       |                                         |
 
-| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
-|------------------|------|-------|---------|-------|---------------------------------|
-| M150             | 4022 | 2.0   |         |       |                                 |
-| M185             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
-| M310             | 4031 | 2.0   | yes     |       |                                 |
-| M310             | 4055 | 2.0   |         | R/W   | smooth scrolling                |
-| M317             |      |       |         |       |                                 |
-| M325             | 400A | 2.0   | yes     | 1000  | smooth scrolling                |
-| M330             |      | 2.0   | yes     | 1000  | smooth scrolling                |
-| M345             | 4017 | 2.0   | yes     | -     | smooth scrolling                |
-| M350             | 101C | 1.0   | yes     |       |                                 |
-| M350             | 4080 | 2.0   |         |       |                                 |
-| M505             | 101D | 1.0   | yes     |       | smooth scrolling, side scrolling|
-| M510             | 1025 | 1.0   | yes     |       | smooth scrolling, side scrolling|
-| M510             | 4051 | 2.0   | yes     |       | smooth scrolling                |
-| M515 Couch       | 4007 | 2.0   | yes     | -     | smooth scrolling                |
-| M525             | 4013 | 2.0   | yes     | -     | smooth scrolling                |
-| M560             |      | 2.0   | yes     | -     | smooth scrolling                |
-| M585             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
-| M590             | 406B | 2.0   | yes     | R/W   | smooth scrolling                |
-| M600 Touch       | 401A | 2.0   | yes     |       |                                 |
-| M705 Marathon    | 101B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| M705 Marathon    | 406D | 2.0   | yes     | R/W   | smooth scrolling                |
-| M720 Triathlon   | 405E | 2.0   | yes     | -     |                                 |
-| T400 Zone Touch  |      | 2.0   | yes     |       | smooth scrolling                |
-| T620 Touch       |      | 2.0   | yes     |       |                                 |
-| Performance MX   | 101A | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
-| Anywhere MX      | 1017 | 1.0   | yes     | R/W   | smooth scrolling, side scrolling|
-| Anywhere MX 2    | 404A | 2.0   | yes     | R/W   | smooth scrolling                |
-| MX Master        | 4041 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
-| MX Master 2S     | 4069 | 2.0   | yes     | R/W   | smooth scrolling, smart shift   |
-| Cube             |      | 2.0   | yes     |       |                                 |
-
-
-### Mice (Nano):
+### Mice (Nano)
 
 | Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
 |------------------|------|-------|---------|-------|---------------------------------|
-| G7               | 1002 | 1.0   | yes     | -     |                                 |
-| G700             | 1023 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| G700s            | 102A | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| V450 Nano        | 1011 | 1.0   | yes     | -     | smooth scrolling                |
-| V550 Nano        | 1013 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| VX Nano          | 100B | 1.0   | yes     | -     | smooth scrolling, side scrolling|
-| VX Nano          | 100F | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| G7               | 1002 | 1.0   | yes     | –     |                                 |
+| G700             | 1023 | 1.0   | yes     | –     | smooth scrolling, side scrolling|
+| G700s            | 102A | 1.0   | yes     | –     | smooth scrolling, side scrolling|
+| V450 Nano        | 1011 | 1.0   | yes     | –     | smooth scrolling                |
+| V550 Nano        | 1013 | 1.0   | yes     | –     | smooth scrolling, side scrolling|
+| VX Nano          | 100B | 1.0   | yes     | –     | smooth scrolling, side scrolling|
+| VX Nano          | 100F | 1.0   | yes     | –     | smooth scrolling, side scrolling|
 | M175             | 4008 |       | yes     |       |                                 |
 | M185 (old)       | 4038 | 2.0   | yes     | R/W   | smooth scrolling (note)         |
 | M185 (new)       | 4054 | 2.0   | no      | R/W   | smooth scrolling (note)         |
@@ -157,50 +164,45 @@ a tuple of known feature settings (from lib/logitech/settings_templates.py).
 | M310             | 1024 | 1.0   | yes     |       |                                 |
 | M315             |      |       | yes     |       |                                 |
 | M330             |      | ?.?   | yes     | ?     | smooth scrolling                |
-| MX 1100          | 1014 | 1.0   | yes     | -     | smooth scrolling, side scrolling|
+| MX 1100          | 1014 | 1.0   | yes     | –     | smooth scrolling, side scrolling|
 
-(old): M185 with P/N: 810-003496
-
-(new): M185 with P/N: 810-005238 or 810-005232
-
-(note): Currently, smooth scrolling events are not processed in xfce and this
+* (old): M185 with P/N: 810-003496
+* (new): M185 with P/N: 810-005238 or 810-005232
+* (note): Currently, smooth scrolling events are not processed in xfce and this
 setting is useful only to disable smooth scrolling.
 
-
-### Mice (Mini):
-
-| Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
-|------------------|------|-------|---------|-------|---------------------------------|
-| MX610            | 1001 | 1.0   | yes     |       |                                 |
-| MX610 lefthanded | 1004 | 1.0   | yes     |       |                                 |
-| MX620            | 100A | 1.0   | yes     |       |                                 |
-| MX620            | 1016 | 1.0   | yes     |       |                                 |
-| V400             | 1003 | 1.0   | yes     |       |                                 |
-| V450             | 1005 | 1.0   | yes     |       |                                 |
-| VX Revolution    | 1006 | 1.0   | yes     |       |                                 |
-| VX Revolution    | 100D | 1.0   | yes     |       |                                 |
-| MX Air           | 1007 | 1.0   | yes     |       |                                 |
-| MX Air           | 100E | 1.0   | yes     |       |                                 |
-| MX Revolution    | 1008 | 1.0   | yes     |       |                                 |
-| MX Revolution    | 100C | 1.0   | yes     |       |                                 |
-
-
-### Trackballs (Unifying):
+### Mice (Mini)
 
 | Device            | WPID | HID++ | Battery | DPI   | Other supported features        |
 |-------------------|------|-------|---------|-------|---------------------------------|
-| M570 Trackball    |      | 1.0   | yes     | -     |                                 |
-| MX Ergo Trackball |      | 2.0   | yes     | -     |                                 |
+| MX610             | 1001 | 1.0   | yes     |       |                                 |
+| MX610 left handed | 1004 | 1.0   | yes     |       |                                 |
+| MX620             | 100A | 1.0   | yes     |       |                                 |
+| MX620             | 1016 | 1.0   | yes     |       |                                 |
+| V400              | 1003 | 1.0   | yes     |       |                                 |
+| V450              | 1005 | 1.0   | yes     |       |                                 |
+| VX Revolution     | 1006 | 1.0   | yes     |       |                                 |
+| VX Revolution     | 100D | 1.0   | yes     |       |                                 |
+| MX Air            | 1007 | 1.0   | yes     |       |                                 |
+| MX Air            | 100E | 1.0   | yes     |       |                                 |
+| MX Revolution     | 1008 | 1.0   | yes     |       |                                 |
+| MX Revolution     | 100C | 1.0   | yes     |       |                                 |
 
-### Touchpads (Unifying):
+### Trackballs (Unifying)
+
+| Device            | WPID | HID++ | Battery | DPI   | Other supported features        |
+|-------------------|------|-------|---------|-------|---------------------------------|
+| M570 Trackball    |      | 1.0   | yes     | –     |                                 |
+| MX Ergo Trackball |      | 2.0   | yes     | –     |                                 |
+
+### Touchpads (Unifying)
 
 | Device           | WPID | HID++ | Battery | DPI   | Other supported features        |
 |------------------|------|-------|---------|-------|---------------------------------|
 | Wireless Touch   | 4011 | 2.0   | yes     |       |                                 |
 | T650 Touchpad    | 4101 | 2.0   | yes     |       | smooth scrolling                |
 
-
-### Mice and Keyboards sold as combos:
+### Mice and Keyboards sold as combos
 
 | Device           | WPID | HID++ | Battery | Other supported features                |
 |------------------|------|-------|---------|-----------------------------------------|
@@ -213,10 +215,10 @@ setting is useful only to disable smooth scrolling.
 | MK550            |      |       |         |                                         |
 | MK700            | 2008 | 1.0   | yes     | FN swap, reprog keys                    |
 | MK710            |      | 1.0   | yes     | FN swap, reprog keys                    |
-| EX100 keyboard   | 6500 | 1.0   | yes     |                                         |
-| EX100 mouse      | 3f00 | 1.0   | yes     |                                         |
+| EX100 keyboard   | 0065 | 1.0   | yes     |                                         |
+| EX100 mouse      | 003f | 1.0   | yes     |                                         |
 
-* The EX100 is old, pre-unifying set, supporting only part of HID++ 1.0 features
+* The EX100 is an old, preunifying receiver and device set, supporting only part of HID++ 1.0 features
 
 [solaar]: https://github.com/pwr-Solaar/Solaar
 [logitech]: https://www.logitech.com
