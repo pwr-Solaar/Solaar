@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.0.4\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2020-12-30 13:37+0100\n"
+        "POT-Creation-Date: 2021-01-18 07:06+0100\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -588,11 +588,11 @@ msgstr  ""
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  ""
 
-#: lib/solaar/gtk.py:143
+#: lib/solaar/gtk.py:148
 msgid   "Solaar depends on a udev file that is not present"
 msgstr  ""
 
-#: lib/solaar/gtk.py:146
+#: lib/solaar/gtk.py:151
 msgid   "For more information see the Solaar installation directions\n"
         "at https://pwr-solaar.github.io/Solaar/installation"
 msgstr  ""
@@ -878,8 +878,8 @@ msgstr  ""
 msgid   "Add argument"
 msgstr  ""
 
-#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:749
+#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:318
+#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:749
 msgid   "offline"
 msgstr  ""
 
@@ -919,7 +919,7 @@ msgid   "%(receiver_name)s: pair new device"
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:206
-msgid   "If the device is already turned on, turn if off and on again."
+msgid   "If the device is already turned on, turn it off and on again."
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:209
@@ -942,19 +942,19 @@ msgstr  ""
 msgid   "Turn on the device you want to pair."
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:59
+#: lib/solaar/ui/tray.py:61
 msgid   "No Logitech receiver found"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:66 lib/solaar/ui/window.py:325
+#: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
 msgid   "Quit"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:295 lib/solaar/ui/tray.py:303
+#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
 msgid   "no receiver"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:319
+#: lib/solaar/ui/tray.py:321
 msgid   "no status"
 msgstr  ""
 
