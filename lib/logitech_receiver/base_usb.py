@@ -33,6 +33,7 @@ from .descriptors import DEVICES as _DEVICES
 
 # max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
 # may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False
+# unpair is for receivers that do support reading from _R.receiver_info offset 0x03, no default
 ## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
@@ -55,6 +56,17 @@ _nano_receiver = lambda product_id: {
     'hid_driver': _DRIVER,  # noqa: F821
     'name': 'Nano Receiver',
     'may_unpair': False,
+    're_pairs': True
+}
+
+_nano_receiver_no_unpair = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'usb_interface': 1,
+    'hid_driver': _DRIVER,  # noqa: F821
+    'name': 'Nano Receiver',
+    'may_unpair': False,
+    'unpair': False,
     're_pairs': True
 }
 
@@ -125,7 +137,7 @@ NANO_RECEIVER_C51B = _nano_receiver(0xc51b)
 NANO_RECEIVER_C521 = _nano_receiver(0xc521)
 NANO_RECEIVER_C525 = _nano_receiver(0xc525)
 NANO_RECEIVER_C526 = _nano_receiver(0xc526)
-NANO_RECEIVER_C52e = _nano_receiver(0xc52e)
+NANO_RECEIVER_C52e = _nano_receiver_no_unpair(0xc52e)
 NANO_RECEIVER_C531 = _nano_receiver(0xc531)
 NANO_RECEIVER_C534 = _nano_receiver_max2(0xc534)
 NANO_RECEIVER_C537 = _nano_receiver(0xc537)
