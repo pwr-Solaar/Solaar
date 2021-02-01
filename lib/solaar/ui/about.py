@@ -1,7 +1,7 @@
 # -*- python-mode -*-
 # -*- coding: UTF-8 -*-
 
-## Copyright (C) 2012-2013  Daniel Pavel 
+## Copyright (C) 2012-2013  Daniel Pavel
 ## Revisions Copyright (C) Contributors to the Solaar project.
 ##
 ## This program is free software; you can redistribute it and/or modify
