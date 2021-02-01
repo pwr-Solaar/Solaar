@@ -1,7 +1,7 @@
 # -*- python-mode -*-
 # -*- coding: UTF-8 -*-
 
-## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2012-2021  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ def _create():
 
     about.set_logo_icon_name(NAME.lower())
 
-    about.set_copyright('© 2012-2013 Daniel Pavel')
+    about.set_copyright('© 2012-2021 Daniel Pavel')
     about.set_license_type(Gtk.License.GPL_2_0)
 
     about.set_authors(('Daniel Pavel http://github.com/pwr', ))
