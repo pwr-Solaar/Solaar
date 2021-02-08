@@ -19,6 +19,7 @@
 
 import os as _os
 import os.path as _path
+import sys as _sys
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -50,7 +51,7 @@ try:
     disp_prog = Display()
     x11 = True
 except Exception:
-    _log.warn('X11 not available - rules will not be activated')
+    _log.warn('X11 not available - rules will not be activated', exc_info=_sys.exc_info())
     XK_KEYS = {}
     x11 = False
 
