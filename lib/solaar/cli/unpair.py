@@ -25,7 +25,9 @@ def run(receivers, args, find_receiver, find_device):
     assert args.device
 
     device_name = args.device.lower()
-    dev = find_device(receivers, device_name)
+    dev = next(find_device(receivers, device_name), None)
+    if not dev:
+        raise Exception("no device found matching '%s'" % device_name)
 
     if not dev.receiver.may_unpair:
         print(
