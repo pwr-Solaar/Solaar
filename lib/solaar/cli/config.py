@@ -51,10 +51,15 @@ def run(receivers, args, find_receiver, find_device):
     assert args.device
 
     device_name = args.device.lower()
-    dev = find_device(receivers, device_name)
 
-    if not dev.ping():
-        raise Exception('%s is offline' % dev.name)
+    dev = None
+    for dev in find_device(receivers, device_name):
+        if dev.ping():
+            break
+        dev = None
+
+    if not dev:
+        raise Exception("no online device found matching '%s'" % device_name)
 
     if not args.setting:  # print all settings, so first set them all up
         if not dev.settings:

@@ -287,6 +287,8 @@ def run(devices, args, find_receiver, find_device):
         _print_receiver(dev)
         return
 
-    dev = find_device(devices, device_name)
-    assert dev
+    dev = next(find_device(devices, device_name), None)
+    if not dev:
+        raise Exception("no device found matching '%s'" % device_name)
+
     _print_device(dev)

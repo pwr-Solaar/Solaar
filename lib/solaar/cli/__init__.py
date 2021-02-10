@@ -156,7 +156,7 @@ def _find_device(receivers, name):
             if number and number <= r.max_devices:
                 dev = r[number]
                 if dev:
-                    return dev
+                    yield dev
         else:  # wired device, make a device list from it
             r = [r]
 
@@ -165,9 +165,10 @@ def _find_device(receivers, name):
                 name == dev.serial.lower() or name == dev.codename.lower() or name == str(dev.kind).lower()
                 or name in dev.name.lower()
             ):
-                return dev
+                yield dev
 
-    raise Exception("no device found matching '%s'" % name)
+
+#    raise Exception("no device found matching '%s'" % name)
 
 
 def run(cli_args=None, hidraw_path=None):
