@@ -433,7 +433,7 @@ class Device(object):
             request_id,
             *params,
             no_reply=no_reply,
-            long_message=self.bluetooth
+            long_message=True  # use long messages for all requests - was self.bluetooth
         )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
