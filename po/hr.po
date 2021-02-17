@@ -3,693 +3,1263 @@
 # This file is distributed under the same license as the solaar package.
 # gogo <trebelnik2@gmail.com>, 2014.
 #
-msgid ""
-msgstr ""
-"Project-Id-Version: solaar 1.0.1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-02 21:30+0200\n"
-"PO-Revision-Date: 2020-08-04 19:52+0200\n"
-"Last-Translator: gogo <trebelnik2@gmail.com>\n"
-"Language-Team: Croatian <hr@hr.org>\n"
-"Language: hr\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+msgid   ""
+msgstr  "Project-Id-Version: solaar 1.0.1\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2021-02-16 20:09-0500\n"
+        "PO-Revision-Date: 2020-08-04 19:52+0200\n"
+        "Last-Translator: gogo <trebelnik2@gmail.com>\n"
+        "Language-Team: Croatian <hr@hr.org>\n"
+        "Language: hr\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "X-Generator: Poedit 2.3\n"
+        "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 "
+        "&& n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: lib/logitech_receiver/device.py:132 lib/solaar/ui/window.py:693
+msgid   "unknown"
+msgstr  "nepoznato"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid "empty"
-msgstr "prazna"
+msgid   "empty"
+msgstr  "prazna"
 
 #: lib/logitech_receiver/i18n.py:39
-msgid "critical"
-msgstr "kritično"
+msgid   "critical"
+msgstr  "kritično"
 
 #: lib/logitech_receiver/i18n.py:40
-msgid "low"
-msgstr "slaba"
+msgid   "low"
+msgstr  "slaba"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid "good"
-msgstr "dobra"
+msgid   "good"
+msgstr  "dobra"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid "full"
-msgstr "napunjena"
+msgid   "full"
+msgstr  "napunjena"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid "discharging"
-msgstr "pražnjenje"
+msgid   "discharging"
+msgstr  "pražnjenje"
 
 #: lib/logitech_receiver/i18n.py:46
-msgid "recharging"
-msgstr "punjenje"
+msgid   "recharging"
+msgstr  "punjenje"
 
 #: lib/logitech_receiver/i18n.py:47
-msgid "almost full"
-msgstr "uskoro puno"
+msgid   "almost full"
+msgstr  "uskoro puno"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid "charged"
-msgstr "napunjena"
+msgid   "charged"
+msgstr  "napunjena"
 
 #: lib/logitech_receiver/i18n.py:49
-msgid "slow recharge"
-msgstr "sporo punjenje"
+msgid   "slow recharge"
+msgstr  "sporo punjenje"
 
 #: lib/logitech_receiver/i18n.py:50
-msgid "invalid battery"
-msgstr "neispravna baterija"
+msgid   "invalid battery"
+msgstr  "neispravna baterija"
 
 #: lib/logitech_receiver/i18n.py:51
-msgid "thermal error"
-msgstr "toplinska greška"
+msgid   "thermal error"
+msgstr  "toplinska greška"
 
 #: lib/logitech_receiver/i18n.py:54
-msgid "device timeout"
-msgstr "istek čekanja uređaja"
+msgid   "device timeout"
+msgstr  "istek čekanja uređaja"
 
 #: lib/logitech_receiver/i18n.py:55
-msgid "device not supported"
-msgstr "uređaj nije podržan"
+msgid   "device not supported"
+msgstr  "uređaj nije podržan"
 
 #: lib/logitech_receiver/i18n.py:56
-msgid "too many devices"
-msgstr "previše uređaja"
+msgid   "too many devices"
+msgstr  "previše uređaja"
 
 #: lib/logitech_receiver/i18n.py:57
-msgid "sequence timeout"
-msgstr "redoslijed isteka vremena"
+msgid   "sequence timeout"
+msgstr  "redoslijed isteka vremena"
 
-#: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:555
-msgid "Firmware"
-msgstr "Firmver"
+#: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:580
+msgid   "Firmware"
+msgstr  "Firmver"
 
 #: lib/logitech_receiver/i18n.py:61
-msgid "Bootloader"
-msgstr "Učitač pokretanja"
+msgid   "Bootloader"
+msgstr  "Učitač pokretanja"
 
 #: lib/logitech_receiver/i18n.py:62
-msgid "Hardware"
-msgstr "Hardver"
+msgid   "Hardware"
+msgstr  "Hardver"
 
 #: lib/logitech_receiver/i18n.py:63
-msgid "Other"
-msgstr "Ostalo"
+msgid   "Other"
+msgstr  "Ostalo"
 
-#: lib/logitech_receiver/notifications.py:75
-msgid "pairing lock is closed"
-msgstr "uparivanje je zatvoreno"
+#: lib/logitech_receiver/notifications.py:77
+msgid   "pairing lock is closed"
+msgstr  "uparivanje je zatvoreno"
 
-#: lib/logitech_receiver/notifications.py:75
-msgid "pairing lock is open"
-msgstr "uparivanje je otvoreno"
+#: lib/logitech_receiver/notifications.py:77
+msgid   "pairing lock is open"
+msgstr  "uparivanje je otvoreno"
 
-#: lib/logitech_receiver/notifications.py:187 lib/solaar/ui/notify.py:119
-msgid "unpaired"
-msgstr "neupareno"
+#: lib/logitech_receiver/notifications.py:161 lib/solaar/ui/notify.py:123
+msgid   "connected"
+msgstr  "povezano"
 
-#: lib/logitech_receiver/notifications.py:238
-msgid "powered on"
-msgstr "uključen"
+#: lib/logitech_receiver/notifications.py:161
+msgid   "disconnected"
+msgstr  ""
 
-#: lib/logitech_receiver/receiver.py:130 lib/solaar/ui/window.py:664
-msgid "unknown"
-msgstr "nepoznato"
+#: lib/logitech_receiver/notifications.py:199 lib/solaar/ui/notify.py:121
+msgid   "unpaired"
+msgstr  "neupareno"
 
-#: lib/logitech_receiver/settings_templates.py:213
-msgid "Hand Detection"
-msgstr "Otkrivanje ruku"
+#: lib/logitech_receiver/notifications.py:249
+msgid   "powered on"
+msgstr  "uključen"
 
-#: lib/logitech_receiver/settings_templates.py:213
-msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr "Uključite osvjetljenje kada ruke lebde nad tipkovnicom."
+#: lib/logitech_receiver/settings_templates.py:69
+msgid   "Hand Detection"
+msgstr  "Otkrivanje ruku"
 
-#: lib/logitech_receiver/settings_templates.py:214
-#: lib/logitech_receiver/settings_templates.py:223
-#: lib/logitech_receiver/settings_templates.py:233
-msgid "High-sensitivity mode for vertical scroll with the wheel."
-msgstr "Visokoosjetljivi način okomitog pomicanja kotačićem."
+#: lib/logitech_receiver/settings_templates.py:69
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  "Uključite osvjetljenje kada ruke lebde nad tipkovnicom."
 
-#: lib/logitech_receiver/settings_templates.py:214
-msgid "Smooth Scrolling"
-msgstr "Glatko pomicanje kotačićem"
+#: lib/logitech_receiver/settings_templates.py:70
+msgid   "Scroll Wheel Smooth Scrolling"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:216
-msgid "Side Scrolling"
-msgstr "Bočno pomicanje kotačićem"
+#: lib/logitech_receiver/settings_templates.py:71
+#: lib/logitech_receiver/settings_templates.py:76
+#: lib/logitech_receiver/settings_templates.py:83
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  "Visokoosjetljivi način okomitog pomicanja kotačićem."
 
-#: lib/logitech_receiver/settings_templates.py:218
-msgid ""
-"When disabled, pushing the wheel sideways sends custom button events\n"
-"instead of the standard side-scrolling events."
-msgstr ""
-"Kad je onemogućeno, guranje kotačića ustranu šalje prilagođeni događaj "
-"tipke\n"
-"umjesto uobičajanog događaja bočnog pomicanja."
+#: lib/logitech_receiver/settings_templates.py:72
+msgid   "Side Scrolling"
+msgstr  "Bočno pomicanje kotačićem"
 
-#: lib/logitech_receiver/settings_templates.py:223
-msgid "High Resolution Scrolling"
-msgstr "Pomicanje kotačićem visoke razlučivosti"
+#: lib/logitech_receiver/settings_templates.py:73
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  "Kad je onemogućeno, guranje kotačića ustranu šalje prilagođeni "
+        "događaj tipke\n"
+        "umjesto uobičajanog događaja bočnog pomicanja."
 
-#: lib/logitech_receiver/settings_templates.py:226
-msgid "HID++ Scrolling"
-msgstr "HID++ Scrolling"
+#: lib/logitech_receiver/settings_templates.py:75
+msgid   "Scroll Wheel High Resolution"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:227
-msgid "Effectively turns off wheel scrolling in Linux."
-msgstr "Učinkovito isključuje pomicanje kotačića u Linuxu."
+#: lib/logitech_receiver/settings_templates.py:77
+msgid   "Scroll Wheel HID++ Scrolling"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:227
-msgid "HID++ mode for vertical scroll with the wheel."
-msgstr "HID++ način rada za okomito pomicanje kotačića."
+#: lib/logitech_receiver/settings_templates.py:78
+msgid   "HID++ mode for vertical scroll with the wheel."
+msgstr  "HID++ način rada za okomito pomicanje kotačića."
 
-#: lib/logitech_receiver/settings_templates.py:230
-msgid "High Resolution Wheel Invert"
-msgstr "Obrnuto pomicanje kotačićem visoke razlučivosti"
+#: lib/logitech_receiver/settings_templates.py:79
+msgid   "Effectively turns off wheel scrolling in Linux."
+msgstr  "Učinkovito isključuje pomicanje kotačića u Linuxu."
 
-#: lib/logitech_receiver/settings_templates.py:231
-msgid "High-sensitivity wheel invert direction for vertical scroll."
-msgstr "Obrnuti visoko osjetljivi smjer kotačića za okomito pomicanje."
+#: lib/logitech_receiver/settings_templates.py:80
+msgid   "Scroll Wheel Direction"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:233
-msgid "Wheel Resolution"
-msgstr "Pomicanje kotačićem"
+#: lib/logitech_receiver/settings_templates.py:81
+msgid   "Invert direction for vertical scroll with wheel."
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:235
-msgid "Swap Fx function"
-msgstr "Zamijeni Fx funkciju"
+#: lib/logitech_receiver/settings_templates.py:82
+msgid   "Scroll Wheel Resolution"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:237
-msgid ""
-"When set, the F1..F12 keys will activate their special function,\n"
-"and you must hold the FN key to activate their standard function."
-msgstr ""
-"Kada je omogućeno, tipke F1..F12 će aktivirati svoje dodatne funkcije,\n"
-"a za aktivaciju njihovih osnovnih funkcija morate držati FN tipku."
+#: lib/logitech_receiver/settings_templates.py:84
+msgid   "Frequency of device polling, in milliseconds"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:240
-msgid ""
-"When unset, the F1..F12 keys will activate their standard function,\n"
-"and you must hold the FN key to activate their special function."
-msgstr ""
-"Kada nije omogućeno, tipke F1..F12 će aktivirati svoje osnovne funkcije,\n"
-"a za aktivaciju njihovih dodatnih funkcija morate držati FN tipku."
+#: lib/logitech_receiver/settings_templates.py:84
+msgid   "Polling Rate (ms)"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:244
-msgid "Sensitivity (DPI)"
-msgstr "Osjetljivost (DPI)"
+#: lib/logitech_receiver/settings_templates.py:85
+msgid   "Swap Fx function"
+msgstr  "Zamijeni Fx funkciju"
 
-#: lib/logitech_receiver/settings_templates.py:246
-msgid "Sensitivity (Pointer Speed)"
-msgstr "Osjetljivost (Brzina pokazivača)"
+#: lib/logitech_receiver/settings_templates.py:86
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  "Kada je omogućeno, tipke F1..F12 će aktivirati svoje dodatne "
+        "funkcije,\n"
+        "a za aktivaciju njihovih osnovnih funkcija morate držati FN tipku."
 
-#: lib/logitech_receiver/settings_templates.py:246
-msgid "Speed multiplier for mouse (256 is normal multiplier)."
-msgstr "Množitelj brzine za miš (256 je normalan množitelj)."
+#: lib/logitech_receiver/settings_templates.py:88
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  "Kada nije omogućeno, tipke F1..F12 će aktivirati svoje osnovne "
+        "funkcije,\n"
+        "a za aktivaciju njihovih dodatnih funkcija morate držati FN tipku."
 
-#: lib/logitech_receiver/settings_templates.py:249
-msgid "Smart Shift"
-msgstr "Pametan pomak"
+#: lib/logitech_receiver/settings_templates.py:90
+msgid   "Mouse movement sensitivity"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:251
-msgid ""
-"Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-"The mouse wheel is always free at 0, and always locked at 50"
-msgstr ""
-"Automatski prebaci kotačić miša između ustavljačkog i slobodnog načina "
-"vrtnje kotačića.\n"
-"Kotačić miša je uvijek slobodan pri 0 i uvijek zaključan pri 50"
+#: lib/logitech_receiver/settings_templates.py:90
+msgid   "Sensitivity (DPI)"
+msgstr  "Osjetljivost (DPI)"
 
-#: lib/logitech_receiver/settings_templates.py:255
-msgid "Backlight"
-msgstr "Osvjetljenje"
+#: lib/logitech_receiver/settings_templates.py:91
+msgid   "Sensitivity (Pointer Speed)"
+msgstr  "Osjetljivost (Brzina pokazivača)"
 
-#: lib/logitech_receiver/settings_templates.py:255
-msgid "Turn illumination on or off on keyboard."
-msgstr "Uključite ili isključite osvjetljenje tipkovnice."
+#: lib/logitech_receiver/settings_templates.py:92
+msgid   "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr  "Množitelj brzine za miš (256 je normalan množitelj)."
 
-#: lib/logitech_receiver/settings_templates.py:257
-msgid "Actions"
-msgstr "Radnje"
+#: lib/logitech_receiver/settings_templates.py:93
+msgid   "Scroll Wheel Rachet"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:257
-msgid "Change the action for the key or button."
-msgstr "Promijeni radnju za tipku."
+#: lib/logitech_receiver/settings_templates.py:94
+msgid   "Automatically switch the mouse wheel between ratchet and freespin "
+        "mode.\n"
+        "The mouse wheel is always free at 0, and always ratcheted at 50"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:258
-msgid ""
-"Changing important actions (such as for the left mouse button) can result in "
-"an unusable system."
-msgstr ""
-"Promjena bitnih radnji (poput lijeve tipke miša) može prouzrokovati "
-"nestabilnosti u sustavu."
+#: lib/logitech_receiver/settings_templates.py:96
+msgid   "Backlight"
+msgstr  "Osvjetljenje"
 
-#: lib/logitech_receiver/settings_templates.py:260
-msgid "Disable keys"
-msgstr "Onemogući tipke"
+#: lib/logitech_receiver/settings_templates.py:96
+msgid   "Turn illumination on or off on keyboard."
+msgstr  "Uključite ili isključite osvjetljenje tipkovnice."
 
-#: lib/logitech_receiver/settings_templates.py:260
-msgid "Disable specific keyboard keys."
-msgstr "Onemogući određene tipke tipkovnice."
+#: lib/logitech_receiver/settings_templates.py:97
+msgid   "Key/Button Actions"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:261
-msgid "Change keys to match OS."
-msgstr "Promijeni tipke tako da se podudaraju sa OS-om."
+#: lib/logitech_receiver/settings_templates.py:98
+msgid   "Change the action for the key or button."
+msgstr  "Promijeni radnju za tipku."
 
-#: lib/logitech_receiver/settings_templates.py:261
-msgid "Set OS"
-msgstr "Postavi OS"
+#: lib/logitech_receiver/settings_templates.py:99
+msgid   "Changing important actions (such as for the left mouse button) can "
+        "result in an unusable system."
+msgstr  "Promjena bitnih radnji (poput lijeve tipke miša) može prouzrokovati "
+        "nestabilnosti u sustavu."
 
-#: lib/logitech_receiver/settings_templates.py:262
-msgid "Change Host"
-msgstr "Promijeni računalo"
+#: lib/logitech_receiver/settings_templates.py:100
+msgid   "Key/Button Diversion"
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:262
-msgid "Switch connection to a different host"
-msgstr "Prebaci povezivanje na drugo računalo"
+#: lib/logitech_receiver/settings_templates.py:101
+msgid   "Make the key or button send HID++ notifications (which trigger "
+        "Solaar rules but are otherwise ignored)."
+msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:264
-msgid "HID++ Thumb Scrolling"
-msgstr "HID++ pomicanje palcem"
+#: lib/logitech_receiver/settings_templates.py:102
+msgid   "Disable keys"
+msgstr  "Onemogući tipke"
 
-#: lib/logitech_receiver/settings_templates.py:265
-msgid "Effectively turns off thumb scrolling in Linux."
-msgstr "Učinkovito isključuje pomicanje palcem u Linuxu."
+#: lib/logitech_receiver/settings_templates.py:102
+msgid   "Disable specific keyboard keys."
+msgstr  "Onemogući određene tipke tipkovnice."
 
-#: lib/logitech_receiver/settings_templates.py:265
-msgid "HID++ mode for horizontal scroll with the thumb wheel."
-msgstr "HID++ način rada za okomito pomicanje kotačića palca."
+#: lib/logitech_receiver/settings_templates.py:103
+msgid   "Change keys to match OS."
+msgstr  "Promijeni tipke tako da se podudaraju sa OS-om."
 
-#: lib/logitech_receiver/settings_templates.py:267
-msgid "Invert thumb scroll direction."
-msgstr "Obrnuti smjer pomicanja kotačića palca."
+#: lib/logitech_receiver/settings_templates.py:103
+msgid   "Set OS"
+msgstr  "Postavi OS"
 
-#: lib/logitech_receiver/settings_templates.py:267
-msgid "Thumb Scroll Invert"
-msgstr "Obrnuto pomicanje kotačića palca"
+#: lib/logitech_receiver/settings_templates.py:104
+msgid   "Change Host"
+msgstr  "Promijeni računalo"
 
-#: lib/logitech_receiver/status.py:106
-msgid "No paired devices."
-msgstr "Nema uparenih uređaja."
+#: lib/logitech_receiver/settings_templates.py:104
+msgid   "Switch connection to a different host"
+msgstr  "Prebaci povezivanje na drugo računalo"
 
-#: lib/logitech_receiver/status.py:107 lib/solaar/ui/window.py:598
+#: lib/logitech_receiver/settings_templates.py:105
+msgid   "Thumb Wheel HID++ Scrolling"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:106
+msgid   "HID++ mode for horizontal scroll with the thumb wheel."
+msgstr  "HID++ način rada za okomito pomicanje kotačića palca."
+
+#: lib/logitech_receiver/settings_templates.py:107
+msgid   "Effectively turns off thumb scrolling in Linux."
+msgstr  "Učinkovito isključuje pomicanje palcem u Linuxu."
+
+#: lib/logitech_receiver/settings_templates.py:108
+msgid   "Invert thumb wheel scroll direction."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:108
+msgid   "Thumb Wheel Direction"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:109
+msgid   "Gestures"
+msgstr  "Geste"
+
+#: lib/logitech_receiver/settings_templates.py:109
+msgid   "Tweak the mouse/touchpad behaviour."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:110
+msgid   "Change numerical parameters of a mouse/touchpad."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:110
+msgid   "Gesture params"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:111
+msgid   "DPI Sliding Adjustment"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:112
+msgid   "Adjust the DPI by sliding the mouse horizontally while holding the "
+        "DPI button."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:113
+msgid   "Divert crown events"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:114
+msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:115
+msgid   "Divert G Keys"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:116
+msgid   "Make G keys send GKEY HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:119
+msgid   "Performs a left click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:119
+msgid   "Single tap"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:120
+msgid   "Performs a right click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:120
+msgid   "Single tap with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:121
+msgid   "Single tap with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:125
+msgid   "Double tap"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:125
+msgid   "Performs a double click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:126
+msgid   "Double tap with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:127
+msgid   "Double tap with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:130
+msgid   "Drags items by dragging the finger after double tapping."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:130
+msgid   "Tap and drag"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:131
+msgid   "Tap and drag with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:132
+msgid   "Drags items by dragging the fingers after double tapping."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:133
+msgid   "Tap and drag with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:135
+msgid   "Suppress tap and edge gestures"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:136
+msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:137
+msgid   "Scroll with one finger"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:137
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
+msgid   "Scrolls."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
+msgid   "Scroll with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:139
+msgid   "Scroll horizontally with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:139
+msgid   "Scrolls horizontally."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:140
+msgid   "Scroll vertically with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:140
+msgid   "Scrolls vertically."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:142
+msgid   "Inverts the scrolling direction."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:142
+msgid   "Natural scrolling"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:143
+msgid   "Enables the thumbwheel."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:143
+msgid   "Thumbwheel"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:154
+#: lib/logitech_receiver/settings_templates.py:158
+msgid   "Swipe from the top edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:155
+msgid   "Swipe from the left edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:156
+msgid   "Swipe from the right edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:157
+msgid   "Swipe from the bottom edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:159
+msgid   "Swipe two fingers from the left edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:160
+msgid   "Swipe two fingers from the right edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:161
+msgid   "Swipe two fingers from the bottom edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:162
+msgid   "Swipe two fingers from the top edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:163
+#: lib/logitech_receiver/settings_templates.py:167
+msgid   "Pinch to zoom out; spread to zoom in."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:163
+msgid   "Zoom with two fingers."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:164
+msgid   "Pinch to zoom out."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:165
+msgid   "Spread to zoom in."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:166
+msgid   "Zoom with three fingers."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:167
+msgid   "Zoom with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Left"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Left-most coordinate."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:192
+msgid   "Top-most coordinate."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:192
+msgid   "top"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:193
+msgid   "Width."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:193
+msgid   "width"
+msgstr  "širina"
+
+#: lib/logitech_receiver/settings_templates.py:194
+msgid   "Height."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:194
+msgid   "height"
+msgstr  "visina"
+
+#: lib/logitech_receiver/settings_templates.py:195
+msgid   "Cursor speed."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:195
+msgid   "Scale"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:198
 #, python-format
-msgid "%(count)s paired device."
-msgid_plural "%(count)s paired devices."
-msgstr[0] "%(count)s upareni uređaj."
-msgstr[1] "%(count)s uparena uređaja."
-msgstr[2] "%(count)s uparenih uređaj."
+msgid   "Disables the %s key."
+msgstr  ""
 
-#: lib/logitech_receiver/status.py:162
+#: lib/logitech_receiver/status.py:108
+msgid   "No paired devices."
+msgstr  "Nema uparenih uređaja."
+
+#: lib/logitech_receiver/status.py:109 lib/solaar/ui/window.py:623
 #, python-format
-msgid "Battery: %(level)s"
-msgstr "Baterija: %(level)s"
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       "%(count)s upareni uređaj."
+msgstr[1]       "%(count)s uparena uređaja."
+msgstr[2]       "%(count)s uparenih uređaj."
 
 #: lib/logitech_receiver/status.py:164
 #, python-format
-msgid "Battery: %(percent)d%%"
-msgstr "Baterija: %(percent)d%%"
+msgid   "Battery: %(level)s"
+msgstr  "Baterija: %(level)s"
 
-#: lib/logitech_receiver/status.py:176
+#: lib/logitech_receiver/status.py:166
 #, python-format
-msgid "Lighting: %(level)s lux"
-msgstr "Osvjetljenje: %(level)s lux"
+msgid   "Battery: %(percent)d%%"
+msgstr  "Baterija: %(percent)d%%"
 
-#: lib/logitech_receiver/status.py:232
+#: lib/logitech_receiver/status.py:178
 #, python-format
-msgid "Battery: %(level)s (%(status)s)"
-msgstr "Baterija: %(level)s (%(status)s)"
+msgid   "Lighting: %(level)s lux"
+msgstr  "Osvjetljenje: %(level)s lux"
 
-#: lib/logitech_receiver/status.py:234
+#: lib/logitech_receiver/status.py:233
 #, python-format
-msgid "Battery: %(percent)d%% (%(status)s)"
-msgstr "Baterija: %(percent)d%% (%(status)s)"
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  "Baterija: %(level)s (%(status)s)"
 
-#: lib/solaar/gtk.py:143
-msgid "Solaar depends on a udev file that is not present"
-msgstr "Solaar ovisi o udev datoteci koja nije prisutna"
-
-#: lib/solaar/gtk.py:146
-msgid ""
-"For more information see the Solaar installation directions\n"
-"at https://pwr-solaar.github.io/Solaar/installation"
-msgstr ""
-"Za više informacija pogledajte upute Solaar instalacije\n"
-"na https://pwr-solaar.github.io/Solaar/installation"
-
-#: lib/solaar/listener.py:97
-msgid "The receiver was unplugged."
-msgstr "Prijemnik je odspojen."
-
-#: lib/solaar/ui/__init__.py:49
-msgid "Permissions error"
-msgstr "Greška dozvole"
-
-#: lib/solaar/ui/__init__.py:51
+#: lib/logitech_receiver/status.py:235
 #, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr "Pronađen je (%s) Logitech Receiver, ali nemate ovlasti za otvoriti ga."
+msgid   "Battery: %(percent)d%% (%(status)s)"
+msgstr  "Baterija: %(percent)d%% (%(status)s)"
+
+#: lib/solaar/gtk.py:148
+msgid   "Solaar depends on a udev file that is not present"
+msgstr  "Solaar ovisi o udev datoteci koja nije prisutna"
+
+#: lib/solaar/gtk.py:151
+msgid   "For more information see the Solaar installation directions\n"
+        "at https://pwr-solaar.github.io/Solaar/installation"
+msgstr  "Za više informacija pogledajte upute Solaar instalacije\n"
+        "na https://pwr-solaar.github.io/Solaar/installation"
 
 #: lib/solaar/ui/__init__.py:52
-msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
-msgstr ""
-"Ako ste upravo instalirali Solaar, pokušajte odspojiti prijemnik i ponovno "
-"ga spojiti."
+msgid   "Permissions error"
+msgstr  "Greška dozvole"
+
+#: lib/solaar/ui/__init__.py:54
+#, python-format
+msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
+        "it."
+msgstr  "Pronađen je (%s) Logitech Receiver, ali nemate ovlasti za otvoriti "
+        "ga."
 
 #: lib/solaar/ui/__init__.py:55
-msgid "Unpairing failed"
-msgstr "Uparivanje neuspjelo"
-
-#: lib/solaar/ui/__init__.py:57
-#, python-brace-format
-msgid "Failed to unpair %{device} from %{receiver}."
-msgstr "Neuspjelo uparivanje %{device} s %{receiver}."
+msgid   "If you've just installed Solaar, try removing the receiver and "
+        "plugging it back in."
+msgstr  "Ako ste upravo instalirali Solaar, pokušajte odspojiti prijemnik i "
+        "ponovno ga spojiti."
 
 #: lib/solaar/ui/__init__.py:58
-msgid "The receiver returned an error, with no further details."
-msgstr "Došlo je do greške kod prijemnika, bez više pojedinosti."
+msgid   "Unpairing failed"
+msgstr  "Uparivanje neuspjelo"
 
-#: lib/solaar/ui/about.py:38
-msgid ""
-"Shows status of devices connected\n"
-"through wireless Logitech receivers."
-msgstr ""
-"Prikazuje stanje uređaja povezanih\n"
-"putem Logitech bežičnih prijemnika."
+#: lib/solaar/ui/__init__.py:60
+#, python-brace-format
+msgid   "Failed to unpair %{device} from %{receiver}."
+msgstr  "Neuspjelo uparivanje %{device} s %{receiver}."
 
-#: lib/solaar/ui/about.py:47
-msgid "GUI design"
-msgstr "GUI dizajn"
+#: lib/solaar/ui/__init__.py:61
+msgid   "The receiver returned an error, with no further details."
+msgstr  "Došlo je do greške kod prijemnika, bez više pojedinosti."
 
-#: lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "Testiranje"
+#: lib/solaar/ui/about.py:39
+msgid   "Shows status of devices connected\n"
+        "through wireless Logitech receivers."
+msgstr  "Prikazuje stanje uređaja povezanih\n"
+        "putem Logitech bežičnih prijemnika."
 
-#: lib/solaar/ui/about.py:56
-msgid "Logitech documentation"
-msgstr "Logitech dokumentacija"
+#: lib/solaar/ui/about.py:48
+msgid   "GUI design"
+msgstr  "GUI dizajn"
 
-#: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:325
-msgid "About"
-msgstr "O"
+#: lib/solaar/ui/about.py:50
+msgid   "Testing"
+msgstr  "Testiranje"
+
+#: lib/solaar/ui/about.py:57
+msgid   "Logitech documentation"
+msgstr  "Logitech dokumentacija"
+
+#: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
+msgid   "About"
+msgstr  "O"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
-#: lib/solaar/ui/window.py:202
-msgid "Unpair"
-msgstr "Odpari"
+#: lib/solaar/ui/window.py:205
+msgid   "Unpair"
+msgstr  "Odpari"
 
-#: lib/solaar/ui/config_panel.py:180
-msgid "Working"
-msgstr "Izvodi se"
+#: lib/solaar/ui/config_panel.py:370
+msgid   "Click to allow changes."
+msgstr  ""
 
-#: lib/solaar/ui/config_panel.py:183
-msgid "Read/write operation failed."
-msgstr "Radnja čitanja/pisanja neuspjela."
+#: lib/solaar/ui/config_panel.py:370
+msgid   "Click to prevent changes."
+msgstr  ""
 
-#: lib/solaar/ui/notify.py:121
-msgid "connected"
-msgstr "povezano"
+#: lib/solaar/ui/config_panel.py:380
+msgid   "Working"
+msgstr  "Izvodi se"
 
-#: lib/solaar/ui/notify.py:123 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:711
-msgid "offline"
-msgstr "nespojivo"
+#: lib/solaar/ui/config_panel.py:383
+msgid   "Read/write operation failed."
+msgstr  "Radnja čitanja/pisanja neuspjela."
+
+#: lib/solaar/ui/config_panel.py:501
+#, python-format
+msgid   "%d value"
+msgid_plural    "%d values"
+msgstr[0]       ""
+msgstr[1]       ""
+msgstr[2]       ""
+
+#: lib/solaar/ui/diversion_rules.py:56
+msgid   "Built-in rules"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:56
+msgid   "User-defined rules"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:58 lib/solaar/ui/diversion_rules.py:789
+msgid   "Rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:59 lib/solaar/ui/diversion_rules.py:502
+#: lib/solaar/ui/diversion_rules.py:619
+msgid   "Sub-rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:61
+msgid   "[empty]"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:84
+msgid   "Solaar Rule Editor"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:134
+msgid   "Make changes permanent?"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:146
+msgid   "If you choose No, changes will be lost when Solaar is closed."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:365
+msgid   "Insert here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:367
+msgid   "Insert above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:369
+msgid   "Insert below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:375
+msgid   "Insert new rule here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:377
+msgid   "Insert new rule above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:379
+msgid   "Insert new rule below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:420
+msgid   "Paste here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:422
+msgid   "Paste above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:424
+msgid   "Paste below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:430
+msgid   "Paste rule here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:432
+msgid   "Paste rule above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:434
+msgid   "Paste rule below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:438
+msgid   "Paste rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:467
+msgid   "Flatten"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:500
+msgid   "Insert"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:503 lib/solaar/ui/diversion_rules.py:621
+#: lib/solaar/ui/diversion_rules.py:832
+msgid   "Or"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:504 lib/solaar/ui/diversion_rules.py:620
+#: lib/solaar/ui/diversion_rules.py:817
+msgid   "And"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:506
+msgid   "Condition"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:508 lib/solaar/ui/diversion_rules.py:920
+msgid   "Feature"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:509 lib/solaar/ui/diversion_rules.py:871
+msgid   "Process"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:953
+msgid   "Report"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:988
+msgid   "Modifiers"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:512 lib/solaar/ui/diversion_rules.py:1024
+msgid   "Key"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:513 lib/solaar/ui/diversion_rules.py:1069
+msgid   "Test"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:517
+msgid   "Action"
+msgstr  "Radnja"
+
+#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1156
+msgid   "Key press"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1205
+msgid   "Mouse scroll"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1253
+msgid   "Mouse click"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:1322
+msgid   "Execute"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:551
+msgid   "Insert new rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:571 lib/solaar/ui/diversion_rules.py:1106
+#: lib/solaar/ui/diversion_rules.py:1281
+msgid   "Delete"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:593
+msgid   "Negate"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:617
+msgid   "Wrap with"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:639
+msgid   "Cut"
+msgstr  "Izreži"
+
+#: lib/solaar/ui/diversion_rules.py:654
+msgid   "Paste"
+msgstr  "Zalijepi"
+
+#: lib/solaar/ui/diversion_rules.py:666
+msgid   "Copy"
+msgstr  "Kopiraj"
+
+#: lib/solaar/ui/diversion_rules.py:769
+msgid   "This editor does not support the selected rule component yet."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:847
+msgid   "Not"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1094
+msgid   "Add key"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1224
+msgid   "Button"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1225
+msgid   "Count"
+msgstr  "Brojač"
+
+#: lib/solaar/ui/diversion_rules.py:1267
+msgid   "Add argument"
+msgstr  ""
+
+#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:318
+#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:749
+msgid   "offline"
+msgstr  "nespojivo"
 
 #: lib/solaar/ui/pair_window.py:134
-msgid "Pairing failed"
-msgstr "Neuspjelo uparivanje"
+msgid   "Pairing failed"
+msgstr  "Neuspjelo uparivanje"
 
 #: lib/solaar/ui/pair_window.py:136
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr ""
-"Pobrinite se da je vaš uređaj u dometu bežičnog povezivanja i da je dovoljno "
-"napunjen."
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "Pobrinite se da je vaš uređaj u dometu bežičnog povezivanja i da je "
+        "dovoljno napunjen."
 
 #: lib/solaar/ui/pair_window.py:138
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr "Novi uređaj je otkriven, ali nije kompatibilan s ovim uređajem."
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "Novi uređaj je otkriven, ali nije kompatibilan s ovim uređajem."
 
 #: lib/solaar/ui/pair_window.py:140
-msgid "More paired devices than receiver can support."
-msgstr "Postoji više uparenih uređaja nego što prijemnik podržava."
+msgid   "More paired devices than receiver can support."
+msgstr  "Postoji više uparenih uređaja nego što prijemnik podržava."
 
 #: lib/solaar/ui/pair_window.py:142
-msgid "No further details are available about the error."
-msgstr "Nema dostupnih više pojedinosti o ovoj grešci."
+msgid   "No further details are available about the error."
+msgstr  "Nema dostupnih više pojedinosti o ovoj grešci."
 
 #: lib/solaar/ui/pair_window.py:156
-msgid "Found a new device:"
-msgstr "Novi uređaj je pronađen:"
+msgid   "Found a new device:"
+msgstr  "Novi uređaj je pronađen:"
 
 #: lib/solaar/ui/pair_window.py:181
-msgid "The wireless link is not encrypted"
-msgstr "Bežično povezivanje nije šifrirano"
+msgid   "The wireless link is not encrypted"
+msgstr  "Bežično povezivanje nije šifrirano"
 
 #: lib/solaar/ui/pair_window.py:199
 #, python-format
-msgid "%(receiver_name)s: pair new device"
-msgstr "%(receiver_name)s: upari novi uređaj"
+msgid   "%(receiver_name)s: pair new device"
+msgstr  "%(receiver_name)s: upari novi uređaj"
 
 #: lib/solaar/ui/pair_window.py:206
-msgid "If the device is already turned on, turn if off and on again."
-msgstr "Ako je uređaj već uključen, isključite ga i ponovno uključite."
+msgid   "If the device is already turned on, turn it off and on again."
+msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:209
 #, python-format
-msgid ""
-"\n"
-"\n"
-"This receiver has %d pairing remaining."
-msgid_plural ""
-"\n"
-"\n"
-"This receiver has %d pairings remaining."
-msgstr[0] ""
-"\n"
-"\n"
-"Ovaj prijemnik ima još %d preostalo uparivanje."
-msgstr[1] ""
-"\n"
-"\n"
-"Ovaj prijemnik ima još %d preostala uparivanja."
-msgstr[2] ""
-"\n"
-"\n"
-"Ovaj prijemnik ima još %d preostalih uparivanja."
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       "\n"
+        "\n"
+        "Ovaj prijemnik ima još %d preostalo uparivanje."
+msgstr[1]       "\n"
+        "\n"
+        "Ovaj prijemnik ima još %d preostala uparivanja."
+msgstr[2]       "\n"
+        "\n"
+        "Ovaj prijemnik ima još %d preostalih uparivanja."
 
 #: lib/solaar/ui/pair_window.py:212
-msgid ""
-"\n"
-"Cancelling at this point will not use up a pairing."
-msgstr ""
-"\n"
-"Prekidanje u ovom trenutku neće izvršiti uparivanje."
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  "\n"
+        "Prekidanje u ovom trenutku neće izvršiti uparivanje."
 
 #: lib/solaar/ui/pair_window.py:215
-msgid "Turn on the device you want to pair."
-msgstr "Uključite uređaj koji želite upariti."
+msgid   "Turn on the device you want to pair."
+msgstr  "Uključite uređaj koji želite upariti."
 
-#: lib/solaar/ui/tray.py:59
-msgid "No Logitech receiver found"
-msgstr "Nema pronađenih Logitechovih prijemnika"
+#: lib/solaar/ui/tray.py:61
+msgid   "No Logitech receiver found"
+msgstr  "Nema pronađenih Logitechovih prijemnika"
 
-#: lib/solaar/ui/tray.py:66 lib/solaar/ui/window.py:322
-msgid "Quit"
-msgstr "Zatvori"
+#: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
+msgid   "Quit"
+msgstr  "Zatvori"
 
-#: lib/solaar/ui/tray.py:295 lib/solaar/ui/tray.py:303
-msgid "no receiver"
-msgstr "nema prijemnika"
+#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
+msgid   "no receiver"
+msgstr  "nema prijemnika"
 
-#: lib/solaar/ui/tray.py:319
-msgid "no status"
-msgstr "bez stanja"
+#: lib/solaar/ui/tray.py:321
+msgid   "no status"
+msgstr  "bez stanja"
 
-#: lib/solaar/ui/window.py:103
-msgid "Scanning"
-msgstr "Pretraživanje"
+#: lib/solaar/ui/window.py:104
+msgid   "Scanning"
+msgstr  "Pretraživanje"
 
-#: lib/solaar/ui/window.py:136
-msgid "Battery"
-msgstr "Baterija"
+#: lib/solaar/ui/window.py:137 lib/solaar/ui/window.py:692
+msgid   "Battery"
+msgstr  "Baterija"
 
-#: lib/solaar/ui/window.py:139
-msgid "Wireless Link"
-msgstr "Bežično povezivanje"
+#: lib/solaar/ui/window.py:140
+msgid   "Wireless Link"
+msgstr  "Bežično povezivanje"
 
-#: lib/solaar/ui/window.py:143
-msgid "Lighting"
-msgstr "Osvjetljenje"
+#: lib/solaar/ui/window.py:144
+msgid   "Lighting"
+msgstr  "Osvjetljenje"
 
-#: lib/solaar/ui/window.py:175
-msgid "Show Technical Details"
-msgstr "Prikaži tehničke pojedinosti"
+#: lib/solaar/ui/window.py:178
+msgid   "Show Technical Details"
+msgstr  "Prikaži tehničke pojedinosti"
 
-#: lib/solaar/ui/window.py:191
-msgid "Pair new device"
-msgstr "Upari novi uređaj"
+#: lib/solaar/ui/window.py:194
+msgid   "Pair new device"
+msgstr  "Upari novi uređaj"
 
-#: lib/solaar/ui/window.py:210
-msgid "Select a device"
-msgstr "Odaberi uređaj"
+#: lib/solaar/ui/window.py:213
+msgid   "Select a device"
+msgstr  "Odaberi uređaj"
 
-#: lib/solaar/ui/window.py:522
-msgid "Path"
-msgstr "Putanja"
+#: lib/solaar/ui/window.py:331
+msgid   "Rule Editor"
+msgstr  ""
 
-#: lib/solaar/ui/window.py:524
-msgid "USB id"
-msgstr "USB id"
+#: lib/solaar/ui/window.py:541
+msgid   "Path"
+msgstr  "Putanja"
 
-#: lib/solaar/ui/window.py:527 lib/solaar/ui/window.py:529
-#: lib/solaar/ui/window.py:546 lib/solaar/ui/window.py:548
-msgid "Serial"
-msgstr "Serijski broj"
+#: lib/solaar/ui/window.py:544
+msgid   "USB ID"
+msgstr  ""
 
-#: lib/solaar/ui/window.py:533
-msgid "Index"
-msgstr "Indeks"
+#: lib/solaar/ui/window.py:547 lib/solaar/ui/window.py:549
+#: lib/solaar/ui/window.py:569 lib/solaar/ui/window.py:571
+msgid   "Serial"
+msgstr  "Serijski broj"
 
-#: lib/solaar/ui/window.py:534
-msgid "Wireless PID"
-msgstr "PID bežične mreže"
+#: lib/solaar/ui/window.py:553
+msgid   "Index"
+msgstr  "Indeks"
 
-#: lib/solaar/ui/window.py:536
-msgid "Protocol"
-msgstr "Protokol"
+#: lib/solaar/ui/window.py:555
+msgid   "Wireless PID"
+msgstr  "PID bežične mreže"
 
-#: lib/solaar/ui/window.py:536
-msgid "Unknown"
-msgstr "Nepoznato"
-
-#: lib/solaar/ui/window.py:539
-#, python-format
-msgid "%(rate)d ms (%(rate_hz)dHz)"
-msgstr "%(rate)d ms (%(rate_hz)dHz)"
-
-#: lib/solaar/ui/window.py:539
-msgid "Polling rate"
-msgstr "Cikličko osvježavanje"
+#: lib/solaar/ui/window.py:557
+msgid   "Product ID"
+msgstr  "ID proizvoda"
 
 #: lib/solaar/ui/window.py:559
-msgid "none"
-msgstr "nepoznato"
+msgid   "Protocol"
+msgstr  "Protokol"
 
-#: lib/solaar/ui/window.py:560
-msgid "Notifications"
-msgstr "Obavijesti"
+#: lib/solaar/ui/window.py:559
+msgid   "Unknown"
+msgstr  "Nepoznato"
 
-#: lib/solaar/ui/window.py:597
-msgid "No device paired."
-msgstr "Nema uparenih uređaja."
-
-#: lib/solaar/ui/window.py:604
+#: lib/solaar/ui/window.py:562
 #, python-format
-msgid "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0] "Najviše %(max_count)s uređaj može biti uparen s ovim prijemnikom."
-msgstr[1] "Najviše %(max_count)s uređaja može biti upareno s ovim prijemnikom."
-msgstr[2] "Najviše %(max_count)s uređaja može biti upareno s ovim prijemnikom."
+msgid   "%(rate)d ms (%(rate_hz)dHz)"
+msgstr  "%(rate)d ms (%(rate_hz)dHz)"
 
-#: lib/solaar/ui/window.py:610
-msgid "Only one device can be paired to this receiver."
-msgstr "Samo jedan uređaj može biti uparen s ovim prijemnikom."
+#: lib/solaar/ui/window.py:562
+msgid   "Polling rate"
+msgstr  "Cikličko osvježavanje"
 
-#: lib/solaar/ui/window.py:614
+#: lib/solaar/ui/window.py:573
+msgid   "Unit ID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:584
+msgid   "none"
+msgstr  "nepoznato"
+
+#: lib/solaar/ui/window.py:585
+msgid   "Notifications"
+msgstr  "Obavijesti"
+
+#: lib/solaar/ui/window.py:622
+msgid   "No device paired."
+msgstr  "Nema uparenih uređaja."
+
+#: lib/solaar/ui/window.py:629
 #, python-format
-msgid "This receiver has %d pairing remaining."
-msgid_plural "This receiver has %d pairings remaining."
-msgstr[0] "Ovaj prijemnik ima još %d preostalo uparivanje."
-msgstr[1] "Ovaj prijemnik ima još %d preostala uparivanja."
-msgstr[2] "Ovaj prijemnik ima još %d preostalih uparivanja."
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       "Najviše %(max_count)s uređaj može biti uparen s ovim "
+        "prijemnikom."
+msgstr[1]       "Najviše %(max_count)s uređaja može biti upareno s ovim "
+        "prijemnikom."
+msgstr[2]       "Najviše %(max_count)s uređaja može biti upareno s ovim "
+        "prijemnikom."
 
-#: lib/solaar/ui/window.py:679 lib/solaar/ui/window.py:681
-msgid "next "
-msgstr "sljedeće "
+#: lib/solaar/ui/window.py:635
+msgid   "Only one device can be paired to this receiver."
+msgstr  "Samo jedan uređaj može biti uparen s ovim prijemnikom."
 
-#: lib/solaar/ui/window.py:684
-msgid "charging"
-msgstr "punjenje"
+#: lib/solaar/ui/window.py:639
+#, python-format
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       "Ovaj prijemnik ima još %d preostalo uparivanje."
+msgstr[1]       "Ovaj prijemnik ima još %d preostala uparivanja."
+msgstr[2]       "Ovaj prijemnik ima još %d preostalih uparivanja."
 
-#: lib/solaar/ui/window.py:686
-msgid "last known"
-msgstr "posljednje poznato"
+#: lib/solaar/ui/window.py:694
+msgid   "Battery information unknown."
+msgstr  ""
 
-#: lib/solaar/ui/window.py:693
-msgid "not encrypted"
-msgstr "nije šifrirano"
+#: lib/solaar/ui/window.py:702
+msgid   "Battery Voltage"
+msgstr  ""
 
-#: lib/solaar/ui/window.py:697
-msgid ""
-"The wireless link between this device and its receiver is not encrypted.\n"
-"\n"
-"For pointing devices (mice, trackballs, trackpads), this is a minor security "
-"issue.\n"
-"\n"
-"It is, however, a major security issue for text-input devices (keyboards, "
-"numpads),\n"
-"because typed text can be sniffed inconspicuously by 3rd parties within "
-"range."
-msgstr ""
-"Bežično povezivanje između ovog uređaja i njegovog prijemnika nije "
-"šifrirano.\n"
-"\n"
-"Za uređaje s pokazivačem (miš, trackballs, trackpads), to je manji "
-"sigurnosni problem.\n"
-"\n"
-"A za uređaje za unos teksta, je veći sigurnosni problem (tipkovnice, "
-"numpads),\n"
-"zato jer upisani tekst može biti neprimjentno nadziran u dometu treće strane."
+#: lib/solaar/ui/window.py:704
+msgid   "Voltage reported by battery"
+msgstr  ""
 
-#: lib/solaar/ui/window.py:706
-msgid "encrypted"
-msgstr "šifrirano"
+#: lib/solaar/ui/window.py:706 lib/solaar/ui/window.py:710
+msgid   "Battery Level"
+msgstr  ""
 
-#: lib/solaar/ui/window.py:708
-msgid "The wireless link between this device and its receiver is encrypted."
-msgstr ""
-"Bežično povezivanje između ovog uređaja i njegovog prijemnika je šifrirano."
+#: lib/solaar/ui/window.py:708 lib/solaar/ui/window.py:712
+msgid   "Approximate level reported by battery"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:715 lib/solaar/ui/window.py:717
+msgid   "next reported "
+msgstr  ""
+
+#: lib/solaar/ui/window.py:718
+msgid   " and next level to be reported."
+msgstr  ""
 
 #: lib/solaar/ui/window.py:721
+msgid   "charging"
+msgstr  "punjenje"
+
+#: lib/solaar/ui/window.py:723
+msgid   "last known"
+msgstr  "posljednje poznato"
+
+#: lib/solaar/ui/window.py:731
+msgid   "not encrypted"
+msgstr  "nije šifrirano"
+
+#: lib/solaar/ui/window.py:735
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "\n"
+        "For pointing devices (mice, trackballs, trackpads), this is a minor "
+        "security issue.\n"
+        "\n"
+        "It is, however, a major security issue for text-input devices "
+        "(keyboards, numpads),\n"
+        "because typed text can be sniffed inconspicuously by 3rd parties "
+        "within range."
+msgstr  "Bežično povezivanje između ovog uređaja i njegovog prijemnika nije "
+        "šifrirano.\n"
+        "\n"
+        "Za uređaje s pokazivačem (miš, trackballs, trackpads), to je manji "
+        "sigurnosni problem.\n"
+        "\n"
+        "A za uređaje za unos teksta, je veći sigurnosni problem (tipkovnice, "
+        "numpads),\n"
+        "zato jer upisani tekst može biti neprimjentno nadziran u dometu "
+        "treće strane."
+
+#: lib/solaar/ui/window.py:744
+msgid   "encrypted"
+msgstr  "šifrirano"
+
+#: lib/solaar/ui/window.py:746
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  "Bežično povezivanje između ovog uređaja i njegovog prijemnika je "
+        "šifrirano."
+
+#: lib/solaar/ui/window.py:759
 #, python-format
-msgid "%(light_level)d lux"
-msgstr "%(light_level)d lux"
+msgid   "%(light_level)d lux"
+msgstr  "%(light_level)d lux"
 
-#~ msgid "The receiver only supports %d paired device(s)."
-#~ msgstr "Prijemnik samo podržava %d upareni uređaj(e)."
+#~ msgid        " paired devices."
+#~ msgstr       " uparena uređaja."
 
-#~ msgid "%(battery_percent)d%%"
-#~ msgstr "%(battery_percent)d%%"
+#~ msgid        "%(battery_level)s"
+#~ msgstr       "%(battery_level)s"
 
-#~ msgid "%(battery_level)s"
-#~ msgstr "%(battery_level)s"
+#~ msgid        "%(battery_percent)d%%"
+#~ msgstr       "%(battery_percent)d%%"
 
-#~ msgid ""
-#~ "If the device is already turned on,\n"
-#~ "turn if off and on again."
-#~ msgstr ""
-#~ "Ako je uređaj već uključen,\n"
-#~ "isključite ga i ponovno uključite."
+#~ msgid        "1 paired device."
+#~ msgstr       "1 upareni uređaj."
 
-#~ msgid "paired devices"
-#~ msgstr "upareni uređaji"
+#~ msgid        "Actions"
+#~ msgstr       "Radnje"
 
-#~ msgid "lux"
-#~ msgstr "lux"
+#~ msgid        "Automatically switch the mouse wheel between ratchet and "
+#~      "freespin mode.\n"
+#~      "The mouse wheel is always free at 0, and always locked at 50"
+#~ msgstr       "Automatski prebaci kotačić miša između ustavljačkog i "
+#~      "slobodnog načina vrtnje kotačića.\n"
+#~      "Kotačić miša je uvijek slobodan pri 0 i uvijek zaključan pri 50"
 
-#~ msgid " paired devices."
-#~ msgstr " uparena uređaja."
+#~ msgid        "HID++ Scrolling"
+#~ msgstr       "HID++ Scrolling"
 
-#~ msgid "1 paired device."
-#~ msgstr "1 upareni uređaj."
+#~ msgid        "HID++ Thumb Scrolling"
+#~ msgstr       "HID++ pomicanje palcem"
 
-#~ msgid "closed"
-#~ msgstr "završeno"
+#~ msgid        "High Resolution Scrolling"
+#~ msgstr       "Pomicanje kotačićem visoke razlučivosti"
 
-#~ msgid "open"
-#~ msgstr "pokrenuto"
+#~ msgid        "High Resolution Wheel Invert"
+#~ msgstr       "Obrnuto pomicanje kotačićem visoke razlučivosti"
+
+#~ msgid        "High-sensitivity wheel invert direction for vertical scroll."
+#~ msgstr       "Obrnuti visoko osjetljivi smjer kotačića za okomito "
+#~      "pomicanje."
+
+#~ msgid        "If the device is already turned on,\n"
+#~      "turn if off and on again."
+#~ msgstr       "Ako je uređaj već uključen,\n"
+#~      "isključite ga i ponovno uključite."
+
+#~ msgid        "If the device is already turned on, turn if off and on again."
+#~ msgstr       "Ako je uređaj već uključen, isključite ga i ponovno "
+#~      "uključite."
+
+#~ msgid        "Invert thumb scroll direction."
+#~ msgstr       "Obrnuti smjer pomicanja kotačića palca."
+
+#~ msgid        "Smart Shift"
+#~ msgstr       "Pametan pomak"
+
+#~ msgid        "Smooth Scrolling"
+#~ msgstr       "Glatko pomicanje kotačićem"
+
+#~ msgid        "The receiver only supports %d paired device(s)."
+#~ msgstr       "Prijemnik samo podržava %d upareni uređaj(e)."
+
+#~ msgid        "The receiver was unplugged."
+#~ msgstr       "Prijemnik je odspojen."
+
+#~ msgid        "Thumb Scroll Invert"
+#~ msgstr       "Obrnuto pomicanje kotačića palca"
+
+#~ msgid        "USB id"
+#~ msgstr       "USB id"
+
+#~ msgid        "Wheel Resolution"
+#~ msgstr       "Pomicanje kotačićem"
+
+#~ msgid        "closed"
+#~ msgstr       "završeno"
+
+#~ msgid        "lux"
+#~ msgstr       "lux"
+
+#~ msgid        "next "
+#~ msgstr       "sljedeće "
+
+#~ msgid        "open"
+#~ msgstr       "pokrenuto"
+
+#~ msgid        "paired devices"
+#~ msgstr       "upareni uređaji"

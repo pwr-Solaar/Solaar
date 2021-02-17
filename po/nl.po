@@ -3,1231 +3,1215 @@
 # This file is distributed under the same license as the solaar package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-msgid ""
-msgstr ""
-"Project-Id-Version: solaar 1.0.1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-30 13:37+0100\n"
-"PO-Revision-Date: 2021-01-15 22:03+0100\n"
-"Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
-"Language-Team: \n"
-"Language: nl\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.2\n"
+msgid   ""
+msgstr  "Project-Id-Version: solaar 1.0.1\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2021-02-16 20:09-0500\n"
+        "PO-Revision-Date: 2021-01-15 22:03+0100\n"
+        "Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
+        "Language-Team: \n"
+        "Language: nl\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+        "X-Generator: Poedit 2.4.2\n"
 
 #: lib/logitech_receiver/device.py:132 lib/solaar/ui/window.py:693
-msgid "unknown"
-msgstr "onbekend"
+msgid   "unknown"
+msgstr  "onbekend"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid "empty"
-msgstr "leeg"
+msgid   "empty"
+msgstr  "leeg"
 
 #: lib/logitech_receiver/i18n.py:39
-msgid "critical"
-msgstr "bijna leeg"
+msgid   "critical"
+msgstr  "bijna leeg"
 
 #: lib/logitech_receiver/i18n.py:40
-msgid "low"
-msgstr "laag"
+msgid   "low"
+msgstr  "laag"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid "good"
-msgstr "goed"
+msgid   "good"
+msgstr  "goed"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid "full"
-msgstr "opgeladen"
+msgid   "full"
+msgstr  "opgeladen"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid "discharging"
-msgstr "bezig met ontladen"
+msgid   "discharging"
+msgstr  "bezig met ontladen"
 
 #: lib/logitech_receiver/i18n.py:46
-msgid "recharging"
-msgstr "bezig met opladen"
+msgid   "recharging"
+msgstr  "bezig met opladen"
 
 #: lib/logitech_receiver/i18n.py:47
-msgid "almost full"
-msgstr "bijna opgeladen"
+msgid   "almost full"
+msgstr  "bijna opgeladen"
 
 #: lib/logitech_receiver/i18n.py:48
-msgid "charged"
-msgstr "opgeladen"
+msgid   "charged"
+msgstr  "opgeladen"
 
 #: lib/logitech_receiver/i18n.py:49
-msgid "slow recharge"
-msgstr "langzaam opladen"
+msgid   "slow recharge"
+msgstr  "langzaam opladen"
 
 #: lib/logitech_receiver/i18n.py:50
-msgid "invalid battery"
-msgstr "verkeerde batterij"
+msgid   "invalid battery"
+msgstr  "verkeerde batterij"
 
 #: lib/logitech_receiver/i18n.py:51
-msgid "thermal error"
-msgstr "temperatuurfout"
+msgid   "thermal error"
+msgstr  "temperatuurfout"
 
 #: lib/logitech_receiver/i18n.py:54
-msgid "device timeout"
-msgstr "time-out opgetreden"
+msgid   "device timeout"
+msgstr  "time-out opgetreden"
 
 #: lib/logitech_receiver/i18n.py:55
-msgid "device not supported"
-msgstr "apparaat wordt niet ondersteund"
+msgid   "device not supported"
+msgstr  "apparaat wordt niet ondersteund"
 
 #: lib/logitech_receiver/i18n.py:56
-msgid "too many devices"
-msgstr "te veel apparaten"
+msgid   "too many devices"
+msgstr  "te veel apparaten"
 
 #: lib/logitech_receiver/i18n.py:57
-msgid "sequence timeout"
-msgstr "meerdere time-outs"
+msgid   "sequence timeout"
+msgstr  "meerdere time-outs"
 
 #: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:580
-msgid "Firmware"
-msgstr "Firmware"
+msgid   "Firmware"
+msgstr  "Firmware"
 
 #: lib/logitech_receiver/i18n.py:61
-msgid "Bootloader"
-msgstr "Opstartlader"
+msgid   "Bootloader"
+msgstr  "Opstartlader"
 
 #: lib/logitech_receiver/i18n.py:62
-msgid "Hardware"
-msgstr "Hardware"
+msgid   "Hardware"
+msgstr  "Hardware"
 
 #: lib/logitech_receiver/i18n.py:63
-msgid "Other"
-msgstr "Overig"
+msgid   "Other"
+msgstr  "Overig"
 
 #: lib/logitech_receiver/notifications.py:77
-msgid "pairing lock is closed"
-msgstr "koppelvergendeling ingeschakeld"
+msgid   "pairing lock is closed"
+msgstr  "koppelvergendeling ingeschakeld"
 
 #: lib/logitech_receiver/notifications.py:77
-msgid "pairing lock is open"
-msgstr "koppelvergendeling uitgeschakeld"
+msgid   "pairing lock is open"
+msgstr  "koppelvergendeling uitgeschakeld"
 
 #: lib/logitech_receiver/notifications.py:161 lib/solaar/ui/notify.py:123
-msgid "connected"
-msgstr "verbonden"
+msgid   "connected"
+msgstr  "verbonden"
 
 #: lib/logitech_receiver/notifications.py:161
-msgid "disconnected"
-msgstr "verbinding verbroken"
+msgid   "disconnected"
+msgstr  "verbinding verbroken"
 
 #: lib/logitech_receiver/notifications.py:199 lib/solaar/ui/notify.py:121
-msgid "unpaired"
-msgstr "niet gekoppeld"
+msgid   "unpaired"
+msgstr  "niet gekoppeld"
 
 #: lib/logitech_receiver/notifications.py:249
-msgid "powered on"
-msgstr "ingeschakeld"
+msgid   "powered on"
+msgstr  "ingeschakeld"
 
 #: lib/logitech_receiver/settings_templates.py:69
-msgid "Hand Detection"
-msgstr "Handpalmdetectie"
+msgid   "Hand Detection"
+msgstr  "Handpalmdetectie"
 
 #: lib/logitech_receiver/settings_templates.py:69
-msgid "Turn on illumination when the hands hover over the keyboard."
-msgstr ""
-"Schakelt de verlichting in als u beide handen boven het toetsenbord houdt."
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  "Schakelt de verlichting in als u beide handen boven het toetsenbord "
+        "houdt."
 
 #: lib/logitech_receiver/settings_templates.py:70
-msgid "Scroll Wheel Smooth Scrolling"
-msgstr "Vloeiend scrollen"
+msgid   "Scroll Wheel Smooth Scrolling"
+msgstr  "Vloeiend scrollen"
 
 #: lib/logitech_receiver/settings_templates.py:71
 #: lib/logitech_receiver/settings_templates.py:76
 #: lib/logitech_receiver/settings_templates.py:83
-msgid "High-sensitivity mode for vertical scroll with the wheel."
-msgstr "Hogegevoeligheidsmodus voor verticaal scrollen."
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  "Hogegevoeligheidsmodus voor verticaal scrollen."
 
 #: lib/logitech_receiver/settings_templates.py:72
-msgid "Side Scrolling"
-msgstr "Zijwaarts scrollen"
+msgid   "Side Scrolling"
+msgstr  "Zijwaarts scrollen"
 
 #: lib/logitech_receiver/settings_templates.py:73
-msgid ""
-"When disabled, pushing the wheel sideways sends custom button events\n"
-"instead of the standard side-scrolling events."
-msgstr ""
-"Schakel dit uit om aangepaste knopgebeurtenissen te versturen als u het "
-"scrollwiel\n"
-"opzijduwt in plaats van de standaard gebeurtenissen."
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  "Schakel dit uit om aangepaste knopgebeurtenissen te versturen als u "
+        "het scrollwiel\n"
+        "opzijduwt in plaats van de standaard gebeurtenissen."
 
 #: lib/logitech_receiver/settings_templates.py:75
-msgid "Scroll Wheel High Resolution"
-msgstr "Scrollen met hoge resolutie"
+msgid   "Scroll Wheel High Resolution"
+msgstr  "Scrollen met hoge resolutie"
 
 #: lib/logitech_receiver/settings_templates.py:77
-msgid "Scroll Wheel HID++ Scrolling"
-msgstr "HID++-scrollen"
+msgid   "Scroll Wheel HID++ Scrolling"
+msgstr  "HID++-scrollen"
 
 #: lib/logitech_receiver/settings_templates.py:78
-msgid "HID++ mode for vertical scroll with the wheel."
-msgstr "HID++-modus voor verticaal scrollen."
+msgid   "HID++ mode for vertical scroll with the wheel."
+msgstr  "HID++-modus voor verticaal scrollen."
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid "Effectively turns off wheel scrolling in Linux."
-msgstr "Schakelt scrollen met het scrollwiel op Linux uit."
+msgid   "Effectively turns off wheel scrolling in Linux."
+msgstr  "Schakelt scrollen met het scrollwiel op Linux uit."
 
 #: lib/logitech_receiver/settings_templates.py:80
-msgid "Scroll Wheel Direction"
-msgstr "Scrollrichting"
+msgid   "Scroll Wheel Direction"
+msgstr  "Scrollrichting"
 
 #: lib/logitech_receiver/settings_templates.py:81
-msgid "Invert direction for vertical scroll with wheel."
-msgstr "Keer de modus van verticaal scrollen met het scrollwiel om."
+msgid   "Invert direction for vertical scroll with wheel."
+msgstr  "Keer de modus van verticaal scrollen met het scrollwiel om."
 
 #: lib/logitech_receiver/settings_templates.py:82
-msgid "Scroll Wheel Resolution"
-msgstr "Scrollresolutie"
+msgid   "Scroll Wheel Resolution"
+msgstr  "Scrollresolutie"
 
 #: lib/logitech_receiver/settings_templates.py:84
-msgid "Swap Fx function"
-msgstr "Fx-functies omdraaien"
+msgid   "Frequency of device polling, in milliseconds"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:84
+msgid   "Polling Rate (ms)"
+msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:85
-msgid ""
-"When set, the F1..F12 keys will activate their special function,\n"
-"and you must hold the FN key to activate their standard function."
-msgstr ""
-"Schakel dit in om de speciale functies van F1-F12 te gebruiken -\n"
-"de standaard functies kunnen worden geactiveerd met Fn + F1-F12."
+msgid   "Swap Fx function"
+msgstr  "Fx-functies omdraaien"
 
-#: lib/logitech_receiver/settings_templates.py:87
-msgid ""
-"When unset, the F1..F12 keys will activate their standard function,\n"
-"and you must hold the FN key to activate their special function."
-msgstr ""
-"Schakel dit in om de standaard functies van F1-F12 te gebruiken -\n"
-"de speciale functies kunnen worden geactiveerd met Fn + F1-F12."
+#: lib/logitech_receiver/settings_templates.py:86
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  "Schakel dit in om de speciale functies van F1-F12 te gebruiken -\n"
+        "de standaard functies kunnen worden geactiveerd met Fn + F1-F12."
 
-#: lib/logitech_receiver/settings_templates.py:89
-msgid "Mouse movement sensitivity"
-msgstr "Muisgevoeligheid"
-
-#: lib/logitech_receiver/settings_templates.py:89
-msgid "Sensitivity (DPI)"
-msgstr "Gevoeligheid (DPI)"
+#: lib/logitech_receiver/settings_templates.py:88
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  "Schakel dit in om de standaard functies van F1-F12 te gebruiken -\n"
+        "de speciale functies kunnen worden geactiveerd met Fn + F1-F12."
 
 #: lib/logitech_receiver/settings_templates.py:90
-msgid "Sensitivity (Pointer Speed)"
-msgstr "Gevoeligheid (cursorsnelheid)"
+msgid   "Mouse movement sensitivity"
+msgstr  "Muisgevoeligheid"
+
+#: lib/logitech_receiver/settings_templates.py:90
+msgid   "Sensitivity (DPI)"
+msgstr  "Gevoeligheid (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:91
-msgid "Speed multiplier for mouse (256 is normal multiplier)."
-msgstr "Muisversnelling (256 is de standaard versnelling)."
+msgid   "Sensitivity (Pointer Speed)"
+msgstr  "Gevoeligheid (cursorsnelheid)"
 
 #: lib/logitech_receiver/settings_templates.py:92
-msgid "Scroll Wheel Rachet"
-msgstr "Vrij scrollen"
+msgid   "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr  "Muisversnelling (256 is de standaard versnelling)."
 
 #: lib/logitech_receiver/settings_templates.py:93
-msgid ""
-"Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-"The mouse wheel is always free at 0, and always ratcheted at 50"
-msgstr ""
-"Schakel het scrollwiel automatisch over van regel-voor-regelmodus naar vrij "
-"scrollen.\n"
-"Bij een waarde van 0 is vrij scrollen altijd ingeschakeld; bij een waarde "
-"van 50 nooit."
+msgid   "Scroll Wheel Rachet"
+msgstr  "Vrij scrollen"
 
-#: lib/logitech_receiver/settings_templates.py:95
-msgid "Backlight"
-msgstr "Achtergrondverlichting"
-
-#: lib/logitech_receiver/settings_templates.py:95
-msgid "Turn illumination on or off on keyboard."
-msgstr "Schakel de toetsenbordverlichting in of uit."
+#: lib/logitech_receiver/settings_templates.py:94
+msgid   "Automatically switch the mouse wheel between ratchet and freespin "
+        "mode.\n"
+        "The mouse wheel is always free at 0, and always ratcheted at 50"
+msgstr  "Schakel het scrollwiel automatisch over van regel-voor-regelmodus "
+        "naar vrij scrollen.\n"
+        "Bij een waarde van 0 is vrij scrollen altijd ingeschakeld; bij een "
+        "waarde van 50 nooit."
 
 #: lib/logitech_receiver/settings_templates.py:96
-msgid "Key/Button Actions"
-msgstr "Toets-/Knopacties"
+msgid   "Backlight"
+msgstr  "Achtergrondverlichting"
+
+#: lib/logitech_receiver/settings_templates.py:96
+msgid   "Turn illumination on or off on keyboard."
+msgstr  "Schakel de toetsenbordverlichting in of uit."
 
 #: lib/logitech_receiver/settings_templates.py:97
-msgid "Change the action for the key or button."
-msgstr "Pas de actie van een toets of knop aan."
+msgid   "Key/Button Actions"
+msgstr  "Toets-/Knopacties"
 
 #: lib/logitech_receiver/settings_templates.py:98
-msgid ""
-"Changing important actions (such as for the left mouse button) can result in "
-"an unusable system."
-msgstr ""
-"Let op: het aanpassen van belangrijke acties (zoals die van de "
-"linkermuisknop) kan leiden tot een onbruikbaar systeem."
+msgid   "Change the action for the key or button."
+msgstr  "Pas de actie van een toets of knop aan."
 
 #: lib/logitech_receiver/settings_templates.py:99
-msgid "Key/Button Diversion"
-msgstr "Toets-/Knopomleiding"
+msgid   "Changing important actions (such as for the left mouse button) can "
+        "result in an unusable system."
+msgstr  "Let op: het aanpassen van belangrijke acties (zoals die van de "
+        "linkermuisknop) kan leiden tot een onbruikbaar systeem."
 
 #: lib/logitech_receiver/settings_templates.py:100
-msgid ""
-"Make the key or button send HID++ notifications (which trigger Solaar rules "
-"but are otherwise ignored)."
-msgstr ""
-"Laat de toets of knop een HID++-melding versturen (welke Solaar's regels "
-"volgen, maar verder genegeerd worden)."
+msgid   "Key/Button Diversion"
+msgstr  "Toets-/Knopomleiding"
 
 #: lib/logitech_receiver/settings_templates.py:101
-msgid "Disable keys"
-msgstr "Toetsen uitschakelen"
-
-#: lib/logitech_receiver/settings_templates.py:101
-msgid "Disable specific keyboard keys."
-msgstr "Schakel specifieke toetsen op het toetsenbord uit."
+msgid   "Make the key or button send HID++ notifications (which trigger "
+        "Solaar rules but are otherwise ignored)."
+msgstr  "Laat de toets of knop een HID++-melding versturen (welke Solaar's "
+        "regels volgen, maar verder genegeerd worden)."
 
 #: lib/logitech_receiver/settings_templates.py:102
-msgid "Change keys to match OS."
-msgstr "Pas de toetsen aan aan het besturingssysteem."
+msgid   "Disable keys"
+msgstr  "Toetsen uitschakelen"
 
 #: lib/logitech_receiver/settings_templates.py:102
-msgid "Set OS"
-msgstr "Besturingssysteem instellen"
+msgid   "Disable specific keyboard keys."
+msgstr  "Schakel specifieke toetsen op het toetsenbord uit."
 
 #: lib/logitech_receiver/settings_templates.py:103
-msgid "Change Host"
-msgstr "Host veranderen"
+msgid   "Change keys to match OS."
+msgstr  "Pas de toetsen aan aan het besturingssysteem."
 
 #: lib/logitech_receiver/settings_templates.py:103
-msgid "Switch connection to a different host"
-msgstr "Schakel over naar een andere host."
+msgid   "Set OS"
+msgstr  "Besturingssysteem instellen"
 
 #: lib/logitech_receiver/settings_templates.py:104
-msgid "Thumb Wheel HID++ Scrolling"
-msgstr "HID++-scrollen met duimwiel"
+msgid   "Change Host"
+msgstr  "Host veranderen"
+
+#: lib/logitech_receiver/settings_templates.py:104
+msgid   "Switch connection to a different host"
+msgstr  "Schakel over naar een andere host."
 
 #: lib/logitech_receiver/settings_templates.py:105
-msgid "HID++ mode for horizontal scroll with the thumb wheel."
-msgstr "HID++-modus voor horizontaal scrollen met het duimwiel."
+msgid   "Thumb Wheel HID++ Scrolling"
+msgstr  "HID++-scrollen met duimwiel"
 
 #: lib/logitech_receiver/settings_templates.py:106
-msgid "Effectively turns off thumb scrolling in Linux."
-msgstr "Schakelt scrollen met het duimwiel op Linux uit."
+msgid   "HID++ mode for horizontal scroll with the thumb wheel."
+msgstr  "HID++-modus voor horizontaal scrollen met het duimwiel."
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid "Invert thumb wheel scroll direction."
-msgstr "Keer de scrollrichting van het duimwiel om."
-
-#: lib/logitech_receiver/settings_templates.py:107
-msgid "Thumb Wheel Direction"
-msgstr "Duimwielrichting"
+msgid   "Effectively turns off thumb scrolling in Linux."
+msgstr  "Schakelt scrollen met het duimwiel op Linux uit."
 
 #: lib/logitech_receiver/settings_templates.py:108
-msgid "Gestures"
-msgstr "Gebaren"
+msgid   "Invert thumb wheel scroll direction."
+msgstr  "Keer de scrollrichting van het duimwiel om."
 
 #: lib/logitech_receiver/settings_templates.py:108
-msgid "Tweak the mouse/touchpad behaviour."
-msgstr "Pas het gedrag van het trackpad/de muis aan."
+msgid   "Thumb Wheel Direction"
+msgstr  "Duimwielrichting"
 
 #: lib/logitech_receiver/settings_templates.py:109
-msgid "Change numerical parameters of a mouse/touchpad."
-msgstr "Pas de numerieke waarden van het trackpad/de muis aan."
+msgid   "Gestures"
+msgstr  "Gebaren"
 
 #: lib/logitech_receiver/settings_templates.py:109
-msgid "Gesture params"
-msgstr "Gebarenwaarden"
+msgid   "Tweak the mouse/touchpad behaviour."
+msgstr  "Pas het gedrag van het trackpad/de muis aan."
 
 #: lib/logitech_receiver/settings_templates.py:110
-msgid "DPI Sliding Adjustment"
-msgstr "DPI aanpassen middels verplaatsen"
+msgid   "Change numerical parameters of a mouse/touchpad."
+msgstr  "Pas de numerieke waarden van het trackpad/de muis aan."
+
+#: lib/logitech_receiver/settings_templates.py:110
+msgid   "Gesture params"
+msgstr  "Gebarenwaarden"
 
 #: lib/logitech_receiver/settings_templates.py:111
-msgid ""
-"Adjust the DPI by sliding the mouse horizontally while holding the DPI "
-"button."
-msgstr ""
-"Pas het aantal dpi aan door de dpi-knop ingedrukt te houden en de muis "
-"horizontaal te verplaatsen."
+msgid   "DPI Sliding Adjustment"
+msgstr  "DPI aanpassen middels verplaatsen"
 
 #: lib/logitech_receiver/settings_templates.py:112
-msgid "Divert crown events"
-msgstr "Kroongebeurtenissen omleiden"
+msgid   "Adjust the DPI by sliding the mouse horizontally while holding the "
+        "DPI button."
+msgstr  "Pas het aantal dpi aan door de dpi-knop ingedrukt te houden en de "
+        "muis horizontaal te verplaatsen."
 
 #: lib/logitech_receiver/settings_templates.py:113
-msgid ""
-"Make crown send CROWN HID++ notifications (which trigger Solaar rules but "
-"are otherwise ignored)."
-msgstr ""
-"Laat de kroon een HID++-melding versturen (welke Solaar's regels volgen, "
-"maar verder genegeerd worden)."
+msgid   "Divert crown events"
+msgstr  "Kroongebeurtenissen omleiden"
 
 #: lib/logitech_receiver/settings_templates.py:114
-msgid "Divert G Keys"
-msgstr "G-toetsen omleiden"
+msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "Laat de kroon een HID++-melding versturen (welke Solaar's regels "
+        "volgen, maar verder genegeerd worden)."
 
 #: lib/logitech_receiver/settings_templates.py:115
-msgid ""
-"Make G keys send GKEY HID++ notifications (which trigger Solaar rules but "
-"are otherwise ignored)."
-msgstr ""
-"Laat de G-toetsen een HID++-melding versturen (welke Solaar's regels volgen, "
-"maar verder genegeerd worden)."
+msgid   "Divert G Keys"
+msgstr  "G-toetsen omleiden"
 
-#: lib/logitech_receiver/settings_templates.py:118
-msgid "Performs a left click."
-msgstr "Voert een linkermuisklik uit."
-
-#: lib/logitech_receiver/settings_templates.py:118
-msgid "Single tap"
-msgstr "Eenmaal tikken"
+#: lib/logitech_receiver/settings_templates.py:116
+msgid   "Make G keys send GKEY HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "Laat de G-toetsen een HID++-melding versturen (welke Solaar's regels "
+        "volgen, maar verder genegeerd worden)."
 
 #: lib/logitech_receiver/settings_templates.py:119
-msgid "Performs a right click."
-msgstr "Voert een rechtermuisklik uit."
+msgid   "Performs a left click."
+msgstr  "Voert een linkermuisklik uit."
 
 #: lib/logitech_receiver/settings_templates.py:119
-msgid "Single tap with two fingers"
-msgstr "Eenmaal tikken met twee vingers"
+msgid   "Single tap"
+msgstr  "Eenmaal tikken"
 
 #: lib/logitech_receiver/settings_templates.py:120
-msgid "Single tap with three fingers"
-msgstr "Eenmaal tikken met drie vingers"
+msgid   "Performs a right click."
+msgstr  "Voert een rechtermuisklik uit."
 
-#: lib/logitech_receiver/settings_templates.py:124
-msgid "Double tap"
-msgstr "Dubbeltikken"
+#: lib/logitech_receiver/settings_templates.py:120
+msgid   "Single tap with two fingers"
+msgstr  "Eenmaal tikken met twee vingers"
 
-#: lib/logitech_receiver/settings_templates.py:124
-msgid "Performs a double click."
-msgstr "Voert een dubbele klik uit."
+#: lib/logitech_receiver/settings_templates.py:121
+msgid   "Single tap with three fingers"
+msgstr  "Eenmaal tikken met drie vingers"
 
 #: lib/logitech_receiver/settings_templates.py:125
-msgid "Double tap with two fingers"
-msgstr "Dubbeltikken met twee vingers"
+msgid   "Double tap"
+msgstr  "Dubbeltikken"
+
+#: lib/logitech_receiver/settings_templates.py:125
+msgid   "Performs a double click."
+msgstr  "Voert een dubbele klik uit."
 
 #: lib/logitech_receiver/settings_templates.py:126
-msgid "Double tap with three fingers"
-msgstr "Dubbeltikken met drie vingers"
+msgid   "Double tap with two fingers"
+msgstr  "Dubbeltikken met twee vingers"
 
-#: lib/logitech_receiver/settings_templates.py:129
-msgid "Drags items by dragging the finger after double tapping."
-msgstr "Verplaats items door na het dubbeltikken uw vinger te verplaatsen."
-
-#: lib/logitech_receiver/settings_templates.py:129
-msgid "Tap and drag"
-msgstr "Tikken-en-slepen"
+#: lib/logitech_receiver/settings_templates.py:127
+msgid   "Double tap with three fingers"
+msgstr  "Dubbeltikken met drie vingers"
 
 #: lib/logitech_receiver/settings_templates.py:130
-msgid "Tap and drag with two fingers"
-msgstr "Tikken-en-slepen met twee vingers"
+msgid   "Drags items by dragging the finger after double tapping."
+msgstr  "Verplaats items door na het dubbeltikken uw vinger te verplaatsen."
+
+#: lib/logitech_receiver/settings_templates.py:130
+msgid   "Tap and drag"
+msgstr  "Tikken-en-slepen"
 
 #: lib/logitech_receiver/settings_templates.py:131
-msgid "Drags items by dragging the fingers after double tapping."
-msgstr "Verplaats items door na het dubbeltikken uw vingers te verplaatsen."
+msgid   "Tap and drag with two fingers"
+msgstr  "Tikken-en-slepen met twee vingers"
 
 #: lib/logitech_receiver/settings_templates.py:132
-msgid "Tap and drag with three fingers"
-msgstr "Tikken-en-slepen met drie vingers"
+msgid   "Drags items by dragging the fingers after double tapping."
+msgstr  "Verplaats items door na het dubbeltikken uw vingers te verplaatsen."
 
-#: lib/logitech_receiver/settings_templates.py:134
-msgid "Suppress tap and edge gestures"
-msgstr "Tik- en randgebaren uitschakelen"
+#: lib/logitech_receiver/settings_templates.py:133
+msgid   "Tap and drag with three fingers"
+msgstr  "Tikken-en-slepen met drie vingers"
 
 #: lib/logitech_receiver/settings_templates.py:135
-msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
-msgstr "Schakel tik- en randgebaren uit (gelijk aan Fn+linkermuisklik)."
+msgid   "Suppress tap and edge gestures"
+msgstr  "Tik- en randgebaren uitschakelen"
 
 #: lib/logitech_receiver/settings_templates.py:136
-msgid "Scroll with one finger"
-msgstr "Scrollen met één vinger"
-
-#: lib/logitech_receiver/settings_templates.py:136
-#: lib/logitech_receiver/settings_templates.py:137
-#: lib/logitech_receiver/settings_templates.py:140
-msgid "Scrolls."
-msgstr "Scrollt."
+msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr  "Schakel tik- en randgebaren uit (gelijk aan Fn+linkermuisklik)."
 
 #: lib/logitech_receiver/settings_templates.py:137
+msgid   "Scroll with one finger"
+msgstr  "Scrollen met één vinger"
+
+#: lib/logitech_receiver/settings_templates.py:137
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
+msgid   "Scrolls."
+msgstr  "Scrollt."
+
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
+msgid   "Scroll with two fingers"
+msgstr  "Scrollen met twee vingers"
+
+#: lib/logitech_receiver/settings_templates.py:139
+msgid   "Scroll horizontally with two fingers"
+msgstr  "Horizontaal scrollen met twee vingers"
+
+#: lib/logitech_receiver/settings_templates.py:139
+msgid   "Scrolls horizontally."
+msgstr  "Scrollt horizontaal."
+
 #: lib/logitech_receiver/settings_templates.py:140
-msgid "Scroll with two fingers"
-msgstr "Scrollen met twee vingers"
+msgid   "Scroll vertically with two fingers"
+msgstr  "Verticaal scrollen met twee vingers"
 
-#: lib/logitech_receiver/settings_templates.py:138
-msgid "Scroll horizontally with two fingers"
-msgstr "Horizontaal scrollen met twee vingers"
-
-#: lib/logitech_receiver/settings_templates.py:138
-msgid "Scrolls horizontally."
-msgstr "Scrollt horizontaal."
-
-#: lib/logitech_receiver/settings_templates.py:139
-msgid "Scroll vertically with two fingers"
-msgstr "Verticaal scrollen met twee vingers"
-
-#: lib/logitech_receiver/settings_templates.py:139
-msgid "Scrolls vertically."
-msgstr "Scrollt verticaal."
-
-#: lib/logitech_receiver/settings_templates.py:141
-msgid "Inverts the scrolling direction."
-msgstr "Draai de scrollrichting om."
-
-#: lib/logitech_receiver/settings_templates.py:141
-msgid "Natural scrolling"
-msgstr "Natuurlijk scrollen"
+#: lib/logitech_receiver/settings_templates.py:140
+msgid   "Scrolls vertically."
+msgstr  "Scrollt verticaal."
 
 #: lib/logitech_receiver/settings_templates.py:142
-msgid "Enables the thumbwheel."
-msgstr "Schakel het duimwiel in."
+msgid   "Inverts the scrolling direction."
+msgstr  "Draai de scrollrichting om."
 
 #: lib/logitech_receiver/settings_templates.py:142
-msgid "Thumbwheel"
-msgstr "Duimwiel"
+msgid   "Natural scrolling"
+msgstr  "Natuurlijk scrollen"
 
-#: lib/logitech_receiver/settings_templates.py:153
-#: lib/logitech_receiver/settings_templates.py:157
-msgid "Swipe from the top edge"
-msgstr "Vegen vanaf bovenkant"
+#: lib/logitech_receiver/settings_templates.py:143
+msgid   "Enables the thumbwheel."
+msgstr  "Schakel het duimwiel in."
+
+#: lib/logitech_receiver/settings_templates.py:143
+msgid   "Thumbwheel"
+msgstr  "Duimwiel"
 
 #: lib/logitech_receiver/settings_templates.py:154
-msgid "Swipe from the left edge"
-msgstr "Vegen vanaf linkerkant"
+#: lib/logitech_receiver/settings_templates.py:158
+msgid   "Swipe from the top edge"
+msgstr  "Vegen vanaf bovenkant"
 
 #: lib/logitech_receiver/settings_templates.py:155
-msgid "Swipe from the right edge"
-msgstr "Vegen vanaf rechterkant"
+msgid   "Swipe from the left edge"
+msgstr  "Vegen vanaf linkerkant"
 
 #: lib/logitech_receiver/settings_templates.py:156
-msgid "Swipe from the bottom edge"
-msgstr "Vegen vanaf onderkant"
+msgid   "Swipe from the right edge"
+msgstr  "Vegen vanaf rechterkant"
 
-#: lib/logitech_receiver/settings_templates.py:158
-msgid "Swipe two fingers from the left edge"
-msgstr "Vegen vanaf linkerkant (twee vingers)"
+#: lib/logitech_receiver/settings_templates.py:157
+msgid   "Swipe from the bottom edge"
+msgstr  "Vegen vanaf onderkant"
 
 #: lib/logitech_receiver/settings_templates.py:159
-msgid "Swipe two fingers from the right edge"
-msgstr "Vegen vanaf rechterkant (twee vingers)"
+msgid   "Swipe two fingers from the left edge"
+msgstr  "Vegen vanaf linkerkant (twee vingers)"
 
 #: lib/logitech_receiver/settings_templates.py:160
-msgid "Swipe two fingers from the bottom edge"
-msgstr "Vegen vanaf onderkant (twee vingers)"
+msgid   "Swipe two fingers from the right edge"
+msgstr  "Vegen vanaf rechterkant (twee vingers)"
 
 #: lib/logitech_receiver/settings_templates.py:161
-msgid "Swipe two fingers from the top edge"
-msgstr "Vegen vanaf bovenkant (twee vingers)"
+msgid   "Swipe two fingers from the bottom edge"
+msgstr  "Vegen vanaf onderkant (twee vingers)"
 
 #: lib/logitech_receiver/settings_templates.py:162
-#: lib/logitech_receiver/settings_templates.py:166
-msgid "Pinch to zoom out; spread to zoom in."
-msgstr "Knijp om uit te zoomen; spreid om in te zoomen."
-
-#: lib/logitech_receiver/settings_templates.py:162
-msgid "Zoom with two fingers."
-msgstr "Zoomen met twee vingers."
+msgid   "Swipe two fingers from the top edge"
+msgstr  "Vegen vanaf bovenkant (twee vingers)"
 
 #: lib/logitech_receiver/settings_templates.py:163
-msgid "Pinch to zoom out."
-msgstr "Knijp om uit te zoomen."
+#: lib/logitech_receiver/settings_templates.py:167
+msgid   "Pinch to zoom out; spread to zoom in."
+msgstr  "Knijp om uit te zoomen; spreid om in te zoomen."
+
+#: lib/logitech_receiver/settings_templates.py:163
+msgid   "Zoom with two fingers."
+msgstr  "Zoomen met twee vingers."
 
 #: lib/logitech_receiver/settings_templates.py:164
-msgid "Spread to zoom in."
-msgstr "Spreid om in te zoomen."
+msgid   "Pinch to zoom out."
+msgstr  "Knijp om uit te zoomen."
 
 #: lib/logitech_receiver/settings_templates.py:165
-msgid "Zoom with three fingers."
-msgstr "Zoomen met drie vingers."
+msgid   "Spread to zoom in."
+msgstr  "Spreid om in te zoomen."
 
 #: lib/logitech_receiver/settings_templates.py:166
-msgid "Zoom with two fingers"
-msgstr "Zoomen met twee vingers"
+msgid   "Zoom with three fingers."
+msgstr  "Zoomen met drie vingers."
 
-#: lib/logitech_receiver/settings_templates.py:190
-msgid "Left"
-msgstr "Links"
-
-#: lib/logitech_receiver/settings_templates.py:190
-msgid "Left-most coordinate."
-msgstr "Het meest linker coördinaat."
+#: lib/logitech_receiver/settings_templates.py:167
+msgid   "Zoom with two fingers"
+msgstr  "Zoomen met twee vingers"
 
 #: lib/logitech_receiver/settings_templates.py:191
-msgid "Top-most coordinate."
-msgstr "Het bovenste coördinaat."
+msgid   "Left"
+msgstr  "Links"
 
 #: lib/logitech_receiver/settings_templates.py:191
-msgid "top"
-msgstr "boven"
+msgid   "Left-most coordinate."
+msgstr  "Het meest linker coördinaat."
 
 #: lib/logitech_receiver/settings_templates.py:192
-msgid "Width."
-msgstr "Breedte."
+msgid   "Top-most coordinate."
+msgstr  "Het bovenste coördinaat."
 
 #: lib/logitech_receiver/settings_templates.py:192
-msgid "width"
-msgstr "breedte"
+msgid   "top"
+msgstr  "boven"
 
 #: lib/logitech_receiver/settings_templates.py:193
-msgid "Height."
-msgstr "Hoogte."
+msgid   "Width."
+msgstr  "Breedte."
 
 #: lib/logitech_receiver/settings_templates.py:193
-msgid "height"
-msgstr "hoogte"
+msgid   "width"
+msgstr  "breedte"
 
 #: lib/logitech_receiver/settings_templates.py:194
-msgid "Cursor speed."
-msgstr "Cursorsnelheid."
+msgid   "Height."
+msgstr  "Hoogte."
 
 #: lib/logitech_receiver/settings_templates.py:194
-msgid "Scale"
-msgstr "Schaal"
+msgid   "height"
+msgstr  "hoogte"
 
-#: lib/logitech_receiver/settings_templates.py:197
+#: lib/logitech_receiver/settings_templates.py:195
+msgid   "Cursor speed."
+msgstr  "Cursorsnelheid."
+
+#: lib/logitech_receiver/settings_templates.py:195
+msgid   "Scale"
+msgstr  "Schaal"
+
+#: lib/logitech_receiver/settings_templates.py:198
 #, python-format
-msgid "Disables the %s key."
-msgstr "Schakelt de %s-toets uit."
+msgid   "Disables the %s key."
+msgstr  "Schakelt de %s-toets uit."
 
 #: lib/logitech_receiver/status.py:108
-msgid "No paired devices."
-msgstr "Geen apparaten gekoppeld."
+msgid   "No paired devices."
+msgstr  "Geen apparaten gekoppeld."
 
 #: lib/logitech_receiver/status.py:109 lib/solaar/ui/window.py:623
 #, python-format
-msgid "%(count)s paired device."
-msgid_plural "%(count)s paired devices."
-msgstr[0] "%(count)s gekoppeld apparaat."
-msgstr[1] "%(count)s gekoppelde apparaten."
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       "%(count)s gekoppeld apparaat."
+msgstr[1]       "%(count)s gekoppelde apparaten."
 
 #: lib/logitech_receiver/status.py:164
 #, python-format
-msgid "Battery: %(level)s"
-msgstr "Batterijniveau: %(level)s"
+msgid   "Battery: %(level)s"
+msgstr  "Batterijniveau: %(level)s"
 
 #: lib/logitech_receiver/status.py:166
 #, python-format
-msgid "Battery: %(percent)d%%"
-msgstr "Batterijniveau: %(percent)d%%"
+msgid   "Battery: %(percent)d%%"
+msgstr  "Batterijniveau: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:178
 #, python-format
-msgid "Lighting: %(level)s lux"
-msgstr "Verlichting: %(level)s lux"
+msgid   "Lighting: %(level)s lux"
+msgstr  "Verlichting: %(level)s lux"
 
 #: lib/logitech_receiver/status.py:233
 #, python-format
-msgid "Battery: %(level)s (%(status)s)"
-msgstr "Batterijniveau: %(level)s (%(status)s)"
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  "Batterijniveau: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:235
 #, python-format
-msgid "Battery: %(percent)d%% (%(status)s)"
-msgstr "Batterijniveau: %(percent)d%% (%(status)s)"
+msgid   "Battery: %(percent)d%% (%(status)s)"
+msgstr  "Batterijniveau: %(percent)d%% (%(status)s)"
 
-#: lib/solaar/gtk.py:143
-msgid "Solaar depends on a udev file that is not present"
-msgstr "Solaar is afhankelijk van een udev-bestand dat niet aanwezig is"
+#: lib/solaar/gtk.py:148
+msgid   "Solaar depends on a udev file that is not present"
+msgstr  "Solaar is afhankelijk van een udev-bestand dat niet aanwezig is"
 
-#: lib/solaar/gtk.py:146
-msgid ""
-"For more information see the Solaar installation directions\n"
-"at https://pwr-solaar.github.io/Solaar/installation"
-msgstr ""
-"Bekijk voor meer informatie de installatiehulp op https://pwr-solaar.github."
-"io/Solaar/installation"
+#: lib/solaar/gtk.py:151
+msgid   "For more information see the Solaar installation directions\n"
+        "at https://pwr-solaar.github.io/Solaar/installation"
+msgstr  "Bekijk voor meer informatie de installatiehulp op https://pwr-solaar."
+        "github.io/Solaar/installation"
 
 #: lib/solaar/ui/__init__.py:52
-msgid "Permissions error"
-msgstr "Machtigingsfout"
+msgid   "Permissions error"
+msgstr  "Machtigingsfout"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
-msgstr ""
-"Er is een Logitech-ontvanger aangetroffen ('%s'), maar Solaar is niet "
-"gemachtigd om deze te tonen."
+msgid   "Found a Logitech Receiver (%s), but did not have permission to open "
+        "it."
+msgstr  "Er is een Logitech-ontvanger aangetroffen ('%s'), maar Solaar is "
+        "niet gemachtigd om deze te tonen."
 
 #: lib/solaar/ui/__init__.py:55
-msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
-msgstr ""
-"Als u Solaar nét heeft geïnstalleerd, plug dan de ontvanger opnieuw in."
+msgid   "If you've just installed Solaar, try removing the receiver and "
+        "plugging it back in."
+msgstr  "Als u Solaar nét heeft geïnstalleerd, plug dan de ontvanger opnieuw "
+        "in."
 
 #: lib/solaar/ui/__init__.py:58
-msgid "Unpairing failed"
-msgstr "Loskoppelen mislukt"
+msgid   "Unpairing failed"
+msgstr  "Loskoppelen mislukt"
 
 #: lib/solaar/ui/__init__.py:60
 #, python-brace-format
-msgid "Failed to unpair %{device} from %{receiver}."
-msgstr "'%{device}' kan niet worden losgekoppeld van '%{receiver}'."
+msgid   "Failed to unpair %{device} from %{receiver}."
+msgstr  "'%{device}' kan niet worden losgekoppeld van '%{receiver}'."
 
 #: lib/solaar/ui/__init__.py:61
-msgid "The receiver returned an error, with no further details."
-msgstr "Er is een fout opgetreden zonder nadere informatie."
+msgid   "The receiver returned an error, with no further details."
+msgstr  "Er is een fout opgetreden zonder nadere informatie."
 
-#: lib/solaar/ui/about.py:38
-msgid ""
-"Shows status of devices connected\n"
-"through wireless Logitech receivers."
-msgstr ""
-"Toont de status van apparaten die verbonden\n"
-"zijn middels draadloze Logitech-ontvangers."
+#: lib/solaar/ui/about.py:39
+msgid   "Shows status of devices connected\n"
+        "through wireless Logitech receivers."
+msgstr  "Toont de status van apparaten die verbonden\n"
+        "zijn middels draadloze Logitech-ontvangers."
 
-#: lib/solaar/ui/about.py:47
-msgid "GUI design"
-msgstr "Toepassingsontwerp"
+#: lib/solaar/ui/about.py:48
+msgid   "GUI design"
+msgstr  "Toepassingsontwerp"
 
-#: lib/solaar/ui/about.py:49
-msgid "Testing"
-msgstr "Testen"
+#: lib/solaar/ui/about.py:50
+msgid   "Testing"
+msgstr  "Testen"
 
-#: lib/solaar/ui/about.py:56
-msgid "Logitech documentation"
-msgstr "Logitech-documentatie"
+#: lib/solaar/ui/about.py:57
+msgid   "Logitech documentation"
+msgstr  "Logitech-documentatie"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid "About"
-msgstr "Over"
+msgid   "About"
+msgstr  "Over"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
-msgid "Unpair"
-msgstr "Loskoppelen"
+msgid   "Unpair"
+msgstr  "Loskoppelen"
 
 #: lib/solaar/ui/config_panel.py:370
-msgid "Click to allow changes."
-msgstr "Klik om wijzigingen toe te staan."
+msgid   "Click to allow changes."
+msgstr  "Klik om wijzigingen toe te staan."
 
 #: lib/solaar/ui/config_panel.py:370
-msgid "Click to prevent changes."
-msgstr "Klik om wijzigingen te voorkomen."
+msgid   "Click to prevent changes."
+msgstr  "Klik om wijzigingen te voorkomen."
 
 #: lib/solaar/ui/config_panel.py:380
-msgid "Working"
-msgstr "Aan het werk"
+msgid   "Working"
+msgstr  "Aan het werk"
 
 #: lib/solaar/ui/config_panel.py:383
-msgid "Read/write operation failed."
-msgstr "Uitlezen/Wegschrijven mislukt."
+msgid   "Read/write operation failed."
+msgstr  "Uitlezen/Wegschrijven mislukt."
 
 #: lib/solaar/ui/config_panel.py:501
 #, python-format
-msgid "%d value"
-msgid_plural "%d values"
-msgstr[0] "%d waarde"
-msgstr[1] "%d waarden"
+msgid   "%d value"
+msgid_plural    "%d values"
+msgstr[0]       "%d waarde"
+msgstr[1]       "%d waarden"
 
 #: lib/solaar/ui/diversion_rules.py:56
-msgid "Built-in rules"
-msgstr "Meegeleverde regels"
+msgid   "Built-in rules"
+msgstr  "Meegeleverde regels"
 
 #: lib/solaar/ui/diversion_rules.py:56
-msgid "User-defined rules"
-msgstr "Eigen regels"
+msgid   "User-defined rules"
+msgstr  "Eigen regels"
 
 #: lib/solaar/ui/diversion_rules.py:58 lib/solaar/ui/diversion_rules.py:789
-msgid "Rule"
-msgstr "Regel"
+msgid   "Rule"
+msgstr  "Regel"
 
 #: lib/solaar/ui/diversion_rules.py:59 lib/solaar/ui/diversion_rules.py:502
 #: lib/solaar/ui/diversion_rules.py:619
-msgid "Sub-rule"
-msgstr "Aanvullende regel"
+msgid   "Sub-rule"
+msgstr  "Aanvullende regel"
 
 #: lib/solaar/ui/diversion_rules.py:61
-msgid "[empty]"
-msgstr "[leeg]"
+msgid   "[empty]"
+msgstr  "[leeg]"
 
 #: lib/solaar/ui/diversion_rules.py:84
-msgid "Solaar Rule Editor"
-msgstr "Solaar-regelbewerker"
+msgid   "Solaar Rule Editor"
+msgstr  "Solaar-regelbewerker"
 
 #: lib/solaar/ui/diversion_rules.py:134
-msgid "Make changes permanent?"
-msgstr "Wilt u de wijzigingen permanent opslaan?"
+msgid   "Make changes permanent?"
+msgstr  "Wilt u de wijzigingen permanent opslaan?"
 
 #: lib/solaar/ui/diversion_rules.py:146
-msgid "If you choose No, changes will be lost when Solaar is closed."
-msgstr "Als u 'Nee' kiest, dan worden ze verworpen nadat Solaar is afgesloten."
+msgid   "If you choose No, changes will be lost when Solaar is closed."
+msgstr  "Als u 'Nee' kiest, dan worden ze verworpen nadat Solaar is "
+        "afgesloten."
 
 #: lib/solaar/ui/diversion_rules.py:365
-msgid "Insert here"
-msgstr "Hier invoegen"
+msgid   "Insert here"
+msgstr  "Hier invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:367
-msgid "Insert above"
-msgstr "Hierboven invoegen"
+msgid   "Insert above"
+msgstr  "Hierboven invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:369
-msgid "Insert below"
-msgstr "Hieronder invoegen"
+msgid   "Insert below"
+msgstr  "Hieronder invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:375
-msgid "Insert new rule here"
-msgstr "Nieuwe regel hier invoegen"
+msgid   "Insert new rule here"
+msgstr  "Nieuwe regel hier invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:377
-msgid "Insert new rule above"
-msgstr "Nieuwe regel hierboven invoegen"
+msgid   "Insert new rule above"
+msgstr  "Nieuwe regel hierboven invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:379
-msgid "Insert new rule below"
-msgstr "Nieuwe regel hieronder invoegen"
+msgid   "Insert new rule below"
+msgstr  "Nieuwe regel hieronder invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:420
-msgid "Paste here"
-msgstr "Hier plakken"
+msgid   "Paste here"
+msgstr  "Hier plakken"
 
 #: lib/solaar/ui/diversion_rules.py:422
-msgid "Paste above"
-msgstr "Hierboven plakken"
+msgid   "Paste above"
+msgstr  "Hierboven plakken"
 
 #: lib/solaar/ui/diversion_rules.py:424
-msgid "Paste below"
-msgstr "Hieronder plakken"
+msgid   "Paste below"
+msgstr  "Hieronder plakken"
 
 #: lib/solaar/ui/diversion_rules.py:430
-msgid "Paste rule here"
-msgstr "Regel hier plakken"
+msgid   "Paste rule here"
+msgstr  "Regel hier plakken"
 
 #: lib/solaar/ui/diversion_rules.py:432
-msgid "Paste rule above"
-msgstr "Regel hierboven plakken"
+msgid   "Paste rule above"
+msgstr  "Regel hierboven plakken"
 
 #: lib/solaar/ui/diversion_rules.py:434
-msgid "Paste rule below"
-msgstr "Regel hieronder plakken"
+msgid   "Paste rule below"
+msgstr  "Regel hieronder plakken"
 
 #: lib/solaar/ui/diversion_rules.py:438
-msgid "Paste rule"
-msgstr "Regel plakken"
+msgid   "Paste rule"
+msgstr  "Regel plakken"
 
 #: lib/solaar/ui/diversion_rules.py:467
-msgid "Flatten"
-msgstr "Vlakmaken"
+msgid   "Flatten"
+msgstr  "Vlakmaken"
 
 #: lib/solaar/ui/diversion_rules.py:500
-msgid "Insert"
-msgstr "Invoegen"
+msgid   "Insert"
+msgstr  "Invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:503 lib/solaar/ui/diversion_rules.py:621
 #: lib/solaar/ui/diversion_rules.py:832
-msgid "Or"
-msgstr "Of"
+msgid   "Or"
+msgstr  "Of"
 
 #: lib/solaar/ui/diversion_rules.py:504 lib/solaar/ui/diversion_rules.py:620
 #: lib/solaar/ui/diversion_rules.py:817
-msgid "And"
-msgstr "En"
+msgid   "And"
+msgstr  "En"
 
 #: lib/solaar/ui/diversion_rules.py:506
-msgid "Condition"
-msgstr "Omstandigheid"
+msgid   "Condition"
+msgstr  "Omstandigheid"
 
 #: lib/solaar/ui/diversion_rules.py:508 lib/solaar/ui/diversion_rules.py:920
-msgid "Feature"
-msgstr "Functie"
+msgid   "Feature"
+msgstr  "Functie"
 
 #: lib/solaar/ui/diversion_rules.py:509 lib/solaar/ui/diversion_rules.py:871
-msgid "Process"
-msgstr "Proces"
+msgid   "Process"
+msgstr  "Proces"
 
 #: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:953
-msgid "Report"
-msgstr "Melden"
+msgid   "Report"
+msgstr  "Melden"
 
 #: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:988
-msgid "Modifiers"
-msgstr "Sneltoetsen"
+msgid   "Modifiers"
+msgstr  "Sneltoetsen"
 
 #: lib/solaar/ui/diversion_rules.py:512 lib/solaar/ui/diversion_rules.py:1024
-msgid "Key"
-msgstr "Toets"
+msgid   "Key"
+msgstr  "Toets"
 
 #: lib/solaar/ui/diversion_rules.py:513 lib/solaar/ui/diversion_rules.py:1069
-msgid "Test"
-msgstr "Testen"
+msgid   "Test"
+msgstr  "Testen"
 
 #: lib/solaar/ui/diversion_rules.py:517
-msgid "Action"
-msgstr "Actie"
+msgid   "Action"
+msgstr  "Actie"
 
 #: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1156
-msgid "Key press"
-msgstr "Toetsaanslag"
+msgid   "Key press"
+msgstr  "Toetsaanslag"
 
 #: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1205
-msgid "Mouse scroll"
-msgstr "Scrollbeweging"
+msgid   "Mouse scroll"
+msgstr  "Scrollbeweging"
 
 #: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1253
-msgid "Mouse click"
-msgstr "Muisklik"
+msgid   "Mouse click"
+msgstr  "Muisklik"
 
 #: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:1322
-msgid "Execute"
-msgstr "Uitvoeren"
+msgid   "Execute"
+msgstr  "Uitvoeren"
 
 #: lib/solaar/ui/diversion_rules.py:551
-msgid "Insert new rule"
-msgstr "Nieuwe regel invoegen"
+msgid   "Insert new rule"
+msgstr  "Nieuwe regel invoegen"
 
 #: lib/solaar/ui/diversion_rules.py:571 lib/solaar/ui/diversion_rules.py:1106
 #: lib/solaar/ui/diversion_rules.py:1281
-msgid "Delete"
-msgstr "Verwijderen"
+msgid   "Delete"
+msgstr  "Verwijderen"
 
 #: lib/solaar/ui/diversion_rules.py:593
-msgid "Negate"
-msgstr "Negeren"
+msgid   "Negate"
+msgstr  "Negeren"
 
 #: lib/solaar/ui/diversion_rules.py:617
-msgid "Wrap with"
-msgstr "Omslaan met"
+msgid   "Wrap with"
+msgstr  "Omslaan met"
 
 #: lib/solaar/ui/diversion_rules.py:639
-msgid "Cut"
-msgstr "Knippen"
+msgid   "Cut"
+msgstr  "Knippen"
 
 #: lib/solaar/ui/diversion_rules.py:654
-msgid "Paste"
-msgstr "Plakken"
+msgid   "Paste"
+msgstr  "Plakken"
 
 #: lib/solaar/ui/diversion_rules.py:666
-msgid "Copy"
-msgstr "Kopiëren"
+msgid   "Copy"
+msgstr  "Kopiëren"
 
 #: lib/solaar/ui/diversion_rules.py:769
-msgid "This editor does not support the selected rule component yet."
-msgstr ""
-"Deze bewerker heeft nog geen ondersteuning voor het geselecteerde onderdeel."
+msgid   "This editor does not support the selected rule component yet."
+msgstr  "Deze bewerker heeft nog geen ondersteuning voor het geselecteerde "
+        "onderdeel."
 
 #: lib/solaar/ui/diversion_rules.py:847
-msgid "Not"
-msgstr "Niet"
+msgid   "Not"
+msgstr  "Niet"
 
 #: lib/solaar/ui/diversion_rules.py:1094
-msgid "Add key"
-msgstr "Toets toevoegen"
+msgid   "Add key"
+msgstr  "Toets toevoegen"
 
 #: lib/solaar/ui/diversion_rules.py:1224
-msgid "Button"
-msgstr "Knop"
+msgid   "Button"
+msgstr  "Knop"
 
 #: lib/solaar/ui/diversion_rules.py:1225
-msgid "Count"
-msgstr "Teller"
+msgid   "Count"
+msgstr  "Teller"
 
 #: lib/solaar/ui/diversion_rules.py:1267
-msgid "Add argument"
-msgstr "Aanvullende optie toevoegen"
+msgid   "Add argument"
+msgstr  "Aanvullende optie toevoegen"
 
-#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:749
-msgid "offline"
-msgstr "offline"
+#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:318
+#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:749
+msgid   "offline"
+msgstr  "offline"
 
 #: lib/solaar/ui/pair_window.py:134
-msgid "Pairing failed"
-msgstr "Koppelen mislukt"
+msgid   "Pairing failed"
+msgstr  "Koppelen mislukt"
 
 #: lib/solaar/ui/pair_window.py:136
-msgid "Make sure your device is within range, and has a decent battery charge."
-msgstr ""
-"Zorg er voor dat het apparaat binnen handbereik is en voldoende is opgeladen."
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "Zorg er voor dat het apparaat binnen handbereik is en voldoende is "
+        "opgeladen."
 
 #: lib/solaar/ui/pair_window.py:138
-msgid "A new device was detected, but it is not compatible with this receiver."
-msgstr ""
-"Er is een nieuw apparaat aangetroffen dat niet compatibel is met deze "
-"ontvanger."
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "Er is een nieuw apparaat aangetroffen dat niet compatibel is met "
+        "deze ontvanger."
 
 #: lib/solaar/ui/pair_window.py:140
-msgid "More paired devices than receiver can support."
-msgstr "Er zijn meer gekoppelde apparaten dan de ontvanger aankan."
+msgid   "More paired devices than receiver can support."
+msgstr  "Er zijn meer gekoppelde apparaten dan de ontvanger aankan."
 
 #: lib/solaar/ui/pair_window.py:142
-msgid "No further details are available about the error."
-msgstr "Er is een fout opgetreden zonder nadere informatie."
+msgid   "No further details are available about the error."
+msgstr  "Er is een fout opgetreden zonder nadere informatie."
 
 #: lib/solaar/ui/pair_window.py:156
-msgid "Found a new device:"
-msgstr "Nieuw apparaat aangetroffen:"
+msgid   "Found a new device:"
+msgstr  "Nieuw apparaat aangetroffen:"
 
 #: lib/solaar/ui/pair_window.py:181
-msgid "The wireless link is not encrypted"
-msgstr "De draadloze verbinding is onversleuteld"
+msgid   "The wireless link is not encrypted"
+msgstr  "De draadloze verbinding is onversleuteld"
 
 #: lib/solaar/ui/pair_window.py:199
 #, python-format
-msgid "%(receiver_name)s: pair new device"
-msgstr "%(receiver_name)s: nieuw apparaat aankoppelen"
+msgid   "%(receiver_name)s: pair new device"
+msgstr  "%(receiver_name)s: nieuw apparaat aankoppelen"
 
 #: lib/solaar/ui/pair_window.py:206
-msgid "If the device is already turned on, turn if off and on again."
-msgstr "Als het apparaat al is ingeschakeld, schakel het dan uit en weer in."
+msgid   "If the device is already turned on, turn it off and on again."
+msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:209
 #, python-format
-msgid ""
-"\n"
-"\n"
-"This receiver has %d pairing remaining."
-msgid_plural ""
-"\n"
-"\n"
-"This receiver has %d pairings remaining."
-msgstr[0] ""
-"\n"
-"\n"
-"Er kan nog %d apparaat worden gekoppeld aan deze ontvanger."
-msgstr[1] ""
-"\n"
-"\n"
-"Er kunnen nog %d apparaten worden gekoppeld aan deze ontvanger."
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       "\n"
+        "\n"
+        "Er kan nog %d apparaat worden gekoppeld aan deze ontvanger."
+msgstr[1]       "\n"
+        "\n"
+        "Er kunnen nog %d apparaten worden gekoppeld aan deze ontvanger."
 
 #: lib/solaar/ui/pair_window.py:212
-msgid ""
-"\n"
-"Cancelling at this point will not use up a pairing."
-msgstr ""
-"\n"
-"Als u nu afbreekt, kunt u nog steeds iets koppelen."
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  "\n"
+        "Als u nu afbreekt, kunt u nog steeds iets koppelen."
 
 #: lib/solaar/ui/pair_window.py:215
-msgid "Turn on the device you want to pair."
-msgstr "Schakel het te koppelen apparaat in."
+msgid   "Turn on the device you want to pair."
+msgstr  "Schakel het te koppelen apparaat in."
 
-#: lib/solaar/ui/tray.py:59
-msgid "No Logitech receiver found"
-msgstr "Geen Logitech-ontvanger aangetroffen"
+#: lib/solaar/ui/tray.py:61
+msgid   "No Logitech receiver found"
+msgstr  "Geen Logitech-ontvanger aangetroffen"
 
-#: lib/solaar/ui/tray.py:66 lib/solaar/ui/window.py:325
-msgid "Quit"
-msgstr "Afsluiten"
+#: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
+msgid   "Quit"
+msgstr  "Afsluiten"
 
-#: lib/solaar/ui/tray.py:295 lib/solaar/ui/tray.py:303
-msgid "no receiver"
-msgstr "geen ontvanger"
+#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
+msgid   "no receiver"
+msgstr  "geen ontvanger"
 
-#: lib/solaar/ui/tray.py:319
-msgid "no status"
-msgstr "geen status"
+#: lib/solaar/ui/tray.py:321
+msgid   "no status"
+msgstr  "geen status"
 
 #: lib/solaar/ui/window.py:104
-msgid "Scanning"
-msgstr "Bezig met zoeken..."
+msgid   "Scanning"
+msgstr  "Bezig met zoeken..."
 
 #: lib/solaar/ui/window.py:137 lib/solaar/ui/window.py:692
-msgid "Battery"
-msgstr "Batterij"
+msgid   "Battery"
+msgstr  "Batterij"
 
 #: lib/solaar/ui/window.py:140
-msgid "Wireless Link"
-msgstr "Draadloze verbinding"
+msgid   "Wireless Link"
+msgstr  "Draadloze verbinding"
 
 #: lib/solaar/ui/window.py:144
-msgid "Lighting"
-msgstr "Verlichting"
+msgid   "Lighting"
+msgstr  "Verlichting"
 
 #: lib/solaar/ui/window.py:178
-msgid "Show Technical Details"
-msgstr "Technische informatie tonen"
+msgid   "Show Technical Details"
+msgstr  "Technische informatie tonen"
 
 #: lib/solaar/ui/window.py:194
-msgid "Pair new device"
-msgstr "Nieuw apparaat aankoppelen"
+msgid   "Pair new device"
+msgstr  "Nieuw apparaat aankoppelen"
 
 #: lib/solaar/ui/window.py:213
-msgid "Select a device"
-msgstr "Kies een apparaat"
+msgid   "Select a device"
+msgstr  "Kies een apparaat"
 
 #: lib/solaar/ui/window.py:331
-msgid "Rule Editor"
-msgstr "Regelbewerker"
+msgid   "Rule Editor"
+msgstr  "Regelbewerker"
 
 #: lib/solaar/ui/window.py:541
-msgid "Path"
-msgstr "Pad"
+msgid   "Path"
+msgstr  "Pad"
 
 #: lib/solaar/ui/window.py:544
-msgid "USB ID"
-msgstr "USB-id"
+msgid   "USB ID"
+msgstr  "USB-id"
 
 #: lib/solaar/ui/window.py:547 lib/solaar/ui/window.py:549
 #: lib/solaar/ui/window.py:569 lib/solaar/ui/window.py:571
-msgid "Serial"
-msgstr "Serie"
+msgid   "Serial"
+msgstr  "Serie"
 
 #: lib/solaar/ui/window.py:553
-msgid "Index"
-msgstr "Index"
+msgid   "Index"
+msgstr  "Index"
 
 #: lib/solaar/ui/window.py:555
-msgid "Wireless PID"
-msgstr "Draadloze pid"
+msgid   "Wireless PID"
+msgstr  "Draadloze pid"
 
 #: lib/solaar/ui/window.py:557
-msgid "Product ID"
-msgstr "Product-id"
+msgid   "Product ID"
+msgstr  "Product-id"
 
 #: lib/solaar/ui/window.py:559
-msgid "Protocol"
-msgstr "Protocol"
+msgid   "Protocol"
+msgstr  "Protocol"
 
 #: lib/solaar/ui/window.py:559
-msgid "Unknown"
-msgstr "Onbekend"
+msgid   "Unknown"
+msgstr  "Onbekend"
 
 #: lib/solaar/ui/window.py:562
 #, python-format
-msgid "%(rate)d ms (%(rate_hz)dHz)"
-msgstr "%(rate)d ms (%(rate_hz)dHz)"
+msgid   "%(rate)d ms (%(rate_hz)dHz)"
+msgstr  "%(rate)d ms (%(rate_hz)dHz)"
 
 #: lib/solaar/ui/window.py:562
-msgid "Polling rate"
-msgstr "Controlesnelheid"
+msgid   "Polling rate"
+msgstr  "Controlesnelheid"
 
 #: lib/solaar/ui/window.py:573
-msgid "Unit ID"
-msgstr "Apparaat-id"
+msgid   "Unit ID"
+msgstr  "Apparaat-id"
 
 #: lib/solaar/ui/window.py:584
-msgid "none"
-msgstr "geen"
+msgid   "none"
+msgstr  "geen"
 
 #: lib/solaar/ui/window.py:585
-msgid "Notifications"
-msgstr "Meldingen"
+msgid   "Notifications"
+msgstr  "Meldingen"
 
 #: lib/solaar/ui/window.py:622
-msgid "No device paired."
-msgstr "Geen apparaat gekoppeld."
+msgid   "No device paired."
+msgstr  "Geen apparaat gekoppeld."
 
 #: lib/solaar/ui/window.py:629
 #, python-format
-msgid "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0] ""
-"Er kan slechts %(max_count)s apparaat worden gekoppeld aan deze ontvanger."
-msgstr[1] ""
-"Er kunnen slechts %(max_count)s apparaten worden gekoppeld aan deze "
-"ontvanger."
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       "Er kan slechts %(max_count)s apparaat worden gekoppeld aan "
+        "deze ontvanger."
+msgstr[1]       "Er kunnen slechts %(max_count)s apparaten worden gekoppeld "
+        "aan deze ontvanger."
 
 #: lib/solaar/ui/window.py:635
-msgid "Only one device can be paired to this receiver."
-msgstr "Er kan slechts één apparaat worden gekoppeld aan deze ontvanger."
+msgid   "Only one device can be paired to this receiver."
+msgstr  "Er kan slechts één apparaat worden gekoppeld aan deze ontvanger."
 
 #: lib/solaar/ui/window.py:639
 #, python-format
-msgid "This receiver has %d pairing remaining."
-msgid_plural "This receiver has %d pairings remaining."
-msgstr[0] "Er kan nog %d apparaat worden gekoppeld aan deze ontvanger."
-msgstr[1] "Er kunnen nog %d apparaten worden gekoppeld aan deze ontvanger."
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       "Er kan nog %d apparaat worden gekoppeld aan deze ontvanger."
+msgstr[1]       "Er kunnen nog %d apparaten worden gekoppeld aan deze "
+        "ontvanger."
 
 #: lib/solaar/ui/window.py:694
-msgid "Battery information unknown."
-msgstr "Geen batterij-informatie beschikbaar."
+msgid   "Battery information unknown."
+msgstr  "Geen batterij-informatie beschikbaar."
 
 #: lib/solaar/ui/window.py:702
-msgid "Battery Voltage"
-msgstr "Batterijvoltage"
+msgid   "Battery Voltage"
+msgstr  "Batterijvoltage"
 
 #: lib/solaar/ui/window.py:704
-msgid "Voltage reported by battery"
-msgstr "Het door de batterij gemelde voltage"
+msgid   "Voltage reported by battery"
+msgstr  "Het door de batterij gemelde voltage"
 
 #: lib/solaar/ui/window.py:706 lib/solaar/ui/window.py:710
-msgid "Battery Level"
-msgstr "Batterijniveau"
+msgid   "Battery Level"
+msgstr  "Batterijniveau"
 
 #: lib/solaar/ui/window.py:708 lib/solaar/ui/window.py:712
-msgid "Approximate level reported by battery"
-msgstr "Het door de batterij geschatte niveau"
+msgid   "Approximate level reported by battery"
+msgstr  "Het door de batterij geschatte niveau"
 
 #: lib/solaar/ui/window.py:715 lib/solaar/ui/window.py:717
-msgid "next reported "
-msgstr "volgende melding "
+msgid   "next reported "
+msgstr  "volgende melding "
 
 #: lib/solaar/ui/window.py:718
-msgid " and next level to be reported."
-msgstr " en het volgende te melden niveau."
+msgid   " and next level to be reported."
+msgstr  " en het volgende te melden niveau."
 
 #: lib/solaar/ui/window.py:721
-msgid "charging"
-msgstr "bezig met opladen"
+msgid   "charging"
+msgstr  "bezig met opladen"
 
 #: lib/solaar/ui/window.py:723
-msgid "last known"
-msgstr "laatst bekend"
+msgid   "last known"
+msgstr  "laatst bekend"
 
 #: lib/solaar/ui/window.py:731
-msgid "not encrypted"
-msgstr "onversleuteld"
+msgid   "not encrypted"
+msgstr  "onversleuteld"
 
 #: lib/solaar/ui/window.py:735
-msgid ""
-"The wireless link between this device and its receiver is not encrypted.\n"
-"\n"
-"For pointing devices (mice, trackballs, trackpads), this is a minor security "
-"issue.\n"
-"\n"
-"It is, however, a major security issue for text-input devices (keyboards, "
-"numpads),\n"
-"because typed text can be sniffed inconspicuously by 3rd parties within "
-"range."
-msgstr ""
-"De draadloze verbinding tussen dit apparaat en de ontvanger is "
-"onversleuteld.\n"
-"\n"
-"Bij aanwijsapparaten (zoals muizen, trackballs en trackpads) vormt dit een "
-"heel klein veiligheidsrisico.\n"
-"\n"
-"Echter, bij tekstinvoerapparaten (zoals (numerieke) toetsenborden) vormt dit "
-"een groot probleem\n"
-"omdat ingevoerde tekst stiekem kan worden uitgelezen door derden binnen "
-"handbereik."
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "\n"
+        "For pointing devices (mice, trackballs, trackpads), this is a minor "
+        "security issue.\n"
+        "\n"
+        "It is, however, a major security issue for text-input devices "
+        "(keyboards, numpads),\n"
+        "because typed text can be sniffed inconspicuously by 3rd parties "
+        "within range."
+msgstr  "De draadloze verbinding tussen dit apparaat en de ontvanger is "
+        "onversleuteld.\n"
+        "\n"
+        "Bij aanwijsapparaten (zoals muizen, trackballs en trackpads) vormt "
+        "dit een heel klein veiligheidsrisico.\n"
+        "\n"
+        "Echter, bij tekstinvoerapparaten (zoals (numerieke) toetsenborden) "
+        "vormt dit een groot probleem\n"
+        "omdat ingevoerde tekst stiekem kan worden uitgelezen door derden "
+        "binnen handbereik."
 
 #: lib/solaar/ui/window.py:744
-msgid "encrypted"
-msgstr "versleuteld"
+msgid   "encrypted"
+msgstr  "versleuteld"
 
 #: lib/solaar/ui/window.py:746
-msgid "The wireless link between this device and its receiver is encrypted."
-msgstr ""
-"De draadloze verbinding tussen dit apparaat en de ontvanger is versleuteld."
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  "De draadloze verbinding tussen dit apparaat en de ontvanger is "
+        "versleuteld."
 
 #: lib/solaar/ui/window.py:759
 #, python-format
-msgid "%(light_level)d lux"
-msgstr "%(light_level)d lux"
-
-#~ msgid "High Resolution Scrolling"
-#~ msgstr "Scrollen met hoge resolutie"
-
-#~ msgid "High Resolution Wheel Invert"
-#~ msgstr "Andersom scrollen met hoge resolutie"
-
-#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
-#~ msgstr "Hogegevoeligheidsmodus voor andersom verticaal scrollen."
-
-#~ msgid "Smart Shift"
-#~ msgstr "Slim schakelen"
-
-#~ msgid "The receiver was unplugged."
-#~ msgstr "De ontvanger is niet meer aanwezig."
+msgid   "%(light_level)d lux"
+msgstr  "%(light_level)d lux"
 
 #, python-format
-#~ msgid "The receiver only supports %d paired device(s)."
-#~ msgstr "Dit apparaat ondersteunt slechts %d gekoppeld apparaat/apparaten."
+#~ msgid        "%(battery_level)s"
+#~ msgstr       "%(battery_level)s"
 
 #, python-format
-#~ msgid "%(battery_percent)d%%"
-#~ msgstr "%(battery_percent)d%%"
+#~ msgid        "%(battery_percent)d%%"
+#~ msgstr       "%(battery_percent)d%%"
+
+#~ msgid        "High Resolution Scrolling"
+#~ msgstr       "Scrollen met hoge resolutie"
+
+#~ msgid        "High Resolution Wheel Invert"
+#~ msgstr       "Andersom scrollen met hoge resolutie"
+
+#~ msgid        "High-sensitivity wheel invert mode for vertical scroll."
+#~ msgstr       "Hogegevoeligheidsmodus voor andersom verticaal scrollen."
+
+#~ msgid        "If the device is already turned on,\n"
+#~      "turn if off and on again."
+#~ msgstr       "Als het apparaat reeds is ingeschakeld,\n"
+#~      "schakel het dan uit en weer in."
+
+#~ msgid        "If the device is already turned on, turn if off and on again."
+#~ msgstr       "Als het apparaat al is ingeschakeld, schakel het dan uit en "
+#~      "weer in."
+
+#~ msgid        "Smart Shift"
+#~ msgstr       "Slim schakelen"
 
 #, python-format
-#~ msgid "%(battery_level)s"
-#~ msgstr "%(battery_level)s"
+#~ msgid        "The receiver only supports %d paired device(s)."
+#~ msgstr       "Dit apparaat ondersteunt slechts %d gekoppeld apparaat/"
+#~      "apparaten."
 
-#~ msgid ""
-#~ "If the device is already turned on,\n"
-#~ "turn if off and on again."
-#~ msgstr ""
-#~ "Als het apparaat reeds is ingeschakeld,\n"
-#~ "schakel het dan uit en weer in."
+#~ msgid        "The receiver was unplugged."
+#~ msgstr       "De ontvanger is niet meer aanwezig."
