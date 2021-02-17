@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.0.4\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2020-12-30 13:37+0100\n"
+        "POT-Creation-Date: 2021-02-16 20:09-0500\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,372 +182,380 @@ msgid   "Scroll Wheel Resolution"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:84
-msgid   "Swap Fx function"
+msgid   "Frequency of device polling, in milliseconds"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:84
+msgid   "Polling Rate (ms)"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:85
+msgid   "Swap Fx function"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:86
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
         "and you must hold the FN key to activate their standard function."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:87
+#: lib/logitech_receiver/settings_templates.py:88
 msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
         "and you must hold the FN key to activate their special function."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:89
+#: lib/logitech_receiver/settings_templates.py:90
 msgid   "Mouse movement sensitivity"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:89
+#: lib/logitech_receiver/settings_templates.py:90
 msgid   "Sensitivity (DPI)"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:90
+#: lib/logitech_receiver/settings_templates.py:91
 msgid   "Sensitivity (Pointer Speed)"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:91
+#: lib/logitech_receiver/settings_templates.py:92
 msgid   "Speed multiplier for mouse (256 is normal multiplier)."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:92
+#: lib/logitech_receiver/settings_templates.py:93
 msgid   "Scroll Wheel Rachet"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:93
+#: lib/logitech_receiver/settings_templates.py:94
 msgid   "Automatically switch the mouse wheel between ratchet and freespin "
         "mode.\n"
         "The mouse wheel is always free at 0, and always ratcheted at 50"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:95
+#: lib/logitech_receiver/settings_templates.py:96
 msgid   "Backlight"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:95
+#: lib/logitech_receiver/settings_templates.py:96
 msgid   "Turn illumination on or off on keyboard."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:96
+#: lib/logitech_receiver/settings_templates.py:97
 msgid   "Key/Button Actions"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:97
+#: lib/logitech_receiver/settings_templates.py:98
 msgid   "Change the action for the key or button."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:98
+#: lib/logitech_receiver/settings_templates.py:99
 msgid   "Changing important actions (such as for the left mouse button) can "
         "result in an unusable system."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:99
+#: lib/logitech_receiver/settings_templates.py:100
 msgid   "Key/Button Diversion"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:100
+#: lib/logitech_receiver/settings_templates.py:101
 msgid   "Make the key or button send HID++ notifications (which trigger "
         "Solaar rules but are otherwise ignored)."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:101
+#: lib/logitech_receiver/settings_templates.py:102
 msgid   "Disable keys"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:101
+#: lib/logitech_receiver/settings_templates.py:102
 msgid   "Disable specific keyboard keys."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:102
+#: lib/logitech_receiver/settings_templates.py:103
 msgid   "Change keys to match OS."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:102
+#: lib/logitech_receiver/settings_templates.py:103
 msgid   "Set OS"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:103
+#: lib/logitech_receiver/settings_templates.py:104
 msgid   "Change Host"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:103
+#: lib/logitech_receiver/settings_templates.py:104
 msgid   "Switch connection to a different host"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:104
+#: lib/logitech_receiver/settings_templates.py:105
 msgid   "Thumb Wheel HID++ Scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:105
+#: lib/logitech_receiver/settings_templates.py:106
 msgid   "HID++ mode for horizontal scroll with the thumb wheel."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:106
+#: lib/logitech_receiver/settings_templates.py:107
 msgid   "Effectively turns off thumb scrolling in Linux."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:107
+#: lib/logitech_receiver/settings_templates.py:108
 msgid   "Invert thumb wheel scroll direction."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:107
+#: lib/logitech_receiver/settings_templates.py:108
 msgid   "Thumb Wheel Direction"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:108
+#: lib/logitech_receiver/settings_templates.py:109
 msgid   "Gestures"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:108
+#: lib/logitech_receiver/settings_templates.py:109
 msgid   "Tweak the mouse/touchpad behaviour."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:109
+#: lib/logitech_receiver/settings_templates.py:110
 msgid   "Change numerical parameters of a mouse/touchpad."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:109
+#: lib/logitech_receiver/settings_templates.py:110
 msgid   "Gesture params"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:110
+#: lib/logitech_receiver/settings_templates.py:111
 msgid   "DPI Sliding Adjustment"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:111
+#: lib/logitech_receiver/settings_templates.py:112
 msgid   "Adjust the DPI by sliding the mouse horizontally while holding the "
         "DPI button."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:112
+#: lib/logitech_receiver/settings_templates.py:113
 msgid   "Divert crown events"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:113
+#: lib/logitech_receiver/settings_templates.py:114
 msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
         "rules but are otherwise ignored)."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:114
+#: lib/logitech_receiver/settings_templates.py:115
 msgid   "Divert G Keys"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:115
+#: lib/logitech_receiver/settings_templates.py:116
 msgid   "Make G keys send GKEY HID++ notifications (which trigger Solaar "
         "rules but are otherwise ignored)."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:118
+#: lib/logitech_receiver/settings_templates.py:119
 msgid   "Performs a left click."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:118
+#: lib/logitech_receiver/settings_templates.py:119
 msgid   "Single tap"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:119
+#: lib/logitech_receiver/settings_templates.py:120
 msgid   "Performs a right click."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:119
+#: lib/logitech_receiver/settings_templates.py:120
 msgid   "Single tap with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:120
+#: lib/logitech_receiver/settings_templates.py:121
 msgid   "Single tap with three fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:124
+#: lib/logitech_receiver/settings_templates.py:125
 msgid   "Double tap"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:124
+#: lib/logitech_receiver/settings_templates.py:125
 msgid   "Performs a double click."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:125
+#: lib/logitech_receiver/settings_templates.py:126
 msgid   "Double tap with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:126
+#: lib/logitech_receiver/settings_templates.py:127
 msgid   "Double tap with three fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:129
+#: lib/logitech_receiver/settings_templates.py:130
 msgid   "Drags items by dragging the finger after double tapping."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:129
+#: lib/logitech_receiver/settings_templates.py:130
 msgid   "Tap and drag"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:130
+#: lib/logitech_receiver/settings_templates.py:131
 msgid   "Tap and drag with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:131
+#: lib/logitech_receiver/settings_templates.py:132
 msgid   "Drags items by dragging the fingers after double tapping."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:132
+#: lib/logitech_receiver/settings_templates.py:133
 msgid   "Tap and drag with three fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:134
+#: lib/logitech_receiver/settings_templates.py:135
 msgid   "Suppress tap and edge gestures"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:135
+#: lib/logitech_receiver/settings_templates.py:136
 msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:136
+#: lib/logitech_receiver/settings_templates.py:137
 msgid   "Scroll with one finger"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:136
 #: lib/logitech_receiver/settings_templates.py:137
-#: lib/logitech_receiver/settings_templates.py:140
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
 msgid   "Scrolls."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:137
-#: lib/logitech_receiver/settings_templates.py:140
+#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:141
 msgid   "Scroll with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:139
 msgid   "Scroll horizontally with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:138
+#: lib/logitech_receiver/settings_templates.py:139
 msgid   "Scrolls horizontally."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:139
+#: lib/logitech_receiver/settings_templates.py:140
 msgid   "Scroll vertically with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:139
+#: lib/logitech_receiver/settings_templates.py:140
 msgid   "Scrolls vertically."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:141
+#: lib/logitech_receiver/settings_templates.py:142
 msgid   "Inverts the scrolling direction."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:141
+#: lib/logitech_receiver/settings_templates.py:142
 msgid   "Natural scrolling"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:142
+#: lib/logitech_receiver/settings_templates.py:143
 msgid   "Enables the thumbwheel."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:142
+#: lib/logitech_receiver/settings_templates.py:143
 msgid   "Thumbwheel"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:153
-#: lib/logitech_receiver/settings_templates.py:157
+#: lib/logitech_receiver/settings_templates.py:154
+#: lib/logitech_receiver/settings_templates.py:158
 msgid   "Swipe from the top edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:154
+#: lib/logitech_receiver/settings_templates.py:155
 msgid   "Swipe from the left edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:155
+#: lib/logitech_receiver/settings_templates.py:156
 msgid   "Swipe from the right edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:156
+#: lib/logitech_receiver/settings_templates.py:157
 msgid   "Swipe from the bottom edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:158
+#: lib/logitech_receiver/settings_templates.py:159
 msgid   "Swipe two fingers from the left edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:159
+#: lib/logitech_receiver/settings_templates.py:160
 msgid   "Swipe two fingers from the right edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:160
+#: lib/logitech_receiver/settings_templates.py:161
 msgid   "Swipe two fingers from the bottom edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:161
+#: lib/logitech_receiver/settings_templates.py:162
 msgid   "Swipe two fingers from the top edge"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:162
-#: lib/logitech_receiver/settings_templates.py:166
+#: lib/logitech_receiver/settings_templates.py:163
+#: lib/logitech_receiver/settings_templates.py:167
 msgid   "Pinch to zoom out; spread to zoom in."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:162
+#: lib/logitech_receiver/settings_templates.py:163
 msgid   "Zoom with two fingers."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:163
+#: lib/logitech_receiver/settings_templates.py:164
 msgid   "Pinch to zoom out."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:164
+#: lib/logitech_receiver/settings_templates.py:165
 msgid   "Spread to zoom in."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:165
+#: lib/logitech_receiver/settings_templates.py:166
 msgid   "Zoom with three fingers."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:166
+#: lib/logitech_receiver/settings_templates.py:167
 msgid   "Zoom with two fingers"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:190
+#: lib/logitech_receiver/settings_templates.py:191
 msgid   "Left"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:190
+#: lib/logitech_receiver/settings_templates.py:191
 msgid   "Left-most coordinate."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:191
+#: lib/logitech_receiver/settings_templates.py:192
 msgid   "Top-most coordinate."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:191
+#: lib/logitech_receiver/settings_templates.py:192
 msgid   "top"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:192
+#: lib/logitech_receiver/settings_templates.py:193
 msgid   "Width."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:192
+#: lib/logitech_receiver/settings_templates.py:193
 msgid   "width"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:193
+#: lib/logitech_receiver/settings_templates.py:194
 msgid   "Height."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:193
+#: lib/logitech_receiver/settings_templates.py:194
 msgid   "height"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:194
+#: lib/logitech_receiver/settings_templates.py:195
 msgid   "Cursor speed."
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:194
+#: lib/logitech_receiver/settings_templates.py:195
 msgid   "Scale"
 msgstr  ""
 
-#: lib/logitech_receiver/settings_templates.py:197
+#: lib/logitech_receiver/settings_templates.py:198
 #, python-format
 msgid   "Disables the %s key."
 msgstr  ""
@@ -588,11 +596,11 @@ msgstr  ""
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  ""
 
-#: lib/solaar/gtk.py:143
+#: lib/solaar/gtk.py:148
 msgid   "Solaar depends on a udev file that is not present"
 msgstr  ""
 
-#: lib/solaar/gtk.py:146
+#: lib/solaar/gtk.py:151
 msgid   "For more information see the Solaar installation directions\n"
         "at https://pwr-solaar.github.io/Solaar/installation"
 msgstr  ""
@@ -625,20 +633,20 @@ msgstr  ""
 msgid   "The receiver returned an error, with no further details."
 msgstr  ""
 
-#: lib/solaar/ui/about.py:38
+#: lib/solaar/ui/about.py:39
 msgid   "Shows status of devices connected\n"
         "through wireless Logitech receivers."
 msgstr  ""
 
-#: lib/solaar/ui/about.py:47
+#: lib/solaar/ui/about.py:48
 msgid   "GUI design"
 msgstr  ""
 
-#: lib/solaar/ui/about.py:49
+#: lib/solaar/ui/about.py:50
 msgid   "Testing"
 msgstr  ""
 
-#: lib/solaar/ui/about.py:56
+#: lib/solaar/ui/about.py:57
 msgid   "Logitech documentation"
 msgstr  ""
 
@@ -878,8 +886,8 @@ msgstr  ""
 msgid   "Add argument"
 msgstr  ""
 
-#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:316
-#: lib/solaar/ui/tray.py:321 lib/solaar/ui/window.py:749
+#: lib/solaar/ui/notify.py:125 lib/solaar/ui/tray.py:318
+#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:749
 msgid   "offline"
 msgstr  ""
 
@@ -919,7 +927,7 @@ msgid   "%(receiver_name)s: pair new device"
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:206
-msgid   "If the device is already turned on, turn if off and on again."
+msgid   "If the device is already turned on, turn it off and on again."
 msgstr  ""
 
 #: lib/solaar/ui/pair_window.py:209
@@ -942,19 +950,19 @@ msgstr  ""
 msgid   "Turn on the device you want to pair."
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:59
+#: lib/solaar/ui/tray.py:61
 msgid   "No Logitech receiver found"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:66 lib/solaar/ui/window.py:325
+#: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
 msgid   "Quit"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:295 lib/solaar/ui/tray.py:303
+#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
 msgid   "no receiver"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:319
+#: lib/solaar/ui/tray.py:321
 msgid   "no status"
 msgstr  ""
 
