@@ -15,10 +15,13 @@ Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
 Solaar can also control some changeable features of devices,
 such as smooth scrolling or function key behavior.
+Solaar keeps track of these changed settings and the GUI application restores them whenever a device connects.
+(Devices forget most settings when powered down.)
 For more information on how to use Solaar see
 [the usage page](https://pwr-solaar.github.io/Solaar/usage),
 and for more information on its capabilities see
 [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
+
 
 Solaar's GUI normally uses an icon in the system tray and starts with its main window visible.
 The GUI can be started in several ways

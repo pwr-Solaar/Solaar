@@ -8,17 +8,23 @@ layout: page
 [**Solaar**][solaar] reports on and controls [Logitech][logitech] devices
 (keyboards, mice, and trackballs) that connect to your computer via a
 Logitech USB receiver (a very small piece of hardware that plugs into one of
-your USB ports)
-It is designed to detect all devices paired with your
-receivers, and at the very least display some basic information about them.
+your USB ports).
+Solaar is designed to detect all connected devices,
+and at the very least display some basic information about them.
 At this moment, all [Unifying][unifying] receivers are supported (devices
 with USB ID `046d:c52b` or `046d:c532`) as are several Lightspeed Receivers
 and a dozen Nano receivers.
 
-Solaar also reports on and controls some Logitech devices that connect to your
-computer using a USB cable or via Bluetooth.
-At this moment only a few devices types that connect via a USB cable or Bluetooth
-are supported in Solaar as information needs to be added to Solaar for each device type.
+Solaar also reports on and controls some Logitech devices that directly connect
+to your computer using a USB cable or via Bluetooth.
+Not all such devices supported in Solaar as information needs to be added to Solaar
+for each device type that directly connects.
+
+Most devices forget changed settings when the are turned off
+or go into a power-saving mode.
+Solaar keeps track of the settings that it has changed.
+The Solaar GUI application notices when devices reconnect and
+applies the remembered settings to the device.
 
 ## HID++
 
