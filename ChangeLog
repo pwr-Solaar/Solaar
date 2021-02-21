@@ -1,5 +1,10 @@
-1.0.5rc2:
+1.0.5:
+  * Update documentation on devices forgetting settings.
+  * Improve help messages
+  * Fix bug in finding receiver to pair
   * Solaar config command can set keyed settings.
+
+1.0.5rc2:
   * Add setting for polling rate
   * Use long HID++ messages for all 2.0 requests
   * Update German, Italian, and Polish translations
