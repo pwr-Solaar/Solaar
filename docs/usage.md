@@ -121,7 +121,7 @@ then `solaar <command> --help` to see the arguments to any of the commands.
 
 ## Solaar settings
 
-Solaar supports the following settings:
+Solaar supports at least the following settings:
 
 Setting                          | Description
 ---------------------------------|------------
@@ -147,8 +147,8 @@ Gestures			 | Turn on and off various (mostly touchpad) gestures
 Gesture params			 | Modify parameters for gestures
 
 HID++ events are mostly not processed by Linux input drivers.
-Settings that involve sending HID++ events exist so that they can be
-turned off under Linux.
+Settings that involve sending HID++ events exist so that these events can be
+processed by Solaar rules instead of by Linux.
 
 Different Logitech devices may implement the same functionality in different ways,
 thus the different settings that do the same thing.

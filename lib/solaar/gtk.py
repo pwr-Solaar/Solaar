@@ -54,7 +54,9 @@ battery_icons_style = 'regular'
 
 def _parse_arguments():
     import argparse
-    arg_parser = argparse.ArgumentParser(prog=NAME.lower())
+    arg_parser = argparse.ArgumentParser(
+        prog=NAME.lower(), epilog='For more information see https://pwr-solaar.github.io/Solaar'
+    )
     arg_parser.add_argument(
         '-d',
         '--debug',
