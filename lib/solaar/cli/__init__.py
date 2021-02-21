@@ -48,13 +48,15 @@ def _create_parser():
         'device',
         nargs='?',
         default='all',
-        help='device to show information about; may be a device number (1..6), a serial, '
+        help='device to show information about; may be a device number (1..6), a serial number, '
         'a substring of a device\'s name, or "all" (the default)'
     )
     sp.set_defaults(action='show')
 
     sp = subparsers.add_parser('probe', help='probe a receiver (debugging use only)')
-    sp.add_argument('receiver', nargs='?', help='select a certain receiver when more than one is present')
+    sp.add_argument(
+        'receiver', nargs='?', help='select receiver by name substring or serial number when more than one is present'
+    )
     sp.set_defaults(action='probe')
 
     sp = subparsers.add_parser(
@@ -64,8 +66,8 @@ def _create_parser():
     )
     sp.add_argument(
         'device',
-        help='device to configure; may be a device number (1..6), a device serial, '
-        'or at least 3 characters of a device\'s name'
+        help='device to configure; may be a device number (1..6), a serial number, '
+        'or a substring of a device\'s name'
     )
     sp.add_argument('setting', nargs='?', help='device-specific setting; leave empty to list available settings')
     sp.add_argument('value_key', nargs='?', help='new value for the setting or key for keyed settings')
@@ -78,12 +80,15 @@ def _create_parser():
         help='pair a new device',
         epilog='The Logitech Unifying Receiver supports up to 6 paired devices at the same time.'
     )
-    sp.add_argument('receiver', nargs='?', help='select a certain receiver when more than one is present')
+    sp.add_argument(
+        'receiver', nargs='?', help='select receiver by name substring or serial number when more than one is present'
+    )
     sp.set_defaults(action='pair')
 
     sp = subparsers.add_parser('unpair', help='unpair a device')
     sp.add_argument(
-        'device', help='device to unpair; may be a device number (1..6), a serial, '
+        'device',
+        help='device to unpair; may be a device number (1..6), a serial number, '
         'or a substring of a device\'s name.'
     )
     sp.set_defaults(action='unpair')
