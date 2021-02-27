@@ -4,10 +4,10 @@
 # Automatically generated, 2013.
 #
 msgid   ""
-msgstr  "Project-Id-Version: solaar 1.0.4\n"
+msgstr  "Project-Id-Version: solaar 1.0.5\n"
         "Report-Msgid-Bugs-To: \n"
         "POT-Creation-Date: 2021-02-16 20:09-0500\n"
-        "PO-Revision-Date: 2021-01-19 13:14+0100\n"
+        "PO-Revision-Date: 2021-02-27 16:19+0100\n"
         "Last-Translator: David Geiger <david.david@mageialinux-online.org>\n"
         "Language-Team: Language: fr\n"
         "Language: fr\n"
@@ -186,11 +186,11 @@ msgstr  "Résolution de la mollette"
 
 #: lib/logitech_receiver/settings_templates.py:84
 msgid   "Frequency of device polling, in milliseconds"
-msgstr  ""
+msgstr  "Fréquence de scrutation du périphérique, en millisecondes"
 
 #: lib/logitech_receiver/settings_templates.py:84
 msgid   "Polling Rate (ms)"
-msgstr  ""
+msgstr  "Taux de scrutation (ms)"
 
 #: lib/logitech_receiver/settings_templates.py:85
 msgid   "Swap Fx function"
