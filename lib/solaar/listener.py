@@ -392,3 +392,5 @@ def _process_receiver_event(action, device_info):
                     _error_callback('permissions', device_info.path)
             except Exception:
                 _error_callback('permissions', device_info.path)
+        except _base.NoReceiver:
+            _error_callback('nodevice', device_info.path)
