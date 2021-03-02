@@ -150,9 +150,13 @@ def _validate_input(line, hidpp=False):
 
 
 def _open(args):
+    def matchfn(bid, vid, pid):
+        if vid == 0x046d:
+            return {'vid': 0x046d}
+
     device = args.device
     if args.hidpp and not device:
-        for d in _hid.enumerate(vendor_id=0x046d):
+        for d in _hid.enumerate(matchfn):
             if d.driver == 'logitech-djreceiver':
                 device = d.path
                 break
