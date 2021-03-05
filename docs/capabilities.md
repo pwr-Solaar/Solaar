@@ -25,6 +25,9 @@ or go into a power-saving mode.
 Solaar keeps track of the settings that it has changed.
 The Solaar GUI application notices when devices reconnect and
 applies the remembered settings to the device.
+This is done independently on each computer that Solaar runs on.
+As a result if a device is switched between different computers
+Solaar can apply different settings on different computers.
 
 ## HID++
 
