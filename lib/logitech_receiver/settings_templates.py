@@ -530,10 +530,11 @@ def _feature_adjustable_dpi():
 
 # Implemented based on code in libratrag
 def _feature_report_rate_callback(device):
+    if device.wpid == '408E':
+        return None  # host mode borks the function keys on the G915 TKL keyboard
     # Host mode is required for report rate to be adjustable
     if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
         _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
-
     reply = device.feature_request(_F.REPORT_RATE, 0x00)
     assert reply, 'Oops, report rate choices cannot be retrieved!'
     rate_list = []
