@@ -227,8 +227,11 @@ def _print_device(dev, num=None):
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
+                    if setting._device and getattr(setting._device, 'persister',
+                                                   None) and setting._device.persister.get(setting.name) is not None:
+                        print('            %s (saved): %s' % (setting.label, setting._device.persister.get(setting.name)))
                     v = setting.read(False)
-                    print('            %s: %s' % (setting.label, v))
+                    print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
         print('     Has %d reprogrammable keys:' % len(dev.keys))
