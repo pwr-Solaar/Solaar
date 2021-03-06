@@ -13,9 +13,13 @@ assignees: ''
 - Distribution:
 - Kernel version (ex. `uname -srmo`): `KERNEL VERSION HERE`
 - Output of `solaar show`:
+
+<details>
+
 ```
 OUTPUT HERE
 ```
+</details>
 
 **Describe the bug**
 A clear and concise description of what the bug is.
