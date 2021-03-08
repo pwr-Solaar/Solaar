@@ -1,3 +1,31 @@
+1.0.6rc1:
+  * Update sliding DPI to look for suitable keys
+  * Add mouse gestures that can trigger rules
+  * Complain if receivers do not support connection notification
+  * In polling rate setting, only modify onboard profiles when actually writing polling rate
+  * Add ability to ignore settings.
+  * Use symbols for receiver sub-registers
+  * Add support for wired G700
+  * Do not set attention icon
+  * Replace deprecated GTK stock menu icons
+  * Better handling of icons in tray and tray menus
+  * Receiver c52e does not unpair
+  * Match active WM_CLASS as well as active process name in rules
+  * Correctly set icon theme value when regular battery icons are not available
+  * Handle exception when device is not available when device is being added
+  * Perform initial activation of devices in listener threads
+  * Keep track of serial numbers in the configuration file
+  * Don't update settings for non-active devices
+  * Set the current host name if not stored on the device
+  * Add setting for SMART SHIFT ENHANCED feature
+  * Don't unnecessarily use long messages for HID++ 1.0 commands
+  * Correctly select choices in solaar config and use 1-origin addressing
+  * Add quirk for G915 TKL keyboard because its host mode inteferes with its Fn keys
+  * Show command outputs both saved and on-device settings
+  * Update documentation
+  * Fix bug in hidconsole
+  * Update French translation
+
 1.0.5:
   * Update documentation on devices forgetting settings.
   * Improve help messages
