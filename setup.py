@@ -8,7 +8,7 @@ except ImportError:
     from distutils.core import setup
 
 # from solaar import NAME, __version__
-__version__ = '1.0.5'
+__version__ = '1.0.6rc1'
 NAME = 'Solaar'
 
 
