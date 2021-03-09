@@ -34,6 +34,7 @@ _log = getLogger(__name__)
 del getLogger
 
 _R = _hidpp10.REGISTERS
+_IR = _hidpp10.INFO_SUBREGISTERS
 
 #
 #
@@ -61,7 +62,7 @@ class Receiver(object):
             raise Exception('Unknown receiver type', self.product_id)
 
         # read the serial immediately, so we can find out max_devices
-        serial_reply = self.read_register(_R.receiver_info, 0x03)
+        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
         if serial_reply:
             self.serial = _strhex(serial_reply[1:5])
             self.max_devices = ord(serial_reply[6:7])
