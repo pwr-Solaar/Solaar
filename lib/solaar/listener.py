@@ -76,6 +76,8 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
+        if receiver.isDevice:  # (wired) devices start as active
+            receiver.status.changed(True)
 
     def has_started(self):
         if _log.isEnabledFor(_INFO):
@@ -282,8 +284,6 @@ def _start(device_info):
         rl = ReceiverListener(receiver, _status_callback)
         rl.start()
         _all_listeners[device_info.path] = rl
-        if isDevice:  # (wired) devices start as active
-            receiver.status.changed(True)
         return rl
 
     _log.warn('failed to open %s', device_info)
