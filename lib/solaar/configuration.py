@@ -36,6 +36,7 @@ _file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
 _KEY_VERSION = '_version'
 _KEY_NAME = '_name'
+_KEY_SERIAL = '_serial'
 _KEY_MODEL_ID = '_modelId'
 _KEY_UNIT_ID = '_unitId'
 _configuration = {}
@@ -114,6 +115,8 @@ class _DeviceEntry(dict):
             self[_KEY_MODEL_ID] = device.modelId
         if device.unitId and device.unitId != self.get(_KEY_UNIT_ID):
             self[_KEY_UNIT_ID] = device.unitId
+        if device.serial and device.serial != '?' and device.serial != self.get(_KEY_SERIAL):
+            self[_KEY_SERIAL] = device.serial
 
     def get_sensitivity(self, name):
         return self.get('_sensitive', {}).get(name, False)
@@ -125,6 +128,13 @@ class _DeviceEntry(dict):
             self['_sensitive'] = sensitives
 
 
+# This is neccessarily complicate because the same device can be attached in several different ways.
+# All HID++ 2.0 devices have a modelId and unitId, which can be accessed when they are connected.
+# When paired via a receiver the receiver provides a WPID and a serial number.
+# The unitId and serial number are supposed to be the same, but for some models they are not
+# so even though the modelId includes the WPID it is not always possible to determine the identity of a
+# paired but not receiver-connected device for which the unitId is not known.
+# This only happens is Solaar has never seen the device while it is paired and connected through a receiver.
 def persister(device):
     if not _configuration:
         _load()
@@ -155,6 +165,8 @@ def persister(device):
     if key and not isinstance(entry, _DeviceEntry):
         entry = _DeviceEntry(device, **entry)
         _configuration[key] = entry
+    if isinstance(entry, _DeviceEntry):
+        entry.update(device)
 
     return entry
 
