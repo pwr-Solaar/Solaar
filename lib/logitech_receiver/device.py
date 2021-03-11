@@ -231,7 +231,9 @@ class Device(object):
             if self.online and self.protocol >= 2.0:
                 ids = _hidpp20.get_ids(self)
                 if ids:
-                    self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+                    self._unitId, self._modelId, self._tid_map = ids
+                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
         return self._modelId
 
     @property
@@ -240,7 +242,9 @@ class Device(object):
             if self.online and self.protocol >= 2.0:
                 ids = _hidpp20.get_ids(self)
                 if ids:
-                    self._unitId, self._modelId, self._tid_map = _hidpp20.get_ids(self)
+                    self._unitId, self._modelId, self._tid_map = ids
+                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
         return self._tid_map
 
     @property
@@ -330,10 +334,9 @@ class Device(object):
 
     @property
     def settings(self):
-        if self._settings is None:
+        if not self._settings:
             self._settings = []
-            if self.descriptor and self.descriptor.settings and self.persister:
-                self._settings = []
+            if self.persister and self.descriptor and self.descriptor.settings:
                 for s in self.descriptor.settings:
                     try:
                         setting = s(self)
@@ -427,14 +430,16 @@ class Device(object):
         return None
 
     def request(self, request_id, *params, no_reply=False):
-        return _base.request(
-            self.handle or self.receiver.handle,
-            self.number,
-            request_id,
-            *params,
-            no_reply=no_reply,
-            long_message=self.bluetooth or self.protocol >= 2.0
-        )
+
+        if self:
+            return _base.request(
+                self.handle or self.receiver.handle,
+                self.number,
+                request_id,
+                *params,
+                no_reply=no_reply,
+                long_message=self.bluetooth or self.protocol >= 2.0
+            )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
