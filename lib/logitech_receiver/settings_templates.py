@@ -317,36 +317,44 @@ def _feature_hires_smooth_resolution():
     return _Setting(_HIRES_RES, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
+class _SmartShiftRW(_FeatureRW):
+    MIN_VALUE = 0
+    MAX_VALUE = 50
+
+    def __init__(self, feature, read_fnid, write_fnid):
+        super(_SmartShiftRW, self).__init__(feature, read_fnid, write_fnid)
+
+    def read(self, device):
+        value = super(_SmartShiftRW, self).read(device)
+        if _bytes2int(value[0:1]) == 1:
+            # Mode = Freespin, map to minimum
+            return _int2bytes(_SmartShiftRW.MIN_VALUE, count=1)
+        else:
+            # Mode = smart shift, map to the value, capped at maximum
+            threshold = min(_bytes2int(value[1:2]), _SmartShiftRW.MAX_VALUE)
+            return _int2bytes(threshold, count=1)
+
+    def write(self, device, data_bytes):
+        threshold = _bytes2int(data_bytes)
+        # Freespin at minimum
+        mode = 1 if threshold == _SmartShiftRW.MIN_VALUE else 2
+        # Ratchet at maximum
+        if threshold == _SmartShiftRW.MAX_VALUE:
+            threshold = 255
+        data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1)
+        return super(_SmartShiftRW, self).write(device, data)
+
+
 def _feature_smart_shift():
-    _MIN_SMART_SHIFT_VALUE = 0
-    _MAX_SMART_SHIFT_VALUE = 50
+    validator = _RangeV(_SmartShiftRW.MIN_VALUE, _SmartShiftRW.MAX_VALUE, 1)
+    rw = _SmartShiftRW(_F.SMART_SHIFT, read_fnid=0x00, write_fnid=0x10)
+    return _Setting(_SMART_SHIFT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
-    class _SmartShiftRW(_FeatureRW):
-        def __init__(self, feature):
-            super(_SmartShiftRW, self).__init__(feature)
 
-        def read(self, device):
-            value = super(_SmartShiftRW, self).read(device)
-            if _bytes2int(value[0:1]) == 1:
-                # Mode = Freespin, map to minimum
-                return _int2bytes(_MIN_SMART_SHIFT_VALUE, count=1)
-            else:
-                # Mode = smart shift, map to the value, capped at maximum
-                threshold = min(_bytes2int(value[1:2]), _MAX_SMART_SHIFT_VALUE)
-                return _int2bytes(threshold, count=1)
-
-        def write(self, device, data_bytes):
-            threshold = _bytes2int(data_bytes)
-            # Freespin at minimum
-            mode = 1 if threshold == _MIN_SMART_SHIFT_VALUE else 2
-            # Ratchet at maximum
-            if threshold == _MAX_SMART_SHIFT_VALUE:
-                threshold = 255
-            data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1) * 2
-            return super(_SmartShiftRW, self).write(device, data)
-
-    validator = _RangeV(_MIN_SMART_SHIFT_VALUE, _MAX_SMART_SHIFT_VALUE, 1)
-    return _Setting(_SMART_SHIFT, _SmartShiftRW(_F.SMART_SHIFT), validator, device_kind=(_DK.mouse, _DK.trackball))
+def _feature_smart_shift_enhanced():
+    validator = _RangeV(_SmartShiftRW.MIN_VALUE, _SmartShiftRW.MAX_VALUE, 1)
+    rw = _SmartShiftRW(_F.SMART_SHIFT_ENHANCED, read_fnid=0x10, write_fnid=0x20)
+    return _Setting(_SMART_SHIFT, rw, validator, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_dpi_sliding():
@@ -766,6 +774,7 @@ _SETTINGS_TABLE = [
     _S(_HIRES_INV, _F.HIRES_WHEEL, _feature_hires_smooth_invert),
     _S(_HIRES_RES, _F.HIRES_WHEEL, _feature_hires_smooth_resolution),
     _S(_SMART_SHIFT, _F.SMART_SHIFT, _feature_smart_shift),
+    _S(_SMART_SHIFT, _F.SMART_SHIFT_ENHANCED, _feature_smart_shift_enhanced, identifier='smart_shift_enhanced'),
     _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
     _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
