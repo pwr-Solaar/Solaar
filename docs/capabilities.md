@@ -3,7 +3,7 @@ title: Solaar Capabilities
 layout: page
 ---
 
-# Solaar capabilities
+# Solaar Capabilities
 
 [**Solaar**][solaar] reports on and controls [Logitech][logitech] devices
 (keyboards, mice, and trackballs) that connect to your computer via a
@@ -69,7 +69,7 @@ without the Unifying logo can probably only connect to the kind of receiver
 that they were bought with.
 
 
-## Supported features
+## Supported Features
 
 Solaar uses the HID++ protocol to pair devices to receivers and unpair
 devices from receivers, and also uses the HID++ protocol to display
@@ -121,16 +121,39 @@ WARNING: Updating firmware can cause a piece of hardware to become
 permanently non-functional if something goes wrong with the update or the
 update installs the wrong firmware.
 
-## Rule-based Processing of HID++ Feature Notifications
+## Other Solaar Capabilities
+
+Solaar has a few capabilities that go beyond simply changing device settings.
+
+### Rule-based Processing of HID++ Feature Notifications
 
 Solaar can process HID++ Feature Notifications from devices to, for example,
-change the speed of some thumb wheels.  For more information on this capability of Solaar see
+change the speed of some thumb wheels.  These notifications are only sent
+for actions that are set in Solaar to their HID++ setting (also known as diverted).
+For more information on this capability of Solaar see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).  As much of rule processing
 depends on X11, this capability is only when running under X11.
 
 Users can edit rules using a GUI by clicking on the `Edit Rule` button in the Solaar main window.
 
 Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
+
+### Sliding DPI
+
+A few mice (such as the MX Vertical) have a button that can be used to change
+the sensitivity (DPI) of the mouse by pressing the button and moving the mouse left and right.
+This processing is only set up in Solaar when the DPI Sliding Adjustment setting is on and
+the DPI Switch button is diverted.
+
+### Mouse Gestures
+
+Some mice (such as the MX Master 3) have a button that can be used to
+create up/down/left/right gestures, which then are seen by the Solaar rules as
+MOUSE_GESTURE notifications.
+This processing is only set up in Solaar when the Mouse Gestures setting is on and
+the App Switch Gesture button or MultiPlatform Gesture Button is diverted.
+
+Mouse gestures is an experimental feature.  Significant changes might be made in response to problems.
 
 
 ## System Tray
