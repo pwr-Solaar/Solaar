@@ -58,8 +58,9 @@ def select_choice(value, choices, setting, key):
     ivalue = to_int(value)
     val = None
     for choice in choices:
-        if value == choice or ivalue is not None and ivalue == choice:
+        if value == str(choice):
             val = choice
+            break
     if val is not None:
         value = val
     elif ivalue is not None and ivalue >= 0 and ivalue < len(choices):
