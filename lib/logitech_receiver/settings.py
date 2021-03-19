@@ -25,10 +25,13 @@ from copy import copy as _copy
 from logging import DEBUG as _DEBUG
 from logging import getLogger
 
+from . import hidpp20 as _hidpp20
+from . import special_keys as _special_keys
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
+from .common import unpack as _unpack
 
 _log = getLogger(__name__)
 del getLogger
@@ -1030,6 +1033,119 @@ class MultipleRangeValidator:
                 raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
             w += _int2bytes(v, sub_item.length)
         return w + b'\xFF'
+
+
+# Turn diverted mouse movement events into a mouse gesture
+#
+# Uses the following FSM.
+# At initialization, we go into `start` state and begin accumulating displacement.
+# If terminated in this state, we report back no movement.
+# If the mouse moves enough, we go into the `moved` state run the progress function.
+# If terminated in this state, we report back how much movement.
+class DivertedMouseMovement(object):
+    def __init__(self, device, dpi_name, key):
+        self.device = device
+        self.key = key
+        self.dx = 0.
+        self.dy = 0.
+        self.fsmState = 'idle'
+        self.dpiSetting = next(filter(lambda s: s.name == dpi_name, device.settings), None)
+
+    @staticmethod
+    def notification_handler(device, n):
+        """Called on notification events from the mouse."""
+        if n.sub_id < 0x40 and device.features[n.sub_id] == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+            state = device._divertedMMState
+            assert state
+            if n.address == 0x00:
+                cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
+                state.handle_keys_event({cid1, cid2, cid3, cid4})
+            elif n.address == 0x10:
+                dx, dy = _unpack('!hh', n.data[:4])
+                state.handle_move_event(dx, dy)
+
+    def handle_move_event(self, dx, dy):
+        # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+        # The multiplier could be configurable to allow adjusting dx
+        dpi = self.dpiSetting.read() if self.dpiSetting else 1000
+        dx = float(dx) / float(dpi) * 15.
+        self.dx += dx
+        dy = float(dy) / float(dpi) * 15.
+        self.dy += dy
+        if self.fsmState == 'pressed':
+            if abs(self.dx) >= 1. or abs(self.dy) >= 1.:
+                self.fsmState = 'moved'
+
+    def handle_keys_event(self, cids):
+        if self.fsmState == 'idle':
+            if self.key in cids:
+                self.fsmState = 'pressed'
+                self.dx = 0.
+                self.dy = 0.
+        elif self.fsmState == 'pressed' or self.fsmState == 'moved':
+            if self.key not in cids:
+                # emit mouse gesture notification
+                from .base import _HIDPP_Notification as _HIDPP_Notification
+                from .common import pack as _pack
+                from .diversion import process_notification as _process_notification
+                payload = _pack('!hh', int(self.dx), int(self.dy))
+                notification = _HIDPP_Notification(0, 0, 0, 0, payload)
+                _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
+                self.fsmState = 'idle'
+                self.dx = 0.
+                self.dy = 0.
+
+
+MouseGestureKeys = [
+    _special_keys.CONTROL.App_Switch_Gesture,
+    _special_keys.CONTROL.MultiPlatform_Gesture_Button,
+]
+
+
+class DivertedMouseMovementRW(object):
+    def __init__(self, dpi_name):
+        self.kind = FeatureRW.kind  # pretend to be FeatureRW as required for HID++ 2.0 devices
+        self.dpi_name = dpi_name
+        self.key = None
+
+    def read(self, device):  # need to return bytes, not a boolean
+        return b'0x01' if '_divertedMMState' in device.__dict__ else b'0x00'
+
+    def write(self, device, data_bytes):
+        def handler(device, n):
+            """Called on notification events from the mouse."""
+            if n.sub_id < 0x40 and device.features[n.sub_id] == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+                state = device._divertedMMState
+                if n.address == 0x00:
+                    cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
+                    state.handle_keys_event({cid1, cid2, cid3, cid4})
+                elif n.address == 0x10:
+                    dx, dy = _unpack('!hh', n.data[:4])
+                    state.handle_move_event(dx, dy)
+
+        if bool(data_bytes):  # enable
+            # Enable HID++ events on moving the mouse while button held
+            for key_number in MouseGestureKeys:
+                key_index = device.keys.index(key_number)
+                self.key = device.keys[key_index] if key_index is not None else None
+                if self.key and 'raw XY' in self.key.flags:
+                    self.key.set_rawXY_reporting(True)
+                    # Store our variables in the device object
+                    device._divertedMMState = DivertedMouseMovement(device, self.dpi_name, self.key.key)
+                    device.add_notification_handler('diverted-mouse-movement-handler', handler)
+                    return True
+            else:
+                _log.error('cannot enable diverted mouse movement on %s', device)
+        else:  # disable
+            try:
+                device.remove_notification_handler('diverted-mouse-movement-handler')
+                del device._divertedMMState
+                if self.key:
+                    self.key.set_rawXY_reporting(False)
+                    self.key = None
+            except Exception:
+                _log.error('cannot disable diverted mouse movement on %s', device)
+        return True
 
 
 def apply_all_settings(device):

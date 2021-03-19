@@ -44,6 +44,7 @@ from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
 from .settings import FeatureRWMap as _FeatureRWMap
 from .settings import LongSettings as _LongSettings
+from .settings import MouseGestureKeys as _MouseGestureKeys
 from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import RangeValidator as _RangeV
 from .settings import RegisterRW as _RegisterRW
@@ -110,6 +111,8 @@ _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/tou
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
+_MOUSE_GESTURES = ('mouse-gestures', _('Mouse Gestures'),
+                   _('Send a gesture by sliding the mouse while holding the App Switch button.'))
 _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
                  _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
@@ -536,6 +539,27 @@ def _feature_adjustable_dpi():
     return _Setting(_DPI, rw, callback=_feature_adjustable_dpi_callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
+def _feature_mouse_gesture_callback(device):
+    # need a gesture button that can send raw XY
+    for key in _MouseGestureKeys:
+        key_index = device.keys.index(key)
+        if key_index is not None and 'raw XY' in device.keys[key_index].flags:
+            return _BooleanV()
+    return False
+
+
+def _feature_mouse_gesture():
+    """Implements the ability to send mouse gestures
+    by sliding a mouse horizontally or vertically while holding the App Switch button."""
+    from .settings import DivertedMouseMovementRW as _DivertedMouseMovementRW
+    return _Setting(
+        _MOUSE_GESTURES,
+        _DivertedMouseMovementRW(_DPI[0]),
+        callback=_feature_mouse_gesture_callback,
+        device_kind=(_DK.mouse, )
+    )
+
+
 # Implemented based on code in libratrag
 def _feature_report_rate_callback(device):
     if device.wpid == '408E':
@@ -784,6 +808,7 @@ _SETTINGS_TABLE = [
     _S(_THUMB_SCROLL_INVERT, _F.THUMB_WHEEL, _feature_thumb_invert),
     _S(_DPI, _F.ADJUSTABLE_DPI, _feature_adjustable_dpi, registerFn=_register_dpi),
     _S(_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_dpi_sliding),
+    _S(_MOUSE_GESTURES, _F.REPROG_CONTROLS_V4, _feature_mouse_gesture),
     _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
     _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
