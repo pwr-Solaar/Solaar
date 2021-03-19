@@ -164,6 +164,8 @@ FEATURE = _NamedInts(
     SIDETONE=0x8300,
     EQUALIZER=0x8310,
     HEADSET_OUT=0x8320,
+    # Fake features for Solaar internal use
+    MOUSE_GESTURE=0xFE00,
 )
 FEATURE._fallback = lambda x: 'unknown:%04X' % x
 
@@ -525,13 +527,12 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         """
         flags = flags if flags else {}  # See flake8 B006
 
-        if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
-            # We need diversion to report raw XY, so divert temporarily
-            # (since XY reporting is also temporary)
-            flags[special_keys.MAPPING_FLAG.diverted] = True
-
-        if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
-            flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
+        # if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
+        # We need diversion to report raw XY, so divert temporarily
+        # (since XY reporting is also temporary)
+        # flags[special_keys.MAPPING_FLAG.diverted] = True
+        # if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
+        # flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
 
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
