@@ -158,6 +158,20 @@ def signed(bytes):
     return int.from_bytes(bytes, 'big', signed=True)
 
 
+def xy_direction(d):
+    x, y = _unpack('!2h', d[:4])
+    if x > 0 and x >= abs(y):
+        return 'right'
+    elif x < 0 and abs(x) >= abs(y):
+        return 'left'
+    elif y > 0:
+        return 'down'
+    elif y < 0:
+        return 'up'
+    else:
+        return None
+
+
 TESTS = {
     'crown_right': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] < 128 and d[1],
     'crown_left': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1],
@@ -173,6 +187,10 @@ TESTS = {
     'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
     'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
     'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
+    'mouse-down': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'down',
+    'mouse-up': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'up',
+    'mouse-left': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'left',
+    'mouse-right': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'right',
     'False': lambda f, r, d: False,
     'True': lambda f, r, d: True,
 }
