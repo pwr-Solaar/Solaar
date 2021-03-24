@@ -21,8 +21,7 @@ and its daemon running. If you have a recent Linux distribution, you are
 most likely good to go.
 
 Solaar requires Python 3.6+ and the
-`python3-pyudev` package.
-The Solaar GUI requires the
+`python3-pyudev`,
 `python3-psutil`, `python3-xlib`, and `python3-yaml` or `python3-pyyaml` packages.
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
 The Debian/Ubuntu packages that need to be installed are
