@@ -181,6 +181,7 @@ try:
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
+        _icons._init_icon_paths()
         theme_paths = Gtk.IconTheme.get_default().get_search_path()
 
         ind = AppIndicator3.Indicator.new_with_path(
