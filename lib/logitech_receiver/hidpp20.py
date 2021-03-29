@@ -23,6 +23,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import DEBUG as _DEBUG
 from logging import ERROR as _ERROR
+from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 from typing import List
@@ -1315,7 +1316,7 @@ def get_host_names(device):
         if capability_flags & 0x01:  # device can get host names
             for host in range(0, numHosts):
                 hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
-                _ignore, status, _ignore, numPages, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
+                _ignore, status, _ignore, _ignore, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
                 name = ''
                 remaining = nameLen
                 while remaining > 0:
@@ -1330,18 +1331,32 @@ def get_host_names(device):
         import socket
         hostname = socket.gethostname().partition('.')[0]
         if host_names[currentHost][1] != hostname:
-            set_host_name(device, bytearray(hostname, 'utf-8'))
+            set_host_name(device, hostname, host_names[currentHost][1])
             host_names[currentHost] = (host_names[currentHost][0], hostname)
     return host_names
 
 
-def set_host_name(device, name):
+def set_host_name(device, name, currentName=''):
+    name = bytearray(name, 'utf-8')
+    currentName = bytearray(currentName, 'utf-8')
+    if _log.isEnabledFor(_INFO):
+        _log.info('Setting host name to %s', name)
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     if state:
-        flags = _unpack('!B', state[:1])[0]
+        flags, _ignore, _ignore, currentHost = _unpack('!BBBB', state[:4])
         if flags & 0x02:
-            response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, name[:14])
-            return response
+            hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, currentHost)
+            _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = _unpack('!BBBBBB', hostinfo[:6])
+            if name[:maxNameLen] == currentName[:maxNameLen] and False:
+                return True
+            length = min(maxNameLen, len(name))
+            chunk = 0
+            while chunk < length:
+                response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk:chunk + 14])
+                if not response:
+                    return False
+                chunk += 14
+        return True
 
 
 def get_onboard_mode(device):
