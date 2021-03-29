@@ -126,6 +126,26 @@ Users can edit rules using a GUI by clicking on the `Edit Rule` button in the So
 Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
 
 
+## System Tray
+
+Solaar's GUI normally uses an icon in the system tray.
+This allows users to close Solaar and reopen from the tray.
+This aspect of Solaar depends on having an active system tray which may
+require some special setup when using Gnome, particularly under Wayland.
+
+If you are running gnome, you most likely need the
+`gnome-shell-extension-appindicator` package installed.
+In Fedora, this can be done by running
+```
+sudo dnf install gnome-shell-extension-appindicator
+```
+The likely command in Ubuntu and related distributions is
+```
+sudo apt install gnome-shell-extension-appindicator
+```
+You may have to log out and log in again before the system tray shows up.
+
+
 ## Battery Icons
 
 For many devices, Solaar shows the approximate battery level via icons that
