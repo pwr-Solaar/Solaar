@@ -1326,6 +1326,12 @@ def get_host_names(device):
                     else:
                         remaining = 0
                 host_names[host] = (bool(status), name)
+        # update the current host's name if it doesn't match the system name
+        import socket
+        hostname = socket.gethostname().partition('.')[0]
+        if host_names[currentHost][1] != hostname:
+            set_host_name(device, bytearray(hostname, 'utf-8'))
+            host_names[currentHost] = (host_names[currentHost][0], hostname)
     return host_names
 
 
@@ -1334,8 +1340,7 @@ def set_host_name(device, name):
     if state:
         flags = _unpack('!B', state[:1])[0]
         if flags & 0x02:
-            hn = name[:min(14, name.find('.'))] if name.find('.') >= 0 else name
-            response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, hn)
+            response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, 0xff, 0, name[:14])
             return response
 
 
