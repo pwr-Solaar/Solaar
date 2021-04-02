@@ -1155,7 +1155,7 @@ def decipher_unified_battery(report):
     discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
     status = BATTERY_STATUS[status]
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('battery %s%% charged, level %s, charging %s', discharge, status)
+        _log.debug('battery %s%% charged, level %s, charging %s', discharge, level, status)
     level = (
         _BATTERY_APPROX.full if level == 8  # full
         else _BATTERY_APPROX.good if level == 4  # good
