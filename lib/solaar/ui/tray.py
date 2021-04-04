@@ -185,7 +185,7 @@ try:
         theme_paths = Gtk.IconTheme.get_default().get_search_path()
 
         ind = AppIndicator3.Indicator.new_with_path(
-            'indicator-solaar', _icon_file(_icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE, ':'.join(theme_paths)
+            'indicator-solaar', _icon_file(_icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE, theme_paths[0]
         )
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
