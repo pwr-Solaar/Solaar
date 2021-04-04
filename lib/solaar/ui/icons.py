@@ -88,8 +88,8 @@ def _init_icon_paths():
 
     _default_theme = Gtk.IconTheme.get_default()
     for p in _look_for_application_icons():
-        if p not in _default_theme.get_search_path():
-            _default_theme.prepend_search_path(p)
+        _default_theme.prepend_search_path(p)
+        break  # only prepend one path - that's sufficient
     if _log.isEnabledFor(_DEBUG):
         _log.debug('icon theme paths: %s', _default_theme.get_search_path())
 
