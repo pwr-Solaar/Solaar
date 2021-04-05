@@ -136,11 +136,11 @@ class DiversionDialog:
             )
             dialog.set_default_size(400, 100)
             dialog.add_buttons(
-                Gtk.STOCK_YES,
+                _('Yes'),
                 Gtk.ResponseType.YES,
-                Gtk.STOCK_NO,
+                _('No'),
                 Gtk.ResponseType.NO,
-                Gtk.STOCK_CANCEL,
+                _('Cancel'),
                 Gtk.ResponseType.CANCEL,
             )
             dialog.set_markup(_('If you choose No, changes will be lost when Solaar is closed.'))

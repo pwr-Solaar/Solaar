@@ -65,7 +65,7 @@ def _create_menu(quit_handler):
 
     from .action import about, make
     menu.append(about.create_menu_item())
-    menu.append(make('application-exit', _('Quit'), quit_handler, stock_id=Gtk.STOCK_QUIT).create_menu_item())
+    menu.append(make('application-exit', _('Quit'), quit_handler, stock_id='application-exit').create_menu_item())
     del about, make
 
     menu.show_all()
