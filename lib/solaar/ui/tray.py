@@ -189,7 +189,7 @@ try:
         )
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-        ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '')
+        # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
         # ind.set_label(NAME, NAME)
 
         ind.set_menu(menu)
@@ -226,7 +226,7 @@ try:
 
     def attention(reason=None):
         if _icon.get_status() != AppIndicator3.IndicatorStatus.ATTENTION:
-            _icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '')
+            # _icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
             _icon.set_status(AppIndicator3.IndicatorStatus.ATTENTION)
             GLib.timeout_add(10 * 1000, _icon.set_status, AppIndicator3.IndicatorStatus.ACTIVE)
 
