@@ -123,6 +123,9 @@ for the step-by-step procedure for manual installation.
   application is also running *may* occasionally cause either of them to become
   confused about the state of the devices.
 
+- There are several implementations of the system tray.   Some of these have problems
+  that can result in missing or wrong-sized icons.
+
 ## License
 
 This software is distributed under the terms of the
