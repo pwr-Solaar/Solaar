@@ -37,6 +37,7 @@ del getLogger
 #
 #
 
+SENSITIVITY_IGNORE = 'ignore'
 KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10, multiple_range=0x40)
 
 
@@ -1029,3 +1030,12 @@ class MultipleRangeValidator:
                 raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
             w += _int2bytes(v, sub_item.length)
         return w + b'\xFF'
+
+
+def apply_all_settings(device):
+    persister = getattr(device, 'persister', None)
+    sensitives = persister.get('_sensitive', {}) if persister else {}
+    for s in device.settings:
+        ignore = sensitives.get(s.name, False)
+        if ignore != SENSITIVITY_IGNORE:
+            s.apply()

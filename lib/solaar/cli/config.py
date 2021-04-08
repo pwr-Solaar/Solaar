@@ -127,8 +127,7 @@ def run(receivers, args, find_receiver, find_device):
         if not dev.settings:
             raise Exception('no settings for %s' % dev.name)
         _configuration.attach_to(dev)
-        for s in dev.settings:
-            s.apply()
+        _settings.apply_all_settings(dev)
         print(dev.name, '(%s) [%s:%s]' % (dev.codename, dev.wpid, dev.serial))
         for s in dev.settings:
             print('')

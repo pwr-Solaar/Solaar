@@ -26,6 +26,7 @@ from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from . import settings as _settings
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
@@ -310,8 +311,7 @@ class DeviceStatus(dict):
                     # make sure they're up-to-date.
                     if _log.isEnabledFor(_INFO):
                         _log.info('%s pushing device settings %s', d, d.settings)
-                    for s in d.settings:
-                        s.apply()
+                    _settings.apply_all_settings(d)
 
                     # battery information may have changed so try to read it now
                     self.read_battery(timestamp)
