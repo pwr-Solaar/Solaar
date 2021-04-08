@@ -20,14 +20,6 @@ to your computer using a USB cable or via Bluetooth.
 Not all such devices supported in Solaar as information needs to be added to Solaar
 for each device type that directly connects.
 
-Most devices forget changed settings when the are turned off
-or go into a power-saving mode.
-Solaar keeps track of the settings that it has changed.
-The Solaar GUI application notices when devices reconnect and
-applies the remembered settings to the device.
-This is done independently on each computer that Solaar runs on.
-As a result if a device is switched between different computers
-Solaar can apply different settings on different computers.
 
 ## HID++
 
@@ -76,6 +68,7 @@ can connect only to the kind of devices they were bought with and devices
 without the Unifying logo can probably only connect to the kind of receiver
 that they were bought with.
 
+
 ## Supported features
 
 Solaar uses the HID++ protocol to pair devices to receivers and unpair
@@ -84,11 +77,40 @@ features of receivers and devices. Currently it only displays some
 features, and can modify even fewer. For a list of HID++ features
 and their support see [the features page](features).
 
-Solaar does not do anything beyond using the HID++ protocol to change the
-behavior of receivers and devices. In particular, it cannot change how
+Solaar does not do much beyond using the HID++ protocol to change the
+behavior of receivers and devices via changing their settings.
+In particular, Solaar cannot change how
 the operating system turns the keycodes that a keyboard produces into
 characters that are sent to programs. That is the province of HID device
 drivers and other software (such as X11).
+
+Settings can only be changed in the Solaar GUI when they are unlocked.
+To unlock a setting click on the icon at the right-hand edge of the setting
+until an unlocked lock appears (with tooltop "Changes allowed").
+
+Solaar keep tracks of the changeable settings of a device.
+Most devices forget changed settings when the are turned off
+or go into a power-saving mode.  When Solaar starts, it restores on-line
+devices to their previously-known state, and while running it restores
+devices to their previously-known state when the device itself comes on line.
+This information is stored in the file `~/.config/solaar/config.json`.
+
+Updating of settings can be turned off in the Solaar GUI by clicking on the icon
+at the right-hand edge of the setting until a red icon appears (with tooltip
+"Ignore this setting" ).
+
+Solaar keeps track of settings independently on each computer.
+As a result if a device is switched between different computers
+Solaar may apply different settings for it on the different computers
+
+Querying a device for its current state can require quite a few HID++
+interactions. These interactions can temporarily slow down the device, so
+Solaar tries to internally cache information about devices while it is
+running.  If the device
+state is changed by some other means, even sometimes by another invocation
+of the program, this cached information may become incorrect. Currently there is
+no way to force an update of the cached information besides restarting the
+program.
 
 Logitech receivers and devices have firmware in them. Some firmware
 can be updated using Logitech software in Windows. For example, there are
@@ -98,21 +120,6 @@ also be updated in Linux using `fwupdmgr`.
 WARNING: Updating firmware can cause a piece of hardware to become
 permanently non-functional if something goes wrong with the update or the
 update installs the wrong firmware.
-
-Solaar does keep track of some changeable settings of a device between
-invocations. When it starts, it restores on-line devices to their
-previously-known state, and while running it restores devices to
-their previously-known state when the device itself comes on line.
-This information is stored in the file `~/.config/solaar/config.json`.
-
-Querying a device for its current state can require quite a few HID++
-interactions. These interactions can temporarily slow down the device, so
-Solaar tries to internally cache information about devices. If the device
-state is changed by some other means, even sometimes by another invocation
-of the program, this cached information may become incorrect. Currently there is
-no way to force an update of the cached information besides restarting the
-program.
-
 
 ## Rule-based Processing of HID++ Feature Notifications
 
