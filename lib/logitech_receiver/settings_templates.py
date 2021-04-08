@@ -772,7 +772,7 @@ _SETTINGS_TABLE = [
     _S(_HI_RES_SCROLL, _F.HI_RES_SCROLLING, _feature_hi_res_scroll),
     _S(_LOW_RES_SCROLL, _F.LOWRES_WHEEL, _feature_lowres_smooth_scroll),
     _S(_HIRES_INV, _F.HIRES_WHEEL, _feature_hires_smooth_invert),
-    #    _S(_HIRES_RES, _F.HIRES_WHEEL, _feature_hires_smooth_resolution),  # Recent Linux drivers depend on this not changing
+    _S(_HIRES_RES, _F.HIRES_WHEEL, _feature_hires_smooth_resolution),  # Recent Linux drivers depend on this not changing
     _S(_SMART_SHIFT, _F.SMART_SHIFT, _feature_smart_shift),
     _S(_SMART_SHIFT, _F.SMART_SHIFT_ENHANCED, _feature_smart_shift_enhanced, identifier='smart_shift_enhanced'),
     _S(_THUMB_SCROLL_MODE, _F.THUMB_WHEEL, _feature_thumb_mode),
