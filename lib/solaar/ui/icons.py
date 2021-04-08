@@ -99,7 +99,7 @@ def _init_icon_paths():
     if gtk.battery_icons_style == 'regular':
         if not _default_theme.has_icon('battery-good'):
             _log.warning('failed to detect icons')
-            gtk.battery_icons_style = 'none'
+            gtk.battery_icons_style = 'solaar'
 
 
 #
