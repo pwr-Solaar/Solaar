@@ -127,6 +127,12 @@ for the step-by-step procedure for manual installation.
   application is also running *may* occasionally cause either of them to become
   confused about the state of the devices.
 
+- Some Linux drivers view or modify the setting Scroll Wheel Resolution to
+  implement smooth scrolling.  If Solaar changes this setting after the driver is
+  set up scrolling can be either very fast or very slow.  To fix this problem
+  click on the icon at the right edge of the setting to set it to
+  "Ignore this setting".   Then turn your device off and on again.
+
 - There are several implementations of the system tray.   Some of these have problems
   that can result in missing or wrong-sized icons.
 
