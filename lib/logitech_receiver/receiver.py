@@ -69,7 +69,10 @@ class Receiver(object):
                 self.max_devices = product_info.get('max_devices', 1)
             # TODO _properly_ figure out which receivers do and which don't support unpairing
             # This code supposes that receivers that don't unpair support a pairing request for device index 0
-            self.may_unpair = self.write_register(_R.receiver_pairing) is None
+            if 'unpair' in product_info:
+                self.may_unpair = product_info['unpair']
+            else:
+                self.may_unpair = self.write_register(_R.receiver_pairing) is None
         else:  # handle receivers that don't have a serial number specially (i.e., c534)
             self.serial = None
             self.max_devices = product_info.get('max_devices', 1)
