@@ -374,6 +374,10 @@ def _change_click(eb, button, arg):
     _change_icon(new_allowed, icon)
     if device.persister:  # remember the new setting sensitivity
         device.persister.set_sensitivity(name, new_allowed)
+    if allowed == _SENSITIVITY_IGNORE:  # get current value of setting if it was being ignored
+        setting = next((s for s in device.settings if s.name == name), None)
+        if setting:
+            _read_async(setting, True, control.get_parent(), bool(device.online), control.get_sensitive())
     return True
 
 
