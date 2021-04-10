@@ -24,7 +24,11 @@ and for more information on its capabilities see
 
 
 Solaar's GUI normally uses an icon in the system tray and starts with its main window visible.
-The GUI can be started in several ways
+This aspect of Solaar depends on having an active system tray, which is not the default
+situation for recent versions of Gnome.  For information on to set up a system Gnome see
+[the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
+
+Solaar's GUI can be started in several ways
 
 - `--window=show` (the default) starts with its main window visible,
 - `--window=hide` starts with its main window hidden,
@@ -122,6 +126,9 @@ for the step-by-step procedure for manual installation.
 - Running the command-line application while the GUI
   application is also running *may* occasionally cause either of them to become
   confused about the state of the devices.
+
+- There are several implementations of the system tray.   Some of these have problems
+  that can result in missing or wrong-sized icons.
 
 ## License
 

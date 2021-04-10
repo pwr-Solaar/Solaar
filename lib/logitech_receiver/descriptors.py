@@ -543,6 +543,8 @@ _D(
     codename='G700',
     protocol=1.0,
     wpid='1023',
+    usbid=0xc06b,
+    interface=1,
     registers=(
         _R.battery_status,
         _R.three_leds,

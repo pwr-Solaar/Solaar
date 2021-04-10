@@ -22,6 +22,7 @@ _log = getLogger(__name__)
 del getLogger
 
 _R = _hidpp10.REGISTERS
+_IR = _hidpp10.INFO_SUBREGISTERS
 
 #
 #
@@ -107,7 +108,7 @@ class Device(object):
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
                 # Not a notification, force a reading of the wpid
-                pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + number - 1)
+                pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + number - 1)
                 if pair_info:
                     # may be either a Unifying receiver, or an Unifying-ready
                     # receiver
@@ -123,7 +124,7 @@ class Device(object):
                     kind = self.get_kind_from_index(number, receiver)
                     self._kind = _hidpp10.DEVICE_KIND[kind]
                 else:
-                    # unifying protocol not supported, must be a Nano receiver
+                    # unifying protocol not supported, probably an old Nano receiver
                     device_info = self.receiver.read_register(_R.receiver_info, 0x04)
                     if device_info is None:
                         _log.error('failed to read Nano wpid for device %d of %s', number, receiver)
@@ -151,7 +152,7 @@ class Device(object):
             if self.descriptor is None:
                 # Last chance to correctly identify the device; many Nano
                 # receivers do not support this call.
-                codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
+                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
                 if codename:
                     codename_length = ord(codename[1:2])
                     codename = codename[2:2 + codename_length]
@@ -198,7 +199,7 @@ class Device(object):
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
             elif self.receiver:
-                codename = self.receiver.read_register(_R.receiver_info, 0x40 + self.number - 1)
+                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
                 if codename:
                     codename_length = ord(codename[1:2])
                     codename = codename[2:2 + codename_length]
@@ -250,7 +251,8 @@ class Device(object):
     @property
     def kind(self):
         if not self._kind:
-            pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + self.number - 1) if self.receiver else None
+            pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + self.number - 1) \
+                if self.receiver else None
             if pair_info:
                 kind = ord(pair_info[7:8]) & 0x0F
                 self._kind = _hidpp10.DEVICE_KIND[kind]
@@ -270,7 +272,7 @@ class Device(object):
     @property
     def serial(self):
         if not self._serial and self.receiver:
-            serial = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
+            serial = self.receiver.read_register(_R.receiver_info, _IR.extended_pairing_information + self.number - 1)
             if serial:
                 ps = ord(serial[9:10]) & 0x0F
                 self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
@@ -288,7 +290,7 @@ class Device(object):
     @property
     def power_switch_location(self):
         if not self._power_switch and self.receiver:
-            ps = self.receiver.read_register(_R.receiver_info, 0x30 + self.number - 1)
+            ps = self.receiver.read_register(_R.receiver_info, _IR.extended_pairing_information + self.number - 1)
             if ps:
                 ps = ord(ps[9:10]) & 0x0F
                 self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
@@ -299,7 +301,7 @@ class Device(object):
     @property
     def polling_rate(self):
         if not self._polling_rate and self.receiver:
-            pair_info = self.receiver.read_register(_R.receiver_info, 0x20 + self.number - 1)
+            pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + self.number - 1)
             if pair_info:
                 self._polling_rate = ord(pair_info[2:3])
             else:

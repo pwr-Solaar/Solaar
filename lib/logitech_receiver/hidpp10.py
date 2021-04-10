@@ -127,6 +127,16 @@ REGISTERS = _NamedInts(
     notifications=0x00,
     firmware=0xF1,
 )
+# Subregisters for receiver_info register
+INFO_SUBREGISTERS = _NamedInts(
+    serial_number=0x01,  # not found on many receivers
+    fw_version=0x02,
+    receiver_information=0x03,
+    pairing_information=0x20,  # 0x2N, by connected device
+    extended_pairing_information=0x30,  # 0x3N, by connected device
+    device_name=0x40,  # 0x4N, by connected device
+)
+
 # Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing
 DEVICE_FEATURES = _NamedInts(
     reserved1=0x010000,

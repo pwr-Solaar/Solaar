@@ -34,6 +34,7 @@ _log = getLogger(__name__)
 del getLogger
 
 _R = _hidpp10.REGISTERS
+_IR = _hidpp10.INFO_SUBREGISTERS
 
 #
 #
@@ -61,7 +62,7 @@ class Receiver(object):
             raise Exception('Unknown receiver type', self.product_id)
 
         # read the serial immediately, so we can find out max_devices
-        serial_reply = self.read_register(_R.receiver_info, 0x03)
+        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
         if serial_reply:
             self.serial = _strhex(serial_reply[1:5])
             self.max_devices = ord(serial_reply[6:7])
@@ -69,7 +70,10 @@ class Receiver(object):
                 self.max_devices = product_info.get('max_devices', 1)
             # TODO _properly_ figure out which receivers do and which don't support unpairing
             # This code supposes that receivers that don't unpair support a pairing request for device index 0
-            self.may_unpair = self.write_register(_R.receiver_pairing) is None
+            if 'unpair' in product_info:
+                self.may_unpair = product_info['unpair']
+            else:
+                self.may_unpair = self.write_register(_R.receiver_pairing) is None
         else:  # handle receivers that don't have a serial number specially (i.e., c534)
             self.serial = None
             self.max_devices = product_info.get('max_devices', 1)
