@@ -113,15 +113,19 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
+- If some icons appear broken in the application, make sure you've properly
+  configured the Gtk theme and icon theme in your control panel.
+
+- There are several implementations of the system tray.   Some of these have problems
+  that can result in missing or wrong-sized icons.
+
 - The icon in the system tray can show up as 'black on black' in dark
-  distributions. This is due to problems in many system tray
-  implementations. Changing to a different theme may help.
+  themes or as non-symbolic when the theme uses symbolic icons.  This is due to problems
+  in some system tray implementations. Changing to a different theme may help.
+  The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
 - Sometimes the system tray icon does not show up.  The cause of this is unknown.
   Either wait a while and try again or try with the `--window=hide` option.
-
-- If some icons appear broken in the application, make sure you've properly
-  configured the Gtk theme and icon theme in your control panel.
 
 - Running the command-line application while the GUI
   application is also running *may* occasionally cause either of them to become
@@ -131,10 +135,17 @@ for the step-by-step procedure for manual installation.
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
   click on the icon at the right edge of the setting to set it to
-  "Ignore this setting".   Then turn your device off and on again.
+  "Ignore this setting".
+  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
-- There are several implementations of the system tray.   Some of these have problems
-  that can result in missing or wrong-sized icons.
+- Many gaming mice have both the ONBOARD PROFILES feature and the REPORT RATE feature.
+  On these mice changing the Polling Rate setting requires modifying a setting in
+  the ONBOARD PROFILES feature, which can modify how the mouse works.  Changing the
+  Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
+  modifying the ONBOARD PROFILES feature.  The mouse needs to be turned off and on
+  again undo the modification of ONBOARD PROFILES feature.
+  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+
 
 ## License
 
