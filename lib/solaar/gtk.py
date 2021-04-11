@@ -22,6 +22,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import importlib
 import os.path
+import subprocess
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -96,7 +97,14 @@ def _parse_arguments():
         args.window = 'show'  # default behaviour is to show main window
 
     global battery_icons_style
-    battery_icons_style = args.battery_icons if args.battery_icons is not None else 'regular'
+    GNOME = b'GNOME' in subprocess.run(['echo $XDG_CURRENT_DESKTOP'], shell=True, capture_output=True).stdout
+
+    if args.battery_icons is not None:
+        battery_icons_style = args.battery_icons
+    elif GNOME:
+        battery_icons_style = 'symbolic'
+    else:
+        battery_icons_style = 'regular'
 
     import logging
     if args.debug > 0:
