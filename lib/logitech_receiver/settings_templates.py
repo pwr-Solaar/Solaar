@@ -550,7 +550,7 @@ def _feature_report_rate_callback(device):
     return _ChoicesV(_NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
-class FeatureReortRateRW(_FeatureRW):
+class FeatureReportRateRW(_FeatureRW):
     def write(self, device, data_bytes):
         # Host mode is required for report rate to be adjustable
         if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
@@ -560,7 +560,7 @@ class FeatureReortRateRW(_FeatureRW):
 
 def _feature_report_rate():
     """Report Rate feature"""
-    rw = FeatureReortRateRW(_F.REPORT_RATE, read_fnid=0x10, write_fnid=0x20)
+    rw = FeatureReportRateRW(_F.REPORT_RATE, read_fnid=0x10, write_fnid=0x20)
     return _Setting(_REPORT_RATE, rw, callback=_feature_report_rate_callback, device_kind=(_DK.mouse, ))
 
 
