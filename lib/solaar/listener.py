@@ -84,7 +84,7 @@ class ReceiverListener(_listener.EventsListener):
         if _log.isEnabledFor(_INFO):
             _log.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
         notification_flags = self.receiver.enable_connection_notifications()
-        assert notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless, \
+        assert self.receiver.isDevice or (notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless), \
             'Receiver on %s does not support connection notifications, GUI will not show it' % self.receiver.path
         self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = notification_flags
         self.receiver.notify_devices()
