@@ -63,17 +63,13 @@ on your system or the rule has changed.
 
 ## Running from the Download Directories
 
-If the latest Solaar udev rule is installed,
-you can just go to the solaar directory and run `bin/solaar` for the GUI
+To run Solaar from the download directories, first install the Solaar udev rule if necessary.
+Then cd to the solaar directory and run `bin/solaar` for the GUI
 or `bin/solaar <command> <arguments>` for the CLI.
 
-Otherwise, you will need to run Solaar as root via
-`sudo bin/solaar` for the GUI
-or `sudo bin/solaar <command> <arguments>` for the CLI.
+Do not run Solaar as root, you may encounter problems with X11 integration and with the system tray.
 
-Warning: Running Solaar as root may result in problems with the Solaar icon in the system tray.
-
-## Installing Solaar
+## Installing Solaar Using Pip
 
 Python programs are usually installed using [pip][pip].
 The pip instructions for solaar are in `setup.py`, the standard place to put such instructions.

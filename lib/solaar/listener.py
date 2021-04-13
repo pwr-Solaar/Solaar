@@ -28,6 +28,7 @@ from logging import getLogger
 
 from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
+from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
@@ -83,6 +84,8 @@ class ReceiverListener(_listener.EventsListener):
         if _log.isEnabledFor(_INFO):
             _log.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
         notification_flags = self.receiver.enable_connection_notifications()
+        assert self.receiver.isDevice or (notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless), \
+            'Receiver on %s does not support connection notifications, GUI will not show it' % self.receiver.path
         self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = notification_flags
         self.receiver.notify_devices()
         self._status_changed(self.receiver)  # , _status.ALERT.NOTIFICATION)

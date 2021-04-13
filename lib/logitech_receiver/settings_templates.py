@@ -540,9 +540,6 @@ def _feature_adjustable_dpi():
 def _feature_report_rate_callback(device):
     if device.wpid == '408E':
         return None  # host mode borks the function keys on the G915 TKL keyboard
-    # Host mode is required for report rate to be adjustable
-    if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
-        _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
     reply = device.feature_request(_F.REPORT_RATE, 0x00)
     assert reply, 'Oops, report rate choices cannot be retrieved!'
     rate_list = []
@@ -553,9 +550,17 @@ def _feature_report_rate_callback(device):
     return _ChoicesV(_NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
+class FeatureReportRateRW(_FeatureRW):
+    def write(self, device, data_bytes):
+        # Host mode is required for report rate to be adjustable
+        if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
+            _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
+        return super().write(device, data_bytes)
+
+
 def _feature_report_rate():
     """Report Rate feature"""
-    rw = _FeatureRW(_F.REPORT_RATE, read_fnid=0x10, write_fnid=0x20)
+    rw = FeatureReportRateRW(_F.REPORT_RATE, read_fnid=0x10, write_fnid=0x20)
     return _Setting(_REPORT_RATE, rw, callback=_feature_report_rate_callback, device_kind=(_DK.mouse, ))
 
 
