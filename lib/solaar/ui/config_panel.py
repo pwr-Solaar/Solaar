@@ -523,7 +523,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
     else:
         raise Exception('NotImplemented')
 
-    control.set_sensitive(sensitive)
+    control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
 
