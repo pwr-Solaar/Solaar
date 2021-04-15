@@ -618,6 +618,22 @@ def _feature_reprogrammable_keys():
     return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
+class DivertKeysRW(object):
+    def __init__(self):
+        self.kind = _FeatureRW.kind
+
+    def read(self, device, key):
+        key_index = device.keys.index(key)
+        key_struct = device.keys[key_index]
+        return b'0x01' if 'diverted' in key_struct.mapping_flags else b'0x00'
+
+    def write(self, device, key, data_bytes):
+        key_index = device.keys.index(key)
+        key_struct = device.keys[key_index]
+        key_struct.set_diverted(data_bytes == b'\x01')
+        return True
+
+
 def _feature_divert_keys_callback(device):
     choices = {}
     for k in device.keys:
@@ -625,11 +641,11 @@ def _feature_divert_keys_callback(device):
             choices[k.key] = [_NamedInt(0x00, 'Regular'), _NamedInt(0x01, 'Diverted')]
     if not choices:
         return None
-    return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, mask=0x01, activate=0x02)
+    return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, mask=0x01)
 
 
 def _feature_divert_keys():
-    rw = _FeatureRWMap(_F.REPROG_CONTROLS_V4, read_fnid=0x20, write_fnid=0x30, key_byte_count=2)
+    rw = DivertKeysRW()
     return _Settings(_DIVERT_KEYS, rw, callback=_feature_divert_keys_callback, device_kind=(_DK.keyboard, ))
 
 
