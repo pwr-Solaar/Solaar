@@ -59,6 +59,7 @@ def _load():
         _log.debug('load => %s', _configuration)
 
     _cleanup(_configuration)
+    _cleanup_load(_configuration)
     _configuration[_KEY_VERSION] = __version__
     return _configuration
 
@@ -99,6 +100,15 @@ def _cleanup(d):
             _cleanup(value)
 
 
+def _cleanup_load(d):
+    # remove boolean values for mouse-gestures
+    for device in d:
+        if isinstance(device, dict):
+            mg = device.get('mouse-gestures', None)
+            if mg is True or mg is False:
+                del device['mouse-gestures']
+
+
 class _DeviceEntry(dict):
     def __init__(self, device, **kwargs):
         super(_DeviceEntry, self).__init__(**kwargs)
@@ -125,7 +135,7 @@ class _DeviceEntry(dict):
         sensitives = self.get('_sensitive', {})
         if sensitives.get(name) != value:
             sensitives[name] = value
-            self['_sensitive'] = sensitives
+            self.__setitem__('_sensitive', sensitives)
 
 
 # This is neccessarily complicate because the same device can be attached in several different ways.

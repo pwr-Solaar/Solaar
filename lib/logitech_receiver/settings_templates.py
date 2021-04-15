@@ -541,11 +541,20 @@ def _feature_adjustable_dpi():
 
 def _feature_mouse_gesture_callback(device):
     # need a gesture button that can send raw XY
-    for key in _MouseGestureKeys:
-        key_index = device.keys.index(key)
-        if key_index is not None and 'raw XY' in device.keys[key_index].flags:
-            return _BooleanV()
-    return None
+    if device.kind == _DK.mouse:
+        keys = []
+        for key in _MouseGestureKeys:
+            key_index = device.keys.index(key)
+            dkey = device.keys[key_index] if key_index is not None else None
+            if dkey is not None and 'raw XY' in dkey.flags and 'divertable' in dkey.flags:
+                keys.append(dkey.key)
+        if not keys:  # none of the keys designed for this, so look for any key with correct flags
+            for key in device.keys:
+                if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
+                    keys.append(key.key)
+        if keys:
+            keys.insert(0, _NamedInt(0, 'Off'))
+            return _ChoicesV(_NamedInts.list(keys), byte_count=2)
 
 
 def _feature_mouse_gesture():
@@ -554,7 +563,7 @@ def _feature_mouse_gesture():
     from .settings import DivertedMouseMovementRW as _DivertedMouseMovementRW
     return _Setting(
         _MOUSE_GESTURES,
-        _DivertedMouseMovementRW(_DPI[0]),
+        _DivertedMouseMovementRW(_DPI[0], _DIVERT_KEYS[0]),
         callback=_feature_mouse_gesture_callback,
         device_kind=(_DK.mouse, )
     )
