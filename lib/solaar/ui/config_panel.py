@@ -481,7 +481,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
         control.set_value(int(value))
     elif isinstance(control, Gtk.HBox):
         kbox, vbox = control.get_children()  # depends on box layout
-        if value.get(kbox.get_active_id()):
+        if value.get(kbox.get_active_id()) is not None:
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     elif isinstance(control, Gtk.ListBox):
         if control.kind == _SETTING_KIND.multiple_toggle:
