@@ -545,7 +545,7 @@ def _feature_mouse_gesture_callback(device):
         key_index = device.keys.index(key)
         if key_index is not None and 'raw XY' in device.keys[key_index].flags:
             return _BooleanV()
-    return False
+    return None
 
 
 def _feature_mouse_gesture():
