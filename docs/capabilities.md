@@ -147,13 +147,17 @@ the DPI Switch button is diverted.
 
 ### Mouse Gestures
 
-Some mice (such as the MX Master 3) have a button that can be used to
-create up/down/left/right gestures, which then are seen by the Solaar rules as
-MOUSE_GESTURE notifications.
-This processing is only set up in Solaar when the Mouse Gestures setting is on and
-the App Switch Gesture button or MultiPlatform Gesture Button is diverted.
+Some mice (such as the MX Master 3) have a button that is supposed to be used to
+create up/down/left/right mouse gestures.  Other mice (such as the MX Master 3) don't
+have a button specific for this but have buttons that can be used for it.
 
-Mouse gestures is an experimental feature.  Significant changes might be made in response to problems.
+The Mouse Gestures setting assigns a button for this purpose.
+Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
+When the button is released a MOUSE_GESTURE notification with the total mouse movement
+while the button was pressed is sent to the Solaar rule system.
+
+Mouse gestures is an experimental feature.
+Significant changes might be made to it in the future.
 
 
 ## System Tray

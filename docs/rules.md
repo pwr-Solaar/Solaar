@@ -91,6 +91,7 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 A 'mouse-down' test is true for a mouse gesture mostly in the downward direction.
 `mouse-up', 'mouse-left', and 'mouse-right' are the same but for gestures in the other directions.
+A 'mouse-noop' test is true for a mouse gesture where the mouse doesn't move much.
 `True` and `False` tests return True and False, respectively.
 
 A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard.
