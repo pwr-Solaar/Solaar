@@ -646,7 +646,7 @@ class DivertKeysRW(object):
 def _feature_divert_keys_callback(device):
     choices = {}
     for k in device.keys:
-        if 'divertable' in k.flags:
+        if 'divertable' in k.flags and 'virtual' not in k.flags:
             choices[k.key] = [_NamedInt(0x00, 'Regular'), _NamedInt(0x01, 'Diverted')]
     if not choices:
         return None

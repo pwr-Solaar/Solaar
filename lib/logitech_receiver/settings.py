@@ -925,9 +925,10 @@ class ChoicesMapValidator(ChoicesValidator):
         return reply_value
 
     def prepare_write(self, key, new_value):
-        choices = self.choices[key]
-        if new_value not in choices and new_value != self.extra_default:
-            raise ValueError('invalid choice %r' % new_value)
+        choices = self.choices.get(key)
+        if choices is None or (new_value not in choices and new_value != self.extra_default):
+            _log.error('invalid choice %r for %s', new_value, key)
+            return None
         new_value = new_value | self.activate
         return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
