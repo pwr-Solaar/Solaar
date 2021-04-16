@@ -21,6 +21,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import namedtuple
 from logging import DEBUG as _DEBUG
+from logging import WARNING as _WARNING
 from logging import getLogger
 
 from solaar.ui import notify as _notify
@@ -110,7 +111,7 @@ _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('In
 _GESTURE2_GESTURES = ('gesture2-gestures', _('Gestures'), _('Tweak the mouse/touchpad behaviour.'))
 _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical parameters of a mouse/touchpad.'))
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
-                _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
+                _('Adjust the DPI by sliding the mouse horizontally while holding the button down.'))
 _MOUSE_GESTURES = ('mouse-gestures', _('Mouse Gestures'),
                    _('Send a gesture by sliding the mouse while holding the button down.'))
 _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
@@ -501,7 +502,8 @@ def _feature_dpi_sliding():
                     DPI_key = device.keys[device.keys.index(_special_keys.CONTROL.DPI_Switch)]
                     DPI_key.set_rawXY_reporting(False)
                 except Exception:
-                    _log.error('cannot disable DPI sliding on %s', device)
+                    if _log.isEnabledFor(_WARNING):
+                        _log.warn('cannot disable DPI sliding on %s', device)
             return True
 
     return _Setting(_DPI_SLIDING, _DpiSlidingRW(), callback=_feature_dpi_sliding_callback, device_kind=(_DK.mouse, ))
