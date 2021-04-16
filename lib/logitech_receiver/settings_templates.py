@@ -112,7 +112,7 @@ _GESTURE2_PARAMS = ('gesture2-params', _('Gesture params'), _('Change numerical 
 _DPI_SLIDING = ('dpi-sliding', _('DPI Sliding Adjustment'),
                 _('Adjust the DPI by sliding the mouse horizontally while holding the DPI button.'))
 _MOUSE_GESTURES = ('mouse-gestures', _('Mouse Gestures'),
-                   _('Send a gesture by sliding the mouse while holding the App Switch button.'))
+                   _('Send a gesture by sliding the mouse while holding the button down.'))
 _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
                  _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),

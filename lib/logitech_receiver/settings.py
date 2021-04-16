@@ -1097,7 +1097,7 @@ class DivertedMouseMovement(object):
 
 
 MouseGestureKeys = [
-    _special_keys.CONTROL.App_Switch_Gesture,
+    _special_keys.CONTROL.Mouse_Gesture_Button,
     _special_keys.CONTROL.MultiPlatform_Gesture_Button,
 ]
 
