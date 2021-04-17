@@ -141,3 +141,11 @@ Here is a file with three rules:
 - Rule: [ Or: [ Test: lowres_wheel_up, Test: lowres_wheel_down ], MouseScroll: [0, 2] ]
 ...
 ```
+
+Here is an example showing how to divert the Back Button on an MX Master 3 so that pressing
+the button will initiate rule processing and a rule that triggers on this notification and
+switches the mouse to host 3 after popping up a simple notification.
+
+![Solaar-divert-back](Solaar-main-window-back-divert.png)
+
+![Solaar-rule-back-host](Solaar-rule-editor.png)

@@ -77,15 +77,17 @@ You can also see and change the settings of devices.
 Changing settings is performed by clicking on buttons,
 moving sliders, or selecting from alternatives.
 
-Device setings now have a clickable lock icon that determines whether the
-setting can be changed.  These locks are not (yet) shown in the images.
-
 ![Solaar-main-window-keyboard](Solaar-main-window-keyboard.png)
 
 ![Solaar-main-window-mouse](Solaar-main-window-mouse.png)
 
-If the selected device is powered down or otherwise disconnected its settings
-cannot be changed
+Device setings now have a clickable icon that determines whether the
+setting can be changed and whether the setting is ignored.
+
+![Solaar-divert-back](Solaar-main-window-back-divert.png)
+
+If the selected device that is connected to a receiver is powered down or
+otherwise disconnected its settings cannot be changed
 but it still can be unpaired if its receiver allows unpairing.
 
 ![Solaar-main-window-offline](Solaar-main-window-offline.png)
@@ -131,7 +133,7 @@ Side Scrolling	    		 | When off, side scrolling sends custom button events
 Scroll Wheel High Resolution	 | Higher-speed vertical scrolling
 Scroll Wheel HID++ Scrolling	 | When on, vertical scrolling uses HID++ events
 Scroll Wheel Direction		 | Reverse direction of vertical scrolling
-Scroll Wheel Resolution		 | Higher-speed vertical scrolling
+Scroll Wheel Resolution		 | Higher-speed vertical scrolling (use with caution)
 Scroll Wheel Rachet		 | Shift wheel ratchet on and off based on wheel speed
 Thumb Wheel HID++ Scrolling	 | When on, thumb-wheel scrolling uses HID++ events
 Thumb Wheel Direction		 | Reverse direction of thumb-wheel scrolling
@@ -139,7 +141,12 @@ Sensitivity (DPI)		 | Mouse movement sensitivity
 Sensitivity (Pointer Speed)	 | Mouse movement sensitivity
 Backlight   			 | Turn on backlight
 Swap Fx function		 | Change Fn keys to normally do their special action
+DPI Sliding Adjustment		 | Change Sensitivity (DPI) by holding a button and moving the mouse
+Mouse Gestures			 | Create HID++ events by holding a button and moving the mouse
 Key/Button Actions   		 | Change what a key or button does
+Key/Button Diversion		 | Divert keys and buttons to create HID++ events
+Divert crown events		 | Divert crown actions to create HID++ events
+Divert G Keys			 | Divert G keys to create HID++ events
 Disable keys			 | Disable one or more keys
 Set OS				 | Change keys to match OS
 Change Host			 | Connect to a different host
