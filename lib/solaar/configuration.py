@@ -101,12 +101,13 @@ def _cleanup(d):
 
 
 def _cleanup_load(d):
-    # remove boolean values for mouse-gestures
-    for device in d:
+    # remove boolean values for mouse-gesture and dpi-sliding
+    for device in d.values():
         if isinstance(device, dict):
-            mg = device.get('mouse-gestures', None)
-            if mg is True or mg is False:
-                del device['mouse-gestures']
+            for setting in ['mouse-gestures', 'dpi-sliding']:
+                mg = device.get(setting, None)
+                if mg is True or mg is False:
+                    del device[setting]
 
 
 class _DeviceEntry(dict):
