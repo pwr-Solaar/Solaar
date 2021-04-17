@@ -140,16 +140,25 @@ Solaar rules is an experimental feature.  Significant changes might be made in r
 
 ### Sliding DPI
 
-A few mice (such as the MX Vertical) have a button that can be used to change
+A few mice (such as the MX Vertical) have a button that is supposed to be used to change
 the sensitivity (DPI) of the mouse by pressing the button and moving the mouse left and right.
-This processing is only set up in Solaar when the DPI Sliding Adjustment setting is on and
-the DPI Switch button is diverted.
+Other mice (such as the MX Master 3) don't have a button specific for this purpose
+but have buttons that can be used for it.
+
+The DPI Sliding Adjustment setting assigns a button for this purpose.
+Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
+When the button is released a new Sensitivity (DPI) value is applied to the mouse,
+depending on how far right or left the mouse is moved.   If the mouse is moved only a little bit
+the previous value that was set is applied to the mouse.
+Notifications from Solaar are displayed while the mouse button is done
+showing the setting that will be applied.
+
 
 ### Mouse Gestures
 
 Some mice (such as the MX Master 3) have a button that is supposed to be used to
-create up/down/left/right mouse gestures.  Other mice (such as the MX Master 3) don't
-have a button specific for this but have buttons that can be used for it.
+create up/down/left/right mouse gestures.  Other mice (such as the MX Vertical) don't
+have a button specific for this purpose but have buttons that can be used for it.
 
 The Mouse Gestures setting assigns a button for this purpose.
 Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
