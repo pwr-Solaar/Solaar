@@ -14,7 +14,7 @@ Clone Solaar from GitHub by `git clone https://github.com/pwr-Solaar/Solaar.git`
 Installing Solaar from a repository should have set up all these requirements
 so in this situation you should be able to skip this section.
 
-Solaar needs a reasonably new kernel (5.2+ should work fine and recent CentOS distributions are likely to work),
+Solaar needs a reasonably new kernel (5.2+ should work fine),
 with kernel modules `hid-logitech-dj`
 and `hid-logitech-hidpp` loaded. Also, the `udev` package must be installed
 and its daemon running. If you have a recent Linux distribution, you are
@@ -72,9 +72,9 @@ Do not run Solaar as root, you may encounter problems with X11 integration and w
 ## Installing Solaar Using Pip
 
 Python programs are usually installed using [pip][pip].
-The pip instructions for solaar are in `setup.py`, the standard place to put such instructions.
+The pip instructions for Solaar are in `setup.py`, the standard place to put such instructions.
 
-To install solaar for yourself only run `pip install --user .` from the solaar directory.
+To install Solaar for yourself only run `pip install --user .` from the solaar directory.
 This tells pip to install into your `.local` directory, but does not install Solaar's udev rule.
 (See above for installing the udev rule.)
 Once the udev rule has been installed you can then run Solaar as `~/.local/bin/solaar`.

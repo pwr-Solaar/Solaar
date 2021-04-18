@@ -25,14 +25,14 @@ and for more information on its capabilities see
 
 Solaar's GUI normally uses an icon in the system tray and starts with its main window visible.
 This aspect of Solaar depends on having an active system tray, which is not the default
-situation for recent versions of Gnome.  For information on to set up a system Gnome see
+situation for recent versions of Gnome.  For information on to set up a system tray under Gnome see
 [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities).
 
 Solaar's GUI can be started in several ways
 
 - `--window=show` (the default) starts with its main window visible,
 - `--window=hide` starts with its main window hidden,
-- `--window=only` do not use the system tray, and start with main window visible.
+- `--window=only` does not use the system tray, and starts with main window visible.
 
 For more information on Solaar's command-line interface use the help option,
 as in `solaar --help`.
@@ -56,8 +56,8 @@ Please report such experiences by creating an issue in
 
 ## Supported Devices
 
-Solaar will detect all devices paired with your Unifying, Lightspeed, or Nano
-receiver, and at the very least display some basic information about them.
+Solaar will detect all devices paired with supported Unifying, Lightspeed, or Nano
+receivers, and at the very least display some basic information about them.
 Solaar will detect some Logitech devices that connect via a USB cable or Bluetooth.
 
 Solaar can pair and unpair a Logitech device showing the Unifying logo
@@ -142,8 +142,7 @@ for the step-by-step procedure for manual installation.
   On these mice changing the Polling Rate setting requires modifying a setting in
   the ONBOARD PROFILES feature, which can modify how the mouse works.  Changing the
   Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
-  modifying the ONBOARD PROFILES feature.  The mouse needs to be turned off and on
-  again undo the modification of ONBOARD PROFILES feature.
+  modifying the ONBOARD PROFILES feature.
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
 
