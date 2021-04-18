@@ -191,6 +191,7 @@ TESTS = {
     'mouse-up': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'up',
     'mouse-left': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'left',
     'mouse-right': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'right',
+    'mouse-noop': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) is None,
     'False': lambda f, r, d: False,
     'True': lambda f, r, d: True,
 }

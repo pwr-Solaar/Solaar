@@ -146,7 +146,9 @@ body() {
 EOF
 }
 echo 'Creating github release...'
-[ -z "$DRY_RUN" ] && url=$(curl -X POST --data "$(body)" "https://api.github.com/repos/$repo/releases?access_token=$github_token" 2>/dev/null | jq -r .html_url)
+##[ -z "$DRY_RUN" ] && url=$(curl -X POST --data "$(body)" "https://api.github.com/repos/$repo/releases?access_token=$github_token" 2>/dev/null | jq -r .html_url)
+[ -z "$DRY_RUN" ] && url=$(curl -H 'Authorization: $github_token' -X POST --data "$(body)" "https://api.github.com/repos/$repo/releases" 2>/dev/null | jq -r .html_url)
+
 [ -z "$DRY_RUN" ] && [ -z "$url" ] && echo -e '\nError: Failed to create a github release' && exit 1
 
 [ -z "$DRY_RUN" ] && echo -e "\nRelease created: $url"

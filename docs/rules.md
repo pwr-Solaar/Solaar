@@ -91,6 +91,7 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 A 'mouse-down' test is true for a mouse gesture mostly in the downward direction.
 `mouse-up', 'mouse-left', and 'mouse-right' are the same but for gestures in the other directions.
+A 'mouse-noop' test is true for a mouse gesture where the mouse doesn't move much.
 `True` and `False` tests return True and False, respectively.
 
 A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard.
@@ -140,3 +141,11 @@ Here is a file with three rules:
 - Rule: [ Or: [ Test: lowres_wheel_up, Test: lowres_wheel_down ], MouseScroll: [0, 2] ]
 ...
 ```
+
+Here is an example showing how to divert the Back Button on an MX Master 3 so that pressing
+the button will initiate rule processing and a rule that triggers on this notification and
+switches the mouse to host 3 after popping up a simple notification.
+
+![Solaar-divert-back](Solaar-main-window-back-divert.png)
+
+![Solaar-rule-back-host](Solaar-rule-editor.png)

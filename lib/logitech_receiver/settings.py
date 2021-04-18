@@ -925,9 +925,10 @@ class ChoicesMapValidator(ChoicesValidator):
         return reply_value
 
     def prepare_write(self, key, new_value):
-        choices = self.choices[key]
-        if new_value not in choices and new_value != self.extra_default:
-            raise ValueError('invalid choice %r' % new_value)
+        choices = self.choices.get(key)
+        if choices is None or (new_value not in choices and new_value != self.extra_default):
+            _log.error('invalid choice %r for %s', new_value, key)
+            return None
         new_value = new_value | self.activate
         return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
@@ -1097,19 +1098,20 @@ class DivertedMouseMovement(object):
 
 
 MouseGestureKeys = [
-    _special_keys.CONTROL.App_Switch_Gesture,
+    _special_keys.CONTROL.Mouse_Gesture_Button,
     _special_keys.CONTROL.MultiPlatform_Gesture_Button,
 ]
 
 
 class DivertedMouseMovementRW(object):
-    def __init__(self, dpi_name):
+    def __init__(self, dpi_name, divert_name):
         self.kind = FeatureRW.kind  # pretend to be FeatureRW as required for HID++ 2.0 devices
         self.dpi_name = dpi_name
+        self.divert_name = divert_name
         self.key = None
 
-    def read(self, device):  # need to return bytes, not a boolean
-        return b'0x01' if '_divertedMMState' in device.__dict__ else b'0x00'
+    def read(self, device):  # need to return bytes, as if read from device
+        return _int2bytes(device._divertedMMState.key, 2) if '_divertedMMState' in device.__dict__ else b'\x00\x00'
 
     def write(self, device, data_bytes):
         def handler(device, n):
@@ -1123,28 +1125,36 @@ class DivertedMouseMovementRW(object):
                     dx, dy = _unpack('!hh', n.data[:4])
                     state.handle_move_event(dx, dy)
 
-        if bool(data_bytes):  # enable
+        key = _bytes2int(data_bytes)
+        if key:  # enable
             # Enable HID++ events on moving the mouse while button held
-            for key_number in MouseGestureKeys:
-                key_index = device.keys.index(key_number)
-                self.key = device.keys[key_index] if key_index is not None else None
-                if self.key and 'raw XY' in self.key.flags:
-                    self.key.set_rawXY_reporting(True)
-                    # Store our variables in the device object
-                    device._divertedMMState = DivertedMouseMovement(device, self.dpi_name, self.key.key)
-                    device.add_notification_handler('diverted-mouse-movement-handler', handler)
-                    return True
+            self.key = next((k for k in device.keys if k.key == key), None)
+            if self.key:
+                self.key.set_rawXY_reporting(True)
+                divertSetting = next(filter(lambda s: s.name == self.divert_name, device.settings), None)
+                divertSetting.write_key_value(int(self.key.key), 1)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(device, refresh=True)  # update main window
+                # Store our variables in the device object
+                device._divertedMMState = DivertedMouseMovement(device, self.dpi_name, self.key.key)
+                device.add_notification_handler('diverted-mouse-movement-handler', handler)
+                return True
             else:
-                _log.error('cannot enable diverted mouse movement on %s', device)
+                _log.error('cannot enable diverted mouse movement on %s for key %s', device.name, key)
         else:  # disable
+            if self.key:
+                self.key.set_rawXY_reporting(False)
+                divertSetting = next(filter(lambda s: s.name == self.divert_name, device.settings), None)
+                divertSetting.write_key_value(int(self.key.key), 0)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(device, refresh=True)  # update main window
+                self.key = None
             try:
                 device.remove_notification_handler('diverted-mouse-movement-handler')
-                del device._divertedMMState
-                if self.key:
-                    self.key.set_rawXY_reporting(False)
-                    self.key = None
             except Exception:
-                _log.error('cannot disable diverted mouse movement on %s', device)
+                pass
+            if hasattr(device, '_divertedMMState'):
+                del device._divertedMMState
         return True
 
 

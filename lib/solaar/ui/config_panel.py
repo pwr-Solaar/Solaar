@@ -374,10 +374,14 @@ def _change_click(eb, button, arg):
     _change_icon(new_allowed, icon)
     if device.persister:  # remember the new setting sensitivity
         device.persister.set_sensitivity(name, new_allowed)
-    if allowed == _SENSITIVITY_IGNORE:  # get current value of setting if it was being ignored
+    if allowed == _SENSITIVITY_IGNORE:  # update setting if it was being ignored
         setting = next((s for s in device.settings if s.name == name), None)
         if setting:
-            _read_async(setting, True, control.get_parent(), bool(device.online), control.get_sensitive())
+            persisted = device.persister.get(setting.name) if device.persister else None
+            if persisted is not None:
+                _write_async(setting, persisted, control.get_parent())
+            else:
+                _read_async(setting, True, control.get_parent(), bool(device.online), control.get_sensitive())
     return True
 
 
@@ -481,7 +485,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
         control.set_value(int(value))
     elif isinstance(control, Gtk.HBox):
         kbox, vbox = control.get_children()  # depends on box layout
-        if value.get(kbox.get_active_id()):
+        if value.get(kbox.get_active_id()) is not None:
             vbox.set_active_id(str(value.get(kbox.get_active_id())))
     elif isinstance(control, Gtk.ListBox):
         if control.kind == _SETTING_KIND.multiple_toggle:

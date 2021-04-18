@@ -11,9 +11,9 @@ Logitech USB receiver (a very small piece of hardware that plugs into one of
 your USB ports).
 Solaar is designed to detect all connected devices,
 and at the very least display some basic information about them.
-At this moment, all [Unifying][unifying] receivers are supported (devices
+At this moment, all [Unifying][unifying] receivers are supported (e.g., devices
 with USB ID `046d:c52b` or `046d:c532`) as are several Lightspeed Receivers
-and a dozen Nano receivers.
+and many Nano receivers.
 
 Solaar also reports on and controls some Logitech devices that directly connect
 to your computer using a USB cable or via Bluetooth.
@@ -26,18 +26,18 @@ for each device type that directly connects.
 The devices that Solaar handles use Logitech's HID++ protocol.
 
 HID++ is a Logitech-proprietary protocol that extends the standard HID
-protocol for interfacing with keyboards, mice, and so on. It allows
+protocol for interfacing with receivers, keyboards, mice, and so on. It allows
 Logitech receivers to communicate with multiple devices and modify some
-features of the device on the device itself. As the HID++ protocol is
+features of the device. As the HID++ protocol is
 proprietary, many aspects of it are unknown. Some information about HID++
 has been obtained from Logitech but even that is subject to change and
 extension.
 
-There are several versions of the HID++ and many Logitech
+There are several versions of HID++ and many Logitech
 receivers and devices that utilize it. Different receivers and devices
 implement different portions of HID++ so even if two devices appear to be
 the same in both physical appearance and behavior they may work
-completely differently underneath. (For example, there are versions of the
+differently underneath. (For example, there are versions of the
 M510 mouse that use different versions of the HID++ protocol.)
 Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
@@ -46,7 +46,7 @@ same to software as some M310 mice.)
 The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software
 identity of a device that connects to a receiver can be determined by
-its Wireless PID as reported by Solaar.  The software identity of devices that
+its wireless PID as reported by Solaar.  The software identity of devices that
 connect via a USB cable or via bluetooth can be determined by their USB or
 Bluetooth product ID.
 
@@ -108,9 +108,8 @@ interactions. These interactions can temporarily slow down the device, so
 Solaar tries to internally cache information about devices while it is
 running.  If the device
 state is changed by some other means, even sometimes by another invocation
-of the program, this cached information may become incorrect. Currently there is
-no way to force an update of the cached information besides restarting the
-program.
+of Solaar, this cached information may become incorrect. Currently there is
+no way to force an update of the cached information besides restarting Solaar.
 
 Logitech receivers and devices have firmware in them. Some firmware
 can be updated using Logitech software in Windows. For example, there are
@@ -125,9 +124,9 @@ update installs the wrong firmware.
 
 Solaar has a few capabilities that go beyond simply changing device settings.
 
-### Rule-based Processing of HID++ Feature Notifications
+### Rule-based Processing of HID++ Notifications
 
-Solaar can process HID++ Feature Notifications from devices to, for example,
+Solaar can process HID++ Notifications from devices to, for example,
 change the speed of some thumb wheels.  These notifications are only sent
 for actions that are set in Solaar to their HID++ setting (also known as diverted).
 For more information on this capability of Solaar see
@@ -140,20 +139,33 @@ Solaar rules is an experimental feature.  Significant changes might be made in r
 
 ### Sliding DPI
 
-A few mice (such as the MX Vertical) have a button that can be used to change
+A few mice (such as the MX Vertical) have a button that is supposed to be used to change
 the sensitivity (DPI) of the mouse by pressing the button and moving the mouse left and right.
-This processing is only set up in Solaar when the DPI Sliding Adjustment setting is on and
-the DPI Switch button is diverted.
+Other mice (such as the MX Master 3) don't have a button specific for this purpose
+but have buttons that can be used for it.
+
+The DPI Sliding Adjustment setting assigns a button for this purpose.
+Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
+When the button is released a new Sensitivity (DPI) value is applied to the mouse,
+depending on how far right or left the mouse is moved.   If the mouse is moved only a little bit
+the previous value that was set is applied to the mouse.
+Notifications from Solaar are displayed while the mouse button is done
+showing the setting that will be applied.
+
 
 ### Mouse Gestures
 
-Some mice (such as the MX Master 3) have a button that can be used to
-create up/down/left/right gestures, which then are seen by the Solaar rules as
-MOUSE_GESTURE notifications.
-This processing is only set up in Solaar when the Mouse Gestures setting is on and
-the App Switch Gesture button or MultiPlatform Gesture Button is diverted.
+Some mice (such as the MX Master 3) have a button that is supposed to be used to
+create up/down/left/right mouse gestures.  Other mice (such as the MX Vertical) don't
+have a button specific for this purpose but have buttons that can be used for it.
 
-Mouse gestures is an experimental feature.  Significant changes might be made in response to problems.
+The Mouse Gestures setting assigns a button for this purpose.
+Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
+When the button is released a MOUSE_GESTURE notification with the total mouse movement
+while the button was pressed is sent to the Solaar rule system.
+
+Mouse gestures is an experimental feature.
+Significant changes might be made to it in the future.
 
 
 ## System Tray
