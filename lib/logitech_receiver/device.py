@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import errno as _errno
 
 from logging import INFO as _INFO
-from logging import WARNING as _WARNING
 from logging import getLogger
 from typing import Optional
 
@@ -419,8 +418,8 @@ class Device(object):
     def remove_notification_handler(self, id: str):
         """Unregisters the notification handler under name `id`."""
 
-        if id not in self._notification_handlers and _log.isEnabledFor(_WARNING):
-            _log.warn(f'Tried to remove nonexistent notification handler {id} from device {self}.')
+        if id not in self._notification_handlers and _log.isEnabledFor(_INFO):
+            _log.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
         else:
             del self._notification_handlers[id]
 
