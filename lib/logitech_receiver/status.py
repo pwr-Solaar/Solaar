@@ -284,6 +284,7 @@ class DeviceStatus(dict):
         # assert d  # may be invalid when processing the 'unpaired' notification
         timestamp = timestamp or _timestamp()
 
+        _log.info(f"tjones: changed: active = {self._active} -> {active} ... reason = [{reason}]")
         if active is not None:
             d.online = active
             was_active, self._active = self._active, active
