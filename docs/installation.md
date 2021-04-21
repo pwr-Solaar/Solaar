@@ -58,9 +58,6 @@ you will then need to either disconnect your receivers and
 any USB-connected or Bluetooth-connected devices and
 re-connect them or reboot your computer.
 
-You only need to install Solaar's udev rule if it is not already installed
-on your system or the rule has changed.
-
 ## Running from the Download Directories
 
 To run Solaar from the download directories, first install the Solaar udev rule if necessary.
