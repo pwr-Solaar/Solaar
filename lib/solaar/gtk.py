@@ -147,14 +147,14 @@ def main():
 
     udev_file = '42-logitech-unify-permissions.rules'
     if not os.path.isfile('/etc/udev/rules.d/' + udev_file) and not os.path.isfile('/lib/udev/rules.d/' + udev_file):
-        print(_i18n._('Solaar depends on a udev file that is not present'))
+        print(_i18n._('ERROR: '), end='')
+        print(_i18n._('Solaar depends on a udev file that is not present'), end='.\n')
         print(
             _i18n._(
                 'For more information see the Solaar installation directions\n'
                 'at https://pwr-solaar.github.io/Solaar/installation'
             )
         )
-
     try:
         import solaar.ui as ui
         import solaar.listener as listener
