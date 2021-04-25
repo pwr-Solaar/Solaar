@@ -42,8 +42,9 @@ def _create():
     about.set_copyright('© 2012-2021 Daniel Pavel and contributors to the Solaar project')
     about.set_license_type(Gtk.License.GPL_2_0)
 
-    about.set_authors(('Daniel Pavel http://github.com/pwr', 'Filipe Laíns', 'Peter F. Patel-Schneider'))
+    about.set_authors(('Daniel Pavel http://github.com/pwr', ))
     try:
+        about.add_credit_section(_('Additional Programming'), ('Filipe Laíns', 'Peter F. Patel-Schneider'))
         about.add_credit_section(_('GUI design'), ('Julien Gascard', 'Daniel Pavel'))
         about.add_credit_section(
             _('Testing'), (
