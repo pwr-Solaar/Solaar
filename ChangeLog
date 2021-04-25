@@ -1,4 +1,4 @@
-1.0.6:
+1.0.6rc2:
   * Update sliding DPI to look for suitable keys
   * Add mouse gestures that can trigger rules
   * Complain if receivers do not support connection notification
