@@ -36,8 +36,7 @@ def _create():
 
     about.set_program_name(NAME)
     about.set_version(__version__)
-    about.set_comments(_('Shows status of devices connected\nthrough wireless Logitech receivers.'))
-
+    about.set_comments(_('Manages Logitech receivers,\nkeyboards, mice, and tablets.'))
     about.set_logo_icon_name(NAME.lower())
 
     about.set_copyright('© 2012-2021 Daniel Pavel and contributors to the Solaar project')
@@ -45,6 +44,7 @@ def _create():
 
     about.set_authors(('Daniel Pavel http://github.com/pwr', ))
     try:
+        about.add_credit_section(_('Additional Programming'), ('Filipe Laíns', 'Peter F. Patel-Schneider'))
         about.add_credit_section(_('GUI design'), ('Julien Gascard', 'Daniel Pavel'))
         about.add_credit_section(
             _('Testing'), (

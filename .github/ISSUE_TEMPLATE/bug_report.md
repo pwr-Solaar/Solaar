@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 **Information**
+<!-- Make sure that your issue is not one of the known issues in the Solaar documentation at https://pwr-solaar.github.io/Solaar/ -->
 <!-- Do not bother opening an issue for a version older than 1.0.1.  Please update to the latest version and see if your issue persists. -->
 - Solaar version (`solaar --version` or `git describe --tags` if cloned from this repository):
 - Distribution:
