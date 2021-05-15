@@ -237,9 +237,9 @@ def _print_device(dev, num=None):
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
-            if dev.keys.keyversion == 1:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V2:
                 print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
-            if dev.keys.keyversion == 4:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ','.join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else 'empty'

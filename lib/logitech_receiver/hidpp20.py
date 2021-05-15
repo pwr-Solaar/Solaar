@@ -589,10 +589,10 @@ class KeysArray(object):
     def __init__(self, device, count):
         assert device is not None
         self.device = device
-        if FEATURE.REPROG_CONTROLS in self.device.features:
-            self.keyversion = 1
-        elif FEATURE.REPROG_CONTROLS_V4 in self.device.features:
-            self.keyversion = 4
+        if FEATURE.REPROG_CONTROLS_V4 in self.device.features:
+            self.keyversion = FEATURE.REPROG_CONTROLS_V4
+        elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
+            self.keyversion = FEATURE.REPROG_CONTROLS_V2
         else:
             if _log.isEnabledFor(_ERROR):
                 _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
@@ -616,13 +616,13 @@ class KeysArray(object):
             raise IndexError(index)
 
         # TODO: add here additional variants for other REPROG_CONTROLS
-        if self.keyversion == 1:
-            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+        if self.keyversion == FEATURE.REPROG_CONTROLS_V2:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V2, 0x10, index)
             if keydata:
                 cid, tid, flags = _unpack('!HHB', keydata[:5])
                 self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
                 self.cid_to_tid[cid] = tid
-        elif self.keyversion == 4:
+        elif self.keyversion == FEATURE.REPROG_CONTROLS_V4:
             keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
             if keydata:
                 cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
@@ -1209,8 +1209,8 @@ def decipher_voltage(voltage_report):
 def get_keys(device):
     # TODO: add here additional variants for other REPROG_CONTROLS
     count = None
-    if FEATURE.REPROG_CONTROLS in device.features:
-        count = feature_request(device, FEATURE.REPROG_CONTROLS)
+    if FEATURE.REPROG_CONTROLS_V2 in device.features:
+        count = feature_request(device, FEATURE.REPROG_CONTROLS_V2)
     elif FEATURE.REPROG_CONTROLS_V4 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
     if count:
