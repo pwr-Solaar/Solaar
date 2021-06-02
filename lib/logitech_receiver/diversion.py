@@ -550,8 +550,8 @@ class KeyPress(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = current_key_modifiers
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
+        if _log.isEnabledFor(_INFO):
+            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
         self.keyDown(self.keys, current)
         self.keyUp(reversed(self.keys), current)
         displayt.sync()
@@ -608,8 +608,8 @@ class MouseScroll(Action):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
+        if _log.isEnabledFor(_INFO):
+            _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         dx, dy = amounts
         if dx:
             click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
@@ -643,8 +643,8 @@ class MouseClick(Action):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('MouseClick action: %d %s' % (self.count, self.button))
+        if _log.isEnabledFor(_INFO):
+            _log.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
         displayt.sync()
@@ -669,8 +669,8 @@ class Execute(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         import subprocess
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('Execute action: %s', self.args)
+        if _log.isEnabledFor(_INFO):
+            _log.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
         return None
 
