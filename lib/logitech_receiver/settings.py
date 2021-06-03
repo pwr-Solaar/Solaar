@@ -1052,7 +1052,7 @@ class DivertedMouseMovement(object):
         self.dy = 0.
         self.fsmState = 'idle'
         self.dpiSetting = next(filter(lambda s: s.name == dpi_name, device.settings), None)
-        self.data = [ 0 ]
+        self.data = [0]
         self.lastEv = 0.
         self.skip = False
 
@@ -1154,7 +1154,7 @@ class DivertedMouseMovementRW(object):
                 if n.address == 0x00:
                     cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
                     x = state.handle_keys_event({cid1, cid2, cid3, cid4})
-                    if x == True:
+                    if x:
                         return True
                 elif n.address == 0x10:
                     dx, dy = _unpack('!hh', n.data[:4])

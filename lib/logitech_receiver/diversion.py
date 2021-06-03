@@ -159,6 +159,7 @@ key_down = None
 def signed(bytes):
     return int.from_bytes(bytes, 'big', signed=True)
 
+
 def xy_direction(_x, _y):
     # normalize x and y
     m = _sqrt((_x * _x) + (_y * _y))
@@ -452,8 +453,11 @@ class Test(Condition):
     def data(self):
         return {'Test': str(self.test)}
 
+
 class MouseGesture(Condition):
-    MOVEMENTS = ['Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left', 'Mouse Down-right']
+    MOVEMENTS = ['Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right',
+                 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left', 'Mouse Down-right']
+
     def __init__(self, movements):
         if isinstance(movements, str):
             movements = [movements]
@@ -492,6 +496,7 @@ class MouseGesture(Condition):
 
     def data(self):
         return {'MouseGesture': [str(m) for m in self.movements]}
+
 
 class Action(RuleComponent):
     def __init__(self, *args):
