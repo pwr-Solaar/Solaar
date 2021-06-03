@@ -1077,8 +1077,10 @@ class TestUI(ConditionUI):
 class MouseGestureUI(ConditionUI):
 
     CLASS = _DIV.MouseGesture
-    MOVE_NAMES = list(map(str, _CONTROL)) + ['Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right',
-                                             'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left', 'Mouse Down-right']
+    MOVE_NAMES = list(map(str, _CONTROL)) + [
+        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
+        'Mouse Down-right'
+    ]
 
     def create_widgets(self):
         self.widgets = {}

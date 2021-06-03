@@ -455,8 +455,10 @@ class Test(Condition):
 
 
 class MouseGesture(Condition):
-    MOVEMENTS = ['Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right',
-                 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left', 'Mouse Down-right']
+    MOVEMENTS = [
+        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
+        'Mouse Down-right'
+    ]
 
     def __init__(self, movements):
         if isinstance(movements, str):
@@ -473,7 +475,7 @@ class MouseGesture(Condition):
         if feature == _F.MOUSE_GESTURE:
             d = notification.data
             count = _unpack('!h', d[:2])[0]
-            data = _unpack('!' + ((int(len(d)/2) - 1) * 'h'), d[2:])
+            data = _unpack('!' + ((int(len(d) / 2) - 1) * 'h'), d[2:])
             if count != len(self.movements):
                 return False
             x = 0
