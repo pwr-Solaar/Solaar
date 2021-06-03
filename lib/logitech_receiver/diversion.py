@@ -163,7 +163,7 @@ def xy_direction(_x, _y):
     # normalize x and y
     m = _sqrt((_x * _x) + (_y * _y))
     if m == 0:
-      return 'noop'
+        return 'noop'
     x = round(_x / m)
     y = round(_y / m)
     if x < 0 and y < 0:
@@ -476,8 +476,8 @@ class MouseGesture(Condition):
             z = 0
             while x < len(data):
                 if data[x] == 0:
-                    dir = xy_direction(data[x + 1], data[x + 2])
-                    if self.movements[z] != dir:
+                    direction = xy_direction(data[x + 1], data[x + 2])
+                    if self.movements[z] != direction:
                         return False
                     x += 3
                 elif data[x] == 1:

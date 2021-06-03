@@ -1122,12 +1122,12 @@ class DivertedMouseMovement(object):
             else:
                 last = (cids - {self.key, 0})
                 if len(last) != 0:
-                  self.push_mouse_event()
-                  self.data.append(1)
-                  self.data.append(list(last)[0])
-                  self.data[0] += 1
-                  self.lastEv = _time_ns() / 1e6
-                  return True
+                    self.push_mouse_event()
+                    self.data.append(1)
+                    self.data.append(list(last)[0])
+                    self.data[0] += 1
+                    self.lastEv = _time_ns() / 1e6
+                    return True
 
 
 MouseGestureKeys = [

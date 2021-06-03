@@ -511,7 +511,7 @@ class DiversionDialog:
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
-                        (_('Mouse Gesture'), _DIV.MouseGesture, []),
+                        (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
                 ],
                 [
