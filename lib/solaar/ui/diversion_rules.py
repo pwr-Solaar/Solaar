@@ -1152,7 +1152,10 @@ class MouseGestureUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return ' -> '.join(component.movements)
+        if len(component.movements) == 0:
+            return 'No-op'
+        else:
+            return ' -> '.join(component.movements)
 
 
 class ActionUI(RuleComponentUI):

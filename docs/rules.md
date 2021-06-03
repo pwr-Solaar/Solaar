@@ -96,6 +96,7 @@ The available actions are `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`,
 An example would be mapping `Mouse Up` -> `Mouse Up`. To perform this gesture, you would hold down the 'Gesture' button, move the mouse upwards, pause momentarily, move the mouse upwards, and release the 'Gesture' button.
 Another example would be mapping `Back Button` -> `Back Button`. With this one, you would hold down the 'Gesture' button, double-tap the 'Back' button, and then release the 'Gesture' button.
 Mouse movements and buttons can be mixed and chained together however you like.
+It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click the 'Gesture' button.
 
 A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard.
 Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
