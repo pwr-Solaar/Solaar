@@ -23,6 +23,8 @@ del getLogger
 _R = _hidpp10.REGISTERS
 _IR = _hidpp10.INFO_SUBREGISTERS
 
+KIND_MAP = {kind: _hidpp10.DEVICE_KIND[str(kind)] for kind in _hidpp20.DEVICE_KIND}
+
 #
 #
 #
@@ -256,7 +258,7 @@ class Device(object):
                 kind = ord(pair_info[7:8]) & 0x0F
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             elif self.online and self.protocol >= 2.0:
-                self._kind = _hidpp20.get_kind(self)
+                self._kind = KIND_MAP[_hidpp20.get_kind(self)]
         return self._kind or '?'
 
     @property
