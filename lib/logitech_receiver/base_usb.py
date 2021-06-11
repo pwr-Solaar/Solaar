@@ -150,6 +150,7 @@ LIGHTSPEED_RECEIVER_C53f = _lightspeed_receiver(0xc53f)
 LIGHTSPEED_RECEIVER_C53d = _lightspeed_receiver(0xc53d)
 LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
+LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xc547)
 
 ALL = (
     UNIFYING_RECEIVER_C52B,
@@ -173,6 +174,7 @@ ALL = (
     LIGHTSPEED_RECEIVER_C53d,
     LIGHTSPEED_RECEIVER_C545,
     LIGHTSPEED_RECEIVER_C541,
+    LIGHTSPEED_RECEIVER_C547,
 )
 
 _wired_device = lambda product_id, interface: {
