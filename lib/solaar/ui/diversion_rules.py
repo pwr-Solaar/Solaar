@@ -1077,10 +1077,11 @@ class TestUI(ConditionUI):
 class MouseGestureUI(ConditionUI):
 
     CLASS = _DIV.MouseGesture
-    MOVE_NAMES = list(map(str, _CONTROL)) + [
+    MOUSE_GESTURE_NAMES = [
         'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
         'Mouse Down-right'
     ]
+    MOVE_NAMES = list(map(str, _CONTROL)) + MOUSE_GESTURE_NAMES
 
     def create_widgets(self):
         self.widgets = {}
@@ -1091,7 +1092,10 @@ class MouseGestureUI(ConditionUI):
         self.widgets[self.add_btn] = (1, 0, 1, 1)
 
     def _create_field(self):
-        field = CompletionEntry(self.MOVE_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        field = Gtk.ComboBoxText.new_with_entry()
+        for g in self.MOUSE_GESTURE_NAMES:
+            field.append(g, g)
+        CompletionEntry.add_completion_to_entry(field.get_child(), self.MOVE_NAMES)
         field.connect('changed', self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 0, 1, 1)
@@ -1122,7 +1126,7 @@ class MouseGestureUI(ConditionUI):
             if f.get_visible():
                 icon = 'dialog-warning' if i < len(self.component.movements
                                                    ) and self.component.movements[i] not in self.MOVE_NAMES else ''
-                f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+                f.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component):
         n = len(component.movements)
@@ -1134,7 +1138,7 @@ class MouseGestureUI(ConditionUI):
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
-                field.set_text(component.movements[i])
+                field.get_child().set_text(component.movements[i])
             field.set_size_request(int(0.3 * self.panel.get_toplevel().get_size()[0]), 0)
             field.show_all()
             self.del_btns[i].show()
@@ -1144,7 +1148,7 @@ class MouseGestureUI(ConditionUI):
         self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
 
     def collect_value(self):
-        return [f.get_text().strip() for f in self.fields if f.get_visible()]
+        return [f.get_active_text().strip() for f in self.fields if f.get_visible()]
 
     @classmethod
     def left_label(cls, component):
