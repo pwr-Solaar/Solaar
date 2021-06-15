@@ -820,7 +820,7 @@ def _feature_divert_gkeys():
             super(_DivertGkeysRW, self).__init__(feature, write_fnid=0x20)
 
         def read(self, device):  # no way to read, so just assume not diverted
-            return 0x00
+            return b'\x00'
 
     rw = _DivertGkeysRW(_F.GKEY)
     return _Setting(_DIVERT_GKEYS, rw, _BooleanV(true_value=0x01, false_value=0x00, mask=0xff), device_kind=(_DK.keyboard, ))
