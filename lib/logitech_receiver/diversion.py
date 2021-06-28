@@ -154,6 +154,7 @@ if x11:
 # See docs/rules.md for documentation
 
 key_down = None
+key_up = None
 
 
 def signed(bytes):
@@ -406,21 +407,50 @@ class Modifiers(Condition):
 
 
 class Key(Condition):
-    def __init__(self, key):
+    DOWN = 'pressed'
+    UP = 'released'
+
+    def __init__(self, args):
+        default_key = 0
+        default_action = self.DOWN
+
+        key, action = None, None
+
+        if not args or not isinstance(args, (list, str)):
+            _log.warn('rule Key arguments unknown: %s' % args)
+            key = default_key
+            action = default_action
+        elif isinstance(args, str):
+            _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+            key = args
+            action = default_action
+        elif isinstance(args, list):
+            if len(args) == 1:
+                _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+                key, action = args[0], default_action
+            elif len(args) >= 2:
+                key, action = args[:2]
+
         if isinstance(key, str) and key in _CONTROL:
             self.key = _CONTROL[key]
         else:
-            _log.warn('rule Key argument not name of a Logitech key: %s', key)
-            self.key = 0
+            _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+            self.key = default_key
+
+        if isinstance(action, str) and action in (self.DOWN, self.UP):
+            self.action = action
+        else:
+            _log.warn('rule Key action unknown: %s, assuming %s' % (action, default_action))
+            self.action = default_action
 
     def __str__(self):
-        return 'Key: ' + (str(self.key) if self.key else 'None')
+        return 'Key: %s (%s)' % ((str(self.key) if self.key else 'None'), self.action)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        return self.key and self.key == key_down
+        return self.key and self.key == (key_down if self.action == self.DOWN else key_up)
 
     def data(self):
-        return {'Key': str(self.key)}
+        return {'Key': [str(self.key), self.action]}
 
 
 def bit_test(start, end, bits):
@@ -735,14 +765,17 @@ g_keys_down = 0x00
 def process_notification(device, status, notification, feature):
     if not x11:
         return
-    global keys_down, g_keys_down, key_down
-    key_down = None
+    global keys_down, g_keys_down, key_down, key_up
+    key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
         new_keys_down = _unpack('!4H', notification.data[:8])
         for key in new_keys_down:
             if key and key not in keys_down:
                 key_down = key
+        for key in keys_down:
+            if key and key not in new_keys_down:
+                key_up = key
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
@@ -750,6 +783,8 @@ def process_notification(device, status, notification, feature):
         for i in range(1, 9):
             if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
                 key_down = _CONTROL['G' + str(i)]
+            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
+                key_up = _CONTROL['G' + str(i)]
         g_keys_down = new_g_keys_down
     rules.evaluate(feature, notification, device, status, True)
 
