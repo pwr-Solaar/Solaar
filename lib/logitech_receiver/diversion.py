@@ -24,6 +24,7 @@ import sys as _sys
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from math import sqrt as _sqrt
 
 import _thread
 import psutil
@@ -159,18 +160,31 @@ def signed(bytes):
     return int.from_bytes(bytes, 'big', signed=True)
 
 
-def xy_direction(d):
-    x, y = _unpack('!2h', d[:4])
-    if x > 0 and x >= abs(y):
-        return 'right'
-    elif x < 0 and abs(x) >= abs(y):
-        return 'left'
+def xy_direction(_x, _y):
+    # normalize x and y
+    m = _sqrt((_x * _x) + (_y * _y))
+    if m == 0:
+        return 'noop'
+    x = round(_x / m)
+    y = round(_y / m)
+    if x < 0 and y < 0:
+        return 'Mouse Up-left'
+    elif x > 0 and y < 0:
+        return 'Mouse Up-right'
+    elif x < 0 and y > 0:
+        return 'Mouse Down-left'
+    elif x > 0 and y > 0:
+        return 'Mouse Down-right'
+    elif x > 0:
+        return 'Mouse Right'
+    elif x < 0:
+        return 'Mouse Left'
     elif y > 0:
-        return 'down'
+        return 'Mouse Down'
     elif y < 0:
-        return 'up'
+        return 'Mouse Up'
     else:
-        return None
+        return 'noop'
 
 
 TESTS = {
@@ -188,11 +202,6 @@ TESTS = {
     'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
     'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
     'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
-    'mouse-down': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'down',
-    'mouse-up': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'up',
-    'mouse-left': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'left',
-    'mouse-right': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'right',
-    'mouse-noop': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) is None,
     'False': lambda f, r, d: False,
     'True': lambda f, r, d: True,
 }
@@ -445,6 +454,52 @@ class Test(Condition):
         return {'Test': str(self.test)}
 
 
+class MouseGesture(Condition):
+    MOVEMENTS = [
+        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
+        'Mouse Down-right'
+    ]
+
+    def __init__(self, movements):
+        if isinstance(movements, str):
+            movements = [movements]
+        for x in movements:
+            if x not in self.MOVEMENTS and x not in _CONTROL:
+                _log.warn('rule Key argument not name of a Logitech key: %s', x)
+        self.movements = movements
+
+    def __str__(self):
+        return 'MouseGesture: ' + ' '.join(self.movements)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if feature == _F.MOUSE_GESTURE:
+            d = notification.data
+            count = _unpack('!h', d[:2])[0]
+            data = _unpack('!' + ((int(len(d) / 2) - 1) * 'h'), d[2:])
+            if count != len(self.movements):
+                return False
+            x = 0
+            z = 0
+            while x < len(data):
+                if data[x] == 0:
+                    direction = xy_direction(data[x + 1], data[x + 2])
+                    if self.movements[z] != direction:
+                        return False
+                    x += 3
+                elif data[x] == 1:
+                    if data[x + 1] not in _CONTROL:
+                        return False
+                    if self.movements[z] != str(_CONTROL[data[x + 1]]):
+                        return False
+                    x += 2
+                z += 1
+            return True
+        return False
+
+    def data(self):
+        return {'MouseGesture': [str(m) for m in self.movements]}
+
+
 class Action(RuleComponent):
     def __init__(self, *args):
         pass
@@ -622,6 +677,7 @@ COMPONENTS = {
     'Modifiers': Modifiers,
     'Key': Key,
     'Test': Test,
+    'MouseGesture': MouseGesture,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,

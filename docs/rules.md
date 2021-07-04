@@ -89,10 +89,14 @@ A `thumb_wheel_up` test is the rotation amount of a `THUMB WHEEL` upward rotatio
 A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rotation.
 `lowres_wheel_up`, `lowres_wheel_down`, `hires_wheel_up`, `hires_wheel_down` are the
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
-A 'mouse-down' test is true for a mouse gesture mostly in the downward direction.
-`mouse-up', 'mouse-left', and 'mouse-right' are the same but for gestures in the other directions.
-A 'mouse-noop' test is true for a mouse gesture where the mouse doesn't move much.
 `True` and `False` tests return True and False, respectively.
+
+`Mouse Gesture` conditions are true if the actions taken while the mouse's 'Gesture' button is held match the configured list when the 'Gesture' button is released.
+The available actions are `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, `Mouse Down-right`, and buttons that are diverted.
+An example would be mapping `Mouse Up` -> `Mouse Up`. To perform this gesture, you would hold down the 'Gesture' button, move the mouse upwards, pause momentarily, move the mouse upwards, and release the 'Gesture' button.
+Another example would be mapping `Back Button` -> `Back Button`. With this one, you would hold down the 'Gesture' button, double-tap the 'Back' button, and then release the 'Gesture' button.
+Mouse movements and buttons can be mixed and chained together however you like.
+It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click the 'Gesture' button.
 
 A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard.
 Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.

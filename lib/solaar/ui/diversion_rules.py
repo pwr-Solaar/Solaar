@@ -511,6 +511,7 @@ class DiversionDialog:
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
+                        (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
                 ],
                 [
@@ -1073,6 +1074,94 @@ class TestUI(ConditionUI):
         return str(component.test)
 
 
+class MouseGestureUI(ConditionUI):
+
+    CLASS = _DIV.MouseGesture
+    MOUSE_GESTURE_NAMES = [
+        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
+        'Mouse Down-right'
+    ]
+    MOVE_NAMES = list(map(str, _CONTROL)) + MOUSE_GESTURE_NAMES
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.fields = []
+        self.del_btns = []
+        self.add_btn = Gtk.Button(_('Add action'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        self.add_btn.connect('clicked', self._clicked_add)
+        self.widgets[self.add_btn] = (1, 0, 1, 1)
+
+    def _create_field(self):
+        field = Gtk.ComboBoxText.new_with_entry()
+        for g in self.MOUSE_GESTURE_NAMES:
+            field.append(g, g)
+        CompletionEntry.add_completion_to_entry(field.get_child(), self.MOVE_NAMES)
+        field.connect('changed', self._on_update)
+        self.fields.append(field)
+        self.widgets[field] = (len(self.fields) - 1, 0, 1, 1)
+        return field
+
+    def _create_del_btn(self):
+        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True, vexpand=True)
+        self.del_btns.append(btn)
+        self.widgets[btn] = (len(self.del_btns) - 1, 1, 1, 1)
+        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        return btn
+
+    def _clicked_add(self, _btn):
+        self.component.__init__(self.collect_value() + [''])
+        self.show(self.component)
+        self.fields[len(self.component.movements) - 1].grab_focus()
+
+    def _clicked_del(self, _btn, pos):
+        v = self.collect_value()
+        v.pop(pos)
+        self.component.__init__(v)
+        self.show(self.component)
+        self._on_update_callback()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        for i, f in enumerate(self.fields):
+            if f.get_visible():
+                icon = 'dialog-warning' if i < len(self.component.movements
+                                                   ) and self.component.movements[i] not in self.MOVE_NAMES else ''
+                f.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    def show(self, component):
+        n = len(component.movements)
+        while len(self.fields) < n:
+            self._create_field()
+            self._create_del_btn()
+        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
+        super().show(component)
+        for i in range(n):
+            field = self.fields[i]
+            with self.ignore_changes():
+                field.get_child().set_text(component.movements[i])
+            field.set_size_request(int(0.3 * self.panel.get_toplevel().get_size()[0]), 0)
+            field.show_all()
+            self.del_btns[i].show()
+        for i in range(n, len(self.fields)):
+            self.fields[i].hide()
+            self.del_btns[i].hide()
+        self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
+
+    def collect_value(self):
+        return [f.get_active_text().strip() for f in self.fields if f.get_visible()]
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Mouse Gesture')
+
+    @classmethod
+    def right_label(cls, component):
+        if len(component.movements) == 0:
+            return 'No-op'
+        else:
+            return ' -> '.join(component.movements)
+
+
 class ActionUI(RuleComponentUI):
 
     CLASS = _DIV.Action
@@ -1337,6 +1426,7 @@ COMPONENT_UI = {
     _DIV.Modifiers: ModifiersUI,
     _DIV.Key: KeyUI,
     _DIV.Test: TestUI,
+    _DIV.MouseGesture: MouseGestureUI,
     _DIV.KeyPress: KeyPressUI,
     _DIV.MouseScroll: MouseScrollUI,
     _DIV.MouseClick: MouseClickUI,
