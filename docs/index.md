@@ -75,7 +75,7 @@ which is done using the usual Bluetooth mechanisms.
 For a partial list of supported devices
 and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/devices).
 
-[logo]: assets/solaar.svg
+[logo]: https://pwr-solaar.github.io/Solaar/assets/solaar.svg
 
 ## Prebuilt packages
 
