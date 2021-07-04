@@ -206,6 +206,14 @@ TESTS = {
     'True': lambda f, r, d: True,
 }
 
+MOUSE_GESTURE_TESTS = {
+    'mouse-down': ['Mouse Down'],
+    'mouse-up': ['Mouse Up'],
+    'mouse-left': ['Mouse Left'],
+    'mouse-right': ['Mouse Right'],
+    'mouse-noop': [],
+}
+
 COMPONENTS = {}
 
 if x11:
@@ -431,7 +439,11 @@ class Test(Condition):
     def __init__(self, test):
         self.test = test
         if isinstance(test, str):
-            if test in TESTS:
+            if test in MOUSE_GESTURE_TESTS:
+                _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                self.__class__ = MouseGesture
+                self.__init__(MOUSE_GESTURE_TESTS[test])
+            elif test in TESTS:
                 self.function = TESTS[test]
             else:
                 _log.warn('rule Test string argument not name of a test: %s', test)
