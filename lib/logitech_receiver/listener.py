@@ -129,7 +129,7 @@ class _ThreadedHandle(object):
 # a while for it to acknowledge it.
 # Forcibly closing the file handle on another thread does _not_ interrupt the
 # read on Linux systems.
-_EVENT_READ_TIMEOUT = 0.4  # in seconds
+_EVENT_READ_TIMEOUT = 1.  # in seconds
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
@@ -174,7 +174,7 @@ class EventsListener(_threading.Thread):
             if self._queued_notifications.empty():
                 try:
                     # _log.debug("read next notification")
-                    n = _base.read(ihandle, _EVENT_READ_TIMEOUT)
+                    n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except _base.NoReceiver:
                     _log.warning('receiver disconnected')
                     self.receiver.close()
