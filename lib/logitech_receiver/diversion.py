@@ -758,7 +758,7 @@ if x11:
     ])
 
 keys_down = []
-g_keys_down = 0x00
+g_keys_down = 0x00000000
 
 
 # process a notification
@@ -779,12 +779,15 @@ def process_notification(device, status, notification, feature):
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down, = _unpack('!B', notification.data[:1])
-        for i in range(1, 9):
-            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
-                key_down = _CONTROL['G' + str(i)]
-            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
-                key_up = _CONTROL['G' + str(i)]
+        new_g_keys_down = _unpack('!4B', notification.data[:4])
+        # process 32 bits, byte by byte
+        for byte_idx in range(4):
+            new_byte, old_byte = new_g_keys_down[byte_idx], g_keys_down[byte_idx]
+            for i in range(1, 9):
+                if new_byte & (0x01 << (i - 1)) and not old_byte & (0x01 << (i - 1)):
+                    key_down = _CONTROL['G' + str(i + 8 * byte_idx)]
+                if old_byte & (0x01 << (i - 1)) and not new_byte & (0x01 << (i - 1)):
+                    key_up = _CONTROL['G' + str(i + 8 * byte_idx)]
         g_keys_down = new_g_keys_down
     rules.evaluate(feature, notification, device, status, True)
 
