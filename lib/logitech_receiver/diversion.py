@@ -447,7 +447,7 @@ class Key(Condition):
         return 'Key: %s (%s)' % ((str(self.key) if self.key else 'None'), self.action)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        return self.key and self.key == (key_down if self.action == self.DOWN else key_up)
+        return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
 
     def data(self):
         return {'Key': [str(self.key), self.action]}
