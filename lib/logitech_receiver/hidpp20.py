@@ -572,7 +572,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             )
         )
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
+        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
             _log.warn(
                 f"REPROG_CONTROLS_v4 endpoint setCidReporting on device {self._device} should echo request packet, but didn't."
             )
