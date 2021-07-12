@@ -58,7 +58,9 @@ can only be `Shift`, `Control`, `Alt`, and `Super`.
 Modifiers conditions are true if their argument is the current keyboard
 modifiers.
 `Key` conditions are true if the Logitech name of the last diverted key or button down is their
-string argument.  Logitech key and button names are shown in the `Key/Button Diversion`
+string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
+is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
+matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
 setting.  Some keyboards have Gn keys, which are diverted using the 'Divert G Keys' setting.
 `Test` conditions are true if their test evaluates to true on the feature,
 report, and data of the current notification.

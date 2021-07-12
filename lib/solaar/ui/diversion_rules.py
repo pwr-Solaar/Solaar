@@ -27,6 +27,7 @@ from shlex import quote as shlex_quote
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
+from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.special_keys import CONTROL as _CONTROL
@@ -1000,25 +1001,36 @@ class KeyUI(ConditionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.field = CompletionEntry(
+        self.key_field = CompletionEntry(
             self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True
         )
-        self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
-        self.widgets[self.field] = (0, 0, 1, 1)
+        self.key_field.set_size_request(600, 0)
+        self.key_field.connect('changed', self._on_update)
+        self.widgets[self.key_field] = (0, 0, 2, 1)
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, 'Key down')
+        self.action_pressed_radio.connect('toggled', self._on_update, _Key.DOWN)
+        self.widgets[self.action_pressed_radio] = (2, 0, 1, 1)
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, 'Key up')
+        self.action_released_radio.connect('toggled', self._on_update, _Key.UP)
+        self.widgets[self.action_released_radio] = (3, 0, 1, 1)
 
     def show(self, component):
         super().show(component)
         with self.ignore_changes():
-            self.field.set_text(str(component.key) if self.component.key else '')
+            self.key_field.set_text(str(component.key) if self.component.key else '')
+            if not component.action or component.action == _Key.DOWN:
+                self.action_pressed_radio.set_active(True)
+            else:
+                self.action_released_radio.set_active(True)
 
     def collect_value(self):
-        return self.field.get_text()
+        action = _Key.UP if self.action_released_radio.get_active() else _Key.DOWN
+        return [self.key_field.get_text(), action]
 
     def _on_update(self, *args):
         super()._on_update(*args)
-        icon = 'dialog-warning' if not self.component.key else ''
-        self.field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        icon = 'dialog-warning' if not self.component.key or not self.component.action else ''
+        self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -1026,7 +1038,7 @@ class KeyUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return '%s (%04X)' % (str(component.key), int(component.key)) if component.key else 'None'
+        return '%s (%04X) (%s)' % (str(component.key), int(component.key), component.action) if component.key else 'None'
 
 
 class TestUI(ConditionUI):
