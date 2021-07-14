@@ -5,7 +5,10 @@ layout: page
 
 Rule processing is an experimental feature.  Significant changes might be made in response to problems.
 
-Note that rule processing is only available when running under X11.
+Note that rule processing only fully works under X11.
+When running under Wayland with X11 libraries loaded most features will not be available and errors may result.
+Features known not to work under Wayland include process conditions and
+anything to do with simulating keyboard or mouse input.
 
 Logitech devices that use HID++ version 2.0 or greater produce feature-based
 notifications that Solaar can process using a simple rule language.  For

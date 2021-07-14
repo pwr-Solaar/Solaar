@@ -340,7 +340,8 @@ class Process(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        return active_process_name.startswith(self.process) or active_wm_class_name.startswith(self.process)
+        return bool(active_process_name and active_process_name.startswith(self.process)) or \
+            bool(active_wm_class_name and active_wm_class_name.startswith(self.process))
 
     def data(self):
         return {'Process': str(self.process)}
