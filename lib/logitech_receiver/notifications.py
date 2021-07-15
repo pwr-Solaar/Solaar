@@ -247,7 +247,7 @@ def _process_hidpp10_notification(device, status, n):
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('%s: device powered on', device)
             reason = status.to_string() or _('powered on')
-            status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
+            status.changed(active=True, reason=reason)
         else:
             _log.warn('%s: unknown %s', device, n)
         return True
@@ -326,7 +326,7 @@ def _process_feature_notification(device, status, n, feature):
                 # only show a user notification if the device can change hosts
                 # as we want to notify when a device changes to this host
                 # but the only indication we get is this notification
-                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
+                alert = _ALERT.NONE
                 status.changed(active=True, alert=alert, reason=reason)
             else:
                 _log.warn('%s: unknown WIRELESS %s', device, n)
