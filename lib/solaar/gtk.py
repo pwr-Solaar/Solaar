@@ -142,7 +142,7 @@ def main():
         # if any argument, run comandline and exit
         return _cli.run(args.action, args.hidraw_path)
 
-    gi = _require('gi', 'python3-gi or python3-gobject')
+    gi = _require('gi', 'python3-gi (in Ubuntu) or python3-gobject (in Fedora)')
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
     udev_file = '42-logitech-unify-permissions.rules'

@@ -24,6 +24,7 @@ import math
 from copy import copy as _copy
 from logging import DEBUG as _DEBUG
 from logging import getLogger
+from time import time_ns as _time_ns
 
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
@@ -1051,6 +1052,9 @@ class DivertedMouseMovement(object):
         self.dy = 0.
         self.fsmState = 'idle'
         self.dpiSetting = next(filter(lambda s: s.name == dpi_name, device.settings), None)
+        self.data = [0]
+        self.lastEv = 0.
+        self.skip = False
 
     @staticmethod
     def notification_handler(device, n):
@@ -1065,14 +1069,31 @@ class DivertedMouseMovement(object):
                 dx, dy = _unpack('!hh', n.data[:4])
                 state.handle_move_event(dx, dy)
 
+    def push_mouse_event(self):
+        x = int(self.dx)
+        y = int(self.dy)
+        if x == 0 and y == 0:
+            return
+        self.data.append(0)
+        self.data.append(x)
+        self.data.append(y)
+        self.data[0] += 1
+        self.dx = 0.
+        self.dy = 0.
+
     def handle_move_event(self, dx, dy):
         # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
         # The multiplier could be configurable to allow adjusting dx
+        now = _time_ns() / 1e6
         dpi = self.dpiSetting.read() if self.dpiSetting else 1000
         dx = float(dx) / float(dpi) * 15.
         self.dx += dx
         dy = float(dy) / float(dpi) * 15.
         self.dy += dy
+        if now - self.lastEv > 50. and not self.skip:
+            self.push_mouse_event()
+        self.lastEv = now
+        self.skip = False
         if self.fsmState == 'pressed':
             if abs(self.dx) >= 1. or abs(self.dy) >= 1.:
                 self.fsmState = 'moved'
@@ -1083,18 +1104,30 @@ class DivertedMouseMovement(object):
                 self.fsmState = 'pressed'
                 self.dx = 0.
                 self.dy = 0.
+                self.lastEv = _time_ns() / 1e6
+                self.skip = True
         elif self.fsmState == 'pressed' or self.fsmState == 'moved':
             if self.key not in cids:
                 # emit mouse gesture notification
                 from .base import _HIDPP_Notification as _HIDPP_Notification
                 from .common import pack as _pack
                 from .diversion import process_notification as _process_notification
-                payload = _pack('!hh', int(self.dx), int(self.dy))
+                self.push_mouse_event()
+                payload = _pack('!' + (len(self.data) * 'h'), *self.data)
                 notification = _HIDPP_Notification(0, 0, 0, 0, payload)
                 _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
+                self.data.clear()
+                self.data.append(0)
                 self.fsmState = 'idle'
-                self.dx = 0.
-                self.dy = 0.
+            else:
+                last = (cids - {self.key, 0})
+                if len(last) != 0:
+                    self.push_mouse_event()
+                    self.data.append(1)
+                    self.data.append(list(last)[0])
+                    self.data[0] += 1
+                    self.lastEv = _time_ns() / 1e6
+                    return True
 
 
 MouseGestureKeys = [
@@ -1120,7 +1153,9 @@ class DivertedMouseMovementRW(object):
                 state = device._divertedMMState
                 if n.address == 0x00:
                     cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
-                    state.handle_keys_event({cid1, cid2, cid3, cid4})
+                    x = state.handle_keys_event({cid1, cid2, cid3, cid4})
+                    if x:
+                        return True
                 elif n.address == 0x10:
                     dx, dy = _unpack('!hh', n.data[:4])
                     state.handle_move_event(dx, dy)

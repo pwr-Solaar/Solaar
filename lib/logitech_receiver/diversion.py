@@ -24,6 +24,7 @@ import sys as _sys
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from math import sqrt as _sqrt
 
 import _thread
 import psutil
@@ -153,24 +154,38 @@ if x11:
 # See docs/rules.md for documentation
 
 key_down = None
+key_up = None
 
 
 def signed(bytes):
     return int.from_bytes(bytes, 'big', signed=True)
 
 
-def xy_direction(d):
-    x, y = _unpack('!2h', d[:4])
-    if x > 0 and x >= abs(y):
-        return 'right'
-    elif x < 0 and abs(x) >= abs(y):
-        return 'left'
+def xy_direction(_x, _y):
+    # normalize x and y
+    m = _sqrt((_x * _x) + (_y * _y))
+    if m == 0:
+        return 'noop'
+    x = round(_x / m)
+    y = round(_y / m)
+    if x < 0 and y < 0:
+        return 'Mouse Up-left'
+    elif x > 0 and y < 0:
+        return 'Mouse Up-right'
+    elif x < 0 and y > 0:
+        return 'Mouse Down-left'
+    elif x > 0 and y > 0:
+        return 'Mouse Down-right'
+    elif x > 0:
+        return 'Mouse Right'
+    elif x < 0:
+        return 'Mouse Left'
     elif y > 0:
-        return 'down'
+        return 'Mouse Down'
     elif y < 0:
-        return 'up'
+        return 'Mouse Up'
     else:
-        return None
+        return 'noop'
 
 
 TESTS = {
@@ -188,13 +203,16 @@ TESTS = {
     'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
     'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
     'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
-    'mouse-down': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'down',
-    'mouse-up': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'up',
-    'mouse-left': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'left',
-    'mouse-right': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) == 'right',
-    'mouse-noop': lambda f, r, d: f == _F.MOUSE_GESTURE and xy_direction(d) is None,
     'False': lambda f, r, d: False,
     'True': lambda f, r, d: True,
+}
+
+MOUSE_GESTURE_TESTS = {
+    'mouse-down': ['Mouse Down'],
+    'mouse-up': ['Mouse Up'],
+    'mouse-left': ['Mouse Left'],
+    'mouse-right': ['Mouse Right'],
+    'mouse-noop': [],
 }
 
 COMPONENTS = {}
@@ -389,21 +407,50 @@ class Modifiers(Condition):
 
 
 class Key(Condition):
-    def __init__(self, key):
+    DOWN = 'pressed'
+    UP = 'released'
+
+    def __init__(self, args):
+        default_key = 0
+        default_action = self.DOWN
+
+        key, action = None, None
+
+        if not args or not isinstance(args, (list, str)):
+            _log.warn('rule Key arguments unknown: %s' % args)
+            key = default_key
+            action = default_action
+        elif isinstance(args, str):
+            _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+            key = args
+            action = default_action
+        elif isinstance(args, list):
+            if len(args) == 1:
+                _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+                key, action = args[0], default_action
+            elif len(args) >= 2:
+                key, action = args[:2]
+
         if isinstance(key, str) and key in _CONTROL:
             self.key = _CONTROL[key]
         else:
-            _log.warn('rule Key argument not name of a Logitech key: %s', key)
-            self.key = 0
+            _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+            self.key = default_key
+
+        if isinstance(action, str) and action in (self.DOWN, self.UP):
+            self.action = action
+        else:
+            _log.warn('rule Key action unknown: %s, assuming %s' % (action, default_action))
+            self.action = default_action
 
     def __str__(self):
-        return 'Key: ' + (str(self.key) if self.key else 'None')
+        return 'Key: %s (%s)' % ((str(self.key) if self.key else 'None'), self.action)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        return self.key and self.key == key_down
+        return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
 
     def data(self):
-        return {'Key': str(self.key)}
+        return {'Key': [str(self.key), self.action]}
 
 
 def bit_test(start, end, bits):
@@ -422,7 +469,11 @@ class Test(Condition):
     def __init__(self, test):
         self.test = test
         if isinstance(test, str):
-            if test in TESTS:
+            if test in MOUSE_GESTURE_TESTS:
+                _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                self.__class__ = MouseGesture
+                self.__init__(MOUSE_GESTURE_TESTS[test])
+            elif test in TESTS:
                 self.function = TESTS[test]
             else:
                 _log.warn('rule Test string argument not name of a test: %s', test)
@@ -443,6 +494,52 @@ class Test(Condition):
 
     def data(self):
         return {'Test': str(self.test)}
+
+
+class MouseGesture(Condition):
+    MOVEMENTS = [
+        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
+        'Mouse Down-right'
+    ]
+
+    def __init__(self, movements):
+        if isinstance(movements, str):
+            movements = [movements]
+        for x in movements:
+            if x not in self.MOVEMENTS and x not in _CONTROL:
+                _log.warn('rule Key argument not name of a Logitech key: %s', x)
+        self.movements = movements
+
+    def __str__(self):
+        return 'MouseGesture: ' + ' '.join(self.movements)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if feature == _F.MOUSE_GESTURE:
+            d = notification.data
+            count = _unpack('!h', d[:2])[0]
+            data = _unpack('!' + ((int(len(d) / 2) - 1) * 'h'), d[2:])
+            if count != len(self.movements):
+                return False
+            x = 0
+            z = 0
+            while x < len(data):
+                if data[x] == 0:
+                    direction = xy_direction(data[x + 1], data[x + 2])
+                    if self.movements[z] != direction:
+                        return False
+                    x += 3
+                elif data[x] == 1:
+                    if data[x + 1] not in _CONTROL:
+                        return False
+                    if self.movements[z] != str(_CONTROL[data[x + 1]]):
+                        return False
+                    x += 2
+                z += 1
+            return True
+        return False
+
+    def data(self):
+        return {'MouseGesture': [str(m) for m in self.movements]}
 
 
 class Action(RuleComponent):
@@ -483,8 +580,8 @@ class KeyPress(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = current_key_modifiers
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
+        if _log.isEnabledFor(_INFO):
+            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
         self.keyDown(self.keys, current)
         self.keyUp(reversed(self.keys), current)
         displayt.sync()
@@ -541,8 +638,8 @@ class MouseScroll(Action):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
+        if _log.isEnabledFor(_INFO):
+            _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         dx, dy = amounts
         if dx:
             click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
@@ -576,8 +673,8 @@ class MouseClick(Action):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('MouseClick action: %d %s' % (self.count, self.button))
+        if _log.isEnabledFor(_INFO):
+            _log.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
         displayt.sync()
@@ -602,8 +699,8 @@ class Execute(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         import subprocess
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('Execute action: %s', self.args)
+        if _log.isEnabledFor(_INFO):
+            _log.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
         return None
 
@@ -622,6 +719,7 @@ COMPONENTS = {
     'Modifiers': Modifiers,
     'Key': Key,
     'Test': Test,
+    'MouseGesture': MouseGesture,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
@@ -660,28 +758,36 @@ if x11:
     ])
 
 keys_down = []
-g_keys_down = 0x00
+g_keys_down = 0x00000000
 
 
 # process a notification
 def process_notification(device, status, notification, feature):
     if not x11:
         return
-    global keys_down, g_keys_down, key_down
-    key_down = None
+    global keys_down, g_keys_down, key_down, key_up
+    key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
         new_keys_down = _unpack('!4H', notification.data[:8])
         for key in new_keys_down:
             if key and key not in keys_down:
                 key_down = key
+        for key in keys_down:
+            if key and key not in new_keys_down:
+                key_up = key
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down, = _unpack('!B', notification.data[:1])
-        for i in range(1, 9):
-            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
-                key_down = _CONTROL['G' + str(i)]
+        new_g_keys_down = _unpack('!4B', notification.data[:4])
+        # process 32 bits, byte by byte
+        for byte_idx in range(4):
+            new_byte, old_byte = new_g_keys_down[byte_idx], g_keys_down[byte_idx]
+            for i in range(1, 9):
+                if new_byte & (0x01 << (i - 1)) and not old_byte & (0x01 << (i - 1)):
+                    key_down = _CONTROL['G' + str(i + 8 * byte_idx)]
+                if old_byte & (0x01 << (i - 1)) and not new_byte & (0x01 << (i - 1)):
+                    key_up = _CONTROL['G' + str(i + 8 * byte_idx)]
         g_keys_down = new_g_keys_down
     rules.evaluate(feature, notification, device, status, True)
 
