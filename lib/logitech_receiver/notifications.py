@@ -24,7 +24,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
-from logging import WARNING as _WARNING
 from logging import getLogger
 
 from . import diversion as _diversion
@@ -367,8 +366,8 @@ def _process_feature_notification(device, status, n, feature):
         elif n.address == 0x20:
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('%s: received analyticsKeyEvents', device)
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
+        elif _log.isEnabledFor(_INFO):
+            _log.info('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
 
     elif feature == _F.HIRES_WHEEL:
         if (n.address == 0x00):
@@ -383,7 +382,8 @@ def _process_feature_notification(device, status, n, feature):
                 ratchet = flags & 0x01
                 _log.info('%s: WHEEL: ratchet: %d', device, ratchet)
         else:
-            _log.warn('%s: unknown WHEEL %s', device, n)
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: unknown WHEEL %s', device, n)
 
     _diversion.process_notification(device, status, n, feature)
 
