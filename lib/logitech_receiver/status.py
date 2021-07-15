@@ -293,7 +293,8 @@ class DeviceStatus(dict):
                 # If the device went to sleep we may not have been notified. As the device will
                 # still be marked as active we need to also check if it's just been woken up to see
                 # if we need to re-apply settings.
-                if not was_active or reason == _('powered on'):
+                #if not was_active or reason == _('powered on'):
+                if not was_active:
                     # Make sure to set notification flags on the device, they
                     # get cleared when the device is turned off (but not when the device
                     # goes idle, and we can't tell the difference right now).
