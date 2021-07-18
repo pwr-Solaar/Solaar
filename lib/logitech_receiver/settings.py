@@ -534,26 +534,30 @@ class RegisterRW(object):
 
 
 class FeatureRW(object):
-    __slots__ = ('feature', 'read_fnid', 'write_fnid', 'no_reply')
+    __slots__ = ('feature', 'read_fnid', 'write_fnid', 'prefix', 'no_reply')
 
     kind = _NamedInt(0x02, 'feature')
     default_read_fnid = 0x00
     default_write_fnid = 0x10
+    default_prefix = b''
 
-    def __init__(self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, no_reply=False):
+    def __init__(
+        self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, prefix=default_prefix, no_reply=False
+    ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
         self.no_reply = no_reply
+        self.prefix = prefix
 
     def read(self, device, data_bytes=b''):
         assert self.feature is not None
-        return device.feature_request(self.feature, self.read_fnid, data_bytes)
+        return device.feature_request(self.feature, self.read_fnid, self.prefix, data_bytes)
 
     def write(self, device, data_bytes):
         assert self.feature is not None
-        reply = device.feature_request(self.feature, self.write_fnid, data_bytes, no_reply=self.no_reply)
+        reply = device.feature_request(self.feature, self.write_fnid, self.prefix, data_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
 
@@ -597,15 +601,16 @@ class FeatureRWMap(FeatureRW):
 
 
 class BooleanValidator(object):
-    __slots__ = ('true_value', 'false_value', 'mask', 'needs_current_value')
+    __slots__ = ('true_value', 'false_value', 'read_offset', 'mask', 'needs_current_value')
 
     kind = KIND.toggle
     default_true = 0x01
     default_false = 0x00
     # mask specifies all the affected bits in the value
     default_mask = 0xFF
+    default_read_offset = 0
 
-    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask):
+    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask, read_offset=default_read_offset):
         if isinstance(true_value, int):
             assert isinstance(false_value, int)
             if mask is None:
@@ -639,8 +644,10 @@ class BooleanValidator(object):
         self.true_value = true_value
         self.false_value = false_value
         self.mask = mask
+        self.read_offset = read_offset
 
     def validate_read(self, reply_bytes):
+        reply_bytes = reply_bytes[self.read_offset:]
         if isinstance(self.mask, int):
             reply_value = ord(reply_bytes[:1]) & self.mask
             if _log.isEnabledFor(_DEBUG):
@@ -683,6 +690,7 @@ class BooleanValidator(object):
                 to_write |= ord(current_value[:1]) & (0xFF ^ self.mask)
             if current_value is not None and to_write == ord(current_value[:1]):
                 return None
+            to_write = bytes([to_write])
         else:
             to_write = bytearray(to_write)
             count = len(self.mask)
