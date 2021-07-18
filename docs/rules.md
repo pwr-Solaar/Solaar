@@ -50,8 +50,10 @@ A Or condition is true if its last evaluated component evaluates to a true
 value.  `And` conditions take a sequence of components are evaluted the same
 as rules.
 
-`Process` conditions are true if the name of the active process starts with
-their string argument.
+`Process` conditions are true if the process for focus input window
+or the window's Window manager class or instance name starts with their string argument.
+`MouseProcess` conditions are true if the process for the window under the mouse
+or the window's Window manager class or instance name starts with their string argument.
 `Feature` conditions are if true if the name of the feature of the current
 notification is their string argument.
 `Report` conditions are if true if the report number in the current
