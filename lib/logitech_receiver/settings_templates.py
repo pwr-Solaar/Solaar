@@ -291,8 +291,8 @@ def _feature_new_fn_swap():
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
-    validator = _BooleanV(true_value=b'\xFF\x01', false_value=b'\xFF\x00')
-    return _Setting(_FN_SWAP, _FeatureRW(_F.K375S_FN_INVERSION), validator, device_kind=(_DK.keyboard, ))
+    validator = _BooleanV(true_value=b'\x01', false_value=b'\x00', read_offset=1)
+    return _Setting(_FN_SWAP, _FeatureRW(_F.K375S_FN_INVERSION, prefix=b'\xFF'), validator, device_kind=(_DK.keyboard, ))
 
 
 # FIXME: This will enable all supported backlight settings,
