@@ -26,6 +26,8 @@ from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import strhex as _strhex
 
+_F = _hidpp20.FEATURE
+
 
 def _print_receiver(receiver):
     paired_count = receiver.count()
@@ -222,7 +224,7 @@ def _print_device(dev, num=None):
                 else:
                     mode = 'On-Board'
                 print('            Device Mode: %s' % mode)
-            elif feature == _hidpp20.FEATURE.BATTERY_STATUS or feature == _hidpp20.FEATURE.BATTERY_VOLTAGE:
+            elif feature in (_F.BATTERY_STATUS, _F.BATTERY_VOLTAGE, _F.BATTERY_VOLTAGE):
                 print('', end='       ')
                 _battery_line(dev)
             for setting in dev_settings:
