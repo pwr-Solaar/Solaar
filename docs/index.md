@@ -93,6 +93,7 @@ one of these packages.
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
+- Fedora Linux (F33+): Included in [@System (standard repository)][fedora]
 
 Solaar uses a standard system tray implementation; solaar-gnome3 is no longer required for gnome or unity integration.
 
@@ -101,7 +102,7 @@ Solaar uses a standard system tray implementation; solaar-gnome3 is no longer re
 [ppa1]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/ppa
 [ppa]: http://launchpad.net/~daniel.pavel/+archive/solaar
 [arch]: https://www.archlinux.org/packages/community/any/solaar/
-[fedora]: https://apps.fedoraproject.org/packages/solaar
+[fedora]: https://src.fedoraproject.org/rpms/solaar
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
