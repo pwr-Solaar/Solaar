@@ -33,6 +33,7 @@ from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import unpack as _unpack
+from .i18n import _
 
 _log = getLogger(__name__)
 del getLogger
@@ -520,7 +521,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
 class RegisterRW(object):
     __slots__ = ('register', )
 
-    kind = _NamedInt(0x01, 'register')
+    kind = _NamedInt(0x01, _('register'))
 
     def __init__(self, register):
         assert isinstance(register, int)
@@ -536,7 +537,7 @@ class RegisterRW(object):
 class FeatureRW(object):
     __slots__ = ('feature', 'read_fnid', 'write_fnid', 'prefix', 'no_reply')
 
-    kind = _NamedInt(0x02, 'feature')
+    kind = _NamedInt(0x02, _('feature'))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
     default_prefix = b''
@@ -562,7 +563,7 @@ class FeatureRW(object):
 
 
 class FeatureRWMap(FeatureRW):
-    kind = _NamedInt(0x02, 'feature')
+    kind = _NamedInt(0x02, _('feature'))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
     default_key_byte_count = 1
@@ -730,7 +731,7 @@ class BitFieldValidator(object):
         r = _bytes2int(reply_bytes[:self.byte_count])
         value = {str(int(k)): False for k in self.options}
         m = 1
-        for _ in range(8 * self.byte_count):
+        for _ignore in range(8 * self.byte_count):
             if m in self.options:
                 value[str(int(m))] = bool(r & m)
             m <<= 1
@@ -804,7 +805,7 @@ class BitFieldWithOffsetAndMaskValidator(object):
             value = _bytes2int(b[:self.byte_count])
             mask_to_opt = self._option_from_offset_mask.get(offset, {})
             m = 1
-            for _ in range(8 * self.byte_count):
+            for _ignore in range(8 * self.byte_count):
                 if m in mask_to_opt:
                     values[str(int(mask_to_opt[m]))] = bool(value & m)
                 m <<= 1

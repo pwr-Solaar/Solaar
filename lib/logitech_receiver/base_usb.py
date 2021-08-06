@@ -30,6 +30,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .descriptors import DEVICES as _DEVICES
+from .i18n import _
 
 # max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
 # may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False
@@ -46,7 +47,7 @@ _unifying_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 2,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Unifying Receiver'
+    'name': _('Unifying Receiver')
 }
 
 _nano_receiver = lambda product_id: {
@@ -54,7 +55,7 @@ _nano_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Nano Receiver',
+    'name': _('Nano Receiver'),
     'may_unpair': False,
     're_pairs': True
 }
@@ -64,7 +65,7 @@ _nano_receiver_no_unpair = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Nano Receiver',
+    'name': _('Nano Receiver'),
     'may_unpair': False,
     'unpair': False,
     're_pairs': True
@@ -75,7 +76,7 @@ _nano_receiver_max2 = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Nano Receiver',
+    'name': _('Nano Receiver'),
     'max_devices': 2,
     'may_unpair': False,
     're_pairs': True
@@ -86,7 +87,7 @@ _nano_receiver_maxn = lambda product_id, max: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Nano Receiver',
+    'name': _('Nano Receiver'),
     'max_devices': max,
     'may_unpair': False,
     're_pairs': True
@@ -97,7 +98,7 @@ _lenovo_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Nano Receiver'
+    'name': _('Nano Receiver')
 }
 
 _lightspeed_receiver = lambda product_id: {
@@ -105,7 +106,7 @@ _lightspeed_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 2,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'Lightspeed Receiver'
+    'name': _('Lightspeed Receiver')
 }
 
 _ex100_receiver = lambda product_id: {
@@ -113,7 +114,7 @@ _ex100_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': 'EX100 Receiver 27 Mhz',
+    'name': _('EX100 Receiver 27 Mhz'),
     'max_devices': 4,
     'may_unpair': False,
     're_pairs': True,
