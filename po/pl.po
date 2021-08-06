@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-06 17:22+0200\n"
-"PO-Revision-Date: 2021-08-06 17:49+0200\n"
+"POT-Creation-Date: 2021-08-06 10:58-0400\n"
+"PO-Revision-Date: 2021-08-06 20:06+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -18,6 +18,24 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 3.0\n"
+
+#: lib/logitech_receiver/base_usb.py:50
+msgid "Unifying Receiver"
+msgstr "Odbiornik Unifying"
+
+#: lib/logitech_receiver/base_usb.py:58 lib/logitech_receiver/base_usb.py:68
+#: lib/logitech_receiver/base_usb.py:79 lib/logitech_receiver/base_usb.py:90
+#: lib/logitech_receiver/base_usb.py:101
+msgid "Nano Receiver"
+msgstr "Odbiornik Nano"
+
+#: lib/logitech_receiver/base_usb.py:109
+msgid "Lightspeed Receiver"
+msgstr "Odbiornik Lightspeed"
+
+#: lib/logitech_receiver/base_usb.py:117
+msgid "EX100 Receiver 27 Mhz"
+msgstr "Odbiornik EX100 27 MHz"
 
 #: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
 msgid "unknown"
@@ -36,72 +54,104 @@ msgid "low"
 msgstr "niski"
 
 #: lib/logitech_receiver/i18n.py:41
+msgid "average"
+msgstr "przeciętny"
+
+#: lib/logitech_receiver/i18n.py:42
 msgid "good"
 msgstr "dobry"
 
-#: lib/logitech_receiver/i18n.py:42
+#: lib/logitech_receiver/i18n.py:43
 msgid "full"
 msgstr "pełny"
 
-#: lib/logitech_receiver/i18n.py:45
+#: lib/logitech_receiver/i18n.py:46
 msgid "discharging"
 msgstr "rozładowywanie"
 
-#: lib/logitech_receiver/i18n.py:46
+#: lib/logitech_receiver/i18n.py:47
 msgid "recharging"
 msgstr "ładowanie"
 
-#: lib/logitech_receiver/i18n.py:47
+#: lib/logitech_receiver/i18n.py:48 lib/solaar/ui/window.py:721
+msgid "charging"
+msgstr "ładowanie"
+
+#: lib/logitech_receiver/i18n.py:49
+msgid "not charging"
+msgstr "brak ładowania"
+
+#: lib/logitech_receiver/i18n.py:50
 msgid "almost full"
 msgstr "prawie pełny"
 
-#: lib/logitech_receiver/i18n.py:48
+#: lib/logitech_receiver/i18n.py:51
 msgid "charged"
 msgstr "naładowany"
 
-#: lib/logitech_receiver/i18n.py:49
+#: lib/logitech_receiver/i18n.py:52
 msgid "slow recharge"
 msgstr "powolne ładowanie"
 
-#: lib/logitech_receiver/i18n.py:50
+#: lib/logitech_receiver/i18n.py:53
 msgid "invalid battery"
 msgstr "nieodpowiedni akumulator"
 
-#: lib/logitech_receiver/i18n.py:51
+#: lib/logitech_receiver/i18n.py:54
 msgid "thermal error"
 msgstr "błąd termiczny"
 
-#: lib/logitech_receiver/i18n.py:54
+#: lib/logitech_receiver/i18n.py:55
+msgid "error"
+msgstr "błąd"
+
+#: lib/logitech_receiver/i18n.py:56
+msgid "standard"
+msgstr "standardowe"
+
+#: lib/logitech_receiver/i18n.py:57
+msgid "fast"
+msgstr "szybkie"
+
+#: lib/logitech_receiver/i18n.py:58
+msgid "slow"
+msgstr "powolne"
+
+#: lib/logitech_receiver/i18n.py:61
 msgid "device timeout"
 msgstr "upłynął limit czasu urządzenia"
 
-#: lib/logitech_receiver/i18n.py:55
+#: lib/logitech_receiver/i18n.py:62
 msgid "device not supported"
 msgstr "urządzenie nie jest obsługiwane"
 
-#: lib/logitech_receiver/i18n.py:56
+#: lib/logitech_receiver/i18n.py:63
 msgid "too many devices"
 msgstr "za dużo urządzeń"
 
-#: lib/logitech_receiver/i18n.py:57
+#: lib/logitech_receiver/i18n.py:64
 msgid "sequence timeout"
 msgstr "upłynął limit czasu sekwencji"
 
-#: lib/logitech_receiver/i18n.py:60 lib/solaar/ui/window.py:580
+#: lib/logitech_receiver/i18n.py:67 lib/solaar/ui/window.py:580
 msgid "Firmware"
 msgstr "Firmware"
 
-#: lib/logitech_receiver/i18n.py:61
+#: lib/logitech_receiver/i18n.py:68
 msgid "Bootloader"
 msgstr "Bootloader"
 
-#: lib/logitech_receiver/i18n.py:62
+#: lib/logitech_receiver/i18n.py:69
 msgid "Hardware"
 msgstr "Sprzęt"
 
-#: lib/logitech_receiver/i18n.py:63
+#: lib/logitech_receiver/i18n.py:70
 msgid "Other"
 msgstr "Inne"
+
+#: lib/logitech_receiver/i18n.py:73
+msgid "Mouse Gesture Button"
+msgstr "Przycisk gestu myszy"
 
 #: lib/logitech_receiver/notifications.py:76
 msgid "pairing lock is closed"
@@ -126,6 +176,14 @@ msgstr "niesparowane"
 #: lib/logitech_receiver/notifications.py:248
 msgid "powered on"
 msgstr "włączone"
+
+#: lib/logitech_receiver/settings.py:524
+msgid "register"
+msgstr "rejestr"
+
+#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+msgid "feature"
+msgstr "funkcja"
 
 #: lib/logitech_receiver/settings_templates.py:71
 msgid "Hand Detection"
@@ -607,6 +665,19 @@ msgstr "Skala"
 msgid "Disables the %s key."
 msgstr "Wyłącza klawisz %s."
 
+#: lib/logitech_receiver/settings_templates.py:521
+#: lib/logitech_receiver/settings_templates.py:573
+msgid "Off"
+msgstr "Wyłączone"
+
+#: lib/logitech_receiver/settings_templates.py:667
+msgid "Diverted"
+msgstr "Przekierowany"
+
+#: lib/logitech_receiver/settings_templates.py:667
+msgid "Regular"
+msgstr "Zwykły"
+
 #: lib/logitech_receiver/status.py:109
 msgid "No paired devices."
 msgstr "Brak sparowanych urządzeń."
@@ -644,15 +715,15 @@ msgstr "Akumulator: %(level)s (%(status)s)"
 msgid "Battery: %(percent)d%% (%(status)s)"
 msgstr "Akumulator: %(percent)d%% (%(status)s)"
 
-#: lib/solaar/gtk.py:150
+#: lib/solaar/gtk.py:152
 msgid "ERROR: "
 msgstr "BŁĄD: "
 
-#: lib/solaar/gtk.py:151
+#: lib/solaar/gtk.py:153
 msgid "Solaar depends on a udev file that is not present"
 msgstr "Solaar zależy od pliku udev, którego nie ma"
 
-#: lib/solaar/gtk.py:154
+#: lib/solaar/gtk.py:156
 msgid ""
 "For more information see the Solaar installation directions\n"
 "at https://pwr-solaar.github.io/Solaar/installation"
@@ -780,7 +851,7 @@ msgstr[2] "%d wartości"
 
 #: lib/solaar/ui/diversion_rules.py:57
 msgid "Built-in rules"
-msgstr "Wbudowane regułu"
+msgstr "Wbudowane reguły"
 
 #: lib/solaar/ui/diversion_rules.py:57
 msgid "User-defined rules"
@@ -818,6 +889,14 @@ msgstr "Nie"
 #: lib/solaar/ui/diversion_rules.py:147
 msgid "If you choose No, changes will be lost when Solaar is closed."
 msgstr "Jeśli wybierzesz Nie, zmiany zostaną utracone po zamknięciu Solaar."
+
+#: lib/solaar/ui/diversion_rules.py:195
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: lib/solaar/ui/diversion_rules.py:200
+msgid "Discard changes"
+msgstr "Odrzuć zmiany"
 
 #: lib/solaar/ui/diversion_rules.py:366
 msgid "Insert here"
@@ -1236,10 +1315,6 @@ msgstr "następny zgłoszony "
 #: lib/solaar/ui/window.py:718
 msgid " and next level to be reported."
 msgstr " oraz następny poziom do zgłoszenia."
-
-#: lib/solaar/ui/window.py:721
-msgid "charging"
-msgstr "ładowanie"
 
 #: lib/solaar/ui/window.py:723
 msgid "last known"
