@@ -38,17 +38,24 @@ _DUMMY = (
     _('empty'),
     _('critical'),
     _('low'),
+    _('average'),
     _('good'),
     _('full'),
 
     # battery charging statuses
     _('discharging'),
     _('recharging'),
+    _('charging'),
+    _('not charging'),
     _('almost full'),
     _('charged'),
     _('slow recharge'),
     _('invalid battery'),
     _('thermal error'),
+    _('error'),
+    _('standard'),
+    _('fast'),
+    _('slow'),
 
     # pairing errors
     _('device timeout'),
