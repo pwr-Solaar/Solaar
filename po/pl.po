@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-06 10:58-0400\n"
-"PO-Revision-Date: 2021-08-06 20:06+0200\n"
+"POT-Creation-Date: 2021-08-07 01:00+0200\n"
+"PO-Revision-Date: 2021-08-07 01:29+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -150,8 +150,76 @@ msgid "Other"
 msgstr "Inne"
 
 #: lib/logitech_receiver/i18n.py:73
+msgid "Left Button"
+msgstr "Przycisk lewy"
+
+#: lib/logitech_receiver/i18n.py:74
+msgid "Right Button"
+msgstr "Przycisk prawy"
+
+#: lib/logitech_receiver/i18n.py:75
+msgid "Middle Button"
+msgstr "Przycisk środkowy"
+
+#: lib/logitech_receiver/i18n.py:76
+msgid "Back Button"
+msgstr "Przycisk wstecz"
+
+#: lib/logitech_receiver/i18n.py:77
+msgid "Forward Button"
+msgstr "Przycisk dalej"
+
+#: lib/logitech_receiver/i18n.py:78
 msgid "Mouse Gesture Button"
-msgstr "Przycisk gestu myszy"
+msgstr "Przycisk gestów myszy"
+
+#: lib/logitech_receiver/i18n.py:79
+msgid "Smart Shift"
+msgstr "SmartShift"
+
+#: lib/logitech_receiver/i18n.py:80
+msgid "DPI Switch"
+msgstr "Przełącznik DPI"
+
+#: lib/logitech_receiver/i18n.py:81
+msgid "Left Tilt"
+msgstr "Pochylenie w lewo"
+
+#: lib/logitech_receiver/i18n.py:82
+msgid "Right Tilt"
+msgstr "Pochylenie w prawo"
+
+#: lib/logitech_receiver/i18n.py:83
+msgid "Left Click"
+msgstr "Kliknięcie LPM"
+
+#: lib/logitech_receiver/i18n.py:84
+msgid "Right Click"
+msgstr "Kliknięcie PPM"
+
+#: lib/logitech_receiver/i18n.py:85
+msgid "Mouse Middle Button"
+msgstr "Przycisk środkowy myszy"
+
+#: lib/logitech_receiver/i18n.py:86
+msgid "Mouse Back Button"
+msgstr "Przycisk wstecz myszy"
+
+#: lib/logitech_receiver/i18n.py:87
+msgid "Mouse Forward Button"
+msgstr "Przycisk dalej myszy"
+
+#: lib/logitech_receiver/i18n.py:88
+msgid "Gesture Button Navigation"
+msgstr "Nawigacja przyciskiem gestów"
+
+#: lib/logitech_receiver/i18n.py:89
+msgid "Mouse Scroll Left Button"
+msgstr "Lewy przycisk kółka myszy"
+
+#: lib/logitech_receiver/i18n.py:90
+msgid "Mouse Scroll Right Button"
+msgstr "Prawy przycisk kółka myszy"
 
 #: lib/logitech_receiver/notifications.py:76
 msgid "pairing lock is closed"
