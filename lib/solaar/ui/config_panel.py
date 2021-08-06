@@ -105,7 +105,7 @@ def _create_choice_control(setting):
     c = Gtk.ComboBoxText()
     # TODO i18n text entries
     for entry in setting.choices:
-        c.append(str(int(entry)), str(entry))
+        c.append(str(int(entry)), _(str(entry)))
     c.connect('changed', _combo_notify, setting)
     return c
 
@@ -133,7 +133,7 @@ def _create_map_choice_control(setting):
         if choices:
             # TODO i18n text entries
             for choice in choices:
-                valueBox.append(str(int(choice)), str(choice))
+                valueBox.append(str(int(choice)), _(str(choice)))
             if current is not None:
                 valueBox.set_active_id(str(int(current)))
 
@@ -144,7 +144,7 @@ def _create_map_choice_control(setting):
     c.pack_end(valueBox, False, False, 0)
     # TODO i18n text entries
     for entry in setting.choices:
-        keyBox.append(str(int(entry)), str(entry))
+        keyBox.append(str(int(entry)), _(str(entry)))
     keyBox.set_active(0)
     keyBox.connect('changed', _map_value_notify_key, (setting, valueBox))
     _map_populate_value_box(valueBox, setting, int(keyBox.get_active_id()))
