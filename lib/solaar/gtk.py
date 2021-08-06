@@ -146,7 +146,9 @@ def main():
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
     udev_file = '42-logitech-unify-permissions.rules'
-    if not os.path.isfile('/etc/udev/rules.d/' + udev_file) and not os.path.isfile('/lib/udev/rules.d/' + udev_file):
+    if not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
+       and not os.path.isfile('/usr/lib/udev/rules.d/' + udev_file) \
+       and not os.path.isfile('/usr/local/lib/udev/rules.d/' + udev_file):
         print(_i18n._('ERROR: '), end='')
         print(_i18n._('Solaar depends on a udev file that is not present'), end='.\n')
         print(
