@@ -32,6 +32,8 @@ import os as _os
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
+from logging import DEBUG as _DEBUG
+from logging import getLogger
 from select import select as _select
 from time import sleep
 from time import time as _timestamp
@@ -41,6 +43,9 @@ from pyudev import Device as _Device
 from pyudev import DeviceNotFoundError
 from pyudev import Devices as _Devices
 from pyudev import Monitor as _Monitor
+
+_log = getLogger(__name__)
+del getLogger
 
 native_implementation = 'udev'
 
@@ -118,6 +123,10 @@ def _match(action, device, filterfn):
         intf_device = device.find_parent('usb', 'usb_interface')
         # print ("*** usb interface", action, device, "usb_interface:", intf_device)
         usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug(
+                'Found device BID %s VID %s PID %s INTERFACE %s FILTER %s', bid, vid, pid, usb_interface, interface_number
+            )
         if not (interface_number is None or interface_number == usb_interface):
             return
         attrs = intf_device.attributes if intf_device else None
