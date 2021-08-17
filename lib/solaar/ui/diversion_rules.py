@@ -192,12 +192,12 @@ class DiversionDialog:
 
         button_box = Gtk.HBox(spacing=20)
         self.save_btn = Gtk.Button.new_from_icon_name('document-save', Gtk.IconSize.BUTTON)
-        self.save_btn.set_label('Save changes')
+        self.save_btn.set_label(_('Save changes'))
         self.save_btn.set_always_show_image(True)
         self.save_btn.set_sensitive(False)
         self.save_btn.set_valign(Gtk.Align.CENTER)
         self.discard_btn = Gtk.Button.new_from_icon_name('document-revert', Gtk.IconSize.BUTTON)
-        self.discard_btn.set_label('Discard changes')
+        self.discard_btn.set_label(_('Discard changes'))
         self.discard_btn.set_always_show_image(True)
         self.discard_btn.set_sensitive(False)
         self.discard_btn.set_valign(Gtk.Align.CENTER)
@@ -508,6 +508,7 @@ class DiversionDialog:
                     [
                         (_('Feature'), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
                         (_('Process'), _DIV.Process, ''),
+                        (_('MouseProcess'), _DIV.MouseProcess, ''),
                         (_('Report'), _DIV.Report, 0),
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
@@ -871,6 +872,34 @@ class ProcessUI(ConditionUI):
     @classmethod
     def left_label(cls, component):
         return _('Process')
+
+    @classmethod
+    def right_label(cls, component):
+        return str(component.process)
+
+
+class MouseProcessUI(ConditionUI):
+
+    CLASS = _DIV.MouseProcess
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.field.set_size_request(600, 0)
+        self.field.connect('changed', self._on_update)
+        self.widgets[self.field] = (0, 0, 1, 1)
+
+    def show(self, component):
+        super().show(component)
+        with self.ignore_changes():
+            self.field.set_text(component.process)
+
+    def collect_value(self):
+        return self.field.get_text()
+
+    @classmethod
+    def left_label(cls, component):
+        return _('MouseProcess')
 
     @classmethod
     def right_label(cls, component):
@@ -1433,6 +1462,7 @@ COMPONENT_UI = {
     _DIV.Or: OrUI,
     _DIV.And: AndUI,
     _DIV.Process: ProcessUI,
+    _DIV.MouseProcess: MouseProcessUI,
     _DIV.Feature: FeatureUI,
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,

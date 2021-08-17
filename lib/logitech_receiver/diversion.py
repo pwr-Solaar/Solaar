@@ -52,57 +52,13 @@ try:
     XK_KEYS = vars(_XK)
     disp_prog = Display()
     x11 = True
+    NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
+    NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
+    WM_CLASS = disp_prog.intern_atom('WM_CLASS')
 except Exception:
     _log.warn('X11 not available - rules will not be activated', exc_info=_sys.exc_info())
     XK_KEYS = {}
     x11 = False
-
-if x11:
-    # determine name of active process
-    NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
-    NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
-    WM_CLASS = disp_prog.intern_atom('WM_CLASS')
-    root2 = disp_prog.screen().root
-    root2.change_attributes(event_mask=Xlib.X.PropertyChangeMask)
-
-active_process_name = None
-active_wm_class_name = None
-
-
-def active_program_name():
-    try:
-        window_id = root2.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
-        window = disp_prog.create_resource_object('window', window_id)
-        window_pid = window.get_full_property(NET_WM_PID, 0).value[0]
-        return psutil.Process(window_pid).name()
-    except (Xlib.error.XError, AttributeError):  # simplify dealing with BadWindow
-        return None
-
-
-def active_program_wm_class():
-    try:
-        window_id = root2.get_full_property(NET_ACTIVE_WINDOW, Xlib.X.AnyPropertyType).value[0]
-        window = disp_prog.create_resource_object('window', window_id)
-        window_wm_class = window.get_wm_class()[0]
-        return window_wm_class
-    except (Xlib.error.XError, AttributeError):  # simplify dealing with BadWindow
-        return None
-
-
-def determine_active_program_and_wm_class():
-    global active_process_name
-    global active_wm_class_name
-    active_process_name = active_program_name()
-    active_wm_class_name = active_program_wm_class()
-    while True:
-        event = disp_prog.next_event()
-        if event.type == Xlib.X.PropertyNotify and event.atom == NET_ACTIVE_WINDOW:
-            active_process_name = active_program_name()
-            active_wm_class_name = active_program_wm_class()
-
-
-if x11:
-    _thread.start_new_thread(determine_active_program_and_wm_class, ())
 
 # determine current key modifiers
 # there must be a better way to do this
@@ -327,6 +283,32 @@ class And(Condition):
         return {'And': [c.data() for c in self.components]}
 
 
+def x11_focus_prog():
+    pid = wm_class = None
+    window = disp_prog.get_input_focus().focus
+    while window:
+        pid = window.get_full_property(NET_WM_PID, 0)
+        wm_class = window.get_wm_class()
+        if wm_class:
+            break
+        window = window.query_tree().parent
+    name = psutil.Process(pid.value[0]).name() if pid else None
+    return (wm_class[0], wm_class[1], name) if wm_class else (name)
+
+
+def x11_pointer_prog():
+    pid = wm_class = None
+    window = disp_prog.screen().root.query_pointer().child
+    for window in reversed(window.query_tree().children):
+        pid = window.get_full_property(NET_WM_PID, 0)
+        wm_class = window.get_wm_class()
+        if wm_class:
+            break
+        window = window.query_tree().parent
+    name = psutil.Process(pid.value[0]).name() if pid else None
+    return (wm_class[0], wm_class[1], name) if wm_class else (name)
+
+
 class Process(Condition):
     def __init__(self, process):
         self.process = process
@@ -340,11 +322,31 @@ class Process(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        return bool(active_process_name and active_process_name.startswith(self.process)) or \
-            bool(active_wm_class_name and active_wm_class_name.startswith(self.process))
+        result = any(bool(s and s.startswith(self.process)) for s in x11_focus_prog())
+        return result
 
     def data(self):
         return {'Process': str(self.process)}
+
+
+class MouseProcess(Condition):
+    def __init__(self, process):
+        self.process = process
+        if not isinstance(process, str):
+            _log.warn('rule MouseProcess argument not a string: %s', process)
+            self.process = str(process)
+
+    def __str__(self):
+        return 'MouseProcess: ' + str(self.process)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if not isinstance(self.process, str):
+            return False
+        result = any(bool(s and s.startswith(self.process)) for s in x11_pointer_prog())
+        return result
+
+    def data(self):
+        return {'MouseProcess': str(self.process)}
 
 
 class Feature(Condition):
@@ -715,6 +717,7 @@ COMPONENTS = {
     'Or': Or,
     'And': And,
     'Process': Process,
+    'MouseProcess': MouseProcess,
     'Feature': Feature,
     'Report': Report,
     'Modifiers': Modifiers,

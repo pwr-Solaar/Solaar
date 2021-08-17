@@ -291,8 +291,8 @@ def _feature_new_fn_swap():
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 def _feature_k375s_fn_swap():
-    validator = _BooleanV(true_value=b'\xFF\x01', false_value=b'\xFF\x00')
-    return _Setting(_FN_SWAP, _FeatureRW(_F.K375S_FN_INVERSION), validator, device_kind=(_DK.keyboard, ))
+    validator = _BooleanV(true_value=b'\x01', false_value=b'\x00', read_offset=1)
+    return _Setting(_FN_SWAP, _FeatureRW(_F.K375S_FN_INVERSION, prefix=b'\xFF'), validator, device_kind=(_DK.keyboard, ))
 
 
 # FIXME: This will enable all supported backlight settings,
@@ -518,7 +518,7 @@ def _feature_dpi_sliding():
                     if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
                         keys.append(key.key)
             if keys:
-                keys.insert(0, _NamedInt(0, 'Off'))
+                keys.insert(0, _NamedInt(0, _('Off')))
                 return _ChoicesV(_NamedInts.list(keys), byte_count=2)
 
     return _Setting(_DPI_SLIDING, _DpiSlidingRW(), callback=_feature_dpi_sliding_callback, device_kind=(_DK.mouse, ))
@@ -570,7 +570,7 @@ def _feature_mouse_gesture_callback(device):
                 if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
                     keys.append(key.key)
         if keys:
-            keys.insert(0, _NamedInt(0, 'Off'))
+            keys.insert(0, _NamedInt(0, _('Off')))
             return _ChoicesV(_NamedInts.list(keys), byte_count=2)
 
 
@@ -664,7 +664,7 @@ def _feature_divert_keys_callback(device):
     choices = {}
     for k in device.keys:
         if 'divertable' in k.flags and 'virtual' not in k.flags:
-            choices[k.key] = [_NamedInt(0x00, 'Regular'), _NamedInt(0x01, 'Diverted')]
+            choices[k.key] = [_NamedInt(0x00, _('Regular')), _NamedInt(0x01, _('Diverted'))]
     if not choices:
         return None
     return _ChoicesMapV(choices, key_byte_count=2, byte_count=1, mask=0x01)
