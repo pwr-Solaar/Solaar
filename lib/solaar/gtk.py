@@ -24,6 +24,7 @@ import importlib
 import os.path
 
 from logging import INFO as _INFO
+from logging import WARNING as _WARNING
 from logging import getLogger
 
 import solaar.cli as _cli
@@ -146,17 +147,12 @@ def main():
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
     udev_file = '42-logitech-unify-permissions.rules'
-    if not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
+    if _log.isEnabledFor(_WARNING) \
+       and not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/lib/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/local/lib/udev/rules.d/' + udev_file):
-        print(_i18n._('ERROR: '), end='')
-        print(_i18n._('Solaar depends on a udev file that is not present'), end='.\n')
-        print(
-            _i18n._(
-                'For more information see the Solaar installation directions\n'
-                'at https://pwr-solaar.github.io/Solaar/installation'
-            )
-        )
+        _log.warning('Solaar udev file not found in expected location')
+        _log.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
         import solaar.ui as ui
         import solaar.listener as listener
