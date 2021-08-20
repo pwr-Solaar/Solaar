@@ -186,9 +186,9 @@ _GESTURE2_GESTURES_LABELS = {
 
 _GESTURE2_PARAMS_LABELS = {
     _GP['ExtraCapabilities']: (None, None),  # not supported
-    _GP['PixelZone']: ('Pixel zone', None),  # TO DO: replace None with a short description
-    _GP['RatioZone']: ('Ratio zone', None),  # TO DO: replace None with a short description
-    _GP['ScaleFactor']: ('Scale factor', 'Sets the cursor speed.'),
+    _GP['PixelZone']: (_('Pixel zone'), None),  # TO DO: replace None with a short description
+    _GP['RatioZone']: (_('Ratio zone'), None),  # TO DO: replace None with a short description
+    _GP['ScaleFactor']: (_('Scale factor'), _('Sets the cursor speed.')),
 }
 
 _GESTURE2_PARAMS_LABELS_SUB = {

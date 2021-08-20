@@ -1036,10 +1036,10 @@ class KeyUI(ConditionUI):
         self.key_field.set_size_request(600, 0)
         self.key_field.connect('changed', self._on_update)
         self.widgets[self.key_field] = (0, 0, 2, 1)
-        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, 'Key down')
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _('Key down'))
         self.action_pressed_radio.connect('toggled', self._on_update, _Key.DOWN)
         self.widgets[self.action_pressed_radio] = (2, 0, 1, 1)
-        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, 'Key up')
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _('Key up'))
         self.action_released_radio.connect('toggled', self._on_update, _Key.UP)
         self.widgets[self.action_released_radio] = (3, 0, 1, 1)
 
@@ -1067,7 +1067,7 @@ class KeyUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return '%s (%04X) (%s)' % (str(component.key), int(component.key), component.action) if component.key else 'None'
+        return '%s (%04X) (%s)' % (str(component.key), int(component.key), _(component.action)) if component.key else 'None'
 
 
 class TestUI(ConditionUI):
