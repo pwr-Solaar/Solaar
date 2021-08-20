@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.0.6\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2021-08-06 10:58-0400\n"
+        "POT-Creation-Date: 2021-08-20 18:22-0300\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -148,7 +148,83 @@ msgid   "Other"
 msgstr  ""
 
 #: lib/logitech_receiver/i18n.py:73
+msgid   "Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:77
+msgid   "Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:78
 msgid   "Mouse Gesture Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "Smart Shift"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:80
+msgid   "DPI Switch"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:81
+msgid   "Left Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:82
+msgid   "Right Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:83
+msgid   "Left Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:84
+msgid   "Right Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:85
+msgid   "Mouse Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:86
+msgid   "Mouse Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:87
+msgid   "Mouse Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:88
+msgid   "Gesture Button Navigation"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:89
+msgid   "Mouse Scroll Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:90
+msgid   "Mouse Scroll Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:93
+msgid   "pressed"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:94
+msgid   "released"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:76
@@ -581,6 +657,22 @@ msgstr  ""
 msgid   "Zoom with two fingers"
 msgstr  ""
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid   "Pixel zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid   "Ratio zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Scale factor"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Sets the cursor speed."
+msgstr  ""
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid   "Left"
 msgstr  ""
@@ -673,19 +765,6 @@ msgstr  ""
 #: lib/logitech_receiver/status.py:236
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  ""
-
-#: lib/solaar/gtk.py:152
-msgid   "ERROR: "
-msgstr  ""
-
-#: lib/solaar/gtk.py:153
-msgid   "Solaar depends on a udev file that is not present"
-msgstr  ""
-
-#: lib/solaar/gtk.py:156
-msgid   "For more information see the Solaar installation directions\n"
-        "at https://pwr-solaar.github.io/Solaar/installation"
 msgstr  ""
 
 #: lib/solaar/ui/__init__.py:52
@@ -1002,6 +1081,14 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:850
 msgid   "Not"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid   "Key down"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid   "Key up"
 msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:1131
