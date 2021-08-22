@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 0.9.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-19 22:23+0800\n"
-"PO-Revision-Date: 2021-08-20 22:08+0800\n"
+"POT-Creation-Date: 2021-08-22 16:55+0800\n"
+"PO-Revision-Date: 2021-08-22 17:09+0800\n"
 "Last-Translator: Peter Dave Hello <hsu@peterdavehello.org>\n"
 "Language-Team: Peter Dave Hello <hsu@peterdavehello.org>\n"
 "Language: zh_TW\n"
@@ -22,13 +22,13 @@ msgstr ""
 
 #: lib/logitech_receiver/base_usb.py:50
 msgid "Unifying Receiver"
-msgstr ""
+msgstr "Unifying 接收器"
 
 #: lib/logitech_receiver/base_usb.py:58 lib/logitech_receiver/base_usb.py:68
 #: lib/logitech_receiver/base_usb.py:79 lib/logitech_receiver/base_usb.py:90
 #: lib/logitech_receiver/base_usb.py:101
 msgid "Nano Receiver"
-msgstr ""
+msgstr "Nano 接收器"
 
 #: lib/logitech_receiver/base_usb.py:109
 msgid "Lightspeed Receiver"
@@ -116,7 +116,7 @@ msgstr "快速"
 
 #: lib/logitech_receiver/i18n.py:58
 msgid "slow"
-msgstr ""
+msgstr "慢"
 
 #: lib/logitech_receiver/i18n.py:61
 msgid "device timeout"
@@ -220,6 +220,14 @@ msgstr ""
 
 #: lib/logitech_receiver/i18n.py:90
 msgid "Mouse Scroll Right Button"
+msgstr ""
+
+#: lib/logitech_receiver/i18n.py:93
+msgid "pressed"
+msgstr ""
+
+#: lib/logitech_receiver/i18n.py:94
+msgid "released"
 msgstr ""
 
 #: lib/logitech_receiver/notifications.py:76
@@ -416,11 +424,11 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:106
 msgid "Change Host"
-msgstr ""
+msgstr "更改主機號碼"
 
 #: lib/logitech_receiver/settings_templates.py:106
 msgid "Switch connection to a different host"
-msgstr ""
+msgstr "切換到其他主機"
 
 #: lib/logitech_receiver/settings_templates.py:107
 msgid "Thumb Wheel HID++ Scrolling"
@@ -456,7 +464,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:112
 msgid "Gesture params"
-msgstr ""
+msgstr "手勢參數"
 
 #: lib/logitech_receiver/settings_templates.py:113
 msgid "DPI Sliding Adjustment"
@@ -502,7 +510,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:123
 msgid "Single tap"
-msgstr ""
+msgstr "單次點擊"
 
 #: lib/logitech_receiver/settings_templates.py:124
 msgid "Performs a right click."
@@ -510,15 +518,15 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:124
 msgid "Single tap with two fingers"
-msgstr ""
+msgstr "用兩根手指點擊"
 
 #: lib/logitech_receiver/settings_templates.py:125
 msgid "Single tap with three fingers"
-msgstr ""
+msgstr "用三根手指點擊"
 
 #: lib/logitech_receiver/settings_templates.py:129
 msgid "Double tap"
-msgstr ""
+msgstr "兩次點擊"
 
 #: lib/logitech_receiver/settings_templates.py:129
 msgid "Performs a double click."
@@ -538,11 +546,11 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:134
 msgid "Tap and drag"
-msgstr ""
+msgstr "點擊並拖動"
 
 #: lib/logitech_receiver/settings_templates.py:135
 msgid "Tap and drag with two fingers"
-msgstr ""
+msgstr "用兩根手指點擊並拖動"
 
 #: lib/logitech_receiver/settings_templates.py:136
 msgid "Drags items by dragging the fingers after double tapping."
@@ -568,12 +576,12 @@ msgstr ""
 #: lib/logitech_receiver/settings_templates.py:142
 #: lib/logitech_receiver/settings_templates.py:145
 msgid "Scrolls."
-msgstr ""
+msgstr "滑動"
 
 #: lib/logitech_receiver/settings_templates.py:142
 #: lib/logitech_receiver/settings_templates.py:145
 msgid "Scroll with two fingers"
-msgstr ""
+msgstr "用兩根手指滑動"
 
 #: lib/logitech_receiver/settings_templates.py:143
 msgid "Scroll horizontally with two fingers"
@@ -665,6 +673,22 @@ msgstr ""
 msgid "Zoom with two fingers"
 msgstr ""
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid "Pixel zone"
+msgstr ""
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid "Ratio zone"
+msgstr ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid "Scale factor"
+msgstr "伸縮係數"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid "Sets the cursor speed."
+msgstr ""
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid "Left"
 msgstr "左"
@@ -679,7 +703,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:196
 msgid "top"
-msgstr ""
+msgstr "上"
 
 #: lib/logitech_receiver/settings_templates.py:197
 msgid "Width."
@@ -713,7 +737,7 @@ msgstr ""
 #: lib/logitech_receiver/settings_templates.py:521
 #: lib/logitech_receiver/settings_templates.py:573
 msgid "Off"
-msgstr ""
+msgstr "關"
 
 #: lib/logitech_receiver/settings_templates.py:667
 msgid "Diverted"
@@ -775,7 +799,7 @@ msgstr "若您剛剛安裝 Solaar，請嘗試將接收器拔下再重新插上�
 
 #: lib/solaar/ui/__init__.py:58
 msgid "Cannot connect to device error"
-msgstr ""
+msgstr "無法連接到裝置錯誤"
 
 #: lib/solaar/ui/__init__.py:60
 #, python-format
@@ -788,7 +812,7 @@ msgstr ""
 msgid ""
 "Try removing the device and plugging it back in or turning it off and then "
 "on."
-msgstr ""
+msgstr "嘗試移除裝置並將其插回，或是關閉然後打開。"
 
 #: lib/solaar/ui/__init__.py:64
 msgid "Unpairing failed"
@@ -899,7 +923,7 @@ msgstr "是"
 
 #: lib/solaar/ui/diversion_rules.py:142
 msgid "No"
-msgstr ""
+msgstr "否"
 
 #: lib/solaar/ui/diversion_rules.py:147
 msgid "If you choose No, changes will be lost when Solaar is closed."
@@ -1017,7 +1041,7 @@ msgstr ""
 
 #: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1196
 msgid "Mouse Gesture"
-msgstr ""
+msgstr "滑鼠手勢"
 
 #: lib/solaar/ui/diversion_rules.py:520
 msgid "Action"
@@ -1076,9 +1100,17 @@ msgstr ""
 msgid "Not"
 msgstr ""
 
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid "Key down"
+msgstr ""
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid "Key up"
+msgstr ""
+
 #: lib/solaar/ui/diversion_rules.py:1131
 msgid "Add action"
-msgstr ""
+msgstr "增加動作"
 
 #: lib/solaar/ui/diversion_rules.py:1224
 msgid "Add key"
@@ -1284,7 +1316,7 @@ msgstr[0] ""
 
 #: lib/solaar/ui/window.py:694
 msgid "Battery information unknown."
-msgstr ""
+msgstr "電池狀態是未知的"
 
 #: lib/solaar/ui/window.py:702
 msgid "Battery Voltage"
@@ -1296,7 +1328,7 @@ msgstr ""
 
 #: lib/solaar/ui/window.py:706 lib/solaar/ui/window.py:710
 msgid "Battery Level"
-msgstr ""
+msgstr "電量"
 
 #: lib/solaar/ui/window.py:708 lib/solaar/ui/window.py:712
 msgid "Approximate level reported by battery"
@@ -1350,24 +1382,25 @@ msgstr "裝置與接收器間的無線連線已加密。"
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lux"
 
-#~ msgid "%(battery_level)s"
-#~ msgstr "%(battery_level)s"
+#~ msgid "Smooth Scrolling"
+#~ msgstr "平滑滾動"
 
-#~ msgid "%(battery_percent)d%%"
-#~ msgstr "%(battery_percent)d%%"
+#~ msgid "High Resolution Wheel Invert"
+#~ msgstr "高解析度滾輪反轉"
 
-#~ msgid "USB id"
-#~ msgstr "USB ID"
+#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
+#~ msgstr "垂直捲動的高解析度反轉模式"
+
+#~ msgid "Wheel Resolution"
+#~ msgstr "滾輪解析度"
 
 #~ msgid ""
-#~ "If the device is already turned on,\n"
-#~ "turn if off and on again."
-#~ msgstr ""
-#~ "若裝置的電源已經開啟，\n"
-#~ "請先關閉再開啟。"
+#~ "Automatically switch the mouse wheel between ratchet and freespin mode.\n"
+#~ "The mouse wheel is always free at 0, and always locked at 50"
+#~ msgstr "自動切換滑鼠滾輪的段落模式"
 
-#~ msgid "The receiver only supports %d paired device(s)."
-#~ msgstr "此接收器僅支援 %d 個配對裝置。"
+#~ msgid "The receiver was unplugged."
+#~ msgstr "接收器已移除。"
 
 #~ msgid ""
 #~ "Shows status of devices connected\n"
@@ -1376,22 +1409,21 @@ msgstr "%(light_level)d lux"
 #~ "顯示羅技接收器\n"
 #~ "已連線的裝置狀態。"
 
-#~ msgid "The receiver was unplugged."
-#~ msgstr "接收器已移除。"
+#~ msgid "The receiver only supports %d paired device(s)."
+#~ msgstr "此接收器僅支援 %d 個配對裝置。"
 
 #~ msgid ""
-#~ "Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-#~ "The mouse wheel is always free at 0, and always locked at 50"
-#~ msgstr "自動切換滑鼠滾輪的段落模式"
+#~ "If the device is already turned on,\n"
+#~ "turn if off and on again."
+#~ msgstr ""
+#~ "若裝置的電源已經開啟，\n"
+#~ "請先關閉再開啟。"
 
-#~ msgid "Wheel Resolution"
-#~ msgstr "滾輪解析度"
+#~ msgid "USB id"
+#~ msgstr "USB ID"
 
-#~ msgid "High-sensitivity wheel invert mode for vertical scroll."
-#~ msgstr "垂直捲動的高解析度反轉模式"
+#~ msgid "%(battery_percent)d%%"
+#~ msgstr "%(battery_percent)d%%"
 
-#~ msgid "High Resolution Wheel Invert"
-#~ msgstr "高解析度滾輪反轉"
-
-#~ msgid "Smooth Scrolling"
-#~ msgstr "平滑滾動"
+#~ msgid "%(battery_level)s"
+#~ msgstr "%(battery_level)s"
