@@ -88,4 +88,8 @@ _DUMMY = (
     _('Gesture Button Navigation'),
     _('Mouse Scroll Left Button'),
     _('Mouse Scroll Right Button'),
+
+    # key/button statuses
+    _('pressed'),
+    _('released'),
 )
