@@ -513,10 +513,6 @@ def ping(handle, devnumber, long_message=False):
     # import inspect as _inspect
     # print ('\n  '.join(str(s) for s in _inspect.stack()))
 
-    assert devnumber != 0xFF
-    assert devnumber >= 0x00
-    assert devnumber < 0x0F
-
     with acquire_timeout(handle_lock(handle), handle, 10.):
 
         # randomize the SoftwareId and mark byte to be able to identify the ping
