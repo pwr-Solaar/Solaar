@@ -571,6 +571,7 @@ _D(
     ],
 )
 
+_D('G102 Lightsync Mouse', codename='G102', usbid=0xc092, interface=1)
 _D('G403 Gaming Mouse', codename='G403', usbid=0xc082)
 _D('G502 Hero Gaming Mouse', codename='G502 Hero', usbid=0xc08d)
 _D('G703 Lightspeed Gaming Mouse', codename='G703', usbid=0xc087)
