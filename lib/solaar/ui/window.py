@@ -441,7 +441,7 @@ def _device_row(receiver_path, device_number, device=None):
 
     receiver_row = _receiver_row(receiver_path, None if device is None else device.receiver)
 
-    if device_number == 0:  # direct-connected device, receiver row is device row
+    if device_number == 0xFF or device_number == 0x0:  # direct-connected device, receiver row is device row
         if receiver_row:
             return receiver_row
         item = None

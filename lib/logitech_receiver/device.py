@@ -40,11 +40,14 @@ class Device(object):
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
+        self.handle = None
+        self.path = None
+        self.product_id = None
 
         if receiver:
             assert number > 0 and number <= receiver.max_devices
         else:
-            assert number == 0
+            assert number == 0xFF
         # Device number, 1..6 for unifying devices, 1 otherwise.
         self.number = number
         # 'device active' flag; requires manual management.
@@ -88,10 +91,6 @@ class Device(object):
 
         # See `add_notification_handler`
         self._notification_handlers = {}
-
-        self.handle = None
-        self.path = None
-        self.product_id = None
 
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("new Device(%s, %s, %s)", receiver, number, link_notification)
@@ -493,7 +492,7 @@ class Device(object):
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, 0, info=device_info)
+                return Device(None, 0xFF, info=device_info)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
