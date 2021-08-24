@@ -762,7 +762,7 @@ if x11:
     ])
 
 keys_down = []
-g_keys_down = 0x00000000
+g_keys_down = [0, 0, 0, 0]
 
 
 # process a notification
