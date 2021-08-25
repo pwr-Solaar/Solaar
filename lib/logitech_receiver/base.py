@@ -381,7 +381,7 @@ def acquire_timeout(lock, handle, timeout):
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False):
+def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -395,7 +395,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
 
     with acquire_timeout(handle_lock(handle), handle, 10.):
         assert isinstance(request_id, int)
-        if devnumber != 0xFF and request_id < 0x8000:
+        if (devnumber != 0xFF or protocol >= 2.0) and request_id < 0x8000:
             # For HID++ 2.0 feature requests, randomize the SoftwareId to make it
             # easier to recognize the reply for this request. also, always set the
             # most significant bit (8) in SoftwareId, to make notifications easier

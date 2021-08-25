@@ -433,7 +433,6 @@ class Device(object):
         return None
 
     def request(self, request_id, *params, no_reply=False):
-
         if self:
             return _base.request(
                 self.handle or self.receiver.handle,
@@ -441,7 +440,8 @@ class Device(object):
                 request_id,
                 *params,
                 no_reply=no_reply,
-                long_message=self.bluetooth or self.protocol >= 2.0
+                long_message=self.bluetooth or self.protocol >= 2.0,
+                protocol=self.protocol
             )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
