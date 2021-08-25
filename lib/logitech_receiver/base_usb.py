@@ -136,6 +136,9 @@ _ex100_receiver = lambda product_id: {
     'ex100_27mhz_wpid_fix': True
 }
 
+# Receivers added here should also be listed in
+# share/solaar/io.github.pwr_solaar.solaar.metainfo.xml
+
 # Bolt receivers (marked with the yellow lightning bolt logo)
 BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
 
