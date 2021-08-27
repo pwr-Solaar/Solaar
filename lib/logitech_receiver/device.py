@@ -198,6 +198,8 @@ class Device(object):
         if not self._codename:
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
+                if not self._codename:
+                    self._codename = self.name.split(' ', 1)[0] if self.name else None
             elif self.receiver:
                 codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
                 if codename:
@@ -213,7 +215,7 @@ class Device(object):
         if not self._name:
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self.codename or ('Unknown device %s' % (self.wpid or self.product_id))
+        return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))
 
     @property
     def unitId(self):

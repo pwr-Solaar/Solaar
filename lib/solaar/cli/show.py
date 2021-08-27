@@ -208,6 +208,8 @@ def _print_device(dev, num=None):
             elif feature == _hidpp20.FEATURE.DEVICE_NAME:
                 print('            Name: %s' % _hidpp20.get_name(dev))
                 print('            Kind: %s' % _hidpp20.get_kind(dev))
+            elif feature == _hidpp20.FEATURE.DEVICE_FRIENDLY_NAME:
+                print('            Friendly Name: %s' % _hidpp20.get_friendly_name(dev))
             elif feature == _hidpp20.FEATURE.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
                     extras = _strhex(fw.extras) if fw.extras else ''
