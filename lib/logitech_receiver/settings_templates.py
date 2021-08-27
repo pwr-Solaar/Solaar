@@ -76,7 +76,7 @@ _SIDE_SCROLL = ('side-scroll', _('Side Scrolling'),
                   'instead of the standard side-scrolling events.'))
 _HI_RES_SCROLL = ('hi-res-scroll', _('Scroll Wheel High Resolution'),
                   _('High-sensitivity mode for vertical scroll with the wheel.'))
-_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('Scroll Wheel HID++ Scrolling'),
+_LOW_RES_SCROLL = ('lowres-smooth-scroll', _('Scroll Wheel Diversion'),
                    _('HID++ mode for vertical scroll with the wheel.') + '\n' +
                    _('Effectively turns off wheel scrolling in Linux.'))
 _HIRES_INV = ('hires-smooth-invert', _('Scroll Wheel Direction'),
@@ -104,7 +104,7 @@ _DIVERT_KEYS = ('divert-keys', _('Key/Button Diversion'),
 _DISABLE_KEYS = ('disable-keyboard-keys', _('Disable keys'), _('Disable specific keyboard keys.'))
 _PLATFORM = ('multiplatform', _('Set OS'), _('Change keys to match OS.'))
 _CHANGE_HOST = ('change-host', _('Change Host'), _('Switch connection to a different host'))
-_THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel HID++ Scrolling'),
+_THUMB_SCROLL_MODE = ('thumb-scroll-mode', _('Thumb Wheel Diversion'),
                       _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' +
                       _('Effectively turns off thumb scrolling in Linux.'))
 _THUMB_SCROLL_INVERT = ('thumb-scroll-invert', _('Thumb Wheel Direction'), _('Invert thumb wheel scroll direction.'))
