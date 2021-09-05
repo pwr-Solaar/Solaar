@@ -272,7 +272,7 @@ class DeviceStatus(dict):
         if battery is not None:
             level, status, nextLevel = battery
             self.set_battery_info(level, status, nextLevel, voltage)
-        elif KEYS.BATTERY_STATUS in self:
+        elif self.get(KEYS.BATTERY_STATUS, None) is not None:
             self[KEYS.BATTERY_STATUS] = None
             self[KEYS.BATTERY_CHARGING] = None
             self[KEYS.BATTERY_VOLTAGE] = None
