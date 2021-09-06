@@ -8,6 +8,11 @@ that connect wirelessly to a USB [Unifying][unifying], Lightspeed, or Nano recei
 connect directly via a USB cable, or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
 
+Documentation here is for the current verison of Solaar.
+Some Linux distributions distribute old versions of Solaar.
+If you are using an old version and something described here does not work you should upgrade
+using one of the methods described below.
+
 Solaar can be used as a GUI application or via its command-line interface.
 Both interfaces are able to list the connected devices and
 show information about each device, often including battery status.
