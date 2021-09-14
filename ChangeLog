@@ -1,4 +1,4 @@
-1.0.7:
+1.0.7rc2:
  * Don't signal status change when battery changes from None to None.
  * Add Japanese translation
  * Use first word of name for code name if no other code name available.
