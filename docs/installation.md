@@ -20,17 +20,20 @@ Most of Solaar should work fine with any kernel more recent than 5.2,
 but newer kernels might be needed for some devices to be correctly recognized and handled.
 The `udev` package must be installed and its daemon running.
 
-Solaar requires Python 3.6+ and the
-`python3-pyudev`,
-`python3-psutil`, `python3-xlib`, and `python3-yaml` or `python3-pyyaml` packages.
+Solaar requires Python 3.6+ and requires several packages to be installed.
+If you are running the system version of Python you should have the
+`python3-pyudev`, `python3-psutil`, `python3-xlib`,
+and `python3-yaml` or `python3-pyyaml` packages installed.
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
-The Debian/Ubuntu packages that need to be installed are
-`python3-gi` and `gir1.2-gtk-3.0`;
-in Fedora you need `gtk3` and `python3-gobject`;
-if you're using another
-distribution the required packages are most likely named something similar.
+If you are running the system verison of Python
+the Debian/Ubuntu packages you should have
+`python3-gi` and `gir1.2-gtk-3.0` installed.
+in Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
+
+If you are running a version of Python different from the system version,
+you may need to use pip to install projects that provide the above Python packages.
 
 If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
