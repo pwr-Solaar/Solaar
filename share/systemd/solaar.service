@@ -1,0 +1,10 @@
+[Unit]
+Description=Manager for Logitech devices
+Documentation=https://pwr-solaar.github.io/Solaar/
+
+[Service]
+ExecStart=/usr/bin/solaar --window hide
+Slice=background.slice
+
+[Install]
+WantedBy=graphical-session.target
