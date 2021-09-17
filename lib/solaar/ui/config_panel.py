@@ -190,7 +190,7 @@ def _create_multiple_toggle_control(setting, change):
             if setting._value[key] != new_state:
                 setting._value[key] = new_state
                 p = control
-                for _ in range(5):
+                for _ in range(5):  # go up widget chain
                     p = p.get_parent()
                 _write_async_key_value(setting, key, new_state, p)
 
@@ -365,7 +365,7 @@ _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 
 # clicking on the lock icon changes from changeable to unchangeable to ignore
 def _change_click(eb, button, arg):
-    control, device, name = arg
+    control, sbox, device, name = arg
     icon = eb.get_children()[0]
     icon_name, _ = icon.get_icon_name()
     allowed = _icons_allowables.get(icon_name, True)
@@ -379,9 +379,9 @@ def _change_click(eb, button, arg):
         if setting:
             persisted = device.persister.get(setting.name) if device.persister else None
             if persisted is not None:
-                _write_async(setting, persisted, control.get_parent())
+                _write_async(setting, persisted, sbox)
             else:
-                _read_async(setting, True, control.get_parent(), bool(device.online), control.get_sensitive())
+                _read_async(setting, True, sbox, bool(device.online), control.get_sensitive())
     return True
 
 
@@ -432,7 +432,7 @@ def _create_sbox(s, device):
     control.kind = s.kind
 
     change.set_sensitive(True)
-    change.connect('button-press-event', _change_click, (control, device, s.name))
+    change.connect('button-press-event', _change_click, (control, sbox, device, s.name))
 
     if s.kind in [_SETTING_KIND.multiple_toggle, _SETTING_KIND.multiple_range]:
         vbox._header.pack_start(label, False, False, 0)
