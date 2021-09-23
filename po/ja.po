@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-09-04 14:07+0900\n"
-"PO-Revision-Date: 2021-09-04 14:37+0900\n"
+"PO-Revision-Date: 2021-09-24 00:25+0900\n"
 "Last-Translator: Ryunosuke Toda <toda.ryunosuke@gmail.com>\n"
 "Language-Team: \n"
 "Language: ja\n"
@@ -230,11 +230,11 @@ msgstr ""
 
 #: lib/logitech_receiver/notifications.py:76
 msgid "pairing lock is closed"
-msgstr ""
+msgstr "ペアリング試行終了"
 
 #: lib/logitech_receiver/notifications.py:76
 msgid "pairing lock is open"
-msgstr ""
+msgstr "ペアリング試行開始"
 
 #: lib/logitech_receiver/notifications.py:160 lib/solaar/ui/notify.py:123
 msgid "connected"
@@ -695,7 +695,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:191
 msgid "Sets the cursor speed."
-msgstr ""
+msgstr "カーソル速度を設定します。"
 
 #: lib/logitech_receiver/settings_templates.py:195
 msgid "Left"
@@ -731,7 +731,7 @@ msgstr "高さ"
 
 #: lib/logitech_receiver/settings_templates.py:199
 msgid "Cursor speed."
-msgstr ""
+msgstr "カーソル速度。"
 
 #: lib/logitech_receiver/settings_templates.py:199
 msgid "Scale"
@@ -740,7 +740,7 @@ msgstr ""
 #: lib/logitech_receiver/settings_templates.py:202
 #, python-format
 msgid "Disables the %s key."
-msgstr ""
+msgstr "キー %s を無効にする。"
 
 #: lib/logitech_receiver/settings_templates.py:521
 #: lib/logitech_receiver/settings_templates.py:573
@@ -1042,7 +1042,7 @@ msgstr "マウスプロセス"
 
 #: lib/solaar/ui/diversion_rules.py:512 lib/solaar/ui/diversion_rules.py:984
 msgid "Report"
-msgstr ""
+msgstr "通知"
 
 #: lib/solaar/ui/diversion_rules.py:513 lib/solaar/ui/diversion_rules.py:1019
 msgid "Modifiers"
@@ -1054,7 +1054,7 @@ msgstr "キー"
 
 #: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1111
 msgid "Test"
-msgstr ""
+msgstr "評価"
 
 #: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1196
 msgid "Mouse Gesture"
@@ -1120,19 +1120,19 @@ msgstr "否"
 
 #: lib/solaar/ui/diversion_rules.py:1039
 msgid "Key down"
-msgstr ""
+msgstr "押す"
 
 #: lib/solaar/ui/diversion_rules.py:1042
 msgid "Key up"
-msgstr ""
+msgstr "離す"
 
 #: lib/solaar/ui/diversion_rules.py:1131
 msgid "Add action"
-msgstr ""
+msgstr "操作追加"
 
 #: lib/solaar/ui/diversion_rules.py:1224
 msgid "Add key"
-msgstr ""
+msgstr "キー追加"
 
 #: lib/solaar/ui/diversion_rules.py:1354
 msgid "Button"
@@ -1365,7 +1365,7 @@ msgstr "〜 "
 
 #: lib/solaar/ui/window.py:718
 msgid " and next level to be reported."
-msgstr ""
+msgstr " と 次に報告される残量。"
 
 #: lib/solaar/ui/window.py:723
 msgid "last known"
