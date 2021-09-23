@@ -24,7 +24,9 @@ import math
 from copy import copy as _copy
 from logging import DEBUG as _DEBUG
 from logging import getLogger
-from time import time_ns as _time_ns
+## use regular time instead of time_ns so as not to require Python 3.7
+# from time import time_ns as _time_ns
+from time import time as _time
 
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
@@ -1093,7 +1095,7 @@ class DivertedMouseMovement(object):
     def handle_move_event(self, dx, dy):
         # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
         # The multiplier could be configurable to allow adjusting dx
-        now = _time_ns() / 1e6
+        now = _time() * 1000  # _time_ns() / 1e6
         dpi = self.dpiSetting.read() if self.dpiSetting else 1000
         dx = float(dx) / float(dpi) * 15.
         self.dx += dx
@@ -1113,7 +1115,7 @@ class DivertedMouseMovement(object):
                 self.fsmState = 'pressed'
                 self.dx = 0.
                 self.dy = 0.
-                self.lastEv = _time_ns() / 1e6
+                self.lastEv = _time() * 1000  # _time_ns() / 1e6
                 self.skip = True
         elif self.fsmState == 'pressed' or self.fsmState == 'moved':
             if self.key not in cids:
@@ -1135,7 +1137,7 @@ class DivertedMouseMovement(object):
                     self.data.append(1)
                     self.data.append(list(last)[0])
                     self.data[0] += 1
-                    self.lastEv = _time_ns() / 1e6
+                    self.lastEv = _time() * 1000  # _time_ns() / 1e6
                     return True
 
 
