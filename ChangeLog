@@ -1,3 +1,25 @@
+1.0.7rc2:
+ * Don't signal status change when battery changes from None to None.
+ * Add Japanese translation
+ * Use first word of name for code name if no other code name available.
+ * Better determination of when to add SW ID.
+ * Check for more HID++ feature request failing.
+ * Fix bug with new_fn_inversion setting.
+ * Use correct device number for directly connected devices
+ * Add debug message when candidate device found
+ * Update Polish, Taiwanese, and Brazilian Portugese translations
+ * Add MouseProcess a rule condition like Process but for the window under the mouse
+ * Add parameters for binary settings to support prefixes
+ * Add locks to serialize requests to devices
+ * Fix bug when reprog key requests returns None
+ * Fix bug for empty process name and class
+ * Rules can now trigger on both pressing and releasing a diverted key
+ * Upgrade mouse gestures to allow sequences of movements
+ * Fix gkeys diversion faked read
+ * Add suppor for Logitech g pro x superlight receiver
+ * Convert HID++ 2.0 device kinds to enhanced HID++ 1.0 device kinds
+ * Update about window, bug report templates, and supported kernels.
+
 1.0.6:
   * Update sliding DPI to look for suitable keys
   * Add mouse gestures that can trigger rules
