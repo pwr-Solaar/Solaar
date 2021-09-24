@@ -360,11 +360,11 @@ handles_lock = {}
 
 def handle_lock(handle):
     with request_lock:
-        if handles_lock.get(int(handle)) is None:
+        if handles_lock.get(handle) is None:
             if _log.isEnabledFor(_INFO):
-                _log.info('New lock %s', int(handle))
-            handles_lock[int(handle)] = _threading.Lock()  # Serialize requests on the handle
-    return handles_lock[int(handle)]
+                _log.info('New lock %s', repr(handle))
+            handles_lock[handle] = _threading.Lock()  # Serialize requests on the handle
+    return handles_lock[handle]
 
 
 # context manager for locks with a timeout
