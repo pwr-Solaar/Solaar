@@ -126,7 +126,7 @@ UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
 UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
 
 # Nano receviers that support the Unifying protocol
-NANO_RECEIVER_ADVANCED = _nano_receiver(0xc52f)
+NANO_RECEIVER_ADVANCED = _nano_receiver_no_unpair(0xc52f)
 
 # ex100 old style receiver pre-unifyimg protocol
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
