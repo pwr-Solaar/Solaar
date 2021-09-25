@@ -1,3 +1,11 @@
+1.0.7rc3:
+ * Don't use time_ns so as not to require Python 3.7
+ * Correctly determine setting box in change_click method
+ * Handle fake Nano connection notifications
+ * Lock on actual handle, not just on handle number
+ * Mark Nano receiver C52F as not unpairing
+ * Upgrade pairing/unpairing documentation
+
 1.0.7rc2:
  * Don't signal status change when battery changes from None to None.
  * Add Japanese translation
