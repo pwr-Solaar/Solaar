@@ -23,6 +23,7 @@ import math
 
 from copy import copy as _copy
 from logging import DEBUG as _DEBUG
+from logging import WARNING as _WARNING
 from logging import getLogger
 ## use regular time instead of time_ns so as not to require Python 3.7
 # from time import time_ns as _time_ns
@@ -1046,6 +1047,72 @@ class MultipleRangeValidator:
                 raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
             w += _int2bytes(v, sub_item.length)
         return w + b'\xFF'
+
+
+class ActionSettingRW(object):
+    """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
+    def __init__(self, name, divert_setting_name):
+        self.name = name
+        self.divert_setting_name = divert_setting_name
+        self.kind = FeatureRW.kind  # pretend to be FeatureRW as required for HID++ 2.0 devices
+        self.device = None
+        self.key = None
+        self.active = False
+        self.pressed = False
+
+    def press_action(self):  # action to take when key is pressed
+        pass
+
+    def release_action(self):  # action to take when key is released
+        pass
+
+    def move_action(self, dx, dy):  # action to take when mouse is moved while key is down
+        pass
+
+    def read(self, device):  # need to return bytes, as if read from device
+        return _int2bytes(self.key, 2) if self.active else b'\x00\x00'
+
+    def write(self, device, data_bytes):
+        def handler(device, n):  # Called on notification events from the device
+            if n.sub_id < 0x40 and device.features[n.sub_id] == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+                if n.address == 0x00:
+                    cids = _unpack('!HHHH', n.data[:8])
+                    if not self.pressed and int(self.key.key) in cids:
+                        self.pressed = True
+                        self.press_action()
+                    elif self.pressed and int(self.key.key) not in cids:
+                        self.pressed = False
+                        self.release_action()
+                elif n.address == 0x10:
+                    if self.pressed:
+                        dx, dy = _unpack('!hh', n.data[:4])
+                        self.move_action(dx, dy)
+
+        divertSetting = next(filter(lambda s: s.name == self.divert_setting_name, device.settings), None)
+        self.device = device
+        key = _bytes2int(data_bytes)
+        if key:  # Enable
+            self.key = next((k for k in device.keys if k.key == key), None)
+            if self.key:
+                self.active = True
+                divertSetting.write_key_value(int(self.key.key), 1)
+                device.add_notification_handler(self.name, handler)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(device, refresh=True)  # update main window
+            else:
+                _log.error('cannot enable %s on %s for key %s', self.name, device, key)
+        else:  # Disable
+            if self.active:
+                self.active = False
+                divertSetting.write_key_value(int(self.key.key), 0)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(device, refresh=True)  # update main window
+                try:
+                    device.remove_notification_handler(self.name)
+                except Exception:
+                    if _log.isEnabledFor(_WARNING):
+                        _log.warn('cannot disable %s on %s', self.name, device)
+        return True
 
 
 # Turn diverted mouse movement events into a mouse gesture

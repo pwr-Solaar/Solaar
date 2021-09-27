@@ -35,6 +35,7 @@ from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import unpack as _unpack
 from .i18n import _
+from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting
 from .settings import BitFieldValidator as _BitFieldV
 from .settings import BitFieldWithOffsetAndMaskSetting as _BitFieldOMSetting
@@ -118,6 +119,9 @@ _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
                  _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
                  _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
+_SPEED_CHANGE = ('speed-change', _('Sensitivity Switching'),
+                 _('Switch the current sensitivity and the remembered sensitivity when the key or button is pressed.\n'
+                   'If there is no remembered sensitivity, just remember the current sensitivity'))
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
@@ -524,6 +528,38 @@ def _feature_dpi_sliding():
     return _Setting(_DPI_SLIDING, _DpiSlidingRW(), callback=_feature_dpi_sliding_callback, device_kind=(_DK.mouse, ))
 
 
+def _feature_speed_change():
+    """Implements the ability to switch Sensitivity by clicking on the DPI_Change button."""
+    class _SpeedChangeRW(_ActionSettingRW):
+        def press_action(self):  # switch sensitivity
+            currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
+            newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
+            speed_setting = next(filter(lambda s: s.name == _POINTER_SPEED[0], self.device.settings), None)
+            if newSpeed is not None:
+                if speed_setting:
+                    speed_setting.write(newSpeed)
+                else:
+                    _log.error('cannot save sensitivity setting on %s', self.device)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(self.device, refresh=True)  # update main window
+            if self.device.persister:
+                self.device.persister['_speed-change'] = currentSpeed
+
+    def callback(device):
+        key_index = device.keys.index(_special_keys.CONTROL.DPI_Change)
+        key = device.keys[key_index] if key_index is not None else None
+        if key is not None and 'divertable' in key.flags:
+            keys = [_NamedInt(0, _('Off')), key.key]
+            return _ChoicesV(_NamedInts.list(keys), byte_count=2)
+
+    return _Setting(
+        _SPEED_CHANGE,
+        _SpeedChangeRW('speed change', _DIVERT_KEYS[0]),
+        callback=callback,
+        device_kind=(_DK.mouse, _DK.trackball)
+    )
+
+
 def _feature_adjustable_dpi_callback(device):
     # [1] getSensorDpiList(sensorIdx)
     reply = device.feature_request(_F.ADJUSTABLE_DPI, 0x10)
@@ -852,6 +888,7 @@ _SETTINGS_TABLE = [
     _S(_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_dpi_sliding),
     _S(_MOUSE_GESTURES, _F.REPROG_CONTROLS_V4, _feature_mouse_gesture),
     _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
+    _S(_SPEED_CHANGE, _F.POINTER_SPEED, _feature_speed_change),
     _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
