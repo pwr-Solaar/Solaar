@@ -5,9 +5,9 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: solaar 1.0.6\n"
+msgstr  "Project-Id-Version: solaar 1.0.7rc3\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2021-08-20 18:22-0300\n"
+        "POT-Creation-Date: 2021-09-25 13:56-0400\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,7 +35,7 @@ msgstr  ""
 msgid   "EX100 Receiver 27 Mhz"
 msgstr  ""
 
-#: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
+#: lib/logitech_receiver/device.py:133 lib/solaar/ui/window.py:693
 msgid   "unknown"
 msgstr  ""
 
@@ -251,11 +251,11 @@ msgstr  ""
 msgid   "powered on"
 msgstr  ""
 
-#: lib/logitech_receiver/settings.py:524
+#: lib/logitech_receiver/settings.py:526
 msgid   "register"
 msgstr  ""
 
-#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+#: lib/logitech_receiver/settings.py:542 lib/logitech_receiver/settings.py:568
 msgid   "feature"
 msgstr  ""
 
@@ -292,7 +292,7 @@ msgid   "Scroll Wheel High Resolution"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid   "Scroll Wheel HID++ Scrolling"
+msgid   "Scroll Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:80
@@ -418,7 +418,7 @@ msgid   "Switch connection to a different host"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid   "Thumb Wheel HID++ Scrolling"
+msgid   "Thumb Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:108
