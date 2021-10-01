@@ -322,13 +322,11 @@ def _create_window_layout():
     bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
     bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
     bottom_buttons_box.set_spacing(20)
-    quit_button = _new_button(_('Quit') + ' ' + NAME, 'application-exit', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=destroy)
+    quit_button = _new_button(_('Quit %s') % NAME, 'application-exit', _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(
-        _('About') + ' ' + NAME, 'help-about', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window
-    )
+    about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Rule Editor'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(_('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
