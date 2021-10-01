@@ -1,4 +1,4 @@
-1.0.7rc3:
+1.0.7:
  * Don't use time_ns so as not to require Python 3.7
  * Correctly determine setting box in change_click method
  * Handle fake Nano connection notifications
