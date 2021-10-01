@@ -844,8 +844,8 @@ msgid   "Logitech documentation"
 msgstr  "Τεκμηρίωση Logitech"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "Περί"
+msgid   "About %s"
+msgstr  "Περί %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1193,8 +1193,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Δεν βρέθηκε δέκτης Logitech"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "Έξοδος"
+msgid   "Quit %s"
+msgstr  "Έξοδος %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"

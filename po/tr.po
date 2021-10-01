@@ -837,8 +837,8 @@ msgid   "Logitech documentation"
 msgstr  "Logitech belgeleri"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "Hakkında"
+msgid   "About %s"
+msgstr  "Hakkında %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1186,8 +1186,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Hiçbir Logitech alıcısı bulunamadı"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "Çıkış"
+msgid   "Quit %s"
+msgstr  "Çıkış %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"
