@@ -20,12 +20,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from gi.repository import Gdk, Gtk
-from solaar import NAME
 from solaar.i18n import _
 
 from ..ui import error_dialog
 from . import pair_window
-from .about import show_window as _show_about_window
 
 # from logging import getLogger
 # _log = getLogger(__name__)
@@ -66,12 +64,6 @@ def make_toggle(name, label, function, stock_id=None, *args):
 #         notify.uninit()
 #     action.set_sensitive(notify.available)
 # toggle_notifications = make_toggle('notifications', 'Notifications', _toggle_notifications)
-
-about = make('help-about', _('About') + ' ' + NAME, _show_about_window, stock_id='help-about')
-
-#
-#
-#
 
 
 def pair(window, receiver):
