@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.7\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-09-25 13:56-0400\n"
-"PO-Revision-Date: 2021-10-01 15:14+0200\n"
+"PO-Revision-Date: 2021-10-01 18:48+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -885,8 +885,8 @@ msgid "Logitech documentation"
 msgstr "Dokumentacja firmy Logitech"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid "About"
-msgstr "O programie"
+msgid "About %s"
+msgstr "O programie %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1248,8 +1248,8 @@ msgid "No Logitech receiver found"
 msgstr "Nie znaleziono odbiornika firmy Logitech"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid "Quit"
-msgstr "Zakończ"
+msgid "Quit %s"
+msgstr "Zakończ %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid "no receiver"
