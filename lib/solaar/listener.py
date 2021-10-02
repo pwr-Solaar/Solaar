@@ -40,6 +40,9 @@ from . import configuration
 _log = getLogger(__name__)
 del getLogger
 
+_R = _hidpp10.REGISTERS
+_IR = _hidpp10.INFO_SUBREGISTERS
+
 #
 #
 #
@@ -217,6 +220,10 @@ class ReceiverListener(_listener.EventsListener):
             return
         elif n.sub_id == 0x41:
             if not already_known:
+                if n.address == 0x0A:
+                    # some Nanos send a notification even if no new pairing - check that there really is a device there
+                    if self.receiver.read_register(_R.receiver_info, _IR.pairing_information + n.devnumber - 1) is None:
+                        return
                 dev = self.receiver.register_new_device(n.devnumber, n)
             elif self.receiver.status.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
                 dev = self.receiver[n.devnumber]

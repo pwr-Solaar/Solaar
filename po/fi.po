@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2021-08-06 10:58-0400\n"
+        "POT-Creation-Date: 2021-09-25 13:56-0400\n"
         "PO-Revision-Date: 2013-08-05 18:49+0300\n"
         "Last-Translator: Tomi Leppänen\n"
         "Language-Team: none\n"
@@ -34,7 +34,7 @@ msgstr  ""
 msgid   "EX100 Receiver 27 Mhz"
 msgstr  ""
 
-#: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
+#: lib/logitech_receiver/device.py:133 lib/solaar/ui/window.py:693
 msgid   "unknown"
 msgstr  "tuntematon"
 
@@ -148,7 +148,83 @@ msgid   "Other"
 msgstr  "Muu"
 
 #: lib/logitech_receiver/i18n.py:73
+msgid   "Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:77
+msgid   "Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:78
 msgid   "Mouse Gesture Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "Smart Shift"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:80
+msgid   "DPI Switch"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:81
+msgid   "Left Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:82
+msgid   "Right Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:83
+msgid   "Left Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:84
+msgid   "Right Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:85
+msgid   "Mouse Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:86
+msgid   "Mouse Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:87
+msgid   "Mouse Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:88
+msgid   "Gesture Button Navigation"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:89
+msgid   "Mouse Scroll Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:90
+msgid   "Mouse Scroll Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:93
+msgid   "pressed"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:94
+msgid   "released"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:76
@@ -175,11 +251,11 @@ msgstr  "parittamaton"
 msgid   "powered on"
 msgstr  "virta päällä"
 
-#: lib/logitech_receiver/settings.py:524
+#: lib/logitech_receiver/settings.py:526
 msgid   "register"
 msgstr  ""
 
-#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+#: lib/logitech_receiver/settings.py:542 lib/logitech_receiver/settings.py:568
 msgid   "feature"
 msgstr  ""
 
@@ -218,7 +294,7 @@ msgid   "Scroll Wheel High Resolution"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid   "Scroll Wheel HID++ Scrolling"
+msgid   "Scroll Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:80
@@ -348,7 +424,7 @@ msgid   "Switch connection to a different host"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid   "Thumb Wheel HID++ Scrolling"
+msgid   "Thumb Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:108
@@ -587,6 +663,22 @@ msgstr  ""
 msgid   "Zoom with two fingers"
 msgstr  ""
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid   "Pixel zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid   "Ratio zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Scale factor"
+msgstr  "Skaalauskerroin"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Sets the cursor speed."
+msgstr  ""
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid   "Left"
 msgstr  ""
@@ -681,19 +773,6 @@ msgstr  ""
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  ""
 
-#: lib/solaar/gtk.py:152
-msgid   "ERROR: "
-msgstr  ""
-
-#: lib/solaar/gtk.py:153
-msgid   "Solaar depends on a udev file that is not present"
-msgstr  ""
-
-#: lib/solaar/gtk.py:156
-msgid   "For more information see the Solaar installation directions\n"
-        "at https://pwr-solaar.github.io/Solaar/installation"
-msgstr  ""
-
 #: lib/solaar/ui/__init__.py:52
 msgid   "Permissions error"
 msgstr  "Virheelliset käyttöoikeudet"
@@ -762,8 +841,8 @@ msgid   "Logitech documentation"
 msgstr  "Logitechin dokumentointi"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "Tietoja"
+msgid   "About %s"
+msgstr  "Tietoja %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1013,6 +1092,14 @@ msgstr  ""
 msgid   "Not"
 msgstr  ""
 
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid   "Key down"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid   "Key up"
+msgstr  ""
+
 #: lib/solaar/ui/diversion_rules.py:1131
 msgid   "Add action"
 msgstr  ""
@@ -1104,8 +1191,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Ei löydetty Logitechin vastaanottimia."
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "Lopeta"
+msgid   "Quit %s"
+msgstr  "Lopeta %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"

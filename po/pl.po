@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.0.4\n"
+"Project-Id-Version: solaar 1.0.7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-07 01:00+0200\n"
-"PO-Revision-Date: 2021-08-07 01:29+0200\n"
+"POT-Creation-Date: 2021-09-25 13:56-0400\n"
+"PO-Revision-Date: 2021-10-01 18:48+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -37,7 +37,7 @@ msgstr "Odbiornik Lightspeed"
 msgid "EX100 Receiver 27 Mhz"
 msgstr "Odbiornik EX100 27 MHz"
 
-#: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
+#: lib/logitech_receiver/device.py:133 lib/solaar/ui/window.py:693
 msgid "unknown"
 msgstr "nieznany"
 
@@ -221,6 +221,14 @@ msgstr "Lewy przycisk kółka myszy"
 msgid "Mouse Scroll Right Button"
 msgstr "Prawy przycisk kółka myszy"
 
+#: lib/logitech_receiver/i18n.py:93
+msgid "pressed"
+msgstr "wciśnięty"
+
+#: lib/logitech_receiver/i18n.py:94
+msgid "released"
+msgstr "zwolniony"
+
 #: lib/logitech_receiver/notifications.py:76
 msgid "pairing lock is closed"
 msgstr "blokada sparowania jest zamknięta"
@@ -245,11 +253,11 @@ msgstr "niesparowane"
 msgid "powered on"
 msgstr "włączone"
 
-#: lib/logitech_receiver/settings.py:524
+#: lib/logitech_receiver/settings.py:526
 msgid "register"
 msgstr "rejestr"
 
-#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+#: lib/logitech_receiver/settings.py:542 lib/logitech_receiver/settings.py:568
 msgid "feature"
 msgstr "funkcja"
 
@@ -291,8 +299,8 @@ msgid "Scroll Wheel High Resolution"
 msgstr "Wysoka rozdzielczość kółka przewijania"
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid "Scroll Wheel HID++ Scrolling"
-msgstr "Przewijanie HID++ kółkiem przewijania"
+msgid "Scroll Wheel Diversion"
+msgstr "Przekierowanie kółka przewijania"
 
 #: lib/logitech_receiver/settings_templates.py:80
 msgid "HID++ mode for vertical scroll with the wheel."
@@ -433,8 +441,8 @@ msgid "Switch connection to a different host"
 msgstr "Przełącz połączenie na innego hosta"
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid "Thumb Wheel HID++ Scrolling"
-msgstr "Przewijanie HID++ kółkiem obsługiwanym kciukiem"
+msgid "Thumb Wheel Diversion"
+msgstr "Przekierowanie kółka obsługiwanego kciukiem"
 
 #: lib/logitech_receiver/settings_templates.py:108
 msgid "HID++ mode for horizontal scroll with the thumb wheel."
@@ -688,6 +696,22 @@ msgstr "Zoom trzema palcami."
 msgid "Zoom with two fingers"
 msgstr "Zoom dwoma palcami"
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid "Pixel zone"
+msgstr "Strefa pikseli"
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid "Ratio zone"
+msgstr "Strefa współczynnika"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid "Scale factor"
+msgstr "Współczynnik skalowania"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid "Sets the cursor speed."
+msgstr "Ustawia szybkość kursora."
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid "Left"
 msgstr "Lewo"
@@ -783,22 +807,6 @@ msgstr "Akumulator: %(level)s (%(status)s)"
 msgid "Battery: %(percent)d%% (%(status)s)"
 msgstr "Akumulator: %(percent)d%% (%(status)s)"
 
-#: lib/solaar/gtk.py:152
-msgid "ERROR: "
-msgstr "BŁĄD: "
-
-#: lib/solaar/gtk.py:153
-msgid "Solaar depends on a udev file that is not present"
-msgstr "Solaar zależy od pliku udev, którego nie ma"
-
-#: lib/solaar/gtk.py:156
-msgid ""
-"For more information see the Solaar installation directions\n"
-"at https://pwr-solaar.github.io/Solaar/installation"
-msgstr ""
-"Więcej informacji można znaleźć w instrukcji instalacji Solaar\n"
-"pod adresem https://pwr-solaar.github.io/Solaar/installation"
-
 #: lib/solaar/ui/__init__.py:52
 msgid "Permissions error"
 msgstr "Błąd uprawnień"
@@ -877,8 +885,8 @@ msgid "Logitech documentation"
 msgstr "Dokumentacja firmy Logitech"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid "About"
-msgstr "O programie"
+msgid "About %s"
+msgstr "O programie %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1129,6 +1137,14 @@ msgstr "Ten edytor nie obsługuje jeszcze wybranego składnika reguły."
 msgid "Not"
 msgstr "Nie"
 
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid "Key down"
+msgstr "Klawisz w dół"
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid "Key up"
+msgstr "Klawisz w górę"
+
 #: lib/solaar/ui/diversion_rules.py:1131
 msgid "Add action"
 msgstr "Dodaj czynność"
@@ -1232,8 +1248,8 @@ msgid "No Logitech receiver found"
 msgstr "Nie znaleziono odbiornika firmy Logitech"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid "Quit"
-msgstr "Zakończ"
+msgid "Quit %s"
+msgstr "Zakończ %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid "no receiver"
@@ -1430,3 +1446,22 @@ msgstr ""
 #, python-format
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lx"
+
+#~ msgid "ERROR: "
+#~ msgstr "BŁĄD: "
+
+#~ msgid ""
+#~ "For more information see the Solaar installation directions\n"
+#~ "at https://pwr-solaar.github.io/Solaar/installation"
+#~ msgstr ""
+#~ "Więcej informacji można znaleźć w instrukcji instalacji Solaar\n"
+#~ "pod adresem https://pwr-solaar.github.io/Solaar/installation"
+
+#~ msgid "Scroll Wheel HID++ Scrolling"
+#~ msgstr "Przewijanie HID++ kółkiem przewijania"
+
+#~ msgid "Solaar depends on a udev file that is not present"
+#~ msgstr "Solaar zależy od pliku udev, którego nie ma"
+
+#~ msgid "Thumb Wheel HID++ Scrolling"
+#~ msgstr "Przewijanie HID++ kółkiem obsługiwanym kciukiem"
