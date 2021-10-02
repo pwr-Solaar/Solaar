@@ -846,8 +846,8 @@ msgid   "Logitech documentation"
 msgstr  ""
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "Solaarについて"
+msgid   "About %s"
+msgstr  "%sについて"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1198,8 +1198,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Logitechレシーバーが見つかりません"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "終了"
+msgid   "Quit %s"
+msgstr  "%sを終了"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"
