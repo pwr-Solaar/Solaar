@@ -45,7 +45,7 @@ del getLogger
 # constants
 #
 
-_TRAY_ICON_SIZE = 32  # pixels
+_TRAY_ICON_SIZE = 64  # pixels - make large as downscaling is done but not always upscaling
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _RECEIVER_SEPARATOR = ('~', None, None, None)
 
@@ -175,10 +175,11 @@ try:
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
+    # Defense against bug that shows up in XFCE 4.16 where icons are not upscaled
     def _icon_file(icon_name):
-        if not os.path.isfile(icon_name):
+        if False and not os.path.isfile(icon_name):
             return icon_name
-        icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name, _TRAY_ICON_SIZE, 0)
+        icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name, _TRAY_ICON_SIZE, Gtk.IconLookupFlags.FORCE_SVG)
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
