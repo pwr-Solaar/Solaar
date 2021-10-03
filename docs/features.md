@@ -18,7 +18,7 @@ Feature                                | ID       | Status             | Notes
 `DEVICE_UNIT_ID`                       | `0x0004` | :x:                |
 `DEVICE_NAME`                          | `0x0005` | :heavy_check_mark: | `get_kind`, `get_name`, read only
 `DEVICE_GROUPS`                        | `0x0006` | :x:                |
-`DEVICE_FRIENDLY_NAME`                 | `0x0007` | :x:                |
+`DEVICE_FRIENDLY_NAME`                 | `0x0007` | :heavy_check_mark: | read only
 `KEEP_ALIVE`                           | `0x0008` | :x:                |
 `RESET`                                | `0x0020` | :x:                | aka “Config Change”
 `CRYPTO_ID`                            | `0x0021` | :x:                |
@@ -49,7 +49,7 @@ Feature                                | ID       | Status             | Notes
 `REPROG_CONTROLS_V3`                   | `0x1B03` | :x:                |
 `REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys`, _feature_reprogrammable_keys
 `REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
-`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :wrench:           |
+`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :x:                |
 `WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :heavy_plus_sign:  | status reporting from device
 `REMAINING_PAIRING`                    | `0x1DF0` | :x:                |
 `FIRMWARE_PROPERTIES`                  | `0x1F1F` | :x:                |
@@ -81,7 +81,7 @@ Feature                                | ID       | Status             | Notes
 `DUALPLATFORM`                         | `0x4530` | :heavy_check_mark: | `_feature_dualplatform`, untested
 `MULTIPLATFORM`                        | `0x4531` | :heavy_check_mark: | `_feature_multiplatform`
 `KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                | read only
-`CROWN`                                | `0x4600` | :x:                |
+`CROWN`                                | `0x4600` | :heavy_check_mark: |
 `TOUCHPAD_FW_ITEMS`                    | `0x6010` | :x:                |
 `TOUCHPAD_SW_ITEMS`                    | `0x6011` | :x:                |
 `TOUCHPAD_WIN8_FW_ITEMS`               | `0x6012` | :x:                |
@@ -94,11 +94,11 @@ Feature                                | ID       | Status             | Notes
 `TOUCHMOUSE_6120`                      | `0x6120` | :x:                |
 `GESTURE`                              | `0x6500` | :x:                |
 `GESTURE_2`                            | `0x6501` | :heavy_plus_sign:  | `_feature_gesture2_gestures`, `_feature_gesture2_params`
-`GKEY`                                 | `0x8010` | :x:                |
+`GKEY`                                 | `0x8010` | :heavy_plus_sign:  |
 `MKEYS`                                | `0x8020` | :x:                |
 `MR`                                   | `0x8030` | :x:                |
 `BRIGHTNESS_CONTROL`                   | `0x8040` | :x:                |
-`REPORT_RATE`                          | `0x8060` | :x:                | in progress
+`REPORT_RATE`                          | `0x8060` | :heavy_check_mark: |
 `COLOR_LED_EFFECTS`                    | `0x8070` | :x:                |
 `RGB_EFFECTS`                          | `0X8071` | :x:                |
 `PER_KEY_LIGHTING`                     | `0x8080` | :x:                |
@@ -113,7 +113,7 @@ Feature                                | ID       | Status             | Notes
 `EQUALIZER`                            | `0x8310` | :x:                |
 `HEADSET_OUT`                          | `0x8320` | :x:                |
 
-A “read only” note means the feature is a read-only feature and cannot be changed.
+A “read only” note means the feature is a read-only feature.
 
 ## Implementing a feature
 
