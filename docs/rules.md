@@ -125,11 +125,14 @@ All of these rules are only active if the key or feature is diverted, of course.
 Solaar reads rules from a YAML configuration file (normally `~/.config/solaar/rules.yaml`).
 This file contains zero or more documents, each a rule.
 
-Here is a file with three rules:
+Here is a file with four rules:
 
 ```
 %YAML 1.3
 ---
+- MouseGesture: [Mouse Up, Mouse Down]
+- Execute: xflock4
+...
 - Feature: CROWN
 - Process: quodlibet
 - Rule: [ Test: crown_start_press, KeyPress: XF86_AudioMute ]

@@ -164,6 +164,10 @@ Pressing the button, if the button is diverted, causes the mouse pointer to stop
 When the button is released a MOUSE_GESTURE notification with the total mouse movement
 while the button was pressed is sent to the Solaar rule system.
 
+MOUSE_GESTURE notifications trigger mouse gesture conditions in Solaar rules.
+For more information on mouse gesture rules conditions see
+[the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
 Mouse gestures is an experimental feature.
 Significant changes might be made to it in the future.
 
