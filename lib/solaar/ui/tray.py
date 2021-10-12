@@ -359,15 +359,16 @@ def _add_device(device):
     receiver_path = device.receiver.path if device.receiver is not None else device.path
     # not true for wired devices - assert receiver_path
 
-    index = 0
+    index = None
     for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
         if path == receiver_path:
             # the first entry matching the receiver serial should be for the receiver itself
             index = idx + 1
             break
-    # assert index is not None
 
-    if device.receiver:
+    if index is None:
+        index = len(_devices_info)
+    elif device.receiver:
         # proper ordering (according to device.number) for a receiver's devices
         while True:
             path, number, _ignore, _ignore = _devices_info[index]
