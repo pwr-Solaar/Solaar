@@ -21,7 +21,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import namedtuple
 from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
 from logging import getLogger
+from time import time as _time
 
 from solaar.ui import notify as _notify
 
@@ -45,7 +47,6 @@ from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
 from .settings import FeatureRWMap as _FeatureRWMap
 from .settings import LongSettings as _LongSettings
-from .settings import MouseGestureKeys as _MouseGestureKeys
 from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import RangeValidator as _RangeV
 from .settings import RegisterRW as _RegisterRW
@@ -518,34 +519,102 @@ def _feature_adjustable_dpi():
     return _Setting(_DPI, rw, callback=_feature_adjustable_dpi_callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _feature_mouse_gesture_callback(device):
-    # need a gesture button that can send raw XY
-    if device.kind == _DK.mouse:
-        keys = []
-        for key in _MouseGestureKeys:
-            key_index = device.keys.index(key)
-            dkey = device.keys[key_index] if key_index is not None else None
-            if dkey is not None and 'raw XY' in dkey.flags and 'divertable' in dkey.flags:
-                keys.append(dkey.key)
-        if not keys:  # none of the keys designed for this, so look for any key with correct flags
-            for key in device.keys:
-                if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
-                    keys.append(key.key)
-        if keys:
-            keys.insert(0, _NamedInt(0, _('Off')))
-            return _ChoicesV(_NamedInts.list(keys), byte_count=2)
-
-
 def _feature_mouse_gesture():
     """Implements the ability to send mouse gestures
     by sliding a mouse horizontally or vertically while holding the App Switch button."""
-    from .settings import DivertedMouseMovementRW as _DivertedMouseMovementRW
-    return _Setting(
-        _MOUSE_GESTURES,
-        _DivertedMouseMovementRW(_DPI[0], _DIVERT_KEYS[0]),
-        callback=_feature_mouse_gesture_callback,
-        device_kind=(_DK.mouse, )
-    )
+    class MouseGestureRW(_ActionSettingRW):
+        def activate_action(self):
+            self.key.set_rawXY_reporting(True)
+            self.dpiSetting = next(filter(lambda s: s.name == _DPI[0], self.device.settings), None)
+            self.fsmState = 'idle'
+            self.initialize_data()
+
+        def deactivate_action(self):
+            self.key.set_rawXY_reporting(False)
+
+        def initialize_data(self):
+            self.dx = 0.
+            self.dy = 0.
+            self.lastEv = None
+            self.data = [0]
+
+        def press_action(self):
+            if self.fsmState == 'idle':
+                self.fsmState = 'pressed'
+                self.initialize_data()
+
+        def release_action(self):
+            if self.fsmState == 'pressed':
+                # emit mouse gesture notification
+                from .base import _HIDPP_Notification as _HIDPP_Notification
+                from .common import pack as _pack
+                from .diversion import process_notification as _process_notification
+                self.push_mouse_event()
+                if _log.isEnabledFor(_INFO):
+                    _log.info('mouse gesture notification %s', self.data)
+                payload = _pack('!' + (len(self.data) * 'h'), *self.data)
+                notification = _HIDPP_Notification(0, 0, 0, 0, payload)
+                _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
+                self.fsmState = 'idle'
+
+        def move_action(self, dx, dy):
+            if self.fsmState == 'pressed':
+                now = _time() * 1000  # _time_ns() / 1e6
+                if self.lastEv is not None and now - self.lastEv > 50.:
+                    self.push_mouse_event()
+                dpi = self.dpiSetting.read() if self.dpiSetting else 1000
+                dx = float(dx) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+                self.dx += dx
+                dy = float(dy) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+                self.dy += dy
+                self.lastEv = now
+
+        def key_action(self, key):
+            self.push_mouse_event()
+            self.data.append(1)
+            self.data.append(key)
+            self.data[0] += 1
+            self.lastEv = _time() * 1000  # _time_ns() / 1e6
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('mouse gesture key event %d %s', key, self.data)
+
+        def push_mouse_event(self):
+            x = int(self.dx)
+            y = int(self.dy)
+            if x == 0 and y == 0:
+                return
+            self.data.append(0)
+            self.data.append(x)
+            self.data.append(y)
+            self.data[0] += 1
+            self.dx = 0.
+            self.dy = 0.
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('mouse gesture move event %d %d %s', x, y, self.data)
+
+    MouseGestureKeys = [
+        _special_keys.CONTROL.Mouse_Gesture_Button,
+        _special_keys.CONTROL.MultiPlatform_Gesture_Button,
+    ]
+
+    def callback(device):
+        if device.kind == _DK.mouse:
+            keys = []
+            for key in MouseGestureKeys:
+                key_index = device.keys.index(key)
+                dkey = device.keys[key_index] if key_index is not None else None
+                if dkey is not None and 'raw XY' in dkey.flags and 'divertable' in dkey.flags:
+                    keys.append(dkey.key)
+            if not keys:  # none of the keys designed for this, so look for any key with correct flags
+                for key in device.keys:
+                    if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
+                        keys.append(key.key)
+            if keys:
+                keys.insert(0, _NamedInt(0, _('Off')))
+                return _ChoicesV(_NamedInts.list(keys), byte_count=2)
+
+    rw = MouseGestureRW('mouse gesture', _DIVERT_KEYS[0])
+    return _Setting(_MOUSE_GESTURES, rw, callback=callback, device_kind=(_DK.mouse, ))
 
 
 # Implemented based on code in libratrag
