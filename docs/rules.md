@@ -26,6 +26,14 @@ diversion can be done with your devices.  Runing Solaar with the `-dd`
 option will show information about notifications, including their feature
 name, report number, and data.
 
+Solaar can also create special notifications in response to mouse movements on some mice.
+Setting the `Mouse Gestures` setting to a key enables special processing of mouse movements
+while the key is depressed.  Moving the mouse creates a mouse movement event.
+Stopping the mouse for a little while and moving it again creates another mouse movement event.
+Pressing a diverted key creates a key event.
+When the key is released the sequence of events is sent as a synthetic notification
+that can be matched with `Mouse Gesture` conditions.
+
 In response to a feature-based HID++ notification Solaar runs a sequence of
 rules.  A `Rule` is a sequence of components, which are either sub-rules,
 conditions, or actions.  Conditions and actions are dictionaries with one
