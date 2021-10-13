@@ -1060,6 +1060,12 @@ class ActionSettingRW(object):
         self.active = False
         self.pressed = False
 
+    def activate_action(self):  # action to take when setting is activated (write non-false)
+        pass
+
+    def deactivate_action(self):  # action to take when setting is deactivated (write false)
+        pass
+
     def press_action(self):  # action to take when key is pressed
         pass
 
@@ -1098,6 +1104,7 @@ class ActionSettingRW(object):
                 divertSetting.write_key_value(int(self.key.key), 1)
                 device.add_notification_handler(self.name, handler)
                 from solaar.ui import status_changed as _status_changed
+                self.activate_action()
                 _status_changed(device, refresh=True)  # update main window
             else:
                 _log.error('cannot enable %s on %s for key %s', self.name, device, key)
@@ -1112,6 +1119,7 @@ class ActionSettingRW(object):
                 except Exception:
                     if _log.isEnabledFor(_WARNING):
                         _log.warn('cannot disable %s on %s', self.name, device)
+                self.deactivate_action()
         return True
 
 
