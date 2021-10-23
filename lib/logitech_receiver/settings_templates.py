@@ -21,8 +21,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import namedtuple
 from logging import DEBUG as _DEBUG
-from logging import WARNING as _WARNING
+from logging import INFO as _INFO
 from logging import getLogger
+from time import time as _time
 
 from solaar.ui import notify as _notify
 
@@ -35,6 +36,7 @@ from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import unpack as _unpack
 from .i18n import _
+from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting
 from .settings import BitFieldValidator as _BitFieldV
 from .settings import BitFieldWithOffsetAndMaskSetting as _BitFieldOMSetting
@@ -45,7 +47,6 @@ from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
 from .settings import FeatureRWMap as _FeatureRWMap
 from .settings import LongSettings as _LongSettings
-from .settings import MouseGestureKeys as _MouseGestureKeys
 from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import RangeValidator as _RangeV
 from .settings import RegisterRW as _RegisterRW
@@ -118,6 +119,9 @@ _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
                  _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
                  _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
+_SPEED_CHANGE = ('speed-change', _('Sensitivity Switching'),
+                 _('Switch the current sensitivity and the remembered sensitivity when the key or button is pressed.\n'
+                   'If there is no remembered sensitivity, just remember the current sensitivity'))
 
 _GESTURE2_GESTURES_LABELS = {
     _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
@@ -362,148 +366,78 @@ def _feature_smart_shift_enhanced():
 
 
 def _feature_dpi_sliding():
-    """Implements the ability to smoothly modify the DPI
-    by sliding a mouse horizontally while holding the DPI button."""
-    class _DpiSlidingRW(object):
-        def __init__(self):
-            self.kind = _FeatureRW.kind  # pretend to be FeatureRW as required for HID++ 2.0 devices
-            self.key = None
+    """ Implements the ability to smoothly modify the DPI by sliding a mouse horizontally while holding the DPI button.
+        Abides by the following FSM:
+        When the button is pressed, go into `pressed` state and begin accumulating displacement.
+        If the button is released in this state swap DPI slots.
+        If the state is `pressed` and the mouse moves enough to switch DPI go into the `moved` state.
+        When the button is released in this state the DPI is set according to the total displacement.
+    """
+    class _DPISlidingRW(_ActionSettingRW):
+        def activate_action(self):
+            self.key.set_rawXY_reporting(True)
+            self.dpiSetting = next(filter(lambda s: s.name == _DPI[0], self.device.settings), None)
+            self.dpiChoices = list(self.dpiSetting.choices)
+            self.otherDpiIdx = self.device.persister.get('_dpi-sliding', -1) if self.device.persister else -1
+            if not isinstance(self.otherDpiIdx, int) or self.otherDpiIdx < 0 or self.otherDpiIdx >= len(self.dpiChoices):
+                self.otherDpiIdx = self.dpiChoices.index(self.dpiSetting.read())
+            self.fsmState = 'idle'
+            self.dx = 0.
+            self.movingDpiIdx = None
 
-        class MxVerticalDpiState(object):
-            __slots__ = (
-                'key', 'device', 'pressedCids', 'dpiSetting', 'dpiChoices', 'fsmState', 'otherDpiIdx', 'dx', 'movingDpiIdx'
-            )
+        def deactivate_action(self):
+            self.key.set_rawXY_reporting(False)
 
-            def __init__(self, device, dpiSetting, key):
-                self.device = device
-                self.key = key
-                self.dpiSetting = dpiSetting
-                self.dpiChoices = list(self.dpiSetting.choices)
-                # Currently pressed/held control IDs
-                self.pressedCids = set()
-                self.fsmState = 'idle'
-                # The DPI setting index for clicking on the DPI button
-                self.otherDpiIdx = self.device.persister.get('_dpi-sliding', -1) if self.device.persister else -1
-                if not isinstance(self.otherDpiIdx, int) or self.otherDpiIdx < 0 or self.otherDpiIdx >= len(self.dpiChoices):
-                    self.otherDpiIdx = self.dpiChoices.index(self.dpiSetting.read())
-                # While in 'moved' state, the total accumulated movement
+        def setNewDpi(self, newDpiIdx):
+            newDpi = self.dpiChoices[newDpiIdx]
+            self.dpiSetting.write(newDpi)
+            from solaar.ui import status_changed as _status_changed
+            _status_changed(self.device, refresh=True)  # update main window
+
+        def displayNewDpi(self, newDpiIdx):
+            if _notify.available:
+                reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
+                # if there is a progress percentage then the reason isn't shown
+                # asPercentage = int(float(newDpiIdx) / float(len(self.dpiChoices) - 1) * 100.)
+                # _notify.show(self.device, reason=reason, progress=asPercentage)
+                _notify.show(self.device, reason=reason)
+
+        def press_action(self):  # start tracking
+            if self.fsmState == 'idle':
+                self.fsmState = 'pressed'
                 self.dx = 0.
-                # While in 'moved' state, the index into 'dpiChoices' of
-                # the currently selected DPI setting
+                # While in 'moved' state, the index into 'dpiChoices' of the currently selected DPI setting
                 self.movingDpiIdx = None
-                '''
-                This setting abides by the following FSM.
-                When the button is pressed, we go into `pressed` state and
-                begin accumulating displacement.
-                If the button is released in this state we swap DPI slots.
-                If the state is `pressed` and the mouse moves enough to switch DPI
-                we go into the `moved` state.
-                When the button is released in this state
-                the DPI is set according to the total displacement.
-                '''
 
-            def setNewDpi(self, newDpiIdx):
-                newDpi = self.dpiChoices[newDpiIdx]
-                self.dpiSetting.write(newDpi)
-                from solaar.ui import status_changed as _status_changed
-                _status_changed(self.device, refresh=True)  # update main window
+        def release_action(self):  # adjust DPI and stop tracking
+            if self.fsmState == 'pressed':  # Swap with other DPI
+                thisIdx = self.dpiChoices.index(self.dpiSetting.read())
+                newDpiIdx, self.otherDpiIdx = self.otherDpiIdx, thisIdx
+                if self.device.persister:
+                    self.device.persister['_dpi-sliding'] = self.otherDpiIdx
+                self.setNewDpi(newDpiIdx)
+                self.displayNewDpi(newDpiIdx)
+            elif self.fsmState == 'moved':  # Set DPI according to displacement
+                self.setNewDpi(self.movingDpiIdx)
+            self.fsmState = 'idle'
 
-            def displayNewDpi(self, newDpiIdx):
-                if _notify.available:
-                    reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
-                    # if there is a progress percentage then the reason isn't shown
-                    # asPercentage = int(float(newDpiIdx) / float(len(self.dpiChoices) - 1) * 100.)
-                    # _notify.show(self.device, reason=reason, progress=asPercentage)
-                    _notify.show(self.device, reason=reason)
-
-            def handle_keys_event(self, cids):
-                if self.fsmState == 'idle':
-                    if self.key in cids:
-                        self.fsmState = 'pressed'
-                        self.dx = 0.
-                elif self.fsmState == 'pressed':
-                    if self.key not in cids:
-                        # Swap with other DPI
-                        thisIdx = self.dpiChoices.index(self.dpiSetting.read())
-                        newDpiIdx, self.otherDpiIdx = self.otherDpiIdx, thisIdx
-                        if self.device.persister:
-                            self.device.persister['_dpi-sliding'] = self.otherDpiIdx
-                        self.setNewDpi(newDpiIdx)
-                        self.fsmState = 'idle'
-                        self.displayNewDpi(newDpiIdx)
-                elif self.fsmState == 'moved':
-                    if self.key not in cids:
-                        self.setNewDpi(self.movingDpiIdx)
-                        self.fsmState = 'idle'
-
-            def handle_move_event(self, dx, dy):
-                currDpi = self.dpiSetting.read()
-                # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
-                # The multiplier could be configurable to allow adjusting dx
-                dx = float(dx) / float(currDpi) * 15.
-                self.dx += dx
-                if self.fsmState == 'pressed':
-                    if abs(self.dx) >= 1.:
-                        self.fsmState = 'moved'
-                        self.movingDpiIdx = self.dpiChoices.index(currDpi)
-                elif self.fsmState == 'moved':
-                    currIdx = self.dpiChoices.index(self.dpiSetting.read())
-                    newMovingDpiIdx = min(max(currIdx + int(self.dx), 0), len(self.dpiChoices) - 1)
-                    if newMovingDpiIdx != self.movingDpiIdx:
-                        self.movingDpiIdx = newMovingDpiIdx
-                        self.displayNewDpi(newMovingDpiIdx)
-
-        def read(self, device):  # need to return bytes, as if read from device
-            return _int2bytes(device._slidingDpiState.key, 2) if '_slidingDpiState' in device.__dict__ else b'\x00\x00'
-
-        def write(self, device, data_bytes):
-            def handler(device, n):
-                """Called on notification events from the mouse."""
-                if n.sub_id < 0x40 and device.features[n.sub_id] == _F.REPROG_CONTROLS_V4:
-                    state = device._slidingDpiState
-                    if n.address == 0x00:
-                        cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
-                        state.handle_keys_event({cid1, cid2, cid3, cid4})
-                    elif n.address == 0x10:
-                        dx, dy = _unpack('!hh', n.data[:4])
-                        state.handle_move_event(dx, dy)
-
-            key = _bytes2int(data_bytes)
-            if key:  # Enable DPI sliding
-                # Enable HID++ events on sliding the mouse while DPI button held
-                self.key = next((k for k in device.keys if k.key == key), None)
-                if self.key:
-                    self.key.set_rawXY_reporting(True)
-                    divertSetting = next(filter(lambda s: s.name == _DIVERT_KEYS[0], device.settings), None)
-                    divertSetting.write_key_value(int(self.key.key), 1)
-                    from solaar.ui import status_changed as _status_changed
-                    _status_changed(device, refresh=True)  # update main window
-                    # Store our variables in the device object
-                    dpiSetting = next(filter(lambda s: s.name == _DPI[0], device.settings), None)
-                    device._slidingDpiState = self.MxVerticalDpiState(device, dpiSetting, self.key.key)
-                    device.add_notification_handler('mx-vertical-dpi-handler', handler)
-                    return True
-                else:
-                    _log.error('cannot enable DPI sliding on %s for key %s', device, key)
-            else:  # Disable DPI sliding
-                if self.key:
-                    self.key.set_rawXY_reporting(False)
-                    divertSetting = next(filter(lambda s: s.name == _DIVERT_KEYS[0], device.settings), None)
-                    divertSetting.write_key_value(int(self.key.key), 0)
-                    from solaar.ui import status_changed as _status_changed
-                    _status_changed(device, refresh=True)  # update main window
-                try:
-                    device.remove_notification_handler('mx-vertical-dpi-handler')
-                except Exception:
-                    if _log.isEnabledFor(_WARNING):
-                        _log.warn('cannot disable DPI sliding on %s', device)
-                if hasattr(device, '_slidingDpiState'):
-                    del device._slidingDpiState
-            return True
+        def move_action(self, dx, dy):
+            currDpi = self.dpiSetting.read()
+            self.dx += float(dx) / float(currDpi) * 15.  # yields a more-or-less DPI-independent dx of about 5/cm
+            if self.fsmState == 'pressed':
+                if abs(self.dx) >= 1.:
+                    self.fsmState = 'moved'
+                    self.movingDpiIdx = self.dpiChoices.index(currDpi)
+            elif self.fsmState == 'moved':
+                currIdx = self.dpiChoices.index(self.dpiSetting.read())
+                newMovingDpiIdx = min(max(currIdx + int(self.dx), 0), len(self.dpiChoices) - 1)
+                if newMovingDpiIdx != self.movingDpiIdx:
+                    self.movingDpiIdx = newMovingDpiIdx
+                    self.displayNewDpi(newMovingDpiIdx)
 
     DPISlidingKeys = [_special_keys.CONTROL.DPI_Switch]
 
-    def _feature_dpi_sliding_callback(device):
+    def callback(device):
         # need _F.REPROG_CONTROLS_V4 feature and a DPI Switch that can send raw XY
         # and _F.ADJUSTABLE_DPI so that the DPI can be adjusted
         if device.kind == _DK.mouse and _F.ADJUSTABLE_DPI in device.features:
@@ -521,7 +455,36 @@ def _feature_dpi_sliding():
                 keys.insert(0, _NamedInt(0, _('Off')))
                 return _ChoicesV(_NamedInts.list(keys), byte_count=2)
 
-    return _Setting(_DPI_SLIDING, _DpiSlidingRW(), callback=_feature_dpi_sliding_callback, device_kind=(_DK.mouse, ))
+    rw = _DPISlidingRW('dpi sliding', _DIVERT_KEYS[0])
+    return _Setting(_DPI_SLIDING, rw, callback=callback, device_kind=(_DK.mouse, ))
+
+
+def _feature_speed_change():
+    """Implements the ability to switch Sensitivity by clicking on the DPI_Change button."""
+    class _SpeedChangeRW(_ActionSettingRW):
+        def press_action(self):  # switch sensitivity
+            currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
+            newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
+            speed_setting = next(filter(lambda s: s.name == _POINTER_SPEED[0], self.device.settings), None)
+            if newSpeed is not None:
+                if speed_setting:
+                    speed_setting.write(newSpeed)
+                else:
+                    _log.error('cannot save sensitivity setting on %s', self.device)
+                from solaar.ui import status_changed as _status_changed
+                _status_changed(self.device, refresh=True)  # update main window
+            if self.device.persister:
+                self.device.persister['_speed-change'] = currentSpeed
+
+    def callback(device):
+        key_index = device.keys.index(_special_keys.CONTROL.DPI_Change)
+        key = device.keys[key_index] if key_index is not None else None
+        if key is not None and 'divertable' in key.flags:
+            keys = [_NamedInt(0, _('Off')), key.key]
+            return _ChoicesV(_NamedInts.list(keys), byte_count=2)
+
+    rw = _SpeedChangeRW('speed change', _DIVERT_KEYS[0]),
+    return _Setting(_SPEED_CHANGE, rw, callback=callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
 def _feature_adjustable_dpi_callback(device):
@@ -556,34 +519,102 @@ def _feature_adjustable_dpi():
     return _Setting(_DPI, rw, callback=_feature_adjustable_dpi_callback, device_kind=(_DK.mouse, _DK.trackball))
 
 
-def _feature_mouse_gesture_callback(device):
-    # need a gesture button that can send raw XY
-    if device.kind == _DK.mouse:
-        keys = []
-        for key in _MouseGestureKeys:
-            key_index = device.keys.index(key)
-            dkey = device.keys[key_index] if key_index is not None else None
-            if dkey is not None and 'raw XY' in dkey.flags and 'divertable' in dkey.flags:
-                keys.append(dkey.key)
-        if not keys:  # none of the keys designed for this, so look for any key with correct flags
-            for key in device.keys:
-                if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
-                    keys.append(key.key)
-        if keys:
-            keys.insert(0, _NamedInt(0, _('Off')))
-            return _ChoicesV(_NamedInts.list(keys), byte_count=2)
-
-
 def _feature_mouse_gesture():
     """Implements the ability to send mouse gestures
     by sliding a mouse horizontally or vertically while holding the App Switch button."""
-    from .settings import DivertedMouseMovementRW as _DivertedMouseMovementRW
-    return _Setting(
-        _MOUSE_GESTURES,
-        _DivertedMouseMovementRW(_DPI[0], _DIVERT_KEYS[0]),
-        callback=_feature_mouse_gesture_callback,
-        device_kind=(_DK.mouse, )
-    )
+    class MouseGestureRW(_ActionSettingRW):
+        def activate_action(self):
+            self.key.set_rawXY_reporting(True)
+            self.dpiSetting = next(filter(lambda s: s.name == _DPI[0], self.device.settings), None)
+            self.fsmState = 'idle'
+            self.initialize_data()
+
+        def deactivate_action(self):
+            self.key.set_rawXY_reporting(False)
+
+        def initialize_data(self):
+            self.dx = 0.
+            self.dy = 0.
+            self.lastEv = None
+            self.data = [0]
+
+        def press_action(self):
+            if self.fsmState == 'idle':
+                self.fsmState = 'pressed'
+                self.initialize_data()
+
+        def release_action(self):
+            if self.fsmState == 'pressed':
+                # emit mouse gesture notification
+                from .base import _HIDPP_Notification as _HIDPP_Notification
+                from .common import pack as _pack
+                from .diversion import process_notification as _process_notification
+                self.push_mouse_event()
+                if _log.isEnabledFor(_INFO):
+                    _log.info('mouse gesture notification %s', self.data)
+                payload = _pack('!' + (len(self.data) * 'h'), *self.data)
+                notification = _HIDPP_Notification(0, 0, 0, 0, payload)
+                _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
+                self.fsmState = 'idle'
+
+        def move_action(self, dx, dy):
+            if self.fsmState == 'pressed':
+                now = _time() * 1000  # _time_ns() / 1e6
+                if self.lastEv is not None and now - self.lastEv > 50.:
+                    self.push_mouse_event()
+                dpi = self.dpiSetting.read() if self.dpiSetting else 1000
+                dx = float(dx) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+                self.dx += dx
+                dy = float(dy) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+                self.dy += dy
+                self.lastEv = now
+
+        def key_action(self, key):
+            self.push_mouse_event()
+            self.data.append(1)
+            self.data.append(key)
+            self.data[0] += 1
+            self.lastEv = _time() * 1000  # _time_ns() / 1e6
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('mouse gesture key event %d %s', key, self.data)
+
+        def push_mouse_event(self):
+            x = int(self.dx)
+            y = int(self.dy)
+            if x == 0 and y == 0:
+                return
+            self.data.append(0)
+            self.data.append(x)
+            self.data.append(y)
+            self.data[0] += 1
+            self.dx = 0.
+            self.dy = 0.
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('mouse gesture move event %d %d %s', x, y, self.data)
+
+    MouseGestureKeys = [
+        _special_keys.CONTROL.Mouse_Gesture_Button,
+        _special_keys.CONTROL.MultiPlatform_Gesture_Button,
+    ]
+
+    def callback(device):
+        if device.kind == _DK.mouse:
+            keys = []
+            for key in MouseGestureKeys:
+                key_index = device.keys.index(key)
+                dkey = device.keys[key_index] if key_index is not None else None
+                if dkey is not None and 'raw XY' in dkey.flags and 'divertable' in dkey.flags:
+                    keys.append(dkey.key)
+            if not keys:  # none of the keys designed for this, so look for any key with correct flags
+                for key in device.keys:
+                    if 'raw XY' in key.flags and 'divertable' in key.flags and 'virtual' not in key.flags:
+                        keys.append(key.key)
+            if keys:
+                keys.insert(0, _NamedInt(0, _('Off')))
+                return _ChoicesV(_NamedInts.list(keys), byte_count=2)
+
+    rw = MouseGestureRW('mouse gesture', _DIVERT_KEYS[0])
+    return _Setting(_MOUSE_GESTURES, rw, callback=callback, device_kind=(_DK.mouse, ))
 
 
 # Implemented based on code in libratrag
@@ -852,6 +883,7 @@ _SETTINGS_TABLE = [
     _S(_DPI_SLIDING, _F.REPROG_CONTROLS_V4, _feature_dpi_sliding),
     _S(_MOUSE_GESTURES, _F.REPROG_CONTROLS_V4, _feature_mouse_gesture),
     _S(_POINTER_SPEED, _F.POINTER_SPEED, _feature_pointer_speed),
+    _S(_SPEED_CHANGE, _F.POINTER_SPEED, _feature_speed_change),
     _S(_BACKLIGHT, _F.BACKLIGHT2, _feature_backlight2),
     _S(_FN_SWAP, _F.FN_INVERSION, _feature_fn_swap, registerFn=_register_fn_swap),
     _S(_FN_SWAP, _F.NEW_FN_INVERSION, _feature_new_fn_swap, identifier='new_fn_swap'),
