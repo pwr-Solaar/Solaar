@@ -351,28 +351,27 @@ def _pick_device_with_lowest_battery():
 #
 
 
+def _add_separator(index):
+    _devices_info.insert(index + 1, _RECEIVER_SEPARATOR)
+    separator = Gtk.SeparatorMenuItem.new()
+    separator.set_visible(True)
+    _menu.insert(separator, index + 1)
+
+
 def _add_device(device):
     assert device
-    # not true for wired devices - assert device.receiver
+
+    index = 0
     receiver_path = device.receiver.path if device.receiver is not None else device.path
-    # not true for wired devices - assert receiver_path
-
-    index = None
-    for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
-        if path == receiver_path:
-            # the first entry matching the receiver serial should be for the receiver itself
-            index = idx + 1
-            break
-
-    if index is None:
-        index = len(_devices_info)
-    elif device.receiver:
-        # proper ordering (according to device.number) for a receiver's devices
-        while True:
+    if device.receiver is not None:  # if receiver insert into devices for the receiver in device number order
+        for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
+            if path and path == receiver_path:
+                index = idx + 1  # the first entry matching the receiver serial should be for the receiver itself
+                break
+        while index < len(_devices_info):
             path, number, _ignore, _ignore = _devices_info[index]
             if path == _RECEIVER_SEPARATOR[0]:
                 break
-            assert path == receiver_path
             assert number != device.number
             if number > device.number:
                 break
@@ -382,9 +381,7 @@ def _add_device(device):
     assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
     _devices_info.insert(index, new_device_info)
 
-    # label_prefix = b'\xE2\x94\x84 '.decode('utf-8')
     label_prefix = '   '
-
     new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else '') + device.name)
     new_menu_item.set_image(Gtk.Image())
     new_menu_item.show_all()
@@ -408,23 +405,20 @@ def _remove_device(index):
 
 
 def _add_receiver(receiver):
-    index = len(_devices_info)
+    index = 0
 
     new_receiver_info = (receiver.path, None, receiver.name, None)
     assert len(new_receiver_info) == len(_RECEIVER_SEPARATOR)
     _devices_info.append(new_receiver_info)
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
-    _menu.insert(new_menu_item, index)
     icon_set = _icons.device_icon_set(receiver.name)
     new_menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver.path)
+    _menu.insert(new_menu_item, index)
 
-    _devices_info.append(_RECEIVER_SEPARATOR)
-    separator = Gtk.SeparatorMenuItem.new()
-    separator.set_visible(True)
-    _menu.insert(separator, index + 1)
+    _add_separator(index)
 
     return 0
 
