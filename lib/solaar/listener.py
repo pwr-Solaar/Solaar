@@ -22,6 +22,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import time
 
 from collections import namedtuple
+from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
@@ -191,6 +192,12 @@ class ReceiverListener(_listener.EventsListener):
         if n.devnumber == 0xFF:
             # a receiver notification
             _notifications.process(self.receiver, n)
+            return
+
+        # a notification that came in to the device listener - strange, but nothing needs to be done here
+        if self.receiver.isDevice:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('Notification %s via device %s being ignored.', n, self.receiver)
             return
 
         # a device notification
