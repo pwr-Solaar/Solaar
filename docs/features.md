@@ -11,107 +11,107 @@ See functions in `hidpp20.py` and `settings_templates.py`
 
 Feature                                | ID       | Status             | Notes
 ---------------------------------------|----------|:------------------:|------
-`ROOT`                                 | `0x0000` | :heavy_check_mark: | System
-`FEATURE_SET`                          | `0x0001` | :heavy_check_mark: | System
-`FEATURE_INFO`                         | `0x0002` | :heavy_check_mark: | System
-`DEVICE_FW_VERSION`                    | `0x0003` | :heavy_check_mark: | `get_firmware`, read only
-`DEVICE_UNIT_ID`                       | `0x0004` | :x:                |
-`DEVICE_NAME`                          | `0x0005` | :heavy_check_mark: | `get_kind`, `get_name`, read only
-`DEVICE_GROUPS`                        | `0x0006` | :x:                |
-`DEVICE_FRIENDLY_NAME`                 | `0x0007` | :heavy_check_mark: | read only
-`KEEP_ALIVE`                           | `0x0008` | :x:                |
-`RESET`                                | `0x0020` | :x:                | aka “Config Change”
-`CRYPTO_ID`                            | `0x0021` | :x:                |
-`TARGET_SOFTWARE`                      | `0x0030` | :x:                |
-`WIRELESS_SIGNAL_STRENGTH`             | `0x0080` | :x:                |
-`DFUCONTROL_LEGACY`                    | `0x00C0` | :x:                |
-`DFUCONTROL_UNSIGNED`                  | `0x00C1` | :x:                |
-`DFUCONTROL_SIGNED`                    | `0x00C2` | :x:                |
-`DFU`                                  | `0x00D0` | :x:                |
-`BATTERY_STATUS`                       | `0x1000` | :heavy_check_mark: | `get_battery`, read only
-`BATTERY_VOLTAGE`                      | `0x1001` | :heavy_check_mark: | `get_voltage`, read only
-`CHARGING_CONTROL`                     | `0x1010` | :x:                |
-`LED_CONTROL`                          | `0x1300` | :x:                |
-`GENERIC_TEST`                         | `0x1800` | :x:                |
-`DEVICE_RESET`                         | `0x1802` | :x:                |
-`OOBSTATE`                             | `0x1805` | :x:                |
-`CONFIG_DEVICE_PROPS`                  | `0x1806` | :x:                |
-`CHANGE_HOST`                          | `0x1814` | :heavy_check_mark: |
-`HOSTS_INFO`                           | `0x1815` | :heavy_plus_sign:  | `get_host_names`, partial listing only
-`BACKLIGHT`                            | `0x1981` | :x:                |
-`BACKLIGHT2`                           | `0x1982` | :heavy_check_mark: | `_feature_backlight2`
-`BACKLIGHT3`                           | `0x1983` | :x:                |
-`PRESENTER_CONTROL`                    | `0x1A00` | :x:                |
-`SENSOR_3D`                            | `0x1A01` | :x:                |
-`REPROG_CONTROLS`                      | `0x1B00` | :heavy_plus_sign:  | `get_keys`, only listing
-`REPROG_CONTROLS_V2`                   | `0x1B01` | :x:                |
-`REPROG_CONTROLS_V2_2`                 | `0x1B02` | :x:                |
-`REPROG_CONTROLS_V3`                   | `0x1B03` | :x:                |
-`REPROG_CONTROLS_V4`                   | `0x1B04` | :heavy_plus_sign:  | `get_keys`, _feature_reprogrammable_keys
-`REPORT_HID_USAGE`                     | `0x1BC0` | :x:                |
-`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | :x:                |
-`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | :heavy_plus_sign:  | status reporting from device
-`REMAINING_PAIRING`                    | `0x1DF0` | :x:                |
-`FIRMWARE_PROPERTIES`                  | `0x1F1F` | :x:                |
-`ADC_MEASUREMENT`                      | `0x1F20` | :x:                |
-`LEFT_RIGHT_SWAP`                      | `0x2001` | :x:                |
-`SWAP_BUTTON_CANCEL`                   | `0x2005` | :x:                |
-`POINTER_AXIS_ORIENTATION`             | `0x2006` | :x:                |
-`VERTICAL_SCROLLING`                   | `0x2100` | :heavy_check_mark: | `get_vertical_scrolling_info`, read only
-`SMART_SHIFT`                          | `0x2110` | :heavy_check_mark: | `_feature_smart_shift`
-`HI_RES_SCROLLING`                     | `0x2120` | :heavy_check_mark: | `get_hi_res_scrolling_info`, `_feature_hi_res_scroll`
-`HIRES_WHEEL`                          | `0x2121` | :heavy_check_mark: | `get_hires_wheel`, `_feature_hires_smooth_invert`, `_feature_hires_smooth_resolution`
-`LOWRES_WHEEL`                         | `0x2130` | :heavy_check_mark: | `get_lowres_wheel_status`, `_feature_lowres_smooth_scroll`
-`THUMB_WHEEL`                          | `0x2150` | :heavy_check_mark: | `_feature_thumb_mode`, `_feature_thumb_invert`
-`MOUSE_POINTER`                        | `0x2200` | :heavy_check_mark: | `get_mouse_pointer_info`, read only
-`ADJUSTABLE_DPI`                       | `0x2201` | :heavy_check_mark: | `_feature_adjustable_dpi`
-`POINTER_SPEED`                        | `0x2205` | :heavy_check_mark: | `get_pointer_speed_info`, `_feature_pointer_speed`
-`ANGLE_SNAPPING`                       | `0x2230` | :x:                |
-`SURFACE_TUNING`                       | `0x2240` | :x:                |
-`HYBRID_TRACKING`                      | `0x2400` | :x:                |
-`FN_INVERSION`                         | `0x40A0` | :heavy_check_mark: | `_feature_fn_swap`
-`NEW_FN_INVERSION`                     | `0x40A2` | :heavy_check_mark: | `get_new_fn_inversion`, `_feature_new_fn_swap`
-`K375S_FN_INVERSION`                   | `0x40A3` | :heavy_check_mark: | `_feature_k375s_fn_swap`
-`ENCRYPTION`                           | `0x4100` | :x:                |
-`LOCK_KEY_STATE`                       | `0x4220` | :x:                |
-`SOLAR_DASHBOARD`                      | `0x4301` | :x:                |
-`KEYBOARD_LAYOUT`                      | `0x4520` | :x:                | read only
-`KEYBOARD_DISABLE_KEYS`                | `0x4521` | :heavy_check_mark: | `_feature_disable_keyboard_keys`
-`KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | :x:                |
-`DUALPLATFORM`                         | `0x4530` | :heavy_check_mark: | `_feature_dualplatform`, untested
-`MULTIPLATFORM`                        | `0x4531` | :heavy_check_mark: | `_feature_multiplatform`
-`KEYBOARD_LAYOUT_2`                    | `0x4540` | :x:                | read only
-`CROWN`                                | `0x4600` | :heavy_check_mark: |
-`TOUCHPAD_FW_ITEMS`                    | `0x6010` | :x:                |
-`TOUCHPAD_SW_ITEMS`                    | `0x6011` | :x:                |
-`TOUCHPAD_WIN8_FW_ITEMS`               | `0x6012` | :x:                |
-`TAP_ENABLE`                           | `0x6020` | :x:                |
-`TAP_ENABLE_EXTENDED`                  | `0x6021` | :x:                |
-`CURSOR_BALLISTIC`                     | `0x6030` | :x:                |
-`TOUCHPAD_RESOLUTION`                  | `0x6040` | :x:                |
-`TOUCHPAD_RAW_XY`                      | `0x6100` | :x:                |
-`TOUCHMOUSE_RAW_POINTS`                | `0x6110` | :x:                |
-`TOUCHMOUSE_6120`                      | `0x6120` | :x:                |
-`GESTURE`                              | `0x6500` | :x:                |
-`GESTURE_2`                            | `0x6501` | :heavy_plus_sign:  | `_feature_gesture2_gestures`, `_feature_gesture2_params`
-`GKEY`                                 | `0x8010` | :heavy_plus_sign:  |
-`MKEYS`                                | `0x8020` | :x:                |
-`MR`                                   | `0x8030` | :x:                |
-`BRIGHTNESS_CONTROL`                   | `0x8040` | :x:                |
-`REPORT_RATE`                          | `0x8060` | :heavy_check_mark: |
-`COLOR_LED_EFFECTS`                    | `0x8070` | :x:                |
-`RGB_EFFECTS`                          | `0X8071` | :x:                |
-`PER_KEY_LIGHTING`                     | `0x8080` | :x:                |
-`PER_KEY_LIGHTING_V2`                  | `0x8081` | :x:                |
-`MODE_STATUS`                          | `0x8090` | :x:                |
-`ONBOARD_PROFILES`                     | `0x8100` | :x:                | in progress
-`MOUSE_BUTTON_SPY`                     | `0x8110` | :x:                |
-`LATENCY_MONITORING`                   | `0x8111` | :x:                |
-`GAMING_ATTACHMENTS`                   | `0x8120` | :x:                |
-`FORCE_FEEDBACK`                       | `0x8123` | :x:                |
-`SIDETONE`                             | `0x8300` | :x:                |
-`EQUALIZER`                            | `0x8310` | :x:                |
-`HEADSET_OUT`                          | `0x8320` | :x:                |
+`ROOT`                                 | `0x0000` | Supported          | System
+`FEATURE_SET`                          | `0x0001` | Supported          | System
+`FEATURE_INFO`                         | `0x0002` | Supported          | System
+`DEVICE_FW_VERSION`                    | `0x0003` | Supported          | `get_firmware`, read only
+`DEVICE_UNIT_ID`                       | `0x0004` | Unsupported        |
+`DEVICE_NAME`                          | `0x0005` | Supported          | `get_kind`, `get_name`, read only
+`DEVICE_GROUPS`                        | `0x0006` | Unsupported        |
+`DEVICE_FRIENDLY_NAME`                 | `0x0007` | Supported          | read only
+`KEEP_ALIVE`                           | `0x0008` | Unsupported        |
+`RESET`                                | `0x0020` | Unsupported        | aka “Config Change”
+`CRYPTO_ID`                            | `0x0021` | Unsupported        |
+`TARGET_SOFTWARE`                      | `0x0030` | Unsupported        |
+`WIRELESS_SIGNAL_STRENGTH`             | `0x0080` | Unsupported        |
+`DFUCONTROL_LEGACY`                    | `0x00C0` | Unsupported        |
+`DFUCONTROL_UNSIGNED`                  | `0x00C1` | Unsupported        |
+`DFUCONTROL_SIGNED`                    | `0x00C2` | Unsupported        |
+`DFU`                                  | `0x00D0` | Unsupported        |
+`BATTERY_STATUS`                       | `0x1000` | Supported          | `get_battery`, read only
+`BATTERY_VOLTAGE`                      | `0x1001` | Supported          | `get_voltage`, read only
+`CHARGING_CONTROL`                     | `0x1010` | Unsupported        |
+`LED_CONTROL`                          | `0x1300` | Unsupported        |
+`GENERIC_TEST`                         | `0x1800` | Unsupported        |
+`DEVICE_RESET`                         | `0x1802` | Unsupported        |
+`OOBSTATE`                             | `0x1805` | Unsupported        |
+`CONFIG_DEVICE_PROPS`                  | `0x1806` | Unsupported        |
+`CHANGE_HOST`                          | `0x1814` | Supported          |
+`HOSTS_INFO`                           | `0x1815` | Partial Support    | `get_host_names`, partial listing only
+`BACKLIGHT`                            | `0x1981` | Unsupported        |
+`BACKLIGHT2`                           | `0x1982` | Supported          | `_feature_backlight2`
+`BACKLIGHT3`                           | `0x1983` | Unsupported        |
+`PRESENTER_CONTROL`                    | `0x1A00` | Unsupported        |
+`SENSOR_3D`                            | `0x1A01` | Unsupported        |
+`REPROG_CONTROLS`                      | `0x1B00` | Listing Only       | `get_keys`, only listing
+`REPROG_CONTROLS_V2`                   | `0x1B01` | Unsupported        |
+`REPROG_CONTROLS_V2_2`                 | `0x1B02` | Unsupported        |
+`REPROG_CONTROLS_V3`                   | `0x1B03` | Unsupported        |
+`REPROG_CONTROLS_V4`                   | `0x1B04` | Partial Support    | `get_keys`, _feature_reprogrammable_keys
+`REPORT_HID_USAGE`                     | `0x1BC0` | Unsupported        |
+`PERSISTENT_REMAPPABLE_ACTION`         | `0x1C00` | Unsupported        |
+`WIRELESS_DEVICE_STATUS`               | `0x1D4B` | Read only          | status reporting from device
+`REMAINING_PAIRING`                    | `0x1DF0` | Unsupported        |
+`FIRMWARE_PROPERTIES`                  | `0x1F1F` | Unsupported        |
+`ADC_MEASUREMENT`                      | `0x1F20` | Unsupported        |
+`LEFT_RIGHT_SWAP`                      | `0x2001` | Unsupported        |
+`SWAP_BUTTON_CANCEL`                   | `0x2005` | Unsupported        |
+`POINTER_AXIS_ORIENTATION`             | `0x2006` | Unsupported        |
+`VERTICAL_SCROLLING`                   | `0x2100` | Supported          | `get_vertical_scrolling_info`, read only
+`SMART_SHIFT`                          | `0x2110` | Supported          | `_feature_smart_shift`
+`HI_RES_SCROLLING`                     | `0x2120` | Supported          | `get_hi_res_scrolling_info`, `_feature_hi_res_scroll`
+`HIRES_WHEEL`                          | `0x2121` | Supported          | `get_hires_wheel`, `_feature_hires_smooth_invert`, `_feature_hires_smooth_resolution`
+`LOWRES_WHEEL`                         | `0x2130` | Supported          | `get_lowres_wheel_status`, `_feature_lowres_smooth_scroll`
+`THUMB_WHEEL`                          | `0x2150` | Supported          | `_feature_thumb_mode`, `_feature_thumb_invert`
+`MOUSE_POINTER`                        | `0x2200` | Supported          | `get_mouse_pointer_info`, read only
+`ADJUSTABLE_DPI`                       | `0x2201` | Supported          | `_feature_adjustable_dpi`
+`POINTER_SPEED`                        | `0x2205` | Supported          | `get_pointer_speed_info`, `_feature_pointer_speed`
+`ANGLE_SNAPPING`                       | `0x2230` | Unsupported        |
+`SURFACE_TUNING`                       | `0x2240` | Unsupported        |
+`HYBRID_TRACKING`                      | `0x2400` | Unsupported        |
+`FN_INVERSION`                         | `0x40A0` | Supported          | `_feature_fn_swap`
+`NEW_FN_INVERSION`                     | `0x40A2` | Supported          | `get_new_fn_inversion`, `_feature_new_fn_swap`
+`K375S_FN_INVERSION`                   | `0x40A3` | Supported          | `_feature_k375s_fn_swap`
+`ENCRYPTION`                           | `0x4100` | Unsupported        |
+`LOCK_KEY_STATE`                       | `0x4220` | Unsupported        |
+`SOLAR_DASHBOARD`                      | `0x4301` | Unsupported        |
+`KEYBOARD_LAYOUT`                      | `0x4520` | Unsupported        | read only
+`KEYBOARD_DISABLE_KEYS`                | `0x4521` | Supported          | `_feature_disable_keyboard_keys`
+`KEYBOARD_DISABLE_BY_USAGE`            | `0x4522` | Unsupported        |
+`DUALPLATFORM`                         | `0x4530` | Supported          | `_feature_dualplatform`, untested
+`MULTIPLATFORM`                        | `0x4531` | Supported          | `_feature_multiplatform`
+`KEYBOARD_LAYOUT_2`                    | `0x4540` | Unsupported        | read only
+`CROWN`                                | `0x4600` | Supported          |
+`TOUCHPAD_FW_ITEMS`                    | `0x6010` | Unsupported        |
+`TOUCHPAD_SW_ITEMS`                    | `0x6011` | Unsupported        |
+`TOUCHPAD_WIN8_FW_ITEMS`               | `0x6012` | Unsupported        |
+`TAP_ENABLE`                           | `0x6020` | Unsupported        |
+`TAP_ENABLE_EXTENDED`                  | `0x6021` | Unsupported        |
+`CURSOR_BALLISTIC`                     | `0x6030` | Unsupported        |
+`TOUCHPAD_RESOLUTION`                  | `0x6040` | Unsupported        |
+`TOUCHPAD_RAW_XY`                      | `0x6100` | Unsupported        |
+`TOUCHMOUSE_RAW_POINTS`                | `0x6110` | Unsupported        |
+`TOUCHMOUSE_6120`                      | `0x6120` | Unsupported        |
+`GESTURE`                              | `0x6500` | Unsupported        |
+`GESTURE_2`                            | `0x6501` | Partial Support    | `_feature_gesture2_gestures`, `_feature_gesture2_params`
+`GKEY`                                 | `0x8010` | Partial Support    |
+`MKEYS`                                | `0x8020` | Unsupported        |
+`MR`                                   | `0x8030` | Unsupported        |
+`BRIGHTNESS_CONTROL`                   | `0x8040` | Unsupported        |
+`REPORT_RATE`                          | `0x8060` | Supported          |
+`COLOR_LED_EFFECTS`                    | `0x8070` | Unsupported        |
+`RGB_EFFECTS`                          | `0X8071` | Unsupported        |
+`PER_KEY_LIGHTING`                     | `0x8080` | Unsupported        |
+`PER_KEY_LIGHTING_V2`                  | `0x8081` | Unsupported        |
+`MODE_STATUS`                          | `0x8090` | Unsupported        |
+`ONBOARD_PROFILES`                     | `0x8100` | Unsupported        | in progress
+`MOUSE_BUTTON_SPY`                     | `0x8110` | Unsupported        |
+`LATENCY_MONITORING`                   | `0x8111` | Unsupported        |
+`GAMING_ATTACHMENTS`                   | `0x8120` | Unsupported        |
+`FORCE_FEEDBACK`                       | `0x8123` | Unsupported        |
+`SIDETONE`                             | `0x8300` | Unsupported        |
+`EQUALIZER`                            | `0x8310` | Unsupported        |
+`HEADSET_OUT`                          | `0x8320` | Unsupported        |
 
 A “read only” note means the feature is a read-only feature.
 
