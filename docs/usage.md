@@ -89,11 +89,17 @@ setting can be changed and whether the setting is ignored.
 
 ![Solaar-divert-back](Solaar-main-window-back-divert.png)
 
-If the selected device that is connected to a receiver is powered down or
+If the selected device that is paired with a receiver is powered down or
 otherwise disconnected its settings cannot be changed
 but it still can be unpaired if its receiver allows unpairing.
 
 ![Solaar-main-window-offline](Solaar-main-window-offline.png)
+
+If a device is paired with a receiver but directly connected via USB or Bluetooth
+the receiver pairing will show up as well as the direct connection.
+The device can only be manipulated using the direct connection.
+
+![Solaar-main-window-multiple](Solaar-main-window-multiple.png)
 
 #### Remapping key and button actions
 
