@@ -886,7 +886,7 @@ def update(device, need_popup=False, refresh=False):
             _model.remove(item)
 
     else:
-        path = device.receiver.path if device.receiver else device.path
+        path = device.receiver.path if device.receiver is not None else device.path
         assert device.number is not None and device.number >= 0, 'invalid device number' + str(device.number)
         item = _device_row(path, device.number, device if bool(device) else None)
 
