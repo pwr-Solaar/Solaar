@@ -345,6 +345,13 @@ _D(
     wpid='0065',
     registers=(_R.battery_status, ),
 )
+_D(
+    'G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard',
+    codename='G915 TKL',
+    protocol=4.2,
+    wpid='408E',
+    usbid=0xC343,
+)
 
 # Mice
 
