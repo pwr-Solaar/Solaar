@@ -109,6 +109,12 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 | Craft            | 4066 | 2.0   |
 
 
+### Keyboards (Lightspeed)
+
+| Device           | WPID | HID++ |
+|------------------|------|-------|
+| G915 TKL         | 408E | 4.2   |
+
 ### Mice (Unifying)
 
 | Device           | WPID | HID++ |
@@ -186,6 +192,12 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 | MX Air            | 100E | 1.0   |
 | MX Revolution     | 1008 | 1.0   |
 | MX Revolution     | 100C | 1.0   |
+
+
+### Mice (Lightspeed)
+| Device                       | WPID | HID++ |
+|------------------------------|------|-------|
+| PRO X Superlight Wireless    | 4093 | 4.2   |
 
 ### Trackballs (Unifying)
 
