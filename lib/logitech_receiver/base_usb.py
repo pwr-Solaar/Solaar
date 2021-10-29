@@ -21,7 +21,7 @@
 ## USB product IDs for receivers: 0xC526 - 0xC5xx
 ## Wireless PIDs for hidpp10 devices: 0x2006 - 0x2019
 ## Wireless PIDs for hidpp20 devices: 0x4002 - 0x4097, 0x4101 - 0x4102
-## USB product IDs for hidpp20 devices: 0xC07D - 0xC093, 0xC32B - 0xC344
+## USB product IDs for hidpp20 devices: 0xC07D - 0xC094, 0xC32B - 0xC344
 ## Bluetooth product IDs (for hidpp20 devices): 0xB012 - 0xB0xx, 0xB32A - 0xB3xx
 
 # USB ids of Logitech wireless receivers.
@@ -203,7 +203,7 @@ def other_device_check(bus_id, vendor_id, product_id):
     if vendor_id != 0x46d:  # Logitech
         return
     if bus_id == 0x3:  # USB
-        if (product_id >= 0xC07D and product_id <= 0xC093 or product_id >= 0xC32B and product_id <= 0xC344):
+        if (product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344):
             return _wired_device(product_id, 2)
     elif bus_id == 0x5:  # Bluetooth
         if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB32A and product_id <= 0xB3FF):

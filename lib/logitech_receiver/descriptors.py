@@ -345,6 +345,13 @@ _D(
     wpid='0065',
     registers=(_R.battery_status, ),
 )
+_D(
+    'G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard',
+    codename='G915 TKL',
+    protocol=4.2,
+    wpid='408E',
+    usbid=0xC343,
+)
 
 # Mice
 
@@ -580,6 +587,15 @@ _D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)
 _D('G903 Lightspeed Gaming Mouse', codename='G903', usbid=0xc086)
 _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D('GPro Gaming Mouse', codename='GPro', usbid=0xc088)
+_D(
+    'PRO X Wireless',
+    kind='mouse',
+    codename='PRO X',
+    protocol=4.2,
+    wpid='4093',
+    usbid=0xc094,
+)
+
 _D('M500S Mouse', codename='M500S', usbid=0xc093, interface=1)
 
 _D(

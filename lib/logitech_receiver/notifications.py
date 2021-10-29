@@ -186,7 +186,7 @@ def _process_hidpp10_custom_notification(device, status, n):
 
 
 def _process_hidpp10_notification(device, status, n):
-    # unpair notification
+    # device unpairing
     if n.sub_id == 0x40:
         if n.address == 0x02:
             # device un-paired
@@ -200,37 +200,29 @@ def _process_hidpp10_notification(device, status, n):
             _log.warn('%s: disconnection with unknown type %02X: %s', device, n.address, n)
         return True
 
-    # wireless link notification
+    # device connection (and disconnection)
     if n.sub_id == 0x41:
-        protocol_name = (
-            'Bluetooth' if n.address == 0x01 else '27 MHz' if n.address == 0x02 else
-            'QUAD or eQUAD' if n.address == 0x03 else 'eQUAD step 4 DJ' if n.address == 0x04 else 'DFU Lite' if n.address ==
-            0x05 else 'eQUAD step 4 Lite' if n.address == 0x06 else 'eQUAD step 4 Gaming' if n.address ==
-            0x07 else 'eQUAD step 4 for gamepads' if n.address == 0x08 else 'eQUAD nano Lite' if n.address ==
-            0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None
-        )
-        if protocol_name:
+        flags = ord(n.data[:1]) & 0xF0
+        if n.address == 0x02:  # very old 27 MHz protocol
+            wpid = '00' + _strhex(n.data[2:3])
+            link_established = True
+            link_encrypted = bool(flags & 0x80)
+        elif n.address > 0x00:  # all other protocols are supposed to be almost the same
             wpid = _strhex(n.data[2:3] + n.data[1:2])
-            # workaround for short EX100 and other 27 MHz wpids
-            if protocol_name == '27 MHz':
-                wpid = '00' + _strhex(n.data[2:3])
-            if wpid != device.wpid:
-                _log.warn('%s wpid mismatch, got %s', device, wpid)
-            flags = ord(n.data[:1]) & 0xF0
-            link_encrypted = bool(flags & 0x20)
             link_established = not (flags & 0x40)
-            if _log.isEnabledFor(_DEBUG):
-                sw_present = bool(flags & 0x10)
-                has_payload = bool(flags & 0x80)
-                _log.debug(
-                    '%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, protocol_name,
-                    sw_present, link_encrypted, link_established, has_payload
-                )
-            status[_K.LINK_ENCRYPTED] = link_encrypted
-            status.changed(active=link_established)
+            link_encrypted = bool(flags & 0x20)
         else:
             _log.warn('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
-
+            return True
+        if wpid != device.wpid:
+            _log.warn('%s wpid mismatch, got %s', device, wpid)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug(
+                '%s: protocol %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, n.address,
+                bool(flags & 0x10), link_encrypted, link_established, bool(flags & 0x80)
+            )
+        status[_K.LINK_ENCRYPTED] = link_encrypted
+        status.changed(active=link_established)
         return True
 
     if n.sub_id == 0x49:
