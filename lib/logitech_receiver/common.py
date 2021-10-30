@@ -255,11 +255,11 @@ class KwException(Exception):
     They can be later accessed by simple member access.
     """
     def __init__(self, **kwargs):
-        super(KwException, self).__init__(kwargs)
+        super().__init__(kwargs)
 
     def __getattr__(self, k):
         try:
-            return super(KwException, self).__getattr__(k)
+            return super().__getattr__(k)
         except AttributeError:
             return self.args[0][k]
 
