@@ -832,7 +832,7 @@ def _save_config_rule_file(file_name=_file_path):
         # 'version': (1, 3),  # it would be printed for every rule
     }
     # Save only user-defined rules
-    rules_to_save = sum([r.data()['Rule'] for r in rules.components if r.source == file_name], [])
+    rules_to_save = sum((r.data()['Rule'] for r in rules.components if r.source == file_name), [])
     if rules_to_save:
         if _log.isEnabledFor(_INFO):
             _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
