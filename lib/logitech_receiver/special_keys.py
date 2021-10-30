@@ -19,8 +19,6 @@
 # Reprogrammable keys information
 # Mostly from Logitech documentation, but with some edits for better Lunix compatability
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from .common import NamedInts as _NamedInts
 
 # <controls.xml awk -F\" '/<Control /{sub(/^LD_FINFO_(CTRLID_)?/, "", $2);printf("\t%s=0x%04X,\n", $2, $4)}' | sort -t= -k2
