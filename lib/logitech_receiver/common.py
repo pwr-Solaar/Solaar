@@ -204,8 +204,7 @@ class NamedInts:
             return value in self.__dict__ or value in self._values
 
     def __iter__(self):
-        for v in self._values:
-            yield v
+        yield from self._values
 
     def __len__(self):
         return len(self._values)
