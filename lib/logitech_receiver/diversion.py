@@ -851,7 +851,7 @@ def _load_config_rule_file():
     loaded_rules = []
     if _path.isfile(_file_path):
         try:
-            with open(_file_path, 'r') as config_file:
+            with open(_file_path) as config_file:
                 loaded_rules = []
                 for loaded_rule in _yaml_safe_load_all(config_file):
                     rule = Rule(loaded_rule, source=_file_path)
