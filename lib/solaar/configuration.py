@@ -45,7 +45,7 @@ def _load():
     if _path.isfile(_file_path):
         loaded_configuration = {}
         try:
-            with open(_file_path, 'r') as config_file:
+            with open(_file_path) as config_file:
                 loaded_configuration = _json_load(config_file)
         except Exception:
             _log.error('failed to load from %s', _file_path)
