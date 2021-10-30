@@ -807,7 +807,7 @@ def _save_config_rule_file(file_name=_file_path):
         pass
 
     def blockseq_rep(dumper, data):
-        return dumper.represent_sequence(u'tag:yaml.org,2002:seq', data, flow_style=True)
+        return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
 
     _yaml_add_representer(inline_list, blockseq_rep)
 
