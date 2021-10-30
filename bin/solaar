@@ -18,8 +18,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, unicode_literals
-
 
 def init_paths():
     """Make the app work in the source tree."""
@@ -29,11 +27,8 @@ def init_paths():
     # Python 2 need conversion from utf-8 filenames
     # Python 3 might have problems converting back to UTF-8 in case of Unicode surrogates
     try:
-        if sys.version_info < (3, ):
-            decoded_path = sys.path[0].decode(sys.getfilesystemencoding())
-        else:
-            decoded_path = sys.path[0]
-            sys.path[0].encode(sys.getfilesystemencoding())
+        decoded_path = sys.path[0]
+        sys.path[0].encode(sys.getfilesystemencoding())
 
     except UnicodeError:
         sys.stderr.write(
