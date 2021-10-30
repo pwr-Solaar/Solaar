@@ -26,8 +26,6 @@
 # USB ids of Logitech wireless receivers.
 # Only receivers supporting the HID++ protocol can go in here.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from .descriptors import DEVICES as _DEVICES
 from .i18n import _
 

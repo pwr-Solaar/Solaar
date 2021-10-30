@@ -18,8 +18,6 @@
 
 # Logitech Unifying Receiver API.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from logging import DEBUG as _DEBUG
 from logging import ERROR as _ERROR
 from logging import INFO as _INFO

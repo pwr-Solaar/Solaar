@@ -28,8 +28,6 @@ http://julien.danjou.info/blog/2012/logitech-k750-linux-support
 http://6xq.net/git/lars/lshidpp.git/plain/doc/
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import logging
 
 from . import listener, status  # noqa: F401

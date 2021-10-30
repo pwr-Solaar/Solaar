@@ -18,8 +18,6 @@
 
 # Some common functions and types.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from binascii import hexlify as _hexlify
 from collections import namedtuple
 from struct import pack, unpack

@@ -19,8 +19,6 @@
 # Base low-level functions used by the API proper.
 # Unlikely to be used directly unless you're expanding the API.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import threading as _threading
 
 from collections import namedtuple

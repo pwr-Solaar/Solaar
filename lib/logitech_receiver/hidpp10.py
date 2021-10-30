@@ -16,8 +16,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from logging import getLogger  # , DEBUG as _DEBUG
 
 from .common import BATTERY_APPROX as _BATTERY_APPROX
