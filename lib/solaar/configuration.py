@@ -111,13 +111,13 @@ def _cleanup_load(d):
 
 class _DeviceEntry(dict):
     def __init__(self, device, **kwargs):
-        super(_DeviceEntry, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         if self.get(_KEY_NAME) != device.name:
             self[_KEY_NAME] = device.name
         self.update(device)
 
     def __setitem__(self, key, value):
-        super(_DeviceEntry, self).__setitem__(key, value)
+        super().__setitem__(key, value)
         save()
 
     def update(self, device):

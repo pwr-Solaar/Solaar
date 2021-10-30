@@ -327,10 +327,10 @@ class _SmartShiftRW(_FeatureRW):
     MAX_VALUE = 50
 
     def __init__(self, feature, read_fnid, write_fnid):
-        super(_SmartShiftRW, self).__init__(feature, read_fnid, write_fnid)
+        super().__init__(feature, read_fnid, write_fnid)
 
     def read(self, device):
-        value = super(_SmartShiftRW, self).read(device)
+        value = super().read(device)
         if _bytes2int(value[0:1]) == 1:
             # Mode = Freespin, map to minimum
             return _int2bytes(_SmartShiftRW.MIN_VALUE, count=1)
@@ -347,7 +347,7 @@ class _SmartShiftRW(_FeatureRW):
         if threshold == _SmartShiftRW.MAX_VALUE:
             threshold = 255
         data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1)
-        return super(_SmartShiftRW, self).write(device, data)
+        return super().write(device, data)
 
 
 def _feature_smart_shift():
@@ -845,7 +845,7 @@ def _feature_divert_crown():
 def _feature_divert_gkeys():
     class _DivertGkeysRW(_FeatureRW):
         def __init__(self, feature):
-            super(_DivertGkeysRW, self).__init__(feature, write_fnid=0x20)
+            super().__init__(feature, write_fnid=0x20)
 
         def read(self, device):  # no way to read, so just assume not diverted
             return b'\x00'
