@@ -86,7 +86,7 @@ class NamedInt(int):
         return 'NamedInt(%d, %r)' % (int(self), self.name)
 
 
-class NamedInts(object):
+class NamedInts:
     """An ordered set of NamedInt values.
 
     Indexing can be made by int or string, and will return the corresponding

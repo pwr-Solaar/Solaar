@@ -38,7 +38,7 @@ _IR = _hidpp10.INFO_SUBREGISTERS
 #
 
 
-class Receiver(object):
+class Receiver:
     """A Unifying Receiver instance.
 
     The paired devices are available through the sequence interface.

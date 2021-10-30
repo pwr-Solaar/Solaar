@@ -40,7 +40,7 @@ del getLogger
 #
 
 
-class _ThreadedHandle(object):
+class _ThreadedHandle:
     """A thread-local wrapper with different open handles for each thread.
 
     Closing a ThreadedHandle will close all handles.

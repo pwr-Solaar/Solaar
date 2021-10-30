@@ -176,7 +176,7 @@ if x11:
     displayt = Display()
 
 
-class RuleComponent(object):
+class RuleComponent:
     def compile(self, c):
         if isinstance(c, RuleComponent):
             return c
