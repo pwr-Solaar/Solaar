@@ -672,7 +672,7 @@ def _feature_reprogrammable_keys():
     return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
-class DivertKeysRW(object):
+class DivertKeysRW:
     def __init__(self):
         self.kind = _FeatureRW.kind
 
