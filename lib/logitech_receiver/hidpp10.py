@@ -35,6 +35,7 @@ del getLogger
 #
 
 DEVICE_KIND = _NamedInts(
+    unknown=0x00,
     keyboard=0x01,
     mouse=0x02,
     numpad=0x03,

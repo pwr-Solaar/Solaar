@@ -21,6 +21,8 @@ import errno as _errno
 from logging import INFO as _INFO
 from logging import getLogger
 
+import hidapi as _hid
+
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from .base_usb import product_information as _product_information
@@ -141,6 +143,60 @@ class Receiver:
             codename_length = ord(codename[1:2])
             codename = codename[2:2 + codename_length]
             return codename.decode('ascii')
+
+    def device_pairing_information(self, n):
+        pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
+        polling_rate = 0
+        if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
+            wpid = _strhex(pair_info[3:5])
+            kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
+            polling_rate = ord(pair_info[2:3])
+        elif self.ex100_27mhz_wpid_fix:  # 27Mhz receiver, fill extracting WPID from udev path
+            wpid = _hid.find_paired_node_wpid(self.path, n)
+            if not wpid:
+                _log.error('Unable to get wpid from udev for device %d of %s', n, self)
+                raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
+            kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
+        else:
+            # unifying protocol not supported, probably an old Nano receiver
+            device_info = self.read_register(_R.receiver_info, 0x04)
+            if device_info is None:
+                _log.error('failed to read Nano wpid for device %d of %s', n, self)
+                raise _base.NoSuchDevice(number=n, receiver=self, error='read Nano wpid')
+            wpid = _strhex(device_info[3:5])
+            kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+        return wpid, kind, polling_rate
+
+    def device_extended_pairing_information(self, n):
+        pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
+        power_switch = '(unknown)'
+        if pair_info:
+            power_switch = _hidpp10.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
+        else:  # some Nano receivers?
+            pair_info = self.read_register(0x2D5)
+        if pair_info:
+            serial = _strhex(pair_info[1:5])
+        else:  # fallback...
+            serial = self.serial
+        return serial, power_switch
+
+    def get_kind_from_index(self, index):
+        """Get device kind from 27Mhz device index"""
+        # accordingly to drivers/hid/hid-logitech-dj.c
+        # index 1 or 2 always mouse, index 3 always the keyboard,
+        # index 4 is used for an optional separate numpad
+        if index == 1:  # mouse
+            kind = 2
+        elif index == 2:  # mouse
+            kind = 2
+        elif index == 3:  # keyboard
+            kind = 1
+        elif index == 4:  # numpad
+            kind = 3
+        else:  # unknown device number on 27Mhz receiver
+            _log.error('failed to calculate device kind for device %d of %s', index, self)
+            raise _base.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
+        return kind
 
     def notify_devices(self):
         """Scan all devices."""
