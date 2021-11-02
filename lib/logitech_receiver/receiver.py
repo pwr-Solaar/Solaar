@@ -59,9 +59,13 @@ class Receiver:
         product_info = _product_information(self.product_id)
         if not product_info:
             raise Exception('Unknown receiver type', self.product_id)
+        self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
-        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
+        if self.receiver_kind == 'bolt':
+            serial_reply = None
+        else:
+            serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
         if serial_reply:
             self.serial = _strhex(serial_reply[1:5])
             self.max_devices = ord(serial_reply[6:7])
@@ -73,7 +77,7 @@ class Receiver:
                 self.may_unpair = product_info['unpair']
             else:
                 self.may_unpair = self.write_register(_R.receiver_pairing) is None
-        else:  # handle receivers that don't have a serial number specially (i.e., c534)
+        else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
             self.serial = None
             self.max_devices = product_info.get('max_devices', 1)
             self.may_unpair = product_info.get('may_unpair', False)
@@ -138,6 +142,8 @@ class Receiver:
         return flag_bits
 
     def device_codename(self, n):
+        if self.receiver_kind == 'bolt':
+            return
         codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
         if codename:
             codename_length = ord(codename[1:2])
@@ -145,6 +151,14 @@ class Receiver:
             return codename.decode('ascii')
 
     def device_pairing_information(self, n):
+        if self.receiver_kind == 'bolt':
+            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+            if pair_info:
+                wpid = _strhex(pair_info[3:4]) + _strhex(pair_info[2:3])
+                kind = _hidpp10.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
+                return wpid, kind, 0
+            else:
+                return '0000', _hidpp10.DEVICE_KIND[0], 0
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
         polling_rate = 0
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
@@ -168,8 +182,15 @@ class Receiver:
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
-        pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         power_switch = '(unknown)'
+        if self.receiver_kind == 'bolt':
+            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+            if pair_info:
+                serial = _strhex(pair_info[4:8])
+                return serial, power_switch
+            else:
+                return '?', power_switch
+        pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         if pair_info:
             power_switch = _hidpp10.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
         else:  # some Nano receivers?

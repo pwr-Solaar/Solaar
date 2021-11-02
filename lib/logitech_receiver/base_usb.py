@@ -39,12 +39,24 @@ from .i18n import _
 
 _DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
+_bolt_receiver = lambda product_id: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'usb_interface': 2,
+    'hid_driver': _DRIVER,  # noqa: F821
+    'name': _('Bolt Receiver'),
+    'receiver_kind': 'bolt',
+    'max_devices': 6,
+    'may_unpair': True
+}
+
 _unifying_receiver = lambda product_id: {
     'vendor_id': 0x046d,
     'product_id': product_id,
     'usb_interface': 2,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Unifying Receiver')
+    'name': _('Unifying Receiver'),
+    'receiver_kind': 'unifying'
 }
 
 _nano_receiver = lambda product_id: {
@@ -53,6 +65,7 @@ _nano_receiver = lambda product_id: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Nano Receiver'),
+    'receiver_kind': 'nano',
     'may_unpair': False,
     're_pairs': True
 }
@@ -63,6 +76,7 @@ _nano_receiver_no_unpair = lambda product_id: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Nano Receiver'),
+    'receiver_kind': 'nano',
     'may_unpair': False,
     'unpair': False,
     're_pairs': True
@@ -74,6 +88,7 @@ _nano_receiver_max2 = lambda product_id: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Nano Receiver'),
+    'receiver_kind': 'nano',
     'max_devices': 2,
     'may_unpair': False,
     're_pairs': True
@@ -85,6 +100,7 @@ _nano_receiver_maxn = lambda product_id, max: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Nano Receiver'),
+    'receiver_kind': 'nano',
     'max_devices': max,
     'may_unpair': False,
     're_pairs': True
@@ -95,7 +111,8 @@ _lenovo_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver')
+    'name': _('Nano Receiver'),
+    'receiver_kind': 'nano'
 }
 
 _lightspeed_receiver = lambda product_id: {
@@ -112,11 +129,15 @@ _ex100_receiver = lambda product_id: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('EX100 Receiver 27 Mhz'),
+    'receiver_kind': '27Mhz',
     'max_devices': 4,
     'may_unpair': False,
     're_pairs': True,
     'ex100_27mhz_wpid_fix': True
 }
+
+# Bolt receivers (marked with the yellow lightning bolt logo)
+BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
 
 # standard Unifying receivers (marked with the orange Unifying logo)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
@@ -151,6 +172,7 @@ LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
 LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xc547)
 
 ALL = (
+    BOLT_RECEIVER_C548,
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
     NANO_RECEIVER_ADVANCED,
