@@ -143,6 +143,7 @@ INFO_SUBREGISTERS = _NamedInts(
     pairing_information=0x20,  # 0x2N, by connected device
     extended_pairing_information=0x30,  # 0x3N, by connected device
     device_name=0x40,  # 0x4N, by connected device
+    bolt_pairing_information=0x50,  # 0x5N, by connected device
 )
 
 # Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing

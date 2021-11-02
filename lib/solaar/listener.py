@@ -224,7 +224,7 @@ class ReceiverListener(_listener.EventsListener):
             return
         elif n.sub_id == 0x41:
             if not already_known:
-                if n.address == 0x0A:
+                if n.address == 0x0A and not self.receiver.receiver_kind == 'bolt':
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
                     if self.receiver.read_register(_R.receiver_info, _IR.pairing_information + n.devnumber - 1) is None:
                         return
