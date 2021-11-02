@@ -148,13 +148,10 @@ class Device:
 
             self.descriptor = _descriptors.get_wpid(self.wpid)
             if self.descriptor is None:
-                # Last chance to correctly identify the device; many Nano
-                # receivers do not support this call.
-                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
+                # Last chance to correctly identify the device; many Nano receivers do not support this call.
+                codename = self.receiver.device_codename(self.number)
                 if codename:
-                    codename_length = ord(codename[1:2])
-                    codename = codename[2:2 + codename_length]
-                    self._codename = codename.decode('ascii')
+                    self._codename = codename
                     self.descriptor = _descriptors.get_codename(self._codename)
         else:
             self.path = info.path
@@ -199,11 +196,9 @@ class Device:
                 if not self._codename:
                     self._codename = self.name.split(' ', 1)[0] if self.name else None
             elif self.receiver:
-                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
+                codename = self.receiver.device_codename(self.number)
                 if codename:
-                    codename_length = ord(codename[1:2])
-                    codename = codename[2:2 + codename_length]
-                    self._codename = codename.decode('utf-8')
+                    self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = '? (%s)' % (self.wpid or self.product_id)
         return self._codename if self._codename else '?? (%s)' % (self.wpid or self.product_id)

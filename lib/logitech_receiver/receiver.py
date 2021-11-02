@@ -135,6 +135,13 @@ class Receiver:
             _log.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits
 
+    def device_codename(self, n):
+        codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
+        if codename:
+            codename_length = ord(codename[1:2])
+            codename = codename[2:2 + codename_length]
+            return codename.decode('ascii')
+
     def notify_devices(self):
         """Scan all devices."""
         if self.handle:
