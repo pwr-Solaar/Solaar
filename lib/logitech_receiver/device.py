@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import errno as _errno
 
 from logging import INFO as _INFO
@@ -30,7 +28,7 @@ KIND_MAP = {kind: _hidpp10.DEVICE_KIND[str(kind)] for kind in _hidpp20.DEVICE_KI
 #
 
 
-class Device(object):
+class Device:
 
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register

@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -18,8 +17,6 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Some common functions and types.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from binascii import hexlify as _hexlify
 from collections import namedtuple
@@ -89,7 +86,7 @@ class NamedInt(int):
         return 'NamedInt(%d, %r)' % (int(self), self.name)
 
 
-class NamedInts(object):
+class NamedInts:
     """An ordered set of NamedInt values.
 
     Indexing can be made by int or string, and will return the corresponding
@@ -207,8 +204,7 @@ class NamedInts(object):
             return value in self.__dict__ or value in self._values
 
     def __iter__(self):
-        for v in self._values:
-            yield v
+        yield from self._values
 
     def __len__(self):
         return len(self._values)
@@ -259,11 +255,11 @@ class KwException(Exception):
     They can be later accessed by simple member access.
     """
     def __init__(self, **kwargs):
-        super(KwException, self).__init__(kwargs)
+        super().__init__(kwargs)
 
     def __getattr__(self, k):
         try:
-            return super(KwException, self).__getattr__(k)
+            return super().__getattr__(k)
         except AttributeError:
             return self.args[0][k]
 

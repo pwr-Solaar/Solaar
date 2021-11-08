@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from collections import namedtuple
 from logging import DEBUG as _DEBUG
@@ -330,10 +327,10 @@ class _SmartShiftRW(_FeatureRW):
     MAX_VALUE = 50
 
     def __init__(self, feature, read_fnid, write_fnid):
-        super(_SmartShiftRW, self).__init__(feature, read_fnid, write_fnid)
+        super().__init__(feature, read_fnid, write_fnid)
 
     def read(self, device):
-        value = super(_SmartShiftRW, self).read(device)
+        value = super().read(device)
         if _bytes2int(value[0:1]) == 1:
             # Mode = Freespin, map to minimum
             return _int2bytes(_SmartShiftRW.MIN_VALUE, count=1)
@@ -350,7 +347,7 @@ class _SmartShiftRW(_FeatureRW):
         if threshold == _SmartShiftRW.MAX_VALUE:
             threshold = 255
         data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1)
-        return super(_SmartShiftRW, self).write(device, data)
+        return super().write(device, data)
 
 
 def _feature_smart_shift():
@@ -675,7 +672,7 @@ def _feature_reprogrammable_keys():
     return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
-class DivertKeysRW(object):
+class DivertKeysRW:
     def __init__(self):
         self.kind = _FeatureRW.kind
 
@@ -848,7 +845,7 @@ def _feature_divert_crown():
 def _feature_divert_gkeys():
     class _DivertGkeysRW(_FeatureRW):
         def __init__(self, feature):
-            super(_DivertGkeysRW, self).__init__(feature, write_fnid=0x20)
+            super().__init__(feature, write_fnid=0x20)
 
         def read(self, device):  # no way to read, so just assume not diverted
             return b'\x00'

@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import time
 
@@ -73,7 +70,7 @@ class ReceiverListener(_listener.EventsListener):
     """Keeps the status of a Receiver.
     """
     def __init__(self, receiver, status_changed_callback):
-        super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
+        super().__init__(receiver, self._notifications_handler)
         # no reason to enable polling yet
         # self.tick_period = _POLL_TICK
         # self._last_tick = 0

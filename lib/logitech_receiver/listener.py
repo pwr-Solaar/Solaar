@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import threading as _threading
 
@@ -43,7 +40,7 @@ del getLogger
 #
 
 
-class _ThreadedHandle(object):
+class _ThreadedHandle:
     """A thread-local wrapper with different open handles for each thread.
 
     Closing a ThreadedHandle will close all handles.
@@ -142,7 +139,7 @@ class EventsListener(_threading.Thread):
     Incoming packets will be passed to the callback function in sequence.
     """
     def __init__(self, receiver, notifications_callback):
-        super(EventsListener, self).__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
+        super().__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
 
         self.daemon = True
         self._active = False

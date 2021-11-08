@@ -18,8 +18,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from logging import DEBUG as _DEBUG
 from logging import getLogger
 from threading import Thread as _Thread
@@ -39,7 +37,7 @@ except ImportError:
 
 class TaskRunner(_Thread):
     def __init__(self, name):
-        super(TaskRunner, self).__init__(name=name)
+        super().__init__(name=name)
         self.daemon = True
         self.queue = _Queue(16)
         self.alive = False

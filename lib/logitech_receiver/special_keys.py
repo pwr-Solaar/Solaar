@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -19,8 +18,6 @@
 
 # Reprogrammable keys information
 # Mostly from Logitech documentation, but with some edits for better Lunix compatability
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .common import NamedInts as _NamedInts
 

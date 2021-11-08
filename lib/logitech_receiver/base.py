@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -19,8 +18,6 @@
 
 # Base low-level functions used by the API proper.
 # Unlikely to be used directly unless you're expanding the API.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import threading as _threading
 
@@ -118,8 +115,7 @@ def filter_receivers(bus_id, vendor_id, product_id):
 
 def receivers():
     """Enumerate all the receivers attached to the machine."""
-    for dev in _hid.enumerate(filter_receivers):
-        yield dev
+    yield from _hid.enumerate(filter_receivers)
 
 
 def filter_devices(bus_id, vendor_id, product_id):
@@ -132,8 +128,7 @@ def filter_devices(bus_id, vendor_id, product_id):
 
 def wired_devices():
     """Enumerate all the USB-connected and Bluetooth devices attached to the machine."""
-    for dev in _hid.enumerate(filter_devices):
-        yield dev
+    yield from _hid.enumerate(filter_devices)
 
 
 def filter_either(bus_id, vendor_id, product_id):

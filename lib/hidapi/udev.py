@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -24,8 +23,6 @@ implemented by signal11 (https://github.com/signal11/hidapi), and requires
 The docstrings are mostly copied from the hidapi API header, with changes where
 necessary.
 """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import errno as _errno
 import os as _os
@@ -336,13 +333,13 @@ def write(device_handle, data):
         try:
             retrycount += 1
             bytes_written = _os.write(device_handle, data)
-        except IOError as e:
+        except OSError as e:
             if e.errno == _errno.EPIPE:
                 sleep(0.1)
         else:
             break
     if bytes_written != len(data):
-        raise IOError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
+        raise OSError(_errno.EIO, 'written %d bytes out of expected %d' % (bytes_written, len(data)))
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
@@ -367,7 +364,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 
     if xlist:
         assert xlist == [device_handle]
-        raise IOError(_errno.EIO, 'exception on file descriptor %d' % device_handle)
+        raise OSError(_errno.EIO, 'exception on file descriptor %d' % device_handle)
 
     if rlist:
         assert rlist == [device_handle]

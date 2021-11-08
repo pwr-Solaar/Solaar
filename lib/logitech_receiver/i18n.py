@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -18,8 +17,6 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Translation support for the Logitech receivers library
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import gettext as _gettext
 
