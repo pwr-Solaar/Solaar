@@ -61,6 +61,9 @@ previously paired to the receiver. These receivers cannot unpair. Further,
 some receivers can pair an unlimited number of times but others can only
 pair a limited number of times.
 
+Bolt receivers add an authentication phase to pairing,
+where the user has type a passcode or click some buttons to authenticate the device.
+
 Only some connections between receivers and devices are possible. In should
 be possible to connect any device with a Unifying logo on it to any receiver
 with a Unifying logo on it. Receivers without the Unifying logo probably

@@ -52,7 +52,10 @@ clicking on the “Pair new device” button.
 Then turn on the device and it should pair with the receiver if that is possible
 and the device is not already paired with another active receiver.
 For multi-host devices first select the host position that you want.
-Some Lightspeed devices may pair by pressing a special pairing button.
+Bolt devices and some Lightspeed devices pair by pressing a special pairing button.
+To pair with a Bolt receiver you have to type a passcode followed by enter
+or click the left and right buttons in the correct sequence followed by
+clicking both buttons simultaneously.
 
 ![Solaar-main-window-receiver](Solaar-main-window-receiver.png)
 
@@ -61,7 +64,10 @@ unpairing. To unpair the device, just click on the “Unpair” button and
 confirm in the window that pops up.
 
 A receiver with the Unifying logo should be able to pair with any device
-with the Unifying logo. If there are no open pairing slots, however, you will
+with the Unifying logo
+and a receiver with the Bolt logo should be able to pair with any device
+with the Bolt logo.
+If there are no open pairing slots, however, you will
 not be able to pair a new device. In this case to pair a new device you
 first need to unpair a device.
 
