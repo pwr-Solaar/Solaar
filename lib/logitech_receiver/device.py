@@ -105,6 +105,7 @@ class Device:
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
                 # Not a notification, force a reading of the wpid
+                self.online = True
                 self.update_pairing_information()
 
             # the wpid is necessary to properly identify wireless link on/off
@@ -112,7 +113,7 @@ class Device:
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            self.path = _hid.find_paired_node(receiver.path, number, _base.DEFAULT_TIMEOUT)
+            self.path = _hid.find_paired_node(receiver.path, number, 1)
             try:
                 self.handle = _hid.open_path(self.path) if self.path else None
             except Exception:  # maybe the device wasn't set up

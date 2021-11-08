@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -18,6 +16,8 @@
 
 # Handles incoming events from the receiver/devices, updating the related
 # status object as appropriate.
+
+import threading as _threading
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
@@ -43,6 +43,8 @@ _F = _hidpp20.FEATURE
 #
 #
 
+notification_lock = _threading.Lock()
+
 
 def process(device, notification):
     assert device
@@ -67,24 +69,70 @@ def _process_receiver_notification(receiver, status, n):
     # supposedly only 0x4x notifications arrive for the receiver
     assert n.sub_id & 0x40 == 0x40
 
-    # pairing lock notification
-    if n.sub_id == 0x4A:
+    if n.sub_id == 0x4A:  # pairing lock notification
         status.lock_open = bool(n.address & 0x01)
         reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
         if _log.isEnabledFor(_INFO):
             _log.info('%s: %s', receiver, reason)
-
         status[_K.ERROR] = None
         if status.lock_open:
             status.new_device = None
-
         pair_error = ord(n.data[:1])
         if pair_error:
             status[_K.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
             status.new_device = None
             _log.warn('pairing error %d: %s', pair_error, error_string)
-
         status.changed(reason=reason)
+        return True
+
+    elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.discovering = n.address == 0x00
+            status.counter = status.device_address = status.device_authentication = status.device_name = None
+            status.device_passkey = None
+            discover_error = ord(n.data[:1])
+            if discover_error:
+                status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
+                _log.warn('bolt discovering error %d: %s', discover_error, discover_string)
+            return True
+
+    elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
+        with notification_lock:
+            counter = n.address + n.data[0] * 256  # notification counter
+            if status.counter is None:
+                status.counter = counter
+            else:
+                if not status.counter == counter:
+                    return None
+            if n.data[1] == 0:
+                status.device_kind = n.data[3]
+                status.device_address = n.data[6:12]
+                status.device_authentication = n.data[14]
+            elif n.data[1] == 1:
+                status.device_name = n.data[3:3 + n.data[2]].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = None
+            status.lock_open = n.address == 0x00
+            pair_error = n.data[0]
+            if status.lock_open:
+                status.new_device = None
+            elif n.address == 0x02 and not pair_error:
+                status.new_device = receiver.register_new_device(n.data[7])
+            if pair_error:
+                status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
+                status.new_device = None
+                _log.warn('pairing error %d: %s', pair_error, error_string)
+            return True
+
+    elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = n.data[0:6].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
         return True
 
     _log.warn('%s: unhandled notification %s', receiver, n)
