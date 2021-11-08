@@ -23,6 +23,8 @@ from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
 
+_R = _hidpp10.REGISTERS
+
 
 def run(receivers, args, find_receiver, _ignore):
     assert receivers
@@ -61,22 +63,62 @@ def run(receivers, args, find_receiver, _ignore):
                         del receiver[n.devnumber]  # get rid of information on device re-paired away
                         receiver.status.new_device = receiver.register_new_device(n.devnumber, n)
 
-    timeout = 20  # seconds
+    timeout = 30  # seconds
     receiver.handle = _HandleWithNotificationHook(receiver.handle)
 
-    receiver.set_lock(False, timeout=timeout)
-    print('Pairing: turn your new device on (timing out in', timeout, 'seconds).')
-
-    # the lock-open notification may come slightly later, wait for it a bit
-    pairing_start = _timestamp()
-    patience = 5  # seconds
-
-    while receiver.status.lock_open or _timestamp() - pairing_start < patience:
-        n = _base.read(receiver.handle)
-        if n:
-            n = _base.make_notification(*n)
+    if receiver.receiver_kind == 'bolt':  # Bolt receivers require authentication to pair a device
+        receiver.discover(timeout=timeout)
+        print('Bolt Pairing: long-press the pairing key or button on your device (timing out in', timeout, 'seconds).')
+        pairing_start = _timestamp()
+        patience = 5  # the discovering notification may come slightly later, so be patient
+        while receiver.status.discovering or _timestamp() - pairing_start < patience:
+            if receiver.status.device_address and receiver.status.device_authentication and receiver.status.device_name:
+                break
+            n = _base.read(receiver.handle)
+            n = _base.make_notification(*n) if n else None
             if n:
                 receiver.handle.notifications_hook(n)
+        address = receiver.status.device_address
+        name = receiver.status.device_name
+        authentication = receiver.status.device_authentication
+        kind = receiver.status.device_kind
+        print(f'Bolt Pairing: discovered {name}')
+        receiver.pair_device(
+            address=address, authentication=authentication, entropy=20 if kind == _hidpp10.DEVICE_KIND.keyboard else 10
+        )
+        pairing_start = _timestamp()
+        patience = 5  # the discovering notification may come slightly later, so be patient
+        while receiver.status.lock_open or _timestamp() - pairing_start < patience:
+            if receiver.status.device_passkey:
+                break
+            n = _base.read(receiver.handle)
+            n = _base.make_notification(*n) if n else None
+            if n:
+                receiver.handle.notifications_hook(n)
+        if authentication & 0x01:
+            print(f'Bolt Pairing: type passkey {receiver.status.device_passkey} and then press the enter key')
+        else:
+            passkey = f'{int(receiver.status.device_passkey):010b}'
+            passkey = ', '.join(['right' if bit == '1' else 'left' for bit in passkey])
+            print(f'Bolt Pairing: press {passkey}')
+            print('and then press left and right buttons simultaneously')
+        while receiver.status.lock_open:
+            n = _base.read(receiver.handle)
+            n = _base.make_notification(*n) if n else None
+            if n:
+                receiver.handle.notifications_hook(n)
+
+    else:
+        receiver.set_lock(False, timeout=timeout)
+        print('Pairing: turn your new device on (timing out in', timeout, 'seconds).')
+        pairing_start = _timestamp()
+        patience = 5  # the lock-open notification may come slightly later, wait for it a bit
+        while receiver.status.lock_open or _timestamp() - pairing_start < patience:
+            n = _base.read(receiver.handle)
+            if n:
+                n = _base.make_notification(*n)
+                if n:
+                    receiver.handle.notifications_hook(n)
 
     if not (old_notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless):
         # only clear the flags if they weren't set before, otherwise a
@@ -91,4 +133,4 @@ def run(receivers, args, find_receiver, _ignore):
         if error:
             raise Exception('pairing failed: %s' % error)
         else:
-            print('Paired a device')  # this is better than an error
+            print('Paired device')  # this is better than an error

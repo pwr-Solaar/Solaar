@@ -158,7 +158,7 @@ class Receiver:
                 kind = _hidpp10.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
                 return wpid, kind, 0
             else:
-                return '0000', _hidpp10.DEVICE_KIND[0], 0
+                raise _base.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
         polling_rate = 0
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
@@ -253,6 +253,24 @@ class Receiver:
                 return True
             _log.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
 
+    def discover(self, cancel=False, timeout=30):  # Bolt device discovery
+        assert self.receiver_kind == 'bolt'
+        if self.handle:
+            action = 0x02 if cancel else 0x01
+            reply = self.write_register(_R.bolt_device_discovery, timeout, action)
+            if reply:
+                return True
+            _log.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
+
+    def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=None, entropy=20):  # Bolt pairing
+        assert self.receiver_kind == 'bolt'
+        if self.handle:
+            action = 0x01 if pair else 0x03
+            reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
+            if reply:
+                return True
+            _log.warn('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
+
     def count(self):
         count = self.read_register(_R.receiver_connection)
         return 0 if count is None else ord(count[1:2])
@@ -313,6 +331,8 @@ class Receiver:
             if key in self._devices:
                 del self._devices[key]
             _log.warn('%s removed device %s', self, dev)
+        elif self.receiver_kind == 'bolt':
+            reply = self.write_register(_R.bolt_pairing, 0x03, key)
         else:
             reply = self.write_register(_R.receiver_pairing, 0x03, key)
             if reply:

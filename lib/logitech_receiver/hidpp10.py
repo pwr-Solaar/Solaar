@@ -111,6 +111,7 @@ ERROR = _NamedInts(
 )
 
 PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
+BOLT_PAIRING_ERRORS = _NamedInts(device_timeout=0x01, failed=0x02)
 """Known registers.
 Devices usually have a (small) sub-set of these. Some registers are only
 applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
@@ -120,6 +121,8 @@ REGISTERS = _NamedInts(
     receiver_pairing=0xB2,
     devices_activity=0x2B3,
     receiver_info=0x2B5,
+    bolt_device_discovery=0xC0,
+    bolt_pairing=0x2C1,
 
     # only apply to devices
     mouse_button_flags=0x01,
@@ -134,6 +137,13 @@ REGISTERS = _NamedInts(
     # apply to both
     notifications=0x00,
     firmware=0xF1,
+
+    # notifications
+    passkey_request_notification=0x4D,
+    passkey_pressed_notification=0x4E,
+    device_discovery_notification=0x4F,
+    discovery_status_notification=0x53,
+    pairing_status_notification=0x54,
 )
 # Subregisters for receiver_info register
 INFO_SUBREGISTERS = _NamedInts(

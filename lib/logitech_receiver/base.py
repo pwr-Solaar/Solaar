@@ -453,13 +453,6 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                         raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                     if reply_data[:2] == request_data[:2]:
-                        if request_id & 0xFE00 == 0x8200:
-                            # long registry r/w should return a long reply
-                            assert report_id == HIDPP_LONG_MESSAGE_ID
-                        elif request_id & 0xFE00 == 0x8000:
-                            # short registry r/w should return a short reply
-                            assert report_id == HIDPP_SHORT_MESSAGE_ID
-
                         if devnumber == 0xFF:
                             if request_id == 0x83B5 or request_id == 0x81F1:
                                 # these replies have to match the first parameter as well
