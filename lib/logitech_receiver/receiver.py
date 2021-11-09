@@ -262,10 +262,10 @@ class Receiver:
                 return True
             _log.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
 
-    def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=None, entropy=20):  # Bolt pairing
+    def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=0x00, entropy=20):  # Bolt pairing
         assert self.receiver_kind == 'bolt'
         if self.handle:
-            action = 0x01 if pair else 0x03
+            action = 0x01 if pair is True else 0x03 if pair is False else 0x02
             reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
             if reply:
                 return True
@@ -331,10 +331,11 @@ class Receiver:
             if key in self._devices:
                 del self._devices[key]
             _log.warn('%s removed device %s', self, dev)
-        elif self.receiver_kind == 'bolt':
-            reply = self.write_register(_R.bolt_pairing, 0x03, key)
         else:
-            reply = self.write_register(_R.receiver_pairing, 0x03, key)
+            if self.receiver_kind == 'bolt':
+                reply = self.write_register(_R.bolt_pairing, 0x03, key)
+            else:
+                reply = self.write_register(_R.receiver_pairing, 0x03, key)
             if reply:
                 # invalidate the device
                 dev.online = False

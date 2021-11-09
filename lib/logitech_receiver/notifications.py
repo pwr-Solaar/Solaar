@@ -88,12 +88,18 @@ def _process_receiver_notification(receiver, status, n):
     elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
         with notification_lock:
             status.discovering = n.address == 0x00
-            status.counter = status.device_address = status.device_authentication = status.device_name = None
+            reason = (_('discovery lock is open') if status.discovering else _('discovery lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if status.discovering:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
             status.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
                 status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
                 _log.warn('bolt discovering error %d: %s', discover_error, discover_string)
+            status.changed(reason=reason)
             return True
 
     elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
@@ -116,6 +122,12 @@ def _process_receiver_notification(receiver, status, n):
         with notification_lock:
             status.device_passkey = None
             status.lock_open = n.address == 0x00
+            reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if not status.lock_open:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
             pair_error = n.data[0]
             if status.lock_open:
                 status.new_device = None
@@ -125,6 +137,7 @@ def _process_receiver_notification(receiver, status, n):
                 status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
                 status.new_device = None
                 _log.warn('pairing error %d: %s', pair_error, error_string)
+            status.changed(reason=reason)
             return True
 
     elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
