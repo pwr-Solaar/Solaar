@@ -268,7 +268,7 @@ def _process_hidpp10_notification(device, status, n):
         elif n.address > 0x00:  # all other protocols are supposed to be almost the same
             wpid = _strhex(n.data[2:3] + n.data[1:2])
             link_established = not (flags & 0x40)
-            link_encrypted = bool(flags & 0x20)
+            link_encrypted = bool(flags & 0x20) or n.address == 0x10  # Bolt protocol always encrypted
         else:
             _log.warn('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
             return True
