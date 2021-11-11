@@ -123,6 +123,7 @@ REGISTERS = _NamedInts(
     receiver_info=0x2B5,
     bolt_device_discovery=0xC0,
     bolt_pairing=0x2C1,
+    bolt_uniqueId=0x02FB,
 
     # only apply to devices
     mouse_button_flags=0x01,
