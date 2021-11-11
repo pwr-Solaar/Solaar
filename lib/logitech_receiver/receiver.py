@@ -63,24 +63,27 @@ class Receiver:
 
         # read the serial immediately, so we can find out max_devices
         if self.receiver_kind == 'bolt':
-            serial_reply = None
-        else:
-            serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
-        if serial_reply:
-            self.serial = _strhex(serial_reply[1:5])
-            self.max_devices = ord(serial_reply[6:7])
-            if self.max_devices <= 0 or self.max_devices > 6:
-                self.max_devices = product_info.get('max_devices', 1)
-            # TODO _properly_ figure out which receivers do and which don't support unpairing
-            # This code supposes that receivers that don't unpair support a pairing request for device index 0
-            if 'unpair' in product_info:
-                self.may_unpair = product_info['unpair']
-            else:
-                self.may_unpair = self.write_register(_R.receiver_pairing) is None
-        else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
-            self.serial = None
+            serial_reply = self.read_register(_R.bolt_uniqueId)
+            self.serial = _strhex(serial_reply)
             self.max_devices = product_info.get('max_devices', 1)
             self.may_unpair = product_info.get('may_unpair', False)
+        else:
+            serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
+            if serial_reply:
+                self.serial = _strhex(serial_reply[1:5])
+                self.max_devices = ord(serial_reply[6:7])
+                if self.max_devices <= 0 or self.max_devices > 6:
+                    self.max_devices = product_info.get('max_devices', 1)
+                # TODO _properly_ figure out which receivers do and which don't support unpairing
+                # This code supposes that receivers that don't unpair support a pairing request for device index 0
+                if 'unpair' in product_info:
+                    self.may_unpair = product_info['unpair']
+                else:
+                    self.may_unpair = self.write_register(_R.receiver_pairing) is None
+            else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
+                self.serial = None
+                self.max_devices = product_info.get('max_devices', 1)
+                self.may_unpair = product_info.get('may_unpair', False)
 
         self.name = product_info.get('name', '')
         self.re_pairs = product_info.get('re_pairs', False)
