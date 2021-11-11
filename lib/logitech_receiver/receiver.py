@@ -143,11 +143,14 @@ class Receiver:
 
     def device_codename(self, n):
         if self.receiver_kind == 'bolt':
+            codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
+            if codename:
+                codename = codename[3:3 + min(14, ord(codename[2:3]))]
+                return codename.decode('ascii')
             return
         codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
         if codename:
-            codename_length = ord(codename[1:2])
-            codename = codename[2:2 + codename_length]
+            codename = codename[2:2 + ord(codename[1:2])]
             return codename.decode('ascii')
 
     def device_pairing_information(self, n):
