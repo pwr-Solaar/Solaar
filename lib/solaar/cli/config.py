@@ -27,7 +27,7 @@ def _print_setting(s, verbose=True):
         if s.description:
             print('#', s.description.replace('\n', ' '))
         if s.kind == _settings.KIND.toggle:
-            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
+            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle')
         elif s.kind == _settings.KIND.choice:
             print(
                 '#   possible values: one of [', ', '.join(str(v) for v in s.choices),
@@ -82,15 +82,18 @@ def select_choice(value, choices, setting, key):
 
 
 def select_toggle(value, setting):
-    try:
-        value = bool(int(value))
-    except Exception:
-        if value.lower() in ('true', 'yes', 'on', 't', 'y'):
-            value = True
-        elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
-            value = False
-        else:
-            raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+    if value == 'Toggle':
+        value = not setting.read()
+    else:
+        try:
+            value = bool(int(value))
+        except Exception:
+            if value.lower() in ('true', 'yes', 'on', 't', 'y'):
+                value = True
+            elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
+                value = False
+            else:
+                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
     return value
 
 
