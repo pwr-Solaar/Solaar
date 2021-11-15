@@ -288,7 +288,7 @@ def x11_focus_prog():
     while window:
         pid = window.get_full_property(NET_WM_PID, 0)
         wm_class = window.get_wm_class()
-        if wm_class:
+        if wm_class and pid:
             break
         window = window.query_tree().parent
     name = psutil.Process(pid.value[0]).name() if pid else None
