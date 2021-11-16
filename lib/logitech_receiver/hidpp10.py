@@ -35,6 +35,7 @@ del getLogger
 #
 
 DEVICE_KIND = _NamedInts(
+    unknown=0x00,
     keyboard=0x01,
     mouse=0x02,
     numpad=0x03,
@@ -110,6 +111,7 @@ ERROR = _NamedInts(
 )
 
 PAIRING_ERRORS = _NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
+BOLT_PAIRING_ERRORS = _NamedInts(device_timeout=0x01, failed=0x02)
 """Known registers.
 Devices usually have a (small) sub-set of these. Some registers are only
 applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
@@ -119,6 +121,9 @@ REGISTERS = _NamedInts(
     receiver_pairing=0xB2,
     devices_activity=0x2B3,
     receiver_info=0x2B5,
+    bolt_device_discovery=0xC0,
+    bolt_pairing=0x2C1,
+    bolt_uniqueId=0x02FB,
 
     # only apply to devices
     mouse_button_flags=0x01,
@@ -133,6 +138,13 @@ REGISTERS = _NamedInts(
     # apply to both
     notifications=0x00,
     firmware=0xF1,
+
+    # notifications
+    passkey_request_notification=0x4D,
+    passkey_pressed_notification=0x4E,
+    device_discovery_notification=0x4F,
+    discovery_status_notification=0x53,
+    pairing_status_notification=0x54,
 )
 # Subregisters for receiver_info register
 INFO_SUBREGISTERS = _NamedInts(
@@ -142,6 +154,8 @@ INFO_SUBREGISTERS = _NamedInts(
     pairing_information=0x20,  # 0x2N, by connected device
     extended_pairing_information=0x30,  # 0x3N, by connected device
     device_name=0x40,  # 0x4N, by connected device
+    bolt_pairing_information=0x50,  # 0x5N, by connected device
+    bolt_device_name=0x60,  # 0x6N01, by connected device,
 )
 
 # Flags taken from https://drive.google.com/file/d/0BxbRzx7vEV7eNDBheWY0UHM5dEU/view?usp=sharing

@@ -181,7 +181,11 @@ class Setting:
 
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
-            self.write(value, save=False)
+            try:
+                self.write(value, save=False)
+            except Exception:
+                if _log.isEnabledFor(_WARNING):
+                    _log.warn('%s: error applying value %s so ignore it (%s)', self.name, self._value, self._device)
 
     def __str__(self):
         if hasattr(self, '_value'):

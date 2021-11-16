@@ -4,7 +4,7 @@ layout: default
 ---
 
 **Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
-that connect wirelessly to a USB [Unifying][unifying], Lightspeed, or Nano receiver,
+that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver,
 connect directly via a USB cable, or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
 
@@ -61,18 +61,21 @@ Please report such experiences by creating an issue in
 
 ## Supported Devices
 
-Solaar will detect all devices paired with supported Unifying, Lightspeed, or Nano
+Solaar will detect all devices paired with supported Unifying, Bolt, Lightspeed, or Nano
 receivers, and at the very least display some basic information about them.
 Solaar will detect some Logitech devices that connect via a USB cable or Bluetooth.
 
 Solaar can pair and unpair a Logitech device showing the Unifying logo
 (Solaar's version of the [logo][logo])
-with any Unifying receiver and
+with any Unifying receiver,
+and pair and unpair a Logitech device showing the Bolt logo
+with any Bolt receiver,
+and
 can pair and unpair Lightspeed devices with Lightspeed receivers for the same model.
 Solaar can pair some Logitech devices with Logitech Nano receivers but not all Logitech
 devices can be paired with Nano receivers.
-Logitech devices without a Unifying logo
-generally cannot be paired with Unifying receivers.
+Logitech devices without a Unifying or Bolt logo
+generally cannot be paired with Unifying or Bolt receivers.
 
 Solaar does not handle connecting or disconnecting via Bluetooth,
 which is done using the usual Bluetooth mechanisms.

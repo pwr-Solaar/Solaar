@@ -96,6 +96,13 @@ class ReceiverStatus(dict):
         # self.updated = 0
 
         self.lock_open = False
+        self.discovering = False
+        self.counter = None
+        self.device_address = None
+        self.device_authentication = None
+        self.device_kind = None
+        self.device_name = None
+        self.device_passkey = None
         self.new_device = None
 
         self[KEYS.ERROR] = None

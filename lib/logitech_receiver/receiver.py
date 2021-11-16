@@ -21,6 +21,8 @@ import errno as _errno
 from logging import INFO as _INFO
 from logging import getLogger
 
+import hidapi as _hid
+
 from . import base as _base
 from . import hidpp10 as _hidpp10
 from .base_usb import product_information as _product_information
@@ -57,24 +59,31 @@ class Receiver:
         product_info = _product_information(self.product_id)
         if not product_info:
             raise Exception('Unknown receiver type', self.product_id)
+        self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
-        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
-        if serial_reply:
-            self.serial = _strhex(serial_reply[1:5])
-            self.max_devices = ord(serial_reply[6:7])
-            if self.max_devices <= 0 or self.max_devices > 6:
-                self.max_devices = product_info.get('max_devices', 1)
-            # TODO _properly_ figure out which receivers do and which don't support unpairing
-            # This code supposes that receivers that don't unpair support a pairing request for device index 0
-            if 'unpair' in product_info:
-                self.may_unpair = product_info['unpair']
-            else:
-                self.may_unpair = self.write_register(_R.receiver_pairing) is None
-        else:  # handle receivers that don't have a serial number specially (i.e., c534)
-            self.serial = None
+        if self.receiver_kind == 'bolt':
+            serial_reply = self.read_register(_R.bolt_uniqueId)
+            self.serial = _strhex(serial_reply)
             self.max_devices = product_info.get('max_devices', 1)
             self.may_unpair = product_info.get('may_unpair', False)
+        else:
+            serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
+            if serial_reply:
+                self.serial = _strhex(serial_reply[1:5])
+                self.max_devices = ord(serial_reply[6:7])
+                if self.max_devices <= 0 or self.max_devices > 6:
+                    self.max_devices = product_info.get('max_devices', 1)
+                # TODO _properly_ figure out which receivers do and which don't support unpairing
+                # This code supposes that receivers that don't unpair support a pairing request for device index 0
+                if 'unpair' in product_info:
+                    self.may_unpair = product_info['unpair']
+                else:
+                    self.may_unpair = self.write_register(_R.receiver_pairing) is None
+            else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
+                self.serial = None
+                self.max_devices = product_info.get('max_devices', 1)
+                self.may_unpair = product_info.get('may_unpair', False)
 
         self.name = product_info.get('name', '')
         self.re_pairs = product_info.get('re_pairs', False)
@@ -135,6 +144,87 @@ class Receiver:
             _log.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits
 
+    def device_codename(self, n):
+        if self.receiver_kind == 'bolt':
+            codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
+            if codename:
+                codename = codename[3:3 + min(14, ord(codename[2:3]))]
+                return codename.decode('ascii')
+            return
+        codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
+        if codename:
+            codename = codename[2:2 + ord(codename[1:2])]
+            return codename.decode('ascii')
+
+    def device_pairing_information(self, n):
+        if self.receiver_kind == 'bolt':
+            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+            if pair_info:
+                wpid = _strhex(pair_info[3:4]) + _strhex(pair_info[2:3])
+                kind = _hidpp10.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
+                return wpid, kind, 0
+            else:
+                raise _base.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
+        pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
+        polling_rate = 0
+        if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
+            wpid = _strhex(pair_info[3:5])
+            kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
+            polling_rate = ord(pair_info[2:3])
+        elif self.ex100_27mhz_wpid_fix:  # 27Mhz receiver, fill extracting WPID from udev path
+            wpid = _hid.find_paired_node_wpid(self.path, n)
+            if not wpid:
+                _log.error('Unable to get wpid from udev for device %d of %s', n, self)
+                raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
+            kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
+        else:
+            # unifying protocol not supported, probably an old Nano receiver
+            device_info = self.read_register(_R.receiver_info, 0x04)
+            if device_info is None:
+                _log.error('failed to read Nano wpid for device %d of %s', n, self)
+                raise _base.NoSuchDevice(number=n, receiver=self, error='read Nano wpid')
+            wpid = _strhex(device_info[3:5])
+            kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+        return wpid, kind, polling_rate
+
+    def device_extended_pairing_information(self, n):
+        power_switch = '(unknown)'
+        if self.receiver_kind == 'bolt':
+            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+            if pair_info:
+                serial = _strhex(pair_info[4:8])
+                return serial, power_switch
+            else:
+                return '?', power_switch
+        pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
+        if pair_info:
+            power_switch = _hidpp10.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
+        else:  # some Nano receivers?
+            pair_info = self.read_register(0x2D5)
+        if pair_info:
+            serial = _strhex(pair_info[1:5])
+        else:  # fallback...
+            serial = self.serial
+        return serial, power_switch
+
+    def get_kind_from_index(self, index):
+        """Get device kind from 27Mhz device index"""
+        # accordingly to drivers/hid/hid-logitech-dj.c
+        # index 1 or 2 always mouse, index 3 always the keyboard,
+        # index 4 is used for an optional separate numpad
+        if index == 1:  # mouse
+            kind = 2
+        elif index == 2:  # mouse
+            kind = 2
+        elif index == 3:  # keyboard
+            kind = 1
+        elif index == 4:  # numpad
+            kind = 3
+        else:  # unknown device number on 27Mhz receiver
+            _log.error('failed to calculate device kind for device %d of %s', index, self)
+            raise _base.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
+        return kind
+
     def notify_devices(self):
         """Scan all devices."""
         if self.handle:
@@ -168,6 +258,24 @@ class Receiver:
             if reply:
                 return True
             _log.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
+
+    def discover(self, cancel=False, timeout=30):  # Bolt device discovery
+        assert self.receiver_kind == 'bolt'
+        if self.handle:
+            action = 0x02 if cancel else 0x01
+            reply = self.write_register(_R.bolt_device_discovery, timeout, action)
+            if reply:
+                return True
+            _log.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
+
+    def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=0x00, entropy=20):  # Bolt pairing
+        assert self.receiver_kind == 'bolt'
+        if self.handle:
+            action = 0x01 if pair is True else 0x03 if pair is False else 0x02
+            reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
+            if reply:
+                return True
+            _log.warn('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -230,7 +338,10 @@ class Receiver:
                 del self._devices[key]
             _log.warn('%s removed device %s', self, dev)
         else:
-            reply = self.write_register(_R.receiver_pairing, 0x03, key)
+            if self.receiver_kind == 'bolt':
+                reply = self.write_register(_R.bolt_pairing, 0x03, key)
+            else:
+                reply = self.write_register(_R.receiver_pairing, 0x03, key)
             if reply:
                 # invalidate the device
                 dev.online = False
