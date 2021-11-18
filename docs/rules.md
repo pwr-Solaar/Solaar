@@ -19,13 +19,15 @@ Windows mode.
 
 Solaar's rules only trigger on HID++ notifications so device actions that
 normally produce HID output need rule processing have to be first be set to
-this mode.  Currently Solaar can set (divert) some mouse scroll wheels, some
-mouse thumb wheels, the crown of Craft keyboards, and some keys and buttons to produce
-HID++ notifications.  Look for `HID++` or `Diversion` settings to see what
-diversion can be done with your devices.
+produce HID++ notifications instead of their normal behavior (diverted).
+Currently Solaar can divert some mouse scroll wheels, some
+mouse thumb wheels, the crown of Craft keyboards, and some keys and buttons.
 If the scroll wheel, thumb wheel, crown, key, or button is
 not diverted by setting the appropriate setting then no HID++ notification is
 generated so rules will not be triggered by manipulating the wheel, crown, key, or button.
+Look for `HID++` or `Diversion` settings to see what
+diversion can be done with your devices.
+
 Running Solaar with the `-dd`
 option will show information about notifications, including their feature
 name, report number, and data.
