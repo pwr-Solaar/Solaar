@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2020 Peter Patel-Schneider
 ##
@@ -177,7 +176,7 @@ if x11:
     displayt = Display()
 
 
-class RuleComponent(object):
+class RuleComponent:
     def compile(self, c):
         if isinstance(c, RuleComponent):
             return c
@@ -289,7 +288,7 @@ def x11_focus_prog():
     while window:
         pid = window.get_full_property(NET_WM_PID, 0)
         wm_class = window.get_wm_class()
-        if wm_class:
+        if wm_class and pid:
             break
         window = window.query_tree().parent
     name = psutil.Process(pid.value[0]).name() if pid else None
@@ -808,7 +807,7 @@ def _save_config_rule_file(file_name=_file_path):
         pass
 
     def blockseq_rep(dumper, data):
-        return dumper.represent_sequence(u'tag:yaml.org,2002:seq', data, flow_style=True)
+        return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
 
     _yaml_add_representer(inline_list, blockseq_rep)
 
@@ -833,7 +832,7 @@ def _save_config_rule_file(file_name=_file_path):
         # 'version': (1, 3),  # it would be printed for every rule
     }
     # Save only user-defined rules
-    rules_to_save = sum([r.data()['Rule'] for r in rules.components if r.source == file_name], [])
+    rules_to_save = sum((r.data()['Rule'] for r in rules.components if r.source == file_name), [])
     if rules_to_save:
         if _log.isEnabledFor(_INFO):
             _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
@@ -852,7 +851,7 @@ def _load_config_rule_file():
     loaded_rules = []
     if _path.isfile(_file_path):
         try:
-            with open(_file_path, 'r') as config_file:
+            with open(_file_path) as config_file:
                 loaded_rules = []
                 for loaded_rule in _yaml_safe_load_all(config_file):
                     rule = Rule(loaded_rule, source=_file_path)

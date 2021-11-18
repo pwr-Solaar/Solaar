@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -46,7 +45,7 @@ def _load():
     if _path.isfile(_file_path):
         loaded_configuration = {}
         try:
-            with open(_file_path, 'r') as config_file:
+            with open(_file_path) as config_file:
                 loaded_configuration = _json_load(config_file)
         except Exception:
             _log.error('failed to load from %s', _file_path)
@@ -112,13 +111,13 @@ def _cleanup_load(d):
 
 class _DeviceEntry(dict):
     def __init__(self, device, **kwargs):
-        super(_DeviceEntry, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         if self.get(_KEY_NAME) != device.name:
             self[_KEY_NAME] = device.name
         self.update(device)
 
     def __setitem__(self, key, value):
-        super(_DeviceEntry, self).__setitem__(key, value)
+        super().__setitem__(key, value)
         save()
 
     def update(self, device):

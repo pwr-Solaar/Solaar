@@ -17,12 +17,18 @@ in response to the pressing of the `Brightness Down` key on Craft keyboards,
 which normally does not produce any input at all when the keyboard is in
 Windows mode.
 
-Solaar's rules only activate on HID++ notifications so device actions that
+Solaar's rules only trigger on HID++ notifications so device actions that
 normally produce HID output need rule processing have to be first be set to
-this mode.  Currently Solaar can set (divert) some mouse scroll wheels, some
-mouse thumb wheels, the crown of Craft keyboards, and some keys to produce
-HID++ notifications.  Look for `HID++` or `Diversion` settings to see what
-diversion can be done with your devices.  Runing Solaar with the `-dd`
+produce HID++ notifications instead of their normal behavior (diverted).
+Currently Solaar can divert some mouse scroll wheels, some
+mouse thumb wheels, the crown of Craft keyboards, and some keys and buttons.
+If the scroll wheel, thumb wheel, crown, key, or button is
+not diverted by setting the appropriate setting then no HID++ notification is
+generated so rules will not be triggered by manipulating the wheel, crown, key, or button.
+Look for `HID++` or `Diversion` settings to see what
+diversion can be done with your devices.
+
+Running Solaar with the `-dd`
 option will show information about notifications, including their feature
 name, report number, and data.
 
@@ -91,17 +97,17 @@ The value of these test condition is the signed value of the selected bytes
 if that is non-zero otherwise True.
 
 The other test conditions are mnemonic shorthands for meaningful feature,
-report, and data combinations.
-A `crown_right` test is the rotation amount of a `CROWN` right rotation.
-A `crown_left` test is the rotation amount of a `CROWN` left rotation.
-A `crown_right_ratchet` test is the ratchet amount of a `CROWN` right ratchet rotation.
-A `crown_left_ratchet` test is the ratchet amount of a `CROWN` left ratchet rotation.
-A `crown_tap` test is true for a `CROWN` tap.
-A `crown_start_press` test is true for the start of a `CROWN` press.
-A `crown_stop_press` test is true for the end of a `CROWN` press.
+report, and data combinations in notifications.
+A `crown_right` test is the rotation amount of a `CROWN` right rotation notification.
+A `crown_left` test is the rotation amount of a `CROWN` left rotation notification.
+A `crown_right_ratchet` test is the ratchet amount of a `CROWN` right ratchet rotation notification.
+A `crown_left_ratchet` test is the ratchet amount of a `CROWN` left ratchet rotation notification.
+A `crown_tap` test is true for a `CROWN` tap notification.
+A `crown_start_press` test is true for the start of a `CROWN` press notification.
+A `crown_stop_press` test is true for the end of a `CROWN` press notification.
 A `crown_pressed` test is true for a `CROWN` notification with the Crown pressed.
-A `thumb_wheel_up` test is the rotation amount of a `THUMB WHEEL` upward rotation.
-A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rotation.
+A `thumb_wheel_up` test is the rotation amount of a `THUMB WHEEL` upward rotation notification.
+A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rotation notification.
 `lowres_wheel_up`, `lowres_wheel_down`, `hires_wheel_up`, `hires_wheel_down` are the
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 `True` and `False` tests return True and False, respectively.

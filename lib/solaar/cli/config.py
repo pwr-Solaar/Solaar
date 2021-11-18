@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -17,8 +16,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from logitech_receiver import settings as _settings
 from logitech_receiver import settings_templates as _settings_templates
 from solaar import configuration as _configuration
@@ -30,7 +27,7 @@ def _print_setting(s, verbose=True):
         if s.description:
             print('#', s.description.replace('\n', ' '))
         if s.kind == _settings.KIND.toggle:
-            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0')
+            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle')
         elif s.kind == _settings.KIND.choice:
             print(
                 '#   possible values: one of [', ', '.join(str(v) for v in s.choices),
@@ -85,15 +82,18 @@ def select_choice(value, choices, setting, key):
 
 
 def select_toggle(value, setting):
-    try:
-        value = bool(int(value))
-    except Exception:
-        if value.lower() in ('true', 'yes', 'on', 't', 'y'):
-            value = True
-        elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
-            value = False
-        else:
-            raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+    if value == 'Toggle':
+        value = not setting.read()
+    else:
+        try:
+            value = bool(int(value))
+        except Exception:
+            if value.lower() in ('true', 'yes', 'on', 't', 'y'):
+                value = True
+            elif value.lower() in ('false', 'no', 'off', 'f', 'n'):
+                value = False
+            else:
+                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
     return value
 
 

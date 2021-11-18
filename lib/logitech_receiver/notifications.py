@@ -1,6 +1,3 @@
-# -*- python-mode -*-
-# -*- coding: UTF-8 -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -20,7 +17,7 @@
 # Handles incoming events from the receiver/devices, updating the related
 # status object as appropriate.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+import threading as _threading
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
@@ -46,6 +43,8 @@ _F = _hidpp20.FEATURE
 #
 #
 
+notification_lock = _threading.Lock()
+
 
 def process(device, notification):
     assert device
@@ -70,24 +69,83 @@ def _process_receiver_notification(receiver, status, n):
     # supposedly only 0x4x notifications arrive for the receiver
     assert n.sub_id & 0x40 == 0x40
 
-    # pairing lock notification
-    if n.sub_id == 0x4A:
+    if n.sub_id == 0x4A:  # pairing lock notification
         status.lock_open = bool(n.address & 0x01)
         reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
         if _log.isEnabledFor(_INFO):
             _log.info('%s: %s', receiver, reason)
-
         status[_K.ERROR] = None
         if status.lock_open:
             status.new_device = None
-
         pair_error = ord(n.data[:1])
         if pair_error:
             status[_K.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
             status.new_device = None
             _log.warn('pairing error %d: %s', pair_error, error_string)
-
         status.changed(reason=reason)
+        return True
+
+    elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.discovering = n.address == 0x00
+            reason = (_('discovery lock is open') if status.discovering else _('discovery lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if status.discovering:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
+            status.device_passkey = None
+            discover_error = ord(n.data[:1])
+            if discover_error:
+                status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
+                _log.warn('bolt discovering error %d: %s', discover_error, discover_string)
+            status.changed(reason=reason)
+            return True
+
+    elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
+        with notification_lock:
+            counter = n.address + n.data[0] * 256  # notification counter
+            if status.counter is None:
+                status.counter = counter
+            else:
+                if not status.counter == counter:
+                    return None
+            if n.data[1] == 0:
+                status.device_kind = n.data[3]
+                status.device_address = n.data[6:12]
+                status.device_authentication = n.data[14]
+            elif n.data[1] == 1:
+                status.device_name = n.data[3:3 + n.data[2]].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = None
+            status.lock_open = n.address == 0x00
+            reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if not status.lock_open:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
+            pair_error = n.data[0]
+            if status.lock_open:
+                status.new_device = None
+            elif n.address == 0x02 and not pair_error:
+                status.new_device = receiver.register_new_device(n.data[7])
+            if pair_error:
+                status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
+                status.new_device = None
+                _log.warn('pairing error %d: %s', pair_error, error_string)
+            status.changed(reason=reason)
+            return True
+
+    elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = n.data[0:6].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
         return True
 
     _log.warn('%s: unhandled notification %s', receiver, n)
@@ -186,7 +244,7 @@ def _process_hidpp10_custom_notification(device, status, n):
 
 
 def _process_hidpp10_notification(device, status, n):
-    # unpair notification
+    # device unpairing
     if n.sub_id == 0x40:
         if n.address == 0x02:
             # device un-paired
@@ -200,37 +258,29 @@ def _process_hidpp10_notification(device, status, n):
             _log.warn('%s: disconnection with unknown type %02X: %s', device, n.address, n)
         return True
 
-    # wireless link notification
+    # device connection (and disconnection)
     if n.sub_id == 0x41:
-        protocol_name = (
-            'Bluetooth' if n.address == 0x01 else '27 MHz' if n.address == 0x02 else
-            'QUAD or eQUAD' if n.address == 0x03 else 'eQUAD step 4 DJ' if n.address == 0x04 else 'DFU Lite' if n.address ==
-            0x05 else 'eQUAD step 4 Lite' if n.address == 0x06 else 'eQUAD step 4 Gaming' if n.address ==
-            0x07 else 'eQUAD step 4 for gamepads' if n.address == 0x08 else 'eQUAD nano Lite' if n.address ==
-            0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None
-        )
-        if protocol_name:
+        flags = ord(n.data[:1]) & 0xF0
+        if n.address == 0x02:  # very old 27 MHz protocol
+            wpid = '00' + _strhex(n.data[2:3])
+            link_established = True
+            link_encrypted = bool(flags & 0x80)
+        elif n.address > 0x00:  # all other protocols are supposed to be almost the same
             wpid = _strhex(n.data[2:3] + n.data[1:2])
-            # workaround for short EX100 and other 27 MHz wpids
-            if protocol_name == '27 MHz':
-                wpid = '00' + _strhex(n.data[2:3])
-            if wpid != device.wpid:
-                _log.warn('%s wpid mismatch, got %s', device, wpid)
-            flags = ord(n.data[:1]) & 0xF0
-            link_encrypted = bool(flags & 0x20)
             link_established = not (flags & 0x40)
-            if _log.isEnabledFor(_DEBUG):
-                sw_present = bool(flags & 0x10)
-                has_payload = bool(flags & 0x80)
-                _log.debug(
-                    '%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, protocol_name,
-                    sw_present, link_encrypted, link_established, has_payload
-                )
-            status[_K.LINK_ENCRYPTED] = link_encrypted
-            status.changed(active=link_established)
+            link_encrypted = bool(flags & 0x20) or n.address == 0x10  # Bolt protocol always encrypted
         else:
             _log.warn('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
-
+            return True
+        if wpid != device.wpid:
+            _log.warn('%s wpid mismatch, got %s', device, wpid)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug(
+                '%s: protocol %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, n.address,
+                bool(flags & 0x10), link_encrypted, link_established, bool(flags & 0x80)
+            )
+        status[_K.LINK_ENCRYPTED] = link_encrypted
+        status.changed(active=link_established)
         return True
 
     if n.sub_id == 0x49:

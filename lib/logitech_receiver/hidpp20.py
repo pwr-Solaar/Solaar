@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -18,8 +17,6 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Logitech Unifying Receiver API.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
 from logging import ERROR as _ERROR
@@ -229,7 +226,7 @@ class FeatureCallError(_KwException):
 #
 
 
-class FeaturesArray(object):
+class FeaturesArray:
     """A sequence of features supported by a HID++ 2.0 device."""
     __slots__ = ('supported', 'device', 'features', 'non_features')
     assert FEATURE.ROOT == 0x0000
@@ -370,7 +367,7 @@ class FeaturesArray(object):
 #
 
 
-class ReprogrammableKey(object):
+class ReprogrammableKey:
     """Information about a control present on a device with the `REPROG_CONTROLS` feature.
     Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
     Read-only properties:
@@ -581,7 +578,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         self._getCidReporting()
 
 
-class KeysArray(object):
+class KeysArray:
     """A sequence of key mappings supported by a HID++ 2.0 device."""
 
     __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids')
@@ -816,7 +813,7 @@ ACTION_ID = _NamedInts(
 ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
-class Gesture(object):
+class Gesture:
 
     gesture_index = {}
 
@@ -872,7 +869,7 @@ class Gesture(object):
     write = set
 
 
-class Param(object):
+class Param:
     param_index = {}
 
     def __init__(self, device, low, high):
@@ -950,7 +947,7 @@ class Spec:
         return f'[{self.spec}={self.value}]'
 
 
-class Gestures(object):
+class Gestures:
     """Information about the gestures that a device supports.
     Right now only some information fields are supported.
     WARNING: Assumes that parameters are always global, which is not the case.

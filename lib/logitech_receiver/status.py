@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
@@ -99,6 +96,13 @@ class ReceiverStatus(dict):
         # self.updated = 0
 
         self.lock_open = False
+        self.discovering = False
+        self.counter = None
+        self.device_address = None
+        self.device_authentication = None
+        self.device_kind = None
+        self.device_name = None
+        self.device_passkey = None
         self.new_device = None
 
         self[KEYS.ERROR] = None

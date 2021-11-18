@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -45,7 +42,7 @@ SENSITIVITY_IGNORE = 'ignore'
 KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10, multiple_range=0x40)
 
 
-class Setting(object):
+class Setting:
     """A setting descriptor.
     Needs to be instantiated for each specific device."""
     __slots__ = (
@@ -184,7 +181,11 @@ class Setting(object):
 
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
-            self.write(value, save=False)
+            try:
+                self.write(value, save=False)
+            except Exception:
+                if _log.isEnabledFor(_WARNING):
+                    _log.warn('%s: error applying value %s so ignore it (%s)', self.name, self._value, self._device)
 
     def __str__(self):
         if hasattr(self, '_value'):
@@ -517,7 +518,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
 #
 
 
-class RegisterRW(object):
+class RegisterRW:
     __slots__ = ('register', )
 
     kind = _NamedInt(0x01, _('register'))
@@ -533,7 +534,7 @@ class RegisterRW(object):
         return device.write_register(self.register, data_bytes)
 
 
-class FeatureRW(object):
+class FeatureRW:
     __slots__ = ('feature', 'read_fnid', 'write_fnid', 'prefix', 'no_reply')
 
     kind = _NamedInt(0x02, _('feature'))
@@ -600,7 +601,7 @@ class FeatureRWMap(FeatureRW):
 #
 
 
-class BooleanValidator(object):
+class BooleanValidator:
     __slots__ = ('true_value', 'false_value', 'read_offset', 'mask', 'needs_current_value')
 
     kind = KIND.toggle
@@ -713,7 +714,7 @@ class BooleanValidator(object):
         return to_write
 
 
-class BitFieldValidator(object):
+class BitFieldValidator:
     __slots__ = ('byte_count', 'options')
 
     kind = KIND.multiple_toggle
@@ -748,7 +749,7 @@ class BitFieldValidator(object):
         return self.options
 
 
-class BitFieldWithOffsetAndMaskValidator(object):
+class BitFieldWithOffsetAndMaskValidator:
     __slots__ = ('byte_count', 'options', '_option_from_key', '_mask_from_offset', '_option_from_offset_mask')
 
     kind = KIND.multiple_toggle
@@ -830,7 +831,7 @@ class BitFieldWithOffsetAndMaskValidator(object):
         return [int(opt) if isinstance(opt, int) else opt.as_int() for opt in self.options]
 
 
-class ChoicesValidator(object):
+class ChoicesValidator:
     kind = KIND.choice
     """Translates between NamedInts and a byte sequence.
     :param choices: a list of NamedInts
@@ -942,7 +943,7 @@ class ChoicesMapValidator(ChoicesValidator):
         return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
 
-class RangeValidator(object):
+class RangeValidator:
     __slots__ = ('min_value', 'max_value', 'flag', '_byte_count', 'needs_current_value')
 
     kind = KIND.range
@@ -1045,7 +1046,7 @@ class MultipleRangeValidator:
         return w + b'\xFF'
 
 
-class ActionSettingRW(object):
+class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
     def __init__(self, name, divert_setting_name):
         self.name = name
