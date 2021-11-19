@@ -1460,12 +1460,10 @@ msgstr "%(light_level)d lux"
 #~ msgstr "Invertir rueda en alta resolución "
 
 #~ msgid "High-sensitivity wheel invert mode for vertical scroll."
-#~ msgstr ""
-#~ "Modo inverso de alta resolución en la rueda para desplazamiento vertical."
+#~ msgstr "Modo inverso de alta resolución en la rueda para desplazamiento vertical."
 
 #~ msgid "If the device is already turned on, turn if off and on again."
-#~ msgstr ""
-#~ "Si el dispositivo ya está encendido, apáguelo y vuelva a encenderlo."
+#~ msgstr "Si el dispositivo ya está encendido, apáguelo y vuelva a encenderlo."
 
 #~ msgid ""
 #~ "Shows status of devices connected\n"
