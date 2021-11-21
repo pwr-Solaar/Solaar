@@ -3,7 +3,7 @@
  * Add toggle command to solaar config to toggle boolean settings
  * Don't select windows with no PID when looking for focus window
  * Catch errors when applying settings so that other settings are not affected
- * Add support for Bolt receivers and devices
+ * Add support for Bolt receivers and devices, including pairing
  * Revise method for creating system tray menu
  * Remove obsolete code (mostly Python 2 compatability code)
  * Add support for PRO X Wireless Mouse, G914 TKL keyboard
