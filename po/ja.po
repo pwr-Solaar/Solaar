@@ -1,7 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the solaar package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Japanese translations for solaar package
+# Copyright (C) 2021 SOLAAR'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the Solaar package.
 #
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.0.6\n"
