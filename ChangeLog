@@ -1,4 +1,4 @@
-1.1.0rc1:
+1.1.0rc2:
  * Add Catalan translation.
  * Add toggle command to solaar config to toggle boolean settings
  * Don't select windows with no PID when looking for focus window
