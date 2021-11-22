@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Catalan translations for Solaar package.
+# Copyright (C) 2021 THE Solaar's COPYRIGHT HOLDER.
+# This file is distributed under the same license as the Solaar package.
+# Marc Serra <hola@webolot.com>, 2021.
 #
 msgid ""
 msgstr ""
