@@ -1,4 +1,5 @@
-1.1.0rc2:
+1.1.0rc3:
+ * Fix bug when adding receiver to tray menu
  * Add Catalan translation.
  * Add toggle command to solaar config to toggle boolean settings
  * Don't select windows with no PID when looking for focus window
