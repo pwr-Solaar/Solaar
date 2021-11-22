@@ -16,5 +16,5 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-__version__ = '1.0.7'
+__version__ = '1.1.0rc2'
 NAME = 'Solaar'

@@ -4,7 +4,7 @@ tagline: Linux Device Manager for Logitech Unifying Receivers and Devices.
 owner: pwr-Solaar
 owner_url: https://github.com/pwr-Solaar
 repository: pwr-Solaar/Solaar
-version: 1.0.7
+version: 1.1.0rc2
 show_downloads: false
 encoding: utf-8
 theme: jekyll-theme-slate

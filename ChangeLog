@@ -1,3 +1,25 @@
+1.1.0rc2:
+ * Add Catalan translation.
+ * Add toggle command to solaar config to toggle boolean settings
+ * Don't select windows with no PID when looking for focus window
+ * Catch errors when applying settings so that other settings are not affected
+ * Add support for Bolt receivers and devices, including pairing
+ * Revise method for creating system tray menu
+ * Remove obsolete code (mostly Python 2 compatability code)
+ * Add support for PRO X Wireless Mouse, G914 TKL keyboard
+ * Ignore more notifications that come to a device listener
+ * Handle more device connection protocols
+ * Update usage and rules documentation
+ * Change emojis to text in documentation
+ * Pare down device documentation so as not to require frequent updates
+ * Add information about M500S mouse
+ * Reimplment MOUSE GESTURE and DPI SLIDING settings
+ * Add setting for DPI CHANGE button to switch sensitivity
+ * Use file name instead of icon name for tray to avoid XFCE bug
+ * Update documentation on implemented features and mouse gestures
+ * Update Polish, Japanese, and Spanish translations
+ * Make Quit and About strings more translatable
+
 1.0.7:
  * Don't use time_ns so as not to require Python 3.7
  * Correctly determine setting box in change_click method
