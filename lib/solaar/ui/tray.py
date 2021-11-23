@@ -407,11 +407,11 @@ def _remove_device(index):
 
 
 def _add_receiver(receiver):
-    index = 0
+    index = len(_devices_info)
 
     new_receiver_info = (receiver.path, None, receiver.name, None)
     assert len(new_receiver_info) == len(_RECEIVER_SEPARATOR)
-    _devices_info.insert(0, new_receiver_info)
+    _devices_info.insert(index, new_receiver_info)
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
     icon_set = _icons.device_icon_set(receiver.name)
