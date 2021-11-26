@@ -1,4 +1,4 @@
-1.1.0rc3:
+1.1.0:
  * Fix bug when adding receiver to tray menu
  * Add Catalan translation.
  * Add toggle command to solaar config to toggle boolean settings
