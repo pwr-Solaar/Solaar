@@ -1,5 +1,10 @@
 			Notes on Major Changes in Releases
 
+Version 1.1.0:
+
+Solaar now supports Bolt receivers and devices that connect to them, including authentication of devices when pairing.
+
+A setting has been added for the DPI CHANGE button to switch movement sensitivity.
 
 Version 1.0.7:
 

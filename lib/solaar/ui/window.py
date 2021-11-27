@@ -879,7 +879,8 @@ def update(device, need_popup=False, refresh=False):
         elif item:
             if _TREE_SEPATATOR:
                 separator = _model.iter_next(item)
-                _model.remove(separator)
+                if separator:
+                    _model.remove(separator)
             _model.remove(item)
 
     else:
