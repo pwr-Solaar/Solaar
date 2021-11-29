@@ -121,8 +121,11 @@ for the step-by-step procedure for manual installation.
 - If some icons appear broken in the application, make sure you've properly
   configured the Gtk theme and icon theme in your control panel.
 
-- There are several implementations of the system tray.   Some of these have problems
-  that can result in missing or wrong-sized icons.
+- Solaar normally uses icon names for its icons, which in some system tray implementatations
+  results in missing or wrong-sized icons.
+  The `--tray-icon-size` option forces Solaar to use icon files of appropriate size
+  for tray icons instead, which produces better results in some system tray implementatations.
+  To use icon files close to 32 pixels in size use `--tray-icon-size=32`.
 
 - The icon in the system tray can show up as 'black on black' in dark
   themes or as non-symbolic when the theme uses symbolic icons.  This is due to problems
