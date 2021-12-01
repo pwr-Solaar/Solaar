@@ -199,6 +199,7 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 
 
 ### Mice (Lightspeed)
+
 | Device                       | WPID | HID++ |
 |------------------------------|------|-------|
 | PRO X Superlight Wireless    | 4093 | 4.2   |
