@@ -602,16 +602,22 @@ class FeatureRWMap(FeatureRW):
 
 
 class BooleanValidator:
-    __slots__ = ('true_value', 'false_value', 'read_offset', 'mask', 'needs_current_value')
+    __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
 
     kind = KIND.toggle
     default_true = 0x01
     default_false = 0x00
     # mask specifies all the affected bits in the value
     default_mask = 0xFF
-    default_read_offset = 0
 
-    def __init__(self, true_value=default_true, false_value=default_false, mask=default_mask, read_offset=default_read_offset):
+    def __init__(
+        self,
+        true_value=default_true,
+        false_value=default_false,
+        mask=default_mask,
+        read_skip_byte_count=0,
+        write_prefix_bytes=b''
+    ):
         if isinstance(true_value, int):
             assert isinstance(false_value, int)
             if mask is None:
@@ -645,10 +651,11 @@ class BooleanValidator:
         self.true_value = true_value
         self.false_value = false_value
         self.mask = mask
-        self.read_offset = read_offset
+        self.read_skip_byte_count = read_skip_byte_count
+        self.write_prefix_bytes = write_prefix_bytes
 
     def validate_read(self, reply_bytes):
-        reply_bytes = reply_bytes[self.read_offset:]
+        reply_bytes = reply_bytes[self.read_skip_byte_count:]
         if isinstance(self.mask, int):
             reply_value = ord(reply_bytes[:1]) & self.mask
             if _log.isEnabledFor(_DEBUG):
@@ -711,7 +718,7 @@ class BooleanValidator:
         if _log.isEnabledFor(_DEBUG):
             _log.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
 
-        return to_write
+        return self.write_prefix_bytes + to_write
 
 
 class BitFieldValidator:
@@ -837,7 +844,7 @@ class ChoicesValidator:
     :param choices: a list of NamedInts
     :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
-    def __init__(self, choices, byte_count=None, read_skip_byte_count=None, write_prefix_bytes=b''):
+    def __init__(self, choices, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b''):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
         assert len(choices) > 1
@@ -850,7 +857,7 @@ class ChoicesValidator:
             assert self._byte_count <= byte_count
             self._byte_count = byte_count
         assert self._byte_count < 8
-        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
+        self._read_skip_byte_count = read_skip_byte_count
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
         assert self._byte_count + self._read_skip_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) <= 14
@@ -916,7 +923,7 @@ class ChoicesMapValidator(ChoicesValidator):
         self.choices = choices_map
         self.needs_current_value = False
         self.extra_default = extra_default
-        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
+        self._read_skip_byte_count = read_skip_byte_count
         self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
         self.activate = activate
         self.mask = mask
@@ -1091,10 +1098,8 @@ class ActionSettingRW:
                             self.pressed = False
                             self.release_action()
                         else:
-                            print(self.key.key, cids)
                             for key in cids:
                                 if key and not key == self.key.key:  # some other diverted key pressed
-                                    print(key, self.key, cids)
                                     self.key_action(key)
                 elif n.address == 0x10:
                     if self.pressed:
