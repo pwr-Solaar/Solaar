@@ -91,5 +91,54 @@
     <modalias>usb:v046DpC342d*</modalias>
     <modalias>usb:v046DpC343d*</modalias>
     <modalias>usb:v046DpC344d*</modalias>
+    <!-- Bluetooth Devices - these appear to be known with usb prefixes -->
+    <!-- Logitech says their IDs are 0xB012 - 0xB0xx, 0xB32A - 0xB3xx -->
+    <modalias>usb:v046DpB012d*</modalias>
+    <modalias>usb:v046DpB013d*</modalias>
+    <modalias>usb:v046DpB014d*</modalias>
+    <modalias>usb:v046DpB015d*</modalias>
+    <modalias>usb:v046DpB016d*</modalias>
+    <modalias>usb:v046DpB017d*</modalias>
+    <modalias>usb:v046DpB018d*</modalias>
+    <modalias>usb:v046DpB019d*</modalias>
+    <modalias>usb:v046DpB01Ad*</modalias>
+    <modalias>usb:v046DpB01Bd*</modalias>
+    <modalias>usb:v046DpB01Cd*</modalias>
+    <modalias>usb:v046DpB01Dd*</modalias>
+    <modalias>usb:v046DpB01Ed*</modalias>
+    <modalias>usb:v046DpB01Fd*</modalias>
+    <modalias>usb:v046DpB02*d*</modalias>
+    <modalias>usb:v046DpB03*d*</modalias>
+    <modalias>usb:v046DpB04*d*</modalias>
+    <modalias>usb:v046DpB05*d*</modalias>
+    <modalias>usb:v046DpB06*d*</modalias>
+    <modalias>usb:v046DpB07*d*</modalias>
+    <modalias>usb:v046DpB08*d*</modalias>
+    <modalias>usb:v046DpB09*d*</modalias>
+    <modalias>usb:v046DpB0A*d*</modalias>
+    <modalias>usb:v046DpB0B*d*</modalias>
+    <modalias>usb:v046DpB0C*d*</modalias>
+    <modalias>usb:v046DpB0D*d*</modalias>
+    <modalias>usb:v046DpB0E*d*</modalias>
+    <modalias>usb:v046DpB0F*d*</modalias>
+    <modalias>usb:v046DpB32Ad*</modalias>
+    <modalias>usb:v046DpB32Bd*</modalias>
+    <modalias>usb:v046DpB32Cd*</modalias>
+    <modalias>usb:v046DpB32Dd*</modalias>
+    <modalias>usb:v046DpB32Ed*</modalias>
+    <modalias>usb:v046DpB32Fd*</modalias>
+    <modalias>usb:v046DpB33*d*</modalias>
+    <modalias>usb:v046DpB34*d*</modalias>
+    <modalias>usb:v046DpB35*d*</modalias>
+    <modalias>usb:v046DpB36*d*</modalias>
+    <modalias>usb:v046DpB37*d*</modalias>
+    <modalias>usb:v046DpB38*d*</modalias>
+    <modalias>usb:v046DpB39*d*</modalias>
+    <modalias>usb:v046DpB3A*d*</modalias>
+    <modalias>usb:v046DpB3B*d*</modalias>
+    <modalias>usb:v046DpB3C*d*</modalias>
+    <modalias>usb:v046DpB3D*d*</modalias>
+    <modalias>usb:v046DpB3E*d*</modalias>
+    <modalias>usb:v046DpB3F*d*</modalias>
   </provides>
 </component>
