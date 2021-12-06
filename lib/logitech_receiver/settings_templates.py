@@ -114,6 +114,8 @@ _MOUSE_GESTURES = ('mouse-gestures', _('Mouse Gestures'),
                    _('Send a gesture by sliding the mouse while holding the button down.'))
 _DIVERT_CROWN = ('divert-crown', _('Divert crown events'),
                  _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
+_CROWN_SMOOTH = ('crown-smooth', _('Crown smooth scroll'),
+                 _('Set crown smooth scroll'))
 _DIVERT_GKEYS = ('divert-gkeys', _('Divert G Keys'),
                  _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
 _SPEED_CHANGE = ('speed-change', _('Sensitivity Switching'),
@@ -846,6 +848,12 @@ def _feature_divert_crown():
     return _Setting(_DIVERT_CROWN, rw, _BooleanV(true_value=0x02, false_value=0x01, mask=0xff), device_kind=(_DK.keyboard, ))
 
 
+def _feature_crown_smooth():
+    rw = _FeatureRW(_F.CROWN, read_fnid=0x10, write_fnid=0x20)
+    validator = _BooleanV(true_value=0x01, false_value=0x02, read_skip_byte_count=1, write_prefix_bytes=b'\x00')
+    return _Setting(_CROWN_SMOOTH, rw, validator, device_kind=(_DK.keyboard, ))
+
+
 def _feature_divert_gkeys():
     class _DivertGkeysRW(_FeatureRW):
         def __init__(self, feature):
@@ -894,6 +902,7 @@ _SETTINGS_TABLE = [
     _S(_DISABLE_KEYS, _F.KEYBOARD_DISABLE_KEYS, _feature_disable_keyboard_keys),
     _S(_REPORT_RATE, _F.REPORT_RATE, _feature_report_rate),
     _S(_DIVERT_CROWN, _F.CROWN, _feature_divert_crown),
+    _S(_CROWN_SMOOTH, _F.CROWN, _feature_crown_smooth),
     _S(_DIVERT_GKEYS, _F.GKEY, _feature_divert_gkeys),
     _S(_PLATFORM, _F.MULTIPLATFORM, _feature_multiplatform),
     _S(_PLATFORM, _F.DUALPLATFORM, _feature_dualplatform, identifier='dualplatform'),
