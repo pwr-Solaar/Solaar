@@ -25,7 +25,7 @@ If you are running the system version of Python you should have the
 `python3-pyudev`, `python3-psutil`, `python3-xlib`,
 and `python3-yaml` or `python3-pyyaml` packages installed.
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
-If you are running the system verison of Python
+If you are running the system version of Python
 the Debian/Ubuntu packages you should have
 `python3-gi` and `gir1.2-gtk-3.0` installed.
 in Fedora you need `gtk3` and `python3-gobject`.
