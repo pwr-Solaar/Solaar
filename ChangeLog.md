@@ -1,4 +1,5 @@
-1.1.0:
+# 1.1.0
+
 * Fix bug when adding receiver to tray menu
 * Add Catalan translation.
 * Add toggle command to solaar config to toggle boolean settings
@@ -21,7 +22,8 @@
 * Update Polish, Japanese, and Spanish translations
 * Make Quit and About strings more translatable
 
-1.0.7:
+# 1.0.7
+
 * Don't use time_ns so as not to require Python 3.7
 * Correctly determine setting box in change_click method
 * Handle fake Nano connection notifications
@@ -29,7 +31,8 @@
 * Mark Nano receiver C52F as not unpairing
 * Upgrade pairing/unpairing documentation
 
-1.0.7rc2:
+# 1.0.7rc2
+
 * Don't signal status change when battery changes from None to None.
 * Add Japanese translation
 * Use first word of name for code name if no other code name available.
@@ -51,7 +54,8 @@
 * Convert HID++ 2.0 device kinds to enhanced HID++ 1.0 device kinds
 * Update about window, bug report templates, and supported kernels.
 
-1.0.6:
+# 1.0.6
+
 * Update sliding DPI to look for suitable keys
 * Add mouse gestures that can trigger rules
 * Complain if receivers do not support connection notification
@@ -79,13 +83,15 @@
 * Fix bug in hidconsole
 * Update French translation
 
-1.0.5:
+# 1.0.5
+
 * Update documentation on devices forgetting settings.
 * Improve help messages
 * Fix bug in finding receiver to pair
 * Solaar config command can set keyed settings.
 
-1.0.5rc2:
+# 1.0.5rc2
+
 * Add setting for polling rate
 * Use long HID++ messages for all 2.0 requests
 * Update German, Italian, and Polish translations
@@ -106,10 +112,12 @@
 * Implement UNIFIED_BATTERY feature and use in battery reports.
 * Add a clickable lock icon that determines where each setting can be changed.
 
-1.0.4:
+# 1.0.4
+
 * Update pt_BR translation
 
-1.0.4rc1:
+# 1.0.4rc1
+
 * Support USB and BT connected devices that are not in descriptors.py
 * Use FRIENDLY NAME for codename if needed and available.
 * Extract manufacturer and product ID from Udev HID information.
@@ -142,17 +150,20 @@
 * Add Lightspeed receivers c545 and c541.
 * Reimplement REPROG_CONTROLS data structure.
 
-1.0.3:
+# 1.0.3
+
 * Clean up documentation files.
 * Update documentation on installation.
 * Update Swedish and French translations.
 * Add Norwegian Nynorsk and Danish translations.
 
-1.0.3rc2:
+# 1.0.3rc2
+
 * Fix bug handling DJ pairing notifications.
 * Add Norwegian Bokmål translation.
 
-1.0.3rc1:
+# 1.0.3rc1
+
 * Remove deprecated solaar-cli application.
 * Don't install udev or autostart files from python (or pip).
 * Solaar needs Python 3.6+ and probably needs kernel 5.2+
@@ -194,16 +205,19 @@
 * Update list of implemented features and provide information on how to implement features.
 * Add c53d as a Lightspeed receiver.
 
-1.0.2:
+# 1.0.2
+
 * Add usage document
 
-1.0.2rc3:
+# 1.0.2rc3
+
 * Don't produce error dialog for inaccessible receivers with access control lists.
 * Add option --battery-icons=symbolic to use symbolic icons if available.
 * Update French translation
 * Update installation documentation
 
-1.0.2rc2:
+# 1.0.2rc2
+
 * Remove packaging directory tree as it is not maintained
 * Pip installs udev rule and solaar autostart when doing install without --user flag
 * Use Solaar icon instead of a missing battery icon
@@ -226,7 +240,8 @@
 * Better tooltip description
 * Add release script to help when creating releases
 
-1.0.2-rc1:
+# 1.0.2-rc1
+
 * Look up tray icon filenames to get around a bug in libappindicator.
 * Make the default behavior be to show the main window at startup.
 * Support c537 nano receiver
@@ -259,24 +274,28 @@
 * Documentation improvements
 * Clean up directory structure and remove unused files
 
-1.0.1:
+# 1.0.1
+
 * Updated the repo url.
 * Fixed typo which was crashing the application.
 * Improved the HID write routine which was causing issues on some devices.
 * Fix non-unifying receivers in Linux 5.2.
 * Add new Lightspeed receiver (used in the G305)
 
-1.0.0:
+# 1.0.0
+
 * Too many to track...
 
-0.9.3:
+# 0.9.3
+
 * Merged solaar-cli functionality into main solaar.
 * Scrolling over the systray icon switches between multiple peripherals.
 * Swedish translation courtesy of Daniel Zippert and Emelie Snecker
 * French translation courtesy of Papoteur, David Geiger and Damien Lallement.
 * Fixed some untranslated strings.
 
-0.9.2:
+# 0.9.2
+
 * Added support for hand detection on the K800.
 * Added support for V550 and V450 Nano.
 * Fixed side-scrolling with the M705 Marathon.
@@ -284,7 +303,8 @@
 * Added internationalization support and romanian translation.
 * Polish translation courtesy of Adrian Piotrowicz.
 
-0.9.1:
+# 0.9.1
+
 * When devices report a battery alert, only show the alert once.
 * Make sure devices in the window tree are sorted by registration index.
 * Added an autostart .desktop file.
@@ -292,7 +312,8 @@
 * Fixed identification of the M505 mouse.
 * Fixed an occasional windowing layout bug with the C52F Nano Receiver.
 
-0.9.0:
+# 0.9.0
+
 * New single-window UI.
 * Performance MX leds show the current battery charge.
 * Support the VX Nano mouse.
@@ -303,7 +324,7 @@
 * Bugfixes to saving and applying device settings.
 * Properly handle ^C when running in console.
 
-0.8.9:
+# 0.8.9
 
 * Improved support for gnome-shell/Unity.
 * Persist devices settings between runs.
@@ -314,7 +335,7 @@
 * Fixed missing icons under Kubuntu.
 * Many more bug-fixes and reliability improvements.
 
-0.8.8:
+# 0.8.8
 
 * Partial support for some Nano receivers.
 * Improved support for some devices: M510, K800, Performance MX.
@@ -325,13 +346,13 @@
 * Incipient support for multiple connected receivers.
 * More Python 3 fixes.
 
-0.8.7:
+# 0.8.7
 
 * Don't show the "device disconnected" notification, it can be annoying and
   not very useful.
 * More robust detection of systray icon visibility.
 
-0.8.6:
+# 0.8.6
 
 * Ensure the Gtk application is single-instance.
 * Fix identifying available dpi values.
