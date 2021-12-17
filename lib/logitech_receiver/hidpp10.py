@@ -43,6 +43,7 @@ DEVICE_KIND = _NamedInts(
     remote=0x07,
     trackball=0x08,
     touchpad=0x09,
+    headset=0x0D,  # not from Logitech documentation
     remote_control=0x0E,  # for compatability with HID++ 2.0
     receiver=0x0F  # for compatability with HID++ 2.0
 )
