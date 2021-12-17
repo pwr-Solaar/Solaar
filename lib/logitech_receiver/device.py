@@ -397,7 +397,9 @@ class Device:
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
+        protocol = _base.ping(
+            self.handle or self.receiver.handle, self.number, long_message=self.bluetooth or self._protocol >= 2.0
+        )
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol

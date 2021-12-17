@@ -739,3 +739,14 @@ _D(
 # Some exotics...
 
 _D('Fujitsu Sonic Mouse', codename='Sonic', protocol=1.0, wpid='1029')
+
+# Headset
+
+_D(
+    'Logitech PRO X Wireless Gaming Headset',
+    codename='PRO Wireless Headset',
+    protocol=2.0,
+    interface=3,
+    kind=_DK.headset,
+    usbid=0x0aba
+)
