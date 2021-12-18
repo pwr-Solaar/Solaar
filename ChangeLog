@@ -6,7 +6,7 @@
  * Catch errors when applying settings so that other settings are not affected
  * Add support for Bolt receivers and devices, including pairing
  * Revise method for creating system tray menu
- * Remove obsolete code (mostly Python 2 compatability code)
+ * Remove obsolete code (mostly Python 2 compatibility code)
  * Add support for PRO X Wireless Mouse, G914 TKL keyboard
  * Ignore more notifications that come to a device listener
  * Handle more device connection protocols
@@ -14,7 +14,7 @@
  * Change emojis to text in documentation
  * Pare down device documentation so as not to require frequent updates
  * Add information about M500S mouse
- * Reimplment MOUSE GESTURE and DPI SLIDING settings
+ * Reimplement MOUSE GESTURE and DPI SLIDING settings
  * Add setting for DPI CHANGE button to switch sensitivity
  * Use file name instead of icon name for tray to avoid XFCE bug
  * Update documentation on implemented features and mouse gestures
@@ -38,7 +38,7 @@
  * Fix bug with new_fn_inversion setting.
  * Use correct device number for directly connected devices
  * Add debug message when candidate device found
- * Update Polish, Taiwanese, and Brazilian Portugese translations
+ * Update Polish, Taiwanese, and Brazilian Portuguese translations
  * Add MouseProcess a rule condition like Process but for the window under the mouse
  * Add parameters for binary settings to support prefixes
  * Add locks to serialize requests to devices
@@ -47,7 +47,7 @@
  * Rules can now trigger on both pressing and releasing a diverted key
  * Upgrade mouse gestures to allow sequences of movements
  * Fix gkeys diversion faked read
- * Add suppor for Logitech g pro x superlight receiver
+ * Add support for Logitech g pro x superlight receiver
  * Convert HID++ 2.0 device kinds to enhanced HID++ 1.0 device kinds
  * Update about window, bug report templates, and supported kernels.
 
@@ -73,7 +73,7 @@
   * Add setting for SMART SHIFT ENHANCED feature
   * Don't unnecessarily use long messages for HID++ 1.0 commands
   * Correctly select choices in solaar config and use 1-origin addressing
-  * Add quirk for G915 TKL keyboard because its host mode inteferes with its Fn keys
+  * Add quirk for G915 TKL keyboard because its host mode interferes with its Fn keys
   * Show command outputs both saved and on-device settings
   * Update documentation
   * Fix bug in hidconsole
@@ -97,7 +97,7 @@
   * Remove information on SUSE package as it is very old.
   * Turn GKEY notifications into Gn key keypresses that can trigger rules.
   * Push device settings to devices after suspend when device is immediately active.
-  * Reduce unneccessary saving of configuration file.
+  * Reduce unnecessary saving of configuration file.
   * Better handling of disconnected devices.
   * Implement GUI to edit rules.
   * Implement rule-base processing of HID++ feature notifications (depends on X11).
@@ -137,7 +137,7 @@
   * Correctly discover settings that share a name.
   * Don't show pop-up notifications at startup.
   * Keep battery voltage updated in GUI.
-  * Add Portugese translation.
+  * Add Portuguese translation.
   * Update several translations.
   * Add Lightspeed receivers c545 and c541.
   * Reimplement REPROG_CONTROLS data structure.
@@ -157,7 +157,7 @@
   * Don't install udev or autostart files from python (or pip).
   * Solaar needs Python 3.6+ and probably needs kernel 5.2+
   * Handle exceptions on dynamic settings when device is not connected.
-  * Fix inifinite loop on some low-level write errors
+  * Fix infinite loop on some low-level write errors
   * Add support for EX100 keyboard/mouse and receiver (046d:c517)
   * Add two settings for THUMB_WHEEL feature - inversion and reporting via HID++
   * Update German translation
@@ -172,7 +172,7 @@
   * Remove Logitech documents from documentation directory
   * Change config command to not read all settings when only printing or showing one
   * Display hosts info in 'solaar show' if device supports it
-  * Remove non-working smooth-scrool from M510 v1
+  * Remove non-working smooth-scroll from M510 v1
   * Add yapf and flake8 code style checks
   * Fix feature k375s Fn inversion
   * Update controls (keys and buttons) and tasks (actions)
@@ -252,7 +252,7 @@
   * Fix bug in remembering features discovered from device reports
   * Show icons in main window device list
   * Count offline devices when determining whether pairing is possible
-  * Update French, Dutch, German, and Croation translations
+  * Update French, Dutch, German, and Croatian translations
   * Better icons for battery levels
   * Support DPI, Backlight 2, Battery Voltage features
   * Support M585, M590, M330, MX Master 2s and 3, new M310, new K800, craft keyboard

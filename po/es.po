@@ -94,7 +94,7 @@ msgstr "recarga lenta"
 
 #: lib/logitech_receiver/i18n.py:53
 msgid "invalid battery"
-msgstr "batería no valida"
+msgstr "batería no válida"
 
 #: lib/logitech_receiver/i18n.py:54
 msgid "thermal error"
@@ -362,7 +362,7 @@ msgstr "Sensibilidad (Velocidad del puntero)"
 #: lib/logitech_receiver/settings_templates.py:94
 msgid "Speed multiplier for mouse (256 is normal multiplier)."
 msgstr ""
-"Multiplicador de velocidad para el ratón (256 és un multiplicador normal)"
+"Multiplicador de velocidad para el ratón (256 es un multiplicador normal)"
 
 #: lib/logitech_receiver/settings_templates.py:95
 msgid "Scroll Wheel Rachet"
@@ -387,18 +387,18 @@ msgstr "Encencer o apagar la iluminación del teclado."
 
 #: lib/logitech_receiver/settings_templates.py:99
 msgid "Key/Button Actions"
-msgstr "Accions de Tecla/Botón"
+msgstr "Acciones de Tecla/Botón"
 
 #: lib/logitech_receiver/settings_templates.py:100
 msgid "Change the action for the key or button."
-msgstr "Cambiar la acción pera la tecla o botón."
+msgstr "Cambiar la acción para la tecla o botón."
 
 #: lib/logitech_receiver/settings_templates.py:101
 msgid ""
 "Changing important actions (such as for the left mouse button) can result in "
 "an unusable system."
 msgstr ""
-"Cambiar accions importantes (pot ejemplo el botón izquierdo del ratón) puede "
+"Cambiar acciones importantes (por ejemplo el botón izquierdo del ratón) puede "
 "dejar su sistema inutilizable."
 
 #: lib/logitech_receiver/settings_templates.py:102
@@ -928,7 +928,7 @@ msgstr "Regla"
 #: lib/solaar/ui/diversion_rules.py:60 lib/solaar/ui/diversion_rules.py:503
 #: lib/solaar/ui/diversion_rules.py:622
 msgid "Sub-rule"
-msgstr "Sub-regla"
+msgstr "Subregla"
 
 #: lib/solaar/ui/diversion_rules.py:62
 msgid "[empty]"
@@ -1369,7 +1369,7 @@ msgstr "Voltaje informado por la batería"
 
 #: lib/solaar/ui/window.py:706 lib/solaar/ui/window.py:710
 msgid "Battery Level"
-msgstr "Nivel de Bateria"
+msgstr "Nivel de Batería"
 
 #: lib/solaar/ui/window.py:708 lib/solaar/ui/window.py:712
 msgid "Approximate level reported by battery"
