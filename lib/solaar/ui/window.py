@@ -695,7 +695,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 
         if battery_voltage is not None:
             panel._battery._label.set_text(_('Battery Voltage'))
-            text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+            text = '%(voltage)dmV, %(level)d%%' % {'voltage': battery_voltage, 'level': battery_level}
             tooltip_text = _('Voltage reported by battery')
         elif isinstance(battery_level, _NamedInt):
             panel._battery._label.set_text(_('Battery Level'))
@@ -909,7 +909,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
-        if battery_voltage is not None:
+        if battery_voltage is not None and False:  # Use levels instead of voltage here
             status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
         elif isinstance(battery_level, _NamedInt):
             status_text = _(str(battery_level))
