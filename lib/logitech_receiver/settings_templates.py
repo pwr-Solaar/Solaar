@@ -680,12 +680,13 @@ def _feature_reprogrammable_keys():
 
 class DivertKeysRW:
     def __init__(self):
+        self.feature = _F.REPROG_CONTROLS_V4
         self.kind = _FeatureRW.kind
 
     def read(self, device, key):
         key_index = device.keys.index(key)
         key_struct = device.keys[key_index]
-        return b'0x01' if 'diverted' in key_struct.mapping_flags else b'0x00'
+        return b'\x00\x00\x01' if 'diverted' in key_struct.mapping_flags else b'\x00\x00\x00'
 
     def write(self, device, key, data_bytes):
         key_index = device.keys.index(key)
