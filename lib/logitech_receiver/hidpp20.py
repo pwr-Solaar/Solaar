@@ -1170,6 +1170,25 @@ def get_voltage(device):
         return decipher_voltage(battery_voltage)
 
 
+# voltage to remaining charge from Logitech
+battery_voltage_remaining = (
+    (4186, 100),
+    (4067, 90),
+    (3989, 80),
+    (3922, 70),
+    (3859, 60),
+    (3811, 50),
+    (3778, 40),
+    (3751, 30),
+    (3717, 20),
+    (3671, 10),
+    (3646, 5),
+    (3579, 2),
+    (3500, 0),
+    (-1000, 0),
+)
+
+
 # modified to be much closer to battery reports
 def decipher_voltage(voltage_report):
     voltage, flags = _unpack('>HB', voltage_report[:3])
@@ -1193,6 +1212,11 @@ def decipher_voltage(voltage_report):
         status = BATTERY_STATUS.slow_recharge
     elif (flags & (1 << 5)):
         charge_lvl = CHARGE_LEVEL.critical
+
+    for level in battery_voltage_remaining:
+        if level[0] < voltage:
+            charge_lvl = level[1]
+            break
 
     if _log.isEnabledFor(_DEBUG):
         _log.debug(
