@@ -78,8 +78,9 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
-        if receiver.isDevice:  # (wired) devices start as active
-            receiver.status.changed(True)
+        if receiver.isDevice:  # ping (wired) devices to see if they are really online
+            if receiver.ping():
+                receiver.status.changed(True, reason='initialization')
 
     def has_started(self):
         if _log.isEnabledFor(_INFO):

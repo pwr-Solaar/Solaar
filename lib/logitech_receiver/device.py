@@ -134,7 +134,7 @@ class Device:
         else:
             self.path = info.path
             self.handle = _hid.open_path(self.path)
-            self.online = True
+            self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
             self.descriptor = _descriptors.get_btid(self.product_id

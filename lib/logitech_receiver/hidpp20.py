@@ -263,7 +263,7 @@ class FeaturesArray:
 
             reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
             if reply is None:
-                self.supported = False
+                return False  # device might not be active so don't assume unsupported
             else:
                 fs_index = ord(reply[0:1])
                 if fs_index:
