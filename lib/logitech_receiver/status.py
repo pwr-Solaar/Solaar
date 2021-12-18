@@ -282,7 +282,7 @@ class DeviceStatus(dict):
             self[KEYS.BATTERY_VOLTAGE] = None
             self.changed()
 
-    def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
+    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False, timestamp=None):
         assert self._changed_callback
         d = self._device
         # assert d  # may be invalid when processing the 'unpaired' notification
@@ -299,22 +299,19 @@ class DeviceStatus(dict):
                     if d.protocol < 2.0:
                         self[KEYS.NOTIFICATION_FLAGS] = d.enable_connection_notifications()
 
-                    # If we've been inactive for a long time, forget anything
-                    # about the battery. (This is probably unnecessary.)
-                    if self.updated > 0 and timestamp - self.updated > _LONG_SLEEP:
-                        self[KEYS.BATTERY_LEVEL] = None
-                        self[KEYS.BATTERY_STATUS] = None
-                        self[KEYS.BATTERY_CHARGING] = None
-                        self[KEYS.BATTERY_VOLTAGE] = None
+                    # battery information may have changed so try to read it now
+                    self.read_battery(timestamp)
 
-                    # Devices lose configuration when they are turned off,
-                    # make sure they're up-to-date.
+                # Push settings for new devices (was_active is None),
+                # when devices request software reconfiguration
+                # and when devices become active if they don't have wireless device status feature,
+                if was_active is None or push or not was_active and (
+                    not d.features or _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
+                ):
                     if _log.isEnabledFor(_INFO):
                         _log.info('%s pushing device settings %s', d, d.settings)
                     _settings.apply_all_settings(d)
 
-                    # battery information may have changed so try to read it now
-                    self.read_battery(timestamp)
             else:
                 if was_active:
                     battery = self.get(KEYS.BATTERY_LEVEL)
