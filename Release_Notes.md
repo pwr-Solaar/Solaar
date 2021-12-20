@@ -1,5 +1,9 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.1
+
+* There is a new settng to switch keyboard crowns between smooth and ratchet scrolling.
+
 ## Version 1.1.0
 
 * Solaar now supports Bolt receivers and devices that connect to them, including authentication of devices when pairing.
