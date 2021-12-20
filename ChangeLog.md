@@ -1,3 +1,17 @@
+# 1.1.1rc1
+
+* Push settings when device requests software reconfiguration
+* Fix read for key/button diversion setting
+* Add modalias information to Solaar metainfo
+* Don't do on-screen notifications when devices are powered on
+* Add setting to switch crown between smooth and ratchet scrolling
+* Add write_prefix_bytes argument to Boolean validator
+* Update Russian and Spanish translations
+* New shell script tools to help determine capabilities of receivers
+* Add special keys for MX Keys for Business and MX Keys Mini
+* Improve tray menu ordering
+* Add --tray-icon-size option to get around bugs in some tray implementations
+
 # 1.1.0
 
 * Fix bug when adding receiver to tray menu
@@ -30,9 +44,6 @@
 * Lock on actual handle, not just on handle number
 * Mark Nano receiver C52F as not unpairing
 * Upgrade pairing/unpairing documentation
-
-# 1.0.7rc2
-
 * Don't signal status change when battery changes from None to None.
 * Add Japanese translation
 * Use first word of name for code name if no other code name available.
@@ -89,9 +100,6 @@
 * Improve help messages
 * Fix bug in finding receiver to pair
 * Solaar config command can set keyed settings.
-
-# 1.0.5rc2
-
 * Add setting for polling rate
 * Use long HID++ messages for all 2.0 requests
 * Update German, Italian, and Polish translations
@@ -115,9 +123,6 @@
 # 1.0.4
 
 * Update pt_BR translation
-
-# 1.0.4rc1
-
 * Support USB and BT connected devices that are not in descriptors.py
 * Use FRIENDLY NAME for codename if needed and available.
 * Extract manufacturer and product ID from Udev HID information.
@@ -156,14 +161,8 @@
 * Update documentation on installation.
 * Update Swedish and French translations.
 * Add Norwegian Nynorsk and Danish translations.
-
-# 1.0.3rc2
-
 * Fix bug handling DJ pairing notifications.
 * Add Norwegian Bokmål translation.
-
-# 1.0.3rc1
-
 * Remove deprecated solaar-cli application.
 * Don't install udev or autostart files from python (or pip).
 * Solaar needs Python 3.6+ and probably needs kernel 5.2+
@@ -208,16 +207,10 @@
 # 1.0.2
 
 * Add usage document
-
-# 1.0.2rc3
-
 * Don't produce error dialog for inaccessible receivers with access control lists.
 * Add option --battery-icons=symbolic to use symbolic icons if available.
 * Update French translation
 * Update installation documentation
-
-# 1.0.2rc2
-
 * Remove packaging directory tree as it is not maintained
 * Pip installs udev rule and solaar autostart when doing install without --user flag
 * Use Solaar icon instead of a missing battery icon
@@ -239,9 +232,6 @@
 * Improve error reporting when required system packages are not install.
 * Better tooltip description
 * Add release script to help when creating releases
-
-# 1.0.2-rc1
-
 * Look up tray icon filenames to get around a bug in libappindicator.
 * Make the default behavior be to show the main window at startup.
 * Support c537 nano receiver
