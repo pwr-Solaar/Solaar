@@ -174,6 +174,8 @@ def _process_device_notification(device, status, n):
         else:
             return _process_hidpp10_notification(device, status, n)
 
+    # These notifications are from the device itself, so it must be active
+    device.online = True
     # At this point, we need to know the device's protocol, otherwise it's
     # possible to not know how to handle it.
     assert device.protocol is not None
@@ -371,9 +373,7 @@ def _process_feature_notification(device, status, n, feature):
             reason = 'powered on' if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
                 alert = _ALERT.NONE
-                status.changed(active=True, alert=alert, reason=reason)
-            else:
-                _log.warn('%s: unknown WIRELESS %s', device, n)
+                status.changed(active=True, alert=alert, reason=reason, push=True)
         else:
             _log.warn('%s: unknown WIRELESS %s', device, n)
 
