@@ -1,5 +1,7 @@
-# 1.1.1rc1
+# 1.1.1rc2
 
+* Display battery percentage estimates from battery voltage
+* Add minimal support for Logitech PRO X Wireless Gaming Headset
 * Push settings when device requests software reconfiguration
 * Fix read for key/button diversion setting
 * Add modalias information to Solaar metainfo
