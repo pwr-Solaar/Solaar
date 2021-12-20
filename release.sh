@@ -107,7 +107,7 @@ git ls-remote $remote | grep "refs/tags/$version$" >/dev/null
 [ $? -eq 0 ] && echo -e '\nError: Tag already exists on remote' && exit 1
 
 # Check if version is in the changelog
-grep "^$version:" ChangeLog.md >/dev/null
+grep '^# '"$version" ChangeLog.md >/dev/null
 [ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
 
 echo
