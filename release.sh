@@ -85,6 +85,10 @@ read -p 'Are you *really* sure you want to proceed? (y/n) ' -n 1 -r < /dev/tty
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
+# Check if version is in the changelog
+grep '^# '"$version" ChangeLog.md >/dev/null
+[ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
+
 # Check for uncomitted changes
 git diff --quiet HEAD >/dev/null
 [ $? -ne 0 ] && echo -e '\nError: Uncomitted changes found' && exit 1
@@ -105,10 +109,6 @@ git rev-list --max-count=1 $version >/dev/null 2>/dev/null
 # Check if tag already exists on remote
 git ls-remote $remote | grep "refs/tags/$version$" >/dev/null
 [ $? -eq 0 ] && echo -e '\nError: Tag already exists on remote' && exit 1
-
-# Check if version is in the changelog
-grep '^# '"$version" ChangeLog.md >/dev/null
-[ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
 
 echo
 
