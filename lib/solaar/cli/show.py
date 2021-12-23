@@ -22,6 +22,7 @@ from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import strhex as _strhex
+from solaar import NAME, __version__
 
 _F = _hidpp20.FEATURE
 
@@ -271,6 +272,9 @@ def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
 
+    print('%s version %s' % (NAME, __version__))
+    print('')
+
     device_name = args.device.lower()
 
     if device_name == 'all':
@@ -289,7 +293,8 @@ def run(devices, args, find_receiver, find_device):
                 print('')
             else:
                 if dev_num == 1:
-                    print('Wired Devices')
+                    print('USB and Bluetooth Devices')
+                print('')
                 _print_device(d, num=dev_num)
                 dev_num += 1
         return
