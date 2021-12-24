@@ -291,8 +291,8 @@ def x11_focus_prog():
         if wm_class and pid:
             break
         window = window.query_tree().parent
-    name = psutil.Process(pid.value[0]).name() if pid else None
-    return (wm_class[0], wm_class[1], name) if wm_class else (name)
+    name = psutil.Process(pid.value[0]).name() if pid else ''
+    return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
 
 def x11_pointer_prog():
@@ -304,8 +304,8 @@ def x11_pointer_prog():
         if wm_class:
             break
         window = window.query_tree().parent
-    name = psutil.Process(pid.value[0]).name() if pid else None
-    return (wm_class[0], wm_class[1], name) if wm_class else (name)
+    name = psutil.Process(pid.value[0]).name() if pid else ''
+    return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
 
 class Process(Condition):
