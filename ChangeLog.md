@@ -1,5 +1,9 @@
-# 1.1.1rc2
+# 1.1.1
 
+* Keep left pane in Solaar main window the same size
+* Fix crash when checking a process condition when X11 not running
+* Add version number to output of solaar show
+* Fix crash when pinging a device with unknown protocol
 * Display battery percentage estimates from battery voltage
 * Add minimal support for Logitech PRO X Wireless Gaming Headset
 * Push settings when device requests software reconfiguration
