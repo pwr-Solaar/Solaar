@@ -303,7 +303,7 @@ def _create_window_layout():
 
     tree_scroll = Gtk.ScrolledWindow()
     tree_scroll.add(_tree)
-    tree_scroll.set_min_content_width(_tree.get_size_request()[0])
+    tree_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     tree_scroll.set_shadow_type(Gtk.ShadowType.IN)
 
     tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -312,7 +312,7 @@ def _create_window_layout():
     tree_panel.pack_start(_details, False, False, 0)
 
     panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
-    panel.pack_start(tree_panel, True, True, 0)
+    panel.pack_start(tree_panel, False, False, 0)
     panel.pack_start(_info, True, True, 0)
     panel.pack_start(_empty, True, True, 0)
 
