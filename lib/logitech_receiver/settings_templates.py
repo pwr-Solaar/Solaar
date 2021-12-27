@@ -933,12 +933,12 @@ def check_feature(device, name, featureId, featureFn):
         return
     try:
         detected = featureFn()(device)
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('check_feature[%s] detected %s', featureId, detected)
+        if _log.isEnabledFor(_INFO):
+            _log.info('check_feature %s [%s] detected %s', name, featureId, detected)
         return detected
     except Exception:
         from traceback import format_exc
-        _log.error('check_feature[%s] inconsistent feature %s', featureId, format_exc())
+        _log.error('check_feature %s [%s] error %s', name, featureId, format_exc())
 
 
 # Returns True if device was queried to find features, False otherwise
@@ -948,12 +948,22 @@ def check_feature_settings(device, already_known):
         return False
     if device.protocol and device.protocol < 2.0:
         return False
+    absent = device.persister.get('_absent', []) if device.persister else []
+    newAbsent = []
     for name, featureId, featureFn, __, __ in _SETTINGS_TABLE:
         if featureId and featureFn:
-            if not any(s.name == name for s in already_known):
+            if name not in absent and not any(s.name == name for s in already_known):
                 setting = check_feature(device, name, featureId, featureFn)
                 if setting:
                     already_known.append(setting)
+                    if name in newAbsent:
+                        newAbsent.remove(name)
+                else:
+                    if not any(s.name == name for s in already_known) and name not in newAbsent:
+                        newAbsent.append(name)
+    if device.persister and newAbsent:
+        absent.extend(newAbsent)
+        device.persister['_absent'] = absent
     return True
 
 
