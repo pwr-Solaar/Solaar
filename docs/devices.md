@@ -75,11 +75,15 @@ This is the main reason for new devices that use the HID++ protocol to need supp
 | 046d:c541 | Lightspeed | 1                  |
 | 046d:c545 | Lightspeed | 1                  |
 | 046d:c547 | Lightspeed | 1                  |
+| 046d:c548 | Bolt       | 6                  |
 | 17ef:6042 | Nano       | 1                  |
 
 Some Nano receivers are only partly supported
-as they do not fully implement the HID++ 1.0 protocol.
-The receiver with USB Id 046d:c517 is an old 27 MHz receiver, supporting only
+as they do not fully implement the full HID++ 1.0 protocol.
+Some Nano receivers are not supported at all as they do not implement the HID++ protocol.
+Receivers with USB ID 046d:c542 fall into this category.
+
+The receiver with USB ID 046d:c517 is an old 27 MHz receiver, supporting only
 subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 
 
@@ -195,6 +199,7 @@ subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 
 
 ### Mice (Lightspeed)
+
 | Device                       | WPID | HID++ |
 |------------------------------|------|-------|
 | PRO X Superlight Wireless    | 4093 | 4.2   |

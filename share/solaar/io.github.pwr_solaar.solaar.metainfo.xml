@@ -4,6 +4,8 @@
 
   <name>Solaar</name>
   <summary>Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads.</summary>
+  <url type="homepage">https://github.com/pwr-Solaar/Solaar</url>
+  <content_rating type="oars-1.0" />
 
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>GPL-2.0-only</project_license>
@@ -16,28 +18,127 @@
 
   <description>
     <p>
-      <em>
-      </em>Solaar<em>
-    </em> is a Linux manager for many Logitech keyboards, mice, and trackpads that connect wirelessly to a USB, Lightspeed, or Nano receiver, connect directly via a USB cable, or connect via Bluetooth. Solaar does not work with peripherals from other companies.
-  </p>
-  <p>
-    Solaar can be used as a GUI application or via its command-line interface. Both interfaces are able to list the connected devices and show information about each device, often including battery status. Solaar is able to pair and unpair devices with receivers as supported by the device and receiver. Solaar can also control some changeable features of devices, such as smooth scrolling or function key behavior.
-  </p>
-  <p>
-    Solaar&apos;s GUI normally uses an icon in the system tray and starts with its main window visible.
-  </p>
-</description>
+      Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads that connect wirelessly to a USB, Lightspeed, or Nano receiver, connect directly via a USB cable, or connect via Bluetooth. Solaar does not work with peripherals from other companies.
+    </p>
+    <p>
+      Solaar can be used as a GUI application or via its command-line interface. Both interfaces are able to list the connected devices and show information about each device, often including battery status. Solaar is able to pair and unpair devices with receivers as supported by the device and receiver. Solaar can also control some changeable features of devices, such as smooth scrolling or function key behavior.
+    </p>
+    <p>
+      Solaar&apos;s GUI normally uses an icon in the system tray and starts with its main window visible.
+    </p>
+  </description>
 
-<launchable type="desktop-id">solaar.desktop</launchable>
-<screenshots>
-  <screenshot type="default">
-    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-button-actions.png</image>
-  </screenshot>
-  <screenshot>
-    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-receiver.png</image>
-  </screenshot>
-  <screenshot>
-    <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-menu.png</image>
-  </screenshot>
-</screenshots>
+  <launchable type="desktop-id">solaar.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-button-actions.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-main-window-receiver.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-menu.png</image>
+    </screenshot>
+  </screenshots>
+
+  <provides>
+    <binary>solaar</binary>
+    <!-- USB Receivers - 27MHz, Unifying, Nano, Bolt -->
+    <modalias>usb:v17EFp6042d*</modalias>
+    <modalias>usb:v046DpC517d*</modalias>
+    <modalias>usb:v046DpC518d*</modalias>
+    <modalias>usb:v046DpC51Ad*</modalias>
+    <modalias>usb:v046DpC51Bd*</modalias>
+    <modalias>usb:v046DpC521d*</modalias>
+    <modalias>usb:v046DpC525d*</modalias>
+    <modalias>usb:v046DpC526d*</modalias>
+    <modalias>usb:v046DpC52Bd*</modalias>
+    <modalias>usb:v046DpC52Ed*</modalias>
+    <modalias>usb:v046DpC52Fd*</modalias>
+    <modalias>usb:v046DpC531d*</modalias>
+    <modalias>usb:v046DpC532d*</modalias>
+    <modalias>usb:v046DpC534d*</modalias>
+    <modalias>usb:v046DpC537d*</modalias>
+    <modalias>usb:v046DpC539d*</modalias>
+    <modalias>usb:v046DpC53Ad*</modalias>
+    <modalias>usb:v046DpC53Dd*</modalias>
+    <modalias>usb:v046DpC53Fd*</modalias>
+    <modalias>usb:v046DpC541d*</modalias>
+    <modalias>usb:v046DpC545d*</modalias>
+    <modalias>usb:v046DpC547d*</modalias>
+    <modalias>usb:v046DpC548d*</modalias>
+    <!-- USB Devices - Logitech says USB IDs are 0xC07D - 0xC094, 0xC32B - 0xC344 -->
+    <!-- Solaar also knows about two others -->
+    <modalias>usb:v046DpC06Bd*</modalias>
+    <modalias>usb:v046DpC07Cd*</modalias>
+    <modalias>usb:v046DpC07Dd*</modalias>
+    <modalias>usb:v046DpC07Ed*</modalias>
+    <modalias>usb:v046DpC07Fd*</modalias>
+    <modalias>usb:v046DpC08*d*</modalias>
+    <modalias>usb:v046DpC090d*</modalias>
+    <modalias>usb:v046DpC091d*</modalias>
+    <modalias>usb:v046DpC092d*</modalias>
+    <modalias>usb:v046DpC093d*</modalias>
+    <modalias>usb:v046DpC094d*</modalias>
+    <modalias>usb:v046DpC32Bd*</modalias>
+    <modalias>usb:v046DpC32Cd*</modalias>
+    <modalias>usb:v046DpC32Dd*</modalias>
+    <modalias>usb:v046DpC32Ed*</modalias>
+    <modalias>usb:v046DpC32Fd*</modalias>
+    <modalias>usb:v046DpC33*d*</modalias>
+    <modalias>usb:v046DpC340d*</modalias>
+    <modalias>usb:v046DpC341d*</modalias>
+    <modalias>usb:v046DpC342d*</modalias>
+    <modalias>usb:v046DpC343d*</modalias>
+    <modalias>usb:v046DpC344d*</modalias>
+    <!-- Bluetooth Devices - these appear to be known with usb prefixes -->
+    <!-- Logitech says their IDs are 0xB012 - 0xB0xx, 0xB32A - 0xB3xx -->
+    <modalias>usb:v046DpB012d*</modalias>
+    <modalias>usb:v046DpB013d*</modalias>
+    <modalias>usb:v046DpB014d*</modalias>
+    <modalias>usb:v046DpB015d*</modalias>
+    <modalias>usb:v046DpB016d*</modalias>
+    <modalias>usb:v046DpB017d*</modalias>
+    <modalias>usb:v046DpB018d*</modalias>
+    <modalias>usb:v046DpB019d*</modalias>
+    <modalias>usb:v046DpB01Ad*</modalias>
+    <modalias>usb:v046DpB01Bd*</modalias>
+    <modalias>usb:v046DpB01Cd*</modalias>
+    <modalias>usb:v046DpB01Dd*</modalias>
+    <modalias>usb:v046DpB01Ed*</modalias>
+    <modalias>usb:v046DpB01Fd*</modalias>
+    <modalias>usb:v046DpB02*d*</modalias>
+    <modalias>usb:v046DpB03*d*</modalias>
+    <modalias>usb:v046DpB04*d*</modalias>
+    <modalias>usb:v046DpB05*d*</modalias>
+    <modalias>usb:v046DpB06*d*</modalias>
+    <modalias>usb:v046DpB07*d*</modalias>
+    <modalias>usb:v046DpB08*d*</modalias>
+    <modalias>usb:v046DpB09*d*</modalias>
+    <modalias>usb:v046DpB0A*d*</modalias>
+    <modalias>usb:v046DpB0B*d*</modalias>
+    <modalias>usb:v046DpB0C*d*</modalias>
+    <modalias>usb:v046DpB0D*d*</modalias>
+    <modalias>usb:v046DpB0E*d*</modalias>
+    <modalias>usb:v046DpB0F*d*</modalias>
+    <modalias>usb:v046DpB32Ad*</modalias>
+    <modalias>usb:v046DpB32Bd*</modalias>
+    <modalias>usb:v046DpB32Cd*</modalias>
+    <modalias>usb:v046DpB32Dd*</modalias>
+    <modalias>usb:v046DpB32Ed*</modalias>
+    <modalias>usb:v046DpB32Fd*</modalias>
+    <modalias>usb:v046DpB33*d*</modalias>
+    <modalias>usb:v046DpB34*d*</modalias>
+    <modalias>usb:v046DpB35*d*</modalias>
+    <modalias>usb:v046DpB36*d*</modalias>
+    <modalias>usb:v046DpB37*d*</modalias>
+    <modalias>usb:v046DpB38*d*</modalias>
+    <modalias>usb:v046DpB39*d*</modalias>
+    <modalias>usb:v046DpB3A*d*</modalias>
+    <modalias>usb:v046DpB3B*d*</modalias>
+    <modalias>usb:v046DpB3C*d*</modalias>
+    <modalias>usb:v046DpB3D*d*</modalias>
+    <modalias>usb:v046DpB3E*d*</modalias>
+    <modalias>usb:v046DpB3F*d*</modalias>
+  </provides>
 </component>

@@ -81,6 +81,7 @@ def _parse_arguments():
         choices=('regular', 'symbolic', 'solaar'),
         help='prefer regular battery / symbolic battery / solaar icons'
     )
+    arg_parser.add_argument('--tray-icon-size', type=int, help='explicit size for tray icons')
     arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__)
     arg_parser.add_argument('--help-actions', action='store_true', help='print help for the optional actions')
     arg_parser.add_argument('action', nargs=argparse.REMAINDER, choices=_cli.actions, help='optional actions to perform')
@@ -96,6 +97,8 @@ def _parse_arguments():
 
     global battery_icons_style
     battery_icons_style = args.battery_icons if args.battery_icons is not None else 'regular'
+    global tray_icon_size
+    tray_icon_size = args.tray_icon_size
 
     import logging
     if args.debug > 0:

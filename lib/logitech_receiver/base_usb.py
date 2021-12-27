@@ -136,6 +136,9 @@ _ex100_receiver = lambda product_id: {
     'ex100_27mhz_wpid_fix': True
 }
 
+# Receivers added here should also be listed in
+# share/solaar/io.github.pwr_solaar.solaar.metainfo.xml
+
 # Bolt receivers (marked with the yellow lightning bolt logo)
 BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
 
@@ -143,58 +146,56 @@ BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
 UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
 UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
 
-# Nano receviers that support the Unifying protocol
+# Nano receivers (usually sold with low-end devices)
 NANO_RECEIVER_ADVANCED = _nano_receiver_no_unpair(0xc52f)
-
-# ex100 old style receiver pre-unifyimg protocol
-EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
-
-# Nano receivers that don't support the Unifying protocol
 NANO_RECEIVER_C518 = _nano_receiver(0xc518)
 NANO_RECEIVER_C51A = _nano_receiver(0xc51a)
 NANO_RECEIVER_C51B = _nano_receiver(0xc51b)
 NANO_RECEIVER_C521 = _nano_receiver(0xc521)
 NANO_RECEIVER_C525 = _nano_receiver(0xc525)
 NANO_RECEIVER_C526 = _nano_receiver(0xc526)
-NANO_RECEIVER_C52e = _nano_receiver_no_unpair(0xc52e)
+NANO_RECEIVER_C52E = _nano_receiver_no_unpair(0xc52e)
 NANO_RECEIVER_C531 = _nano_receiver(0xc531)
 NANO_RECEIVER_C534 = _nano_receiver_max2(0xc534)
 NANO_RECEIVER_C537 = _nano_receiver(0xc537)
 NANO_RECEIVER_6042 = _lenovo_receiver(0x6042)
 
-# Lightspeed receivers
+# Lightspeed receivers (usually sold with gaming devices)
 LIGHTSPEED_RECEIVER_C539 = _lightspeed_receiver(0xc539)
-LIGHTSPEED_RECEIVER_C53a = _lightspeed_receiver(0xc53a)
-LIGHTSPEED_RECEIVER_C53f = _lightspeed_receiver(0xc53f)
-LIGHTSPEED_RECEIVER_C53d = _lightspeed_receiver(0xc53d)
-LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
+LIGHTSPEED_RECEIVER_C53A = _lightspeed_receiver(0xc53a)
+LIGHTSPEED_RECEIVER_C53D = _lightspeed_receiver(0xc53d)
+LIGHTSPEED_RECEIVER_C53F = _lightspeed_receiver(0xc53f)
 LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
+LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xc547)
+
+# EX100 old style receiver pre-unifying protocol
+EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
 
 ALL = (
     BOLT_RECEIVER_C548,
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
     NANO_RECEIVER_ADVANCED,
-    EX100_27MHZ_RECEIVER_C517,
     NANO_RECEIVER_C518,
     NANO_RECEIVER_C51A,
     NANO_RECEIVER_C51B,
     NANO_RECEIVER_C521,
     NANO_RECEIVER_C525,
     NANO_RECEIVER_C526,
-    NANO_RECEIVER_C52e,
+    NANO_RECEIVER_C52E,
     NANO_RECEIVER_C531,
     NANO_RECEIVER_C534,
     NANO_RECEIVER_C537,
     NANO_RECEIVER_6042,
     LIGHTSPEED_RECEIVER_C539,
-    LIGHTSPEED_RECEIVER_C53a,
-    LIGHTSPEED_RECEIVER_C53f,
-    LIGHTSPEED_RECEIVER_C53d,
-    LIGHTSPEED_RECEIVER_C545,
+    LIGHTSPEED_RECEIVER_C53A,
+    LIGHTSPEED_RECEIVER_C53D,
+    LIGHTSPEED_RECEIVER_C53F,
     LIGHTSPEED_RECEIVER_C541,
+    LIGHTSPEED_RECEIVER_C545,
     LIGHTSPEED_RECEIVER_C547,
+    EX100_27MHZ_RECEIVER_C517,
 )
 
 _wired_device = lambda product_id, interface: {

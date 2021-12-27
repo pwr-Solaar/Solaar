@@ -174,6 +174,8 @@ def _process_device_notification(device, status, n):
         else:
             return _process_hidpp10_notification(device, status, n)
 
+    # These notifications are from the device itself, so it must be active
+    device.online = True
     # At this point, we need to know the device's protocol, otherwise it's
     # possible to not know how to handle it.
     assert device.protocol is not None
@@ -305,6 +307,9 @@ def _process_hidpp10_notification(device, status, n):
 
 
 def _process_feature_notification(device, status, n, feature):
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('%s: notification for feature %s, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
+
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
             discharge_level = ord(n.data[:1])
@@ -317,31 +322,27 @@ def _process_feature_notification(device, status, n, feature):
                 _log.info('%s: spurious BATTERY status %s', device, n)
         else:
             _log.warn('%s: unknown BATTERY %s', device, n)
-        return True
 
-    if feature == _F.BATTERY_VOLTAGE:
+    elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
             battery_level, battery_status, battery_voltage, _ignore, _ignore = _hidpp20.decipher_voltage(n.data)
             status.set_battery_info(battery_level, battery_status, None, battery_voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
-        return True
 
-    if feature == _F.UNIFIED_BATTERY:
+    elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
             battery_level, battery_status, battery_voltage = _hidpp20.decipher_unified_battery(n.data)
             status.set_battery_info(battery_level, battery_status, None, battery_voltage)
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
-        return True
 
-    if feature == _F.SOLAR_DASHBOARD:
+    elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
             charge, lux, adc = _unpack('!BHH', n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
             status_text = _hidpp20.BATTERY_STATUS.discharging
-
             if n.address == 0x00:
                 status[_K.LIGHT_LEVEL] = None
                 status.set_battery_info(charge, status_text, None)
@@ -364,26 +365,19 @@ def _process_feature_notification(device, status, n, feature):
                 _log.warn('%s: unknown SOLAR CHARGE %s', device, n)
         else:
             _log.warn('%s: SOLAR CHARGE not GOOD? %s', device, n)
-        return True
 
-    if feature == _F.WIRELESS_DEVICE_STATUS:
+    elif feature == _F.WIRELESS_DEVICE_STATUS:
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('wireless status: %s', n)
             reason = 'powered on' if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
-                # only show a user notification if the device can change hosts
-                # as we want to notify when a device changes to this host
-                # but the only indication we get is this notification
-                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
-                status.changed(active=True, alert=alert, reason=reason)
-            else:
-                _log.warn('%s: unknown WIRELESS %s', device, n)
+                alert = _ALERT.NONE
+                status.changed(active=True, alert=alert, reason=reason, push=True)
         else:
             _log.warn('%s: unknown WIRELESS %s', device, n)
-        return True
 
-    if feature == _F.TOUCHMOUSE_RAW_POINTS:
+    elif feature == _F.TOUCHMOUSE_RAW_POINTS:
         if n.address == 0x00:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: TOUCH MOUSE points %s', device, n)
@@ -408,7 +402,7 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
                 cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
-                _log.debug('%s: diverted controls pressed: %i, %i, %i, %i', device, cid1, cid2, cid3, cid4)
+                _log.debug('%s: diverted controls pressed: 0x%x, 0x%x, 0x%x, 0x%x', device, cid1, cid2, cid3, cid4)
         elif n.address == 0x10:
             if _log.isEnabledFor(_DEBUG):
                 dx, dy = _unpack('!hh', n.data[:4])
@@ -436,6 +430,4 @@ def _process_feature_notification(device, status, n, feature):
                 _log.info('%s: unknown WHEEL %s', device, n)
 
     _diversion.process_notification(device, status, n, feature)
-
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s: notification for feature %r, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
+    return True

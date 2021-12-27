@@ -22,6 +22,7 @@ from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import strhex as _strhex
+from solaar import NAME, __version__
 
 _F = _hidpp20.FEATURE
 
@@ -240,9 +241,9 @@ def _print_device(dev, num=None):
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
-            if dev.keys.keyversion == 1:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V2:
                 print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
-            if dev.keys.keyversion == 4:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ','.join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
@@ -271,6 +272,9 @@ def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
 
+    print('%s version %s' % (NAME, __version__))
+    print('')
+
     device_name = args.device.lower()
 
     if device_name == 'all':
@@ -289,7 +293,8 @@ def run(devices, args, find_receiver, find_device):
                 print('')
             else:
                 if dev_num == 1:
-                    print('Wired Devices')
+                    print('USB and Bluetooth Devices')
+                print('')
                 _print_device(d, num=dev_num)
                 dev_num += 1
         return

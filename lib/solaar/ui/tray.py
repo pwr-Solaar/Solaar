@@ -42,9 +42,8 @@ del getLogger
 # constants
 #
 
-_TRAY_ICON_SIZE = 64  # pixels - make large as downscaling is done but not always upscaling
+_TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
-_RECEIVER_SEPARATOR = ('~', None, None, None)
 
 #
 #
@@ -56,7 +55,7 @@ def _create_menu(quit_handler):
 
     # per-device menu entries will be generated as-needed
 
-    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech receiver found'))
+    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech device found'))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
@@ -87,7 +86,7 @@ def _scroll(tray_icon, event, direction=None):
 
     if len(_devices_info) < 4:
         # don't bother with scrolling when there's only one receiver
-        # with only one device (3 = [receiver, device, separator])
+        # with only one or two devices
         return
 
     # scroll events come way too fast (at least 5-6 at once)
@@ -174,9 +173,11 @@ try:
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
     # Defense against bug that shows up in XFCE 4.16 where icons are not upscaled
     def _icon_file(icon_name):
-        if False and not os.path.isfile(icon_name):
+        if gtk.tray_icon_size is None and not os.path.isfile(icon_name):
             return icon_name
-        icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name, _TRAY_ICON_SIZE, Gtk.IconLookupFlags.FORCE_SVG)
+        icon_info = Gtk.IconTheme.get_default().lookup_icon(
+            icon_name, gtk.tray_icon_size or _TRAY_ICON_SIZE, Gtk.IconLookupFlags.FORCE_SVG
+        )
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
@@ -332,7 +333,7 @@ def _pick_device_with_lowest_battery():
     picked_level = 1000
 
     for info in _devices_info:
-        if info[1] is None:  # is receiver/separator
+        if info[1] is None:  # is receiver
             continue
         level = info[-1].get(_K.BATTERY_LEVEL)
         # print ("checking %s -> %s", info, level)
@@ -351,13 +352,6 @@ def _pick_device_with_lowest_battery():
 #
 
 
-def _add_separator(index):
-    _devices_info.insert(index + 1, _RECEIVER_SEPARATOR)
-    separator = Gtk.SeparatorMenuItem.new()
-    separator.set_visible(True)
-    _menu.insert(separator, index + 1)
-
-
 def _add_device(device):
     assert device
 
@@ -370,7 +364,7 @@ def _add_device(device):
                 break
         while index < len(_devices_info):
             path, number, _ignore, _ignore = _devices_info[index]
-            if path == _RECEIVER_SEPARATOR[0]:
+            if not path == receiver_path:
                 break
             assert number != device.number
             if number > device.number:
@@ -378,7 +372,6 @@ def _add_device(device):
             index = index + 1
 
     new_device_info = (receiver_path, device.number, device.name, device.status)
-    assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
     _devices_info.insert(index, new_device_info)
 
     label_prefix = '   '
@@ -405,38 +398,28 @@ def _remove_device(index):
 
 
 def _add_receiver(receiver):
-    index = 0
+    index = len(_devices_info)
 
     new_receiver_info = (receiver.path, None, receiver.name, None)
-    assert len(new_receiver_info) == len(_RECEIVER_SEPARATOR)
-    _devices_info.insert(0, new_receiver_info)
+    _devices_info.insert(index, new_receiver_info)
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
     icon_set = _icons.device_icon_set(receiver.name)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
+    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_set.names[0], _MENU_ICON_SIZE))
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver.path)
     _menu.insert(new_menu_item, index)
-
-    _add_separator(index)
 
     return 0
 
 
 def _remove_receiver(receiver):
     index = 0
-    found = False
-
     # remove all entries in devices_info that match this receiver
     while index < len(_devices_info):
         path, _ignore, _ignore, _ignore = _devices_info[index]
         if path == receiver.path:
-            found = True
             _remove_device(index)
-        elif found and path == _RECEIVER_SEPARATOR[0]:
-            # the separator after this receiver
-            _remove_device(index)
-            break
         else:
             index += 1
 
@@ -535,7 +518,6 @@ def update(device=None):
         menu_items = _menu.get_children()
         no_receivers_index = len(_devices_info)
         menu_items[no_receivers_index].set_visible(not _devices_info)
-        menu_items[no_receivers_index + 1].set_visible(not _devices_info)
 
     global _picked_device
     if (not _picked_device or _last_scroll == 0) and device is not None and device.kind is not None:

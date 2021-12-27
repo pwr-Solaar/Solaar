@@ -134,7 +134,7 @@ class Device:
         else:
             self.path = info.path
             self.handle = _hid.open_path(self.path)
-            self.online = True
+            self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
             self.descriptor = _descriptors.get_btid(self.product_id
@@ -397,7 +397,8 @@ class Device:
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
+        long = self.bluetooth or self._protocol is not None and self._protocol >= 2.0
+        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol

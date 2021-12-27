@@ -7,7 +7,7 @@ candidates (ex. `1.0.0rc1`). Release candidates must have a `rcX` suffix.
 
 Release routine:
 
-- Update ChangeLog, setup.py, lib/solaar/__init__.py, and docs/_config.yml to the new version
+- Update ChangeLog.md, setup.py, lib/solaar/__init__.py, and docs/_config.yml to the new version
 - Create a commit that starts with `release VERSION`
 - Push commit to Solaar repository
 - Invoke `./release.sh`

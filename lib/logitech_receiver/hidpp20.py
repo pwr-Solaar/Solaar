@@ -263,7 +263,7 @@ class FeaturesArray:
 
             reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
             if reply is None:
-                self.supported = False
+                return False  # device might not be active so don't assume unsupported
             else:
                 fs_index = ord(reply[0:1])
                 if fs_index:
@@ -586,10 +586,10 @@ class KeysArray:
     def __init__(self, device, count):
         assert device is not None
         self.device = device
-        if FEATURE.REPROG_CONTROLS in self.device.features:
-            self.keyversion = 1
-        elif FEATURE.REPROG_CONTROLS_V4 in self.device.features:
-            self.keyversion = 4
+        if FEATURE.REPROG_CONTROLS_V4 in self.device.features:
+            self.keyversion = FEATURE.REPROG_CONTROLS_V4
+        elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
+            self.keyversion = FEATURE.REPROG_CONTROLS_V2
         else:
             if _log.isEnabledFor(_ERROR):
                 _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
@@ -613,13 +613,13 @@ class KeysArray:
             raise IndexError(index)
 
         # TODO: add here additional variants for other REPROG_CONTROLS
-        if self.keyversion == 1:
-            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
+        if self.keyversion == FEATURE.REPROG_CONTROLS_V2:
+            keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V2, 0x10, index)
             if keydata:
                 cid, tid, flags = _unpack('!HHB', keydata[:5])
                 self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
                 self.cid_to_tid[cid] = tid
-        elif self.keyversion == 4:
+        elif self.keyversion == FEATURE.REPROG_CONTROLS_V4:
             keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
             if keydata:
                 cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
@@ -1170,6 +1170,25 @@ def get_voltage(device):
         return decipher_voltage(battery_voltage)
 
 
+# voltage to remaining charge from Logitech
+battery_voltage_remaining = (
+    (4186, 100),
+    (4067, 90),
+    (3989, 80),
+    (3922, 70),
+    (3859, 60),
+    (3811, 50),
+    (3778, 40),
+    (3751, 30),
+    (3717, 20),
+    (3671, 10),
+    (3646, 5),
+    (3579, 2),
+    (3500, 0),
+    (-1000, 0),
+)
+
+
 # modified to be much closer to battery reports
 def decipher_voltage(voltage_report):
     voltage, flags = _unpack('>HB', voltage_report[:3])
@@ -1194,6 +1213,11 @@ def decipher_voltage(voltage_report):
     elif (flags & (1 << 5)):
         charge_lvl = CHARGE_LEVEL.critical
 
+    for level in battery_voltage_remaining:
+        if level[0] < voltage:
+            charge_lvl = level[1]
+            break
+
     if _log.isEnabledFor(_DEBUG):
         _log.debug(
             'device ???, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
@@ -1206,8 +1230,8 @@ def decipher_voltage(voltage_report):
 def get_keys(device):
     # TODO: add here additional variants for other REPROG_CONTROLS
     count = None
-    if FEATURE.REPROG_CONTROLS in device.features:
-        count = feature_request(device, FEATURE.REPROG_CONTROLS)
+    if FEATURE.REPROG_CONTROLS_V2 in device.features:
+        count = feature_request(device, FEATURE.REPROG_CONTROLS_V2)
     elif FEATURE.REPROG_CONTROLS_V4 in device.features:
         count = feature_request(device, FEATURE.REPROG_CONTROLS_V4)
     if count:

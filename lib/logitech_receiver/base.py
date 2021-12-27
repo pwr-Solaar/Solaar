@@ -69,8 +69,8 @@ DEFAULT_TIMEOUT = 4
 _RECEIVER_REQUEST_TIMEOUT = 0.9
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
-# when pinging, be extra patient
-_PING_TIMEOUT = DEFAULT_TIMEOUT * 2
+# when pinging, be extra patient (no longer)
+_PING_TIMEOUT = DEFAULT_TIMEOUT
 
 #
 # Exceptions that may be raised by this API.
