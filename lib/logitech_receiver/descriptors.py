@@ -232,6 +232,7 @@ _D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=
 _D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E', settings=[_FS.fn_swap()])
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
+_D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 
 # Mice
 
@@ -447,7 +448,7 @@ _D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407
 _D('Wireless Mouse Pebble M350', protocol=2.0, wpid='4080', codename='Pebble')
 _D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
 _D('PRO X Wireless', kind='mouse', codename='PRO X', wpid='4093', usbid=0xc094)
-
+_D('G402 Gaming Mouse', codename='G402', usbid=0xc07e, interface=1)
 _D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)
 _D('G403 Gaming Mouse', codename='G403', usbid=0xc082)
 _D('G903 Lightspeed Gaming Mouse', codename='G903', usbid=0xc086)
