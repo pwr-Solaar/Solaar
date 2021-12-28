@@ -42,7 +42,6 @@ from .settings import BooleanValidator as _BooleanV
 from .settings import ChoicesMapValidator as _ChoicesMapV
 from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
-from .settings import FeatureRWMap as _FeatureRWMap
 from .settings import LongSettings as _LongSettings
 from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import RangeValidator as _RangeV
@@ -660,6 +659,23 @@ def _feature_pointer_speed():
 # each choice value is a NamedInt with the string from a task (to be shown to the user)
 # and the integer being the control number for that task (to be written to the device)
 # Solaar only remaps keys (controlled by key gmask and group), not other key reprogramming
+class ReprogrammableKeysRW:
+    def __init__(self):
+        self.feature = _F.REPROG_CONTROLS_V4
+        self.kind = _FeatureRW.kind
+
+    def read(self, device, key):
+        key_index = device.keys.index(key)
+        key_struct = device.keys[key_index]
+        return b'\x00\x00' + _int2bytes(int(key_struct.mapped_to), 2)
+
+    def write(self, device, key, data_bytes):
+        key_index = device.keys.index(key)
+        key_struct = device.keys[key_index]
+        key_struct.remap(_special_keys.CONTROL[_bytes2int(data_bytes)])
+        return True
+
+
 def _feature_reprogrammable_keys_callback(device):
     choices = {}
     for k in device.keys:
@@ -668,13 +684,11 @@ def _feature_reprogrammable_keys_callback(device):
             choices[k.key] = tgts
     if not choices:
         return None
-    return _ChoicesMapV(
-        choices, key_byte_count=2, byte_count=2, read_skip_byte_count=1, write_prefix_bytes=b'\x00', extra_default=0
-    )
+    return _ChoicesMapV(choices, key_byte_count=2, byte_count=2, extra_default=0)
 
 
 def _feature_reprogrammable_keys():
-    rw = _FeatureRWMap(_F.REPROG_CONTROLS_V4, read_fnid=0x20, write_fnid=0x30, key_byte_count=2)
+    rw = ReprogrammableKeysRW()
     return _Settings(_REPROGRAMMABLE_KEYS, rw, callback=_feature_reprogrammable_keys_callback, device_kind=(_DK.keyboard, ))
 
 
