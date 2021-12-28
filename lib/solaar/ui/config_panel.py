@@ -361,9 +361,9 @@ _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 
 
 # clicking on the lock icon changes from changeable to unchangeable to ignore
-def _change_click(eb, button, arg):
+def _change_click(button, arg):
     control, sbox, device, name = arg
-    icon = eb.get_children()[0]
+    icon = button.get_children()[0]
     icon_name, _ = icon.get_icon_name()
     allowed = _icons_allowables.get(icon_name, True)
     new_allowed = _next_allowable[allowed]
@@ -402,7 +402,8 @@ def _create_sbox(s, device):
 
     change_icon = Gtk.Image.new_from_icon_name('changes-prevent', Gtk.IconSize.LARGE_TOOLBAR)
     _change_icon(False, change_icon)
-    change = Gtk.EventBox()
+    change = Gtk.Button()
+    change.set_relief(Gtk.ReliefStyle.NONE)
     change.add(change_icon)
 
     if s.kind == _SETTING_KIND.toggle:
@@ -429,7 +430,7 @@ def _create_sbox(s, device):
     control.kind = s.kind
 
     change.set_sensitive(True)
-    change.connect('button-press-event', _change_click, (control, sbox, device, s.name))
+    change.connect('clicked', _change_click, (control, sbox, device, s.name))
 
     if s.kind in [_SETTING_KIND.multiple_toggle, _SETTING_KIND.multiple_range]:
         vbox._header.pack_start(label, False, False, 0)
