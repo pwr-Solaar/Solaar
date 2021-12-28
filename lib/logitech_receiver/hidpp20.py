@@ -439,10 +439,6 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
     @property
     def remappable_to(self) -> List[_NamedInt]:
-        # this flag is only to show in UI, ignore in Solaar
-        # if special_keys.KEY_FLAG.reprogrammable not in self.flags:
-        #     return []
-
         self._device.keys._ensure_all_keys_queried()
         ret = []
         if self.group_mask != []:  # only keys with a non-zero gmask are remappable
@@ -454,7 +450,6 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     tgt_task = _NamedInt(tgt_cid, tgt_task)
                     if tgt_task != self.default_task:  # don't put itself in twice
                         ret.append(tgt_task)
-
         return ret
 
     @property
@@ -464,8 +459,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         return special_keys.MAPPING_FLAG.flag_names(self._mapping_flags)
 
     def set_diverted(self, value: bool):
-        """If set, the control is diverted temporarily and reports presses as HID++ events
-        until a HID++ configuration reset occurs."""
+        """If set, the control is diverted temporarily and reports presses as HID++ events."""
         flags = {special_keys.MAPPING_FLAG.diverted: value}
         self._setCidReporting(flags=flags)
 
@@ -475,23 +469,17 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         self._setCidReporting(flags=flags)
 
     def set_rawXY_reporting(self, value: bool):
-        """If set, the mouse reports all its raw XY events while this control is pressed
-        as HID++ events. Gets cleared on a HID++ configuration reset."""
+        """If set, the mouse temporarilty reports all its raw XY events while this control is pressed as HID++ events."""
         flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
         self._setCidReporting(flags=flags)
 
     def remap(self, to: _NamedInt):
-        """Remaps this control to another action."""
+        """Temporarily remaps this control to another action."""
         self._setCidReporting(remap=int(to))
 
     def _getCidReporting(self):
         try:
-            mapped_data = feature_request(
-                self._device,
-                FEATURE.REPROG_CONTROLS_V4,
-                0x20,
-                *tuple(_pack('!H', self._cid)),
-            )
+            mapped_data = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack('!H', self._cid)))
             if mapped_data:
                 cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
                 if cid != self._cid and _log.isEnabledFor(_WARNING):
@@ -515,9 +503,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             self._mapped_to = self._cid
 
     def _setCidReporting(self, flags=None, remap=0):
-        """Sends a `setCidReporting` request with the given parameters to the control. Raises
-        an exception if the parameters are invalid.
-
+        """Sends a `setCidReporting` request with the given parameters. Raises an exception if the parameters are invalid.
         Parameters:
         - flags {Dict[_NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
         - remap {int} -- which control ID to remap to; or 0 to keep current mapping
@@ -525,8 +511,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         flags = flags if flags else {}  # See flake8 B006
 
         # if special_keys.MAPPING_FLAG.raw_XY_diverted in flags and flags[special_keys.MAPPING_FLAG.raw_XY_diverted]:
-        # We need diversion to report raw XY, so divert temporarily
-        # (since XY reporting is also temporary)
+        # We need diversion to report raw XY, so divert temporarily (since XY reporting is also temporary)
         # flags[special_keys.MAPPING_FLAG.diverted] = True
         # if special_keys.MAPPING_FLAG.diverted in flags and not flags[special_keys.MAPPING_FLAG.diverted]:
         # flags[special_keys.MAPPING_FLAG.raw_XY_diverted] = False
@@ -547,35 +532,28 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" ' +
                     f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
                 )
-
             bfield |= int(f) if v else 0
             bfield |= int(f) << 1  # The 'Xvalid' bit
+            if self._mapping_flags:  # update flags if already read
+                if v:
+                    self._mapping_flags |= int(f)
+                else:
+                    self._mapping_flags &= ~int(f)
 
         if remap != 0 and remap not in self.remappable_to:
             raise FeatureNotSupported(
                 msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to ' +
                 f'on device {self._device}.'
             )
+        if remap != 0:  # update mapping if changing (even if not already read)
+            self._mapped_to = remap
 
-        pkt = tuple(
-            _pack(
-                '!HBH',
-                self._cid,
-                bfield & 0xff,
-                remap,
-                # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append
-                # another byte `(bfield >> 8) & 0xff` here. But older devices
-                # might behave oddly given that byte, so we don't send it.
-            )
-        )
+        pkt = tuple(_pack('!HBH', self._cid, bfield & 0xff, remap))
+        # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
+        # But older devices might behave oddly given that byte, so we don't send it.
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
         if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
-            _log.warn(
-                f"REPROG_CONTROLS_v4 endpoint setCidReporting on device {self._device} should echo request packet, but didn't."
-            )
-
-        # update knowledge of mapping
-        self._getCidReporting()
+            _log.warn(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
 class KeysArray:
@@ -657,12 +635,6 @@ class KeysArray:
         for index, k in enumerate(self.keys):
             if k is not None and int(value) == int(k.key):
                 return index
-
-        for index, k in enumerate(self.keys):
-            if k is None:
-                k = self.__getitem__(index)
-                if k is not None:
-                    return index
 
     def __iter__(self):
         for k in range(0, len(self.keys)):
