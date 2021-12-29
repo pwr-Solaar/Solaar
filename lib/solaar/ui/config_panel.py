@@ -91,6 +91,8 @@ def _create_toggle_control(setting):
 
     c = Gtk.Switch()
     c.connect('notify::active', _switch_notify, setting)
+    c.set_valign(Gtk.Align.CENTER)
+    c.set_halign(Gtk.Align.CENTER)
     return c
 
 
