@@ -16,6 +16,14 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+#
+# Devices (not receivers) known to Solaar.
+# Solaar can handle many recent devices without having any entry here.
+# An entry should only be added to fix problems, such as
+# - the device's device ID or WPID falls outside the range that Solaar searches
+# - the device uses a USB interface other than 2
+# - the name or codename should be different from what the device reports
+
 from collections import namedtuple
 
 from . import settings_templates as _ST
@@ -126,23 +134,12 @@ def get_btid(btid):
     return found
 
 
-#
-#
-#
-
 # Some HID++1.0 registers and HID++2.0 features can be discovered at run-time,
 # so they are not specified here.
 #
-# For known registers, however, please do specify them here -- avoids
-# unnecessary communication with the device and makes it easier to make certain
-# decisions when querying the device's state.
-#
-# Specify a negative value to blacklist a certain register for a device.
-#
-# Usually, state registers (battery, leds, some features, etc) are only used by
+# State registers (battery, leds, some features, etc) are only used by
 # HID++ 1.0 devices, while HID++ 2.0 devices use features for the same
-# functionalities. This is a rule that's been discovered by trial-and-error,
-# so it may change in the future.
+# functionalities.
 
 # Well-known registers (in hex):
 #  * 00 - notification flags (all devices)

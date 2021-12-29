@@ -1,5 +1,21 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.2
+
+* Rules partly work under Wayland.  There is no access to the current process in Wayland.  Simulated input uses uinput if XTest extension not available, requiring read and write permissions on /dev/uinput.
+
+* There is a setting to divert gestures so that they can trigger rules.
+
+* There is a setting to disable Onboard Profiles, which can interfere with the Polling Rate and M-Key LEDs settings.  The Polling Rate setting no longer disables onboard profiles.
+
+* There is a setting for the Persistent Remappable Keys feature.
+
+* There is a new rule condition that tests device settings.
+
+* There are new settings to set M-Key LEDs and MR-Key LED.
+
+* There is a new kind of Solaar rule action to change settings for devices.
+
 ## Version 1.1.1
 
 * There is a new setting to switch keyboard crowns between smooth and ratchet scrolling.
