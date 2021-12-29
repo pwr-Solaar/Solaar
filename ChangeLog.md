@@ -1,3 +1,59 @@
+# 1.1.2rc2
+
+* Try to use uinput for fake input if XTest extension not available
+* Add Nano receiver C542 for M190 mice
+* Broaden range of HID++ Bluetooth devices
+* Add setting to divert gestures
+* Rule editor can edit all rule components
+* Configuation via solaar config takes effect in Solaar UI if it is running
+* Add setting to disable Onboard Profiles and decouple from Polling Rate setting
+* Add setting for PERSISTENT_REMAPPABLE_ACTION, common keyboard and mouse cases only
+* Split Test rule condition into Test and TestBytes and support in rule editor
+* Fix bug in speed-change setting
+* Support Backlight and Backlight3 features
+* Ensure that settings are pushed in resume
+* Update German translation
+* Determine device number for direct-connected devices from protocol
+* fix bug in add and delete button actions in rule editor
+* dispose of no-op notifications quickly
+* add rule condition for checking device settings
+* use local file for conversion from key names to keysyms
+* get keyboard group and use to get correct keycodes (X11 only)
+* improve how rules work under Wayland
+* add settings for M-Key LEDs and MR-Key LED
+* fix bug in unpacking M and MR key notification
+* add G815 keyboard and MX518 mouse
+* add new special keys for recent keyboards
+* track M and MR keys for use in rules
+* make sure that device is online when searching for devices in solaar show
+* don't check for device kind in dpi sliding setting
+* fix problem with devices that report 0 DPI
+* handle missing divert-setting in action RW for settings
+* add id property (unitId or serial) and don't use ? for unknown serial
+* fix contains for NamedInts and eliminate use of has_element
+* check for xtest and disable modifier checking if not available
+* improve determination of gesture information
+* add Set rules to rule GUI
+* add gesture params to Set rules
+* hide system tray when there are no devices to control
+* add G733 headset, G9 mouse, G502 Hero mouse
+* Use greyscale solaar icon in tray when using symbolic icons
+* Fix bugs in solaar config
+* Use classes for settings to hep with modularity
+* Accept '~' and Toggle for toggling boolean settings in cli and rules
+* handle errors when writing to devices
+* refactor config_panel.py to use classes for widgets
+* add rules action to set Solaar settings
+* decrease amount of logging at each debug level
+* don't stretch toggles in settings
+* use key structure for key remapping setting
+* optimize ReprogrammableKey implementation
+* keep track of settings that are absent from device
+* add G512 keyboard and G402 mouse
+* reformat descriptors.py
+* use feature numbers for reprogrammable key versions
+* don't use new_from_icon_set in menu as it is deprecated
+
 # 1.1.1
 
 * Keep left pane in Solaar main window the same size
