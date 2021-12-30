@@ -76,101 +76,181 @@ def _write_async_key_value(setting, key, value, sbox):
 #
 
 
-def _create_toggle_control(setting):
-    def _switch_notify(switch, _ignore, s):
-        if switch.get_sensitive():
-            _write_async(s, switch.get_active() is True, switch.get_parent())
+class ToggleControl(Gtk.Switch):
+    def __init__(self, setting, delegate=None):
+        super().__init__(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        self.setting = setting
+        self.delegate = delegate
+        self.connect('notify::active', self.changed)
 
-    c = Gtk.Switch()
-    c.connect('notify::active', _switch_notify, setting)
-    c.set_valign(Gtk.Align.CENTER)
-    c.set_halign(Gtk.Align.CENTER)
-    return c
+    def set_value(self, value):
+        self.set_state(value)
 
+    def changed(self, *args):
+        if self.get_sensitive():
+            self.delegate.update() if self.delegate else self.update()
 
-def _create_choice_control(setting):
-    def _combo_notify(cbbox, s):
-        if cbbox.get_sensitive():
-            _write_async(s, cbbox.get_active_id(), cbbox.get_parent())
-
-    c = Gtk.ComboBoxText()
-    # TODO i18n text entries
-    for entry in setting.choices:
-        c.append(str(int(entry)), _(str(entry)))
-    c.connect('changed', _combo_notify, setting)
-    return c
+    def update(self):
+        _write_async(self.setting, self.get_active() is True, self.get_parent())
 
 
-def _create_map_choice_control(setting):
-    def _map_value_notify_key(cbbox, s):
-        setting, valueBox = s
-        key_choice = int(cbbox.get_active_id())
-        if cbbox.get_sensitive():
-            valueBox.remove_all()
-            _map_populate_value_box(valueBox, setting, key_choice)
+class SliderControl(Gtk.Scale):
+    def __init__(self, setting, delegate=None):
+        super().__init__(halign=Gtk.Align.FILL)
+        self.setting = setting
+        self.delegate = delegate
+        self.timer = None
+        self.set_range(*self.setting.range)
+        self.set_round_digits(0)
+        self.set_digits(0)
+        self.set_increments(1, 5)
+        self.connect('value-changed', self.changed)
 
-    def _map_value_notify_value(cbbox, s):
-        setting, keyBox = s
-        key_choice = keyBox.get_active_id()
-        if key_choice is not None and cbbox.get_sensitive() and cbbox.get_active_id():
-            if setting._value.get(key_choice) != int(cbbox.get_active_id()):
-                setting._value[key_choice] = int(cbbox.get_active_id())
-                _write_async_key_value(setting, key_choice, setting._value[key_choice], cbbox.get_parent().get_parent())
+    def changed(self, *args):
+        if self.get_sensitive():
+            if self.timer:
+                self.timer.cancel()
+            self.timer = _Timer(0.5, lambda: GLib.idle_add(self.do_change))
+            self.timer.start()
 
-    def _map_populate_value_box(valueBox, setting, key_choice):
-        choices = None
-        choices = setting.choices[key_choice]
-        current = setting._value.get(str(key_choice)) if setting._value else None
-        if choices:
-            # TODO i18n text entries
-            for choice in choices:
-                valueBox.append(str(int(choice)), _(str(choice)))
-            if current is not None:
-                valueBox.set_active_id(str(int(current)))
+    def do_change(self):
+        self.timer.cancel()
+        self.delegate.update() if self.delegate else self.update()
 
-    c = Gtk.HBox(homogeneous=False, spacing=6)
-    keyBox = Gtk.ComboBoxText()
-    valueBox = Gtk.ComboBoxText()
-    c.pack_start(keyBox, False, False, 0)
-    c.pack_end(valueBox, False, False, 0)
-    # TODO i18n text entries
-    for entry in setting.choices:
-        keyBox.append(str(int(entry)), _(str(entry)))
-    keyBox.set_active(0)
-    keyBox.connect('changed', _map_value_notify_key, (setting, valueBox))
-    _map_populate_value_box(valueBox, setting, int(keyBox.get_active_id()))
-    valueBox.connect('changed', _map_value_notify_value, (setting, keyBox))
-    return c
+    def update(self):
+        _write_async(self.setting, int(self.get_value()), self.get_parent())
 
 
-def _create_slider_control(setting):
-    class SliderControl:
-        __slots__ = ('gtk_range', 'timer', 'setting')
+def _create_choice_control(setting, delegate=None, choices=None):
+    if 50 > len(choices if choices else setting.choices):
+        return ChoiceControlLittle(setting, choices=choices, delegate=delegate)
+    else:
+        return ChoiceControlBig(setting, choices=choices, delegate=delegate)
 
-        def __init__(self, setting):
-            self.setting = setting
-            self.timer = None
 
-            self.gtk_range = Gtk.Scale()
-            self.gtk_range.set_range(*self.setting.range)
-            self.gtk_range.set_round_digits(0)
-            self.gtk_range.set_digits(0)
-            self.gtk_range.set_increments(1, 5)
-            self.gtk_range.connect('value-changed', lambda _, c: c._changed(), self)
+class ChoiceControlLittle(Gtk.ComboBoxText):
+    def __init__(self, setting, delegate=None, choices=None):
+        super().__init__(halign=Gtk.Align.FILL)
+        self.setting = setting
+        self.delegate = delegate
+        self.choices = choices if choices is not None else setting.choices
+        for entry in self.choices:
+            self.append(str(int(entry)), str(entry))
+        self.connect('changed', self.changed)
 
-        def _write(self):
-            _write_async(self.setting, int(self.gtk_range.get_value()), self.gtk_range.get_parent())
-            self.timer.cancel()
+    def get_value(self):
+        id = int(self.get_active_id())
+        return next((x for x in self.choices if x == id), None)
 
-        def _changed(self):
-            if self.gtk_range.get_sensitive():
-                if self.timer:
-                    self.timer.cancel()
-                self.timer = _Timer(0.5, lambda: GLib.idle_add(self._write))
-                self.timer.start()
+    def set_value(self, value):
+        self.set_active_id(str(int(value)))
 
-    control = SliderControl(setting)
-    return control.gtk_range
+    def set_choices(self, choices):
+        self.remove_all()
+        for choice in choices:
+            self.append(str(int(choice)), _(str(choice)))
+
+    def changed(self, *args):
+        if self.get_sensitive():
+            self.delegate.update() if self.delegate else self.update()
+
+    def update(self):
+        _write_async(self.setting, self.get_active_id(), self.get_parent())
+
+
+class ChoiceControlBig(Gtk.Entry):
+    def __init__(self, setting, delegate=None, choices=None):
+        super().__init__(halign=Gtk.Align.FILL)
+        self.setting = setting
+        self.delegate = delegate
+        self.choices = choices if choices is not None else setting.choices
+        self.value = None
+        width = max([len(str(x)) for x in self.choices]) + 2  # maximum choice length plus space for icon
+        self.set_width_chars(width)
+        liststore = Gtk.ListStore(int, str)
+        for v in self.choices:
+            liststore.append((int(v), str(v)))
+        completion = Gtk.EntryCompletion()
+        completion.set_model(liststore)
+        norm = lambda s: s.replace('_', '').replace(' ', '').lower()
+        completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][1]))
+        completion.set_text_column(1)
+        self.set_completion(completion)
+        self.connect('changed', self.changed)
+        self.connect('activate', self.activate)
+        completion.connect('match_selected', self.select)
+
+    def get_value(self):
+        key = self.get_text()
+        return next((x for x in self.choices if x == key), None)
+
+    def set_value(self, value):
+        self.set_text(str(next((x for x in self.choices if x == value), None)))
+
+    def changed(self, *args):
+        self.value = next((x for x in self.choices if x == self.get_text()), None)
+        icon = 'dialog-warning' if self.value is None else 'dialog-question' if self.get_sensitive() else ''
+        self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        tooltip = _('Incomplete') if self.value is None else _('Complete - ENTER to change')
+        self.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, tooltip)
+
+    def activate(self, *args):
+        if self.value is not None and self.get_sensitive():
+            self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, '')
+            self.delegate.update() if self.delegate else self.update()
+
+    def select(self, completion, model, iter):
+        self.set_value(model.get(iter, 0)[0])
+        if self.value and self.get_sensitive():
+            self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, '')
+            self.delegate.update() if self.delegate else self.update()
+
+    def update(self):
+        _write_async(self.setting, int(self.value), self.get_parent())
+
+
+class MapChoiceControl(Gtk.HBox):
+    def __init__(self, setting):
+        super().__init__(homogeneous=False, spacing=6)
+        self.setting = setting
+        self.keyBox = Gtk.ComboBoxText()
+        for entry in setting.choices:
+            self.keyBox.append(str(int(entry)), _(str(entry)))
+        self.keyBox.set_active(0)
+        key_choice = int(self.keyBox.get_active_id())
+        self.value_choices = self.setting.choices[key_choice]
+        self.valueBox = _create_choice_control(setting, choices=self.value_choices, delegate=self)
+        self.pack_start(self.keyBox, False, False, 0)
+        self.pack_end(self.valueBox, False, False, 0)
+        self.keyBox.connect('changed', self.map_value_notify_key)
+
+    def set_value(self, value):
+        self.valueBox.set_sensitive(self.get_sensitive())
+        if value.get(self.keyBox.get_active_id()) is not None:
+            self.valueBox.set_value(value.get(self.keyBox.get_active_id()))
+        self.valueBox.set_sensitive(True)
+
+    def map_populate_value_box(self, key_choice):
+        choices = self.setting.choices[int(key_choice)]
+        if choices != self.value_choices:
+            self.value_choices = choices
+            self.valueBox.remove_all()
+            self.valueBox.set_choices(choices)
+        current = self.setting._value.get(str(key_choice)) if self.setting._value else None
+        if current is not None:
+            self.valueBox.set_value(current)
+
+    def map_value_notify_key(self, *args):
+        key_choice = self.keyBox.get_active_id()
+        if self.keyBox.get_sensitive():
+            self.map_populate_value_box(key_choice)
+
+    def update(self):
+        key_choice = self.keyBox.get_active_id()
+        if key_choice is not None and self.valueBox.get_sensitive() and self.valueBox.get_value() is not None:
+            if self.setting._value.get(key_choice) != int(self.valueBox.get_value()):
+                self.setting._value[key_choice] = int(self.valueBox.get_value())
+                _write_async_key_value(self.setting, key_choice, self.setting._value[key_choice], self.get_parent())
 
 
 def _create_multiple_toggle_control(setting, change):
@@ -402,13 +482,13 @@ def _create_sbox(s, device):
     change.add(change_icon)
 
     if s.kind == _SETTING_KIND.toggle:
-        control = _create_toggle_control(s)
+        control = ToggleControl(s)
+    elif s.kind == _SETTING_KIND.range:
+        control = SliderControl(s)
     elif s.kind == _SETTING_KIND.choice:
         control = _create_choice_control(s)
-    elif s.kind == _SETTING_KIND.range:
-        control = _create_slider_control(s)
     elif s.kind == _SETTING_KIND.map_choice:
-        control = _create_map_choice_control(s)
+        control = MapChoiceControl(s)
     elif s.kind == _SETTING_KIND.multiple_toggle:
         vbox = _create_multiple_toggle_control(s, change)
         control = vbox._control
@@ -470,16 +550,14 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
 
     control.set_sensitive(False)
     failed.set_visible(False)
-    if isinstance(control, Gtk.Switch):
-        control.set_state(value)
-    elif isinstance(control, Gtk.ComboBoxText):
-        control.set_active_id(str(int(value)))
-    elif isinstance(control, Gtk.Scale):
-        control.set_value(int(value))
+    if isinstance(control, ToggleControl) or isinstance(control, SliderControl):
+        control.set_value(value)
+    elif isinstance(control, ChoiceControlBig) or isinstance(control, ChoiceControlLittle):
+        control.set_value(value)
+    elif isinstance(control, MapChoiceControl):
+        control.set_value(value)
     elif isinstance(control, Gtk.HBox):
-        kbox, vbox = control.get_children()  # depends on box layout
-        if value.get(kbox.get_active_id()) is not None:
-            vbox.set_active_id(str(value.get(kbox.get_active_id())))
+        control.set_value(value)
     elif isinstance(control, Gtk.ListBox):
         if control.kind == _SETTING_KIND.multiple_toggle:
             total = len(control._label_control_pairs)
