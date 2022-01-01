@@ -50,8 +50,13 @@ its wireless PID as reported by Solaar.  The software identity of devices that
 connect via a USB cable or via bluetooth can be determined by their USB or
 Bluetooth product ID.
 
-Even something as fundamental as pairing works differently for different
-receivers. For Unifying receivers, pairing adds a new paired device, but
+
+# Pairing and Unpairing
+
+Solaar is able to pair and unpair devices with
+receivers as supported by the device and receiver.
+
+For Unifying receivers, pairing adds a new paired device, but
 only if there is an open slot on the receiver. So these receivers need to
 be able to unpair devices that they have been paired with or else they will
 not have any open slots for pairing. Some other receivers, like the
@@ -72,13 +77,10 @@ without the Unifying logo can probably only connect to the kind of receiver
 that they were bought with.
 
 
-## Supported Features
+## Device Settings
 
-Solaar uses the HID++ protocol to pair devices to receivers and unpair
-devices from receivers, and also uses the HID++ protocol to display
-features of receivers and devices. Currently it only displays some
-features, and can modify even fewer. For a list of HID++ features
-and their support see [the features page](features).
+Solaar can display quite a few changeable settings of receivers and devices.
+For a list of HID++ features and their support see [the features page](features).
 
 Solaar does not do much beyond using the HID++ protocol to change the
 behavior of receivers and devices via changing their settings.
@@ -91,14 +93,17 @@ Settings can only be changed in the Solaar GUI when they are unlocked.
 To unlock a setting click on the icon at the right-hand edge of the setting
 until an unlocked lock appears (with tooltop "Changes allowed").
 
-Solaar keep tracks of the changeable settings of a device.
-Most devices forget changed settings when the are turned off
-or go into a power-saving mode.  When Solaar starts, it restores on-line
-devices to their previously-known state, and while running it restores
+Solaar keeps track of most of the changeable settings of a device.
+Devices forget most changed settings when the device is turned off
+or goes into a power-saving mode.
+The exceptions include the setting to change the host the device is connected to
+and the setting to persistently change what a key or button does.
+When Solaar starts, it restores on-line devices to their previously-known state
+for the unexceptionable settings and while running it restores
 devices to their previously-known state when the device itself comes on line.
-This information is stored in the file `~/.config/solaar/config.json`.
+Setting information is stored in the file `~/.config/solaar/config.json`.
 
-Updating of settings can be turned off in the Solaar GUI by clicking on the icon
+Updating of a setting can be turned off in the Solaar GUI by clicking on the icon
 at the right-hand edge of the setting until a red icon appears (with tooltip
 "Ignore this setting" ).
 
@@ -140,6 +145,7 @@ Users can edit rules using a GUI by clicking on the `Edit Rule` button in the So
 
 Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
 
+
 ### Sliding DPI
 
 A few mice (such as the MX Vertical) have a button that is supposed to be used to change
@@ -154,7 +160,6 @@ depending on how far right or left the mouse is moved.   If the mouse is moved o
 the previous value that was set is applied to the mouse.
 Notifications from Solaar are displayed while the mouse button is done
 showing the setting that will be applied.
-
 
 ### Mouse Gestures
 

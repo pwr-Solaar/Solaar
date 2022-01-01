@@ -18,10 +18,11 @@ Both interfaces are able to list the connected devices and
 show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
-Solaar can also control some changeable features of devices,
+Solaar can also control some changeable settings of devices,
 such as scroll wheel direction and function key behavior.
-Solaar keeps track of these changed settings on a per-computer basis and the GUI application restores them whenever a device connects.
-(Devices forget most settings when powered down.)
+Solaar keeps track of most of these settings on a per-computer basis,
+because devices forget most settings when powered down,
+and the GUI application restores them whenever a device connects.
 For more information on how to use Solaar see
 [the usage page](https://pwr-solaar.github.io/Solaar/usage),
 and for more information on its capabilities see
