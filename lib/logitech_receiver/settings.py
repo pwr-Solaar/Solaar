@@ -172,6 +172,9 @@ class Setting:
 
             return value
 
+    def acceptable(self, args, current):
+        return self._validator.acceptable(args, current) if self._validator else None
+
     def apply(self):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -371,7 +374,7 @@ class LongSettings(Setting):
                                 return None
             return map
 
-    def write_item_value(self, item, value):
+    def write_key_value(self, item, value):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert item is not None
@@ -689,7 +692,7 @@ class BooleanValidator:
         if new_value is None:
             new_value = False
         else:
-            assert isinstance(new_value, bool)
+            assert isinstance(new_value, bool), 'New value %s for boolean setting is not a boolean' % new_value
 
         to_write = self.true_value if new_value else self.false_value
 
@@ -719,6 +722,12 @@ class BooleanValidator:
             _log.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
 
         return self.write_prefix_bytes + to_write
+
+    def acceptable(self, args, current):
+        if len(args) != 1:
+            return None
+        val = [args[0]] if type(args[0]) == bool else [not current] if args[0] == '~' else None
+        return val
 
 
 class BitFieldValidator:
@@ -754,6 +763,15 @@ class BitFieldValidator:
 
     def all_options(self):
         return self.options
+
+    def acceptable(self, args, current):
+        if len(args) != 2:
+            return None
+        key = next((key for key in self.options if key == args[0]), None)
+        if key is None:
+            return None
+        val = args[1] if type(args[1]) == bool else not current[str(int(key))] if args[1] == '~' else None
+        return None if val is None else [str(int(key)), val]
 
 
 class BitFieldWithOffsetAndMaskValidator:
@@ -837,6 +855,15 @@ class BitFieldWithOffsetAndMaskValidator:
     def all_options(self):
         return [int(opt) if isinstance(opt, int) else opt.as_int() for opt in self.options]
 
+    def acceptable(self, args, current):
+        if len(args) != 2:
+            return None
+        key = next((option.id for option in self.options if option.as_int() == args[0]), None)
+        if key is None:
+            return None
+        val = args[1] if type(args[1]) == bool else not current[str(int(key))] if args[1] == '~' else None
+        return None if val is None else [str(key), val]
+
 
 class ChoicesValidator:
     kind = KIND.choice
@@ -870,21 +897,31 @@ class ChoicesValidator:
 
     def prepare_write(self, new_value, current_value=None):
         if new_value is None:
-            choice = self.choices[:][0]
+            value = self.choices[:][0]
         else:
-            if isinstance(new_value, int):
-                choice = self.choices[new_value]
-            elif int(new_value) in self.choices:
-                choice = self.choices[int(new_value)]
-            elif new_value in self.choices:
-                choice = self.choices[new_value]
-            else:
-                raise ValueError(new_value)
-
-        if choice is None:
+            value = self.choice(new_value)
+        if value is None:
             raise ValueError('invalid choice %r' % new_value)
-        assert isinstance(choice, _NamedInt)
-        return self._write_prefix_bytes + choice.bytes(self._byte_count)
+        assert isinstance(value, _NamedInt)
+        return self._write_prefix_bytes + value.bytes(self._byte_count)
+
+    def choice(self, value):
+        if isinstance(value, int):
+            return self.choices[value]
+        try:
+            int(value)
+            if int(value) in self.choices:
+                return self.choices[int(value)]
+        except Exception:
+            pass
+        if value in self.choices:
+            return self.choices[value]
+        else:
+            return None
+
+    def acceptable(self, args, current):
+        choice = self.choice(args[0]) if len(args) == 1 else None
+        return None if choice is None else [choice]
 
 
 class ChoicesMapValidator(ChoicesValidator):
@@ -949,6 +986,15 @@ class ChoicesMapValidator(ChoicesValidator):
         new_value = new_value | self.activate
         return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
 
+    def acceptable(self, args, current):
+        if len(args) != 2:
+            return None
+        key, choices = next(((key, item) for key, item in self.choices.items() if key == args[0]), (None, None))
+        if choices is None or args[1] not in choices:
+            return None
+        choice = next((item for item in choices if item == args[1]), None)
+        return [str(int(key)), int(choice)] if choice is not None else None
+
 
 class RangeValidator:
     __slots__ = ('min_value', 'max_value', 'flag', '_byte_count', 'needs_current_value')
@@ -981,6 +1027,11 @@ class RangeValidator:
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError('invalid choice %r' % new_value)
         return _int2bytes(new_value, self._byte_count)
+
+    def acceptable(self, args, current):
+        arg = args[0]
+        #  None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args)
+        return None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args
 
 
 class MultipleRangeValidator:
@@ -1051,6 +1102,9 @@ class MultipleRangeValidator:
                 raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
             w += _int2bytes(v, sub_item.length)
         return w + b'\xFF'
+
+    def acceptable(self, args, current):
+        pass  # not implemented yet
 
 
 class ActionSettingRW:
