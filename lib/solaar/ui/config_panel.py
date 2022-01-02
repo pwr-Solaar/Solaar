@@ -37,18 +37,24 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
     _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
 
-def _write_async(setting, value, sbox):
-    failed, spinner, control = _get_failed_spinner_control(sbox)
-    control.set_sensitive(False)
-    failed.set_visible(False)
-    spinner.set_visible(True)
-    spinner.start()
+def _write_async(setting, value, sbox, sensitive=True, key=None):
+    if sbox:
+        failed, spinner, control = _get_failed_spinner_control(sbox)
+        control.set_sensitive(False)
+        failed.set_visible(False)
+        spinner.set_visible(True)
+        spinner.start()
 
-    def _do_write(s, v, sb):
-        v = setting.write(v)
-        GLib.idle_add(_update_setting_item, sb, v, True, priority=99)
+    def _do_write(s, v, sb, key):
+        if key is None:
+            v = setting.write(v)
+        else:
+            v = setting.write_key_value(key, v)
+            v = {key: v}
+        if sb:
+            GLib.idle_add(_update_setting_item, sb, v, True, sensitive, priority=99)
 
-    _ui_async(_do_write, setting, value, sbox)
+    _ui_async(_do_write, setting, value, sbox, key)
 
 
 def _write_async_key_value(setting, key, value, sbox):
@@ -63,20 +69,6 @@ def _write_async_key_value(setting, key, value, sbox):
         GLib.idle_add(_update_setting_item, sb, {k: v}, True, priority=99)
 
     _ui_async(_do_write_key_value, setting, key, value, sbox)
-
-
-def _write_async_item_value(setting, item, value, sbox):
-    failed, spinner, control = _get_failed_spinner_control(sbox)
-    control.set_sensitive(False)
-    failed.set_visible(False)
-    spinner.set_visible(True)
-    spinner.start()
-
-    def _do_write_item_value(s, k, v, sb):
-        v = setting.write_item_value(k, v)
-        GLib.idle_add(_update_setting_item, sb, {k: v}, True, priority=99)
-
-    _ui_async(_do_write_item_value, setting, item, value, sbox)
 
 
 #
@@ -257,7 +249,7 @@ def _create_multiple_range_control(setting, change):
             p = control
             for _i in range(7):
                 p = p.get_parent()
-            _write_async_item_value(setting, str(int(item)), setting._value[str(int(item))], p)
+            _write_async_key_value(setting, str(int(item)), setting._value[str(int(item))], p)
 
     def _changed(control, setting, item, sub_item):
         if control.get_sensitive():
@@ -385,9 +377,10 @@ def _change_click(button, arg):
 
 
 def _change_icon(allowed, icon):
-    allowed = allowed if allowed in _allowables_icons else True
-    icon.set_from_icon_name(_allowables_icons[allowed], Gtk.IconSize.LARGE_TOOLBAR)
-    icon.set_tooltip_text(_allowables_tooltips[allowed])
+    if allowed in _allowables_icons:
+        icon._allowed = allowed
+        icon.set_from_icon_name(_allowables_icons[allowed], Gtk.IconSize.LARGE_TOOLBAR)
+        icon.set_tooltip_text(_allowables_tooltips[allowed])
 
 
 def _create_sbox(s, device):
@@ -478,7 +471,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
     control.set_sensitive(False)
     failed.set_visible(False)
     if isinstance(control, Gtk.Switch):
-        control.set_active(value)
+        control.set_state(value)
     elif isinstance(control, Gtk.ComboBoxText):
         control.set_active_id(str(int(value)))
     elif isinstance(control, Gtk.Scale):
@@ -527,6 +520,7 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True):
     else:
         raise Exception('NotImplemented')
 
+    sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
     control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
@@ -583,7 +577,6 @@ def update(device, is_online=None):
         else:
             sbox = _items[k] = _create_sbox(s, device)
             _box.pack_start(sbox, False, False, 0)
-
         sensitive = device.persister.get_sensitivity(s.name) if device.persister else True
         _read_async(s, False, sbox, is_online, sensitive)
 
@@ -606,3 +599,13 @@ def destroy():
     global _box
     _box = None
     _items.clear()
+
+
+def change_setting(device, setting, values):
+    device = setting._device
+    device_path = device.receiver.path if device.receiver else device.path
+    if (device_path, device.number, setting.name) in _items:
+        sbox = _items[(device_path, device.number, setting.name)]
+    else:
+        sbox = None
+    _write_async(setting, values[-1], sbox, None, key=values[0] if len(values) > 1 else None)

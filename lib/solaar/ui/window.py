@@ -926,3 +926,18 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
         full_update = full or was_online != is_online
         _update_info_panel(device, full=full_update)
+
+
+def find_device(serial):
+    assert serial, 'need serial number or unit ID to find a device'
+    result = None
+
+    def check(_store, _treepath, row):
+        nonlocal result
+        device = _model.get_value(row, _COLUMN.DEVICE)
+        if device and device.kind and (device.unitId == serial or device.serial == serial):
+            result = device
+            return True
+
+    _model.foreach(check)
+    return result

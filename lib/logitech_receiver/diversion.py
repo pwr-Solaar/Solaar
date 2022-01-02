@@ -27,7 +27,9 @@ from math import sqrt as _sqrt
 
 import _thread
 import psutil
+import solaar.ui.window as _window
 
+from solaar.ui.config_panel import change_setting as _change_setting
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
@@ -686,6 +688,41 @@ class MouseClick(Action):
         return {'MouseClick': [self.button, self.count]}
 
 
+class Set(Action):
+    def __init__(self, args):
+        if not (isinstance(args, list) and len(args) > 2):
+            _log.warn('rule Set argument not list with minimum length 3: %s', args)
+            self.args = []
+        else:
+            self.args = args
+
+    def __str__(self):
+        return 'Set: ' + ' '.join([str(a) for a in self.args])
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if len(self.args) < 3:
+            return None
+        if _log.isEnabledFor(_INFO):
+            _log.info('Set action: %s', self.args)
+        dev = _window.find_device(self.args[0]) if self.args[0] is not None else device
+        if dev is None:
+            _log.error('Set action: device %s is not known', self.args[0])
+            return None
+        setting = next((s for s in dev.settings if s.name == self.args[1]), None)
+        if setting is None:
+            _log.error('Set action: setting %s is not the name of a setting for %s', self.args[1], dev.name)
+            return None
+        args = setting.acceptable(self.args[2:], setting.read())
+        if args is None:
+            _log.error('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
+            return None
+        _change_setting(dev, setting, args)
+        return None
+
+    def data(self):
+        return {'Set': self.args[:]}
+
+
 class Execute(Action):
     def __init__(self, args):
         if isinstance(args, str):
@@ -726,6 +763,7 @@ COMPONENTS = {
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
+    'Set': Set,
     'Execute': Execute,
 }
 
