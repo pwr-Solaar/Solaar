@@ -145,19 +145,26 @@ def run(receivers, args, find_receiver, find_device):
         _print_setting(setting)
         return
 
+    message, result, value = set(dev, setting, args)
+    print(message)
+    if result is None:
+        raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
+
+
+def set(dev, setting, args):
     if setting.kind == _settings.KIND.toggle:
         value = select_toggle(args.value_key, setting)
-        print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        message = 'Setting %s of %s to %s' % (setting.name, dev.name, value)
         result = setting.write(value)
 
     elif setting.kind == _settings.KIND.range:
         value = select_range(args.value_key, setting)
-        print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        message = 'Setting %s of %s to %s' % (setting.name, dev.name, value)
         result = setting.write(value)
 
     elif setting.kind == _settings.KIND.choice:
         value = select_choice(args.value_key, setting.choices, setting, None)
-        print('Setting %s of %s to %s' % (setting.name, dev.name, value))
+        message = 'Setting %s of %s to %s' % (setting.name, dev.name, value)
         result = setting.write(value)
 
     elif setting.kind == _settings.KIND.map_choice:
@@ -170,7 +177,7 @@ def run(receivers, args, find_receiver, find_device):
             value = select_choice(args.extra_subkey, setting.choices[k], setting, key)
         else:
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        print('Setting %s of %s key %r to %r' % (setting.name, dev.name, k, value))
+        message = 'Setting %s of %s key %r to %r' % (setting.name, dev.name, k, value)
         result = setting.write_key_value(int(k), value)
 
     elif setting.kind == _settings.KIND.multiple_toggle:
@@ -183,7 +190,7 @@ def run(receivers, args, find_receiver, find_device):
             value = select_toggle(args.extra_subkey, setting)
         else:
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        print('Setting %s key %r to %r' % (setting.name, k, value))
+        message = 'Setting %s key %r to %r' % (setting.name, k, value)
         result = setting.write_key_value(int(k), value)
 
     elif setting.kind == _settings.KIND.multiple_range:
@@ -203,17 +210,10 @@ def run(receivers, args, find_receiver, find_device):
             item[args.extra_subkey] = to_int(args.extra2)
         else:
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        print('Setting %s key %s parameter %s to %r' % (setting.name, k, args.extra_subkey, item[args.extra_subkey]))
+        message = 'Setting %s key %s parameter %s to %r' % (setting.name, k, args.extra_subkey, item[args.extra_subkey])
         result = setting.write_item_value(int(k), item)
-
-
-# KIND = _NamedInts(, multiple_toggle=0x10, multiple_range=0x40)
-# BitField; MultipleRange
-# disable_keyboard_keys, gesture2; gesture2_params
-# k400+ / craft, k400+; k400+
 
     else:
         raise Exception('NotImplemented')
 
-    if result is None:
-        raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
+    return result, message, value
