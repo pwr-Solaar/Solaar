@@ -197,8 +197,11 @@ try:
 
         return ind
 
-    def _destroy(indicator):
+    def _hide(indicator):
         indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+
+    def _show(indicator):
+        indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != 'solaar':
@@ -246,8 +249,11 @@ except ImportError:
 
         return icon
 
-    def _destroy(icon):
+    def _hide(icon):
         icon.set_visible(False)
+
+    def _show(icon):
+        icon.set_visible(True)
 
     def _update_tray_icon():
         tooltip_lines = _generate_tooltip_lines()
@@ -463,13 +469,14 @@ def init(_quit_handler):
     _menu = _create_menu(_quit_handler)
     assert _icon is None
     _icon = _create(_menu)
+    update()
 
 
 def destroy():
     global _icon, _menu, _devices_info
     if _icon is not None:
         i, _icon = _icon, None
-        _destroy(i)
+        _hide(i)
         i = None
 
     _icon = None
@@ -525,3 +532,9 @@ def update(device=None):
         _picked_device = _pick_device_with_lowest_battery()
 
     _update_tray_icon()
+
+    if _icon:
+        if not _devices_info:
+            _hide(_icon)
+        else:
+            _show(_icon)
