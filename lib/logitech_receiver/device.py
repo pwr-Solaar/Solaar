@@ -1,4 +1,5 @@
 import errno as _errno
+import threading as _threading
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -77,9 +78,11 @@ class Device:
         self._firmware = None
         self._keys = None
         self._gestures = None
+        self._gestures_lock = _threading.Lock()
         self._registers = None
         self._settings = None
         self._feature_settings_checked = False
+        self._settings_lock = _threading.Lock()
 
         # Misc stuff that's irrelevant to any functionality, but may be
         # displayed in the UI and caching it here helps.
@@ -288,8 +291,10 @@ class Device:
     @property
     def gestures(self):
         if not self._gestures:
-            if self.online and self.protocol >= 2.0:
-                self._gestures = _hidpp20.get_gestures(self) or ()
+            with self._gestures_lock:
+                if not self._gestures:
+                    if self.online and self.protocol >= 2.0:
+                        self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
 
     @property
@@ -304,19 +309,24 @@ class Device:
     @property
     def settings(self):
         if not self._settings:
-            self._settings = []
-            if self.persister and self.descriptor and self.descriptor.settings:
-                for sclass in self.descriptor.settings:
-                    try:
-                        setting = sclass.build(self)
-                    except Exception as e:  # Do nothing if the device is offline
-                        setting = None
-                        if self.online:
-                            raise e
-                    if setting is not None:
-                        self._settings.append(setting)
+            with self._settings_lock:
+                if not self._settings:
+                    settings = []
+                    if self.persister and self.descriptor and self.descriptor.settings:
+                        for sclass in self.descriptor.settings:
+                            try:
+                                setting = sclass.build(self)
+                            except Exception as e:  # Do nothing if the device is offline
+                                setting = None
+                                if self.online:
+                                    raise e
+                            if setting is not None:
+                                settings.append(setting)
+                    self._settings = settings
         if not self._feature_settings_checked:
-            self._feature_settings_checked = _check_feature_settings(self, self._settings)
+            with self._settings_lock:
+                if not self._feature_settings_checked:
+                    self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
 
     @property
