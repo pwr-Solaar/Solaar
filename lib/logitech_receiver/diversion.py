@@ -293,7 +293,10 @@ def x11_focus_prog():
         if wm_class and pid:
             break
         window = window.query_tree().parent
-    name = psutil.Process(pid.value[0]).name() if pid else ''
+    try:
+        name = psutil.Process(pid.value[0]).name() if pid else ''
+    except Exception:
+        name = ''
     return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
 
@@ -323,7 +326,8 @@ class Process(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        result = any(bool(s and s.startswith(self.process)) for s in x11_focus_prog())
+        focus = x11_focus_prog()
+        result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
     def data(self):
