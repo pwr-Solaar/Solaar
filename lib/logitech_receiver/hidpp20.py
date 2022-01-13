@@ -18,6 +18,8 @@
 
 # Logitech Unifying Receiver API.
 
+import threading as _threading
+
 from logging import DEBUG as _DEBUG
 from logging import ERROR as _ERROR
 from logging import INFO as _INFO
@@ -560,11 +562,12 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 class KeysArray:
     """A sequence of key mappings supported by a HID++ 2.0 device."""
 
-    __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids')
+    __slots__ = ('device', 'keys', 'keyversion', 'cid_to_tid', 'group_cids', 'lock')
 
     def __init__(self, device, count):
         assert device is not None
         self.device = device
+        self.lock = _threading.Lock()
         if FEATURE.REPROG_CONTROLS_V4 in self.device.features:
             self.keyversion = FEATURE.REPROG_CONTROLS_V4
         elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
@@ -613,9 +616,10 @@ class KeysArray:
     def _ensure_all_keys_queried(self):
         """The retrieval of key information is lazy, but for certain functionality
         we need to know all keys. This function makes sure that's the case."""
-        for (i, k) in enumerate(self.keys):
-            if k is None:
-                self._query_key(i)
+        with self.lock:  # don't want two threads doing this
+            for (i, k) in enumerate(self.keys):
+                if k is None:
+                    self._query_key(i)
 
     def __getitem__(self, index):
         if isinstance(index, int):
