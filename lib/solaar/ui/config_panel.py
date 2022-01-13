@@ -39,11 +39,14 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
     def _do_write(s, v, sb, key):
-        if key is None:
-            v = setting.write(v)
-        else:
-            v = setting.write_key_value(key, v)
-            v = {key: v}
+        try:
+            if key is None:
+                v = setting.write(v)
+            else:
+                v = setting.write_key_value(key, v)
+                v = {key: v}
+        except Exception:
+            v = None
         if sb:
             GLib.idle_add(_update_setting_item, sb, v, True, sensitive, priority=99)
 
