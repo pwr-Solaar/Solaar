@@ -787,10 +787,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
 class Gesture:
-
-    gesture_index = {}
-
-    def __init__(self, device, low, high):
+    def __init__(self, device, low, high, next_index):
         self._device = device
         self.id = low
         self.gesture = GESTURE[low]
@@ -802,8 +799,7 @@ class Gesture:
         self.default_enabled = high & 0x20
         self.index = None
         if self.can_be_enabled or self.default_enabled:
-            self.index = Gesture.gesture_index.get(device, 0)
-            Gesture.gesture_index[device] = self.index + 1
+            self.index = next_index
         self.offset, self.mask = self._offset_mask()
 
     def _offset_mask(self):  # offset and mask
@@ -931,6 +927,7 @@ class Gestures:
         self.params = {}
         self.specs = {}
         index = 0
+        next_gesture_index = 0
         field_high = 0x00
         while field_high != 0x01:  # end of fields
             # retrieve the next eight fields
@@ -943,7 +940,8 @@ class Gestures:
                 if field_high == 0x1:  # end of fields
                     break
                 elif field_high & 0x80:
-                    gesture = Gesture(device, field_low, field_high)
+                    gesture = Gesture(device, field_low, field_high, next_gesture_index)
+                    next_gesture_index = next_gesture_index if gesture.index is None else next_gesture_index + 1
                     self.gestures[gesture.gesture] = gesture
                 elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
                     param = Param(device, field_low, field_high)
