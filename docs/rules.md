@@ -124,7 +124,23 @@ Any key symbols that correspond to modifier keys that are in the current keyboar
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
-An `Execute` actions takes a program and arguments and executes it asynchronously.
+An `Execute` action takes a program and arguments and executes it asynchronously.
+
+A `Set` action changes a Solaar setting for a device, provided that the device is on-line.
+`Set` actions take three or four arguments, depending on the setting:
+the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
+or null for the device that initiated rule processing;
+the internal name of a setting (which can be found from solaar config <device>);
+one or two arguments for the setting.
+For settings that use keys or buttons as an argument the Logtech name can be used
+as shown in the Solaar main window for these settings,
+or the numeric value for the key or button.
+For settings that use gestures as an argument the internal name of the gesture is used,
+which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
+For settings that need one of a set of names as an argument the name can be used or its internal integer value,
+as used in the Solaar config file.
+For boolean settings '~' can be used to toggle the setting.
+All settings are supported except for gesture parameters.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
 One rule turns
