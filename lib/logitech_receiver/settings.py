@@ -42,6 +42,22 @@ SENSITIVITY_IGNORE = 'ignore'
 KIND = _NamedInts(toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10, multiple_range=0x40)
 
 
+def bool_or_toggle(current, new):
+    if isinstance(new, bool):
+        return new
+    try:
+        return bool(int(new))
+    except (TypeError, ValueError):
+        new = str(new).lower()
+    if new in ('true', 'yes', 'on', 't', 'y'):
+        return True
+    if new in ('false', 'no', 'off', 'f', 'n'):
+        return False
+    if new in ('~', 'toggle'):
+        return not current
+    return None
+
+
 class Setting:
     """A setting descriptor.
     Needs to be instantiated for each specific device."""
@@ -726,8 +742,9 @@ class BooleanValidator:
     def acceptable(self, args, current):
         if len(args) != 1:
             return None
-        val = [args[0]] if type(args[0]) == bool else [not current] if args[0] == '~' else None
-        return val
+
+        val = bool_or_toggle(current, args[0])
+        return [val] if val is not None else None
 
 
 class BitFieldValidator:
@@ -770,7 +787,7 @@ class BitFieldValidator:
         key = next((key for key in self.options if key == args[0]), None)
         if key is None:
             return None
-        val = args[1] if type(args[1]) == bool else not current[str(int(key))] if args[1] == '~' else None
+        val = bool_or_toggle(current[str(int(key))], args[1])
         return None if val is None else [str(int(key)), val]
 
 
@@ -861,7 +878,7 @@ class BitFieldWithOffsetAndMaskValidator:
         key = next((option.id for option in self.options if option.as_int() == args[0]), None)
         if key is None:
             return None
-        val = args[1] if type(args[1]) == bool else not current[str(int(key))] if args[1] == '~' else None
+        val = bool_or_toggle(current[str(int(key))], args[1])
         return None if val is None else [str(key), val]
 
 
