@@ -290,9 +290,9 @@ class Device:
 
     @property
     def gestures(self):
-        if not self._gestures:
+        if self._gestures is None:
             with self._gestures_lock:
-                if not self._gestures:
+                if self._gestures is None:
                     if self.online and self.protocol >= 2.0:
                         self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
