@@ -27,7 +27,7 @@ def _print_setting(s, verbose=True):
         if s.description:
             print('#', s.description.replace('\n', ' '))
         if s.kind == _settings.KIND.toggle:
-            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle')
+            print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle/~')
         elif s.kind == _settings.KIND.choice:
             print(
                 '#   possible values: one of [', ', '.join(str(v) for v in s.choices),
@@ -82,7 +82,7 @@ def select_choice(value, choices, setting, key):
 
 
 def select_toggle(value, setting):
-    if value == 'Toggle':
+    if value.lower() in ('toggle', '~'):
         value = not setting.read()
     else:
         try:
