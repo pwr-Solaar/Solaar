@@ -306,9 +306,9 @@ class Device:
         if not self._settings:
             self._settings = []
             if self.persister and self.descriptor and self.descriptor.settings:
-                for s in self.descriptor.settings:
+                for sclass in self.descriptor.settings:
                     try:
-                        setting = s(self)
+                        setting = sclass.build(self)
                     except Exception as e:  # Do nothing if the device is offline
                         setting = None
                         if self.online:
