@@ -18,7 +18,6 @@
 
 import math
 
-from copy import copy as _copy
 from logging import DEBUG as _DEBUG
 from logging import WARNING as _WARNING
 from logging import getLogger
@@ -58,51 +57,170 @@ def bool_or_toggle(current, new):
     return None
 
 
-class Setting:
-    """A setting descriptor.
-    Needs to be instantiated for each specific device."""
-    __slots__ = (
-        'name', 'label', 'description', 'kind', 'device_kind', 'feature', 'persist', '_rw', '_validator', '_callback',
-        '_device', '_value'
-    )
+# moved first for dependency reasons
+class Validator:
+    @classmethod
+    def build(cls, setting_class, device, **kwargs):
+        return cls(**kwargs)
 
-    def __init__(self, name, rw, validator=None, callback=None, kind=None, device_kind=None, feature=None, persist=True):
-        assert name
-        self.name = name[0]
-        self.label = name[1]
-        self.description = name[2]
-        self.device_kind = device_kind
-        self.feature = getattr(rw, 'feature', None)
-        self.persist = persist
-        self._rw = rw
-        assert (validator and not callback) or (not validator and callback)
-        self._validator = validator
-        self._callback = callback
 
-        assert kind is None or validator is None or kind & validator.kind != 0
-        self.kind = kind or getattr(validator, 'kind', None)
+class BooleanValidator(Validator):
+    __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
 
-    def __call__(self, device):
-        assert not hasattr(self, '_value')
-        # combined keyboards and touchpads (e.g., K400) break this assertion so don't use it
-        # assert self.device_kind is None or device.kind in self.device_kind
-        p = device.protocol
-        if p == 1.0:
-            # HID++ 1.0 devices do not support features
-            assert self._rw.kind == RegisterRW.kind
-        elif p >= 2.0:
-            # HID++ 2.0 devices do not support registers
-            assert self._rw.kind == FeatureRW.kind
-        o = _copy(self)
-        if o._callback:
-            o._validator = o._callback(device)
-            if o._validator is None:
+    kind = KIND.toggle
+    default_true = 0x01
+    default_false = 0x00
+    # mask specifies all the affected bits in the value
+    default_mask = 0xFF
+
+    def __init__(
+        self,
+        true_value=default_true,
+        false_value=default_false,
+        mask=default_mask,
+        read_skip_byte_count=0,
+        write_prefix_bytes=b''
+    ):
+        if isinstance(true_value, int):
+            assert isinstance(false_value, int)
+            if mask is None:
+                mask = self.default_mask
+            else:
+                assert isinstance(mask, int)
+            assert true_value & false_value == 0
+            assert true_value & mask == true_value
+            assert false_value & mask == false_value
+            self.needs_current_value = (mask != self.default_mask)
+        elif isinstance(true_value, bytes):
+            if false_value is None or false_value == self.default_false:
+                false_value = b'\x00' * len(true_value)
+            else:
+                assert isinstance(false_value, bytes)
+            if mask is None or mask == self.default_mask:
+                mask = b'\xFF' * len(true_value)
+            else:
+                assert isinstance(mask, bytes)
+            assert len(mask) == len(true_value) == len(false_value)
+            tv = _bytes2int(true_value)
+            fv = _bytes2int(false_value)
+            mv = _bytes2int(mask)
+            assert tv != fv  # true and false might be something other than bit values
+            assert tv & mv == tv
+            assert fv & mv == fv
+            self.needs_current_value = any(m != b'\xFF' for m in mask)
+        else:
+            raise Exception("invalid mask '%r', type %s" % (mask, type(mask)))
+
+        self.true_value = true_value
+        self.false_value = false_value
+        self.mask = mask
+        self.read_skip_byte_count = read_skip_byte_count
+        self.write_prefix_bytes = write_prefix_bytes
+
+    def validate_read(self, reply_bytes):
+        reply_bytes = reply_bytes[self.read_skip_byte_count:]
+        if isinstance(self.mask, int):
+            reply_value = ord(reply_bytes[:1]) & self.mask
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('BooleanValidator: validate read %r => %02X', reply_bytes, reply_value)
+            if reply_value == self.true_value:
+                return True
+            if reply_value == self.false_value:
+                return False
+            _log.warn(
+                'BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
+                self.mask
+            )
+            return False
+
+        count = len(self.mask)
+        mask = _bytes2int(self.mask)
+        reply_value = _bytes2int(reply_bytes[:count]) & mask
+
+        true_value = _bytes2int(self.true_value)
+        if reply_value == true_value:
+            return True
+
+        false_value = _bytes2int(self.false_value)
+        if reply_value == false_value:
+            return False
+
+        _log.warn('BooleanValidator: reply %r mismatched %r/%r/%r', reply_bytes, self.true_value, self.false_value, self.mask)
+        return False
+
+    def prepare_write(self, new_value, current_value=None):
+        if new_value is None:
+            new_value = False
+        else:
+            assert isinstance(new_value, bool), 'New value %s for boolean setting is not a boolean' % new_value
+
+        to_write = self.true_value if new_value else self.false_value
+
+        if isinstance(self.mask, int):
+            if current_value is not None and self.needs_current_value:
+                to_write |= ord(current_value[:1]) & (0xFF ^ self.mask)
+            if current_value is not None and to_write == ord(current_value[:1]):
                 return None
-            assert o.kind is None or o.kind & o._validator.kind != 0
-            o.kind = o.kind or o._validator.kind
-        o._value = None
-        o._device = device
-        return o
+            to_write = bytes([to_write])
+        else:
+            to_write = bytearray(to_write)
+            count = len(self.mask)
+            for i in range(0, count):
+                b = ord(to_write[i:i + 1])
+                m = ord(self.mask[i:i + 1])
+                assert b & m == b
+                # b &= m
+                if current_value is not None and self.needs_current_value:
+                    b |= ord(current_value[i:i + 1]) & (0xFF ^ m)
+                to_write[i] = b
+            to_write = bytes(to_write)
+
+            if current_value is not None and to_write == current_value[:len(to_write)]:
+                return None
+
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
+
+        return self.write_prefix_bytes + to_write
+
+    def acceptable(self, args, current):
+        if len(args) != 1:
+            return None
+        val = bool_or_toggle(current, args[0])
+        return [val] if val is not None else None
+
+
+class Setting:
+    """A setting descriptor. Needs to be instantiated for each specific device."""
+    name = label = description = ''
+    feature = register = kind = None
+    persist = True
+    rw_options = {}
+    validator_class = BooleanValidator
+    validator_options = {}
+
+    def __init__(self, device, rw, validator):
+        self._device = device
+        self._rw = rw
+        self._validator = validator
+        self.kind = getattr(self._validator, 'kind', None)
+        self._value = None
+
+    @classmethod
+    def build(cls, device):
+        assert cls.feature or cls.register, 'Settings require either a feature or a register'
+        rw_class = cls.rw_class if hasattr(cls, 'rw_class') else FeatureRW if cls.feature else RegisterRW
+        rw = rw_class(cls.feature if cls.feature else cls.register, **cls.rw_options)
+        p = device.protocol
+        if p == 1.0:  # HID++ 1.0 devices do not support features
+            assert rw.kind == RegisterRW.kind
+        elif p >= 2.0:  # HID++ 2.0 devices do not support registers
+            assert rw.kind == FeatureRW.kind
+        validator_class = cls.validator_class
+        validator = validator_class.build(cls, device, **cls.validator_options)
+        if validator:
+            assert cls.kind is None or cls.kind & validator.kind != 0
+            return cls(device, rw, validator)
 
     @property
     def choices(self):
@@ -173,7 +291,7 @@ class Setting:
 
             current_value = None
             if self._validator.needs_current_value:
-                # the validator needs the current value, possibly to merge flag values
+                # the _validator needs the current value, possibly to merge flag values
                 current_value = self._rw.read(self._device)
 
             data_bytes = self._validator.prepare_write(value, current_value)
@@ -614,140 +732,7 @@ class FeatureRWMap(FeatureRW):
         return reply if not self.no_reply else True
 
 
-#
-# value validators
-# handle the conversion from read bytes, to setting value, and back
-#
-
-
-class BooleanValidator:
-    __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
-
-    kind = KIND.toggle
-    default_true = 0x01
-    default_false = 0x00
-    # mask specifies all the affected bits in the value
-    default_mask = 0xFF
-
-    def __init__(
-        self,
-        true_value=default_true,
-        false_value=default_false,
-        mask=default_mask,
-        read_skip_byte_count=0,
-        write_prefix_bytes=b''
-    ):
-        if isinstance(true_value, int):
-            assert isinstance(false_value, int)
-            if mask is None:
-                mask = self.default_mask
-            else:
-                assert isinstance(mask, int)
-            assert true_value & false_value == 0
-            assert true_value & mask == true_value
-            assert false_value & mask == false_value
-            self.needs_current_value = (mask != self.default_mask)
-        elif isinstance(true_value, bytes):
-            if false_value is None or false_value == self.default_false:
-                false_value = b'\x00' * len(true_value)
-            else:
-                assert isinstance(false_value, bytes)
-            if mask is None or mask == self.default_mask:
-                mask = b'\xFF' * len(true_value)
-            else:
-                assert isinstance(mask, bytes)
-            assert len(mask) == len(true_value) == len(false_value)
-            tv = _bytes2int(true_value)
-            fv = _bytes2int(false_value)
-            mv = _bytes2int(mask)
-            assert tv != fv  # true and false might be something other than bit values
-            assert tv & mv == tv
-            assert fv & mv == fv
-            self.needs_current_value = any(m != b'\xFF' for m in mask)
-        else:
-            raise Exception("invalid mask '%r', type %s" % (mask, type(mask)))
-
-        self.true_value = true_value
-        self.false_value = false_value
-        self.mask = mask
-        self.read_skip_byte_count = read_skip_byte_count
-        self.write_prefix_bytes = write_prefix_bytes
-
-    def validate_read(self, reply_bytes):
-        reply_bytes = reply_bytes[self.read_skip_byte_count:]
-        if isinstance(self.mask, int):
-            reply_value = ord(reply_bytes[:1]) & self.mask
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('BooleanValidator: validate read %r => %02X', reply_bytes, reply_value)
-            if reply_value == self.true_value:
-                return True
-            if reply_value == self.false_value:
-                return False
-            _log.warn(
-                'BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
-                self.mask
-            )
-            return False
-
-        count = len(self.mask)
-        mask = _bytes2int(self.mask)
-        reply_value = _bytes2int(reply_bytes[:count]) & mask
-
-        true_value = _bytes2int(self.true_value)
-        if reply_value == true_value:
-            return True
-
-        false_value = _bytes2int(self.false_value)
-        if reply_value == false_value:
-            return False
-
-        _log.warn('BooleanValidator: reply %r mismatched %r/%r/%r', reply_bytes, self.true_value, self.false_value, self.mask)
-        return False
-
-    def prepare_write(self, new_value, current_value=None):
-        if new_value is None:
-            new_value = False
-        else:
-            assert isinstance(new_value, bool), 'New value %s for boolean setting is not a boolean' % new_value
-
-        to_write = self.true_value if new_value else self.false_value
-
-        if isinstance(self.mask, int):
-            if current_value is not None and self.needs_current_value:
-                to_write |= ord(current_value[:1]) & (0xFF ^ self.mask)
-            if current_value is not None and to_write == ord(current_value[:1]):
-                return None
-            to_write = bytes([to_write])
-        else:
-            to_write = bytearray(to_write)
-            count = len(self.mask)
-            for i in range(0, count):
-                b = ord(to_write[i:i + 1])
-                m = ord(self.mask[i:i + 1])
-                assert b & m == b
-                # b &= m
-                if current_value is not None and self.needs_current_value:
-                    b |= ord(current_value[i:i + 1]) & (0xFF ^ m)
-                to_write[i] = b
-            to_write = bytes(to_write)
-
-            if current_value is not None and to_write == current_value[:len(to_write)]:
-                return None
-
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
-
-        return self.write_prefix_bytes + to_write
-
-    def acceptable(self, args, current):
-        if len(args) != 1:
-            return None
-
-        val = bool_or_toggle(current, args[0])
-        return [val] if val is not None else None
-
-
-class BitFieldValidator:
+class BitFieldValidator(Validator):
     __slots__ = ('byte_count', 'options')
 
     kind = KIND.multiple_toggle
@@ -791,7 +776,7 @@ class BitFieldValidator:
         return None if val is None else [str(int(key)), val]
 
 
-class BitFieldWithOffsetAndMaskValidator:
+class BitFieldWithOffsetAndMaskValidator(Validator):
     __slots__ = ('byte_count', 'options', '_option_from_key', '_mask_from_offset', '_option_from_offset_mask')
 
     kind = KIND.multiple_toggle
@@ -882,13 +867,16 @@ class BitFieldWithOffsetAndMaskValidator:
         return None if val is None else [str(key), val]
 
 
-class ChoicesValidator:
-    kind = KIND.choice
+class ChoicesValidator(Validator):
     """Translates between NamedInts and a byte sequence.
     :param choices: a list of NamedInts
     :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
-    def __init__(self, choices, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b''):
+    kind = KIND.choice
+    choices_universe = None  # the possible choices, or an empty sequence for anything
+    choices_extra = None  # an extra choice, so as not to require extending a large NamedInts
+
+    def __init__(self, choices=None, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b''):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
         assert len(choices) > 1
@@ -943,6 +931,8 @@ class ChoicesValidator:
 
 class ChoicesMapValidator(ChoicesValidator):
     kind = KIND.map_choice
+    keys_universe = None  # the possible keys, or an empty sequence for anything
+    choices_universe = None  # the possible choices, or an empty sequence for anything
 
     def __init__(
         self,
@@ -1013,16 +1003,23 @@ class ChoicesMapValidator(ChoicesValidator):
         return [str(int(key)), int(choice)] if choice is not None else None
 
 
-class RangeValidator:
-    __slots__ = ('min_value', 'max_value', 'flag', '_byte_count', 'needs_current_value')
-
+class RangeValidator(Validator):
     kind = KIND.range
     """Translates between integers and a byte sequence.
     :param min_value: minimum accepted value (inclusive)
     :param max_value: maximum accepted value (inclusive)
     :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the range."""
-    def __init__(self, min_value, max_value, byte_count=None):
+    min_value = 0
+    max_value = 255
+
+    @classmethod
+    def build(cls, setting_class, device, **kwargs):
+        kwargs['min_value'] = setting_class.min_value
+        kwargs['max_value'] = setting_class.max_value
+        return cls(**kwargs)
+
+    def __init__(self, min_value=0, max_value=255, byte_count=1):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
@@ -1051,7 +1048,7 @@ class RangeValidator:
         return None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args
 
 
-class MultipleRangeValidator:
+class MultipleRangeValidator(Validator):
 
     kind = KIND.multiple_range
 
@@ -1126,7 +1123,8 @@ class MultipleRangeValidator:
 
 class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
-    def __init__(self, name, divert_setting_name):
+    def __init__(self, feature, name='', divert_setting_name='divert-keys'):
+        self.feature = feature  # not used?
         self.name = name
         self.divert_setting_name = divert_setting_name
         self.kind = FeatureRW.kind  # pretend to be FeatureRW as required for HID++ 2.0 devices
