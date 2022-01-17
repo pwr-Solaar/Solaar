@@ -1741,11 +1741,11 @@ class SetUI(ActionUI):
                 self.key_field.append(str(int(k)), str(k))
 
     def update_devices(self):
+        if not self.component:
+            return
         with self.ignore_changes():
             device_value = self.collect_value()[0]
             self.devices = _all_devices()
-            if not self.component:
-                return
             self.device_field.remove_all()
             self.device_field.append('', _('Originating device'))
             acceptable_values = []
