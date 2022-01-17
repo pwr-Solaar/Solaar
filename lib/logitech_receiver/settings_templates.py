@@ -167,8 +167,8 @@ class RegisterSideScroll(_Setting):
 
 # different devices have different sets of permissable dpis, so this should be subclassed
 class RegisterDpi(_Setting):
-    name = 'dpi'
-    label = _('Sensitivity (DPI)')
+    name = 'dpi-old'
+    label = _('Sensitivity (DPI - older mice)')
     description = _('Mouse movement sensitivity')
     register = _R.mouse_dpi
     choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
