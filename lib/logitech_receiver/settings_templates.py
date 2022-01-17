@@ -21,8 +21,6 @@ from logging import INFO as _INFO
 from logging import getLogger
 from time import time as _time
 
-from solaar.ui import notify as _notify
-
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
@@ -570,6 +568,10 @@ class DpiSliding(_Setting):
             _status_changed(self.device, refresh=True)  # update main window
 
         def displayNewDpi(self, newDpiIdx):
+            from solaar.ui import notify as _notify
+            # import here to avoid circular import when running `solaar show`,
+            # which does not require this method
+
             if _notify.available:
                 reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
                 # if there is a progress percentage then the reason isn't shown
