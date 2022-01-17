@@ -29,6 +29,7 @@ from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.settings import KIND as _SKIND
+from logitech_receiver.settings import Setting as _Setting
 from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
 from solaar.i18n import _
@@ -1574,14 +1575,32 @@ class SetValueControl(Gtk.HBox):
         self.unsupported_label.show()
 
 
+def _all_settings():
+    settings = {}
+    for s in sorted(_SETTINGS, key=lambda setting: setting.label):
+        if s.validator_class.kind == _SKIND.multiple_range:  # not supported yet
+            continue
+        if s.name not in settings:
+            settings[s.name] = [s]
+        else:
+            prev_setting = settings[s.name][0]
+            prev_kind = prev_setting.validator_class.kind
+            if prev_kind != s.validator_class.kind:
+                _log.warning(
+                    'ignoring setting {} - same name of {}, but different kind ({} != {})'.format(
+                        s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
+                    )
+                )
+                continue
+            settings[s.name].append(s)
+    return settings
+
+
 class SetUI(ActionUI):
 
     CLASS = _DIV.Set
 
-    ALL_SETTINGS = {
-        s.name: s
-        for s in sorted(_SETTINGS, key=lambda setting: setting.label) if not s.validator_class.kind == _SKIND.multiple_range
-    }
+    ALL_SETTINGS = _all_settings()
 
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
 
@@ -1609,7 +1628,7 @@ class SetUI(ActionUI):
         self.setting_field = Gtk.ComboBoxText()
         self.setting_field.append('', '')
         for setting in self.ALL_SETTINGS.values():
-            self.setting_field.append(setting.name, setting.label)
+            self.setting_field.append(setting[0].name, setting[0].label)
         self.setting_field.set_valign(Gtk.Align.START)
         self.setting_field.connect('changed', self._on_update)
         self.setting_field.connect('changed', self._changed_setting)
@@ -1629,17 +1648,33 @@ class SetUI(ActionUI):
 
     @classmethod
     def _all_choices(cls, setting):  # choice and map-choice
-        return (getattr(setting, 'choices_universe', None)
-                or NamedInts()) | (getattr(setting, 'choices_extra', None) or NamedInts())
+        """Return a NamedInts instance with the choices for a setting.
+
+        If the argument `setting` is a Setting instance, then the choices are taken only from it.
+        If instead it is a name, then the function returns the union of the choices for each setting with that name.
+        Only one label per number is kept.
+        """
+        if isinstance(setting, type) and issubclass(setting, _Setting):
+            return (getattr(setting, 'choices_universe', None)
+                    or NamedInts()) | (getattr(setting, 'choices_extra', None) or NamedInts())
+        settings = cls.ALL_SETTINGS.get(setting, [])
+        choices = NamedInts()
+        for s in settings:
+            choices |= cls._all_choices(s)
+        return choices
 
     @classmethod
     def _setting_attributes(cls, setting_name):
-        setting = cls.ALL_SETTINGS.get(setting_name, None)
+        settings = cls.ALL_SETTINGS.get(setting_name, [None])
+        setting = settings[0]  # if settings have the same name, use the first one to get the basic data
         val_class = setting.validator_class if setting else None
         kind = val_class.kind if val_class else None
         if kind in cls.MULTIPLE:
-            keys = getattr(setting, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe',
-                           None) or NamedInts()
+            keys = NamedInts()
+            for s in settings:
+                keys |= getattr(s, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe',
+                                None) or NamedInts()
+            # only one key per number is used
         else:
             keys = None
         return setting, val_class, kind, keys
@@ -1661,7 +1696,7 @@ class SetUI(ActionUI):
         if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
             self.value_field.make_toggle()
         elif kind in (_SKIND.choice, _SKIND.map_choice):
-            all_values = self._all_choices(setting)
+            all_values = self._all_choices(setting_name)
             self.value_field.make_choice(all_values)
         elif kind in (_SKIND.range, ):  # _SKIND.multiple_range not supported
             self.value_field.make_range(val_class.min_value, val_class.max_value)
@@ -1748,7 +1783,7 @@ class SetUI(ActionUI):
             disp.append(_from_named_ints(key, keys) if keys else key)
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
-            all_values = cls._all_choices(setting)
+            all_values = cls._all_choices(setting_name)
             if all_values:
                 value = all_values[value]
         disp.append(value)
