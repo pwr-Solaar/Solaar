@@ -430,7 +430,7 @@ class DivertKeys(_Settings):
     description = _('Make the key or button send HID++ notifications (which trigger Solaar rules but are otherwise ignored).')
     feature = _F.REPROG_CONTROLS_V4
     keys_universe = _special_keys.CONTROL
-    choices_universe = [_NamedInt(0x00, _('Regular')), _NamedInt(0x01, _('Diverted'))]
+    choices_universe = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1})
 
     class rw_class:
         def __init__(self, feature):
