@@ -469,6 +469,7 @@ class AdjustableDpi(_Setting):
     description = _('Mouse movement sensitivity')
     feature = _F.ADJUSTABLE_DPI
     rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30}
+    choices_universe = _NamedInts.range(50, 4000, str, 50)
 
     class validator_class(_ChoicesV):
         @classmethod
