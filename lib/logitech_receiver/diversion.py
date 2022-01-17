@@ -66,19 +66,23 @@ except Exception:
 
 if x11:
     display = Display()
-    context = display.record_create_context(
-        0, [record.AllClients], [{
-            'core_requests': (0, 0),
-            'core_replies': (0, 0),
-            'ext_requests': (0, 0, 0, 0),
-            'ext_replies': (0, 0, 0, 0),
-            'delivered_events': (0, 0),
-            'device_events': (X.KeyPress, X.KeyRelease),
-            'errors': (0, 0),
-            'client_started': False,
-            'client_died': False,
-        }]
-    )
+    try:
+        context = display.record_create_context(
+            0, [record.AllClients], [{
+                'core_requests': (0, 0),
+                'core_replies': (0, 0),
+                'ext_requests': (0, 0, 0, 0),
+                'ext_replies': (0, 0, 0, 0),
+                'delivered_events': (0, 0),
+                'device_events': (X.KeyPress, X.KeyRelease),
+                'errors': (0, 0),
+                'client_started': False,
+                'client_died': False,
+            }]
+        )
+    except Exception:
+        _log.warn('X11 xtest not available - Modifiers and KeyPress will not work correctly', exc_info=_sys.exc_info())
+        context = None
     modifier_keycodes = display.get_modifier_mapping()
     current_key_modifiers = 0
 
@@ -104,7 +108,7 @@ def key_press_handler(reply):
             current_key_modifiers = event.state & ~(1 << mod) if mod is not None else event.state
 
 
-if x11:
+if x11 and context is not None:
     _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
 # display.record_free_context(context)  when should this be done??
 
