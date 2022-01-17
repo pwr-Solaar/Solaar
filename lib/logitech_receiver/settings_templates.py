@@ -172,6 +172,7 @@ class RegisterDpi(_Setting):
     description = _('Mouse movement sensitivity')
     register = _R.mouse_dpi
     choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
+    validator_class = _ChoicesV
     validator_options = {'choices': choices_universe}
 
 
@@ -760,6 +761,8 @@ class Multiplatform(_Setting):
     description = _('Change keys to match OS.')
     feature = _F.MULTIPLATFORM
     rw_options = {'read_fnid': 0x00, 'write_fnid': 0x30}
+    choices_universe = _NamedInts(**{'OS ' + str(i + 1): i for i in range(8)})
+
     # multiplatform OS bits
     OSS = [('Linux', 0x0400), ('MacOS', 0x2000), ('Windows', 0x0100), ('iOS', 0x4000), ('Android', 0x1000), ('WebOS', 0x8000),
            ('Chrome', 0x0800), ('WinEmb', 0x0200), ('Tizen', 0x0001)]
