@@ -99,7 +99,7 @@ class NamedInts:
     if the value already exists in the set (int or string), ValueError will be
     raised.
     """
-    __slots__ = ('__dict__', '_values', '_indexed', '_fallback')
+    __slots__ = ('__dict__', '_values', '_indexed', '_fallback', '_is_sorted')
 
     def __init__(self, **kwargs):
         def _readable_name(n):
@@ -110,7 +110,9 @@ class NamedInts:
         # print (repr(kwargs))
         values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
         self.__dict__ = values
-        self._values = sorted(list(values.values()))
+        self._is_sorted = False
+        self._values = list(values.values())
+        self._sort_values()
         self._indexed = {int(v): v for v in self._values}
         # assert len(values) == len(self._indexed)
         # "(%d) %r\n=> (%d) %r" % (len(values), values, len(self._indexed), self._indexed)
@@ -137,14 +139,20 @@ class NamedInts:
         if unknown_bits:
             yield 'unknown:%06X' % unknown_bits
 
+    def _sort_values(self):
+        self._values = sorted(self._values)
+        self._is_sorted = True
+
     def __getitem__(self, index):
         if isinstance(index, int):
             if index in self._indexed:
                 return self._indexed[int(index)]
-            if self._fallback and isinstance(index, int):
+            if self._fallback:
                 value = NamedInt(index, self._fallback(index))
                 self._indexed[index] = value
-                self._values = sorted(self._values + [value])
+                self._values.append(value)
+                self._is_sorted = False
+                self._sort_values()
                 return value
 
         elif is_string(index):
@@ -153,21 +161,24 @@ class NamedInts:
             return (next((x for x in self._values if str(x) == index), None))
 
         elif isinstance(index, slice):
+            values = self._values if self._is_sorted else sorted(self._values)
+
             if index.start is None and index.stop is None:
-                return self._values[:]
+                return values[:]
 
-            v_start = int(self._values[0]) if index.start is None else int(index.start)
-            v_stop = (self._values[-1] + 1) if index.stop is None else int(index.stop)
+            v_start = int(values[0]) if index.start is None else int(index.start)
+            v_stop = (values[-1] + 1) if index.stop is None else int(index.stop)
 
-            if v_start > v_stop or v_start > self._values[-1] or v_stop <= self._values[0]:
+            if v_start > v_stop or v_start > values[-1] or v_stop <= values[0]:
                 return []
 
-            if v_start <= self._values[0] and v_stop > self._values[-1]:
-                return self._values[:]
+            if v_start <= values[0] and v_stop > values[-1]:
+                return values[:]
 
             start_index = 0
-            stop_index = len(self._values)
-            for i, value in enumerate(self._values):
+            stop_index = len(values)
+
+            for i, value in enumerate(values):
                 if value < v_start:
                     start_index = i + 1
                 elif index.stop is None:
@@ -176,7 +187,7 @@ class NamedInts:
                     stop_index = i
                     break
 
-            return self._values[start_index:stop_index]
+            return values[start_index:stop_index]
 
     def __setitem__(self, index, name):
         assert isinstance(index, int), type(index)
@@ -193,7 +204,9 @@ class NamedInts:
         if int(value) in self._indexed:
             raise ValueError('%d (%s) already known' % (int(value), value))
 
-        self._values = sorted(self._values + [value])
+        self._values.append(value)
+        self._is_sorted = False
+        self._sort_values()
         self.__dict__[str(value)] = value
         self._indexed[int(value)] = value
 
@@ -214,6 +227,15 @@ class NamedInts:
 
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)
+
+
+class UnsortedNamedInts(NamedInts):
+    def _sort_values(self):
+        pass
+
+    def __or__(self, other):
+        c = UnsortedNamedInts if isinstance(other, UnsortedNamedInts) else NamedInts
+        return c(**self.__dict__, **other.__dict__)
 
 
 def strhex(x):

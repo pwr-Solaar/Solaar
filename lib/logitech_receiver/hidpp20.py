@@ -31,6 +31,7 @@ from .common import FirmwareInfo as _FirmwareInfo
 from .common import KwException as _KwException
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
+from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import pack as _pack
 from .common import unpack as _unpack
@@ -438,18 +439,18 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         return _NamedInt(self._mapped_to, task)
 
     @property
-    def remappable_to(self) -> List[_NamedInt]:
+    def remappable_to(self) -> _NamedInts:
         self._device.keys._ensure_all_keys_queried()
-        ret = []
+        ret = _UnsortedNamedInts()
         if self.group_mask != []:  # only keys with a non-zero gmask are remappable
-            ret = [self.default_task]  # it should always be possible to map the key to itself
+            ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
                 g = special_keys.CID_GROUP[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
                     tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
                     tgt_task = _NamedInt(tgt_cid, tgt_task)
                     if tgt_task != self.default_task:  # don't put itself in twice
-                        ret.append(tgt_task)
+                        ret[tgt_task] = tgt_task
         return ret
 
     @property

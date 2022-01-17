@@ -23,7 +23,7 @@ from shlex import quote as shlex_quote
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
-from logitech_receiver.common import NamedInt, NamedInts
+from logitech_receiver.common import NamedInt, UnsortedNamedInts
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
@@ -1655,10 +1655,16 @@ class SetUI(ActionUI):
         Only one label per number is kept.
         """
         if isinstance(setting, type) and issubclass(setting, _Setting):
-            return (getattr(setting, 'choices_universe', None)
-                    or NamedInts()) | (getattr(setting, 'choices_extra', None) or NamedInts())
+            choices = UnsortedNamedInts()
+            universe = getattr(setting, 'choices_universe', None)
+            if universe:
+                choices |= universe
+            extra = getattr(setting, 'choices_extra', None)
+            if extra:
+                choices |= extra
+            return choices
         settings = cls.ALL_SETTINGS.get(setting, [])
-        choices = NamedInts()
+        choices = UnsortedNamedInts()
         for s in settings:
             choices |= cls._all_choices(s)
         return choices
@@ -1670,10 +1676,11 @@ class SetUI(ActionUI):
         val_class = setting.validator_class if setting else None
         kind = val_class.kind if val_class else None
         if kind in cls.MULTIPLE:
-            keys = NamedInts()
+            keys = UnsortedNamedInts()
             for s in settings:
-                keys |= getattr(s, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe',
-                                None) or NamedInts()
+                universe = getattr(s, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe', None)
+                if universe:
+                    keys |= universe
             # only one key per number is used
         else:
             keys = None
