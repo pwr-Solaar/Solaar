@@ -1189,13 +1189,17 @@ class ActionSettingRW:
                         self.move_action(dx, dy)
 
         divertSetting = next(filter(lambda s: s.name == self.divert_setting_name, device.settings), None)
+        if divertSetting is None:
+            _log.warn('setting %s not found on %s', self.divert_setting_name, device.name)
+            return None
         self.device = device
         key = _bytes2int(data_bytes)
         if key:  # Enable
             self.key = next((k for k in device.keys if k.key == key), None)
             if self.key:
                 self.active = True
-                divertSetting.write_key_value(int(self.key.key), 1)
+                if divertSetting:
+                    divertSetting.write_key_value(int(self.key.key), 1)
                 device.add_notification_handler(self.name, handler)
                 from solaar.ui import status_changed as _status_changed
                 self.activate_action()
@@ -1205,7 +1209,8 @@ class ActionSettingRW:
         else:  # Disable
             if self.active:
                 self.active = False
-                divertSetting.write_key_value(int(self.key.key), 0)
+                if divertSetting:
+                    divertSetting.write_key_value(int(self.key.key), 0)
                 from solaar.ui import status_changed as _status_changed
                 _status_changed(device, refresh=True)  # update main window
                 try:
