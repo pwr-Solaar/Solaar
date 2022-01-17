@@ -951,7 +951,7 @@ class ChoicesMapValidator(ChoicesValidator):
         max_value_bits = 0
         for key, choices in choices_map.items():
             assert isinstance(key, _NamedInt)
-            assert isinstance(choices, list)
+            assert isinstance(choices, _NamedInts)
             max_key_bits = max(max_key_bits, key.bit_length())
             for key_value in choices:
                 assert isinstance(key_value, _NamedInt)
