@@ -212,6 +212,9 @@ class NamedInts:
     def __repr__(self):
         return 'NamedInts(%s)' % ', '.join(repr(v) for v in self._values)
 
+    def __or__(self, other):
+        return NamedInts(**self.__dict__, **other.__dict__)
+
 
 def strhex(x):
     assert x is not None

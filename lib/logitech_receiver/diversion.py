@@ -34,6 +34,7 @@ from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
+from .common import NamedInt
 from .common import unpack as _unpack
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
@@ -859,6 +860,8 @@ def _save_config_rule_file(file_name=_file_path):
             return [convert(c) for c in elem]
         if isinstance(elem, dict):
             return {k: convert(v) for k, v in elem.items()}
+        if isinstance(elem, NamedInt):
+            return int(elem)
         return elem
 
     # YAML format settings

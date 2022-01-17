@@ -23,10 +23,13 @@ from shlex import quote as shlex_quote
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
+from logitech_receiver.common import NamedInt, NamedInts
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
+from logitech_receiver.settings import KIND as _SKIND
+from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
 from solaar.i18n import _
 
@@ -282,9 +285,7 @@ class DiversionDialog:
         wrapped = model[it][0]
         component = wrapped.component
         self._editing_component = component
-        self.ui[type(component)].show(component)
-        for c in self.bottom_panel.get_children():
-            c.set_sensitive(wrapped.editable)
+        self.ui[type(component)].show(component, wrapped.editable)
         self.bottom_panel.set_sensitive(wrapped.editable)
 
     def _event_key_pressed(self, v, e):
@@ -520,6 +521,7 @@ class DiversionDialog:
                         (_('Mouse scroll'), _DIV.MouseScroll, [0, 0]),
                         (_('Mouse click'), _DIV.MouseClick, ['left', 1]),
                         (_('Execute'), _DIV.Execute, ['']),
+                        (_('Set'), _DIV.Set, [None, '', None]),
                     ]
                 ],
             ]
@@ -716,8 +718,8 @@ class RuleComponentUI:
     def create_widgets(self):
         pass
 
-    def show(self, component):
-        self._show_widgets()
+    def show(self, component, editable):
+        self._show_widgets(editable)
         self.component = component
 
     def collect_value(self):
@@ -737,10 +739,11 @@ class RuleComponentUI:
             return value
         return None
 
-    def _show_widgets(self):
+    def _show_widgets(self, editable):
         self._remove_panel_items()
         for widget, coord in self.widgets.items():
             self.panel.attach(widget, *coord)
+            widget.set_sensitive(editable)
             widget.show()
 
     @classmethod
@@ -858,8 +861,8 @@ class ProcessUI(ConditionUI):
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field.set_text(component.process)
 
@@ -886,8 +889,8 @@ class MouseProcessUI(ConditionUI):
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field.set_text(component.process)
 
@@ -927,8 +930,8 @@ class FeatureUI(ConditionUI):
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             f = str(component.feature) if component.feature else ''
             self.field.set_active_id(f)
@@ -968,8 +971,8 @@ class ReportUI(ConditionUI):
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field.set_value(component.report)
 
@@ -1002,8 +1005,8 @@ class ModifiersUI(ConditionUI):
             self.switches[m] = switch
             switch.connect('notify::active', self._on_update)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             for m in _DIV.MODIFIERS:
                 self.switches[m].set_active(m in component.modifiers)
@@ -1040,8 +1043,8 @@ class KeyUI(ConditionUI):
         self.action_released_radio.connect('toggled', self._on_update, _Key.UP)
         self.widgets[self.action_released_radio] = (3, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.key_field.set_text(str(component.key) if self.component.key else '')
             if not component.action or component.action == _Key.DOWN:
@@ -1084,8 +1087,8 @@ class TestUI(ConditionUI):
         self.field.connect('changed', self._on_update)
         self.widgets[self.field] = (0, 0, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field.set_active_id(component.test or '')
             if component.test not in _DIV.TESTS:
@@ -1166,13 +1169,13 @@ class MouseGestureUI(ConditionUI):
                                                    ) and self.component.movements[i] not in self.MOVE_NAMES else ''
                 f.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
-    def show(self, component):
+    def show(self, component, editable):
         n = len(component.movements)
         while len(self.fields) < n:
             self._create_field()
             self._create_del_btn()
         self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
-        super().show(component)
+        super().show(component, editable)
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
@@ -1256,13 +1259,13 @@ class KeyPressUI(ActionUI):
                                                    ) and self.component.key_symbols[i] not in self.KEY_NAMES else ''
                 f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
-    def show(self, component):
+    def show(self, component, editable):
         n = len(component.key_symbols)
         while len(self.fields) < n:
             self._create_field()
             self._create_del_btn()
         self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
-        super().show(component)
+        super().show(component, editable)
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
@@ -1318,8 +1321,8 @@ class MouseScrollUI(ActionUI):
         except (TypeError, ValueError):
             return 0
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field_x.set_value(self.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0))
             self.field_y.set_value(self.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0))
@@ -1363,8 +1366,8 @@ class MouseClickUI(ActionUI):
         self.widgets[self.field_b] = (0, 1, 1, 1)
         self.widgets[self.field_c] = (1, 1, 1, 1)
 
-    def show(self, component):
-        super().show(component)
+    def show(self, component, editable):
+        super().show(component, editable)
         with self.ignore_changes():
             self.field_b.set_text(component.button)
             self.field_c.set_value(component.count)
@@ -1424,7 +1427,7 @@ class ExecuteUI(ActionUI):
         self.show(self.component)
         self._on_update_callback()
 
-    def show(self, component):
+    def show(self, component, editable):
         n = len(component.args)
         while len(self.fields) < n:
             self._create_field()
@@ -1435,7 +1438,7 @@ class ExecuteUI(ActionUI):
                 field.set_text(component.args[i])
             self.del_btns[i].show()
         self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
-        super().show(component)
+        super().show(component, editable)
         for i in range(n, len(self.fields)):
             self.fields[i].hide()
             self.del_btns[i].hide()
@@ -1451,6 +1454,305 @@ class ExecuteUI(ActionUI):
     @classmethod
     def right_label(cls, component):
         return ' '.join([shlex_quote(a) for a in component.args])
+
+
+def _from_named_ints(v, all_values):
+    """Obtain a NamedInt from NamedInts given its numeric value (as int or str) or name."""
+    if isinstance(v, str) and v.isdigit():
+        v = int(v)
+    if all_values and (v in all_values):
+        return all_values[v]
+    return v
+
+
+class SetValueControl(Gtk.HBox):
+
+    TOGGLE_VALUES = [('~', _('Toggle')), ('t', _('True')), ('f', _('False'))]
+
+    TYPES = ('toggle', 'choice', 'range')
+
+    def __init__(self, on_change, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.on_change = on_change
+        self.toggle_widget = Gtk.ComboBoxText()
+        for v in self.TOGGLE_VALUES:
+            self.toggle_widget.append(*v)
+        self.toggle_widget.connect('changed', self._changed)
+        self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
+        self.range_widget.connect('changed', self._changed)
+        self.choice_widget = Gtk.ComboBoxText.new_with_entry()
+        self.choice_widget.connect('changed', self._changed)
+        self.unsupported_label = Gtk.Label(_('Unsupported setting'))
+        for w in [self.toggle_widget, self.range_widget, self.choice_widget, self.unsupported_label]:
+            self.pack_end(w, True, True, 0)
+            w.hide()
+        self.unsupp_value = None
+        self.get_value = lambda: None
+        self.set_value = lambda value: None
+
+    def _changed(self, widget, *args):
+        if widget.get_visible():
+            value = self.get_value()
+            if widget == self.choice_widget:
+                value = _from_named_ints(value, widget._allowed_values)
+                icon = 'dialog-warning' if widget._allowed_values and (value not in widget._allowed_values) else ''
+                widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+            self.on_change(value)
+
+    def _hide_all(self):
+        for w in self.get_children():
+            w.hide()
+
+    def make_toggle(self):
+        self._hide_all()
+
+        def g():
+            value = self.toggle_widget.get_active_id()
+            return True if value == 't' else False if value == 'f' else value
+
+        self.get_value = g
+
+        def s(value):
+            if value in ('true', 'yes', 'on', 't', 'y'):
+                self.toggle_widget.set_active_id('t')
+            elif value in ('false', 'no', 'off', 'f', 'n'):
+                self.toggle_widget.set_active_id('f')
+            elif value in ('~', 'toggle'):
+                self.toggle_widget.set_active_id('~')
+            else:
+                self.toggle_widget.set_active_id(None)
+
+        self.set_value = lambda value: s(str(value).lower())
+        self.toggle_widget.show()
+
+    def make_range(self, minimum, maximum):
+        self._hide_all()
+        self.range_widget.set_range(minimum, maximum)
+        self.get_value = lambda: int(self.range_widget.get_value())
+
+        def s(value):
+            try:
+                v = round(float(value))
+            except (ValueError, TypeError):
+                v = minimum
+            self.range_widget.set_value(max(minimum, min(maximum, v)))
+
+        self.set_value = s
+        self.range_widget.show()
+
+    def make_choice(self, values):
+        self._hide_all()
+        self.choice_widget.remove_all()
+        for v in sorted(values, key=str):
+            self.choice_widget.append(str(int(v)), str(v))
+        CompletionEntry.add_completion_to_entry(self.choice_widget.get_child(), map(str, values))
+        self.choice_widget._allowed_values = values
+
+        def g():
+            value = self.choice_widget.get_active_id() or self.choice_widget.get_active_text().strip() or ''
+            return _from_named_ints(value, self.choice_widget._allowed_values)
+
+        def s(value):
+            value = _from_named_ints(value, self.choice_widget._allowed_values)
+            if value in self.choice_widget._allowed_values:
+                self.choice_widget.set_active_id(str(int(value)))
+            else:
+                self.choice_widget.get_child().set_text(str(value))
+
+        self.get_value = g
+        self.set_value = s
+        self.choice_widget.show()
+
+    def make_unsupported(self):
+        self._hide_all()
+        self.get_value = lambda: self.unsupp_value
+
+        def s(value):  # preserve unsupported values
+            self.unsupp_value = value
+
+        self.set_value = s
+        self.unsupported_label.show()
+
+
+class SetUI(ActionUI):
+
+    CLASS = _DIV.Set
+
+    ALL_SETTINGS = {
+        s.name: s
+        for s in sorted(_SETTINGS, key=lambda setting: setting.label) if not s.validator_class.kind == _SKIND.multiple_range
+    }
+
+    MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
+
+    def create_widgets(self):
+        self.widgets = {}
+
+        self._old_device_values = {}
+
+        lbl = Gtk.Label(_('Same device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        self.widgets[lbl] = (0, 0, 1, 1)
+        self.same_device_chk = Gtk.Switch()
+        self.same_device_chk.connect('state-set', self._changed_same_device)
+        self.widgets[self.same_device_chk] = (0, 1, 1, 1)
+
+        lbl = Gtk.Label(_('Serial or Unit ID'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        self.widgets[lbl] = (1, 0, 1, 1)
+        self.device_field = Gtk.ComboBoxText.new_with_entry()
+        self.device_field.get_child().set_text('')
+        self.device_field.set_valign(Gtk.Align.START)
+        self.device_field.connect('changed', self._on_update)
+        self.widgets[self.device_field] = (1, 1, 1, 1)
+
+        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        self.widgets[lbl] = (2, 0, 1, 1)
+        self.setting_field = Gtk.ComboBoxText()
+        self.setting_field.append('', '')
+        for setting in self.ALL_SETTINGS.values():
+            self.setting_field.append(setting.name, setting.label)
+        self.setting_field.set_valign(Gtk.Align.START)
+        self.setting_field.connect('changed', self._on_update)
+        self.setting_field.connect('changed', self._changed_setting)
+        self.widgets[self.setting_field] = (2, 1, 1, 1)
+
+        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        self.widgets[self.value_lbl] = (4, 0, 1, 1)
+        self.value_field = SetValueControl(self._on_update)
+        self.value_field.set_size_request(250, 35)
+        self.widgets[self.value_field] = (4, 1, 1, 1)
+
+        self.key_field = Gtk.ComboBoxText.new_with_entry()
+        self.key_field.hide()
+        self.key_field.set_valign(Gtk.Align.END)
+        self.key_field.connect('changed', self._on_update)
+        self.widgets[self.key_field] = (4, 0, 1, 1)
+
+    @classmethod
+    def _all_choices(cls, setting):  # choice and map-choice
+        return (getattr(setting, 'choices_universe', None)
+                or NamedInts()) | (getattr(setting, 'choices_extra', None) or NamedInts())
+
+    @classmethod
+    def _setting_attributes(cls, setting_name):
+        setting = cls.ALL_SETTINGS.get(setting_name, None)
+        val_class = setting.validator_class if setting else None
+        kind = val_class.kind if val_class else None
+        if kind in cls.MULTIPLE:
+            keys = getattr(setting, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe',
+                           None) or NamedInts()
+        else:
+            keys = None
+        return setting, val_class, kind, keys
+
+    def _changed_same_device(self, *args):
+        same = self.same_device_chk.get_active()
+        if same:
+            self._old_device_values[self.component] = self.device_field.get_child().get_text()
+            self.device_field.get_child().set_text(_('[originating device]'))
+            self.device_field.set_sensitive(False)
+        else:
+            self.device_field.get_child().set_text(self._old_device_values.get(self.component, ''))
+            self.device_field.set_sensitive(True)
+            self.device_field.grab_focus()
+
+    def _changed_setting(self, *args):
+        setting_name = self.setting_field.get_active_id() or None
+        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
+            self.value_field.make_toggle()
+        elif kind in (_SKIND.choice, _SKIND.map_choice):
+            all_values = self._all_choices(setting)
+            self.value_field.make_choice(all_values)
+        elif kind in (_SKIND.range, ):  # _SKIND.multiple_range not supported
+            self.value_field.make_range(val_class.min_value, val_class.max_value)
+        else:
+            self.value_field.make_unsupported()
+        value = self.component.args[-1]
+        self.value_field.set_value(value if value is not None else '')
+        multiple = kind in self.MULTIPLE
+        if multiple:
+            self.key_field.remove_all()
+            self.key_field.append('', '')
+            CompletionEntry.add_completion_to_entry(self.key_field.get_child(), map(str, keys))
+            for k in sorted(keys, key=str):
+                self.key_field.append(str(int(k)), str(k))
+        self._update_visibility()
+
+    def _update_visibility(self):
+        a = iter(self.component.args)
+        next(a, None)  # device - currently not checked
+        setting_name = next(a, '')
+        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        multiple = kind in self.MULTIPLE
+        self.value_lbl.set_visible(not multiple)
+        self.key_field.set_visible(multiple)
+        if multiple:
+            key = _from_named_ints(next(a, ''), keys)
+            icon = 'dialog-warning' if keys and (key not in keys) else ''
+            self.key_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    def _on_update(self, *_args):
+        if self._ignore_changes:
+            return
+        super()._on_update(*_args)
+        self._update_visibility()
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        a = iter(component.args)
+        with self.ignore_changes():
+            device = next(a, None)
+            same = device is None
+            self._old_device_values[self.component] = device or ''
+            self.device_field.get_child().set_text(device or '')
+            if self.same_device_chk.get_active() != same:
+                self.same_device_chk.set_active(same)
+            else:
+                self._changed_same_device()
+            setting_name = next(a, '')
+            setting, _v, kind, keys = self._setting_attributes(setting_name)
+            self.setting_field.set_active_id(setting.name if setting else '')
+            self._changed_setting()
+            if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
+                key = _from_named_ints(next(a, ''), keys)
+                if isinstance(key, NamedInt):
+                    self.key_field.set_active_id(str(int(key)))
+                else:
+                    self.key_field.get_child().set_text(key)
+            self.value_field.set_value(next(a, ''))
+        self._update_visibility()
+
+    def collect_value(self):
+        same = self.same_device_chk.get_active()
+        device = None if same else self.device_field.get_active_id() or self.device_field.get_active_text().strip()
+        setting_name = self.setting_field.get_active_id() or None
+        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        key_value = []
+        if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
+            key = self.key_field.get_active_id() or self.key_field.get_active_text().strip() or ''
+            key = _from_named_ints(key, keys)
+            key_value.append(keys[key] if keys else key)
+        key_value.append(self.value_field.get_value())
+        return [device, setting_name, *key_value]
+
+    @classmethod
+    def right_label(cls, component):
+        a = iter(component.args)
+        device = next(a, None)
+        disp = [_('[originating device]') if device is None else device]
+        setting_name = next(a, None)
+        setting, val_class, kind, keys = cls._setting_attributes(setting_name)
+        disp.append(setting.label if setting else setting_name)
+        if kind in cls.MULTIPLE:
+            key = next(a, None)
+            disp.append(_from_named_ints(key, keys) if keys else key)
+        value = next(a, None)
+        if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
+            all_values = cls._all_choices(setting)
+            if all_values:
+                value = all_values[value]
+        disp.append(value)
+        return '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
 COMPONENT_UI = {
@@ -1470,6 +1772,7 @@ COMPONENT_UI = {
     _DIV.MouseScroll: MouseScrollUI,
     _DIV.MouseClick: MouseClickUI,
     _DIV.Execute: ExecuteUI,
+    _DIV.Set: SetUI,
     type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
 }
 
