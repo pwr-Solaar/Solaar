@@ -1730,12 +1730,12 @@ class SetUI(ActionUI):
             self.value_field.make_range(val_class.min_value, val_class.max_value)
         else:
             self.value_field.make_unsupported()
-        value = self.component.args[-1]
-        self.value_field.set_value(value if value is not None else '')
+        self.value_field.set_value('')
         multiple = kind in self.MULTIPLE
         if multiple:
             self.key_field.remove_all()
             self.key_field.append('', '')
+            self.key_field.set_active_id('')
             CompletionEntry.add_completion_to_entry(self.key_field.get_child(), map(str, keys))
             for k in sorted(keys, key=str):
                 self.key_field.append(str(int(k)), str(k))
