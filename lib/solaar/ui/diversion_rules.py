@@ -1544,7 +1544,8 @@ class SetValueControl(Gtk.HBox):
     def make_choice(self, values):
         self._hide_all()
         self.choice_widget.remove_all()
-        for v in sorted(values, key=str):
+        sort_key = int if all(str(v).isdigit() for v in values) else str
+        for v in sorted(values, key=sort_key):
             self.choice_widget.append(str(int(v)), str(v))
         CompletionEntry.add_completion_to_entry(self.choice_widget.get_child(), map(str, values))
         self.choice_widget._allowed_values = values
