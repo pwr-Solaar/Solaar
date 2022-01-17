@@ -1811,7 +1811,7 @@ class SetUI(ActionUI):
                 if isinstance(key, NamedInt):
                     self.key_field.set_active_id(str(int(key)))
                 else:
-                    self.key_field.get_child().set_text(key)
+                    self.key_field.get_child().set_text(key or '')
             self.value_field.set_value(next(a, ''))
         self._update_visibility()
 
