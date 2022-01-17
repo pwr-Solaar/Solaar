@@ -15,6 +15,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import string
 
 from collections import defaultdict
 from contextlib import contextmanager as contextlib_contextmanager
@@ -1760,7 +1761,14 @@ class SetUI(ActionUI):
             return
         a = iter(self.component.args)
         device_str = next(a, None)
-        icon = 'dialog-warning' if device_str and not _find_device(self.devices, device_str) else ''
+        device = _find_device(self.devices, device_str)
+        if device_str and not device:
+            if len(device_str) == 8 and all(c in string.hexdigits for c in device_str):
+                icon = 'dialog-question'
+            else:
+                icon = 'dialog-warning'
+        else:
+            icon = ''
         self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         setting_name = next(a, '')
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
