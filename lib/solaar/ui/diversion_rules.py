@@ -1736,20 +1736,20 @@ class SetUI(ActionUI):
                 self.key_field.append(str(int(k)), str(k))
 
     def update_devices(self):
-        device_value = self.collect_value()[0]
-        self.devices = _all_devices()
-        if not self.component:
-            return
-        self.device_field.remove_all()
-        self.device_field.append('', _('Originating device'))
-        acceptable_values = []
-        for device in self.devices:
-            display_name = _device_display_name(device)
-            acceptable_values += [display_name, device.unitId, device.serial]
-            self.device_field.append(device.serial or device.unitId, display_name)
-        CompletionEntry.add_completion_to_entry(self.device_field.get_child(), filter(lambda v: v, acceptable_values))
-        device = _find_device(self.devices, device_value)
         with self.ignore_changes():
+            device_value = self.collect_value()[0]
+            self.devices = _all_devices()
+            if not self.component:
+                return
+            self.device_field.remove_all()
+            self.device_field.append('', _('Originating device'))
+            acceptable_values = []
+            for device in self.devices:
+                display_name = _device_display_name(device)
+                acceptable_values += [display_name, device.unitId, device.serial]
+                self.device_field.append(device.serial or device.unitId, display_name)
+            CompletionEntry.add_completion_to_entry(self.device_field.get_child(), filter(lambda v: v, acceptable_values))
+            device = _find_device(self.devices, device_value)
             if device or not device_value:
                 self.device_field.set_active_id((device.serial or device.unitId) if device else '')
             else:
