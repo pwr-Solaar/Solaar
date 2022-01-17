@@ -671,6 +671,10 @@ class DiversionDialog:
         menu_copy.show()
         return menu_copy
 
+    def update_devices(self):
+        for rc in self.ui.values():
+            rc.update_devices()
+
 
 ## Not currently used
 #
@@ -762,6 +766,9 @@ class RuleComponentUI:
     def _remove_panel_items(self):
         for c in self.panel.get_children():
             self.panel.remove(c)
+
+    def update_devices(self):
+        pass
 
 
 class UnsupportedRuleComponentUI(RuleComponentUI):
@@ -1597,6 +1604,30 @@ def _all_settings():
     return settings
 
 
+def _all_devices():
+    devices = []
+
+    def dev_in_row(_store, _treepath, row):
+        device = _dev_model.get_value(row, 7)
+        if device and device.kind:
+            devices.append(device)
+
+    _dev_model.foreach(dev_in_row)
+    return devices
+
+
+def _device_display_name(device):
+    id = device.serial or device.unitId
+    name = device.codename
+    return name if not id else name + ' (' + id + ')'
+
+
+def _find_device(devices, search):
+    if not search:
+        return None
+    return next((d for d in devices if search in [d.unitId, d.serial, _device_display_name(d)]), None)
+
+
 class SetUI(ActionUI):
 
     CLASS = _DIV.Set
@@ -1606,21 +1637,16 @@ class SetUI(ActionUI):
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
 
     def create_widgets(self):
+        self.devices = []
+
         self.widgets = {}
 
-        self._old_device_values = {}
-
-        lbl = Gtk.Label(_('Same device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.widgets[lbl] = (0, 0, 1, 1)
-        self.same_device_chk = Gtk.Switch()
-        self.same_device_chk.connect('state-set', self._changed_same_device)
-        self.widgets[self.same_device_chk] = (0, 1, 1, 1)
-
-        lbl = Gtk.Label(_('Serial or Unit ID'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
+        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
         self.widgets[lbl] = (1, 0, 1, 1)
         self.device_field = Gtk.ComboBoxText.new_with_entry()
         self.device_field.get_child().set_text('')
         self.device_field.set_valign(Gtk.Align.START)
+        self.device_field.set_size_request(300, 0)
         self.device_field.connect('changed', self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
@@ -1687,17 +1713,6 @@ class SetUI(ActionUI):
             keys = None
         return setting, val_class, kind, keys
 
-    def _changed_same_device(self, *args):
-        same = self.same_device_chk.get_active()
-        if same:
-            self._old_device_values[self.component] = self.device_field.get_child().get_text()
-            self.device_field.get_child().set_text(_('[originating device]'))
-            self.device_field.set_sensitive(False)
-        else:
-            self.device_field.get_child().set_text(self._old_device_values.get(self.component, ''))
-            self.device_field.set_sensitive(True)
-            self.device_field.grab_focus()
-
     def _changed_setting(self, *args):
         setting_name = self.setting_field.get_active_id() or None
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
@@ -1719,11 +1734,34 @@ class SetUI(ActionUI):
             CompletionEntry.add_completion_to_entry(self.key_field.get_child(), map(str, keys))
             for k in sorted(keys, key=str):
                 self.key_field.append(str(int(k)), str(k))
-        self._update_visibility()
+
+    def update_devices(self):
+        device_value = self.collect_value()[0]
+        self.devices = _all_devices()
+        if not self.component:
+            return
+        self.device_field.remove_all()
+        self.device_field.append('', _('Originating device'))
+        acceptable_values = []
+        for device in self.devices:
+            display_name = _device_display_name(device)
+            acceptable_values += [display_name, device.unitId, device.serial]
+            self.device_field.append(device.serial or device.unitId, display_name)
+        CompletionEntry.add_completion_to_entry(self.device_field.get_child(), filter(lambda v: v, acceptable_values))
+        device = _find_device(self.devices, device_value)
+        with self.ignore_changes():
+            if device or not device_value:
+                self.device_field.set_active_id((device.serial or device.unitId) if device else '')
+            else:
+                self.device_field.get_child().set_text(device_value or '')
 
     def _update_visibility(self):
+        if not self.component:
+            return
         a = iter(self.component.args)
-        next(a, None)  # device - currently not checked
+        device_str = next(a, None)
+        icon = 'dialog-warning' if device_str and not _find_device(self.devices, device_str) else ''
+        self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         setting_name = next(a, '')
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         multiple = kind in self.MULTIPLE
@@ -1742,16 +1780,16 @@ class SetUI(ActionUI):
 
     def show(self, component, editable):
         super().show(component, editable)
+        self.update_devices()
         a = iter(component.args)
         with self.ignore_changes():
-            device = next(a, None)
-            same = device is None
-            self._old_device_values[self.component] = device or ''
-            self.device_field.get_child().set_text(device or '')
-            if self.same_device_chk.get_active() != same:
-                self.same_device_chk.set_active(same)
+            device_str = next(a, None)
+            same = not device_str
+            device = _find_device(self.devices, device_str)
+            if device or same:
+                self.device_field.set_active_id((device.serial or device.unitId) if device else '')
             else:
-                self._changed_same_device()
+                self.device_field.get_child().set_text(device_str or '')
             setting_name = next(a, '')
             setting, _v, kind, keys = self._setting_attributes(setting_name)
             self.setting_field.set_active_id(setting.name if setting else '')
@@ -1766,8 +1804,12 @@ class SetUI(ActionUI):
         self._update_visibility()
 
     def collect_value(self):
-        same = self.same_device_chk.get_active()
-        device = None if same else self.device_field.get_active_id() or self.device_field.get_active_text().strip()
+        device_str = self.device_field.get_active_id()
+        if device_str is None:
+            device_str = self.device_field.get_active_text().strip()
+        same = device_str in ['', _('Originating device')]
+        device = None if same else _find_device(self.devices, device_str)
+        device_value = (device.serial or device.unitId) if device else None if same else device_str
         setting_name = self.setting_field.get_active_id() or None
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         key_value = []
@@ -1776,16 +1818,18 @@ class SetUI(ActionUI):
             key = _from_named_ints(key, keys)
             key_value.append(keys[key] if keys else key)
         key_value.append(self.value_field.get_value())
-        return [device, setting_name, *key_value]
+        return [device_value, setting_name, *key_value]
 
     @classmethod
     def right_label(cls, component):
         a = iter(component.args)
-        device = next(a, None)
-        disp = [_('[originating device]') if device is None else device]
+        device_str = next(a, None)
+        device = None if not device_str else _find_device(_all_devices(), device_str)
+        device_disp = _('Originating device'
+                        ) if not device_str else _device_display_name(device) if device else shlex_quote(device_str)
         setting_name = next(a, None)
         setting, val_class, kind, keys = cls._setting_attributes(setting_name)
-        disp.append(setting.label if setting else setting_name)
+        disp = [setting.label if setting else setting_name]
         if kind in cls.MULTIPLE:
             key = next(a, None)
             disp.append(_from_named_ints(key, keys) if keys else key)
@@ -1795,7 +1839,7 @@ class SetUI(ActionUI):
             if all_values:
                 value = all_values[value]
         disp.append(value)
-        return '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
+        return device_disp + ':  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
 COMPONENT_UI = {
@@ -1820,9 +1864,17 @@ COMPONENT_UI = {
 }
 
 
-def show_window(trigger=None):
+def update_devices():
+    global _diversion_dialog
+    if _diversion_dialog:
+        _diversion_dialog.update_devices()
+
+
+def show_window(model):
     GObject.type_register(RuleComponentWrapper)
     global _diversion_dialog
+    global _dev_model
+    _dev_model = model
     if _diversion_dialog is None:
         _diversion_dialog = DiversionDialog()
     _diversion_dialog.window.present()

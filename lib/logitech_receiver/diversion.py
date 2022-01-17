@@ -27,7 +27,6 @@ from math import sqrt as _sqrt
 
 import _thread
 import psutil
-import solaar.ui.window as _window
 
 from solaar.ui.config_panel import change_setting as _change_setting
 from yaml import add_representer as _yaml_add_representer
@@ -701,6 +700,9 @@ class Set(Action):
         return 'Set: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, feature, notification, device, status, last_result):
+        import solaar.ui.window as _window
+        # importing here to avoid circular imports
+
         if len(self.args) < 3:
             return None
         if _log.isEnabledFor(_INFO):
