@@ -96,7 +96,7 @@ def ui_async(function, *args, **kwargs):
 #
 #
 
-from . import notify, tray, window  # isort:skip  # noqa: E402
+from . import diversion_rules, notify, tray, window  # isort:skip  # noqa: E402
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -177,6 +177,7 @@ def _status_changed(device, alert, reason, refresh=False):
 
     need_popup = alert & ALERT.SHOW_WINDOW
     window.update(device, need_popup, refresh)
+    diversion_rules.update_devices()
 
     if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
         notify.show(device, reason)

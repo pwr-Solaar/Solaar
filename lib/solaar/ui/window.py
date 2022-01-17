@@ -323,7 +323,9 @@ def _create_window_layout():
     bottom_buttons_box.add(quit_button)
     about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(
+        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+    )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
