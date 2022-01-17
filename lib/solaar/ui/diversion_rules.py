@@ -1642,37 +1642,41 @@ class SetUI(ActionUI):
 
         self.widgets = {}
 
-        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.widgets[lbl] = (1, 0, 1, 1)
+        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.widgets[lbl] = (0, 0, 1, 1)
         self.device_field = Gtk.ComboBoxText.new_with_entry()
         self.device_field.get_child().set_text('')
-        self.device_field.set_valign(Gtk.Align.START)
-        self.device_field.set_size_request(300, 0)
+        self.device_field.set_valign(Gtk.Align.CENTER)
+        self.device_field.set_size_request(400, 0)
         self.device_field.connect('changed', self._on_update)
-        self.widgets[self.device_field] = (1, 1, 1, 1)
+        self.widgets[self.device_field] = (1, 0, 1, 1)
 
-        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.widgets[lbl] = (2, 0, 1, 1)
+        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.widgets[lbl] = (0, 1, 1, 1)
         self.setting_field = Gtk.ComboBoxText()
         self.setting_field.append('', '')
         for setting in self.ALL_SETTINGS.values():
             self.setting_field.append(setting[0].name, setting[0].label)
-        self.setting_field.set_valign(Gtk.Align.START)
+        self.setting_field.set_valign(Gtk.Align.CENTER)
         self.setting_field.connect('changed', self._on_update)
         self.setting_field.connect('changed', self._changed_setting)
-        self.widgets[self.setting_field] = (2, 1, 1, 1)
+        self.widgets[self.setting_field] = (1, 1, 1, 1)
 
-        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
-        self.widgets[self.value_lbl] = (4, 0, 1, 1)
+        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.widgets[self.value_lbl] = (2, 1, 1, 1)
         self.value_field = SetValueControl(self._on_update)
+        self.value_field.set_valign(Gtk.Align.CENTER)
         self.value_field.set_size_request(250, 35)
-        self.widgets[self.value_field] = (4, 1, 1, 1)
+        self.widgets[self.value_field] = (3, 1, 1, 1)
 
+        self.key_lbl = Gtk.Label(_('Key'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.key_lbl.hide()
+        self.widgets[self.key_lbl] = (2, 0, 1, 1)
         self.key_field = Gtk.ComboBoxText.new_with_entry()
         self.key_field.hide()
-        self.key_field.set_valign(Gtk.Align.END)
+        self.key_field.set_valign(Gtk.Align.CENTER)
         self.key_field.connect('changed', self._on_update)
-        self.widgets[self.key_field] = (4, 0, 1, 1)
+        self.widgets[self.key_field] = (3, 0, 1, 1)
 
     @classmethod
     def _all_choices(cls, setting):  # choice and map-choice
@@ -1773,8 +1777,8 @@ class SetUI(ActionUI):
         setting_name = next(a, '')
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         multiple = kind in self.MULTIPLE
-        self.value_lbl.set_visible(not multiple)
         self.key_field.set_visible(multiple)
+        self.key_lbl.set_visible(multiple)
         if multiple:
             key = _from_named_ints(next(a, ''), keys)
             icon = 'dialog-warning' if keys and (key not in keys) else ''
