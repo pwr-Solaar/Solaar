@@ -104,7 +104,7 @@ class DiversionDialog:
             for rc_class, rc_ui_class in COMPONENT_UI.items()
         })
         bottom_box = Gtk.ScrolledWindow()
-        bottom_box.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
+        bottom_box.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         bottom_box.add(self.bottom_panel)
         vbox.pack_start(bottom_box, True, True, 0)
 
@@ -1610,23 +1610,32 @@ def _all_devices():
 
     def dev_in_row(_store, _treepath, row):
         device = _dev_model.get_value(row, 7)
-        if device and device.kind:
+        if device and device.kind and (device.serial and device.serial != '?' or device.unitId and device.unitId != '?'):
             devices.append(device)
 
     _dev_model.foreach(dev_in_row)
     return devices
 
 
+def _device_identifiers(device):
+    ids = []
+    if device.serial and device.serial != '?':
+        ids.append(device.serial)
+    if device.unitId and device.unitId != '?':
+        ids.append(device.unitId)
+    return ids
+
+
 def _device_display_name(device):
-    id = device.serial or device.unitId
     name = device.codename
+    id = _device_identifiers(device)[0]
     return name if not id else name + ' (' + id + ')'
 
 
 def _find_device(devices, search):
     if not search:
         return None
-    return next((d for d in devices if search in [d.unitId, d.serial, _device_display_name(d)]), None)
+    return next((d for d in devices if search in [*_device_identifiers(d), _device_display_name(d)]), None)
 
 
 class SetUI(ActionUI):
@@ -1642,16 +1651,20 @@ class SetUI(ActionUI):
 
         self.widgets = {}
 
-        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        m = 20
+        lbl = Gtk.Label(
+            _('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
+        )
         self.widgets[lbl] = (0, 0, 1, 1)
         self.device_field = Gtk.ComboBoxText.new_with_entry()
         self.device_field.get_child().set_text('')
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
+        self.device_field.set_margin_top(m)
         self.device_field.connect('changed', self._on_update)
         self.widgets[self.device_field] = (1, 0, 1, 1)
 
-        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[lbl] = (0, 1, 1, 1)
         self.setting_field = Gtk.ComboBoxText()
         self.setting_field.append('', '')
@@ -1662,17 +1675,20 @@ class SetUI(ActionUI):
         self.setting_field.connect('changed', self._changed_setting)
         self.widgets[self.setting_field] = (1, 1, 1, 1)
 
-        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[self.value_lbl] = (2, 1, 1, 1)
         self.value_field = SetValueControl(self._on_update)
         self.value_field.set_valign(Gtk.Align.CENTER)
         self.value_field.set_size_request(250, 35)
         self.widgets[self.value_field] = (3, 1, 1, 1)
 
-        self.key_lbl = Gtk.Label(_('Key'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.key_lbl = Gtk.Label(
+            _('Key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
+        )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)
         self.key_field = Gtk.ComboBoxText.new_with_entry()
+        self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
         self.key_field.connect('changed', self._on_update)
@@ -1751,12 +1767,13 @@ class SetUI(ActionUI):
             acceptable_values = []
             for device in self.devices:
                 display_name = _device_display_name(device)
-                acceptable_values += [display_name, device.unitId, device.serial]
-                self.device_field.append(device.serial or device.unitId, display_name)
+                ids = _device_identifiers(device)
+                acceptable_values += [display_name, *ids]
+                self.device_field.append(ids[0], display_name)
             CompletionEntry.add_completion_to_entry(self.device_field.get_child(), filter(lambda v: v, acceptable_values))
             device = _find_device(self.devices, device_value)
             if device or not device_value:
-                self.device_field.set_active_id((device.serial or device.unitId) if device else '')
+                self.device_field.set_active_id(_device_identifiers(device)[0] if device else '')
             else:
                 self.device_field.get_child().set_text(device_value or '')
 
@@ -1799,7 +1816,7 @@ class SetUI(ActionUI):
             same = not device_str
             device = _find_device(self.devices, device_str)
             if device or same:
-                self.device_field.set_active_id((device.serial or device.unitId) if device else '')
+                self.device_field.set_active_id(_device_identifiers(device)[0] if device else '')
             else:
                 self.device_field.get_child().set_text(device_str or '')
             setting_name = next(a, '')
@@ -1821,7 +1838,7 @@ class SetUI(ActionUI):
             device_str = self.device_field.get_active_text().strip()
         same = device_str in ['', _('Originating device')]
         device = None if same else _find_device(self.devices, device_str)
-        device_value = (device.serial or device.unitId) if device else None if same else device_str
+        device_value = _device_identifiers(device)[0] if device else None if same else device_str
         setting_name = self.setting_field.get_active_id() or None
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         key_value = []
