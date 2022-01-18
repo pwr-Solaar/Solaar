@@ -264,7 +264,14 @@ class Device:
     def serial(self):
         if not self._serial:
             self.update_extended_pairing_information()
-        return self._serial or '?'
+        return self._serial or ''
+
+    @property
+    def id(self):
+        if not self.serial:
+            if self.persister and self.persister.get('_serial', None):
+                self._serial = self.persister.get('_serial', None)
+        return self.unitId or self.serial
 
     @property
     def power_switch_location(self):
