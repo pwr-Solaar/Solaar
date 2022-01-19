@@ -2,7 +2,7 @@
 
 ## Version 1.1.1
 
-* There is a new settng to switch keyboard crowns between smooth and ratchet scrolling.
+* There is a new setting to switch keyboard crowns between smooth and ratchet scrolling.
 
 ## Version 1.1.0
 
