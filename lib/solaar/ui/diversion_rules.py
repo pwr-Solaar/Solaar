@@ -739,8 +739,10 @@ class SmartComboBox(Gtk.ComboBox):
     Otherwise, only a drop-down list is shown, with an extra blank item in the beginning (correspondent to `None`).
     The display text of the blank item is defined by the parameter `blank`.
 
+    if `case_insensitive` is `True`, then upper-case and lower-case letters are treated as equal.
+
     """
-    def __init__(self, all_values, blank='', completion=False, **kwargs):
+    def __init__(self, all_values, blank='', completion=False, case_insensitive=False, **kwargs):
         super().__init__(**kwargs)
         self._name_to_idx = {}
         self._value_to_idx = {}
@@ -749,6 +751,8 @@ class SmartComboBox(Gtk.ComboBox):
         self._blank = blank
         self._model = None
         self._commpletion = completion
+        self._case_insensitive = case_insensitive
+        self._norm = lambda s: None if s is None else s if not case_insensitive else s.upper()
 
         self.set_id_column(0)
         if self.get_has_entry():
@@ -798,13 +802,15 @@ class SmartComboBox(Gtk.ComboBox):
 
     def _include(self, model, idx, value, visible, *names):
         name = str(names[0]) if names else str(value).strip()
-        self._name_to_idx[name] = idx
+        self._name_to_idx[self._norm(name)] = idx
         if isinstance(value, NamedInt):
-            self._name_to_idx[str(name)] = idx
+            self._name_to_idx[self._norm(str(name))] = idx
         model.append((str(idx), name, visible))
         for alt in names[1:]:
-            self._name_to_idx[str(alt).strip()] = idx
+            self._name_to_idx[self._norm(str(alt).strip())] = idx
         self._value_to_idx[value] = idx
+        if self._case_insensitive and isinstance(value, str):
+            self._name_to_idx[self._norm(value)] = idx
 
     def get_value(self, invalid_as_str=True, accept_hidden=True):
         """Return the selected value or the typed text.
@@ -840,7 +846,7 @@ class SmartComboBox(Gtk.ComboBox):
         except KeyError:
             pass
         try:
-            return self._name_to_idx[search]
+            return self._name_to_idx[self._norm(search)]
         except KeyError:
             pass
         if isinstance(search, str) and search.isdigit():
@@ -1903,7 +1909,11 @@ class SetUI(ActionUI):
             _('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
         )
         self.widgets[lbl] = (0, 0, 1, 1)
-        self.device_field = SmartComboBox([], completion=True, has_entry=True, blank=_('Originating device'))
+        self.device_field = SmartComboBox([],
+                                          completion=True,
+                                          has_entry=True,
+                                          blank=_('Originating device'),
+                                          case_insensitive=True)
         self.device_field.set_value('')
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
