@@ -140,7 +140,7 @@ which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_rec
 For settings that need one of a set of names as an argument the name can be used or its internal integer value,
 as used in the Solaar config file.
 For boolean settings '~' can be used to toggle the setting.
-All settings are supported except for gesture parameters.
+All settings are supported.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
 One rule turns
