@@ -212,6 +212,7 @@ def set(dev, setting, args):
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
         message = 'Setting %s key %s parameter %s to %r' % (setting.name, k, args.extra_subkey, item[args.extra_subkey])
         result = setting.write_key_value(int(k), item)
+        value = item
 
     else:
         raise Exception('NotImplemented')
