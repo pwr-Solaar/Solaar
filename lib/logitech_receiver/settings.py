@@ -1057,6 +1057,7 @@ class MultipleRangeValidator(Validator):
         assert isinstance(sub_items, dict)
         # sub_items: items -> class with .minimum, .maximum, .length (in bytes), .id (a string) and .widget (e.g. 'Scale')
         self.items = items
+        self.keys = _NamedInts(**{str(item): int(item) for item in items})
         self._item_from_id = {int(k): k for k in items}
         self.sub_items = sub_items
 
