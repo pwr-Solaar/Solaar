@@ -28,7 +28,7 @@ from typing import Dict
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
-from logitech_receiver.common import NamedInt, UnsortedNamedInts
+from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
@@ -1743,40 +1743,57 @@ class SetValueControl(Gtk.HBox):
             self.toggle_widget.append(*v)
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
-        self.range_widget.connect('changed', self._changed)
+        self.range_widget.connect('value-changed', self._changed)
         self.choice_widget = SmartComboBox([], completion=True, has_entry=True)
         self.choice_widget.connect('changed', self._changed)
+        self.sub_key_widget = SmartComboBox([])
+        self.sub_key_widget.connect('changed', self._changed)
         self.unsupported_label = Gtk.Label(_('Unsupported setting'))
+        self.pack_start(self.sub_key_widget, False, False, 0)
+        self.sub_key_widget.set_hexpand(False)
+        self.sub_key_widget.set_size_request(120, 0)
+        self.sub_key_widget.hide()
         for w in [self.toggle_widget, self.range_widget, self.choice_widget, self.unsupported_label]:
             self.pack_end(w, True, True, 0)
             w.hide()
         self.unsupp_value = None
-        self.get_value = lambda: None
-        self.set_value = lambda value: None
+        self.current_kind = None
+        self.sub_key_range_items = None
 
     def _changed(self, widget, *args):
         if widget.get_visible():
             value = self.get_value()
-            if widget == self.choice_widget:
+            if self.current_kind == 'choice':
                 value = widget.get_value()
                 icon = 'dialog-warning' if widget._allowed_values and (value not in widget._allowed_values) else ''
                 widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+            elif self.current_kind == 'range_with_key' and widget == self.sub_key_widget:
+                key = self.sub_key_widget.get_value()
+                selected_item = next((item for item in self.sub_key_range_items
+                                      if key == item.id), None) if self.sub_key_range_items else None
+                (minimum, maximum) = (selected_item.minimum, selected_item.maximum) if selected_item else (0, 0xFFFF)
+                self.range_widget.set_range(minimum, maximum)
             self.on_change(value)
 
     def _hide_all(self):
         for w in self.get_children():
             w.hide()
 
-    def make_toggle(self):
-        self._hide_all()
-
-        def g():
+    def get_value(self):
+        if self.current_kind == 'toggle':
             value = self.toggle_widget.get_active_id()
             return True if value == 't' else False if value == 'f' else value
+        if self.current_kind == 'range':
+            return int(self.range_widget.get_value())
+        if self.current_kind == 'range_with_key':
+            return {self.sub_key_widget.get_value(): int(self.range_widget.get_value())}
+        if self.current_kind == 'choice':
+            return self.choice_widget.get_value()
+        return self.unsupp_value
 
-        self.get_value = g
-
-        def s(value):
+    def set_value(self, value):
+        if self.current_kind == 'toggle':
+            value = str(value).lower()
             if value in ('true', 'yes', 'on', 't', 'y'):
                 self.toggle_widget.set_active_id('t')
             elif value in ('false', 'no', 'off', 'f', 'n'):
@@ -1785,50 +1802,74 @@ class SetValueControl(Gtk.HBox):
                 self.toggle_widget.set_active_id('~')
             else:
                 self.toggle_widget.set_active_id(None)
-
-        self.set_value = lambda value: s(str(value).lower())
-        self.toggle_widget.show()
-
-    def make_range(self, minimum, maximum):
-        self._hide_all()
-        self.range_widget.set_range(minimum, maximum)
-        self.get_value = lambda: int(self.range_widget.get_value())
-
-        def s(value):
+        elif self.current_kind == 'range':
+            minimum, maximum = self.range_widget.get_range()
             try:
                 v = round(float(value))
             except (ValueError, TypeError):
                 v = minimum
             self.range_widget.set_value(max(minimum, min(maximum, v)))
+        elif self.current_kind == 'range_with_key':
+            if not (isinstance(value, dict) and len(value) == 1):
+                value = {None: None}
+            key = next(iter(value.keys()))
+            selected_item = next((item for item in self.sub_key_range_items
+                                  if key == item.id), None) if self.sub_key_range_items else None
+            (minimum, maximum) = (selected_item.minimum, selected_item.maximum) if selected_item else (0, 0xFFFF)
+            try:
+                v = round(float(next(iter(value.values()))))
+            except (ValueError, TypeError):
+                v = minimum
+            self.sub_key_widget.set_value(key or '')
+            self.range_widget.set_value(max(minimum, min(maximum, v)))
+        elif self.current_kind == 'choice':
+            self.choice_widget.set_value(value)
+        else:
+            self.unsupp_value = value
+        if value is None or value == '':  # reset all
+            self.range_widget.set_range(0x0000, 0xFFFF)
+            self.range_widget.set_value(0)
+            self.toggle_widget.set_active_id('')
+            self.sub_key_widget.set_value('')
+            self.choice_widget.set_value('')
 
-        self.set_value = s
+    def make_toggle(self):
+        self.current_kind = 'toggle'
+        self._hide_all()
+        self.toggle_widget.show()
+
+    def make_range(self, minimum, maximum):
+        self.current_kind = 'range'
+        self._hide_all()
+        self.range_widget.set_range(minimum, maximum)
+        self.range_widget.show()
+
+    def make_range_with_key(self, items):
+        self.current_kind = 'range_with_key'
+        self._hide_all()
+        self.sub_key_range_items = items or None
+        self.sub_key_widget.set_all_values(map(lambda item: item.id, items) if items else [])
+        self.sub_key_widget.show()
         self.range_widget.show()
 
     def make_choice(self, values):
+        self.current_kind = 'choice'
         self._hide_all()
         sort_key = int if all(str(v).isdigit() for v in values) else str
         self.choice_widget.set_all_values(sorted(values, key=sort_key))
         self.choice_widget._allowed_values = values
-        self.get_value = self.choice_widget.get_value
-        self.set_value = self.choice_widget.set_value
         self.choice_widget.show()
 
     def make_unsupported(self):
+        self.current_kind = None
         self._hide_all()
-        self.get_value = lambda: self.unsupp_value
-
-        def s(value):  # preserve unsupported values
-            self.unsupp_value = value
-
-        self.set_value = s
         self.unsupported_label.show()
 
 
 def _all_settings():
     settings = {}
     for s in sorted(_SETTINGS, key=lambda setting: setting.label):
-        if s.validator_class.kind == _SKIND.multiple_range:  # not supported yet
-            continue
+
         if s.name not in settings:
             settings[s.name] = [s]
         else:
@@ -1931,7 +1972,7 @@ class SetUI(ActionUI):
         if kind in cls.MULTIPLE:
             keys = UnsortedNamedInts()
             for s in settings:
-                universe = getattr(s, 'choices_universe' if kind == _SKIND.multiple_toggle else 'keys_universe', None)
+                universe = getattr(s, 'keys_universe' if kind == _SKIND.map_choice else 'choices_universe', None)
                 if universe:
                     keys |= universe
             # only one key per number is used
@@ -2004,6 +2045,8 @@ class SetUI(ActionUI):
                 elif device_setting.kind == _SKIND.map_choice:
                     choices = val.choices or None
                     supported_keys = choices.keys() if choices else None
+                elif device_setting.kind == _SKIND.multiple_range:
+                    supported_keys = val.keys
             self.key_field.show_only(supported_keys)
             self._update_validation()
 
@@ -2026,8 +2069,10 @@ class SetUI(ActionUI):
                     supported_values = choices.get(key, None) or None
             self.value_field.choice_widget.show_only(supported_values)
             self._update_validation()
-        elif kind in (_SKIND.range, ):  # _SKIND.multiple_range not supported
+        elif kind == _SKIND.range:
             self.value_field.make_range(val_class.min_value, val_class.max_value)
+        elif kind == _SKIND.multiple_range:
+            self.value_field.make_range_with_key(getattr(setting, 'sub_items_universe', {}).get(key, {}) if setting else {})
         else:
             self.value_field.make_unsupported()
 
@@ -2107,9 +2152,13 @@ class SetUI(ActionUI):
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
             all_values = cls._all_choices(setting_name)
-            if all_values:
+            if isinstance(all_values, NamedInts):
                 value = all_values[value]
-        disp.append(value)
+        if isinstance(value, dict) and len(value) == 1:
+            k, v = next(iter(value.items()))
+            disp.append(f'{k}={v}')
+        else:
+            disp.append(value)
         return device_disp + ':  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
