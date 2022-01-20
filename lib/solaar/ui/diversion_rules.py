@@ -827,13 +827,13 @@ class SmartComboBox(Gtk.ComboBox):
             t = self.get_model()[tree_iter]
             number = t[0]
             return self._all_values[int(number)][0] if number != '' and (accept_hidden or t[2]) else None
-        elif self.get_has_entry() and invalid_as_str:
+        elif self.get_has_entry():
             text = self.get_child().get_text().strip()
             if text == self._blank:
                 return None
             idx = self._find_idx(text)
             if idx is None:
-                return text
+                return text if invalid_as_str else None
             item = self._all_values[idx]
             return item[0] if len(item) > 1 else str(item[0])
         return None
