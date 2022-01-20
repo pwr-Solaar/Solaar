@@ -286,7 +286,7 @@ class MultipleToggleControl(Gtk.ListBox, MultipleControl):
         self.set_no_show_all(True)
         self._showing = True
         self._label_control_pairs = []
-        for k in sbox.setting._validator.all_options():
+        for k in sbox.setting._validator.get_options():
             h = Gtk.HBox(homogeneous=False, spacing=0)
             lbl_text = str(k)
             lbl_tooltip = None
