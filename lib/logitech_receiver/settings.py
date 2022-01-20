@@ -1118,7 +1118,19 @@ class MultipleRangeValidator(Validator):
         return w + b'\xFF'
 
     def acceptable(self, args, current):
-        pass  # not implemented yet
+        # just one item, with at least one sub-item
+        if not isinstance(args, list) or len(args) != 2 or not isinstance(args[1], dict):
+            return None
+        item = next((p for p in self.items if p.id == args[0] or str(p) == args[0]), None)
+        if not item:
+            return None
+        for sub_key, value in args[1].items():
+            sub_item = next((it for it in self.sub_items[item] if it.id == sub_key), None)
+            if not sub_item:
+                return None
+            if not isinstance(value, int) or not (sub_item.minimum <= value <= sub_item.maximum):
+                return None
+        return [str(int(item)), {**args[1]}]
 
 
 class ActionSettingRW:
