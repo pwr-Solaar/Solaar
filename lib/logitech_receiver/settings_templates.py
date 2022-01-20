@@ -1044,7 +1044,7 @@ def check_feature_settings(device, already_known):
 
 def check_feature_setting(device, setting_name):
     for setting in SETTINGS:
-        if setting.name == setting_name and getattr(setting.rw, 'feature', None):
-            feature = check_feature(device, setting.name, getattr(setting.rw, 'feature', None))
+        if setting.name == setting_name:
+            feature = check_feature(device, setting)
             if feature:
                 return feature
