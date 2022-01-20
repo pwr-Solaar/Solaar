@@ -1736,17 +1736,12 @@ def _from_named_ints(v, all_values):
 
 
 class SetValueControl(Gtk.HBox):
-
-    TOGGLE_VALUES = [('~', _('Toggle')), ('t', _('True')), ('f', _('False'))]
-
-    TYPES = ('toggle', 'choice', 'range')
-
     def __init__(self, on_change, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
-        self.toggle_widget = Gtk.ComboBoxText()
-        for v in self.TOGGLE_VALUES:
-            self.toggle_widget.append(*v)
+        self.toggle_widget = SmartComboBox([('~', _('Toggle'), _('Toggle')), (True, 'True', _('True'), 'yes', 'on', 't', 'y'),
+                                            (False, 'False', _('False'), 'no', 'off', 'f', 'n')],
+                                           case_insensitive=True)
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
         self.range_widget.connect('value-changed', self._changed)
@@ -1787,8 +1782,7 @@ class SetValueControl(Gtk.HBox):
 
     def get_value(self):
         if self.current_kind == 'toggle':
-            value = self.toggle_widget.get_active_id()
-            return True if value == 't' else False if value == 'f' else value
+            return self.toggle_widget.get_value()
         if self.current_kind == 'range':
             return int(self.range_widget.get_value())
         if self.current_kind == 'range_with_key':
@@ -1799,15 +1793,7 @@ class SetValueControl(Gtk.HBox):
 
     def set_value(self, value):
         if self.current_kind == 'toggle':
-            value = str(value).lower()
-            if value in ('true', 'yes', 'on', 't', 'y'):
-                self.toggle_widget.set_active_id('t')
-            elif value in ('false', 'no', 'off', 'f', 'n'):
-                self.toggle_widget.set_active_id('f')
-            elif value in ('~', 'toggle'):
-                self.toggle_widget.set_active_id('~')
-            else:
-                self.toggle_widget.set_active_id(None)
+            self.toggle_widget.set_value(value if value is not None else '')
         elif self.current_kind == 'range':
             minimum, maximum = self.range_widget.get_range()
             try:
