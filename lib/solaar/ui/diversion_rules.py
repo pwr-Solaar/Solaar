@@ -16,11 +16,15 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import string
+import threading
 
 from collections import defaultdict
 from contextlib import contextmanager as contextlib_contextmanager
+from copy import copy
+from dataclasses import dataclass, field
 from logging import getLogger
 from shlex import quote as shlex_quote
+from typing import Dict
 
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
@@ -675,6 +679,7 @@ class DiversionDialog:
     def update_devices(self):
         for rc in self.ui.values():
             rc.update_devices()
+        self.view.queue_draw()
 
 
 ## Not currently used
@@ -698,15 +703,265 @@ class CompletionEntry(Gtk.Entry):
 
     @classmethod
     def add_completion_to_entry(cls, entry, values):
-        entry.liststore = Gtk.ListStore(str)
-        for v in sorted(values, key=str.casefold):
-            entry.liststore.append((v, ))
-        entry.completion = Gtk.EntryCompletion()
-        entry.completion.set_model(entry.liststore)
-        norm = lambda s: s.replace('_', '').replace(' ', '').lower()
-        entry.completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
-        entry.completion.set_text_column(0)
-        entry.set_completion(entry.completion)
+        completion = entry.get_completion()
+        if not completion:
+            liststore = Gtk.ListStore(str)
+            completion = Gtk.EntryCompletion()
+            completion.set_model(liststore)
+            norm = lambda s: s.replace('_', '').replace(' ', '').lower()
+            completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
+            completion.set_text_column(0)
+            entry.set_completion(completion)
+        else:
+            liststore = completion.get_model()
+            liststore.clear()
+        for v in sorted(set(values), key=str.casefold):
+            liststore.append((v, ))
+
+
+class SmartComboBox(Gtk.ComboBox):
+    """A custom ComboBox with some extra features.
+
+    The constructor requires a collection of allowed values.
+    Each element must be a single value or a non-empty tuple containing:
+    - a value (any hashable object)
+    - a name (optional; str(value) is used if not provided)
+    - alternative names.
+    Example: (some_object, 'object name', 'other name', 'also accept this').
+
+    It is assumed that the same string cannot be the name or an
+    alternative name of more than one value.
+
+    The widget displays the names, but the alternative names are also suggested and accepted as input.
+    For values that are `int` instances (including `NamedInt`s), their numerical values are also accepted if typed by the user.
+
+    If `has_entry` is `True`, then the user can insert arbitrary text (possibly with auto-complete if `completion` is True).
+    Otherwise, only a drop-down list is shown, with an extra blank item in the beginning (correspondent to `None`).
+    The display text of the blank item is defined by the parameter `blank`.
+
+    """
+    def __init__(self, all_values, blank='', completion=False, **kwargs):
+        super().__init__(**kwargs)
+        self._name_to_idx = {}
+        self._value_to_idx = {}
+        self._hidden_idx = set()
+        self._all_values = []
+        self._blank = blank
+        self._model = None
+        self._commpletion = completion
+
+        self.set_id_column(0)
+        if self.get_has_entry():
+            self.set_entry_text_column(1)
+        else:
+            renderer = Gtk.CellRendererText()
+            self.pack_start(renderer, True)
+            self.add_attribute(renderer, 'text', 1)
+        self.set_all_values(all_values)
+        self.set_active_id('')
+
+    @classmethod
+    def new_model(cls):
+        model = Gtk.ListStore(str, str, bool)
+        # (index: int converted to str, name: str, visible: bool)
+        filtered_model = model.filter_new()
+        filtered_model.set_visible_column(2)
+        return model, filtered_model
+
+    def set_all_values(self, all_values, visible_fn=(lambda value: True)):
+        old_value = self.get_value()
+        self._name_to_idx = {}
+        self._value_to_idx = {}
+        self._hidden_idx = set()
+        self._all_values = [v if isinstance(v, tuple) else (v, ) for v in all_values]
+
+        model, filtered_model = SmartComboBox.new_model()
+        # creating a new model seems to be necessary to avoid firing 'changed' event once per inserted item
+        model.append(('', self._blank, True))
+        self._model = model
+
+        to_complete = [self._blank]
+        for idx, item in enumerate(self._all_values):
+            value, *names = item if isinstance(item, tuple) else (item, )
+            visible = visible_fn(value)
+            self._include(model, idx, value, visible, *names)
+            if visible:
+                to_complete += names if names else [str(value).strip()]
+        self.set_model(filtered_model)
+        if self.get_has_entry() and self._commpletion:
+            CompletionEntry.add_completion_to_entry(self.get_child(), to_complete)
+        if self._find_idx(old_value) is not None:
+            self.set_value(old_value)
+        else:
+            self.set_value(self._blank)
+        self.queue_draw()
+
+    def _include(self, model, idx, value, visible, *names):
+        name = str(names[0]) if names else str(value).strip()
+        self._name_to_idx[name] = idx
+        if isinstance(value, NamedInt):
+            self._name_to_idx[str(name)] = idx
+        model.append((str(idx), name, visible))
+        for alt in names[1:]:
+            self._name_to_idx[str(alt).strip()] = idx
+        self._value_to_idx[value] = idx
+
+    def get_value(self, invalid_as_str=True, accept_hidden=True):
+        """Return the selected value or the typed text.
+
+        If the typed or selected text corresponds to one of the allowed values (or their names and
+        alternative names), then the value is returned.
+
+        Otherwise, the raw text is returned as string if the widget has an entry and `invalid_as_str`
+        is `True`; if the widget has no entry or `invalid_as_str` is `False`, then `None` is returned.
+
+        """
+        tree_iter = self.get_active_iter()
+        if tree_iter is not None:
+            t = self.get_model()[tree_iter]
+            number = t[0]
+            return self._all_values[int(number)][0] if number != '' and (accept_hidden or t[2]) else None
+        elif self.get_has_entry() and invalid_as_str:
+            text = self.get_child().get_text().strip()
+            if text == self._blank:
+                return None
+            idx = self._find_idx(text)
+            if idx is None:
+                return text
+            item = self._all_values[idx]
+            return item[0] if len(item) > 1 else str(item[0])
+        return None
+
+    def _find_idx(self, search):
+        if search == self._blank:
+            return None
+        try:
+            return self._value_to_idx[search]
+        except KeyError:
+            pass
+        try:
+            return self._name_to_idx[search]
+        except KeyError:
+            pass
+        if isinstance(search, str) and search.isdigit():
+            try:
+                return self._value_to_idx[int(search)]
+            except KeyError:
+                pass
+        return None
+
+    def set_value(self, value, accept_invalid=True):
+        """Set a specific value.
+
+        Raw values, their names and alternative names are accepted.
+        Base-10 representations of int values as strings are also accepted.
+        The actual value is used in all cases.
+
+        If `value` is invalid, then the entry text is set to the provided value
+        if the widget has an entry and `accept_invalid` is True, or else the blank value is set.
+        """
+        idx = self._find_idx(value) if value != self._blank else ''
+        if idx is not None:
+            self.set_active_id(str(idx))
+        else:
+            if self.get_has_entry() and accept_invalid:
+                self.get_child().set_text(str(value or '') if value != '' else self._blank)
+            else:
+                self.set_active_id('')
+
+    def show_only(self, only, include_new=False):
+        """Hide items not present in `only`.
+
+        Only values are accepted (not their names and alternative names).
+
+        If `include_new` is True, then the values in `only` not currently present
+        are included with their string representation as names; otherwise,
+        they are ignored.
+
+        If `only` is new, then the visibility status is reset and all values are shown.
+        """
+        values = self._all_values[:]
+        if include_new and only is not None:
+            values += [v for v in only if v not in self._value_to_idx]
+        self.set_all_values(values, (lambda v: only is None or (v in only)))
+
+
+@dataclass
+class DeviceInfo:
+
+    serial: str = ''
+    unitId: str = ''
+    codename: str = ''
+    settings: Dict[str, _Setting] = field(default_factory=dict)
+
+    @property
+    def id(self):
+        return self.serial or self.unitId or ''
+
+    @property
+    def identifiers(self):
+        return [id for id in (self.serial, self.unitId) if id]
+
+    @property
+    def display_name(self):
+        return f'{self.codename} ({self.id})'
+
+    def __post_init__(self):
+        if self.serial is None or self.serial == '?':
+            self.serial = ''
+        if self.unitId is None or self.unitId == '?':
+            self.unitId = ''
+
+    def matches(self, search):
+        return search and search in (self.serial, self.unitId, self.display_name)
+
+    def update(self, device):
+        for k in ('serial', 'unitId', 'codename', 'settings'):
+            if not getattr(self, k, None):
+                v = getattr(device, k, None)
+                if v and v != '?':
+                    setattr(self, k, copy(v) if k != 'settings' else {s.name: s for s in v})
+
+    @classmethod
+    def from_device(cls, device):
+        d = DeviceInfo()
+        d.update(device)
+        return d
+
+
+class AllDevicesInfo:
+    def __init__(self):
+        self._devices = []
+        self._lock = threading.Lock()
+
+    def __iter__(self):
+        return iter(self._devices)
+
+    def __getitem__(self, search):
+        if not search:
+            return search
+        assert isinstance(search, str)
+        # linear search - ok because it is always a small list
+        return next((d for d in self._devices if d.matches(search)), None)
+
+    def refresh(self):
+        updated = False
+
+        def dev_in_row(_store, _treepath, row):
+            nonlocal updated
+            device = _dev_model.get_value(row, 7)
+            if device and device.kind and (device.serial and device.serial != '?' or device.unitId and device.unitId != '?'):
+                existing = self[device.serial] or self[device.unitId]
+                if not existing:
+                    updated = True
+                    self._devices.append(DeviceInfo.from_device(device))
+                elif not existing.settings and device.settings:
+                    updated = True
+                    existing.update(device)
+
+        with self._lock:
+            _dev_model.foreach(dev_in_row)
+        return updated
 
 
 class RuleComponentUI:
@@ -717,7 +972,7 @@ class RuleComponentUI:
         self.panel = panel
         self.widgets = {}  # widget -> coord. in grid
         self.component = None
-        self._ignore_changes = False
+        self._ignore_changes = 0
         self._on_update_callback = (lambda: None) if on_update is None else on_update
         self.create_widgets()
 
@@ -733,9 +988,9 @@ class RuleComponentUI:
 
     @contextlib_contextmanager
     def ignore_changes(self):
-        self._ignore_changes = True
+        self._ignore_changes += 1
         yield None
-        self._ignore_changes = False
+        self._ignore_changes -= 1
 
     def _on_update(self, *_args):
         if not self._ignore_changes and self.component is not None:
@@ -1311,10 +1566,10 @@ class MouseScrollUI(ActionUI):
         self.label_y = Gtk.Label(label='y', halign=Gtk.Align.START, valign=Gtk.Align.END, hexpand=True, vexpand=True)
         self.field_x = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field_y = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
-        for field in [self.field_x, self.field_y]:
-            field.set_halign(Gtk.Align.CENTER)
-            field.set_valign(Gtk.Align.START)
-            field.set_vexpand(True)
+        for f in [self.field_x, self.field_y]:
+            f.set_halign(Gtk.Align.CENTER)
+            f.set_valign(Gtk.Align.START)
+            f.set_vexpand(True)
         self.field_x.connect('changed', self._on_update)
         self.field_y.connect('changed', self._on_update)
         self.widgets[self.label_x] = (0, 0, 1, 1)
@@ -1364,10 +1619,10 @@ class MouseClickUI(ActionUI):
         self.label_c = Gtk.Label(label=_('Count'), halign=Gtk.Align.START, valign=Gtk.Align.END, hexpand=True, vexpand=True)
         self.field_b = CompletionEntry(self.BUTTONS)
         self.field_c = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
-        for field in [self.field_b, self.field_c]:
-            field.set_halign(Gtk.Align.CENTER)
-            field.set_valign(Gtk.Align.START)
-            field.set_vexpand(True)
+        for f in [self.field_b, self.field_c]:
+            f.set_halign(Gtk.Align.CENTER)
+            f.set_valign(Gtk.Align.START)
+            f.set_vexpand(True)
         self.field_b.connect('changed', self._on_update)
         self.field_c.connect('changed', self._on_update)
         self.widgets[self.label_b] = (0, 0, 1, 1)
@@ -1489,7 +1744,7 @@ class SetValueControl(Gtk.HBox):
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
         self.range_widget.connect('changed', self._changed)
-        self.choice_widget = Gtk.ComboBoxText.new_with_entry()
+        self.choice_widget = SmartComboBox([], completion=True, has_entry=True)
         self.choice_widget.connect('changed', self._changed)
         self.unsupported_label = Gtk.Label(_('Unsupported setting'))
         for w in [self.toggle_widget, self.range_widget, self.choice_widget, self.unsupported_label]:
@@ -1503,7 +1758,7 @@ class SetValueControl(Gtk.HBox):
         if widget.get_visible():
             value = self.get_value()
             if widget == self.choice_widget:
-                value = _from_named_ints(value, widget._allowed_values)
+                value = widget.get_value()
                 icon = 'dialog-warning' if widget._allowed_values and (value not in widget._allowed_values) else ''
                 widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
             self.on_change(value)
@@ -1551,26 +1806,11 @@ class SetValueControl(Gtk.HBox):
 
     def make_choice(self, values):
         self._hide_all()
-        self.choice_widget.remove_all()
         sort_key = int if all(str(v).isdigit() for v in values) else str
-        for v in sorted(values, key=sort_key):
-            self.choice_widget.append(str(int(v)), str(v))
-        CompletionEntry.add_completion_to_entry(self.choice_widget.get_child(), map(str, values))
+        self.choice_widget.set_all_values(sorted(values, key=sort_key))
         self.choice_widget._allowed_values = values
-
-        def g():
-            value = self.choice_widget.get_active_id() or self.choice_widget.get_active_text().strip() or ''
-            return _from_named_ints(value, self.choice_widget._allowed_values)
-
-        def s(value):
-            value = _from_named_ints(value, self.choice_widget._allowed_values)
-            if value in self.choice_widget._allowed_values:
-                self.choice_widget.set_active_id(str(int(value)))
-            else:
-                self.choice_widget.get_child().set_text(str(value))
-
-        self.get_value = g
-        self.set_value = s
+        self.get_value = self.choice_widget.get_value
+        self.set_value = self.choice_widget.set_value
         self.choice_widget.show()
 
     def make_unsupported(self):
@@ -1605,39 +1845,6 @@ def _all_settings():
     return settings
 
 
-def _all_devices():
-    devices = []
-
-    def dev_in_row(_store, _treepath, row):
-        device = _dev_model.get_value(row, 7)
-        if device and device.kind and (device.serial and device.serial != '?' or device.unitId and device.unitId != '?'):
-            devices.append(device)
-
-    _dev_model.foreach(dev_in_row)
-    return devices
-
-
-def _device_identifiers(device):
-    ids = []
-    if device.serial and device.serial != '?':
-        ids.append(device.serial)
-    if device.unitId and device.unitId != '?':
-        ids.append(device.unitId)
-    return ids
-
-
-def _device_display_name(device):
-    name = device.codename
-    id = _device_identifiers(device)[0]
-    return name if not id else name + ' (' + id + ')'
-
-
-def _find_device(devices, search):
-    if not search:
-        return None
-    return next((d for d in devices if search in [*_device_identifiers(d), _device_display_name(d)]), None)
-
-
 class SetUI(ActionUI):
 
     CLASS = _DIV.Set
@@ -1647,7 +1854,6 @@ class SetUI(ActionUI):
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
 
     def create_widgets(self):
-        self.devices = []
 
         self.widgets = {}
 
@@ -1656,23 +1862,21 @@ class SetUI(ActionUI):
             _('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
         )
         self.widgets[lbl] = (0, 0, 1, 1)
-        self.device_field = Gtk.ComboBoxText.new_with_entry()
-        self.device_field.get_child().set_text('')
+        self.device_field = SmartComboBox([], completion=True, has_entry=True, blank=_('Originating device'))
+        self.device_field.set_value('')
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
         self.device_field.set_margin_top(m)
+        self.device_field.connect('changed', self._changed_device)
         self.device_field.connect('changed', self._on_update)
         self.widgets[self.device_field] = (1, 0, 1, 1)
 
         lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[lbl] = (0, 1, 1, 1)
-        self.setting_field = Gtk.ComboBoxText()
-        self.setting_field.append('', '')
-        for setting in self.ALL_SETTINGS.values():
-            self.setting_field.append(setting[0].name, setting[0].label)
+        self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in self.ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
-        self.setting_field.connect('changed', self._on_update)
         self.setting_field.connect('changed', self._changed_setting)
+        self.setting_field.connect('changed', self._on_update)
         self.widgets[self.setting_field] = (1, 1, 1, 1)
 
         self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
@@ -1687,10 +1891,11 @@ class SetUI(ActionUI):
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)
-        self.key_field = Gtk.ComboBoxText.new_with_entry()
+        self.key_field = SmartComboBox([], has_entry=True, completion=True)
         self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
+        self.key_field.connect('changed', self._changed_key)
         self.key_field.connect('changed', self._on_update)
         self.widgets[self.key_field] = (3, 0, 1, 1)
 
@@ -1734,116 +1939,154 @@ class SetUI(ActionUI):
             keys = None
         return setting, val_class, kind, keys
 
+    def _changed_device(self, *args):
+        device = _all_devices[self.device_field.get_value()]
+        setting_name = self.setting_field.get_value()
+        if not device or not device.settings or setting_name in device.settings:
+            kind = self._setting_attributes(setting_name)[2]
+            key = self.key_field.get_value() if kind in self.MULTIPLE else None
+        else:
+            setting_name = kind = key = None
+        with self.ignore_changes():
+            self._update_setting_list(device)
+            self._update_key_list(setting_name, device)
+            self._update_value_list(setting_name, device, key)
+
     def _changed_setting(self, *args):
-        setting_name = self.setting_field.get_active_id() or None
+        with self.ignore_changes():
+            device = _all_devices[self.device_field.get_value()]
+            setting_name = self.setting_field.get_value()
+            self._update_key_list(setting_name, device)
+            key = self.key_field.get_value()
+            self._update_value_list(setting_name, device, key)
+
+    def _changed_key(self, *args):
+        with self.ignore_changes():
+            setting_name = self.setting_field.get_value()
+            device = _all_devices[self.device_field.get_value()]
+            key = self.key_field.get_value()
+            self._update_value_list(setting_name, device, key)
+
+    def update_devices(self):
+        self._update_device_list()
+
+    def _update_device_list(self):
+        with self.ignore_changes():
+            self.device_field.set_all_values([(d.id, d.display_name, *d.identifiers[1:]) for d in _all_devices])
+
+    def _update_setting_list(self, device=None):
+        supported_settings = device.settings.keys() if device else {}
+        with self.ignore_changes():
+            self.setting_field.show_only(supported_settings or None)
+
+    def _update_key_list(self, setting_name, device=None):
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        multiple = kind in self.MULTIPLE
+        self.key_field.set_visible(multiple)
+        self.key_lbl.set_visible(multiple)
+        if not multiple:
+            return
+        labels = getattr(setting, '_labels', {})
+
+        def item(k):
+            lbl = labels.get(k, None)
+            return (k, lbl[0] if lbl and isinstance(lbl, tuple) and lbl[0] else str(k))
+
+        with self.ignore_changes():
+            self.key_field.set_all_values(sorted(map(item, keys), key=lambda k: k[1]))
+            ds = device.settings if device else {}
+            device_setting = ds.get(setting_name, None)
+            supported_keys = None
+            if device_setting:
+                val = device_setting._validator
+                if device_setting.kind == _SKIND.multiple_toggle:
+                    supported_keys = val.get_options() or None
+                elif device_setting.kind == _SKIND.map_choice:
+                    choices = val.choices or None
+                    supported_keys = choices.keys() if choices else None
+            self.key_field.show_only(supported_keys)
+            self._update_validation()
+
+    def _update_value_list(self, setting_name, device=None, key=None):
+        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        ds = device.settings if device else {}
+        device_setting = ds.get(setting_name, None)
         if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
             self.value_field.make_toggle()
         elif kind in (_SKIND.choice, _SKIND.map_choice):
             all_values = self._all_choices(setting_name)
             self.value_field.make_choice(all_values)
+            supported_values = None
+            if device_setting:
+                val = device_setting._validator
+                choices = getattr(val, 'choices', None) or None
+                if kind == _SKIND.choice:
+                    supported_values = choices
+                elif kind == _SKIND.map_choice and isinstance(choices, dict):
+                    supported_values = choices.get(key, None) or None
+            self.value_field.choice_widget.show_only(supported_values)
+            self._update_validation()
         elif kind in (_SKIND.range, ):  # _SKIND.multiple_range not supported
             self.value_field.make_range(val_class.min_value, val_class.max_value)
         else:
             self.value_field.make_unsupported()
-        self.value_field.set_value('')
-        multiple = kind in self.MULTIPLE
-        if multiple:
-            self.key_field.remove_all()
-            self.key_field.append('', '')
-            self.key_field.set_active_id('')
-            CompletionEntry.add_completion_to_entry(self.key_field.get_child(), map(str, keys))
-            for k in sorted(keys, key=str):
-                self.key_field.append(str(int(k)), str(k))
 
-    def update_devices(self):
-        if not self.component:
-            return
-        with self.ignore_changes():
-            device_value = self.collect_value()[0]
-            self.devices = _all_devices()
-            self.device_field.remove_all()
-            self.device_field.append('', _('Originating device'))
-            acceptable_values = []
-            for device in self.devices:
-                display_name = _device_display_name(device)
-                ids = _device_identifiers(device)
-                acceptable_values += [display_name, *ids]
-                self.device_field.append(ids[0], display_name)
-            CompletionEntry.add_completion_to_entry(self.device_field.get_child(), filter(lambda v: v, acceptable_values))
-            device = _find_device(self.devices, device_value)
-            if device or not device_value:
-                self.device_field.set_active_id(_device_identifiers(device)[0] if device else '')
-            else:
-                self.device_field.get_child().set_text(device_value or '')
+    def _on_update(self, *_args):
+        if not self._ignore_changes and self.component:
+            super()._on_update(*_args)
+            self._update_validation()
 
-    def _update_visibility(self):
-        if not self.component:
-            return
-        a = iter(self.component.args)
-        device_str = next(a, None)
-        device = _find_device(self.devices, device_str)
+    def _update_validation(self):
+        device_str = self.device_field.get_value()
+        device = _all_devices[device_str]
         if device_str and not device:
-            if len(device_str) == 8 and all(c in string.hexdigits for c in device_str):
-                icon = 'dialog-question'
-            else:
-                icon = 'dialog-warning'
+            icon = 'dialog-question' if len(device_str) == 8 and all(
+                c in string.hexdigits for c in device_str
+            ) else 'dialog-warning'
         else:
             icon = ''
         self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
-        setting_name = next(a, '')
+        setting_name = self.setting_field.get_value()
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         multiple = kind in self.MULTIPLE
-        self.key_field.set_visible(multiple)
-        self.key_lbl.set_visible(multiple)
         if multiple:
-            key = _from_named_ints(next(a, ''), keys)
-            icon = 'dialog-warning' if keys and (key not in keys) else ''
+            key = self.key_field.get_value(invalid_as_str=False, accept_hidden=False)
+            icon = 'dialog-warning' if key is None else ''
             self.key_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
-
-    def _on_update(self, *_args):
-        if self._ignore_changes:
-            return
-        super()._on_update(*_args)
-        self._update_visibility()
+        if kind in (_SKIND.choice, _SKIND.map_choice):
+            value = self.value_field.choice_widget.get_value(invalid_as_str=False, accept_hidden=False)
+            icon = 'dialog-warning' if value is None else ''
+            self.value_field.choice_widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable):
         super().show(component, editable)
-        self.update_devices()
         a = iter(component.args)
         with self.ignore_changes():
             device_str = next(a, None)
             same = not device_str
-            device = _find_device(self.devices, device_str)
-            if device or same:
-                self.device_field.set_active_id(_device_identifiers(device)[0] if device else '')
-            else:
-                self.device_field.get_child().set_text(device_str or '')
+            device = _all_devices[device_str]
+            self.device_field.set_value(device.id if device else '' if same else device_str or '')
             setting_name = next(a, '')
             setting, _v, kind, keys = self._setting_attributes(setting_name)
-            self.setting_field.set_active_id(setting.name if setting else '')
+            self.setting_field.set_value(setting.name if setting else '')
             self._changed_setting()
+            key = None
             if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
                 key = _from_named_ints(next(a, ''), keys)
-                if isinstance(key, NamedInt):
-                    self.key_field.set_active_id(str(int(key)))
-                else:
-                    self.key_field.get_child().set_text(key or '')
+            self.key_field.set_value(key)
             self.value_field.set_value(next(a, ''))
-        self._update_visibility()
+            self._update_validation()
 
     def collect_value(self):
-        device_str = self.device_field.get_active_id()
-        if device_str is None:
-            device_str = self.device_field.get_active_text().strip()
+        device_str = self.device_field.get_value()
         same = device_str in ['', _('Originating device')]
-        device = None if same else _find_device(self.devices, device_str)
-        device_value = _device_identifiers(device)[0] if device else None if same else device_str
-        setting_name = self.setting_field.get_active_id() or None
+        device = None if same else _all_devices[device_str]
+        device_value = device.id if device else None if same else device_str
+        setting_name = self.setting_field.get_value()
         setting, val_class, kind, keys = self._setting_attributes(setting_name)
         key_value = []
         if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
-            key = self.key_field.get_active_id() or self.key_field.get_active_text().strip() or ''
+            key = self.key_field.get_value()
             key = _from_named_ints(key, keys)
             key_value.append(keys[key] if keys else key)
         key_value.append(self.value_field.get_value())
@@ -1853,12 +2096,11 @@ class SetUI(ActionUI):
     def right_label(cls, component):
         a = iter(component.args)
         device_str = next(a, None)
-        device = None if not device_str else _find_device(_all_devices(), device_str)
-        device_disp = _('Originating device'
-                        ) if not device_str else _device_display_name(device) if device else shlex_quote(device_str)
+        device = None if not device_str else _all_devices[device_str]
+        device_disp = _('Originating device') if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
         setting, val_class, kind, keys = cls._setting_attributes(setting_name)
-        disp = [setting.label if setting else setting_name]
+        disp = [setting_name]
         if kind in cls.MULTIPLE:
             key = next(a, None)
             disp.append(_from_named_ints(key, keys) if keys else key)
@@ -1892,10 +2134,15 @@ COMPONENT_UI = {
     type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
 }
 
+_all_devices = AllDevicesInfo()
+_dev_model = None
+
 
 def update_devices():
+    global _dev_model
+    global _all_devices
     global _diversion_dialog
-    if _diversion_dialog:
+    if _dev_model and _all_devices.refresh() and _diversion_dialog:
         _diversion_dialog.update_devices()
 
 
@@ -1906,4 +2153,5 @@ def show_window(model):
     _dev_model = model
     if _diversion_dialog is None:
         _diversion_dialog = DiversionDialog()
+    update_devices()
     _diversion_dialog.window.present()

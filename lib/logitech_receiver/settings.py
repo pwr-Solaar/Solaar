@@ -763,7 +763,7 @@ class BitFieldValidator(Validator):
                 w |= int(k)
         return _int2bytes(w, self.byte_count)
 
-    def all_options(self):
+    def get_options(self):
         return self.options
 
     def acceptable(self, args, current):
@@ -854,7 +854,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
                        | value, 2 * self.byte_count + 2) for offset, value in w.items()
         ]
 
-    def all_options(self):
+    def get_options(self):
         return [int(opt) if isinstance(opt, int) else opt.as_int() for opt in self.options]
 
     def acceptable(self, args, current):
