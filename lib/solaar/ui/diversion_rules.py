@@ -752,7 +752,7 @@ class SmartComboBox(Gtk.ComboBox):
         self._model = None
         self._commpletion = completion
         self._case_insensitive = case_insensitive
-        self._norm = lambda s: None if s is None else s if not case_insensitive else s.upper()
+        self._norm = lambda s: None if s is None else s if not case_insensitive else str(s).upper()
 
         self.set_id_column(0)
         if self.get_has_entry():
@@ -1750,7 +1750,7 @@ class SetValueControl(Gtk.HBox):
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
         self.range_widget.connect('value-changed', self._changed)
-        self.choice_widget = SmartComboBox([], completion=True, has_entry=True)
+        self.choice_widget = SmartComboBox([], completion=True, has_entry=True, case_insensitive=True)
         self.choice_widget.connect('changed', self._changed)
         self.sub_key_widget = SmartComboBox([])
         self.sub_key_widget.connect('changed', self._changed)
@@ -1942,7 +1942,7 @@ class SetUI(ActionUI):
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)
-        self.key_field = SmartComboBox([], has_entry=True, completion=True)
+        self.key_field = SmartComboBox([], has_entry=True, completion=True, case_insensitive=True)
         self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
