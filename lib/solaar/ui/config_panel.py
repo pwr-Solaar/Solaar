@@ -440,11 +440,15 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
                 to_join = []
                 for c in ch._sub_items:
                     sub_item = c._setting_sub_item
-                    c._control.set_value(v[str(sub_item)])
+                    try:
+                        sub_item_value = v[str(sub_item)]
+                    except KeyError:
+                        sub_item_value = c._control.get_value()
+                    c._control.set_value(sub_item_value)
                     n += 1
-                    to_join.append(str(sub_item) + f'={v[str(sub_item)]}')
+                    to_join.append(str(sub_item) + f'={sub_item_value}')
                 b += ', '.join(to_join) + ') '
-            lbl_text = ngettext('%d value', '%d values', n) % n
+        lbl_text = ngettext('%d value', '%d values', n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
 
