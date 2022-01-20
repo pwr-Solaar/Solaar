@@ -356,7 +356,7 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
             lbl_text = str(item)
             lbl_tooltip = None
             if hasattr(sbox.setting, '_labels'):
-                l1, l2 = sbox.setting._labels.get(item, (None, None))
+                l1, l2 = sbox.setting._labels.get(int(item), (None, None))
                 lbl_text = l1 if l1 else lbl_text
                 lbl_tooltip = l2 if l2 else lbl_tooltip
             item_lbl = Gtk.Label(lbl_text)

@@ -949,11 +949,7 @@ class Gesture2Params(_LongSettings):
     rw_options = {'read_fnid': 0x70, 'write_fnid': 0x80}
     choices_universe = None
 
-    class ParamWrapper:
-        def get(self, name, default=None):
-            return _GESTURE2_PARAMS_LABELS.get(name.param, default)
-
-    _labels = ParamWrapper()
+    _labels = _GESTURE2_PARAMS_LABELS
     _labels_sub = _GESTURE2_PARAMS_LABELS_SUB
 
     class validator_class(_MultipleRangeV):
