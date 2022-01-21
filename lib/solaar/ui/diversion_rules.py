@@ -1844,11 +1844,16 @@ class SetValueControl(Gtk.HBox):
         self.sub_key_widget.show()
         self.range_widget.show()
 
-    def make_choice(self, values):
+    def make_choice(self, values, extra=None):
+        # if extra is not in values, it is ignored
         self.current_kind = 'choice'
         self._hide_all()
-        sort_key = int if all(str(v).isdigit() for v in values) else str
-        self.choice_widget.set_all_values(sorted(values, key=sort_key))
+        sort_key = int if all((v == extra or str(v).isdigit()) for v in values) else str
+        if extra is not None and extra in values:
+            values = [extra] + sorted((v for v in values if v != extra), key=sort_key)
+        else:
+            values = sorted(values, key=sort_key)
+        self.choice_widget.set_all_values(values)
         self.choice_widget._allowed_values = values
         self.choice_widget.show()
 
@@ -1943,6 +1948,10 @@ class SetUI(ActionUI):
         If the argument `setting` is a Setting instance, then the choices are taken only from it.
         If instead it is a name, then the function returns the union of the choices for each setting with that name.
         Only one label per number is kept.
+
+        The function returns a 2-tuple whose first element is a NamedInts instance with the possible choices
+        (including the extra value if it exists) and the second element is the extra value to be pinned to
+        the start of the list (or `None` if there is no extra value).
         """
         if isinstance(setting, type) and issubclass(setting, _Setting):
             choices = UnsortedNamedInts()
@@ -1950,14 +1959,18 @@ class SetUI(ActionUI):
             if universe:
                 choices |= universe
             extra = getattr(setting, 'choices_extra', None)
-            if extra:
-                choices |= extra
-            return choices
+            if extra is not None:
+                choices |= NamedInts(**{str(extra): int(extra)})
+            return choices, extra
         settings = cls.ALL_SETTINGS.get(setting, [])
         choices = UnsortedNamedInts()
+        extra = None
         for s in settings:
-            choices |= cls._all_choices(s)
-        return choices
+            ch, ext = cls._all_choices(s)
+            choices |= ch
+            if ext is not None:
+                extra = ext
+        return choices, extra
 
     @classmethod
     def _setting_attributes(cls, setting_name):
@@ -2053,8 +2066,8 @@ class SetUI(ActionUI):
         if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
             self.value_field.make_toggle()
         elif kind in (_SKIND.choice, _SKIND.map_choice):
-            all_values = self._all_choices(setting_name)
-            self.value_field.make_choice(all_values)
+            all_values, extra = self._all_choices(setting_name)
+            self.value_field.make_choice(all_values, extra)
             supported_values = None
             if device_setting:
                 val = device_setting._validator
@@ -2147,7 +2160,7 @@ class SetUI(ActionUI):
             disp.append(_from_named_ints(key, keys) if keys else key)
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
-            all_values = cls._all_choices(setting_name)
+            all_values = cls._all_choices(setting_name)[0]
             if isinstance(all_values, NamedInts):
                 value = all_values[value]
         if isinstance(value, dict) and len(value) == 1:
