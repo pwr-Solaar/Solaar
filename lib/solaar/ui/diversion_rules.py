@@ -2006,9 +2006,13 @@ class SetUI(ActionUI):
         return choices, extra
 
     @classmethod
-    def _setting_attributes(cls, setting_name):
-        settings = cls.ALL_SETTINGS.get(setting_name, [None])
-        setting = settings[0]  # if settings have the same name, use the first one to get the basic data
+    def _setting_attributes(cls, setting_name, device=None):
+        if device and setting_name in device.settings:
+            setting = device.settings.get(setting_name, None)
+            settings = [type(setting)] if setting else None
+        else:
+            settings = cls.ALL_SETTINGS.get(setting_name, [None])
+            setting = settings[0]  # if settings have the same name, use the first one to get the basic data
         val_class = setting.validator_class if setting else None
         kind = val_class.kind if val_class else None
         if kind in cls.MULTIPLE:
@@ -2026,7 +2030,7 @@ class SetUI(ActionUI):
         device = _all_devices[self.device_field.get_value()]
         setting_name = self.setting_field.get_value()
         if not device or not device.settings or setting_name in device.settings:
-            kind = self._setting_attributes(setting_name)[2]
+            kind = self._setting_attributes(setting_name, device)[2]
             key = self.key_field.get_value() if kind in self.MULTIPLE else None
         else:
             setting_name = kind = key = None
@@ -2063,7 +2067,7 @@ class SetUI(ActionUI):
             self.setting_field.show_only(supported_settings or None)
 
     def _update_key_list(self, setting_name, device=None):
-        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         multiple = kind in self.MULTIPLE
         self.key_field.set_visible(multiple)
         self.key_lbl.set_visible(multiple)
@@ -2093,7 +2097,7 @@ class SetUI(ActionUI):
             self._update_validation()
 
     def _update_value_list(self, setting_name, device=None, key=None):
-        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         ds = device.settings if device else {}
         device_setting = ds.get(setting_name, None)
         if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
@@ -2137,7 +2141,7 @@ class SetUI(ActionUI):
             icon = ''
         self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         setting_name = self.setting_field.get_value()
-        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         multiple = kind in self.MULTIPLE
         if multiple:
             key = self.key_field.get_value(invalid_as_str=False, accept_hidden=False)
@@ -2157,7 +2161,7 @@ class SetUI(ActionUI):
             device = _all_devices[device_str]
             self.device_field.set_value(device.id if device else '' if same else device_str or '')
             setting_name = next(a, '')
-            setting, _v, kind, keys = self._setting_attributes(setting_name)
+            setting, _v, kind, keys = self._setting_attributes(setting_name, device)
             self.setting_field.set_value(setting.name if setting else '')
             self._changed_setting()
             key = None
@@ -2173,7 +2177,7 @@ class SetUI(ActionUI):
         device = None if same else _all_devices[device_str]
         device_value = device.id if device else None if same else device_str
         setting_name = self.setting_field.get_value()
-        setting, val_class, kind, keys = self._setting_attributes(setting_name)
+        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         key_value = []
         if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
             key = self.key_field.get_value()
@@ -2189,7 +2193,7 @@ class SetUI(ActionUI):
         device = None if not device_str else _all_devices[device_str]
         device_disp = _('Originating device') if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
-        setting, val_class, kind, keys = cls._setting_attributes(setting_name)
+        setting, val_class, kind, keys = cls._setting_attributes(setting_name, device)
         disp = [setting.label or setting.name if setting else setting_name]
         if kind in cls.MULTIPLE:
             key = next(a, None)
