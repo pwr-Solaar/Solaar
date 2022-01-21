@@ -2080,7 +2080,7 @@ class SetUI(ActionUI):
                     supported_keys = choices.keys() if choices else None
                 elif device_setting.kind == _SKIND.multiple_range:
                     supported_keys = val.keys
-            self.key_field.show_only(supported_keys)
+            self.key_field.show_only(supported_keys, include_new=True)
             self._update_validation()
 
     def _update_value_list(self, setting_name, device=None, key=None):
@@ -2100,7 +2100,7 @@ class SetUI(ActionUI):
                     supported_values = choices
                 elif kind == _SKIND.map_choice and isinstance(choices, dict):
                     supported_values = choices.get(key, None) or None
-            self.value_field.choice_widget.show_only(supported_values)
+            self.value_field.choice_widget.show_only(supported_values, include_new=True)
             self._update_validation()
         elif kind == _SKIND.range:
             self.value_field.make_range(val_class.min_value, val_class.max_value)
@@ -2166,7 +2166,7 @@ class SetUI(ActionUI):
         if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
             key = self.key_field.get_value()
             key = _from_named_ints(key, keys)
-            key_value.append(keys[key] if keys else key)
+            key_value.append(key)
         key_value.append(self.value_field.get_value())
         return [device_value, setting_name, *key_value]
 
