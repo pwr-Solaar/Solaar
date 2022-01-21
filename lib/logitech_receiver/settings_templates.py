@@ -918,9 +918,9 @@ _GESTURE2_PARAMS_LABELS = {
 
 _GESTURE2_PARAMS_LABELS_SUB = {
     'left': (_('Left'), _('Left-most coordinate.')),
-    'top': (_('top'), _('Top-most coordinate.')),
-    'width': (_('width'), _('Width.')),
-    'height': (_('height'), _('Height.')),
+    'bottom': (_('Bottom'), _('Bottom coordinate.')),
+    'width': (_('Width'), _('Width.')),
+    'height': (_('Height'), _('Height.')),
     'scale': (_('Scale'), _('Cursor speed.')),
 }
 

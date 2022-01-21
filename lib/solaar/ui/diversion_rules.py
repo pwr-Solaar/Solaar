@@ -37,7 +37,7 @@ from logitech_receiver.settings import KIND as _SKIND
 from logitech_receiver.settings import Setting as _Setting
 from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
-from solaar.i18n import _
+from solaar.i18n import _, pgettext
 
 _log = getLogger(__name__)
 del getLogger
@@ -1754,8 +1754,8 @@ class SetValueControl(Gtk.HBox):
     def __init__(self, on_change, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
-        self.toggle_widget = SmartComboBox([('~', _('Toggle'), _('Toggle')), (True, 'True', _('True'), 'yes', 'on', 't', 'y'),
-                                            (False, 'False', _('False'), 'no', 'off', 'f', 'n')],
+        self.toggle_widget = SmartComboBox([('Toggle', _('Toggle'), '~'), (True, _('True'), 'True', 'yes', 'on', 't', 'y'),
+                                            (False, _('False'), 'False', 'no', 'off', 'f', 'n')],
                                            case_insensitive=True)
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
@@ -1855,11 +1855,15 @@ class SetValueControl(Gtk.HBox):
         self.range_widget.set_range(minimum, maximum)
         self.range_widget.show()
 
-    def make_range_with_key(self, items):
+    def make_range_with_key(self, items, labels=None):
         self.current_kind = 'range_with_key'
         self._hide_all()
         self.sub_key_range_items = items or None
-        self.sub_key_widget.set_all_values(map(lambda item: item.id, items) if items else [])
+        if not labels:
+            labels = {}
+        self.sub_key_widget.set_all_values(
+            map(lambda item: (item.id, labels.get(item.id, [str(item.id)])[0]), items) if items else []
+        )
         self.sub_key_widget.show()
         self.range_widget.show()
 
@@ -1949,7 +1953,12 @@ class SetUI(ActionUI):
         self.widgets[self.value_field] = (3, 1, 1, 1)
 
         self.key_lbl = Gtk.Label(
-            _('Key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
+            pgettext('setting key, oppossed to value', 'Key'),
+            halign=Gtk.Align.CENTER,
+            valign=Gtk.Align.CENTER,
+            hexpand=True,
+            vexpand=False,
+            margin_top=m
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)
@@ -2105,7 +2114,10 @@ class SetUI(ActionUI):
         elif kind == _SKIND.range:
             self.value_field.make_range(val_class.min_value, val_class.max_value)
         elif kind == _SKIND.multiple_range:
-            self.value_field.make_range_with_key(getattr(setting, 'sub_items_universe', {}).get(key, {}) if setting else {})
+            self.value_field.make_range_with_key(
+                getattr(setting, 'sub_items_universe', {}).get(key, {}) if setting else {},
+                getattr(setting, '_labels_sub', None) if setting else None
+            )
         else:
             self.value_field.make_unsupported()
 
@@ -2178,21 +2190,26 @@ class SetUI(ActionUI):
         device_disp = _('Originating device') if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
         setting, val_class, kind, keys = cls._setting_attributes(setting_name)
-        disp = [setting_name]
+        disp = [setting.label or setting.name if setting else setting_name]
         if kind in cls.MULTIPLE:
             key = next(a, None)
-            disp.append(_from_named_ints(key, keys) if keys else key)
+            key = _from_named_ints(key, keys) if keys else key
+            key_label = getattr(setting, '_labels', {}).get(key, [None])[0] if setting else None
+            disp.append(key_label or key)
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
             all_values = cls._all_choices(setting_name)[0]
             if isinstance(all_values, NamedInts):
                 value = all_values[value]
-        if isinstance(value, dict) and len(value) == 1:
+        elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
             k, v = next(iter(value.items()))
+            k = (getattr(setting, '_labels_sub', {}).get(k, (None, ))[0] if setting else None) or k
             disp.append(f'{k}={v}')
+        elif kind in (_SKIND.toggle, _SKIND.multiple_toggle):
+            disp.append(_(str(value)))
         else:
             disp.append(value)
-        return device_disp + ':  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
+        return device_disp + '  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
 COMPONENT_UI = {
