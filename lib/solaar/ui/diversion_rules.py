@@ -2190,6 +2190,7 @@ class SetUI(ActionUI):
         device_disp = _('Originating device') if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
         setting, val_class, kind, keys = cls._setting_attributes(setting_name, device)
+        device_setting = (device.settings if device else {}).get(setting_name, None)
         disp = [setting.label or setting.name if setting else setting_name]
         if kind in cls.MULTIPLE:
             key = next(a, None)
@@ -2199,7 +2200,17 @@ class SetUI(ActionUI):
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
             all_values = cls._all_choices(setting or setting_name)[0]
-            if all_values and isinstance(all_values, NamedInts):
+            supported_values = None
+            if device_setting:
+                val = device_setting._validator
+                choices = getattr(val, 'choices', None) or None
+                if kind == _SKIND.choice:
+                    supported_values = choices
+                elif kind == _SKIND.map_choice and isinstance(choices, dict):
+                    supported_values = choices.get(key, None) or None
+                if supported_values and isinstance(supported_values, NamedInts):
+                    value = supported_values[value]
+            if not supported_values and all_values and isinstance(all_values, NamedInts):
                 value = all_values[value]
             disp.append(value)
         elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
