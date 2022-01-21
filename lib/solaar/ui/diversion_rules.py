@@ -739,10 +739,15 @@ class SmartComboBox(Gtk.ComboBox):
     Otherwise, only a drop-down list is shown, with an extra blank item in the beginning (correspondent to `None`).
     The display text of the blank item is defined by the parameter `blank`.
 
-    if `case_insensitive` is `True`, then upper-case and lower-case letters are treated as equal.
+    If `case_insensitive` is `True`, then upper-case and lower-case letters are treated as equal.
+
+    If `replace_with_default_name`, then the field text is immediately replaced with the default name of a value
+    as soon as the user finishes typing any accepted name.
 
     """
-    def __init__(self, all_values, blank='', completion=False, case_insensitive=False, **kwargs):
+    def __init__(
+        self, all_values, blank='', completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
+    ):
         super().__init__(**kwargs)
         self._name_to_idx = {}
         self._value_to_idx = {}
@@ -753,6 +758,15 @@ class SmartComboBox(Gtk.ComboBox):
         self._commpletion = completion
         self._case_insensitive = case_insensitive
         self._norm = lambda s: None if s is None else s if not case_insensitive else str(s).upper()
+        self._replace_with_default_name = replace_with_default_name
+
+        def replace_with(value):
+            if self.get_has_entry() and self._replace_with_default_name and value is not None:
+                name = self._all_values[self._value_to_idx[value]][1]
+                if name != self.get_child().get_text():
+                    self.get_child().set_text(name)
+
+        self.connect('changed', lambda *a: replace_with(self.get_value(invalid_as_str=False)))
 
         self.set_id_column(0)
         if self.get_has_entry():
@@ -1904,7 +1918,8 @@ class SetUI(ActionUI):
                                           completion=True,
                                           has_entry=True,
                                           blank=_('Originating device'),
-                                          case_insensitive=True)
+                                          case_insensitive=True,
+                                          replace_with_default_name=True)
         self.device_field.set_value('')
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
