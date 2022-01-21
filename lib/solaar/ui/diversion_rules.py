@@ -1972,7 +1972,7 @@ class SetUI(ActionUI):
     def _all_choices(cls, setting):  # choice and map-choice
         """Return a NamedInts instance with the choices for a setting.
 
-        If the argument `setting` is a Setting instance, then the choices are taken only from it.
+        If the argument `setting` is a Setting instance or subclass, then the choices are taken only from it.
         If instead it is a name, then the function returns the union of the choices for each setting with that name.
         Only one label per number is kept.
 
@@ -1980,6 +1980,8 @@ class SetUI(ActionUI):
         (including the extra value if it exists) and the second element is the extra value to be pinned to
         the start of the list (or `None` if there is no extra value).
         """
+        if isinstance(setting, _Setting):
+            setting = type(setting)
         if isinstance(setting, type) and issubclass(setting, _Setting):
             choices = UnsortedNamedInts()
             universe = getattr(setting, 'choices_universe', None)
@@ -2197,7 +2199,7 @@ class SetUI(ActionUI):
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
             all_values = cls._all_choices(setting or setting_name)[0]
-            if isinstance(all_values, NamedInts):
+            if all_values and isinstance(all_values, NamedInts):
                 value = all_values[value]
             disp.append(value)
         elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
