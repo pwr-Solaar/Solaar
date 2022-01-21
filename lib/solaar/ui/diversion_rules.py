@@ -2205,6 +2205,7 @@ class SetUI(ActionUI):
             all_values = cls._all_choices(setting_name)[0]
             if isinstance(all_values, NamedInts):
                 value = all_values[value]
+            disp.append(value)
         elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
             k, v = next(iter(value.items()))
             k = (getattr(setting, '_labels_sub', {}).get(k, (None, ))[0] if setting else None) or k
