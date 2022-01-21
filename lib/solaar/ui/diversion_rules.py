@@ -733,7 +733,6 @@ class SmartComboBox(Gtk.ComboBox):
     alternative name of more than one value.
 
     The widget displays the names, but the alternative names are also suggested and accepted as input.
-    For values that are `int` instances (including `NamedInt`s), their numerical values are also accepted if typed by the user.
 
     If `has_entry` is `True`, then the user can insert arbitrary text (possibly with auto-complete if `completion` is True).
     Otherwise, only a drop-down list is shown, with an extra blank item in the beginning (correspondent to `None`).
@@ -864,11 +863,6 @@ class SmartComboBox(Gtk.ComboBox):
             return self._name_to_idx[self._norm(search)]
         except KeyError:
             pass
-        if isinstance(search, str) and search.isdigit():
-            try:
-                return self._value_to_idx[int(search)]
-            except KeyError:
-                pass
         return None
 
     def set_value(self, value, accept_invalid=True):
@@ -904,7 +898,9 @@ class SmartComboBox(Gtk.ComboBox):
         values = self._all_values[:]
         if include_new and only is not None:
             values += [v for v in only if v not in self._value_to_idx]
-        self.set_all_values(values, (lambda v: only is None or (v in only)))
+        self.set_all_values(
+            values, (lambda v: only is None or (only.has_element(v) if isinstance(only, NamedInts) else (v in only)))
+        )
 
 
 @dataclass
@@ -1742,9 +1738,7 @@ class ExecuteUI(ActionUI):
 
 
 def _from_named_ints(v, all_values):
-    """Obtain a NamedInt from NamedInts given its numeric value (as int or str) or name."""
-    if isinstance(v, str) and v.isdigit():
-        v = int(v)
+    """Obtain a NamedInt from NamedInts given its numeric value (as int) or name."""
     if all_values and (v in all_values):
         return all_values[v]
     return v
