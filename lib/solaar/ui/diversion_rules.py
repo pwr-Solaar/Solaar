@@ -2097,7 +2097,7 @@ class SetUI(ActionUI):
         if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
             self.value_field.make_toggle()
         elif kind in (_SKIND.choice, _SKIND.map_choice):
-            all_values, extra = self._all_choices(setting_name)
+            all_values, extra = self._all_choices(device_setting or setting_name)
             self.value_field.make_choice(all_values, extra)
             supported_values = None
             if device_setting:
@@ -2196,7 +2196,7 @@ class SetUI(ActionUI):
             disp.append(key_label or key)
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
-            all_values = cls._all_choices(setting_name)[0]
+            all_values = cls._all_choices(setting or setting_name)[0]
             if isinstance(all_values, NamedInts):
                 value = all_values[value]
             disp.append(value)
