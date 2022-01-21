@@ -228,6 +228,9 @@ class NamedInts:
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)
 
+    def has_element(self, value):
+        return self[value] == value
+
 
 class UnsortedNamedInts(NamedInts):
     def _sort_values(self):
