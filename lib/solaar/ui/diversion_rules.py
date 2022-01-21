@@ -762,7 +762,8 @@ class SmartComboBox(Gtk.ComboBox):
 
         def replace_with(value):
             if self.get_has_entry() and self._replace_with_default_name and value is not None:
-                name = self._all_values[self._value_to_idx[value]][1]
+                item = self._all_values[self._value_to_idx[value]]
+                name = item[1] if len(item) > 1 else str(item[0])
                 if name != self.get_child().get_text():
                     self.get_child().set_text(name)
 
@@ -849,7 +850,7 @@ class SmartComboBox(Gtk.ComboBox):
             if idx is None:
                 return text if invalid_as_str else None
             item = self._all_values[idx]
-            return item[0] if len(item) > 1 else str(item[0])
+            return item[0]
         return None
 
     def _find_idx(self, search):
@@ -1759,7 +1760,11 @@ class SetValueControl(Gtk.HBox):
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
         self.range_widget.connect('value-changed', self._changed)
-        self.choice_widget = SmartComboBox([], completion=True, has_entry=True, case_insensitive=True)
+        self.choice_widget = SmartComboBox([],
+                                           completion=True,
+                                           has_entry=True,
+                                           case_insensitive=True,
+                                           replace_with_default_name=True)
         self.choice_widget.connect('changed', self._changed)
         self.sub_key_widget = SmartComboBox([])
         self.sub_key_widget.connect('changed', self._changed)
@@ -1948,7 +1953,11 @@ class SetUI(ActionUI):
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)
-        self.key_field = SmartComboBox([], has_entry=True, completion=True, case_insensitive=True)
+        self.key_field = SmartComboBox([],
+                                       has_entry=True,
+                                       completion=True,
+                                       case_insensitive=True,
+                                       replace_with_default_name=True)
         self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
