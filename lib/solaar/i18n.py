@@ -66,3 +66,4 @@ try:
 except Exception:
     _ = _gettext.gettext
     ngettext = _gettext.ngettext
+    pgettext = _gettext.pgettext
