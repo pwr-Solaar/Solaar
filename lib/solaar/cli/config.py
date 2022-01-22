@@ -18,6 +18,7 @@
 
 from logitech_receiver import settings as _settings
 from logitech_receiver import settings_templates as _settings_templates
+from logitech_receiver.common import NamedInts as _NamedInts
 from solaar import configuration as _configuration
 
 
@@ -145,7 +146,7 @@ def run(receivers, args, find_receiver, find_device):
         _print_setting(setting)
         return
 
-    message, result, value = set(dev, setting, args)
+    result, message, value = set(dev, setting, args)
     print(message)
     if result is None:
         raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
@@ -182,7 +183,8 @@ def set(dev, setting, args):
 
     elif setting.kind == _settings.KIND.multiple_toggle:
         key = args.value_key
-        ikey = to_int(key)
+        all_keys = getattr(setting, 'choices_universe', None)
+        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
         k = next((k for k in setting._labels if key == k), None)
         if k is None and ikey is not None:
             k = next((k for k in setting._labels if ikey == k), None)
@@ -195,14 +197,15 @@ def set(dev, setting, args):
 
     elif setting.kind == _settings.KIND.multiple_range:
         key = args.value_key
-        ikey = to_int(key)
+        all_keys = getattr(setting, 'choices_universe', None)
+        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
         if args.extra_subkey is None:
             raise Exception('%s: setting needs a subkey' % (setting.name))
         if args.extra2 is None or to_int(args.extra2) is None:
             raise Exception('%s: setting needs an integer value, not %s' % (setting.name, args.extra2))
         if not setting._value:  # ensure that there are values to look through
             setting.read()
-        k = next((k for k in setting._value if key == k), None)
+        k = next((k for k in setting._value if key == ikey or key.isdigit() and ikey == int(key)), None)
         if k is None and ikey is not None:
             k = next((k for k in setting._value if ikey == k), None)
         item = setting._value[k]
@@ -212,6 +215,7 @@ def set(dev, setting, args):
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
         message = 'Setting %s key %s parameter %s to %r' % (setting.name, k, args.extra_subkey, item[args.extra_subkey])
         result = setting.write_key_value(int(k), item)
+        value = item
 
     else:
         raise Exception('NotImplemented')
