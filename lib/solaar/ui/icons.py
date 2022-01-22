@@ -91,6 +91,8 @@ def _init_icon_paths():
         _log.debug('icon theme paths: %s', _default_theme.get_search_path())
 
     if gtk.battery_icons_style == 'symbolic':
+        global TRAY_OKAY
+        TRAY_OKAY = TRAY_INIT  # use monochrome tray icon
         if not _default_theme.has_icon('battery-good-symbolic'):
             _log.warning('failed to detect symbolic icons')
             gtk.battery_icons_style = 'regular'
