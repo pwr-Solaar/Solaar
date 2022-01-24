@@ -211,7 +211,9 @@ class NamedInts:
         self._indexed[int(value)] = value
 
     def __contains__(self, value):
-        if isinstance(value, int):
+        if isinstance(value, NamedInt):
+            return self[value] == value
+        elif isinstance(value, int):
             return value in self._indexed
         elif is_string(value):
             return value in self.__dict__ or value in self._values
@@ -227,9 +229,6 @@ class NamedInts:
 
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)
-
-    def has_element(self, value):
-        return self[value] == value
 
 
 class UnsortedNamedInts(NamedInts):
