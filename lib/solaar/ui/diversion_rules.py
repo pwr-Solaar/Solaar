@@ -898,9 +898,7 @@ class SmartComboBox(Gtk.ComboBox):
         values = self._all_values[:]
         if include_new and only is not None:
             values += [v for v in only if v not in self._value_to_idx]
-        self.set_all_values(
-            values, (lambda v: only is None or (only.has_element(v) if isinstance(only, NamedInts) else (v in only)))
-        )
+        self.set_all_values(values, (lambda v: only is None or (v in only)))
 
 
 @dataclass
