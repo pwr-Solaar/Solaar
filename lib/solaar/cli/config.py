@@ -41,7 +41,36 @@ def _print_setting(s, verbose=True):
     if value is None:
         print(s.name, '= ? (failed to read from device)')
     else:
-        print(s.name, '= %s' % value)
+        print(s.name, '=', s.val_to_string(value))
+
+
+def _print_setting_keyed(s, key, verbose=True):
+    print('#', s.label)
+    if verbose:
+        if s.description:
+            print('#', s.description.replace('\n', ' '))
+        if s.kind == _settings.KIND.multiple_toggle:
+            k = next((k for k in s._labels if key == k), None)
+            if k is None:
+                print(s.name, '=? (key not found)')
+            else:
+                print('#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle/~')
+                value = s.read(cached=False)
+                if value is None:
+                    print(s.name, '= ? (failed to read from device)')
+                else:
+                    print(s.name, s.val_to_string({k: value[str(int(k))]}))
+        elif s.kind == _settings.KIND.map_choice:
+            k = next((k for k in s.choices.keys() if key == k), None)
+            if k is None:
+                print(s.name, '=? (key not found)')
+            else:
+                print('#   possible values: one of [', ', '.join(str(v) for v in s.choices[k]), ']')
+                value = s.read(cached=False)
+                if value is None:
+                    print(s.name, '= ? (failed to read from device)')
+                else:
+                    print(s.name, s.val_to_string({k: value[str(int(k))]}))
 
 
 def to_int(s):
@@ -66,7 +95,7 @@ def select_choice(value, choices, setting, key):
     elif lvalue in ('higher', 'lower'):
         old_value = setting.read() if key is None else setting.read_key(key)
         if old_value is None:
-            raise Exception("%s: could not read current value'" % setting.name)
+            raise Exception('%s: could not read current value' % setting.name)
         if lvalue == 'lower':
             lower_values = choices[:old_value]
             value = lower_values[-1] if lower_values else choices[:][0]
@@ -82,9 +111,9 @@ def select_choice(value, choices, setting, key):
     return value
 
 
-def select_toggle(value, setting):
+def select_toggle(value, setting, key=None):
     if value.lower() in ('toggle', '~'):
-        value = not setting.read()
+        value = not (setting.read() if key is None else setting.read()[str(int(key))])
     else:
         try:
             value = bool(int(value))
@@ -147,9 +176,10 @@ def run(receivers, args, find_receiver, find_device):
         return
 
     result, message, value = set(dev, setting, args)
-    print(message)
-    if result is None:
-        raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
+    if message is not None:
+        print(message)
+        if result is None:
+            raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
 
 
 def set(dev, setting, args):
@@ -169,6 +199,9 @@ def set(dev, setting, args):
         result = setting.write(value)
 
     elif setting.kind == _settings.KIND.map_choice:
+        if args.extra_subkey is None:
+            _print_setting_keyed(setting, args.value_key)
+            return (None, None, None)
         key = args.value_key
         ikey = to_int(key)
         k = next((k for k in setting.choices.keys() if key == k), None)
@@ -182,6 +215,9 @@ def set(dev, setting, args):
         result = setting.write_key_value(int(k), value)
 
     elif setting.kind == _settings.KIND.multiple_toggle:
+        if args.extra_subkey is None:
+            _print_setting_keyed(setting, args.value_key)
+            return (None, None, None)
         key = args.value_key
         all_keys = getattr(setting, 'choices_universe', None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
@@ -189,18 +225,18 @@ def set(dev, setting, args):
         if k is None and ikey is not None:
             k = next((k for k in setting._labels if ikey == k), None)
         if k is not None:
-            value = select_toggle(args.extra_subkey, setting)
+            value = select_toggle(args.extra_subkey, setting, key=k)
         else:
             raise Exception("%s: key '%s' not in setting" % (setting.name, key))
         message = 'Setting %s key %r to %r' % (setting.name, k, value)
-        result = setting.write_key_value(int(k), value)
+        result = setting.write_key_value(str(int(k)), value)
 
     elif setting.kind == _settings.KIND.multiple_range:
+        if args.extra_subkey is None:
+            raise Exception('%s: setting needs both key and value to set' % (setting.name))
         key = args.value_key
         all_keys = getattr(setting, 'choices_universe', None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
-        if args.extra_subkey is None:
-            raise Exception('%s: setting needs a subkey' % (setting.name))
         if args.extra2 is None or to_int(args.extra2) is None:
             raise Exception('%s: setting needs an integer value, not %s' % (setting.name, args.extra2))
         if not setting._value:  # ensure that there are values to look through

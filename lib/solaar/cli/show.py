@@ -171,7 +171,7 @@ def _print_device(dev, num=None):
                         print('            Provide vertical tuning, trackball')
                     else:
                         print('            No vertical tuning, standard mice')
-            if feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+            elif feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
                     print('            Roller type: %s' % vertical_scrolling_info['roller'])
@@ -231,10 +231,11 @@ def _print_device(dev, num=None):
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
-                    if setting._device and getattr(setting._device, 'persister',
-                                                   None) and setting._device.persister.get(setting.name) is not None:
-                        print('            %s (saved): %s' % (setting.label, setting._device.persister.get(setting.name)))
-                    v = setting.read(False)
+                    if setting._device and getattr(setting._device, 'persister', None) and \
+                       setting._device.persister.get(setting.name) is not None:
+                        v = setting.val_to_string(setting._device.persister.get(setting.name))
+                        print('            %s (saved): %s' % (setting.label, v))
+                    v = setting.val_to_string(setting.read(False))
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
