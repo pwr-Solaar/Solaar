@@ -63,6 +63,10 @@ class Validator:
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
 
+    @classmethod
+    def to_string(cls, value):
+        return (str(value))
+
 
 class BooleanValidator(Validator):
     __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
@@ -221,6 +225,9 @@ class Setting:
         if validator:
             assert cls.kind is None or cls.kind & validator.kind != 0
             return cls(device, rw, validator)
+
+    def val_to_string(self, value):
+        return self._validator.to_string(value)
 
     @property
     def choices(self):
@@ -745,6 +752,13 @@ class BitFieldValidator(Validator):
             assert (isinstance(byte_count, int) and byte_count >= self.byte_count)
             self.byte_count = byte_count
 
+    def to_string(self, value):
+        def element_to_string(key, val):
+            k = next((k for k in self.options if int(key) == k), None)
+            return str(k) + ':' + str(val) if k is not None else '?'
+
+        return '{' + ', '.join([element_to_string(k, value[k]) for k in value]) + '}'
+
     def validate_read(self, reply_bytes):
         r = _bytes2int(reply_bytes[:self.byte_count])
         value = {str(int(k)): False for k in self.options}
@@ -894,6 +908,9 @@ class ChoicesValidator(Validator):
         assert self._byte_count + self._read_skip_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) <= 14
 
+    def to_string(self, value):
+        return str(self.choices[value]) if isinstance(value, int) else str(value)
+
     def validate_read(self, reply_bytes):
         reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count:self._read_skip_byte_count + self._byte_count])
         valid_value = self.choices[reply_value]
@@ -973,6 +990,13 @@ class ChoicesMapValidator(ChoicesValidator):
         self.mask = mask
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
+
+    def to_string(self, value):
+        def element_to_string(key, val):
+            k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
+            return str(k) + ':' + str(c[val]) if k is not None else '?'
+
+        return '{' + ', '.join([element_to_string(k, value[k]) for k in sorted(value)]) + '}'
 
     def validate_read(self, reply_bytes, key):
         start = self._key_byte_count + self._read_skip_byte_count
