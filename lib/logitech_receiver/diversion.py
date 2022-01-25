@@ -41,7 +41,12 @@ from .special_keys import CONTROL as _CONTROL
 _log = getLogger(__name__)
 del getLogger
 
+#
+# See docs/rules.md for documentation
+#
+
 # many of the rule features require X11 so turn rule processing off if X11 is not available
+XK_KEYS = {}
 try:
     import Xlib
     from Xlib import X
@@ -57,13 +62,13 @@ try:
     NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
     WM_CLASS = disp_prog.intern_atom('WM_CLASS')
 except Exception:
-    _log.warn('X11 not available - rules will not be activated', exc_info=_sys.exc_info())
-    XK_KEYS = {}
+    _log.warn(
+        'X11 not available - rules cannot access current process or modifier key state nor can they simulate input',
+        exc_info=_sys.exc_info()
+    )
     x11 = False
 
-# determine current key modifiers
-# there must be a better way to do this
-
+# determine current key modifiers - there must be a better way to do this
 if x11:
     display = Display()
     try:
@@ -81,10 +86,10 @@ if x11:
             }]
         )
     except Exception:
-        _log.warn('X11 xtest not available - Modifiers and KeyPress will not work correctly', exc_info=_sys.exc_info())
+        _log.warn('X11 xtest not available - rules cannot access modifier key state', exc_info=_sys.exc_info())
         context = None
     modifier_keycodes = display.get_modifier_mapping()
-    current_key_modifiers = 0
+current_key_modifiers = 0
 
 
 def modifier_code(keycode):
@@ -111,8 +116,6 @@ def key_press_handler(reply):
 if x11 and context is not None:
     _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
 # display.record_free_context(context)  when should this be done??
-
-# See docs/rules.md for documentation
 
 key_down = None
 key_up = None
@@ -180,6 +183,8 @@ COMPONENTS = {}
 
 if x11:
     displayt = Display()
+else:
+    displayt = None
 
 
 class RuleComponent:
@@ -320,6 +325,8 @@ def x11_pointer_prog():
 class Process(Condition):
     def __init__(self, process):
         self.process = process
+        if not x11:
+            _log.warn('X11 not available - rules cannot access current process - %s', self)
         if not isinstance(process, str):
             _log.warn('rule Process argument not a string: %s', process)
             self.process = str(process)
@@ -330,7 +337,7 @@ class Process(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog()
+        focus = x11_focus_prog() if x11 else None
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
@@ -341,6 +348,8 @@ class Process(Condition):
 class MouseProcess(Condition):
     def __init__(self, process):
         self.process = process
+        if not x11:
+            _log.warn('X11 not available - rules cannot access current mouse process - %s', self)
         if not isinstance(process, str):
             _log.warn('rule MouseProcess argument not a string: %s', process)
             self.process = str(process)
@@ -351,7 +360,7 @@ class MouseProcess(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        result = any(bool(s and s.startswith(self.process)) for s in x11_pointer_prog())
+        result = any(bool(s and s.startswith(self.process)) for s in x11_pointer_prog()) if x11 else None
         return result
 
     def data(self):
@@ -407,11 +416,15 @@ class Modifiers(Condition):
                 self.modifiers.append(k)
             else:
                 _log.warn('unknown rule Modifier value: %s', k)
+        if not x11:
+            _log.warn('X11 not available - rules cannot access keyboard modifier state - %s', self)
 
     def __str__(self):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if not context:
+            _log.warn('X11 xtest not available - rules cannot access modifier key state - %s', self)
         return self.desired == (current_key_modifiers & MODIFIER_MASK)
 
     def data(self):
@@ -567,27 +580,33 @@ class KeyPress(Action):
         if isinstance(keys, str):
             keys = [keys]
         self.key_symbols = keys
-        key_from_string = lambda s: displayt.keysym_to_keycode(Xlib.XK.string_to_keysym(s))
-        self.keys = [isinstance(k, str) and key_from_string(k) for k in keys]
-        if not all(self.keys):
-            _log.warn('rule KeyPress argument not sequence of key names %s', keys)
+        if x11:
+            key_from_string = lambda s: (displayt.keysym_to_keycode(Xlib.XK.string_to_keysym(s)))
+            self.keys = [isinstance(k, str) and key_from_string(k) for k in keys]
+            if not all(self.keys):
+                _log.warn('rule KeyPress argument not sequence of key names %s', keys)
+                self.keys = []
+        else:
             self.keys = []
+            _log.warn('X11 not available - rules cannot simulate keyboard input - %s', self)
 
     def __str__(self):
         return 'KeyPress: ' + ' '.join(self.key_symbols)
 
     def needed(self, k, current_key_modifiers):
+        if not context:
+            _log.warn('X11 xtest not available - rules cannot access modifier key state - %s', self)
         code = modifier_code(k)
         return not (code and current_key_modifiers & (1 << code))
 
     def keyDown(self, keys, modifiers):
         for k in keys:
-            if self.needed(k, modifiers):
+            if self.needed(k, modifiers) and x11:
                 Xlib.ext.xtest.fake_input(displayt, X.KeyPress, k)
 
     def keyUp(self, keys, modifiers):
         for k in keys:
-            if self.needed(k, modifiers):
+            if self.needed(k, modifiers) and x11:
                 Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, k)
 
     def evaluate(self, feature, notification, device, status, last_result):
@@ -596,7 +615,8 @@ class KeyPress(Action):
             _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
         self.keyDown(self.keys, current)
         self.keyUp(reversed(self.keys), current)
-        displayt.sync()
+        if x11:
+            displayt.sync()
         return None
 
     def data(self):
@@ -626,9 +646,12 @@ for i in range(8, 31):
 
 
 def click(button, count):
-    for _ in range(count):
-        Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonPress, button)
-        Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonRelease, button)
+    if x11:
+        for _ in range(count):
+            Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonPress, button)
+            Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonRelease, button)
+    else:
+        _log.warn('X11 not available - rules cannot simulate mouse clicks')
 
 
 class MouseScroll(Action):
@@ -640,6 +663,8 @@ class MouseScroll(Action):
             _log.warn('rule MouseScroll argument not two numbers %s', amounts)
             amounts = [0, 0]
         self.amounts = amounts
+        if not x11:
+            _log.warn('X11 not available - rules cannot simulate mouse scrolling - %s', self)
 
     def __str__(self):
         return 'MouseScroll: ' + ' '.join([str(a) for a in self.amounts])
@@ -657,7 +682,8 @@ class MouseScroll(Action):
             click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
         if dy:
             click(button=buttons['scroll_up'] if dy > 0 else buttons['scroll_down'], count=abs(dy))
-        displayt.sync()
+        if x11:
+            displayt.sync()
         return None
 
     def data(self):
@@ -680,6 +706,8 @@ class MouseClick(Action):
         except (ValueError, TypeError):
             _log.warn('rule MouseClick action: count %s should be an integer', count)
             self.count = 1
+        if not x11:
+            _log.warn('X11 not available - rules cannot simulate mouse clicks - %s', self)
 
     def __str__(self):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
@@ -689,7 +717,8 @@ class MouseClick(Action):
             _log.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
-        displayt.sync()
+        if x11:
+            displayt.sync()
         return None
 
     def data(self):
@@ -779,7 +808,7 @@ COMPONENTS = {
 }
 
 built_in_rules = Rule([])
-if x11:
+if True:  # x11
     built_in_rules = Rule([
         {'Rule': [  # Implement problematic keys for Craft and MX Master
             {'Rule': [{'Key': 'Brightness Down'}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
@@ -817,7 +846,7 @@ mr_key_down = False
 
 # process a notification
 def process_notification(device, status, notification, feature):
-    if not x11:
+    if False:  # not x11
         return
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up
     key_down, key_up = None, None
@@ -935,5 +964,5 @@ def _load_config_rule_file():
     rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
 
 
-if x11:
+if True:  # x11
     _load_config_rule_file()
