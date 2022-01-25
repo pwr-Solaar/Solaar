@@ -1165,7 +1165,7 @@ class ActionSettingRW:
         pass
 
     def read(self, device):  # need to return bytes, as if read from device
-        return _int2bytes(self.key, 2) if self.active else b'\x00\x00'
+        return _int2bytes(self.key.key, 2) if self.active and self.key else b'\x00\x00'
 
     def write(self, device, data_bytes):
         def handler(device, n):  # Called on notification events from the device
