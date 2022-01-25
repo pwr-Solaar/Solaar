@@ -1042,7 +1042,6 @@ class MRKeyLED(_Setting):
             return b'\x00'
 
 
-
 ## Only implemented for devices that can produce HID and Consumer Key Codes
 ## Only interested in current host, so use 0xFF for it
 class PersistentRemappableAction(_Settings):
@@ -1118,7 +1117,7 @@ SETTINGS = [
     CrownSmooth,  # working
     DivertGkeys,  # working
     MKeyLEDs,  # working
-    MRKeyLED, # working
+    MRKeyLED,  # working
     Multiplatform,  # working
     DualPlatform,  # simple
     ChangeHost,  # working
