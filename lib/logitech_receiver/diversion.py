@@ -25,9 +25,9 @@ from logging import INFO as _INFO
 from logging import getLogger
 from math import sqrt as _sqrt
 
-import _thread
 import psutil
 
+from gi.repository import Gdk, GLib
 from solaar.ui.config_panel import change_setting as _change_setting
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
@@ -45,51 +45,28 @@ del getLogger
 # See docs/rules.md for documentation
 #
 
-# many of the rule features require X11 so turn rule processing off if X11 is not available
 XK_KEYS = {}
 try:
     import Xlib
     from Xlib import X
     from Xlib.display import Display
-    from Xlib.ext import record
-    from Xlib.protocol import rq
     from Xlib import XK as _XK
     _XK.load_keysym_group('xf86')
     XK_KEYS = vars(_XK)
-    disp_prog = Display()
+    xdisplay = Display()
+    modifier_keycodes = xdisplay.get_modifier_mapping()  # there should be a way to do this in Gdk
     x11 = True
-    NET_ACTIVE_WINDOW = disp_prog.intern_atom('_NET_ACTIVE_WINDOW')
-    NET_WM_PID = disp_prog.intern_atom('_NET_WM_PID')
-    WM_CLASS = disp_prog.intern_atom('WM_CLASS')
+    NET_ACTIVE_WINDOW = xdisplay.intern_atom('_NET_ACTIVE_WINDOW')
+    NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
+    WM_CLASS = xdisplay.intern_atom('WM_CLASS')
 except Exception:
     _log.warn(
         'X11 not available - rules cannot access current process or modifier key state nor can they simulate input',
+        #        'X11 not available - rules cannot access current process nor can they simulate input',
         exc_info=_sys.exc_info()
     )
+    modifier_keycodes = []
     x11 = False
-
-# determine current key modifiers - there must be a better way to do this
-if x11:
-    display = Display()
-    try:
-        context = display.record_create_context(
-            0, [record.AllClients], [{
-                'core_requests': (0, 0),
-                'core_replies': (0, 0),
-                'ext_requests': (0, 0, 0, 0),
-                'ext_replies': (0, 0, 0, 0),
-                'delivered_events': (0, 0),
-                'device_events': (X.KeyPress, X.KeyRelease),
-                'errors': (0, 0),
-                'client_started': False,
-                'client_died': False,
-            }]
-        )
-    except Exception:
-        _log.warn('X11 xtest not available - rules cannot access modifier key state', exc_info=_sys.exc_info())
-        context = None
-    modifier_keycodes = display.get_modifier_mapping()
-current_key_modifiers = 0
 
 
 def modifier_code(keycode):
@@ -100,22 +77,8 @@ def modifier_code(keycode):
             return m
 
 
-def key_press_handler(reply):
-    global current_key_modifiers
-    data = reply.data
-    while len(data):
-        event, data = rq.EventField(None).parse_binary_value(data, display.display, None, None)
-        if event.type == X.KeyPress:
-            mod = modifier_code(event.detail)
-            current_key_modifiers = event.state | 1 << mod if mod is not None else event.state
-        elif event.type == X.KeyRelease:
-            mod = modifier_code(event.detail)
-            current_key_modifiers = event.state & ~(1 << mod) if mod is not None else event.state
-
-
-if x11 and context is not None:
-    _thread.start_new_thread(display.record_enable_context, (context, key_press_handler))
-# display.record_free_context(context)  when should this be done??
+gdisplay = Gdk.Display.get_default()
+gkeymap = Gdk.Keymap.get_for_display(gdisplay)
 
 key_down = None
 key_up = None
@@ -295,7 +258,7 @@ class And(Condition):
 
 def x11_focus_prog():
     pid = wm_class = None
-    window = disp_prog.get_input_focus().focus
+    window = xdisplay.get_input_focus().focus
     while window:
         pid = window.get_full_property(NET_WM_PID, 0)
         wm_class = window.get_wm_class()
@@ -311,7 +274,7 @@ def x11_focus_prog():
 
 def x11_pointer_prog():
     pid = wm_class = None
-    window = disp_prog.screen().root.query_pointer().child
+    window = xdisplay.screen().root.query_pointer().child
     for window in reversed(window.query_tree().children):
         pid = window.get_full_property(NET_WM_PID, 0)
         wm_class = window.get_wm_class()
@@ -401,7 +364,12 @@ class Report(Condition):
         return {'Report': self.report}
 
 
-MODIFIERS = {'Shift': 0x01, 'Control': 0x04, 'Alt': 0x08, 'Super': 0x40}
+MODIFIERS = {
+    'Shift': int(Gdk.ModifierType.SHIFT_MASK),
+    'Control': int(Gdk.ModifierType.CONTROL_MASK),
+    'Alt': int(Gdk.ModifierType.MOD1_MASK),
+    'Super': int(Gdk.ModifierType.MOD4_MASK)
+}
 MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + MODIFIERS['Super']
 
 
@@ -416,16 +384,14 @@ class Modifiers(Condition):
                 self.modifiers.append(k)
             else:
                 _log.warn('unknown rule Modifier value: %s', k)
-        if not x11:
-            _log.warn('X11 not available - rules cannot access keyboard modifier state - %s', self)
 
     def __str__(self):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if not context:
-            _log.warn('X11 xtest not available - rules cannot access modifier key state - %s', self)
-        return self.desired == (current_key_modifiers & MODIFIER_MASK)
+        ##        (_, _, _, current) = gdisplay.get_pointer()  # get the current keyboard modifier
+        current = gkeymap.get_modifier_state()  # get the current keyboard modifier
+        return self.desired == (current & MODIFIER_MASK)
 
     def data(self):
         return {'Modifiers': [str(m) for m in self.modifiers]}
@@ -584,37 +550,44 @@ class KeyPress(Action):
             key_from_string = lambda s: (displayt.keysym_to_keycode(Xlib.XK.string_to_keysym(s)))
             self.keys = [isinstance(k, str) and key_from_string(k) for k in keys]
             if not all(self.keys):
-                _log.warn('rule KeyPress argument not sequence of key names %s', keys)
+                _log.warn('rule KeyPress argument not sequence of current key names %s', keys)
                 self.keys = []
         else:
             self.keys = []
             _log.warn('X11 not available - rules cannot simulate keyboard input - %s', self)
 
+    def string_to_keycode(self, s, modifiers):  # should take group and shift into account
+        keysym = Xlib.XK.string_to_keysym(s)
+        keycodes = gkeymap.get_entries_for_keyval(keysym)
+        for k in keycodes.keys:
+            return k.keycode
+        _log.warn('rule KeyPress key name not currently available %s', self)
+
     def __str__(self):
         return 'KeyPress: ' + ' '.join(self.key_symbols)
 
-    def needed(self, k, current_key_modifiers):
-        if not context:
-            _log.warn('X11 xtest not available - rules cannot access modifier key state - %s', self)
+    def needed(self, k, modifiers):
         code = modifier_code(k)
-        return not (code and current_key_modifiers & (1 << code))
+        return not (code is not None and modifiers & (1 << code))
 
     def keyDown(self, keys, modifiers):
         for k in keys:
-            if self.needed(k, modifiers) and x11:
-                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, k)
+            keycode = self.string_to_keycode(k, modifiers)
+            if self.needed(keycode, modifiers) and x11 and keycode:
+                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, keycode)
 
     def keyUp(self, keys, modifiers):
         for k in keys:
-            if self.needed(k, modifiers) and x11:
-                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, k)
+            keycode = self.string_to_keycode(k, modifiers)
+            if self.needed(keycode, modifiers) and x11 and keycode:
+                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, keycode)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        current = current_key_modifiers
+        current = gkeymap.get_modifier_state()
         if _log.isEnabledFor(_INFO):
             _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
-        self.keyDown(self.keys, current)
-        self.keyUp(reversed(self.keys), current)
+        self.keyDown(self.key_symbols, current)
+        self.keyUp(reversed(self.key_symbols), current)
         if x11:
             displayt.sync()
         return None
@@ -889,7 +862,7 @@ def process_notification(device, status, notification, feature):
         if mr_key_down and not new_mr_key_down:
             key_up = _CONTROL['MR']
         mr_key_down = new_mr_key_down
-    rules.evaluate(feature, notification, device, status, True)
+    GLib.idle_add(rules.evaluate, feature, notification, device, status, True)
 
 
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))
