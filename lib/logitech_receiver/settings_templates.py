@@ -629,7 +629,7 @@ class DpiSliding(_Setting):
         def build(cls, setting_class, device):
             # need _F.REPROG_CONTROLS_V4 feature and a DPI Switch that can send raw XY
             # and _F.ADJUSTABLE_DPI so that the DPI can be adjusted
-            if device.kind == _DK.mouse and _F.ADJUSTABLE_DPI in device.features:
+            if _F.ADJUSTABLE_DPI in device.features:
                 keys = []
                 for key in cls.sliding_keys:
                     key_index = device.keys.index(key)
