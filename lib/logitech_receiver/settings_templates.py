@@ -493,6 +493,14 @@ class AdjustableDpi(_Setting):
                 dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
             return cls(choices=_NamedInts.list(dpi_list), byte_count=3) if dpi_list else None
 
+        def validate_read(self, reply_bytes):  # special validator to use default DPI if needed
+            reply_value = _bytes2int(reply_bytes[1:3])
+            if reply_value == 0:  # use default value instead
+                reply_value = _bytes2int(reply_bytes[3:5])
+            valid_value = self.choices[reply_value]
+            assert valid_value is not None, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+            return valid_value
+
 
 class SpeedChange(_Setting):
     """Implements the ability to switch Sensitivity by clicking on the DPI_Change button."""
