@@ -19,7 +19,7 @@ show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
 Solaar can also control some changeable features of devices,
-such as smooth scrolling or function key behavior.
+such as scroll wheel direction and function key behavior.
 Solaar keeps track of these changed settings on a per-computer basis and the GUI application restores them whenever a device connects.
 (Devices forget most settings when powered down.)
 For more information on how to use Solaar see
