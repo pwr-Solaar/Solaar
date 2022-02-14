@@ -811,13 +811,15 @@ if x11:
 
 keys_down = []
 g_keys_down = [0, 0, 0, 0]
+m_keys_down = 0
+mr_key_down = False
 
 
 # process a notification
 def process_notification(device, status, notification, feature):
     if not x11:
         return
-    global keys_down, g_keys_down, key_down, key_up
+    global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
@@ -841,6 +843,23 @@ def process_notification(device, status, notification, feature):
                 if old_byte & (0x01 << (i - 1)) and not new_byte & (0x01 << (i - 1)):
                     key_up = _CONTROL['G' + str(i + 8 * byte_idx)]
         g_keys_down = new_g_keys_down
+    # and also M keys down
+    elif feature == _F.MKEYS and notification.address == 0x00:
+        new_m_keys_down = _unpack('!1B', notification.data[:1])
+        for i in range(1, 9):
+            if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
+                key_down = _CONTROL['M' + str(i + 8 * byte_idx)]
+            if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
+                key_up = _CONTROL['M' + str(i + 8 * byte_idx)]
+        m_keys_down = new_m_keys_down
+    # and also MR key
+    elif feature == _F.MR and notification.address == 0x00:
+        new_mr_key_down = _unpack('!1B', notification.data[:1])
+        if not mr_key_down and new_mr_key_down:
+            key_down = _CONTROL['MR']
+        if mr_key_down and not new_mr_key_down:
+            key_up = _CONTROL['MR']
+        mr_key_down = new_mr_key_down
     rules.evaluate(feature, notification, device, status, True)
 
 
