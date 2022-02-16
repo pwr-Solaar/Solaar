@@ -62,9 +62,9 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     python_requires='>=3.6',
     install_requires=[
         'pyudev (>= 0.13)',
-        'PyYAML (>= 5.1)',
+        'PyYAML (>= 3.12)',
         'python-xlib (>= 0.27)',
-        'psutil (>= 5.6.0)',
+        'psutil (>= 5.4.3)',
     ],
     package_dir={'': 'lib'},
     packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
