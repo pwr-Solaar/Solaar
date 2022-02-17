@@ -197,11 +197,21 @@ class K375sFnSwap(FnSwapVirtual):
     validator_options = {'true_value': b'\x01', 'false_value': b'\x00', 'read_skip_byte_count': 1}
 
 
-# we should allow the users to select which settings they want to enable.
-class Backlight2(_Setting):
-    name = 'backlight'
+class BacklightVirtual(_Setting):
     label = _('Backlight')
     description = _('Turn illumination on or off on keyboard.')
+
+
+class Backlight(BacklightVirtual):
+    name = 'backlight-timed'
+    feature = _F.BACKLIGHT
+    choices_universe = _NamedInts(Off=0, Short=5, Medium=20, Long=60, VeryLong=180)
+    validator_class = _ChoicesV
+    validator_options = {'choices': choices_universe}
+
+
+class Backlight2(BacklightVirtual):
+    name = 'backlight'
     feature = _F.BACKLIGHT2
 
 
@@ -1045,6 +1055,7 @@ SETTINGS = [
     DpiSliding,  # working
     SpeedChange,
     MouseGesture,  # working
+    Backlight,
     Backlight2,  # working
     FnSwap,  # simple
     NewFnSwap,  # simple
