@@ -994,7 +994,7 @@ class RuleComponentUI:
     def create_widgets(self):
         pass
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         self._show_widgets(editable)
         self.component = component
 
@@ -1538,7 +1538,7 @@ class KeyPressUI(ActionUI):
                                                    ) and self.component.key_symbols[i] not in self.KEY_NAMES else ''
                 f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         n = len(component.key_symbols)
         while len(self.fields) < n:
             self._create_field()
