@@ -119,8 +119,9 @@ Another example would be mapping `Back Button` -> `Back Button`. With this one, 
 Mouse movements and buttons can be mixed and chained together however you like.
 It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click the 'Gesture' button.
 
-A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard.
+A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard, such as "A", "Shift+A", or "Control+A".
 Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
+Use separate  `KeyPress` actions for multiple characters.
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
