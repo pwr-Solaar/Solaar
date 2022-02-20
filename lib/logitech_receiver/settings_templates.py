@@ -208,7 +208,10 @@ class Backlight2(_Setting):
 class HiResScroll(_Setting):
     name = 'hi-res-scroll'
     label = _('Scroll Wheel High Resolution')
-    description = _('High-sensitivity mode for vertical scroll with the wheel.')
+    description = (
+        _('High-sensitivity mode for vertical scroll with the wheel.') + '\n' +
+        _('Set to ignore if scrolling is abnormally fast or slow')
+    )
     feature = _F.HI_RES_SCROLLING
 
 
@@ -233,7 +236,10 @@ class HiresSmoothInvert(_Setting):
 class HiresSmoothResolution(_Setting):
     name = 'hires-smooth-resolution'
     label = _('Scroll Wheel Resolution')
-    description = _('High-sensitivity mode for vertical scroll with the wheel.')
+    description = (
+        _('High-sensitivity mode for vertical scroll with the wheel.') + '\n' +
+        _('Set to ignore if scrolling is abnormally fast or slow')
+    )
     feature = _F.HIRES_WHEEL
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     validator_options = {'true_value': 0x02, 'mask': 0x02}
@@ -272,7 +278,10 @@ class ThumbInvert(_Setting):
 class ReportRate(_Setting):
     name = 'report_rate'
     label = _('Polling Rate (ms)')
-    description = _('Frequency of device polling, in milliseconds')
+    description = (
+        _('Frequency of device polling, in milliseconds') + '\n' +
+        _('Set to ignore if unusual device behaviour is experienced')
+    )
     feature = _F.REPORT_RATE
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     choices_universe = _NamedInts.range(1, 8)
@@ -320,7 +329,10 @@ class CrownSmooth(_Setting):
 class DivertGkeys(_Setting):
     name = 'divert-gkeys'
     label = _('Divert G Keys')
-    description = _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).')
+    description = (
+        _('Make G keys send GKEY HID++ notifications (which trigger Solaar rules but are otherwise ignored).') + '\n' +
+        _('May also make M keys and MR key send HID++ notifications')
+    )
     feature = _F.GKEY
     validator_options = {'true_value': 0x01, 'false_value': 0x00, 'mask': 0xff}
 
