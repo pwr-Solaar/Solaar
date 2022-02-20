@@ -161,6 +161,9 @@ def _process_device_notification(device, status, n):
     # HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
+    if n.sub_id == 00:  # no-op feature notification, dispose of it quickly
+        return False
+
     # Allow the device object to handle the notification using custom
     # per-device state.
     handling_ret = device.handle_notification(n)
