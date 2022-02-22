@@ -219,6 +219,7 @@ _D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, 
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
+_D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
 
 # Mice
 
@@ -447,6 +448,7 @@ _D('G903 Lightspeed Gaming Mouse', codename='G903', usbid=0xc086)
 _D('G703 Lightspeed Gaming Mouse', codename='G703', usbid=0xc087)
 _D('GPro Gaming Mouse', codename='GPro', usbid=0xc088)
 _D('G502 Hero Gaming Mouse', codename='G502 Hero', usbid=0xc08d)
+_D('MX518 Gaming Mouse', codename='MX518', usbid=0xc08e, interface=1)
 _D('G703 Hero Gaming Mouse', codename='G703 Hero', usbid=0xc090)
 _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D('G102 Lightsync Mouse', codename='G102', usbid=0xc092, interface=1)
