@@ -59,6 +59,25 @@ try:
     NET_ACTIVE_WINDOW = xdisplay.intern_atom('_NET_ACTIVE_WINDOW')
     NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
     WM_CLASS = xdisplay.intern_atom('WM_CLASS')
+
+    # set up to get keyboard state using ctypes interface to libx11
+    import ctypes
+
+    class X11Display(ctypes.Structure):
+        """ opaque struct """
+
+    class X11XkbStateRec(ctypes.Structure):
+        _fields_ = [('group', ctypes.c_ubyte), ('locked_group', ctypes.c_ubyte), ('base_group', ctypes.c_ushort),
+                    ('latched_group', ctypes.c_ushort), ('mods', ctypes.c_ubyte), ('base_mods', ctypes.c_ubyte),
+                    ('latched_mods', ctypes.c_ubyte), ('locked_mods', ctypes.c_ubyte), ('compat_state', ctypes.c_ubyte),
+                    ('grab_mods', ctypes.c_ubyte), ('compat_grab_mods', ctypes.c_ubyte), ('lookup_mods', ctypes.c_ubyte),
+                    ('compat_lookup_mods', ctypes.c_ubyte),
+                    ('ptr_buttons', ctypes.c_ushort)]  # something strange is happening here but it is not being used
+
+    X11Lib = ctypes.cdll.LoadLibrary('libX11.so')
+    X11Lib.XOpenDisplay.restype = ctypes.POINTER(X11Display)
+    X11Lib.XkbGetState.argtypes = [ctypes.POINTER(X11Display), ctypes.c_uint, ctypes.POINTER(X11XkbStateRec)]
+    display = X11Lib.XOpenDisplay(None)
 except Exception:
     _log.warn(
         'X11 not available - rules cannot access current process or modifier key state nor can they simulate input',
@@ -67,6 +86,15 @@ except Exception:
     )
     modifier_keycodes = []
     x11 = False
+
+
+def kbdgroup():
+    if x11:
+        state = X11XkbStateRec()
+        X11Lib.XkbGetState(display, 0x100, ctypes.pointer(state))  # 0x100 is core device FIXME
+        return state.group
+    else:
+        return None
 
 
 def modifier_code(keycode):
@@ -557,11 +585,17 @@ class KeyPress(Action):
             _log.warn('X11 not available - rules cannot simulate keyboard input - %s', self)
 
     def string_to_keycode(self, s, modifiers):  # should take group and shift into account
+        group = kbdgroup()
         keysym = Xlib.XK.string_to_keysym(s)
         keycodes = gkeymap.get_entries_for_keyval(keysym)
-        for k in keycodes.keys:
+        if len(keycodes.keys) == 1:
+            k = keycodes.keys[0]
             return k.keycode
-        _log.warn('rule KeyPress key name not currently available %s', self)
+        else:
+            for k in keycodes.keys:
+                if group == k.group:
+                    return k.keycode
+            _log.warn('rule KeyPress key name not currently available %s', self)
 
     def __str__(self):
         return 'KeyPress: ' + ' '.join(self.key_symbols)
