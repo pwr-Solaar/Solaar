@@ -26,6 +26,7 @@ from logging import getLogger
 from math import sqrt as _sqrt
 
 import keysyms.keysymdef as _keysymdef
+import evdev
 import psutil
 
 from gi.repository import Gdk, GLib
@@ -51,7 +52,7 @@ del getLogger
 # Process condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
 # MouseProcess condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
 # Modifiers condition depends only on GDK
-# KeyPress action currently only works in X11, and is not currently available under Wayland
+# KeyPress action currently only works in X11, and is not currently available under Wayland  FIXME
 # KeyPress action determines whether a keysym is a currently-down modifier using get_modifier_mapping from python-xlib;
 #   under Wayland no modifier keys are considered down so all modifier keys are pressed, potentially leading to problems
 # KeyPress action translates key names to keysysms using the local file described for GUI keyname determination
@@ -71,7 +72,6 @@ XK_KEYS = _keysymdef.keysymdef
 
 try:
     import Xlib
-    from Xlib import X
     from Xlib.display import Display
     xdisplay = Display()
     modifier_keycodes = xdisplay.get_modifier_mapping()  # there should be a way to do this in Gdk
@@ -84,10 +84,10 @@ try:
     # set up to get keyboard state using ctypes interface to libx11
     import ctypes
 
-    class X11Display(ctypes.Structure):
+    class XkbDisplay(ctypes.Structure):
         """ opaque struct """
 
-    class X11XkbStateRec(ctypes.Structure):
+    class XkbStateRec(ctypes.Structure):
         _fields_ = [('group', ctypes.c_ubyte), ('locked_group', ctypes.c_ubyte), ('base_group', ctypes.c_ushort),
                     ('latched_group', ctypes.c_ushort), ('mods', ctypes.c_ubyte), ('base_mods', ctypes.c_ubyte),
                     ('latched_mods', ctypes.c_ubyte), ('locked_mods', ctypes.c_ubyte), ('compat_state', ctypes.c_ubyte),
@@ -95,10 +95,11 @@ try:
                     ('compat_lookup_mods', ctypes.c_ubyte),
                     ('ptr_buttons', ctypes.c_ushort)]  # something strange is happening here but it is not being used
 
+    XkbUseCoreKbd = 0x100
     X11Lib = ctypes.cdll.LoadLibrary('libX11.so')
-    X11Lib.XOpenDisplay.restype = ctypes.POINTER(X11Display)
-    X11Lib.XkbGetState.argtypes = [ctypes.POINTER(X11Display), ctypes.c_uint, ctypes.POINTER(X11XkbStateRec)]
-    display = X11Lib.XOpenDisplay(None)
+    X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
+    X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
+    Xkbdisplay = X11Lib.XOpenDisplay(None)
 except Exception:
     _log.warn(
         'X11 not available - rules cannot access current process or keyboard group and cannot simulate input. %s',
@@ -110,8 +111,8 @@ except Exception:
 
 def kbdgroup():
     if x11:
-        state = X11XkbStateRec()
-        X11Lib.XkbGetState(display, 0x100, ctypes.pointer(state))  # 0x100 is core device FIXME
+        state = XkbStateRec()
+        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, ctypes.pointer(state))
         return state.group
     else:
         return None
@@ -645,6 +646,10 @@ class Action(RuleComponent):
         return None
 
 
+dinput = evdev.uinput.UInput()
+ddevice = dinput.device
+
+
 class KeyPress(Action):
     def __init__(self, keys):
         if isinstance(keys, str):
@@ -666,7 +671,7 @@ class KeyPress(Action):
             return k.keycode
         else:
             for k in keycodes.keys:
-                if group == k.group:
+                if group is None or group == k.group:
                     return k.keycode
             _log.warn('rule KeyPress key symbol not currently available %s', self)
 
@@ -681,13 +686,15 @@ class KeyPress(Action):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if self.needed(keycode, modifiers) and x11 and keycode:
-                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, keycode)
+                #                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, keycode)
+                ddevice.write(evdev.ecodes.EV_KEY, keycode - 8, 1)  # X adds 8 to keycodes
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if self.needed(keycode, modifiers) and x11 and keycode:
-                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, keycode)
+                #                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, keycode)
+                ddevice.write(evdev.ecodes.EV_KEY, keycode - 8, 0)  # X adds 8 to keycodes
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = gkeymap.get_modifier_state()
@@ -696,7 +703,8 @@ class KeyPress(Action):
         self.keyDown(self.key_symbols, current)
         self.keyUp(reversed(self.key_symbols), current)
         if x11:
-            displayt.sync()
+            #            displayt.sync()
+            dinput.syn()
         return None
 
     def data(self):
