@@ -25,6 +25,7 @@ from logging import INFO as _INFO
 from logging import getLogger
 from math import sqrt as _sqrt
 
+import keysyms.keysymdef as _keysymdef
 import psutil
 
 from gi.repository import Gdk, GLib
@@ -44,18 +45,38 @@ del getLogger
 #
 # See docs/rules.md for documentation
 #
+# Several capabilities of rules depend on aspects of GDK, X11, or XKB
+# As the Solaar GUI uses GTK, Glib and GDK are always available and are obtained from gi.repository
+#
+# Process condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
+# MouseProcess condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
+# Modifiers condition depends only on GDK
+# KeyPress action currently only works in X11, and is not currently available under Wayland
+# KeyPress action determines whether a keysym is a currently-down modifier using get_modifier_mapping from python-xlib;
+#   under Wayland no modifier keys are considered down so all modifier keys are pressed, potentially leading to problems
+# KeyPress action translates key names to keysysms using the local file described for GUI keyname determination
+# KeyPress action gets the current keyboard group using XkbGetState from libX11.so using ctypes definitions
+#   under Wayland the keyboard group is None resulting in using the first keyboard group
+# KeyPress action translates keysyms to keycodes using the GDK keymap
+# KeyPress action simulates keyboard input with X11 XTest from python-xlib
+# MouseScroll and MouseClick actions currently only work in X11, and are not currently available under Wayland
+# MouseScroll and MouseClick actions simulate mouse input with X11 XTest from python-xlib
+#
+# Rule GUI keyname determination uses a local file generated
+#   from http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
+#   and http://cgit.freedesktop.org/xorg/proto/x11proto/plain/XF86keysym.h
+# because there does not seem to be a non-X11 file for this set of key names
 
-XK_KEYS = {}
+XK_KEYS = _keysymdef.keysymdef
+
 try:
     import Xlib
     from Xlib import X
     from Xlib.display import Display
-    from Xlib import XK as _XK
-    _XK.load_keysym_group('xf86')
-    XK_KEYS = vars(_XK)
     xdisplay = Display()
     modifier_keycodes = xdisplay.get_modifier_mapping()  # there should be a way to do this in Gdk
     x11 = True
+
     NET_ACTIVE_WINDOW = xdisplay.intern_atom('_NET_ACTIVE_WINDOW')
     NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
     WM_CLASS = xdisplay.intern_atom('WM_CLASS')
@@ -80,8 +101,7 @@ try:
     display = X11Lib.XOpenDisplay(None)
 except Exception:
     _log.warn(
-        'X11 not available - rules cannot access current process or modifier key state nor can they simulate input',
-        #        'X11 not available - rules cannot access current process nor can they simulate input',
+        'X11 not available - rules cannot access current process or keyboard group and cannot simulate input. %s',
         exc_info=_sys.exc_info()
     )
     modifier_keycodes = []
@@ -417,7 +437,6 @@ class Modifiers(Condition):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        ##        (_, _, _, current) = gdisplay.get_pointer()  # get the current keyboard modifier
         current = gkeymap.get_modifier_state()  # get the current keyboard modifier
         return self.desired == (current & MODIFIER_MASK)
 
@@ -573,20 +592,17 @@ class KeyPress(Action):
     def __init__(self, keys):
         if isinstance(keys, str):
             keys = [keys]
-        self.key_symbols = keys
-        if x11:
-            key_from_string = lambda s: (displayt.keysym_to_keycode(Xlib.XK.string_to_keysym(s)))
-            self.keys = [isinstance(k, str) and key_from_string(k) for k in keys]
-            if not all(self.keys):
-                _log.warn('rule KeyPress argument not sequence of current key names %s', keys)
-                self.keys = []
-        else:
-            self.keys = []
-            _log.warn('X11 not available - rules cannot simulate keyboard input - %s', self)
+        self.key_names = keys
+        self.key_symbols = [XK_KEYS.get(k, None) for k in keys]
+        if not all(self.key_symbols):
+            _log.warn('rule KeyPress not sequence of key names %s', keys)
+            self.key_symbols = []
+        if not x11:
+            _log.warn('rule KeyPress action only available in X11 %s', keys)
+            self.key_symbols = []
 
-    def string_to_keycode(self, s, modifiers):  # should take group and shift into account
-        group = kbdgroup()
-        keysym = Xlib.XK.string_to_keysym(s)
+    def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
+        group = kbdgroup() or 0
         keycodes = gkeymap.get_entries_for_keyval(keysym)
         if len(keycodes.keys) == 1:
             k = keycodes.keys[0]
@@ -595,24 +611,24 @@ class KeyPress(Action):
             for k in keycodes.keys:
                 if group == k.group:
                     return k.keycode
-            _log.warn('rule KeyPress key name not currently available %s', self)
+            _log.warn('rule KeyPress key symbol not currently available %s', self)
 
     def __str__(self):
-        return 'KeyPress: ' + ' '.join(self.key_symbols)
+        return 'KeyPress: ' + ' '.join(self.key_names)
 
     def needed(self, k, modifiers):
         code = modifier_code(k)
         return not (code is not None and modifiers & (1 << code))
 
-    def keyDown(self, keys, modifiers):
-        for k in keys:
-            keycode = self.string_to_keycode(k, modifiers)
+    def keyDown(self, keysyms, modifiers):
+        for k in keysyms:
+            keycode = self.keysym_to_keycode(k, modifiers)
             if self.needed(keycode, modifiers) and x11 and keycode:
                 Xlib.ext.xtest.fake_input(displayt, X.KeyPress, keycode)
 
-    def keyUp(self, keys, modifiers):
-        for k in keys:
-            keycode = self.string_to_keycode(k, modifiers)
+    def keyUp(self, keysyms, modifiers):
+        for k in keysyms:
+            keycode = self.keysym_to_keycode(k, modifiers)
             if self.needed(keycode, modifiers) and x11 and keycode:
                 Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, keycode)
 
@@ -627,7 +643,7 @@ class KeyPress(Action):
         return None
 
     def data(self):
-        return {'KeyPress': [str(k) for k in self.key_symbols]}
+        return {'KeyPress': [str(k) for k in self.key_names]}
 
 
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable
