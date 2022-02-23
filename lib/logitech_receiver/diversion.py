@@ -845,16 +845,16 @@ def process_notification(device, status, notification, feature):
         g_keys_down = new_g_keys_down
     # and also M keys down
     elif feature == _F.MKEYS and notification.address == 0x00:
-        new_m_keys_down = _unpack('!1B', notification.data[:1])
+        new_m_keys_down = _unpack('!1B', notification.data[:1])[0]
         for i in range(1, 9):
             if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
-                key_down = _CONTROL['M' + str(i + 8 * byte_idx)]
+                key_down = _CONTROL['M' + str(i)]
             if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
-                key_up = _CONTROL['M' + str(i + 8 * byte_idx)]
+                key_up = _CONTROL['M' + str(i)]
         m_keys_down = new_m_keys_down
     # and also MR key
     elif feature == _F.MR and notification.address == 0x00:
-        new_mr_key_down = _unpack('!1B', notification.data[:1])
+        new_mr_key_down = _unpack('!1B', notification.data[:1])[0]
         if not mr_key_down and new_mr_key_down:
             key_down = _CONTROL['MR']
         if mr_key_down and not new_mr_key_down:
