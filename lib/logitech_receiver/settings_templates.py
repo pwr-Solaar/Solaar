@@ -995,7 +995,6 @@ class MKeyLEDs(_BitFieldSetting):
     for i in range(8):
         choices_universe[1 << i] = 'M' + str(i + 1)
     _labels = {k: (None, _('Lights up the %s key.') % k) for k in choices_universe}
-    print('MKEYS CHOICES UNIVERSE', choices_universe, _labels)
 
     class rw_class(_FeatureRW):
         def __init__(self, feature):
@@ -1009,8 +1008,21 @@ class MKeyLEDs(_BitFieldSetting):
         def build(cls, setting_class, device):
             number = device.feature_request(setting_class.feature, 0x00)[0]
             options = [setting_class.choices_universe[1 << i] for i in range(number)]
-            print('NUMBER OF MKEYS', number, options)
             return cls(options) if options else None
+
+
+class MRKeyLED(_Setting):
+    name = 'mr-key-led'
+    label = _('MR-Key LED')
+    description = _('Control the MR-Key LED.')
+    feature = _F.MR
+
+    class rw_class(_FeatureRW):
+        def __init__(self, feature):
+            super().__init__(feature, write_fnid=0x00)
+
+        def read(self, device):  # no way to read, so just assume off
+            return b'\x00'
 
 
 SETTINGS = [
@@ -1043,7 +1055,8 @@ SETTINGS = [
     DivertCrown,  # working
     CrownSmooth,  # working
     DivertGkeys,  # working
-    MKeyLEDs,
+    MKeyLEDs,  # working
+    MRKeyLED,
     Multiplatform,  # working
     DualPlatform,  # simple
     ChangeHost,  # working
