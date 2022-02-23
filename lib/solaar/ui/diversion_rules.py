@@ -1521,7 +1521,7 @@ class KeyPressUI(ActionUI):
     def _clicked_add(self, _btn):
         self.component.__init__(self.collect_value() + [''])
         self.show(self.component)
-        self.fields[len(self.component.key_symbols) - 1].grab_focus()
+        self.fields[len(self.component.key_names) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
@@ -1534,12 +1534,12 @@ class KeyPressUI(ActionUI):
         super()._on_update(*args)
         for i, f in enumerate(self.fields):
             if f.get_visible():
-                icon = 'dialog-warning' if i < len(self.component.key_symbols
-                                                   ) and self.component.key_symbols[i] not in self.KEY_NAMES else ''
+                icon = 'dialog-warning' if i < len(self.component.key_names
+                                                   ) and self.component.key_names[i] not in self.KEY_NAMES else ''
                 f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable=True):
-        n = len(component.key_symbols)
+        n = len(component.key_names)
         while len(self.fields) < n:
             self._create_field()
             self._create_del_btn()
@@ -1548,7 +1548,7 @@ class KeyPressUI(ActionUI):
         for i in range(n):
             field = self.fields[i]
             with self.ignore_changes():
-                field.set_text(component.key_symbols[i])
+                field.set_text(component.key_names[i])
             field.set_size_request(int(0.3 * self.panel.get_toplevel().get_size()[0]), 0)
             field.show_all()
             self.del_btns[i].show()
@@ -1566,7 +1566,7 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return ' + '.join(component.key_symbols)
+        return ' + '.join(component.key_names)
 
 
 class MouseScrollUI(ActionUI):
