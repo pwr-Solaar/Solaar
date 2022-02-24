@@ -5,12 +5,17 @@ layout: page
 
 Creating and editing most rules can be done in the Solaar GUI, by pressing the 'Rule Editor' button in the
 Solaar main window.
+
 Rule processing is an experimental feature.  Significant changes might be made in response to problems.
 
-Note that rule processing only fully works under X11.
-When running under Wayland with X11 libraries loaded most features will not be available and errors may result.
-Features known not to work under Wayland include process conditions and
-anything to do with simulating keyboard or mouse input.
+*Note that rule processing only fully works under X11.
+When running under Wayland with X11 libraries loaded some features will not be available.
+When running under Wayland without X11 libraries loaded even more features will not be available.
+Rule features known not to work under Wayland include process and mouse process conditions.
+Under Wayland using keyboard groups may result in incorrect symbols being input for simulated input.
+Under Wayland simulating inputs when modifier keys are pressed may result in incorrect symbols being input.
+Simulated input uses Xtest if available or uinput if the user has write access to /dev/uinput.
+To get access to /dev/uinput run `sudo setfacl -m u:${user}:rw /dev/uinput`*
 
 Logitech devices that use HID++ version 2.0 or greater produce feature-based
 notifications that Solaar can process using a simple rule language.  For
@@ -20,17 +25,17 @@ which normally does not produce any input at all when the keyboard is in
 Windows mode.
 
 Solaar's rules only trigger on HID++ notifications so device actions that
-normally produce HID output need rule processing have to be first be set to
-produce HID++ notifications instead of their normal behavior (diverted).
+normally produce HID output have to be first be set (diverted) to
+produce HID++ notifications instead of their normal behavior.
 Currently Solaar can divert some mouse scroll wheels, some
 mouse thumb wheels, the crown of Craft keyboards, and some keys and buttons.
 If the scroll wheel, thumb wheel, crown, key, or button is
 not diverted by setting the appropriate setting then no HID++ notification is
-generated so rules will not be triggered by manipulating the wheel, crown, key, or button.
+generated and rules will not be triggered by manipulating the wheel, crown, key, or button.
 Look for `HID++` or `Diversion` settings to see what
 diversion can be done with your devices.
 
-Running Solaar with the `-dd`
+Running Solaar with the `-ddd`
 option will show information about notifications, including their feature
 name, report number, and data.
 
@@ -139,6 +144,17 @@ Another example would be mapping `Back Button` -> `Back Button`. With this one, 
 Mouse movements and buttons can be mixed and chained together however you like.
 It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click the 'Gesture' button.
 
+`Setting` conditions check device settings of devices, provided the device is on-line.
+The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
+or null for the device that initiated rule processing; and
+the internal name of a setting (which can be found from solaar config <device>).
+Most simple settings take one extra argument, the value to check the setting value against.
+Range setting can also take two arguments, which form an inclusive range to check against.
+Other settings take two arguments, a key indicating which sub-setting to check and the value to check it against.
+For settings that use gestures as an argument the internal name of the gesture is used,
+which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
+For boolean settings '~' can be used to toggle the setting.
+
 A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard, such as "A", "Shift+A", or "Control+A".
 Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
 Use separate  `KeyPress` actions for multiple characters.
@@ -148,19 +164,15 @@ A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) an
 An `Execute` action takes a program and arguments and executes it asynchronously.
 
 A `Set` action changes a Solaar setting for a device, provided that the device is on-line.
-`Set` actions take three or four arguments, depending on the setting:
-the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
-or null for the device that initiated rule processing;
-the internal name of a setting (which can be found from solaar config <device>);
-one or two arguments for the setting.
-For settings that use keys or buttons as an argument the Logtech name can be used
-as shown in the Solaar main window for these settings,
-or the numeric value for the key or button.
+`Set` actions take three or four arguments, depending on the setting.
+The first two are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
+or null for the device that initiated rule processing; and
+the internal name of a setting (which can be found from solaar config <device>).
+Simple settings take one extra argument, the value to set the setting to.
+For boolean settings '~' can be used to toggle the setting.
+Other simple settings take two extra arguments, a key indicating which sub-setting to set and the value to set it to.
 For settings that use gestures as an argument the internal name of the gesture is used,
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
-For settings that need one of a set of names as an argument the name can be used or its internal integer value,
-as used in the Solaar config file.
-For boolean settings '~' can be used to toggle the setting.
 All settings are supported.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
