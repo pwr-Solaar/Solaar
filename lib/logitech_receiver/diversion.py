@@ -25,8 +25,8 @@ from logging import INFO as _INFO
 from logging import getLogger
 from math import sqrt as _sqrt
 
-import keysyms.keysymdef as _keysymdef
 import evdev
+import keysyms.keysymdef as _keysymdef
 import psutil
 
 from gi.repository import Gdk, GLib
@@ -52,16 +52,15 @@ del getLogger
 # Process condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
 # MouseProcess condition depends on X11 from python-xlib, and is probably not possible at all in Wayland
 # Modifiers condition depends only on GDK
-# KeyPress action currently only works in X11, and is not currently available under Wayland  FIXME
 # KeyPress action determines whether a keysym is a currently-down modifier using get_modifier_mapping from python-xlib;
 #   under Wayland no modifier keys are considered down so all modifier keys are pressed, potentially leading to problems
 # KeyPress action translates key names to keysysms using the local file described for GUI keyname determination
 # KeyPress action gets the current keyboard group using XkbGetState from libX11.so using ctypes definitions
 #   under Wayland the keyboard group is None resulting in using the first keyboard group
 # KeyPress action translates keysyms to keycodes using the GDK keymap
-# KeyPress action simulates keyboard input with X11 XTest from python-xlib
-# MouseScroll and MouseClick actions currently only work in X11, and are not currently available under Wayland
-# MouseScroll and MouseClick actions simulate mouse input with X11 XTest from python-xlib
+# KeyPress, MouseScroll, and MouseClick actions use XTest (under X11) or uinput.
+# For uinput to work the user must have write access for /dev/uinput.
+# To get this access run  sudo setfacl -m u:${user}:rw /dev/uinput
 #
 # Rule GUI keyname determination uses a local file generated
 #   from http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h
@@ -192,11 +191,6 @@ MOUSE_GESTURE_TESTS = {
 }
 
 COMPONENTS = {}
-
-if x11:
-    displayt = Display()
-else:
-    displayt = None
 
 
 class RuleComponent:
@@ -638,16 +632,70 @@ class MouseGesture(Condition):
         return {'MouseGesture': [str(m) for m in self.movements]}
 
 
+buttons = {
+    'unknown': (None, None),
+    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
+    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
+    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
+    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
+    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
+    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
+    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
+    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
+    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
+}
+mousecap = {evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode]}
+
+if x11:
+    displayt = Display()
+else:
+    displayt = None
+
+try:
+    ukeyboard = evdev.uinput.UInput()
+    umouse = evdev.uinput.UInput(mousecap)
+except Exception as e:
+    if not x11:
+        _log.warn('cannot create uinput device: %s', e)
+    else:
+        _log.info('cannot create uinput device: %s', e)
+    ukeyboard = None
+    umouse = None
+
+
+def simulate_input(code, event):  # X11 keycode/buttoncode and event
+    global displayt, ukeyboard, umouse
+    if isinstance(code, int):  # evdev keycode is 8 less than X11 keycodes
+        code = (code, code - 8)
+    if displayt:
+        try:
+            if code[0]:
+                Xlib.ext.xtest.fake_input(displayt, event, code[0])
+            displayt.sync()
+            return True
+        except Exception as e:
+            displayt = None
+            _log.warn('xtest fake input failed: %s', e)
+    if ukeyboard:
+        direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
+        device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
+        try:
+            if code[1]:
+                device.write(evdev.ecodes.EV_KEY, code[1], direction)
+            device.syn()
+            return True
+        except Exception as e:
+            ukeyboard = umouse = None
+            _log.warn('uinput write failed: %s', e)
+    _log.warn('no way to simulate input')
+
+
 class Action(RuleComponent):
     def __init__(self, *args):
         pass
 
     def evaluate(self, feature, notification, device, status, last_result):
         return None
-
-
-dinput = evdev.uinput.UInput()
-ddevice = dinput.device
 
 
 class KeyPress(Action):
@@ -658,9 +706,6 @@ class KeyPress(Action):
         self.key_symbols = [XK_KEYS.get(k, None) for k in keys]
         if not all(self.key_symbols):
             _log.warn('rule KeyPress not sequence of key names %s', keys)
-            self.key_symbols = []
-        if not x11:
-            _log.warn('rule KeyPress action only available in X11 %s', keys)
             self.key_symbols = []
 
     def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
@@ -685,26 +730,21 @@ class KeyPress(Action):
     def keyDown(self, keysyms, modifiers):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
-            if self.needed(keycode, modifiers) and x11 and keycode:
-                #                Xlib.ext.xtest.fake_input(displayt, X.KeyPress, keycode)
-                ddevice.write(evdev.ecodes.EV_KEY, keycode - 8, 1)  # X adds 8 to keycodes
+            if keycode and self.needed(keycode, modifiers):
+                simulate_input(keycode, Xlib.X.KeyPress)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
-            if self.needed(keycode, modifiers) and x11 and keycode:
-                #                Xlib.ext.xtest.fake_input(displayt, X.KeyRelease, keycode)
-                ddevice.write(evdev.ecodes.EV_KEY, keycode - 8, 0)  # X adds 8 to keycodes
+            if keycode and self.needed(keycode, modifiers):
+                simulate_input(keycode, Xlib.X.KeyRelease)
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = gkeymap.get_modifier_state()
         if _log.isEnabledFor(_INFO):
-            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.key_symbols])
+            _log.info('KeyPress action: %s, modifiers %s %s', self.key_names, current, [hex(k) for k in self.key_symbols])
         self.keyDown(self.key_symbols, current)
         self.keyUp(reversed(self.key_symbols), current)
-        if x11:
-            #            displayt.sync()
-            dinput.syn()
         return None
 
     def data(self):
@@ -719,27 +759,11 @@ class KeyPress(Action):
 #    def evaluate(self, feature, notification, device, status, last_result):
 #        super().keyUp(self.keys, current_key_modifiers)
 
-buttons = {
-    'unknown': None,
-    'left': 1,
-    'middle': 2,
-    'right': 3,
-    'scroll_up': 4,
-    'scroll_down': 5,
-    'scroll_left': 6,
-    'scroll_right': 7
-}
-for i in range(8, 31):
-    buttons['button%d' % i] = i
-
 
 def click(button, count):
-    if x11:
-        for _ in range(count):
-            Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonPress, button)
-            Xlib.ext.xtest.fake_input(displayt, Xlib.X.ButtonRelease, button)
-    else:
-        _log.warn('X11 not available - rules cannot simulate mouse clicks')
+    for _ in range(count):
+        simulate_input(button, Xlib.X.ButtonPress)
+        simulate_input(button, Xlib.X.ButtonRelease)
 
 
 class MouseScroll(Action):
@@ -751,8 +775,6 @@ class MouseScroll(Action):
             _log.warn('rule MouseScroll argument not two numbers %s', amounts)
             amounts = [0, 0]
         self.amounts = amounts
-        if not x11:
-            _log.warn('X11 not available - rules cannot simulate mouse scrolling - %s', self)
 
     def __str__(self):
         return 'MouseScroll: ' + ' '.join([str(a) for a in self.amounts])
@@ -770,8 +792,6 @@ class MouseScroll(Action):
             click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
         if dy:
             click(button=buttons['scroll_up'] if dy > 0 else buttons['scroll_down'], count=abs(dy))
-        if x11:
-            displayt.sync()
         return None
 
     def data(self):
@@ -794,8 +814,6 @@ class MouseClick(Action):
         except (ValueError, TypeError):
             _log.warn('rule MouseClick action: count %s should be an integer', count)
             self.count = 1
-        if not x11:
-            _log.warn('X11 not available - rules cannot simulate mouse clicks - %s', self)
 
     def __str__(self):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
@@ -805,8 +823,6 @@ class MouseClick(Action):
             _log.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
-        if x11:
-            displayt.sync()
         return None
 
     def data(self):
