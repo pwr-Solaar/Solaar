@@ -22,7 +22,7 @@ The `udev` package must be installed and its daemon running.
 
 Solaar requires Python 3.6+ and requires several packages to be installed.
 If you are running the system version of Python you should have the
-`python3-pyudev`, `python3-psutil`, `python3-xlib`,
+`python3-pyudev`, `python3-psutil`, `python3-xlib`, `python3-evdev`,
 and `python3-yaml` or `python3-pyyaml` packages installed.
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
 If you are running the system version of Python

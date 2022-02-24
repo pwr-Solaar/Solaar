@@ -101,7 +101,7 @@ try:
     Xkbdisplay = X11Lib.XOpenDisplay(None)
 except Exception:
     _log.warn(
-        'X11 not available - rules cannot access current process or keyboard group and cannot simulate input. %s',
+        'X11 not available - rules cannot access current process, modifier keys, or keyboard group. %s',
         exc_info=_sys.exc_info()
     )
     modifier_keycodes = []
@@ -914,7 +914,7 @@ COMPONENTS = {
 }
 
 built_in_rules = Rule([])
-if True:  # x11
+if True:
     built_in_rules = Rule([
         {'Rule': [  # Implement problematic keys for Craft and MX Master
             {'Rule': [{'Key': ['Brightness Down', 'pressed']}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
@@ -952,8 +952,6 @@ mr_key_down = False
 
 # process a notification
 def process_notification(device, status, notification, feature):
-    if False:  # not x11
-        return
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
@@ -1070,5 +1068,4 @@ def _load_config_rule_file():
     rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
 
 
-if True:  # x11
-    _load_config_rule_file()
+_load_config_rule_file()
