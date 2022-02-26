@@ -412,6 +412,43 @@ class Report(Condition):
         return {'Report': self.report}
 
 
+# Setting(device, setting, [key], value...)
+class Setting(Condition):
+    def __init__(self, args):
+        if not (isinstance(args, list) and len(args) > 2):
+            _log.warn('rule Setting argument not list with minimum length 3: %s', args)
+            self.args = []
+        else:
+            self.args = args
+
+    def __str__(self):
+        return 'Setting: ' + ' '.join([str(a) for a in self.args])
+
+    def evaluate(self, report, notification, device, status, last_result):
+        import solaar.ui.window as _window
+        if len(self.args) < 3:
+            return None
+        dev = _window.find_device(self.args[0]) if self.args[0] is not None else device
+        if dev is None:
+            _log.warn('Setting condition: device %s is not known', self.args[0])
+            return False
+        setting = next((s for s in dev.settings if s.name == self.args[1]), None)
+        if setting is None:
+            _log.warn('Setting condition: setting %s is not the name of a setting for %s', self.args[1], dev.name)
+            return None
+        # should the value argument be checked to be sure it is acceptable?? needs to be careful about boolean toggle
+        # TODO add compare  methods for more validators
+        try:
+            result = setting.compare(self.args[2:], setting.read())
+        except Exception as e:
+            _log.warn('Setting condition: error when checking setting %s: %s', self.args, e)
+            result = False
+        return result
+
+    def data(self):
+        return {'Setting': self.args[:]}
+
+
 MODIFIERS = {
     'Shift': int(Gdk.ModifierType.SHIFT_MASK),
     'Control': int(Gdk.ModifierType.CONTROL_MASK),
@@ -635,7 +672,7 @@ class KeyPress(Action):
     def evaluate(self, feature, notification, device, status, last_result):
         current = gkeymap.get_modifier_state()
         if _log.isEnabledFor(_INFO):
-            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.keys])
+            _log.info('KeyPress action: %s, modifiers %s %s', self.key_symbols, current, [hex(k) for k in self.key_symbols])
         self.keyDown(self.key_symbols, current)
         self.keyUp(reversed(self.key_symbols), current)
         if x11:
@@ -819,6 +856,7 @@ COMPONENTS = {
     'MouseProcess': MouseProcess,
     'Feature': Feature,
     'Report': Report,
+    'Setting': Setting,
     'Modifiers': Modifiers,
     'Key': Key,
     'Test': Test,

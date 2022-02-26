@@ -67,6 +67,11 @@ class Validator:
     def to_string(cls, value):
         return (str(value))
 
+    def compare(self, args, current):
+        if len(args) != 1:
+            return False
+        return args[0] == current
+
 
 class BooleanValidator(Validator):
     __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
@@ -315,6 +320,9 @@ class Setting:
 
     def acceptable(self, args, current):
         return self._validator.acceptable(args, current) if self._validator else None
+
+    def compare(self, args, current):
+        return self._validator.compare(args, current) if self._validator else None
 
     def apply(self):
         assert hasattr(self, '_value')
@@ -789,6 +797,14 @@ class BitFieldValidator(Validator):
         val = bool_or_toggle(current[str(int(key))], args[1])
         return None if val is None else [str(int(key)), val]
 
+    def compare(self, args, current):
+        if len(args) != 2:
+            return False
+        key = next((key for key in self.options if key == args[0]), None)
+        if key is None:
+            return False
+        return args[1] == current[str(int(key))]
+
 
 class BitFieldWithOffsetAndMaskValidator(Validator):
     __slots__ = ('byte_count', 'options', '_option_from_key', '_mask_from_offset', '_option_from_offset_mask')
@@ -878,7 +894,15 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         if key is None:
             return None
         val = bool_or_toggle(current[str(int(key))], args[1])
-        return None if val is None else [str(key), val]
+        return None if val is None else [str(int(key)), val]
+
+    def compare(self, args, current):
+        if len(args) != 2:
+            return False
+        key = next((option.id for option in self.options if option.as_int() == args[0]), None)
+        if key is None:
+            return False
+        return args[1] == current[str(int(key))]
 
 
 class ChoicesValidator(Validator):
@@ -1026,6 +1050,14 @@ class ChoicesMapValidator(ChoicesValidator):
         choice = next((item for item in choices if item == args[1]), None)
         return [str(int(key)), int(choice)] if choice is not None else None
 
+    def compare(self, args, current):
+        if len(args) != 2:
+            return False
+        key = next((key for key in self.choices if key == int(args[0])), None)
+        if key is None:
+            return False
+        return args[1] == current[str(int(key))]
+
 
 class RangeValidator(Validator):
     kind = KIND.range
@@ -1070,6 +1102,14 @@ class RangeValidator(Validator):
         arg = args[0]
         #  None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args)
         return None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args
+
+    def compare(self, args, current):
+        if len(args) == 1:
+            return args[0] == current
+        elif len(args) == 2:
+            return args[0] <= current and current <= args[1]
+        else:
+            return False
 
 
 class MultipleRangeValidator(Validator):
@@ -1156,6 +1196,10 @@ class MultipleRangeValidator(Validator):
             if not isinstance(value, int) or not (sub_item.minimum <= value <= sub_item.maximum):
                 return None
         return [str(int(item)), {**args[1]}]
+
+    def commpare(self, args, current):
+        _log.warn('compare not implemented for multiple range settings')
+        return False
 
 
 class ActionSettingRW:
