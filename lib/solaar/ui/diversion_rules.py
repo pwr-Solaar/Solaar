@@ -1430,14 +1430,14 @@ class MouseGestureUI(ConditionUI):
 
     def _clicked_add(self, _btn):
         self.component.__init__(self.collect_value() + [''])
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self.fields[len(self.component.movements) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
         v.pop(pos)
         self.component.__init__(v)
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self._on_update_callback()
 
     def _on_update(self, *args):
@@ -1520,14 +1520,14 @@ class KeyPressUI(ActionUI):
 
     def _clicked_add(self, _btn):
         self.component.__init__(self.collect_value() + [''])
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self.fields[len(self.component.key_names) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
         v.pop(pos)
         self.component.__init__(v)
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self._on_update_callback()
 
     def _on_update(self, *args):
@@ -1696,14 +1696,14 @@ class ExecuteUI(ActionUI):
 
     def _clicked_add(self, *_args):
         self.component.__init__(self.collect_value() + [''])
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self.fields[len(self.component.args) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
         v.pop(pos)
         self.component.__init__(v)
-        self.show(self.component)
+        self.show(self.component, editable=True)
         self._on_update_callback()
 
     def show(self, component, editable):
