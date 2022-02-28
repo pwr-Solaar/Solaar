@@ -29,7 +29,7 @@ from .hidpp10 import REGISTERS as _R
 
 _DeviceDescriptor = namedtuple(
     '_DeviceDescriptor',
-    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'persister', 'usbid', 'interface', 'btid')
+    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'usbid', 'interface', 'btid')
 )
 del namedtuple
 
@@ -45,7 +45,6 @@ def _D(
     protocol=None,
     registers=None,
     settings=None,
-    persister=None,
     usbid=None,
     interface=None,
     btid=None,
@@ -84,7 +83,6 @@ def _D(
         protocol=protocol,
         registers=registers,
         settings=settings,
-        persister=persister,
         usbid=usbid,
         interface=interface,
         btid=btid
@@ -441,6 +439,18 @@ _D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407
 _D('Wireless Mouse Pebble M350', protocol=2.0, wpid='4080', codename='Pebble')
 _D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
 _D('PRO X Wireless', kind='mouse', codename='PRO X', wpid='4093', usbid=0xc094)
+_D(
+    'G9 Laser Mouse',
+    codename='G9',
+    usbid=0xc048,
+    interface=1,
+    protocol=1.0,
+    settings=[
+        _PerformanceMXDpi,
+        _ST.RegisterSmoothScroll,
+        _ST.RegisterSideScroll,
+    ]
+)
 _D('G402 Gaming Mouse', codename='G402', usbid=0xc07e, interface=1)
 _D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)
 _D('G403 Gaming Mouse', codename='G403', usbid=0xc082)
