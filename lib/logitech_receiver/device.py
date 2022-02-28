@@ -44,10 +44,7 @@ class Device:
 
         if receiver:
             assert number > 0 and number <= receiver.max_devices
-        else:
-            assert number == 0xFF
-        # Device number, 1..6 for unifying devices, 1 otherwise.
-        self.number = number
+        self.number = number  # will be None at this point for directly connected devices
         # 'device active' flag; requires manual management.
         self.online = None
 
@@ -140,8 +137,10 @@ class Device:
             self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
-            self.descriptor = _descriptors.get_btid(self.product_id
-                                                    ) if self.bluetooth else _descriptors.get_usbid(self.product_id)
+            self.descriptor = _descriptors.get_btid(self.product_id) if self.bluetooth else \
+                _descriptors.get_usbid(self.product_id)
+            if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
+                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
 
         if self.descriptor:
             self._name = self.descriptor.name
@@ -458,7 +457,7 @@ class Device:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, 0xFF, info=device_info)
+                return Device(None, None, info=device_info)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
