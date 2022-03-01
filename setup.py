@@ -67,7 +67,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'psutil (>= 5.4.3)',
     ],
     package_dir={'': 'lib'},
-    packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
+    packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
     scripts=_glob('bin/*'),
 )
