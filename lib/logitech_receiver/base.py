@@ -325,6 +325,10 @@ def make_notification(report_id, devnumber, data):
         return
 
     address = ord(data[1:2])
+    if sub_id == 0x00 and (address & 0x0F == 0x00):
+        # this is a no-op notification - don't do anything with it
+        return
+
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
         (sub_id >= 0x40) or  # noqa: E131
