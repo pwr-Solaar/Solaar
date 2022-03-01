@@ -872,8 +872,8 @@ built_in_rules = Rule([])
 if True:  # x11
     built_in_rules = Rule([
         {'Rule': [  # Implement problematic keys for Craft and MX Master
-            {'Rule': [{'Key': 'Brightness Down'}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
-            {'Rule': [{'Key': 'Brightness Up'}, {'KeyPress': 'XF86_MonBrightnessUp'}]},
+            {'Rule': [{'Key': ['Brightness Down', 'pressed']}, {'KeyPress': 'XF86_MonBrightnessDown'}]},
+            {'Rule': [{'Key': ['Brightness Up', 'pressed']}, {'KeyPress': 'XF86_MonBrightnessUp'}]},
         ]},
         {'Rule': [  # In firefox, crown emits keys that move up and down if not pressed, rotate through tabs otherwise
             {'Process': 'firefox'},
