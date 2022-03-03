@@ -687,15 +687,12 @@ class RegisterRW:
 
 
 class FeatureRW:
-    __slots__ = ('feature', 'read_fnid', 'write_fnid', 'prefix', 'no_reply')
-
     kind = _NamedInt(0x02, _('feature'))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
-    default_prefix = b''
 
     def __init__(
-        self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, prefix=default_prefix, no_reply=False
+        self, feature, read_fnid=default_read_fnid, write_fnid=default_write_fnid, prefix=b'', suffix=b'', no_reply=False
     ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
@@ -703,6 +700,7 @@ class FeatureRW:
         self.write_fnid = write_fnid
         self.no_reply = no_reply
         self.prefix = prefix
+        self.suffix = suffix
 
     def read(self, device, data_bytes=b''):
         assert self.feature is not None
@@ -710,7 +708,9 @@ class FeatureRW:
 
     def write(self, device, data_bytes):
         assert self.feature is not None
-        reply = device.feature_request(self.feature, self.write_fnid, self.prefix, data_bytes, no_reply=self.no_reply)
+        reply = device.feature_request(
+            self.feature, self.write_fnid, self.prefix, data_bytes, self.suffix, no_reply=self.no_reply
+        )
         return reply if not self.no_reply else True
 
 

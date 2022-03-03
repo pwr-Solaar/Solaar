@@ -197,22 +197,31 @@ class K375sFnSwap(FnSwapVirtual):
     validator_options = {'true_value': b'\x01', 'false_value': b'\x00', 'read_skip_byte_count': 1}
 
 
-class BacklightVirtual(_Setting):
-    label = _('Backlight')
-    description = _('Turn illumination on or off on keyboard.')
-
-
-class Backlight(BacklightVirtual):
-    name = 'backlight-timed'
+class Backlight(_Setting):
+    name = 'backlight-qualitative'
+    description = _('Set illumination time for keyboard.')
     feature = _F.BACKLIGHT
     choices_universe = _NamedInts(Off=0, Short=5, Medium=20, Long=60, VeryLong=180)
     validator_class = _ChoicesV
     validator_options = {'choices': choices_universe}
 
 
-class Backlight2(BacklightVirtual):
+class Backlight2(_Setting):
+    label = _('Backlight')
+    description = _('Turn illumination on or off on keyboard.')
     name = 'backlight'
     feature = _F.BACKLIGHT2
+
+
+class Backlight3(_Setting):
+    name = 'backlight-timed'
+    description = _('Set illumination time for keyboard.')
+    feature = _F.BACKLIGHT3
+    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20, 'suffix': 0x09}
+    validator_class = _RangeV
+    min_value = 0
+    max_value = 1000
+    validator_options = {'byte_count': 2}
 
 
 class HiResScroll(_Setting):
@@ -1057,6 +1066,7 @@ SETTINGS = [
     MouseGesture,  # working
     Backlight,
     Backlight2,  # working
+    Backlight3,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
