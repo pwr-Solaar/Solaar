@@ -644,12 +644,17 @@ buttons = {
     'button8': (8, evdev.ecodes.ecodes['BTN_8']),
     'button9': (9, evdev.ecodes.ecodes['BTN_9']),
 }
-mousecap = {evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode]}
+mousecap = {
+    evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode],
+    evdev.ecodes.EV_REL:
+    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
+}
 
 if x11:
     displayt = Display()
 else:
     displayt = None
+displayt = None
 
 try:
     ukeyboard = evdev.uinput.UInput()
@@ -663,31 +668,67 @@ except Exception as e:
     umouse = None
 
 
-def simulate_input(code, event):  # X11 keycode/buttoncode and event
-    global displayt, ukeyboard, umouse
-    if isinstance(code, int):  # evdev keycode is 8 less than X11 keycodes
-        code = (code, code - 8)
+def simulate_xtest(code, event):
+    global displayt
     if displayt:
         try:
-            if code[0]:
-                Xlib.ext.xtest.fake_input(displayt, event, code[0])
+            Xlib.ext.xtest.fake_input(displayt, event, code)
             displayt.sync()
             return True
         except Exception as e:
             displayt = None
             _log.warn('xtest fake input failed: %s', e)
-    if ukeyboard:
-        direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
-        device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
+
+
+def simulate_uinput(device, what, code, arg):
+    global ukeyboard, umouse
+    if device:
         try:
-            if code[1]:
-                device.write(evdev.ecodes.EV_KEY, code[1], direction)
+            device.write(what, code, arg)
             device.syn()
             return True
         except Exception as e:
             ukeyboard = umouse = None
-            _log.warn('uinput write failed: %s', e)
+            _log.warn('uinput write key failed: %s', e)
+
+
+def simulate_key(code, event):  # X11 keycode and event
+    if simulate_xtest(code, event):
+        return True
+    direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
+    device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
+    if simulate_uinput(device, evdev.ecodes.EV_KEY, code - 8, direction):
+        return True
     _log.warn('no way to simulate input')
+
+
+def click(button, count):
+    for _ in range(count):
+        if not simulate_xtest(button, Xlib.X.ButtonPress):
+            return False
+        if not simulate_xtest(button, Xlib.X.ButtonRelease):
+            return False
+    return True
+
+
+def simulate_scroll(dx, dy):
+    if displayt:
+        success = True
+        if dx:
+            success = click(7 if dx > 0 else 6, count=abs(dx))
+        if dy and success:
+            success = click(4 if dy > 0 else 5, count=abs(dy))
+        if success:
+            return True
+    if umouse:
+        success = True
+        if dx:
+            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+        if dy and success:
+            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+        if success:
+            return True
+    _log.warn('no way to simulate scrolling')
 
 
 class Action(RuleComponent):
@@ -731,13 +772,13 @@ class KeyPress(Action):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
-                simulate_input(keycode, Xlib.X.KeyPress)
+                simulate_key(keycode, Xlib.X.KeyPress)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
-                simulate_input(keycode, Xlib.X.KeyRelease)
+                simulate_key(keycode, Xlib.X.KeyRelease)
 
     def evaluate(self, feature, notification, device, status, last_result):
         current = gkeymap.get_modifier_state()
@@ -758,12 +799,6 @@ class KeyPress(Action):
 # class KeyUp(KeyPress):
 #    def evaluate(self, feature, notification, device, status, last_result):
 #        super().keyUp(self.keys, current_key_modifiers)
-
-
-def click(button, count):
-    for _ in range(count):
-        simulate_input(button, Xlib.X.ButtonPress)
-        simulate_input(button, Xlib.X.ButtonRelease)
 
 
 class MouseScroll(Action):
@@ -788,10 +823,7 @@ class MouseScroll(Action):
         if _log.isEnabledFor(_INFO):
             _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         dx, dy = amounts
-        if dx:
-            click(button=buttons['scroll_right'] if dx > 0 else buttons['scroll_left'], count=abs(dx))
-        if dy:
-            click(button=buttons['scroll_up'] if dy > 0 else buttons['scroll_down'], count=abs(dy))
+        simulate_scroll(dx, dy)
         return None
 
     def data(self):
