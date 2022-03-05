@@ -203,7 +203,7 @@ class Backlight(_Setting):
     label = _('Backlight')
     description = _('Set illumination time for keyboard.')
     feature = _F.BACKLIGHT
-    choices_universe = _NamedInts(Off=0, Short=5, Medium=20, Long=60, VeryLong=180)
+    choices_universe = _NamedInts(Off=0, Varying=2, VeryShort=5, Short=10, Medium=20, Long=60, VeryLong=180)
     validator_class = _ChoicesV
     validator_options = {'choices': choices_universe}
 
