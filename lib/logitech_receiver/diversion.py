@@ -654,8 +654,6 @@ if x11:
     displayt = Display()
 else:
     displayt = None
-displayt = None
-
 try:
     ukeyboard = evdev.uinput.UInput()
     umouse = evdev.uinput.UInput(mousecap)
@@ -968,12 +966,6 @@ if True:
             {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioRaiseVolume'}]},
             {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioLowerVolume'}]}
         ]},
-        {'Rule': [  # Thumb wheel does horizontal movement, doubled if control key not pressed
-            {'Feature': 'THUMB WHEEL'},  # with control modifier on mouse scrolling sometimes does something different!
-            {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_up'}, {'MouseScroll': [-1, 0]}]},
-            {'Rule': [{'Modifiers': 'Control'}, {'Test': 'thumb_wheel_down'}, {'MouseScroll': [-1, 0]}]},
-            {'Rule': [{'Or': [{'Test': 'thumb_wheel_up'}, {'Test': 'thumb_wheel_down'}]}, {'MouseScroll': [-2, 0]}]}
-        ]}
     ])
 
 keys_down = []
