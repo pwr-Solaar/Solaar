@@ -163,6 +163,103 @@ def xy_direction(_x, _y):
         return 'noop'
 
 
+buttons = {
+    'unknown': (None, None),
+    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
+    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
+    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
+    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
+    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
+    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
+    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
+    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
+    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
+}
+mousecap = {
+    evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode],
+    evdev.ecodes.EV_REL:
+    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
+}
+
+if x11:
+    displayt = Display()
+else:
+    displayt = None
+try:
+    ukeyboard = evdev.uinput.UInput()
+    umouse = evdev.uinput.UInput(mousecap)
+except Exception as e:
+    if not x11:
+        _log.warn('cannot create uinput device: %s', e)
+    else:
+        _log.info('cannot create uinput device: %s', e)
+    ukeyboard = None
+    umouse = None
+
+
+def simulate_xtest(code, event):
+    global displayt
+    if displayt:
+        try:
+            Xlib.ext.xtest.fake_input(displayt, event, code)
+            displayt.sync()
+            return True
+        except Exception as e:
+            displayt = None
+            _log.warn('xtest fake input failed: %s', e)
+
+
+def simulate_uinput(device, what, code, arg):
+    global ukeyboard, umouse
+    if device:
+        try:
+            device.write(what, code, arg)
+            device.syn()
+            return True
+        except Exception as e:
+            ukeyboard = umouse = None
+            _log.warn('uinput write key failed: %s', e)
+
+
+def simulate_key(code, event):  # X11 keycode and event
+    if simulate_xtest(code, event):
+        return True
+    direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
+    device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
+    if simulate_uinput(device, evdev.ecodes.EV_KEY, code - 8, direction):
+        return True
+    _log.warn('no way to simulate input')
+
+
+def click(button, count):
+    for _ in range(count):
+        if not simulate_xtest(button, Xlib.X.ButtonPress):
+            return False
+        if not simulate_xtest(button, Xlib.X.ButtonRelease):
+            return False
+    return True
+
+
+def simulate_scroll(dx, dy):
+    if displayt:
+        success = True
+        if dx:
+            success = click(7 if dx > 0 else 6, count=abs(dx))
+        if dy and success:
+            success = click(4 if dy > 0 else 5, count=abs(dy))
+        if success:
+            return True
+    if umouse:
+        success = True
+        if dx:
+            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+        if dy and success:
+            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+        if success:
+            return True
+    _log.warn('no way to simulate scrolling')
+
+
 TESTS = {
     'crown_right': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] < 128 and d[1],
     'crown_left': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1],
@@ -630,103 +727,6 @@ class MouseGesture(Condition):
 
     def data(self):
         return {'MouseGesture': [str(m) for m in self.movements]}
-
-
-buttons = {
-    'unknown': (None, None),
-    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
-    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
-    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
-    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
-    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
-    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
-    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
-    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
-    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
-}
-mousecap = {
-    evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode],
-    evdev.ecodes.EV_REL:
-    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
-}
-
-if x11:
-    displayt = Display()
-else:
-    displayt = None
-try:
-    ukeyboard = evdev.uinput.UInput()
-    umouse = evdev.uinput.UInput(mousecap)
-except Exception as e:
-    if not x11:
-        _log.warn('cannot create uinput device: %s', e)
-    else:
-        _log.info('cannot create uinput device: %s', e)
-    ukeyboard = None
-    umouse = None
-
-
-def simulate_xtest(code, event):
-    global displayt
-    if displayt:
-        try:
-            Xlib.ext.xtest.fake_input(displayt, event, code)
-            displayt.sync()
-            return True
-        except Exception as e:
-            displayt = None
-            _log.warn('xtest fake input failed: %s', e)
-
-
-def simulate_uinput(device, what, code, arg):
-    global ukeyboard, umouse
-    if device:
-        try:
-            device.write(what, code, arg)
-            device.syn()
-            return True
-        except Exception as e:
-            ukeyboard = umouse = None
-            _log.warn('uinput write key failed: %s', e)
-
-
-def simulate_key(code, event):  # X11 keycode and event
-    if simulate_xtest(code, event):
-        return True
-    direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
-    device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
-    if simulate_uinput(device, evdev.ecodes.EV_KEY, code - 8, direction):
-        return True
-    _log.warn('no way to simulate input')
-
-
-def click(button, count):
-    for _ in range(count):
-        if not simulate_xtest(button, Xlib.X.ButtonPress):
-            return False
-        if not simulate_xtest(button, Xlib.X.ButtonRelease):
-            return False
-    return True
-
-
-def simulate_scroll(dx, dy):
-    if displayt:
-        success = True
-        if dx:
-            success = click(7 if dx > 0 else 6, count=abs(dx))
-        if dy and success:
-            success = click(4 if dy > 0 else 5, count=abs(dy))
-        if success:
-            return True
-    if umouse:
-        success = True
-        if dx:
-            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
-        if dy and success:
-            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
-        if success:
-            return True
-    _log.warn('no way to simulate scrolling')
 
 
 class Action(RuleComponent):
