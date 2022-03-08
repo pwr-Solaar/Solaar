@@ -343,18 +343,18 @@ def ping_all(resuming=False):
     for l in _all_listeners.values():
         if l.receiver.isDevice:
             if resuming:
-                l.receiver.status._active = False
+                l.receiver.status._active = None  # ensure that settings are pushed
             if l.receiver.ping():
-                l.receiver.status.changed(active=True)
+                l.receiver.status.changed(active=True, push=True)
             l._status_changed(l.receiver)
         else:
             count = l.receiver.count()
             if count:
                 for dev in l.receiver:
                     if resuming:
-                        dev.status._active = False
+                        dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
-                        dev.status.changed(active=True)
+                        dev.status.changed(active=True, push=True)
                     l._status_changed(dev)
                     count -= 1
                     if not count:
