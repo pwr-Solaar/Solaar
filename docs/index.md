@@ -154,6 +154,20 @@ for the step-by-step procedure for manual installation.
   The device has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
 
+## Contributing to Solaar
+
+Conributions to Solaaar are very welcome.
+
+Solaar has complete or  partial translations of its GUI strings into several languages.
+If you want to update a translation or add a new one see
+[the translation page](https://pwr-solaar.github.io/Solaar/i18n) for moe information.
+
+If you find a bug and have a fix for it, please open a bug issue and also a GitHub pull request.
+Label your commits using the naming conventions in recent commits to Solaar.
+If you want to enhance Solaar open an enhancement issue to discuss your proposal.
+There are also usually several open issues for enhancements that have already been requested.
+
+
 ## License
 
 This software is distributed under the terms of the
