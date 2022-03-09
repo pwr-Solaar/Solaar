@@ -557,8 +557,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_WARNING):
-            _log.warn(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
+        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_DEBUG):
+            _log.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
 class KeysArray:
