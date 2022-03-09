@@ -546,7 +546,7 @@ class SpeedChange(_Setting):
     feature = _F.POINTER_SPEED
     rw_options = {'name': 'speed change'}
 
-    class _SpeedChangeRW(_ActionSettingRW):
+    class rw_class(_ActionSettingRW):
         def press_action(self):  # switch sensitivity
             currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
             newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
