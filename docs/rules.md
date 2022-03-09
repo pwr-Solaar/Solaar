@@ -3,6 +3,8 @@ title: Rule Processing of HID++ Notifications
 layout: page
 ---
 
+Creating and editing most rules can be done in the Solaar GUI, by pressing the 'Rule Editor' button in the
+Solaar main window.
 Rule processing is an experimental feature.  Significant changes might be made in response to problems.
 
 Note that rule processing only fully works under X11.
@@ -80,7 +82,7 @@ modifiers.
 string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
-setting.  Some keyboards have Gn keys, which are diverted using the 'Divert G Keys' setting.
+setting.  Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
 `Test` conditions are true if their test evaluates to true on the feature,
 report, and data of the current notification.
 Test conditions can return a number instead of a boolean.
@@ -156,12 +158,24 @@ All of these rules are only active if the key or feature is diverted, of course.
 Solaar reads rules from a YAML configuration file (normally `~/.config/solaar/rules.yaml`).
 This file contains zero or more documents, each a rule.
 
-Here is a file with four rules:
+Here is a file with six rules:
 
 ```
 %YAML 1.3
 ---
+- Key: [M2, pressed]
+- Set: [198E3EB8, dpi, 3000]
+- Execute: [notify-send, Incresed mouse speed]
+...
+---
+- Key: [Host Switch Channel 2, pressed]
+- Set: [43DAF041, change-host, 1]
+- Set: [198E3EB8, change-host, 1]
+- Execute: [notify-send, Switched to host 2]
+...
+---
 - MouseGesture: [Mouse Up, Mouse Down]
+- Execute: [notify-send, Locking]
 - Execute: xflock4
 ...
 - Feature: CROWN
