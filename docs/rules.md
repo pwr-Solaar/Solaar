@@ -83,22 +83,22 @@ string argument.  Alternatively, if the argument is a list `[name, action]` wher
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
 setting.  Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
-`Test` conditions are true if their test evaluates to true on the feature,
+`Test` and `TestBytes` conditions are true if their test evaluates to true on the feature,
 report, and data of the current notification.
 Test conditions can return a number instead of a boolean.
 
-Test conditions consisting of a sequence of three or four integers use the first
+`TestBytes` conditions consist of a sequence of three or four integers and use the first
 two to select bytes of the notification data.
 Writing this kind of test condition is not trivial.
-Three-element test conditions are true if the selected bytes bit-wise anded
+Three-element `TestBytes` conditions are true if the selected bytes bit-wise anded
 with its third element is non-zero.
 The value of these test conditions is the result of the and.
-Four-element test conditions are true if the selected bytes form a signed
+Four-element `TestBytes` conditions are true if the selected bytes form a signed
 integer between the third and fourth elements.
 The value of these test condition is the signed value of the selected bytes
 if that is non-zero otherwise True.
 
-The other test conditions are mnemonic shorthands for meaningful feature,
+`Test` conditions are mnemonic shorthands for meaningful feature,
 report, and data combinations in notifications.
 A `crown_right` test is the rotation amount of a `CROWN` right rotation notification.
 A `crown_left` test is the rotation amount of a `CROWN` left rotation notification.
