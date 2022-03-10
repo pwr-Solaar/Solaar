@@ -18,7 +18,7 @@
 import string
 import threading
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from contextlib import contextmanager as contextlib_contextmanager
 from copy import copy
 from dataclasses import dataclass, field
@@ -512,11 +512,12 @@ class DiversionDialog:
                     [
                         (_('Feature'), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
                         (_('Process'), _DIV.Process, ''),
-                        (_('MouseProcess'), _DIV.MouseProcess, ''),
+                        (_('Mouse process'), _DIV.MouseProcess, ''),
                         (_('Report'), _DIV.Report, 0),
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
+                        (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
                         (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
                 ],
@@ -1394,6 +1395,123 @@ class TestUI(ConditionUI):
         return str(component.test)
 
 
+_TestBytesElement = namedtuple('TestBytesElement', ['id', 'label', 'min', 'max'])
+_TestBytesMode = namedtuple('TestBytesMode', ['label', 'elements', 'label_fn'])
+
+
+class TestBytesUI(ConditionUI):
+
+    CLASS = _DIV.TestBytes
+
+    _common_elements = [
+        _TestBytesElement('begin', _('begin (inclusive)'), 0, 16),
+        _TestBytesElement('end', _('end (exclusive)'), 0, 16)
+    ]
+
+    _global_min = -2**31
+    _global_max = 2**31 - 1
+
+    _modes = {
+        'range':
+        _TestBytesMode(
+            _('range'),
+            _common_elements + [
+                _TestBytesElement('minimum', _('minimum'), _global_min, _global_max),  # uint32
+                _TestBytesElement('maximum', _('maximum'), _global_min, _global_max),
+            ],
+            lambda e: _('bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d' % {str(i): v
+                                                                               for i, v in enumerate(e)})
+        ),
+        'mask':
+        _TestBytesMode(
+            _('mask'), _common_elements + [_TestBytesElement('mask', _('mask'), _global_min, _global_max)],
+            lambda e: _('bytes %(0)d to %(1)d, mask %(2)d' % {str(i): v
+                                                              for i, v in enumerate(e)})
+        )
+    }
+
+    def create_widgets(self):
+        self.fields = {}
+        self.field_labels = {}
+        self.widgets = {}
+        col = 0
+        mode_col = 2
+        self.mode_field = Gtk.ComboBox.new_with_model(Gtk.ListStore(str, str))
+        mode_renderer = Gtk.CellRendererText()
+        self.mode_field.set_id_column(0)
+        self.mode_field.pack_start(mode_renderer, True)
+        self.mode_field.add_attribute(mode_renderer, 'text', 1)
+        self.widgets[self.mode_field] = (mode_col, 1, 1, 1)
+        mode_label = Gtk.Label(_('type'), margin_top=20)
+        self.widgets[mode_label] = (mode_col, 0, 1, 1)
+        for mode_id, mode in TestBytesUI._modes.items():
+            self.mode_field.get_model().append([mode_id, mode.label])
+            for element in mode.elements:
+                if element.id not in self.fields:
+                    field = Gtk.SpinButton.new_with_range(element.min, element.max, 1)
+                    field.set_value(0)
+                    field.set_size_request(150, 0)
+                    field.connect('value-changed', self._on_update)
+                    label = Gtk.Label(element.label, margin_top=20)
+                    self.fields[element.id] = field
+                    self.field_labels[element.id] = label
+                    self.widgets[label] = (col, 0, 1, 1)
+                    self.widgets[field] = (col, 1, 1, 1)
+                    col += 1 if col != mode_col - 1 else 2
+        self.mode_field.connect('changed', lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
+        self.mode_field.set_active_id('range')
+
+    def show(self, component, editable):
+        super().show(component, editable)
+
+        with self.ignore_changes():
+            mode_id = {3: 'mask', 4: 'range'}.get(len(component.test), None)
+            self._only_mode(mode_id)
+            if not mode_id:
+                return
+            self.mode_field.set_active_id(mode_id)
+            if mode_id:
+                mode = TestBytesUI._modes[mode_id]
+                for i, element in enumerate(mode.elements):
+                    self.fields[element.id].set_value(component.test[i])
+
+    def collect_value(self):
+        mode_id = self.mode_field.get_active_id()
+        return [self.fields[element.id].get_value_as_int() for element in TestBytesUI._modes[mode_id].elements]
+
+    def _only_mode(self, mode_id):
+        if not mode_id:
+            return
+        keep = {element.id for element in TestBytesUI._modes[mode_id].elements}
+        for element_id, f in self.fields.items():
+            visible = element_id in keep
+            f.set_visible(visible)
+            self.field_labels[element_id].set_visible(visible)
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        if not self.component:
+            return
+        begin, end, *etc = self.component.test
+        icon = 'dialog-warning' if end <= begin else ''
+        self.fields['end'].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        if len(self.component.test) == 4:
+            *etc, minimum, maximum = self.component.test
+            icon = 'dialog-warning' if maximum < minimum else ''
+            self.fields['maximum'].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Test bytes')
+
+    @classmethod
+    def right_label(cls, component):
+        mode_id = {3: 'mask', 4: 'range'}.get(len(component.test), None)
+        if not mode_id:
+            return str(component.test)
+        return TestBytesUI._modes[mode_id].label_fn(component.test)
+
+
 class MouseGestureUI(ConditionUI):
 
     CLASS = _DIV.MouseGesture
@@ -2234,6 +2352,7 @@ COMPONENT_UI = {
     _DIV.Modifiers: ModifiersUI,
     _DIV.Key: KeyUI,
     _DIV.Test: TestUI,
+    _DIV.TestBytes: TestBytesUI,
     _DIV.MouseGesture: MouseGestureUI,
     _DIV.KeyPress: KeyPressUI,
     _DIV.MouseScroll: MouseScrollUI,
