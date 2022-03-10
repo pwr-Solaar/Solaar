@@ -587,21 +587,21 @@ class PersistentRemappableAction():
         elif self.actionId == special_keys.ACTIONID.Key:
             return 'Key: ' + str(self.modifiers) + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Mouse:
-            return 'Mouse Button'
+            return 'Mouse Button: ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Xdisp:
-            return 'X Displacement'
+            return 'X Displacement ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Ydisp:
-            return 'Y Displacement'
+            return 'Y Displacement ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Vscroll:
-            return 'Vertical Scroll'
+            return 'Vertical Scroll ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Hscroll:
-            return 'Horizontal Scroll'
+            return 'Horizontal Scroll: ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Consumer:
             return 'Consumer: ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return 'Internal Action'
+            return 'Internal Action ' + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return 'Power'
+            return 'Power ' + str(self.remapped)
         else:
             return 'Unknown'
 
@@ -781,6 +781,8 @@ class KeysArrayPersistent(KeysArray):
                 remapped = special_keys.USB_HID_KEYCODES[remapped]
             elif actionId == special_keys.ACTIONID.Mouse:
                 remapped = special_keys.MOUSE_BUTTONS[remapped]
+            elif actionId == special_keys.ACTIONID.Hscroll:
+                remapped = special_keys.HORIZONTAL_SCROLL[remapped]
             elif actionId == special_keys.ACTIONID.Consumer:
                 remapped = special_keys.HID_CONSUMERCODES[remapped]
             self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)

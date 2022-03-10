@@ -597,34 +597,6 @@ DISABLE = _NamedInts(
 )
 DISABLE._fallback = lambda x: 'unknown:%02X' % x
 
-##
-## Information for x1c00 Persistent from https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28
-##
-
-KEYMOD = _NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
-
-ACTIONID = _NamedInts(
-    Empty=0x00,
-    Key=0x01,
-    Mouse=0x02,
-    Xdisp=0x03,
-    Ydisp=0x04,
-    Vscroll=0x05,
-    Hscroll=0x06,
-    Consumer=0x07,
-    Internal=0x08,
-    Power=0x09
-)
-
-MOUSE_BUTTONS = _NamedInts(
-    Left=0x01,
-    Right=0x02,
-    Middle=0x04,
-    Back=0x08,
-    Forward=0x10,
-)
-MOUSE_BUTTONS._fallback = lambda x: 'unknown:%02X' % x
-
 # HID USB Keycodes from https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 # Modified by information from Linux HID driver linux/drivers/hid/hid-input.c
 USB_HID_KEYCODES = _NamedInts(
@@ -797,28 +769,6 @@ USB_HID_KEYCODES[0x25] = '8'
 USB_HID_KEYCODES[0x26] = '9'
 USB_HID_KEYCODES[0x27] = '0'
 USB_HID_KEYCODES[0x64] = '102ND'
-
-# Construct keys plus modifiers
-modifiers = {
-    0x0: '',
-    0x1: 'Cntrl+',
-    0x2: 'Shift+',
-    0x4: 'Alt+',
-    0x8: 'Meta+',
-    0x3: 'Cntrl+Shift+',
-    0x5: 'Alt+Cntrl+',
-    0x9: 'Meta+Cntrl+',
-    0x6: 'Alt+Shift+',
-    0xA: 'Meta+Shift+',
-    0xC: 'Meta+Alt+'
-}
-KEYS_Default = 0x7FFFFFFF  # Special value to reset key to default - has to be different from all others
-KEYS = _UnsortedNamedInts()
-KEYS[KEYS_Default] = 'Default'  # Value to reset to default
-KEYS[0] = 'None'  # Value for no output
-for val, name in modifiers.items():
-    for key in USB_HID_KEYCODES:
-        KEYS[0x01000000 + (int(key) << 8) + val] = name + str(key)
 
 HID_CONSUMERCODES = _NamedInts(
     #    Unassigned=0x00,
@@ -1203,5 +1153,85 @@ HID_CONSUMERCODES[0x20] = '+10'
 HID_CONSUMERCODES[0x21] = '+100'
 HID_CONSUMERCODES._fallback = lambda x: 'unknown:%04X' % x
 
+## Information for x1c00 Persistent from https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28
+
+KEYMOD = _NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
+
+ACTIONID = _NamedInts(
+    Empty=0x00,
+    Key=0x01,
+    Mouse=0x02,
+    Xdisp=0x03,
+    Ydisp=0x04,
+    Vscroll=0x05,
+    Hscroll=0x06,
+    Consumer=0x07,
+    Internal=0x08,
+    Power=0x09
+)
+
+MOUSE_BUTTONS = _NamedInts(
+    Mouse_Button_Left=0x0001,
+    Mouse_Button_Right=0x0002,
+    Mouse_Button_Middle=0x0004,
+    Mouse_Button_Back=0x0008,
+    Mouse_Button_Forward=0x0010,
+)
+MOUSE_BUTTONS._fallback = lambda x: 'unknown mouse button:%04X' % x
+
+HORIZONTAL_SCROLL = _NamedInts(
+    Horizontal_Scroll_Left=0x4000,
+    Horizontal_Scroll_Right=0x8000,
+)
+HORIZONTAL_SCROLL._fallback = lambda x: 'unknown horizontal scroll:%04X' % x
+
+# Construct universe for Persistent Remappable Keys setting (only for supported values)
+KEYS = _UnsortedNamedInts()
+KEYS_Default = 0x7FFFFFFF  # Special value to reset key to default - has to be different from all others
+KEYS[KEYS_Default] = 'Default'  # Value to reset to default
+KEYS[0] = 'None'  # Value for no output
+
+# Add HID keys plus modifiers
+modifiers = {
+    0x00: '',
+    0x01: 'Cntrl+',
+    0x02: 'Shift+',
+    0x04: 'Alt+',
+    0x08: 'Meta+',
+    0x03: 'Cntrl+Shift+',
+    0x05: 'Alt+Cntrl+',
+    0x09: 'Meta+Cntrl+',
+    0x06: 'Alt+Shift+',
+    0x0A: 'Meta+Shift+',
+    0x0C: 'Meta+Alt+'
+}
+for val, name in modifiers.items():
+    for key in USB_HID_KEYCODES:
+        KEYS[(ACTIONID.Key << 24) + (int(key) << 8) + val] = name + str(key)
+
+# Add HID Consumer Codes
 for code in HID_CONSUMERCODES:
-    KEYS[0x07000000 + (int(code) << 8)] = str(code)
+    KEYS[(ACTIONID.Consumer << 24) + (int(code) << 8)] = str(code)
+
+# Add Mouse Buttons
+for code in MOUSE_BUTTONS:
+    KEYS[(ACTIONID.Mouse << 24) + (int(code) << 8)] = str(code)
+
+# Add Horizontal Scroll
+for code in HORIZONTAL_SCROLL:
+    KEYS[(ACTIONID.Hscroll << 24) + (int(code) << 8)] = str(code)
+
+
+# Construct subsets for known devices
+def persistent_keys(action_ids):
+    keys = _UnsortedNamedInts()
+    keys[KEYS_Default] = 'Default'  # Value to reset to default
+    keys[0] = 'None'  # Value for no output
+    for key in KEYS:
+        if (int(key) >> 24) in action_ids:
+            keys[int(key)] = str(key)
+    return keys
+
+
+KEYS_KEYS_CONSUMER = persistent_keys([ACTIONID.Key, ACTIONID.Consumer])
+KEYS_KEYS_MOUSE_HSCROLL = persistent_keys([ACTIONID.Key, ACTIONID.Mouse, ACTIONID.Hscroll])

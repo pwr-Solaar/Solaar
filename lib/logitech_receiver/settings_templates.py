@@ -18,6 +18,7 @@
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
+from logging import WARN as _WARN
 from logging import getLogger
 from time import time as _time
 
@@ -1042,7 +1043,8 @@ class MRKeyLED(_Setting):
             return b'\x00'
 
 
-## Only implemented for devices that can produce HID and Consumer Key Codes
+## Only implemented for devices that can produce Key and Consumer Codes (e.g., Craft)
+## and devices that can produce Key, Mouse, and Horizontal Scroll (e.g., M720)
 ## Only interested in current host, so use 0xFF for it
 class PersistentRemappableAction(_Settings):
     name = 'persistent-remappable-keys'
@@ -1074,12 +1076,21 @@ class PersistentRemappableAction(_Settings):
         @classmethod
         def build(cls, setting_class, device):
             remap_keys = device.remap_keys
-            if not remap_keys or not device.remap_keys.capabilities & 0x0041 == 0x0041:  # HID and Consumer Key Codes
+            if not remap_keys:
+                return None
+            capabilities = device.remap_keys.capabilities
+            if capabilities & 0x0041 == 0x0041:  # Key and Consumer Codes
+                keys = _special_keys.KEYS_KEYS_CONSUMER
+            elif capabilities & 0x0023 == 0x0023:  # Key, Mouse, and HScroll Codes
+                keys = _special_keys.KEYS_KEYS_MOUSE_HSCROLL
+            else:
+                if _log.isEnabledFor(_WARN):
+                    _log.warn('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
                 return None
             choices = {}
             for k in remap_keys:
                 key = _special_keys.CONTROL[k.key]
-                choices[key] = _special_keys.KEYS
+                choices[key] = keys  # TO RECOVER FROM BAD VALUES use _special_keys.KEYS
             return cls(choices, key_byte_count=2, byte_count=4) if choices else None
 
 
