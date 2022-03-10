@@ -932,7 +932,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
 class Gesture:
-    def __init__(self, device, low, high, next_index):
+    def __init__(self, device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
         self.gesture = GESTURE[low]
@@ -942,31 +942,51 @@ class Gesture:
         self.desired_software_default = high & 0x08
         self.persistent = high & 0x10
         self.default_enabled = high & 0x20
-        self.index = None
-        if self.can_be_enabled or self.default_enabled:
-            self.index = next_index
-        self.offset, self.mask = self._offset_mask()
+        self.index = next_index if self.can_be_enabled or self.default_enabled else None
+        self.diversion_index = next_diversion_index if self.can_be_diverted else None
+        self._enabled = None
+        self._diverted = None
 
-    def _offset_mask(self):  # offset and mask
-        if self.index is not None:
-            offset = self.index >> 3  # 8 gestures per byte
-            mask = 0x1 << (self.index % 8)
+    def _offset_mask(self, index):  # offset and mask
+        if index is not None:
+            offset = index >> 3  # 8 gestures per byte
+            mask = 0x1 << (index % 8)
             return (offset, mask)
         else:
             return (None, None)
 
+    enable_offset_mask = lambda gesture: gesture._offset_mask(gesture.index)
+
+    diversion_offset_mask = lambda gesture: gesture._offset_mask(gesture.diversion_index)
+
     def enabled(self):  # is the gesture enabled?
-        if self.offset is not None:
-            result = feature_request(self._device, FEATURE.GESTURE_2, 0x10, self.offset, 0x01, self.mask)
-            return bool(result[0] & self.mask) if result else None
+        if self._enabled is None and self.index is not None:
+            offset, mask = self.enable_offset_mask()
+            result = feature_request(self._device, FEATURE.GESTURE_2, 0x10, offset, 0x01, mask)
+            self._enabled = bool(result[0] & mask) if result else None
+        return self._enabled
 
     def set(self, enable):  # enable or disable the gesture
         if not self.can_be_enabled:
             return None
-        if self.offset is not None:
-            reply = feature_request(
-                self._device, FEATURE.GESTURE_2, 0x20, self.offset, 0x01, self.mask, self.mask if enable else 0x00
-            )
+        if self.index is not None:
+            offset, mask = self.enable_offset_mask()
+            reply = feature_request(self._device, FEATURE.GESTURE_2, 0x20, offset, 0x01, mask, mask if enable else 0x00)
+            return reply
+
+    def diverted(self):  # is the gesture diverted?
+        if self._diverted is None and self.diversion_index is not None:
+            offset, mask = self.diversion_offset_mask()
+            result = feature_request(self._device, FEATURE.GESTURE_2, 0x30, offset, 0x01, mask)
+            self._diverted = bool(result[0] & mask) if result else None
+        return self._diverted
+
+    def divert(self, diverted):  # divert or undivert the gesture
+        if not self.can_be_diverted:
+            return None
+        if self.diversion_index is not None:
+            offset, mask = self.diversion_offset_mask()
+            reply = feature_request(self._device, FEATURE.GESTURE_2, 0x40, offset, 0x01, mask, mask if diverted else 0x00)
             return reply
 
     def as_int(self):
@@ -976,7 +996,7 @@ class Gesture:
         return self.id
 
     def __repr__(self):
-        return f'<Gesture {self.gesture} offset={self.offset} mask={self.mask}>'
+        return f'<Gesture {self.gesture} index={self.index} diversion_index={self.diversion_index}>'
 
     # allow a gesture to be used as a settings reader/writer to enable and disable the gesture
     read = enabled
@@ -1072,7 +1092,7 @@ class Gestures:
         self.params = {}
         self.specs = {}
         index = 0
-        next_gesture_index = 0
+        next_gesture_index = next_divsn_index = 0
         field_high = 0x00
         while field_high != 0x01:  # end of fields
             # retrieve the next eight fields
@@ -1085,8 +1105,9 @@ class Gestures:
                 if field_high == 0x1:  # end of fields
                     break
                 elif field_high & 0x80:
-                    gesture = Gesture(device, field_low, field_high, next_gesture_index)
+                    gesture = Gesture(device, field_low, field_high, next_gesture_index, next_divsn_index)
                     next_gesture_index = next_gesture_index if gesture.index is None else next_gesture_index + 1
+                    next_divsn_index = next_divsn_index if gesture.diversion_index is None else next_divsn_index + 1
                     self.gestures[gesture.gesture] = gesture
                 elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
                     param = Param(device, field_low, field_high)
@@ -1100,7 +1121,6 @@ class Gestures:
                 else:
                     _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
                 index += 1
-        device._gestures = self
 
     def gesture(self, gesture):
         return self.gestures.get(gesture, None)

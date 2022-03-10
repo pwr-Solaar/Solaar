@@ -262,11 +262,14 @@ def _print_device(dev, num=None):
             (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
         )
         for k in dev.gestures.gestures.values():
-            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
+            print(
+                '        %-26s Enabled(%4s): %-5s  Diverted:(%4s) %s' %
+                (k.gesture, k.index, k.enabled(), k.diversion_index, k.diverted())
+            )
         for k in dev.gestures.params.values():
-            print('        %-26s Value   (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
+            print('        %-26s Value  (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
         for k in dev.gestures.specs.values():
-            print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
+            print('        %-26s Spec   (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
         _battery_line(dev)
     else:
