@@ -588,7 +588,7 @@ class TestBytes(Condition):
         return self.function(feature, notification.address, notification.data)
 
     def data(self):
-        return {'TestBytes': str(self.test)}
+        return {'TestBytes': self.test[:]}
 
 
 class MouseGesture(Condition):
