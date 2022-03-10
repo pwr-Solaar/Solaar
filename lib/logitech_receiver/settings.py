@@ -811,28 +811,32 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
     kind = KIND.multiple_toggle
     sep = 0x01
 
-    def __init__(self, options, byte_count=None):
+    def __init__(self, options, om_method=None, byte_count=None):
         assert (isinstance(options, list))
-        # each element of options must have .offset and .mask,
-        # and its int representation must be its id (not its index)
+        # each element of options is an instance of a class
+        # that has an id (which is used as an index in other dictionaries)
+        # and where om_method is a method that returns a byte offset and byte mask
+        # that says how to access and modify the bit toogle for the option
         self.options = options
+        self.om_method = om_method
         # to retrieve the options efficiently:
         self._option_from_key = {}
         self._mask_from_offset = {}
         self._option_from_offset_mask = {}
         for opt in options:
+            offset, mask = om_method(opt)
             self._option_from_key[int(opt)] = opt
             try:
-                self._mask_from_offset[opt.offset] |= opt.mask
+                self._mask_from_offset[offset] |= mask
             except KeyError:
-                self._mask_from_offset[opt.offset] = opt.mask
+                self._mask_from_offset[offset] = mask
             try:
-                mask_to_opt = self._option_from_offset_mask[opt.offset]
+                mask_to_opt = self._option_from_offset_mask[offset]
             except KeyError:
                 mask_to_opt = {}
-                self._option_from_offset_mask[opt.offset] = mask_to_opt
-            mask_to_opt[opt.mask] = opt
-        self.byte_count = (max(x.mask.bit_length() for x in options) + 7) // 8
+                self._option_from_offset_mask[offset] = mask_to_opt
+            mask_to_opt[mask] = opt
+        self.byte_count = (max(om_method(x)[1].bit_length() for x in options) + 7) // 8  # is this correct??
         if byte_count:
             assert (isinstance(byte_count, int) and byte_count >= self.byte_count)
             self.byte_count = byte_count
@@ -849,8 +853,9 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         option = self._option_from_key.get(key, None)
         if option is None:
             return None
-        b = option.offset << (8 * (self.byte_count + 1))
-        b |= (self.sep << (8 * self.byte_count)) | option.mask
+        offset, mask = option.om_method(option)
+        b = offset << (8 * (self.byte_count + 1))
+        b |= (self.sep << (8 * self.byte_count)) | mask
         return _int2bytes(b, self.byte_count + 2)
 
     def validate_read(self, reply_bytes_dict):
@@ -872,10 +877,11 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         w = {}
         for k, v in new_value.items():
             option = self._option_from_key[int(k)]
-            if option.offset not in w:
-                w[option.offset] = 0
+            offset, mask = self.om_method(option)
+            if offset not in w:
+                w[offset] = 0
             if v:
-                w[option.offset] |= option.mask
+                w[offset] |= mask
         return [
             _int2bytes((offset << (8 * (2 * self.byte_count + 1)))
                        | (self.sep << (16 * self.byte_count))

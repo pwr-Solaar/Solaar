@@ -459,10 +459,11 @@ class ReprogrammableKeys(_Settings):
         @classmethod
         def build(cls, setting_class, device):
             choices = {}
-            for k in device.keys:
-                tgts = k.remappable_to
-                if len(tgts) > 1:
-                    choices[k.key] = tgts
+            if device.keys:
+                for k in device.keys:
+                    tgts = k.remappable_to
+                    if len(tgts) > 1:
+                        choices[k.key] = tgts
             return cls(choices, key_byte_count=2, byte_count=2, extra_default=0) if choices else None
 
 
@@ -494,9 +495,10 @@ class DivertKeys(_Settings):
         @classmethod
         def build(cls, setting_class, device):
             choices = {}
-            for k in device.keys:
-                if 'divertable' in k.flags and 'virtual' not in k.flags:
-                    choices[k.key] = setting_class.choices_universe
+            if device.keys:
+                for k in device.keys:
+                    if 'divertable' in k.flags and 'virtual' not in k.flags:
+                        choices[k.key] = setting_class.choices_universe
             if not choices:
                 return None
             return cls(choices, key_byte_count=2, byte_count=1, mask=0x01)
@@ -982,14 +984,32 @@ class Gesture2Gestures(_BitFieldOMSetting):
     description = _('Tweak the mouse/touchpad behaviour.')
     feature = _F.GESTURE_2
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    validator_options = {'om_method': _hidpp20.Gesture.enable_offset_mask}
     choices_universe = _hidpp20.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
         @classmethod
-        def build(cls, setting_class, device):
-            options = [g for g in _hidpp20.get_gestures(device).gestures.values() if g.can_be_enabled or g.default_enabled]
-            return cls(options) if options else None
+        def build(cls, setting_class, device, om_method=None):
+            options = [g for g in device.gestures.gestures.values() if g.can_be_enabled or g.default_enabled]
+            return cls(options, om_method=om_method) if options else None
+
+
+class Gesture2Divert(_BitFieldOMSetting):
+    name = 'gesture2-divert'
+    label = _('Gestures Diversion')
+    description = _('Divert mouse/touchpad gestures.')
+    feature = _F.GESTURE_2
+    rw_options = {'read_fnid': 0x30, 'write_fnid': 0x40}
+    validator_options = {'om_method': _hidpp20.Gesture.diversion_offset_mask}
+    choices_universe = _hidpp20.GESTURE
+    _labels = _GESTURE2_GESTURES_LABELS
+
+    class validator_class(_BitFieldOMV):
+        @classmethod
+        def build(cls, setting_class, device, om_method=None):
+            options = [g for g in device.gestures.gestures.values() if g.can_be_diverted]
+            return cls(options, om_method=om_method) if options else None
 
 
 class Gesture2Params(_LongSettings):
@@ -1147,6 +1167,7 @@ SETTINGS = [
     DualPlatform,  # simple
     ChangeHost,  # working
     Gesture2Gestures,  # working
+    Gesture2Divert,
     Gesture2Params,  # working
 ]
 
