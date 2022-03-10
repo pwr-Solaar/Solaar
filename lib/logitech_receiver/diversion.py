@@ -553,11 +553,10 @@ class Test(Condition):
             else:
                 _log.warn('rule Test string argument not name of a test: %s', test)
                 self.function = TESTS['False']
-        elif (
-            isinstance(test, list) and 2 < len(test) <= 4 and all(isinstance(t, int) for t in test) and test[0] >= 0
-            and test[0] <= 16 and test[1] >= 0 and test[1] <= 16 and test[0] < test[1]
-        ):
-            self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
+        elif isinstance(test, list) and all(isinstance(t, int) for t in test):
+            _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
+            self.__class__ = TestBytes
+            self.__init__(test)
         else:
             _log.warn('rule Test argument not valid %s', test)
 
@@ -569,6 +568,27 @@ class Test(Condition):
 
     def data(self):
         return {'Test': str(self.test)}
+
+
+class TestBytes(Condition):
+    def __init__(self, test):
+        self.test = test
+        if (
+            isinstance(test, list) and 2 < len(test) <= 4 and all(isinstance(t, int) for t in test) and test[0] >= 0
+            and test[0] <= 16 and test[1] >= 0 and test[1] <= 16 and test[0] < test[1]
+        ):
+            self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
+        else:
+            _log.warn('rule TestBytes argument not valid %s', test)
+
+    def __str__(self):
+        return 'TestBytes: ' + str(self.test)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        return self.function(feature, notification.address, notification.data)
+
+    def data(self):
+        return {'TestBytes': str(self.test)}
 
 
 class MouseGesture(Condition):
@@ -860,6 +880,7 @@ COMPONENTS = {
     'Modifiers': Modifiers,
     'Key': Key,
     'Test': Test,
+    'TestBytes': TestBytes,
     'MouseGesture': MouseGesture,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
