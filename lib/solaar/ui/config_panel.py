@@ -16,6 +16,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import traceback
+
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
@@ -46,6 +48,7 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
                 v = setting.write_key_value(key, v)
                 v = {key: v}
         except Exception:
+            traceback.print_exc()
             v = None
         if sb:
             GLib.idle_add(_update_setting_item, sb, v, True, sensitive, priority=99)
