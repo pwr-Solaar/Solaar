@@ -149,12 +149,8 @@ for the step-by-step procedure for manual installation.
 
 - Many gaming mice and keyboards have the ONBOARD PROFILES feature.
   This feature can override other features, including polling rate and key lighting.
-  On these devices, the Polling Rate setting turns off
-  the ONBOARD PROFILES feature which then changes how the device works.  Changing the
-  Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
-  modifying the ONBOARD PROFILES feature.
-  The device has to be reset (e.g., by turning it off and on again) before this fix will take effect.
-
+  To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
+  This may have other effects, such as turning off backlighting.
 
 ## Contributing to Solaar
 

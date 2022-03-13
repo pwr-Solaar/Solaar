@@ -200,6 +200,7 @@ class K375sFnSwap(FnSwapVirtual):
 
 class Backlight(_Setting):
     name = 'backlight-qualitative'
+    label = _('Backlight')
     description = _('Set illumination time for keyboard.')
     feature = _F.BACKLIGHT
     choices_universe = _NamedInts(Off=0, Short=5, Medium=20, Long=60, VeryLong=180)
@@ -208,14 +209,15 @@ class Backlight(_Setting):
 
 
 class Backlight2(_Setting):
+    name = 'backlight'
     label = _('Backlight')
     description = _('Turn illumination on or off on keyboard.')
-    name = 'backlight'
     feature = _F.BACKLIGHT2
 
 
 class Backlight3(_Setting):
     name = 'backlight-timed'
+    label = _('Backlight')
     description = _('Set illumination time for keyboard.')
     feature = _F.BACKLIGHT3
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20, 'suffix': 0x09}
@@ -295,18 +297,29 @@ class ThumbInvert(_Setting):
     validator_options = {'true_value': b'\x00\x01', 'false_value': b'\x00\x00', 'mask': b'\x00\x01'}
 
 
+class OnboardProfiles(_Setting):
+    name = 'onboard_profiles'
+    label = _('Onboard Profiles')
+    description = _('Enable onboard profiles, which often control report rate and keyboard lighting')
+    feature = _F.ONBOARD_PROFILES
+    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x10}
+    choices_universe = _NamedInts(Enable=1, Disable=2)
+    validator_class = _ChoicesV
+    validator_options = {'choices': choices_universe}
+
+
 class ReportRate(_Setting):
     name = 'report_rate'
     label = _('Polling Rate (ms)')
     description = (
         _('Frequency of device polling, in milliseconds') + '\n' +
-        _('Set to ignore if unusual device behaviour is experienced')
+        _('May need Onboard Profiles set to Disable to be effective.')
     )
     feature = _F.REPORT_RATE
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     choices_universe = _NamedInts.range(1, 8)
 
-    class rw_class(_FeatureRW):
+    class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
         def write(self, device, data_bytes):
             # Host mode is required for report rate to be adjustable
             if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
@@ -316,8 +329,8 @@ class ReportRate(_Setting):
     class validator_class(_ChoicesV):
         @classmethod
         def build(cls, setting_class, device):
-            if device.wpid == '408E':
-                return None  # host mode borks the function keys on the G915 TKL keyboard
+            # if device.wpid == '408E':
+            #    return None  # host mode borks the function keys on the G915 TKL keyboard
             reply = device.feature_request(_F.REPORT_RATE, 0x00)
             assert reply, 'Oops, report rate choices cannot be retrieved!'
             rate_list = []
@@ -1007,7 +1020,7 @@ class Gesture2Params(_LongSettings):
 class MKeyLEDs(_BitFieldSetting):
     name = 'm-key-leds'
     label = _('M-Key LEDs')
-    description = _('Control the M-Key LEDs.')
+    description = (_('Control the M-Key LEDs.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
     feature = _F.MKEYS
     choices_universe = _NamedInts()
     for i in range(8):
@@ -1108,6 +1121,7 @@ SETTINGS = [
     SmartShiftEnhanced,  # simple
     ThumbMode,  # working
     ThumbInvert,  # working
+    OnboardProfiles,
     ReportRate,  # working
     PointerSpeed,  # simple
     AdjustableDpi,  # working
