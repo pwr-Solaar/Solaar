@@ -147,9 +147,10 @@ for the step-by-step procedure for manual installation.
   "Ignore this setting".
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
-- Many gaming mice and keyboards have both the ONBOARD PROFILES feature and the REPORT RATE feature.
-  On these devices changing the Polling Rate setting requires modifying a setting in
-  the ONBOARD PROFILES feature, which can modify how the device works.  Changing the
+- Many gaming mice and keyboards have the ONBOARD PROFILES feature.
+  This feature can override other features, including polling rate and key lighting.
+  On these devices, the Polling Rate setting turns off
+  the ONBOARD PROFILES feature which then changes how the device works.  Changing the
   Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
   modifying the ONBOARD PROFILES feature.
   The device has to be reset (e.g., by turning it off and on again) before this fix will take effect.

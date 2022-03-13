@@ -66,26 +66,44 @@ A Or condition is true if its last evaluated component evaluates to a true
 value.  `And` conditions take a sequence of components are evaluted the same
 as rules.
 
-`Process` conditions are true if the process for focus input window
-or the window's Window manager class or instance name starts with their string argument.
-`MouseProcess` conditions are true if the process for the window under the mouse
-or the window's Window manager class or instance name starts with their string argument.
 `Feature` conditions are if true if the name of the feature of the current
 notification is their string argument.
 `Report` conditions are if true if the report number in the current
 notification is their integer argument.
-`Modifiers` conditions take either a string or a sequence of strings, which
-can only be `Shift`, `Control`, `Alt`, and `Super`.
-Modifiers conditions are true if their argument is the current keyboard
-modifiers.
-`Key` conditions are true if the Logitech name of the last diverted key or button down is their
+
+`Key` conditions are true if the Logitech name of the last diverted key or button pressed is their
 string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
 setting.  Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+
+`Modifiers` conditions take either a string or a sequence of strings, which
+can only be `Shift`, `Control`, `Alt`, and `Super`.
+Modifiers conditions are true if their argument is the current keyboard
+modifiers.
+
+`Process` conditions are true if the process for focus input window
+or the window's Window manager class or instance name starts with their string argument.
+`MouseProcess` conditions are true if the process for the window under the mouse
+or the window's Window manager class or instance name starts with their string argument.
+
+`Setting` conditions checks the value of a Solaar setting on a device.
+`Setting` conditions take three or four arguments, depending on the setting:
+the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
+or null for the device that initiated rule processing;
+the internal name of a setting (which can be found from solaar config <device>);
+one or two arguments for the setting.
+For settings that use keys or buttons as an argument the Logtech name can be used
+as shown in the Solaar main window for these settings,
+or the numeric value for the key or button.
+For settings that use gestures as an argument the internal name of the gesture is used,
+which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
+For settings that need one of a set of names as an argument the name can be used or its internal integer value,
+as used in the Solaar config file.
+
 `Test` and `TestBytes` conditions are true if their test evaluates to true on the feature,
 report, and data of the current notification.
-Test conditions can return a number instead of a boolean.
+`TestBytes`  conditions can return a number instead of a boolean.
 
 `TestBytes` conditions consist of a sequence of three or four integers and use the first
 two to select bytes of the notification data.
@@ -95,7 +113,7 @@ with its third element is non-zero.
 The value of these test conditions is the result of the and.
 Four-element `TestBytes` conditions are true if the selected bytes form a signed
 integer between the third and fourth elements.
-The value of these test condition is the signed value of the selected bytes
+The value of these conditions is the signed value of the selected bytes
 if that is non-zero otherwise True.
 
 `Test` conditions are mnemonic shorthands for meaningful feature,
