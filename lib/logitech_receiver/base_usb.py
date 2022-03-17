@@ -226,7 +226,7 @@ def other_device_check(bus_id, vendor_id, product_id):
         if (product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344):
             return _wired_device(product_id, 2)
     elif bus_id == 0x5:  # Bluetooth
-        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB32A and product_id <= 0xB3FF):
+        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF):
             return _bt_device(product_id)
 
 
