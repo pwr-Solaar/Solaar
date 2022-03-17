@@ -84,9 +84,7 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if len(_devices_info) < 4:
-        # don't bother with scrolling when there's only one receiver
-        # with only one or two devices
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
         return
 
     # scroll events come way too fast (at least 5-6 at once)
