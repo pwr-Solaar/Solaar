@@ -518,6 +518,7 @@ class DiversionDialog:
                         (_('Key'), _DIV.Key, ''),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
                         (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
+                        (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
                 ],
@@ -1861,11 +1862,13 @@ def _from_named_ints(v, all_values):
 
 
 class SetValueControl(Gtk.HBox):
-    def __init__(self, on_change, *args, **kwargs):
+    def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
-        self.toggle_widget = SmartComboBox([('Toggle', _('Toggle'), '~'), (True, _('True'), 'True', 'yes', 'on', 't', 'y'),
-                                            (False, _('False'), 'False', 'no', 'off', 'f', 'n')],
+        self.toggle_widget = SmartComboBox([
+            *([('Toggle', _('Toggle'), '~')] if accept_toggle else []), (True, _('True'), 'True', 'yes', 'on', 't', 'y'),
+            (False, _('False'), 'False', 'no', 'off', 'f', 'n')
+        ],
                                            case_insensitive=True)
         self.toggle_widget.connect('changed', self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
@@ -2016,13 +2019,13 @@ def _all_settings():
     return settings
 
 
-class SetUI(ActionUI):
-
-    CLASS = _DIV.Set
+class _SettingWithValueUI:
 
     ALL_SETTINGS = _all_settings()
 
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
+
+    ACCEPT_TOGGLE = True
 
     def create_widgets(self):
 
@@ -2057,7 +2060,7 @@ class SetUI(ActionUI):
 
         self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[self.value_lbl] = (2, 1, 1, 1)
-        self.value_field = SetValueControl(self._on_update)
+        self.value_field = SetValueControl(self._on_update, accept_toggle=self.ACCEPT_TOGGLE)
         self.value_field.set_valign(Gtk.Align.CENTER)
         self.value_field.set_size_request(250, 35)
         self.widgets[self.value_field] = (3, 1, 1, 1)
@@ -2239,7 +2242,6 @@ class SetUI(ActionUI):
 
     def _on_update(self, *_args):
         if not self._ignore_changes and self.component:
-            super()._on_update(*_args)
             self._update_validation()
 
     def _update_validation(self):
@@ -2265,7 +2267,6 @@ class SetUI(ActionUI):
             self.value_field.choice_widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable):
-        super().show(component, editable)
         a = iter(component.args)
         with self.ignore_changes():
             device_str = next(a, None)
@@ -2340,6 +2341,36 @@ class SetUI(ActionUI):
         return device_disp + '  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
+class SetUI(_SettingWithValueUI, ActionUI):
+
+    CLASS = _DIV.Set
+    ACCEPT_TOGGLE = True
+
+    def show(self, component, editable):
+        ActionUI.show(self, component, editable)
+        _SettingWithValueUI.show(self, component, editable)
+
+    def _on_update(self, *_args):
+        if not self._ignore_changes and self.component:
+            ActionUI._on_update(self, *_args)
+            _SettingWithValueUI._on_update(self, *_args)
+
+
+class SettingUI(_SettingWithValueUI, ConditionUI):
+
+    CLASS = _DIV.Setting
+    ACCEPT_TOGGLE = False
+
+    def show(self, component, editable):
+        ConditionUI.show(self, component, editable)
+        _SettingWithValueUI.show(self, component, editable)
+
+    def _on_update(self, *_args):
+        if not self._ignore_changes and self.component:
+            ConditionUI._on_update(self, *_args)
+            _SettingWithValueUI._on_update(self, *_args)
+
+
 COMPONENT_UI = {
     _DIV.Rule: RuleUI,
     _DIV.Not: NotUI,
@@ -2353,6 +2384,7 @@ COMPONENT_UI = {
     _DIV.Key: KeyUI,
     _DIV.Test: TestUI,
     _DIV.TestBytes: TestBytesUI,
+    _DIV.Setting: SettingUI,
     _DIV.MouseGesture: MouseGestureUI,
     _DIV.KeyPress: KeyPressUI,
     _DIV.MouseScroll: MouseScrollUI,
