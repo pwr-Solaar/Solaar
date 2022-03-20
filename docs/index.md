@@ -47,7 +47,7 @@ Solaar does not process normal input from devices. It is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
 by Linux drivers or other software.
 
-Solaar has progressed past version 1.0. Problems with earlier versions should
+Solaar has progressed past version 1.1. Problems with earlier versions should
 not be reported as bugs. Instead, upgrade to a recent version or manually install
 the current version from [GitHub](https://github.com/pwr-Solaar/Solaar).
 Some capabilities of Solaar have been developed by observing the behavior of
