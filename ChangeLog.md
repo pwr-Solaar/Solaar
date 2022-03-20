@@ -1,5 +1,7 @@
-# 1.1.2rc2
+# 1.1.2
 
+* Update documentation on supported devices and translations
+* Include evdev as a dependency
 * Try to use uinput for fake input if XTest extension not available
 * Add Nano receiver C542 for M190 mice
 * Broaden range of HID++ Bluetooth devices
@@ -10,9 +12,9 @@
 * Add setting for PERSISTENT_REMAPPABLE_ACTION, common keyboard and mouse cases only
 * Split Test rule condition into Test and TestBytes and support in rule editor
 * Fix bug in speed-change setting
-* Support Backlight and Backlight3 features
+* Support Backlight3 feature
 * Ensure that settings are pushed in resume
-* Update German translation
+* Update German, Polish,  and zh_CN translations
 * Determine device number for direct-connected devices from protocol
 * fix bug in add and delete button actions in rule editor
 * dispose of no-op notifications quickly
