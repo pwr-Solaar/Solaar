@@ -1148,7 +1148,7 @@ SETTINGS = [
     DpiSliding,  # working
     SpeedChange,
     MouseGesture,  # working
-    Backlight,
+    #    Backlight,  # not working - disabled temporarily
     Backlight2,  # working
     Backlight3,
     FnSwap,  # simple
