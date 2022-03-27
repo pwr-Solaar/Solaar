@@ -2,6 +2,8 @@
 
 ## Version 1.1.2
 
+* Solaar now depends on Python evdev.  It can be installed if needed via `pip install --user evdev` or, in most distributions, by installing the python3-evdev package.
+
 * Rules partly work under Wayland.  There is no access to the current process in Wayland.  Simulated input uses uinput if XTest extension not available, requiring read and write permissions on /dev/uinput.
 
 * There is a setting to divert gestures so that they can trigger rules.
