@@ -1040,7 +1040,10 @@ class Gesture2Params(_LongSettings):
 class MKeyLEDs(_BitFieldSetting):
     name = 'm-key-leds'
     label = _('M-Key LEDs')
-    description = (_('Control the M-Key LEDs.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
+    description = (
+        _('Control the M-Key LEDs.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.') + '\n' +
+        _('May need G Keys diverted to be effective.')
+    )
     feature = _F.MKEYS
     choices_universe = _NamedInts()
     for i in range(8):
@@ -1065,7 +1068,10 @@ class MKeyLEDs(_BitFieldSetting):
 class MRKeyLED(_Setting):
     name = 'mr-key-led'
     label = _('MR-Key LED')
-    description = _('Control the MR-Key LED.')
+    description = (
+        _('Control the MR-Key LED.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.') + '\n' +
+        _('May need G Keys diverted to be effective.')
+    )
     feature = _F.MR
 
     class rw_class(_FeatureRW):
