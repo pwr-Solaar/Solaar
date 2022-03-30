@@ -125,8 +125,8 @@ def modifier_code(keycode):
             return m
 
 
-gdisplay = Gdk.Display.get_default()
-gkeymap = Gdk.Keymap.get_for_display(gdisplay)
+gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
+gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 
 key_down = None
 key_up = None
@@ -415,12 +415,11 @@ def x11_focus_prog():
 def x11_pointer_prog():
     pid = wm_class = None
     window = xdisplay.screen().root.query_pointer().child
-    for window in reversed(window.query_tree().children):
-        pid = window.get_full_property(NET_WM_PID, 0)
-        wm_class = window.get_wm_class()
+    for child in reversed(window.query_tree().children):
+        pid = child.get_full_property(NET_WM_PID, 0)
+        wm_class = child.get_wm_class()
         if wm_class:
             break
-        window = window.query_tree().parent
     name = psutil.Process(pid.value[0]).name() if pid else ''
     return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
@@ -566,8 +565,12 @@ class Modifiers(Condition):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        current = gkeymap.get_modifier_state()  # get the current keyboard modifier
-        return self.desired == (current & MODIFIER_MASK)
+        if gkeymap:
+            current = gkeymap.get_modifier_state()  # get the current keyboard modifier
+            return self.desired == (current & MODIFIER_MASK)
+        else:
+            _log.warn('no keymap so cannot determine modifier keys')
+            return False
 
     def data(self):
         return {'Modifiers': [str(m) for m in self.modifiers]}
@@ -779,11 +782,14 @@ class KeyPress(Action):
                 simulate_key(keycode, Xlib.X.KeyRelease)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        current = gkeymap.get_modifier_state()
-        if _log.isEnabledFor(_INFO):
-            _log.info('KeyPress action: %s, modifiers %s %s', self.key_names, current, [hex(k) for k in self.key_symbols])
-        self.keyDown(self.key_symbols, current)
-        self.keyUp(reversed(self.key_symbols), current)
+        if gkeymap:
+            current = gkeymap.get_modifier_state()
+            if _log.isEnabledFor(_INFO):
+                _log.info('KeyPress action: %s, modifiers %s %s', self.key_names, current, [hex(k) for k in self.key_symbols])
+            self.keyDown(self.key_symbols, current)
+            self.keyUp(reversed(self.key_symbols), current)
+        else:
+            _log.warn('no keymap so cannot determine which keycode to send')
         return None
 
     def data(self):
