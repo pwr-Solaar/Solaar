@@ -1176,6 +1176,17 @@ MOUSE_BUTTONS = _NamedInts(
     Mouse_Button_Middle=0x0004,
     Mouse_Button_Back=0x0008,
     Mouse_Button_Forward=0x0010,
+    Mouse_Button_6=0x0020,
+    Mouse_Button_Scroll_Left=0x0040,
+    Mouse_Button_Scroll_Right=0x0080,
+    Mouse_Button_9=0x0100,
+    Mouse_Button_10=0x0200,
+    Mouse_Button_11=0x0400,
+    Mouse_Button_12=0x0800,
+    Mouse_Button_13=0x1000,
+    Mouse_Button_DPI=0x2000,
+    Mouse_Button_15=0x4000,
+    Mouse_Button_16=0x8000,
 )
 MOUSE_BUTTONS._fallback = lambda x: 'unknown mouse button:%04X' % x
 
