@@ -136,10 +136,6 @@ for the step-by-step procedure for manual installation.
 - Sometimes the system tray icon does not show up.  The cause of this is unknown.
   Either wait a while and try again or try with the `--window=hide` option.
 
-- Running the command-line application while the GUI
-  application is also running *may* occasionally cause either of them to become
-  confused about the state of the devices.
-
 - Some Linux drivers view or modify the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
@@ -156,6 +152,8 @@ for the step-by-step procedure for manual installation.
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
+- Sometimes bluetooth connections are not torn down correctly.
+  This can result in two entries in Solaar for the same device, with only one being active.
 
 ## Contributing to Solaar
 
