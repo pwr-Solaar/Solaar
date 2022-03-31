@@ -80,25 +80,6 @@ try:
     NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
     WM_CLASS = xdisplay.intern_atom('WM_CLASS')
 
-    # set up to get keyboard state using ctypes interface to libx11
-    import ctypes
-
-    class XkbDisplay(ctypes.Structure):
-        """ opaque struct """
-
-    class XkbStateRec(ctypes.Structure):
-        _fields_ = [('group', ctypes.c_ubyte), ('locked_group', ctypes.c_ubyte), ('base_group', ctypes.c_ushort),
-                    ('latched_group', ctypes.c_ushort), ('mods', ctypes.c_ubyte), ('base_mods', ctypes.c_ubyte),
-                    ('latched_mods', ctypes.c_ubyte), ('locked_mods', ctypes.c_ubyte), ('compat_state', ctypes.c_ubyte),
-                    ('grab_mods', ctypes.c_ubyte), ('compat_grab_mods', ctypes.c_ubyte), ('lookup_mods', ctypes.c_ubyte),
-                    ('compat_lookup_mods', ctypes.c_ubyte),
-                    ('ptr_buttons', ctypes.c_ushort)]  # something strange is happening here but it is not being used
-
-    XkbUseCoreKbd = 0x100
-    X11Lib = ctypes.cdll.LoadLibrary('libX11.so')
-    X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
-    X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
-    Xkbdisplay = X11Lib.XOpenDisplay(None)
 except Exception:
     _log.warn(
         'X11 not available - rules cannot access current process, modifier keys, or keyboard group. %s',
@@ -107,9 +88,35 @@ except Exception:
     modifier_keycodes = []
     x11 = False
 
+if x11:
+    try:
+        # set up to get keyboard state using ctypes interface to libx11
+        import ctypes
+
+        class XkbDisplay(ctypes.Structure):
+            """ opaque struct """
+
+        class XkbStateRec(ctypes.Structure):
+            _fields_ = [('group', ctypes.c_ubyte), ('locked_group', ctypes.c_ubyte), ('base_group', ctypes.c_ushort),
+                        ('latched_group', ctypes.c_ushort), ('mods', ctypes.c_ubyte), ('base_mods', ctypes.c_ubyte),
+                        ('latched_mods', ctypes.c_ubyte), ('locked_mods', ctypes.c_ubyte), ('compat_state', ctypes.c_ubyte),
+                        ('grab_mods', ctypes.c_ubyte), ('compat_grab_mods', ctypes.c_ubyte), ('lookup_mods', ctypes.c_ubyte),
+                        ('compat_lookup_mods', ctypes.c_ubyte),
+                        ('ptr_buttons', ctypes.c_ushort)]  # something strange is happening here but it is not being used
+
+        XkbUseCoreKbd = 0x100
+        X11Lib = ctypes.cdll.LoadLibrary('libX11.so')
+        X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
+        X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
+        Xkbdisplay = X11Lib.XOpenDisplay(None)
+
+    except Exception:
+        _log.warn('X11 library not available - rules cannot access keyboard group. %s', exc_info=_sys.exc_info())
+        Xkbdisplay = None
+
 
 def kbdgroup():
-    if x11:
+    if Xkbdisplay:
         state = XkbStateRec()
         X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, ctypes.pointer(state))
         return state.group

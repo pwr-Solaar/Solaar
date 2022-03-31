@@ -35,6 +35,13 @@ depending on your distribution).
 If you are running a version of Python different from the system version,
 you may need to use pip to install projects that provide the above Python packages.
 
+Solaar runs best under X11 with the Xtest extension enabled so that Solaar rules can fake keyboard input using Xtest.
+Solaar also uses the X11 library to access the XKB extension,
+which requires installation of the X11 development package.
+(In Fedora this is `libX11-devel`.  In other distributions it may be `libX11-dev`.)
+Solaar will run under Wayland but some parts of Solaar rules will not work.
+For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
 If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also see desktop notifications when devices come online/go offline.
