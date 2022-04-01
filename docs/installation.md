@@ -20,7 +20,7 @@ Most of Solaar should work fine with any kernel more recent than 5.2,
 but newer kernels might be needed for some devices to be correctly recognized and handled.
 The `udev` package must be installed and its daemon running.
 
-Solaar requires Python 3.6+ and requires several packages to be installed.
+Solaar requires Python 3.7+ and requires several packages to be installed.
 If you are running the system version of Python you should have the
 `python3-pyudev`, `python3-psutil`, `python3-xlib`, `python3-evdev`,
 and `python3-yaml` or `python3-pyyaml` packages installed.
