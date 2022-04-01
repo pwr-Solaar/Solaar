@@ -59,7 +59,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     # sudo apt install python-gi python3-gi \
     #        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-ayatanaappindicator3-0.1
     # os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
         'evdev (>= 1.1.2)',
         'pyudev (>= 0.13)',
