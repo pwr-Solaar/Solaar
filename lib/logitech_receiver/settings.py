@@ -369,9 +369,7 @@ class Settings(Setting):
             for key in self._validator.choices:
                 reply = self._rw.read(self._device, key)
                 if reply:
-                    # keys are ints, because that is what the device uses,
-                    # encoded into strings because JSON requires strings as keys
-                    reply_map[str(int(key))] = self._validator.validate_read(reply, key)
+                    reply_map[int(key)] = self._validator.validate_read(reply, key)
             self._value = reply_map
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
@@ -388,15 +386,15 @@ class Settings(Setting):
 
         self._pre_read(cached)
         if cached and self._value is not None:
-            return self._value[str(int(key))]
+            return self._value[int(key)]
 
         if self._device.online:
             reply = self._rw.read(self._device, key)
             if reply:
-                self._value[str(int(key))] = self._validator.validate_read(reply, key)
+                self._value[int(key)] = self._validator.validate_read(reply, key)
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value
-            return self._value[str(int(key))]
+            return self._value[int(key)]
 
     def write(self, map, save=True):
         assert hasattr(self, '_value')
@@ -434,7 +432,7 @@ class Settings(Setting):
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
                 # always need to write to configuration because dictionary is shared and could have changed
-                self._value[str(key)] = value
+                self._value[int(key)] = value
                 self._pre_write()
             except ValueError:
                 data_bytes = value = None
@@ -470,9 +468,7 @@ class LongSettings(Setting):
                 r = self._validator.prepare_read_item(item)
                 reply = self._rw.read(self._device, r)
                 if reply:
-                    # keys are ints, because that is what the device uses,
-                    # encoded into strings because JSON requires strings as keys
-                    reply_map[str(int(item))] = self._validator.validate_read_item(reply, item)
+                    reply_map[int(item)] = self._validator.validate_read_item(reply, item)
             self._value = reply_map
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
@@ -489,16 +485,16 @@ class LongSettings(Setting):
 
         self._pre_read(cached)
         if cached and self._value is not None:
-            return self._value[str(int(item))]
+            return self._value[int(item)]
 
         if self._device.online:
             r = self._validator.prepare_read_item(item)
             reply = self._rw.read(self._device, r)
             if reply:
-                self._value[str(int(item))] = self._validator.validate_read_item(reply, item)
+                self._value[int(item)] = self._validator.validate_read_item(reply, item)
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value
-            return self._value[str(int(item))]
+            return self._value[int(item)]
 
     def write(self, map, save=True):
         assert hasattr(self, '_value')
@@ -535,7 +531,7 @@ class LongSettings(Setting):
             if not self._value:
                 self.read()
             data_bytes = self._validator.prepare_write_item(item, value)
-            self._value[str(int(item))] = value
+            self._value[int(item)] = value
             self._pre_write()
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
@@ -564,8 +560,6 @@ class BitFieldSetting(Setting):
             reply_map = {}
             reply = self._do_read()
             if reply:
-                # keys are ints, because that is what the device uses,
-                # encoded into strings because JSON requires strings as keys
                 reply_map = self._validator.validate_read(reply)
             self._value = reply_map
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
@@ -587,7 +581,7 @@ class BitFieldSetting(Setting):
         self._pre_read(cached)
 
         if cached and self._value is not None:
-            return self._value[str(int(key))]
+            return self._value[int(key)]
 
         if self._device.online:
             reply = self._do_read_key(key)
@@ -595,7 +589,7 @@ class BitFieldSetting(Setting):
                 self._value = self._validator.validate_read(reply)
             if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value
-            return self._value[str(int(key))]
+            return self._value[int(key)]
 
     def _do_read_key(self, key):
         return self._rw.read(self._device, key)
@@ -635,7 +629,7 @@ class BitFieldSetting(Setting):
             if not self._value:
                 self.read()
             value = bool(value)
-            self._value[str(key)] = value
+            self._value[int(key)] = value
             self._pre_write()
 
             data_bytes = self._validator.prepare_write(self._value)
@@ -768,11 +762,11 @@ class BitFieldValidator(Validator):
 
     def validate_read(self, reply_bytes):
         r = _bytes2int(reply_bytes[:self.byte_count])
-        value = {str(int(k)): False for k in self.options}
+        value = {int(k): False for k in self.options}
         m = 1
         for _ignore in range(8 * self.byte_count):
             if m in self.options:
-                value[str(int(m))] = bool(r & m)
+                value[int(m)] = bool(r & m)
             m <<= 1
         return value
 
@@ -793,8 +787,8 @@ class BitFieldValidator(Validator):
         key = next((key for key in self.options if key == args[0]), None)
         if key is None:
             return None
-        val = bool_or_toggle(current[str(int(key))], args[1])
-        return None if val is None else [str(int(key)), val]
+        val = bool_or_toggle(current[int(key)], args[1])
+        return None if val is None else [int(key), val]
 
     def compare(self, args, current):
         if len(args) != 2:
@@ -802,7 +796,7 @@ class BitFieldValidator(Validator):
         key = next((key for key in self.options if key == args[0]), None)
         if key is None:
             return False
-        return args[1] == current[str(int(key))]
+        return args[1] == current[int(key)]
 
 
 class BitFieldWithOffsetAndMaskValidator(Validator):
@@ -859,7 +853,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         return _int2bytes(b, self.byte_count + 2)
 
     def validate_read(self, reply_bytes_dict):
-        values = {str(int(k)): False for k in self.options}
+        values = {int(k): False for k in self.options}
         for query, b in reply_bytes_dict.items():
             offset = _bytes2int(query[0:1])
             b += (self.byte_count - len(b)) * b'\x00'
@@ -868,7 +862,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
             m = 1
             for _ignore in range(8 * self.byte_count):
                 if m in mask_to_opt:
-                    values[str(int(mask_to_opt[m]))] = bool(value & m)
+                    values[int(mask_to_opt[m])] = bool(value & m)
                 m <<= 1
         return values
 
@@ -898,8 +892,8 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         key = next((option.id for option in self.options if option.as_int() == args[0]), None)
         if key is None:
             return None
-        val = bool_or_toggle(current[str(int(key))], args[1])
-        return None if val is None else [str(int(key)), val]
+        val = bool_or_toggle(current[int(key)], args[1])
+        return None if val is None else [int(key), val]
 
     def compare(self, args, current):
         if len(args) != 2:
@@ -907,7 +901,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         key = next((option.id for option in self.options if option.as_int() == args[0]), None)
         if key is None:
             return False
-        return args[1] == current[str(int(key))]
+        return args[1] == current[int(key)]
 
 
 class ChoicesValidator(Validator):
@@ -1060,7 +1054,7 @@ class ChoicesMapValidator(ChoicesValidator):
         if choices is None or args[1] not in choices:
             return None
         choice = next((item for item in choices if item == args[1]), None)
-        return [str(int(key)), int(choice)] if choice is not None else None
+        return [int(key), int(choice)] if choice is not None else None
 
     def compare(self, args, current):
         if len(args) != 2:
@@ -1068,7 +1062,7 @@ class ChoicesMapValidator(ChoicesValidator):
         key = next((key for key in self.choices if key == int(args[0])), None)
         if key is None:
             return False
-        return args[1] == current[str(int(key))]
+        return args[1] == current[int(key)]
 
 
 class RangeValidator(Validator):
@@ -1166,7 +1160,7 @@ class MultipleRangeValidator(Validator):
             b = _int2bytes(_item.index, 1)
             for sub_item in self.sub_items[_item]:
                 try:
-                    v = value[str(int(item))][str(sub_item)]
+                    v = value[int(item)][str(sub_item)]
                 except KeyError:
                     return None
                 if not (sub_item.minimum <= v <= sub_item.maximum):
@@ -1207,7 +1201,7 @@ class MultipleRangeValidator(Validator):
                 return None
             if not isinstance(value, int) or not (sub_item.minimum <= value <= sub_item.maximum):
                 return None
-        return [str(int(item)), {**args[1]}]
+        return [int(item), {**args[1]}]
 
     def commpare(self, args, current):
         _log.warn('compare not implemented for multiple range settings')
