@@ -136,6 +136,7 @@ def _create_choice_control(sbox, delegate=None, choices=None):
         return ChoiceControlBig(sbox, choices=choices, delegate=delegate)
 
 
+# GTK boxes have property lists, but the keys must be strings
 class ChoiceControlLittle(Gtk.ComboBoxText, Control):
     def __init__(self, sbox, delegate=None, choices=None):
         super().__init__(halign=Gtk.Align.FILL)
@@ -227,37 +228,38 @@ class MapChoiceControl(Gtk.HBox, Control):
         self.keyBox.connect('changed', self.map_value_notify_key)
 
     def get_value(self):
-        key_choice = self.keyBox.get_active_id()
+        key_choice = int(self.keyBox.get_active_id())
         if key_choice is not None and self.valueBox.get_value() is not None:
             return self.valueBox.get_value()
 
     def set_value(self, value):
         self.valueBox.set_sensitive(self.get_sensitive())
-        if value.get(self.keyBox.get_active_id()) is not None:
-            self.valueBox.set_value(value.get(self.keyBox.get_active_id()))
+        key = int(self.keyBox.get_active_id())
+        if value.get(key) is not None:
+            self.valueBox.set_value(value.get(key))
         self.valueBox.set_sensitive(True)
 
     def map_populate_value_box(self, key_choice):
-        choices = self.sbox.setting.choices[int(key_choice)]
+        choices = self.sbox.setting.choices[key_choice]
         if choices != self.value_choices:
             self.value_choices = choices
             self.valueBox.remove_all()
             self.valueBox.set_choices(choices)
-        current = self.sbox.setting._value.get(str(key_choice)) if self.sbox.setting._value else None
+        current = self.sbox.setting._value.get(key_choice) if self.sbox.setting._value else None
         if current is not None:
             self.valueBox.set_value(current)
 
     def map_value_notify_key(self, *args):
-        key_choice = self.keyBox.get_active_id()
+        key_choice = int(self.keyBox.get_active_id())
         if self.keyBox.get_sensitive():
             self.map_populate_value_box(key_choice)
 
     def update(self):
-        key_choice = self.keyBox.get_active_id()
+        key_choice = int(self.keyBox.get_active_id())
         value = self.get_value()
         if value is not None and self.valueBox.get_sensitive() and self.sbox.setting._value.get(key_choice) != value:
-            self.sbox.setting._value[key_choice] = value
-            _write_async(self.sbox.setting, value, self.sbox, key=key_choice)
+            self.sbox.setting._value[int(key_choice)] = value
+            _write_async(self.sbox.setting, value, self.sbox, key=int(key_choice))
 
 
 class MultipleControl(Control):
@@ -300,7 +302,7 @@ class MultipleToggleControl(Gtk.ListBox, MultipleControl):
             lbl = Gtk.Label(lbl_text)
             h.set_tooltip_text(lbl_tooltip or ' ')
             control = Gtk.Switch()
-            control._setting_key = str(int(k))
+            control._setting_key = int(k)
             control.connect('notify::active', self.toggle_notify)
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, False, False, 0)
@@ -329,7 +331,7 @@ class MultipleToggleControl(Gtk.ListBox, MultipleControl):
             new_state = switch.get_state()
             if self.sbox.setting._value[key] != new_state:
                 self.sbox.setting._value[key] = new_state
-                _write_async(self.sbox.setting, new_state, self.sbox, key=key)
+                _write_async(self.sbox.setting, new_state, self.sbox, key=int(key))
 
     def set_value(self, value):
         active = 0
@@ -428,16 +430,16 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
         control._timer.cancel()
         delattr(control, '_timer')
         new_state = int(control.get_value())
-        if self.sbox.setting._value[str(int(item))][str(sub_item)] != new_state:
-            self.sbox.setting._value[str(int(item))][str(sub_item)] = new_state
-            _write_async(self.sbox.setting, self.sbox.setting._value[str(int(item))], self.sbox, key=str(int(item)))
+        if self.sbox.setting._value[int(item)][str(sub_item)] != new_state:
+            self.sbox.setting._value[int(item)][str(sub_item)] = new_state
+            _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
 
     def set_value(self, value):
         b = ''
         n = 0
         for ch in self._items:
             item = ch._setting_item
-            v = value.get(str(int(item)), None)
+            v = value.get(int(item), None)
             if v is not None:
                 b += str(item) + ': ('
                 to_join = []

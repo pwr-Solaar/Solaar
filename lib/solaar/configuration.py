@@ -60,10 +60,9 @@ def _load():
         try:
             with open(_file_path) as config_file:
                 loaded_config = _json.load(config_file)
-            loaded_config = _convert_json(loaded_config)
         except Exception as e:
             _log.error('failed to load from %s: %s', _file_path, e)
-
+        loaded_config = _convert_json(loaded_config)
     if _log.isEnabledFor(_DEBUG):
         _log.debug('load => %s', loaded_config)
     _config = _cleanup_load(loaded_config)
@@ -98,6 +97,10 @@ def _convert_json(json_dict):
         if len(key) == 2:
             dev[_KEY_WPID] = dev.get(_KEY_WPID) if dev.get(_KEY_WPID) else key[0]
             dev[_KEY_SERIAL] = dev.get(_KEY_SERIAL) if dev.get(_KEY_SERIAL) else key[1]
+            for k, v in dev.items():
+                if type(k) == str and not k.startswith('_') and type(v) == dict:  # convert string keys to ints
+                    v = {int(dk) if type(dk) == str else dk: dv for dk, dv in v.items()}
+                dev[k] = v
             config.append(dev)
     return config
 
