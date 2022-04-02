@@ -16,9 +16,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import ctypes as _ctypes
 import os as _os
 import os.path as _path
 import sys as _sys
+import time as _time
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
@@ -67,73 +69,152 @@ del getLogger
 #   and http://cgit.freedesktop.org/xorg/proto/x11proto/plain/XF86keysym.h
 # because there does not seem to be a non-X11 file for this set of key names
 
+# Setting up is complex because there are several systems that each provide partial facilities:
+# GDK - always available (when running with a window system) but only provides access to keymap
+# X11 - provides access to active process and process with window under mouse and current modifier keys
+# Xtest extension to X11 - provides input simulation, partly works under Wayland
+# Wayland - provides input simulation
+
 XK_KEYS = _keysymdef.keysymdef
+
+# Event codes - can't use Xlib.X codes because Xlib might not be available
+_KEY_RELEASE = 0
+_KEY_PRESS = 1
+_BUTTON_RELEASE = 2
+_BUTTON_PRESS = 3
+
+gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
+gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
+if _log.isEnabledFor(_INFO):
+    _log.info('GDK Keymap %sset up', '' if gkeymap else 'not ')
+
+wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
+if wayland:
+    _log.warn('rules cannot access active process or modifier keys in Wayland')
 
 try:
     import Xlib
-    from Xlib.display import Display
-    xdisplay = Display()
-    modifier_keycodes = xdisplay.get_modifier_mapping()  # there should be a way to do this in Gdk
-    x11 = True
-
-    NET_ACTIVE_WINDOW = xdisplay.intern_atom('_NET_ACTIVE_WINDOW')
-    NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
-    WM_CLASS = xdisplay.intern_atom('WM_CLASS')
-
+    _x11 = None  # X11 might be available
 except Exception:
-    _log.warn(
-        'X11 not available - rules cannot access current process, modifier keys, or keyboard group. %s',
-        exc_info=_sys.exc_info()
-    )
-    modifier_keycodes = []
-    x11 = False
+    _x11 = False  # X11 is not available
 
-if x11:
+xtest_available = True  # Xtest might be available
+xdisplay = None
+Xkbdisplay = None  # xkb might be avilable
+modifier_keycodes = []
+XkbUseCoreKbd = 0x100
+
+
+class XkbDisplay(_ctypes.Structure):
+    """ opaque struct """
+
+
+class XkbStateRec(_ctypes.Structure):
+    _fields_ = [('group', _ctypes.c_ubyte), ('locked_group', _ctypes.c_ubyte), ('base_group', _ctypes.c_ushort),
+                ('latched_group', _ctypes.c_ushort), ('mods', _ctypes.c_ubyte), ('base_mods', _ctypes.c_ubyte),
+                ('latched_mods', _ctypes.c_ubyte), ('locked_mods', _ctypes.c_ubyte), ('compat_state', _ctypes.c_ubyte),
+                ('grab_mods', _ctypes.c_ubyte), ('compat_grab_mods', _ctypes.c_ubyte), ('lookup_mods', _ctypes.c_ubyte),
+                ('compat_lookup_mods', _ctypes.c_ubyte),
+                ('ptr_buttons', _ctypes.c_ushort)]  # something strange is happening here but it is not being used
+
+
+def x11_setup():
+    global _x11, xdisplay, modifier_keycodes, NET_ACTIVE_WINDOW, NET_WM_PID, WM_CLASS, xtest_available
+    if _x11 is not None:
+        return _x11
     try:
-        # set up to get keyboard state using ctypes interface to libx11
-        import ctypes
-
-        class XkbDisplay(ctypes.Structure):
-            """ opaque struct """
-
-        class XkbStateRec(ctypes.Structure):
-            _fields_ = [('group', ctypes.c_ubyte), ('locked_group', ctypes.c_ubyte), ('base_group', ctypes.c_ushort),
-                        ('latched_group', ctypes.c_ushort), ('mods', ctypes.c_ubyte), ('base_mods', ctypes.c_ubyte),
-                        ('latched_mods', ctypes.c_ubyte), ('locked_mods', ctypes.c_ubyte), ('compat_state', ctypes.c_ubyte),
-                        ('grab_mods', ctypes.c_ubyte), ('compat_grab_mods', ctypes.c_ubyte), ('lookup_mods', ctypes.c_ubyte),
-                        ('compat_lookup_mods', ctypes.c_ubyte),
-                        ('ptr_buttons', ctypes.c_ushort)]  # something strange is happening here but it is not being used
-
-        XkbUseCoreKbd = 0x100
-        X11Lib = ctypes.cdll.LoadLibrary('libX11.so')
-        X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
-        X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
-        Xkbdisplay = X11Lib.XOpenDisplay(None)
-
+        from Xlib.display import Display
+        xdisplay = Display()
+        modifier_keycodes = xdisplay.get_modifier_mapping()  # there should be a way to do this in Gdk
+        NET_ACTIVE_WINDOW = xdisplay.intern_atom('_NET_ACTIVE_WINDOW')
+        NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
+        WM_CLASS = xdisplay.intern_atom('WM_CLASS')
+        _x11 = True  # X11 available
+        if _log.isEnabledFor(_INFO):
+            _log.info('X11 library loaded and display set up')
     except Exception:
-        _log.warn('X11 library not available - rules cannot access keyboard group. %s', exc_info=_sys.exc_info())
-        Xkbdisplay = None
+        _log.warn('X11 not available - some rule capabilities inoperable: %s', exc_info=_sys.exc_info())
+        _x11 = False
+        xtest_available = False
+    return _x11
+
+
+def xkb_setup():
+    global X11Lib, Xkbdisplay
+    if Xkbdisplay is not None:
+        return Xkbdisplay
+    try:  # set up to get keyboard state using ctypes interface to libx11
+        X11Lib = _ctypes.cdll.LoadLibrary('libX11.so')
+        X11Lib.XOpenDisplay.restype = _ctypes.POINTER(XkbDisplay)
+        X11Lib.XkbGetState.argtypes = [_ctypes.POINTER(XkbDisplay), _ctypes.c_uint, _ctypes.POINTER(XkbStateRec)]
+        Xkbdisplay = X11Lib.XOpenDisplay(None)
+        if _log.isEnabledFor(_INFO):
+            _log.info('XKB display set up')
+    except Exception:
+        _log.warn('XKB display not available - rules cannot access keyboard group: %s', exc_info=_sys.exc_info())
+        Xkbdisplay = False
+    return Xkbdisplay
+
+
+buttons = {
+    'unknown': (None, None),
+    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
+    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
+    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
+    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
+    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
+    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
+    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
+    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
+    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
+}
+
+# uinput capability for keyboard keys, mouse buttons, and scrolling
+key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith('KEY') and n != 'KEY_CNT']
+for (_, evcode) in buttons.values():
+    if evcode:
+        key_events.append(evcode)
+devicecap = {
+    evdev.ecodes.EV_KEY:
+    key_events,
+    evdev.ecodes.EV_REL:
+    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
+}
+udevice = None
+
+
+def setup_uinput():
+    global udevice
+    if udevice is not None:
+        return udevice
+    try:
+        udevice = evdev.uinput.UInput(events=devicecap, name='solaar-keyboard')
+        if _log.isEnabledFor(_INFO):
+            _log.info('uinput device set up')
+    except Exception as e:
+        _log.warn('cannot create uinput device: %s', e)
+
+
+if wayland:  # wayland can't use xtest so may as well set up uinput now
+    setup_uinput()
 
 
 def kbdgroup():
-    if Xkbdisplay:
+    if xkb_setup():
         state = XkbStateRec()
-        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, ctypes.pointer(state))
+        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, _ctypes.pointer(state))
         return state.group
     else:
         return None
 
 
 def modifier_code(keycode):
-    if keycode == 0:
+    if wayland or not x11_setup() or keycode == 0:
         return None
     for m in range(0, len(modifier_keycodes)):
         if keycode in modifier_keycodes[m]:
             return m
 
-
-gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
-gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 
 key_down = None
 key_up = None
@@ -170,85 +251,75 @@ def xy_direction(_x, _y):
         return 'noop'
 
 
-buttons = {
-    'unknown': (None, None),
-    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
-    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
-    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
-    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
-    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
-    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
-    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
-    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
-    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
-}
-mousecap = {
-    evdev.ecodes.EV_KEY: [evcode for (_, evcode) in buttons.values() if evcode],
-    evdev.ecodes.EV_REL:
-    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
-}
-
-if x11:
-    displayt = Display()
-else:
-    displayt = None
-try:
-    ukeyboard = evdev.uinput.UInput()
-    umouse = evdev.uinput.UInput(mousecap)
-except Exception as e:
-    if not x11:
-        _log.warn('cannot create uinput device: %s', e)
-    else:
-        _log.info('cannot create uinput device: %s', e)
-    ukeyboard = None
-    umouse = None
-
-
 def simulate_xtest(code, event):
-    global displayt
-    if displayt:
+    global xtest_available
+    if x11_setup() and xtest_available:
         try:
-            Xlib.ext.xtest.fake_input(displayt, event, code)
-            displayt.sync()
+            event = (
+                Xlib.X.KeyPress if event == _KEY_PRESS else Xlib.X.KeyRelease if event == _KEY_RELEASE else
+                Xlib.X.ButtonPress if event == _BUTTON_PRESS else Xlib.X.ButtonRelease if event == _BUTTON_RELEASE else None
+            )
+            Xlib.ext.xtest.fake_input(xdisplay, event, code)
+            xdisplay.sync()
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('xtest simulated input %s %s %s', xdisplay, event, code)
             return True
         except Exception as e:
-            displayt = None
+            xtest_available = False
             _log.warn('xtest fake input failed: %s', e)
 
 
-def simulate_uinput(device, what, code, arg):
-    global ukeyboard, umouse
-    if device:
+def simulate_uinput(what, code, arg):
+    global udevice
+    if setup_uinput():
         try:
-            device.write(what, code, arg)
-            device.syn()
+            udevice.write(what, code, arg)
+            udevice.syn()
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('uinput simulated input %s %s %s', what, code, arg)
             return True
         except Exception as e:
-            ukeyboard = umouse = None
-            _log.warn('uinput write key failed: %s', e)
+            udevice = None
+            _log.warn('uinput write failed: %s', e)
 
 
-def simulate_key(code, event):  # X11 keycode and event
-    if simulate_xtest(code, event):
+def simulate_key(code, event):  # X11 keycode but Solaar event code
+    if not wayland and simulate_xtest(code, event):
         return True
-    direction = 1 if event == Xlib.X.KeyPress or event == Xlib.X.ButtonPress else 0
-    device = ukeyboard if event == Xlib.X.KeyPress or event == Xlib.X.KeyRelease else umouse
-    if simulate_uinput(device, evdev.ecodes.EV_KEY, code - 8, direction):
+    if simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
-    _log.warn('no way to simulate input')
+    _log.warn('no way to simulate key input')
 
 
-def click(button, count):
+def click_xtest(button, count):
     for _ in range(count):
-        if not simulate_xtest(button, Xlib.X.ButtonPress):
+        if not simulate_xtest(button[0], _BUTTON_PRESS):
             return False
-        if not simulate_xtest(button, Xlib.X.ButtonRelease):
+        if not simulate_xtest(button[0], _BUTTON_RELEASE):
             return False
     return True
 
 
+def click_uinput(button, count):
+    for _ in range(count):
+        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+            return False
+        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+            return False
+    return True
+
+
+def click(button, count):
+    if not wayland and click_xtest(button, count):
+        return True
+    if click_uinput(button, count):
+        return True
+    _log.warn('no way to simulate mouse click')
+    return False
+
+
 def simulate_scroll(dx, dy):
-    if displayt:
+    if not wayland and xtest_available:
         success = True
         if dx:
             success = click(7 if dx > 0 else 6, count=abs(dx))
@@ -256,12 +327,12 @@ def simulate_scroll(dx, dy):
             success = click(4 if dy > 0 else 5, count=abs(dy))
         if success:
             return True
-    if umouse:
+    if setup_uinput():
         success = True
         if dx:
-            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
+            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_HWHEEL, dx)
         if dy and success:
-            success = simulate_uinput(umouse, evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
+            success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
         if success:
             return True
     _log.warn('no way to simulate scrolling')
@@ -404,6 +475,8 @@ class And(Condition):
 
 
 def x11_focus_prog():
+    if not x11_setup():
+        return None
     pid = wm_class = None
     window = xdisplay.get_input_focus().focus
     while window:
@@ -420,6 +493,8 @@ def x11_focus_prog():
 
 
 def x11_pointer_prog():
+    if not x11_setup():
+        return None
     pid = wm_class = None
     window = xdisplay.screen().root.query_pointer().child
     for child in reversed(window.query_tree().children):
@@ -434,8 +509,8 @@ def x11_pointer_prog():
 class Process(Condition):
     def __init__(self, process):
         self.process = process
-        if not x11:
-            _log.warn('X11 not available - rules cannot access current process - %s', self)
+        if wayland or not x11_setup():
+            _log.warn('rules can only access active process in X11 - %s', self)
         if not isinstance(process, str):
             _log.warn('rule Process argument not a string: %s', process)
             self.process = str(process)
@@ -446,7 +521,7 @@ class Process(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog() if x11 else None
+        focus = x11_focus_prog()
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
@@ -457,8 +532,8 @@ class Process(Condition):
 class MouseProcess(Condition):
     def __init__(self, process):
         self.process = process
-        if not x11:
-            _log.warn('X11 not available - rules cannot access current mouse process - %s', self)
+        if wayland or not x11_setup():
+            _log.warn('rules cannot access active mouse process in X11 - %s', self)
         if not isinstance(process, str):
             _log.warn('rule MouseProcess argument not a string: %s', process)
             self.process = str(process)
@@ -469,7 +544,8 @@ class MouseProcess(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if not isinstance(self.process, str):
             return False
-        result = any(bool(s and s.startswith(self.process)) for s in x11_pointer_prog()) if x11 else None
+        pointer_focus = x11_pointer_prog()
+        result = any(bool(s and s.startswith(self.process)) for s in pointer_focus) if pointer_focus else None
         return result
 
     def data(self):
@@ -780,13 +856,13 @@ class KeyPress(Action):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
-                simulate_key(keycode, Xlib.X.KeyPress)
+                simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             keycode = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
-                simulate_key(keycode, Xlib.X.KeyRelease)
+                simulate_key(keycode, _KEY_RELEASE)
 
     def evaluate(self, feature, notification, device, status, last_result):
         if gkeymap:
@@ -795,6 +871,7 @@ class KeyPress(Action):
                 _log.info('KeyPress action: %s, modifiers %s %s', self.key_names, current, [hex(k) for k in self.key_symbols])
             self.keyDown(self.key_symbols, current)
             self.keyUp(reversed(self.key_symbols), current)
+            _time.sleep(0.01)
         else:
             _log.warn('no keymap so cannot determine which keycode to send')
         return None
@@ -835,6 +912,7 @@ class MouseScroll(Action):
             _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         dx, dy = amounts
         simulate_scroll(dx, dy)
+        _time.sleep(0.01)
         return None
 
     def data(self):
@@ -866,6 +944,7 @@ class MouseClick(Action):
             _log.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
+        _time.sleep(0.01)
         return None
 
     def data(self):
