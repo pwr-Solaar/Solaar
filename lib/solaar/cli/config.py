@@ -172,9 +172,15 @@ def run(receivers, args, find_receiver, find_device):
 
     setting_name = args.setting.lower()
     setting = _settings_templates.check_feature_setting(dev, setting_name)
+    if not setting and dev.descriptor and dev.descriptor.settings:
+        for sclass in dev.descriptor.settings:
+            if sclass.register and sclass.name == setting_name:
+                try:
+                    setting = sclass.build(dev)
+                except Exception:
+                    setting = None
     if setting is None:
         raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
-    _configuration.attach_to(dev)
 
     if args.value_key is None:
         setting.apply()
