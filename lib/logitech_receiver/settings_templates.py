@@ -1222,8 +1222,8 @@ def check_feature_settings(device, already_known):
 
 
 def check_feature_setting(device, setting_name):
-    for setting in SETTINGS:
-        if setting.name == setting_name:
-            feature = check_feature(device, setting)
-            if feature:
-                return feature
+    for sclass in SETTINGS:
+        if sclass.feature and sclass.name == setting_name and device.features:
+            setting = check_feature(device, sclass)
+            if setting:
+                return setting
