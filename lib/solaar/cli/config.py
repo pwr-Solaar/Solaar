@@ -194,7 +194,7 @@ def run(receivers, args, find_receiver, find_device):
 
     # if the Solaar UI is running tell it to also perform the set
     if application.get_is_remote():
-        argl = ['config', dev.serial, setting.name]
+        argl = ['config', dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
         application.run(_yaml.safe_dump(argl))
 
