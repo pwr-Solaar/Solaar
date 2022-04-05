@@ -198,6 +198,12 @@ class ReceiverListener(_listener.EventsListener):
                 _log.debug('Notification %s via device %s being ignored.', n, self.receiver)
             return
 
+        # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
+        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
+            if _log.isEnabledFor(_INFO):
+                _log.info('ignoring DJ pairing notification %s', n)
+            return
+
         # a device notification
         if not (0 < n.devnumber <= self.receiver.max_devices):
             if _log.isEnabledFor(_WARNING):
@@ -218,12 +224,7 @@ class ReceiverListener(_listener.EventsListener):
         if n.sub_id == 0x40 and not already_known:
             return  # disconnecting something that is not known - nothing to do
 
-        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
-            # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
-            if _log.isEnabledFor(_INFO):
-                _log.info('ignoring DJ pairing notification %s', n)
-            return
-        elif n.sub_id == 0x41:
+        if n.sub_id == 0x41:
             if not already_known:
                 if n.address == 0x0A and not self.receiver.receiver_kind == 'bolt':
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
