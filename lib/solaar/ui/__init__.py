@@ -163,7 +163,7 @@ def _shutdown(app, shutdown_hook):
 def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     assert use_tray or show_window, 'need either tray or visible window'
     # from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
-    APP_ID = 'io.github.pwr.solaar'
+    APP_ID = 'io.github.pwr_solaar.solaar'
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
     application.connect('startup', lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)

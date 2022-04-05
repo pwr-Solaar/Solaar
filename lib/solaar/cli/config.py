@@ -187,7 +187,7 @@ def run(receivers, args, find_receiver, find_device):
         _print_setting(setting)
         return
 
-    APP_ID = 'io.github.pwr.solaar'
+    APP_ID = 'io.github.pwr_solaar.solaar'
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
     application.register()
 
