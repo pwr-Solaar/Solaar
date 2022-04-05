@@ -187,19 +187,22 @@ def run(receivers, args, find_receiver, find_device):
         _print_setting(setting)
         return
 
-    APP_ID = 'io.github.pwr_solaar.solaar'
-    application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
-    application.register()
+    remote = False
+    if Gtk.init_check()[0]:  # can Gtk be initialized?
+        APP_ID = 'io.github.pwr_solaar.solaar'
+        application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+        application.register()
+        remote = application.get_is_remote()
 
     # if the Solaar UI is running don't save configuration here
-    result, message, value = set(dev, setting, args, not application.get_is_remote())
+    result, message, value = set(dev, setting, args, not remote)
     if message is not None:
         print(message)
         if result is None:
             raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
 
     # if the Solaar UI is running tell it to also perform the set
-    if application.get_is_remote():
+    if remote:
         argl = ['config', dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
         application.run(_yaml.safe_dump(argl))
