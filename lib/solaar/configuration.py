@@ -81,7 +81,7 @@ def save():
 
     try:
         with open(_yaml_file_path, 'w') as config_file:
-            _yaml.dump(_config, config_file)
+            _yaml.dump(_config, config_file, default_flow_style=None, width=150)
 
         if _log.isEnabledFor(_INFO):
             _log.info('saved %s to %s', _config, _yaml_file_path)
@@ -101,6 +101,13 @@ def _convert_json(json_dict):
                 if type(k) == str and not k.startswith('_') and type(v) == dict:  # convert string keys to ints
                     v = {int(dk) if type(dk) == str else dk: dv for dk, dv in v.items()}
                 dev[k] = v
+            for k in ['mouse-gestures', 'dpi-sliding']:
+                v = dev.get(k, None)
+                if v is True or v is False:
+                    dev.pop(k)
+            if '_name' in dev:
+                dev[_KEY_NAME] = dev['_name']
+                dev.pop('_name')
             config.append(dev)
     return config
 
@@ -109,11 +116,6 @@ def _cleanup_load(c):
     _config = [__version__]
     for element in c:
         if isinstance(element, dict):
-            # remove boolean values for mouse-gesture and dpi-sliding
-            for setting in ['mouse-gestures', 'dpi-sliding']:
-                mg = element.get(setting, None)
-                if mg is True or mg is False:
-                    del element[setting]
             # convert to device entries
             element = _DeviceEntry(**element)
             _config.append(element)
