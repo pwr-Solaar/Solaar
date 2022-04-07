@@ -7,6 +7,7 @@
   <summary>Linux manager for Logitech keyboards, mice, and trackpads</summary>
   <url type="homepage">https://github.com/pwr-Solaar/Solaar</url>
   <content_rating type="oars-1.0" />
+  <update_contact>pfpschneider_AT_gmail.com</update_contact>
 
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>GPL-2.0-only</project_license>
