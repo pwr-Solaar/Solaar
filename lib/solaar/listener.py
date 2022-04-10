@@ -275,8 +275,6 @@ class ReceiverListener(_listener.EventsListener):
     def __str__(self):
         return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
 
-    __unicode__ = __str__
-
 
 #
 #

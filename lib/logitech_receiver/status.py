@@ -116,8 +116,6 @@ class ReceiverStatus(dict):
             }
         )
 
-    __unicode__ = __str__
-
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         # self.updated = _timestamp()
         self._changed_callback(self._receiver, alert=alert, reason=reason)

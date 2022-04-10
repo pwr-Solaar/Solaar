@@ -105,8 +105,6 @@ class _ThreadedHandle:
         if self._local:
             return str(int(self))
 
-    __unicode__ = __str__
-
     def __repr__(self):
         return '<_ThreadedHandle(%s)>' % self.path
 

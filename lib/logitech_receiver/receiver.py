@@ -375,7 +375,7 @@ class Receiver:
     def __str__(self):
         return self._str
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
     __bool__ = __nonzero__ = lambda self: self.handle is not None
 
