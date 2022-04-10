@@ -37,7 +37,7 @@ from logitech_receiver.settings import KIND as _SKIND
 from logitech_receiver.settings import Setting as _Setting
 from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
-from solaar.i18n import _, pgettext
+from solaar.i18n import _
 
 _log = getLogger(__name__)
 del getLogger
@@ -2066,12 +2066,7 @@ class _SettingWithValueUI:
         self.widgets[self.value_field] = (3, 1, 1, 1)
 
         self.key_lbl = Gtk.Label(
-            pgettext('setting key, oppossed to value', 'Key'),
-            halign=Gtk.Align.CENTER,
-            valign=Gtk.Align.CENTER,
-            hexpand=True,
-            vexpand=False,
-            margin_top=m
+            _('Item'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 0, 1, 1)

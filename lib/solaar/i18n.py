@@ -61,4 +61,3 @@ _gettext.install(_LOCALE_DOMAIN)
 
 _ = _gettext.gettext
 ngettext = _gettext.ngettext
-pgettext = _gettext.pgettext
