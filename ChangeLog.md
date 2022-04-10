@@ -1,3 +1,18 @@
+# 1.1.3rc1
+
+* Remove pggettext so as to not require Python 3.8
+* Remove Python 2 unicode support
+* Store keys in configuration file as int instead of str
+* Use yaml for configuration file instead of json.
+* Remove process-dependent rules from built-in rules.
+* Handle situation where GTK application cannot be set up in CLI.
+* Remove obsolete upower signals.
+* Appinfo/metadata fixes including using correct APP_ID.
+* Fix bugs in solaar config.
+* Add full set of mouse buttons in persistent remappable actions seeting.
+* Improve rule behaviour under Wayland and when Xtest or X11 not available.
+* Fix up and document dependencies (evdev, Python, ...).
+
 # 1.1.2
 
 * Update documentation on supported devices and translations

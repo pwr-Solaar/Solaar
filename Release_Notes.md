@@ -1,10 +1,16 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.3
+
+* Solaar uses yaml for configuration files, converting the json configuration file to yaml if necessary.
+
+* Solaar rules work better under Wayland but still cannot access the current process nor the current keyboard modifiers.
+
 ## Version 1.1.2
 
 * Solaar now depends on Python evdev.  It can be installed if needed via `pip install --user evdev` or, in most distributions, by installing the python3-evdev package.
 
-* Rules partly work under Wayland.  There is no access to the current process in Wayland.  Simulated input uses uinput if XTest extension not available, requiring read and write permissions on /dev/uinput.
+* Solaar rules partly work under Wayland.  There is no access to the current process in Wayland.  Simulated input uses uinput if XTest extension not available, requiring read and write permissions on /dev/uinput.
 
 * There is a setting to divert gestures so that they can trigger rules.
 
