@@ -444,7 +444,7 @@ class Device:
             self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
         )
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
     def notify_devices(self):  # no need to notify, as there are none
         pass

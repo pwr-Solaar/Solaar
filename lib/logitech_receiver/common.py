@@ -22,24 +22,7 @@ from binascii import hexlify as _hexlify
 from collections import namedtuple
 from struct import pack, unpack
 
-try:
-    unicode  # noqa: F821
-    # if Python2, unicode_literals will mess our first (un)pack() argument
-    _pack_str = pack
-    _unpack_str = unpack
-    pack = lambda x, *args: _pack_str(str(x), *args)
-    unpack = lambda x, *args: _unpack_str(str(x), *args)
-
-    is_string = lambda d: isinstance(d, unicode) or isinstance(d, str)  # noqa: F821
-    # no easy way to distinguish between b'' and '' :(
-    # or (isinstance(d, str) \
-    #     and not any((chr(k) in d for k in range(0x00, 0x1F))) \
-    #     and not any((chr(k) in d for k in range(0x80, 0xFF))) \
-    #     )
-except Exception:
-    # this is certainly Python 3
-    # In Py3, unicode and str are equal (the unicode object does not exist)
-    is_string = lambda d: isinstance(d, str)
+is_string = lambda d: isinstance(d, str)
 
 #
 #
@@ -80,8 +63,6 @@ class NamedInt(int):
     def __str__(self):
         return self.name
 
-    __unicode__ = __str__
-
     def __repr__(self):
         return 'NamedInt(%d, %r)' % (int(self), self.name)
 
@@ -104,7 +85,7 @@ class NamedInts:
     def __init__(self, **kwargs):
         def _readable_name(n):
             if not is_string(n):
-                raise TypeError('expected (unicode) string, got ' + str(type(n)))
+                raise TypeError('expected string, got ' + str(type(n)))
             return n.replace('__', '/').replace('_', ' ')
 
         # print (repr(kwargs))

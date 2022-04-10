@@ -20,13 +20,8 @@
 
 import gettext as _gettext
 
-try:
-    unicode  # noqa: F821
-    _ = lambda x: _gettext.gettext(x).decode('UTF-8')
-    ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
-except Exception:
-    _ = _gettext.gettext
-    ngettext = _gettext.ngettext
+_ = _gettext.gettext
+ngettext = _gettext.ngettext
 
 # A few common strings, not always accessible as such in the code.
 

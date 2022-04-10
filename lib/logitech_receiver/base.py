@@ -346,7 +346,6 @@ _HIDPP_Notification = namedtuple('_HIDPP_Notification', ('report_id', 'devnumber
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%02x,%d,%02X,%02X,%s)' % (
     self.report_id, self.devnumber, self.sub_id, self.address, _strhex(self.data)
 )
-_HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple
 
 #

@@ -347,7 +347,7 @@ class Setting:
             )
         return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind if self._validator else None, self.name)
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
 
 class Settings(Setting):
