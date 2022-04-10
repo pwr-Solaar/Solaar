@@ -1,5 +1,12 @@
-# 1.1.3rc1
+# 1.1.3rc2
 
+* Allow mouse gesture setting for non-mice, e.g., trackballs
+* Print message when there is another Solaar process running
+* Fix determination of whether to force read before writing boolean setting
+* Add recent diversion features to default list in rules UI
+* Add setting to divert hires scroll wheel
+* Don't use device kind to determine how to handle notifications
+* Update Polish and Russian translations
 * Remove pggettext so as to not require Python 3.8
 * Remove Python 2 unicode support
 * Store keys in configuration file as int instead of str
