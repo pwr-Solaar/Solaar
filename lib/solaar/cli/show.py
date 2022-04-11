@@ -135,8 +135,7 @@ def _print_device(dev, num=None):
         print('     Supports %d HID++ 2.0 features:' % len(dev.features))
         dev_settings = []
         _settings_templates.check_feature_settings(dev, dev_settings)
-        for index, feature in enumerate(dev.features):
-            feature = dev.features[index]
+        for feature, index in dev.features.enumerate():
             flags = dev.request(0x0000, feature.bytes(2))
             flags = 0 if flags is None else ord(flags[1:2])
             flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
