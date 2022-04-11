@@ -232,145 +232,87 @@ class FeatureCallError(_KwException):
 #
 
 
-class FeaturesArray:
-    """A sequence of features supported by a HID++ 2.0 device."""
-    __slots__ = ('supported', 'device', 'features', 'non_features')
-    assert FEATURE.ROOT == 0x0000
-
+class FeaturesArray(dict):
     def __init__(self, device):
         assert device is not None
-        self.device = device
         self.supported = True
-        self.features = None
-        self.non_features = set()
-
-    def __del__(self):
-        self.supported = False
-        self.device = None
-        self.features = None
+        self.device = device
+        self.inverse = {}
+        self.count = 0
 
     def _check(self):
-        # print (self.device, "check", self.supported, self.features, self.device.protocol)
-        if self.supported:
-            assert self.device is not None
-            if self.features is not None:
-                return True
-
-            if not self.device.online:
-                # device is not connected right now, will have to try later
-                return False
-
-            # I _think_ this is universally true
-            if self.device.protocol and self.device.protocol < 2.0:
-                self.supported = False
-                self.device.features = None
-                self.device = None
-                return False
-
-            reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
-            if reply is None:
-                return False  # device might not be active so don't assume unsupported
-            else:
-                fs_index = ord(reply[0:1])
-                if fs_index:
-                    count = self.device.request(fs_index << 8)
-                    if count is None:
-                        _log.warn('FEATURE_SET found, but failed to read features count')
-                        # most likely the device is unavailable
-                        return False
-                    else:
-                        count = ord(count[:1])
-                        assert count >= fs_index
-                        self.features = [None] * (1 + count)
-                        self.features[0] = FEATURE.ROOT
-                        self.features[fs_index] = FEATURE.FEATURE_SET
-                        return True
+        if self.supported is False or not self.device.online:
+            return False
+        if self.device.protocol and self.device.protocol < 2.0:
+            self.supported = False
+            return False
+        if self.count > 0:
+            return True
+        reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
+        if reply is not None:
+            fs_index = ord(reply[0:1])
+            if fs_index:
+                count = self.device.request(fs_index << 8)
+                if count is None:
+                    _log.warn('FEATURE_SET found, but failed to read features count')
+                    return False
                 else:
-                    self.supported = False
-
+                    self.count = ord(count[:1])
+                    self[FEATURE.ROOT] = 0
+                    self[FEATURE.FEATURE_SET] = fs_index
+                    return True
+            else:
+                self.supported = False
         return False
+
+    def get_feature(self, index):
+        feature = self.inverse.get(index)
+        if feature is not None:
+            return feature
+        elif self._check():
+            feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
+            if feature:
+                feature = FEATURE[_unpack('!H', feature[:2])[0]]
+                self[feature] = index
+                return feature
+
+    def enumerate(self):  # return all features and their index, ordered by index
+        if self._check():
+            for index in range(self.count):
+                feature = self.get_feature(index)
+                yield feature, index
 
     __bool__ = __nonzero__ = _check
 
-    def __getitem__(self, index):
-        if self._check():
-            if isinstance(index, int):
-                if index < 0 or index >= len(self.features):
-                    raise IndexError(index)
+    def __getitem__(self, feature):
+        index = super().get(feature)
+        if index is not None:
+            return index
+        elif self._check():
+            response = self.device.request(0x0000, _pack('!H', feature))
+            if response:
+                index = response[0]
+                self[feature] = index if index else False
+                return index if index else False
 
-                if self.features[index] is None:
-                    feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
-                    if feature:
-                        feature, = _unpack('!H', feature[:2])
-                        self.features[index] = FEATURE[feature]
+    def __setitem__(self, feature, index):
+        if type(super().get(feature)) == int:
+            self.inverse.pop(super().get(feature))
+        super().__setitem__(feature, index)
+        if type(index) == int:
+            self.inverse[index] = feature
 
-                return self.features[index]
+    def __delitem__(self, feature):
+        if type(super().get(feature)) == int:
+            self.inverse.pop(super().get(feature))
+        super().__delitem__(feature)
 
-            elif isinstance(index, slice):
-                indices = index.indices(len(self.features))
-                return [self.__getitem__(i) for i in range(*indices)]
-
-    def __contains__(self, featureId):
-        """Tests whether the list contains given Feature ID"""
-        if self._check():
-            ivalue = int(featureId)
-            if ivalue in self.non_features:
-                return False
-
-            may_have = False
-            for f in self.features:
-                if f is None:
-                    may_have = True
-                elif ivalue == int(f):
-                    return True
-
-            if may_have and self.device:
-                reply = self.device.request(0x0000, _pack('!H', ivalue))
-                if reply:
-                    index = ord(reply[0:1])
-                    if index:
-                        self.features[index] = FEATURE[ivalue]
-                        return True
-                    else:
-                        self.non_features.add(ivalue)
-                        return False
-
-    def index(self, featureId):
-        """Gets the Feature Index for a given Feature ID"""
-        if self._check():
-            may_have = False
-            ivalue = int(featureId)
-            for index, f in enumerate(self.features):
-                if f is None:
-                    may_have = True
-                elif ivalue == int(f):
-                    return index
-
-            if may_have:
-                reply = self.device.request(0x0000, _pack('!H', ivalue))
-                if reply:
-                    index = ord(reply[0:1])
-                    self.features[index] = FEATURE[ivalue]
-                    return index
-
-        raise ValueError('%r not in list' % featureId)
-
-    def __iter__(self):
-        if self._check():
-            yield FEATURE.ROOT
-            index = 1
-            last_index = len(self.features)
-            while index < last_index:
-                yield self.__getitem__(index)
-                index += 1
+    def __contains__(self, feature):  # is a feature present
+        index = self.__getitem__(feature)
+        return index is not None and index is not False
 
     def __len__(self):
-        return len(self.features) if self._check() else 0
-
-
-#
-#
-#
+        return self.count
 
 
 class ReprogrammableKey:
@@ -1157,7 +1099,7 @@ class Gestures:
 def feature_request(device, feature, function=0x00, *params, no_reply=False):
     if device.online and device.features:
         if feature in device.features:
-            feature_index = device.features.index(int(feature))
+            feature_index = device.features[feature]
             return device.request((feature_index << 8) + (function & 0xFF), *params, no_reply=no_reply)
 
 
