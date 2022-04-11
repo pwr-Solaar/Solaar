@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.1.2\n"
+"Project-Id-Version: solaar 1.1.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-20 10:03+0100\n"
-"PO-Revision-Date: 2022-03-20 12:07+0100\n"
+"POT-Creation-Date: 2022-04-11 20:59+0200\n"
+"PO-Revision-Date: 2022-04-11 21:08+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -41,191 +41,191 @@ msgstr "Odbiornik Lightspeed"
 msgid "EX100 Receiver 27 Mhz"
 msgstr "Odbiornik EX100 27 MHz"
 
-#: lib/logitech_receiver/i18n.py:35
+#: lib/logitech_receiver/i18n.py:30
 msgid "empty"
 msgstr "pusty"
 
-#: lib/logitech_receiver/i18n.py:36
+#: lib/logitech_receiver/i18n.py:31
 msgid "critical"
 msgstr "krytyczny"
 
-#: lib/logitech_receiver/i18n.py:37
+#: lib/logitech_receiver/i18n.py:32
 msgid "low"
 msgstr "niski"
 
-#: lib/logitech_receiver/i18n.py:38
+#: lib/logitech_receiver/i18n.py:33
 msgid "average"
 msgstr "przeciętny"
 
-#: lib/logitech_receiver/i18n.py:39
+#: lib/logitech_receiver/i18n.py:34
 msgid "good"
 msgstr "dobry"
 
-#: lib/logitech_receiver/i18n.py:40
+#: lib/logitech_receiver/i18n.py:35
 msgid "full"
 msgstr "pełny"
 
-#: lib/logitech_receiver/i18n.py:43
+#: lib/logitech_receiver/i18n.py:38
 msgid "discharging"
 msgstr "rozładowywanie"
 
-#: lib/logitech_receiver/i18n.py:44
+#: lib/logitech_receiver/i18n.py:39
 msgid "recharging"
 msgstr "ładowanie"
 
-#: lib/logitech_receiver/i18n.py:45 lib/solaar/ui/window.py:718
+#: lib/logitech_receiver/i18n.py:40 lib/solaar/ui/window.py:718
 msgid "charging"
 msgstr "ładowanie"
 
-#: lib/logitech_receiver/i18n.py:46
+#: lib/logitech_receiver/i18n.py:41
 msgid "not charging"
 msgstr "brak ładowania"
 
-#: lib/logitech_receiver/i18n.py:47
+#: lib/logitech_receiver/i18n.py:42
 msgid "almost full"
 msgstr "prawie pełny"
 
-#: lib/logitech_receiver/i18n.py:48
+#: lib/logitech_receiver/i18n.py:43
 msgid "charged"
 msgstr "naładowany"
 
-#: lib/logitech_receiver/i18n.py:49
+#: lib/logitech_receiver/i18n.py:44
 msgid "slow recharge"
 msgstr "powolne ładowanie"
 
-#: lib/logitech_receiver/i18n.py:50
+#: lib/logitech_receiver/i18n.py:45
 msgid "invalid battery"
 msgstr "nieodpowiedni akumulator"
 
-#: lib/logitech_receiver/i18n.py:51
+#: lib/logitech_receiver/i18n.py:46
 msgid "thermal error"
 msgstr "błąd termiczny"
 
-#: lib/logitech_receiver/i18n.py:52
+#: lib/logitech_receiver/i18n.py:47
 msgid "error"
 msgstr "błąd"
 
-#: lib/logitech_receiver/i18n.py:53
+#: lib/logitech_receiver/i18n.py:48
 msgid "standard"
 msgstr "standardowe"
 
-#: lib/logitech_receiver/i18n.py:54
+#: lib/logitech_receiver/i18n.py:49
 msgid "fast"
 msgstr "szybkie"
 
-#: lib/logitech_receiver/i18n.py:55
+#: lib/logitech_receiver/i18n.py:50
 msgid "slow"
 msgstr "powolne"
 
-#: lib/logitech_receiver/i18n.py:58
+#: lib/logitech_receiver/i18n.py:53
 msgid "device timeout"
 msgstr "upłynął limit czasu urządzenia"
 
-#: lib/logitech_receiver/i18n.py:59
+#: lib/logitech_receiver/i18n.py:54
 msgid "device not supported"
 msgstr "urządzenie nie jest obsługiwane"
 
-#: lib/logitech_receiver/i18n.py:60
+#: lib/logitech_receiver/i18n.py:55
 msgid "too many devices"
 msgstr "za dużo urządzeń"
 
-#: lib/logitech_receiver/i18n.py:61
+#: lib/logitech_receiver/i18n.py:56
 msgid "sequence timeout"
 msgstr "upłynął limit czasu sekwencji"
 
-#: lib/logitech_receiver/i18n.py:64 lib/solaar/ui/window.py:577
+#: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:577
 msgid "Firmware"
 msgstr "Firmware"
 
-#: lib/logitech_receiver/i18n.py:65
+#: lib/logitech_receiver/i18n.py:60
 msgid "Bootloader"
 msgstr "Bootloader"
 
-#: lib/logitech_receiver/i18n.py:66
+#: lib/logitech_receiver/i18n.py:61
 msgid "Hardware"
 msgstr "Sprzęt"
 
-#: lib/logitech_receiver/i18n.py:67
+#: lib/logitech_receiver/i18n.py:62
 msgid "Other"
 msgstr "Inne"
 
-#: lib/logitech_receiver/i18n.py:70
+#: lib/logitech_receiver/i18n.py:65
 msgid "Left Button"
 msgstr "Przycisk lewy"
 
-#: lib/logitech_receiver/i18n.py:71
+#: lib/logitech_receiver/i18n.py:66
 msgid "Right Button"
 msgstr "Przycisk prawy"
 
-#: lib/logitech_receiver/i18n.py:72
+#: lib/logitech_receiver/i18n.py:67
 msgid "Middle Button"
 msgstr "Przycisk środkowy"
 
-#: lib/logitech_receiver/i18n.py:73
+#: lib/logitech_receiver/i18n.py:68
 msgid "Back Button"
 msgstr "Przycisk wstecz"
 
-#: lib/logitech_receiver/i18n.py:74
+#: lib/logitech_receiver/i18n.py:69
 msgid "Forward Button"
 msgstr "Przycisk dalej"
 
-#: lib/logitech_receiver/i18n.py:75
+#: lib/logitech_receiver/i18n.py:70
 msgid "Mouse Gesture Button"
 msgstr "Przycisk gestów myszy"
 
-#: lib/logitech_receiver/i18n.py:76
+#: lib/logitech_receiver/i18n.py:71
 msgid "Smart Shift"
 msgstr "SmartShift"
 
-#: lib/logitech_receiver/i18n.py:77
+#: lib/logitech_receiver/i18n.py:72
 msgid "DPI Switch"
 msgstr "Przełącznik DPI"
 
-#: lib/logitech_receiver/i18n.py:78
+#: lib/logitech_receiver/i18n.py:73
 msgid "Left Tilt"
 msgstr "Pochylenie w lewo"
 
-#: lib/logitech_receiver/i18n.py:79
+#: lib/logitech_receiver/i18n.py:74
 msgid "Right Tilt"
 msgstr "Pochylenie w prawo"
 
-#: lib/logitech_receiver/i18n.py:80
+#: lib/logitech_receiver/i18n.py:75
 msgid "Left Click"
 msgstr "Kliknięcie LPM"
 
-#: lib/logitech_receiver/i18n.py:81
+#: lib/logitech_receiver/i18n.py:76
 msgid "Right Click"
 msgstr "Kliknięcie PPM"
 
-#: lib/logitech_receiver/i18n.py:82
+#: lib/logitech_receiver/i18n.py:77
 msgid "Mouse Middle Button"
 msgstr "Przycisk środkowy myszy"
 
-#: lib/logitech_receiver/i18n.py:83
+#: lib/logitech_receiver/i18n.py:78
 msgid "Mouse Back Button"
 msgstr "Przycisk wstecz myszy"
 
-#: lib/logitech_receiver/i18n.py:84
+#: lib/logitech_receiver/i18n.py:79
 msgid "Mouse Forward Button"
 msgstr "Przycisk dalej myszy"
 
-#: lib/logitech_receiver/i18n.py:85
+#: lib/logitech_receiver/i18n.py:80
 msgid "Gesture Button Navigation"
 msgstr "Nawigacja przyciskiem gestów"
 
-#: lib/logitech_receiver/i18n.py:86
+#: lib/logitech_receiver/i18n.py:81
 msgid "Mouse Scroll Left Button"
 msgstr "Lewy przycisk kółka myszy"
 
-#: lib/logitech_receiver/i18n.py:87
+#: lib/logitech_receiver/i18n.py:82
 msgid "Mouse Scroll Right Button"
 msgstr "Prawy przycisk kółka myszy"
 
-#: lib/logitech_receiver/i18n.py:90
+#: lib/logitech_receiver/i18n.py:85
 msgid "pressed"
 msgstr "wciśnięty"
 
-#: lib/logitech_receiver/i18n.py:91
+#: lib/logitech_receiver/i18n.py:86
 msgid "released"
 msgstr "zwolniony"
 
@@ -263,11 +263,11 @@ msgstr "niesparowane"
 msgid "powered on"
 msgstr "włączone"
 
-#: lib/logitech_receiver/settings.py:675
+#: lib/logitech_receiver/settings.py:669
 msgid "register"
 msgstr "rejestr"
 
-#: lib/logitech_receiver/settings.py:689 lib/logitech_receiver/settings.py:717
+#: lib/logitech_receiver/settings.py:683 lib/logitech_receiver/settings.py:711
 msgid "feature"
 msgstr "funkcja"
 
@@ -434,7 +434,8 @@ msgid "Frequency of device polling, in milliseconds"
 msgstr "Częstotliwość odpytywania urządzenia w milisekundach"
 
 #: lib/logitech_receiver/settings_templates.py:316
-#: lib/logitech_receiver/settings_templates.py:1043
+#: lib/logitech_receiver/settings_templates.py:1044
+#: lib/logitech_receiver/settings_templates.py:1072
 msgid "May need Onboard Profiles set to Disable to be effective."
 msgstr "Aby działało, może być konieczne wyłączenie profili wbudowanych."
 
@@ -857,32 +858,37 @@ msgstr "Zmień parametry numeryczne myszy/panelu dotykowego."
 msgid "M-Key LEDs"
 msgstr "Diody LED klawiszy M"
 
-#: lib/logitech_receiver/settings_templates.py:1043
+#: lib/logitech_receiver/settings_templates.py:1044
 msgid "Control the M-Key LEDs."
 msgstr "Kontroluj diody LED klawiszy M."
 
-#: lib/logitech_receiver/settings_templates.py:1048
+#: lib/logitech_receiver/settings_templates.py:1045
+#: lib/logitech_receiver/settings_templates.py:1073
+msgid "May need G Keys diverted to be effective."
+msgstr "Aby działało, może być konieczne włączenie przekierowania klawiszy G."
+
+#: lib/logitech_receiver/settings_templates.py:1051
 #, python-format
 msgid "Lights up the %s key."
 msgstr "Zapala klawisz %s."
 
-#: lib/logitech_receiver/settings_templates.py:1067
+#: lib/logitech_receiver/settings_templates.py:1070
 msgid "MR-Key LED"
 msgstr "Dioda LED klawisza MR"
 
-#: lib/logitech_receiver/settings_templates.py:1068
+#: lib/logitech_receiver/settings_templates.py:1072
 msgid "Control the MR-Key LED."
 msgstr "Kontroluj diody LED klawiszy MR."
 
-#: lib/logitech_receiver/settings_templates.py:1084
+#: lib/logitech_receiver/settings_templates.py:1090
 msgid "Persistent Key/Button Mapping"
 msgstr "Trwałe mapowanie klawiszy/przycisków"
 
-#: lib/logitech_receiver/settings_templates.py:1086
+#: lib/logitech_receiver/settings_templates.py:1092
 msgid "Permanently change the mapping for the key or button."
 msgstr "Trwale zmień mapowania klawisza lub przycisku."
 
-#: lib/logitech_receiver/settings_templates.py:1087
+#: lib/logitech_receiver/settings_templates.py:1093
 msgid ""
 "Changing important keys or buttons (such as for the left mouse button) can "
 "result in an unusable system."
@@ -902,27 +908,27 @@ msgstr[0] "%(count)s sparowane urządzenie."
 msgstr[1] "%(count)s sparowane urządzenia."
 msgstr[2] "%(count)s sparowanych urządzeń."
 
-#: lib/logitech_receiver/status.py:169
+#: lib/logitech_receiver/status.py:167
 #, python-format
 msgid "Battery: %(level)s"
 msgstr "Akumulator: %(level)s"
 
-#: lib/logitech_receiver/status.py:171
+#: lib/logitech_receiver/status.py:169
 #, python-format
 msgid "Battery: %(percent)d%%"
 msgstr "Akumulator: %(percent)d%%"
 
-#: lib/logitech_receiver/status.py:183
+#: lib/logitech_receiver/status.py:181
 #, python-format
 msgid "Lighting: %(level)s lux"
 msgstr "Oświetlenie: %(level)s lx"
 
-#: lib/logitech_receiver/status.py:238
+#: lib/logitech_receiver/status.py:236
 #, python-format
 msgid "Battery: %(level)s (%(status)s)"
 msgstr "Akumulator: %(level)s (%(status)s)"
 
-#: lib/logitech_receiver/status.py:240
+#: lib/logitech_receiver/status.py:238
 #, python-format
 msgid "Battery: %(percent)d%% (%(status)s)"
 msgstr "Akumulator: %(percent)d%% (%(status)s)"
@@ -1013,15 +1019,15 @@ msgstr "Usuń sparowanie"
 msgid "Cancel"
 msgstr "Anuluj"
 
-#: lib/solaar/ui/config_panel.py:199
+#: lib/solaar/ui/config_panel.py:200
 msgid "Complete - ENTER to change"
 msgstr "Kompletne - ENTER, aby zmienić"
 
-#: lib/solaar/ui/config_panel.py:199
+#: lib/solaar/ui/config_panel.py:200
 msgid "Incomplete"
 msgstr "Niekompletne"
 
-#: lib/solaar/ui/config_panel.py:454
+#: lib/solaar/ui/config_panel.py:456
 #, python-format
 msgid "%d value"
 msgid_plural "%d values"
@@ -1029,23 +1035,23 @@ msgstr[0] "%d wartość"
 msgstr[1] "%d wartości"
 msgstr[2] "%d wartości"
 
-#: lib/solaar/ui/config_panel.py:465
+#: lib/solaar/ui/config_panel.py:467
 msgid "Changes allowed"
 msgstr "Zmiany dozwolone"
 
-#: lib/solaar/ui/config_panel.py:466
+#: lib/solaar/ui/config_panel.py:468
 msgid "No changes allowed"
 msgstr "Zmiany niedozwolone"
 
-#: lib/solaar/ui/config_panel.py:467
+#: lib/solaar/ui/config_panel.py:469
 msgid "Ignore this setting"
 msgstr "Ignoruj to ustawienie"
 
-#: lib/solaar/ui/config_panel.py:512
+#: lib/solaar/ui/config_panel.py:514
 msgid "Working"
 msgstr "Pracuję"
 
-#: lib/solaar/ui/config_panel.py:515
+#: lib/solaar/ui/config_panel.py:517
 msgid "Read/write operation failed."
 msgstr "Operacja odczytu/zapisu nie powiodła się."
 
@@ -1363,14 +1369,18 @@ msgstr "Nieobsługiwane ustawienie"
 msgid "Device"
 msgstr "Urządzenie"
 
-#: lib/solaar/ui/diversion_rules.py:2042 lib/solaar/ui/diversion_rules.py:2289
-#: lib/solaar/ui/diversion_rules.py:2307
+#: lib/solaar/ui/diversion_rules.py:2042 lib/solaar/ui/diversion_rules.py:2284
+#: lib/solaar/ui/diversion_rules.py:2302
 msgid "Originating device"
 msgstr "Urządzenie inicjujące"
 
 #: lib/solaar/ui/diversion_rules.py:2061
 msgid "Value"
 msgstr "Wartość"
+
+#: lib/solaar/ui/diversion_rules.py:2069
+msgid "Item"
+msgstr "Pozycja"
 
 #: lib/solaar/ui/notify.py:122 lib/solaar/ui/tray.py:323
 #: lib/solaar/ui/tray.py:328 lib/solaar/ui/window.py:746
@@ -1703,14 +1713,23 @@ msgstr ""
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lx"
 
-#~ msgid "Thumb Wheel HID++ Scrolling"
-#~ msgstr "Przewijanie HID++ kółkiem obsługiwanym kciukiem"
+#~ msgid "Top-most coordinate."
+#~ msgstr "Współrzędna najbardziej z góry."
 
-#~ msgid "Solaar depends on a udev file that is not present"
-#~ msgstr "Solaar zależy od pliku udev, którego nie ma"
+#~ msgid "top"
+#~ msgstr "góra"
 
-#~ msgid "Scroll Wheel HID++ Scrolling"
-#~ msgstr "Przewijanie HID++ kółkiem przewijania"
+#~ msgid "width"
+#~ msgstr "szerokość"
+
+#~ msgid "height"
+#~ msgstr "wysokość"
+
+#~ msgid "No Logitech receiver found"
+#~ msgstr "Nie znaleziono odbiornika firmy Logitech"
+
+#~ msgid "ERROR: "
+#~ msgstr "BŁĄD: "
 
 #~ msgid ""
 #~ "For more information see the Solaar installation directions\n"
@@ -1719,20 +1738,11 @@ msgstr "%(light_level)d lx"
 #~ "Więcej informacji można znaleźć w instrukcji instalacji Solaar\n"
 #~ "pod adresem https://pwr-solaar.github.io/Solaar/installation"
 
-#~ msgid "ERROR: "
-#~ msgstr "BŁĄD: "
+#~ msgid "Scroll Wheel HID++ Scrolling"
+#~ msgstr "Przewijanie HID++ kółkiem przewijania"
 
-#~ msgid "No Logitech receiver found"
-#~ msgstr "Nie znaleziono odbiornika firmy Logitech"
+#~ msgid "Solaar depends on a udev file that is not present"
+#~ msgstr "Solaar zależy od pliku udev, którego nie ma"
 
-#~ msgid "height"
-#~ msgstr "wysokość"
-
-#~ msgid "width"
-#~ msgstr "szerokość"
-
-#~ msgid "top"
-#~ msgstr "góra"
-
-#~ msgid "Top-most coordinate."
-#~ msgstr "Współrzędna najbardziej z góry."
+#~ msgid "Thumb Wheel HID++ Scrolling"
+#~ msgstr "Przewijanie HID++ kółkiem obsługiwanym kciukiem"
