@@ -7,9 +7,8 @@ layout: page
 
 Solaar only supports Logitech receivers and devices that use the Logitech proprietary HID++ protocol.
 
-Solaar supports most Logitech Nano and Unifying receivers.
+Solaar supports most Logitech Nano, Unifying, and Bolt receivers.
 Solaar supports some Lightspeed receivers.
-Solaar does not currently support Bolt receivers.
 See the receiver table below for the list of currently supported receivers.
 
 Solaar supports most recent and many older Logitech devices
@@ -32,22 +31,24 @@ open an enhancement issue requesting that it be supported.
 ## Adding new receivers and devices
 
 Adding a new receiver requires knowing whether the receiver is a regular
-Unifying receiver, a Nano receiver, or a Lightspeed receiver. Add a line to
+Unifying receiver, a Nano receiver, a Bolt receiver, or a Lightspeed receiver. Add a line to
 `../lib/logitech_receiver/base_usb.py` defining the receiver as one of these.
 If the receiver has an unusual number of pairing slots, then this also needs
 to be specified. Then add the receiver to the tuple of receivers (ALL).
 
-Most new devices do not need to be known to Solaar to work. However, an
-entry in `lib/logitech-receiver/descriptors.py` can provide a better name for
-the device and a feature list can speed up Solaar startup a bit. The
-arguments to the _D function are the device's long name, its short name
-(codename), its HID++ protocol version, its wireless product ID (wpid), and
-a tuple of known feature settings (from `lib/logitech/settings_templates.py`).
-If the device can connect via a USB cable its USB product ID should be included.
-If the device can connect via Bluetooth its Bluetooth product ID should be included.
-
-If a USB device connects via a USB interface other than the default, add that information.
-This is the main reason for new devices that use the HID++ protocol to need support information in Solaar.
+Most new devices do not need to be known to Solaar to work.
+The _D function in `../lib/logitech_receiver/descriptors.py` makes a device known to Solaar.
+The usual arguments to the _D function are the device's long name, its short name
+(codename), and its HID++ protocol version.
+Devices that use HID++ 1.0 need a tuple of known registers (registers) and settings (settings).
+Settings can be provided for Devices that use HID++ 2.0 or later,
+but Solaar can determine these from the device.
+If the device can connect to a receiver, provide its wireless product ID (wpid),
+If the device can connect via Bluetooth, provide its Bluetooth product ID (btid).
+If the device can connect via a USB cable, provide its USB product ID (usbid),
+and the interface it uses to send and receiver HID++ messages (interface - default 2).
+The use of a non-default USB interface is the main reason for requiring information about
+modern devices to be added to Solaar.
 
 
 ### Supported Receivers
@@ -73,6 +74,7 @@ This is the main reason for new devices that use the HID++ protocol to need supp
 | 046d:c53d | Lightspeed | 1                  |
 | 046d:c53f | Lightspeed | 1                  |
 | 046d:c541 | Lightspeed | 1                  |
+| 046d:c542 | Nano       | 1                  |
 | 046d:c545 | Lightspeed | 1                  |
 | 046d:c547 | Lightspeed | 1                  |
 | 046d:c548 | Bolt       | 6                  |

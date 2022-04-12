@@ -17,12 +17,14 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
 from logging import getLogger
+
+import yaml as _yaml
 
 import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # NOQA: E402
-
-from gi.repository import GLib, Gtk  # NOQA: E402 # isort:skip
+from gi.repository import GLib, Gtk, Gio  # NOQA: E402 # isort:skip
 from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
 from solaar.i18n import _  # NOQA: E402 # isort:skip
 
@@ -96,7 +98,7 @@ def ui_async(function, *args, **kwargs):
 #
 #
 
-from . import notify, tray, window  # isort:skip  # noqa: E402
+from . import diversion_rules, notify, tray, window  # isort:skip  # noqa: E402
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -126,9 +128,20 @@ def _activate(app):
 
 
 def _command_line(app, command_line):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('command_line %s', command_line.get_arguments())
-
+    args = command_line.get_arguments()
+    args = _yaml.safe_load(''.join(args)) if args else args
+    if not args:
+        _activate(app)
+    elif args[0] == 'config':  # config call from remote instance
+        if _log.isEnabledFor(_INFO):
+            _log.info('remote command line %s', args)
+        from solaar.ui.config_panel import change_setting  # prevent circular import
+        from solaar.ui.window import find_device  # prevent circular import
+        dev = find_device(args[1])
+        if dev:
+            setting = next((s for s in dev.settings if s.name == args[2]), None)
+            if setting:
+                change_setting(dev, setting, args[3:])
     return 0
 
 
@@ -147,18 +160,18 @@ def _shutdown(app, shutdown_hook):
     notify.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, use_tray, show_window, args=None):
+def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     assert use_tray or show_window, 'need either tray or visible window'
     # from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
-    APP_ID = 'io.github.pwr.solaar'
-    application = Gtk.Application.new(APP_ID, 0)  # _ApplicationFlags.HANDLES_COMMAND_LINE)
+    APP_ID = 'io.github.pwr_solaar.solaar'
+    application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
     application.connect('startup', lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
     application.connect('command-line', _command_line)
     application.connect('activate', _activate)
     application.connect('shutdown', _shutdown, shutdown_hook)
 
-    application.run(args)
+    application.run()
 
 
 #
@@ -177,6 +190,7 @@ def _status_changed(device, alert, reason, refresh=False):
 
     need_popup = alert & ALERT.SHOW_WINDOW
     window.update(device, need_popup, refresh)
+    diversion_rules.update_devices()
 
     if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
         notify.show(device, reason)

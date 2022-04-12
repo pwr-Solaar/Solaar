@@ -20,12 +20,12 @@ Most of Solaar should work fine with any kernel more recent than 5.2,
 but newer kernels might be needed for some devices to be correctly recognized and handled.
 The `udev` package must be installed and its daemon running.
 
-Solaar requires Python 3.6+ and requires several packages to be installed.
+Solaar requires Python 3.7+ and requires several packages to be installed.
 If you are running the system version of Python you should have the
-`python3-pyudev`, `python3-psutil`, `python3-xlib`,
+`python3-pyudev`, `python3-psutil`, `python3-xlib`, `python3-evdev`,
 and `python3-yaml` or `python3-pyyaml` packages installed.
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
-If you are running the system verison of Python
+If you are running the system version of Python
 the Debian/Ubuntu packages you should have
 `python3-gi` and `gir1.2-gtk-3.0` installed.
 in Fedora you need `gtk3` and `python3-gobject`.
@@ -34,6 +34,13 @@ depending on your distribution).
 
 If you are running a version of Python different from the system version,
 you may need to use pip to install projects that provide the above Python packages.
+
+Solaar runs best under X11 with the Xtest extension enabled so that Solaar rules can fake keyboard input using Xtest.
+Solaar also uses the X11 library to access the XKB extension,
+which requires installation of the X11 development package.
+(In Fedora this is `libX11-devel`.  In other distributions it may be `libX11-dev`.)
+Solaar will run under Wayland but some parts of Solaar rules will not work.
+For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
 If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),

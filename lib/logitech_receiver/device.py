@@ -1,4 +1,5 @@
 import errno as _errno
+import threading as _threading
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -43,10 +44,7 @@ class Device:
 
         if receiver:
             assert number > 0 and number <= receiver.max_devices
-        else:
-            assert number == 0xFF
-        # Device number, 1..6 for unifying devices, 1 otherwise.
-        self.number = number
+        self.number = number  # will be None at this point for directly connected devices
         # 'device active' flag; requires manual management.
         self.online = None
 
@@ -76,10 +74,13 @@ class Device:
 
         self._firmware = None
         self._keys = None
+        self._remap_keys = None
         self._gestures = None
+        self._gestures_lock = _threading.Lock()
         self._registers = None
         self._settings = None
         self._feature_settings_checked = False
+        self._settings_lock = _threading.Lock()
 
         # Misc stuff that's irrelevant to any functionality, but may be
         # displayed in the UI and caching it here helps.
@@ -134,11 +135,13 @@ class Device:
         else:
             self.path = info.path
             self.handle = _hid.open_path(self.path)
-            self.online = True
+            self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
-            self.descriptor = _descriptors.get_btid(self.product_id
-                                                    ) if self.bluetooth else _descriptors.get_usbid(self.product_id)
+            self.descriptor = _descriptors.get_btid(self.product_id) if self.bluetooth else \
+                _descriptors.get_usbid(self.product_id)
+            if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
+                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
 
         if self.descriptor:
             self._name = self.descriptor.name
@@ -188,37 +191,29 @@ class Device:
                 self._name = _hidpp20.get_name(self)
         return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))
 
+    def get_ids(self):
+        ids = _hidpp20.get_ids(self)
+        if ids:
+            self._unitId, self._modelId, self._tid_map = ids
+            if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+
     @property
     def unitId(self):
-        if not self._unitId:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._unitId and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._unitId
 
     @property
     def modelId(self):
-        if not self._modelId:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._modelId and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._modelId
 
     @property
     def tid_map(self):
-        if not self._tid_map:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._tid_map and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._tid_map
 
     def update_pairing_information(self):
@@ -261,7 +256,14 @@ class Device:
     def serial(self):
         if not self._serial:
             self.update_extended_pairing_information()
-        return self._serial or '?'
+        return self._serial or ''
+
+    @property
+    def id(self):
+        if not self.serial:
+            if self.persister and self.persister.get('_serial', None):
+                self._serial = self.persister.get('_serial', None)
+        return self.unitId or self.serial
 
     @property
     def power_switch_location(self):
@@ -286,10 +288,19 @@ class Device:
         return self._keys
 
     @property
-    def gestures(self):
-        if not self._gestures:
+    def remap_keys(self):
+        if self._remap_keys is None:
             if self.online and self.protocol >= 2.0:
-                self._gestures = _hidpp20.get_gestures(self) or ()
+                self._remap_keys = _hidpp20.get_remap_keys(self) or ()
+        return self._remap_keys
+
+    @property
+    def gestures(self):
+        if self._gestures is None:
+            with self._gestures_lock:
+                if self._gestures is None:
+                    if self.online and self.protocol >= 2.0:
+                        self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
 
     @property
@@ -304,19 +315,24 @@ class Device:
     @property
     def settings(self):
         if not self._settings:
-            self._settings = []
-            if self.persister and self.descriptor and self.descriptor.settings:
-                for s in self.descriptor.settings:
-                    try:
-                        setting = s(self)
-                    except Exception as e:  # Do nothing if the device is offline
-                        setting = None
-                        if self.online:
-                            raise e
-                    if setting is not None:
-                        self._settings.append(setting)
+            with self._settings_lock:
+                if not self._settings:
+                    settings = []
+                    if self.persister and self.descriptor and self.descriptor.settings:
+                        for sclass in self.descriptor.settings:
+                            try:
+                                setting = sclass.build(self)
+                            except Exception as e:  # Do nothing if the device is offline
+                                setting = None
+                                if self.online:
+                                    raise e
+                            if setting is not None:
+                                settings.append(setting)
+                    self._settings = settings
         if not self._feature_settings_checked:
-            self._feature_settings_checked = _check_feature_settings(self, self._settings)
+            with self._settings_lock:
+                if not self._feature_settings_checked:
+                    self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
 
     @property
@@ -397,7 +413,8 @@ class Device:
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
+        long = self.bluetooth or self._protocol is not None and self._protocol >= 2.0
+        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol
@@ -427,7 +444,7 @@ class Device:
             self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
         )
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
     def notify_devices(self):  # no need to notify, as there are none
         pass
@@ -440,7 +457,7 @@ class Device:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, 0xFF, info=device_info)
+                return Device(None, None, info=device_info)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:

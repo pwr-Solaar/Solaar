@@ -303,7 +303,7 @@ def _create_window_layout():
 
     tree_scroll = Gtk.ScrolledWindow()
     tree_scroll.add(_tree)
-    tree_scroll.set_min_content_width(_tree.get_size_request()[0])
+    tree_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     tree_scroll.set_shadow_type(Gtk.ShadowType.IN)
 
     tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -312,7 +312,7 @@ def _create_window_layout():
     tree_panel.pack_start(_details, False, False, 0)
 
     panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
-    panel.pack_start(tree_panel, True, True, 0)
+    panel.pack_start(tree_panel, False, False, 0)
     panel.pack_start(_info, True, True, 0)
     panel.pack_start(_empty, True, True, 0)
 
@@ -323,7 +323,9 @@ def _create_window_layout():
     bottom_buttons_box.add(quit_button)
     about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(
+        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+    )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
@@ -695,7 +697,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 
         if battery_voltage is not None:
             panel._battery._label.set_text(_('Battery Voltage'))
-            text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+            text = '%(voltage)dmV, %(level)d%%' % {'voltage': battery_voltage, 'level': battery_level}
             tooltip_text = _('Voltage reported by battery')
         elif isinstance(battery_level, _NamedInt):
             panel._battery._label.set_text(_('Battery Level'))
@@ -909,7 +911,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
-        if battery_voltage is not None:
+        if battery_voltage is not None and False:  # Use levels instead of voltage here
             status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
         elif isinstance(battery_level, _NamedInt):
             status_text = _(str(battery_level))
@@ -926,3 +928,18 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
         full_update = full or was_online != is_online
         _update_info_panel(device, full=full_update)
+
+
+def find_device(serial):
+    assert serial, 'need serial number or unit ID to find a device'
+    result = None
+
+    def check(_store, _treepath, row):
+        nonlocal result
+        device = _model.get_value(row, _COLUMN.DEVICE)
+        if device and device.kind and (device.unitId == serial or device.serial == serial):
+            result = device
+            return True
+
+    _model.foreach(check)
+    return result

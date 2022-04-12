@@ -84,9 +84,7 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if len(_devices_info) < 4:
-        # don't bother with scrolling when there's only one receiver
-        # with only one or two devices
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
         return
 
     # scroll events come way too fast (at least 5-6 at once)
@@ -197,8 +195,11 @@ try:
 
         return ind
 
-    def _destroy(indicator):
+    def _hide(indicator):
         indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+
+    def _show(indicator):
+        indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != 'solaar':
@@ -246,8 +247,11 @@ except ImportError:
 
         return icon
 
-    def _destroy(icon):
+    def _hide(icon):
         icon.set_visible(False)
+
+    def _show(icon):
+        icon.set_visible(True)
 
     def _update_tray_icon():
         tooltip_lines = _generate_tooltip_lines()
@@ -405,7 +409,7 @@ def _add_receiver(receiver):
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
     icon_set = _icons.device_icon_set(receiver.name)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
+    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_set.names[0], _MENU_ICON_SIZE))
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver.path)
     _menu.insert(new_menu_item, index)
@@ -463,13 +467,14 @@ def init(_quit_handler):
     _menu = _create_menu(_quit_handler)
     assert _icon is None
     _icon = _create(_menu)
+    update()
 
 
 def destroy():
     global _icon, _menu, _devices_info
     if _icon is not None:
         i, _icon = _icon, None
-        _destroy(i)
+        _hide(i)
         i = None
 
     _icon = None
@@ -525,3 +530,9 @@ def update(device=None):
         _picked_device = _pick_device_with_lowest_battery()
 
     _update_tray_icon()
+
+    if _icon:
+        if not _devices_info:
+            _hide(_icon)
+        else:
+            _show(_icon)

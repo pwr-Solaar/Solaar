@@ -162,6 +162,7 @@ def _find_device(receivers, name):
                 if dev:
                     yield dev
         else:  # wired device, make a device list from it
+            r.ping()
             r = [r]
 
         for dev in r:

@@ -8,7 +8,7 @@ except ImportError:
     from distutils.core import setup
 
 # from solaar import NAME, __version__
-__version__ = '1.1.0'
+__version__ = '1.1.3rc1'
 NAME = 'Solaar'
 
 
@@ -59,15 +59,16 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     # sudo apt install python-gi python3-gi \
     #        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-ayatanaappindicator3-0.1
     # os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
+        'evdev (>= 1.1.2)',
         'pyudev (>= 0.13)',
-        'PyYAML (>= 5.1)',
+        'PyYAML (>= 3.12)',
         'python-xlib (>= 0.27)',
-        'psutil (>= 5.6.0)',
+        'psutil (>= 5.4.3)',
     ],
     package_dir={'': 'lib'},
-    packages=['hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
+    packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
     scripts=_glob('bin/*'),
 )

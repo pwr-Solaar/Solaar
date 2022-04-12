@@ -69,8 +69,8 @@ DEFAULT_TIMEOUT = 4
 _RECEIVER_REQUEST_TIMEOUT = 0.9
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
-# when pinging, be extra patient
-_PING_TIMEOUT = DEFAULT_TIMEOUT * 2
+# when pinging, be extra patient (no longer)
+_PING_TIMEOUT = DEFAULT_TIMEOUT
 
 #
 # Exceptions that may be raised by this API.
@@ -325,6 +325,10 @@ def make_notification(report_id, devnumber, data):
         return
 
     address = ord(data[1:2])
+    if sub_id == 0x00 and (address & 0x0F == 0x00):
+        # this is a no-op notification - don't do anything with it
+        return
+
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
         (sub_id >= 0x40) or  # noqa: E131
@@ -342,7 +346,6 @@ _HIDPP_Notification = namedtuple('_HIDPP_Notification', ('report_id', 'devnumber
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%02x,%d,%02X,%02X,%s)' % (
     self.report_id, self.devnumber, self.sub_id, self.address, _strhex(self.data)
 )
-_HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple
 
 #

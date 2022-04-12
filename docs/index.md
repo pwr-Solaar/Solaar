@@ -18,10 +18,11 @@ Both interfaces are able to list the connected devices and
 show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
-Solaar can also control some changeable features of devices,
-such as smooth scrolling or function key behavior.
-Solaar keeps track of these changed settings on a per-computer basis and the GUI application restores them whenever a device connects.
-(Devices forget most settings when powered down.)
+Solaar can also control some changeable settings of devices,
+such as scroll wheel direction and function key behavior.
+Solaar keeps track of most of these settings on a per-computer basis,
+because devices forget most settings when powered down,
+and the GUI application restores them whenever a device connects.
 For more information on how to use Solaar see
 [the usage page](https://pwr-solaar.github.io/Solaar/usage),
 and for more information on its capabilities see
@@ -46,7 +47,7 @@ Solaar does not process normal input from devices. It is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
 by Linux drivers or other software.
 
-Solaar has progressed past version 1.0. Problems with earlier versions should
+Solaar has progressed past version 1.1. Problems with earlier versions should
 not be reported as bugs. Instead, upgrade to a recent version or manually install
 the current version from [GitHub](https://github.com/pwr-Solaar/Solaar).
 Some capabilities of Solaar have been developed by observing the behavior of
@@ -135,10 +136,6 @@ for the step-by-step procedure for manual installation.
 - Sometimes the system tray icon does not show up.  The cause of this is unknown.
   Either wait a while and try again or try with the `--window=hide` option.
 
-- Running the command-line application while the GUI
-  application is also running *may* occasionally cause either of them to become
-  confused about the state of the devices.
-
 - Some Linux drivers view or modify the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
@@ -146,12 +143,30 @@ for the step-by-step procedure for manual installation.
   "Ignore this setting".
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
-- Many gaming mice have both the ONBOARD PROFILES feature and the REPORT RATE feature.
-  On these mice changing the Polling Rate setting requires modifying a setting in
-  the ONBOARD PROFILES feature, which can modify how the mouse works.  Changing the
-  Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
-  modifying the ONBOARD PROFILES feature.
-  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+- Many gaming mice and keyboards have the ONBOARD PROFILES feature.
+  This feature can override other features, including polling rate and key lighting.
+  To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
+  This may have other effects, such as turning off backlighting.
+
+- Solaar will try to use uinput to simulate input from rules if Xtest is not available
+  but this needs write permission on /dev/uinput.
+  For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
+- Sometimes bluetooth connections are not torn down correctly.
+  This can result in two entries in Solaar for the same device, with only one being active.
+
+## Contributing to Solaar
+
+Conributions to Solaaar are very welcome.
+
+Solaar has complete or  partial translations of its GUI strings into several languages.
+If you want to update a translation or add a new one see
+[the translation page](https://pwr-solaar.github.io/Solaar/i18n) for moe information.
+
+If you find a bug and have a fix for it, please open a bug issue and also a GitHub pull request.
+Label your commits using the naming conventions in recent commits to Solaar.
+If you want to enhance Solaar open an enhancement issue to discuss your proposal.
+There are also usually several open issues for enhancements that have already been requested.
 
 
 ## License

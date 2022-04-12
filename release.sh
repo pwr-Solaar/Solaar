@@ -85,6 +85,10 @@ read -p 'Are you *really* sure you want to proceed? (y/n) ' -n 1 -r < /dev/tty
 echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
+# Check if version is in the changelog
+grep '^# '"$version" ChangeLog.md >/dev/null
+[ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
+
 # Check for uncomitted changes
 git diff --quiet HEAD >/dev/null
 [ $? -ne 0 ] && echo -e '\nError: Uncomitted changes found' && exit 1
@@ -106,10 +110,6 @@ git rev-list --max-count=1 $version >/dev/null 2>/dev/null
 git ls-remote $remote | grep "refs/tags/$version$" >/dev/null
 [ $? -eq 0 ] && echo -e '\nError: Tag already exists on remote' && exit 1
 
-# Check if version is in the changelog
-grep "^$version:" ChangeLog >/dev/null
-[ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
-
 echo
 
 # Create tag
@@ -123,7 +123,7 @@ echo 'Creating tag...'
             [ "$line" == "$version:" ] && found=yes || found=no
         fi
         [ "$found" == 'yes' ] && [ "${line:0:1}" == '*' ] && echo "$line"
-    done < ChangeLog
+    done < ChangeLog.md
 } > /tmp/solaar-changelog
 [ -z "$DRY_RUN" ] && git tag -s $version -F /tmp/solaar-changelog >/dev/null || true
 [ $? -ne 0 ] && echo -e '\nError: Failed to create tag' && exit 1

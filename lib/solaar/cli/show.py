@@ -22,6 +22,7 @@ from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import strhex as _strhex
+from solaar import NAME, __version__
 
 _F = _hidpp20.FEATURE
 
@@ -170,7 +171,7 @@ def _print_device(dev, num=None):
                         print('            Provide vertical tuning, trackball')
                     else:
                         print('            No vertical tuning, standard mice')
-            if feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+            elif feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
                     print('            Roller type: %s' % vertical_scrolling_info['roller'])
@@ -230,19 +231,20 @@ def _print_device(dev, num=None):
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
-                    if setting._device and getattr(setting._device, 'persister',
-                                                   None) and setting._device.persister.get(setting.name) is not None:
-                        print('            %s (saved): %s' % (setting.label, setting._device.persister.get(setting.name)))
-                    v = setting.read(False)
+                    if setting._device and getattr(setting._device, 'persister', None) and \
+                       setting._device.persister.get(setting.name) is not None:
+                        v = setting.val_to_string(setting._device.persister.get(setting.name))
+                        print('            %s (saved): %s' % (setting.label, v))
+                    v = setting.val_to_string(setting.read(False))
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
-            if dev.keys.keyversion == 1:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V2:
                 print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
-            if dev.keys.keyversion == 4:
+            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ','.join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
@@ -250,17 +252,24 @@ def _print_device(dev, num=None):
                 report_fmt = ', '.join(k.mapping_flags)
                 report_fmt = report_fmt if report_fmt else 'default'
                 print('             reporting: %s' % (report_fmt))
+    if dev.online and dev.remap_keys:
+        print('     Has %d persistent remappable keys:' % len(dev.remap_keys))
+        for k in dev.remap_keys:
+            print('        %2d: %-26s => %s%s' % (k.index, k.key, k.action, ' (remapped)' if k.cidStatus else ''))
     if dev.online and dev.gestures:
         print(
             '     Has %d gesture(s), %d param(s) and %d spec(s):' %
             (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
         )
         for k in dev.gestures.gestures.values():
-            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
+            print(
+                '        %-26s Enabled(%4s): %-5s  Diverted:(%4s) %s' %
+                (k.gesture, k.index, k.enabled(), k.diversion_index, k.diverted())
+            )
         for k in dev.gestures.params.values():
-            print('        %-26s Value   (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
+            print('        %-26s Value  (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
         for k in dev.gestures.specs.values():
-            print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
+            print('        %-26s Spec   (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
         _battery_line(dev)
     else:
@@ -270,6 +279,9 @@ def _print_device(dev, num=None):
 def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
+
+    print('%s version %s' % (NAME, __version__))
+    print('')
 
     device_name = args.device.lower()
 
@@ -289,7 +301,8 @@ def run(devices, args, find_receiver, find_device):
                 print('')
             else:
                 if dev_num == 1:
-                    print('Wired Devices')
+                    print('USB and Bluetooth Devices')
+                print('')
                 _print_device(d, num=dev_num)
                 dev_num += 1
         return

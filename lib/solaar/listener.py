@@ -78,8 +78,9 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
-        if receiver.isDevice:  # (wired) devices start as active
-            receiver.status.changed(True)
+        if receiver.isDevice:  # ping (wired) devices to see if they are really online
+            if receiver.ping():
+                receiver.status.changed(True, reason='initialization')
 
     def has_started(self):
         if _log.isEnabledFor(_INFO):
@@ -197,6 +198,12 @@ class ReceiverListener(_listener.EventsListener):
                 _log.debug('Notification %s via device %s being ignored.', n, self.receiver)
             return
 
+        # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
+        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
+            if _log.isEnabledFor(_INFO):
+                _log.info('ignoring DJ pairing notification %s', n)
+            return
+
         # a device notification
         if not (0 < n.devnumber <= self.receiver.max_devices):
             if _log.isEnabledFor(_WARNING):
@@ -217,12 +224,7 @@ class ReceiverListener(_listener.EventsListener):
         if n.sub_id == 0x40 and not already_known:
             return  # disconnecting something that is not known - nothing to do
 
-        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
-            # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
-            if _log.isEnabledFor(_INFO):
-                _log.info('ignoring DJ pairing notification %s', n)
-            return
-        elif n.sub_id == 0x41:
+        if n.sub_id == 0x41:
             if not already_known:
                 if n.address == 0x0A and not self.receiver.receiver_kind == 'bolt':
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
@@ -272,8 +274,6 @@ class ReceiverListener(_listener.EventsListener):
 
     def __str__(self):
         return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
-
-    __unicode__ = __str__
 
 
 #
@@ -342,18 +342,18 @@ def ping_all(resuming=False):
     for l in _all_listeners.values():
         if l.receiver.isDevice:
             if resuming:
-                l.receiver.status._active = False
+                l.receiver.status._active = None  # ensure that settings are pushed
             if l.receiver.ping():
-                l.receiver.status.changed(active=True)
+                l.receiver.status.changed(active=True, push=True)
             l._status_changed(l.receiver)
         else:
             count = l.receiver.count()
             if count:
                 for dev in l.receiver:
                     if resuming:
-                        dev.status._active = False
+                        dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
-                        dev.status.changed(active=True)
+                        dev.status.changed(active=True, push=True)
                     l._status_changed(dev)
                     count -= 1
                     if not count:
