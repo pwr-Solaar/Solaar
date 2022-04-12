@@ -17,7 +17,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Reprogrammable keys information
-# Mostly from Logitech documentation, but with some edits for better Lunix compatability
+# Mostly from Logitech documentation, but with some edits for better Lunix compatibility
 
 from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts

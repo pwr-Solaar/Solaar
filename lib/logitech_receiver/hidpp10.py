@@ -44,8 +44,8 @@ DEVICE_KIND = _NamedInts(
     trackball=0x08,
     touchpad=0x09,
     headset=0x0D,  # not from Logitech documentation
-    remote_control=0x0E,  # for compatability with HID++ 2.0
-    receiver=0x0F  # for compatability with HID++ 2.0
+    remote_control=0x0E,  # for compatibility with HID++ 2.0
+    receiver=0x0F  # for compatibility with HID++ 2.0
 )
 
 POWER_SWITCH_LOCATION = _NamedInts(

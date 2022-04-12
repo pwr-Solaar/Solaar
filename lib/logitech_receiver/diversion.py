@@ -100,7 +100,7 @@ except Exception:
 
 xtest_available = True  # Xtest might be available
 xdisplay = None
-Xkbdisplay = None  # xkb might be avilable
+Xkbdisplay = None  # xkb might be available
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
 

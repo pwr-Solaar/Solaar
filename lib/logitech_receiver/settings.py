@@ -810,7 +810,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         # each element of options is an instance of a class
         # that has an id (which is used as an index in other dictionaries)
         # and where om_method is a method that returns a byte offset and byte mask
-        # that says how to access and modify the bit toogle for the option
+        # that says how to access and modify the bit toggle for the option
         self.options = options
         self.om_method = om_method
         # to retrieve the options efficiently:
@@ -1203,7 +1203,7 @@ class MultipleRangeValidator(Validator):
                 return None
         return [int(item), {**args[1]}]
 
-    def commpare(self, args, current):
+    def compare(self, args, current):
         _log.warn('compare not implemented for multiple range settings')
         return False
 

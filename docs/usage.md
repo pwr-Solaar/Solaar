@@ -90,7 +90,7 @@ moving sliders, or selecting from alternatives.
 
 ![Solaar-main-window-mouse](Solaar-main-window-mouse.png)
 
-Device setings now have a clickable icon that determines whether the
+Device settings now have a clickable icon that determines whether the
 setting can be changed and whether the setting is ignored.
 
 ![Solaar-divert-back](Solaar-main-window-back-divert.png)
