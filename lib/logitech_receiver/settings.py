@@ -116,7 +116,7 @@ class BooleanValidator(Validator):
             assert tv != fv  # true and false might be something other than bit values
             assert tv & mv == tv
             assert fv & mv == fv
-            self.needs_current_value = any(m != b'\xFF' for m in mask)
+            self.needs_current_value = any(m != 0xff for m in mask)
         else:
             raise Exception("invalid mask '%r', type %s" % (mask, type(mask)))
 
