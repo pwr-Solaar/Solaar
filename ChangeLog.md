@@ -9,7 +9,7 @@
 * Remove obsolete upower signals.
 * Appinfo/metadata fixes including using correct APP_ID.
 * Fix bugs in solaar config.
-* Add full set of mouse buttons in persistent remappable actions seeting.
+* Add full set of mouse buttons in persistent remappable actions setting.
 * Improve rule behaviour under Wayland and when Xtest or X11 not available.
 * Fix up and document dependencies (evdev, Python, ...).
 
@@ -22,7 +22,7 @@
 * Broaden range of HID++ Bluetooth devices
 * Add setting to divert gestures
 * Rule editor can edit all rule components
-* Configuation via solaar config takes effect in Solaar UI if it is running
+* Configuration via solaar config takes effect in Solaar UI if it is running
 * Add setting to disable Onboard Profiles and decouple from Polling Rate setting
 * Add setting for PERSISTENT_REMAPPABLE_ACTION, common keyboard and mouse cases only
 * Split Test rule condition into Test and TestBytes and support in rule editor

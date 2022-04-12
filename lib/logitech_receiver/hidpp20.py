@@ -475,7 +475,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         self._setCidReporting(flags=flags)
 
     def set_rawXY_reporting(self, value: bool):
-        """If set, the mouse temporarilty reports all its raw XY events while this control is pressed as HID++ events."""
+        """If set, the mouse temporarily reports all its raw XY events while this control is pressed as HID++ events."""
         flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
         self._setCidReporting(flags=flags)
 

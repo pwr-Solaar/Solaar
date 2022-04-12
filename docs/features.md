@@ -154,7 +154,7 @@ A setting implementation for a feature (for modern devices that use the HID++ 2.
 needs a feature identifier.
 A setting implementation needs a reader/writer and a validator.
 
-The reader/writer is resposible for actually writing settings to the device
+The reader/writer is responsible for actually writing settings to the device
 and reading them from the device, writing and reading the byte strings that
 represent the setting values on the device.
 For most feature settings the setting implementation can just inherit
@@ -162,7 +162,7 @@ the standard feature reader/writer, `FeatureRW`.
 
 Options for `FeatureRW` are supplied by the `rw_options` class variable,
 which is used to provide command numbers for reading and writing as well
-as other information needed to identify the parts of the command and reponse
+as other information needed to identify the parts of the command and response
 that hold the setting value and modify the reading and writing procedure.
 `PointerSpeed` uses the defaults; here is an example of specifying non-default commands
 for reading and writing:

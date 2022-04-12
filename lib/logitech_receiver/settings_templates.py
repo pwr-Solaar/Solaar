@@ -166,7 +166,7 @@ class RegisterSideScroll(_Setting):
     validator_options = {'true_value': 0x02, 'mask': 0x02}
 
 
-# different devices have different sets of permissable dpis, so this should be subclassed
+# different devices have different sets of permissible dpis, so this should be subclassed
 class RegisterDpi(_Setting):
     name = 'dpi-old'
     label = _('Sensitivity (DPI - older mice)')

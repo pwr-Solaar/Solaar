@@ -68,7 +68,7 @@ evaluating each of their components in order.
 An Or condition is terminated early if a component evaluates to true or the
 last evaluated sub-component of a component is an action.
 A Or condition is true if its last evaluated component evaluates to a true
-value.  `And` conditions take a sequence of components are evaluted the same
+value.  `And` conditions take a sequence of components are evaluated the same
 as rules.
 
 `Feature` conditions are if true if the name of the feature of the current
@@ -195,7 +195,7 @@ Here is a file with six rules:
 ---
 - Key: [M2, pressed]
 - Set: [198E3EB8, dpi, 3000]
-- Execute: [notify-send, Incresed mouse speed]
+- Execute: [notify-send, Increased mouse speed]
 ...
 ---
 - Key: [Host Switch Channel 2, pressed]
