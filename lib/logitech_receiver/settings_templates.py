@@ -1200,8 +1200,8 @@ def check_feature(device, sclass):
         return
     try:
         detected = sclass.build(device)
-        if _log.isEnabledFor(_INFO):
-            _log.info('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
         return detected
     except Exception:
         from traceback import format_exc
@@ -1211,7 +1211,7 @@ def check_feature(device, sclass):
 # Returns True if device was queried to find features, False otherwise
 def check_feature_settings(device, already_known):
     """Auto-detect device settings by the HID++ 2.0 features they have."""
-    if device.features is None or not device.online:
+    if not device.features or not device.online:
         return False
     if device.protocol and device.protocol < 2.0:
         return False
