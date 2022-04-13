@@ -171,6 +171,9 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     application.connect('activate', _activate)
     application.connect('shutdown', _shutdown, shutdown_hook)
 
+    application.register()
+    if application.get_is_remote():
+        print(_('Another Solaar process is already running so just expose its window'))
     application.run()
 
 
