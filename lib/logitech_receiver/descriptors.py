@@ -267,15 +267,12 @@ _D('Wireless Mouse M150', protocol=2.0, wpid='4022')
 _D('Wireless Mouse M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041', btid=0xb012)
 _D('Anywhere Mouse MX 2', codename='Anywhere MX 2', protocol=4.5, wpid='404A', settings=[_ST.HiresSmoothInvert])
-_D('Wireless Mouse M510', protocol=2.0, wpid='4051', codename='M510v2', settings=[_ST.LowresSmoothScroll])
-_D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054',
-    settings=[_ST.LowresSmoothScroll, _ST.PointerSpeed])
-_D('Wireless Mouse M185/M235/M310', codename='M185/M235/M310', protocol=4.5, wpid='4055',
-    settings=[_ST.LowresSmoothScroll, _ST.PointerSpeed])
+_D('Wireless Mouse M510', protocol=2.0, wpid='4051', codename='M510v2')
+_D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054')
+_D('Wireless Mouse M185/M235/M310', codename='M185/M235/M310', protocol=4.5, wpid='4055')
 _D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5, wpid='4069', btid=0xb019,
     settings=[_ST.HiresSmoothInvert])
-_D('Multi Device Silent Mouse M585/M590', codename='M585/M590', protocol=4.5, wpid='406B',
-    settings=[_ST.LowresSmoothScroll, _ST.PointerSpeed])
+_D('Multi Device Silent Mouse M585/M590', codename='M585/M590', protocol=4.5, wpid='406B')
 _D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',
     settings=[_ST.HiresSmoothInvert, _ST.PointerSpeed])
 _D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407B', btid=0xb020, usbid=0xc08a)
