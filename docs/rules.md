@@ -14,7 +14,7 @@ When running under Wayland without X11 libraries loaded even more features will 
 Rule features known not to work under Wayland include process and mouse process conditions.
 Under Wayland using keyboard groups may result in incorrect symbols being input for simulated input.
 Under Wayland simulating inputs when modifier keys are pressed may result in incorrect symbols being input.
-Simulated input uses Xtest if available or uinput if the user has write access to /dev/uinput.
+Simulated input uses Xtest if available under X11 or uinput if the user has write access to /dev/uinput.
 To get access to /dev/uinput run `sudo setfacl -m u:${user}:rw /dev/uinput`*
 
 Logitech devices that use HID++ version 2.0 or greater produce feature-based
