@@ -1191,10 +1191,15 @@ class FeatureUI(ConditionUI):
 
     CLASS = _DIV.Feature
     FEATURES_WITH_DIVERSION = [
-        'CROWN',
-        'GESTURE 2',
-        'REPROG CONTROLS V4',
-        'THUMB WHEEL',
+        str(_ALL_FEATURES.CROWN),
+        str(_ALL_FEATURES.THUMB_WHEEL),
+        str(_ALL_FEATURES.LOWRES_WHEEL),
+        str(_ALL_FEATURES.HIRES_WHEEL),
+        str(_ALL_FEATURES.GESTURE_2),
+        str(_ALL_FEATURES.REPROG_CONTROLS_V4),
+        str(_ALL_FEATURES.GKEY),
+        str(_ALL_FEATURES.MKEYS),
+        str(_ALL_FEATURES.MR),
     ]
 
     def create_widgets(self):
