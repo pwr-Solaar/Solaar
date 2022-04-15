@@ -237,11 +237,11 @@ class HiResScroll(_Setting):
     feature = _F.HI_RES_SCROLLING
 
 
-class LowresSmoothScroll(_Setting):
-    name = 'lowres-smooth-scroll'
+class LowresMode(_Setting):
+    name = 'lowres-scroll-mode'
     label = _('Scroll Wheel Diversion')
-    description = (
-        _('HID++ mode for vertical scroll with the wheel.') + '\n' + _('Effectively turns off wheel scrolling in Linux.')
+    description = _(
+        'Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
     )
     feature = _F.LOWRES_WHEEL
 
@@ -267,6 +267,17 @@ class HiresSmoothResolution(_Setting):
     validator_options = {'true_value': 0x02, 'mask': 0x02}
 
 
+class HiresMode(_Setting):
+    name = 'hires-scroll-mode'
+    label = _('Scroll Wheel Diversion')
+    description = _(
+        'Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
+    )
+    feature = _F.HIRES_WHEEL
+    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    validator_options = {'true_value': 0x01, 'mask': 0x01}
+
+
 class PointerSpeed(_Setting):
     name = 'pointer_speed'
     label = _('Sensitivity (Pointer Speed)')
@@ -281,8 +292,9 @@ class PointerSpeed(_Setting):
 class ThumbMode(_Setting):
     name = 'thumb-scroll-mode'
     label = _('Thumb Wheel Diversion')
-    description = _('HID++ mode for horizontal scroll with the thumb wheel.') + '\n' + \
-        _('Effectively turns off thumb scrolling in Linux.')
+    description = _(
+        'Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
+    )
     feature = _F.THUMB_WHEEL
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     validator_options = {'true_value': b'\x01\x00', 'false_value': b'\x00\x00', 'mask': b'\x01\x00'}
@@ -1140,9 +1152,10 @@ SETTINGS = [
     RegisterDpi,
     RegisterFnSwap,  # working
     HiResScroll,  # simple
-    LowresSmoothScroll,  # simple
+    LowresMode,  # simple
     HiresSmoothInvert,  # working
     HiresSmoothResolution,  # working
+    HiresMode,  # simple
     SmartShift,  # working
     SmartShiftEnhanced,  # simple
     ThumbMode,  # working
