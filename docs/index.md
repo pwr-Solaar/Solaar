@@ -148,7 +148,7 @@ for the step-by-step procedure for manual installation.
   To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
   This may have other effects, such as turning off backlighting.
 
-- Solaar will try to use uinput to simulate input from rules if Xtest is not available
+- Solaar will try to use uinput to simulate input from rules under Wayland or if Xtest is not available
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 

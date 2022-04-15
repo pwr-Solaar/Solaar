@@ -6,6 +6,8 @@
 
 * Solaar rules work better under Wayland but still cannot access the current process nor the current keyboard modifiers.
 
+* Solaar uses uinput for simulating input in Wayland.  See https://pwr-solaar.github.io/Solaar/rules for instructions on setting up uinput correctly.
+
 ## Version 1.1.2
 
 * Solaar now depends on Python evdev.  It can be installed if needed via `pip install --user evdev` or, in most distributions, by installing the python3-evdev package.

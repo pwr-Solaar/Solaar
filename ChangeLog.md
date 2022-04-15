@@ -1,12 +1,15 @@
-# 1.1.3rc2
+# 1.1.3rc3
 
+* Update documentation files
+* Lower remove python 3.7 constructs and lower python dependency to 3.6
+* Fix bug in xtest mouse scrolling
 * Allow mouse gesture setting for non-mice, e.g., trackballs
 * Print message when there is another Solaar process running
 * Fix determination of whether to force read before writing boolean setting
 * Add recent diversion features to default list in rules UI
 * Add setting to divert hires scroll wheel
 * Don't use device kind to determine how to handle notifications
-* Update Polish and Russian translations
+* Update Polish, Russian, and zh_CN translations
 * Remove pggettext so as to not require Python 3.8
 * Remove Python 2 unicode support
 * Store keys in configuration file as int instead of str
