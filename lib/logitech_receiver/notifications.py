@@ -54,7 +54,7 @@ def process(device, notification):
     status = device.status
     assert status is not None
 
-    if device.kind is None:
+    if not device.isDevice:
         return _process_receiver_notification(device, status, notification)
 
     return _process_device_notification(device, status, notification)
