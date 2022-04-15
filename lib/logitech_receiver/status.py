@@ -71,7 +71,7 @@ def attach_to(device, changed_callback):
     assert changed_callback
 
     if not hasattr(device, 'status') or device.status is None:
-        if device.kind is None:
+        if not device.isDevice:
             device.status = ReceiverStatus(device, changed_callback)
         else:
             device.status = DeviceStatus(device, changed_callback)
