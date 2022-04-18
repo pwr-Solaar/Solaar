@@ -322,9 +322,9 @@ def simulate_scroll(dx, dy):
     if not wayland and xtest_available:
         success = True
         if dx:
-            success = click(7 if dx > 0 else 6, count=abs(dx))
+            success = click_xtest(buttons['scroll_right' if dx > 0 else 'scroll_left'], count=abs(dx))
         if dy and success:
-            success = click(4 if dy > 0 else 5, count=abs(dy))
+            success = click_xtest(buttons['scroll_up' if dy > 0 else 'scroll_down'], count=abs(dy))
         if success:
             return True
     if setup_uinput():
