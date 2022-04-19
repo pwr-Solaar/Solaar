@@ -1219,15 +1219,15 @@ def check_feature_settings(device, already_known):
     newAbsent = []
     for sclass in SETTINGS:
         if sclass.feature:
-            if sclass.name not in absent and not any(s.name == sclass.name for s in already_known):
+            known_present = device.persister and sclass.name in device.persister
+            if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
                 setting = check_feature(device, sclass)
                 if setting:
                     already_known.append(setting)
                     if sclass.name in newAbsent:
                         newAbsent.remove(sclass.name)
-                else:
-                    if not any(s.name == sclass.name for s in already_known) and sclass.name not in newAbsent:
-                        newAbsent.append(sclass.name)
+                elif sclass.name not in newAbsent and sclass.name not in absent and sclass.name not in device.persister:
+                    newAbsent.append(sclass.name)
     if device.persister and newAbsent:
         absent.extend(newAbsent)
         device.persister['_absent'] = absent
