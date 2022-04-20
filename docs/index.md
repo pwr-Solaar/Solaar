@@ -159,13 +159,12 @@ for the step-by-step procedure for manual installation.
 
 Conributions to Solaaar are very welcome.
 
-Solaar has complete or  partial translations of its GUI strings into several languages.
-If you want to update a translation or add a new one see
-[the translation page](https://pwr-solaar.github.io/Solaar/i18n) for moe information.
+Solaar has complete or partial translations of its GUI strings in several languages.
+If you want to update a translation or add a new one see [the translation page](https://pwr-solaar.github.io/Solaar/i18n) for more information.
 
-If you find a bug and have a fix for it, please open a bug issue and also a GitHub pull request.
-Label your commits using the naming conventions in recent commits to Solaar.
-If you want to enhance Solaar open an enhancement issue to discuss your proposal.
+If you find a bug, please check first if it has already been reported. If yes, please add additional information you may have to the existing issue. If not, please open a new bug report issue. If you can provide a fix for it, please also open a GitHub pull request. Label your commits using the naming conventions in recent commits to Solaar.
+
+If you want to add a new feature to Solaar, feel free to open a feature request issue to discuss your proposal.
 There are also usually several open issues for enhancements that have already been requested.
 
 
