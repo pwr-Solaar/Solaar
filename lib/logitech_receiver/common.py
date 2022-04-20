@@ -82,14 +82,15 @@ class NamedInts:
     """
     __slots__ = ('__dict__', '_values', '_indexed', '_fallback', '_is_sorted')
 
-    def __init__(self, **kwargs):
+    def __init__(self, dict=None, **kwargs):
         def _readable_name(n):
             if not is_string(n):
                 raise TypeError('expected string, got ' + str(type(n)))
             return n.replace('__', '/').replace('_', ' ')
 
         # print (repr(kwargs))
-        values = {k: NamedInt(v, _readable_name(k)) for (k, v) in kwargs.items()}
+        elements = dict if dict else kwargs
+        values = {k: NamedInt(v, _readable_name(k)) for (k, v) in elements.items()}
         self.__dict__ = values
         self._is_sorted = False
         self._values = list(values.values())
