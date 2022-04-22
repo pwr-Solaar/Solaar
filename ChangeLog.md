@@ -1,4 +1,4 @@
-# 1.1.3rc3
+# 1.1.3
 
 * Update documentation files
 * Lower remove python 3.7 constructs and lower python dependency to 3.6
