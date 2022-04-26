@@ -186,7 +186,9 @@ def persister(device):
             entry = c
             break
     if not entry:
-        if not device.online and device.protocol > 1.0:  # don't create entry for unseen offline modern devices
+        if not device.online and not device.serial:  # don't create entry for offline devices without serial number
+            if _log.isEnabledFor(_INFO):
+                _log.info('not creating persister for device %s', device.get('name'))
             return
         entry = _DeviceEntry()
         _config.append(entry)
