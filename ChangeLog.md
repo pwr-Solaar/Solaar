@@ -1,3 +1,33 @@
+# 1.1.4rc1
+
+* Add depress and release options to KeyPress rule action
+* Only close existing devices for receiver
+* Differentiate debug messages for different setting types
+* Implement packed range setting in config panel
+* Only produce warning for unimplemented display of setting
+* Add sidetone and equalizer settings for headsets
+* Add packed ranges setting
+* Use built-ins for conversions between int and byte string
+* Don't add HI_RES wheel ecodes to evdev device codes
+* Handle null key in persistent remappable actions when device does not respond
+* Consult polling rate feature for polling rate
+* Eliminate extra file handles
+* Close file handles for receiver-connected devices
+* Access to more keys in KeyPress rule action when in other keyboard groups
+* Update Turkish translation
+* Put battery levels in tray menu labels
+* Reduce warnings for inaccessible keys in KeyPress rule action
+* Better determination of keycodes and insert needed shifts in KeyPress actions.
+* Be careful when processing notifications for partly set up devices.
+* Clear out fields for empty persistent remappable action.
+* Fix message generation when device is offline.
+* Fix bug in feature lookup.
+* Add support for G533 Headset and G502 Gaming Mouse
+* Improve device features handling.
+* Keep trying settings that have worked in the past.
+* Store None in persisters for non-persisting settings.
+* Only create configuration entries for off-line devices if they have a serial number.
+
 # 1.1.3
 
 * Update documentation files
