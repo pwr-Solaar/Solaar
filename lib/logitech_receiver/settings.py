@@ -255,10 +255,10 @@ class Setting:
             # maybe we have something in the configuration.
             self._value = self._device.persister.get(self.name)
         if cached and self._value is not None:
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # If this is a new device (or a new setting for an old device),
                 # make sure to save its current value for the next time.
-                self._device.persister[self.name] = self._value
+                self._device.persister[self.name] = self._value if self.persist else None
 
     def read(self, cached=True):
         assert hasattr(self, '_value')
@@ -275,18 +275,18 @@ class Setting:
             reply = self._rw.read(self._device)
             if reply:
                 self._value = self._validator.validate_read(reply)
-            if self.persist and self._device.persister and self.name not in self._device.persister:
+            if self._device.persister and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
-                self._device.persister[self.name] = self._value
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def _pre_write(self, save=True):
         # Remember the value we're trying to set, even if the write fails.
         # This way even if the device is offline or some other error occurs,
         # the last value we've tried to write is remembered in the configuration.
-        if self.persist and self._device.persister and save:
-            self._device.persister[self.name] = self._value
+        if self._device.persister and save:
+            self._device.persister[self.name] = self._value if self.persist else None
 
     def write(self, value, save=True):
         assert hasattr(self, '_value')
@@ -371,10 +371,10 @@ class Settings(Setting):
                 if reply:
                     reply_map[int(key)] = self._validator.validate_read(reply, key)
             self._value = reply_map
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
-                self._device.persister[self.name] = self._value
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def read_key(self, key, cached=True):
@@ -392,8 +392,8 @@ class Settings(Setting):
             reply = self._rw.read(self._device, key)
             if reply:
                 self._value[int(key)] = self._validator.validate_read(reply, key)
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                self._device.persister[self.name] = self._value
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(key)]
 
     def write(self, map, save=True):
@@ -470,10 +470,10 @@ class LongSettings(Setting):
                 if reply:
                     reply_map[int(item)] = self._validator.validate_read_item(reply, item)
             self._value = reply_map
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
-                self._device.persister[self.name] = self._value
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def read_item(self, item, cached=True):
@@ -492,8 +492,8 @@ class LongSettings(Setting):
             reply = self._rw.read(self._device, r)
             if reply:
                 self._value[int(item)] = self._validator.validate_read_item(reply, item)
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                self._device.persister[self.name] = self._value
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(item)]
 
     def write(self, map, save=True):
@@ -562,10 +562,10 @@ class BitFieldSetting(Setting):
             if reply:
                 reply_map = self._validator.validate_read(reply)
             self._value = reply_map
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
-                self._device.persister[self.name] = self._value
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def _do_read(self):
@@ -587,8 +587,8 @@ class BitFieldSetting(Setting):
             reply = self._do_read_key(key)
             if reply:
                 self._value = self._validator.validate_read(reply)
-            if self.persist and getattr(self._device, 'persister', None) and self.name not in self._device.persister:
-                self._device.persister[self.name] = self._value
+            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+                self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(key)]
 
     def _do_read_key(self, key):
