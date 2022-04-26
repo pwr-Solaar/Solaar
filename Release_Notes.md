@@ -1,5 +1,13 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.4
+
+* There are settings for sidetone and equalizer gains for headsets.
+
+* The KeyPress action can now either deppress, release, or click (default) keys.
+
+* The KeyPress action now inserts shift and level 3 keypresses if simulating a key symbol requires one or both of them.  So producing a "B" no longer requires adding a shift keysymbol.
+
 ## Version 1.1.3
 
 * Solaar uses yaml for configuration files, converting the json configuration file to yaml if necessary.
