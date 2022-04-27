@@ -1158,8 +1158,8 @@ SETTINGS = [
     HiresMode,  # simple
     SmartShift,  # working
     SmartShiftEnhanced,  # simple
-    ThumbMode,  # working
     ThumbInvert,  # working
+    ThumbMode,  # working
     OnboardProfiles,
     ReportRate,  # working
     PointerSpeed,  # simple
@@ -1177,8 +1177,8 @@ SETTINGS = [
     PersistentRemappableAction,
     DivertKeys,  # working
     DisableKeyboardKeys,  # working
-    DivertCrown,  # working
     CrownSmooth,  # working
+    DivertCrown,  # working
     DivertGkeys,  # working
     MKeyLEDs,  # working
     MRKeyLED,  # working
