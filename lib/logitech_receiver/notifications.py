@@ -192,7 +192,7 @@ def _process_device_notification(device, status, n):
         _log.warn('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
         return False
     try:
-        feature = device.features[n.sub_id]
+        feature = device.features.get_feature(n.sub_id)
     except IndexError:
         _log.warn('%s: notification from invalid feature index %02X: %s', device, n.sub_id, n)
         return False
