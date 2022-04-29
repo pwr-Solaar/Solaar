@@ -1243,7 +1243,7 @@ class ActionSettingRW:
 
     def write(self, device, data_bytes):
         def handler(device, n):  # Called on notification events from the device
-            if n.sub_id < 0x40 and device.features[n.sub_id] == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+            if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
                     cids = _unpack('!HHHH', n.data[:8])
                     if not self.pressed and int(self.key.key) in cids:  # trigger key pressed
