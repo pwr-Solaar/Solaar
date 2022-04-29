@@ -152,7 +152,7 @@ for the step-by-step procedure for manual installation.
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
-- Sometimes bluetooth connections are not torn down correctly.
+- Sometimes bluetooth connections are not torn down correctly by Linux.
   This can result in two entries in Solaar for the same device, with only one being active.
 
 ## Contributing to Solaar
