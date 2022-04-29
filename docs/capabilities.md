@@ -138,10 +138,10 @@ Solaar can process HID++ Notifications from devices to, for example,
 change the speed of some thumb wheels.  These notifications are only sent
 for actions that are set in Solaar to their HID++ setting (also known as diverted).
 For more information on this capability of Solaar see
-[the rules page](https://pwr-solaar.github.io/Solaar/rules).  As much of rule processing
-depends on X11, this capability is only when running under X11.
+[the rules page](https://pwr-solaar.github.io/Solaar/rules).
+Some features of rules do not work under Wayland.
 
-Users can edit rules using a GUI by clicking on the `Edit Rule` button in the Solaar main window.
+Users can edit rules using a GUI by clicking on the `Rule Editor` button in the Solaar main window.
 
 Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
 
