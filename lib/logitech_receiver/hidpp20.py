@@ -727,6 +727,8 @@ class KeysArrayPersistent(KeysArray):
                 remapped = special_keys.HORIZONTAL_SCROLL[remapped]
             elif actionId == special_keys.ACTIONID.Consumer:
                 remapped = special_keys.HID_CONSUMERCODES[remapped]
+            elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
+                remapped = modifiers = status = 0
             self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
         elif _log.isEnabledFor(_WARNING):
             _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
