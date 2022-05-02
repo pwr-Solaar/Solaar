@@ -155,9 +155,16 @@ For settings that use gestures as an argument the internal name of the gesture i
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 For boolean settings '~' can be used to toggle the setting.
 
-A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard, such as "A", "Shift+A", or "Control+A".
-Any key symbols that correspond to modifier keys that are in the current keyboard modifiers are ignored.
+A `KeyPress` action takes a sequence of X11 key symbols and simulates a chorded keypress on the keyboard,
+such as "A", "Shift+A", or "Control+A".
 Use separate  `KeyPress` actions for multiple characters.
+If Solaar can determine the current modifier keys,
+any key symbols that correspond to these modifier keys are not pressed.
+Simulating input in Linux is complex.
+Solaar has to try to determine which keyboard key corresponds to which input character as it cannot directly
+simulate inputting a character and, unfortunately, this determination can go wrong in multiple ways and is more likely
+to go wrong under Wayland than under X11.
+
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
