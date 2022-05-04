@@ -836,14 +836,14 @@ class KeyPress(Action):
     def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
         group = kbdgroup() or 0
         keycodes = gkeymap.get_entries_for_keyval(keysym)
-        if len(keycodes.keys) == 1:
-            k = keycodes.keys[0]
-            return k.keycode
-        else:
-            for k in keycodes.keys:
-                if group is None or group == k.group:
-                    return k.keycode
+        (keycode, level) = (None, None)
+        for k in keycodes.keys:
+            if (group == k.group or len(keycodes.keys) == 1) and k.keycode < 256 and (level is None or k.level < level):
+                keycode = k.keycode
+                level = k.level
+        if keycode is None:
             _log.warn('rule KeyPress key symbol not currently available %s', self)
+        return (keycode, level)
 
     def __str__(self):
         return 'KeyPress: ' + ' '.join(self.key_names)
@@ -852,17 +852,29 @@ class KeyPress(Action):
         code = modifier_code(k)
         return not (code is not None and modifiers & (1 << code))
 
+    def mods(self, level, modifiers, direction):
+        if level == 2 or level == 3:
+            (sk, _) = self.keysym_to_keycode(XK_KEYS.get('ISO_Level3_Shift', None), modifiers)
+            if sk and self.needed(sk, modifiers):
+                simulate_key(sk, direction)
+        if level == 1 or level == 3:
+            (sk, _) = self.keysym_to_keycode(XK_KEYS.get('Shift_L', None), modifiers)
+            if sk and self.needed(sk, modifiers):
+                simulate_key(sk, direction)
+
     def keyDown(self, keysyms, modifiers):
         for k in keysyms:
-            keycode = self.keysym_to_keycode(k, modifiers)
+            (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
+                self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
-            keycode = self.keysym_to_keycode(k, modifiers)
+            (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode and self.needed(keycode, modifiers):
                 simulate_key(keycode, _KEY_RELEASE)
+                self.mods(level, modifiers, _KEY_RELEASE)
 
     def evaluate(self, feature, notification, device, status, last_result):
         if gkeymap:
