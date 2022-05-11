@@ -162,6 +162,8 @@ i.e., don't use a single `KeyPress` like 'a+b'.
 If a key symbol can only be produced by a shfited or level 3 keypress, e.g., "A",
 then Solaar will add keypresses to produce that keysymbol,
 e.g., simulating a left shift keypress to get "A" instead of "a".
+If a key symbol is not available in the current keymap or needs other shift-like keys,
+then Solaar cannot simulate it.
 If Solaar can determine the current key modifiers (shift, control, etc.)
 any key symbols that correspond to these modifier keys are not pressed,
 so if the shift key is currently down on a keyboard Solaar will not bother to simulate a shift key.

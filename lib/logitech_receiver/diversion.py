@@ -841,8 +841,6 @@ class KeyPress(Action):
             if (group == k.group or len(keycodes.keys) == 1) and k.keycode < 256 and (level is None or k.level < level):
                 keycode = k.keycode
                 level = k.level
-        if keycode is None:
-            _log.warn('rule KeyPress key symbol not currently available %s', self)
         return (keycode, level)
 
     def __str__(self):
@@ -865,7 +863,9 @@ class KeyPress(Action):
     def keyDown(self, keysyms, modifiers):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
-            if keycode and self.needed(keycode, modifiers):
+            if keycode is None:
+                _log.warn('rule KeyPress key symbol not currently available %s', self)
+            elif self.needed(keycode, modifiers):
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
