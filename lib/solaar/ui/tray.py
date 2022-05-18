@@ -440,6 +440,7 @@ def _update_menu_item(index, device):
     charging = device.status.get(_K.BATTERY_CHARGING)
     icon_name = _icons.battery(level, charging)
 
+    menu_item.set_label(('  ' if 0 < device.number <= 6 else '') + device.name + ': ' + device.status.to_string())
     image_widget = menu_item.get_image()
     image_widget.set_sensitive(bool(device.online))
     _update_menu_icon(image_widget, icon_name)
