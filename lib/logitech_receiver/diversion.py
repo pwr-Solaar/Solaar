@@ -133,7 +133,7 @@ def x11_setup():
         if _log.isEnabledFor(_INFO):
             _log.info('X11 library loaded and display set up')
     except Exception:
-        _log.warn('X11 not available - some rule capabilities inoperable: %s', exc_info=_sys.exc_info())
+        _log.warn('X11 not available - some rule capabilities inoperable', exc_info=_sys.exc_info())
         _x11 = False
         xtest_available = False
     return _x11
@@ -191,6 +191,7 @@ def setup_uinput():
         udevice = evdev.uinput.UInput(events=devicecap, name='solaar-keyboard')
         if _log.isEnabledFor(_INFO):
             _log.info('uinput device set up')
+        return True
     except Exception as e:
         _log.warn('cannot create uinput device: %s', e)
 
@@ -833,14 +834,23 @@ class KeyPress(Action):
             _log.warn('rule KeyPress not sequence of key names %s', keys)
             self.key_symbols = []
 
+    # WARNING:  This is an attempt to reverse the keycode to keysym mappping in XKB.  It may not be completely general.
     def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
         group = kbdgroup() or 0
         keycodes = gkeymap.get_entries_for_keyval(keysym)
         (keycode, level) = (None, None)
-        for k in keycodes.keys:
-            if (group == k.group or len(keycodes.keys) == 1) and k.keycode < 256 and (level is None or k.level < level):
+        for k in keycodes.keys:  # mappings that have the correct group
+            if group == k.group and k.keycode < 256 and (level is None or k.level < level):
                 keycode = k.keycode
                 level = k.level
+        if keycode or group == 0:
+            return (keycode, level)
+        for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
+            if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
+                (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
+                if a and all(mk.group == 0 for mk in m):
+                    keycode = k.keycode
+                    level = k.level
         return (keycode, level)
 
     def __str__(self):
@@ -880,7 +890,7 @@ class KeyPress(Action):
         if gkeymap:
             current = gkeymap.get_modifier_state()
             if _log.isEnabledFor(_INFO):
-                _log.info('KeyPress action: %s, modifiers %s %s', self.key_names, current, [hex(k) for k in self.key_symbols])
+                _log.info('KeyPress action: %s, group %s, modifiers %s', self.key_names, kbdgroup(), current)
             self.keyDown(self.key_symbols, current)
             self.keyUp(reversed(self.key_symbols), current)
             _time.sleep(0.01)
