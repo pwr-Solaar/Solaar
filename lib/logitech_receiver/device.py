@@ -275,7 +275,7 @@ class Device:
     def polling_rate(self):
         if not self._polling_rate:
             self.update_pairing_information()
-        if not self._polling_rate and self.protocol >= 2.0:
+        if self.protocol >= 2.0:
             rate = _hidpp20.get_polling_rate(self)
             self._polling_rate = rate if rate else self._polling_rate
         return self._polling_rate
