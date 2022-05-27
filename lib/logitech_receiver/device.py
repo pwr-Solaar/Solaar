@@ -33,13 +33,13 @@ class Device:
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register
 
-    def __init__(self, receiver, number, link_notification=None, info=None):
+    def __init__(self, receiver, number, link_notification=None, info=None, path=None, handle=None):
         assert receiver or info
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
-        self.handle = None
-        self.path = None
+        self.path = path
+        self.handle = handle
         self.product_id = None
 
         if receiver:
@@ -93,6 +93,19 @@ class Device:
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("new Device(%s, %s, %s)", receiver, number, link_notification)
 
+        if not self.path:
+            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else info.path
+        if not self.handle:
+            try:
+                self.handle = _base.open_path(self.path) if self.path else None
+            except Exception:  # maybe the device wasn't set up
+                try:
+                    import time
+                    time.sleep(1)
+                    self.handle = _base.open_path(self.path) if self.path else None
+                except Exception:  # give up
+                    self.handle = None
+
         if receiver:
             if link_notification is not None:
                 self.online = not bool(ord(link_notification.data[0:1]) & 0x40)
@@ -114,17 +127,6 @@ class Device:
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            self.path = _hid.find_paired_node(receiver.path, number, 1)
-            try:
-                self.handle = _hid.open_path(self.path) if self.path else None
-            except Exception:  # maybe the device wasn't set up
-                try:
-                    import time
-                    time.sleep(1)
-                    self.handle = _hid.open_path(self.path)
-                except Exception:  # give up
-                    self.handle = None
-
             self.descriptor = _descriptors.get_wpid(self.wpid)
             if self.descriptor is None:
                 # Last chance to correctly identify the device; many Nano receivers do not support this call.
@@ -133,8 +135,6 @@ class Device:
                     self._codename = codename
                     self.descriptor = _descriptors.get_codename(self._codename)
         else:
-            self.path = info.path
-            self.handle = _hid.open_path(self.path)
             self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
@@ -457,7 +457,7 @@ class Device:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, None, info=device_info)
+                return Device(None, None, info=device_info, handle=handle, path=device_info.path)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
