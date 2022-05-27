@@ -98,6 +98,8 @@ class Receiver:
 
     def close(self):
         handle, self.handle = self.handle, None
+        for _n, d in self._devices.items():
+            d.close()
         self._devices.clear()
         return (handle and _base.close(handle))
 
