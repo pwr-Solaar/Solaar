@@ -1140,8 +1140,9 @@ class PersistentRemappableAction(_Settings):
                 return None
             choices = {}
             for k in remap_keys:
-                key = _special_keys.CONTROL[k.key]
-                choices[key] = keys  # TO RECOVER FROM BAD VALUES use _special_keys.KEYS
+                if k is not None:
+                    key = _special_keys.CONTROL[k.key]
+                    choices[key] = keys  # TO RECOVER FROM BAD VALUES use _special_keys.KEYS
             return cls(choices, key_byte_count=2, byte_count=4) if choices else None
 
 
