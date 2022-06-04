@@ -151,7 +151,7 @@ def xkb_setup():
         if _log.isEnabledFor(_INFO):
             _log.info('XKB display set up')
     except Exception:
-        _log.warn('XKB display not available - rules cannot access keyboard group: %s', exc_info=_sys.exc_info())
+        _log.warn('XKB display not available - rules cannot access keyboard group', exc_info=_sys.exc_info())
         Xkbdisplay = False
     return Xkbdisplay
 
@@ -174,12 +174,7 @@ key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith('KEY') a
 for (_, evcode) in buttons.values():
     if evcode:
         key_events.append(evcode)
-devicecap = {
-    evdev.ecodes.EV_KEY:
-    key_events,
-    evdev.ecodes.EV_REL:
-    [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL, evdev.ecodes.REL_WHEEL_HI_RES, evdev.ecodes.REL_HWHEEL_HI_RES]
-}
+devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
 udevice = None
 
 
