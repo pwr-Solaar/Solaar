@@ -18,6 +18,8 @@
 
 import traceback
 
+from logging import WARNING as _WARNING
+from logging import getLogger
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
@@ -25,6 +27,9 @@ from logitech_receiver.settings import KIND as _SETTING_KIND
 from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
 from solaar.ui import ui_async as _ui_async
+
+_log = getLogger(__name__)
+del getLogger
 
 #
 #
@@ -538,7 +543,10 @@ def _create_sbox(s, device):
     elif s.kind == _SETTING_KIND.multiple_range:
         control = MultipleRangeControl(sbox, change)
     else:
-        raise Exception('NotImplemented')
+        if _log.isEnabledFor(_WARNING):
+            _log.warn('setting %s display not implemented', s.label)
+        return None
+
     control.set_sensitive(False)  # the first read will enable it
     control.layout(sbox, label, change, spinner, failed)
     sbox._control = control
@@ -610,7 +618,10 @@ def update(device, is_online=None):
         if k in _items:
             sbox = _items[k]
         else:
-            sbox = _items[k] = _create_sbox(s, device)
+            sbox = _create_sbox(s, device)
+            if sbox is None:
+                continue
+            _items[k] = sbox
             _box.pack_start(sbox, False, False, 0)
         sensitive = device.persister.get_sensitivity(s.name) if device.persister else True
         _read_async(s, False, sbox, is_online, sensitive)
