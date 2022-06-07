@@ -27,6 +27,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
 from random import getrandbits as _random_bits
+from struct import pack as _pack
 from time import time as _timestamp
 
 import hidapi as _hid
@@ -37,7 +38,6 @@ from .base_usb import ALL as _RECEIVER_USB_IDS
 from .base_usb import DEVICES as _DEVICE_IDS
 from .base_usb import other_device_check as _other_device_check
 from .common import KwException as _KwException
-from .common import pack as _pack
 from .common import strhex as _strhex
 
 _log = getLogger(__name__)

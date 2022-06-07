@@ -26,6 +26,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
 from math import sqrt as _sqrt
+from struct import unpack as _unpack
 
 import evdev
 import keysyms.keysymdef as _keysymdef
@@ -38,7 +39,6 @@ from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
 from .common import NamedInt
-from .common import unpack as _unpack
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 

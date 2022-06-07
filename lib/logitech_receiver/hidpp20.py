@@ -25,6 +25,8 @@ from logging import ERROR as _ERROR
 from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
+from struct import pack as _pack
+from struct import unpack as _unpack
 from typing import List
 
 from . import special_keys
@@ -36,8 +38,6 @@ from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
-from .common import pack as _pack
-from .common import unpack as _unpack
 
 _log = getLogger(__name__)
 del getLogger

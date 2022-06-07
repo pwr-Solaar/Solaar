@@ -22,13 +22,13 @@ import threading as _threading
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from struct import unpack as _unpack
 
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import strhex as _strhex
-from .common import unpack as _unpack
 from .i18n import _
 from .status import ALERT as _ALERT
 from .status import KEYS as _K
