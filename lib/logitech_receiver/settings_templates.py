@@ -41,6 +41,8 @@ from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
 from .settings import LongSettings as _LongSettings
 from .settings import MultipleRangeValidator as _MultipleRangeV
+from .settings import PackedRangeValidator as _PackedRangeV
+from .settings import RangeFieldSetting as _RangeFieldSetting
 from .settings import RangeValidator as _RangeV
 from .settings import Setting as _Setting
 from .settings import Settings as _Settings
@@ -75,6 +77,7 @@ _GP = _hidpp20.PARAM
 #    and permit reading or writing the entire map or just one key/value pair.
 # The _BitFieldSetting class is for settings that have multiple boolean values packed into a bit field.
 # _BitFieldOMSetting is similar.
+# The _RangeFieldSetting class is for settings that have multiple ranges packed into a byte string.
 # _LongSettings is for settings that have an even more complex structure.
 #
 # When settings are created a reader/writer and a validator are created.
@@ -1146,6 +1149,45 @@ class PersistentRemappableAction(_Settings):
             return cls(choices, key_byte_count=2, byte_count=4) if choices else None
 
 
+class Sidetone(_Setting):
+    name = 'sidetone'
+    label = _('Sidetone')
+    description = _('Set sidetone level.')
+    feature = _F.SIDETONE
+    validator_class = _RangeV
+    min_value = 0
+    max_value = 100
+
+
+class Equalizer(_RangeFieldSetting):
+    name = 'equalizer'
+    label = _('Equalizer')
+    description = _('Set equalizer levels.')
+    feature = _F.EQUALIZER
+    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30, 'read_prefix': b'\x00'}
+    keys_universe = []
+
+    class validator_class(_PackedRangeV):
+        @classmethod
+        def build(cls, setting_class, device):
+            data = device.feature_request(_F.EQUALIZER, 0x00)
+            if not data:
+                return None
+            count, dbRange, _x, dbMin, dbMax = _unpack('!BBBBB', data[:5])
+            if dbMin == 0:
+                dbMin = -dbRange
+            if dbMax == 0:
+                dbMax = dbRange
+            map = _NamedInts()
+            for g in range((count + 6) // 7):
+                freqs = device.feature_request(_F.EQUALIZER, 0x10, g * 7)
+                for b in range(7):
+                    if g * 7 + b >= count:
+                        break
+                    map[g * 7 + b] = str(int.from_bytes(freqs[2 * b + 1:2 * b + 3], 'big')) + _('Hz')
+            return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b'\x02')
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1189,6 +1231,8 @@ SETTINGS = [
     Gesture2Gestures,  # working
     Gesture2Divert,
     Gesture2Params,  # working
+    Sidetone,
+    Equalizer,
 ]
 
 #
