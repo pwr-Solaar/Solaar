@@ -20,7 +20,6 @@
 
 from binascii import hexlify as _hexlify
 from collections import namedtuple
-from struct import pack, unpack
 
 is_string = lambda d: isinstance(d, str)
 
@@ -228,35 +227,15 @@ def strhex(x):
     return _hexlify(x).decode('ascii').upper()
 
 
-def bytes2int(x):
-    """Convert a bytes string to an int.
-    The bytes are assumed to be in most-significant-first order.
-    """
-    assert isinstance(x, bytes)
-    assert len(x) < 9
-    qx = (b'\x00' * 8) + x
-    result, = unpack('!Q', qx[-8:])
-    # assert x == int2bytes(result, len(x))
-    return result
+def bytes2int(x, signed=False):
+    return int.from_bytes(x, signed=signed, byteorder='big')
 
 
-def int2bytes(x, count=None):
-    """Convert an int to a bytes representation.
-    The bytes are ordered in most-significant-first order.
-    If 'count' is not given, the necessary number of bytes is computed.
-    """
-    assert isinstance(x, int)
-    result = pack('!Q', x)
-    assert isinstance(result, bytes)
-    # assert x == bytes2int(result)
-
-    if count is None:
-        return result.lstrip(b'\x00')
-
-    assert isinstance(count, int)
-    assert count > 0
-    assert x.bit_length() <= count * 8
-    return result[-count:]
+def int2bytes(x, count=None, signed=False):
+    if count:
+        return x.to_bytes(length=count, byteorder='big', signed=signed)
+    else:
+        return x.to_bytes(length=8, byteorder='big', signed=signed).lstrip(b'\x00')
 
 
 class KwException(Exception):

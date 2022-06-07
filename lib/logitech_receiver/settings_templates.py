@@ -20,6 +20,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARN as _WARN
 from logging import getLogger
+from struct import unpack as _unpack
 from time import time as _time
 
 from . import hidpp10 as _hidpp10
@@ -29,7 +30,6 @@ from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
-from .common import unpack as _unpack
 from .i18n import _
 from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting

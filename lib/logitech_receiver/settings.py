@@ -21,13 +21,13 @@ import math
 from logging import DEBUG as _DEBUG
 from logging import WARNING as _WARNING
 from logging import getLogger
+from struct import unpack as _unpack
 
 from . import hidpp20 as _hidpp20
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
-from .common import unpack as _unpack
 from .i18n import _
 
 _log = getLogger(__name__)
