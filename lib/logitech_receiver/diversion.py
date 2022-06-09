@@ -820,14 +820,28 @@ class Action(RuleComponent):
 
 
 class KeyPress(Action):
-    def __init__(self, keys):
-        if isinstance(keys, str):
-            keys = [keys]
-        self.key_names = keys
-        self.key_symbols = [XK_KEYS.get(k, None) for k in keys]
-        if not all(self.key_symbols):
-            _log.warn('rule KeyPress not sequence of key names %s', keys)
+    CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
+
+    def __init__(self, args):
+        self.key_names, self.action = self.regularize_args(args)
+        if not isinstance(self.key_names, list):
+            _log.warn('rule KeyPress keys not key names %s', self.keys_names)
             self.key_symbols = []
+        else:
+            self.key_symbols = [XK_KEYS.get(k, None) for k in self.key_names]
+        if not all(self.key_symbols):
+            _log.warn('rule KeyPress keys not key names %s', self.key_names)
+            self.key_symbols = []
+
+    def regularize_args(self, args):
+        action = self.CLICK
+        if not isinstance(args, list):
+            args = [args]
+        keys = args
+        if len(args) == 2 and args[1] in [self.CLICK, self.DEPRESS, self.RELEASE]:
+            keys = [args[0]] if isinstance(args[0], str) else args[0]
+            action = args[1]
+        return keys, action
 
     # WARNING:  This is an attempt to reverse the keycode to keysym mappping in XKB.  It may not be completely general.
     def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
@@ -849,7 +863,7 @@ class KeyPress(Action):
         return (keycode, level)
 
     def __str__(self):
-        return 'KeyPress: ' + ' '.join(self.key_names)
+        return 'KeyPress: ' + ' '.join(self.key_names) + ' ' + self.action
 
     def needed(self, k, modifiers):
         code = modifier_code(k)
@@ -885,16 +899,18 @@ class KeyPress(Action):
         if gkeymap:
             current = gkeymap.get_modifier_state()
             if _log.isEnabledFor(_INFO):
-                _log.info('KeyPress action: %s, group %s, modifiers %s', self.key_names, kbdgroup(), current)
-            self.keyDown(self.key_symbols, current)
-            self.keyUp(reversed(self.key_symbols), current)
+                _log.info('KeyPress action: %s %s, group %s, modifiers %s', self.key_names, self.action, kbdgroup(), current)
+            if self.action != self.RELEASE:
+                self.keyDown(self.key_symbols, current)
+            if self.action != self.DEPRESS:
+                self.keyUp(reversed(self.key_symbols), current)
             _time.sleep(0.01)
         else:
             _log.warn('no keymap so cannot determine which keycode to send')
         return None
 
     def data(self):
-        return {'KeyPress': [str(k) for k in self.key_names]}
+        return {'KeyPress': [[str(k) for k in self.key_names], self.action]}
 
 
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable

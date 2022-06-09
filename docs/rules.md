@@ -160,10 +160,20 @@ For settings that use gestures as an argument the internal name of the gesture i
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 For boolean settings '~' can be used to toggle the setting.
 
-A `KeyPress` action takes a sequence of X11 key symbols, such as "a" or "Control+a",
-and simulates a chorded keypress on the keyboard to produce these symbols.
+A `KeyPress` action takes either the name of an X11 key symbol, such as "a",
+a list of X11 key symbols, such as "a" or "Control+a",
+or a two-element list with the first element as above
+and the second element one of 'click', 'depress', or 'release'
+and executes key actions on a simulated keyboard to produce these symbols.
 Use separate  `KeyPress` actions for multiple characters,
 i.e., don't use a single `KeyPress` like 'a+b'.
+The `KeyPress` action normally both depresses and releases (clicks) the keys,
+but can also just depress the keys or just release the keys.
+Use the depress or release options with extreme care,
+ensuring that the depressed keys are later released.
+Otherwise it may become difficult to use your system.
+The keys are depressed in forward order and released in reverse order.
+
 If a key symbol can only be produced by a shfited or level 3 keypress, e.g., "A",
 then Solaar will add keypresses to produce that keysymbol,
 e.g., simulating a left shift keypress to get "A" instead of "a".
