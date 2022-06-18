@@ -31,6 +31,7 @@ from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
+from logitech_receiver.diversion import KeyPress as _KeyPress
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.settings import KIND as _SKIND
@@ -1627,6 +1628,15 @@ class KeyPressUI(ActionUI):
         self.add_btn = Gtk.Button(_('Add key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
         self.add_btn.connect('clicked', self._clicked_add)
         self.widgets[self.add_btn] = (1, 0, 1, 1)
+        self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _('Click'))
+        self.action_clicked_radio.connect('toggled', self._on_update, _KeyPress.CLICK)
+        self.widgets[self.action_clicked_radio] = (0, 2, 1, 1)
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _('Depress'))
+        self.action_pressed_radio.connect('toggled', self._on_update, _KeyPress.DEPRESS)
+        self.widgets[self.action_pressed_radio] = (1, 2, 1, 1)
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _('Release'))
+        self.action_released_radio.connect('toggled', self._on_update, _KeyPress.RELEASE)
+        self.widgets[self.action_released_radio] = (2, 2, 1, 1)
 
     def _create_field(self):
         field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True, vexpand=True)
@@ -1643,14 +1653,15 @@ class KeyPressUI(ActionUI):
         return btn
 
     def _clicked_add(self, _btn):
-        self.component.__init__(self.collect_value() + [''])
+        keys, action = self.component.regularize_args(self.collect_value())
+        self.component.__init__([keys + [''], action])
         self.show(self.component, editable=True)
         self.fields[len(self.component.key_names) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
-        v = self.collect_value()
-        v.pop(pos)
-        self.component.__init__(v)
+        keys, action = self.component.regularize_args(self.collect_value())
+        keys.pop(pos)
+        self.component.__init__([keys, action])
         self.show(self.component, editable=True)
         self._on_update_callback()
 
@@ -1682,7 +1693,9 @@ class KeyPressUI(ActionUI):
         self.add_btn.set_valign(Gtk.Align.END if n >= 1 else Gtk.Align.CENTER)
 
     def collect_value(self):
-        return [f.get_text().strip() for f in self.fields if f.get_visible()]
+        action = _KeyPress.CLICK if self.action_clicked_radio.get_active() else \
+                 _KeyPress.DEPRESS if self.action_pressed_radio.get_active() else _KeyPress.RELEASE
+        return [[f.get_text().strip() for f in self.fields if f.get_visible()], action]
 
     @classmethod
     def left_label(cls, component):
@@ -1690,7 +1703,8 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return ' + '.join(component.key_names)
+        return ' + '.join(component.key_names
+                          ) + ('  (' + component.action + ')' if component.action != _KeyPress.CLICK else '')
 
 
 class MouseScrollUI(ActionUI):
