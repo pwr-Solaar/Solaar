@@ -267,7 +267,29 @@ class MapChoiceControl(Gtk.HBox, Control):
             _write_async(self.sbox.setting, value, self.sbox, key=int(key_choice))
 
 
-class MultipleControl(Control):
+class MultipleControl(Gtk.ListBox, Control):
+    def __init__(self, sbox, change, button_label='...', delegate=None):
+        super().__init__()
+        self.init(sbox, delegate)
+        self.set_selection_mode(Gtk.SelectionMode.NONE)
+        self.set_no_show_all(True)
+        self._showing = True
+        self.setup(sbox.setting)  # set up the data and boxes for the sub-controls
+        btn = Gtk.Button(button_label)
+        btn.set_alignment(1.0, 0.5)
+        btn.connect('clicked', self.toggle_display)
+        self._button = btn
+        hbox = Gtk.HBox(homogeneous=False, spacing=6)
+        hbox.pack_end(change, False, False, 0)
+        hbox.pack_end(btn, False, False, 0)
+        self._header = hbox
+        vbox = Gtk.VBox(homogeneous=False, spacing=6)
+        vbox.pack_start(hbox, True, True, 0)
+        vbox.pack_end(self, True, True, 0)
+        self.vbox = vbox
+        self.toggle_display()
+        _disable_listbox_highlight_bg(self)
+
     def layout(self, sbox, label, change, spinner, failed):
         self._header.pack_start(label, False, False, 0)
         self._header.pack_end(spinner, False, False, 0)
@@ -288,20 +310,15 @@ class MultipleControl(Control):
                 c.show_all()
 
 
-class MultipleToggleControl(Gtk.ListBox, MultipleControl):
-    def __init__(self, sbox, change, delegate=None):
-        super().__init__()
-        self.init(sbox, delegate)
-        self.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.set_no_show_all(True)
-        self._showing = True
+class MultipleToggleControl(MultipleControl):
+    def setup(self, setting):
         self._label_control_pairs = []
-        for k in sbox.setting._validator.get_options():
+        for k in setting._validator.get_options():
             h = Gtk.HBox(homogeneous=False, spacing=0)
             lbl_text = str(k)
             lbl_tooltip = None
-            if hasattr(sbox.setting, '_labels'):
-                l1, l2 = sbox.setting._labels.get(k, (None, None))
+            if hasattr(setting, '_labels'):
+                l1, l2 = setting._labels.get(k, (None, None))
                 lbl_text = l1 if l1 else lbl_text
                 lbl_tooltip = l2 if l2 else lbl_tooltip
             lbl = Gtk.Label(lbl_text)
@@ -315,20 +332,6 @@ class MultipleToggleControl(Gtk.ListBox, MultipleControl):
             lbl.set_margin_left(30)
             self.add(h)
             self._label_control_pairs.append((lbl, control))
-        btn = Gtk.Button('? / ?')
-        btn.set_alignment(1.0, 0.5)
-        btn.connect('clicked', self.toggle_display)
-        self._button = btn
-        hbox = Gtk.HBox(homogeneous=False, spacing=6)
-        hbox.pack_end(change, False, False, 0)
-        hbox.pack_end(btn, False, False, 0)
-        self._header = hbox
-        vbox = Gtk.VBox(homogeneous=False, spacing=6)
-        vbox.pack_start(hbox, True, True, 0)
-        vbox.pack_end(self, True, True, 0)
-        self.vbox = vbox
-        self.toggle_display()
-        _disable_listbox_highlight_bg(self)
 
     def toggle_notify(self, switch, active):
         if switch.get_sensitive():
@@ -354,19 +357,14 @@ class MultipleToggleControl(Gtk.ListBox, MultipleControl):
         self._button.set_tooltip_text(b)
 
 
-class MultipleRangeControl(Gtk.ListBox, MultipleControl):
-    def __init__(self, sbox, change, delegate=None):
-        super().__init__()
-        self.init(sbox, delegate)
-        self.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.set_no_show_all(True)
-        self._showing = True
+class MultipleRangeControl(MultipleControl):
+    def setup(self, setting):
         self._items = []
-        for item in sbox.setting._validator.items:
+        for item in setting._validator.items:
             lbl_text = str(item)
             lbl_tooltip = None
-            if hasattr(sbox.setting, '_labels'):
-                l1, l2 = sbox.setting._labels.get(int(item), (None, None))
+            if hasattr(setting, '_labels'):
+                l1, l2 = setting._labels.get(int(item), (None, None))
                 lbl_text = l1 if l1 else lbl_text
                 lbl_tooltip = l2 if l2 else lbl_tooltip
             item_lbl = Gtk.Label(lbl_text)
@@ -375,12 +373,12 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
             item_lb = Gtk.ListBox()
             item_lb.set_selection_mode(Gtk.SelectionMode.NONE)
             item_lb._sub_items = []
-            for sub_item in sbox.setting._validator.sub_items[item]:
+            for sub_item in setting._validator.sub_items[item]:
                 h = Gtk.HBox(homogeneous=False, spacing=20)
                 lbl_text = str(sub_item)
                 lbl_tooltip = None
-                if hasattr(sbox.setting, '_labels_sub'):
-                    l1, l2 = sbox.setting._labels_sub.get(str(sub_item), (None, None))
+                if hasattr(setting, '_labels_sub'):
+                    l1, l2 = setting._labels_sub.get(str(sub_item), (None, None))
                     lbl_text = l1 if l1 else lbl_text
                     lbl_tooltip = l2 if l2 else lbl_tooltip
                 sub_item_lbl = Gtk.Label(lbl_text)
@@ -408,21 +406,6 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
             _disable_listbox_highlight_bg(item_lb)
             self.add(item_lb)
             self._items.append(item_lb)
-        btn = Gtk.Button('...')
-        btn.set_alignment(1.0, 0.5)
-        btn.set_alignment(1.0, 0.5)
-        btn.connect('clicked', self.toggle_display)
-        self._button = btn
-        hbox = Gtk.HBox(homogeneous=False, spacing=6)
-        hbox.pack_end(change, False, False, 0)
-        hbox.pack_end(btn, False, False, 0)
-        self._header = hbox
-        vbox = Gtk.VBox(homogeneous=False, spacing=6)
-        vbox.pack_start(hbox, True, True, 0)
-        vbox.pack_end(self, True, True, 0)
-        self.vbox = vbox
-        self.toggle_display()
-        _disable_listbox_highlight_bg(self)
 
     def changed(self, control, item, sub_item):
         if control.get_sensitive():
@@ -458,6 +441,57 @@ class MultipleRangeControl(Gtk.ListBox, MultipleControl):
                     n += 1
                     to_join.append(str(sub_item) + f'={sub_item_value}')
                 b += ', '.join(to_join) + ') '
+        lbl_text = ngettext('%d value', '%d values', n) % n
+        self._button.set_label(lbl_text)
+        self._button.set_tooltip_text(b)
+
+
+class PackedRangeControl(MultipleRangeControl):
+    def setup(self, setting):
+        validator = setting._validator
+        self._items = []
+        for item in range(validator.count):
+            h = Gtk.HBox(homogeneous=False, spacing=0)
+            lbl = Gtk.Label(str(validator.keys[item]))
+            control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, validator.min_value, validator.max_value, 1)
+            control.set_round_digits(0)
+            control.set_digits(0)
+            control.connect('value-changed', self.changed, validator.keys[item])
+            h.pack_start(lbl, False, False, 0)
+            h.pack_end(control, True, True, 0)
+            h._setting_item = validator.keys[item]
+            h.control = control
+            lbl.set_alignment(0.0, 0.5)
+            lbl.set_margin_left(30)
+            self.add(h)
+            self._items.append(h)
+
+    def changed(self, control, item):
+        if control.get_sensitive():
+            if hasattr(control, '_timer'):
+                control._timer.cancel()
+            control._timer = _Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
+            control._timer.start()
+
+    def _write(self, control, item):
+        control._timer.cancel()
+        delattr(control, '_timer')
+        new_state = int(control.get_value())
+        if self.sbox.setting._value[int(item)] != new_state:
+            self.sbox.setting._value[int(item)] = new_state
+            _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
+
+    def set_value(self, value):
+        b = ''
+        n = len(self._items)
+        for h in self._items:
+            item = h._setting_item
+            v = value.get(int(item), None)
+            if v is not None:
+                h.control.set_value(v)
+            else:
+                v = self.sbox.setting._value[int(item)]
+            b += str(item) + ': (' + str(v) + ') '
         lbl_text = ngettext('%d value', '%d values', n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
@@ -542,6 +576,8 @@ def _create_sbox(s, device):
         control = MultipleToggleControl(sbox, change)
     elif s.kind == _SETTING_KIND.multiple_range:
         control = MultipleRangeControl(sbox, change)
+    elif s.kind == _SETTING_KIND.packed_range:
+        control = PackedRangeControl(sbox, change)
     else:
         if _log.isEnabledFor(_WARNING):
             _log.warn('setting %s display not implemented', s.label)
