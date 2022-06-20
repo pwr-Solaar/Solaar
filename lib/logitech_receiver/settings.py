@@ -296,7 +296,7 @@ class Setting:
         assert value is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write %r to %s', self.name, value, self._device)
+            _log.debug('%s: setting write %r to %s', self.name, value, self._device)
 
         if self._device.online:
             if self._value != value:
@@ -504,7 +504,7 @@ class LongSettings(Setting):
         assert map is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write %r to %s', self.name, map, self._device)
+            _log.debug('%s: long settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self._value = map
             self._pre_write(save)
@@ -527,7 +527,7 @@ class LongSettings(Setting):
         assert value is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write item %r value %r to %s', self.name, item, value, self._device)
+            _log.debug('%s: long settings write item %r value %r to %s', self.name, item, value, self._device)
 
         if self._device.online:
             if not self._value:
@@ -602,7 +602,7 @@ class BitFieldSetting(Setting):
         assert map is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write %r to %s', self.name, map, self._device)
+            _log.debug('%s: bit field settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self._value = map
             self._pre_write(save)
@@ -625,7 +625,7 @@ class BitFieldSetting(Setting):
         assert value is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
+            _log.debug('%s: bit field settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
             if not self._value:
@@ -694,24 +694,26 @@ class RangeFieldSetting(Setting):
         assert hasattr(self, '_device')
         assert map is not None
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write %r to %s', self.name, map, self._device)
+            _log.debug('%s: range field setting write %r to %s', self.name, map, self._device)
         if self._device.online:
             self._value = map
             self._pre_write(save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
-                    _log.debug('%s: settings prepare map write(%s) => %r', self.name, self._value, data_bytes)
+                    _log.debug('%s: range field setting prepare map write(%s) => %r', self.name, self._value, data_bytes)
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
                     return None
+            elif _log.isEnabledFor(_WARNING):
+                _log.warn('%s: range field setting no data to write', self.name)
             return map
 
     def write_key_value(self, key, value):
         assert key is not None
         assert value is not None
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
+            _log.debug('%s: range field setting write key %r value %r to %s', self.name, key, value, self._device)
         if self._device.online:
             if not self._value:
                 self.read()
