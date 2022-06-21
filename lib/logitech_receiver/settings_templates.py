@@ -20,6 +20,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARN as _WARN
 from logging import getLogger
+from struct import pack as _pack
 from struct import unpack as _unpack
 from time import time as _time
 
@@ -758,7 +759,6 @@ class MouseGesture(_Setting):
             if self.fsmState == 'pressed':
                 # emit mouse gesture notification
                 from .base import _HIDPP_Notification as _HIDPP_Notification
-                from .common import pack as _pack
                 from .diversion import process_notification as _process_notification
                 self.push_mouse_event()
                 if _log.isEnabledFor(_INFO):
