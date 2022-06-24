@@ -326,7 +326,6 @@ def _generate_description_lines():
                 yield '<b>%s</b> <small>(' % name + _('no status') + ')</small>'
             else:
                 yield '<b>%s</b> <small>(' % name + _('offline') + ')</small>'
-        yield ''
 
 
 def _pick_device_with_lowest_battery():
