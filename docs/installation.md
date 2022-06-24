@@ -42,14 +42,18 @@ which requires installation of the X11 development package.
 Solaar will run under Wayland but some parts of Solaar rules will not work.
 For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
+Solaar needs a library to interact with the system tray.
+The library that provides this interaction depends on the distribution and window system.
+If ayatana appindicator is available then it is best to have this library installed,
+e.g., by installing `libayatana-appindicator` or `gir1.2-ayatanaappindicator3-0.1` or similar,
+depending on distribution.
+Otherwise appindicator can sometimes be used,
+e.g., by installing `libappindicator-gtk3` or `gir1.2-appindicator3-0.1` or similar,
+depending on distribution.
+
 If desktop notifications bindings are also installed
 (`gir1.2-notify-0.7` for Debian/Ubuntu),
 you will also see desktop notifications when devices come online/go offline.
-For GNOME Shell/Budgie Desktop/KDE/XFCE support, you also need to have
-`gir1.2-ayatanaappindicator3-0.1` installed in Debian/Ubuntu. Although it is
-recommended to install and use `gir1.2-ayatanaappindicator3-0.1` if it is
-available, you can also use `gir1.2-appindicator3-0.1` if necessary (e.g.,
-for Unity in Ubuntu).
 
 ### Installing Solaar's udev rule
 
