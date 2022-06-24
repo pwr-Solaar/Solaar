@@ -1,5 +1,9 @@
-# 1.1.4rc1
+# 1.1.4rc2
 
+* Handle unanticipated values for persistent remappable action as default
+* Improve system tray interface documentation
+* Remove blank lines from system tray popup
+* Update Polish translation
 * Add depress and release options to KeyPress rule action
 * Only close existing devices for receiver
 * Differentiate debug messages for different setting types
