@@ -758,6 +758,7 @@ USB_HID_KEYCODES = _NamedInts(
     MEDIA_REFRESH=0xfa,
     MEDIA_CALC=0xfb,
 )
+USB_HID_KEYCODES[0] = 'No Output'
 USB_HID_KEYCODES[0x1e] = '1'
 USB_HID_KEYCODES[0x1f] = '2'
 USB_HID_KEYCODES[0x20] = '3'
@@ -1237,7 +1238,7 @@ for code in HORIZONTAL_SCROLL:
 def persistent_keys(action_ids):
     keys = _UnsortedNamedInts()
     keys[KEYS_Default] = 'Default'  # Value to reset to default
-    keys[0] = 'None'  # Value for no output
+    keys[0] = 'No Output (only as default)'
     for key in KEYS:
         if (int(key) >> 24) in action_ids:
             keys[int(key)] = str(key)
