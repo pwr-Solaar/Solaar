@@ -67,21 +67,16 @@ def _battery_text(level):
 
 
 def _battery_line(dev):
-    battery = _hidpp20.get_battery(dev)
-    if battery is None:
-        battery = _hidpp10.get_battery(dev)
+    battery = dev.battery()
     if battery is not None:
-        level, status, nextLevel = battery
+        level, nextLevel, status, voltage = battery
         text = _battery_text(level)
+        if voltage is not None:
+            text = text + (' %smV ' % voltage)
         nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
         print('     Battery: %s, %s%s.' % (text, status, nextText))
     else:
-        battery_voltage = _hidpp20.get_voltage(dev)
-        if battery_voltage:
-            (level, status, voltage, charge_sts, charge_type) = battery_voltage
-            print('     Battery: %smV, %s, %s.' % (voltage, status, level))
-        else:
-            print('     Battery status unavailable.')
+        print('     Battery status unavailable.')
 
 
 def _print_device(dev, num=None):
@@ -225,7 +220,7 @@ def _print_device(dev, num=None):
                 else:
                     mode = 'On-Board'
                 print('            Device Mode: %s' % mode)
-            elif feature in (_F.BATTERY_STATUS, _F.BATTERY_VOLTAGE, _F.BATTERY_VOLTAGE):
+            elif _hidpp20.battery_functions.get(feature, None):
                 print('', end='       ')
                 _battery_line(dev)
             for setting in dev_settings:

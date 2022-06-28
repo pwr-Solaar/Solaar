@@ -1216,27 +1216,32 @@ def get_friendly_name(device):
         return name.decode('utf-8')
 
 
-def get_battery(device):
-    """Reads a device's battery level."""
-    battery = feature_request(device, FEATURE.BATTERY_STATUS)
-    if battery:
-        discharge, next, status = _unpack('!BBB', battery[:3])
-        discharge = None if discharge == 0 else discharge
-        status = BATTERY_STATUS[status]
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('device %d battery %s%% charged, next %s%%, status %s', device.number, discharge, next, status)
-        return discharge, status, next
-    else:
-        battery = feature_request(device, FEATURE.UNIFIED_BATTERY, 0x10)
-        if battery:
-            return decipher_unified_battery(battery)
+def get_battery_status(device):
+    report = feature_request(device, FEATURE.BATTERY_STATUS)
+    if report:
+        return decipher_battery_status(report)
 
 
-def decipher_unified_battery(report):
+def decipher_battery_status(report):
+    discharge, next, status = _unpack('!BBB', report[:3])
+    discharge = None if discharge == 0 else discharge
+    status = BATTERY_STATUS[status]
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('battery status %s%% charged, next %s%%, status %s', discharge, next, status)
+    return FEATURE.BATTERY_STATUS, discharge, next, status, None
+
+
+def get_battery_unified(device):
+    report = feature_request(device, FEATURE.UNIFIED_BATTERY, 0x10)
+    if report is not None:
+        return decipher_battery_unified(report)
+
+
+def decipher_battery_unified(report):
     discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
     status = BATTERY_STATUS[status]
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('battery %s%% charged, level %s, charging %s', discharge, level, status)
+        _log.debug('battery unified %s%% charged, level %s, charging %s', discharge, level, status)
     level = (
         _BATTERY_APPROX.full if level == 8  # full
         else _BATTERY_APPROX.good if level == 4  # good
@@ -1244,13 +1249,7 @@ def decipher_unified_battery(report):
         else _BATTERY_APPROX.critical if level == 1  # critical
         else _BATTERY_APPROX.empty
     )
-    return discharge if discharge else level, status, None
-
-
-def get_voltage(device):
-    battery_voltage = feature_request(device, FEATURE.BATTERY_VOLTAGE)
-    if battery_voltage:
-        return decipher_voltage(battery_voltage)
+    return FEATURE.UNIFIED_BATTERY, discharge if discharge else level, None, status, None
 
 
 # voltage to remaining charge from Logitech
@@ -1272,14 +1271,18 @@ battery_voltage_remaining = (
 )
 
 
-# modified to be much closer to battery reports
-def decipher_voltage(voltage_report):
-    voltage, flags = _unpack('>HB', voltage_report[:3])
+def get_battery_voltage(device):
+    report = feature_request(device, FEATURE.BATTERY_VOLTAGE)
+    if report is not None:
+        return decipher_battery_voltage(report)
+
+
+def decipher_battery_voltage(report):
+    voltage, flags = _unpack('>HB', report[:3])
     status = BATTERY_STATUS.discharging
     charge_sts = ERROR.unknown
     charge_lvl = CHARGE_LEVEL.average
     charge_type = CHARGE_TYPE.standard
-
     if flags & (1 << 7):
         status = BATTERY_STATUS.recharging
         charge_sts = CHARGE_STATUS[flags & 0x03]
@@ -1295,19 +1298,39 @@ def decipher_voltage(voltage_report):
         status = BATTERY_STATUS.slow_recharge
     elif (flags & (1 << 5)):
         charge_lvl = CHARGE_LEVEL.critical
-
     for level in battery_voltage_remaining:
         if level[0] < voltage:
             charge_lvl = level[1]
             break
-
     if _log.isEnabledFor(_DEBUG):
         _log.debug(
-            'device ???, battery voltage %d mV, charging = %s, charge status %d = %s, charge level %s, charge type %s',
-            voltage, status, (flags & 0x03), charge_sts, charge_lvl, charge_type
+            'battery voltage %d mV, charging %s, status %d = %s, level %s, type %s', voltage, status, (flags & 0x03),
+            charge_sts, charge_lvl, charge_type
         )
+    return FEATURE.BATTERY_VOLTAGE, charge_lvl, None, status, voltage
 
-    return charge_lvl, status, voltage, charge_sts, charge_type
+
+battery_functions = {
+    FEATURE.BATTERY_STATUS: get_battery_status,
+    FEATURE.BATTERY_VOLTAGE: get_battery_unified,
+    FEATURE.UNIFIED_BATTERY: get_battery_voltage,
+}
+
+
+def get_battery(device, feature):
+    """Return battery information - feature, approximate level, next, charging, voltage"""
+    if feature is not None:
+        battery_function = battery_functions.get(feature, None)
+        if battery_function:
+            result = battery_function(device)
+            if result:
+                return result
+    else:
+        for battery_function in battery_functions.values():
+            result = battery_function(device)
+            if result:
+                return result
+    return 0, None, None, None, None
 
 
 def get_keys(device):
