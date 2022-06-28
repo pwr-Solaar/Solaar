@@ -265,8 +265,8 @@ def parse_battery_status(register, reply):
             # some 'charging' notifications may come with no battery level information
             charge = None
 
-        # Return None for next charge level as this is not in HID++ 1.0 spec
-        return charge, status_text, None
+        # Return None for next charge level and voltage as these are not in HID++ 1.0 spec
+        return charge, None, status_text, None
 
 
 def get_firmware(device):
