@@ -337,6 +337,13 @@ def _process_feature_notification(device, status, n, feature):
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
 
+    elif feature == _F.ADC_MEASUREMENT:
+        if n.address == 0x00:
+            _ignore, level, next, status, voltage = _hidpp20.decipher_adc_measurement(n.data)
+            status.set_battery_info(level, next, status, voltage)
+        else:
+            _log.warn('%s: unknown ADC MEASUREMENT %s', device, n)
+
     elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
             charge, lux, adc = _unpack('!BHH', n.data[:5])
