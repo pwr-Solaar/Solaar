@@ -1310,10 +1310,28 @@ def decipher_battery_voltage(report):
     return FEATURE.BATTERY_VOLTAGE, charge_lvl, None, status, voltage
 
 
+def get_adc_measurement(device):
+    try:  # this feature call has been known to produce errors so be extra cautious
+        report = feature_request(device, FEATURE.ADC_MEASUREMENT)
+        if report is not None:
+            return decipher_adc_measurement(report)
+    except FeatureCallError:
+        return None
+
+
+def decipher_adc_measurement(report):
+    # partial implementation - needs mapping to levels
+    adc, flags = _unpack('!HB', report[:3])
+    if flags & 0x01:
+        status = BATTERY_STATUS.recharging if flags & 0x02 else BATTERY_STATUS.discharging
+        return FEATURE.ADC_MEASUREMENT, None, None, status, adc
+
+
 battery_functions = {
     FEATURE.BATTERY_STATUS: get_battery_status,
     FEATURE.BATTERY_VOLTAGE: get_battery_unified,
     FEATURE.UNIFIED_BATTERY: get_battery_voltage,
+    FEATURE.ADC_MEASUREMENT: get_adc_measurement,
 }
 
 
