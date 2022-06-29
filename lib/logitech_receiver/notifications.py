@@ -325,22 +325,24 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            _ignore, level, next, status, voltage = _hidpp20.decipher_battery_voltage(n.data)
-            status.set_battery_info(level, next, status, voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            _ignore, level, next, status, voltage = _hidpp20.decipher_battery_unified(n.data)
-            status.set_battery_info(level, next, status, voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
 
     elif feature == _F.ADC_MEASUREMENT:
         if n.address == 0x00:
-            _ignore, level, next, status, voltage = _hidpp20.decipher_adc_measurement(n.data)
-            status.set_battery_info(level, next, status, voltage)
+            result = _hidpp20.decipher_adc_measurement(n.data)
+            if result:
+                _ignore, level, next, battery_status, voltage = result
+                status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown ADC MEASUREMENT %s', device, n)
 
