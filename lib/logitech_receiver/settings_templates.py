@@ -1148,6 +1148,17 @@ class PersistentRemappableAction(_Settings):
                     choices[key] = keys  # TO RECOVER FROM BAD VALUES use _special_keys.KEYS
             return cls(choices, key_byte_count=2, byte_count=4) if choices else None
 
+        def validate_read(self, reply_bytes, key):
+            start = self._key_byte_count + self._read_skip_byte_count
+            end = start + self._byte_count
+            reply_value = _bytes2int(reply_bytes[start:end]) & self.mask
+            # Craft keyboard has a value that isn't valid so fudge these values
+            if reply_value not in self.choices[key]:
+                if _log.isEnabledFor(_WARN):
+                    _log.warn('unusual persistent remappable action mapping %x: use Default', reply_value)
+                reply_value = _special_keys.KEYS_Default
+            return reply_value
+
 
 class Sidetone(_Setting):
     name = 'sidetone'
