@@ -974,8 +974,6 @@ class ChoicesValidator(Validator):
     :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
     kind = KIND.choice
-    choices_universe = None  # the possible choices, or an empty sequence for anything
-    choices_extra = None  # an extra choice, so as not to require extending a large NamedInts
 
     def __init__(self, choices=None, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b''):
         assert choices is not None
@@ -1035,8 +1033,6 @@ class ChoicesValidator(Validator):
 
 class ChoicesMapValidator(ChoicesValidator):
     kind = KIND.map_choice
-    keys_universe = None  # the possible keys, or an empty sequence for anything
-    choices_universe = None  # the possible choices, or an empty sequence for anything
 
     def __init__(
         self,
