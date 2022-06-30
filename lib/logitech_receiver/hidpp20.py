@@ -1322,9 +1322,13 @@ def get_adc_measurement(device):
 def decipher_adc_measurement(report):
     # partial implementation - needs mapping to levels
     adc, flags = _unpack('!HB', report[:3])
+    for level in battery_voltage_remaining:
+        if level[0] < adc:
+            charge_level = level[1]
+            break
     if flags & 0x01:
         status = BATTERY_STATUS.recharging if flags & 0x02 else BATTERY_STATUS.discharging
-        return FEATURE.ADC_MEASUREMENT, None, None, status, adc
+        return FEATURE.ADC_MEASUREMENT, charge_level, None, status, adc
 
 
 battery_functions = {
