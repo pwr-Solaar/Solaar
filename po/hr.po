@@ -858,7 +858,7 @@ msgstr "LED osvjetljenje M-tipke"
 
 #: lib/logitech_receiver/settings_templates.py:1056
 msgid "Control the M-Key LEDs."
-msgstr "Upravljajte LED osvjetljenjem M-tipke"
+msgstr "Upravljajte LED osvjetljenjem M-tipke."
 
 #: lib/logitech_receiver/settings_templates.py:1057
 #: lib/logitech_receiver/settings_templates.py:1085
@@ -1298,7 +1298,7 @@ msgstr "početak (uključiv)"
 
 #: lib/solaar/ui/diversion_rules.py:1414
 msgid "end (exclusive)"
-msgstr "Završetak (isključiv)"
+msgstr "završetak (isključiv)"
 
 #: lib/solaar/ui/diversion_rules.py:1423
 msgid "range"
