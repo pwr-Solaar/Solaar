@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: solaar 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-04-21 05:26+0800\n"
-"PO-Revision-Date: 2022-06-30 20:19+0200\n"
+"PO-Revision-Date: 2022-07-01 11:47+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@hr.org>\n"
 "Language: hr\n"
@@ -1237,11 +1237,11 @@ msgstr "Klik kotačića"
 
 #: lib/solaar/ui/diversion_rules.py:531 lib/solaar/ui/diversion_rules.py:1855
 msgid "Execute"
-msgstr "Pokreni"
+msgstr "Pokretanje"
 
 #: lib/solaar/ui/diversion_rules.py:532
 msgid "Set"
-msgstr "Postavi"
+msgstr "Postavka"
 
 #: lib/solaar/ui/diversion_rules.py:561
 msgid "Insert new rule"
