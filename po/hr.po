@@ -223,11 +223,11 @@ msgstr "Desna tipka pomicanja miša"
 
 #: lib/logitech_receiver/i18n.py:85
 msgid "pressed"
-msgstr "pritisnuta"
+msgstr "pritisak"
 
 #: lib/logitech_receiver/i18n.py:86
 msgid "released"
-msgstr "otpuštena"
+msgstr "otpuštanje"
 
 #: lib/logitech_receiver/notifications.py:74
 #: lib/logitech_receiver/notifications.py:125
