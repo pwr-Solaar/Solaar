@@ -808,7 +808,7 @@ class MouseGesture(_Setting):
 
         @classmethod
         def build(cls, setting_class, device):
-            if True:  # was device.kind == _DK.mouse
+            if device.keys:  # ensure that the device has a keys array
                 keys = []
                 for key in cls.MouseGestureKeys:
                     key_index = device.keys.index(key)
