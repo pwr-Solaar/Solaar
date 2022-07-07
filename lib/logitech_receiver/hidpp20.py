@@ -444,10 +444,12 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
                 raise FeatureCallError(msg='No reply from device.')
-        except Exception:
-            if _log.isEnabledFor(_ERROR):
-                _log.error(f'Exception in _getCidReporting on device {self._device}: ', exc_info=1)
-            # Clear flags and set mapping target to self as fallback
+        except FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
+            if _log.isEnabledFor(_WARNING):
+                _log.warn(
+                    f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
+                )
+            # Clear flags and set mapping target to self
             self._mapping_flags = 0
             self._mapped_to = self._cid
 
@@ -1016,9 +1018,9 @@ class Spec:
     def read(self):
         try:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
-        except FeatureCallError:
-            # I don't know if this should happen, but I get an error
-            # with spec 5
+        except FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
+            if _log.isEnabledFor(_WARNING):
+                _log.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
             return None
         return _bytes2int(value[:self.byte_count])
 
