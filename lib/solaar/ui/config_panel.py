@@ -173,7 +173,7 @@ class ChoiceControlBig(Gtk.Entry, Control):
         self.init(sbox, delegate)
         self.choices = choices if choices is not None else sbox.setting.choices
         self.value = None
-        self.set_width_chars(max([len(str(x)) for x in self.choices]) + 2)
+        self.set_width_chars(max([len(str(x)) for x in self.choices]) + 5)
         liststore = Gtk.ListStore(int, str)
         for v in self.choices:
             liststore.append((int(v), str(v)))
