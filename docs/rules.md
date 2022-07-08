@@ -85,7 +85,9 @@ notification is their integer argument.
 string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
-setting.  Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+setting.  These names are also shown in the output of `solaar show` in the 'reprogrammable keys'
+section.  Only keys or buttons that have 'divertable' in their report can be diverted.
+Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
 
 `Modifiers` conditions take either a string or a sequence of strings, which
 can only be `Shift`, `Control`, `Alt`, and `Super`.
