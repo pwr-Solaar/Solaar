@@ -1,5 +1,18 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.5
+
+* The Active rule condition takes the serial number or unitID of a device and checks whether the device is active.  A device is active if it is connected (via a receiver, USB or Bluetooth), not turned off, and not in a power-saving state.  This condition can be used to check whether changing a setting on the device will have any effect, as devices respond to messages only when active.
+
+* Solaar logs warnings and errors to a file in the user's temporary file directory.  This file is deleted when Solaar exists normally.  If Solaar is run with `-dd` or `-ddd` informational messages are also logged in the file.
+
+* If the first element of a Mouse Gesture rule condition is a key or button name then that name must be the same as the name of the key or button that initiated the mouse gesture.
+
+* The Sliding DPI and Mouse Gestures are now set up using the Key/Button Diversion setting.   Changing a key or button to Sliding DPI makes it initiate the sliding DPI changing.  Changing a key or button to Mouse Gestures makes it initiate a mouse gesture.  There can be multiple keys or buttons for sliding DPI and multiple keys or buttons for mouse gestures.
+
+* Solaar waits a few seconds to save settings changes to its configuration file.  If you interrupt Solaar soon after changing a setting the change might not be saved.
+
+
 ## Version 1.1.4
 
 * There are settings for sidetone and equalizer gains for headsets.

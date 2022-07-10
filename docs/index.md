@@ -138,12 +138,20 @@ for the step-by-step procedure for manual installation.
   in some system tray implementations. Changing to a different theme may help.
   The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
-- Some Linux drivers view or modify the setting Scroll Wheel Resolution to
-  implement smooth scrolling.  If Solaar changes this setting after the driver is
-  set up scrolling can be either very fast or very slow.  To fix this problem
+- The Linux HID++ driver modifies the setting Scroll Wheel Resolution to
+  implement smooth scrolling.  If Solaar later changes this setting scrolling
+  can be either very fast or very slow.  To fix this problem
   click on the icon at the right edge of the setting to set it to
   "Ignore this setting".
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+
+- The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
+  This can interfere with the Scroll Wheel Direction setting, requiring flipping this setting back and forth
+  to restore reversed scrolling.
+
+- The driver sends messages to devices that do not conform with the Logitech HID++ specification
+  resulting in reponses being sent back that look like other messages.  For some devices this causes
+  Solaar to report incorrect battery levels.
 
 - Many gaming mice and keyboards have the ONBOARD PROFILES feature.
   This feature can override other features, including polling rate and key lighting.
