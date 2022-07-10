@@ -1,3 +1,46 @@
+# 1.1.5rc1
+
+* Update Turkish translation
+* Move old device descriptions to new locations and clean up
+* Increase minimum stopped time between mouse movements
+* Fix bug with non-recognized empty mouse movement
+* Allow config panel to scroll
+* Add descriptions for K360 4004, MX Master 4017, Lightspeed C541, and G915 407D
+* Change security tooltip for unencrypted wireless connections
+* Add Norwegian Bokmal translation
+* Update documentation on continuously running GUI, diverted keys, and changing hosts
+* Solaar config no longer applies settings
+* Add description of rule components to rule editor
+* Ignore first movement for mouse gestures when reprog controls version is 5 or more
+* Add Active rule condition to test whether a device is active
+* Terminate iteration over receiver devices when all have been found
+* Downgrade Set prolem messages from error to warning
+* Log informational messages and above to a temporary file
+* Don't produce warnings when editing rules in rule editor
+* Fix bug that didn't save rules file if there were no rules
+* Allow devices with connection number larger than max_devices
+* Show more registers in solaar probe
+* Show feature versions in solaar show
+* Fix problems with deleting devices on exit
+* Update German translation
+* Update device documentation directory
+* Add descriptors for G502 Proteus Spectrum Optical Mouse and G935 headset
+* Record feature versions
+* Add Serbian translation
+* Fix circular import in rules
+* Keep track of devices and use in rules
+* Update zh_CN and zh_TW translations
+* Convert old-style mouse gestures and sliding dpi settings to new style
+* Allow multiple keys for mouse gestures and sliding dpi
+* Defer saving configuration file for a while to cut down on the number if times it is saved
+* Use correct functions for unified battery and battery voltage features.
+* Add defensive check for missing keys array in mouse gestures setting
+* Better presentation of battery information
+* Add support for ADC MEASUREMENT battery feature
+* Add information on how to find divertable key names in solaar show output
+* Better warnings for feature call errors with reprogrammable key and gesture settings
+* Increase entry size for ChoiceControlBig
+
 # 1.1.4
 
 * Update Croatian translation
