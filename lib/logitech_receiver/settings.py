@@ -1410,6 +1410,84 @@ class ActionSettingRW:
         return True
 
 
+class RawXYProcessing:
+    """Special class for processing RawXY action messages initiated by pressing a key with rawXY diversion capability"""
+    def __init__(self, device, name=''):
+        self.device = device
+        self.name = name
+        self.keys = []  # the keys that can initiate processing
+        self.initiating_key = None  # the key that did initiate processing
+        self.active = False
+        self.feature_offset = device.features[_hidpp20.FEATURE.REPROG_CONTROLS_V4]
+        assert self.feature_offset is not False
+
+    def handler(self, device, n):  # Called on notification events from the device
+        if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+            if n.address == 0x00:
+                cids = _unpack('!HHHH', n.data[:8])
+                ## generalize to list of keys
+                if not self.initiating_key:  # no initiating key pressed
+                    for k in self.keys:
+                        if int(k.key) in cids:  # initiating key that was pressed
+                            self.initiating_key = k
+                    if self.initiating_key:
+                        self.press_action(self.initiating_key)
+                else:
+                    if int(self.initiating_key.key) not in cids:  # initiating key released
+                        self.initiating_key = None
+                        self.release_action()
+                    else:
+                        for key in cids:
+                            if key and key != self.initiating_key.key:
+                                self.key_action(key)
+            elif n.address == 0x10:
+                if self.initiating_key:
+                    dx, dy = _unpack('!hh', n.data[:4])
+                    self.move_action(dx, dy)
+
+    def start(self, key):
+        device_key = next((k for k in self.device.keys if k.key == key), None)
+        self.keys.append(device_key)
+        if not self.active:
+            self.active = True
+            self.activate_action()
+            self.device.add_notification_handler(self.name, self.handler)
+        device_key.set_rawXY_reporting(True)
+
+    def stop(self, key):  # only stop if this is the active key
+        if self.active:
+            processing_key = next((k for k in self.keys if k.key == key), None)
+            if processing_key:
+                processing_key.set_rawXY_reporting(False)
+                self.keys.remove(processing_key)
+            if not self.keys:
+                try:
+                    self.device.remove_notification_handler(self.name)
+                except Exception:
+                    if _log.isEnabledFor(_WARNING):
+                        _log.warn('cannot disable %s on %s', self.name, self.device)
+                self.deactivate_action()
+                self.active = False
+
+    def activate_action(self):  # action to take when processing is activated
+        pass
+
+    def deactivate_action(self):  # action to take when processing is deactivated
+        pass
+
+    def press_action(self, key):  # action to take when an initiating key is pressed
+        pass
+
+    def release_action(self):  # action to take when key is released
+        pass
+
+    def move_action(self, dx, dy):  # action to take when mouse is moved while key is down
+        pass
+
+    def key_action(self, key):  # acction to take when some other diverted key is pressed
+        pass
+
+
 def apply_all_settings(device):
     persister = getattr(device, 'persister', None)
     sensitives = persister.get('_sensitive', {}) if persister else {}

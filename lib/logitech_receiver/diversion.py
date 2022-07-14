@@ -776,7 +776,7 @@ class MouseGesture(Condition):
             movements = [movements]
         for x in movements:
             if x not in self.MOVEMENTS and x not in _CONTROL:
-                _log.warn('rule Key argument not name of a Logitech key: %s', x)
+                _log.warn('rule Mouse Gesture argument not direction or name of a Logitech key: %s', x)
         self.movements = movements
 
     def __str__(self):
@@ -785,26 +785,28 @@ class MouseGesture(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if feature == _F.MOUSE_GESTURE:
             d = notification.data
-            count = _unpack('!h', d[:2])[0]
-            data = _unpack('!' + ((int(len(d) / 2) - 1) * 'h'), d[2:])
-            if count != len(self.movements):
-                return False
-            x = 0
-            z = 0
-            while x < len(data):
-                if data[x] == 0:
-                    direction = xy_direction(data[x + 1], data[x + 2])
-                    if self.movements[z] != direction:
+            data = _unpack('!' + (int(len(d) / 2) * 'h'), d)
+            data_offset = 0
+            for m in self.movements:
+                if data_offset == 0:
+                    data_offset += 1
+                    if m not in self.MOVEMENTS:  # matching against initiating key
+                        if m != str(_CONTROL[data[0]]):
+                            return False
+                        else:
+                            continue
+                if data_offset >= len(data):
+                    return False
+                if data[data_offset] == 0:
+                    direction = xy_direction(data[data_offset + 1], data[data_offset + 2])
+                    if m != direction:
                         return False
-                    x += 3
-                elif data[x] == 1:
-                    if data[x + 1] not in _CONTROL:
+                    data_offset += 3
+                elif data[data_offset] == 1:
+                    if m != str(_CONTROL[data[data_offset + 1]]):
                         return False
-                    if self.movements[z] != str(_CONTROL[data[x + 1]]):
-                        return False
-                    x += 2
-                z += 1
-            return True
+                    data_offset += 2
+            return data_offset == len(data)
         return False
 
     def data(self):
