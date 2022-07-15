@@ -150,10 +150,10 @@ the sensitivity (DPI) of the mouse by pressing the button and moving the mouse l
 Other mice (such as the MX Master 3) don't have a button specific for this purpose
 but have buttons that can be used for it.
 
-The `DPI Sliding Adjustment` setting,
-which is only present on devices that support this capability in Solaar,
-assigns a button to adjust sensitivity.
-Pressing the button when the button is diverted causes the mouse pointer to stop moving.
+The `Key/Button Diversion` setting can assign buttons to adjust sensitivity by setting the value for the button to `Sliding DPI`.
+This capability is only present if the device supports changing the DPI in this way.
+
+Pressing a button when it is set to `Sliding DPI` causes the mouse pointer to stop moving.
 When the button is released a new Sensitivity (DPI) value is applied to the mouse,
 depending on how far right or left the mouse is moved.   If the mouse is moved only a little bit
 the previous value that was set is applied to the mouse.
@@ -165,15 +165,13 @@ Some mice (such as the MX Master 3) have a button that is supposed to be used to
 create up/down/left/right mouse gestures.  Other mice (such as the MX Vertical) don't
 have a button specific for this purpose but have buttons that can be used for it.
 
-The `Mouse Gestures` setting,
-which is only present on devices that support this capability in Solaar,
-assigns a button for mouse gestures.
-Pressing the button when the button is diverted causes the mouse pointer to stop moving.
-When the button is released a `MOUSE_GESTURE` notification with the total mouse movements
-while the button was pressed are sent to the Solaar rule system.
+The `Key/Button Diversion` setting can assign buttons to initiate mous gestures by setting the value for the button to `Mouse Gestures`.
+This capability is only present if the device can support it.
 
-Mouse gesture conditions in Solaar rules can be used to detect these notifications.
-For more information on mouse gesture rules conditions see
+Pressing a button when it is set to `Mouse Gestures` causes the mouse pointer to stop moving.
+When the button is released a `MOUSE_GESTURE` notification with the mouse movements and diverted key presses
+is sent to the Solaar rule system so that rules can detect these notifications.
+For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
 ## System Tray
