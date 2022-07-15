@@ -1333,8 +1333,8 @@ def decipher_adc_measurement(report):
 
 battery_functions = {
     FEATURE.BATTERY_STATUS: get_battery_status,
-    FEATURE.BATTERY_VOLTAGE: get_battery_unified,
-    FEATURE.UNIFIED_BATTERY: get_battery_voltage,
+    FEATURE.BATTERY_VOLTAGE: get_battery_voltage,
+    FEATURE.UNIFIED_BATTERY: get_battery_unified,
     FEATURE.ADC_MEASUREMENT: get_adc_measurement,
 }
 
