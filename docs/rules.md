@@ -144,12 +144,14 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 `True` and `False` tests return True and False, respectively.
 
-`Mouse Gesture` conditions are true if the actions taken while the mouse's 'Gesture' button is held match the configured list when the 'Gesture' button is released.
-The available actions are `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, `Mouse Down-right`, and buttons that are diverted.
-An example would be mapping `Mouse Up` -> `Mouse Up`. To perform this gesture, you would hold down the 'Gesture' button, move the mouse upwards, pause momentarily, move the mouse upwards, and release the 'Gesture' button.
-Another example would be mapping `Back Button` -> `Back Button`. With this one, you would hold down the 'Gesture' button, double-tap the 'Back' button, and then release the 'Gesture' button.
-Mouse movements and buttons can be mixed and chained together however you like.
-It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click the 'Gesture' button.
+`Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
+Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
+The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
+If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
+So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
+The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
+Directions and buttons can be mixed and chained together however you like.
+It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
 `Setting` conditions check device settings of devices, provided the device is on-line.
 The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,

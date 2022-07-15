@@ -449,7 +449,7 @@ class ReprogrammableKeys(_Settings):
     name = 'reprogrammable-keys'
     label = _('Key/Button Actions')
     description = (
-        _('Change the action for the key or button.') + '\n' +
+        _('Change the action for the key or button.') + '  ' + _('Overridden by diversion.') + '\n' +
         _('Changing important actions (such as for the left mouse button) can result in an unusable system.')
     )
     feature = _F.REPROG_CONTROLS_V4
