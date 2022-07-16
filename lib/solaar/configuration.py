@@ -23,9 +23,12 @@ import os.path as _path
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from threading import Lock as _Lock
+from threading import Timer as _Timer
 
 import yaml as _yaml
 
+from gi.repository import GLib
 from logitech_receiver.common import NamedInt as _NamedInt
 from solaar import __version__
 
@@ -68,7 +71,12 @@ def _load():
     _config = _cleanup_load(loaded_config)
 
 
-def save():
+save_timer = None
+save_lock = _Lock()
+
+
+def save(defer=False):
+    global save_timer
     if not _config:
         return
     dirname = _os.path.dirname(_yaml_file_path)
@@ -77,17 +85,29 @@ def save():
             _os.makedirs(dirname)
         except Exception:
             _log.error('failed to create %s', dirname)
-            return False
+            return
+    if not defer:
+        do_save()
+    else:
+        with save_lock:
+            if not save_timer:
+                save_timer = _Timer(5.0, lambda: GLib.idle_add(do_save))
+                save_timer.start()
 
-    try:
-        with open(_yaml_file_path, 'w') as config_file:
-            _yaml.dump(_config, config_file, default_flow_style=None, width=150)
 
-        if _log.isEnabledFor(_INFO):
-            _log.info('saved %s to %s', _config, _yaml_file_path)
-        return True
-    except Exception as e:
-        _log.error('failed to save to %s: %s', _yaml_file_path, e)
+def do_save():
+    global save_timer
+    with save_lock:
+        if save_timer:
+            save_timer.cancel()
+            save_timer = None
+        try:
+            with open(_yaml_file_path, 'w') as config_file:
+                _yaml.dump(_config, config_file, default_flow_style=None, width=150)
+            if _log.isEnabledFor(_INFO):
+                _log.info('saved %s to %s', _config, _yaml_file_path)
+        except Exception as e:
+            _log.error('failed to save to %s: %s', _yaml_file_path, e)
 
 
 def _convert_json(json_dict):
@@ -128,7 +148,7 @@ class _DeviceEntry(dict):
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
-        save()
+        save(defer=True)
 
     def update(self, device):
         if device.name and device.name != self.get(_KEY_NAME):
