@@ -194,18 +194,22 @@ def run(receivers, args, find_receiver, find_device):
         application.register()
         remote = application.get_is_remote()
 
-    # if the Solaar UI is running don't save configuration here
-    result, message, value = set(dev, setting, args, not remote)
+    # don't save configuration here because we might want the Solaar GUI to make the change
+    result, message, value = set(dev, setting, args, False)
     if message is not None:
         print(message)
         if result is None:
             raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
 
-    # if the Solaar UI is running tell it to also perform the set
+    # if the Solaar UI is running tell it to also perform the set, otherwise save the change in the configuration file
     if remote:
         argl = ['config', dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
         application.run(_yaml.safe_dump(argl))
+    else:
+        if dev.persister and setting.persist:
+            dev.persister[setting.name] = setting._value
+            _configuration.save(defer=False)
 
 
 def set(dev, setting, args, save):
