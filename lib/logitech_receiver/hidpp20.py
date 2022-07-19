@@ -239,6 +239,7 @@ class FeaturesArray(dict):
         self.supported = True
         self.device = device
         self.inverse = {}
+        self.version = {}
         self.count = 0
 
     def _check(self):
@@ -271,10 +272,11 @@ class FeaturesArray(dict):
         if feature is not None:
             return feature
         elif self._check():
-            feature = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
-            if feature:
-                feature = FEATURE[_unpack('!H', feature[:2])[0]]
+            response = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
+            if response:
+                feature = FEATURE[_unpack('!H', response[:2])[0]]
                 self[feature] = index
+                self.version[feature] = response[3]
                 return feature
 
     def enumerate(self):  # return all features and their index, ordered by index
@@ -282,6 +284,10 @@ class FeaturesArray(dict):
             for index in range(self.count):
                 feature = self.get_feature(index)
                 yield feature, index
+
+    def get_feature_version(self, feature):
+        if self[feature]:
+            return self.version[feature]
 
     __bool__ = __nonzero__ = _check
 
@@ -294,6 +300,7 @@ class FeaturesArray(dict):
             if response:
                 index = response[0]
                 self[feature] = index if index else False
+                self.version[feature] = response[2]
                 return index if index else False
 
     def __setitem__(self, feature, index):
