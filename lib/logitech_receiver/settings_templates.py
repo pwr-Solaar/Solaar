@@ -928,6 +928,9 @@ class MouseGesture(_Setting):
         def move_action(self, dx, dy):
             if self.fsmState == 'pressed':
                 now = _time() * 1000  # _time_ns() / 1e6
+                if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.lastEv is None:
+                    self.lastEv = now  # hack to ignore strange first movement report from MX Master 3S
+                    return
                 if self.lastEv is not None and now - self.lastEv > 50.:
                     self.push_mouse_event()
                 dpi = self.dpiSetting.read() if self.dpiSetting else 1000
