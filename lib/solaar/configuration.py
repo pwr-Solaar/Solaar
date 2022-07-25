@@ -136,6 +136,16 @@ def _cleanup_load(c):
     _config = [__version__]
     for element in c:
         if isinstance(element, dict):
+            divert = element.get('divert-keys')
+            if divert:
+                sliding = element.get('dpi-sliding')
+                if sliding:  # convert old-style dpi-sliding setting to divert-keys entry
+                    divert[sliding] = 3
+                    element.pop('dpi-sliding')
+                gestures = element.get('mouse-gestures')
+                if gestures:  # convert old-style mouse-gestures setting to divert-keys entry
+                    divert[gestures] = 2
+                    element.pop('mouse-gestures')
             # convert to device entries
             element = _DeviceEntry(**element)
             _config.append(element)
