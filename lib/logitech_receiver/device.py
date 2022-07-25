@@ -29,12 +29,13 @@ KIND_MAP = {kind: _hidpp10.DEVICE_KIND[str(kind)] for kind in _hidpp20.DEVICE_KI
 
 
 class Device:
-
+    instances = []
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register
 
     def __init__(self, receiver, number, link_notification=None, info=None, path=None, handle=None):
         assert receiver or info
+        self.instances.append(self)
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
@@ -157,6 +158,15 @@ class Device:
         else:
             # may be a 2.0 device; if not, it will fix itself later
             self.features = _hidpp20.FeaturesArray(self)
+
+    @classmethod
+    def find(self, serial):
+        assert serial, 'need serial number or unit ID to find a device'
+        result = None
+        for device in self.instances:
+            if device.online and (device.unitId == serial or device.serial == serial):
+                result = device
+        return result
 
     @property
     def protocol(self):
@@ -480,6 +490,7 @@ class Device:
 
     def close(self):
         handle, self.handle = self.handle, None
+        self.instances.remove(self)
         return (handle and _base.close(handle))
 
     def __del__(self):
