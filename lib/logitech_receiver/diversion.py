@@ -39,6 +39,7 @@ from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
 from .common import NamedInt
+from .device import Device as _Device
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 
@@ -595,10 +596,9 @@ class Setting(Condition):
         return 'Setting: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, report, notification, device, status, last_result):
-        import solaar.ui.window as _window
         if len(self.args) < 3:
             return None
-        dev = _window.find_device(self.args[0]) if self.args[0] is not None else device
+        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             _log.warn('Setting condition: device %s is not known', self.args[0])
             return False
@@ -998,14 +998,11 @@ class Set(Action):
         return 'Set: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, feature, notification, device, status, last_result):
-        import solaar.ui.window as _window
-        # importing here to avoid circular imports
-
         if len(self.args) < 3:
             return None
         if _log.isEnabledFor(_INFO):
             _log.info('Set action: %s', self.args)
-        dev = _window.find_device(self.args[0]) if self.args[0] is not None else device
+        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             _log.error('Set action: device %s is not known', self.args[0])
             return None
