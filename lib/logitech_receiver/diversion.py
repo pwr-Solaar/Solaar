@@ -32,7 +32,6 @@ import evdev
 import keysyms.keysymdef as _keysymdef
 import psutil
 
-from gi.repository import Gdk, GLib
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
@@ -41,6 +40,10 @@ from .common import NamedInt
 from .device import Device as _Device
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
+
+import gi  # isort:skip
+gi.require_version('Gdk', '3.0')  # isort:skip
+from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
 _log = getLogger(__name__)
 del getLogger
