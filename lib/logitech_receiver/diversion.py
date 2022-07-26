@@ -33,7 +33,6 @@ import keysyms.keysymdef as _keysymdef
 import psutil
 
 from gi.repository import Gdk, GLib
-from solaar.ui.config_panel import change_setting as _change_setting
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
@@ -998,6 +997,9 @@ class Set(Action):
         return 'Set: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, feature, notification, device, status, last_result):
+        # importing here to avoid circular imports
+        from solaar.ui.config_panel import change_setting as _change_setting
+
         if len(self.args) < 3:
             return None
         if _log.isEnabledFor(_INFO):
