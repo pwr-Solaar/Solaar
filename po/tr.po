@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 0.9.2\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2021-08-06 10:58-0400\n"
+        "POT-Creation-Date: 2021-09-25 13:56-0400\n"
         "PO-Revision-Date: 2015-04-11 17:35+0200\n"
         "Last-Translator: Behzat Erte <b3hzat@gmail.com>\n"
         "Language-Team: Behzat Erte <b3hzat@gmail.com>\n"
@@ -36,7 +36,7 @@ msgstr  ""
 msgid   "EX100 Receiver 27 Mhz"
 msgstr  ""
 
-#: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
+#: lib/logitech_receiver/device.py:133 lib/solaar/ui/window.py:693
 msgid   "unknown"
 msgstr  "bilinmeyen"
 
@@ -54,7 +54,7 @@ msgstr  "az"
 
 #: lib/logitech_receiver/i18n.py:41
 msgid   "average"
-msgstr  ""
+msgstr  "ortalama"
 
 #: lib/logitech_receiver/i18n.py:42
 msgid   "good"
@@ -78,7 +78,7 @@ msgstr  "şarj oluyor"
 
 #: lib/logitech_receiver/i18n.py:49
 msgid   "not charging"
-msgstr  ""
+msgstr  "şarj olmuyor"
 
 #: lib/logitech_receiver/i18n.py:50
 msgid   "almost full"
@@ -86,11 +86,11 @@ msgstr  "nerdeyse dolu"
 
 #: lib/logitech_receiver/i18n.py:51
 msgid   "charged"
-msgstr  ""
+msgstr  "şarj edildi"
 
 #: lib/logitech_receiver/i18n.py:52
 msgid   "slow recharge"
-msgstr  "yavaş yeniden doldurma"
+msgstr  "yavaş yeniden şarj olma"
 
 #: lib/logitech_receiver/i18n.py:53
 msgid   "invalid battery"
@@ -102,19 +102,19 @@ msgstr  "ısı hatası"
 
 #: lib/logitech_receiver/i18n.py:55
 msgid   "error"
-msgstr  ""
+msgstr  "hata"
 
 #: lib/logitech_receiver/i18n.py:56
 msgid   "standard"
-msgstr  ""
+msgstr  "standart"
 
 #: lib/logitech_receiver/i18n.py:57
 msgid   "fast"
-msgstr  ""
+msgstr  "hizli"
 
 #: lib/logitech_receiver/i18n.py:58
 msgid   "slow"
-msgstr  ""
+msgstr  "yavaş"
 
 #: lib/logitech_receiver/i18n.py:61
 msgid   "device timeout"
@@ -126,7 +126,7 @@ msgstr  "aygıt desteklenmiyor"
 
 #: lib/logitech_receiver/i18n.py:63
 msgid   "too many devices"
-msgstr  "birden çok aygıt"
+msgstr  "cihaz sayisi cok fazla"
 
 #: lib/logitech_receiver/i18n.py:64
 msgid   "sequence timeout"
@@ -149,16 +149,92 @@ msgid   "Other"
 msgstr  "Diğer"
 
 #: lib/logitech_receiver/i18n.py:73
+msgid   "Left Button"
+msgstr  "Sol Tuş"
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Right Button"
+msgstr  "Sag Tuş"
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Middle Button"
+msgstr  "Orta Tuş"
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Back Button"
+msgstr  "Geri Tuşu"
+
+#: lib/logitech_receiver/i18n.py:77
+msgid   "Forward Button"
+msgstr  "Ileri Tuşu"
+
+#: lib/logitech_receiver/i18n.py:78
 msgid   "Mouse Gesture Button"
+msgstr  "Fare jest düğmesi"
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "Smart Shift"
+msgstr  "Akilli Shift"
+
+#: lib/logitech_receiver/i18n.py:80
+msgid   "DPI Switch"
+msgstr  "Cozunurluk Tuşu"
+
+#: lib/logitech_receiver/i18n.py:81
+msgid   "Left Tilt"
+msgstr  "Sol Eğim"
+
+#: lib/logitech_receiver/i18n.py:82
+msgid   "Right Tilt"
+msgstr  "Sağ Eğim"
+
+#: lib/logitech_receiver/i18n.py:83
+msgid   "Left Click"
+msgstr  "Sol tık"
+
+#: lib/logitech_receiver/i18n.py:84
+msgid   "Right Click"
+msgstr  "Sağ tık"
+
+#: lib/logitech_receiver/i18n.py:85
+msgid   "Mouse Middle Button"
+msgstr  "Fare Orta Düğmesi"
+
+#: lib/logitech_receiver/i18n.py:86
+msgid   "Mouse Back Button"
+msgstr  "Fare Geri Düğmesi"
+
+#: lib/logitech_receiver/i18n.py:87
+msgid   "Mouse Forward Button"
+msgstr  "Fare İleri Düğmesi"
+
+#: lib/logitech_receiver/i18n.py:88
+msgid   "Gesture Button Navigation"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:89
+msgid   "Mouse Scroll Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:90
+msgid   "Mouse Scroll Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:93
+msgid   "pressed"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:94
+msgid   "released"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:76
 msgid   "pairing lock is closed"
-msgstr  ""
+msgstr  "eşleştirme kilidi kapalı"
 
 #: lib/logitech_receiver/notifications.py:76
 msgid   "pairing lock is open"
-msgstr  ""
+msgstr  "eşleştirme kilidi açık"
 
 #: lib/logitech_receiver/notifications.py:160 lib/solaar/ui/notify.py:123
 msgid   "connected"
@@ -166,7 +242,7 @@ msgstr  "bağlı"
 
 #: lib/logitech_receiver/notifications.py:160
 msgid   "disconnected"
-msgstr  ""
+msgstr  "bağlantı kesildi"
 
 #: lib/logitech_receiver/notifications.py:198 lib/solaar/ui/notify.py:121
 msgid   "unpaired"
@@ -176,13 +252,13 @@ msgstr  "eşleşmemiş"
 msgid   "powered on"
 msgstr  "açık"
 
-#: lib/logitech_receiver/settings.py:524
+#: lib/logitech_receiver/settings.py:526
 msgid   "register"
-msgstr  ""
+msgstr  "kaydet"
 
-#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+#: lib/logitech_receiver/settings.py:542 lib/logitech_receiver/settings.py:568
 msgid   "feature"
-msgstr  ""
+msgstr  "özellik"
 
 #: lib/logitech_receiver/settings_templates.py:71
 msgid   "Hand Detection"
@@ -194,13 +270,13 @@ msgstr  "Eller klavyenin üzerindeyken aydınlanmayı aç."
 
 #: lib/logitech_receiver/settings_templates.py:72
 msgid   "Scroll Wheel Smooth Scrolling"
-msgstr  ""
+msgstr  "Kaydırma Tekerleği Yumuşak Kaydırma"
 
 #: lib/logitech_receiver/settings_templates.py:73
 #: lib/logitech_receiver/settings_templates.py:78
 #: lib/logitech_receiver/settings_templates.py:85
 msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  "Tekerleği dikey kaydırma için yüksek hasasiyet kipi"
+msgstr  "Tekerleği dikey kaydırma için yüksek hasasiyet modu"
 
 #: lib/logitech_receiver/settings_templates.py:74
 msgid   "Side Scrolling"
@@ -219,7 +295,7 @@ msgid   "Scroll Wheel High Resolution"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid   "Scroll Wheel HID++ Scrolling"
+msgid   "Scroll Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:80
@@ -252,7 +328,7 @@ msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:87
 msgid   "Swap Fx function"
-msgstr  "Fx işlevlerini takasla"
+msgstr  "Fx işlevlerini ters cevir"
 
 #: lib/logitech_receiver/settings_templates.py:88
 msgid   "When set, the F1..F12 keys will activate their special function,\n"
@@ -272,7 +348,7 @@ msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:92
 msgid   "Sensitivity (DPI)"
-msgstr  "Duyarlılık (DPI)"
+msgstr  "Hassasiyet (DPI)"
 
 #: lib/logitech_receiver/settings_templates.py:93
 msgid   "Sensitivity (Pointer Speed)"
@@ -294,7 +370,7 @@ msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:98
 msgid   "Backlight"
-msgstr  ""
+msgstr  "Aydinlatma"
 
 #: lib/logitech_receiver/settings_templates.py:98
 msgid   "Turn illumination on or off on keyboard."
@@ -336,7 +412,7 @@ msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:105
 msgid   "Set OS"
-msgstr  ""
+msgstr  "Isletim sistemi sec"
 
 #: lib/logitech_receiver/settings_templates.py:106
 msgid   "Change Host"
@@ -347,7 +423,7 @@ msgid   "Switch connection to a different host"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid   "Thumb Wheel HID++ Scrolling"
+msgid   "Thumb Wheel Diversion"
 msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:108
@@ -586,6 +662,22 @@ msgstr  ""
 msgid   "Zoom with two fingers"
 msgstr  ""
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid   "Pixel zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid   "Ratio zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Scale factor"
+msgstr  "Ölçek katsayısı"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Sets the cursor speed."
+msgstr  ""
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid   "Left"
 msgstr  ""
@@ -658,40 +750,27 @@ msgstr[1]       ""
 #: lib/logitech_receiver/status.py:165
 #, python-format
 msgid   "Battery: %(level)s"
-msgstr  ""
+msgstr  "Pil: %(level)s"
 
 #: lib/logitech_receiver/status.py:167
 #, python-format
 msgid   "Battery: %(percent)d%%"
-msgstr  ""
+msgstr  "Pil: %(percent)d%%"
 
 #: lib/logitech_receiver/status.py:179
 #, python-format
 msgid   "Lighting: %(level)s lux"
-msgstr  ""
+msgstr  "Aydınlatma: %(level)s lux"
 
 #: lib/logitech_receiver/status.py:234
 #, python-format
 msgid   "Battery: %(level)s (%(status)s)"
-msgstr  ""
+msgstr  "Pil: %(level)s (%(status)s)"
 
 #: lib/logitech_receiver/status.py:236
 #, python-format
 msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  ""
-
-#: lib/solaar/gtk.py:152
-msgid   "ERROR: "
-msgstr  ""
-
-#: lib/solaar/gtk.py:153
-msgid   "Solaar depends on a udev file that is not present"
-msgstr  ""
-
-#: lib/solaar/gtk.py:156
-msgid   "For more information see the Solaar installation directions\n"
-        "at https://pwr-solaar.github.io/Solaar/installation"
-msgstr  ""
+msgstr  "Pil: %(percent)d%% (%(status)s)"
 
 #: lib/solaar/ui/__init__.py:52
 msgid   "Permissions error"
@@ -710,36 +789,38 @@ msgstr  "Eğer Solaar'ı yeni yüklediyseniz, alıcıyı çıkartıp tekrar tak�
 
 #: lib/solaar/ui/__init__.py:58
 msgid   "Cannot connect to device error"
-msgstr  ""
+msgstr  "Hata. Cihaza bağlanılamıyor"
 
 #: lib/solaar/ui/__init__.py:60
 #, python-format
 msgid   "Found a Logitech receiver or device at %s, but encountered an error "
         "connecting to it."
-msgstr  ""
+msgstr  "%s konumunda bir Logitech alıcısı veya aygıtı bulundu"
+        "ancak buna bağlanırken bir hatayla karşılaşıldı."
 
 #: lib/solaar/ui/__init__.py:61
 msgid   "Try removing the device and plugging it back in or turning it off "
         "and then on."
-msgstr  ""
+msgstr  "Aygıtı çıkarmayı ve yeniden takmayı veya kapatıp açmayı deneyin."
 
 #: lib/solaar/ui/__init__.py:64
 msgid   "Unpairing failed"
-msgstr  "Eş ayrıma hatalı"
+msgstr  "Eşlestirmeyi kaldirma hatalı"
 
 #: lib/solaar/ui/__init__.py:66
 #, python-brace-format
 msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "%{device},  %{receiver}'dan ayrımı başarısız oldu."
+msgstr  "%{device} ve %{receiver} eşleştirmesini kaldırma başarısız."
 
 #: lib/solaar/ui/__init__.py:67
 msgid   "The receiver returned an error, with no further details."
-msgstr  "Alıcı hata döndü, bu hata hakkında ayrıntı mevcut değil."
+msgstr  "Alıcı hata verdi, bu hata hakkında ayrıntı mevcut değil."
 
 #: lib/solaar/ui/about.py:39
 msgid   "Manages Logitech receivers,\n"
         "keyboards, mice, and tablets."
-msgstr  ""
+msgstr  "Logitech alıcılarını, klavyelerini,\n"
+        "farelerini ve tabletlerini yönetir."
 
 #: lib/solaar/ui/about.py:47
 msgid   "Additional Programming"
@@ -758,8 +839,8 @@ msgid   "Logitech documentation"
 msgstr  "Logitech belgeleri"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "Hakkında"
+msgid   "About %s"
+msgstr  "Hakkında %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -768,11 +849,11 @@ msgstr  "Eş ayrıma"
 
 #: lib/solaar/ui/action.py:99 lib/solaar/ui/diversion_rules.py:144
 msgid   "Cancel"
-msgstr  ""
+msgstr  "İptal et"
 
 #: lib/solaar/ui/config_panel.py:358
 msgid   "Changes allowed"
-msgstr  ""
+msgstr  "İzin verilen değişiklikler"
 
 #: lib/solaar/ui/config_panel.py:359
 msgid   "No changes allowed"
@@ -799,15 +880,15 @@ msgstr[1]       ""
 
 #: lib/solaar/ui/diversion_rules.py:57
 msgid   "Built-in rules"
-msgstr  ""
+msgstr  "Varolan kurallar"
 
 #: lib/solaar/ui/diversion_rules.py:57
 msgid   "User-defined rules"
-msgstr  ""
+msgstr  "Kullanıcı tanımlı kurallar"
 
 #: lib/solaar/ui/diversion_rules.py:59 lib/solaar/ui/diversion_rules.py:792
 msgid   "Rule"
-msgstr  ""
+msgstr  "Kural"
 
 #: lib/solaar/ui/diversion_rules.py:60 lib/solaar/ui/diversion_rules.py:503
 #: lib/solaar/ui/diversion_rules.py:622
@@ -816,15 +897,15 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:62
 msgid   "[empty]"
-msgstr  ""
+msgstr  "[boş]"
 
 #: lib/solaar/ui/diversion_rules.py:85
 msgid   "Solaar Rule Editor"
-msgstr  ""
+msgstr  "Solar Kural Editörü"
 
 #: lib/solaar/ui/diversion_rules.py:135
 msgid   "Make changes permanent?"
-msgstr  ""
+msgstr  "Değişiklikleri kalıcı yap?"
 
 #: lib/solaar/ui/diversion_rules.py:140
 msgid   "Yes"
@@ -832,31 +913,31 @@ msgstr  "Evet"
 
 #: lib/solaar/ui/diversion_rules.py:142
 msgid   "No"
-msgstr  ""
+msgstr  "Hayır"
 
 #: lib/solaar/ui/diversion_rules.py:147
 msgid   "If you choose No, changes will be lost when Solaar is closed."
-msgstr  ""
+msgstr  "Hayır'ı seçerseniz, Solaar kapatıldığında değişiklikler kaybolacaktır."
 
 #: lib/solaar/ui/diversion_rules.py:195
 msgid   "Save changes"
-msgstr  ""
+msgstr  "Değişiklikleri kaydet"
 
 #: lib/solaar/ui/diversion_rules.py:200
 msgid   "Discard changes"
-msgstr  ""
+msgstr  "Değişiklikleri gözardı et"
 
 #: lib/solaar/ui/diversion_rules.py:366
 msgid   "Insert here"
-msgstr  ""
+msgstr  "Buraya ekle"
 
 #: lib/solaar/ui/diversion_rules.py:368
 msgid   "Insert above"
-msgstr  ""
+msgstr  "Yukarıya ekle"
 
 #: lib/solaar/ui/diversion_rules.py:370
 msgid   "Insert below"
-msgstr  ""
+msgstr  "Aşağıya ekle"
 
 #: lib/solaar/ui/diversion_rules.py:376
 msgid   "Insert new rule here"
@@ -872,31 +953,31 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:421
 msgid   "Paste here"
-msgstr  ""
+msgstr  "Buraya yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:423
 msgid   "Paste above"
-msgstr  ""
+msgstr  "Yukarı yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:425
 msgid   "Paste below"
-msgstr  ""
+msgstr  "Aşağıya yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:431
 msgid   "Paste rule here"
-msgstr  ""
+msgstr  "Kuralı buraya yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:433
 msgid   "Paste rule above"
-msgstr  ""
+msgstr  "Kuralı yukarı yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:435
 msgid   "Paste rule below"
-msgstr  ""
+msgstr  "Kuralı aşağıya yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:439
 msgid   "Paste rule"
-msgstr  ""
+msgstr  "Kuralı yapıştır"
 
 #: lib/solaar/ui/diversion_rules.py:468
 msgid   "Flatten"
@@ -909,16 +990,16 @@ msgstr  ""
 #: lib/solaar/ui/diversion_rules.py:504 lib/solaar/ui/diversion_rules.py:624
 #: lib/solaar/ui/diversion_rules.py:835
 msgid   "Or"
-msgstr  ""
+msgstr  "Veya"
 
 #: lib/solaar/ui/diversion_rules.py:505 lib/solaar/ui/diversion_rules.py:623
 #: lib/solaar/ui/diversion_rules.py:820
 msgid   "And"
-msgstr  ""
+msgstr  "Ve"
 
 #: lib/solaar/ui/diversion_rules.py:507
 msgid   "Condition"
-msgstr  ""
+msgstr  "Durum"
 
 #: lib/solaar/ui/diversion_rules.py:509 lib/solaar/ui/diversion_rules.py:951
 msgid   "Feature"
@@ -926,7 +1007,7 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:874
 msgid   "Process"
-msgstr  ""
+msgstr  "İşlem"
 
 #: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:902
 msgid   "MouseProcess"
@@ -934,7 +1015,7 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:512 lib/solaar/ui/diversion_rules.py:984
 msgid   "Report"
-msgstr  ""
+msgstr  "Rapor"
 
 #: lib/solaar/ui/diversion_rules.py:513 lib/solaar/ui/diversion_rules.py:1019
 msgid   "Modifiers"
@@ -946,7 +1027,7 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1111
 msgid   "Test"
-msgstr  ""
+msgstr  "Test"
 
 #: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1196
 msgid   "Mouse Gesture"
@@ -962,24 +1043,24 @@ msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:1335
 msgid   "Mouse scroll"
-msgstr  ""
+msgstr  "Fare kaydırma"
 
 #: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:1383
 msgid   "Mouse click"
-msgstr  ""
+msgstr  "Fare tıklaması"
 
 #: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1452
 msgid   "Execute"
-msgstr  ""
+msgstr  "Uygula"
 
 #: lib/solaar/ui/diversion_rules.py:554
 msgid   "Insert new rule"
-msgstr  ""
+msgstr  "Yeni kural ekle"
 
 #: lib/solaar/ui/diversion_rules.py:574 lib/solaar/ui/diversion_rules.py:1146
 #: lib/solaar/ui/diversion_rules.py:1236 lib/solaar/ui/diversion_rules.py:1411
 msgid   "Delete"
-msgstr  ""
+msgstr  "Sil"
 
 #: lib/solaar/ui/diversion_rules.py:596
 msgid   "Negate"
@@ -1003,10 +1084,18 @@ msgstr  "Kopyala"
 
 #: lib/solaar/ui/diversion_rules.py:772
 msgid   "This editor does not support the selected rule component yet."
-msgstr  ""
+msgstr  "Seçilen kural bileşeni henüz desteklenmiyor."
 
 #: lib/solaar/ui/diversion_rules.py:850
 msgid   "Not"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid   "Key down"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid   "Key up"
 msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:1131
@@ -1051,7 +1140,7 @@ msgstr  "Aygıt algılandı fakat bu alıcı ile uyumlu değil."
 
 #: lib/solaar/ui/pair_window.py:140
 msgid   "More paired devices than receiver can support."
-msgstr  ""
+msgstr  "Alıcının destekleyebileceğinden daha fazla eşleştirilmiş cihaz."
 
 #: lib/solaar/ui/pair_window.py:142
 msgid   "No further details are available about the error."
@@ -1059,7 +1148,7 @@ msgstr  "Hata hakkında daha fazla ayrıntı mevcut değil. "
 
 #: lib/solaar/ui/pair_window.py:156
 msgid   "Found a new device:"
-msgstr  ""
+msgstr  "Yeni bir cihaz bulundu:"
 
 #: lib/solaar/ui/pair_window.py:181
 msgid   "The wireless link is not encrypted"
@@ -1068,11 +1157,11 @@ msgstr  "Kablosuz bağlantı şifrelenmemiş"
 #: lib/solaar/ui/pair_window.py:199
 #, python-format
 msgid   "%(receiver_name)s: pair new device"
-msgstr  ""
+msgstr  "%(receiver_name)s: yeni cihazı eşleştir"
 
 #: lib/solaar/ui/pair_window.py:206
 msgid   "If the device is already turned on, turn it off and on again."
-msgstr  ""
+msgstr  "Cihaz zaten açıksa, kapatıp tekrar açın."
 
 #: lib/solaar/ui/pair_window.py:209
 #, python-format
@@ -1099,8 +1188,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Hiçbir Logitech alıcısı bulunamadı"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "Çıkış"
+msgid   "Quit %s"
+msgstr  "Çıkış %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"
@@ -1194,11 +1283,11 @@ msgstr  "yok"
 
 #: lib/solaar/ui/window.py:585
 msgid   "Notifications"
-msgstr  "Uyarılar"
+msgstr  "Bildirimler"
 
 #: lib/solaar/ui/window.py:622
 msgid   "No device paired."
-msgstr  ""
+msgstr  "Eşleştirilmiş cihaz yok."
 
 #: lib/solaar/ui/window.py:629
 #, python-format
@@ -1232,7 +1321,7 @@ msgstr  ""
 
 #: lib/solaar/ui/window.py:706 lib/solaar/ui/window.py:710
 msgid   "Battery Level"
-msgstr  ""
+msgstr  "Pil Durumu"
 
 #: lib/solaar/ui/window.py:708 lib/solaar/ui/window.py:712
 msgid   "Approximate level reported by battery"
@@ -1345,4 +1434,4 @@ msgstr  ""
 #~ msgstr       "eşlenmiş aygıtlar"
 
 #~ msgid        "pairing lock is "
-#~ msgstr       "eş kilidi"
+#~ msgstr       "eşleştirme kilidi "

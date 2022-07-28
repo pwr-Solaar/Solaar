@@ -4,19 +4,25 @@ layout: default
 ---
 
 **Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
-that connect wirelessly to a USB [Unifying][unifying], Lightspeed, or Nano receiver,
+that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver,
 connect directly via a USB cable, or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
+
+Documentation here is for the current version of Solaar.
+Some Linux distributions distribute old versions of Solaar.
+If you are using an old version and something described here does not work you should upgrade
+using one of the methods described below.
 
 Solaar can be used as a GUI application or via its command-line interface.
 Both interfaces are able to list the connected devices and
 show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
-Solaar can also control some changeable features of devices,
-such as smooth scrolling or function key behavior.
-Solaar keeps track of these changed settings on a per-computer basis and the GUI application restores them whenever a device connects.
-(Devices forget most settings when powered down.)
+Solaar can also control some changeable settings of devices,
+such as scroll wheel direction and function key behavior.
+Solaar keeps track of most of these settings on a per-computer basis,
+because devices forget most settings when powered down,
+and the GUI application restores them whenever a device connects.
 For more information on how to use Solaar see
 [the usage page](https://pwr-solaar.github.io/Solaar/usage),
 and for more information on its capabilities see
@@ -41,7 +47,7 @@ Solaar does not process normal input from devices. It is thus unable
 to fix problems that arise from incorrect handling of mouse movements or keycodes
 by Linux drivers or other software.
 
-Solaar has progressed past version 1.0. Problems with earlier versions should
+Solaar has progressed past version 1.1. Problems with earlier versions should
 not be reported as bugs. Instead, upgrade to a recent version or manually install
 the current version from [GitHub](https://github.com/pwr-Solaar/Solaar).
 Some capabilities of Solaar have been developed by observing the behavior of
@@ -56,18 +62,21 @@ Please report such experiences by creating an issue in
 
 ## Supported Devices
 
-Solaar will detect all devices paired with supported Unifying, Lightspeed, or Nano
+Solaar will detect all devices paired with supported Unifying, Bolt, Lightspeed, or Nano
 receivers, and at the very least display some basic information about them.
 Solaar will detect some Logitech devices that connect via a USB cable or Bluetooth.
 
 Solaar can pair and unpair a Logitech device showing the Unifying logo
 (Solaar's version of the [logo][logo])
-with any Unifying receiver and
+with any Unifying receiver,
+and pair and unpair a Logitech device showing the Bolt logo
+with any Bolt receiver,
+and
 can pair and unpair Lightspeed devices with Lightspeed receivers for the same model.
 Solaar can pair some Logitech devices with Logitech Nano receivers but not all Logitech
 devices can be paired with Nano receivers.
-Logitech devices without a Unifying logo
-generally cannot be paired with Unifying receivers.
+Logitech devices without a Unifying or Bolt logo
+generally cannot be paired with Unifying or Bolt receivers.
 
 Solaar does not handle connecting or disconnecting via Bluetooth,
 which is done using the usual Bluetooth mechanisms.
@@ -113,8 +122,11 @@ for the step-by-step procedure for manual installation.
 - If some icons appear broken in the application, make sure you've properly
   configured the Gtk theme and icon theme in your control panel.
 
-- There are several implementations of the system tray.   Some of these have problems
-  that can result in missing or wrong-sized icons.
+- Solaar normally uses icon names for its icons, which in some system tray implementatations
+  results in missing or wrong-sized icons.
+  The `--tray-icon-size` option forces Solaar to use icon files of appropriate size
+  for tray icons instead, which produces better results in some system tray implementatations.
+  To use icon files close to 32 pixels in size use `--tray-icon-size=32`.
 
 - The icon in the system tray can show up as 'black on black' in dark
   themes or as non-symbolic when the theme uses symbolic icons.  This is due to problems
@@ -124,10 +136,6 @@ for the step-by-step procedure for manual installation.
 - Sometimes the system tray icon does not show up.  The cause of this is unknown.
   Either wait a while and try again or try with the `--window=hide` option.
 
-- Running the command-line application while the GUI
-  application is also running *may* occasionally cause either of them to become
-  confused about the state of the devices.
-
 - Some Linux drivers view or modify the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
@@ -135,12 +143,29 @@ for the step-by-step procedure for manual installation.
   "Ignore this setting".
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
-- Many gaming mice have both the ONBOARD PROFILES feature and the REPORT RATE feature.
-  On these mice changing the Polling Rate setting requires modifying a setting in
-  the ONBOARD PROFILES feature, which can modify how the mouse works.  Changing the
-  Polling Rate setting to "Ignore this setting" (see above) prevents Solaar from
-  modifying the ONBOARD PROFILES feature.
-  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+- Many gaming mice and keyboards have the ONBOARD PROFILES feature.
+  This feature can override other features, including polling rate and key lighting.
+  To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
+  This may have other effects, such as turning off backlighting.
+
+- Solaar will try to use uinput to simulate input from rules under Wayland or if Xtest is not available
+  but this needs write permission on /dev/uinput.
+  For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
+- Sometimes bluetooth connections are not torn down correctly by Linux.
+  This can result in two entries in Solaar for the same device, with only one being active.
+
+## Contributing to Solaar
+
+Conributions to Solaaar are very welcome.
+
+Solaar has complete or partial translations of its GUI strings in several languages.
+If you want to update a translation or add a new one see [the translation page](https://pwr-solaar.github.io/Solaar/i18n) for more information.
+
+If you find a bug, please check first if it has already been reported. If yes, please add additional information you may have to the existing issue. If not, please open a new bug report issue. If you can provide a fix for it, please also open a GitHub pull request. Label your commits using the naming conventions in recent commits to Solaar.
+
+If you want to add a new feature to Solaar, feel free to open a feature request issue to discuss your proposal.
+There are also usually several open issues for enhancements that have already been requested.
 
 
 ## License

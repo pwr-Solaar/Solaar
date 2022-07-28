@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -20,8 +19,6 @@
 # Base low-level functions used by the API proper.
 # Unlikely to be used directly unless you're expanding the API.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import threading as _threading
 
 from collections import namedtuple
@@ -30,6 +27,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
 from random import getrandbits as _random_bits
+from struct import pack as _pack
 from time import time as _timestamp
 
 import hidapi as _hid
@@ -40,7 +38,6 @@ from .base_usb import ALL as _RECEIVER_USB_IDS
 from .base_usb import DEVICES as _DEVICE_IDS
 from .base_usb import other_device_check as _other_device_check
 from .common import KwException as _KwException
-from .common import pack as _pack
 from .common import strhex as _strhex
 
 _log = getLogger(__name__)
@@ -72,8 +69,8 @@ DEFAULT_TIMEOUT = 4
 _RECEIVER_REQUEST_TIMEOUT = 0.9
 # devices may reply a lot slower, as the call has to go wireless to them and come back
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
-# when pinging, be extra patient
-_PING_TIMEOUT = DEFAULT_TIMEOUT * 2
+# when pinging, be extra patient (no longer)
+_PING_TIMEOUT = DEFAULT_TIMEOUT
 
 #
 # Exceptions that may be raised by this API.
@@ -118,8 +115,7 @@ def filter_receivers(bus_id, vendor_id, product_id):
 
 def receivers():
     """Enumerate all the receivers attached to the machine."""
-    for dev in _hid.enumerate(filter_receivers):
-        yield dev
+    yield from _hid.enumerate(filter_receivers)
 
 
 def filter_devices(bus_id, vendor_id, product_id):
@@ -132,8 +128,7 @@ def filter_devices(bus_id, vendor_id, product_id):
 
 def wired_devices():
     """Enumerate all the USB-connected and Bluetooth devices attached to the machine."""
-    for dev in _hid.enumerate(filter_devices):
-        yield dev
+    yield from _hid.enumerate(filter_devices)
 
 
 def filter_either(bus_id, vendor_id, product_id):
@@ -330,6 +325,10 @@ def make_notification(report_id, devnumber, data):
         return
 
     address = ord(data[1:2])
+    if sub_id == 0x00 and (address & 0x0F == 0x00):
+        # this is a no-op notification - don't do anything with it
+        return
+
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
         (sub_id >= 0x40) or  # noqa: E131
@@ -347,7 +346,6 @@ _HIDPP_Notification = namedtuple('_HIDPP_Notification', ('report_id', 'devnumber
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%02x,%d,%02X,%02X,%s)' % (
     self.report_id, self.devnumber, self.sub_id, self.address, _strhex(self.data)
 )
-_HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple
 
 #
@@ -360,11 +358,11 @@ handles_lock = {}
 
 def handle_lock(handle):
     with request_lock:
-        if handles_lock.get(int(handle)) is None:
+        if handles_lock.get(handle) is None:
             if _log.isEnabledFor(_INFO):
-                _log.info('New lock %s', int(handle))
-            handles_lock[int(handle)] = _threading.Lock()  # Serialize requests on the handle
-    return handles_lock[int(handle)]
+                _log.info('New lock %s', repr(handle))
+            handles_lock[handle] = _threading.Lock()  # Serialize requests on the handle
+    return handles_lock[handle]
 
 
 # context manager for locks with a timeout
@@ -381,7 +379,7 @@ def acquire_timeout(lock, handle, timeout):
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False):
+def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -395,7 +393,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
 
     with acquire_timeout(handle_lock(handle), handle, 10.):
         assert isinstance(request_id, int)
-        if devnumber != 0xFF and request_id < 0x8000:
+        if (devnumber != 0xFF or protocol >= 2.0) and request_id < 0x8000:
             # For HID++ 2.0 feature requests, randomize the SoftwareId to make it
             # easier to recognize the reply for this request. also, always set the
             # most significant bit (8) in SoftwareId, to make notifications easier
@@ -458,13 +456,6 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                         raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                     if reply_data[:2] == request_data[:2]:
-                        if request_id & 0xFE00 == 0x8200:
-                            # long registry r/w should return a long reply
-                            assert report_id == HIDPP_LONG_MESSAGE_ID
-                        elif request_id & 0xFE00 == 0x8000:
-                            # short registry r/w should return a short reply
-                            assert report_id == HIDPP_SHORT_MESSAGE_ID
-
                         if devnumber == 0xFF:
                             if request_id == 0x83B5 or request_id == 0x81F1:
                                 # these replies have to match the first parameter as well

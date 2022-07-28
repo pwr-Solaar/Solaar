@@ -1,6 +1,5 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import errno as _errno
+import threading as _threading
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -14,7 +13,6 @@ from . import descriptors as _descriptors
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
-from .i18n import _
 from .settings_templates import check_feature_settings as _check_feature_settings
 
 _log = getLogger(__name__)
@@ -30,26 +28,24 @@ KIND_MAP = {kind: _hidpp10.DEVICE_KIND[str(kind)] for kind in _hidpp20.DEVICE_KI
 #
 
 
-class Device(object):
-
+class Device:
+    instances = []
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register
 
-    def __init__(self, receiver, number, link_notification=None, info=None):
+    def __init__(self, receiver, number, link_notification=None, info=None, path=None, handle=None):
         assert receiver or info
+        self.instances.append(self)
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
-        self.handle = None
-        self.path = None
+        self.path = path
+        self.handle = handle
         self.product_id = None
 
         if receiver:
             assert number > 0 and number <= receiver.max_devices
-        else:
-            assert number == 0xFF
-        # Device number, 1..6 for unifying devices, 1 otherwise.
-        self.number = number
+        self.number = number  # will be None at this point for directly connected devices
         # 'device active' flag; requires manual management.
         self.online = None
 
@@ -79,10 +75,13 @@ class Device(object):
 
         self._firmware = None
         self._keys = None
+        self._remap_keys = None
         self._gestures = None
+        self._gestures_lock = _threading.Lock()
         self._registers = None
         self._settings = None
         self._feature_settings_checked = False
+        self._settings_lock = _threading.Lock()
 
         # Misc stuff that's irrelevant to any functionality, but may be
         # displayed in the UI and caching it here helps.
@@ -94,6 +93,19 @@ class Device(object):
 
         # if _log.isEnabledFor(_DEBUG):
         #     _log.debug("new Device(%s, %s, %s)", receiver, number, link_notification)
+
+        if not self.path:
+            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else info.path
+        if not self.handle:
+            try:
+                self.handle = _base.open_path(self.path) if self.path else None
+            except Exception:  # maybe the device wasn't set up
+                try:
+                    import time
+                    time.sleep(1)
+                    self.handle = _base.open_path(self.path) if self.path else None
+                except Exception:  # give up
+                    self.handle = None
 
         if receiver:
             if link_notification is not None:
@@ -108,64 +120,29 @@ class Device(object):
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
                 # Not a notification, force a reading of the wpid
-                pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + number - 1)
-                if pair_info:
-                    # may be either a Unifying receiver, or an Unifying-ready
-                    # receiver
-                    self.wpid = _strhex(pair_info[3:5])
-                    kind = ord(pair_info[7:8]) & 0x0F
-                    self._kind = _hidpp10.DEVICE_KIND[kind]
-                elif receiver.ex100_27mhz_wpid_fix:
-                    # 27Mhz receiver, fill extracting WPID from udev path
-                    self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
-                    if not self.wpid:
-                        _log.error('Unable to get wpid from udev for device %d of %s', number, receiver)
-                        raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
-                    kind = self.get_kind_from_index(number, receiver)
-                    self._kind = _hidpp10.DEVICE_KIND[kind]
-                else:
-                    # unifying protocol not supported, probably an old Nano receiver
-                    device_info = self.receiver.read_register(_R.receiver_info, 0x04)
-                    if device_info is None:
-                        _log.error('failed to read Nano wpid for device %d of %s', number, receiver)
-                        raise _base.NoSuchDevice(number=number, receiver=receiver, error='read Nano wpid')
-                    self.wpid = _strhex(device_info[3:5])
-                    self._power_switch = '(' + _('unknown') + ')'
+                self.online = True
+                self.update_pairing_information()
 
             # the wpid is necessary to properly identify wireless link on/off
             # notifications also it gets set to None on this object when the
             # device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
-            self.path = _hid.find_paired_node(receiver.path, number, _base.DEFAULT_TIMEOUT)
-            try:
-                self.handle = _hid.open_path(self.path) if self.path else None
-            except Exception:  # maybe the device wasn't set up
-                try:
-                    import time
-                    time.sleep(1)
-                    self.handle = _hid.open_path(self.path)
-                except Exception:  # give up
-                    self.handle = None
-
             self.descriptor = _descriptors.get_wpid(self.wpid)
             if self.descriptor is None:
-                # Last chance to correctly identify the device; many Nano
-                # receivers do not support this call.
-                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
+                # Last chance to correctly identify the device; many Nano receivers do not support this call.
+                codename = self.receiver.device_codename(self.number)
                 if codename:
-                    codename_length = ord(codename[1:2])
-                    codename = codename[2:2 + codename_length]
-                    self._codename = codename.decode('ascii')
+                    self._codename = codename
                     self.descriptor = _descriptors.get_codename(self._codename)
         else:
-            self.path = info.path
-            self.handle = _hid.open_path(self.path)
-            self.online = True
+            self.online = None  # a direct connected device might not be online (as reported by user)
             self.product_id = info.product_id
             self.bluetooth = info.bus_id == 0x0005
-            self.descriptor = _descriptors.get_btid(self.product_id
-                                                    ) if self.bluetooth else _descriptors.get_usbid(self.product_id)
+            self.descriptor = _descriptors.get_btid(self.product_id) if self.bluetooth else \
+                _descriptors.get_usbid(self.product_id)
+            if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
+                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
 
         if self.descriptor:
             self._name = self.descriptor.name
@@ -181,6 +158,15 @@ class Device(object):
         else:
             # may be a 2.0 device; if not, it will fix itself later
             self.features = _hidpp20.FeaturesArray(self)
+
+    @classmethod
+    def find(self, serial):
+        assert serial, 'need serial number or unit ID to find a device'
+        result = None
+        for device in self.instances:
+            if device.online and (device.unitId == serial or device.serial == serial):
+                result = device
+        return result
 
     @property
     def protocol(self):
@@ -198,12 +184,12 @@ class Device(object):
         if not self._codename:
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
+                if not self._codename:
+                    self._codename = self.name.split(' ', 1)[0] if self.name else None
             elif self.receiver:
-                codename = self.receiver.read_register(_R.receiver_info, _IR.device_name + self.number - 1)
+                codename = self.receiver.device_codename(self.number)
                 if codename:
-                    codename_length = ord(codename[1:2])
-                    codename = codename[2:2 + codename_length]
-                    self._codename = codename.decode('utf-8')
+                    self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = '? (%s)' % (self.wpid or self.product_id)
         return self._codename if self._codename else '?? (%s)' % (self.wpid or self.product_id)
@@ -213,51 +199,58 @@ class Device(object):
         if not self._name:
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self.codename or ('Unknown device %s' % (self.wpid or self.product_id))
+        return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))
+
+    def get_ids(self):
+        ids = _hidpp20.get_ids(self)
+        if ids:
+            self._unitId, self._modelId, self._tid_map = ids
+            if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+                _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
 
     @property
     def unitId(self):
-        if not self._unitId:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._unitId and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._unitId
 
     @property
     def modelId(self):
-        if not self._modelId:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._modelId and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._modelId
 
     @property
     def tid_map(self):
-        if not self._tid_map:
-            if self.online and self.protocol >= 2.0:
-                ids = _hidpp20.get_ids(self)
-                if ids:
-                    self._unitId, self._modelId, self._tid_map = ids
-                    if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                        _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+        if not self._tid_map and self.online and self.protocol >= 2.0:
+            self.get_ids()
         return self._tid_map
+
+    def update_pairing_information(self):
+        if self.receiver:
+            wpid, kind, polling_rate = self.receiver.device_pairing_information(self.number)
+            if not self.wpid:
+                self.wpid = wpid
+            if not self._kind:
+                self._kind = kind
+            if not self._polling_rate:
+                self._polling_rate = polling_rate
+
+    def update_extended_pairing_information(self):
+        if self.receiver:
+            serial, power_switch = self.receiver.device_extended_pairing_information(self.number)
+            if not self._serial:
+                self._serial = serial
+            if not self._power_switch:
+                self._power_switch = power_switch
 
     @property
     def kind(self):
         if not self._kind:
-            pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + self.number - 1) \
-                if self.receiver else None
-            if pair_info:
-                kind = ord(pair_info[7:8]) & 0x0F
-                self._kind = _hidpp10.DEVICE_KIND[kind]
-            elif self.online and self.protocol >= 2.0:
-                self._kind = KIND_MAP[_hidpp20.get_kind(self)]
+            self.update_pairing_information()
+            if not self._kind and self.protocol >= 2.0:
+                kind = _hidpp20.get_kind(self)
+                self._kind = KIND_MAP[kind] if kind else None
         return self._kind or '?'
 
     @property
@@ -271,42 +264,28 @@ class Device(object):
 
     @property
     def serial(self):
-        if not self._serial and self.receiver:
-            serial = self.receiver.read_register(_R.receiver_info, _IR.extended_pairing_information + self.number - 1)
-            if serial:
-                ps = ord(serial[9:10]) & 0x0F
-                self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
-            else:
-                # some Nano receivers?
-                serial = self.receiver.read_register(0x2D5)
+        if not self._serial:
+            self.update_extended_pairing_information()
+        return self._serial or ''
 
-            if serial:
-                self._serial = _strhex(serial[1:5])
-            else:
-                # fallback...
-                self._serial = self.receiver.serial
-        return self._serial or '?'
+    @property
+    def id(self):
+        if not self.serial:
+            if self.persister and self.persister.get('_serial', None):
+                self._serial = self.persister.get('_serial', None)
+        return self.unitId or self.serial
 
     @property
     def power_switch_location(self):
-        if not self._power_switch and self.receiver:
-            ps = self.receiver.read_register(_R.receiver_info, _IR.extended_pairing_information + self.number - 1)
-            if ps:
-                ps = ord(ps[9:10]) & 0x0F
-                self._power_switch = _hidpp10.POWER_SWITCH_LOCATION[ps]
-            else:
-                self._power_switch = '(unknown)'
+        if not self._power_switch:
+            self.update_extended_pairing_information()
         return self._power_switch
 
     @property
     def polling_rate(self):
-        if not self._polling_rate and self.receiver:
-            pair_info = self.receiver.read_register(_R.receiver_info, _IR.pairing_information + self.number - 1)
-            if pair_info:
-                self._polling_rate = ord(pair_info[2:3])
-            else:
-                self._polling_rate = 0
-        if self.online and self.protocol >= 2.0 and self.features and _hidpp20.FEATURE.REPORT_RATE in self.features:
+        if not self._polling_rate:
+            self.update_pairing_information()
+        if self.protocol >= 2.0:
             rate = _hidpp20.get_polling_rate(self)
             self._polling_rate = rate if rate else self._polling_rate
         return self._polling_rate
@@ -319,10 +298,19 @@ class Device(object):
         return self._keys
 
     @property
-    def gestures(self):
-        if not self._gestures:
+    def remap_keys(self):
+        if self._remap_keys is None:
             if self.online and self.protocol >= 2.0:
-                self._gestures = _hidpp20.get_gestures(self) or ()
+                self._remap_keys = _hidpp20.get_remap_keys(self) or ()
+        return self._remap_keys
+
+    @property
+    def gestures(self):
+        if self._gestures is None:
+            with self._gestures_lock:
+                if self._gestures is None:
+                    if self.online and self.protocol >= 2.0:
+                        self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
 
     @property
@@ -337,19 +325,24 @@ class Device(object):
     @property
     def settings(self):
         if not self._settings:
-            self._settings = []
-            if self.persister and self.descriptor and self.descriptor.settings:
-                for s in self.descriptor.settings:
-                    try:
-                        setting = s(self)
-                    except Exception as e:  # Do nothing if the device is offline
-                        setting = None
-                        if self.online:
-                            raise e
-                    if setting is not None:
-                        self._settings.append(setting)
+            with self._settings_lock:
+                if not self._settings:
+                    settings = []
+                    if self.persister and self.descriptor and self.descriptor.settings:
+                        for sclass in self.descriptor.settings:
+                            try:
+                                setting = sclass.build(self)
+                            except Exception as e:  # Do nothing if the device is offline
+                                setting = None
+                                if self.online:
+                                    raise e
+                            if setting is not None:
+                                settings.append(setting)
+                    self._settings = settings
         if not self._feature_settings_checked:
-            self._feature_settings_checked = _check_feature_settings(self, self._settings)
+            with self._settings_lock:
+                if not self._feature_settings_checked:
+                    self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
 
     @property
@@ -358,24 +351,18 @@ class Device(object):
             self._persister = _configuration.persister(self)
         return self._persister
 
-    def get_kind_from_index(self, index, receiver):
-        """Get device kind from 27Mhz device index"""
-        # accordingly to drivers/hid/hid-logitech-dj.c
-        # index 1 or 2 always mouse, index 3 always the keyboard,
-        # index 4 is used for an optional separate numpad
-
-        if index == 1:  # mouse
-            kind = 2
-        elif index == 2:  # mouse
-            kind = 2
-        elif index == 3:  # keyboard
-            kind = 1
-        elif index == 4:  # numpad
-            kind = 3
-        else:  # unknown device number on 27Mhz receiver
-            _log.error('failed to calculate device kind for device %d of %s', index, receiver)
-            raise _base.NoSuchDevice(number=index, receiver=receiver, error='Unknown 27Mhz device number')
-        return kind
+    def battery(self):  # None  or  level, next, status, voltage
+        if self.protocol < 2.0:
+            return _hidpp10.get_battery(self)
+        else:
+            battery_feature = self.persister.get('_battery', None) if self.persister else None
+            if battery_feature != 0:
+                result = _hidpp20.get_battery(self, battery_feature)
+                if result:
+                    feature, level, next, status, voltage = result
+                    if self.persister and battery_feature is None:
+                        self.persister['_battery'] = feature
+                    return level, next, status, voltage
 
     def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
@@ -432,7 +419,6 @@ class Device(object):
         return None
 
     def request(self, request_id, *params, no_reply=False):
-
         if self:
             return _base.request(
                 self.handle or self.receiver.handle,
@@ -440,7 +426,8 @@ class Device(object):
                 request_id,
                 *params,
                 no_reply=no_reply,
-                long_message=self.bluetooth or self.protocol >= 2.0
+                long_message=self.bluetooth or self.protocol >= 2.0,
+                protocol=self.protocol
             )
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
@@ -449,7 +436,8 @@ class Device(object):
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
+        long = self.bluetooth or self._protocol is not None and self._protocol >= 2.0
+        protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol
@@ -479,7 +467,7 @@ class Device(object):
             self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
         )
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
     def notify_devices(self):  # no need to notify, as there are none
         pass
@@ -492,7 +480,7 @@ class Device(object):
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, 0xFF, info=device_info)
+                return Device(None, None, info=device_info, handle=handle, path=device_info.path)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
@@ -502,6 +490,7 @@ class Device(object):
 
     def close(self):
         handle, self.handle = self.handle, None
+        self.instances.remove(self)
         return (handle and _base.close(handle))
 
     def __del__(self):

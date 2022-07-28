@@ -1,3 +1,3 @@
-include COPYRIGHT COPYING README.md ChangeLog
+include COPYRIGHT COPYING README.md ChangeLog.md
 recursive-include rules.d *
 recursive-include share/locale *

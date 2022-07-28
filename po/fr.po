@@ -6,7 +6,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.0.5\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2021-08-06 10:58-0400\n"
+        "POT-Creation-Date: 2021-09-25 13:56-0400\n"
         "PO-Revision-Date: 2021-02-27 16:19+0100\n"
         "Last-Translator: David Geiger <david.david@mageialinux-online.org>\n"
         "Language-Team: Language: fr\n"
@@ -35,7 +35,7 @@ msgstr  ""
 msgid   "EX100 Receiver 27 Mhz"
 msgstr  ""
 
-#: lib/logitech_receiver/device.py:134 lib/solaar/ui/window.py:693
+#: lib/logitech_receiver/device.py:133 lib/solaar/ui/window.py:693
 msgid   "unknown"
 msgstr  "inconnu"
 
@@ -148,7 +148,83 @@ msgid   "Other"
 msgstr  "Autre"
 
 #: lib/logitech_receiver/i18n.py:73
+msgid   "Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:77
+msgid   "Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:78
 msgid   "Mouse Gesture Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "Smart Shift"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:80
+msgid   "DPI Switch"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:81
+msgid   "Left Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:82
+msgid   "Right Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:83
+msgid   "Left Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:84
+msgid   "Right Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:85
+msgid   "Mouse Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:86
+msgid   "Mouse Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:87
+msgid   "Mouse Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:88
+msgid   "Gesture Button Navigation"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:89
+msgid   "Mouse Scroll Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:90
+msgid   "Mouse Scroll Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:93
+msgid   "pressed"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:94
+msgid   "released"
 msgstr  ""
 
 #: lib/logitech_receiver/notifications.py:76
@@ -175,11 +251,11 @@ msgstr  "non jumelé"
 msgid   "powered on"
 msgstr  "sous tension"
 
-#: lib/logitech_receiver/settings.py:524
+#: lib/logitech_receiver/settings.py:526
 msgid   "register"
 msgstr  ""
 
-#: lib/logitech_receiver/settings.py:540 lib/logitech_receiver/settings.py:566
+#: lib/logitech_receiver/settings.py:542 lib/logitech_receiver/settings.py:568
 msgid   "feature"
 msgstr  ""
 
@@ -219,8 +295,8 @@ msgid   "Scroll Wheel High Resolution"
 msgstr  "Mollette haute résolution"
 
 #: lib/logitech_receiver/settings_templates.py:79
-msgid   "Scroll Wheel HID++ Scrolling"
-msgstr  "Déroulement HID++ à la mollette"
+msgid   "Scroll Wheel Diversion"
+msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:80
 msgid   "HID++ mode for vertical scroll with the wheel."
@@ -357,8 +433,8 @@ msgid   "Switch connection to a different host"
 msgstr  "Commuter la connexion vers un autre hôte"
 
 #: lib/logitech_receiver/settings_templates.py:107
-msgid   "Thumb Wheel HID++ Scrolling"
-msgstr  "Défilement de la molette de pouce HID++"
+msgid   "Thumb Wheel Diversion"
+msgstr  ""
 
 #: lib/logitech_receiver/settings_templates.py:108
 msgid   "HID++ mode for horizontal scroll with the thumb wheel."
@@ -600,6 +676,22 @@ msgstr  "Zoom à trois doigts."
 msgid   "Zoom with two fingers"
 msgstr  "Zoom à deux doigts"
 
+#: lib/logitech_receiver/settings_templates.py:189
+msgid   "Pixel zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:190
+msgid   "Ratio zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Scale factor"
+msgstr  "Facteur d’échelle"
+
+#: lib/logitech_receiver/settings_templates.py:191
+msgid   "Sets the cursor speed."
+msgstr  ""
+
 #: lib/logitech_receiver/settings_templates.py:195
 msgid   "Left"
 msgstr  "Gauche"
@@ -694,21 +786,6 @@ msgstr  "Batterie : %(level)s (%(status)s)"
 msgid   "Battery: %(percent)d%% (%(status)s)"
 msgstr  "Batterie : %(percent)d%% (%(status)s)"
 
-#: lib/solaar/gtk.py:152
-msgid   "ERROR: "
-msgstr  ""
-
-#: lib/solaar/gtk.py:153
-msgid   "Solaar depends on a udev file that is not present"
-msgstr  "Solaar dépend d'un fichier udev qui n'est pas présent"
-
-#: lib/solaar/gtk.py:156
-msgid   "For more information see the Solaar installation directions\n"
-        "at https://pwr-solaar.github.io/Solaar/installation"
-msgstr  "Pour plus d'informations, consultez les instructions d'installation\n"
-        "de Solaar à l'adresse https://pwr-solaar.github.io/Solaar/"
-        "installation"
-
 #: lib/solaar/ui/__init__.py:52
 msgid   "Permissions error"
 msgstr  "Erreur de permissions"
@@ -776,8 +853,8 @@ msgid   "Logitech documentation"
 msgstr  "Documentațion Logitech"
 
 #: lib/solaar/ui/action.py:70 lib/solaar/ui/window.py:328
-msgid   "About"
-msgstr  "À propos de"
+msgid   "About %s"
+msgstr  "À propos de %s"
 
 #: lib/solaar/ui/action.py:96 lib/solaar/ui/action.py:100
 #: lib/solaar/ui/window.py:205
@@ -1028,6 +1105,14 @@ msgstr  "Cet éditeur ne gère pas encore le composant de règle sélectionné."
 msgid   "Not"
 msgstr  "Non"
 
+#: lib/solaar/ui/diversion_rules.py:1039
+msgid   "Key down"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1042
+msgid   "Key up"
+msgstr  ""
+
 #: lib/solaar/ui/diversion_rules.py:1131
 msgid   "Add action"
 msgstr  ""
@@ -1126,8 +1211,8 @@ msgid   "No Logitech receiver found"
 msgstr  "Aucun récepteur Logitech trouvé"
 
 #: lib/solaar/ui/tray.py:68 lib/solaar/ui/window.py:325
-msgid   "Quit"
-msgstr  "Quitter"
+msgid   "Quit %s"
+msgstr  "Quitter %s"
 
 #: lib/solaar/ui/tray.py:298 lib/solaar/ui/tray.py:306
 msgid   "no receiver"
@@ -1330,7 +1415,23 @@ msgstr  "%(light_level)d lux"
 #~ msgid        "Click to prevent changes."
 #~ msgstr       "Cliquez pour empêcher les modifications."
 
+#~ msgid        "For more information see the Solaar installation directions\n"
+#~      "at https://pwr-solaar.github.io/Solaar/installation"
+#~ msgstr       "Pour plus d'informations, consultez les instructions "
+#~      "d'installation\n"
+#~      "de Solaar à l'adresse https://pwr-solaar.github.io/Solaar/"
+#~      "installation"
+
+#~ msgid        "Scroll Wheel HID++ Scrolling"
+#~ msgstr       "Déroulement HID++ à la mollette"
+
 #~ msgid        "Shows status of devices connected\n"
 #~      "through wireless Logitech receivers."
 #~ msgstr       "Affiche l'état des périphériques connectés\n"
 #~      "à travers les récepteurs sans fil Logitech."
+
+#~ msgid        "Solaar depends on a udev file that is not present"
+#~ msgstr       "Solaar dépend d'un fichier udev qui n'est pas présent"
+
+#~ msgid        "Thumb Wheel HID++ Scrolling"
+#~ msgstr       "Défilement de la molette de pouce HID++"

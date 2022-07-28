@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import INFO as _INFO
 from logging import getLogger
@@ -55,7 +52,7 @@ def _suspend_or_resume(suspend):
 
 def watch(on_resume_callback=None, on_suspend_callback=None):
     """Register callback for suspend/resume events.
-    They are called only if the system DBus is running, and the UPower daemon is available."""
+    They are called only if the system DBus is running, and the Login daemon is available."""
     global _resume_callback, _suspend_callback
     _suspend_callback = on_suspend_callback
     _resume_callback = on_resume_callback
@@ -64,8 +61,6 @@ def watch(on_resume_callback=None, on_suspend_callback=None):
 try:
     import dbus
 
-    _UPOWER_BUS = 'org.freedesktop.UPower'
-    _UPOWER_INTERFACE = 'org.freedesktop.UPower'
     _LOGIND_BUS = 'org.freedesktop.login1'
     _LOGIND_INTERFACE = 'org.freedesktop.login1.Manager'
 
@@ -75,10 +70,6 @@ try:
 
     bus = dbus.SystemBus()
     assert bus
-
-    bus.add_signal_receiver(_suspend, signal_name='Sleeping', dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
-
-    bus.add_signal_receiver(_resume, signal_name='Resuming', dbus_interface=_UPOWER_INTERFACE, bus_name=_UPOWER_BUS)
 
     bus.add_signal_receiver(_suspend_or_resume, 'PrepareForSleep', dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 

@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import gettext as _gettext
 import locale
@@ -62,10 +59,5 @@ _gettext.bindtextdomain(_LOCALE_DOMAIN, path)
 _gettext.textdomain(_LOCALE_DOMAIN)
 _gettext.install(_LOCALE_DOMAIN)
 
-try:
-    unicode  # noqa: F821
-    _ = lambda x: _gettext.gettext(x).decode('UTF-8')
-    ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
-except Exception:
-    _ = _gettext.gettext
-    ngettext = _gettext.ngettext
+_ = _gettext.gettext
+ngettext = _gettext.ngettext

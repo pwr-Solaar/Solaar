@@ -1,6 +1,3 @@
-# -*- python-mode -*-
-# -*- coding: UTF-8 -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -20,18 +17,18 @@
 # Handles incoming events from the receiver/devices, updating the related
 # status object as appropriate.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+import threading as _threading
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from struct import unpack as _unpack
 
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import strhex as _strhex
-from .common import unpack as _unpack
 from .i18n import _
 from .status import ALERT as _ALERT
 from .status import KEYS as _K
@@ -46,6 +43,8 @@ _F = _hidpp20.FEATURE
 #
 #
 
+notification_lock = _threading.Lock()
+
 
 def process(device, notification):
     assert device
@@ -55,7 +54,7 @@ def process(device, notification):
     status = device.status
     assert status is not None
 
-    if device.kind is None:
+    if not device.isDevice:
         return _process_receiver_notification(device, status, notification)
 
     return _process_device_notification(device, status, notification)
@@ -70,24 +69,83 @@ def _process_receiver_notification(receiver, status, n):
     # supposedly only 0x4x notifications arrive for the receiver
     assert n.sub_id & 0x40 == 0x40
 
-    # pairing lock notification
-    if n.sub_id == 0x4A:
+    if n.sub_id == 0x4A:  # pairing lock notification
         status.lock_open = bool(n.address & 0x01)
         reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
         if _log.isEnabledFor(_INFO):
             _log.info('%s: %s', receiver, reason)
-
         status[_K.ERROR] = None
         if status.lock_open:
             status.new_device = None
-
         pair_error = ord(n.data[:1])
         if pair_error:
             status[_K.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
             status.new_device = None
             _log.warn('pairing error %d: %s', pair_error, error_string)
-
         status.changed(reason=reason)
+        return True
+
+    elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.discovering = n.address == 0x00
+            reason = (_('discovery lock is open') if status.discovering else _('discovery lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if status.discovering:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
+            status.device_passkey = None
+            discover_error = ord(n.data[:1])
+            if discover_error:
+                status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
+                _log.warn('bolt discovering error %d: %s', discover_error, discover_string)
+            status.changed(reason=reason)
+            return True
+
+    elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
+        with notification_lock:
+            counter = n.address + n.data[0] * 256  # notification counter
+            if status.counter is None:
+                status.counter = counter
+            else:
+                if not status.counter == counter:
+                    return None
+            if n.data[1] == 0:
+                status.device_kind = n.data[3]
+                status.device_address = n.data[6:12]
+                status.device_authentication = n.data[14]
+            elif n.data[1] == 1:
+                status.device_name = n.data[3:3 + n.data[2]].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = None
+            status.lock_open = n.address == 0x00
+            reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
+            if _log.isEnabledFor(_INFO):
+                _log.info('%s: %s', receiver, reason)
+            status[_K.ERROR] = None
+            if not status.lock_open:
+                status.counter = status.device_address = status.device_authentication = status.device_name = None
+            pair_error = n.data[0]
+            if status.lock_open:
+                status.new_device = None
+            elif n.address == 0x02 and not pair_error:
+                status.new_device = receiver.register_new_device(n.data[7])
+            if pair_error:
+                status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
+                status.new_device = None
+                _log.warn('pairing error %d: %s', pair_error, error_string)
+            status.changed(reason=reason)
+            return True
+
+    elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
+        with notification_lock:
+            status.device_passkey = n.data[0:6].decode('utf-8')
+            return True
+
+    elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
         return True
 
     _log.warn('%s: unhandled notification %s', receiver, n)
@@ -103,6 +161,9 @@ def _process_device_notification(device, status, n):
     # HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
+    if n.sub_id == 00:  # no-op feature notification, dispose of it quickly
+        return False
+
     # Allow the device object to handle the notification using custom
     # per-device state.
     handling_ret = device.handle_notification(n)
@@ -116,6 +177,8 @@ def _process_device_notification(device, status, n):
         else:
             return _process_hidpp10_notification(device, status, n)
 
+    # These notifications are from the device itself, so it must be active
+    device.online = True
     # At this point, we need to know the device's protocol, otherwise it's
     # possible to not know how to handle it.
     assert device.protocol is not None
@@ -129,7 +192,7 @@ def _process_device_notification(device, status, n):
         _log.warn('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
         return False
     try:
-        feature = device.features[n.sub_id]
+        feature = device.features.get_feature(n.sub_id)
     except IndexError:
         _log.warn('%s: notification from invalid feature index %02X: %s', device, n.sub_id, n)
         return False
@@ -172,7 +235,7 @@ def _process_hidpp10_custom_notification(device, status, n):
         assert n.data[-1:] == b'\x00'
         data = chr(n.address).encode() + n.data
         charge, status_text, next_charge = _hidpp10.parse_battery_status(n.sub_id, data)
-        status.set_battery_info(charge, status_text, next_charge)
+        status.set_battery_info(charge, next_charge, status_text, None)
         return True
 
     if n.sub_id == _R.keyboard_illumination:
@@ -186,7 +249,7 @@ def _process_hidpp10_custom_notification(device, status, n):
 
 
 def _process_hidpp10_notification(device, status, n):
-    # unpair notification
+    # device unpairing
     if n.sub_id == 0x40:
         if n.address == 0x02:
             # device un-paired
@@ -200,37 +263,29 @@ def _process_hidpp10_notification(device, status, n):
             _log.warn('%s: disconnection with unknown type %02X: %s', device, n.address, n)
         return True
 
-    # wireless link notification
+    # device connection (and disconnection)
     if n.sub_id == 0x41:
-        protocol_name = (
-            'Bluetooth' if n.address == 0x01 else '27 MHz' if n.address == 0x02 else
-            'QUAD or eQUAD' if n.address == 0x03 else 'eQUAD step 4 DJ' if n.address == 0x04 else 'DFU Lite' if n.address ==
-            0x05 else 'eQUAD step 4 Lite' if n.address == 0x06 else 'eQUAD step 4 Gaming' if n.address ==
-            0x07 else 'eQUAD step 4 for gamepads' if n.address == 0x08 else 'eQUAD nano Lite' if n.address ==
-            0x0A else 'Lightspeed 1' if n.address == 0x0C else 'Lightspeed 1_1' if n.address == 0x0D else None
-        )
-        if protocol_name:
+        flags = ord(n.data[:1]) & 0xF0
+        if n.address == 0x02:  # very old 27 MHz protocol
+            wpid = '00' + _strhex(n.data[2:3])
+            link_established = True
+            link_encrypted = bool(flags & 0x80)
+        elif n.address > 0x00:  # all other protocols are supposed to be almost the same
             wpid = _strhex(n.data[2:3] + n.data[1:2])
-            # workaround for short EX100 and other 27 MHz wpids
-            if protocol_name == '27 MHz':
-                wpid = '00' + _strhex(n.data[2:3])
-            if wpid != device.wpid:
-                _log.warn('%s wpid mismatch, got %s', device, wpid)
-            flags = ord(n.data[:1]) & 0xF0
-            link_encrypted = bool(flags & 0x20)
             link_established = not (flags & 0x40)
-            if _log.isEnabledFor(_DEBUG):
-                sw_present = bool(flags & 0x10)
-                has_payload = bool(flags & 0x80)
-                _log.debug(
-                    '%s: %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, protocol_name,
-                    sw_present, link_encrypted, link_established, has_payload
-                )
-            status[_K.LINK_ENCRYPTED] = link_encrypted
-            status.changed(active=link_established)
+            link_encrypted = bool(flags & 0x20) or n.address == 0x10  # Bolt protocol always encrypted
         else:
             _log.warn('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
-
+            return True
+        if wpid != device.wpid:
+            _log.warn('%s wpid mismatch, got %s', device, wpid)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug(
+                '%s: protocol %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, n.address,
+                bool(flags & 0x10), link_encrypted, link_established, bool(flags & 0x80)
+            )
+        status[_K.LINK_ENCRYPTED] = link_encrypted
+        status.changed(active=link_established)
         return True
 
     if n.sub_id == 0x49:
@@ -255,51 +310,56 @@ def _process_hidpp10_notification(device, status, n):
 
 
 def _process_feature_notification(device, status, n, feature):
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('%s: notification for feature %s, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
+
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
-            discharge_level = ord(n.data[:1])
-            discharge_level = None if discharge_level == 0 else discharge_level
-            discharge_next_level = ord(n.data[1:2])
-            battery_status = ord(n.data[2:3])
-            status.set_battery_info(discharge_level, _hidpp20.BATTERY_STATUS[battery_status], discharge_next_level)
+            _ignore, discharge_level, discharge_next_level, battery_status, voltage = _hidpp20.decipher_battery_status(n.data)
+            status.set_battery_info(discharge_level, discharge_next_level, battery_status, voltage)
         elif n.address == 0x10:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: spurious BATTERY status %s', device, n)
         else:
             _log.warn('%s: unknown BATTERY %s', device, n)
-        return True
 
-    if feature == _F.BATTERY_VOLTAGE:
+    elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            battery_level, battery_status, battery_voltage, _ignore, _ignore = _hidpp20.decipher_voltage(n.data)
-            status.set_battery_info(battery_level, battery_status, None, battery_voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
-        return True
 
-    if feature == _F.UNIFIED_BATTERY:
+    elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            battery_level, battery_status, battery_voltage = _hidpp20.decipher_unified_battery(n.data)
-            status.set_battery_info(battery_level, battery_status, None, battery_voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
-        return True
 
-    if feature == _F.SOLAR_DASHBOARD:
+    elif feature == _F.ADC_MEASUREMENT:
+        if n.address == 0x00:
+            result = _hidpp20.decipher_adc_measurement(n.data)
+            if result:
+                _ignore, level, next, battery_status, voltage = result
+                status.set_battery_info(level, next, battery_status, voltage)
+        else:
+            _log.warn('%s: unknown ADC MEASUREMENT %s', device, n)
+
+    elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
             charge, lux, adc = _unpack('!BHH', n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
             status_text = _hidpp20.BATTERY_STATUS.discharging
-
             if n.address == 0x00:
                 status[_K.LIGHT_LEVEL] = None
-                status.set_battery_info(charge, status_text, None)
+                status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x10:
                 status[_K.LIGHT_LEVEL] = lux
                 if lux > 200:
                     status_text = _hidpp20.BATTERY_STATUS.recharging
-                status.set_battery_info(charge, status_text, None)
+                status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x20:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: Light Check button pressed', device)
@@ -314,26 +374,19 @@ def _process_feature_notification(device, status, n, feature):
                 _log.warn('%s: unknown SOLAR CHARGE %s', device, n)
         else:
             _log.warn('%s: SOLAR CHARGE not GOOD? %s', device, n)
-        return True
 
-    if feature == _F.WIRELESS_DEVICE_STATUS:
+    elif feature == _F.WIRELESS_DEVICE_STATUS:
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('wireless status: %s', n)
             reason = 'powered on' if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
-                # only show a user notification if the device can change hosts
-                # as we want to notify when a device changes to this host
-                # but the only indication we get is this notification
-                alert = _ALERT.NOTIFICATION if _F.CHANGE_HOST in device.features else _ALERT.NONE
-                status.changed(active=True, alert=alert, reason=reason)
-            else:
-                _log.warn('%s: unknown WIRELESS %s', device, n)
+                alert = _ALERT.NONE
+                status.changed(active=True, alert=alert, reason=reason, push=True)
         else:
             _log.warn('%s: unknown WIRELESS %s', device, n)
-        return True
 
-    if feature == _F.TOUCHMOUSE_RAW_POINTS:
+    elif feature == _F.TOUCHMOUSE_RAW_POINTS:
         if n.address == 0x00:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: TOUCH MOUSE points %s', device, n)
@@ -358,7 +411,7 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
                 cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
-                _log.debug('%s: diverted controls pressed: %i, %i, %i, %i', device, cid1, cid2, cid3, cid4)
+                _log.debug('%s: diverted controls pressed: 0x%x, 0x%x, 0x%x, 0x%x', device, cid1, cid2, cid3, cid4)
         elif n.address == 0x10:
             if _log.isEnabledFor(_DEBUG):
                 dx, dy = _unpack('!hh', n.data[:4])
@@ -386,6 +439,4 @@ def _process_feature_notification(device, status, n, feature):
                 _log.info('%s: unknown WHEEL %s', device, n)
 
     _diversion.process_notification(device, status, n, feature)
-
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s: notification for feature %r, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
+    return True

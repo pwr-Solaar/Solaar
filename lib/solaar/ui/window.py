@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
 from logging import getLogger
@@ -306,7 +303,7 @@ def _create_window_layout():
 
     tree_scroll = Gtk.ScrolledWindow()
     tree_scroll.add(_tree)
-    tree_scroll.set_min_content_width(_tree.get_size_request()[0])
+    tree_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
     tree_scroll.set_shadow_type(Gtk.ShadowType.IN)
 
     tree_panel = Gtk.Box.new(Gtk.Orientation.VERTICAL, 0)
@@ -315,20 +312,20 @@ def _create_window_layout():
     tree_panel.pack_start(_details, False, False, 0)
 
     panel = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 16)
-    panel.pack_start(tree_panel, True, True, 0)
+    panel.pack_start(tree_panel, False, False, 0)
     panel.pack_start(_info, True, True, 0)
     panel.pack_start(_empty, True, True, 0)
 
     bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
     bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
     bottom_buttons_box.set_spacing(20)
-    quit_button = _new_button(_('Quit') + ' ' + NAME, 'application-exit', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=destroy)
+    quit_button = _new_button(_('Quit %s') % NAME, 'application-exit', _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(
-        _('About') + ' ' + NAME, 'help-about', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window
-    )
+    about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Rule Editor'), '', icon_size=_SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(
+        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+    )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
@@ -681,10 +678,8 @@ def _update_device_panel(device, panel, buttons, full=False):
         device.status.read_battery(device)
 
     battery_level = device.status.get(_K.BATTERY_LEVEL)
-    battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
     battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
-
-    if battery_level is None:
+    if battery_level is None and battery_voltage is None:
         icon_name = _icons.battery()
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(False)
@@ -693,24 +688,26 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._text.set_markup('<small>%s</small>' % _('unknown'))
         panel._battery.set_tooltip_text(_('Battery information unknown.'))
     else:
+        battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
         charging = device.status.get(_K.BATTERY_CHARGING)
         icon_name = _icons.battery(battery_level, charging)
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(True)
+        panel._battery._text.set_sensitive(is_online)
 
         if battery_voltage is not None:
             panel._battery._label.set_text(_('Battery Voltage'))
-            text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+            text = '%dmV' % battery_voltage
             tooltip_text = _('Voltage reported by battery')
-        elif isinstance(battery_level, _NamedInt):
-            panel._battery._label.set_text(_('Battery Level'))
-            text = _(str(battery_level))
-            tooltip_text = _('Approximate level reported by battery')
         else:
             panel._battery._label.set_text(_('Battery Level'))
-            text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
+            text = ''
             tooltip_text = _('Approximate level reported by battery')
-        if battery_next_level is not None:
+        if battery_voltage is not None and battery_level is not None:
+            text += ', '
+        if battery_level is not None:
+            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else '%d%%' % battery_level
+        if battery_next_level is not None and not charging:
             if isinstance(battery_next_level, _NamedInt):
                 text += '<small> (' + _('next reported ') + _(str(battery_next_level)) + ')</small>'
             else:
@@ -721,7 +718,7 @@ def _update_device_panel(device, panel, buttons, full=False):
                 text += ' <small>(%s)</small>' % _('charging')
         else:
             text += ' <small>(%s)</small>' % _('last known')
-        panel._battery._text.set_sensitive(is_online)
+
         panel._battery._text.set_markup(text)
         panel._battery.set_tooltip_text(tooltip_text)
 
@@ -884,11 +881,12 @@ def update(device, need_popup=False, refresh=False):
         elif item:
             if _TREE_SEPATATOR:
                 separator = _model.iter_next(item)
-                _model.remove(separator)
+                if separator:
+                    _model.remove(separator)
             _model.remove(item)
 
     else:
-        path = device.receiver.path if device.receiver else device.path
+        path = device.receiver.path if device.receiver is not None else device.path
         assert device.number is not None and device.number >= 0, 'invalid device number' + str(device.number)
         item = _device_row(path, device.number, device if bool(device) else None)
 
@@ -913,7 +911,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
-        if battery_voltage is not None:
+        if battery_voltage is not None and False:  # Use levels instead of voltage here
             status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
         elif isinstance(battery_level, _NamedInt):
             status_text = _(str(battery_level))
@@ -930,3 +928,18 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
         full_update = full or was_online != is_online
         _update_info_panel(device, full=full_update)
+
+
+def find_device(serial):
+    assert serial, 'need serial number or unit ID to find a device'
+    result = None
+
+    def check(_store, _treepath, row):
+        nonlocal result
+        device = _model.get_value(row, _COLUMN.DEVICE)
+        if device and device.kind and (device.unitId == serial or device.serial == serial):
+            result = device
+            return True
+
+    _model.foreach(check)
+    return result

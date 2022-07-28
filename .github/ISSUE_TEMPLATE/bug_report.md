@@ -9,7 +9,8 @@ assignees: ''
 
 **Information**
 <!-- Make sure that your issue is not one of the known issues in the Solaar documentation at https://pwr-solaar.github.io/Solaar/ -->
-<!-- Do not bother opening an issue for a version older than 1.0.6.  Please update to the latest version and see if your issue persists. -->
+<!-- Do not bother opening an issue for a version older than 1.1.0.  Upgrade to the latest version and see if your issue persists. -->
+<!-- If you not running the current version of Solaar, strongly consider upgrading to the newest version. -->
 - Solaar version (`solaar --version` or `git describe --tags` if cloned from this repository):
 - Distribution:
 - Kernel version (ex. `uname -srmo`): `KERNEL VERSION HERE`
@@ -18,9 +19,24 @@ assignees: ''
 <details>
 
 ```
-OUTPUT HERE
+SOLAAR SHOW OUTPUT HERE
 ```
 </details>
+
+- Contents of `~/.config/solaar/config.yaml` (or `~/.config/solaar/config.json` if `~/.config/solaar/config.yaml` not present):
+
+<details>
+
+```
+CONTENTS HERE
+```
+</details>
+
+
+- Errors or warrnings from Solaar:
+<!-- Run Solaar as `solaar -dd`, after killing any running Solaar processes.  If any warnings or errors show up, include the output here. -->
+
+
 
 **Describe the bug**
 A clear and concise description of what the bug is.

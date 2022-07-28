@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -17,8 +16,6 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 
 from logging import DEBUG as _DEBUG
@@ -34,6 +31,7 @@ from solaar import NAME
 from solaar.i18n import _
 
 from . import icons as _icons
+from .about import show_window as _show_about_window
 from .window import popup as _window_popup
 from .window import toggle as _window_toggle
 
@@ -44,9 +42,8 @@ del getLogger
 # constants
 #
 
-_TRAY_ICON_SIZE = 32  # pixels
+_TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
-_RECEIVER_SEPARATOR = ('~', None, None, None)
 
 #
 #
@@ -58,15 +55,15 @@ def _create_menu(quit_handler):
 
     # per-device menu entries will be generated as-needed
 
-    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech receiver found'))
+    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech device found'))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    from .action import about, make
-    menu.append(about.create_menu_item())
-    menu.append(make('application-exit', _('Quit') + ' ' + NAME, quit_handler, stock_id='application-exit').create_menu_item())
-    del about, make
+    from .action import make
+    menu.append(make('help-about', _('About %s') % NAME, _show_about_window, stock_id='help-about').create_menu_item())
+    menu.append(make('application-exit', _('Quit %s') % NAME, quit_handler, stock_id='application-exit').create_menu_item())
+    del make
 
     menu.show_all()
 
@@ -87,9 +84,7 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if len(_devices_info) < 4:
-        # don't bother with scrolling when there's only one receiver
-        # with only one device (3 = [receiver, device, separator])
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
         return
 
     # scroll events come way too fast (at least 5-6 at once)
@@ -174,10 +169,13 @@ try:
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
+    # Defense against bug that shows up in XFCE 4.16 where icons are not upscaled
     def _icon_file(icon_name):
-        if not os.path.isfile(icon_name):
+        if gtk.tray_icon_size is None and not os.path.isfile(icon_name):
             return icon_name
-        icon_info = Gtk.IconTheme.get_default().lookup_icon(icon_name, _TRAY_ICON_SIZE, 0)
+        icon_info = Gtk.IconTheme.get_default().lookup_icon(
+            icon_name, gtk.tray_icon_size or _TRAY_ICON_SIZE, Gtk.IconLookupFlags.FORCE_SVG
+        )
         return icon_info.get_filename() if icon_info else icon_name
 
     def _create(menu):
@@ -197,8 +195,11 @@ try:
 
         return ind
 
-    def _destroy(indicator):
+    def _hide(indicator):
         indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+
+    def _show(indicator):
+        indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != 'solaar':
@@ -246,8 +247,11 @@ except ImportError:
 
         return icon
 
-    def _destroy(icon):
+    def _hide(icon):
         icon.set_visible(False)
+
+    def _show(icon):
+        icon.set_visible(True)
 
     def _update_tray_icon():
         tooltip_lines = _generate_tooltip_lines()
@@ -322,7 +326,6 @@ def _generate_description_lines():
                 yield '<b>%s</b> <small>(' % name + _('no status') + ')</small>'
             else:
                 yield '<b>%s</b> <small>(' % name + _('offline') + ')</small>'
-        yield ''
 
 
 def _pick_device_with_lowest_battery():
@@ -333,7 +336,7 @@ def _pick_device_with_lowest_battery():
     picked_level = 1000
 
     for info in _devices_info:
-        if info[1] is None:  # is receiver/separator
+        if info[1] is None:  # is receiver
             continue
         level = info[-1].get(_K.BATTERY_LEVEL)
         # print ("checking %s -> %s", info, level)
@@ -354,37 +357,27 @@ def _pick_device_with_lowest_battery():
 
 def _add_device(device):
     assert device
-    # not true for wired devices - assert device.receiver
-    receiver_path = device.receiver.path if device.receiver is not None else device.path
-    # not true for wired devices - assert receiver_path
 
     index = 0
-    for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
-        if path == receiver_path:
-            # the first entry matching the receiver serial should be for the receiver itself
-            index = idx + 1
-            break
-    # assert index is not None
-
-    if device.receiver:
-        # proper ordering (according to device.number) for a receiver's devices
-        while True:
-            path, number, _ignore, _ignore = _devices_info[index]
-            if path == _RECEIVER_SEPARATOR[0]:
+    receiver_path = device.receiver.path if device.receiver is not None else device.path
+    if device.receiver is not None:  # if receiver insert into devices for the receiver in device number order
+        for idx, (path, _ignore, _ignore, _ignore) in enumerate(_devices_info):
+            if path and path == receiver_path:
+                index = idx + 1  # the first entry matching the receiver serial should be for the receiver itself
                 break
-            assert path == receiver_path
+        while index < len(_devices_info):
+            path, number, _ignore, _ignore = _devices_info[index]
+            if not path == receiver_path:
+                break
             assert number != device.number
             if number > device.number:
                 break
             index = index + 1
 
     new_device_info = (receiver_path, device.number, device.name, device.status)
-    assert len(new_device_info) == len(_RECEIVER_SEPARATOR)
     _devices_info.insert(index, new_device_info)
 
-    # label_prefix = b'\xE2\x94\x84 '.decode('utf-8')
     label_prefix = '   '
-
     new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else '') + device.name)
     new_menu_item.set_image(Gtk.Image())
     new_menu_item.show_all()
@@ -411,44 +404,31 @@ def _add_receiver(receiver):
     index = len(_devices_info)
 
     new_receiver_info = (receiver.path, None, receiver.name, None)
-    assert len(new_receiver_info) == len(_RECEIVER_SEPARATOR)
-    _devices_info.append(new_receiver_info)
+    _devices_info.insert(index, new_receiver_info)
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
-    _menu.insert(new_menu_item, index)
     icon_set = _icons.device_icon_set(receiver.name)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_set(icon_set, _MENU_ICON_SIZE))
+    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_set.names[0], _MENU_ICON_SIZE))
     new_menu_item.show_all()
     new_menu_item.connect('activate', _window_popup, receiver.path)
-
-    _devices_info.append(_RECEIVER_SEPARATOR)
-    separator = Gtk.SeparatorMenuItem.new()
-    separator.set_visible(True)
-    _menu.insert(separator, index + 1)
+    _menu.insert(new_menu_item, index)
 
     return 0
 
 
 def _remove_receiver(receiver):
     index = 0
-    found = False
-
     # remove all entries in devices_info that match this receiver
     while index < len(_devices_info):
         path, _ignore, _ignore, _ignore = _devices_info[index]
         if path == receiver.path:
-            found = True
             _remove_device(index)
-        elif found and path == _RECEIVER_SEPARATOR[0]:
-            # the separator after this receiver
-            _remove_device(index)
-            break
         else:
             index += 1
 
 
 def _update_menu_item(index, device):
-    if not device or device.status is None:
+    if device is None or device.status is None:
         _log.warn('updating an inactive device %s, assuming disconnected', device)
         return None
 
@@ -459,6 +439,7 @@ def _update_menu_item(index, device):
     charging = device.status.get(_K.BATTERY_CHARGING)
     icon_name = _icons.battery(level, charging)
 
+    menu_item.set_label(('  ' if 0 < device.number <= 6 else '') + device.name + ': ' + device.status.to_string())
     image_widget = menu_item.get_image()
     image_widget.set_sensitive(bool(device.online))
     _update_menu_icon(image_widget, icon_name)
@@ -486,13 +467,14 @@ def init(_quit_handler):
     _menu = _create_menu(_quit_handler)
     assert _icon is None
     _icon = _create(_menu)
+    update()
 
 
 def destroy():
     global _icon, _menu, _devices_info
     if _icon is not None:
         i, _icon = _icon, None
-        _destroy(i)
+        _hide(i)
         i = None
 
     _icon = None
@@ -541,7 +523,6 @@ def update(device=None):
         menu_items = _menu.get_children()
         no_receivers_index = len(_devices_info)
         menu_items[no_receivers_index].set_visible(not _devices_info)
-        menu_items[no_receivers_index + 1].set_visible(not _devices_info)
 
     global _picked_device
     if (not _picked_device or _last_scroll == 0) and device is not None and device.kind is not None:
@@ -549,3 +530,9 @@ def update(device=None):
         _picked_device = _pick_device_with_lowest_battery()
 
     _update_tray_icon()
+
+    if _icon:
+        if not _devices_info:
+            _hide(_icon)
+        else:
+            _show(_icon)

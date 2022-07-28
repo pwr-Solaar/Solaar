@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -17,11 +16,10 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import time
 
 from collections import namedtuple
+from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
@@ -39,6 +37,9 @@ from . import configuration
 
 _log = getLogger(__name__)
 del getLogger
+
+_R = _hidpp10.REGISTERS
+_IR = _hidpp10.INFO_SUBREGISTERS
 
 #
 #
@@ -69,7 +70,7 @@ class ReceiverListener(_listener.EventsListener):
     """Keeps the status of a Receiver.
     """
     def __init__(self, receiver, status_changed_callback):
-        super(ReceiverListener, self).__init__(receiver, self._notifications_handler)
+        super().__init__(receiver, self._notifications_handler)
         # no reason to enable polling yet
         # self.tick_period = _POLL_TICK
         # self._last_tick = 0
@@ -77,16 +78,17 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
-        if receiver.isDevice:  # (wired) devices start as active
-            receiver.status.changed(True)
+        if receiver.isDevice:  # ping (wired) devices to see if they are really online
+            if receiver.ping():
+                receiver.status.changed(True, reason='initialization')
 
     def has_started(self):
         if _log.isEnabledFor(_INFO):
             _log.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
-        notification_flags = self.receiver.enable_connection_notifications()
-        assert self.receiver.isDevice or (notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless), \
+        nfs = self.receiver.enable_connection_notifications()
+        assert self.receiver.isDevice or ((nfs if nfs else 0) & _hidpp10.NOTIFICATION_FLAG.wireless), \
             'Receiver on %s does not support connection notifications, GUI will not show it' % self.receiver.path
-        self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = notification_flags
+        self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = nfs
         self.receiver.notify_devices()
         self._status_changed(self.receiver)  # , _status.ALERT.NOTIFICATION)
 
@@ -190,6 +192,18 @@ class ReceiverListener(_listener.EventsListener):
             _notifications.process(self.receiver, n)
             return
 
+        # a notification that came in to the device listener - strange, but nothing needs to be done here
+        if self.receiver.isDevice:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('Notification %s via device %s being ignored.', n, self.receiver)
+            return
+
+        # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
+        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
+            if _log.isEnabledFor(_INFO):
+                _log.info('ignoring DJ pairing notification %s', n)
+            return
+
         # a device notification
         if not (0 < n.devnumber <= self.receiver.max_devices):
             if _log.isEnabledFor(_WARNING):
@@ -210,13 +224,12 @@ class ReceiverListener(_listener.EventsListener):
         if n.sub_id == 0x40 and not already_known:
             return  # disconnecting something that is not known - nothing to do
 
-        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
-            # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
-            if _log.isEnabledFor(_INFO):
-                _log.info('ignoring DJ pairing notification %s', n)
-            return
-        elif n.sub_id == 0x41:
+        if n.sub_id == 0x41:
             if not already_known:
+                if n.address == 0x0A and not self.receiver.receiver_kind == 'bolt':
+                    # some Nanos send a notification even if no new pairing - check that there really is a device there
+                    if self.receiver.read_register(_R.receiver_info, _IR.pairing_information + n.devnumber - 1) is None:
+                        return
                 dev = self.receiver.register_new_device(n.devnumber, n)
             elif self.receiver.status.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
                 dev = self.receiver[n.devnumber]
@@ -261,8 +274,6 @@ class ReceiverListener(_listener.EventsListener):
 
     def __str__(self):
         return '<ReceiverListener(%s,%s)>' % (self.receiver.path, self.receiver.handle)
-
-    __unicode__ = __str__
 
 
 #
@@ -331,18 +342,18 @@ def ping_all(resuming=False):
     for l in _all_listeners.values():
         if l.receiver.isDevice:
             if resuming:
-                l.receiver.status._active = False
+                l.receiver.status._active = None  # ensure that settings are pushed
             if l.receiver.ping():
-                l.receiver.status.changed(active=True)
+                l.receiver.status.changed(active=True, push=True)
             l._status_changed(l.receiver)
         else:
             count = l.receiver.count()
             if count:
                 for dev in l.receiver:
                     if resuming:
-                        dev.status._active = False
+                        dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
-                        dev.status.changed(active=True)
+                        dev.status.changed(active=True, push=True)
                     l._status_changed(dev)
                     count -= 1
                     if not count:

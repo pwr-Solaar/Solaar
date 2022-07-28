@@ -1,5 +1,4 @@
 # -*- python-mode -*-
-# -*- coding: UTF-8 -*-
 
 ## Copyright (C) 2012-2013  Daniel Pavel
 ##
@@ -16,8 +15,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
@@ -74,7 +71,7 @@ def attach_to(device, changed_callback):
     assert changed_callback
 
     if not hasattr(device, 'status') or device.status is None:
-        if device.kind is None:
+        if not device.isDevice:
             device.status = ReceiverStatus(device, changed_callback)
         else:
             device.status = DeviceStatus(device, changed_callback)
@@ -99,6 +96,13 @@ class ReceiverStatus(dict):
         # self.updated = 0
 
         self.lock_open = False
+        self.discovering = False
+        self.counter = None
+        self.device_address = None
+        self.device_authentication = None
+        self.device_kind = None
+        self.device_name = None
+        self.device_passkey = None
         self.new_device = None
 
         self[KEYS.ERROR] = None
@@ -111,8 +115,6 @@ class ReceiverStatus(dict):
                 'count': count
             }
         )
-
-    __unicode__ = __str__
 
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         # self.updated = _timestamp()
@@ -188,7 +190,7 @@ class DeviceStatus(dict):
 
     __nonzero__ = __bool__
 
-    def set_battery_info(self, level, status, nextLevel=None, voltage=None, timestamp=None):
+    def set_battery_info(self, level, nextLevel, status, voltage, timestamp=None):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: battery %s, %s', self._device, level, status)
 
@@ -243,42 +245,21 @@ class DeviceStatus(dict):
     # Retrieve and regularize battery status
     def read_battery(self, timestamp=None):
         if self._active:
-            d = self._device
-            assert d
-
-            if d.protocol < 2.0:
-                battery = _hidpp10.get_battery(d)
-                self.set_battery_keys(battery)
-                return
-
-            battery = _hidpp20.get_battery(d)
-            if battery is None:
-                v = _hidpp20.get_voltage(d)
-                if v is not None:
-                    level, status, voltage, _ignore, _ignore = v
-                    self.set_battery_keys((level, status, None), voltage)
-                    return
-
-            # Really unnecessary, if the device has SOLAR_DASHBOARD it should be
-            # broadcasting it's battery status anyway, it will just take a little while.
-            # However, when the device has just been detected, it will not show
-            # any battery status for a while (broadcasts happen every 90 seconds).
-            if battery is None and d.features and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
-                d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
-                return
+            assert self._device
+            battery = self._device.battery()
             self.set_battery_keys(battery)
 
-    def set_battery_keys(self, battery, voltage=None):
+    def set_battery_keys(self, battery):
         if battery is not None:
-            level, status, nextLevel = battery
-            self.set_battery_info(level, status, nextLevel, voltage)
-        elif KEYS.BATTERY_STATUS in self:
+            level, nextLevel, status, voltage = battery
+            self.set_battery_info(level, nextLevel, status, voltage)
+        elif self.get(KEYS.BATTERY_STATUS, None) is not None:
             self[KEYS.BATTERY_STATUS] = None
             self[KEYS.BATTERY_CHARGING] = None
             self[KEYS.BATTERY_VOLTAGE] = None
             self.changed()
 
-    def changed(self, active=None, alert=ALERT.NONE, reason=None, timestamp=None):
+    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False, timestamp=None):
         assert self._changed_callback
         d = self._device
         # assert d  # may be invalid when processing the 'unpaired' notification
@@ -295,22 +276,19 @@ class DeviceStatus(dict):
                     if d.protocol < 2.0:
                         self[KEYS.NOTIFICATION_FLAGS] = d.enable_connection_notifications()
 
-                    # If we've been inactive for a long time, forget anything
-                    # about the battery. (This is probably unnecessary.)
-                    if self.updated > 0 and timestamp - self.updated > _LONG_SLEEP:
-                        self[KEYS.BATTERY_LEVEL] = None
-                        self[KEYS.BATTERY_STATUS] = None
-                        self[KEYS.BATTERY_CHARGING] = None
-                        self[KEYS.BATTERY_VOLTAGE] = None
+                    # battery information may have changed so try to read it now
+                    self.read_battery(timestamp)
 
-                    # Devices lose configuration when they are turned off,
-                    # make sure they're up-to-date.
+                # Push settings for new devices (was_active is None),
+                # when devices request software reconfiguration
+                # and when devices become active if they don't have wireless device status feature,
+                if was_active is None or push or not was_active and (
+                    not d.features or _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
+                ):
                     if _log.isEnabledFor(_INFO):
                         _log.info('%s pushing device settings %s', d, d.settings)
                     _settings.apply_all_settings(d)
 
-                    # battery information may have changed so try to read it now
-                    self.read_battery(timestamp)
             else:
                 if was_active:
                     battery = self.get(KEYS.BATTERY_LEVEL)

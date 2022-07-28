@@ -49,23 +49,32 @@ about the selected receiver or device (useful for debugging).
 
 When a receiver is selected in the main window, you can pair a new device by
 clicking on the “Pair new device” button.
-Then turn on the device and it should pair with the receiver if that is possible.
+Then turn on the device and it should pair with the receiver if that is possible
+and the device is not already paired with another active receiver.
 For multi-host devices first select the host position that you want.
-Some Lightspeed devices may pair by pressing a special pairing button.
+Bolt devices and some Lightspeed devices pair by pressing a special pairing button.
+To pair with a Bolt receiver you have to type a passcode followed by enter
+or click the left and right buttons in the correct sequence followed by
+clicking both buttons simultaneously.
 
 ![Solaar-main-window-receiver](Solaar-main-window-receiver.png)
-
-Some receivers can only pair with certain kinds of devices, other receivers
-pair a new device by replacing an existing paired device of the same kind,
-and even other receivers can only pair a limited number of times.
-A receiver with the Unifying logo should be able to pair with any device
-with the Unifying logo. If there are no open pairing slots, however, you may
-not be able to pair a new device. In this case to pair a new device you
-first need to unpair a device.
 
 When a device is selected you can unpair the device if your receiver supports
 unpairing. To unpair the device, just click on the “Unpair” button and
 confirm in the window that pops up.
+
+A receiver with the Unifying logo should be able to pair with any device
+with the Unifying logo
+and a receiver with the Bolt logo should be able to pair with any device
+with the Bolt logo.
+If there are no open pairing slots, however, you will
+not be able to pair a new device. In this case to pair a new device you
+first need to unpair a device.
+
+Other receivers can only pair with certain kinds of devices.
+Most of these receivers do not allow unpairing - instead
+pairing a new device replaces an existing paired device of the same kind.
+Some receivers can only pair a limited number of times.
 
 ### Viewing and changing device settings
 
@@ -81,16 +90,22 @@ moving sliders, or selecting from alternatives.
 
 ![Solaar-main-window-mouse](Solaar-main-window-mouse.png)
 
-Device setings now have a clickable icon that determines whether the
+Device settings now have a clickable icon that determines whether the
 setting can be changed and whether the setting is ignored.
 
 ![Solaar-divert-back](Solaar-main-window-back-divert.png)
 
-If the selected device that is connected to a receiver is powered down or
+If the selected device that is paired with a receiver is powered down or
 otherwise disconnected its settings cannot be changed
 but it still can be unpaired if its receiver allows unpairing.
 
 ![Solaar-main-window-offline](Solaar-main-window-offline.png)
+
+If a device is paired with a receiver but directly connected via USB or Bluetooth
+the receiver pairing will show up as well as the direct connection.
+The device can only be manipulated using the direct connection.
+
+![Solaar-main-window-multiple](Solaar-main-window-multiple.png)
 
 #### Remapping key and button actions
 
