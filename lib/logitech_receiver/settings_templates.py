@@ -218,6 +218,9 @@ class Backlight2(_Setting):
     label = _('Backlight')
     description = _('Turn illumination on or off on keyboard.')
     feature = _F.BACKLIGHT2
+    # 0xFF stands for "Do not change the current effect", helps MX Mechanical backlight effect settings to be followed.
+    # according to https://drive.google.com/drive/u/2/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28?resourcekey=0-dQ-Lx1FORQl0KAdOHQaE1A
+    validator_options = {'true_value': b'\xFF', 'false_value': b'\x01', 'read_skip_byte_count': 1}
 
 
 class Backlight3(_Setting):
