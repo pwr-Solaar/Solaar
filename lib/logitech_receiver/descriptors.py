@@ -296,6 +296,7 @@ _D('G703 Hero Gaming Mouse', codename='G703 Hero', usbid=0xc090)
 _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D('G102 Lightsync Mouse', codename='G102', usbid=0xc092, interface=1)
 _D('M500S Mouse', codename='M500S', usbid=0xc093, interface=1)
+_D('G502 Proteus Spectrum Optical Mouse', codename='G502 Proteus Spectrum', usbid=0xc332, interface=1)
 
 # Trackballs
 
