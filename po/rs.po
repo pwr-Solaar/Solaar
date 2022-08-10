@@ -10,12 +10,12 @@ msgstr ""
 "POT-Creation-Date: 2022-08-09 17:35+0200\n"
 "PO-Revision-Date: 2022-08-09 17:35+0200\n"
 "Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"Language-Team: github.com/renatoka\n"
 "Language: rs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: lib/logitech_receiver/base_usb.py:47
 msgid "Bolt Receiver"
@@ -1525,7 +1525,7 @@ msgstr "O %s"
 #: lib/solaar/ui/tray.py:65 lib/solaar/ui/window.py:322
 #, python-format
 msgid "Quit %s"
-msgstr "Izađi %s"
+msgstr "Zatvori %s"
 
 #: lib/solaar/ui/tray.py:302 lib/solaar/ui/tray.py:310
 msgid "no receiver"
@@ -1629,8 +1629,8 @@ msgstr "Nijedan uređaj nije uparen."
 #, python-format
 msgid "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0] "Do %(mak_count)s uređaj može da se upari sa ovim prijemnikom."
-msgstr[1] "Do %(mak_count)s uređaja može da se upari sa ovim prijemnikom."
+msgstr[0] "Do %(max_count)s uređaj može da se upari sa ovim prijemnikom."
+msgstr[1] "Do %(max_count)s uređaja može da se upari sa ovim prijemnikom."
 
 #: lib/solaar/ui/window.py:632
 msgid "Only one device can be paired to this receiver."
