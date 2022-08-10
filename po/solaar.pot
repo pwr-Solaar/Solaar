@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.1.4\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2022-07-28 20:50+0800\n"
+        "POT-Creation-Date: 2022-08-10 16:48+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
