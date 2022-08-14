@@ -44,7 +44,7 @@ class Device:
         self.product_id = None
 
         if receiver:
-            assert number > 0 and number <= receiver.max_devices
+            assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
         self.number = number  # will be None at this point for directly connected devices
         # 'device active' flag; requires manual management.
         self.online = None

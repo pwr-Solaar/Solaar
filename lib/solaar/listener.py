@@ -205,7 +205,7 @@ class ReceiverListener(_listener.EventsListener):
             return
 
         # a device notification
-        if not (0 < n.devnumber <= self.receiver.max_devices):
+        if not (0 < n.devnumber <= 16):  # some receivers have devices past their max # devices
             if _log.isEnabledFor(_WARNING):
                 _log.warning('Unexpected device number (%s) in notification %s.', n.devnumber, n)
             return
