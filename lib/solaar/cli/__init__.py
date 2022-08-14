@@ -157,7 +157,7 @@ def _find_device(receivers, name):
 
     for r in receivers:
         if not r.isDevice:  # look for nth device of receiver
-            if number and number <= r.max_devices:
+            if number:
                 dev = r[number]
                 if dev:
                     yield dev
