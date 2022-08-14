@@ -52,13 +52,13 @@ def run(receivers, args, find_receiver, _ignore):
     rgst = receiver.read_register(_R.devices_activity)
     print('    Device Activity       %#04x: %s' % (_R.devices_activity % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
 
-    for sub_reg in range(0, 6):
+    for sub_reg in range(0, 16):
         rgst = receiver.read_register(_R.receiver_info, sub_reg)
         print(
             '    Pairing Register %#04x %#04x: %s' %
             (_R.receiver_info % 0x100, sub_reg, '0x' + _strhex(rgst) if rgst else 'None')
         )
-    for device in range(0, 6):
+    for device in range(0, 7):
         for sub_reg in [0x10, 0x20, 0x30, 0x50]:
             rgst = receiver.read_register(_R.receiver_info, sub_reg + device)
             print(
