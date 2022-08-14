@@ -35,7 +35,7 @@ class Device:
 
     def __init__(self, receiver, number, link_notification=None, info=None, path=None, handle=None):
         assert receiver or info
-        self.instances.append(self)
+        Device.instances.append(self)
         self.receiver = receiver
         self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
@@ -163,7 +163,7 @@ class Device:
     def find(self, serial):
         assert serial, 'need serial number or unit ID to find a device'
         result = None
-        for device in self.instances:
+        for device in Device.instances:
             if device.online and (device.unitId == serial or device.serial == serial):
                 result = device
         return result
@@ -490,7 +490,8 @@ class Device:
 
     def close(self):
         handle, self.handle = self.handle, None
-        self.instances.remove(self)
+        if self in Device.instances:
+            Device.instances.remove(self)
         return (handle and _base.close(handle))
 
     def __del__(self):
