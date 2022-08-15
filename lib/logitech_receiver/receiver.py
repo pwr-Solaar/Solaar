@@ -171,8 +171,10 @@ class Receiver:
                 return wpid, kind, 0
             else:
                 raise _base.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
+        wpid = 0
+        kind = None
+        polling_rate = None
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
-        polling_rate = 0
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
@@ -183,14 +185,11 @@ class Receiver:
                 _log.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
             kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
-        else:
-            # unifying protocol not supported, probably an old Nano receiver
+        else:  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
-            if device_info is None:
-                _log.error('failed to read Nano wpid for device %d of %s', n, self)
-                raise _base.NoSuchDevice(number=n, receiver=self, error='read Nano wpid')
-            wpid = _strhex(device_info[3:5])
-            kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+            if device_info:
+                wpid = _strhex(device_info[3:5])
+                kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
@@ -246,7 +245,6 @@ class Receiver:
 
         try:
             dev = Device(self, number, notification)
-            assert dev.wpid
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
