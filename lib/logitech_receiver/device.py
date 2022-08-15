@@ -449,7 +449,7 @@ class Device:
     __int__ = __index__
 
     def __eq__(self, other):
-        return other is not None and self.kind == other.kind and self.wpid == other.wpid
+        return other is not None and self._kind == other._kind and self.wpid == other.wpid
 
     def __ne__(self, other):
         return other is None or self.kind != other.kind or self.wpid != other.wpid
