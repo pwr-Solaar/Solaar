@@ -227,7 +227,7 @@ class Device:
         return self._tid_map
 
     def update_pairing_information(self):
-        if self.receiver:
+        if self.receiver and (not self.wpid or self._kind is None or self._polling_rate is None):
             wpid, kind, polling_rate = self.receiver.device_pairing_information(self.number)
             if not self.wpid:
                 self.wpid = wpid
