@@ -1,0 +1,60 @@
+Solaar version 1.1.4
+
+  1: Wireless Mouse M185/M235/M310
+     Device path  : /dev/hidraw2
+     WPID         : 4055
+     Codename     : M185/M235/M310
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 82C9A01F
+     Model ID:      405500000000
+     Unit ID:       82C9A01F
+          Firmware: RQM 65.00.B0003
+     The power switch is located on the base.
+     Supports 21 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQM 65.00.B0003 4055
+            Unit ID: 82C9A01F  Model ID: 405500000000  Transport IDs: {'wpid': '4055'}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Mouse
+            Kind: mouse
+         4: RESET                  {0020}
+         5: BATTERY STATUS         {1000}
+            Battery: 70%, discharging, next level 5%.
+         6: unknown:1810           {1810}   internal, hidden
+         7: unknown:1830           {1830}   internal, hidden
+         8: DEVICE RESET           {1802}   internal, hidden
+         9: unknown:1862           {1862}   internal, hidden
+        10: unknown:1890           {1890}   internal, hidden
+        11: unknown:18A0           {18A0}   internal, hidden
+        12: unknown:18B1           {18B1}   internal, hidden
+        13: REPROG CONTROLS V4     {1B04}
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Diversion (saved): {Left Button:Regular, Right Button:Regular, Middle Button:Regular}
+            Key/Button Diversion        : {Left Button:Regular, Right Button:Regular, Middle Button:Regular}
+        14: WIRELESS DEVICE STATUS {1D4B}
+        15: REMAINING PAIRING      {1DF0}   hidden
+            Remaining Pairings: 116
+        16: unknown:1DF3           {1DF3}   internal, hidden
+        17: unknown:1E00           {1E00}   hidden
+        18: unknown:1EB0           {1EB0}   internal, hidden
+        19: unknown:1F03           {1F03}   internal, hidden
+        20: LOWRES WHEEL           {2130}
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+     Has 3 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, divertable, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, divertable, pos:0, group:1, group mask:g1
+             reporting: analytics key events reporting
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: unknown:000200
+     Battery: 70%, discharging, next level 5%.

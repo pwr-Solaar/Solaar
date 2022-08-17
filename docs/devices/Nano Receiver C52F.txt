@@ -1,0 +1,7 @@
+Nano Receiver
+  Device path  : /dev/hidraw3
+  USB id       : 046d:c52f
+  Serial       : 6D0342C5
+    Firmware   : 30.00.B0009
+  Has 1 paired device(s) out of a maximum of 1.
+  Notifications: (none)

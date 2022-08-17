@@ -1,0 +1,13 @@
+Solaar version 1.1.4rc2
+
+Nano Receiver
+  Device path  : /dev/hidraw1
+  USB id       : 046d:C534
+  Serial       : None
+    Firmware   : 29.01.B0016
+  Has 2 paired device(s) out of a maximum of 2.
+  Has 18 successful pairing(s) remaining.
+  Notifications: wireless, software present (0x000900)
+
+
+Seen paired with Wireless Keyboard 4075 and Wireless Mouse M185 new 4054

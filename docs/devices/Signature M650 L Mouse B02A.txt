@@ -1,0 +1,86 @@
+Solaar version 1.1.3
+
+  2: Signature M650 L Mouse
+     Device path  : None
+     WPID         : B02A
+     Codename     : Logi M650 L
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Serial number: 46756ABD
+     Model ID:      B02A00000000
+     Unit ID:       46756ABD
+        Bootloader: BL1 38.01.B0011
+          Firmware: RBM 16.02.B0013
+             Other:
+     The power switch is located on the (unknown).
+     Supports 29 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BL1 38.01.B0011 B02ADFC9033D
+            Firmware: Firmware RBM 16.02.B0013 B02AB0706FCD
+            Firmware: Other
+            Unit ID: 46756ABD  Model ID: B02A00000000  Transport IDs: {'btleid': 'B02A'}
+         3: DEVICE NAME            {0005}
+            Name: Signature M650 L Mouse
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: Logi M650 L
+         7: UNIFIED BATTERY        {1004}
+         8: REPROG CONTROLS V4     {1B04}
+            DPI Sliding Adjustment (saved): Off
+            DPI Sliding Adjustment        : Off
+            Mouse Gestures (saved): Off
+            Mouse Gestures        : Off
+            Key/Button Actions (saved): {Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button}
+            Key/Button Actions        : {Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Regular, Forward Button:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular}
+         9: HOSTS INFO             {1815}
+            Host 0 (paired): legion15
+        10: XY STATS               {2250}
+        11: LOWRES WHEEL           {2130}
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        12: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI) (saved): 1200
+            Sensitivity (DPI)        : 1200
+        13: DFUCONTROL             {00C3}
+        14: DEVICE RESET           {1802}   internal, hidden, unknown:000010
+        15: unknown:1803           {1803}   internal, hidden, unknown:000010
+        16: CONFIG DEVICE PROPS    {1806}   internal, hidden, unknown:000010
+        17: unknown:1816           {1816}   internal, hidden, unknown:000010
+        18: OOBSTATE               {1805}   internal, hidden
+        19: unknown:1830           {1830}   internal, hidden, unknown:000010
+        20: unknown:1891           {1891}   internal, hidden, unknown:000008
+        21: unknown:18A1           {18A1}   internal, hidden, unknown:000010
+        22: unknown:1E00           {1E00}   hidden
+        23: unknown:1E02           {1E02}   internal, hidden
+        24: unknown:1E22           {1E22}   internal, hidden, unknown:000010
+        25: unknown:1602           {1602}
+        26: unknown:1EB0           {1EB0}   internal, hidden, unknown:000010
+        27: unknown:1861           {1861}   internal, hidden, unknown:000010
+        28: unknown:18B1           {18B1}   internal, hidden, unknown:000010
+     Has 6 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, analytics key events, pos:0, group:1, group mask:empty
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, analytics key events, pos:0, group:1, group mask:empty
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, unknown:000800, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, unknown:000800, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:4, group mask:empty
+             reporting: default
+     Battery: 95%, discharging.

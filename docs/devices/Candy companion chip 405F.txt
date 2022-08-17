@@ -1,0 +1,30 @@
+ 7: Candy companion chip
+     Device path  : /dev/hidraw11
+     Codename     : Candy
+     Kind         : touchpad
+     Protocol     : HID++ 4.2
+     Serial number: 5B2B9A98
+     Model ID:      405F00000000
+     Unit ID:       32314707
+          Firmware: CC  07.00.B0010
+        Bootloader: BOT 32.00.B0010
+     Supports 11 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware CC  07.00.B0010 405F
+            Firmware: Bootloader BOT 32.00.B0010 405F
+            Unit ID: 32314707  Model ID: 405F00000000  Transport IDs: {'wpid': '405F'}
+         3: DEVICE NAME            {0005}
+            Name: Candy companion chip
+            Kind: touchpad
+         4: unknown:18A1           {18A1}   internal, hidden
+         5: unknown:1E00           {1E00}   hidden
+         6: unknown:1EB0           {1EB0}   internal, hidden
+         7: DFUCONTROL SIGNED      {00C2}
+         8: unknown:1801           {1801}   internal, hidden
+         9: DEVICE RESET           {1802}   internal, hidden
+        10: unknown:1803           {1803}   internal, hidden
+     Battery status unavailable.
+
+Part of the G PowerPlay Wireless Mouse Pad.

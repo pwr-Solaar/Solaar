@@ -1,0 +1,108 @@
+Solaar version 1.1.3
+
+  2: MX Vertical Wireless Mouse
+     Device path  : /dev/hidraw5
+     WPID         : 407B
+     Codename     : MX Vertical
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 87A544C3
+     Model ID:      B020407BC08A
+     Unit ID:       7818C6EE
+        Bootloader: BOT 78.00.B0009
+          Firmware: MPM 16.00.B0009
+             Other:
+     Supports 34 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 78.00.B0009 AAE28E5B17FF
+            Firmware: Firmware MPM 16.00.B0009 407B8E5B17FF
+            Firmware: Other
+            Unit ID: 7818C6EE  Model ID: B020407BC08A  Transport IDs: {'btleid': 'B020', 'wpid': '407B', 'usbid': 'C08A'}
+         3: DEVICE NAME            {0005}
+            Name: MX Vertical Advanced Ergonomic Mouse
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: CRYPTO ID              {0021}
+         7: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: MX Vertical
+         8: BATTERY STATUS         {1000}
+            Battery: 50%, discharging, next level 20%.
+         9: unknown:1002           {1002}
+        10: REPROG CONTROLS V4     {1B04}
+            DPI Sliding Adjustment (saved): Off
+            DPI Sliding Adjustment        : Off
+            Mouse Gestures (saved): Off
+            Mouse Gestures        : Off
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, DPI Switch:DPI Switch}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, DPI Switch:DPI Switch}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Diverted, Forward Button:Diverted, ?, DPI Switch:Diverted}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Diverted, Forward Button:Diverted, DPI Switch:Diverted}
+        11: PERSISTENT REMAPPABLE ACTION {1C00}
+        12: CHANGE HOST            {1814}
+            Change Host        : 1:pudim
+        13: HOSTS INFO             {1815}
+            Host 0 (unpaired): pudim
+            Host 1 (unpaired):
+            Host 2 (unpaired):
+        14: XY STATS               {2250}
+        15: unknown:18B1           {18B1}   internal, hidden
+        16: VERTICAL SCROLLING     {2100}
+            Roller type: standard
+            Ratchet per turn: 24
+            Scroll lines: 0
+        17: LOWRES WHEEL           {2130}
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        18: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI) (saved): 2800
+            Sensitivity (DPI)        : 2800
+        19: DEVICE RESET           {1802}   internal, hidden
+        20: unknown:1803           {1803}   internal, hidden
+        21: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        22: unknown:1813           {1813}   internal, hidden
+        23: OOBSTATE               {1805}   internal, hidden
+        24: unknown:1830           {1830}   internal, hidden
+        25: unknown:1890           {1890}   internal, hidden
+        26: unknown:1891           {1891}   internal, hidden
+        27: unknown:18A1           {18A1}   internal, hidden
+        28: unknown:1DF3           {1DF3}   internal, hidden
+        29: unknown:1E00           {1E00}   hidden
+        30: unknown:1EB0           {1EB0}   internal, hidden
+        31: unknown:1E22           {1E22}   internal, hidden
+        32: unknown:1861           {1861}   internal, hidden
+        33: unknown:18C0           {18C0}   internal, hidden
+     Has 7 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: diverted
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: diverted
+         5: DPI Switch                , default: DPI Switch                  => DPI Switch
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: diverted
+         6: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:3, group mask:empty
+             reporting: default
+     Has 6 persistent remappable keys:
+         0: Left Button                => Mouse Button: Mouse Button Left
+         1: Right Button               => Mouse Button: Mouse Button Right
+         2: Middle Button              => Mouse Button: Mouse Button Middle
+         3: Back Button                => Mouse Button: Mouse Button Back
+         4: Forward Button             => Mouse Button: Mouse Button Forward
+         5: unknown:0000               => None
+     Battery: 50%, discharging, next level 20%.
