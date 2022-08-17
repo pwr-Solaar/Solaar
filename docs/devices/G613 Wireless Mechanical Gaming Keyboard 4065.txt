@@ -1,0 +1,74 @@
+Solaar version 1.1.3
+
+  1: G613 Wireless Mechanical Gaming Keyboard
+     Device path  : None
+     WPID         : 4065
+     Codename     : G613
+     Kind         : keyboard
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number: 0DBC5FF6
+     Model ID:      B34F40650000
+     Unit ID:       9AAB3225
+        Bootloader: BOT 46.00.B0006
+          Firmware: MPK 05.02.B0021
+             Other:
+     Supports 32 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 46.00.B0006 00006E86A7BD
+            Firmware: Firmware MPK 05.02.B0021 40656E86A7BD
+            Firmware: Other
+            Unit ID: 9AAB3225  Model ID: B34F40650000  Transport IDs: {'btleid': 'B34F', 'wpid': '4065'}
+         3: DEVICE NAME            {0005}
+            Name: G613 Wireless Mechanical Gaming Keyboard
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: G613
+         7: BATTERY STATUS         {1000}
+            Battery: 50%, discharging, next level 20%.
+         8: CHANGE HOST            {1814}
+            Change Host        : 1:video2
+         9: HOSTS INFO             {1815}
+            Host 0 (paired): video2
+            Host 1 (paired): CB73CG2
+        10: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Host Switch Channel 1:Regular, Host Switch Channel 2:Regular}
+            Key/Button Diversion        : {Host Switch Channel 1:Regular, Host Switch Channel 2:Regular}
+        11: REPORT HID USAGE       {1BC0}
+        12: ENCRYPTION             {4100}
+        13: KEYBOARD DISABLE BY USAGE {4522}
+        14: KEYBOARD LAYOUT 2      {4540}
+        15: GKEY                   {8010}
+            Divert G Keys (saved): True
+            Divert G Keys        : False
+        16: REPORT RATE            {8060}
+            Polling Rate (ms): 1
+            Polling Rate (ms) (saved): 1
+            Polling Rate (ms)        : 1
+        17: DFUCONTROL SIGNED      {00C2}
+        18: DEVICE RESET           {1802}   internal, hidden
+        19: unknown:1803           {1803}   internal, hidden
+        20: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        21: unknown:1813           {1813}   internal, hidden
+        22: OOBSTATE               {1805}   internal, hidden
+        23: unknown:1830           {1830}   internal, hidden
+        24: unknown:1890           {1890}   internal, hidden
+        25: unknown:1891           {1891}   internal, hidden
+        26: unknown:18A1           {18A1}   internal, hidden
+        27: unknown:1DF3           {1DF3}   internal, hidden
+        28: unknown:1E00           {1E00}   hidden
+        29: unknown:1EB0           {1EB0}   internal, hidden
+        30: unknown:1861           {1861}   internal, hidden
+        31: unknown:18B1           {18B1}   internal, hidden
+     Has 2 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             divertable, persistently divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             divertable, persistently divertable, pos:2, group:0, group mask:empty
+             reporting: default
+     Battery: 50%, discharging, next level 20%.

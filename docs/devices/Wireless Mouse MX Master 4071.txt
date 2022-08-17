@@ -1,24 +1,13 @@
-Unifying Receiver
-  Device path  : /dev/hidraw7
-  USB id       : 046d:c52b
-  Serial       : BB7D9447
-    Firmware   : 24.01.B0023
-    Bootloader : 01.08
-    Other      : AA.AD
-  Has 2 paired device(s) out of a maximum of 6.
-  Notifications: wireless, software present (0x000900)
-  Device activity counters: 2=156
-
-  1: Wireless Mouse MX Master 2S
-     Codename     : MX Master 2S
+  1: Wireless Mouse MX Master
+     Codename     : MX Master
      Kind         : mouse
-     Wireless PID : 4069
+     Wireless PID : 4071
      Protocol     : HID++ 4.5
      Polling rate : 8 ms (125Hz)
-     Serial number: EAB71F76
-        Bootloader: BOT 56.01.B0006
-          Firmware: MPM 12.01.B0006
-          Firmware: MPM 12.01.B0006
+     Serial number: A6A40064
+        Bootloader: BOT 56.10.B0005
+          Firmware: MPM 12.10.B0005
+          Firmware: MPM 12.10.B0005
              Other:
      The power switch is located on the base.
      Supports 32 HID++ 2.0 features:
@@ -48,7 +37,6 @@ Unifying Receiver
             High resolution mode
             HID notification
         15: GESTURE 2              {6501}
-        16: unknown:00C2           {00C2}
         17: unknown:1813           {1813}   internal, hidden
         18: unknown:1830           {1830}   internal, hidden
         19: unknown:1890           {1890}   internal, hidden

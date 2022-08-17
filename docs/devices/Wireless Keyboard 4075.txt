@@ -1,0 +1,60 @@
+Solaar version 1.1.4rc2
+
+ 1: Wireless Keyboard
+     Device path  : /dev/hidraw2
+     WPID         : 4075
+     Codename     :
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Polling rate : 20 ms (50Hz)
+     Serial number: 00000000
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQK 71.00.B0002
+     Supports 19 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQK 71.00.B0002 4075
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Keyboard
+            Kind: keyboard
+         4: RESET                  {0020}
+         5: BATTERY STATUS         {1000}
+            Battery: 30%, discharging, next level 5%.
+         6: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Calculator:Regular, Mail:Regular, My Home:Regular, Search:Regular}
+            Key/Button Diversion        : {Calculator:Regular, Mail:Regular, My Home:Regular, Search:Regular}
+         7: WIRELESS DEVICE STATUS {1D4B}
+         8: NEW FN INVERSION       {40A2}
+            Fn-swap: disabled
+            Fn-swap default: disabled
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+         9: ENCRYPTION             {4100}
+        10: LOCK KEY STATE         {4220}
+        11: KEYBOARD DISABLE KEYS  {4521}
+            Disable keys (saved): {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+        12: unknown:1810           {1810}   internal, hidden
+        13: unknown:1830           {1830}   internal, hidden
+        14: unknown:1890           {1890}   internal, hidden
+        15: unknown:18A0           {18A0}   internal, hidden
+        16: unknown:18B0           {18B0}   internal, hidden
+        17: unknown:1DF3           {1DF3}   internal, hidden
+        18: unknown:1E00           {1E00}   hidden
+     Has 4 reprogrammable keys:
+         0: My Home                   , default: HomePage                    => HomePage
+             is FN, FN sensitive, reprogrammable, divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Mail                      , default: Email                       => Email
+             is FN, FN sensitive, reprogrammable, divertable, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Search                    , default: Search Files                => Search Files
+             is FN, FN sensitive, reprogrammable, divertable, pos:3, group:0, group mask:empty
+             reporting: default
+         3: Calculator                , default: Calculator                  => Calculator
+             is FN, FN sensitive, reprogrammable, divertable, pos:4, group:0, group mask:empty
+             reporting: default
+     Battery: 30%, discharging, next level 5%.

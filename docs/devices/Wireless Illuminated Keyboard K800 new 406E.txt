@@ -1,0 +1,67 @@
+  2: Wireless Illuminated Keyboard K800 new
+     Codename     : new
+     Kind         : keyboard
+     Wireless PID : 406E
+     Protocol     : HID++ 4.5
+     Polling rate : 20 ms (50Hz)
+     Serial number: 636E1413
+        Bootloader: BOT 60.00.B0002
+          Firmware: RQK 68.01.B0009
+     The power switch is located on the top right corner.
+     Supports 25 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+         7: unknown:1983           {1983}
+         8: REPROG CONTROLS V4     {1B04}
+         9: FN INVERSION           {40A0}
+        10: ENCRYPTION             {4100}
+        11: KEYBOARD DISABLE       {4521}
+        12: unknown:00C2           {00C2}
+        13: unknown:1803           {1803}   internal, hidden
+        14: unknown:1806           {1806}   internal, hidden
+        15: unknown:1811           {1811}   internal, hidden
+        17: unknown:1890           {1890}   internal, hidden
+        18: unknown:18A1           {18A1}   internal, hidden
+        19: unknown:1DF3           {1DF3}   internal, hidden
+        20: unknown:1E00           {1E00}   hidden
+        21: unknown:1EB0           {1EB0}   internal, hidden
+        22: unknown:1861           {1861}   internal, hidden
+        23: unknown:1A20           {1A20}   internal, hidden
+        24: unknown:18B0           {18B0}   internal, hidden
+     Has 15 reprogrammable keys:
+         0: MY HOME                   , default: HomePage                    => MY HOME
+             is FN, FN sensitive, reprogrammable, divertable, pos:1, group:0, gmask:0
+         1: Mail                      , default: Email                       => Mail
+             is FN, FN sensitive, reprogrammable, divertable, pos:2, group:0, gmask:0
+         2: SEARCH                    , default: SearchForFiles              => SEARCH
+             is FN, FN sensitive, reprogrammable, divertable, pos:3, group:0, gmask:0
+         3: Application Switcher      , default: Application Switcher        => Application Switcher
+             is FN, FN sensitive, reprogrammable, divertable, pos:4, group:0, gmask:0
+         4: unknown:00E2              , default: unknown:00C1                => unknown:00E2
+             is FN, FN sensitive, divertable, pos:5, group:0, gmask:0
+         5: unknown:00E3              , default: unknown:00C2                => unknown:00E3
+             is FN, FN sensitive, divertable, pos:6, group:0, gmask:0
+         6: SLEEP                     , default: Sleep                       => SLEEP
+             is FN, FN sensitive, reprogrammable, divertable, pos:8, group:0, gmask:0
+         7: MEDIA PLAYER              , default: Music                       => MEDIA PLAYER
+             is FN, FN sensitive, reprogrammable, divertable, pos:9, group:0, gmask:0
+         8: Previous                  , default: Previous                    => Previous
+             is FN, FN sensitive, divertable, pos:10, group:0, gmask:0
+         9: Play/Pause                , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, divertable, pos:11, group:0, gmask:0
+        10: Next                      , default: Next                        => Next
+             is FN, FN sensitive, divertable, pos:12, group:0, gmask:0
+        11: Volume Up                 , default: Volume Up                   => Volume Up
+             nonstandard, divertable, pos:0, group:0, gmask:0
+        12: Volume Down               , default: Volume Down                 => Volume Down
+             nonstandard, divertable, pos:0, group:0, gmask:0
+        13: Mute                      , default: Mute                        => Mute
+             nonstandard, divertable, pos:0, group:0, gmask:0
+        14: Calculator                , default: Calculator                  => Calculator
+             nonstandard, reprogrammable, divertable, pos:0, group:0, gmask:0
+     Battery: 50%, discharging.

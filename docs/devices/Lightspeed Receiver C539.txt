@@ -1,0 +1,15 @@
+Solaar version 1.1.4
+
+Lightspeed Receiver
+  Device path  : /dev/hidraw8
+  USB id       : 046d:C539
+  Serial       : C1469DD4
+    Firmware   : 39.06.B0040
+    Bootloader : 02.09
+    Other      : AA.BE
+  Has 1 paired device(s) out of a maximum of 1.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: (empty)
+
+Seen paired with G502 Gaming Mouse 407F
+Seen paired with G Pro Wireless Gaming Mouse 4079

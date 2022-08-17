@@ -1,0 +1,141 @@
+Solaar version 1.1.3
+
+  1: Wireless Multi-Device Keyboard K780
+     Device path  : /dev/hidraw6
+     WPID         : 405B
+     Codename     : K780
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Polling rate : 20 ms (50Hz)
+     Serial number: 190FABF3
+     Model ID:      B33B405B0000
+     Unit ID:       20D60309
+        Bootloader: BOT 25.01.B0006
+          Firmware: MPK 01.05.B0029
+             Other:
+     The power switch is located on the edge of top right corner.
+     Supports 31 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 25.01.B0006 00003C32CFDB01
+            Firmware: Firmware MPK 01.05.B0029 405B3C32CFDB01
+            Firmware: Other
+            Unit ID: 20D60309  Model ID: B33B405B0000  Transport IDs: {'btleid': 'B33B', 'wpid': '405B'}
+         3: DEVICE NAME            {0005}
+            Name: K780 Multi-Device Wireless Keyboard
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: Keyboard K780
+         7: BATTERY STATUS         {1000}
+            Battery: 90%, discharging, next level 50%.
+         8: CHANGE HOST            {1814}
+            改变主机        : 1:yxl-pc
+         9: HOSTS INFO             {1815}
+            Host 0 (paired): yxl-pc
+            Host 1 (paired): yxl-pc
+            Host 2 (paired): DESKTOP-EPVSBVF
+        10: REPROG CONTROLS V4     {1B04}
+            按键/按钮改道 (saved): {Volume Up:常规, Volume Down:常规, Mute:常规, Play/Pause:常规, Next:常规, Previous:常规, Multiplatform Back:常规, Multiplatform Insert:常规, Screen Capture/Print Screen:常规, Fn Down:常规, Fn Up:常规, Multiplatform Lock:常规, Host Switch Channel 1:常规, Host Switch Channel 2:常规, Host Switch Channel 3:常规, MultiPlatform Search:常规, MultiPlatform Home/Mission Control:常规, MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:常规}
+            按键/按钮改道        : {Volume Up:常规, Volume Down:常规, Mute:常规, Play/Pause:常规, Next:常规, Previous:常规, Multiplatform Back:常规, Multiplatform Insert:常规, Screen Capture/Print Screen:常规, Fn Down:常规, Fn Up:常规, Multiplatform Lock:常规, Host Switch Channel 1:常规, Host Switch Channel 2:常规, Host Switch Channel 3:常规, MultiPlatform Search:常规, MultiPlatform Home/Mission Control:常规, MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:常规}
+        11: PERSISTENT REMAPPABLE ACTION {1C00}
+            持久化按键/按钮映射        : {Volume Up:Volume Up, Volume Down:Volume Down, Mute:Mute, Play/Pause:Play/Pause, Next:Scan Next Track, Previous:Scan Previous Track, Multiplatform Back:Keyboard Illumination Down, MultiPlatform Search:AC Search, MultiPlatform Home/Mission Control:AC Home, MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:COMPOSE}
+        12: NEW FN INVERSION       {40A2}
+            Fn-swap: enabled
+            Fn-swap default: enabled
+            互换 Fx 键功能 (saved): True
+            互换 Fx 键功能        : True
+        13: ENCRYPTION             {4100}
+        14: KEYBOARD DISABLE KEYS  {4521}
+            禁用按键 (saved): {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+            禁用按键        : {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+        15: MULTIPLATFORM          {4531}
+            设置操作系统 (saved): Windows
+            设置操作系统        : Windows
+        16: LOCK KEY STATE         {4220}
+        17: DFUCONTROL SIGNED      {00C2}
+        18: unknown:1803           {1803}   internal, hidden
+        19: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        20: OOBSTATE               {1805}   internal, hidden
+        21: unknown:1813           {1813}   internal, hidden
+        22: unknown:1830           {1830}   internal, hidden
+        23: unknown:1861           {1861}   internal, hidden
+        24: unknown:1890           {1890}   internal, hidden
+        25: unknown:1891           {1891}   internal, hidden
+        26: unknown:18A1           {18A1}   internal, hidden
+        27: unknown:1DF3           {1DF3}   internal, hidden
+        28: unknown:1E00           {1E00}   hidden
+        29: unknown:1EB0           {1EB0}   internal, hidden
+        30: unknown:18B0           {18B0}   internal, hidden
+     Has 19 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             is FN, FN sensitive, divertable, persistently divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             is FN, FN sensitive, divertable, persistently divertable, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             is FN, FN sensitive, divertable, persistently divertable, pos:3, group:0, group mask:empty
+             reporting: default
+         3: MultiPlatform Home/Mission Control, default: Multiplatform Home/Mission Control => Multiplatform Home/Mission Control
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:4, group:0, group mask:empty
+             reporting: default
+         4: MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad, default: Multiplatform Menu/Launchpad => Multiplatform Menu/Launchpad
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:5, group:0, group mask:empty
+             reporting: default
+         5: Multiplatform Back        , default: MultiPlatform Back          => MultiPlatform Back
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:6, group:0, group mask:empty
+             reporting: default
+         6: Previous                  , default: Previous                    => Previous
+             is FN, FN sensitive, divertable, persistently divertable, pos:7, group:0, group mask:empty
+             reporting: default
+         7: Play/Pause                , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, divertable, persistently divertable, pos:8, group:0, group mask:empty
+             reporting: default
+         8: Next                      , default: Next                        => Next
+             is FN, FN sensitive, divertable, persistently divertable, pos:9, group:0, group mask:empty
+             reporting: default
+         9: Mute                      , default: Mute                        => Mute
+             is FN, FN sensitive, divertable, persistently divertable, pos:10, group:0, group mask:empty
+             reporting: default
+        10: Volume Down               , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, divertable, persistently divertable, pos:11, group:0, group mask:empty
+             reporting: default
+        11: Volume Up                 , default: Volume Up                   => Volume Up
+             is FN, FN sensitive, divertable, persistently divertable, pos:12, group:0, group mask:empty
+             reporting: default
+        12: MultiPlatform Search      , default: Multiplatform Search        => Multiplatform Search
+             nonstandard, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        13: Multiplatform Insert      , default: Switch Language             => Switch Language
+             is FN, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Screen Capture/Print Screen, default: Screen Capture              => Screen Capture
+             is FN, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        15: Multiplatform Lock        , default: WindowsLock                 => WindowsLock
+             is FN, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        16: Fn Up                     , default: unknown:0070                => unknown:0070
+             is FN, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Fn Down                   , default: unknown:006F                => unknown:006F
+             is FN, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        18: FN Key                    , default: Do Nothing One              => Do Nothing One
+             nonstandard, pos:0, group:0, group mask:empty
+             reporting: default
+     Has 10 persistent remappable keys:
+         0: MultiPlatform Home/Mission Control => Consumer: AC Home
+         1: MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad => Key: COMPOSE
+         2: Multiplatform Back         => Consumer: Keyboard Illumination Down (remapped)
+         3: Previous                   => Consumer: Scan Previous Track
+         4: Play/Pause                 => Consumer: Play/Pause
+         5: Next                       => Consumer: Scan Next Track
+         6: Mute                       => Consumer: Mute
+         7: Volume Down                => Consumer: Volume Down
+         8: Volume Up                  => Consumer: Volume Up
+         9: MultiPlatform Search       => Consumer: AC Search
+     Battery: 90%, discharging, next level 50%.

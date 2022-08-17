@@ -1,0 +1,121 @@
+Solaar version 1.1.4
+
+  1: Wireless Mouse MX Master 2S
+     Device path  : /dev/hidraw1
+     WPID         : 4069
+     Codename     : MX Master 2S
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 9429B808
+     Model ID:      B01940690000
+     Unit ID:       65D747F7
+        Bootloader: BOT 56.01.B0006
+          Firmware: MPM 12.01.B0006
+          Firmware: MPM 12.01.B0006
+             Other:
+     The power switch is located on the base.
+     Supports 31 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 56.01.B0006 406916A9FC5401
+            Firmware: Firmware MPM 12.01.B0006 B01916A9FC5401
+            Firmware: Firmware MPM 12.01.B0006 406916A9FC5401
+            Firmware: Other
+            Unit ID: 65D747F7  Model ID: B01940690000  Transport IDs: {'btleid': 'B019', 'wpid': '4069'}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Mouse MX Master 2S
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: CRYPTO ID              {0021}
+         7: BATTERY STATUS         {1000}
+            Battery: 50%, discharging, next level 20%.
+         8: CONFIG DEVICE PROPS    {1806}   internal, hidden
+         9: CHANGE HOST            {1814}
+            Cambiar Host        : 2:lapega
+        10: REPROG CONTROLS V4     {1B04}
+            Ajustar DPI deslizando (saved): Off
+            Ajustar DPI deslizando        : Off
+            Gestos de Ratón (saved): Off
+            Gestos de Ratón        : Off
+            Acciones de Tecla/Botón (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Mouse Gesture Button:Gesture Button Navigation, Smart Shift:Smart Shift}
+            Acciones de Tecla/Botón        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Mouse Gesture Button:Gesture Button Navigation, Smart Shift:Smart Shift}
+            Desvio de Tecla/Botón (saved): {Middle Button:Normal, Back Button:Normal, Forward Button:Normal, Mouse Gesture Button:Normal, Smart Shift:Normal}
+            Desvio de Tecla/Botón        : {Middle Button:Normal, Back Button:Normal, Forward Button:Normal, Mouse Gesture Button:Normal, Smart Shift:Normal}
+        11: ADJUSTABLE DPI         {2201}
+            Sensibilidad (PPP) (saved): 4000
+            Sensibilidad (PPP)        : 4000
+        12: VERTICAL SCROLLING     {2100}
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+        13: SMART SHIFT            {2110}
+            Trinquete Rueda Desplazamiento (saved): 50
+            Trinquete Rueda Desplazamiento        : 50
+        14: HIRES WHEEL            {2121}
+            Multiplier: 8
+            Has invert: Normal wheel motion
+            Has ratchet switch: Normal wheel mode
+            High resolution mode
+            HID notification
+            Dirección Rueda Desplazamiento (saved): False
+            Dirección Rueda Desplazamiento        : False
+            Resolución Rueda Desplazamiento (saved): True
+            Resolución Rueda Desplazamiento        : True
+            Desvio Rueda Desplazamiento (saved): False
+            Desvio Rueda Desplazamiento        : False
+        15: GESTURE 2              {6501}
+            Gestos (saved): {45: True, 46: True}
+            Gestos        : {46: True, 45: True}
+            Gestures Diversion (saved): {46: False}
+            Gestures Diversion        : {46: False}
+        16: DFUCONTROL SIGNED      {00C2}
+        17: unknown:1813           {1813}   internal, hidden
+        18: unknown:1830           {1830}   internal, hidden
+        19: unknown:1890           {1890}   internal, hidden
+        20: unknown:1891           {1891}   internal, hidden
+        21: unknown:18A1           {18A1}   internal, hidden
+        22: unknown:18C0           {18C0}   internal, hidden
+        23: unknown:1DF3           {1DF3}   internal, hidden
+        24: unknown:1E00           {1E00}   hidden
+        25: unknown:1EB0           {1EB0}   internal, hidden
+        26: unknown:1803           {1803}   internal, hidden
+        27: unknown:1861           {1861}   internal, hidden
+        28: unknown:9001           {9001}   internal, hidden
+        29: unknown:9200           {9200}   internal, hidden
+        30: unknown:9202           {9202}   internal, hidden
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Mouse Gesture Button      , default: Gesture Button Navigation   => Gesture Button Navigation
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         6: Smart Shift               , default: Smart Shift                 => Smart Shift
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:4, group mask:empty
+             reporting: default
+     Has 2 gesture(s), 0 param(s) and 4 spec(s):
+        Thumbwheel                 Enabled(   0): True   Diverted:(   0) False
+        NaturalScrolling           Enabled(   1): True   Diverted:(None) None
+        period unit                Spec   (   3): 800
+        DVI field width            Spec   (   1): 8
+        field widths               Spec   (   2): 8
+        resolution                 Spec   (   4): 2048
+     Battery: 50%, discharging, next level 20%.

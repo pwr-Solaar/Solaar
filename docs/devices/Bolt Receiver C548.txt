@@ -1,0 +1,9 @@
+Solaar version 1.1.4
+
+Bolt Receiver
+  Device path  : /dev/hidraw8
+  USB id       : 046d:C548
+  Serial       : 38423638313332394241363434313837
+  Has 2 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=252, 2=135
