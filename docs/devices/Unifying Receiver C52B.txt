@@ -1,0 +1,12 @@
+Solaar version 1.1.4
+
+Unifying Receiver
+  Device path  : /dev/hidraw0
+  USB id       : 046d:C52B
+  Serial       : E0662192
+    Firmware   : 24.11.B0036
+    Bootloader : 02.09
+    Other      : AA.AC
+  Has 2 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=225, 2=132
