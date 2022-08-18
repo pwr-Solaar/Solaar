@@ -29,17 +29,23 @@ Files that do not follow this naming convention are retained for historical purp
 
 File Contents
 
-Each file should start with the Solaar version as given in the first line of
-output from `solaar show` and a blank line.  Next is the output of `solaar
-show` for the device or receiver. The output of `solaar show` can be edited
+Each file should contain the output of `solaar show NAME` where NAME
+is enough of the full name of a device or receiver to identify it.
+The output of `solaar show` will provide information on all connnected
+devices and receivers including their names.
+The output of `solaar show NAME` can be edited
 to remove serial numbers and variable information such as the current values
-of settings.  For older devices probes of the device registers should be
-included but for newer devices this should not be necessary.
+of settings.
+Passing the style requirements for Solaar documentation may require removing
+trailing white space on lines.
+
+For older devices probes of the device registers should be
+included but for newer devices this is not necessary.
 
 Unifying receivers can pair with any device that has the Unifying logo.
 Bolt receivers can pair with any device that has the Bolt logo.
 Nano and Lightspeed receivers can only pair with certain devices,
-so the end of their files should contain device WPIDs that they have
+so the end of their files should state the devices that they have
 been seen to be paired with or are part of.
 
 
@@ -47,4 +53,4 @@ Updating Files
 
 Newer versions of Solaar add support for more settings so it is useful to
 provide updated versions of these files if there is information from the
-current version of `solaar show` that is not in the existing file.
+current version of `solaar show NAME` that is not in the existing file.
