@@ -12,46 +12,30 @@ Solaar supports some Lightspeed receivers.
 See the receiver table below for the list of currently supported receivers.
 
 Solaar supports most recent and many older Logitech devices
-(keyboards, mice, trackballs, and touchpads)
+(keyboards, mice, trackballs, touchpads, and headsets)
 that can connect to supported receivers.
 Solaar supports many recent Logitech devices that can connect via a USB cable,
 but some such Logitech devices are not suited for use in Solaar because they do not use the HID++ protocol.
 One example is the MX518 Gaming Mouse.
 Solaar supports most recent Logitech devices that can connect via Bluetooth.
 
-The device tables below provide a list of some of the devices that Solaar supports,
-giving their product name, WPID product number, and HID++ protocol information..
-The tables concentrate on older devices that have explicit support information in Solaar.
-
 The best way to determine whether Solaar supports a device is to run Solaar while the device is connected.
 If the device is supported, it will show up in the Solaar main window.
 If it is not, and there is no issue about the device in the Solaar GitHub repository,
 open an enhancement issue requesting that it be supported.
 
-## Adding new receivers and devices
+The directory https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices contains
+
+
+## Adding new receivers
 
 Adding a new receiver requires knowing whether the receiver is a regular
-Unifying receiver, a Nano receiver, a Bolt receiver, or a Lightspeed receiver. Add a line to
-`../lib/logitech_receiver/base_usb.py` defining the receiver as one of these.
+Unifying receiver, a Nano receiver, a Bolt receiver, or a Lightspeed receiver.
+Add a line to `../lib/logitech_receiver/base_usb.py` defining the receiver as one of these.
 If the receiver has an unusual number of pairing slots, then this also needs
 to be specified. Then add the receiver to the tuple of receivers (ALL).
 
-Most new devices do not need to be known to Solaar to work.
-The _D function in `../lib/logitech_receiver/descriptors.py` makes a device known to Solaar.
-The usual arguments to the _D function are the device's long name, its short name
-(codename), and its HID++ protocol version.
-Devices that use HID++ 1.0 need a tuple of known registers (registers) and settings (settings).
-Settings can be provided for Devices that use HID++ 2.0 or later,
-but Solaar can determine these from the device.
-If the device can connect to a receiver, provide its wireless product ID (wpid),
-If the device can connect via Bluetooth, provide its Bluetooth product ID (btid).
-If the device can connect via a USB cable, provide its USB product ID (usbid),
-and the interface it uses to send and receiver HID++ messages (interface - default 2).
-The use of a non-default USB interface is the main reason for requiring information about
-modern devices to be added to Solaar.
-
-
-### Supported Receivers
+## Supported Receivers
 
 | USB ID    | Kind       | Max Paired Devices |
 ------------|------------|--------------------|
@@ -88,6 +72,33 @@ Receivers with USB ID 046d:c542 fall into this category.
 The receiver with USB ID 046d:c517 is an old 27 MHz receiver, supporting only
 subset of HID++ 1.0 protocol. Only hardware pairing is supported.
 
+
+## Adding new devices
+
+Most new devices do not need to be known to Solaar to work.
+
+
+The _D function in `../lib/logitech_receiver/descriptors.py` makes a device known to Solaar.
+The usual arguments to the _D function are the device's long name, its short name
+(codename), and its HID++ protocol version.
+Devices that use HID++ 1.0 need a tuple of known registers (registers) and settings (settings).
+Settings can be provided for Devices that use HID++ 2.0 or later,
+but Solaar can determine these from the device.
+If the device can connect to a receiver, provide its wireless product ID (wpid),
+If the device can connect via Bluetooth, provide its Bluetooth product ID (btid).
+If the device can connect via a USB cable, provide its USB product ID (usbid),
+and the interface it uses to send and receiver HID++ messages (interface - default 2).
+The use of a non-default USB interface is the main reason for requiring information about
+modern devices to be added to Solaar.
+
+
+
+## Supported Devices
+
+The device tables below  provide a list of some of the devices that Solaar supports,
+giving their product name, WPID product number, and HID++ protocol information.
+The tables concentrate on older devices that have explicit support information in Solaar
+and are not being updated for new devices that are supported by Solaar.
 
 ### Keyboards (Unifying)
 
