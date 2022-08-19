@@ -34,8 +34,11 @@ CONTENTS HERE
 
 
 - Errors or warrnings from Solaar:
-<!-- Run Solaar as `solaar -dd`, after killing any running Solaar processes.  If any warnings or errors show up, include the output here. -->
-
+<!-- Under normal operation Solaar keeps a log of warning and error messages in ~/.tmp
+while it is running as a file starting with 'Solaar'.
+If this file is not available or does not have useful information you can
+run Solaar as `solaar -dd`, after killing any running Solaar processes to
+have Solaar log informational, warning, and error messages to stdout. -->
 
 
 **Describe the bug**
