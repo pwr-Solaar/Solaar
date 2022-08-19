@@ -19,19 +19,19 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import importlib
+import logging
 import os.path
+import tempfile
 
 from logging import INFO as _INFO
 from logging import WARNING as _WARNING
-from logging import getLogger
 
 import solaar.cli as _cli
 import solaar.i18n as _i18n
 
 from solaar import NAME, __version__
 
-_log = getLogger(__name__)
-del getLogger
+_log = logging.getLogger(__name__)
 
 #
 #
@@ -49,6 +49,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
 
 
 battery_icons_style = 'regular'
+temp = tempfile.NamedTemporaryFile(prefix='Solaar_', mode='w', delete=True)
 
 
 def _parse_arguments():
@@ -100,17 +101,21 @@ def _parse_arguments():
     global tray_icon_size
     tray_icon_size = args.tray_icon_size
 
-    import logging
+    log_format = '%(asctime)s,%(msecs)03d %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
+    log_level = logging.ERROR - 10 * args.debug
+    logging.getLogger('').setLevel(min(log_level, logging.WARNING))
+    file_handler = logging.StreamHandler(temp)
+    file_handler.setLevel(max(min(log_level, logging.WARNING), logging.INFO))
+    file_handler.setFormatter(logging.Formatter(log_format))
+    logging.getLogger('').addHandler(file_handler)
     if args.debug > 0:
-        log_level = logging.ERROR - 10 * args.debug
-        log_format = '%(asctime)s,%(msecs)03d %(levelname)8s [%(threadName)s] %(name)s: %(message)s'
-        logging.basicConfig(level=max(log_level, logging.DEBUG), format=log_format, datefmt='%H:%M:%S')
-    else:
-        logging.root.addHandler(logging.NullHandler())
-        logging.root.setLevel(logging.ERROR)
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter(log_format))
+        stream_handler.setLevel(log_level)
+        logging.getLogger('').addHandler(stream_handler)
 
     if not args.action:
-        if logging.root.isEnabledFor(logging.INFO):
+        if _log.isEnabledFor(logging.INFO):
             logging.info('language %s (%s), translations path %s', _i18n.language, _i18n.encoding, _i18n.path)
 
     return args
@@ -171,6 +176,8 @@ def main():
         import sys
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
+
+    temp.close()
 
 
 if __name__ == '__main__':
