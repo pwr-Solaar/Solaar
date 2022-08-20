@@ -171,7 +171,7 @@ msgstr "Vorwärts Taste"
 
 #: lib/logitech_receiver/i18n.py:70
 msgid "Mouse Gesture Button"
-msgstr "XXXXX"
+msgstr "Gestentaste"
 
 #: lib/logitech_receiver/i18n.py:71
 msgid "Smart Shift"
@@ -213,7 +213,7 @@ msgstr ""
 
 #: lib/logitech_receiver/i18n.py:80
 msgid "Gesture Button Navigation"
-msgstr "Gestennavigation Taste"
+msgstr "Gestentaste-Navigation"
 
 #: lib/logitech_receiver/i18n.py:81
 msgid "Mouse Scroll Left Button"
