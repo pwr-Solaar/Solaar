@@ -119,13 +119,14 @@ class Device:
                     kind = self.get_kind_from_index(number, receiver)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
-                # Not a notification, force a reading of the wpid
+                # Not a notification, force a reading of pairing information
                 self.online = True
                 self.update_pairing_information()
+                self.update_extended_pairing_information()
+                if not self.wpid and not self._serial:  # if neither then the device almost certainly wasn't found
+                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='no wpid or serial')
 
-            # the wpid is necessary to properly identify wireless link on/off
-            # notifications also it gets set to None on this object when the
-            # device is unpaired
+            # the wpid is set to None on this object when the device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
 
             self.descriptor = _descriptors.get_wpid(self.wpid)

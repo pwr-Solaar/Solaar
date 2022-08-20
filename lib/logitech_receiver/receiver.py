@@ -193,6 +193,7 @@ class Receiver:
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
+        serial = None
         power_switch = '(unknown)'
         if self.receiver_kind == 'bolt':
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
@@ -208,8 +209,6 @@ class Receiver:
             pair_info = self.read_register(0x2D5)
         if pair_info:
             serial = _strhex(pair_info[1:5])
-        else:  # fallback...
-            serial = self.serial
         return serial, power_switch
 
     def get_kind_from_index(self, index):
