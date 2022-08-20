@@ -101,7 +101,7 @@ and the setting to persistently change what a key or button does.
 When Solaar starts, it restores on-line devices to their previously-known state
 for the unexceptionable settings and while running it restores
 devices to their previously-known state when the device itself comes on line.
-Setting information is stored in the file `~/.config/solaar/config.json`.
+Setting information is stored in the file `~/.config/solaar/config.yaml`.
 
 Updating of a setting can be turned off in the Solaar GUI by clicking on the icon
 at the right-hand edge of the setting until a red icon appears (with tooltip
