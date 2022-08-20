@@ -287,7 +287,7 @@ class FeaturesArray(dict):
 
     def get_feature_version(self, feature):
         if self[feature]:
-            return self.version[feature]
+            return self.version.get(feature, 0)
 
     __bool__ = __nonzero__ = _check
 

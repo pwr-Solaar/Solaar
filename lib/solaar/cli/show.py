@@ -134,7 +134,9 @@ def _print_device(dev, num=None):
             flags = dev.request(0x0000, feature.bytes(2))
             flags = 0 if flags is None else ord(flags[1:2])
             flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
-            print('        %2d: %-22s {%04X}   %s' % (index, feature, feature, ', '.join(flags)))
+            version = dev.features.get_feature_version(int(feature))
+            version = version if version else 0
+            print('        %2d: %-22s {%04X} V%s    %s ' % (index, feature, feature, version, ', '.join(flags)))
             if feature == _hidpp20.FEATURE.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
