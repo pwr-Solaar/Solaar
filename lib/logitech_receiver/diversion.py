@@ -380,7 +380,7 @@ class RuleComponent:
 
 
 class Rule(RuleComponent):
-    def __init__(self, args, source=None):
+    def __init__(self, args, source=None, warn=True):
         self.components = [self.compile(a) for a in args]
         self.source = source
 
@@ -414,7 +414,7 @@ class Condition(RuleComponent):
 
 
 class Not(Condition):
-    def __init__(self, op):
+    def __init__(self, op, warn=True):
         if isinstance(op, list) and len(op) == 1:
             op = op[0]
         self.op = op
@@ -432,7 +432,7 @@ class Not(Condition):
 
 
 class Or(Condition):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
     def __str__(self):
@@ -453,7 +453,7 @@ class Or(Condition):
 
 
 class And(Condition):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
     def __str__(self):
@@ -506,12 +506,14 @@ def x11_pointer_prog():
 
 
 class Process(Condition):
-    def __init__(self, process):
+    def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
-            _log.warn('rules can only access active process in X11 - %s', self)
+            if warn:
+                _log.warn('rules can only access active process in X11 - %s', self)
         if not isinstance(process, str):
-            _log.warn('rule Process argument not a string: %s', process)
+            if warn:
+                _log.warn('rule Process argument not a string: %s', process)
             self.process = str(process)
 
     def __str__(self):
@@ -529,12 +531,14 @@ class Process(Condition):
 
 
 class MouseProcess(Condition):
-    def __init__(self, process):
+    def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
-            _log.warn('rules cannot access active mouse process in X11 - %s', self)
+            if warn:
+                _log.warn('rules cannot access active mouse process in X11 - %s', self)
         if not isinstance(process, str):
-            _log.warn('rule MouseProcess argument not a string: %s', process)
+            if warn:
+                _log.warn('rule MouseProcess argument not a string: %s', process)
             self.process = str(process)
 
     def __str__(self):
@@ -552,9 +556,10 @@ class MouseProcess(Condition):
 
 
 class Feature(Condition):
-    def __init__(self, feature):
+    def __init__(self, feature, warn=True):
         if not (isinstance(feature, str) and feature in _F):
-            _log.warn('rule Feature argument not name of a feature: %s', feature)
+            if warn:
+                _log.warn('rule Feature argument not name of a feature: %s', feature)
             self.feature = None
         self.feature = _F[feature]
 
@@ -569,9 +574,10 @@ class Feature(Condition):
 
 
 class Report(Condition):
-    def __init__(self, report):
+    def __init__(self, report, warn=True):
         if not (isinstance(report, int)):
-            _log.warn('rule Report argument not an integer: %s', report)
+            if warn:
+                _log.warn('rule Report argument not an integer: %s', report)
             self.report = -1
         self.report = report
 
@@ -587,9 +593,10 @@ class Report(Condition):
 
 # Setting(device, setting, [key], value...)
 class Setting(Condition):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
-            _log.warn('rule Setting argument not list with minimum length 3: %s', args)
+            if warn:
+                _log.warn('rule Setting argument not list with minimum length 3: %s', args)
             self.args = []
         else:
             self.args = args
@@ -631,7 +638,7 @@ MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + M
 
 
 class Modifiers(Condition):
-    def __init__(self, modifiers):
+    def __init__(self, modifiers, warn=True):
         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
         self.desired = 0
         self.modifiers = []
@@ -640,7 +647,8 @@ class Modifiers(Condition):
                 self.desired += MODIFIERS.get(k, 0)
                 self.modifiers.append(k)
             else:
-                _log.warn('unknown rule Modifier value: %s', k)
+                if warn:
+                    _log.warn('unknown rule Modifier value: %s', k)
 
     def __str__(self):
         return 'Modifiers: ' + str(self.desired)
@@ -661,14 +669,15 @@ class Key(Condition):
     DOWN = 'pressed'
     UP = 'released'
 
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         default_key = 0
         default_action = self.DOWN
 
         key, action = None, None
 
         if not args or not isinstance(args, (list, str)):
-            _log.warn('rule Key arguments unknown: %s' % args)
+            if warn:
+                _log.warn('rule Key arguments unknown: %s' % args)
             key = default_key
             action = default_action
         elif isinstance(args, str):
@@ -685,13 +694,15 @@ class Key(Condition):
         if isinstance(key, str) and key in _CONTROL:
             self.key = _CONTROL[key]
         else:
-            _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+            if warn:
+                _log.warn('rule Key key name not name of a Logitech key: %s' % key)
             self.key = default_key
 
         if isinstance(action, str) and action in (self.DOWN, self.UP):
             self.action = action
         else:
-            _log.warn('rule Key action unknown: %s, assuming %s' % (action, default_action))
+            if warn:
+                _log.warn('rule Key action unknown: %s, assuming %s' % (action, default_action))
             self.action = default_action
 
     def __str__(self):
@@ -717,24 +728,28 @@ def range_test(start, end, min, max):
 
 
 class Test(Condition):
-    def __init__(self, test):
+    def __init__(self, test, warn=True):
         self.test = test
         if isinstance(test, str):
             if test in MOUSE_GESTURE_TESTS:
-                _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                if warn:
+                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
                 self.__class__ = MouseGesture
-                self.__init__(MOUSE_GESTURE_TESTS[test])
+                self.__init__(MOUSE_GESTURE_TESTS[test], warn=warn)
             elif test in TESTS:
                 self.function = TESTS[test]
             else:
-                _log.warn('rule Test string argument not name of a test: %s', test)
+                if warn:
+                    _log.warn('rule Test string argument not name of a test: %s', test)
                 self.function = TESTS['False']
         elif isinstance(test, list) and all(isinstance(t, int) for t in test):
-            _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
+            if warn:
+                _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
             self.__class__ = TestBytes
-            self.__init__(test)
+            self.__init__(test, warn=warn)
         else:
-            _log.warn('rule Test argument not valid %s', test)
+            if warn:
+                _log.warn('rule Test argument not valid %s', test)
 
     def __str__(self):
         return 'Test: ' + str(self.test)
@@ -747,7 +762,7 @@ class Test(Condition):
 
 
 class TestBytes(Condition):
-    def __init__(self, test):
+    def __init__(self, test, warn=True):
         self.test = test
         if (
             isinstance(test, list) and 2 < len(test) <= 4 and all(isinstance(t, int) for t in test) and test[0] >= 0
@@ -755,7 +770,8 @@ class TestBytes(Condition):
         ):
             self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
         else:
-            _log.warn('rule TestBytes argument not valid %s', test)
+            if warn:
+                _log.warn('rule TestBytes argument not valid %s', test)
 
     def __str__(self):
         return 'TestBytes: ' + str(self.test)
@@ -773,12 +789,13 @@ class MouseGesture(Condition):
         'Mouse Down-right'
     ]
 
-    def __init__(self, movements):
+    def __init__(self, movements, warn=True):
         if isinstance(movements, str):
             movements = [movements]
         for x in movements:
             if x not in self.MOVEMENTS and x not in _CONTROL:
-                _log.warn('rule Mouse Gesture argument not direction or name of a Logitech key: %s', x)
+                if warn:
+                    _log.warn('rule Mouse Gesture argument not direction or name of a Logitech key: %s', x)
         self.movements = movements
 
     def __str__(self):
@@ -826,15 +843,17 @@ class Action(RuleComponent):
 class KeyPress(Action):
     CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
 
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         self.key_names, self.action = self.regularize_args(args)
         if not isinstance(self.key_names, list):
-            _log.warn('rule KeyPress keys not key names %s', self.keys_names)
+            if warn:
+                _log.warn('rule KeyPress keys not key names %s', self.keys_names)
             self.key_symbols = []
         else:
             self.key_symbols = [XK_KEYS.get(k, None) for k in self.key_names]
         if not all(self.key_symbols):
-            _log.warn('rule KeyPress keys not key names %s', self.key_names)
+            if warn:
+                _log.warn('rule KeyPress keys not key names %s', self.key_names)
             self.key_symbols = []
 
     def regularize_args(self, args):
@@ -927,12 +946,13 @@ class KeyPress(Action):
 
 
 class MouseScroll(Action):
-    def __init__(self, amounts):
+    def __init__(self, amounts, warn=True):
         import numbers
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
-            _log.warn('rule MouseScroll argument not two numbers %s', amounts)
+            if warn:
+                _log.warn('rule MouseScroll argument not two numbers %s', amounts)
             amounts = [0, 0]
         self.amounts = amounts
 
@@ -957,20 +977,22 @@ class MouseScroll(Action):
 
 
 class MouseClick(Action):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         if len(args) == 1 and isinstance(args[0], list):
             args = args[0]
         if not isinstance(args, list):
             args = [args]
         self.button = str(args[0]) if len(args) >= 0 else None
         if self.button not in buttons:
-            _log.warn('rule MouseClick action: button %s not known', self.button)
+            if warn:
+                _log.warn('rule MouseClick action: button %s not known', self.button)
             self.button = None
         count = args[1] if len(args) >= 2 else 1
         try:
             self.count = int(count)
         except (ValueError, TypeError):
-            _log.warn('rule MouseClick action: count %s should be an integer', count)
+            if warn:
+                _log.warn('rule MouseClick action: count %s should be an integer', count)
             self.count = 1
 
     def __str__(self):
@@ -989,9 +1011,10 @@ class MouseClick(Action):
 
 
 class Set(Action):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
-            _log.warn('rule Set argument not list with minimum length 3: %s', args)
+            if warn:
+                _log.warn('rule Set argument not list with minimum length 3: %s', args)
             self.args = []
         else:
             self.args = args
@@ -1027,11 +1050,12 @@ class Set(Action):
 
 
 class Execute(Action):
-    def __init__(self, args):
+    def __init__(self, args, warn=True):
         if isinstance(args, str):
             args = [args]
         if not (isinstance(args, list) and all(isinstance(arg), str) for arg in args):
-            _log.warn('rule Execute argument not list of strings: %s', args)
+            if warn:
+                _log.warn('rule Execute argument not list of strings: %s', args)
             self.args = []
         else:
             self.args = args

@@ -498,7 +498,7 @@ class DiversionDialog:
             self.view.expand_row(m.get_path(new_iter), True)
 
     def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
-        new_c = cls(initial_value)
+        new_c = cls(initial_value, warn=False)
         return self._menu_do_insert(_mitem, m, it, new_c, below=below)
 
     def _menu_insert(self, m, it, below=False):
@@ -612,7 +612,7 @@ class DiversionDialog:
         parent_it = m.iter_parent(it)
         parent_c = m[parent_it][0].component
         if isinstance(parent_c, _DIV.Not):
-            new_c = cls([c])
+            new_c = cls([c], warn=False)
             parent_c.component = new_c
             m.remove(it)
             self._populate_model(m, parent_it, new_c, level=wrapped.level, pos=0)
@@ -1013,7 +1013,7 @@ class RuleComponentUI:
     def _on_update(self, *_args):
         if not self._ignore_changes and self.component is not None:
             value = self.collect_value()
-            self.component.__init__(value)
+            self.component.__init__(value, warn=False)
             self._on_update_callback()
             return value
         return None
@@ -1554,14 +1554,14 @@ class MouseGestureUI(ConditionUI):
         return btn
 
     def _clicked_add(self, _btn):
-        self.component.__init__(self.collect_value() + [''])
+        self.component.__init__(self.collect_value() + [''], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.movements) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
         v.pop(pos)
-        self.component.__init__(v)
+        self.component.__init__(v, warn=False)
         self.show(self.component, editable=True)
         self._on_update_callback()
 
@@ -1654,14 +1654,14 @@ class KeyPressUI(ActionUI):
 
     def _clicked_add(self, _btn):
         keys, action = self.component.regularize_args(self.collect_value())
-        self.component.__init__([keys + [''], action])
+        self.component.__init__([keys + [''], action], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.key_names) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         keys, action = self.component.regularize_args(self.collect_value())
         keys.pop(pos)
-        self.component.__init__([keys, action])
+        self.component.__init__([keys, action], warn=False)
         self.show(self.component, editable=True)
         self._on_update_callback()
 
@@ -1833,14 +1833,14 @@ class ExecuteUI(ActionUI):
         return btn
 
     def _clicked_add(self, *_args):
-        self.component.__init__(self.collect_value() + [''])
+        self.component.__init__(self.collect_value() + [''], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.args) - 1].grab_focus()
 
     def _clicked_del(self, _btn, pos):
         v = self.collect_value()
         v.pop(pos)
-        self.component.__init__(v)
+        self.component.__init__(v, warn=False)
         self.show(self.component, editable=True)
         self._on_update_callback()
 
