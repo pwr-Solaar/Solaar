@@ -1,0 +1,73 @@
+Solaar version 1.1.4
+
+  2: Wireless Mouse Pebble M350
+     Device path  : /dev/hidraw2
+     WPID         : 4080
+     Codename     : Pebble
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 2B442F40
+     Model ID:      B02140800000
+     Unit ID:       DE12CCD9
+          Firmware: MPM 18.00.B0007
+             Other:
+     The power switch is located on the base.
+     Supports 26 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Firmware MPM 18.00.B0007 4080BEA0D686
+            Firmware: Other
+            Unit ID: DE12CCD9  Model ID: B02140800000  Transport IDs: {'btleid': 'B021', 'wpid': '4080'}
+         3: DEVICE NAME            {0005} V0
+            Name: M350 Wireless Mouse
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: RESET                  {0020} V0
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: Logitech Pebble
+         7: BATTERY STATUS         {1000} V1
+            Battery: 50%, discharging, next level 20%.
+         8: REPROG CONTROLS V4     {1B04} V4
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Diversion (saved): {Middle Button:Regular, ?}
+            Key/Button Diversion        : {Middle Button:Regular}
+         9: CHANGE HOST            {1814} V1
+            Change Host        : 1:brandy
+        10: ADJUSTABLE DPI         {2201} V1
+            Sensitivity (DPI) (saved): 1000
+            Sensitivity (DPI)        : 1000
+        11: LOWRES WHEEL           {2130} V0
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        12: DEVICE RESET           {1802} V0    internal, hidden
+        13: unknown:1803           {1803} V0    internal, hidden
+        14: CONFIG DEVICE PROPS    {1806} V5    internal, hidden
+        15: unknown:1812           {1812} V0    internal, hidden
+        16: OOBSTATE               {1805} V0    internal, hidden
+        17: unknown:1830           {1830} V0    internal, hidden
+        18: unknown:1890           {1890} V4    internal, hidden
+        19: unknown:1891           {1891} V4    internal, hidden
+        20: unknown:18A1           {18A1} V0    internal, hidden
+        21: unknown:1DF3           {1DF3} V0    internal, hidden
+        22: unknown:1E00           {1E00} V0    hidden
+        23: unknown:1EB0           {1EB0} V0    internal, hidden
+        24: unknown:1861           {1861} V0    internal, hidden
+        25: unknown:18B1           {18B1} V0    internal, hidden
+     Has 4 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:3, group mask:empty
+             reporting: default
+     Battery: 50%, discharging, next level 20%.
