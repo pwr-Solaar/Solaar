@@ -1189,7 +1189,7 @@ def _save_config_rule_file(file_name=_file_path):
     }
     # Save only user-defined rules
     rules_to_save = sum((r.data()['Rule'] for r in rules.components if r.source == file_name), [])
-    if rules_to_save:
+    if True:  # save even if there are no rules to save
         if _log.isEnabledFor(_INFO):
             _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
         try:
