@@ -519,6 +519,7 @@ class DiversionDialog:
                         (_('Key'), _DIV.Key, ''),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
                         (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
+                        (_('Active'), _DIV.Active, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
@@ -1607,6 +1608,35 @@ class MouseGestureUI(ConditionUI):
             return ' -> '.join(component.movements)
 
 
+class ActiveUI(ConditionUI):
+
+    CLASS = _DIV.Active
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
+        self.field.set_size_request(600, 0)
+        self.field.connect('changed', self._on_update)
+        self.widgets[self.field] = (0, 0, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field.set_text(component.devID)
+
+    def collect_value(self):
+        return self.field.get_text()
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Active')
+
+    @classmethod
+    def right_label(cls, component):
+        device = _all_devices[component.devID]
+        return device.display_name if device else shlex_quote(component.devID)
+
+
 class ActionUI(RuleComponentUI):
 
     CLASS = _DIV.Action
@@ -2392,6 +2422,7 @@ COMPONENT_UI = {
     _DIV.And: AndUI,
     _DIV.Process: ProcessUI,
     _DIV.MouseProcess: MouseProcessUI,
+    _DIV.Active: ActiveUI,
     _DIV.Feature: FeatureUI,
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,
