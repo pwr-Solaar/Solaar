@@ -579,7 +579,8 @@ class Report(Condition):
             if warn:
                 _log.warn('rule Report argument not an integer: %s', report)
             self.report = -1
-        self.report = report
+        else:
+            self.report = report
 
     def __str__(self):
         return 'Report: ' + str(self.report)
@@ -830,6 +831,25 @@ class MouseGesture(Condition):
 
     def data(self):
         return {'MouseGesture': [str(m) for m in self.movements]}
+
+
+class Active(Condition):
+    def __init__(self, devID, warn=True):
+        if not (isinstance(devID, str)):
+            if warn:
+                _log.warn('rule Active argument not a string: %s', devID)
+            self.devID = ''
+        self.devID = devID
+
+    def __str__(self):
+        return 'Active: ' + str(self.devID)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        dev = _Device.find(self.devID)
+        return bool(dev and dev.ping())
+
+    def data(self):
+        return {'Active': self.devID}
 
 
 class Action(RuleComponent):
@@ -1089,6 +1109,7 @@ COMPONENTS = {
     'Test': Test,
     'TestBytes': TestBytes,
     'MouseGesture': MouseGesture,
+    'Active': Active,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
