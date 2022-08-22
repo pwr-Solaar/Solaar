@@ -1,0 +1,96 @@
+Solaar version 1.1.3
+
+  2: Wireless Mobile Mouse MX Anywhere 2S
+     Device path  : None
+     WPID         : 406A
+     Codename     : MX Anywhere 2S
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: C53F2F0B
+     Model ID:      B01A406A0000
+     Unit ID:       3F714CA3
+        Bootloader: BOT 57.00.B0003
+          Firmware: MPM 13.00.B0003
+          Firmware: MPM 13.00.B0003
+             Other:
+     The power switch is located on the base.
+     Supports 28 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 57.00.B0003 406AD22DCF4D01
+            Firmware: Firmware MPM 13.00.B0003 B01AD22DCF4D01
+            Firmware: Firmware MPM 13.00.B0003 406AD22DCF4D01
+            Firmware: Other
+            Unit ID: 3F714CA3  Model ID: B01A406A0000  Transport IDs: {'btleid': 'B01A', 'wpid': '406A'}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Mobile Mouse MX Anywhere 2S
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+            Battery: 90%, discharging, next level 50%.
+         7: CONFIG DEVICE PROPS    {1806}   internal, hidden
+         8: CHANGE HOST            {1814}
+         9: REPROG CONTROLS V4     {1B04}
+        10: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI) (saved): 4000
+            Sensitivity (DPI)        : 4000
+        11: VERTICAL SCROLLING     {2100}
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+        12: HIRES WHEEL            {2121}
+            Multiplier: 8
+            Has invert: Normal wheel motion
+            Has ratchet switch: Free wheel mode
+            Low resolution mode
+            HID notification
+            Scroll Wheel Direction (saved): False
+            Scroll Wheel Direction        : False
+            Scroll Wheel Resolution (saved): False
+            Scroll Wheel Resolution        : False
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        13: DFUCONTROL UNSIGNED    {00C1}
+        14: DFUCONTROL SIGNED      {00C2}
+        15: unknown:1813           {1813}   internal, hidden
+        16: unknown:1830           {1830}   internal, hidden
+        17: unknown:1890           {1890}   internal, hidden
+        18: unknown:1891           {1891}   internal, hidden
+        19: unknown:18A1           {18A1}   internal, hidden
+        20: unknown:18C0           {18C0}   internal, hidden
+        21: unknown:1DF3           {1DF3}   internal, hidden
+        22: unknown:1E00           {1E00}   hidden
+        23: unknown:1EB0           {1EB0}   internal, hidden
+        24: unknown:1803           {1803}   internal, hidden
+        25: unknown:1861           {1861}   internal, hidden
+        26: unknown:9001           {9001}   internal, hidden
+        27: OOBSTATE               {1805}   internal, hidden
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Gesture Button Navigation   => Gesture Button Navigation
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2,g4
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Mouse Scroll Left Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Mouse Scroll Right Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:4, group mask:empty
+             reporting: default
+     Battery: 90%, discharging, next level 50%.
