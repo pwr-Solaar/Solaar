@@ -99,7 +99,11 @@ or the window's Window manager class or instance name starts with their string a
 `MouseProcess` conditions are true if the process for the window under the mouse
 or the window's Window manager class or instance name starts with their string argument.
 
-`Setting` conditions checks the value of a Solaar setting on a device.
+`Active` conditions are true if a particular device is active.
+`Active` conditions take one argument, which is the Serial number or Unit ID of a device,
+as shown in Solaar's detail pane.
+
+`Setting` conditions check the value of a Solaar setting on a device.
 `Setting` conditions take three or four arguments, depending on the setting:
 the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing;
