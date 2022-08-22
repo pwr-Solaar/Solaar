@@ -1032,15 +1032,15 @@ class Set(Action):
             _log.info('Set action: %s', self.args)
         dev = _Device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
-            _log.error('Set action: device %s is not known', self.args[0])
+            _log.warn('Set action: device %s is not known', self.args[0])
             return None
         setting = next((s for s in dev.settings if s.name == self.args[1]), None)
         if setting is None:
-            _log.error('Set action: setting %s is not the name of a setting for %s', self.args[1], dev.name)
+            _log.warn('Set action: setting %s is not the name of a setting for %s', self.args[1], dev.name)
             return None
         args = setting.acceptable(self.args[2:], setting.read())
         if args is None:
-            _log.error('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
+            _log.warn('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
             return None
         _change_setting(dev, setting, args)
         return None
