@@ -511,15 +511,15 @@ class DiversionDialog:
                     _('Condition'),
                     [
                         (_('Feature'), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
+                        (_('Report'), _DIV.Report, 0),
                         (_('Process'), _DIV.Process, ''),
                         (_('Mouse process'), _DIV.MouseProcess, ''),
-                        (_('Report'), _DIV.Report, 0),
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
-                        (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
-                        (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
                         (_('Active'), _DIV.Active, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
+                        (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
+                        (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
                         (_('Mouse Gesture'), _DIV.MouseGesture, ''),
                     ]
                 ],
@@ -529,8 +529,8 @@ class DiversionDialog:
                         (_('Key press'), _DIV.KeyPress, 'space'),
                         (_('Mouse scroll'), _DIV.MouseScroll, [0, 0]),
                         (_('Mouse click'), _DIV.MouseClick, ['left', 1]),
-                        (_('Execute'), _DIV.Execute, ['']),
                         (_('Set'), _DIV.Set, [None, '', None]),
+                        (_('Execute'), _DIV.Execute, ['']),
                     ]
                 ],
             ]
@@ -1639,38 +1639,6 @@ class MouseGestureUI(ConditionUI):
             return ' -> '.join(component.movements)
 
 
-class ActiveUI(ConditionUI):
-
-    CLASS = _DIV.Active
-
-    def create_widgets(self):
-        self.widgets = {}
-        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Check whether device is active and its settings can be changed.'))
-        self.widgets[self.label] = (0, 0, 1, 1)
-        self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=True)
-        self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
-        self.widgets[self.field] = (0, 1, 1, 1)
-
-    def show(self, component, editable):
-        super().show(component, editable)
-        with self.ignore_changes():
-            self.field.set_text(component.devID)
-
-    def collect_value(self):
-        return self.field.get_text()
-
-    @classmethod
-    def left_label(cls, component):
-        return _('Active')
-
-    @classmethod
-    def right_label(cls, component):
-        device = _all_devices[component.devID]
-        return device.display_name if device else shlex_quote(component.devID)
-
-
 class ActionUI(RuleComponentUI):
 
     CLASS = _DIV.Action
@@ -2117,6 +2085,66 @@ def _all_settings():
     return settings
 
 
+class _DeviceUI:
+    label_text = ''
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(self.label_text)
+        self.widgets[self.label] = (0, 0, 5, 1)
+        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        self.widgets[lbl] = (0, 1, 1, 1)
+        self.device_field = SmartComboBox([],
+                                          completion=True,
+                                          has_entry=True,
+                                          blank=_('Originating device'),
+                                          case_insensitive=True,
+                                          replace_with_default_name=True)
+        self.device_field.set_value('')
+        self.device_field.set_valign(Gtk.Align.CENTER)
+        self.device_field.set_size_request(400, 0)
+        #        self.device_field.connect('changed', self._changed_device)
+        self.device_field.connect('changed', self._on_update)
+        self.widgets[self.device_field] = (1, 1, 1, 1)
+
+    def update_devices(self):
+        self._update_device_list()
+
+    def _update_device_list(self):
+        with self.ignore_changes():
+            self.device_field.set_all_values([(d.id, d.display_name, *d.identifiers[1:]) for d in _all_devices])
+
+
+class ActiveUI(_DeviceUI, ConditionUI):
+
+    CLASS = _DIV.Active
+    label_text = _('Device is active and its settings can be changed.')
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            same = not component.devID
+            device = _all_devices[component.devID]
+            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
+
+    def collect_value(self):
+        device_str = self.device_field.get_value()
+        same = device_str in ['', _('Originating device')]
+        device = None if same else _all_devices[device_str]
+        device_value = device.id if device else None if same else device_str
+        return device_value
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Active')
+
+    @classmethod
+    def right_label(cls, component):
+        device = _all_devices[component.devID]
+        return device.display_name if device else shlex_quote(component.devID)
+
+
 class _SettingWithValueUI:
 
     ALL_SETTINGS = _all_settings()
@@ -2460,7 +2488,7 @@ class SettingUI(_SettingWithValueUI, ConditionUI):
     CLASS = _DIV.Setting
     ACCEPT_TOGGLE = False
 
-    label_text = _('Test setting on device')
+    label_text = _('Setting on device')
 
     def show(self, component, editable):
         ConditionUI.show(self, component, editable)
