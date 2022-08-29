@@ -204,6 +204,7 @@ _D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=
 _D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E', settings=[_ST.FnSwap])
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
+_D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
 
@@ -296,6 +297,7 @@ _D('G703 Hero Gaming Mouse', codename='G703 Hero', usbid=0xc090)
 _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D('G102 Lightsync Mouse', codename='G102', usbid=0xc092, interface=1)
 _D('M500S Mouse', codename='M500S', usbid=0xc093, interface=1)
+# _D('G600 Gaming Mouse', codename='G600 Gaming', usbid=0xc24a, interface=1) # not an HID++ device
 _D('G502 Proteus Spectrum Optical Mouse', codename='G502 Proteus Spectrum', usbid=0xc332, interface=1)
 
 # Trackballs
