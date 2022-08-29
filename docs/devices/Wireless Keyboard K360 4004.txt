@@ -1,0 +1,36 @@
+Solaar version 1.1.4
+
+  2: Wireless Keyboard K360
+     Device path  : /dev/hidraw2
+     WPID         : 4004
+     Codename     : K360
+     Kind         : keyboard
+     Protocol     : HID++ 2.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: 334AC01A
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQK 36.00.B0007
+     The power switch is located on the top case.
+     Supports 12 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQK 36.00.B0007 4004
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Keyboard K360
+            Kind: keyboard
+         4: BATTERY STATUS         {1000}
+            Battery: 70%, discharging, next level 20%.
+         5: unknown:1820           {1820}   hidden
+         6: REPROG CONTROLS        {1B00}
+         7: WIRELESS DEVICE STATUS {1D4B}
+         8: REMAINING PAIRING      {1DF0}   hidden
+            Remaining Pairings: 55
+         9: unknown:1DF3           {1DF3}   hidden
+        10: FN INVERSION           {40A0}
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+        11: ENCRYPTION             {4100}
+     Battery: 70%, discharging, next level 20%.
