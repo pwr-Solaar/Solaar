@@ -629,7 +629,14 @@ def create():
     assert _box is None
     _box = Gtk.VBox(homogeneous=False, spacing=8)
     _box._last_device = None
-    return _box
+
+    config_scroll = Gtk.ScrolledWindow()
+    config_scroll.add(_box)
+    config_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+    config_scroll.set_shadow_type(Gtk.ShadowType.IN)
+    config_scroll.set_size_request(0, 350)  # ask for enough vertical space for about eight settings
+
+    return config_scroll
 
 
 def update(device, is_online=None):
