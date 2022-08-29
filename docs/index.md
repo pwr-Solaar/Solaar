@@ -163,6 +163,11 @@ for the step-by-step procedure for manual installation.
   the host switching behaviour of a host switch key that was diverted, for example to switch away
   from a host that crashed or was turned off.
 
+- When a receiver-connected device changes hosts Solaar remembers which diverted keys were down on it.
+  When the device changes back the first time any of these diverted keys is depressed Solaar will not
+  realize that the key was newly depressed.  For this reason Solaar rules that can change hosts should
+  trigger on key releasing.
+
 ## Contributing to Solaar
 
 Conributions to Solaaar are very welcome.
