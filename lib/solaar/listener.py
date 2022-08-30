@@ -325,6 +325,8 @@ def stop_all():
             l.stop()
 
     configuration.save()
+    for device in Device.instances:
+        device.reset(no_reply=True)  # when UI finishes reset devices to their default state
 
     if listeners:
         for l in listeners:

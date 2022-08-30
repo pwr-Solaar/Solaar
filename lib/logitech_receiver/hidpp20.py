@@ -65,7 +65,7 @@ FEATURE = _NamedInts(
     DEVICE_GROUPS=0x0006,
     DEVICE_FRIENDLY_NAME=0x0007,
     KEEP_ALIVE=0x0008,
-    RESET=0x0020,  # "Config Change"
+    CONFIG_CHANGE=0x0020,
     CRYPTO_ID=0x0021,
     TARGET_SOFTWARE=0x0030,
     WIRELESS_SIGNAL_STRENGTH=0x0080,
@@ -1549,3 +1549,7 @@ def get_remaining_pairing(device):
     if result:
         result = _unpack('!B', result[:1])[0]
         return result
+
+
+def reset(device, configuration=0x0, no_reply=False):
+    return feature_request(device, FEATURE.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)

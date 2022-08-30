@@ -350,6 +350,10 @@ class Device:
                     self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
 
+    def reset(self, configuration=0x0, no_reply=False):
+        if self.online and self.protocol >= 2.0:
+            _hidpp20.reset(self, configuration, no_reply=no_reply)
+
     @property
     def persister(self):
         if not self._persister:
