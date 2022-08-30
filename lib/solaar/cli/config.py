@@ -76,7 +76,7 @@ def _print_setting_keyed(s, key, verbose=True):
                 if value is None:
                     print(s.name, '= ? (failed to read from device)')
                 else:
-                    print(s.name, s.val_to_string({k: value[str(int(k))]}))
+                    print(s.name, s.val_to_string({k: value[int(k)]}))
 
 
 def to_int(s):
@@ -163,7 +163,7 @@ def run(receivers, args, find_receiver, find_device):
         if not dev.settings:
             raise Exception('no settings for %s' % dev.name)
         _configuration.attach_to(dev)
-        _settings.apply_all_settings(dev)
+        #        _settings.apply_all_settings(dev)
         print(dev.name, '(%s) [%s:%s]' % (dev.codename, dev.wpid, dev.serial))
         for s in dev.settings:
             print('')
@@ -183,7 +183,7 @@ def run(receivers, args, find_receiver, find_device):
         raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
 
     if args.value_key is None:
-        setting.apply()
+        #        setting.apply()
         _print_setting(setting)
         return
 
