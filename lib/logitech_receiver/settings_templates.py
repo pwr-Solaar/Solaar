@@ -586,7 +586,7 @@ class MouseGesturesXY(_RawXYProcessing):
             if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.starting:
                 self.starting = False  # hack to ignore strange first movement report from MX Master 3S
                 return
-            if self.lastEv is not None and now - self.lastEv > 50.:
+            if self.lastEv is not None and now - self.lastEv > 200.:
                 self.push_mouse_event()
             dpi = self.dpiSetting.read() if self.dpiSetting else 1000
             dx = float(dx) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
