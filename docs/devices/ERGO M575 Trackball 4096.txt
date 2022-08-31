@@ -1,0 +1,79 @@
+Solaar version 1.1.4
+
+  1: ERGO M575 Trackball
+     Device path  : /dev/hidraw5
+     WPID         : 4096
+     Codename     : ERGO M575
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 460DFDC2
+     Model ID:      B02740960000
+     Unit ID:       460DFDC2
+        Bootloader: BOT 40.00.B0009
+          Firmware: MPM 26.00.B0009
+             Other:
+     The power switch is located on the base.
+     Supports 25 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 40.00.B0009 0000ABF1CB8B01
+            Firmware: Firmware MPM 26.00.B0009 4096ABF1CB8B01
+            Firmware: Other
+            Unit ID: 460DFDC2  Model ID: B02740960000  Transport IDs: {'btleid': 'B027', 'wpid': '4096'}
+         3: DEVICE NAME            {0005}
+            Name: ERGO M575 Trackball
+            Kind: trackball
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: ERGO M575
+         7: UNIFIED BATTERY        {1004}
+         8: REPROG CONTROLS V4     {1B04}
+            DPI Sliding Adjustment (saved): Off
+            DPI Sliding Adjustment        : Off
+            Mouse Gestures (saved): Off
+            Mouse Gestures        : Off
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Regular, Forward Button:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular}
+         9: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI) (saved): 500
+            Sensitivity (DPI)        : 500
+        10: XY STATS               {2250}
+        11: DFUCONTROL SIGNED      {00C2}
+        12: DEVICE RESET           {1802}   internal, hidden
+        13: unknown:1803           {1803}   internal, hidden
+        14: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        15: unknown:1812           {1812}   internal, hidden
+        16: OOBSTATE               {1805}   internal, hidden
+        17: unknown:1830           {1830}   internal, hidden
+        18: unknown:1890           {1890}   internal, hidden
+        19: unknown:1891           {1891}   internal, hidden
+        20: unknown:18A1           {18A1}   internal, hidden
+        21: unknown:1E00           {1E00}   hidden
+        22: unknown:1EB0           {1EB0}   internal, hidden
+        23: unknown:1861           {1861}   internal, hidden
+        24: unknown:1E22           {1E22}   internal, hidden
+     Has 6 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:3, group mask:empty
+             reporting: default
+     Battery: 85%, discharging.

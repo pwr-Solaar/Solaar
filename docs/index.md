@@ -4,8 +4,8 @@ layout: default
 ---
 
 **Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
-that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver,
-connect directly via a USB cable, or connect via Bluetooth.
+that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver;
+connect directly via a USB cable; or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
 
 Documentation here is for the current version of Solaar.
@@ -13,8 +13,13 @@ Some Linux distributions distribute old versions of Solaar.
 If you are using an old version and something described here does not work you should upgrade
 using one of the methods described below.
 
-Solaar can be used as a GUI application or via its command-line interface.
-Both interfaces are able to list the connected devices and
+Solaar can be used as a GUI application, the usual case, or via its command-line interface.
+The Solaar GUI is meant to run continuously in the background,
+monitoring devices, making changes to them, and responding to some messages they emit.
+To this end, it is useful to have Solaar start at user login so that
+changes made to devices by Solaar are applied at login and through out the user's session.
+
+Both Solaar interfaces are able to list the connected devices and
 show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
@@ -133,9 +138,6 @@ for the step-by-step procedure for manual installation.
   in some system tray implementations. Changing to a different theme may help.
   The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
-- Sometimes the system tray icon does not show up.  The cause of this is unknown.
-  Either wait a while and try again or try with the `--window=hide` option.
-
 - Some Linux drivers view or modify the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
@@ -154,6 +156,17 @@ for the step-by-step procedure for manual installation.
 
 - Sometimes bluetooth connections are not torn down correctly by Linux.
   This can result in two entries in Solaar for the same device, with only one being active.
+
+- Diverted keys remain diverted and so do not have their normal behaviour when Solaar terminates
+  or a device disconnects from a host that is running Solaar.  If necessary, their normal behaviour
+  can be reestablished by turning the device off and on again.  This is most important to restore
+  the host switching behaviour of a host switch key that was diverted, for example to switch away
+  from a host that crashed or was turned off.
+
+- When a receiver-connected device changes hosts Solaar remembers which diverted keys were down on it.
+  When the device changes back the first time any of these diverted keys is depressed Solaar will not
+  realize that the key was newly depressed.  For this reason Solaar rules that can change hosts should
+  trigger on key releasing.
 
 ## Contributing to Solaar
 
