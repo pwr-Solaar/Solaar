@@ -4,8 +4,8 @@ layout: default
 ---
 
 **Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
-that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver,
-connect directly via a USB cable, or connect via Bluetooth.
+that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver;
+connect directly via a USB cable; or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
 
 Documentation here is for the current version of Solaar.
@@ -13,8 +13,13 @@ Some Linux distributions distribute old versions of Solaar.
 If you are using an old version and something described here does not work you should upgrade
 using one of the methods described below.
 
-Solaar can be used as a GUI application or via its command-line interface.
-Both interfaces are able to list the connected devices and
+Solaar can be used as a GUI application, the usual case, or via its command-line interface.
+The Solaar GUI is meant to run continuously in the background,
+monitoring devices, making changes to them, and responding to some messages they emit.
+To this end, it is useful to have Solaar start at user login so that
+changes made to devices by Solaar are applied at login and through out the user's session.
+
+Both Solaar interfaces are able to list the connected devices and
 show information about each device, often including battery status.
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.

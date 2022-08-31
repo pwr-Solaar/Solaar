@@ -1,17 +1,20 @@
 ---
-title: Solaar Usage
+title: Solaar GUI Usage
 layout: page
 ---
 
-# Solaar usage
+# Solaar GUI Usage
 
-Under normal usage Solaar creates an icon in your system tray. This icon is
+The Solaar GUI (the usual way to run Solaar) is meant to run continuously in the background,
+monitoring devices, making changes to them, and responding to some messages they emit.
+The Solaar GUI normally creates an icon in your system tray that provides an interface
+to Solaar.  This icon is
 usually a battery icon showing the approximate battery level for your device
 with the lowest known battery level. If there are no devices with battery information,
 then the icon is one of the Solaar icons.
 
 Solaar also has a main window.  When the main window is invisible,
-click on the icon in the system tray to bring up the menu, and then
+click on Solaar's icon in the system tray to bring up the Solaar menu, and then
 click on a receiver or device in the menu to see information about
 that receiver or device.
 
@@ -21,11 +24,12 @@ also be other battery icons or versions of the Logitech Unifying icon.
 
 ![Solaar-menu](Solaar-menu.png)
 
-Clicking on “Quit” in the Solaar menu terminates the program, and “About Solaar” pops up a window with further information.
+Clicking on “Quit” in the Solaar menu terminates the program.
+Clicking on “About Solaar” pops up a window with further information about Solaar.
 
 ## Solaar options
 
-There are several options that affect how Solaar behaves:
+There are several options that affect how the Solaar GUI behaves:
 
 * `--help` shows a help message and then quits
 * `---window=show` starts Solaar with the main window showing
