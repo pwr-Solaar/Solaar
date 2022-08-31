@@ -138,9 +138,6 @@ for the step-by-step procedure for manual installation.
   in some system tray implementations. Changing to a different theme may help.
   The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
-- Sometimes the system tray icon does not show up.  The cause of this is unknown.
-  Either wait a while and try again or try with the `--window=hide` option.
-
 - Some Linux drivers view or modify the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar changes this setting after the driver is
   set up scrolling can be either very fast or very slow.  To fix this problem
@@ -159,6 +156,12 @@ for the step-by-step procedure for manual installation.
 
 - Sometimes bluetooth connections are not torn down correctly by Linux.
   This can result in two entries in Solaar for the same device, with only one being active.
+
+- Diverted keys remain diverted and so do not have their normal behaviour when Solaar terminates
+  or a device disconnects from a host that is running Solaar.  If necessary, their normal behaviour
+  can be reestablished by turning the device off and on again.  This is most important to restore
+  the host switching behaviour of a host switch key that was diverted, for example to switch away
+  from a host that crashed or was turned off.
 
 ## Contributing to Solaar
 
