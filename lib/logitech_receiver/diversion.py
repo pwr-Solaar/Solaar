@@ -806,15 +806,13 @@ class MouseGesture(Condition):
         if feature == _F.MOUSE_GESTURE:
             d = notification.data
             data = _unpack('!' + (int(len(d) / 2) * 'h'), d)
-            data_offset = 0
-            for m in self.movements:
-                if data_offset == 0:
-                    data_offset += 1
-                    if m not in self.MOVEMENTS:  # matching against initiating key
-                        if m != str(_CONTROL[data[0]]):
-                            return False
-                        else:
-                            continue
+            data_offset = 1
+            movement_offset = 0
+            if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
+                movement_offset = 1
+                if self.movements[0] != str(_CONTROL[data[0]]):
+                    return False
+            for m in self.movements[movement_offset:]:
                 if data_offset >= len(data):
                     return False
                 if data[data_offset] == 0:
