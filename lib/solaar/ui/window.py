@@ -730,11 +730,7 @@ def _update_device_panel(device, panel, buttons, full=False):
             panel._secure.set_tooltip_text(
                 _(
                     'The wireless link between this device and its receiver is not encrypted.\n'
-                    '\n'
-                    'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
-                    '\n'
-                    'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
-                    'because typed text can be sniffed inconspicuously by 3rd parties within range.'
+                    'This is a security issue for pointing devices, and a major security issue for text-input devices.'
                 )
             )
         else:
