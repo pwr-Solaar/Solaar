@@ -32,9 +32,9 @@ Clicking on “About Solaar” pops up a window with further information about S
 There are several options that affect how the Solaar GUI behaves:
 
 * `--help` shows a help message and then quits
-* `---window=show` starts Solaar with the main window showing
-* `---window=hide` starts Solaar with the main window not showing
-* `---window=only` starts Solaar with no system tray icon and the main window showing
+* `--window=show` starts Solaar with the main window showing
+* `--window=hide` starts Solaar with the main window not showing
+* `--window=only` starts Solaar with no system tray icon and the main window showing
 * `--battery-icons=symbolic` uses symbolic icons for battery levels
 
 ## Solaar main window
