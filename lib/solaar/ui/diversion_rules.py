@@ -1260,7 +1260,7 @@ class ReportUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Report number  of notification triggering rule processing.'))
+        self.label.set_text(_('Report number of notification triggering rule processing.'))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field.set_halign(Gtk.Align.CENTER)
