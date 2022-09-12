@@ -41,19 +41,6 @@ prompt = '?? Input: ' if interactive else ''
 start_time = time.time()
 
 strhex = lambda d: hexlify(d).decode('ascii').upper()
-try:
-    unicode  # noqa: F821
-    # this is certanly Python 2
-    is_string = lambda d: isinstance(d, unicode)  # noqa: F821
-    # no easy way to distinguish between b'' and '' :(
-    # or (isinstance(d, str) \
-    #     and not any((chr(k) in d for k in range(0x00, 0x1F))) \
-    #     and not any((chr(k) in d for k in range(0x80, 0xFF))) \
-    #     )
-except Exception:
-    # this is certanly Python 3
-    # In Py3, unicode and str are equal (the unicode object does not exist)
-    is_string = lambda d: isinstance(d, str)
 
 #
 #
@@ -65,7 +52,7 @@ del Lock
 
 def _print(marker, data, scroll=False):
     t = time.time() - start_time
-    if is_string(data):
+    if isinstance(data, str):
         s = marker + ' ' + data
     else:
         hexs = strhex(data)

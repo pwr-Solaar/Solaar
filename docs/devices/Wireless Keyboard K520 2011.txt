@@ -1,0 +1,15 @@
+  2: Wireless Keyboard K520
+     Device path  : /dev/hidraw5
+     WPID         : 2011
+     Codename     : K520
+     Kind         : keyboard
+     Protocol     : HID++ 1.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: C17F6771
+          Firmware: 26.00.B0012
+             Other: 00.07
+     The power switch is located on the top case.
+     Notifications: battery status (0x100000).
+     Battery: full, discharging.
+
+Has Swap Fn register

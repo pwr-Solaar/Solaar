@@ -158,6 +158,7 @@ NANO_RECEIVER_C52E = _nano_receiver_no_unpair(0xc52e)
 NANO_RECEIVER_C531 = _nano_receiver(0xc531)
 NANO_RECEIVER_C534 = _nano_receiver_max2(0xc534)
 NANO_RECEIVER_C537 = _nano_receiver(0xc537)
+NANO_RECEIVER_C542 = _nano_receiver(0xc542)
 NANO_RECEIVER_6042 = _lenovo_receiver(0x6042)
 
 # Lightspeed receivers (usually sold with gaming devices)
@@ -187,6 +188,7 @@ ALL = (
     NANO_RECEIVER_C531,
     NANO_RECEIVER_C534,
     NANO_RECEIVER_C537,
+    NANO_RECEIVER_C542,
     NANO_RECEIVER_6042,
     LIGHTSPEED_RECEIVER_C539,
     LIGHTSPEED_RECEIVER_C53A,
@@ -226,7 +228,7 @@ def other_device_check(bus_id, vendor_id, product_id):
         if (product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344):
             return _wired_device(product_id, 2)
     elif bus_id == 0x5:  # Bluetooth
-        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB32A and product_id <= 0xB3FF):
+        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF):
             return _bt_device(product_id)
 
 

@@ -1,0 +1,97 @@
+Solaar version 1.1.4
+
+  1: Bluetooth Multi-Device Keyboard K380
+     Device path  : /dev/hidraw5
+     USB id       : 046d:B342
+     Codename     : Keyboard K380
+     Kind         : ?
+     Protocol     : HID++ 4.5
+     Serial number:
+     Model ID:      B34200000000
+     Unit ID:       16000000
+          Firmware: RBK 42.01.B0017
+          Hardware: 72
+     Supports 14 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RBK 42.01.B0017 B342C18DBFDD
+            Firmware: Hardware  72
+            Unit ID: 16000000  Model ID: B34200000000  Transport IDs: {'btid': 'B342'}
+         3: DEVICE NAME            {0005}
+            Name: Bluetooth Multi-Device Keyboard K380
+            Kind: keyboard
+         4: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: Keyboard K380
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+            Battery: 20%, discharging, next level 5%.
+         7: CHANGE HOST            {1814}
+            Change Host        : 1:Luay-A
+         8: HOSTS INFO             {1815}
+            Host 0 (paired): Luay-A
+            Host 1 (paired): BCM20703A2 Generic UART UHE App
+            Host 2 (unpaired):
+         9: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Volume Up:Regular, Volume Down:Regular, Mute:Regular, Play/Pause:Regular, Next:Regular, Previous:Regular, Search:Regular, Multiplatform App Switch:Regular, Multiplatform Home:Regular, Multiplatform Menu:Diverted, Multiplatform Back:Regular, Multiplatform Insert:Regular, Screen Capture/Print Screen:Regular, Fn Down:Regular, Fn Up:Regular, Multiplatform Lock:Regular}
+            Key/Button Diversion        : {Volume Up:Regular, Volume Down:Regular, Mute:Regular, Play/Pause:Regular, Next:Regular, Previous:Regular, Search:Regular, Multiplatform App Switch:Regular, Multiplatform Home:Regular, Multiplatform Menu:Diverted, Multiplatform Back:Regular, Multiplatform Insert:Regular, Screen Capture/Print Screen:Regular, Fn Down:Regular, Fn Up:Regular, Multiplatform Lock:Regular}
+        10: unknown:1E00           {1E00}   hidden
+        11: NEW FN INVERSION       {40A2}
+            Fn-swap: disabled
+            Fn-swap default: enabled
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+        12: LOCK KEY STATE         {4220}
+        13: KEYBOARD DISABLE KEYS  {4521}
+            Disable keys (saved): {Caps Lock:False, Scroll Lock:False, Insert:True, Win:False}
+            Disable keys        : {Caps Lock:False, Scroll Lock:False, Insert:True, Win:False}
+     Has 16 reprogrammable keys:
+         0: Multiplatform Home        , default: MultiPlatform Home          => MultiPlatform Home
+             is FN, FN sensitive, reprogrammable, divertable, pos:4, group:0, group mask:empty
+             reporting: default
+         1: Multiplatform App Switch  , default: MultiPlatform App Switch    => MultiPlatform App Switch
+             is FN, FN sensitive, reprogrammable, divertable, pos:5, group:0, group mask:empty
+             reporting: default
+         2: Multiplatform Menu        , default: MultiPlatform Menu          => MultiPlatform Menu
+             is FN, FN sensitive, reprogrammable, divertable, pos:6, group:0, group mask:empty
+             reporting: diverted
+         3: Multiplatform Back        , default: MultiPlatform Back          => MultiPlatform Back
+             is FN, FN sensitive, reprogrammable, divertable, pos:7, group:0, group mask:empty
+             reporting: default
+         4: Previous                  , default: Previous                    => Previous
+             is FN, FN sensitive, divertable, pos:8, group:0, group mask:empty
+             reporting: default
+         5: Play/Pause                , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, divertable, pos:9, group:0, group mask:empty
+             reporting: default
+         6: Next                      , default: Next                        => Next
+             is FN, FN sensitive, divertable, pos:10, group:0, group mask:empty
+             reporting: default
+         7: Mute                      , default: Mute                        => Mute
+             is FN, FN sensitive, divertable, pos:11, group:0, group mask:empty
+             reporting: default
+         8: Volume Down               , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, divertable, pos:12, group:0, group mask:empty
+             reporting: default
+         9: Volume Up                 , default: Volume Up                   => Volume Up
+             is FN, FN sensitive, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        10: Multiplatform Insert      , default: Switch Language             => Switch Language
+             FN sensitive, reprogrammable, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        11: Fn Up                     , default: unknown:0070                => unknown:0070
+             is FN, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        12: Fn Down                   , default: unknown:006F                => unknown:006F
+             is FN, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        13: Screen Capture/Print Screen, default: Screen Capture              => Screen Capture
+             is FN, reprogrammable, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Search                    , default: Search Files                => Search Files
+             is FN, reprogrammable, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        15: Multiplatform Lock        , default: WindowsLock                 => WindowsLock
+             is FN, reprogrammable, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+     Battery: 20%, discharging, next level 5%.

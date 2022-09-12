@@ -67,21 +67,16 @@ def _battery_text(level):
 
 
 def _battery_line(dev):
-    battery = _hidpp20.get_battery(dev)
-    if battery is None:
-        battery = _hidpp10.get_battery(dev)
+    battery = dev.battery()
     if battery is not None:
-        level, status, nextLevel = battery
+        level, nextLevel, status, voltage = battery
         text = _battery_text(level)
+        if voltage is not None:
+            text = text + (' %smV ' % voltage)
         nextText = '' if nextLevel is None else ', next level ' + _battery_text(nextLevel)
         print('     Battery: %s, %s%s.' % (text, status, nextText))
     else:
-        battery_voltage = _hidpp20.get_voltage(dev)
-        if battery_voltage:
-            (level, status, voltage, charge_sts, charge_type) = battery_voltage
-            print('     Battery: %smV, %s, %s.' % (voltage, status, level))
-        else:
-            print('     Battery status unavailable.')
+        print('     Battery status unavailable.')
 
 
 def _print_device(dev, num=None):
@@ -135,12 +130,13 @@ def _print_device(dev, num=None):
         print('     Supports %d HID++ 2.0 features:' % len(dev.features))
         dev_settings = []
         _settings_templates.check_feature_settings(dev, dev_settings)
-        for index, feature in enumerate(dev.features):
-            feature = dev.features[index]
+        for feature, index in dev.features.enumerate():
             flags = dev.request(0x0000, feature.bytes(2))
             flags = 0 if flags is None else ord(flags[1:2])
             flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
-            print('        %2d: %-22s {%04X}   %s' % (index, feature, feature, ', '.join(flags)))
+            version = dev.features.get_feature_version(int(feature))
+            version = version if version else 0
+            print('        %2d: %-22s {%04X} V%s    %s ' % (index, feature, feature, version, ', '.join(flags)))
             if feature == _hidpp20.FEATURE.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
@@ -171,7 +167,7 @@ def _print_device(dev, num=None):
                         print('            Provide vertical tuning, trackball')
                     else:
                         print('            No vertical tuning, standard mice')
-            if feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+            elif feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
                     print('            Roller type: %s' % vertical_scrolling_info['roller'])
@@ -226,15 +222,16 @@ def _print_device(dev, num=None):
                 else:
                     mode = 'On-Board'
                 print('            Device Mode: %s' % mode)
-            elif feature in (_F.BATTERY_STATUS, _F.BATTERY_VOLTAGE, _F.BATTERY_VOLTAGE):
+            elif _hidpp20.battery_functions.get(feature, None):
                 print('', end='       ')
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
-                    if setting._device and getattr(setting._device, 'persister',
-                                                   None) and setting._device.persister.get(setting.name) is not None:
-                        print('            %s (saved): %s' % (setting.label, setting._device.persister.get(setting.name)))
-                    v = setting.read(False)
+                    if setting._device and getattr(setting._device, 'persister', None) and \
+                       setting._device.persister.get(setting.name) is not None:
+                        v = setting.val_to_string(setting._device.persister.get(setting.name))
+                        print('            %s (saved): %s' % (setting.label, v))
+                    v = setting.val_to_string(setting.read(False))
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
@@ -251,17 +248,24 @@ def _print_device(dev, num=None):
                 report_fmt = ', '.join(k.mapping_flags)
                 report_fmt = report_fmt if report_fmt else 'default'
                 print('             reporting: %s' % (report_fmt))
+    if dev.online and dev.remap_keys:
+        print('     Has %d persistent remappable keys:' % len(dev.remap_keys))
+        for k in dev.remap_keys:
+            print('        %2d: %-26s => %s%s' % (k.index, k.key, k.action, ' (remapped)' if k.cidStatus else ''))
     if dev.online and dev.gestures:
         print(
             '     Has %d gesture(s), %d param(s) and %d spec(s):' %
             (len(dev.gestures.gestures), len(dev.gestures.params), len(dev.gestures.specs))
         )
         for k in dev.gestures.gestures.values():
-            print('        %-26s Enabled (%4s): %s' % (k.gesture, k.index, k.enabled()))
+            print(
+                '        %-26s Enabled(%4s): %-5s  Diverted:(%4s) %s' %
+                (k.gesture, k.index, k.enabled(), k.diversion_index, k.diverted())
+            )
         for k in dev.gestures.params.values():
-            print('        %-26s Value   (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
+            print('        %-26s Value  (%4s): %s [Default: %s]' % (k.param, k.index, k.value, k.default_value))
         for k in dev.gestures.specs.values():
-            print('        %-26s Spec    (%4s): %s' % (k.spec, k.id, k.value))
+            print('        %-26s Spec   (%4s): %s' % (k.spec, k.id, k.value))
     if dev.online:
         _battery_line(dev)
     else:

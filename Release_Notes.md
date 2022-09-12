@@ -1,8 +1,55 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.5
+
+* The Active rule condition takes the serial number or unitID of a device and checks whether the device is active.  A device is active if it is connected (via a receiver, USB or Bluetooth), not turned off, and not in a power-saving state.  This condition can be used to check whether changing a setting on the device will have any effect, as devices respond to messages only when active.
+
+* Solaar logs warnings and errors to a file in the user's temporary file directory.  This file is deleted when Solaar exists normally.  If Solaar is run with `-dd` or `-ddd` informational messages are also logged in the file.
+
+* If the first element of a Mouse Gesture rule condition is a key or button name then that name must be the same as the name of the key or button that initiated the mouse gesture.
+
+* The Sliding DPI and Mouse Gestures are now set up using the Key/Button Diversion setting.   Changing a key or button to Sliding DPI makes it initiate the sliding DPI changing.  Changing a key or button to Mouse Gestures makes it initiate a mouse gesture.  There can be multiple keys or buttons for sliding DPI and multiple keys or buttons for mouse gestures.
+
+* Solaar waits a few seconds to save settings changes to its configuration file.  If you interrupt Solaar soon after changing a setting the change might not be saved.
+
+
+## Version 1.1.4
+
+* There are settings for sidetone and equalizer gains for headsets.
+
+* The KeyPress action can now either deppress, release, or click (default) keys.
+
+* The KeyPress action now inserts shift and level 3 keypresses if simulating a key symbol requires one or both of them.  So producing a "B" no longer requires adding a shift keysymbol.
+
+## Version 1.1.3
+
+* Solaar uses yaml for configuration files, converting the json configuration file to yaml if necessary.
+
+* Solaar rules work better under Wayland but still cannot access the current process nor the current keyboard modifiers.
+
+* Solaar uses uinput for simulating input in Wayland.  See https://pwr-solaar.github.io/Solaar/rules for instructions on setting up uinput correctly.
+
+## Version 1.1.2
+
+* Solaar now depends on Python evdev.  It can be installed if needed via `pip install --user evdev` or, in most distributions, by installing the python3-evdev package.
+
+* Solaar rules partly work under Wayland.  There is no access to the current process in Wayland.  Simulated input uses uinput if XTest extension not available, requiring read and write permissions on /dev/uinput.
+
+* There is a setting to divert gestures so that they can trigger rules.
+
+* There is a setting to disable Onboard Profiles, which can interfere with the Polling Rate and M-Key LEDs settings.  The Polling Rate setting no longer disables onboard profiles.
+
+* There is a setting for the Persistent Remappable Keys feature.
+
+* There is a new rule condition that tests device settings.
+
+* There are new settings to set M-Key LEDs and MR-Key LED.
+
+* There is a new kind of Solaar rule action to change settings for devices.
+
 ## Version 1.1.1
 
-* There is a new settng to switch keyboard crowns between smooth and ratchet scrolling.
+* There is a new setting to switch keyboard crowns between smooth and ratchet scrolling.
 
 ## Version 1.1.0
 

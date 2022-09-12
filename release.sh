@@ -89,9 +89,9 @@ echo
 grep '^# '"$version" ChangeLog.md >/dev/null
 [ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
 
-# Check for uncomitted changes
+# Check for uncommitted changes
 git diff --quiet HEAD >/dev/null
-[ $? -ne 0 ] && echo -e '\nError: Uncomitted changes found' && exit 1
+[ $? -ne 0 ] && echo -e '\nError: Uncommitted changes found' && exit 1
 
 # Check if commit is a version bump
 git show -s --format=%B HEAD | grep "^release $version">/dev/null

@@ -1,0 +1,40 @@
+  1: Wireless Rechargeable Touchpad T650
+     Codename     : T650
+     Kind         : touchpad
+     Wireless PID : 4101
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 22205A4D
+          Firmware: RQM 41.01.B0037
+        Bootloader: BL  03.00
+          Hardware: 72
+             Other:
+     The power switch is located on the base.
+     Supports 23 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+         4: DEVICE NAME            {0005}
+         5: BATTERY STATUS         {1000}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: unknown:1DF3           {1DF3}   internal, hidden
+         8: REPROG CONTROLS        {1B00}
+         9: unknown:1F03           {1F03}   internal, hidden
+        10: VERTICAL SCROLLING     {2100}
+        11: HI RES SCROLLING       {2120}
+        12: MOUSE POINTER          {2200}
+        13: DFUCONTROL             {00C0}
+        14: unknown:1E80           {1E80}   internal, hidden
+        15: TOUCHPAD RAW XY        {6100}
+        16: unknown:1860           {1860}   internal, hidden
+        17: unknown:1E00           {1E00}   hidden
+        18: REPROG CONTROLS V2     {1B01}
+        19: unknown:1890           {1890}   internal, hidden
+        20: unknown:18E5           {18E5}   internal, hidden
+        21: unknown:18A0           {18A0}   internal, hidden
+        22: unknown:1830           {1830}   internal, hidden
+     Has 2 reprogrammable keys:
+         0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+         1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+     Battery: 50%, discharging.

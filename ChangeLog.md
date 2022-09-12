@@ -1,3 +1,164 @@
+# 1.1.5rc1
+
+* Update Turkish translation
+* Move old device descriptions to new locations and clean up
+* Increase minimum stopped time between mouse movements
+* Fix bug with non-recognized empty mouse movement
+* Allow config panel to scroll
+* Add descriptions for K360 4004, MX Master 4017, Lightspeed C541, and G915 407D
+* Change security tooltip for unencrypted wireless connections
+* Add Norwegian Bokmal translation
+* Update documentation on continuously running GUI, diverted keys, and changing hosts
+* Solaar config no longer applies settings
+* Add description of rule components to rule editor
+* Ignore first movement for mouse gestures when reprog controls version is 5 or more
+* Add Active rule condition to test whether a device is active
+* Terminate iteration over receiver devices when all have been found
+* Downgrade Set prolem messages from error to warning
+* Log informational messages and above to a temporary file
+* Don't produce warnings when editing rules in rule editor
+* Fix bug that didn't save rules file if there were no rules
+* Allow devices with connection number larger than max_devices
+* Show more registers in solaar probe
+* Show feature versions in solaar show
+* Fix problems with deleting devices on exit
+* Update German translation
+* Update device documentation directory
+* Add descriptors for G502 Proteus Spectrum Optical Mouse and G935 headset
+* Record feature versions
+* Add Serbian translation
+* Fix circular import in rules
+* Keep track of devices and use in rules
+* Update zh_CN and zh_TW translations
+* Convert old-style mouse gestures and sliding dpi settings to new style
+* Allow multiple keys for mouse gestures and sliding dpi
+* Defer saving configuration file for a while to cut down on the number if times it is saved
+* Use correct functions for unified battery and battery voltage features.
+* Add defensive check for missing keys array in mouse gestures setting
+* Better presentation of battery information
+* Add support for ADC MEASUREMENT battery feature
+* Add information on how to find divertable key names in solaar show output
+* Better warnings for feature call errors with reprogrammable key and gesture settings
+* Increase entry size for ChoiceControlBig
+
+# 1.1.4
+
+* Update Croatian translation
+* Handle unanticipated values for persistent remappable action as default
+* Improve system tray interface documentation
+* Remove blank lines from system tray popup
+* Update Polish translation
+* Add depress and release options to KeyPress rule action
+* Only close existing devices for receiver
+* Differentiate debug messages for different setting types
+* Implement packed range setting in config panel
+* Only produce warning for unimplemented display of setting
+* Add sidetone and equalizer settings for headsets
+* Add packed ranges setting
+* Use built-ins for conversions between int and byte string
+* Don't add HI_RES wheel ecodes to evdev device codes
+* Handle null key in persistent remappable actions when device does not respond
+* Consult polling rate feature for polling rate
+* Eliminate extra file handles
+* Close file handles for receiver-connected devices
+* Access to more keys in KeyPress rule action when in other keyboard groups
+* Update Turkish translation
+* Put battery levels in tray menu labels
+* Reduce warnings for inaccessible keys in KeyPress rule action
+* Better determination of keycodes and insert needed shifts in KeyPress actions.
+* Be careful when processing notifications for partly set up devices.
+* Clear out fields for empty persistent remappable action.
+* Fix message generation when device is offline.
+* Fix bug in feature lookup.
+* Add support for G533 Headset and G502 Gaming Mouse
+* Improve device features handling.
+* Keep trying settings that have worked in the past.
+* Store None in persisters for non-persisting settings.
+* Only create configuration entries for off-line devices if they have a serial number.
+
+# 1.1.3
+
+* Update documentation files
+* Lower remove python 3.7 constructs and lower python dependency to 3.6
+* Fix bug in xtest mouse scrolling
+* Allow mouse gesture setting for non-mice, e.g., trackballs
+* Print message when there is another Solaar process running
+* Fix determination of whether to force read before writing boolean setting
+* Add recent diversion features to default list in rules UI
+* Add setting to divert hires scroll wheel
+* Don't use device kind to determine how to handle notifications
+* Update Polish, Russian, and zh_CN translations
+* Remove pggettext so as to not require Python 3.8
+* Remove Python 2 unicode support
+* Store keys in configuration file as int instead of str
+* Use yaml for configuration file instead of json.
+* Remove process-dependent rules from built-in rules.
+* Handle situation where GTK application cannot be set up in CLI.
+* Remove obsolete upower signals.
+* Appinfo/metadata fixes including using correct APP_ID.
+* Fix bugs in solaar config.
+* Add full set of mouse buttons in persistent remappable actions setting.
+* Improve rule behaviour under Wayland and when Xtest or X11 not available.
+* Fix up and document dependencies (evdev, Python, ...).
+
+# 1.1.2
+
+* Update documentation on supported devices and translations
+* Include evdev as a dependency
+* Try to use uinput for fake input if XTest extension not available
+* Add Nano receiver C542 for M190 mice
+* Broaden range of HID++ Bluetooth devices
+* Add setting to divert gestures
+* Rule editor can edit all rule components
+* Configuration via solaar config takes effect in Solaar UI if it is running
+* Add setting to disable Onboard Profiles and decouple from Polling Rate setting
+* Add setting for PERSISTENT_REMAPPABLE_ACTION, common keyboard and mouse cases only
+* Split Test rule condition into Test and TestBytes and support in rule editor
+* Fix bug in speed-change setting
+* Support Backlight3 feature
+* Ensure that settings are pushed in resume
+* Update German, Polish,  and zh_CN translations
+* Determine device number for direct-connected devices from protocol
+* fix bug in add and delete button actions in rule editor
+* dispose of no-op notifications quickly
+* add rule condition for checking device settings
+* use local file for conversion from key names to keysyms
+* get keyboard group and use to get correct keycodes (X11 only)
+* improve how rules work under Wayland
+* add settings for M-Key LEDs and MR-Key LED
+* fix bug in unpacking M and MR key notification
+* add G815 keyboard and MX518 mouse
+* add new special keys for recent keyboards
+* track M and MR keys for use in rules
+* make sure that device is online when searching for devices in solaar show
+* don't check for device kind in dpi sliding setting
+* fix problem with devices that report 0 DPI
+* handle missing divert-setting in action RW for settings
+* add id property (unitId or serial) and don't use ? for unknown serial
+* fix contains for NamedInts and eliminate use of has_element
+* check for xtest and disable modifier checking if not available
+* improve determination of gesture information
+* add Set rules to rule GUI
+* add gesture params to Set rules
+* hide system tray when there are no devices to control
+* add G733 headset, G9 mouse, G502 Hero mouse
+* Use greyscale solaar icon in tray when using symbolic icons
+* Fix bugs in solaar config
+* Use classes for settings to hep with modularity
+* Accept '~' and Toggle for toggling boolean settings in cli and rules
+* handle errors when writing to devices
+* refactor config_panel.py to use classes for widgets
+* add rules action to set Solaar settings
+* decrease amount of logging at each debug level
+* don't stretch toggles in settings
+* use key structure for key remapping setting
+* optimize ReprogrammableKey implementation
+* keep track of settings that are absent from device
+* add G512 keyboard and G402 mouse
+* reformat descriptors.py
+* use feature numbers for reprogrammable key versions
+* don't use new_from_icon_set in menu as it is deprecated
+
 # 1.1.1
 
 * Keep left pane in Solaar main window the same size

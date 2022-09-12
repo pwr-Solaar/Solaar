@@ -1,0 +1,140 @@
+Solaar version 1.1.4rc1
+
+  1: MX Keys Keyboard
+     Device path  : /dev/hidraw8
+     USB id       : 046d:B35B
+     Codename     : MX Keys
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Serial number:
+     Model ID:      B35B408A0000
+     Unit ID:       EC96CD5C
+        Bootloader: BL1 08.00.B0011
+          Firmware: MPK 12.01.B0013
+             Other:
+     Supports 29 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BL1 08.00.B0011 00008169E8BB
+            Firmware: Firmware MPK 12.01.B0013 B35BFE037737
+            Firmware: Other
+            Unit ID: EC96CD5C  Model ID: B35B408A0000  Transport IDs: {'btleid': 'B35B', 'wpid': '408A'}
+         3: DEVICE NAME            {0005}
+            Name: MX Keys Wireless Keyboard
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: MX Keys
+         7: BATTERY STATUS         {1000}
+            Battery: 100%, discharging, next level 50%.
+         8: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Calculator:Regular, Show Desktop:Regular, Lock PC:Regular, Screen Capture/Print Screen:Regular, Brightness Down:Regular, Brightness Up:Regular, Host Switch Channel 1:Regular, Host Switch Channel 2:Regular, Host Switch Channel 3:Regular, Mission Control/Task View:Regular, Dashboard Launchpad/Action Center:Regular, Backlight Down:Regular, Backlight Up:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, App Contextual Menu/Right Click:Regular, Right Arrow:Regular, Left Arrow:Regular}
+            Key/Button Diversion        : {Calculator:Regular, Show Desktop:Regular, Lock PC:Regular, Screen Capture/Print Screen:Regular, Brightness Down:Regular, Brightness Up:Regular, Host Switch Channel 1:Regular, Host Switch Channel 2:Regular, Host Switch Channel 3:Regular, Mission Control/Task View:Regular, Dashboard Launchpad/Action Center:Regular, Backlight Down:Regular, Backlight Up:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, App Contextual Menu/Right Click:Regular, Right Arrow:Regular, Left Arrow:Regular}
+         9: CHANGE HOST            {1814}
+            Change Host        : 1:ak
+        10: HOSTS INFO             {1815}
+            Host 0 (paired): ak
+            Host 1 (unpaired):
+            Host 2 (unpaired):
+        11: BACKLIGHT2             {1982}
+            Backlight (saved): True
+            Backlight        : True
+        12: K375S FN INVERSION     {40A3}
+            Swap Fx function (saved): True
+            Swap Fx function        : True
+        13: ENCRYPTION             {4100}
+        14: LOCK KEY STATE         {4220}
+        15: KEYBOARD DISABLE KEYS  {4521}
+            Disable keys (saved): {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Num Lock:False, Scroll Lock:False, Insert:False, Win:False}
+        16: MULTIPLATFORM          {4531}
+            Set OS (saved): MacOS
+            Set OS        : MacOS
+        17: DFUCONTROL SIGNED      {00C2}
+        18: DEVICE RESET           {1802}   internal, hidden
+        19: unknown:1803           {1803}   internal, hidden
+        20: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        21: unknown:1813           {1813}   internal, hidden
+        22: OOBSTATE               {1805}   internal, hidden
+        23: unknown:1830           {1830}   internal, hidden
+        24: unknown:18A1           {18A1}   internal, hidden
+        25: unknown:1E00           {1E00}   hidden
+        26: unknown:1EB0           {1EB0}   internal, hidden
+        27: unknown:1861           {1861}   internal, hidden
+        28: unknown:1A20           {1A20}   internal, hidden
+     Has 24 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             nonstandard, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             nonstandard, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+         2: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             nonstandard, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+         3: Brightness Down           , default: Brightness Down             => Brightness Down
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:1, group:0, group mask:empty
+             reporting: default
+         4: Brightness Up             , default: Brightness Up               => Brightness Up
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:2, group:0, group mask:empty
+             reporting: default
+         5: Mission Control/Task View , default: Mission Control/Task View   => Mission Control/Task View
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:3, group:0, group mask:empty
+             reporting: default
+         6: Dashboard Launchpad/Action Center, default: Dashboard Launchpad/Action Center => Dashboard Launchpad/Action Center
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:4, group:0, group mask:empty
+             reporting: default
+         7: Show Desktop              , default: Show Desktop                => Show Desktop
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:5, group:0, group mask:empty
+             reporting: default
+         8: Backlight Down            , default: Backlight Down              => Backlight Down
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:6, group:0, group mask:empty
+             reporting: default
+         9: Backlight Up              , default: Backlight Up                => Backlight Up
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:7, group:0, group mask:empty
+             reporting: default
+        10: Previous Fn               , default: Previous                    => Previous
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:8, group:0, group mask:empty
+             reporting: default
+        11: Play/Pause Fn             , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:9, group:0, group mask:empty
+             reporting: default
+        12: Next Fn                   , default: Next                        => Next
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:10, group:0, group mask:empty
+             reporting: default
+        13: Mute Fn                   , default: Mute                        => Mute
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:11, group:0, group mask:empty
+             reporting: default
+        14: Volume Down Fn            , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, analytics key events, pos:12, group:0, group mask:empty
+             reporting: default
+        15: Volume Up Fn              , default: Volume Up                   => Volume Up
+             nonstandard, reprogrammable, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        16: Calculator                , default: Calculator                  => Calculator
+             nonstandard, reprogrammable, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Screen Capture/Print Screen, default: Screen Capture              => Screen Capture
+             nonstandard, reprogrammable, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        18: App Contextual Menu/Right Click, default: Right Click/App Contextual Menu => Right Click/App Contextual Menu
+             nonstandard, reprogrammable, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        19: Lock PC                   , default: WindowsLock                 => WindowsLock
+             nonstandard, reprogrammable, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        20: Left Arrow                , default: Keyboard Left Arrow         => Keyboard Left Arrow
+             nonstandard, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        21: Right Arrow               , default: Keyboard Right Arrow        => Keyboard Right Arrow
+             nonstandard, divertable, persistently divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        22: F Lock                    , default: Do Nothing One              => Do Nothing One
+             is FN, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        23: FN Key                    , default: Do Nothing One              => Do Nothing One
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+     Battery: 100%, discharging, next level 50%.

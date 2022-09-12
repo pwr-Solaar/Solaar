@@ -71,7 +71,7 @@ def attach_to(device, changed_callback):
     assert changed_callback
 
     if not hasattr(device, 'status') or device.status is None:
-        if device.kind is None:
+        if not device.isDevice:
             device.status = ReceiverStatus(device, changed_callback)
         else:
             device.status = DeviceStatus(device, changed_callback)
@@ -115,8 +115,6 @@ class ReceiverStatus(dict):
                 'count': count
             }
         )
-
-    __unicode__ = __str__
 
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         # self.updated = _timestamp()
@@ -192,7 +190,7 @@ class DeviceStatus(dict):
 
     __nonzero__ = __bool__
 
-    def set_battery_info(self, level, status, nextLevel=None, voltage=None, timestamp=None):
+    def set_battery_info(self, level, nextLevel, status, voltage, timestamp=None):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: battery %s, %s', self._device, level, status)
 
@@ -247,35 +245,14 @@ class DeviceStatus(dict):
     # Retrieve and regularize battery status
     def read_battery(self, timestamp=None):
         if self._active:
-            d = self._device
-            assert d
-
-            if d.protocol < 2.0:
-                battery = _hidpp10.get_battery(d)
-                self.set_battery_keys(battery)
-                return
-
-            battery = _hidpp20.get_battery(d)
-            if battery is None:
-                v = _hidpp20.get_voltage(d)
-                if v is not None:
-                    level, status, voltage, _ignore, _ignore = v
-                    self.set_battery_keys((level, status, None), voltage)
-                    return
-
-            # Really unnecessary, if the device has SOLAR_DASHBOARD it should be
-            # broadcasting it's battery status anyway, it will just take a little while.
-            # However, when the device has just been detected, it will not show
-            # any battery status for a while (broadcasts happen every 90 seconds).
-            if battery is None and d.features and _hidpp20.FEATURE.SOLAR_DASHBOARD in d.features:
-                d.feature_request(_hidpp20.FEATURE.SOLAR_DASHBOARD, 0x00, 1, 1)
-                return
+            assert self._device
+            battery = self._device.battery()
             self.set_battery_keys(battery)
 
-    def set_battery_keys(self, battery, voltage=None):
+    def set_battery_keys(self, battery):
         if battery is not None:
-            level, status, nextLevel = battery
-            self.set_battery_info(level, status, nextLevel, voltage)
+            level, nextLevel, status, voltage = battery
+            self.set_battery_info(level, nextLevel, status, voltage)
         elif self.get(KEYS.BATTERY_STATUS, None) is not None:
             self[KEYS.BATTERY_STATUS] = None
             self[KEYS.BATTERY_CHARGING] = None

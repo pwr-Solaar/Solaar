@@ -1,0 +1,147 @@
+Solaar version 1.1.4
+
+  1: Wireless Touch Keyboard K400 Plus
+     Device path  : /dev/hidraw2
+     WPID         : 404D
+     Codename     : K400 Plus
+     Kind         : keyboard
+     Protocol     : HID++ 4.1
+     Polling rate : 8 ms (125Hz)
+     Serial number: 6DC5C81C
+     Model ID:      404D00000000
+     Unit ID:       641487CF
+        Bootloader: BOT 22.02.B0002
+          Firmware: RQK 63.02.B0016
+             Other:
+     The power switch is located on the top edge.
+     Supports 23 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 22.02.B0002 404D6217AD40
+            Firmware: Firmware RQK 63.02.B0016 404D6217AD40
+            Firmware: Other
+            Unit ID: 641487CF  Model ID: 404D00000000  Transport IDs: {'wpid': '404D'}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Touch Keyboard K400 Plus
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+            Battery: 90%, discharging, next level 50%.
+         7: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Volume Up:Regular, Volume Down:Regular, Mute:Regular, Play/Pause:Regular, Next:Regular, Previous:Regular, Application Switcher:Regular, My Home:Regular, Media Player:Regular, Search:Regular, Sleep:Regular, Contextual Menu:Regular, Back:Regular, Show Desktop:Regular, Maximize Window:Regular, Switch Screen:Regular, Fn Left Click:Regular, Second Left Click:Regular}
+            Key/Button Diversion        : {Volume Up:Regular, Volume Down:Regular, Mute:Regular, Play/Pause:Regular, Next:Regular, Previous:Regular, Application Switcher:Regular, My Home:Regular, Media Player:Regular, Search:Regular, Sleep:Regular, Contextual Menu:Regular, Back:Regular, Show Desktop:Regular, Maximize Window:Regular, Switch Screen:Regular, Fn Left Click:Regular, Second Left Click:Regular}
+         8: SWAP BUTTON CANCEL     {2005}
+         9: NEW FN INVERSION       {40A2}
+            Fn-swap: enabled
+            Fn-swap default: enabled
+            Swap Fx function (saved): True
+            Swap Fx function        : True
+        10: ENCRYPTION             {4100}
+        11: KEYBOARD DISABLE KEYS  {4521}
+            Disable keys (saved): {Caps Lock:False, Scroll Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Scroll Lock:False, Insert:False, Win:False}
+        12: TOUCHPAD RAW XY        {6100}
+        13: GESTURE 2              {6501}
+            Gestures (saved): {1: True, 2: True, 10: True, 30: True, 34: False, 42: True, 43: True, 45: False, 64: False, 65: False, 67: False, 84: True}
+            Gestures        : {1: True, 2: True, 30: True, 10: True, 45: False, 42: True, 43: True, 64: False, 65: False, 67: False, 84: True, 34: False}
+            Gestures Diversion (saved): {1: False, 2: False, 10: False, 44: False, 64: False, 65: False, 67: False, 84: False, 85: False, 100: False}
+            Gestures Diversion        : {1: False, 2: False, 10: False, 44: False, 64: False, 65: False, 67: False, 84: False, 85: False, 100: False}
+            Gesture params (saved): {4: {'scale': 256}}
+            Gesture params        : {4: {'scale': 256}}
+        14: DFUCONTROL UNSIGNED    {00C1}
+        15: unknown:1811           {1811}   internal, hidden
+        16: unknown:1830           {1830}   internal, hidden
+        17: unknown:1890           {1890}   internal, hidden
+        18: unknown:1DF3           {1DF3}   internal, hidden
+        19: unknown:1E00           {1E00}   hidden
+        20: unknown:1EB0           {1EB0}   internal, hidden
+        21: unknown:1861           {1861}   internal, hidden
+        22: unknown:18B0           {18B0}   internal, hidden
+     Has 20 reprogrammable keys:
+         0: Second Left Click         , default: Left Click                  => Left Click
+             mse, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+         1: Back                      , default: Mouse Back Button           => Mouse Back Button
+             is FN, FN sensitive, reprogrammable, divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         2: My Home                   , default: HomePage                    => HomePage
+             is FN, FN sensitive, reprogrammable, divertable, pos:2, group:0, group mask:empty
+             reporting: default
+         3: Application Switcher      , default: Application Switcher        => Application Switcher
+             is FN, FN sensitive, reprogrammable, divertable, pos:3, group:0, group mask:empty
+             reporting: default
+         4: Contextual Menu           , default: Right Click                 => Right Click
+             is FN, FN sensitive, reprogrammable, divertable, pos:4, group:0, group mask:empty
+             reporting: default
+         5: Search                    , default: Search Files                => Search Files
+             is FN, FN sensitive, reprogrammable, divertable, pos:5, group:0, group mask:empty
+             reporting: default
+         6: Show Desktop              , default: Show Desktop                => Show Desktop
+             is FN, FN sensitive, reprogrammable, divertable, pos:6, group:0, group mask:empty
+             reporting: default
+         7: Maximize Window           , default: Maximize Window             => Maximize Window
+             is FN, FN sensitive, reprogrammable, divertable, pos:7, group:0, group mask:empty
+             reporting: default
+         8: Switch Screen             , default: Switch Presentation/Switch Screen => Switch Presentation/Switch Screen
+             is FN, FN sensitive, reprogrammable, divertable, pos:8, group:0, group mask:empty
+             reporting: default
+         9: Media Player              , default: Music                       => Music
+             is FN, FN sensitive, reprogrammable, divertable, pos:9, group:0, group mask:empty
+             reporting: default
+        10: Previous                  , default: Previous                    => Previous
+             is FN, FN sensitive, divertable, pos:10, group:0, group mask:empty
+             reporting: default
+        11: Play/Pause                , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, divertable, pos:11, group:0, group mask:empty
+             reporting: default
+        12: Next                      , default: Next                        => Next
+             is FN, FN sensitive, divertable, pos:12, group:0, group mask:empty
+             reporting: default
+        13: Fn Left Click             , default: ShowUI                      => ShowUI
+             divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Left Button               , default: Left Click                  => Left Click
+             mse, pos:0, group:0, group mask:empty
+             reporting: default
+        15: Right Button              , default: Right Click                 => Right Click
+             mse, pos:0, group:0, group mask:empty
+             reporting: default
+        16: Mute                      , default: Mute                        => Mute
+             nonstandard, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Volume Up                 , default: Volume Up                   => Volume Up
+             nonstandard, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        18: Volume Down               , default: Volume Down                 => Volume Down
+             nonstandard, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        19: Sleep                     , default: Sleep                       => Sleep
+             reprogrammable, divertable, pos:0, group:0, group mask:empty
+             reporting: default
+     Has 17 gesture(s), 1 param(s) and 5 spec(s):
+        Track1Finger               Enabled(None): None   Diverted:(None) None
+        TapGestures                Enabled(None): None   Diverted:(None) None
+        Tap1Finger                 Enabled(   0): True   Diverted:(   0) False
+        Tap2Finger                 Enabled(   1): True   Diverted:(   1) False
+        TapDrag1Finger             Enabled(   2): True   Diverted:(None) None
+        DoubleTap1Finger           Enabled(   3): True   Diverted:(   2) False
+        Scroll2FingerStateless     Enabled(None): None   Diverted:(   3) False
+        NaturalScrolling           Enabled(   4): False  Diverted:(None) None
+        Scroll2FingerHoriz         Enabled(   5): True   Diverted:(None) None
+        Scroll2FingerVert          Enabled(   6): True   Diverted:(None) None
+        LeftEdgeSwipe1Finger2      Enabled(   7): False  Diverted:(   4) False
+        RightEdgeSwipe1Finger2     Enabled(   8): False  Diverted:(   5) False
+        TopEdgeSwipe1Finger2       Enabled(   9): False  Diverted:(   6) False
+        Zoom2FingerStateless       Enabled(  10): True   Diverted:(   7) False
+        FnClickGestureSuppression  Enabled(  11): False  Diverted:(None) None
+        TwoFingersPresent          Enabled(None): None   Diverted:(   8) False
+        DeviceSpecificRawData      Enabled(None): None   Diverted:(   9) False
+        ScaleFactor                Value  (   0): 256 [Default: 256]
+        period unit                Spec   (   3): 2048
+        DVI field width            Spec   (   1): 8
+        field widths               Spec   (   2): 8
+        multiplier                 Spec   (   5): None
+        resolution                 Spec   (   4): 4
+     Battery: 90%, discharging, next level 50%.

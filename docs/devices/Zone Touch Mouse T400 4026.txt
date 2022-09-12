@@ -1,0 +1,50 @@
+  1: Zone Touch Mouse T400
+     Codename     : T400
+     Kind         : mouse
+     Wireless PID : 4026
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 131A3093
+          Firmware: RQM 39.00.B0029
+        Bootloader: BL  03.00
+          Hardware: 72
+             Other:
+     The power switch is located on the base.
+     Supports 28 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+         4: DEVICE NAME            {0005}
+         5: DFUCONTROL             {00C0}
+         6: BATTERY STATUS         {1000}
+         7: unknown:1802           {1802}   internal, hidden
+         8: unknown:1810           {1810}   internal, hidden
+         9: unknown:1830           {1830}   internal, hidden
+        10: unknown:1850           {1850}   internal, hidden
+        11: unknown:1860           {1860}   internal, hidden
+        12: unknown:1890           {1890}   internal, hidden
+        13: unknown:18A0           {18A0}   internal, hidden
+        14: unknown:18E3           {18E3}   internal, hidden
+        15: REPROG CONTROLS        {1B00}
+        16: WIRELESS DEVICE STATUS {1D4B}
+        17: unknown:1DF3           {1DF3}   internal, hidden
+        18: unknown:1E00           {1E00}   hidden
+        19: unknown:1E80           {1E80}   internal, hidden
+        20: unknown:1F03           {1F03}   internal, hidden
+        21: unknown:1F04           {1F04}   internal, hidden
+        22: VERTICAL SCROLLING     {2100}
+        23: unknown:2101           {2101}   hidden
+        24: HI RES SCROLLING       {2120}
+        25: MOUSE POINTER          {2200}
+        26: TOUCHMOUSE RAW POINTS  {6110}   hidden
+        27: REPROG CONTROLS V3     {1B03}
+     Has 7 reprogrammable keys:
+         0: LEFT CLICK                 => LeftClick                     mse, reprogrammable
+         1: RIGHT CLICK                => RightClick                    mse, reprogrammable
+         2: MIDDLE BUTTON              => MiddleMouseButton             mse, reprogrammable
+         3: METRO START SCREEN         => MetroStartScreen              mse, reprogrammable
+         4: ZOOMIN                     => Do Nothing                    mse, reprogrammable
+         5: ZOOMOUT                    => Do Nothing                    mse, reprogrammable
+         6: BACK HSCROLL               => TouchBackForwardHorzScroll
+     Battery: 100%, discharging.

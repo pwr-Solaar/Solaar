@@ -59,10 +59,5 @@ _gettext.bindtextdomain(_LOCALE_DOMAIN, path)
 _gettext.textdomain(_LOCALE_DOMAIN)
 _gettext.install(_LOCALE_DOMAIN)
 
-try:
-    unicode  # noqa: F821
-    _ = lambda x: _gettext.gettext(x).decode('UTF-8')
-    ngettext = lambda *x: _gettext.ngettext(*x).decode('UTF-8')
-except Exception:
-    _ = _gettext.gettext
-    ngettext = _gettext.ngettext
+_ = _gettext.gettext
+ngettext = _gettext.ngettext

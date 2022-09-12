@@ -323,7 +323,9 @@ def _create_window_layout():
     bottom_buttons_box.add(quit_button)
     about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(_('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=_show_diversion_window)
+    diversion_button = _new_button(
+        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+    )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
@@ -676,10 +678,8 @@ def _update_device_panel(device, panel, buttons, full=False):
         device.status.read_battery(device)
 
     battery_level = device.status.get(_K.BATTERY_LEVEL)
-    battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
     battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
-
-    if battery_level is None:
+    if battery_level is None and battery_voltage is None:
         icon_name = _icons.battery()
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(False)
@@ -688,24 +688,26 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._text.set_markup('<small>%s</small>' % _('unknown'))
         panel._battery.set_tooltip_text(_('Battery information unknown.'))
     else:
+        battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
         charging = device.status.get(_K.BATTERY_CHARGING)
         icon_name = _icons.battery(battery_level, charging)
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(True)
+        panel._battery._text.set_sensitive(is_online)
 
         if battery_voltage is not None:
             panel._battery._label.set_text(_('Battery Voltage'))
-            text = '%(voltage)dmV, %(level)d%%' % {'voltage': battery_voltage, 'level': battery_level}
+            text = '%dmV' % battery_voltage
             tooltip_text = _('Voltage reported by battery')
-        elif isinstance(battery_level, _NamedInt):
-            panel._battery._label.set_text(_('Battery Level'))
-            text = _(str(battery_level))
-            tooltip_text = _('Approximate level reported by battery')
         else:
             panel._battery._label.set_text(_('Battery Level'))
-            text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
+            text = ''
             tooltip_text = _('Approximate level reported by battery')
-        if battery_next_level is not None:
+        if battery_voltage is not None and battery_level is not None:
+            text += ', '
+        if battery_level is not None:
+            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else '%d%%' % battery_level
+        if battery_next_level is not None and not charging:
             if isinstance(battery_next_level, _NamedInt):
                 text += '<small> (' + _('next reported ') + _(str(battery_next_level)) + ')</small>'
             else:
@@ -716,7 +718,7 @@ def _update_device_panel(device, panel, buttons, full=False):
                 text += ' <small>(%s)</small>' % _('charging')
         else:
             text += ' <small>(%s)</small>' % _('last known')
-        panel._battery._text.set_sensitive(is_online)
+
         panel._battery._text.set_markup(text)
         panel._battery.set_tooltip_text(tooltip_text)
 
@@ -728,11 +730,7 @@ def _update_device_panel(device, panel, buttons, full=False):
             panel._secure.set_tooltip_text(
                 _(
                     'The wireless link between this device and its receiver is not encrypted.\n'
-                    '\n'
-                    'For pointing devices (mice, trackballs, trackpads), this is a minor security issue.\n'
-                    '\n'
-                    'It is, however, a major security issue for text-input devices (keyboards, numpads),\n'
-                    'because typed text can be sniffed inconspicuously by 3rd parties within range.'
+                    'This is a security issue for pointing devices, and a major security issue for text-input devices.'
                 )
             )
         else:
@@ -926,3 +924,18 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
         full_update = full or was_online != is_online
         _update_info_panel(device, full=full_update)
+
+
+def find_device(serial):
+    assert serial, 'need serial number or unit ID to find a device'
+    result = None
+
+    def check(_store, _treepath, row):
+        nonlocal result
+        device = _model.get_value(row, _COLUMN.DEVICE)
+        if device and device.kind and (device.unitId == serial or device.serial == serial):
+            result = device
+            return True
+
+    _model.foreach(check)
+    return result

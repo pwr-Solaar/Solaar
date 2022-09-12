@@ -157,12 +157,15 @@ def _find_device(receivers, name):
 
     for r in receivers:
         if not r.isDevice:  # look for nth device of receiver
-            if number and number <= r.max_devices:
+            if number:
                 dev = r[number]
                 if dev:
                     yield dev
+            count = r.count()
         else:  # wired device, make a device list from it
+            r.ping()
             r = [r]
+            count = 1
 
         for dev in r:
             if (
@@ -170,6 +173,9 @@ def _find_device(receivers, name):
                 or name in dev.name.lower()
             ):
                 yield dev
+            count -= 1
+            if not count:
+                break
 
 
 #    raise Exception("no device found matching '%s'" % name)

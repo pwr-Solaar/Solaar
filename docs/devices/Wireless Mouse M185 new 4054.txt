@@ -1,0 +1,61 @@
+Solaar version 1.1.4rc2
+
+ 2: Wireless Mouse M185 new
+     Device path  : /dev/hidraw3
+     WPID         : 4054
+     Codename     : M185n
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 00000000
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQM 64.00.B0008
+     The power switch is located on the base.
+     Supports 19 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQM 64.00.B0008 4054
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005}
+            Name: Wireless Mouse
+            Kind: mouse
+         4: RESET                  {0020}
+         5: REPROG CONTROLS V4     {1B04}
+            Mouse Gestures (saved): Off
+            Mouse Gestures        : Off
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button}
+            Key/Button Diversion (saved): {Middle Button:Regular}
+            Key/Button Diversion        : {Middle Button:Regular}
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: LOWRES WHEEL           {2130}
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+         8: POINTER SPEED          {2205}
+            Pointer Speed: 1.0
+            Sensitivity (Pointer Speed) (saved): 256
+            Sensitivity (Pointer Speed)        : 256
+         9: DEVICE RESET           {1802}   internal, hidden
+        10: unknown:1810           {1810}   internal, hidden
+        11: unknown:1830           {1830}   internal, hidden
+        12: unknown:1850           {1850}   internal, hidden
+        13: unknown:1869           {1869}   internal, hidden
+        14: unknown:1890           {1890}   internal, hidden
+        15: unknown:18B1           {18B1}   internal, hidden
+        16: unknown:1DF3           {1DF3}   internal, hidden
+        17: unknown:1E00           {1E00}   hidden
+        18: unknown:1F03           {1F03}   internal, hidden
+     Has 3 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+     Battery status unavailable.

@@ -50,8 +50,13 @@ its wireless PID as reported by Solaar.  The software identity of devices that
 connect via a USB cable or via bluetooth can be determined by their USB or
 Bluetooth product ID.
 
-Even something as fundamental as pairing works differently for different
-receivers. For Unifying receivers, pairing adds a new paired device, but
+
+# Pairing and Unpairing
+
+Solaar is able to pair and unpair devices with
+receivers as supported by the device and receiver.
+
+For Unifying receivers, pairing adds a new paired device, but
 only if there is an open slot on the receiver. So these receivers need to
 be able to unpair devices that they have been paired with or else they will
 not have any open slots for pairing. Some other receivers, like the
@@ -72,13 +77,10 @@ without the Unifying logo can probably only connect to the kind of receiver
 that they were bought with.
 
 
-## Supported Features
+## Device Settings
 
-Solaar uses the HID++ protocol to pair devices to receivers and unpair
-devices from receivers, and also uses the HID++ protocol to display
-features of receivers and devices. Currently it only displays some
-features, and can modify even fewer. For a list of HID++ features
-and their support see [the features page](features).
+Solaar can display quite a few changeable settings of receivers and devices.
+For a list of HID++ features and their support see [the features page](features).
 
 Solaar does not do much beyond using the HID++ protocol to change the
 behavior of receivers and devices via changing their settings.
@@ -91,14 +93,17 @@ Settings can only be changed in the Solaar GUI when they are unlocked.
 To unlock a setting click on the icon at the right-hand edge of the setting
 until an unlocked lock appears (with tooltop "Changes allowed").
 
-Solaar keep tracks of the changeable settings of a device.
-Most devices forget changed settings when the are turned off
-or go into a power-saving mode.  When Solaar starts, it restores on-line
-devices to their previously-known state, and while running it restores
+Solaar keeps track of most of the changeable settings of a device.
+Devices forget most changed settings when the device is turned off
+or goes into a power-saving mode.
+The exceptions include the setting to change the host the device is connected to
+and the setting to persistently change what a key or button does.
+When Solaar starts, it restores on-line devices to their previously-known state
+for the unexceptionable settings and while running it restores
 devices to their previously-known state when the device itself comes on line.
-This information is stored in the file `~/.config/solaar/config.json`.
+Setting information is stored in the file `~/.config/solaar/config.yaml`.
 
-Updating of settings can be turned off in the Solaar GUI by clicking on the icon
+Updating of a setting can be turned off in the Solaar GUI by clicking on the icon
 at the right-hand edge of the setting until a red icon appears (with tooltip
 "Ignore this setting" ).
 
@@ -133,12 +138,10 @@ Solaar can process HID++ Notifications from devices to, for example,
 change the speed of some thumb wheels.  These notifications are only sent
 for actions that are set in Solaar to their HID++ setting (also known as diverted).
 For more information on this capability of Solaar see
-[the rules page](https://pwr-solaar.github.io/Solaar/rules).  As much of rule processing
-depends on X11, this capability is only when running under X11.
+[the rules page](https://pwr-solaar.github.io/Solaar/rules).
+Some features of rules do not work under Wayland.
 
-Users can edit rules using a GUI by clicking on the `Edit Rule` button in the Solaar main window.
-
-Solaar rules is an experimental feature.  Significant changes might be made in response to problems.
+Users can edit rules using a GUI by clicking on the `Rule Editor` button in the Solaar main window.
 
 ### Sliding DPI
 
@@ -147,14 +150,14 @@ the sensitivity (DPI) of the mouse by pressing the button and moving the mouse l
 Other mice (such as the MX Master 3) don't have a button specific for this purpose
 but have buttons that can be used for it.
 
-The DPI Sliding Adjustment setting assigns a button for this purpose.
-Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
+The `Key/Button Diversion` setting can assign buttons to adjust sensitivity by setting the value for the button to `Sliding DPI`.
+This capability is only present if the device supports changing the DPI in this way.
+
+Pressing a button when it is set to `Sliding DPI` causes the mouse pointer to stop moving.
 When the button is released a new Sensitivity (DPI) value is applied to the mouse,
 depending on how far right or left the mouse is moved.   If the mouse is moved only a little bit
 the previous value that was set is applied to the mouse.
-Notifications from Solaar are displayed while the mouse button is done
-showing the setting that will be applied.
-
+Notifications from Solaar are displayed showing the setting that will be applied.
 
 ### Mouse Gestures
 
@@ -162,18 +165,14 @@ Some mice (such as the MX Master 3) have a button that is supposed to be used to
 create up/down/left/right mouse gestures.  Other mice (such as the MX Vertical) don't
 have a button specific for this purpose but have buttons that can be used for it.
 
-The Mouse Gestures setting assigns a button for this purpose.
-Pressing the button, if the button is diverted, causes the mouse pointer to stop moving.
-When the button is released a MOUSE_GESTURE notification with the total mouse movement
-while the button was pressed is sent to the Solaar rule system.
+The `Key/Button Diversion` setting can assign buttons to initiate mous gestures by setting the value for the button to `Mouse Gestures`.
+This capability is only present if the device can support it.
 
-MOUSE_GESTURE notifications trigger mouse gesture conditions in Solaar rules.
-For more information on mouse gesture rules conditions see
+Pressing a button when it is set to `Mouse Gestures` causes the mouse pointer to stop moving.
+When the button is released a `MOUSE_GESTURE` notification with the mouse movements and diverted key presses
+is sent to the Solaar rule system so that rules can detect these notifications.
+For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
-
-Mouse gestures is an experimental feature.
-Significant changes might be made to it in the future.
-
 
 ## System Tray
 

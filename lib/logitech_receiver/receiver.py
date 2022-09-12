@@ -62,6 +62,7 @@ class Receiver:
         self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
+        self.last_id = 0
         if self.receiver_kind == 'bolt':
             serial_reply = self.read_register(_R.bolt_uniqueId)
             self.serial = _strhex(serial_reply)
@@ -72,6 +73,7 @@ class Receiver:
             if serial_reply:
                 self.serial = _strhex(serial_reply[1:5])
                 self.max_devices = ord(serial_reply[6:7])
+                self.last_id = ord(serial_reply[7:8])
                 if self.max_devices <= 0 or self.max_devices > 6:
                     self.max_devices = product_info.get('max_devices', 1)
                 # TODO _properly_ figure out which receivers do and which don't support unpairing
@@ -84,6 +86,7 @@ class Receiver:
                 self.serial = None
                 self.max_devices = product_info.get('max_devices', 1)
                 self.may_unpair = product_info.get('may_unpair', False)
+        self.last_id = self.last_id if self.last_id else self.max_devices
 
         self.name = product_info.get('name', '')
         self.re_pairs = product_info.get('re_pairs', False)
@@ -98,6 +101,9 @@ class Receiver:
 
     def close(self):
         handle, self.handle = self.handle, None
+        for _n, d in self._devices.items():
+            if d:
+                d.close()
         self._devices.clear()
         return (handle and _base.close(handle))
 
@@ -165,8 +171,10 @@ class Receiver:
                 return wpid, kind, 0
             else:
                 raise _base.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
+        wpid = 0
+        kind = None
+        polling_rate = None
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
-        polling_rate = 0
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
@@ -177,17 +185,15 @@ class Receiver:
                 _log.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
             kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
-        else:
-            # unifying protocol not supported, probably an old Nano receiver
+        else:  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
-            if device_info is None:
-                _log.error('failed to read Nano wpid for device %d of %s', n, self)
-                raise _base.NoSuchDevice(number=n, receiver=self, error='read Nano wpid')
-            wpid = _strhex(device_info[3:5])
-            kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+            if device_info:
+                wpid = _strhex(device_info[3:5])
+                kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
+        serial = None
         power_switch = '(unknown)'
         if self.receiver_kind == 'bolt':
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
@@ -203,8 +209,6 @@ class Receiver:
             pair_info = self.read_register(0x2D5)
         if pair_info:
             serial = _strhex(pair_info[1:5])
-        else:  # fallback...
-            serial = self.serial
         return serial, power_switch
 
     def get_kind_from_index(self, index):
@@ -240,7 +244,6 @@ class Receiver:
 
         try:
             dev = Device(self, number, notification)
-            assert dev.wpid
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
@@ -292,7 +295,7 @@ class Receiver:
     write_register = _hidpp10.write_register
 
     def __iter__(self):
-        for number in range(1, 1 + self.max_devices):
+        for number in range(1, 16):  # some receivers have devices past their max # devices
             if number in self._devices:
                 dev = self._devices[number]
             else:
@@ -310,7 +313,7 @@ class Receiver:
 
         if not isinstance(key, int):
             raise TypeError('key must be an integer')
-        if key < 1 or key > self.max_devices:
+        if key < 1 or key > 15:  # some receivers have devices past their max # devices
             raise IndexError(key)
 
         return self.register_new_device(key)
@@ -375,7 +378,7 @@ class Receiver:
     def __str__(self):
         return self._str
 
-    __unicode__ = __repr__ = __str__
+    __repr__ = __str__
 
     __bool__ = __nonzero__ = lambda self: self.handle is not None
 

@@ -1,0 +1,117 @@
+Solaar version 1.1.4
+
+  255: MX Keys Mini
+     Device path  : /dev/hidraw6
+     USB id       : 046d:B369
+     Codename     : MX Keys Mini
+     Kind         : ?
+     Protocol     : HID++ 4.5
+     Serial number:
+     Model ID:      B36900000000
+     Unit ID:       42BABA25
+        Bootloader: BL1 53.01.B0006
+          Firmware: RBK 73.01.B0006
+             Other:
+     Supports 31 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BL1 53.01.B0006 B369FD70F4
+            Firmware: Firmware RBK 73.01.B0006 B369FD70F4
+            Firmware: Other
+            Unit ID: 42BABA25  Model ID: B36900000000  Transport IDs: {'btleid': 'B369'}
+         3: DEVICE NAME            {0005}
+            Name: MX Keys Mini
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+            Friendly Name: MX Keys Mini
+         7: UNIFIED BATTERY        {1004}
+         8: REPROG CONTROLS V4     {1B04}
+            Key/Button Diversion (saved): {Backlight Down:Regular, Backlight Up:Regular, Play/Pause Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, Voice Dictation:Regular, Open Emoji Panel:Regular, Snipping Tool:Regular, Delete:Regular, Mute Microphone:Regular}
+            Key/Button Diversion        : {Backlight Down:Regular, Backlight Up:Regular, Play/Pause Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, Voice Dictation:Regular, Open Emoji Panel:Regular, Snipping Tool:Regular, Delete:Regular, Mute Microphone:Regular}
+         9: CHANGE HOST            {1814}
+            Change Host        : 3:fedora
+        10: HOSTS INFO             {1815}
+            Host 0 (paired): U308198
+            Host 1 (paired): DESKTOP-9C4GF7M
+            Host 2 (paired): fedora
+        11: BACKLIGHT2             {1982}
+            Backlight (saved): True
+            Backlight        : True
+        12: K375S FN INVERSION     {40A3}
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+        13: LOCK KEY STATE         {4220}
+        14: KEYBOARD DISABLE KEYS  {4521}
+            Disable keys (saved): {Caps Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Insert:False, Win:False}
+        15: MULTIPLATFORM          {4531}
+            Set OS (saved): Windows
+            Set OS        : Windows
+        16: DFUCONTROL             {00C3}
+        17: DEVICE RESET           {1802}   internal, hidden, unknown:000010
+        18: unknown:1803           {1803}   internal, hidden, unknown:000010
+        19: CONFIG DEVICE PROPS    {1806}   internal, hidden, unknown:000010
+        20: unknown:1816           {1816}   internal, hidden, unknown:000010
+        21: OOBSTATE               {1805}   internal, hidden
+        22: unknown:1830           {1830}   internal, hidden, unknown:000010
+        23: unknown:1891           {1891}   internal, hidden, unknown:000008
+        24: unknown:18A1           {18A1}   internal, hidden, unknown:000010
+        25: unknown:1E00           {1E00}   hidden
+        26: unknown:1E02           {1E02}   internal, hidden
+        27: unknown:1602           {1602}
+        28: unknown:1EB0           {1EB0}   internal, hidden, unknown:000010
+        29: unknown:1861           {1861}   internal, hidden, unknown:000010
+        30: unknown:1A20           {1A20}   internal, hidden, unknown:000010
+     Has 16 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             is FN, FN sensitive, analytics key events, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             is FN, FN sensitive, analytics key events, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             is FN, FN sensitive, analytics key events, pos:3, group:0, group mask:empty
+             reporting: default
+         3: Backlight Down            , default: Backlight Down              => Backlight Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:4, group:0, group mask:empty
+             reporting: default
+         4: Backlight Up              , default: Backlight Up                => Backlight Up
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:5, group:0, group mask:empty
+             reporting: default
+         5: Voice Dictation           , default: Voice Dictation             => Voice Dictation
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:6, group:0, group mask:empty
+             reporting: default
+         6: Open Emoji Panel          , default: Open Emoji Panel            => Open Emoji Panel
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:7, group:0, group mask:empty
+             reporting: default
+         7: Snipping Tool             , default: Snipping Tool               => Snipping Tool
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:8, group:0, group mask:empty
+             reporting: default
+         8: Mute Microphone           , default: Mute Microphone             => Mute Microphone
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:9, group:0, group mask:empty
+             reporting: default
+         9: Play/Pause Fn             , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:10, group:0, group mask:empty
+             reporting: default
+        10: Mute Fn                   , default: Mute                        => Mute
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:11, group:0, group mask:empty
+             reporting: default
+        11: Volume Down Fn            , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:12, group:0, group mask:empty
+             reporting: default
+        12: Volume Up Fn              , default: Volume Up                   => Volume Up
+             nonstandard, reprogrammable, divertable, analytics key events, pos:13, group:0, group mask:empty
+             reporting: default
+        13: Delete                    , default: Delete                      => Delete
+             nonstandard, reprogrammable, divertable, analytics key events, pos:14, group:0, group mask:empty
+             reporting: default
+        14: F Lock                    , default: Do Nothing One              => Do Nothing One
+             is FN, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        15: FN Key                    , default: Do Nothing One              => Do Nothing One
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+     Battery: 40%, discharging.

@@ -27,6 +27,7 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
 from random import getrandbits as _random_bits
+from struct import pack as _pack
 from time import time as _timestamp
 
 import hidapi as _hid
@@ -37,7 +38,6 @@ from .base_usb import ALL as _RECEIVER_USB_IDS
 from .base_usb import DEVICES as _DEVICE_IDS
 from .base_usb import other_device_check as _other_device_check
 from .common import KwException as _KwException
-from .common import pack as _pack
 from .common import strhex as _strhex
 
 _log = getLogger(__name__)
@@ -325,6 +325,10 @@ def make_notification(report_id, devnumber, data):
         return
 
     address = ord(data[1:2])
+    if sub_id == 0x00 and (address & 0x0F == 0x00):
+        # this is a no-op notification - don't do anything with it
+        return
+
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
         (sub_id >= 0x40) or  # noqa: E131
@@ -342,7 +346,6 @@ _HIDPP_Notification = namedtuple('_HIDPP_Notification', ('report_id', 'devnumber
 _HIDPP_Notification.__str__ = lambda self: 'Notification(%02x,%d,%02X,%02X,%s)' % (
     self.report_id, self.devnumber, self.sub_id, self.address, _strhex(self.data)
 )
-_HIDPP_Notification.__unicode__ = _HIDPP_Notification.__str__
 del namedtuple
 
 #

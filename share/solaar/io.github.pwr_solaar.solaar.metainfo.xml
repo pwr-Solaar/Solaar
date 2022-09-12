@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2020-2022 Peter F. Patel-Schneider -->
 <component type="desktop-application">
   <id>io.github.pwr_solaar.solaar</id>
 
   <name>Solaar</name>
-  <summary>Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads.</summary>
+  <summary>Linux manager for Logitech keyboards, mice, and trackpads</summary>
   <url type="homepage">https://github.com/pwr-Solaar/Solaar</url>
   <content_rating type="oars-1.0" />
+  <update_contact>pfpschneider_AT_gmail.com</update_contact>
 
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>GPL-2.0-only</project_license>
@@ -40,6 +42,15 @@
       <image>https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/docs/Solaar-menu.png</image>
     </screenshot>
   </screenshots>
+
+  <releases>
+    <release version="1.1.5rc1" date="2022-09-10"/>
+    <release version="1.1.4" date="2022-07-04"/>
+    <release version="1.1.3" date="2022-04-25"/>
+    <release version="1.1.2" date="2022-03-26"/>
+    <release version="1.1.1" date="2021-12-25"/>
+    <release version="1.1.0" date="2021-12-20"/>
+  </releases>
 
   <provides>
     <binary>solaar</binary>

@@ -22,13 +22,13 @@ import threading as _threading
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
+from struct import unpack as _unpack
 
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import strhex as _strhex
-from .common import unpack as _unpack
 from .i18n import _
 from .status import ALERT as _ALERT
 from .status import KEYS as _K
@@ -54,7 +54,7 @@ def process(device, notification):
     status = device.status
     assert status is not None
 
-    if device.kind is None:
+    if not device.isDevice:
         return _process_receiver_notification(device, status, notification)
 
     return _process_device_notification(device, status, notification)
@@ -161,6 +161,9 @@ def _process_device_notification(device, status, n):
     # HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
+    if n.sub_id == 00:  # no-op feature notification, dispose of it quickly
+        return False
+
     # Allow the device object to handle the notification using custom
     # per-device state.
     handling_ret = device.handle_notification(n)
@@ -189,7 +192,7 @@ def _process_device_notification(device, status, n):
         _log.warn('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
         return False
     try:
-        feature = device.features[n.sub_id]
+        feature = device.features.get_feature(n.sub_id)
     except IndexError:
         _log.warn('%s: notification from invalid feature index %02X: %s', device, n.sub_id, n)
         return False
@@ -232,7 +235,7 @@ def _process_hidpp10_custom_notification(device, status, n):
         assert n.data[-1:] == b'\x00'
         data = chr(n.address).encode() + n.data
         charge, status_text, next_charge = _hidpp10.parse_battery_status(n.sub_id, data)
-        status.set_battery_info(charge, status_text, next_charge)
+        status.set_battery_info(charge, next_charge, status_text, None)
         return True
 
     if n.sub_id == _R.keyboard_illumination:
@@ -312,11 +315,8 @@ def _process_feature_notification(device, status, n, feature):
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
-            discharge_level = ord(n.data[:1])
-            discharge_level = None if discharge_level == 0 else discharge_level
-            discharge_next_level = ord(n.data[1:2])
-            battery_status = ord(n.data[2:3])
-            status.set_battery_info(discharge_level, _hidpp20.BATTERY_STATUS[battery_status], discharge_next_level)
+            _ignore, discharge_level, discharge_next_level, battery_status, voltage = _hidpp20.decipher_battery_status(n.data)
+            status.set_battery_info(discharge_level, discharge_next_level, battery_status, voltage)
         elif n.address == 0x10:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: spurious BATTERY status %s', device, n)
@@ -325,17 +325,26 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            battery_level, battery_status, battery_voltage, _ignore, _ignore = _hidpp20.decipher_voltage(n.data)
-            status.set_battery_info(battery_level, battery_status, None, battery_voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            battery_level, battery_status, battery_voltage = _hidpp20.decipher_unified_battery(n.data)
-            status.set_battery_info(battery_level, battery_status, None, battery_voltage)
+            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
+            status.set_battery_info(level, next, battery_status, voltage)
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
+
+    elif feature == _F.ADC_MEASUREMENT:
+        if n.address == 0x00:
+            result = _hidpp20.decipher_adc_measurement(n.data)
+            if result:
+                _ignore, level, next, battery_status, voltage = result
+                status.set_battery_info(level, next, battery_status, voltage)
+        else:
+            _log.warn('%s: unknown ADC MEASUREMENT %s', device, n)
 
     elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
@@ -345,12 +354,12 @@ def _process_feature_notification(device, status, n, feature):
             status_text = _hidpp20.BATTERY_STATUS.discharging
             if n.address == 0x00:
                 status[_K.LIGHT_LEVEL] = None
-                status.set_battery_info(charge, status_text, None)
+                status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x10:
                 status[_K.LIGHT_LEVEL] = lux
                 if lux > 200:
                     status_text = _hidpp20.BATTERY_STATUS.recharging
-                status.set_battery_info(charge, status_text, None)
+                status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x20:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: Light Check button pressed', device)

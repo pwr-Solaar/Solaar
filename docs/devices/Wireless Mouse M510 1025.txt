@@ -1,0 +1,17 @@
+Solaar version 1.1.4
+
+  1: Wireless Mouse M510
+     Device path  : /dev/hidraw2
+     WPID         : 1025
+     Codename     : M510
+     Kind         : mouse
+     Protocol     : HID++ 1.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 93E8527F
+          Firmware: 23.01.B0016
+     The power switch is located on the base.
+     Notifications: battery status (0x100000).
+     Features: special buttons, buttons control resolution (0x820000)
+     Battery: good, discharging.
+
+Has Side Scrolling register
