@@ -1,6 +1,7 @@
-# 1.1.5rc1
+# 1.1.5
 
-* Update Turkish translation
+* Add G213 Prodigy Gaming Keyboard
+* Update Turkish, Croation, and zh_CN translations
 * Move old device descriptions to new locations and clean up
 * Increase minimum stopped time between mouse movements
 * Fix bug with non-recognized empty mouse movement
