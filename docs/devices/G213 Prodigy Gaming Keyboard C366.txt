@@ -1,0 +1,40 @@
+Solaar version 1.1.5rc1
+
+USB and Bluetooth Devices
+
+  1: G213 Prodigy Gaming Keyboard
+     Device path  : /dev/hidraw2
+     USB id       : 046d:C336
+     Codename     : G213
+     Kind         : keyboard
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number:
+     Model ID:      C33600000000
+     Unit ID:       31314709
+          Firmware: U1  09.00.B0006
+        Bootloader: BOT 31.00.B0002
+     Supports 15 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Firmware U1  09.00.B0006 C336
+            Firmware: Bootloader BOT 31.00.B0002 AAC8
+            Unit ID: 31314709  Model ID: C33600000000  Transport IDs: {'usbid': 'C336'}
+         3: KEYBOARD DISABLE BY USAGE {4522} V0
+         4: DEVICE NAME            {0005} V0
+            Name: Gaming Keyboard G213
+            Kind: keyboard
+         5: unknown:1E00           {1E00} V0    hidden
+         6: KEYBOARD LAYOUT 2      {4540} V0
+         7: unknown:1EB0           {1EB0} V0    internal, hidden
+         8: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Polling Rate (ms)        : 1
+         9: DFUCONTROL SIGNED      {00C2} V0
+        10: unknown:1801           {1801} V0    internal, hidden
+        11: DEVICE RESET           {1802} V0    internal, hidden
+        12: COLOR LED EFFECTS      {8070} V5
+        13: unknown:1821           {1821} V0
+        14: REPORT HID USAGE       {1BC0} V0
+     Battery: N/A, None.

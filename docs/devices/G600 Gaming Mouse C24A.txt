@@ -1,0 +1,200 @@
+This mouse does not use HID++
+
+
+[root@gpiro device]# lsusb -vv -d 046d:c24a
+
+Bus 003 Device 002: ID 046d:c24a Logitech, Inc. G600 Gaming Mouse
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0        32
+  idVendor           0x046d Logitech, Inc.
+  idProduct          0xc24a G600 Gaming Mouse
+  bcdDevice           77.02
+  iManufacturer           1 Logitech
+  iProduct                2 Gaming Mouse G600
+  iSerial                 3 385226BFEFD20017
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength       0x003b
+    bNumInterfaces          2
+    bConfigurationValue     1
+    iConfiguration          4 U77.02_B0017
+    bmAttributes         0xa0
+      (Bus Powered)
+      Remote Wakeup
+    MaxPower              500mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         3 Human Interface Device
+      bInterfaceSubClass      1 Boot Interface Subclass
+      bInterfaceProtocol      2 Mouse
+      iInterface              0
+        HID Device Descriptor:
+          bLength                 9
+          bDescriptorType        33
+          bcdHID               1.11
+          bCountryCode            0 Not supported
+          bNumDescriptors         1
+          bDescriptorType        34 Report
+          wDescriptorLength      67
+         Report Descriptors:
+           ** UNAVAILABLE **
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0009  1x 9 bytes
+        bInterval               1
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         3 Human Interface Device
+      bInterfaceSubClass      0
+      bInterfaceProtocol      1 Keyboard
+      iInterface              0
+        HID Device Descriptor:
+          bLength                 9
+          bDescriptorType        33
+          bcdHID               1.11
+          bCountryCode            0 Not supported
+          bNumDescriptors         1
+          bDescriptorType        34 Report
+          wDescriptorLength     135
+         Report Descriptors:
+           ** UNAVAILABLE **
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0020  1x 32 bytes
+        bInterval               1
+can't get device qualifier: Resource temporarily unavailable
+can't get debug descriptor: Resource temporarily unavailable
+Device Status:     0x0000
+  (Bus Powered)
+
+/sys/devices/pci0000:00/0000:00:08.1/0000:05:00.4/usb3/3-2/3-2:1.1/0003:046D:C24A.0007/report_descriptor
+Usage Page (Desktop),               ; Generic desktop controls (01h)
+Usage (Keyboard),                   ; Keyboard (06h, application collection)
+Collection (Application),
+    Report ID (1),
+    Usage Page (Keyboard),          ; Keyboard/keypad (07h)
+    Usage Minimum (KB Leftcontrol), ; Keyboard left control (E0h, dynamic value)
+    Usage Maximum (KB Right GUI),   ; Keyboard right GUI (E7h, dynamic value)
+    Logical Minimum (0),
+    Logical Maximum (1),
+    Report Size (1),
+    Report Count (8),
+    Input (Variable),
+    Report Size (8),
+    Report Count (5),
+    Logical Minimum (0),
+    Logical Maximum (164),
+    Usage Minimum (None),           ; No event (00h, selector)
+    Usage Maximum (KB ExSel),       ; Keyboard ExSel (A4h, selector)
+    Input,
+End Collection,
+Usage Page (FF80h),                 ; FF80h, vendor-defined
+Usage (80h),
+Collection (Application),
+    Report ID (128),
+    Usage (80h),
+    Report Size (8),
+    Report Count (5),
+    Input (Variable),
+    Report ID (246),
+    Usage (F6h),
+    Report Size (8),
+    Report Count (7),
+    Input (Variable),
+    Report ID (240),
+    Usage (F0h),
+    Report Count (3),
+    Feature (Variable),
+    Report ID (241),
+    Usage (F1h),
+    Report Count (7),
+    Feature (Variable),
+    Report ID (242),
+    Usage (F2h),
+    Report Count (4),
+    Feature (Variable),
+    Report ID (243),
+    Usage (F3h),
+    Report Count (153),
+    Feature (Variable),
+    Report ID (244),
+    Usage (F4h),
+    Report Count (153),
+    Feature (Variable),
+    Report ID (245),
+    Usage (F5h),
+    Report Count (153),
+    Feature (Variable),
+    Report ID (246),
+    Usage (F6h),
+    Report Count (7),
+    Feature (Variable),
+    Report ID (247),
+    Usage (F7h),
+    Report Size (8),
+    Report Count (31),
+    Input (Variable),
+End Collection
+
+/sys/devices/pci0000:00/0000:00:08.1/0000:05:00.4/usb3/3-2/3-2:1.0/0003:046D:C24A.0006/report_descriptor
+Usage Page (Desktop),               ; Generic desktop controls (01h)
+Usage (Mouse),                      ; Mouse (02h, application collection)
+Collection (Application),
+    Usage (Pointer),                ; Pointer (01h, physical collection)
+    Collection (Physical),
+        Usage Page (Button),        ; Button (09h)
+        Usage Minimum (01h),
+        Usage Maximum (10h),
+        Logical Minimum (0),
+        Logical Maximum (1),
+        Report Size (1),
+        Report Count (16),
+        Input (Variable),
+        Usage Page (Desktop),       ; Generic desktop controls (01h)
+        Usage (X),                  ; X (30h, dynamic value)
+        Usage (Y),                  ; Y (31h, dynamic value)
+        Logical Minimum (-32767),
+        Logical Maximum (32767),
+        Report Size (16),
+        Report Count (2),
+        Input (Variable, Relative),
+        Usage (Wheel),              ; Wheel (38h, dynamic value)
+        Report Size (8),
+        Report Count (1),
+        Logical Minimum (-127),
+        Logical Maximum (127),
+        Input (Variable, Relative),
+        Usage Page (Consumer),      ; Consumer (0Ch)
+        Usage (AC Pan),             ; AC pan (0238h, linear control)
+        Report Count (1),
+        Input (Variable, Relative),
+    End Collection,
+End Collection
