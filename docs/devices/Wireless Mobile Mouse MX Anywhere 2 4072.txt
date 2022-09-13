@@ -1,0 +1,72 @@
+  2: Wireless Mobile Mouse MX Anywhere 2
+     Codename     : MX Anywhere 2
+     Kind         : mouse
+     Wireless PID : 4072
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: DDAE1933
+        Bootloader: BOT 57.10.B0003
+          Firmware: MPM 13.10.B0003
+          Firmware: MPM 13.10.B0003
+             Other:
+     The power switch is located on the base.
+     Supports 28 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: CRYPTO ID              {0021}
+         7: BATTERY STATUS         {1000}
+         8: CONFIG DEVICE PROPS    {1806}   internal, hidden
+         9: CHANGE HOST            {1814}
+        10: REPROG CONTROLS V4     {1B04}
+        11: ADJUSTABLE DPI         {2201}
+        12: VERTICAL SCROLLING     {2100}
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+        13: HIRES WHEEL            {2121}
+            Multiplier: 8
+            Has invert
+              Normal wheel motion
+            Has ratchet switch
+              Normal wheel mode
+            Low resolution mode
+            HID notification
+            High Resolution Wheel Invert: False
+            Wheel Resolution: False
+        14: DFUCONTROL SIGNED      {00C2}
+        15: unknown:1813           {1813}   internal, hidden
+        16: unknown:1830           {1830}   internal, hidden
+        17: unknown:1890           {1890}   internal, hidden
+        18: unknown:1891           {1891}   internal, hidden
+        19: unknown:18A1           {18A1}   internal, hidden
+        20: unknown:18C0           {18C0}   internal, hidden
+        21: unknown:1DF3           {1DF3}   internal, hidden
+        22: unknown:1E00           {1E00}   hidden
+        23: unknown:1EB0           {1EB0}   internal, hidden
+        24: unknown:1803           {1803}   internal, hidden
+        25: unknown:1861           {1861}   internal, hidden
+        26: unknown:9001           {9001}   internal, hidden
+        27: OOBSTATE               {1805}   internal, hidden
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Button
+             mse, pos:0, group:1, gmask:1
+         1: Right Button              , default: Right Click                 => Right Button
+             mse, pos:0, group:1, gmask:1
+         2: Middle Button             , default: Gesture Button Navigation   => Middle Button
+             mse, reprogrammable, divertable, pos:0, group:2, gmask:11
+         3: Back Button               , default: Mouse Back Button           => Back Button
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:15
+         4: Forward Button            , default: Mouse Forward Button        => Forward Button
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:15
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Left Tilt
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:15
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Right Tilt
+             mse, reprogrammable, divertable, pos:0, group:3, gmask:15
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, pos:0, group:4, gmask:0
+     Battery: 90%, discharging, next level 50%.
+15:29:59,190     INFO [MainThread] logitech_receiver.receiver: <UnifyingReceiver(/dev/hidraw0,3)>: found new device 3 (4024)

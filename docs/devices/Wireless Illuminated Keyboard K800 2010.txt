@@ -1,3 +1,18 @@
+  2: Wireless Illuminated Keyboard K800
+     Codename     : K800
+     Kind         : keyboard
+     Wireless PID : 2010
+     Protocol     : HID++ 1.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: FFC65665
+          Firmware: 22.01.B0019
+        Bootloader: 02.01
+             Other: 00.07
+     The power switch is located on the top right corner.
+     Notifications: battery status (0x100000).
+     Battery: full, discharging.
+
+
 # 0x00 - Enabled Notifications. rw (see HID++ 1.0 spec)
 << (   0.055) [10 02 8100 000000] '\x10\x02\x81\x00\x00\x00\x00'
 >> (   0.084) [10 02 8100 000000] '\x10\x02\x81\x00\x00\x00\x00'

@@ -5,3 +5,5 @@ Nano Receiver
     Firmware   : 30.00.B0009
   Has 1 paired device(s) out of a maximum of 1.
   Notifications: (none)
+
+Seen with Marathon Mouse M705
