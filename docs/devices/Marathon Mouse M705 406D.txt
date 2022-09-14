@@ -1,25 +1,23 @@
-Solaar 1.0.6
-
-  1: Marathon Mouse M705 (M-R0073)
-     Device path  : /dev/hidraw6
+  3: Marathon Mouse M705 (M-R0073)
+     Device path  : /dev/hidraw3
      WPID         : 406D
      Codename     : M705 (M-R0073)
      Kind         : mouse
      Protocol     : HID++ 4.5
      Polling rate : 8 ms (125Hz)
-     Serial number: 1967999A
+     Serial number: B14D65DA
      Model ID:      406D00000000
-     Unit ID:       AD21B902
+     Unit ID:       5E1A15B8
         Bootloader: BOT 59.00.B0002
           Firmware: RQM 67.01.B0005
      The power switch is located on the base.
-     Supports 27 HID++ 2.0 features:
+     Supports 26 HID++ 2.0 features:
          0: ROOT                   {0000}
          1: FEATURE SET            {0001}
          2: DEVICE FW VERSION      {0003}
             Firmware: Bootloader BOT 59.00.B0002 406D5F5048B901
             Firmware: Firmware RQM 67.01.B0005 406D5F5048B901
-            Unit ID: AD21B902  Model ID: 406D00000000  Transport IDs: {'wpid': '406D'}
+            Unit ID: 5E1A15B8  Model ID: 406D00000000  Transport IDs: {'wpid': '406D'}
          3: DEVICE NAME            {0005}
             Name: Marathon Mouse/Performance Plus M705
             Kind: mouse
@@ -28,8 +26,10 @@ Solaar 1.0.6
          6: BATTERY STATUS         {1000}
             Battery: 50%, discharging, next level 20%.
          7: REPROG CONTROLS V4     {1B04}
-            Key/Button Actions (saved): {'80': 80, '81': 81, '82': 82, '83': 83, '86': 86, '91': 91, '93': 93}
-            Key/Button Actions        : {'80': 80, '81': 81, '82': 82, '83': 83, '86': 86, '91': 91, '93': 93}
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, Left Tilt:Regular, Right Tilt:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, Left Tilt:Regular, Right Tilt:Regular}
          8: POINTER SPEED          {2205}
             Pointer Speed: 1.0
             Sensitivity (Pointer Speed) (saved): 256
@@ -54,16 +54,92 @@ Solaar 1.0.6
         23: unknown:1850           {1850}   internal, hidden
         24: unknown:1F03           {1F03}   internal, hidden
         25: unknown:18C0           {18C0}   internal, hidden
+     Has 7 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Mouse Scroll Left Button
+             mse, reprogrammable, divertable, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Mouse Scroll Right Button
+             mse, reprogrammable, divertable, pos:0, group:2, group mask:g1,g2
+             reporting: default
+     Battery: 50%, discharging, next level 20%.
+
+
+  3: Marathon Mouse M705 (M-R0073)
+     Device path  : /dev/hidraw3
+     WPID         : 406D
+     Codename     : M705 (M-R0073)
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: B14D65DA
+     Model ID:      406D00000000
+     Unit ID:       5E1A15B8
+        Bootloader: BOT 59.00.B0002
+          Firmware: RQM 67.01.B0005
+     The power switch is located on the base.
+     Supports 27 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+            Firmware: Bootloader BOT 59.00.B0002 406D5F5048B901
+            Firmware: Firmware RQM 67.01.B0005 406D5F5048B901
+            Unit ID: 5E1A15B8  Model ID: 406D00000000  Transport IDs: {'wpid': '406D'}
+         3: DEVICE NAME            {0005}
+            Name: Marathon Mouse/Performance Plus M705
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: BATTERY STATUS         {1000}
+            Battery: 50%, discharging, next level 20%.
+         7: REPROG CONTROLS V4     {1B04}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, Left Tilt:Regular, Right Tilt:Regular}
+         8: POINTER SPEED          {2205}
+            Pointer Speed: 1.0
+            Sensitivity (Pointer Speed)        : 256
+         9: VERTICAL SCROLLING     {2100}
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+        10: DFUCONTROL SIGNED      {00C2}
+        11: DEVICE RESET           {1802}   internal, hidden
+        12: unknown:1803           {1803}   internal, hidden
+        13: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        14: unknown:1810           {1810}   internal, hidden
+        15: unknown:1830           {1830}   internal, hidden
+        16: unknown:1890           {1890}   internal, hidden
+        17: unknown:18A1           {18A1}   internal, hidden
+        18: unknown:1DF3           {1DF3}   internal, hidden
+        19: unknown:1E00           {1E00}   hidden
+        20: unknown:1EB0           {1EB0}   internal, hidden
+        21: unknown:1861           {1861}   internal, hidden
+        22: unknown:18B1           {18B1}   internal, hidden
+        23: unknown:1850           {1850}   internal, hidden
+        24: unknown:1F03           {1F03}   internal, hidden
+        25: unknown:18C0           {18C0}   internal, hidden
         26: HIRES WHEEL            {2121}
             Multiplier: 8
             Has invert: Normal wheel motion
-            Has ratchet switch: Free wheel mode
-            High resolution mode
+            Has ratchet switch: Normal wheel mode
+            Low resolution mode
             HID notification
-            Scroll Wheel Direction (saved): False
             Scroll Wheel Direction        : False
-            Scroll Wheel Resolution (saved): True
-            Scroll Wheel Resolution        : True
+            Scroll Wheel Resolution        : False
      Has 7 reprogrammable keys:
          0: Left Button               , default: Left Click                  => Left Click
              mse, reprogrammable, pos:0, group:1, group mask:g1
