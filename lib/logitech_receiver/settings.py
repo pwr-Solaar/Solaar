@@ -22,6 +22,7 @@ from logging import DEBUG as _DEBUG
 from logging import WARNING as _WARNING
 from logging import getLogger
 from struct import unpack as _unpack
+from time import sleep as _sleep
 
 from . import hidpp20 as _hidpp20
 from .common import NamedInt as _NamedInt
@@ -1489,6 +1490,8 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
+    if device.features and _hidpp20.FEATURE.HIRES_WHEEL in device.features:
+        _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, 'persister', None)
     sensitives = persister.get('_sensitive', {}) if persister else {}
     for s in device.settings:
