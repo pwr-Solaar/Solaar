@@ -56,7 +56,8 @@ _unifying_receiver = lambda product_id: {
     'usb_interface': 2,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Unifying Receiver'),
-    'receiver_kind': 'unifying'
+    'receiver_kind': 'unifying',
+    'may_unpair': True
 }
 
 _nano_receiver = lambda product_id: {
@@ -112,7 +113,8 @@ _lenovo_receiver = lambda product_id: {
     'usb_interface': 1,
     'hid_driver': _DRIVER,  # noqa: F821
     'name': _('Nano Receiver'),
-    'receiver_kind': 'nano'
+    'receiver_kind': 'nano',
+    'may_unpair': False
 }
 
 _lightspeed_receiver = lambda product_id: {
@@ -120,7 +122,8 @@ _lightspeed_receiver = lambda product_id: {
     'product_id': product_id,
     'usb_interface': 2,
     'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Lightspeed Receiver')
+    'name': _('Lightspeed Receiver'),
+    'may_unpair': False
 }
 
 _ex100_receiver = lambda product_id: {
