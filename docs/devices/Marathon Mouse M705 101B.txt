@@ -11,3 +11,46 @@
      The power switch is located on the base.
      Notifications: battery status (0x100000).
      Battery: 25%, discharging.
+
+registers:
+
+# writing 0x10 in this register will generate an event
+#   10 02 0Dxx yyzz00
+# where 0D happens to be the battery register number
+#       xx is the battery charge
+#       yy, zz ?
+<< (   0.001) [10 02 8100 000000] '\x10\x02\x81\x00\x00\x00\x00'
+>> (   1.132) [10 02 8100 100000] '\x10\x02\x81\x00\x10\x00\x00'
+
+# smooth scroll - possible values
+#    - 00 (off)
+#    - 02 ?, apparently off as well, default value at power-on
+#    - 0x40 (on)
+<< (   2.005) [10 02 8101 000000] '\x10\x02\x81\x01\x00\x00\x00'
+>> (   2.052) [10 02 8101 020000] '\x10\x02\x81\x01\x02\x00\x00'
+
+# battery status:  percentage full, ?, ?
+<< (  14.835) [10 02 810D 000000] '\x10\x02\x81\r\x00\x00\x00'
+>> (  14.847) [10 02 810D 644734] '\x10\x02\x81\rdG4'
+
+# accepts mask 0xF1
+# setting 0x10 turns off the movement events (but buttons still work)
+<< ( 221.495) [10 02 81D0 000000] '\x10\x02\x81\xd0\x00\x00\x00'
+>> ( 221.509) [10 02 81D0 000000] '\x10\x02\x81\xd0\x00\x00\x00'
+
+# appears to be read-only?
+<< ( 223.527) [10 02 81D2 000000] '\x10\x02\x81\xd2\x00\x00\x00'
+>> ( 223.540) [10 02 81D2 000003] '\x10\x02\x81\xd2\x00\x00\x03'
+
+# appears to be read-only?
+<< ( 225.557) [10 02 81D4 000000] '\x10\x02\x81\xd4\x00\x00\x00'
+>> ( 225.571) [10 02 81D4 000004] '\x10\x02\x81\xd4\x00\x00\x04'
+
+# read-only, 01-04 firmware info
+<< ( 259.270) [10 02 81F1 000000] '\x10\x02\x81\xf1\x00\x00\x00'
+>> ( 259.283) [10 02 8F81 F10300] '\x10\x02\x8f\x81\xf1\x03\x00'
+
+# writing 01 here will trigger an avalanche of events, most likely
+# raw input from the mouse; disable by writing 00
+<< ( 261.300) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
+>> ( 261.315) [10 02 81F3 000000] '\x10\x02\x81\xf3\x00\x00\x00'
