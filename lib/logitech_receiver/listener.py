@@ -98,6 +98,8 @@ class _ThreadedHandle:
                 return self._local.handle
             except Exception:
                 return self._open()
+        else:
+            return -1
 
     __int__ = __index__
 
