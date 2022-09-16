@@ -925,14 +925,14 @@ class KeyPress(Action):
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode is None:
                 _log.warn('rule KeyPress key symbol not currently available %s', self)
-            elif self.needed(keycode, modifiers):
+            elif self.action != self.CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
-            if keycode and self.needed(keycode, modifiers):
+            if keycode and (self.action != self.CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 

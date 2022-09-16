@@ -187,9 +187,11 @@ then Solaar will add keypresses to produce that keysymbol,
 e.g., simulating a left shift keypress to get "A" instead of "a".
 If a key symbol is not available in the current keymap or needs other shift-like keys,
 then Solaar cannot simulate it.
-If Solaar can determine the current key modifiers (shift, control, etc.)
-any key symbols that correspond to these modifier keys are not pressed,
-so if the shift key is currently down on a keyboard Solaar will not bother to simulate a shift key.
+Under X11 Solaar can determine the current key modifiers (shift, control, etc.).
+Any key symbols that correspond to these modifier keys are not depressed and released when clicking.
+So if the shift key is currently down on a keyboard Solaar will not bother to simulate a shift key.
+Under Wayland this check cannot be done so the net result of a `KeyPress` action that is not a `depress` or a `release`
+and that contains modifier keys might be to release the modifier keys.
 
 Simulating input in Linux is complex.
 Solaar has to try to determine which keyboard key corresponds to which input character as it cannot directly
