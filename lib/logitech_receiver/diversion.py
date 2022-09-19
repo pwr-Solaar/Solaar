@@ -398,6 +398,10 @@ class Rule(RuleComponent):
                 return result
         return result
 
+    def once(self, feature, notification, device, status, last_result):
+        self.evaluate(feature, notification, device, status, last_result)
+        return False
+
     def data(self):
         return {'Rule': [c.data() for c in self.components]}
 
@@ -1115,7 +1119,7 @@ class Later(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         if self.delay and self.rule:
-            GLib.timeout_add_seconds(self.delay, Rule.evaluate, self.rule, feature, notification, device, status, last_result)
+            GLib.timeout_add_seconds(self.delay, Rule.once, self.rule, feature, notification, device, status, last_result)
         return None
 
     def data(self):
