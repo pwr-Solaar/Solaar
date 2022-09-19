@@ -257,7 +257,7 @@ class DiversionDialog:
                 editable = editable or (rule_component.source is not None)
         wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
         piter = model.insert(it, pos, (wrapped, ))
-        if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or)):
+        if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
             for c in rule_component.components:
                 ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
                 self._populate_model(model, piter, c, level + 1, editable=ed)
@@ -531,6 +531,7 @@ class DiversionDialog:
                         (_('Mouse click'), _DIV.MouseClick, ['left', 1]),
                         (_('Set'), _DIV.Set, [None, '', None]),
                         (_('Execute'), _DIV.Execute, ['']),
+                        (_('Later'), _DIV.Later, [1]),
                     ]
                 ],
             ]
@@ -1115,6 +1116,42 @@ class OrUI(RuleComponentUI):
     @classmethod
     def left_label(cls, component):
         return _('Or')
+
+
+class LaterUI(RuleComponentUI):
+
+    CLASS = _DIV.Later
+    MIN_VALUE = 1
+    MAX_VALUE = 100
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(_('Number of seconds to delay.'))
+        self.widgets[self.label] = (0, 0, 1, 1)
+        self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
+        self.field.set_halign(Gtk.Align.CENTER)
+        self.field.set_valign(Gtk.Align.CENTER)
+        self.field.set_hexpand(True)
+        #        self.field.set_vexpand(True)
+        self.field.connect('changed', self._on_update)
+        self.widgets[self.field] = (0, 1, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field.set_value(component.delay)
+
+    def collect_value(self):
+        return [int(self.field.get_value())] + self.component.components
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Later')
+
+    @classmethod
+    def right_label(cls, component):
+        return str(component.delay)
 
 
 class NotUI(RuleComponentUI):
@@ -2505,6 +2542,7 @@ COMPONENT_UI = {
     _DIV.Not: NotUI,
     _DIV.Or: OrUI,
     _DIV.And: AndUI,
+    _DIV.Later: LaterUI,
     _DIV.Process: ProcessUI,
     _DIV.MouseProcess: MouseProcessUI,
     _DIV.Active: ActiveUI,
