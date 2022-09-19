@@ -1092,6 +1092,38 @@ class Execute(Action):
         return {'Execute': self.args[:]}
 
 
+class Later(Action):
+    def __init__(self, args, warn=True):
+        self.delay = 0
+        self.rule = Rule([])
+        self.components = []
+        if not (isinstance(args, list)):
+            args = [args]
+        if not (isinstance(args, list) and len(args) >= 1):
+            if warn:
+                _log.warn('rule Later argument not list with minimum length 1: %s', args)
+        elif not (isinstance(args[0], int)) or not 0 < args[0] < 101:
+            if warn:
+                _log.warn('rule Later argument delay not integer between 1 and 100: %s', args)
+        else:
+            self.delay = args[0]
+            self.rule = Rule(args[1:], warn=warn)
+            self.components = self.rule.components
+
+    def __str__(self):
+        return 'Later: [' + str(self.delay) + ', ' + ', '.join(str(c) for c in self.components) + ']'
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if self.delay and self.rule:
+            GLib.timeout_add_seconds(self.delay, Rule.evaluate, self.rule, feature, notification, device, status, last_result)
+        return None
+
+    def data(self):
+        data = [c.data() for c in self.components]
+        data.insert(0, self.delay)
+        return {'Later': data}
+
+
 COMPONENTS = {
     'Rule': Rule,
     'Not': Not,
@@ -1113,6 +1145,7 @@ COMPONENTS = {
     'MouseClick': MouseClick,
     'Set': Set,
     'Execute': Execute,
+    'Later': Later,
 }
 
 built_in_rules = Rule([])
