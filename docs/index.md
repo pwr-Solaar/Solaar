@@ -13,6 +13,16 @@ Some Linux distributions distribute old versions of Solaar.
 If you are using an old version and something described here does not work you should upgrade
 using one of the methods described below.
 
+Solaar runs as a regular user process, albeit with direct access to the Linux interface
+that lets it directly communicate with the Logitech devices it manages using special
+Logitech-proprietary (HID++) commands.
+Each Logitech device implements a different subset of these commands.
+Solaar is thus only able to make the changes to devices that devices implement.
+
+Solaar is not a device driver and does not process normal input from devices.
+It is thus unable to fix problems that arise from incorrect handling of
+mouse movements or keycodes by Linux drivers or other software.
+
 Solaar can be used as a GUI application, the usual case, or via its command-line interface.
 The Solaar GUI is meant to run continuously in the background,
 monitoring devices, making changes to them, and responding to some messages they emit.
@@ -47,10 +57,6 @@ Solaar's GUI can be started in several ways
 
 For more information on Solaar's command-line interface use the help option,
 as in `solaar --help`.
-
-Solaar does not process normal input from devices. It is thus unable
-to fix problems that arise from incorrect handling of mouse movements or keycodes
-by Linux drivers or other software.
 
 Solaar has progressed past version 1.1. Problems with earlier versions should
 not be reported as bugs. Instead, upgrade to a recent version or manually install
