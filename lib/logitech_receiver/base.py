@@ -273,7 +273,7 @@ def _read(handle, timeout):
         report_id = ord(data[:1])
         devnumber = ord(data[1:2])
 
-        if _log.isEnabledFor(_DEBUG):
+        if _log.isEnabledFor(_DEBUG) and (report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10):  # ignore DJ input messages
             _log.debug('(%s) => r[%02X %02X %s %s]', handle, report_id, devnumber, _strhex(data[2:4]), _strhex(data[4:]))
 
         return report_id, devnumber, data[2:]
