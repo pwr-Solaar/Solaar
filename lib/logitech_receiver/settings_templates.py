@@ -669,9 +669,7 @@ class DivertKeys(_Settings):
                             choices[k.key] = setting_class.choices_gesture
                             if gestures is None:
                                 gestures = MouseGesturesXY(device, name='MouseGestures')
-                            if _F.ADJUSTABLE_DPI not in device.features:
-                                choices[k.key] = setting_class.choices_gesture
-                            else:
+                            if _F.ADJUSTABLE_DPI in device.features:
                                 choices[k.key] = setting_class.choices_universe
                                 if sliding is None:
                                     sliding = DpiSlidingXY(device, name='DpiSlding')
