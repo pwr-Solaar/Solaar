@@ -1,6 +1,6 @@
 Solaar version 1.1.5
 
-  2: G733 Gaming Headset
+ 2: G733 Gaming Headset
      Device path  : /dev/hidraw2
      USB id       : 046d:0AB5
      Codename     : G733 Headset
@@ -10,7 +10,7 @@ Solaar version 1.1.5
      Model ID:      0AB500000000
      Unit ID:       FFFFFFFF
           Firmware: U1  37.00.B0131
-     Supports 8 HID++ 2.0 features:
+     Supports 9 HID++ 2.0 features:
          0: ROOT                   {0000} V0
          1: FEATURE SET            {0001} V0
          2: DEVICE FW VERSION      {0003} V2
@@ -25,6 +25,8 @@ Solaar version 1.1.5
             Divert G Keys        : False
          6: EQUALIZER              {8310} V0
          7: SIDETONE               {8300} V0
-            Sidetone (saved): 70
-            Sidetone        : 70
+            Sidetone (saved): 65
+            Sidetone        : 65
+         8: ADC MEASUREMENT        {1F20} V0
+            Battery status unavailable.
      Battery status unavailable.
