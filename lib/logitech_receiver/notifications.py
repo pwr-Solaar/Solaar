@@ -343,6 +343,8 @@ def _process_feature_notification(device, status, n, feature):
             if result:
                 _ignore, level, next, battery_status, voltage = result
                 status.set_battery_info(level, next, battery_status, voltage)
+            else:  # this feature is used to signal device becoming inactive
+                status.changed(active=False)
         else:
             _log.warn('%s: unknown ADC MEASUREMENT %s', device, n)
 

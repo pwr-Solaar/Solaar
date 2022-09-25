@@ -237,7 +237,7 @@ class DeviceStatus(dict):
             else:
                 reason = _('Battery: %(percent)d%% (%(status)s)') % {'percent': level, 'status': status.name}
 
-        if changed or reason:
+        if changed or reason or not self._active:  # a battery response means device is active
             # update the leds on the device, if any
             _hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
             self.changed(active=True, alert=alert, reason=reason, timestamp=timestamp)
