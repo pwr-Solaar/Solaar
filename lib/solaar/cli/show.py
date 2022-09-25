@@ -231,7 +231,10 @@ def _print_device(dev, num=None):
                        setting._device.persister.get(setting.name) is not None:
                         v = setting.val_to_string(setting._device.persister.get(setting.name))
                         print('            %s (saved): %s' % (setting.label, v))
-                    v = setting.val_to_string(setting.read(False))
+                    try:
+                        v = setting.val_to_string(setting.read(False))
+                    except _hidpp20.FeatureCallError as e:
+                        v = e
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
