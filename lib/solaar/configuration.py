@@ -160,15 +160,15 @@ class _DeviceEntry(dict):
         super().__setitem__(key, value)
         save(defer=True)
 
-    def update(self, device):
+    def update(self, device, modelId):
         if device.name and device.name != self.get(_KEY_NAME):
             super().__setitem__(_KEY_NAME, device.name)
         if device.wpid and device.wpid != self.get(_KEY_WPID):
             super().__setitem__(_KEY_WPID, device.wpid)
         if device.serial and device.serial != '?' and device.serial != self.get(_KEY_SERIAL):
             super().__setitem__(_KEY_SERIAL, device.serial)
-        if device.modelId and device.modelId != self.get(_KEY_MODEL_ID):
-            super().__setitem__(_KEY_MODEL_ID, device.modelId)
+        if modelId and modelId != self.get(_KEY_MODEL_ID):
+            super().__setitem__(_KEY_MODEL_ID, modelId)
         if device.unitId and device.unitId != self.get(_KEY_UNIT_ID):
             super().__setitem__(_KEY_UNIT_ID, device.unitId)
 
@@ -198,6 +198,7 @@ _yaml.add_representer(_NamedInt, named_int_representer)
 
 # A device can be identified by a combination of WPID and serial number (for receiver-connected devices)
 # or a combination of modelId and unitId (for direct-connected devices).
+# But some devices have empty (all zero) modelIds and unitIds.  Use the device name as a backup for the modelId.
 # The worst situation is a receiver-connected device that Solaar has never seen on-line
 # that is directly connected.  Here there is no way to realize that the two devices are the same.
 # So new entries are not created for unseen off-line receiver-connected devices except for those with protocol 1.0
@@ -211,8 +212,10 @@ def persister(device):
     if not _config:
         _load()
     entry = None
+    modelId = device.modelId if device.modelId != '000000000000' else device.name if device.modelId else None
+    print('PERSISTER for', device.name, device.wpid, device.serial, device.modelId, device.unitId, modelId)
     for c in _config:
-        if isinstance(c, _DeviceEntry) and match(device.wpid, device.serial, device.modelId, device.unitId, c):
+        if isinstance(c, _DeviceEntry) and match(device.wpid, device.serial, modelId, device.unitId, c):
             entry = c
             break
     if not entry:
@@ -220,9 +223,11 @@ def persister(device):
             if _log.isEnabledFor(_INFO):
                 _log.info('not setting up persister for offline device %s with missing serial number', device.name)
             return
+        if _log.isEnabledFor(_INFO):
+            _log.info('setting up persister for device %s', device.name)
         entry = _DeviceEntry()
         _config.append(entry)
-    entry.update(device)
+    entry.update(device, modelId)
     return entry
 
 
