@@ -1318,12 +1318,12 @@ def decipher_battery_voltage(report):
 
 
 def get_adc_measurement(device):
-    try:  # this feature call has been known to produce errors so be extra cautious
+    try:  # this feature call produces an error for headsets that are connected but inactive
         report = feature_request(device, FEATURE.ADC_MEASUREMENT)
         if report is not None:
             return decipher_adc_measurement(report)
     except FeatureCallError:
-        return None
+        return FEATURE.ADC_MEASUREMENT if FEATURE.ADC_MEASUREMENT in device.features else None
 
 
 def decipher_adc_measurement(report):
@@ -1347,7 +1347,8 @@ battery_functions = {
 
 
 def get_battery(device, feature):
-    """Return battery information - feature, approximate level, next, charging, voltage"""
+    """Return battery information - feature, approximate level, next, charging, voltage
+    or battery feature if there is one but it is not responding or None for no battery feature"""
     if feature is not None:
         battery_function = battery_functions.get(feature, None)
         if battery_function:
@@ -1359,7 +1360,7 @@ def get_battery(device, feature):
             result = battery_function(device)
             if result:
                 return result
-    return 0, None, None, None, None
+    return 0
 
 
 def get_keys(device):

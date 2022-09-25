@@ -359,11 +359,14 @@ class Device:
             battery_feature = self.persister.get('_battery', None) if self.persister else None
             if battery_feature != 0:
                 result = _hidpp20.get_battery(self, battery_feature)
-                if result:
+                try:
                     feature, level, next, status, voltage = result
                     if self.persister and battery_feature is None:
                         self.persister['_battery'] = feature
                     return level, next, status, voltage
+                except Exception:
+                    if self.persister and battery_feature is None:
+                        self.persister['_battery'] = result
 
     def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
