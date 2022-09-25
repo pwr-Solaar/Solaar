@@ -259,7 +259,7 @@ class FeaturesArray(dict):
                     _log.warn('FEATURE_SET found, but failed to read features count')
                     return False
                 else:
-                    self.count = ord(count[:1])
+                    self.count = ord(count[:1]) + 1  # ROOT feature not included in count
                     self[FEATURE.ROOT] = 0
                     self[FEATURE.FEATURE_SET] = fs_index
                     return True
