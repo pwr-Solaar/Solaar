@@ -1,3 +1,27 @@
+# 1.1.6r2
+
+* Don't add non-existant key in raw xy processing
+* Add special keys from MX Mechanical Mini
+* Fix processing of HID++ 1.0 battery reports
+* Use report descriptors to determine suitable devices
+* Handle exceptions when processing configuration file
+* Add Logitech PRO Gaming Keyboard
+* Fix bad entries in divert-keys when found
+* Correctly convert old-style diversions to new style and remove old ones
+* Add optional save argument to write_key_value methods
+* Use device name in configuration entries if device modelId is zeroes
+* Don't show normal DJ messages in debug log
+* Add Later rule action
+* Correctly record battery feature when ADC produces error
+* Print feature call errors in solaar show instead of terminating
+* Use ADC notifications to set device inactive and active
+* Add one to feature count to count ROOT feature
+* Don't check modifiers for KeyPress actions that are not clicks
+* Augment comments on what Solaar cannot do
+* Fix bug in printing closed handle
+* Use only product records to determine which receivers unpair
+* Add conditional delay to get around race with Linux HID++ driver
+
 # 1.1.5
 
 * Add G213 Prodigy Gaming Keyboard
