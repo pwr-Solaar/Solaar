@@ -216,8 +216,8 @@ For settings that use gestures as an argument the internal name of the gesture i
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 All settings are supported.
 
-A `Sleep` action executes rule components later.
-`Set` actions take an integer delay between 1 and 100 followed by a list of rule components that will be executed later.
+A `Later` action executes rule components later.
+`Later` actions take an integer delay in seconds between 1 and 100 followed by a zero or more rule components that will be executed later.
 Processing of the rest of the rule continues immediately.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
