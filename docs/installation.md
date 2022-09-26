@@ -7,8 +7,8 @@ layout: page
 
 ## Downloading
 
-Clone Solaar from GitHub by `git clone --recurse-submodules https://github.com/pwr-Solaar/Solaar.git`
-Solaar has a submodule, so make sure that the submodule is cloned.
+Clone Solaar from GitHub by `git clone --recurse-submodules https://github.com/pwr-Solaar/Solaar.git`.
+Make sure that the submodule python-hid-parser was cloned, i.e., the directory `python-hid-parser` has content.
 
 ## Requirements for Solaar
 
