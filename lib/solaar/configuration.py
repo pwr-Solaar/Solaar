@@ -213,7 +213,6 @@ def persister(device):
         _load()
     entry = None
     modelId = device.modelId if device.modelId != '000000000000' else device.name if device.modelId else None
-    print('PERSISTER for', device.name, device.wpid, device.serial, device.modelId, device.unitId, modelId)
     for c in _config:
         if isinstance(c, _DeviceEntry) and match(device.wpid, device.serial, modelId, device.unitId, c):
             entry = c
