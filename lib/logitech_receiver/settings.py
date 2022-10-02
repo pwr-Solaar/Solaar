@@ -420,7 +420,7 @@ class Settings(Setting):
                         return None
             return map
 
-    def write_key_value(self, key, value):
+    def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
@@ -436,7 +436,7 @@ class Settings(Setting):
                 data_bytes = self._validator.prepare_write(int(key), value)
                 # always need to write to configuration because dictionary is shared and could have changed
                 self._value[int(key)] = value
-                self._pre_write()
+                self._pre_write(save)
             except ValueError:
                 data_bytes = value = None
             if data_bytes is not None:
@@ -521,7 +521,7 @@ class LongSettings(Setting):
                                 return None
             return map
 
-    def write_key_value(self, item, value):
+    def write_key_value(self, item, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert item is not None
@@ -535,7 +535,7 @@ class LongSettings(Setting):
                 self.read()
             data_bytes = self._validator.prepare_write_item(item, value)
             self._value[int(item)] = value
-            self._pre_write()
+            self._pre_write(save)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
@@ -619,7 +619,7 @@ class BitFieldSetting(Setting):
                         return None
             return map
 
-    def write_key_value(self, key, value):
+    def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
@@ -633,7 +633,7 @@ class BitFieldSetting(Setting):
                 self.read()
             value = bool(value)
             self._value[int(key)] = value
-            self._pre_write()
+            self._pre_write(save)
 
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
@@ -710,7 +710,7 @@ class RangeFieldSetting(Setting):
                 _log.warn('%s: range field setting no data to write', self.name)
             return map
 
-    def write_key_value(self, key, value):
+    def write_key_value(self, key, value, save=True):
         assert key is not None
         assert value is not None
         if _log.isEnabledFor(_DEBUG):
@@ -720,7 +720,7 @@ class RangeFieldSetting(Setting):
                 self.read()
             map = self._value
             map[int(key)] = value
-            self.write(map)
+            self.write(map, save)
             return value
 
 
