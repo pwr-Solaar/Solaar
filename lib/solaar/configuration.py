@@ -146,6 +146,8 @@ def _cleanup_load(c):
                 if gestures:  # convert old-style mouse-gestures setting to divert-keys entry
                     divert[int(gestures)] = 2
                 element.pop('mouse-gestures', None)
+                # remove any string entries (from bad conversions)
+                element['divert-keys'] = {k: v for k, v in divert.items() if isinstance(k, int)}
             # convert to device entries
             element = _DeviceEntry(**element)
             _config.append(element)
