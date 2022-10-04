@@ -114,14 +114,15 @@ def _receivers(dev_path=None):
             _sys.exit('%s: error: %s' % (NAME, str(e)))
 
 
-def _wired_devices(dev_path=None):
+def _receivers_and_devices(dev_path=None):
     from logitech_receiver import Device
-    from logitech_receiver.base import wired_devices
-    for dev_info in wired_devices():
+    from logitech_receiver import Receiver
+    from logitech_receiver.base import receivers_and_devices
+    for dev_info in receivers_and_devices():
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            d = Device.open(dev_info)
+            d = Device.open(dev_info) if dev_info.isDevice else Receiver.open(dev_info)
             if _log.isEnabledFor(_DEBUG):
                 _log.debug('[%s] => %s', dev_info.path, d)
             if d is not None:
@@ -198,13 +199,12 @@ def run(cli_args=None, hidraw_path=None):
     assert action in actions
 
     try:
-        c = list(_receivers(hidraw_path))
         if action == 'show' or action == 'probe' or action == 'config':
-            c += list(_wired_devices(hidraw_path))
-
+            c = list(_receivers_and_devices(hidraw_path))
+        else:
+            c = list(_receivers(hidraw_path))
         if not c:
             raise Exception('No devices found')
-
         from importlib import import_module
         m = import_module('.' + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)

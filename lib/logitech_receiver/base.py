@@ -106,7 +106,7 @@ def match(record, bus_id, vendor_id, product_id):
             and (record.get('product_id') is None or record.get('product_id') == product_id))
 
 
-def filter_receivers(bus_id, vendor_id, product_id):
+def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
     for record in _RECEIVER_USB_IDS:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
@@ -118,26 +118,28 @@ def receivers():
     yield from _hid.enumerate(filter_receivers)
 
 
-def filter_devices(bus_id, vendor_id, product_id):
+def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is of interest and if so return the device record for further checking"""
+    for record in _RECEIVER_USB_IDS:  # known receivers
+        if match(record, bus_id, vendor_id, product_id):
+            return record
     for record in _DEVICE_IDS:  # known devices
         if match(record, bus_id, vendor_id, product_id):
             return record
-    return _other_device_check(bus_id, vendor_id, product_id)  # USB and BT devices unknown to Solaar
+    if hidpp_short or hidpp_long:  # unknown devices that use HID++
+        return {'vendor_id': vendor_id, 'product_id': product_id, 'bus_id': bus_id, 'isDevice': True}
+    elif hidpp_short is None and hidpp_long is None:  # unknown devices in correct range of IDs
+        return _other_device_check(bus_id, vendor_id, product_id)
 
 
-def wired_devices():
-    """Enumerate all the USB-connected and Bluetooth devices attached to the machine."""
-    yield from _hid.enumerate(filter_devices)
-
-
-def filter_either(bus_id, vendor_id, product_id):
-    return filter_receivers(bus_id, vendor_id, product_id) or filter_devices(bus_id, vendor_id, product_id)
+def receivers_and_devices():
+    """Enumerate all the receivers and devices directly attached to the machine."""
+    yield from _hid.enumerate(filter)
 
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    return _hid.monitor_glib(callback, filter_either)
+    return _hid.monitor_glib(callback, filter)
 
 
 #
