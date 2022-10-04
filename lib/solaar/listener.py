@@ -309,9 +309,7 @@ def start_all():
 
     if _log.isEnabledFor(_INFO):
         _log.info('starting receiver listening threads')
-    for device_info in _base.receivers():
-        _process_receiver_event('add', device_info)
-    for device_info in _base.wired_devices():
+    for device_info in _base.receivers_and_devices():
         _process_receiver_event('add', device_info)
 
 

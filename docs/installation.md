@@ -32,6 +32,9 @@ in Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
 
+Solaar also uses the hidtools library from the Python hid-tools project.
+To install this library use `pip install --user hid-tools`.
+
 If you are running a version of Python different from the system version,
 you may need to use pip to install projects that provide the above Python packages.
 

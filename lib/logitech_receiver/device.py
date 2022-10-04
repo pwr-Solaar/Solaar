@@ -42,6 +42,8 @@ class Device:
         self.path = path
         self.handle = handle
         self.product_id = None
+        self.hidpp_short = info.hidpp_short if info else None
+        self.hidpp_long = info.hidpp_long if info else None
 
         if receiver:
             assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
@@ -172,7 +174,9 @@ class Device:
     @property
     def protocol(self):
         if not self._protocol and self.online:
-            self._protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=self.bluetooth)
+            self._protocol = _base.ping(
+                self.handle or self.receiver.handle, self.number, long_message=self.bluetooth or self.hidpp_short is False
+            )
             # if the ping failed, the peripheral is (almost) certainly offline
             self.online = self._protocol is not None
 
@@ -430,7 +434,7 @@ class Device:
                 request_id,
                 *params,
                 no_reply=no_reply,
-                long_message=self.bluetooth or self.protocol >= 2.0,
+                long_message=self.bluetooth or self.hidpp_short is False or self.protocol >= 2.0,
                 protocol=self.protocol
             )
 
