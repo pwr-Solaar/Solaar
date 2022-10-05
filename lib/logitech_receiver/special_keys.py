@@ -302,6 +302,8 @@ CONTROL = _NamedInts({
     'Standard_Key_A': 0x122,
     'Standard_Key_B': 0x123,
     'Standard_Key_C': 0x124,  # There are lots more of these
+    'Right_Option__Start__2': 0x013C,  # On MX Mechanical Mini
+    'Play_Pause': 0x0141,  # On MX Mechanical Mini
 })
 
 for i in range(1, 33):  # add in G keys - these are not really Logitech Controls
