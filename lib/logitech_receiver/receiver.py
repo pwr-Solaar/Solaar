@@ -80,6 +80,7 @@ class Receiver:
         self.notification_flags = None
         self.pairing = Pairing()
         self.initialize(product_info)
+        _hidpp10.set_configuration_pending_flags(self, 0xFF)
 
     def initialize(self, product_info: dict):
         # read the receiver information subregister, so we can find out max_devices
@@ -131,11 +132,7 @@ class Receiver:
             return False
 
         if enable:
-            set_flag_bits = (
-                hidpp10_constants.NOTIFICATION_FLAG.battery_status
-                | hidpp10_constants.NOTIFICATION_FLAG.wireless
-                | hidpp10_constants.NOTIFICATION_FLAG.software_present
-            )
+            set_flag_bits = hidpp10_constants.NOTIFICATION_FLAG.wireless | hidpp10_constants.NOTIFICATION_FLAG.software_present
         else:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)

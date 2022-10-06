@@ -189,6 +189,17 @@ class Hidpp10:
             assert len(flags) == 3
             return _bytes2int(flags)
 
+    def get_configuration_pending_flags(self, receiver):
+        assert not receiver.isDevice
+        result = read_register(receiver, REGISTERS.devices_configuration)
+        if result is not None:
+            return ord(result[:1])
+
+    def set_configuration_pending_flags(self, receiver, devices):
+        assert not receiver.isDevice
+        result = write_register(receiver, REGISTERS.devices_configuration, devices)
+        return result is not None
+
 
 def parse_battery_status(register, reply):
     if register == REGISTERS.battery_charge:
