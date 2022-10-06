@@ -35,6 +35,9 @@ def _print_receiver(receiver):
     print("  Device path  :", receiver.path)
     print("  USB id       : 046d:%s" % receiver.product_id)
     print("  Serial       :", receiver.serial)
+    pending = _hidpp10.get_configuration_pending_flags(receiver)
+    if pending:
+        print("  C Pending    : %02x" % pending)
     if receiver.firmware:
         for f in receiver.firmware:
             print("    %-11s: %s" % (f.kind, f.version))
@@ -225,6 +228,9 @@ def _print_device(dev, num=None):
                 or feature == _hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE
             ):
                 print("            Report Rate: %s" % _hidpp20.get_polling_rate(dev))
+            elif feature == _hidpp20_constants.FEATURE.CONFIG_CHANGE:
+                response = dev.feature_request(_hidpp20_constants.FEATURE.CONFIG_CHANGE, 0x10)
+                print("            Configuration: %s" % response.hex())
             elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
                 print("            Remaining Pairings: %d" % _hidpp20.get_remaining_pairing(dev))
             elif feature == _hidpp20_constants.FEATURE.ONBOARD_PROFILES:

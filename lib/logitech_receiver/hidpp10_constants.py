@@ -73,18 +73,16 @@ NOTIFICATION_FLAG = NamedInts(
     battery_status=0x100000,  # send battery charge notifications (0x07 or 0x0D)
     mouse_extra_buttons=0x080000,
     roller_V=0x040000,
-    keyboard_sleep_raw=0x020000,  # system control keys such as Sleep
+    power_keys=0x020000,  # system control keys such as Sleep
     keyboard_multimedia_raw=0x010000,  # consumer controls such as Mute and Calculator
-    # reserved_r1b4=        0x001000,  # unknown, seen on a unifying receiver
-    reserved5=0x008000,
-    reserved4=0x004000,
-    reserved3=0x002000,
-    reserved2=0x001000,
-    software_present=0x000800,  # .. no idea
-    reserved1=0x000400,
-    keyboard_illumination=0x000200,  # illumination brightness level changes (by pressing keys)
+    multi_touch=0x001000,  # notify on multi-touch changes
+    software_present=0x000800,  # software is controlling part of device behaviour
+    link_quality=0x000400,  # notify on link quality changes
+    ui=0x000200,  # notify on UI changes
     wireless=0x000100,  # notify when the device wireless goes on/off-line
-    mx_air_3d_gesture=0x000001,
+    configuration_complete=0x000004,
+    voip_telephony=0x000002,
+    threed_gesture=0x000001,
 )
 
 ERROR = NamedInts(
@@ -119,6 +117,7 @@ REGISTERS = NamedInts(
     # only apply to devices
     mouse_button_flags=0x01,
     keyboard_hand_detection=0x01,
+    devices_configuration=0x03,
     battery_status=0x07,
     keyboard_fn_swap=0x09,
     battery_charge=0x0D,

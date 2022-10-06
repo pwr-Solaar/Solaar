@@ -393,9 +393,8 @@ class Device:
         if enable:
             set_flag_bits = (
                 hidpp10_constants.NOTIFICATION_FLAG.battery_status
-                | hidpp10_constants.NOTIFICATION_FLAG.keyboard_illumination
-                | hidpp10_constants.NOTIFICATION_FLAG.wireless
-                | hidpp10_constants.NOTIFICATION_FLAG.software_present
+                | hidpp10_constants.NOTIFICATION_FLAG.ui
+                | hidpp10_constants.NOTIFICATION_FLAG.configuration_complete
             )
         else:
             set_flag_bits = 0
@@ -404,8 +403,8 @@ class Device:
             logger.warning("%s: failed to %s device notifications", self, "enable" if enable else "disable")
 
         flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
+            flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
             logger.info("%s: device notifications %s %s", self, "enabled" if enable else "disabled", flag_names)
         return flag_bits if ok else None
 
@@ -416,10 +415,6 @@ class Device:
             self.online = active
             was_active, self._active = self._active, active
             if active:
-                if not was_active:
-                    if self.protocol < 2.0:  # Make sure to set notification flags on the device
-                        self.notification_flags = self.enable_connection_notifications()
-                    self.read_battery()  # battery information may have changed so try to read it now
                 # Push settings for new devices when devices request software reconfiguration
                 # and when devices become active if they don't have wireless device status feature,
                 if (
@@ -431,6 +426,14 @@ class Device:
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
                     settings.apply_all_settings(self)
+                if not was_active:
+                    if self.protocol < 2.0:  # Make sure to set notification flags on the device
+                        self.notification_flags = self.enable_connection_notifications()
+                    else:
+                        self.set_configuration(0x11)  # signal end of configuration
+                    self.read_battery()  # battery information may have changed so try to read it now
+            elif was_active and self.receiver:  # need to set configuration pending flag in receiver
+                hidpp10.Hidpp10().set_configuration_pending_flags(self.receiver, 0xFF)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
         if self.status_callback is not None:

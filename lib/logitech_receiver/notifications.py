@@ -261,6 +261,8 @@ def _process_hidpp10_notification(device, n):
                 bool(flags & 0x80),
             )
         device.link_encrypted = link_encrypted
+        if not link_established and device.receiver:
+            _hidpp10.set_configuration_pending_flags(device.receiver, 0xFF)
         device.changed(active=link_established)
         return True
 
