@@ -85,6 +85,8 @@ class Receiver:
         self._firmware = None
         self._devices = {}
         self._remaining_pairings = None
+        print('FLAGS', _hidpp10.get_configuration_pending_flags(self))
+        _hidpp10.set_configuration_pending_flags(self, 0xFF)
 
     def close(self):
         handle, self.handle = self.handle, None

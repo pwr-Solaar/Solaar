@@ -118,6 +118,7 @@ applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
 REGISTERS = _NamedInts(
     # only apply to receivers
     receiver_connection=0x02,
+    devices_configuration=0x03,
     receiver_pairing=0xB2,
     devices_activity=0x2B3,
     receiver_info=0x2B5,
@@ -376,6 +377,19 @@ def set_notification_flags(device, *flag_bits):
     flag_bits = sum(int(b) for b in flag_bits)
     assert flag_bits & 0x00FFFFFF == flag_bits
     result = write_register(device, REGISTERS.notifications, _int2bytes(flag_bits, 3))
+    return result is not None
+
+
+def get_configuration_pending_flags(receiver):
+    assert not receiver.isDevice
+    result = read_register(receiver, REGISTERS.devices_configuration)
+    if result is not None:
+        return ord(result[:1])
+
+
+def set_configuration_pending_flags(receiver, devices):
+    assert not receiver.isDevice
+    result = write_register(receiver, REGISTERS.devices_configuration, devices)
     return result is not None
 
 

@@ -1550,6 +1550,10 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
+    if device.receiver:
+        from . import hidpp10 as _hidpp10
+        print(device, device.receiver)
+        print('FLAGS APPLY', _hidpp10.get_configuration_pending_flags(device.receiver))
     if device.features and _hidpp20.FEATURE.HIRES_WHEEL in device.features:
         _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, 'persister', None)

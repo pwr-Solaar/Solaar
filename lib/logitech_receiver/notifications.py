@@ -283,6 +283,9 @@ def _process_hidpp10_notification(device, status, n):
                 bool(flags & 0x10), link_encrypted, link_established, bool(flags & 0x80)
             )
         status[_K.LINK_ENCRYPTED] = link_encrypted
+        if not link_established and device.receiver:
+            print('FLAGS OFFLINE', _hidpp10.get_configuration_pending_flags(device.receiver))
+            _hidpp10.set_configuration_pending_flags(device.receiver, 0xFF)
         status.changed(active=link_established)
         return True
 
