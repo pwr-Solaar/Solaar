@@ -1,0 +1,46 @@
+Solaar version 1.1.5
+
+  1: Wireless Mouse M215 2nd Gen
+     Device path  : None
+     WPID         : 401B
+     Codename     : Wireless
+     Kind         : mouse
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: D225825E
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQM 27.12.B0029
+     The power switch is located on the base.
+     Supports 13 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V0
+            Firmware: Firmware RQM 27.12.B0029 401B
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005} V0
+            Name: Wireless Mouse M215 2nd Gen
+            Kind: mouse
+         4: BATTERY STATUS         {1000} V0
+            Battery: 90%, discharging, next level 5%.
+         5: WIRELESS DEVICE STATUS {1D4B} V0
+         6: unknown:1DF3           {1DF3} V0    hidden
+         7: REPROG CONTROLS        {1B00} V0
+         8: REMAINING PAIRING      {1DF0} V0    hidden
+            Remaining Pairings: 126
+         9: unknown:1F03           {1F03} V0    hidden
+        10: VERTICAL SCROLLING     {2100} V0
+            Roller type: standard
+            Ratchet per turn: 24
+            Scroll lines: 0
+        11: HI RES SCROLLING       {2120} V0
+            Hi-res scrolling disabled
+            Hi-res scrolling multiplier: 8
+            Scroll Wheel High Resolution (saved): False
+            Scroll Wheel High Resolution        : False
+        12: MOUSE POINTER          {2200} V0
+            DPI: 800
+            Acceleration: low
+            Override OS ballistics
+            No vertical tuning, standard mice
+     Battery: 90%, discharging, next level 5%.
