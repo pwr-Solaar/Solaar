@@ -141,6 +141,7 @@ _ex100_receiver = lambda product_id: {
 
 # Receivers added here should also be listed in
 # share/solaar/io.github.pwr_solaar.solaar.metainfo.xml
+# Look in https://github.com/torvalds/linux/blob/master/drivers/hid/hid-ids.h
 
 # Bolt receivers (marked with the yellow lightning bolt logo)
 BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
@@ -160,6 +161,7 @@ NANO_RECEIVER_C526 = _nano_receiver(0xc526)
 NANO_RECEIVER_C52E = _nano_receiver_no_unpair(0xc52e)
 NANO_RECEIVER_C531 = _nano_receiver(0xc531)
 NANO_RECEIVER_C534 = _nano_receiver_max2(0xc534)
+NANO_RECEIVER_C535 = _nano_receiver(0xc535)  # branded as Dell
 NANO_RECEIVER_C537 = _nano_receiver(0xc537)
 NANO_RECEIVER_C542 = _nano_receiver(0xc542)
 NANO_RECEIVER_6042 = _lenovo_receiver(0x6042)
@@ -174,7 +176,9 @@ LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
 LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xc547)
 
 # EX100 old style receiver pre-unifying protocol
+# EX100_27MHZ_RECEIVER_C50C = _ex100_receiver(0xc50C)  # in hid/hid-ids.h
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
+# EX100_27MHZ_RECEIVER_C51B = _ex100_receiver(0xc51B)  # in hid/hid-ids.h
 
 ALL = (
     BOLT_RECEIVER_C548,
@@ -190,6 +194,7 @@ ALL = (
     NANO_RECEIVER_C52E,
     NANO_RECEIVER_C531,
     NANO_RECEIVER_C534,
+    NANO_RECEIVER_C535,
     NANO_RECEIVER_C537,
     NANO_RECEIVER_C542,
     NANO_RECEIVER_6042,
