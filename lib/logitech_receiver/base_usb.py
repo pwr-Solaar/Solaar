@@ -35,7 +35,6 @@ from .i18n import _
 ## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
-# ex100_27mhz_wpid_fix enable workarounds for EX100 and possible other old 27Mhz receivers
 
 _DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
 
@@ -135,8 +134,7 @@ _ex100_receiver = lambda product_id: {
     'receiver_kind': '27Mhz',
     'max_devices': 4,
     'may_unpair': False,
-    're_pairs': True,
-    'ex100_27mhz_wpid_fix': True
+    're_pairs': True
 }
 
 # Receivers added here should also be listed in

@@ -83,12 +83,11 @@ class Receiver:
                 self.may_unpair = product_info.get('may_unpair', False)
         self.last_id = self.last_id if self.last_id else self.max_devices
 
-        self.name = product_info.get('name', '')
+        self.name = product_info.get('name', 'Receiver')
         self.re_pairs = product_info.get('re_pairs', False)
         self._str = '<%s(%s,%s%s)>' % (
             self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
         )
-        self.ex100_27mhz_wpid_fix = product_info.get('ex100_27mhz_wpid_fix', False)
 
         self._firmware = None
         self._devices = {}
@@ -174,7 +173,7 @@ class Receiver:
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
             polling_rate = ord(pair_info[2:3])
-        elif self.ex100_27mhz_wpid_fix:  # 27Mhz receiver, fill extracting WPID from udev path
+        elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
                 _log.error('Unable to get wpid from udev for device %d of %s', n, self)

@@ -116,7 +116,7 @@ class Device:
                 # assert link_notification.address == (0x04 if unifying else 0x03)
                 kind = ord(link_notification.data[0:1]) & 0x0F
                 # get 27Mhz wpid and set kind based on index
-                if receiver.ex100_27mhz_wpid_fix:  # 27 Mhz receiver
+                if receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver
                     self.wpid = '00' + _strhex(link_notification.data[2:3])
                     kind = self.get_kind_from_index(number, receiver)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
