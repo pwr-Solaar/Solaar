@@ -111,6 +111,8 @@ def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_lon
     for record in _RECEIVER_USB_IDS:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
+    if vendor_id == 0x046D and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
+        return {'vendor_id': vendor_id, 'product_id': product_id, 'bus_id': bus_id, 'isDevice': False}
 
 
 def receivers():
@@ -120,9 +122,9 @@ def receivers():
 
 def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is of interest and if so return the device record for further checking"""
-    for record in _RECEIVER_USB_IDS:  # known receivers
-        if match(record, bus_id, vendor_id, product_id):
-            return record
+    record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
+    if record:  # known or unknown receiver
+        return record
     for record in _DEVICE_IDS:  # known devices
         if match(record, bus_id, vendor_id, product_id):
             return record

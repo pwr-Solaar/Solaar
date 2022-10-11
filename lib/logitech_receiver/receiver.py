@@ -58,7 +58,8 @@ class Receiver:
         self.product_id = device_info.product_id
         product_info = _product_information(self.product_id)
         if not product_info:
-            raise Exception('Unknown receiver type', self.product_id)
+            _log.warning('Unknown receiver type: %s', self.product_id)
+            product_info = {}
         self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
