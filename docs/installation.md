@@ -7,7 +7,8 @@ layout: page
 
 ## Downloading
 
-Clone Solaar from GitHub by `git clone https://github.com/pwr-Solaar/Solaar.git`
+Clone Solaar from GitHub by `git clone --recurse-submodules https://github.com/pwr-Solaar/Solaar.git`
+Solaar has a submodule, so make sure that the submodule is cloned.
 
 ## Requirements for Solaar
 
@@ -31,9 +32,6 @@ the Debian/Ubuntu packages you should have
 in Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
-
-Solaar also uses the hidtools library from the Python hid-tools project.
-To install this library use `pip install --user hid-tools`.
 
 If you are running a version of Python different from the system version,
 you may need to use pip to install projects that provide the above Python packages.
