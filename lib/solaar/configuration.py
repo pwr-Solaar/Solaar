@@ -134,23 +134,26 @@ def _convert_json(json_dict):
 
 def _cleanup_load(c):
     _config = [__version__]
-    for element in c:
-        if isinstance(element, dict):
-            divert = element.get('divert-keys')
-            if divert:
-                sliding = element.get('dpi-sliding')
-                if sliding:  # convert old-style dpi-sliding setting to divert-keys entry
-                    divert[int(sliding)] = 3
-                element.pop('dpi-sliding', None)
-                gestures = element.get('mouse-gestures')
-                if gestures:  # convert old-style mouse-gestures setting to divert-keys entry
-                    divert[int(gestures)] = 2
-                element.pop('mouse-gestures', None)
-                # remove any string entries (from bad conversions)
-                element['divert-keys'] = {k: v for k, v in divert.items() if isinstance(k, int)}
-            # convert to device entries
-            element = _DeviceEntry(**element)
-            _config.append(element)
+    try:
+        for element in c:
+            if isinstance(element, dict):
+                divert = element.get('divert-keys')
+                if divert:
+                    sliding = element.get('dpi-sliding')
+                    if sliding:  # convert old-style dpi-sliding setting to divert-keys entry
+                        divert[int(sliding)] = 3
+                    element.pop('dpi-sliding', None)
+                    gestures = element.get('mouse-gestures')
+                    if gestures:  # convert old-style mouse-gestures setting to divert-keys entry
+                        divert[int(gestures)] = 2
+                    element.pop('mouse-gestures', None)
+                    # remove any string entries (from bad conversions)
+                    element['divert-keys'] = {k: v for k, v in divert.items() if isinstance(k, int)}
+                # convert to device entries
+                element = _DeviceEntry(**element)
+                _config.append(element)
+    except Exception as e:
+        _log.warn('Exception processing config.yaml file, ignoring contents: %s', e)
     return _config
 
 
