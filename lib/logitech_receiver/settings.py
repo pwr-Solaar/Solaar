@@ -1448,12 +1448,13 @@ class RawXYProcessing:
 
     def start(self, key):
         device_key = next((k for k in self.device.keys if k.key == key), None)
-        self.keys.append(device_key)
-        if not self.active:
-            self.active = True
-            self.activate_action()
-            self.device.add_notification_handler(self.name, self.handler)
-        device_key.set_rawXY_reporting(True)
+        if device_key:
+            self.keys.append(device_key)
+            if not self.active:
+                self.active = True
+                self.activate_action()
+                self.device.add_notification_handler(self.name, self.handler)
+            device_key.set_rawXY_reporting(True)
 
     def stop(self, key):  # only stop if this is the active key
         if self.active:
