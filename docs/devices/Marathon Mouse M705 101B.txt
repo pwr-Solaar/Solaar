@@ -1,16 +1,20 @@
+Solaar version 1.1.5
+
   1: Marathon Mouse M705 (M-R0009)
+     Device path  : /dev/hidraw1
+     WPID         : 101B
      Codename     : M705 (M-R0009)
      Kind         : mouse
-     Wireless PID : 101B
      Protocol     : HID++ 1.0
      Polling rate : 8 ms (125Hz)
-     Serial number: 7C44B18E
+     Serial number: 23691D3D
           Firmware: 17.01.B0017
         Bootloader: 02.06
              Other: 00.04
      The power switch is located on the base.
      Notifications: battery status (0x100000).
-     Battery: 25%, discharging.
+     Features: special buttons, scroll accel (0x420000)
+     Battery: 65%, discharging.
 
 registers:
 
