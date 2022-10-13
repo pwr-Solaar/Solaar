@@ -234,8 +234,8 @@ def _process_hidpp10_custom_notification(device, status, n):
         # message layout: 10 ix <register> <xx> <yy> <zz> <00>
         assert n.data[-1:] == b'\x00'
         data = chr(n.address).encode() + n.data
-        charge, status_text, next_charge = _hidpp10.parse_battery_status(n.sub_id, data)
-        status.set_battery_info(charge, next_charge, status_text, None)
+        charge, next_charge, status_text, voltage = _hidpp10.parse_battery_status(n.sub_id, data)
+        status.set_battery_info(charge, next_charge, status_text, voltage)
         return True
 
     if n.sub_id == _R.keyboard_illumination:

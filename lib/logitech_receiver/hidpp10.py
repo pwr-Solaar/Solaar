@@ -237,7 +237,7 @@ def parse_battery_status(register, reply):
             BATTERY_STATUS.discharging if status_byte == 0x30 else
             BATTERY_STATUS.recharging if status_byte == 0x50 else BATTERY_STATUS.full if status_byte == 0x90 else None
         )
-        return charge, status_text, None
+        return charge, None, status_text, None
 
     if register == REGISTERS.battery_status:
         status_byte = ord(reply[:1])
