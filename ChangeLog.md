@@ -1,4 +1,4 @@
-# 1.1.6r3
+# 1.1.6rc4
 
 * Don't add non-existant key in raw xy processing
 * Add special keys from MX Mechanical Mini
