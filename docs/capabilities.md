@@ -96,10 +96,11 @@ until an unlocked lock appears (with tooltop "Changes allowed").
 Solaar keeps track of most of the changeable settings of a device.
 Devices forget most changed settings when the device is turned off
 or goes into a power-saving mode.
-The exceptions include the setting to change the host the device is connected to
-and the setting to persistently change what a key or button does.
+Exceptions include the setting to change the host the device is connected to,
+the setting to persistently change what a key or button does,
+and, for some devices, the fn-swap setting.
 When Solaar starts, it restores on-line devices to their previously-known state
-for the unexceptionable settings and while running it restores
+except for host connection and persistent key and button changes and while running Solaar restores
 devices to their previously-known state when the device itself comes on line.
 Setting information is stored in the file `~/.config/solaar/config.yaml`.
 
