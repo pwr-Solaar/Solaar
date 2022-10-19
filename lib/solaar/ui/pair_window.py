@@ -81,6 +81,7 @@ def _check_lock_state(assistant, receiver, count=2):
         return False
 
     if receiver.status.new_device:
+        receiver.remaining_pairings(False)  # Update remaining pairings
         device, receiver.status.new_device = receiver.status.new_device, None
         _pairing_succeeded(assistant, receiver, device)
         return False
