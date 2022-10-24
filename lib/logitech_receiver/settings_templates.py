@@ -396,7 +396,7 @@ class DivertGkeys(_Setting):
 
 class ScrollRatchet(_Setting):
     name = 'scroll-ratchet'
-    label = _('Scroll wheel Ratcheted')
+    label = _('Scroll Wheel Ratcheted')
     description = _('Switch the mouse wheel between speed-controlled ratcheting and always freespin.')
     feature = _F.SMART_SHIFT
     choices_universe = _NamedInts(**{_('Freespinning'): 1, _('Ratcheted'): 2})
@@ -406,16 +406,16 @@ class ScrollRatchet(_Setting):
 
 class SmartShift(_Setting):
     name = 'smart-shift'
-    label = _('Scroll Wheel Rachet Speed')
+    label = _('Scroll Wheel Ratchet Speed')
     description = _(
         'Use the mouse wheel speed to switch between ratcheted and freespinning.\n'
-        'The mouse wheel is always free at 0, and always ratcheted at 50.'
+        'The mouse wheel is always ratcheted at 50.'
     )
     feature = _F.SMART_SHIFT
     rw_options = {'read_fnid': 0x00, 'write_fnid': 0x10}
 
     class rw_class(_FeatureRW):
-        MIN_VALUE = 0
+        MIN_VALUE = 1
         MAX_VALUE = 50
 
         def __init__(self, feature, read_fnid, write_fnid):
