@@ -1,5 +1,8 @@
-# 1.1.6rc4
+# 1.1.6
 
+* Only update remaining pairings after successful pairing
+* Check for presence of status attribute when resuming
+* Update Polish and Croation translations
 * Don't add non-existant key in raw xy processing
 * Add special keys from MX Mechanical Mini
 * Fix processing of HID++ 1.0 battery reports
