@@ -394,12 +394,22 @@ class DivertGkeys(_Setting):
             return b'\x00'
 
 
+class ScrollRatchet(_Setting):
+    name = 'scroll-ratchet'
+    label = _('Scroll wheel Ratcheted')
+    description = _('Switch the mouse wheel between speed-controlled ratcheting and always freespin.')
+    feature = _F.SMART_SHIFT
+    choices_universe = _NamedInts(**{_('Freespinning'): 1, _('Ratcheted'): 2})
+    validator_class = _ChoicesV
+    validator_options = {'choices': choices_universe}
+
+
 class SmartShift(_Setting):
     name = 'smart-shift'
-    label = _('Scroll Wheel Rachet')
+    label = _('Scroll Wheel Rachet Speed')
     description = _(
-        'Automatically switch the mouse wheel between ratchet and freespin mode.\n'
-        'The mouse wheel is always free at 0, and always ratcheted at 50'
+        'Use the mouse wheel speed to switch between ratcheted and freespinning.\n'
+        'The mouse wheel is always free at 0, and always ratcheted at 50.'
     )
     feature = _F.SMART_SHIFT
     rw_options = {'read_fnid': 0x00, 'write_fnid': 0x10}
@@ -424,11 +434,11 @@ class SmartShift(_Setting):
         def write(self, device, data_bytes):
             threshold = _bytes2int(data_bytes)
             # Freespin at minimum
-            mode = 1 if threshold == self.MIN_VALUE else 2
+            mode = 0  # 1 if threshold <= self.MIN_VALUE else 2
             # Ratchet at maximum
-            if threshold == self.MAX_VALUE:
+            if threshold >= self.MAX_VALUE:
                 threshold = 255
-            data = _int2bytes(mode, count=1) + _int2bytes(threshold, count=1)
+            data = _int2bytes(mode, count=1) + _int2bytes(max(0, threshold), count=1)
             return super().write(device, data)
 
     min_value = rw_class.MIN_VALUE
@@ -1167,6 +1177,7 @@ SETTINGS = [
     HiresSmoothInvert,  # working
     HiresSmoothResolution,  # working
     HiresMode,  # simple
+    ScrollRatchet,  # simple
     SmartShift,  # working
     SmartShiftEnhanced,  # simple
     ThumbInvert,  # working
