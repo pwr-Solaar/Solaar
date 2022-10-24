@@ -27,6 +27,7 @@ from struct import unpack as _unpack
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
+from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import strhex as _strhex
 from .i18n import _
@@ -325,15 +326,15 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
-            status.set_battery_info(level, next, battery_status, voltage)
+            _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
+            status.set_battery_info(level, nextl, battery_status, voltage)
         else:
             _log.warn('%s: unknown VOLTAGE %s', device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            _ignore, level, next, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
-            status.set_battery_info(level, next, battery_status, voltage)
+            _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
+            status.set_battery_info(level, nextl, battery_status, voltage)
         else:
             _log.warn('%s: unknown UNIFIED BATTERY %s', device, n)
 
@@ -341,8 +342,8 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             result = _hidpp20.decipher_adc_measurement(n.data)
             if result:
-                _ignore, level, next, battery_status, voltage = result
-                status.set_battery_info(level, next, battery_status, voltage)
+                _ignore, level, nextl, battery_status, voltage = result
+                status.set_battery_info(level, nextl, battery_status, voltage)
             else:  # this feature is used to signal device becoming inactive
                 status.changed(active=False)
         else:
@@ -432,10 +433,13 @@ def _process_feature_notification(device, status, n, feature):
                 periods = flags & 0x0f
                 _log.info('%s: WHEEL: res: %d periods: %d delta V:%-3d', device, high_res, periods, delta_v)
         elif (n.address == 0x10):
+            ratchet = ord(n.data[:1]) & 0x01
             if _log.isEnabledFor(_INFO):
-                flags = ord(n.data[:1])
-                ratchet = flags & 0x01
                 _log.info('%s: WHEEL: ratchet: %d', device, ratchet)
+            from solaar.ui.config_panel import change_setting  # prevent circular import
+            setting = next((s for s in device.settings if s.name == _st.ScrollRatchet.name), None)
+            if setting:
+                change_setting(device, setting, [2 if ratchet else 1])
         else:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: unknown WHEEL %s', device, n)
