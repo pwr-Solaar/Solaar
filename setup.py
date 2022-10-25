@@ -67,8 +67,12 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'python-xlib (>= 0.27)',
         'psutil (>= 5.4.3)',
     ],
+    extras_require={
+        'report-descriptor': ['hid-parser'],
+        'desktop-notifications': ['Notify (>= 0.7)'],
+    },
     package_dir={'': 'lib'},
-    packages=['keysyms', 'hidapi', 'hid_parser', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
+    packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
     scripts=_glob('bin/*'),
 )

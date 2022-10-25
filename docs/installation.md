@@ -7,8 +7,7 @@ layout: page
 
 ## Downloading
 
-Clone Solaar from GitHub by `git clone --recurse-submodules https://github.com/pwr-Solaar/Solaar.git`.
-Make sure that the submodule python-hid-parser was cloned, i.e., the directory `python-hid-parser` has content.
+Clone Solaar from GitHub by `git clone https://github.com/pwr-Solaar/Solaar.git`.
 
 ## Requirements for Solaar
 
@@ -32,6 +31,11 @@ the Debian/Ubuntu packages you should have
 in Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
+
+If the `hid_parser` Python package is available, Solaar parses HID report descriptors
+and can control more HID++ devices that do not use a receiver.
+This package may not be available in some distributions but can be installed using pip
+via `pip install --user hid-parser`.
 
 If you are running a version of Python different from the system version,
 you may need to use pip to install projects that provide the above Python packages.
