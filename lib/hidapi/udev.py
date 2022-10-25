@@ -36,8 +36,6 @@ from select import select as _select
 from time import sleep
 from time import time as _timestamp
 
-from hid_parser import ReportDescriptor as _ReportDescriptor
-from hid_parser import Usage as _Usage
 from pyudev import Context as _Context
 from pyudev import Device as _Device
 from pyudev import DeviceNotFoundError
@@ -103,8 +101,13 @@ def _match(action, device, filterfn):
     if not hid_id:
         return  # there are reports that sometimes the id isn't set up right so be defensive
     bid, vid, pid = hid_id.split(':')
+    hid_hid_device = hid_device.find_parent('hid')
+    if hid_hid_device:
+        return  # these are devices connected through a receiver so don't pick them up here
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
+        from hid_parser import ReportDescriptor as _ReportDescriptor
+        from hid_parser import Usage as _Usage
         hidpp_short = hidpp_long = False
         devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'
         with fileopen(devfile, 'rb') as fd:
@@ -122,9 +125,6 @@ def _match(action, device, filterfn):
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
         _log.warn('Report Descriptor not processed for BID %s VID %s PID %s: %s', bid, vid, pid, e)
-    hid_hid_device = hid_device.find_parent('hid')
-    if hid_hid_device:
-        return  # these are devices connected through a receiver so don't pick them up here
 
     filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:

@@ -1,3 +1,0 @@
-[submodule "python-hid-parser"]
-	path = python-hid-parser
-	url = https://github.com/usb-tools/python-hid-parser
