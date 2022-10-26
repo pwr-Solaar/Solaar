@@ -593,7 +593,7 @@ def _create_sbox(s, device):
 
 
 def _update_setting_item(sbox, value, is_online=True, sensitive=True):
-    sbox._spinner.set_visible(False)
+    #    sbox._spinner.set_visible(False)   # don't repack item box
     sbox._spinner.stop()
     if value is None:
         sbox._control.set_sensitive(False)
