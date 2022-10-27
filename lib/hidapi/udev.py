@@ -107,19 +107,17 @@ def _match(action, device, filterfn):
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
         from hid_parser import ReportDescriptor as _ReportDescriptor
-        from hid_parser import Usage as _Usage
+        # from hid_parser import Usage as _Usage
         hidpp_short = hidpp_long = False
         devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'
         with fileopen(devfile, 'rb') as fd:
             with _warnings.catch_warnings():
                 _warnings.simplefilter('ignore')
                 rd = _ReportDescriptor(fd.read())
-            hidpp_short = 0x10 in rd.input_report_ids and 6 * 8 == int(
-                rd.get_input_report_size(0x10)
-            ) and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages
-            hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(
-                rd.get_input_report_size(0x11)
-            ) and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages
+            hidpp_short = 0x10 in rd.input_report_ids and 6 * 8 == int(rd.get_input_report_size(0x10))
+            # and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages  # be more permissive
+            hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(rd.get_input_report_size(0x11))
+            # and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages  # be more permissive
         if not hidpp_short and not hidpp_long:
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
