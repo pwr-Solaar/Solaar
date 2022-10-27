@@ -130,6 +130,9 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
+- If the Python hid-parser package is not available Solaar will not recognize some devices.
+  Use pip to install hid-parser.
+
 - If some icons appear broken in the application, make sure you've properly
   configured the Gtk theme and icon theme in your control panel.
 
@@ -167,9 +170,6 @@ for the step-by-step procedure for manual installation.
 - Solaar will try to use uinput to simulate input from rules under Wayland or if Xtest is not available
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
-
-- Sometimes bluetooth connections are not torn down correctly by Linux.
-  This can result in two entries in Solaar for the same device, with only one being active.
 
 - Diverted keys remain diverted and so do not have their normal behaviour when Solaar terminates
   or a device disconnects from a host that is running Solaar.  If necessary, their normal behaviour

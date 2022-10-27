@@ -1,3 +1,10 @@
+# 1.1.7rc1
+
+* Switch scroll ratcheting in response to scroll ratchet button notification
+* Add setting to turn scroll ratchet on and off
+* Eliminate visual glitch when updating range setting
+* Make hid-parser an optional dependency
+
 # 1.1.6
 
 * Only update remaining pairings after successful pairing
