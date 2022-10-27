@@ -1,5 +1,11 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.7rc1
+
+* Solaar responds to scroll wheel ratchet notifications by changing its scroll wheel ratcheting.
+
+* Solaar processing of report descriptors is optional, depending on whether the package hid-parser is available.
+
 ## Version 1.1.6
 
 * Solaar requires Python version 3.7.
