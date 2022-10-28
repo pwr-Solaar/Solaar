@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-19 14:32+0200\n"
-"PO-Revision-Date: 2022-10-19 14:37+0200\n"
+"POT-Creation-Date: 2022-10-28 10:28+0200\n"
+"PO-Revision-Date: 2022-10-28 10:37+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@hr.org>\n"
 "Language: hr\n"
@@ -229,37 +229,37 @@ msgstr "pritisak"
 msgid "released"
 msgstr "otpuštanje"
 
-#: lib/logitech_receiver/notifications.py:74
-#: lib/logitech_receiver/notifications.py:125
+#: lib/logitech_receiver/notifications.py:75
+#: lib/logitech_receiver/notifications.py:126
 msgid "pairing lock is closed"
 msgstr "uparivanje je zatvoreno"
 
-#: lib/logitech_receiver/notifications.py:74
-#: lib/logitech_receiver/notifications.py:125
+#: lib/logitech_receiver/notifications.py:75
+#: lib/logitech_receiver/notifications.py:126
 msgid "pairing lock is open"
 msgstr "uparivanje je otvoreno"
 
-#: lib/logitech_receiver/notifications.py:91
+#: lib/logitech_receiver/notifications.py:92
 msgid "discovery lock is closed"
 msgstr "otkrivanje je zatvoreno"
 
-#: lib/logitech_receiver/notifications.py:91
+#: lib/logitech_receiver/notifications.py:92
 msgid "discovery lock is open"
 msgstr "otkrivanje je otvoreno"
 
-#: lib/logitech_receiver/notifications.py:223 lib/solaar/ui/notify.py:120
+#: lib/logitech_receiver/notifications.py:224 lib/solaar/ui/notify.py:120
 msgid "connected"
 msgstr "povezano"
 
-#: lib/logitech_receiver/notifications.py:223
+#: lib/logitech_receiver/notifications.py:224
 msgid "disconnected"
 msgstr "nije povezano"
 
-#: lib/logitech_receiver/notifications.py:261 lib/solaar/ui/notify.py:118
+#: lib/logitech_receiver/notifications.py:262 lib/solaar/ui/notify.py:118
 msgid "unpaired"
 msgstr "neupareno"
 
-#: lib/logitech_receiver/notifications.py:303
+#: lib/logitech_receiver/notifications.py:304
 msgid "powered on"
 msgstr "uključen"
 
@@ -327,7 +327,7 @@ msgid "Sensitivity (DPI - older mice)"
 msgstr "Osjetljivost (DPI - stariji miševi)"
 
 #: lib/logitech_receiver/settings_templates.py:178
-#: lib/logitech_receiver/settings_templates.py:693
+#: lib/logitech_receiver/settings_templates.py:703
 msgid "Mouse movement sensitivity"
 msgstr "Osjetljivost pomicanja miša"
 
@@ -437,8 +437,8 @@ msgid "Frequency of device polling, in milliseconds"
 msgstr "Učestalost pozivanja uređaja, u milisekundama"
 
 #: lib/logitech_receiver/settings_templates.py:333
-#: lib/logitech_receiver/settings_templates.py:1016
-#: lib/logitech_receiver/settings_templates.py:1044
+#: lib/logitech_receiver/settings_templates.py:1026
+#: lib/logitech_receiver/settings_templates.py:1054
 msgid "May need Onboard Profiles set to Disable to be effective."
 msgstr ""
 "Možda je potrebno postaviti Onboard profile na 'Onemogućeno' kako bi bili "
@@ -481,31 +481,51 @@ msgid "May also make M keys and MR key send HID++ notifications"
 msgstr "Neka isto M tipke i MR tipka šalje HID++ obavijesti"
 
 #: lib/logitech_receiver/settings_templates.py:399
-msgid "Scroll Wheel Rachet"
+msgid "Scroll Wheel Ratcheted"
 msgstr "Ustavljanje pomicanja kotačića"
 
-#: lib/logitech_receiver/settings_templates.py:401
+#: lib/logitech_receiver/settings_templates.py:400
 msgid ""
-"Automatically switch the mouse wheel between ratchet and freespin mode.\n"
-"The mouse wheel is always free at 0, and always ratcheted at 50"
+"Switch the mouse wheel between speed-controlled ratcheting and always "
+"freespin."
 msgstr ""
-"Automatski prebaci kotačić miša između ustavljačkog i slobodnog načina "
-"vrtnje kotačića.\n"
-"Kotačić miša je uvijek slobodan pri 0 i uvijek zaključan pri 50"
+"Prebaci kotačić miša između ustavljačkog brzinom upravljanog načina i "
+"slobodnog načina vrtnje kotačića."
 
-#: lib/logitech_receiver/settings_templates.py:450
+#: lib/logitech_receiver/settings_templates.py:402
+msgid "Freespinning"
+msgstr "Slobodna vrtnja"
+
+#: lib/logitech_receiver/settings_templates.py:402
+msgid "Ratcheted"
+msgstr "Ustavljanje"
+
+#: lib/logitech_receiver/settings_templates.py:409
+msgid "Scroll Wheel Ratchet Speed"
+msgstr "Brzina ustavljanja pomicanja kotačića"
+
+#: lib/logitech_receiver/settings_templates.py:411
+msgid ""
+"Use the mouse wheel speed to switch between ratcheted and freespinning.\n"
+"The mouse wheel is always ratcheted at 50."
+msgstr ""
+"Koristite brzinu kotačića miša za prebacivanje između ustavljačkog i "
+"slobodnog načina vrtnje kotačića.\n"
+"Kotačić miša je uvijek, ustavljen pri 50."
+
+#: lib/logitech_receiver/settings_templates.py:460
 msgid "Key/Button Actions"
 msgstr "Radnje tipki"
 
-#: lib/logitech_receiver/settings_templates.py:452
+#: lib/logitech_receiver/settings_templates.py:462
 msgid "Change the action for the key or button."
 msgstr "Promijeni radnju za tipku."
 
-#: lib/logitech_receiver/settings_templates.py:452
+#: lib/logitech_receiver/settings_templates.py:462
 msgid "Overridden by diversion."
 msgstr "Preusmjereno skretanjem."
 
-#: lib/logitech_receiver/settings_templates.py:453
+#: lib/logitech_receiver/settings_templates.py:463
 msgid ""
 "Changing important actions (such as for the left mouse button) can result in "
 "an unusable system."
@@ -513,11 +533,11 @@ msgstr ""
 "Promjena bitnih radnji (poput lijeve tipke miša) može prouzrokovati "
 "nestabilnosti u sustavu."
 
-#: lib/logitech_receiver/settings_templates.py:622
+#: lib/logitech_receiver/settings_templates.py:632
 msgid "Key/Button Diversion"
 msgstr "Preusmjeravanje tipki"
 
-#: lib/logitech_receiver/settings_templates.py:623
+#: lib/logitech_receiver/settings_templates.py:633
 msgid ""
 "Make the key or button send HID++ notifications (Diverted) or initiate Mouse "
 "Gestures or Sliding DPI"
@@ -525,36 +545,36 @@ msgstr ""
 "Neka tipka ili šalje HID++ obavijesti (preusmjerene) ili pokreće gete mišem "
 "ili klizni DPI"
 
-#: lib/logitech_receiver/settings_templates.py:626
-#: lib/logitech_receiver/settings_templates.py:627
-#: lib/logitech_receiver/settings_templates.py:628
+#: lib/logitech_receiver/settings_templates.py:636
+#: lib/logitech_receiver/settings_templates.py:637
+#: lib/logitech_receiver/settings_templates.py:638
 msgid "Diverted"
 msgstr "Preusmjerno"
 
-#: lib/logitech_receiver/settings_templates.py:626
-#: lib/logitech_receiver/settings_templates.py:627
+#: lib/logitech_receiver/settings_templates.py:636
+#: lib/logitech_receiver/settings_templates.py:637
 msgid "Mouse Gestures"
 msgstr "Geste miša"
 
-#: lib/logitech_receiver/settings_templates.py:626
-#: lib/logitech_receiver/settings_templates.py:627
-#: lib/logitech_receiver/settings_templates.py:628
+#: lib/logitech_receiver/settings_templates.py:636
+#: lib/logitech_receiver/settings_templates.py:637
+#: lib/logitech_receiver/settings_templates.py:638
 msgid "Regular"
 msgstr "Normalna"
 
-#: lib/logitech_receiver/settings_templates.py:626
+#: lib/logitech_receiver/settings_templates.py:636
 msgid "Sliding DPI"
 msgstr "Klizni DPI"
 
-#: lib/logitech_receiver/settings_templates.py:692
+#: lib/logitech_receiver/settings_templates.py:702
 msgid "Sensitivity (DPI)"
 msgstr "Osjetljivost (DPI)"
 
-#: lib/logitech_receiver/settings_templates.py:732
+#: lib/logitech_receiver/settings_templates.py:742
 msgid "Sensitivity Switching"
 msgstr "Prebacivanje osjetljivosti"
 
-#: lib/logitech_receiver/settings_templates.py:734
+#: lib/logitech_receiver/settings_templates.py:744
 msgid ""
 "Switch the current sensitivity and the remembered sensitivity when the key "
 "or button is pressed.\n"
@@ -564,326 +584,326 @@ msgstr ""
 "pritisne.\n"
 "Ako ne postoji zapamćena osjetljivost, zapamti trenutnu osjetljivost"
 
-#: lib/logitech_receiver/settings_templates.py:738
+#: lib/logitech_receiver/settings_templates.py:748
 msgid "Off"
 msgstr "Isključeno"
 
-#: lib/logitech_receiver/settings_templates.py:769
+#: lib/logitech_receiver/settings_templates.py:779
 msgid "Disable keys"
 msgstr "Onemogući tipke"
 
-#: lib/logitech_receiver/settings_templates.py:770
+#: lib/logitech_receiver/settings_templates.py:780
 msgid "Disable specific keyboard keys."
 msgstr "Onemogući određene tipke tipkovnice."
 
-#: lib/logitech_receiver/settings_templates.py:773
+#: lib/logitech_receiver/settings_templates.py:783
 #, python-format
 msgid "Disables the %s key."
 msgstr "Onemogućuje %s tipku."
 
-#: lib/logitech_receiver/settings_templates.py:786
-#: lib/logitech_receiver/settings_templates.py:834
+#: lib/logitech_receiver/settings_templates.py:796
+#: lib/logitech_receiver/settings_templates.py:844
 msgid "Set OS"
 msgstr "Postavi OS"
 
-#: lib/logitech_receiver/settings_templates.py:787
-#: lib/logitech_receiver/settings_templates.py:835
+#: lib/logitech_receiver/settings_templates.py:797
+#: lib/logitech_receiver/settings_templates.py:845
 msgid "Change keys to match OS."
 msgstr "Promijeni tipke tako da se podudaraju sa OS-om."
 
-#: lib/logitech_receiver/settings_templates.py:847
+#: lib/logitech_receiver/settings_templates.py:857
 msgid "Change Host"
 msgstr "Promijeni računalo"
 
-#: lib/logitech_receiver/settings_templates.py:848
+#: lib/logitech_receiver/settings_templates.py:858
 msgid "Switch connection to a different host"
 msgstr "Prebaci povezivanje na drugo računalo"
 
-#: lib/logitech_receiver/settings_templates.py:873
+#: lib/logitech_receiver/settings_templates.py:883
 msgid "Performs a left click."
 msgstr "Izvodi lijevi klik."
 
-#: lib/logitech_receiver/settings_templates.py:873
+#: lib/logitech_receiver/settings_templates.py:883
 msgid "Single tap"
 msgstr "Jednostruki dodir"
 
-#: lib/logitech_receiver/settings_templates.py:874
+#: lib/logitech_receiver/settings_templates.py:884
 msgid "Performs a right click."
 msgstr "Izvodi desni klik."
 
-#: lib/logitech_receiver/settings_templates.py:874
+#: lib/logitech_receiver/settings_templates.py:884
 msgid "Single tap with two fingers"
 msgstr "Jednostruki dodir s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:875
+#: lib/logitech_receiver/settings_templates.py:885
 msgid "Single tap with three fingers"
 msgstr "Jednostruki dodir s tri prsta"
 
-#: lib/logitech_receiver/settings_templates.py:879
+#: lib/logitech_receiver/settings_templates.py:889
 msgid "Double tap"
 msgstr "Dvostruki dodir"
 
-#: lib/logitech_receiver/settings_templates.py:879
+#: lib/logitech_receiver/settings_templates.py:889
 msgid "Performs a double click."
 msgstr "Izvodi dvostruki klik."
 
-#: lib/logitech_receiver/settings_templates.py:880
+#: lib/logitech_receiver/settings_templates.py:890
 msgid "Double tap with two fingers"
 msgstr "Dvostruki dodir s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:881
+#: lib/logitech_receiver/settings_templates.py:891
 msgid "Double tap with three fingers"
 msgstr "Dvostruki dodir s tri prsta"
 
-#: lib/logitech_receiver/settings_templates.py:884
+#: lib/logitech_receiver/settings_templates.py:894
 msgid "Drags items by dragging the finger after double tapping."
 msgstr "Povlačite stavke povlačenjem prsta nakon dvostrukog dodira."
 
-#: lib/logitech_receiver/settings_templates.py:884
+#: lib/logitech_receiver/settings_templates.py:894
 msgid "Tap and drag"
 msgstr "Dodirni i povuci"
 
-#: lib/logitech_receiver/settings_templates.py:886
+#: lib/logitech_receiver/settings_templates.py:896
 msgid "Drags items by dragging the fingers after double tapping."
 msgstr "Povlačite stavke povlačenjem prsta nakon dvostrukog dodira."
 
-#: lib/logitech_receiver/settings_templates.py:886
+#: lib/logitech_receiver/settings_templates.py:896
 msgid "Tap and drag with two fingers"
 msgstr "Dodirni i povuci s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:887
+#: lib/logitech_receiver/settings_templates.py:897
 msgid "Tap and drag with three fingers"
 msgstr "Dodirni i povuci s tri prsta"
 
-#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:900
 msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
 msgstr ""
 "Onemogućuje dodir i rubne geste (ekvivalent pritiska na Fn+Lijevi klik)"
 
-#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:900
 msgid "Suppress tap and edge gestures"
 msgstr "Onemogući dodir i rubne geste"
 
-#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:901
 msgid "Scroll with one finger"
 msgstr "Pomicanje s jednim prstom"
 
-#: lib/logitech_receiver/settings_templates.py:891
-#: lib/logitech_receiver/settings_templates.py:892
-#: lib/logitech_receiver/settings_templates.py:895
+#: lib/logitech_receiver/settings_templates.py:901
+#: lib/logitech_receiver/settings_templates.py:902
+#: lib/logitech_receiver/settings_templates.py:905
 msgid "Scrolls."
 msgstr "Pomicanje."
 
-#: lib/logitech_receiver/settings_templates.py:892
-#: lib/logitech_receiver/settings_templates.py:895
+#: lib/logitech_receiver/settings_templates.py:902
+#: lib/logitech_receiver/settings_templates.py:905
 msgid "Scroll with two fingers"
 msgstr "Pomicanje s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:893
+#: lib/logitech_receiver/settings_templates.py:903
 msgid "Scroll horizontally with two fingers"
 msgstr "Vodoravno pomicanje s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:893
+#: lib/logitech_receiver/settings_templates.py:903
 msgid "Scrolls horizontally."
 msgstr "Vodoravno pomicanje."
 
-#: lib/logitech_receiver/settings_templates.py:894
+#: lib/logitech_receiver/settings_templates.py:904
 msgid "Scroll vertically with two fingers"
 msgstr "Okomito pomicanje s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:894
+#: lib/logitech_receiver/settings_templates.py:904
 msgid "Scrolls vertically."
 msgstr "Okomito pomicanje."
 
-#: lib/logitech_receiver/settings_templates.py:896
+#: lib/logitech_receiver/settings_templates.py:906
 msgid "Inverts the scrolling direction."
 msgstr "Obrnite smjer pomicanja."
 
-#: lib/logitech_receiver/settings_templates.py:896
+#: lib/logitech_receiver/settings_templates.py:906
 msgid "Natural scrolling"
 msgstr "Prirodno pomicanje"
 
-#: lib/logitech_receiver/settings_templates.py:897
+#: lib/logitech_receiver/settings_templates.py:907
 msgid "Enables the thumbwheel."
 msgstr "Omogućite kotačić palca."
 
-#: lib/logitech_receiver/settings_templates.py:897
+#: lib/logitech_receiver/settings_templates.py:907
 msgid "Thumbwheel"
 msgstr "Kotačić palca"
 
-#: lib/logitech_receiver/settings_templates.py:908
-#: lib/logitech_receiver/settings_templates.py:912
+#: lib/logitech_receiver/settings_templates.py:918
+#: lib/logitech_receiver/settings_templates.py:922
 msgid "Swipe from the top edge"
 msgstr "Prijeđite prstom od gornjeg ruba"
 
-#: lib/logitech_receiver/settings_templates.py:909
+#: lib/logitech_receiver/settings_templates.py:919
 msgid "Swipe from the left edge"
 msgstr "Prijeđite prstom od lijevog ruba"
 
-#: lib/logitech_receiver/settings_templates.py:910
+#: lib/logitech_receiver/settings_templates.py:920
 msgid "Swipe from the right edge"
 msgstr "Prijeđite prstom od desnog ruba"
 
-#: lib/logitech_receiver/settings_templates.py:911
+#: lib/logitech_receiver/settings_templates.py:921
 msgid "Swipe from the bottom edge"
 msgstr "Prijeđite prstom od donjeg ruba"
 
-#: lib/logitech_receiver/settings_templates.py:913
+#: lib/logitech_receiver/settings_templates.py:923
 msgid "Swipe two fingers from the left edge"
 msgstr "Prijeđite s dva prsta od lijevog ruba"
 
-#: lib/logitech_receiver/settings_templates.py:914
+#: lib/logitech_receiver/settings_templates.py:924
 msgid "Swipe two fingers from the right edge"
 msgstr "Prijeđite s dva prsta od desnog ruba"
 
-#: lib/logitech_receiver/settings_templates.py:915
+#: lib/logitech_receiver/settings_templates.py:925
 msgid "Swipe two fingers from the bottom edge"
 msgstr "Prijeđite s dva prsta od donjeg ruba"
 
-#: lib/logitech_receiver/settings_templates.py:916
+#: lib/logitech_receiver/settings_templates.py:926
 msgid "Swipe two fingers from the top edge"
 msgstr "Prijeđite s dva prsta od gornjeg ruba"
 
-#: lib/logitech_receiver/settings_templates.py:917
-#: lib/logitech_receiver/settings_templates.py:921
+#: lib/logitech_receiver/settings_templates.py:927
+#: lib/logitech_receiver/settings_templates.py:931
 msgid "Pinch to zoom out; spread to zoom in."
 msgstr "Skupite prste za smanjivanje; raširite prste za uvećanje."
 
-#: lib/logitech_receiver/settings_templates.py:917
+#: lib/logitech_receiver/settings_templates.py:927
 msgid "Zoom with two fingers."
 msgstr "Uvećanje/Smanjenje s dva prsta."
 
-#: lib/logitech_receiver/settings_templates.py:918
+#: lib/logitech_receiver/settings_templates.py:928
 msgid "Pinch to zoom out."
 msgstr "Skupite prste za smanjivanje."
 
-#: lib/logitech_receiver/settings_templates.py:919
+#: lib/logitech_receiver/settings_templates.py:929
 msgid "Spread to zoom in."
 msgstr "Raširite prste za uvećanje."
 
-#: lib/logitech_receiver/settings_templates.py:920
+#: lib/logitech_receiver/settings_templates.py:930
 msgid "Zoom with three fingers."
 msgstr "Uvećanje/Smanjenje s tri prsta."
 
-#: lib/logitech_receiver/settings_templates.py:921
+#: lib/logitech_receiver/settings_templates.py:931
 msgid "Zoom with two fingers"
 msgstr "Uvećanje/Smanjenje s dva prsta"
 
-#: lib/logitech_receiver/settings_templates.py:939
+#: lib/logitech_receiver/settings_templates.py:949
 msgid "Pixel zone"
 msgstr "Zona piksela"
 
-#: lib/logitech_receiver/settings_templates.py:940
+#: lib/logitech_receiver/settings_templates.py:950
 msgid "Ratio zone"
 msgstr "Zona omjera"
 
-#: lib/logitech_receiver/settings_templates.py:941
+#: lib/logitech_receiver/settings_templates.py:951
 msgid "Scale factor"
 msgstr "Faktor veličine"
 
-#: lib/logitech_receiver/settings_templates.py:941
+#: lib/logitech_receiver/settings_templates.py:951
 msgid "Sets the cursor speed."
 msgstr "Postavlja brzinu pokazivača."
 
-#: lib/logitech_receiver/settings_templates.py:945
+#: lib/logitech_receiver/settings_templates.py:955
 msgid "Left"
 msgstr "Lijevo"
 
-#: lib/logitech_receiver/settings_templates.py:945
+#: lib/logitech_receiver/settings_templates.py:955
 msgid "Left-most coordinate."
 msgstr "Najčešća lijeva koordinata."
 
-#: lib/logitech_receiver/settings_templates.py:946
+#: lib/logitech_receiver/settings_templates.py:956
 msgid "Bottom"
 msgstr "Dno"
 
-#: lib/logitech_receiver/settings_templates.py:946
+#: lib/logitech_receiver/settings_templates.py:956
 msgid "Bottom coordinate."
 msgstr "Koordinata na dnu."
 
-#: lib/logitech_receiver/settings_templates.py:947
+#: lib/logitech_receiver/settings_templates.py:957
 msgid "Width"
 msgstr "Širina"
 
-#: lib/logitech_receiver/settings_templates.py:947
+#: lib/logitech_receiver/settings_templates.py:957
 msgid "Width."
 msgstr "Širina."
 
-#: lib/logitech_receiver/settings_templates.py:948
+#: lib/logitech_receiver/settings_templates.py:958
 msgid "Height"
 msgstr "Visina"
 
-#: lib/logitech_receiver/settings_templates.py:948
+#: lib/logitech_receiver/settings_templates.py:958
 msgid "Height."
 msgstr "Visina."
 
-#: lib/logitech_receiver/settings_templates.py:949
+#: lib/logitech_receiver/settings_templates.py:959
 msgid "Cursor speed."
 msgstr "Brzina pokazivača."
 
-#: lib/logitech_receiver/settings_templates.py:949
+#: lib/logitech_receiver/settings_templates.py:959
 msgid "Scale"
 msgstr "Prilagodba veličine"
 
-#: lib/logitech_receiver/settings_templates.py:955
+#: lib/logitech_receiver/settings_templates.py:965
 msgid "Gestures"
 msgstr "Geste"
 
-#: lib/logitech_receiver/settings_templates.py:956
+#: lib/logitech_receiver/settings_templates.py:966
 msgid "Tweak the mouse/touchpad behaviour."
 msgstr "Prilagodite ponašanje miša/touchpada."
 
-#: lib/logitech_receiver/settings_templates.py:972
+#: lib/logitech_receiver/settings_templates.py:982
 msgid "Gestures Diversion"
 msgstr "Preusmjeravanje gesta"
 
-#: lib/logitech_receiver/settings_templates.py:973
+#: lib/logitech_receiver/settings_templates.py:983
 msgid "Divert mouse/touchpad gestures."
 msgstr "Preusmjerite ponašanje miša/touchpada."
 
-#: lib/logitech_receiver/settings_templates.py:989
+#: lib/logitech_receiver/settings_templates.py:999
 msgid "Gesture params"
 msgstr "Parametri gesta"
 
-#: lib/logitech_receiver/settings_templates.py:990
+#: lib/logitech_receiver/settings_templates.py:1000
 msgid "Change numerical parameters of a mouse/touchpad."
 msgstr "Promijenite brojčane parametre miša/touchpada."
 
-#: lib/logitech_receiver/settings_templates.py:1014
+#: lib/logitech_receiver/settings_templates.py:1024
 msgid "M-Key LEDs"
 msgstr "LED osvjetljenje M-tipke"
 
-#: lib/logitech_receiver/settings_templates.py:1016
+#: lib/logitech_receiver/settings_templates.py:1026
 msgid "Control the M-Key LEDs."
 msgstr "Upravljajte LED osvjetljenjem M-tipke."
 
-#: lib/logitech_receiver/settings_templates.py:1017
-#: lib/logitech_receiver/settings_templates.py:1045
+#: lib/logitech_receiver/settings_templates.py:1027
+#: lib/logitech_receiver/settings_templates.py:1055
 msgid "May need G Keys diverted to be effective."
 msgstr "Možda je potrebno preusmjeravanje G tipka kako bi bile učinkovite."
 
-#: lib/logitech_receiver/settings_templates.py:1023
+#: lib/logitech_receiver/settings_templates.py:1033
 #, python-format
 msgid "Lights up the %s key."
 msgstr "Osvijetli %s tipku."
 
-#: lib/logitech_receiver/settings_templates.py:1042
+#: lib/logitech_receiver/settings_templates.py:1052
 msgid "MR-Key LED"
 msgstr "LED osvjetljenje MR-tipke"
 
-#: lib/logitech_receiver/settings_templates.py:1044
+#: lib/logitech_receiver/settings_templates.py:1054
 msgid "Control the MR-Key LED."
 msgstr "Upravljajte LED osvjetljenjem MR-tipke."
 
-#: lib/logitech_receiver/settings_templates.py:1062
+#: lib/logitech_receiver/settings_templates.py:1072
 msgid "Persistent Key/Button Mapping"
 msgstr "Trajno mapiranje tipka"
 
-#: lib/logitech_receiver/settings_templates.py:1064
+#: lib/logitech_receiver/settings_templates.py:1074
 msgid "Permanently change the mapping for the key or button."
 msgstr "Trajno promijenite mapiranje za tipku."
 
-#: lib/logitech_receiver/settings_templates.py:1065
+#: lib/logitech_receiver/settings_templates.py:1075
 msgid ""
 "Changing important keys or buttons (such as for the left mouse button) can "
 "result in an unusable system."
@@ -891,23 +911,23 @@ msgstr ""
 "Promjena bitnih tipka (poput lijeve tipke miša) može prouzrokovati "
 "nestabilnosti u sustavu."
 
-#: lib/logitech_receiver/settings_templates.py:1122
+#: lib/logitech_receiver/settings_templates.py:1132
 msgid "Sidetone"
 msgstr "Bočni ton"
 
-#: lib/logitech_receiver/settings_templates.py:1123
+#: lib/logitech_receiver/settings_templates.py:1133
 msgid "Set sidetone level."
 msgstr "Postavi razinu bočnog tona."
 
-#: lib/logitech_receiver/settings_templates.py:1132
+#: lib/logitech_receiver/settings_templates.py:1142
 msgid "Equalizer"
 msgstr "Ekvalizator"
 
-#: lib/logitech_receiver/settings_templates.py:1133
+#: lib/logitech_receiver/settings_templates.py:1143
 msgid "Set equalizer levels."
 msgstr "Postavi razine ekvilizatora."
 
-#: lib/logitech_receiver/settings_templates.py:1155
+#: lib/logitech_receiver/settings_templates.py:1165
 msgid "Hz"
 msgstr "Hz"
 
@@ -1518,31 +1538,31 @@ msgstr "Postavka na uređaju"
 msgid "offline"
 msgstr "nespojivo"
 
-#: lib/solaar/ui/pair_window.py:121 lib/solaar/ui/pair_window.py:255
-#: lib/solaar/ui/pair_window.py:277
+#: lib/solaar/ui/pair_window.py:122 lib/solaar/ui/pair_window.py:256
+#: lib/solaar/ui/pair_window.py:278
 #, python-format
 msgid "%(receiver_name)s: pair new device"
 msgstr "%(receiver_name)s: upari novi uređaj"
 
-#: lib/solaar/ui/pair_window.py:122
+#: lib/solaar/ui/pair_window.py:123
 #, python-format
 msgid "Enter passcode on %(name)s."
 msgstr "Upišite lozinku na %(name)s."
 
-#: lib/solaar/ui/pair_window.py:125
+#: lib/solaar/ui/pair_window.py:126
 #, python-format
 msgid "Type %(passcode)s and then press the enter key."
 msgstr "Upišite %(passcode)s i zatim pritisnite Enter tipku."
 
-#: lib/solaar/ui/pair_window.py:128
+#: lib/solaar/ui/pair_window.py:129
 msgid "left"
 msgstr "lijevo"
 
-#: lib/solaar/ui/pair_window.py:128
+#: lib/solaar/ui/pair_window.py:129
 msgid "right"
 msgstr "desno"
 
-#: lib/solaar/ui/pair_window.py:130
+#: lib/solaar/ui/pair_window.py:131
 #, python-format
 msgid ""
 "Press %(code)s\n"
@@ -1551,55 +1571,55 @@ msgstr ""
 "Pritisnite %(code)s\n"
 "i zatim istovremeno pritisnite lijevu i desnu tipku."
 
-#: lib/solaar/ui/pair_window.py:187
+#: lib/solaar/ui/pair_window.py:188
 msgid "Pairing failed"
 msgstr "Neuspjelo uparivanje"
 
-#: lib/solaar/ui/pair_window.py:189
+#: lib/solaar/ui/pair_window.py:190
 msgid "Make sure your device is within range, and has a decent battery charge."
 msgstr ""
 "Pobrinite se da je vaš uređaj u dometu bežičnog povezivanja i da je dovoljno "
 "napunjen."
 
-#: lib/solaar/ui/pair_window.py:191
+#: lib/solaar/ui/pair_window.py:192
 msgid "A new device was detected, but it is not compatible with this receiver."
 msgstr "Novi uređaj je otkriven, ali nije kompatibilan s ovim uređajem."
 
-#: lib/solaar/ui/pair_window.py:193
+#: lib/solaar/ui/pair_window.py:194
 msgid "More paired devices than receiver can support."
 msgstr "Postoji više uparenih uređaja nego što prijemnik podržava."
 
-#: lib/solaar/ui/pair_window.py:195
+#: lib/solaar/ui/pair_window.py:196
 msgid "No further details are available about the error."
 msgstr "Nema dostupnih više pojedinosti o ovoj grešci."
 
-#: lib/solaar/ui/pair_window.py:209
+#: lib/solaar/ui/pair_window.py:210
 msgid "Found a new device:"
 msgstr "Novi uređaj je pronađen:"
 
-#: lib/solaar/ui/pair_window.py:234
+#: lib/solaar/ui/pair_window.py:235
 msgid "The wireless link is not encrypted"
 msgstr "Bežično povezivanje nije šifrirano"
 
-#: lib/solaar/ui/pair_window.py:263
+#: lib/solaar/ui/pair_window.py:264
 msgid "Press a pairing button or key until the pairing light flashes quickly."
 msgstr ""
 "Pritisnite tipku uparivanja sve dok svjetlo uparivanja ne počne brzo "
 "treptati."
 
-#: lib/solaar/ui/pair_window.py:265
+#: lib/solaar/ui/pair_window.py:266
 msgid "You may have to first turn the device off and on again."
 msgstr "Možda trebate prvo isključiti uređaj pa ponovno uključiti."
 
-#: lib/solaar/ui/pair_window.py:267
+#: lib/solaar/ui/pair_window.py:268
 msgid "Turn on the device you want to pair."
 msgstr "Uključite uređaj koji želite upariti."
 
-#: lib/solaar/ui/pair_window.py:269
+#: lib/solaar/ui/pair_window.py:270
 msgid "If the device is already turned on, turn it off and on again."
 msgstr "Ako je uređaj već uključen, isključite ga i ponovno uključite."
 
-#: lib/solaar/ui/pair_window.py:272
+#: lib/solaar/ui/pair_window.py:273
 #, python-format
 msgid ""
 "\n"
@@ -1622,7 +1642,7 @@ msgstr[2] ""
 "\n"
 "Ovaj prijemnik ima još %d preostalih uparivanja."
 
-#: lib/solaar/ui/pair_window.py:275
+#: lib/solaar/ui/pair_window.py:276
 msgid ""
 "\n"
 "Cancelling at this point will not use up a pairing."
@@ -1858,6 +1878,14 @@ msgstr "%(light_level)d lux"
 #~ "vrtnje kotačića.\n"
 #~ "Kotačić miša je uvijek slobodan pri 0 i uvijek zaključan pri 50"
 
+#~ msgid ""
+#~ "Automatically switch the mouse wheel between ratchet and freespin mode.\n"
+#~ "The mouse wheel is always free at 0, and always ratcheted at 50"
+#~ msgstr ""
+#~ "Automatski prebaci kotačić miša između ustavljačkog i slobodnog načina "
+#~ "vrtnje kotačića.\n"
+#~ "Kotačić miša je uvijek slobodan pri 0 i uvijek zaključan pri 50"
+
 #~ msgid "DPI Sliding Adjustment"
 #~ msgstr "Prilagodba DPI pomicanjem"
 
@@ -1914,6 +1942,9 @@ msgstr "%(light_level)d lux"
 #~ msgstr ""
 #~ "Neka tipka šalje HID++ obavijesti (što pokreće Solaar pravila, u "
 #~ "suprotnome ih zanemaruje)."
+
+#~ msgid "Scroll Wheel Rachet"
+#~ msgstr "Ustavljanje pomicanja kotačića"
 
 #~ msgid "Send a gesture by sliding the mouse while holding the button down."
 #~ msgstr "Prilagodite geste pomicanjem miša držeći pritisnutu tipku."
