@@ -511,7 +511,7 @@ msgid ""
 msgstr ""
 "Koristite brzinu kotačića miša za prebacivanje između ustavljačkog i "
 "slobodnog načina vrtnje kotačića.\n"
-"Kotačić miša je uvijek, ustavljen pri 50."
+"Kotačić miša je uvijek ustavljen pri 50."
 
 #: lib/logitech_receiver/settings_templates.py:460
 msgid "Key/Button Actions"
