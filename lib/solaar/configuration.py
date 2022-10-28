@@ -28,9 +28,14 @@ from threading import Timer as _Timer
 
 import yaml as _yaml
 
-from gi.repository import GLib
 from logitech_receiver.common import NamedInt as _NamedInt
 from solaar import __version__
+
+try:
+    from gi.repository import GLib
+    _HAS_GLIB = True
+except ModuleNotFoundError:
+    _HAS_GLIB = False
 
 _log = getLogger(__name__)
 del getLogger
@@ -91,7 +96,8 @@ def save(defer=False):
     else:
         with save_lock:
             if not save_timer:
-                save_timer = _Timer(5.0, lambda: GLib.idle_add(do_save))
+                func = lambda: GLib.idle_add(do_save) if _HAS_GLIB else do_save
+                save_timer = _Timer(5.0, func)
                 save_timer.start()
 
 
