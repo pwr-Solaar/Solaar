@@ -1,6 +1,6 @@
 # Notes on Major Changes in Releases
 
-## Version 1.1.7rc1
+## Version 1.1.7
 
 * Solaar responds to scroll wheel ratchet notifications by changing its scroll wheel ratcheting.
 
