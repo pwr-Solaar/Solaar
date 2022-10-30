@@ -1,5 +1,8 @@
-# 1.1.7rc1
+# 1.1.7rc2
 
+* Don't defer saves in CLI and don't require Gtk in CLI
+* Be more permissive in recognizing HID++ report descriptors
+* Update Polish and Croatian translations
 * Switch scroll ratcheting in response to scroll ratchet button notification
 * Add setting to turn scroll ratchet on and off
 * Eliminate visual glitch when updating range setting
