@@ -23,10 +23,6 @@ from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInts as _NamedInts
 from solaar import configuration as _configuration
 
-import gi  # isort:skip
-gi.require_version('Gtk', '3.0')  # NOQA: E402
-from gi.repository import Gio, Gtk  # NOQA: E402 # isort:skip
-
 
 def _print_setting(s, verbose=True):
     print('#', s.label)
@@ -188,11 +184,17 @@ def run(receivers, args, find_receiver, find_device):
         return
 
     remote = False
-    if Gtk.init_check()[0]:  # can Gtk be initialized?
-        APP_ID = 'io.github.pwr_solaar.solaar'
-        application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
-        application.register()
-        remote = application.get_is_remote()
+    try:
+        import gi
+        gi.require_version('Gtk', '3.0')
+        from gi.repository import Gio, Gtk
+        if Gtk.init_check()[0]:  # can Gtk be initialized?
+            APP_ID = 'io.github.pwr_solaar.solaar'
+            application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+            application.register()
+            remote = application.get_is_remote()
+    except Exception:
+        pass
 
     # don't save configuration here because we might want the Solaar GUI to make the change
     result, message, value = set(dev, setting, args, False)
@@ -209,7 +211,6 @@ def run(receivers, args, find_receiver, find_device):
     else:
         if dev.persister and setting.persist:
             dev.persister[setting.name] = setting._value
-            _configuration.save(defer=False)
 
 
 def set(dev, setting, args, save):

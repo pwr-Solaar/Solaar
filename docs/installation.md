@@ -24,6 +24,7 @@ Solaar requires Python 3.7+ and requires several packages to be installed.
 If you are running the system version of Python you should have the
 `python3-pyudev`, `python3-psutil`, `python3-xlib`, `python3-evdev`,
 and `python3-yaml` or `python3-pyyaml` packages installed.
+
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
 If you are running the system version of Python
 the Debian/Ubuntu packages you should have
@@ -31,6 +32,10 @@ the Debian/Ubuntu packages you should have
 in Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
+Although the Solaar CLI does not require Gtk3,
+`solaar config` does use Gtk3 capabilities to determine whether the Solaar GUI is running
+and thus should tell the Solaar GUI to update its information about settings
+so it is a good idea to have Gtk3 available even for the Solaar CLI.
 
 If the `hid_parser` Python package is available, Solaar parses HID report descriptors
 and can control more HID++ devices that do not use a receiver.
