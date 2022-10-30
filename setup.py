@@ -66,6 +66,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'PyYAML (>= 3.12)',
         'python-xlib (>= 0.27)',
         'psutil (>= 5.4.3)',
+        'typing_extensions (>=4.0.0)',
     ],
     extras_require={
         'report-descriptor': ['hid-parser'],
