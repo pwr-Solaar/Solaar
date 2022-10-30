@@ -170,6 +170,9 @@ def main():
         else:
             _upower.watch(lambda: listener.ping_all(True))
 
+        import solaar.configuration as _configuration
+        _configuration.defer_saves = True  # allow configuration saves to be deferred
+
         # main UI event loop
         ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:

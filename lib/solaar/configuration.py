@@ -28,7 +28,6 @@ from threading import Timer as _Timer
 
 import yaml as _yaml
 
-from gi.repository import GLib
 from logitech_receiver.common import NamedInt as _NamedInt
 from solaar import __version__
 
@@ -73,6 +72,7 @@ def _load():
 
 save_timer = None
 save_lock = _Lock()
+defer_saves = False  # don't allow configuration saves to be deferred
 
 
 def save(defer=False):
@@ -86,11 +86,12 @@ def save(defer=False):
         except Exception:
             _log.error('failed to create %s', dirname)
             return
-    if not defer:
+    if not defer or not defer_saves:
         do_save()
     else:
         with save_lock:
             if not save_timer:
+                from gi.repository import GLib
                 save_timer = _Timer(5.0, lambda: GLib.idle_add(do_save))
                 save_timer.start()
 
