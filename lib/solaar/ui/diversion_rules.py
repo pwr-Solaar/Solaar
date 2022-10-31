@@ -117,8 +117,8 @@ class DiversionDialog:
         window.add(vbox)
 
         geometry = Gdk.Geometry()
-        geometry.min_width = 800
-        geometry.min_height = 800
+        geometry.min_width = 600  # don't ask for so much space
+        geometry.min_height = 400
         window.set_geometry_hints(None, geometry, Gdk.WindowHints.MIN_SIZE)
         window.set_position(Gtk.WindowPosition.CENTER)
 
@@ -192,7 +192,7 @@ class DiversionDialog:
         view.connect('button-release-event', self._event_button_released)
         view.get_selection().connect('changed', self._selection_changed)
         sw.add(view)
-        sw.set_size_request(0, 600)
+        sw.set_size_request(0, 300)  # don't ask for so much height
 
         button_box = Gtk.HBox(spacing=20)
         self.save_btn = Gtk.Button.new_from_icon_name('document-save', Gtk.IconSize.BUTTON)
