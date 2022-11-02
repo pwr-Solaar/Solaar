@@ -173,7 +173,7 @@ class EventsListener(_threading.Thread):
                     # _log.debug("read next notification")
                     n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except _base.NoReceiver:
-                    _log.warning('receiver disconnected')
+                    _log.warning('%s disconnected', self.receiver.name)
                     self.receiver.close()
                     break
 
