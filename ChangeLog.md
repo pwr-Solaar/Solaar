@@ -1,5 +1,6 @@
-# 1.1.7rc2
+# 1.1.7
 
+* Add dependency on typing_extension to setup.py
 * Don't defer saves in CLI and don't require Gtk in CLI
 * Be more permissive in recognizing HID++ report descriptors
 * Update Polish and Croatian translations
