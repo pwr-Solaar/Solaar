@@ -166,7 +166,7 @@ Some mice (such as the MX Master 3) have a button that is supposed to be used to
 create up/down/left/right mouse gestures.  Other mice (such as the MX Vertical) don't
 have a button specific for this purpose but have buttons that can be used for it.
 
-The `Key/Button Diversion` setting can assign buttons to initiate mous gestures by setting the value for the button to `Mouse Gestures`.
+The `Key/Button Diversion` setting can assign buttons to initiate mouse gestures by setting the value for the button to `Mouse Gestures`.
 This capability is only present if the device can support it.
 
 Pressing a button when it is set to `Mouse Gestures` causes the mouse pointer to stop moving.
