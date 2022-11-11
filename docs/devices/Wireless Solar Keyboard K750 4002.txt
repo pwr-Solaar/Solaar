@@ -1,6 +1,3 @@
-(from Julien Danjou)
-
-(solaar)
   2: Wireless Solar Keyboard K750
      Codename     : K750
      Kind         : keyboard

@@ -1,13 +1,3 @@
-Unifying Receiver
-  Device path  : /dev/hidraw2
-  USB id       : 046d:c52b
-  Serial       : C03E9E2E
-    Firmware   : 12.01.B0019
-    Bootloader : 02.14
-  Has 2 paired device(s) out of a maximum of 6.
-  Notifications: wireless, software present (0x000900)
-  Device activity counters: 2=118
-
   2: Wireless Keyboard K270(unifying)
      Codename     : K270(unifying)
      Kind         : keyboard

@@ -1,29 +1,3 @@
-Mouse
-(ltunify)
-HID++ version: 2.0
-Device index 1
-Mouse
-Name: M525
-Wireless Product ID: 4013
-Serial number: DAFA335E
-Device was unavailable, version information not available.
-Total number of HID++ 2.0 features: 12
-  0: [0000]     IRoot
-  1: [0001]     IFeatureSet
-  2: [0003]     IFirmwareInfo
-  3: [0005]     GetDeviceNameType
-  4: [1000]     batteryLevelStatus
-  5: [1D4B]     WirelessDeviceStatus
-  6: [1DF3]  H  unknown
-  7: [1B00]     SpecialKeysMSEButtons
-  8: [1DF0]  H  unknown
-  9: [1F03]  H  unknown
- 10: [2100]     VerticalScrolling
- 11: [2120]     HiResScrolling
- 12: [2200]     MousePointer
-(O = obsolete feature; H = SW hidden feature;
- I = reserved for internal use)
-(solaar)
   1: Wireless Mouse M525
      Codename     : M525
      Kind         : mouse
