@@ -1,14 +1,3 @@
-Unifying Receiver
-  Device path  : /dev/hidraw0
-  USB id       : 046d:c52b
-  Serial       : A7F5923B
-    Firmware   : 24.01.B0023
-    Bootloader : 01.08
-    Other      : AA.AD
-  Has 1 paired device(s) out of a maximum of 6.
-  Notifications: wireless, software present (0x000900)
-  Device activity counters: 1=11
-
   1: Wireless Mouse MX Anywhere 2
      Codename     : MX Anywhere 2
      Kind         : mouse

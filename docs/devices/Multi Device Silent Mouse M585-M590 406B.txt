@@ -1,0 +1,74 @@
+  2: Multi Device Silent Mouse M585/M590
+     Codename     : M585/M590
+     Kind         : mouse
+     Wireless PID : 406B
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: DB633BD6
+        Bootloader: BOT 48.00.B0001
+          Firmware: MPM 05.01.B0006
+             Other:
+     The power switch is located on the base.
+     Supports 33 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: WIRELESS DEVICE STATUS {1D4B}
+         5: RESET                  {0020}
+         6: DEVICE FRIENDLY NAME   {0007}
+         7: BATTERY STATUS         {1000}
+         8: CHANGE HOST            {1814}
+            Change Host: 1:ASIX
+         9: HOSTS INFO             {1815}
+            Host 0 (paired):
+            Host 1 (unpaired):
+        10: REPROG CONTROLS V4     {1B04}
+            Actions: {'80': 80, '81': 81, '82': 82, '83': 83, '86': 86, '91': 91, '93': 93}
+        11: PERSISTENT REMAPPABLE ACTION {1C00}
+        12: POINTER SPEED          {2205}
+            Pointer Speed: 1.0
+            Sensitivity (Pointer Speed): 256
+        13: VERTICAL SCROLLING     {2100}
+            Roller type: standard
+            Ratchet per turn: 18
+            Scroll lines: 0
+        14: DFUCONTROL SIGNED      {00C2}
+        15: DEVICE RESET           {1802}   internal, hidden
+        16: unknown:1803           {1803}   internal, hidden
+        17: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        18: OOBSTATE               {1805}   internal, hidden
+        19: unknown:1813           {1813}   internal, hidden
+        20: unknown:1830           {1830}   internal, hidden
+        21: unknown:1861           {1861}   internal, hidden
+        22: unknown:1890           {1890}   internal, hidden
+        23: unknown:1891           {1891}   internal, hidden
+        24: unknown:18A1           {18A1}   internal, hidden
+        25: unknown:1DF3           {1DF3}   internal, hidden
+        26: unknown:1E00           {1E00}   hidden
+        27: unknown:1EB0           {1EB0}   internal, hidden
+        28: unknown:18B1           {18B1}   internal, hidden
+        29: unknown:1850           {1850}   internal, hidden
+        30: unknown:1F03           {1F03}   internal, hidden
+        31: unknown:18C0           {18C0}   internal, hidden
+        32: LOWRES WHEEL           {2130}
+            Wheel Reports: HID
+            HID++ Scrolling: False
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Button
+             mse, reprogrammable, pos:0, group:1, gmask:1
+         1: Right Button              , default: Right Click                 => Right Button
+             mse, reprogrammable, pos:0, group:1, gmask:1
+         2: Middle Button             , default: Mouse Middle Button         => Middle Button
+             mse, reprogrammable, divertable, persistently divertable, pos:0, group:2, gmask:3
+         3: Back Button               , default: Mouse Back Button           => Back Button
+             mse, reprogrammable, divertable, persistently divertable, pos:0, group:2, gmask:3
+         4: Forward Button            , default: Mouse Forward Button        => Forward Button
+             mse, reprogrammable, divertable, persistently divertable, pos:0, group:2, gmask:3
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Left Tilt
+             mse, reprogrammable, divertable, persistently divertable, pos:0, group:2, gmask:3
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Right Tilt
+             mse, reprogrammable, divertable, persistently divertable, pos:0, group:2, gmask:3
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, pos:0, group:3, gmask:0
+     Battery: 50%, discharging, next level 20%.

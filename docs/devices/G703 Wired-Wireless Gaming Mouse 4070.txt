@@ -1,0 +1,43 @@
+  1: G703 Wired/Wireless Gaming Mouse
+     Codename     : G703
+     Kind         : mouse
+     Wireless PID : 4070
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number: AFE674F7
+          Firmware: MPM 14.02.B0007
+        Bootloader: BOT 64.02.B0007
+             Other:
+     The power switch is located on the base.
+     Supports 29 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: DEVICE FW VERSION      {0003}
+         3: DEVICE NAME            {0005}
+         4: BATTERY VOLTAGE        {1001}
+         5: unknown:1863           {1863}   internal, hidden
+         6: unknown:18A1           {18A1}   internal, hidden
+         7: unknown:1E00           {1E00}   hidden
+         8: unknown:1E20           {1E20}
+         9: unknown:1EB0           {1EB0}   internal, hidden
+        10: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI): 1600
+        11: ANGLE SNAPPING         {2230}
+        12: SURFACE TUNING         {2240}
+        13: REPORT RATE            {8060}
+        14: ONBOARD PROFILES       {8100}
+        15: MOUSE BUTTON SPY       {8110}
+        16: unknown:1850           {1850}   internal, hidden
+        17: DFUCONTROL SIGNED      {00C2}
+        18: unknown:1801           {1801}   internal, hidden
+        19: DEVICE RESET           {1802}   internal, hidden
+        20: unknown:1803           {1803}   internal, hidden
+        21: unknown:1890           {1890}   internal, hidden
+        22: unknown:1811           {1811}   internal, hidden
+        23: LATENCY MONITORING     {8111}
+        24: COLOR LED EFFECTS      {8070}
+        25: unknown:1809           {1809}
+        26: unknown:1830           {1830}   internal, hidden
+        27: OOBSTATE               {1805}   internal, hidden
+        28: CONFIG DEVICE PROPS    {1806}   internal, hidden
+     Battery: 3807mV, discharging, average
