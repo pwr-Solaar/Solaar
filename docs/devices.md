@@ -46,7 +46,7 @@ where <NAME> is the name of your receiver or device.
 `N` is the current HID raw number of your receiver or device.
 
 3. Provide the contents of the file `/sys/class/hidraw/hidrawN/device/uevent` where N was found
-above in the enhancement issue.
+above.
 
 4. Also attach contents of the file `/sys/class/hidraw/hidrawN/device/report_descriptor`
 to the enhancement request.
