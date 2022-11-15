@@ -24,7 +24,8 @@ If the device is supported, it will show up in the Solaar main window.
 If it is not, and there is no issue about the device in the Solaar GitHub repository,
 open an enhancement issue requesting that it be supported.
 
-The directory https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices contains
+The directory https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices contains edited output
+of `solaar show` on many devices and can be used to see what Solaar can do with the the device.
 
 
 ## Adding new devices
