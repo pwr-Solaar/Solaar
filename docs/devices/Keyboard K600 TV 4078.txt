@@ -1,0 +1,180 @@
+Solaar version 1.1.7
+
+  1: Keyboard K600 TV
+     Device path  : /dev/hidraw3
+     WPID         : 4078
+     Codename     : K600 TV
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: C4E873FC
+     Model ID:      B35340780000
+     Unit ID:       CA575869
+        Bootloader: BOT 73.00.B0015
+          Firmware: MPK 08.00.B0015
+             Other:
+             Other:
+     Supports 36 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Bootloader BOT 73.00.B0015 00001E30DA07
+            Firmware: Firmware MPK 08.00.B0015 40781E30DA07
+            Firmware: Other
+            Firmware: Other
+            Unit ID: CA575869  Model ID: B35340780000  Transport IDs: {'btleid': 'B353', 'wpid': '4078'}
+         3: DEVICE NAME            {0005} V0
+            Name: Keyboard K600 TV
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: RESET                  {0020} V0
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: Keyboard K600 T
+         7: BATTERY STATUS         {1000} V1
+            Battery: 90%, discharging, next level 50%.
+         8: REPROG CONTROLS V4     {1B04} V4
+            Desvio de Tecla/Botón (saved): {Fn Left Click:Normal, Multiplatform App Switch:Normal, Multiplatform Back:Normal, Multiplatform Insert:Normal, Brightness Down:Normal, Brightness Up:Normal, Host Switch Channel 1:Normal, Host Switch Channel 2:Normal, Host Switch Channel 3:Normal, MultiPlatform Search:Normal, MultiPlatform Home/Mission Control:Normal, MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:Normal, Previous Fn:Normal, Play/Pause Fn:Normal, Next Fn:Normal, Mute Fn:Normal, Volume Down Fn:Normal, Volume Up Fn:Normal}
+            Desvio de Tecla/Botón        : {Fn Left Click:Normal, Multiplatform App Switch:Normal, Multiplatform Back:Normal, Multiplatform Insert:Normal, Brightness Down:Normal, Brightness Up:Normal, Host Switch Channel 1:Normal, Host Switch Channel 2:Normal, Host Switch Channel 3:Normal, MultiPlatform Search:Normal, MultiPlatform Home/Mission Control:Normal, MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:Normal, Previous Fn:Normal, Play/Pause Fn:Normal, Next Fn:Normal, Mute Fn:Normal, Volume Down Fn:Normal, Volume Up Fn:Normal}
+         9: PERSISTENT REMAPPABLE ACTION {1C00} V0
+            Persistent Key/Button Mapping        : {Multiplatform App Switch:No Output (only as default), Multiplatform Back:No Output (only as default), Multiplatform Insert:No Output (only as default), Brightness Down:No Output (only as default), Brightness Up:No Output (only as default), MultiPlatform Search:No Output (only as default), MultiPlatform Home/Mission Control:No Output (only as default), MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad:No Output (only as default), Previous Fn:No Output (only as default), Play/Pause Fn:No Output (only as default), Next Fn:No Output (only as default), Mute Fn:No Output (only as default), Volume Down Fn:No Output (only as default), Volume Up Fn:No Output (only as default)}
+        10: SWAP BUTTON CANCEL     {2005} V0
+        11: CHANGE HOST            {1814} V1
+            Cambiar Host        : 1:romanescu
+        12: HOSTS INFO             {1815} V1
+            Host 0 (paired): romanescu
+            Host 1 (unpaired):
+            Host 2 (unpaired):
+        13: NEW FN INVERSION       {40A2} V0
+            Fn-swap: enabled
+            Fn-swap default: enabled
+            Intercambiar función Fx (saved): True
+            Intercambiar función Fx        : True
+        14: ENCRYPTION             {4100} V0
+        15: LOCK KEY STATE         {4220} V0
+        16: KEYBOARD DISABLE KEYS  {4521} V0
+            Desactivar teclas (saved): {Caps Lock:False, Insert:False, Win:False}
+            Desactivar teclas        : {Caps Lock:False, Insert:False, Win:False}
+        17: MULTIPLATFORM          {4531} V1
+            Especificar SO (saved): Windows
+            Especificar SO        : Windows
+        18: TOUCHPAD RAW XY        {6100} V0
+        19: GESTURE 2              {6501} V0
+            Gestos (saved): {1: True, 2: True, 4: True, 5: True, 10: True, 30: True, 34: False, 42: True, 43: True, 45: False, 84: True}
+            Gestos        : {1: True, 2: True, 4: True, 5: True, 30: True, 10: True, 45: False, 42: True, 43: True, 84: True, 34: False}
+            Gestures Diversion (saved): {1: False, 2: False, 4: False, 5: False, 10: False, 44: False, 84: False, 85: False, 100: False}
+            Gestures Diversion        : {1: False, 2: False, 4: False, 5: False, 10: False, 44: False, 84: False, 85: False, 100: False}
+            Parámetros de gestos (saved): {4: {'scale': 256}}
+            Parámetros de gestos        : {4: {'scale': 256}}
+        20: DFUCONTROL SIGNED      {00C2} V0
+        21: DEVICE RESET           {1802} V0    internal, hidden
+        22: unknown:1803           {1803} V0    internal, hidden
+        23: CONFIG DEVICE PROPS    {1806} V5    internal, hidden
+        24: unknown:1813           {1813} V0    internal, hidden
+        25: OOBSTATE               {1805} V0    internal, hidden
+        26: unknown:1830           {1830} V0    internal, hidden
+        27: unknown:1890           {1890} V2    internal, hidden
+        28: unknown:1891           {1891} V2    internal, hidden
+        29: unknown:18A1           {18A1} V0    internal, hidden
+        30: unknown:1DF3           {1DF3} V0    internal, hidden
+        31: unknown:1E00           {1E00} V0    hidden
+        32: unknown:1EB0           {1EB0} V0    internal, hidden
+        33: unknown:1861           {1861} V0    internal, hidden
+        34: unknown:18B0           {18B0} V0    internal, hidden
+        35: unknown:1F11           {1F11} V0    internal, hidden
+     Has 19 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             is FN, FN sensitive, divertable, persistently divertable, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             is FN, FN sensitive, divertable, persistently divertable, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             is FN, FN sensitive, divertable, persistently divertable, pos:3, group:0, group mask:empty
+             reporting: default
+         3: MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad, default: Multiplatform Menu/Launchpad => Multiplatform Menu/Launchpad
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:4, group:0, group mask:empty
+             reporting: default
+         4: Brightness Down           , default: Brightness Down             => Brightness Down
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:5, group:0, group mask:empty
+             reporting: default
+         5: Brightness Up             , default: Brightness Up               => Brightness Up
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:6, group:0, group mask:empty
+             reporting: default
+         6: Previous Fn               , default: Previous                    => Previous
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:7, group:0, group mask:empty
+             reporting: default
+         7: Play/Pause Fn             , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:8, group:0, group mask:empty
+             reporting: default
+         8: Next Fn                   , default: Next                        => Next
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:9, group:0, group mask:empty
+             reporting: default
+         9: Mute Fn                   , default: Mute                        => Mute
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:10, group:0, group mask:empty
+             reporting: default
+        10: Volume Down Fn            , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:11, group:0, group mask:empty
+             reporting: default
+        11: Volume Up Fn              , default: Volume Up                   => Volume Up
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:12, group:0, group mask:empty
+             reporting: default
+        12: Multiplatform Insert      , default: Switch Language             => Switch Language
+             is FN, FN sensitive, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        13: MultiPlatform Home/Mission Control, default: Multiplatform Home/Mission Control => Multiplatform Home/Mission Control
+             nonstandard, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Multiplatform Back        , default: MultiPlatform Back          => MultiPlatform Back
+             nonstandard, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        15: Multiplatform App Switch  , default: MultiPlatform App Switch    => MultiPlatform App Switch
+             nonstandard, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        16: MultiPlatform Search      , default: Multiplatform Search        => Multiplatform Search
+             nonstandard, reprogrammable, divertable, persistently divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Fn Left Click             , default: ShowUI                      => ShowUI
+             divertable, pos:0, group:0, group mask:empty
+             reporting: default
+        18: FN Key                    , default: Do Nothing One              => Do Nothing One
+             nonstandard, pos:0, group:0, group mask:empty
+             reporting: default
+     Has 14 persistent remappable keys:
+         0: MultiPlatform Menu/Show/Hide Virtual Keyboard/Launchpad => None
+         1: Brightness Down            => None
+         2: Brightness Up              => None
+         3: Previous Fn                => None
+         4: Play/Pause Fn              => None
+         5: Next Fn                    => None
+         6: Mute Fn                    => None
+         7: Volume Down Fn             => None
+         8: Volume Up Fn               => None
+         9: Multiplatform Insert       => None
+        10: MultiPlatform Home/Mission Control => None
+        11: Multiplatform Back         => None
+        12: Multiplatform App Switch   => None
+        13: MultiPlatform Search       => None
+     Has 16 gesture(s), 1 param(s) and 5 spec(s):
+        Track1Finger               Enabled(None): None   Diverted:(None) None
+        TapGestures                Enabled(None): None   Diverted:(None) None
+        Tap1Finger                 Enabled(   0): True   Diverted:(   0) False
+        Tap2Finger                 Enabled(   1): True   Diverted:(   1) False
+        Click1Finger               Enabled(   2): True   Diverted:(   2) False
+        Click2Finger               Enabled(   3): True   Diverted:(   3) False
+        TapDrag1Finger             Enabled(   4): True   Diverted:(None) None
+        DoubleTap1Finger           Enabled(   5): True   Diverted:(   4) False
+        Scroll2FingerStateless     Enabled(None): None   Diverted:(   5) False
+        NaturalScrolling           Enabled(   6): False  Diverted:(None) None
+        Scroll2FingerHoriz         Enabled(   7): True   Diverted:(None) None
+        Scroll2FingerVert          Enabled(   8): True   Diverted:(None) None
+        Zoom2FingerStateless       Enabled(   9): True   Diverted:(   6) False
+        FnClickGestureSuppression  Enabled(  10): False  Diverted:(None) None
+        TwoFingersPresent          Enabled(None): None   Diverted:(   7) False
+        DeviceSpecificRawData      Enabled(None): None   Diverted:(   8) False
+        ScaleFactor                Value  (   0): 256 [Default: 256]
+        period unit                Spec   (   3): 2048
+        DVI field width            Spec   (   1): 8
+        field widths               Spec   (   2): 8
+        multiplier                 Spec   (   5): None
+        resolution                 Spec   (   4): 4
+     Battery: 90%, discharging, next level 50%.
