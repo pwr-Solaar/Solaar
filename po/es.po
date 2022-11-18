@@ -1321,7 +1321,7 @@ msgstr  "Modificadores de teclado activos. No siempre disponible en Wayland."
 #: lib/solaar/ui/diversion_rules.py:1375
 msgid   "Diverted key or button depressed or released.\n"
         "Use the Key/Button Diversion setting to divert keys and buttons."
-msgstr  "Tecla desviada o botón presionado o liberado.\in"
+msgstr  "Tecla desviada o botón presionado o liberado.\n"
         "Use la configuración Desvío de teclas/botones para desviar teclas y botones."
 
 #: lib/solaar/ui/diversion_rules.py:1384
