@@ -17,6 +17,12 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# Is it possible to start here?
+# https://github.com/GNOME/gnome-boxes/blob/main/src/app.vala#L119
+#
+# for this report
+# https://github.com/pwr-Solaar/Solaar/issues/1852
+
 from gi.repository import Gtk
 from solaar import NAME, __version__
 from solaar.i18n import _
