@@ -1,4 +1,29 @@
-# 1.1.7
+# 1.1.8rc1
+
+* Improve handling of wheel notifications
+* Only record changes of scroll wheel ratchet
+* Don't mark setting as absent if there are device errors
+* More robust access to keyword exception fields
+* Add support for config change feature
+* Clean up GTK code
+* Update documentation on mouse gestures and known issues
+* Get commit information from git describe and dpkg-parsechangelog
+* Update pre-commit tools to current versions
+* Update installation instructions
+* Add 8-character commit hash to version information
+* Update solaar.desktop (#1857)
+* Get release in setup.py by reading lib/solaar/__init__.py
+* Remove version number from docs/_config.yml
+* Update solaar.desktop
+* Update es.po
+* Clarify status of C542 receiver
+* Update devices directory
+* Add description of several devices
+* Show name of disconnecting receiver or device in disconnect warning
+* Reduce standard size of rule editor window
+* Remove unnecessary dependency on typing_extensions
+
+	# 1.1.7
 
 * Add dependency on typing_extension to setup.py
 * Don't defer saves in CLI and don't require Gtk in CLI
