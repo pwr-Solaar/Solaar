@@ -11,7 +11,7 @@ main_ns = {}
 with open('lib/solaar/__init__.py') as ver_file:
     exec(ver_file.read(), main_ns)
 NAME = main_ns['NAME']
-__version__ = main_ns['__version__']
+__version__ = main_ns['__version_short__']
 
 
 def _data_files():
@@ -72,6 +72,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     extras_require={
         'report-descriptor': ['hid-parser'],
         'desktop-notifications': ['Notify (>= 0.7)'],
+        'git-commit': ['python-git-info'],
     },
     package_dir={'': 'lib'},
     packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
