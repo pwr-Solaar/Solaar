@@ -7,9 +7,11 @@ try:
 except ImportError:
     from distutils.core import setup
 
-# from solaar import NAME, __version__
-__version__ = '1.1.7'
-NAME = 'Solaar'
+main_ns = {}
+with open('lib/solaar/__init__.py') as ver_file:
+    exec(ver_file.read(), main_ns)
+NAME = main_ns['NAME']
+__version__ = main_ns['__version__']
 
 
 def _data_files():
