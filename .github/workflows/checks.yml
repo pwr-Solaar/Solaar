@@ -15,6 +15,8 @@ jobs:
     - name: Run pre-commit
       uses: pre-commit/action@v2.0.0
 
+
+---
 repos:
   - repo: https://github.com/python/black
     rev: 22.3.0
