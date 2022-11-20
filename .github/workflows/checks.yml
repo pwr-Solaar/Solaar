@@ -18,11 +18,3 @@ jobs:
       uses: pre-commit/action@v3.0.0
       with:
         extra_args: flake8 --all-files
-
-      -   repo: https://github.com/PyCQA/flake8
-        rev: 3.9.2
-      hooks:
-      - id: flake8
-        args:
-          - "--max-line-length=100"
-          - "--max-complexity=18"
