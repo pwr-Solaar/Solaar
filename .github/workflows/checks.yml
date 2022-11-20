@@ -15,4 +15,4 @@ jobs:
           python-version: '3.10'
 
     - name: Run pre-commit
-      uses: cloudposse/github-action-pre-commit@v2.1.2
+      uses: pre-commit/action@v3.0.0
