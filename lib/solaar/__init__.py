@@ -16,11 +16,15 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-__version_short__ = '1.1.7'
-NAME = 'Solaar'
+import subprocess as _subprocess
+import sys as _sys
+
+from solaar.version import NAME as _NAME
+from solaar.version import version as _version
 
 try:
-    import gitinfo
-    __version__ = __version_short__ + '-' + gitinfo.get_git_info()['commit'][:8]
+    __version__ = _subprocess.check_output(['git', 'describe', '--always'], cwd=_sys.path[0],
+                                           stderr=_subprocess.DEVNULL).strip().decode()
 except Exception:
-    __version__ = __version_short__
+    __version__ = _version
+NAME = _NAME

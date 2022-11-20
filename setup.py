@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import subprocess
+
 from glob import glob as _glob
 
 try:
@@ -7,11 +9,16 @@ try:
 except ImportError:
     from distutils.core import setup
 
-main_ns = {}
-with open('lib/solaar/__init__.py') as ver_file:
-    exec(ver_file.read(), main_ns)
-NAME = main_ns['NAME']
-__version__ = main_ns['__version_short__']
+NAME = 'Solaar'
+version = '1.1.7'
+
+try:
+    cver = max(version, subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode())
+except Exception:
+    cver = version
+with open('lib/solaar/version.py', 'w') as vfile:
+    vfile.write(f'NAME = \'{NAME}\'\n')
+    vfile.write(f'version = \'{cver}\'\n')
 
 
 def _data_files():
@@ -33,7 +40,7 @@ def _data_files():
 
 setup(
     name=NAME.lower(),
-    version=__version__,
+    version=version,
     description='Linux device manager for Logitech receivers, keyboards, mice, and tablets.',
     long_description='''
 Solaar is a Linux device manager for many Logitech peripherals that connect through
