@@ -15,7 +15,8 @@ jobs:
     - name: Run pre-commit
       uses: pre-commit/action@v2.0.0
 
--   repo: https://github.com/PyCQA/flake8
-    rev: '5.0.4'  # Use the revision sha / tag you want to point at
-    hooks:
-    -   id: flake8
+repos:
+      - repo: https://github.com/PyCQA/flake8
+        rev: '5.0.4'  # Use the revision sha / tag you want to point at
+        hooks:
+        - id: flake8
