@@ -4,52 +4,12 @@ on: [push, pull_request]
 
 jobs:
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4.1.0
+        with:
+          python-version: '3.10'
 
-    - name: Run pre-commit
-      uses: pre-commit/action@v2.0.0
-
-
----
-repos:
-  - repo: https://github.com/python/black
-    rev: 22.3.0
-    hooks:
-      - id: black
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.1.0
-    hooks:
-      - id: codespell
-        args:
-          - --ignore-words-list=nd,reacher,thist,ths, ure, referenc,wile
-  - repo: https://gitlab.com/PyCQA/flake8
-  - repo: https://github.com/PyCQA/flake8
-    rev: 4.0.1
-    hooks:
-      - id: flake8
-        args:
-          - '--per-file-ignores=*/__init__.py:F401 gymnasium/envs/registration.py:E704 docs/tutorials/*.py:E402'
-          - --ignore=E203,W503,E741
-          - --max-complexity=30
-          - --max-line-length=456
-          - --show-source
-          - --statistics
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.1.1
-    hooks:
-      - id: pydocstyle
-        exclude: ^(gymnasium/envs/)|(tests/)|(docs/)
-        args:
-          - --source
-          - --explain
+      - uses: pre-commit/action@v3.0.0
