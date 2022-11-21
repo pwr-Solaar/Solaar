@@ -75,6 +75,7 @@ def _create():
             'Daniel Pavel (română)',
             'Daniel Zippert, Emelie Snecker (svensk)',
             'Dimitriy Ryazantcev (Russian)',
+            'El Jinete Sin Cabeza (Español)',
         ))
     )
 
