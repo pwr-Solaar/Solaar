@@ -6,6 +6,7 @@ __pycache__/
 
 /lib/Solaar.egg-info/
 /lib/solaar.egg-info/
+/lib/solaar/commit
 /build/
 /sdist/
 /dist/
