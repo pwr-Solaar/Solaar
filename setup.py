@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import subprocess
 
 from glob import glob as _glob
@@ -10,15 +9,16 @@ except ImportError:
     from distutils.core import setup
 
 NAME = 'Solaar'
-version = '1.1.7'
+
+with open('lib/solaar/version', 'r') as vfile:
+    version = vfile.read().strip()
 
 try:
-    cver = max(version, subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode())
+    commit = subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode()
+    with open('lib/solaar/commit', 'w') as vfile:
+        vfile.write(f'{commit}\n')
 except Exception:
-    cver = version
-with open('lib/solaar/version.py', 'w') as vfile:
-    vfile.write(f'NAME = \'{NAME}\'\n')
-    vfile.write(f'version = \'{cver}\'\n')
+    pass
 
 
 def _data_files():
@@ -84,5 +84,6 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     package_dir={'': 'lib'},
     packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
+    include_package_data=True,
     scripts=_glob('bin/*'),
 )
