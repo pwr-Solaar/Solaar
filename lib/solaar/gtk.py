@@ -123,9 +123,9 @@ def _parse_arguments():
 
 # On first SIGINT, dump threads to stderr; on second, exit
 def _handlesigint(signal, stack):
+    import faulthandler
     import signal
     import sys
-    import faulthandler
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     if _log.isEnabledFor(_INFO):
@@ -160,8 +160,8 @@ def main():
         _log.warning('Solaar udev file not found in expected location')
         _log.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
-        import solaar.ui as ui
         import solaar.listener as listener
+        import solaar.ui as ui
         listener.setup_scanner(ui.status_changed, ui.error_dialog)
 
         import solaar.upower as _upower
@@ -176,6 +176,7 @@ def main():
         # main UI event loop
         ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:
+        
         import sys
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
