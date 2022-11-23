@@ -115,8 +115,7 @@ def _receivers(dev_path=None):
 
 
 def _receivers_and_devices(dev_path=None):
-    from logitech_receiver import Device
-    from logitech_receiver import Receiver
+    from logitech_receiver import Device, Receiver
     from logitech_receiver.base import receivers_and_devices
     for dev_info in receivers_and_devices():
         if dev_path is not None and dev_path != dev_info.path:
