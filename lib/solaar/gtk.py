@@ -176,7 +176,7 @@ def main():
         # main UI event loop
         ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:
-        
+
         import sys
 
         from traceback import format_exc
