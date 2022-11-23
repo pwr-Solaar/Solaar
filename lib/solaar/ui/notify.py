@@ -37,8 +37,9 @@ except (ValueError, ImportError):
     available = False
 
 if available:
-    from logging import getLogger, INFO as _INFO
-    _log = getLogger(__name__)
+    rom logging import INFO as _INFO
+    from logging import getLogger
+    from logging import getLogger    _log = getLogger(__name__)
     del getLogger
 
     from solaar import NAME
