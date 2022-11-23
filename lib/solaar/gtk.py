@@ -178,6 +178,7 @@ def main():
     except Exception:
         
         import sys
+
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
 
