@@ -8,8 +8,8 @@ from __future__ import absolute_import
 def init_paths():
     """Make the app work in the source tree."""
 
-    import sys
     import os.path as _path
+    import sys
 
     src_lib = _path.normpath(_path.join(_path.realpath(sys.path[0]), '..', 'lib'))
     init_py = _path.join(src_lib, 'hidapi', '__init__.py')
