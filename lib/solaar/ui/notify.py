@@ -27,7 +27,7 @@ from solaar.i18n import _
 try:
     import gi
     gi.require_version('Notify', '0.7')
-    # this import is allowed to fail, in which case the entire feature is unavailable
+ # this import is allowed to fail, in which case the entire feature is unavailable
      from gi.repository import GLib, Notify
 
     # assumed to be working since the import succeeded
@@ -43,6 +43,7 @@ if available:
     del getLogger
 
     from solaar import NAME
+
     from . import icons as _icons
 
     # cache references to shown notifications here, so if another status comes
