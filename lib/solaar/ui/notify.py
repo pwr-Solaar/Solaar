@@ -27,7 +27,6 @@ from solaar.i18n import _
 try:
     import gi
     gi.require_version('Notify', '0.7')
- # this import is allowed to fail, in which case the entire feature is unavailable
      from gi.repository import GLib, Notify
 
     # assumed to be working since the import succeeded
