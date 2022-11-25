@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+import os
+import re
 import subprocess
+import sys
 
 from glob import glob as _glob
 
@@ -15,10 +18,22 @@ with open('lib/solaar/version', 'r') as vfile:
 
 try:
     commit = subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode()
+    print('GIT', commit)
     with open('lib/solaar/commit', 'w') as vfile:
         vfile.write(f'{commit}\n')
+except Exception:  # get commit from Ubuntu PPA directory name
+    dir = os.path.basename(sys.path[0])
+    print('DIRECTORY', sys.path[0], dir, os.getcwd())
+    commit_match = re.search(r'git[0-9]*-([0-9a-f]*)~', dir)
+    if commit_match:
+        with open('lib/solaar/commit', 'w') as vfile:
+            vfile.write(f'{version}-g{commit_match[1]}\n')
+print(subprocess.check_output(['pwd'], stderr=subprocess.DEVNULL).strip().decode())
+try:
+    print(subprocess.check_output(['dpkg-parsechangelog'], stderr=subprocess.DEVNULL).strip().decode())
 except Exception:
     pass
+print(os.environ)
 
 
 def _data_files():
