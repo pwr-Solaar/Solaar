@@ -27,7 +27,7 @@ from solaar.i18n import _
 try:
     import gi
     gi.require_version('Notify', '0.7')
-     from gi.repository import GLib, Notify
+    from gi.repository import GLib, Notify
 
     # assumed to be working since the import succeeded
     available = True
