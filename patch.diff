@@ -1,0 +1,893 @@
+diff --git a/lib/hidapi/hidconsole.py b/lib/hidapi/hidconsole.py
+index 1390de2..aaa96e8 100644
+--- a/lib/hidapi/hidconsole.py
++++ b/lib/hidapi/hidconsole.py
+@@ -134,6 +134,7 @@ def _validate_input(line, hidpp=False):
+ 
+ 
+ def _open(args):
++
+     def matchfn(bid, vid, pid):
+         if vid == 0x046d:
+             return {'vid': 0x046d}
+diff --git a/lib/hidapi/udev.py b/lib/hidapi/udev.py
+index ed6b235..2d1e494 100644
+--- a/lib/hidapi/udev.py
++++ b/lib/hidapi/udev.py
+@@ -303,6 +303,7 @@ def open(vendor_id, product_id, serial=None):
+ 
+     :returns: an opaque device handle, or ``None``.
+     """
++
+     def matchfn(bid, vid, pid):
+         return vid == vendor_id and pid == product_id
+ 
+diff --git a/lib/logitech_receiver/common.py b/lib/logitech_receiver/common.py
+index ec73200..2e04f99 100644
+--- a/lib/logitech_receiver/common.py
++++ b/lib/logitech_receiver/common.py
+@@ -33,6 +33,7 @@ class NamedInt(int):
+ 
+     Caution: comparison with strings will also match this NamedInt's name
+     (case-insensitive)."""
++
+     def __new__(cls, value, name):
+         assert is_string(name)
+         obj = int.__new__(cls, value)
+@@ -82,6 +83,7 @@ class NamedInts:
+     __slots__ = ('__dict__', '_values', '_indexed', '_fallback', '_is_sorted')
+ 
+     def __init__(self, dict=None, **kwargs):
++
+         def _readable_name(n):
+             if not is_string(n):
+                 raise TypeError('expected string, got ' + str(type(n)))
+@@ -213,6 +215,7 @@ class NamedInts:
+ 
+ 
+ class UnsortedNamedInts(NamedInts):
++
+     def _sort_values(self):
+         pass
+ 
+@@ -242,6 +245,7 @@ class KwException(Exception):
+     """An exception that remembers all arguments passed to the constructor.
+     They can be later accessed by simple member access.
+     """
++
+     def __init__(self, **kwargs):
+         super().__init__(kwargs)
+ 
+diff --git a/lib/logitech_receiver/diversion.py b/lib/logitech_receiver/diversion.py
+index 0d12754..948ecbf 100644
+--- a/lib/logitech_receiver/diversion.py
++++ b/lib/logitech_receiver/diversion.py
+@@ -42,6 +42,7 @@ from .hidpp20 import FEATURE as _F
+ from .special_keys import CONTROL as _CONTROL
+ 
+ import gi  # isort:skip
++
+ gi.require_version('Gdk', '3.0')  # isort:skip
+ from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
+ 
+@@ -368,6 +369,7 @@ COMPONENTS = {}
+ 
+ 
+ class RuleComponent:
++
+     def compile(self, c):
+         if isinstance(c, RuleComponent):
+             return c
+@@ -380,6 +382,7 @@ class RuleComponent:
+ 
+ 
+ class Rule(RuleComponent):
++
+     def __init__(self, args, source=None, warn=True):
+         self.components = [self.compile(a) for a in args]
+         self.source = source
+@@ -407,6 +410,7 @@ class Rule(RuleComponent):
+ 
+ 
+ class Condition(RuleComponent):
++
+     def __init__(self, *args):
+         pass
+ 
+@@ -418,6 +422,7 @@ class Condition(RuleComponent):
+ 
+ 
+ class Not(Condition):
++
+     def __init__(self, op, warn=True):
+         if isinstance(op, list) and len(op) == 1:
+             op = op[0]
+@@ -436,6 +441,7 @@ class Not(Condition):
+ 
+ 
+ class Or(Condition):
++
+     def __init__(self, args, warn=True):
+         self.components = [self.compile(a) for a in args]
+ 
+@@ -457,6 +463,7 @@ class Or(Condition):
+ 
+ 
+ class And(Condition):
++
+     def __init__(self, args, warn=True):
+         self.components = [self.compile(a) for a in args]
+ 
+@@ -510,6 +517,7 @@ def x11_pointer_prog():
+ 
+ 
+ class Process(Condition):
++
+     def __init__(self, process, warn=True):
+         self.process = process
+         if wayland or not x11_setup():
+@@ -535,6 +543,7 @@ class Process(Condition):
+ 
+ 
+ class MouseProcess(Condition):
++
+     def __init__(self, process, warn=True):
+         self.process = process
+         if wayland or not x11_setup():
+@@ -560,6 +569,7 @@ class MouseProcess(Condition):
+ 
+ 
+ class Feature(Condition):
++
+     def __init__(self, feature, warn=True):
+         if not (isinstance(feature, str) and feature in _F):
+             if warn:
+@@ -578,6 +588,7 @@ class Feature(Condition):
+ 
+ 
+ class Report(Condition):
++
+     def __init__(self, report, warn=True):
+         if not (isinstance(report, int)):
+             if warn:
+@@ -598,6 +609,7 @@ class Report(Condition):
+ 
+ # Setting(device, setting, [key], value...)
+ class Setting(Condition):
++
+     def __init__(self, args, warn=True):
+         if not (isinstance(args, list) and len(args) > 2):
+             if warn:
+@@ -643,6 +655,7 @@ MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + M
+ 
+ 
+ class Modifiers(Condition):
++
+     def __init__(self, modifiers, warn=True):
+         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
+         self.desired = 0
+@@ -725,6 +738,7 @@ def bit_test(start, end, bits):
+ 
+ 
+ def range_test(start, end, min, max):
++
+     def range_test_helper(f, r, d):
+         value = int.from_bytes(d[start:end], byteorder='big', signed=True)
+         return min <= value <= max and (value if value else True)
+@@ -733,6 +747,7 @@ def range_test(start, end, min, max):
+ 
+ 
+ class Test(Condition):
++
+     def __init__(self, test, warn=True):
+         self.test = test
+         if isinstance(test, str):
+@@ -767,6 +782,7 @@ class Test(Condition):
+ 
+ 
+ class TestBytes(Condition):
++
+     def __init__(self, test, warn=True):
+         self.test = test
+         if (
+@@ -836,6 +852,7 @@ class MouseGesture(Condition):
+ 
+ 
+ class Active(Condition):
++
+     def __init__(self, devID, warn=True):
+         if not (isinstance(devID, str)):
+             if warn:
+@@ -855,6 +872,7 @@ class Active(Condition):
+ 
+ 
+ class Action(RuleComponent):
++
+     def __init__(self, *args):
+         pass
+ 
+@@ -968,6 +986,7 @@ class KeyPress(Action):
+ 
+ 
+ class MouseScroll(Action):
++
+     def __init__(self, amounts, warn=True):
+         import numbers
+         if len(amounts) == 1 and isinstance(amounts[0], list):
+@@ -999,6 +1018,7 @@ class MouseScroll(Action):
+ 
+ 
+ class MouseClick(Action):
++
+     def __init__(self, args, warn=True):
+         if len(args) == 1 and isinstance(args[0], list):
+             args = args[0]
+@@ -1033,6 +1053,7 @@ class MouseClick(Action):
+ 
+ 
+ class Set(Action):
++
+     def __init__(self, args, warn=True):
+         if not (isinstance(args, list) and len(args) > 2):
+             if warn:
+@@ -1072,6 +1093,7 @@ class Set(Action):
+ 
+ 
+ class Execute(Action):
++
+     def __init__(self, args, warn=True):
+         if isinstance(args, str):
+             args = [args]
+@@ -1097,6 +1119,7 @@ class Execute(Action):
+ 
+ 
+ class Later(Action):
++
+     def __init__(self, args, warn=True):
+         self.delay = 0
+         self.rule = Rule([])
+diff --git a/lib/logitech_receiver/hidpp20.py b/lib/logitech_receiver/hidpp20.py
+index 166be1b..f9d97c1 100644
+--- a/lib/logitech_receiver/hidpp20.py
++++ b/lib/logitech_receiver/hidpp20.py
+@@ -234,6 +234,7 @@ class FeatureCallError(_KwException):
+ 
+ 
+ class FeaturesArray(dict):
++
+     def __init__(self, device):
+         assert device is not None
+         self.supported = True
+@@ -332,6 +333,7 @@ class ReprogrammableKey:
+     - default_task {_NamedInt} -- the native function of this control
+     - flags {List[str]} -- capabilities and desired software handling of the control
+     """
++
+     def __init__(self, device, index, cid, tid, flags):
+         self._device = device
+         self.index = index
+@@ -373,6 +375,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
+     - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
+     - mapping_flags {List[str]} -- mapping flags set on the control
+     """
++
+     def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
+         ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
+         self.pos = pos
+@@ -515,6 +518,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
+ 
+ 
+ class PersistentRemappableAction():
++
+     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
+         self._device = device
+         self.index = index
+@@ -580,6 +584,7 @@ class PersistentRemappableAction():
+ 
+ class KeysArray:
+     """A sequence of key mappings supported by a HID++ 2.0 device."""
++
+     def __init__(self, device, count, version):
+         assert device is not None
+         self.device = device
+@@ -655,6 +660,7 @@ class KeysArray:
+ 
+ 
+ class KeysArrayV1(KeysArray):
++
+     def __init__(self, device, count, version=1):
+         super().__init__(device, count, version)
+         """The mapping from Control IDs to their native Task IDs.
+@@ -682,6 +688,7 @@ class KeysArrayV1(KeysArray):
+ 
+ 
+ class KeysArrayV4(KeysArrayV1):
++
+     def __init__(self, device, count):
+         super().__init__(device, count, 4)
+ 
+@@ -702,6 +709,7 @@ class KeysArrayV4(KeysArrayV1):
+ 
+ # we are only interested in the current host, so use 0xFF for the host throughout
+ class KeysArrayPersistent(KeysArray):
++
+     def __init__(self, device, count):
+         super().__init__(device, count, 5)
+         self._capabilities = None
+@@ -886,6 +894,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
+ 
+ 
+ class Gesture:
++
+     def __init__(self, device, low, high, next_index, next_diversion_index):
+         self._device = device
+         self.id = low
+@@ -1009,6 +1018,7 @@ class Param:
+ 
+ 
+ class Spec:
++
+     def __init__(self, device, low, high):
+         self._device = device
+         self.id = low
+@@ -1040,6 +1050,7 @@ class Gestures:
+     Right now only some information fields are supported.
+     WARNING: Assumes that parameters are always global, which is not the case.
+     """
++
+     def __init__(self, device):
+         self.device = device
+         self.gestures = {}
+diff --git a/lib/logitech_receiver/listener.py b/lib/logitech_receiver/listener.py
+index 1ec2dc1..b42de2a 100644
+--- a/lib/logitech_receiver/listener.py
++++ b/lib/logitech_receiver/listener.py
+@@ -138,6 +138,7 @@ class EventsListener(_threading.Thread):
+ 
+     Incoming packets will be passed to the callback function in sequence.
+     """
++
+     def __init__(self, receiver, notifications_callback):
+         super().__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
+ 
+diff --git a/lib/logitech_receiver/settings.py b/lib/logitech_receiver/settings.py
+index f75477a..789dccf 100644
+--- a/lib/logitech_receiver/settings.py
++++ b/lib/logitech_receiver/settings.py
+@@ -62,6 +62,7 @@ def bool_or_toggle(current, new):
+ 
+ # moved first for dependency reasons
+ class Validator:
++
+     @classmethod
+     def build(cls, setting_class, device, **kwargs):
+         return cls(**kwargs)
+@@ -356,6 +357,7 @@ class Setting:
+ class Settings(Setting):
+     """A setting descriptor for multiple choices, being a map from keys to values.
+     Needs to be instantiated for each specific device."""
++
+     def read(self, cached=True):
+         assert hasattr(self, '_value')
+         assert hasattr(self, '_device')
+@@ -453,6 +455,7 @@ class LongSettings(Setting):
+     Allows multiple write requests, if the options don't fit in 16 bytes.
+     The validator must return a list.
+     Needs to be instantiated for each specific device."""
++
+     def read(self, cached=True):
+         assert hasattr(self, '_value')
+         assert hasattr(self, '_device')
+@@ -548,6 +551,7 @@ class LongSettings(Setting):
+ class BitFieldSetting(Setting):
+     """A setting descriptor for a set of choices represented by one bit each, being a map from options to booleans.
+     Needs to be instantiated for each specific device."""
++
+     def read(self, cached=True):
+         assert hasattr(self, '_value')
+         assert hasattr(self, '_device')
+@@ -653,6 +657,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
+     """A setting descriptor for a set of choices represented by one bit each,
+     each one having an offset, being a map from options to booleans.
+     Needs to be instantiated for each specific device."""
++
+     def _do_read(self):
+         return {r: self._rw.read(self._device, r) for r in self._validator.prepare_read()}
+ 
+@@ -664,6 +669,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
+ class RangeFieldSetting(Setting):
+     """A setting descriptor for a set of choices represented by one field each, with map from option names to range(0,n).
+     Needs to be instantiated for each specific device."""
++
+     def read(self, cached=True):
+         assert hasattr(self, '_value')
+         assert hasattr(self, '_device')
+@@ -819,6 +825,7 @@ class BitFieldValidator(Validator):
+             self.byte_count = byte_count
+ 
+     def to_string(self, value):
++
+         def element_to_string(key, val):
+             k = next((k for k in self.options if int(key) == k), None)
+             return str(k) + ':' + str(val) if k is not None else '?'
+@@ -1079,6 +1086,7 @@ class ChoicesMapValidator(ChoicesValidator):
+         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
+ 
+     def to_string(self, value):
++
+         def element_to_string(key, val):
+             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
+             return str(k) + ':' + str(c[val]) if k is not None else '?'
+@@ -1325,6 +1333,7 @@ class MultipleRangeValidator(Validator):
+ 
+ class ActionSettingRW:
+     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
++
+     def __init__(self, feature, name='', divert_setting_name='divert-keys'):
+         self.feature = feature  # not used?
+         self.name = name
+@@ -1357,6 +1366,7 @@ class ActionSettingRW:
+         return _int2bytes(self.key.key, 2) if self.active and self.key else b'\x00\x00'
+ 
+     def write(self, device, data_bytes):
++
+         def handler(device, n):  # Called on notification events from the device
+             if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+                 if n.address == 0x00:
+@@ -1413,6 +1423,7 @@ class ActionSettingRW:
+ 
+ class RawXYProcessing:
+     """Special class for processing RawXY action messages initiated by pressing a key with rawXY diversion capability"""
++
+     def __init__(self, device, name=''):
+         self.device = device
+         self.name = name
+diff --git a/lib/logitech_receiver/settings_templates.py b/lib/logitech_receiver/settings_templates.py
+index bf45cd3..78e15a5 100644
+--- a/lib/logitech_receiver/settings_templates.py
++++ b/lib/logitech_receiver/settings_templates.py
+@@ -337,6 +337,7 @@ class ReportRate(_Setting):
+     choices_universe = _NamedInts.range(1, 8)
+ 
+     class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
++
+         def write(self, device, data_bytes):
+             # Host mode is required for report rate to be adjustable
+             if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
+@@ -344,6 +345,7 @@ class ReportRate(_Setting):
+             return super().write(device, data_bytes)
+ 
+     class validator_class(_ChoicesV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             # if device.wpid == '408E':
+@@ -387,6 +389,7 @@ class DivertGkeys(_Setting):
+     validator_options = {'true_value': 0x01, 'false_value': 0x00, 'mask': 0xff}
+ 
+     class rw_class(_FeatureRW):
++
+         def __init__(self, feature):
+             super().__init__(feature, write_fnid=0x20)
+ 
+@@ -467,6 +470,7 @@ class ReprogrammableKeys(_Settings):
+     choices_universe = _special_keys.CONTROL
+ 
+     class rw_class:
++
+         def __init__(self, feature):
+             self.feature = feature
+             self.kind = _FeatureRW.kind
+@@ -483,6 +487,7 @@ class ReprogrammableKeys(_Settings):
+             return True
+ 
+     class validator_class(_ChoicesMapV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             choices = {}
+@@ -495,6 +500,7 @@ class ReprogrammableKeys(_Settings):
+ 
+ 
+ class DpiSlidingXY(_RawXYProcessing):
++
+     def activate_action(self):
+         self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
+         self.dpiChoices = list(self.dpiSetting.choices)
+@@ -559,6 +565,7 @@ class DpiSlidingXY(_RawXYProcessing):
+ 
+ 
+ class MouseGesturesXY(_RawXYProcessing):
++
+     def activate_action(self):
+         self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
+         self.fsmState = 'idle'
+@@ -638,6 +645,7 @@ class DivertKeys(_Settings):
+     choices_divert = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1})
+ 
+     class rw_class:
++
+         def __init__(self, feature):
+             self.feature = feature
+             self.kind = _FeatureRW.kind
+@@ -654,6 +662,7 @@ class DivertKeys(_Settings):
+             return True
+ 
+     class validator_class(_ChoicesMapV):
++
+         def __init__(self, choices, key_byte_count=2, byte_count=1, mask=0x01):
+             super().__init__(choices, key_byte_count, byte_count, mask)
+ 
+@@ -706,6 +715,7 @@ class AdjustableDpi(_Setting):
+     choices_universe = _NamedInts.range(200, 4000, str, 50)
+ 
+     class validator_class(_ChoicesV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             # [1] getSensorDpiList(sensorIdx)
+@@ -750,6 +760,7 @@ class SpeedChange(_Setting):
+     rw_options = {'name': 'speed change'}
+ 
+     class rw_class(_ActionSettingRW):
++
+         def press_action(self):  # switch sensitivity
+             currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
+             newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
+@@ -765,6 +776,7 @@ class SpeedChange(_Setting):
+                 self.device.persister['_speed-change'] = currentSpeed
+ 
+     class validator_class(_ChoicesV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             key_index = device.keys.index(_special_keys.CONTROL.DPI_Change)
+@@ -784,6 +796,7 @@ class DisableKeyboardKeys(_BitFieldSetting):
+     choices_universe = _DKEY
+ 
+     class validator_class(_BitFieldV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS, 0x00)[0]
+@@ -807,9 +820,12 @@ class Multiplatform(_Setting):
+     # as, for example, the integer value for 'Windows' can be different on different devices
+ 
+     class validator_class(_ChoicesV):
++
+         @classmethod
+         def build(cls, setting_class, device):
++
+             def _str_os_versions(low, high):
++
+                 def _str_os_version(version):
+                     if version == 0:
+                         return ''
+@@ -862,6 +878,7 @@ class ChangeHost(_Setting):
+     choices_universe = _NamedInts(**{'Host ' + str(i + 1): i for i in range(3)})
+ 
+     class validator_class(_ChoicesV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             infos = device.feature_request(_F.CHANGE_HOST)
+@@ -971,6 +988,7 @@ class Gesture2Gestures(_BitFieldOMSetting):
+     _labels = _GESTURE2_GESTURES_LABELS
+ 
+     class validator_class(_BitFieldOMV):
++
+         @classmethod
+         def build(cls, setting_class, device, om_method=None):
+             options = [g for g in device.gestures.gestures.values() if g.can_be_enabled or g.default_enabled]
+@@ -988,6 +1006,7 @@ class Gesture2Divert(_BitFieldOMSetting):
+     _labels = _GESTURE2_GESTURES_LABELS
+ 
+     class validator_class(_BitFieldOMV):
++
+         @classmethod
+         def build(cls, setting_class, device, om_method=None):
+             options = [g for g in device.gestures.gestures.values() if g.can_be_diverted]
+@@ -1009,6 +1028,7 @@ class Gesture2Params(_LongSettings):
+     _labels_sub = _GESTURE2_PARAMS_LABELS_SUB
+ 
+     class validator_class(_MultipleRangeV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             params = _hidpp20.get_gestures(device).params.values()
+@@ -1033,6 +1053,7 @@ class MKeyLEDs(_BitFieldSetting):
+     _labels = {k: (None, _('Lights up the %s key.') % k) for k in choices_universe}
+ 
+     class rw_class(_FeatureRW):
++
+         def __init__(self, feature):
+             super().__init__(feature, write_fnid=0x10)
+ 
+@@ -1040,6 +1061,7 @@ class MKeyLEDs(_BitFieldSetting):
+             return b'\x00'
+ 
+     class validator_class(_BitFieldV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             number = device.feature_request(setting_class.feature, 0x00)[0]
+@@ -1057,6 +1079,7 @@ class MRKeyLED(_Setting):
+     feature = _F.MR
+ 
+     class rw_class(_FeatureRW):
++
+         def __init__(self, feature):
+             super().__init__(feature, write_fnid=0x00)
+ 
+@@ -1080,6 +1103,7 @@ class PersistentRemappableAction(_Settings):
+     choices_universe = _special_keys.KEYS
+ 
+     class rw_class:
++
+         def __init__(self, feature):
+             self.feature = feature
+             self.kind = _FeatureRW.kind
+@@ -1094,6 +1118,7 @@ class PersistentRemappableAction(_Settings):
+             return v
+ 
+     class validator_class(_ChoicesMapV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             remap_keys = device.remap_keys
+@@ -1146,6 +1171,7 @@ class Equalizer(_RangeFieldSetting):
+     keys_universe = []
+ 
+     class validator_class(_PackedRangeV):
++
+         @classmethod
+         def build(cls, setting_class, device):
+             data = device.feature_request(_F.EQUALIZER, 0x00)
+diff --git a/lib/logitech_receiver/status.py b/lib/logitech_receiver/status.py
+index ca9bc5c..ec43b5f 100644
+--- a/lib/logitech_receiver/status.py
++++ b/lib/logitech_receiver/status.py
+@@ -86,6 +86,7 @@ class ReceiverStatus(dict):
+     """The 'runtime' status of a receiver, mostly about the pairing process --
+     is the pairing lock open or closed, any pairing errors, etc.
+     """
++
+     def __init__(self, receiver, changed_callback):
+         assert receiver
+         self._receiver = receiver
+@@ -144,6 +145,7 @@ class DeviceStatus(dict):
+     active/inactive, battery charge, lux, etc. It updates them mostly by
+     processing incoming notification events from the device itself.
+     """
++
+     def __init__(self, device, changed_callback):
+         assert device
+         self._device = device
+@@ -158,6 +160,7 @@ class DeviceStatus(dict):
+         self.updated = 0
+ 
+     def to_string(self):
++
+         def _items():
+             comma = False
+ 
+diff --git a/lib/solaar/cli/pair.py b/lib/solaar/cli/pair.py
+index 307808b..b63953f 100644
+--- a/lib/solaar/cli/pair.py
++++ b/lib/solaar/cli/pair.py
+@@ -49,6 +49,7 @@ def run(receivers, args, find_receiver, _ignore):
+     known_devices = [dev.number for dev in receiver]
+ 
+     class _HandleWithNotificationHook(int):
++
+         def notifications_hook(self, n):
+             nonlocal known_devices
+             assert n
+diff --git a/lib/solaar/configuration.py b/lib/solaar/configuration.py
+index 47daf73..7cb84ef 100644
+--- a/lib/solaar/configuration.py
++++ b/lib/solaar/configuration.py
+@@ -159,6 +159,7 @@ def _cleanup_load(c):
+ 
+ 
+ class _DeviceEntry(dict):
++
+     def __init__(self, **kwargs):
+         super().__init__(**kwargs)
+ 
+@@ -209,6 +210,7 @@ _yaml.add_representer(_NamedInt, named_int_representer)
+ # that is directly connected.  Here there is no way to realize that the two devices are the same.
+ # So new entries are not created for unseen off-line receiver-connected devices except for those with protocol 1.0
+ def persister(device):
++
+     def match(wpid, serial, modelId, unitId, c):
+         return ((wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL)) or (
+             modelId and modelId != '000000000000' and modelId == c.get(_KEY_MODEL_ID) and unitId
+diff --git a/lib/solaar/listener.py b/lib/solaar/listener.py
+index 56e4eb9..a115e11 100644
+--- a/lib/solaar/listener.py
++++ b/lib/solaar/listener.py
+@@ -69,6 +69,7 @@ def _ghost(device):
+ class ReceiverListener(_listener.EventsListener):
+     """Keeps the status of a Receiver.
+     """
++
+     def __init__(self, receiver, status_changed_callback):
+         super().__init__(receiver, self._notifications_handler)
+         # no reason to enable polling yet
+diff --git a/lib/solaar/tasks.py b/lib/solaar/tasks.py
+index f44ed70..1bf45d2 100644
+--- a/lib/solaar/tasks.py
++++ b/lib/solaar/tasks.py
+@@ -36,6 +36,7 @@ except ImportError:
+ 
+ 
+ class TaskRunner(_Thread):
++
+     def __init__(self, name):
+         super().__init__(name=name)
+         self.daemon = True
+diff --git a/lib/solaar/ui/__init__.py b/lib/solaar/ui/__init__.py
+index ffc931a..ec55156 100644
+--- a/lib/solaar/ui/__init__.py
++++ b/lib/solaar/ui/__init__.py
+@@ -23,6 +23,7 @@ from logging import getLogger
+ import yaml as _yaml
+ 
+ import gi  # isort:skip
++
+ gi.require_version('Gtk', '3.0')  # NOQA: E402
+ from gi.repository import GLib, Gtk, Gio  # NOQA: E402 # isort:skip
+ from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
+diff --git a/lib/solaar/ui/config_panel.py b/lib/solaar/ui/config_panel.py
+index b547367..df1e95d 100644
+--- a/lib/solaar/ui/config_panel.py
++++ b/lib/solaar/ui/config_panel.py
+@@ -37,6 +37,7 @@ del getLogger
+ 
+ 
+ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
++
+     def _do_read(s, force, sb, online, sensitive):
+         v = s.read(not force)
+         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, priority=99)
+@@ -45,6 +46,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
+ 
+ 
+ def _write_async(setting, value, sbox, sensitive=True, key=None):
++
+     def _do_write(s, v, sb, key):
+         try:
+             if key is None:
+@@ -72,6 +74,7 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
+ 
+ 
+ class Control():
++
+     def __init__(**kwargs):
+         pass
+ 
+@@ -96,6 +99,7 @@ class Control():
+ 
+ 
+ class ToggleControl(Gtk.Switch, Control):
++
+     def __init__(self, sbox, delegate=None):
+         super().__init__(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+         self.init(sbox, delegate)
+@@ -109,6 +113,7 @@ class ToggleControl(Gtk.Switch, Control):
+ 
+ 
+ class SliderControl(Gtk.Scale, Control):
++
+     def __init__(self, sbox, delegate=None):
+         super().__init__(halign=Gtk.Align.FILL)
+         self.init(sbox, delegate)
+@@ -143,6 +148,7 @@ def _create_choice_control(sbox, delegate=None, choices=None):
+ 
+ # GTK boxes have property lists, but the keys must be strings
+ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
++
+     def __init__(self, sbox, delegate=None, choices=None):
+         super().__init__(halign=Gtk.Align.FILL)
+         self.init(sbox, delegate)
+@@ -168,6 +174,7 @@ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
+ 
+ 
+ class ChoiceControlBig(Gtk.Entry, Control):
++
+     def __init__(self, sbox, delegate=None, choices=None):
+         super().__init__(halign=Gtk.Align.FILL)
+         self.init(sbox, delegate)
+@@ -218,6 +225,7 @@ class ChoiceControlBig(Gtk.Entry, Control):
+ 
+ 
+ class MapChoiceControl(Gtk.HBox, Control):
++
+     def __init__(self, sbox, delegate=None):
+         super().__init__(homogeneous=False, spacing=6)
+         self.init(sbox, delegate)
+@@ -268,6 +276,7 @@ class MapChoiceControl(Gtk.HBox, Control):
+ 
+ 
+ class MultipleControl(Gtk.ListBox, Control):
++
+     def __init__(self, sbox, change, button_label='...', delegate=None):
+         super().__init__()
+         self.init(sbox, delegate)
+@@ -311,6 +320,7 @@ class MultipleControl(Gtk.ListBox, Control):
+ 
+ 
+ class MultipleToggleControl(MultipleControl):
++
+     def setup(self, setting):
+         self._label_control_pairs = []
+         for k in setting._validator.get_options():
+@@ -358,6 +368,7 @@ class MultipleToggleControl(MultipleControl):
+ 
+ 
+ class MultipleRangeControl(MultipleControl):
++
+     def setup(self, setting):
+         self._items = []
+         for item in setting._validator.items:
+@@ -447,6 +458,7 @@ class MultipleRangeControl(MultipleControl):
+ 
+ 
+ class PackedRangeControl(MultipleRangeControl):
++
+     def setup(self, setting):
+         validator = setting._validator
+         self._items = []
+diff --git a/lib/solaar/ui/diversion_rules.py b/lib/solaar/ui/diversion_rules.py
+index af0d2fc..2805fdd 100644
+--- a/lib/solaar/ui/diversion_rules.py
++++ b/lib/solaar/ui/diversion_rules.py
+@@ -52,6 +52,7 @@ _rule_component_clipboard = None
+ 
+ 
+ class RuleComponentWrapper(GObject.GObject):
++
+     def __init__(self, component, level=0, editable=False):
+         self.component = component
+         self.level = level
+@@ -86,6 +87,7 @@ class RuleComponentWrapper(GObject.GObject):
+ 
+ 
+ class DiversionDialog:
++
+     def __init__(self):
+ 
+         window = Gtk.Window()
+@@ -701,6 +703,7 @@ class DiversionDialog:
+ 
+ 
+ class CompletionEntry(Gtk.Entry):
++
+     def __init__(self, values, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         CompletionEntry.add_completion_to_entry(self, values)
+@@ -748,6 +751,7 @@ class SmartComboBox(Gtk.ComboBox):
+     as soon as the user finishes typing any accepted name.
+ 
+     """
++
+     def __init__(
+         self, all_values, blank='', completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
+     ):
+@@ -949,6 +953,7 @@ class DeviceInfo:
+ 
+ 
+ class AllDevicesInfo:
++
+     def __init__(self):
+         self._devices = []
+         self._lock = threading.Lock()
+@@ -1965,6 +1970,7 @@ def _from_named_ints(v, all_values):
+ 
+ 
+ class SetValueControl(Gtk.HBox):
++
+     def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
+         super().__init__(*args, **kwargs)
+         self.on_change = on_change

@@ -159,6 +159,7 @@ def _cleanup_load(c):
 
 
 class _DeviceEntry(dict):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -209,6 +210,7 @@ _yaml.add_representer(_NamedInt, named_int_representer)
 # that is directly connected.  Here there is no way to realize that the two devices are the same.
 # So new entries are not created for unseen off-line receiver-connected devices except for those with protocol 1.0
 def persister(device):
+
     def match(wpid, serial, modelId, unitId, c):
         return ((wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL)) or (
             modelId and modelId != '000000000000' and modelId == c.get(_KEY_MODEL_ID) and unitId

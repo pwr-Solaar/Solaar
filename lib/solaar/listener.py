@@ -69,6 +69,7 @@ def _ghost(device):
 class ReceiverListener(_listener.EventsListener):
     """Keeps the status of a Receiver.
     """
+
     def __init__(self, receiver, status_changed_callback):
         super().__init__(receiver, self._notifications_handler)
         # no reason to enable polling yet

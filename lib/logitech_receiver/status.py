@@ -86,6 +86,7 @@ class ReceiverStatus(dict):
     """The 'runtime' status of a receiver, mostly about the pairing process --
     is the pairing lock open or closed, any pairing errors, etc.
     """
+
     def __init__(self, receiver, changed_callback):
         assert receiver
         self._receiver = receiver
@@ -144,6 +145,7 @@ class DeviceStatus(dict):
     active/inactive, battery charge, lux, etc. It updates them mostly by
     processing incoming notification events from the device itself.
     """
+
     def __init__(self, device, changed_callback):
         assert device
         self._device = device
@@ -158,6 +160,7 @@ class DeviceStatus(dict):
         self.updated = 0
 
     def to_string(self):
+
         def _items():
             comma = False
 
