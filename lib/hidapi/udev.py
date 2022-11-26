@@ -107,6 +107,7 @@ def _match(action, device, filterfn):
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
         from hid_parser import ReportDescriptor as _ReportDescriptor
+
         # from hid_parser import Usage as _Usage
         hidpp_short = hidpp_long = False
         devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'

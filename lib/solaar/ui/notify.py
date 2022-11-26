@@ -28,7 +28,7 @@ try:
     import gi
     gi.require_version('Notify', '0.7')
     # this import is allowed to fail, in which case the entire feature is unavailable
-    from gi.repository import Notify, GLib
+    from gi.repository import GLib, Notify
 
     # assumed to be working since the import succeeded
     available = True
@@ -37,11 +37,13 @@ except (ValueError, ImportError):
     available = False
 
 if available:
-    from logging import getLogger, INFO as _INFO
+    from logging import INFO as _INFO
+    from logging import getLogger
     _log = getLogger(__name__)
     del getLogger
 
     from solaar import NAME
+
     from . import icons as _icons
 
     # cache references to shown notifications here, so if another status comes

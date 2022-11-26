@@ -21,8 +21,8 @@
 
 def init_paths():
     """Make the app work in the source tree."""
-    import sys
     import os.path as _path
+    import sys
 
     # Python 2 need conversion from utf-8 filenames
     # Python 3 might have problems converting back to UTF-8 in case of Unicode surrogates
