@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-import os
 import re
 import subprocess
-import sys
 
 from glob import glob as _glob
 
@@ -16,24 +14,26 @@ NAME = 'Solaar'
 with open('lib/solaar/version', 'r') as vfile:
     version = vfile.read().strip()
 
-try:
+try:  # get commit from git describe
     commit = subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode()
     print('GIT', commit)
     with open('lib/solaar/commit', 'w') as vfile:
         vfile.write(f'{commit}\n')
-except Exception:  # get commit from Ubuntu PPA directory name
-    dir = os.path.basename(sys.path[0])
-    print('DIRECTORY', sys.path[0], dir, os.getcwd())
-    commit_match = re.search(r'git[0-9]*-([0-9a-f]*)~', dir)
-    if commit_match:
+except Exception:  # get commit from Ubuntu dpkg-parsechangelog
+    try:
+        dpkg = subprocess.check_output(['dpkg-parsechangelog'], stderr=subprocess.DEVNULL).strip().decode()
+        print(dpkg)
+        match = re.search(r'\nVersion: (.*)~', dpkg)
+        print(match.group(1))
         with open('lib/solaar/commit', 'w') as vfile:
-            vfile.write(f'{version}-g{commit_match[1]}\n')
-print(subprocess.check_output(['pwd'], stderr=subprocess.DEVNULL).strip().decode())
-try:
-    print(subprocess.check_output(['dpkg-parsechangelog'], stderr=subprocess.DEVNULL).strip().decode())
-except Exception:
-    pass
-print(os.environ)
+            vfile.write(f'{match.group[1]}\n')
+        print(
+            'DPKG VERSION',
+            subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
+                                    stderr=subprocess.DEVNULL).strip().decode()
+        )
+    except Exception:
+        pass
 
 
 def _data_files():
