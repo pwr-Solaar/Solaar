@@ -179,7 +179,7 @@ def main():
         ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:
         import sys
- 
+
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
 
