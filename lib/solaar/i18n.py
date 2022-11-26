@@ -28,7 +28,6 @@ from solaar import NAME as _NAME
 
 def _find_locale_path(lc_domain):
     import os.path as _path
-
     import sys as _sys
     prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
     src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
