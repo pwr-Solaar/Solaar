@@ -48,6 +48,7 @@ TRAY_ATTENTION = 'solaar-attention'
 def _look_for_application_icons():
     import os.path as _path
     import sys as _sys
+
     from os import environ as _environ
     if _log.isEnabledFor(_DEBUG):
         _log.debug('sys.path[0] = %s', _sys.path[0])
