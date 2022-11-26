@@ -62,6 +62,7 @@ def bool_or_toggle(current, new):
 
 # moved first for dependency reasons
 class Validator:
+
     @classmethod
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
@@ -356,6 +357,7 @@ class Setting:
 class Settings(Setting):
     """A setting descriptor for multiple choices, being a map from keys to values.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -453,6 +455,7 @@ class LongSettings(Setting):
     Allows multiple write requests, if the options don't fit in 16 bytes.
     The validator must return a list.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -548,6 +551,7 @@ class LongSettings(Setting):
 class BitFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one bit each, being a map from options to booleans.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -653,6 +657,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
     """A setting descriptor for a set of choices represented by one bit each,
     each one having an offset, being a map from options to booleans.
     Needs to be instantiated for each specific device."""
+
     def _do_read(self):
         return {r: self._rw.read(self._device, r) for r in self._validator.prepare_read()}
 
@@ -664,6 +669,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
 class RangeFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one field each, with map from option names to range(0,n).
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -819,6 +825,7 @@ class BitFieldValidator(Validator):
             self.byte_count = byte_count
 
     def to_string(self, value):
+
         def element_to_string(key, val):
             k = next((k for k in self.options if int(key) == k), None)
             return str(k) + ':' + str(val) if k is not None else '?'
@@ -1079,6 +1086,7 @@ class ChoicesMapValidator(ChoicesValidator):
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
     def to_string(self, value):
+
         def element_to_string(key, val):
             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
             return str(k) + ':' + str(c[val]) if k is not None else '?'
@@ -1325,6 +1333,7 @@ class MultipleRangeValidator(Validator):
 
 class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
+
     def __init__(self, feature, name='', divert_setting_name='divert-keys'):
         self.feature = feature  # not used?
         self.name = name
@@ -1357,6 +1366,7 @@ class ActionSettingRW:
         return _int2bytes(self.key.key, 2) if self.active and self.key else b'\x00\x00'
 
     def write(self, device, data_bytes):
+
         def handler(device, n):  # Called on notification events from the device
             if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
@@ -1413,6 +1423,7 @@ class ActionSettingRW:
 
 class RawXYProcessing:
     """Special class for processing RawXY action messages initiated by pressing a key with rawXY diversion capability"""
+
     def __init__(self, device, name=''):
         self.device = device
         self.name = name

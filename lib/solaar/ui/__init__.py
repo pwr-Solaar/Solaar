@@ -23,6 +23,7 @@ from logging import getLogger
 import yaml as _yaml
 
 import gi  # isort:skip
+
 gi.require_version('Gtk', '3.0')  # NOQA: E402
 from gi.repository import GLib, Gtk, Gio  # NOQA: E402 # isort:skip
 from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip

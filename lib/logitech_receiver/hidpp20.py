@@ -234,6 +234,7 @@ class FeatureCallError(_KwException):
 
 
 class FeaturesArray(dict):
+
     def __init__(self, device):
         assert device is not None
         self.supported = True
@@ -332,6 +333,7 @@ class ReprogrammableKey:
     - default_task {_NamedInt} -- the native function of this control
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
+
     def __init__(self, device, index, cid, tid, flags):
         self._device = device
         self.index = index
@@ -373,6 +375,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
+
     def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
         ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
         self.pos = pos
@@ -515,6 +518,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
 
 class PersistentRemappableAction():
+
     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
         self._device = device
         self.index = index
@@ -580,6 +584,7 @@ class PersistentRemappableAction():
 
 class KeysArray:
     """A sequence of key mappings supported by a HID++ 2.0 device."""
+
     def __init__(self, device, count, version):
         assert device is not None
         self.device = device
@@ -655,6 +660,7 @@ class KeysArray:
 
 
 class KeysArrayV1(KeysArray):
+
     def __init__(self, device, count, version=1):
         super().__init__(device, count, version)
         """The mapping from Control IDs to their native Task IDs.
@@ -682,6 +688,7 @@ class KeysArrayV1(KeysArray):
 
 
 class KeysArrayV4(KeysArrayV1):
+
     def __init__(self, device, count):
         super().__init__(device, count, 4)
 
@@ -702,6 +709,7 @@ class KeysArrayV4(KeysArrayV1):
 
 # we are only interested in the current host, so use 0xFF for the host throughout
 class KeysArrayPersistent(KeysArray):
+
     def __init__(self, device, count):
         super().__init__(device, count, 5)
         self._capabilities = None
@@ -886,6 +894,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
 class Gesture:
+
     def __init__(self, device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
@@ -1009,6 +1018,7 @@ class Param:
 
 
 class Spec:
+
     def __init__(self, device, low, high):
         self._device = device
         self.id = low
@@ -1040,6 +1050,7 @@ class Gestures:
     Right now only some information fields are supported.
     WARNING: Assumes that parameters are always global, which is not the case.
     """
+
     def __init__(self, device):
         self.device = device
         self.gestures = {}

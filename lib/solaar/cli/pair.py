@@ -49,6 +49,7 @@ def run(receivers, args, find_receiver, _ignore):
     known_devices = [dev.number for dev in receiver]
 
     class _HandleWithNotificationHook(int):
+
         def notifications_hook(self, n):
             nonlocal known_devices
             assert n
