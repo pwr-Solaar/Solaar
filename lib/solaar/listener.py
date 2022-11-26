@@ -397,8 +397,8 @@ def _process_receiver_event(action, device_info):
             # (It would be easier to use pylibacl but adding the pylibacl dependencies
             # for this special case is not good.)
             try:
-                import subprocess
                 import re
+                import subprocess
                 output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path])
                 if not re.search(b'user:.+:', output):
                     _error_callback('permissions', device_info.path)
