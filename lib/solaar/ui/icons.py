@@ -47,9 +47,8 @@ TRAY_ATTENTION = 'solaar-attention'
 
 def _look_for_application_icons():
     import os.path as _path
-    from os import environ as _environ
-
     import sys as _sys
+    from os import environ as _environ
     if _log.isEnabledFor(_DEBUG):
         _log.debug('sys.path[0] = %s', _sys.path[0])
     prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
