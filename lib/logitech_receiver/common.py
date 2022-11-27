@@ -33,6 +33,7 @@ class NamedInt(int):
 
     Caution: comparison with strings will also match this NamedInt's name
     (case-insensitive)."""
+
     def __new__(cls, value, name):
         assert is_string(name)
         obj = int.__new__(cls, value)
@@ -82,6 +83,7 @@ class NamedInts:
     __slots__ = ('__dict__', '_values', '_indexed', '_fallback', '_is_sorted')
 
     def __init__(self, dict=None, **kwargs):
+
         def _readable_name(n):
             if not is_string(n):
                 raise TypeError('expected string, got ' + str(type(n)))
@@ -213,6 +215,7 @@ class NamedInts:
 
 
 class UnsortedNamedInts(NamedInts):
+
     def _sort_values(self):
         pass
 
@@ -242,6 +245,7 @@ class KwException(Exception):
     """An exception that remembers all arguments passed to the constructor.
     They can be later accessed by simple member access.
     """
+
     def __init__(self, **kwargs):
         super().__init__(kwargs)
 

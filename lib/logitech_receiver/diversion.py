@@ -42,6 +42,7 @@ from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 
 import gi  # isort:skip
+
 gi.require_version('Gdk', '3.0')  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
@@ -368,6 +369,7 @@ COMPONENTS = {}
 
 
 class RuleComponent:
+
     def compile(self, c):
         if isinstance(c, RuleComponent):
             return c
@@ -380,6 +382,7 @@ class RuleComponent:
 
 
 class Rule(RuleComponent):
+
     def __init__(self, args, source=None, warn=True):
         self.components = [self.compile(a) for a in args]
         self.source = source
@@ -407,6 +410,7 @@ class Rule(RuleComponent):
 
 
 class Condition(RuleComponent):
+
     def __init__(self, *args):
         pass
 
@@ -418,6 +422,7 @@ class Condition(RuleComponent):
 
 
 class Not(Condition):
+
     def __init__(self, op, warn=True):
         if isinstance(op, list) and len(op) == 1:
             op = op[0]
@@ -436,6 +441,7 @@ class Not(Condition):
 
 
 class Or(Condition):
+
     def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
@@ -457,6 +463,7 @@ class Or(Condition):
 
 
 class And(Condition):
+
     def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
@@ -510,6 +517,7 @@ def x11_pointer_prog():
 
 
 class Process(Condition):
+
     def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
@@ -535,6 +543,7 @@ class Process(Condition):
 
 
 class MouseProcess(Condition):
+
     def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
@@ -560,6 +569,7 @@ class MouseProcess(Condition):
 
 
 class Feature(Condition):
+
     def __init__(self, feature, warn=True):
         if not (isinstance(feature, str) and feature in _F):
             if warn:
@@ -578,6 +588,7 @@ class Feature(Condition):
 
 
 class Report(Condition):
+
     def __init__(self, report, warn=True):
         if not (isinstance(report, int)):
             if warn:
@@ -598,6 +609,7 @@ class Report(Condition):
 
 # Setting(device, setting, [key], value...)
 class Setting(Condition):
+
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -643,6 +655,7 @@ MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + M
 
 
 class Modifiers(Condition):
+
     def __init__(self, modifiers, warn=True):
         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
         self.desired = 0
@@ -725,6 +738,7 @@ def bit_test(start, end, bits):
 
 
 def range_test(start, end, min, max):
+
     def range_test_helper(f, r, d):
         value = int.from_bytes(d[start:end], byteorder='big', signed=True)
         return min <= value <= max and (value if value else True)
@@ -733,6 +747,7 @@ def range_test(start, end, min, max):
 
 
 class Test(Condition):
+
     def __init__(self, test, warn=True):
         self.test = test
         if isinstance(test, str):
@@ -767,6 +782,7 @@ class Test(Condition):
 
 
 class TestBytes(Condition):
+
     def __init__(self, test, warn=True):
         self.test = test
         if (
@@ -836,6 +852,7 @@ class MouseGesture(Condition):
 
 
 class Active(Condition):
+
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
@@ -855,6 +872,7 @@ class Active(Condition):
 
 
 class Action(RuleComponent):
+
     def __init__(self, *args):
         pass
 
@@ -968,6 +986,7 @@ class KeyPress(Action):
 
 
 class MouseScroll(Action):
+
     def __init__(self, amounts, warn=True):
         import numbers
         if len(amounts) == 1 and isinstance(amounts[0], list):
@@ -999,6 +1018,7 @@ class MouseScroll(Action):
 
 
 class MouseClick(Action):
+
     def __init__(self, args, warn=True):
         if len(args) == 1 and isinstance(args[0], list):
             args = args[0]
@@ -1033,6 +1053,7 @@ class MouseClick(Action):
 
 
 class Set(Action):
+
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -1072,6 +1093,7 @@ class Set(Action):
 
 
 class Execute(Action):
+
     def __init__(self, args, warn=True):
         if isinstance(args, str):
             args = [args]
@@ -1097,6 +1119,7 @@ class Execute(Action):
 
 
 class Later(Action):
+
     def __init__(self, args, warn=True):
         self.delay = 0
         self.rule = Rule([])

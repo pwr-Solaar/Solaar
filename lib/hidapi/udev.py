@@ -304,6 +304,7 @@ def open(vendor_id, product_id, serial=None):
 
     :returns: an opaque device handle, or ``None``.
     """
+
     def matchfn(bid, vid, pid):
         return vid == vendor_id and pid == product_id
 
