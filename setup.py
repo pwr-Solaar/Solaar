@@ -16,7 +16,6 @@ with open('lib/solaar/version', 'r') as vfile:
 
 try:  # get commit from git describe
     commit = subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode()
-    print('GIT', commit)
     with open('lib/solaar/commit', 'w') as vfile:
         vfile.write(f'{commit}\n')
 except Exception:  # get commit from Ubuntu dpkg-parsechangelog
@@ -24,14 +23,14 @@ except Exception:  # get commit from Ubuntu dpkg-parsechangelog
         dpkg = subprocess.check_output(['dpkg-parsechangelog'], stderr=subprocess.DEVNULL).strip().decode()
         print(dpkg)
         match = re.search(r'\nVersion: (.*)~', dpkg)
-        print(match.group(1))
+        print('VERSION', match.group(0), match.group(1))
         with open('lib/solaar/commit', 'w') as vfile:
             vfile.write(f'{match.group[1]}\n')
-        print(
-            'DPKG VERSION',
-            subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
-                                    stderr=subprocess.DEVNULL).strip().decode()
-        )
+        commit = subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
+                                         stderr=subprocess.DEVNULL).strip().decode()
+        print('DPKG VERSION', commit)
+        #        with open('lib/solaar/commit', 'w') as vfile:
+        #    vfile.write(f'{commit]}\n')
     except Exception:
         pass
 
