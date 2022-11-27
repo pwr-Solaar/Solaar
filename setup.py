@@ -21,14 +21,15 @@ try:  # get commit from git describe
 except Exception:  # get commit from Ubuntu dpkg-parsechangelog
     try:
         dpkg = subprocess.check_output(['dpkg-parsechangelog'], stderr=subprocess.DEVNULL).strip().decode()
-        print(dpkg)
+        print('DPKG', dpkg)
         match = re.search(r'\nVersion: (.*)~', dpkg)
         print('VERSION', match.group(0), match.group(1))
         with open('lib/solaar/commit', 'w') as vfile:
             vfile.write(f'{match.group[1]}\n')
-        commit = subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
-                                         stderr=subprocess.DEVNULL).strip().decode()
-        print('DPKG VERSION', commit)
+        print('Version', subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version']).strip().decode())
+        print('version', subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'version']).strip().decode())
+        print('Version', subprocess.check_output(['dpkg-parsechangelog', '--show-field=Version']).strip().decode())
+        print('version', subprocess.check_output(['dpkg-parsechangelog', '--show-field=version']).strip().decode())
         #        with open('lib/solaar/commit', 'w') as vfile:
         #    vfile.write(f'{commit]}\n')
     except Exception:
