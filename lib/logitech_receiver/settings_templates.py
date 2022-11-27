@@ -337,6 +337,7 @@ class ReportRate(_Setting):
     choices_universe = _NamedInts.range(1, 8)
 
     class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
+
         def write(self, device, data_bytes):
             # Host mode is required for report rate to be adjustable
             if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
@@ -344,6 +345,7 @@ class ReportRate(_Setting):
             return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
+
         @classmethod
         def build(cls, setting_class, device):
             # if device.wpid == '408E':
@@ -387,6 +389,7 @@ class DivertGkeys(_Setting):
     validator_options = {'true_value': 0x01, 'false_value': 0x00, 'mask': 0xff}
 
     class rw_class(_FeatureRW):
+
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x20)
 
@@ -467,6 +470,7 @@ class ReprogrammableKeys(_Settings):
     choices_universe = _special_keys.CONTROL
 
     class rw_class:
+
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -483,6 +487,7 @@ class ReprogrammableKeys(_Settings):
             return True
 
     class validator_class(_ChoicesMapV):
+
         @classmethod
         def build(cls, setting_class, device):
             choices = {}
@@ -495,6 +500,7 @@ class ReprogrammableKeys(_Settings):
 
 
 class DpiSlidingXY(_RawXYProcessing):
+
     def activate_action(self):
         self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
         self.dpiChoices = list(self.dpiSetting.choices)
@@ -559,6 +565,7 @@ class DpiSlidingXY(_RawXYProcessing):
 
 
 class MouseGesturesXY(_RawXYProcessing):
+
     def activate_action(self):
         self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
         self.fsmState = 'idle'
@@ -638,6 +645,7 @@ class DivertKeys(_Settings):
     choices_divert = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1})
 
     class rw_class:
+
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -654,6 +662,7 @@ class DivertKeys(_Settings):
             return True
 
     class validator_class(_ChoicesMapV):
+
         def __init__(self, choices, key_byte_count=2, byte_count=1, mask=0x01):
             super().__init__(choices, key_byte_count, byte_count, mask)
 
@@ -706,6 +715,7 @@ class AdjustableDpi(_Setting):
     choices_universe = _NamedInts.range(200, 4000, str, 50)
 
     class validator_class(_ChoicesV):
+
         @classmethod
         def build(cls, setting_class, device):
             # [1] getSensorDpiList(sensorIdx)
@@ -750,6 +760,7 @@ class SpeedChange(_Setting):
     rw_options = {'name': 'speed change'}
 
     class rw_class(_ActionSettingRW):
+
         def press_action(self):  # switch sensitivity
             currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
             newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
@@ -765,6 +776,7 @@ class SpeedChange(_Setting):
                 self.device.persister['_speed-change'] = currentSpeed
 
     class validator_class(_ChoicesV):
+
         @classmethod
         def build(cls, setting_class, device):
             key_index = device.keys.index(_special_keys.CONTROL.DPI_Change)
@@ -784,6 +796,7 @@ class DisableKeyboardKeys(_BitFieldSetting):
     choices_universe = _DKEY
 
     class validator_class(_BitFieldV):
+
         @classmethod
         def build(cls, setting_class, device):
             mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS, 0x00)[0]
@@ -807,9 +820,12 @@ class Multiplatform(_Setting):
     # as, for example, the integer value for 'Windows' can be different on different devices
 
     class validator_class(_ChoicesV):
+
         @classmethod
         def build(cls, setting_class, device):
+
             def _str_os_versions(low, high):
+
                 def _str_os_version(version):
                     if version == 0:
                         return ''
@@ -862,6 +878,7 @@ class ChangeHost(_Setting):
     choices_universe = _NamedInts(**{'Host ' + str(i + 1): i for i in range(3)})
 
     class validator_class(_ChoicesV):
+
         @classmethod
         def build(cls, setting_class, device):
             infos = device.feature_request(_F.CHANGE_HOST)
@@ -971,6 +988,7 @@ class Gesture2Gestures(_BitFieldOMSetting):
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
+
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_enabled or g.default_enabled]
@@ -988,6 +1006,7 @@ class Gesture2Divert(_BitFieldOMSetting):
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
+
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_diverted]
@@ -1009,6 +1028,7 @@ class Gesture2Params(_LongSettings):
     _labels_sub = _GESTURE2_PARAMS_LABELS_SUB
 
     class validator_class(_MultipleRangeV):
+
         @classmethod
         def build(cls, setting_class, device):
             params = _hidpp20.get_gestures(device).params.values()
@@ -1033,6 +1053,7 @@ class MKeyLEDs(_BitFieldSetting):
     _labels = {k: (None, _('Lights up the %s key.') % k) for k in choices_universe}
 
     class rw_class(_FeatureRW):
+
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x10)
 
@@ -1040,6 +1061,7 @@ class MKeyLEDs(_BitFieldSetting):
             return b'\x00'
 
     class validator_class(_BitFieldV):
+
         @classmethod
         def build(cls, setting_class, device):
             number = device.feature_request(setting_class.feature, 0x00)[0]
@@ -1057,6 +1079,7 @@ class MRKeyLED(_Setting):
     feature = _F.MR
 
     class rw_class(_FeatureRW):
+
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x00)
 
@@ -1080,6 +1103,7 @@ class PersistentRemappableAction(_Settings):
     choices_universe = _special_keys.KEYS
 
     class rw_class:
+
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -1094,6 +1118,7 @@ class PersistentRemappableAction(_Settings):
             return v
 
     class validator_class(_ChoicesMapV):
+
         @classmethod
         def build(cls, setting_class, device):
             remap_keys = device.remap_keys
@@ -1146,6 +1171,7 @@ class Equalizer(_RangeFieldSetting):
     keys_universe = []
 
     class validator_class(_PackedRangeV):
+
         @classmethod
         def build(cls, setting_class, device):
             data = device.feature_request(_F.EQUALIZER, 0x00)

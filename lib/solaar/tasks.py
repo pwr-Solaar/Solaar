@@ -36,6 +36,7 @@ except ImportError:
 
 
 class TaskRunner(_Thread):
+
     def __init__(self, name):
         super().__init__(name=name)
         self.daemon = True

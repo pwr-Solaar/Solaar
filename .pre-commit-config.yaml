@@ -12,7 +12,7 @@ repos:
   - id: end-of-file-fixer
   - id: trailing-whitespace
 - repo: https://github.com/pre-commit/mirrors-yapf
-  rev: v0.30.0
+  rev: v0.32.0
   hooks:
   - id: yapf
 - repo: https://github.com/pre-commit/mirrors-isort

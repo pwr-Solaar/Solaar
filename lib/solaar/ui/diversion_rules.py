@@ -52,6 +52,7 @@ _rule_component_clipboard = None
 
 
 class RuleComponentWrapper(GObject.GObject):
+
     def __init__(self, component, level=0, editable=False):
         self.component = component
         self.level = level
@@ -86,6 +87,7 @@ class RuleComponentWrapper(GObject.GObject):
 
 
 class DiversionDialog:
+
     def __init__(self):
 
         window = Gtk.Window()
@@ -701,6 +703,7 @@ class DiversionDialog:
 
 
 class CompletionEntry(Gtk.Entry):
+
     def __init__(self, values, *args, **kwargs):
         super().__init__(*args, **kwargs)
         CompletionEntry.add_completion_to_entry(self, values)
@@ -748,6 +751,7 @@ class SmartComboBox(Gtk.ComboBox):
     as soon as the user finishes typing any accepted name.
 
     """
+
     def __init__(
         self, all_values, blank='', completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
     ):
@@ -949,6 +953,7 @@ class DeviceInfo:
 
 
 class AllDevicesInfo:
+
     def __init__(self):
         self._devices = []
         self._lock = threading.Lock()
@@ -1965,6 +1970,7 @@ def _from_named_ints(v, all_values):
 
 
 class SetValueControl(Gtk.HBox):
+
     def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
