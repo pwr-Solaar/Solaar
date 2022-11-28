@@ -1,3 +1,7 @@
+# 1.1.8
+
+* Update Spanish
+
 # 1.1.7
 
 * Add dependency on typing_extension to setup.py
