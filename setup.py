@@ -19,11 +19,11 @@ try:  # get commit from git describe
         vfile.write(f'{commit}\n')
 except Exception:  # get commit from Ubuntu dpkg-parsechangelog
     try:
-        version = subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
-                                          stderr=subprocess.DEVNULL).strip().decode()
-        version = version.split('~')
+        commit = subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
+                                         stderr=subprocess.DEVNULL).strip().decode()
+        commit = commit.split('~')
         with open('lib/solaar/commit', 'w') as vfile:
-            vfile.write(f'{version[0]}\n')
+            vfile.write(f'{commit[0]}\n')
     except Exception as e:
         print('Exception using dpkg-parsechangelog', e)
 
