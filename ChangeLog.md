@@ -1,5 +1,6 @@
 # 1.1.8
 
+* Soport for PPA info git: https://github.com/pwr-Solaar/Solaar/issues/1868
 * Update Spanish
 
 # 1.1.7
