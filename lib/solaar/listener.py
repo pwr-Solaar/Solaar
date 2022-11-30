@@ -340,7 +340,7 @@ def ping_all(resuming=False):
         _log.info('ping all devices%s', ' when resuming' if resuming else '')
     for l in _all_listeners.values():
         if l.receiver.isDevice:
-            if resuming and hasattr(l.reciever, 'status'):
+            if resuming and hasattr(l.receiver, 'status'):
                 l.receiver.status._active = None  # ensure that settings are pushed
             if l.receiver.ping():
                 l.receiver.status.changed(active=True, push=True)
