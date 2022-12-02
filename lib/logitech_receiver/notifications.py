@@ -312,7 +312,7 @@ def _process_hidpp10_notification(device, status, n):
 
 def _process_feature_notification(device, status, n, feature):
     if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s: notification for feature %s, report %s, data %s', device, feature, n.sub_id >> 4, _strhex(n.data))
+        _log.debug('%s: notification for feature %s, report %s, data %s', device, feature, n.address >> 4, _strhex(n.data))
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
@@ -436,10 +436,10 @@ def _process_feature_notification(device, status, n, feature):
             ratchet = ord(n.data[:1]) & 0x01
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: WHEEL: ratchet: %d', device, ratchet)
-            from solaar.ui.config_panel import change_setting  # prevent circular import
+            from solaar.ui.config_panel import record_setting  # prevent circular import
             setting = next((s for s in device.settings if s.name == _st.ScrollRatchet.name), None)
             if setting:
-                change_setting(device, setting, [2 if ratchet else 1])
+                record_setting(device, setting, [2 if ratchet else 1])
         else:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: unknown WHEEL %s', device, n)

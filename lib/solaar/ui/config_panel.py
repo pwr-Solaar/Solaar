@@ -715,3 +715,23 @@ def _change_setting(device, setting, values):
     else:
         sbox = None
     _write_async(setting, values[-1], sbox, None, key=values[0] if len(values) > 1 else None)
+
+
+def record_setting(device, setting, values):
+    """External interface to record a setting that has changed on the device and have the GUI show the change"""
+    assert device == setting._device
+    GLib.idle_add(_record_setting, device, setting, values, priority=99)
+
+
+def _record_setting(device, setting, values):
+    if len(values) > 1:
+        setting.update_key_value(values[0], values[-1])
+        value = {values[0]: values[-1]}
+    else:
+        setting.update(values[-1])
+        value = values[-1]
+    device_path = device.receiver.path if device.receiver else device.path
+    if (device_path, device.number, setting.name) in _items:
+        sbox = _items[(device_path, device.number, setting.name)]
+        if sbox:
+            _update_setting_item(sbox, value)

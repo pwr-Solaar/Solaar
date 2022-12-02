@@ -292,6 +292,10 @@ class Setting:
         if self._device.persister and save:
             self._device.persister[self.name] = self._value if self.persist else None
 
+    def update(self, value, save=True):
+        self._value = value
+        self._pre_write(save)
+
     def write(self, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -302,8 +306,7 @@ class Setting:
 
         if self._device.online:
             if self._value != value:
-                self._value = value
-                self._pre_write(save)
+                self.update(value, save)
 
             current_value = None
             if self._validator.needs_current_value:
@@ -410,8 +413,7 @@ class Settings(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
 
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             for key, value in map.items():
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
@@ -421,6 +423,10 @@ class Settings(Setting):
                     if not reply:
                         return None
             return map
+
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
 
     def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
@@ -437,8 +443,7 @@ class Settings(Setting):
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
                 # always need to write to configuration because dictionary is shared and could have changed
-                self._value[int(key)] = value
-                self._pre_write(save)
+                self.update_key_value(key, value, save)
             except ValueError:
                 data_bytes = value = None
             if data_bytes is not None:
@@ -510,8 +515,7 @@ class LongSettings(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: long settings write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             for item, value in map.items():
                 data_bytes_list = self._validator.prepare_write(self._value)
                 if data_bytes_list is not None:
@@ -523,6 +527,10 @@ class LongSettings(Setting):
                             if not reply:
                                 return None
             return map
+
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
 
     def write_key_value(self, item, value, save=True):
         assert hasattr(self, '_value')
@@ -537,8 +545,7 @@ class LongSettings(Setting):
             if not self._value:
                 self.read()
             data_bytes = self._validator.prepare_write_item(item, value)
-            self._value[int(item)] = value
-            self._pre_write(save)
+            self.update_key_value(item, value, save)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
@@ -609,8 +616,7 @@ class BitFieldSetting(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: bit field settings write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
@@ -622,6 +628,10 @@ class BitFieldSetting(Setting):
                     if not reply:
                         return None
             return map
+
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
 
     def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
@@ -636,8 +646,7 @@ class BitFieldSetting(Setting):
             if not self._value:
                 self.read()
             value = bool(value)
-            self._value[int(key)] = value
-            self._pre_write(save)
+            self.update_key_value(key, value, save)
 
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
@@ -703,8 +712,7 @@ class RangeFieldSetting(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: range field setting write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
