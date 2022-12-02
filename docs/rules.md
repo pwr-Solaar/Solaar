@@ -44,14 +44,6 @@ Running Solaar with the `-ddd`
 option will show information about notifications, including their feature
 name, report number, and data.
 
-Solaar can also create special notifications in response to mouse movements on some mice.
-Setting the `Mouse Gestures` setting to a key enables special processing of mouse movements
-while the key is depressed.  Moving the mouse creates a mouse movement event.
-Stopping the mouse for a little while and moving it again creates another mouse movement event.
-Pressing a diverted key creates a key event.
-When the key is released the sequence of events is sent as a synthetic notification
-that can be matched with `Mouse Gesture` conditions.
-
 In response to a feature-based HID++ notification Solaar runs a sequence of
 rules.  A `Rule` is a sequence of components, which are either sub-rules,
 conditions, or actions.  Conditions and actions are dictionaries with one
@@ -88,6 +80,24 @@ matched, respectively.  Logitech key and button names are shown in the `Key/Butt
 setting.  These names are also shown in the output of `solaar show` in the 'reprogrammable keys'
 section.  Only keys or buttons that have 'divertable' in their report can be diverted.
 Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+
+Solaar can also create special notifications in response to mouse movements on some mice.
+Setting `Key/Button Diversion` for a key or button causes the key or button to create a `Mouse Gesture`
+notification for the period that the key or button is depressed.
+Moving the mouse creates a mouse movement event.
+Stopping the mouse for a little while and moving it again creates another mouse movement event.
+Pressing a diverted key creates a key event.
+When the key is released the sequence of events is sent as a synthetic notification
+that can be matched with `Mouse Gesture` conditions.
+
+`Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
+Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
+The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
+If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
+So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
+The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
+Directions and buttons can be mixed and chained together however you like.
+It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
 `Modifiers` conditions take either a string or a sequence of strings, which
 can only be `Shift`, `Control`, `Alt`, and `Super`.
@@ -147,15 +157,6 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 `lowres_wheel_up`, `lowres_wheel_down`, `hires_wheel_up`, `hires_wheel_down` are the
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 `True` and `False` tests return True and False, respectively.
-
-`Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
-Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
-The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
-If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
-So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
-The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
-Directions and buttons can be mixed and chained together however you like.
-It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
 `Setting` conditions check device settings of devices, provided the device is on-line.
 The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
