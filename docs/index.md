@@ -106,9 +106,13 @@ available from the standard repositories for your distribution you can try
 one of these packages.
 
 - Arch solaar package in the [community repository][arch]
-- Ubuntu/Kubuntu 16.04+: use the solaar package from [universe repository][universe repository]
 - Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
+
+Solaar is available from some other repositories
+but they are several versions behind the current version.
+
+- for Ubuntu/Kubuntu 16.04+: the solaar package from [universe repository][universe repository]
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
 
