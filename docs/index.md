@@ -134,22 +134,9 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
-- If the Python hid-parser package is not available Solaar will not recognize some devices.
-  Use pip to install hid-parser.
-
-- If some icons appear broken in the application, make sure you've properly
-  configured the Gtk theme and icon theme in your control panel.
-
-- Solaar normally uses icon names for its icons, which in some system tray implementatations
-  results in missing or wrong-sized icons.
-  The `--tray-icon-size` option forces Solaar to use icon files of appropriate size
-  for tray icons instead, which produces better results in some system tray implementatations.
-  To use icon files close to 32 pixels in size use `--tray-icon-size=32`.
-
-- The icon in the system tray can show up as 'black on black' in dark
-  themes or as non-symbolic when the theme uses symbolic icons.  This is due to problems
-  in some system tray implementations. Changing to a different theme may help.
-  The `--battery-icons=symbolic` option can be used to force symbolic icons.
+- Solaar expects that it has exclusive control over settings that are not ignored.
+  Running other programs that modify these settings, such as logiops,
+  will likely result in unexpected device behavior.
 
 - The Linux HID++ driver modifies the setting Scroll Wheel Resolution to
   implement smooth scrolling.  If Solaar later changes this setting scrolling
@@ -165,6 +152,20 @@ for the step-by-step procedure for manual installation.
 - The driver sends messages to devices that do not conform with the Logitech HID++ specification
   resulting in reponses being sent back that look like other messages.  For some devices this causes
   Solaar to report incorrect battery levels.
+
+- If the Python hid-parser package is not available Solaar will not recognize some devices.
+  Use pip to install hid-parser.
+
+- Solaar normally uses icon names for its icons, which in some system tray implementatations
+  results in missing or wrong-sized icons.
+  The `--tray-icon-size` option forces Solaar to use icon files of appropriate size
+  for tray icons instead, which produces better results in some system tray implementatations.
+  To use icon files close to 32 pixels in size use `--tray-icon-size=32`.
+
+- The icon in the system tray can show up as 'black on black' in dark
+  themes or as non-symbolic when the theme uses symbolic icons.  This is due to problems
+  in some system tray implementations. Changing to a different theme may help.
+  The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
 - Many gaming mice and keyboards have the ONBOARD PROFILES feature.
   This feature can override other features, including polling rate and key lighting.
