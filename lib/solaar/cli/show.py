@@ -234,7 +234,7 @@ def _print_device(dev, num=None):
                     try:
                         v = setting.val_to_string(setting.read(False))
                     except _hidpp20.FeatureCallError as e:
-                        v = e
+                        v = 'HID++ error ' + str(e)
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:

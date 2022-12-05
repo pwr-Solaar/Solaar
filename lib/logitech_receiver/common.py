@@ -253,7 +253,7 @@ class KwException(Exception):
         try:
             return super().__getattr__(k)
         except AttributeError:
-            return self.args[0][k]
+            return self.args[0].get(k)  # was self.args[0][k]
 
 
 """Firmware information."""
