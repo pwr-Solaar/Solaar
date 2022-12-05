@@ -433,13 +433,14 @@ def _process_feature_notification(device, status, n, feature):
                 periods = flags & 0x0f
                 _log.info('%s: WHEEL: res: %d periods: %d delta V:%-3d', device, high_res, periods, delta_v)
         elif (n.address == 0x10):
-            ratchet = ord(n.data[:1]) & 0x01
+            ratchet = n.data[0]
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: WHEEL: ratchet: %d', device, ratchet)
-            from solaar.ui.config_panel import record_setting  # prevent circular import
-            setting = next((s for s in device.settings if s.name == _st.ScrollRatchet.name), None)
-            if setting:
-                record_setting(device, setting, [2 if ratchet else 1])
+            if ratchet < 2:  # don't process messages with unusual ratchet values
+                from solaar.ui.config_panel import record_setting  # prevent circular import
+                setting = next((s for s in device.settings if s.name == _st.ScrollRatchet.name), None)
+                if setting:
+                    record_setting(device, setting, [2 if ratchet else 1])
         else:
             if _log.isEnabledFor(_INFO):
                 _log.info('%s: unknown WHEEL %s', device, n)
