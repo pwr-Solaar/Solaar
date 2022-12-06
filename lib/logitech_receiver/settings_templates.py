@@ -1251,9 +1251,10 @@ def check_feature(device, sclass):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
         return detected
-    except Exception:
+    except Exception as e:
         from traceback import format_exc
-        _log.error('check_feature %s [%s] error %s', sclass.name, sclass.feature, format_exc())
+        _log.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, format_exc())
+        return False  # differentiate from an error-free determination that the setting is not supported
 
 
 # Returns True if device was queried to find features, False otherwise
@@ -1274,8 +1275,9 @@ def check_feature_settings(device, already_known):
                     already_known.append(setting)
                     if sclass.name in newAbsent:
                         newAbsent.remove(sclass.name)
-                elif sclass.name not in newAbsent and sclass.name not in absent and sclass.name not in device.persister:
-                    newAbsent.append(sclass.name)
+                elif setting is None:
+                    if sclass.name not in newAbsent and sclass.name not in absent and sclass.name not in device.persister:
+                        newAbsent.append(sclass.name)
     if device.persister and newAbsent:
         absent.extend(newAbsent)
         device.persister['_absent'] = absent
