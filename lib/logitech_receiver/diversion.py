@@ -338,23 +338,49 @@ def simulate_scroll(dx, dy):
     _log.warn('no way to simulate scrolling')
 
 
+def thumb_wheel_up(f, r, d, a):
+    global thumb_wheel_displacement
+    if f != _F.THUMB_WHEEL or r != 0:
+        return False
+    if a is None:
+        return signed(d[0:2]) < 0 and signed(d[0:2])
+    elif thumb_wheel_displacement <= -a:
+        thumb_wheel_displacement += a
+        return 1
+    else:
+        return False
+
+
+def thumb_wheel_down(f, r, d, a):
+    global thumb_wheel_displacement
+    if f != _F.THUMB_WHEEL or r != 0:
+        return False
+    if a is None:
+        return signed(d[0:2]) > 0 and signed(d[0:2])
+    elif thumb_wheel_displacement >= a:
+        thumb_wheel_displacement -= a
+        return 1
+    else:
+        return False
+
+
 TESTS = {
-    'crown_right': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] < 128 and d[1],
-    'crown_left': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1],
-    'crown_right_ratchet': lambda f, r, d: f == _F.CROWN and r == 0 and d[2] < 128 and d[2],
-    'crown_left_ratchet': lambda f, r, d: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2],
-    'crown_tap': lambda f, r, d: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5],
-    'crown_start_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6],
-    'crown_end_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6],
-    'crown_pressed': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6],
-    'thumb_wheel_up': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) < 0 and signed(d[0:2]),
-    'thumb_wheel_down': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) > 0 and signed(d[0:2]),
-    'lowres_wheel_up': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
-    'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
-    'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
-    'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
-    'False': lambda f, r, d: False,
-    'True': lambda f, r, d: True,
+    'crown_right': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] < 128 and d[1], False],
+    'crown_left': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
+    'crown_right_ratchet': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] < 128 and d[2], False],
+    'crown_left_ratchet': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    'crown_tap': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
+    'crown_start_press': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
+    'crown_end_press': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
+    'crown_pressed': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
+    'thumb_wheel_up': [thumb_wheel_up, True],
+    'thumb_wheel_down': [thumb_wheel_down, True],
+    'lowres_wheel_up': [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]), False],
+    'lowres_wheel_down': [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]), False],
+    'hires_wheel_up': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]), False],
+    'hires_wheel_down': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]), False],
+    'False': [lambda f, r, d, a: False, False],
+    'True': [lambda f, r, d, a: True, False],
 }
 
 MOUSE_GESTURE_TESTS = {
@@ -749,24 +775,30 @@ def range_test(start, end, min, max):
 class Test(Condition):
 
     def __init__(self, test, warn=True):
-        self.test = test
+        self.test = ''
+        self.parameter = None
         if isinstance(test, str):
-            if test in MOUSE_GESTURE_TESTS:
-                if warn:
-                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
-                self.__class__ = MouseGesture
-                self.__init__(MOUSE_GESTURE_TESTS[test], warn=warn)
-            elif test in TESTS:
-                self.function = TESTS[test]
-            else:
-                if warn:
-                    _log.warn('rule Test string argument not name of a test: %s', test)
-                self.function = TESTS['False']
-        elif isinstance(test, list) and all(isinstance(t, int) for t in test):
+            test = [test]
+        if isinstance(test, list) and all(isinstance(t, int) for t in test):
             if warn:
                 _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
             self.__class__ = TestBytes
             self.__init__(test, warn=warn)
+        elif isinstance(test, list):
+            if test[0] in MOUSE_GESTURE_TESTS:
+                if warn:
+                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                self.__class__ = MouseGesture
+                self.__init__(MOUSE_GESTURE_TESTS[0][test], warn=warn)
+            elif test[0] in TESTS:
+                self.test = test[0]
+                self.function = TESTS[test[0]][0]
+                self.parameter = test[1] if len(test) > 1 else None
+            else:
+                if warn:
+                    _log.warn('rule Test name not name of a test: %s', test)
+                self.test = 'False'
+                self.function = TESTS['False'][0]
         else:
             if warn:
                 _log.warn('rule Test argument not valid %s', test)
@@ -775,10 +807,10 @@ class Test(Condition):
         return 'Test: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        return self.function(feature, notification.address, notification.data)
+        return self.function(feature, notification.address, notification.data, self.parameter)
 
     def data(self):
-        return {'Test': str(self.test)}
+        return {'Test': ([self.test, self.parameter] if self.parameter is not None else [self.test])}
 
 
 class TestBytes(Condition):
@@ -1204,11 +1236,12 @@ keys_down = []
 g_keys_down = [0, 0, 0, 0]
 m_keys_down = 0
 mr_key_down = False
+thumb_wheel_displacement = 0
 
 
 # process a notification
 def process_notification(device, status, notification, feature):
-    global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up
+    global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
@@ -1249,6 +1282,12 @@ def process_notification(device, status, notification, feature):
         if mr_key_down and not new_mr_key_down:
             key_up = _CONTROL['MR']
         mr_key_down = new_mr_key_down
+    # keep track of thumb wheel movment
+    elif feature == _F.THUMB_WHEEL and notification.address == 0x00:
+        if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
+            thumb_wheel_displacement = 0
+        thumb_wheel_displacement += signed(notification.data[0:2])
+
     GLib.idle_add(rules.evaluate, feature, notification, device, status, True)
 
 
