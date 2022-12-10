@@ -1,5 +1,8 @@
-# 1.1.8rc2
+# 1.1.8rc3
 
+* Add parameter to thumb wheel rule conditions
+* Rename Serbian translation file
+* Update Polish translation
 * Improve handling of wheel notifications
 * Only record changes of scroll wheel ratchet
 * Don't mark setting as absent if there are device errors

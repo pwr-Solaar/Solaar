@@ -1,5 +1,9 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.8
+
+* The thumb wheel rule conditions take an optional parameter that checks for total signed thumb wheel movement.
+
 ## Version 1.1.7
 
 * Solaar responds to scroll wheel ratchet notifications by changing its scroll wheel ratcheting.
