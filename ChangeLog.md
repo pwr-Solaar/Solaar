@@ -1,4 +1,4 @@
-# 1.1.8rc1
+# 1.1.8rc2
 
 * Improve handling of wheel notifications
 * Only record changes of scroll wheel ratchet
@@ -23,7 +23,7 @@
 * Reduce standard size of rule editor window
 * Remove unnecessary dependency on typing_extensions
 
-	# 1.1.7
+# 1.1.7
 
 * Add dependency on typing_extension to setup.py
 * Don't defer saves in CLI and don't require Gtk in CLI
