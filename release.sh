@@ -37,7 +37,7 @@ do
     shift
 done
 
-version=$(sed '/^__version__/!d' setup.py | cut -d\' -f2)
+version=$(cat lib/solaar/version)
 
 prerelease=false
 echo $version | grep '.*rc.*' >/dev/null
