@@ -33,47 +33,46 @@ class Device:
     read_register = _hidpp10.read_register
     write_register = _hidpp10.write_register
 
-    def __init__(self, receiver, number, link_notification=None, info=None, path=None, handle=None):
-        assert receiver or info
+    def __init__(
+        self,
+        receiver,
+        number,
+        link_notification=None,
+        path=None,
+        handle=None,
+        short=None,
+        long=None,
+        product_id=None,
+        bus_id=None
+    ):
+        assert receiver or handle
         Device.instances.append(self)
-        self.receiver = receiver
-        self.may_unpair = False
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
+        self.may_unpair = False
+        self.receiver = receiver
         self.path = path
         self.handle = handle
-        self.product_id = None
-        self.hidpp_short = info.hidpp_short if info else None
-        self.hidpp_long = info.hidpp_long if info else None
+        self.product_id = product_id
+        self.hidpp_short = short
+        self.hidpp_long = long
+        self.bluetooth = bus_id == 0x0005  # Bluetooth connections need long messages
 
         if receiver:
             assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
         self.number = number  # will be None at this point for directly connected devices
-        # 'device active' flag; requires manual management.
         self.online = None
 
-        # the Wireless PID is unique per device model
-        self.wpid = None
+        self.wpid = None  # the Wireless PID is unique per device model
         self.descriptor = None
-        # Bluetooth connections need long messages
-        self.bluetooth = False
-        # mouse, keyboard, etc (see _hidpp10.DEVICE_KIND)
-        self._kind = None
-        # Unifying peripherals report a codename.
-        self._codename = None
-        # the full name of the model
-        self._name = None
-        # HID++ protocol version, 1.0 or 2.0
-        self._protocol = None
-        # serial number (an 8-char hex string)
-        self._serial = None
-        # unit id (distinguishes within a model - the same as serial)
-        self._unitId = None
-        # model id (contains identifiers for the transports of the device)
-        self._modelId = None
-        # map from transports to product identifiers
-        self._tid_map = None
-        # persister holds settings
-        self._persister = None
+        self._kind = None  # mouse, keyboard, etc (see _hidpp10.DEVICE_KIND)
+        self._codename = None  # Unifying peripherals report a codename.
+        self._name = None  # the full name of the model
+        self._protocol = None  # HID++ protocol version, 1.0 or 2.0
+        self._serial = None  # serial number (an 8-char hex string)
+        self._unitId = None  # unit id (distinguishes within a model - the same as serial)
+        self._modelId = None  # model id (contains identifiers for the transports of the device)
+        self._tid_map = None  # map from transports to product identifiers
+        self._persister = None  # persister holds settings
 
         self._firmware = None
         self._keys = None
@@ -84,20 +83,14 @@ class Device:
         self._settings = None
         self._feature_settings_checked = False
         self._settings_lock = _threading.Lock()
-
-        # Misc stuff that's irrelevant to any functionality, but may be
-        # displayed in the UI and caching it here helps.
         self._polling_rate = None
         self._power_switch = None
 
         # See `add_notification_handler`
         self._notification_handlers = {}
 
-        # if _log.isEnabledFor(_DEBUG):
-        #     _log.debug("new Device(%s, %s, %s)", receiver, number, link_notification)
-
         if not self.path:
-            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else info.path
+            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
                 self.handle = _base.open_path(self.path) if self.path else None
@@ -140,8 +133,6 @@ class Device:
                     self.descriptor = _descriptors.get_codename(self._codename)
         else:
             self.online = None  # a direct connected device might not be online (as reported by user)
-            self.product_id = info.product_id
-            self.bluetooth = info.bus_id == 0x0005
             self.descriptor = _descriptors.get_btid(self.product_id) if self.bluetooth else \
                 _descriptors.get_usbid(self.product_id)
             if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
@@ -495,7 +486,16 @@ class Device:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Device(None, None, info=device_info, handle=handle, path=device_info.path)
+                return Device(
+                    None,
+                    None,
+                    handle=handle,
+                    path=device_info.path,
+                    short=device_info.hidpp_short,
+                    long=device_info.hidpp_long,
+                    product_id=device_info.product_id,
+                    bus_id=device_info.bus_id
+                )
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
