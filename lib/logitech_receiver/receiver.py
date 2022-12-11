@@ -48,14 +48,12 @@ class Receiver:
     number = 0xFF
     kind = None
 
-    def __init__(self, handle, device_info):
+    def __init__(self, handle, path, product_id):
         assert handle
-        self.handle = handle
-        assert device_info
-        self.path = device_info.path
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
-        # USB product id, used for some Nano receivers
-        self.product_id = device_info.product_id
+        self.handle = handle
+        self.path = path
+        self.product_id = product_id
         product_info = _product_information(self.product_id)
         if not product_info:
             _log.warning('Unknown receiver type: %s', self.product_id)
@@ -386,7 +384,7 @@ class Receiver:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Receiver(handle, device_info)
+                return Receiver(handle, device_info.path, device_info.product_id)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
