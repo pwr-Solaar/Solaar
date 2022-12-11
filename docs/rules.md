@@ -158,6 +158,12 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 `True` and `False` tests return True and False, respectively.
 
+Solaar keeps track of the total signed displacement of the current thumb wheel movement.
+This displacement is reset when the thumb wheel is inactive.
+`thumb_wheel_up` and `thumb_wheel_down` tests take an optional integer parameter.
+With a parameter the test is only true if the current thumb wheel displacement is greater than the parameter.
+The displacement is then lessened by the amount of the parameter.
+
 `Setting` conditions check device settings of devices, provided the device is on-line.
 The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing; and
