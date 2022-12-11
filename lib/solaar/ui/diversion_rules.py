@@ -1428,36 +1428,53 @@ class TestUI(ConditionUI):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(_('Test condition on notification triggering rule processing.'))
-        self.widgets[self.label] = (0, 0, 1, 1)
-        self.field = Gtk.ComboBoxText.new_with_entry()
-        self.field.append('', '')
+        self.widgets[self.label] = (0, 0, 4, 1)
+        lbl = Gtk.Label(_('Test'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        self.widgets[lbl] = (0, 1, 1, 1)
+        lbl = Gtk.Label(_('Parameter'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        self.widgets[lbl] = (2, 1, 1, 1)
+
+        self.test = Gtk.ComboBoxText.new_with_entry()
+        self.test.append('', '')
         for t in _DIV.TESTS:
-            self.field.append(t, t)
-        self.field.set_valign(Gtk.Align.CENTER)
-        #        self.field.set_vexpand(True)
-        self.field.set_size_request(600, 0)
-        CompletionEntry.add_completion_to_entry(self.field.get_child(), _DIV.TESTS)
-        self.field.connect('changed', self._on_update)
-        self.widgets[self.field] = (0, 1, 1, 1)
+            self.test.append(t, t)
+        self.test.set_halign(Gtk.Align.END)
+        self.test.set_valign(Gtk.Align.CENTER)
+        self.test.set_hexpand(False)
+        self.test.set_size_request(300, 0)
+        CompletionEntry.add_completion_to_entry(self.test.get_child(), _DIV.TESTS)
+        self.test.connect('changed', self._on_update)
+        self.widgets[self.test] = (1, 1, 1, 1)
+
+        self.parameter = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.parameter.set_size_request(150, 0)
+        self.parameter.connect('changed', self._on_update)
+        self.widgets[self.parameter] = (3, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            self.field.set_active_id(component.test or '')
+            self.test.set_active_id(component.test)
+            self.parameter.set_text(str(component.parameter) if component.parameter is not None else '')
             if component.test not in _DIV.TESTS:
-                self.field.get_child().set_text(component.test)
+                self.test.get_child().set_text(component.test)
                 self._change_status_icon()
 
     def collect_value(self):
-        return (self.field.get_active_text() or '').strip()
+        try:
+            param = int(self.parameter.get_text()) if self.parameter.get_text() else None
+        except Exception:
+            param = self.parameter.get_text()
+        test = (self.test.get_active_text() or '').strip()
+        return [test, param] if param is not None else [test]
 
     def _on_update(self, *args):
         super()._on_update(*args)
         self._change_status_icon()
 
     def _change_status_icon(self):
-        icon = 'dialog-warning' if self.component.test not in _DIV.TESTS else ''
-        self.field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        icon = 'dialog-warning' if (self.test.get_active_text() or '').strip() not in _DIV.TESTS else ''
+        self.test.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -1465,7 +1482,7 @@ class TestUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return str(component.test)
+        return component.test + (' ' + repr(component.parameter) if component.parameter is not None else '')
 
 
 _TestBytesElement = namedtuple('TestBytesElement', ['id', 'label', 'min', 'max'])
