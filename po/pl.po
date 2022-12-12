@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.1.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-10 16:00+0100\n"
-"PO-Revision-Date: 2022-12-10 16:04+0100\n"
+"POT-Creation-Date: 2022-12-12 14:23+0100\n"
+"PO-Revision-Date: 2022-12-12 14:37+0100\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -617,7 +617,7 @@ msgstr "Zmień klawisze, aby pasowały do systemu operacyjnego."
 
 #: lib/logitech_receiver/settings_templates.py:873
 msgid "Change Host"
-msgstr "Zmień hosta"
+msgstr "Zmiana hosta"
 
 #: lib/logitech_receiver/settings_templates.py:874
 msgid "Switch connection to a different host"
@@ -1248,23 +1248,24 @@ msgstr "Modyfikatory"
 msgid "Key"
 msgstr "Klawisz"
 
-#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:2183
+#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:2200
 msgid "Active"
 msgstr "Aktywny"
 
-#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2226
+#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2243
 msgid "Setting"
 msgstr "Ustawienie"
 
-#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:1464
+#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:1432
+#: lib/solaar/ui/diversion_rules.py:1481
 msgid "Test"
 msgstr "Test"
 
-#: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:1581
+#: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:1598
 msgid "Test bytes"
 msgstr "Bajty testowe"
 
-#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1674
+#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1691
 msgid "Mouse Gesture"
 msgstr "Gest myszy"
 
@@ -1272,15 +1273,15 @@ msgstr "Gest myszy"
 msgid "Action"
 msgstr "Czynność"
 
-#: lib/solaar/ui/diversion_rules.py:531 lib/solaar/ui/diversion_rules.py:1783
+#: lib/solaar/ui/diversion_rules.py:531 lib/solaar/ui/diversion_rules.py:1800
 msgid "Key press"
 msgstr "Naciśnięcie klawisza"
 
-#: lib/solaar/ui/diversion_rules.py:532 lib/solaar/ui/diversion_rules.py:1836
+#: lib/solaar/ui/diversion_rules.py:532 lib/solaar/ui/diversion_rules.py:1853
 msgid "Mouse scroll"
 msgstr "Przewijanie myszą"
 
-#: lib/solaar/ui/diversion_rules.py:533 lib/solaar/ui/diversion_rules.py:1887
+#: lib/solaar/ui/diversion_rules.py:533 lib/solaar/ui/diversion_rules.py:1904
 msgid "Mouse click"
 msgstr "Kliknięcie myszą"
 
@@ -1288,7 +1289,7 @@ msgstr "Kliknięcie myszą"
 msgid "Set"
 msgstr "Ustaw"
 
-#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1958
+#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1975
 msgid "Execute"
 msgstr "Wykonaj"
 
@@ -1300,8 +1301,8 @@ msgstr "Później"
 msgid "Insert new rule"
 msgstr "Wstaw nową regułę"
 
-#: lib/solaar/ui/diversion_rules.py:585 lib/solaar/ui/diversion_rules.py:1624
-#: lib/solaar/ui/diversion_rules.py:1728 lib/solaar/ui/diversion_rules.py:1917
+#: lib/solaar/ui/diversion_rules.py:585 lib/solaar/ui/diversion_rules.py:1641
+#: lib/solaar/ui/diversion_rules.py:1745 lib/solaar/ui/diversion_rules.py:1934
 msgid "Delete"
 msgstr "Usuń"
 
@@ -1382,41 +1383,45 @@ msgstr "Klawisz w górę"
 msgid "Test condition on notification triggering rule processing."
 msgstr "Warunek testowy przy powiadomieniu wyzwalający przetwarzanie reguły."
 
-#: lib/solaar/ui/diversion_rules.py:1480
+#: lib/solaar/ui/diversion_rules.py:1434
+msgid "Parameter"
+msgstr "Parametr"
+
+#: lib/solaar/ui/diversion_rules.py:1497
 msgid "begin (inclusive)"
 msgstr "rozpocznij (włącznie)"
 
-#: lib/solaar/ui/diversion_rules.py:1481
+#: lib/solaar/ui/diversion_rules.py:1498
 msgid "end (exclusive)"
 msgstr "zakończ (wyłącznie)"
 
-#: lib/solaar/ui/diversion_rules.py:1490
+#: lib/solaar/ui/diversion_rules.py:1507
 msgid "range"
 msgstr "zakres"
 
-#: lib/solaar/ui/diversion_rules.py:1492
+#: lib/solaar/ui/diversion_rules.py:1509
 msgid "minimum"
 msgstr "minimum"
 
-#: lib/solaar/ui/diversion_rules.py:1493
+#: lib/solaar/ui/diversion_rules.py:1510
 msgid "maximum"
 msgstr "maksimum"
 
-#: lib/solaar/ui/diversion_rules.py:1495
+#: lib/solaar/ui/diversion_rules.py:1512
 #, python-format
 msgid "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
 msgstr "bajty %(0)d do %(1)d, począwszy od %(2)d do %(3)d"
 
-#: lib/solaar/ui/diversion_rules.py:1500
+#: lib/solaar/ui/diversion_rules.py:1517
 msgid "mask"
 msgstr "maska"
 
-#: lib/solaar/ui/diversion_rules.py:1501
+#: lib/solaar/ui/diversion_rules.py:1518
 #, python-format
 msgid "bytes %(0)d to %(1)d, mask %(2)d"
 msgstr "bajty %(0)d do %(1)d, maska %(2)d"
 
-#: lib/solaar/ui/diversion_rules.py:1511
+#: lib/solaar/ui/diversion_rules.py:1528
 msgid ""
 "Bit or range test on bytes in notification message triggering rule "
 "processing."
@@ -1424,11 +1429,11 @@ msgstr ""
 "Test bitowy lub zakresowy na bajtach w komunikacie powiadomienia "
 "uruchamiający przetwarzanie reguł."
 
-#: lib/solaar/ui/diversion_rules.py:1521
+#: lib/solaar/ui/diversion_rules.py:1538
 msgid "type"
 msgstr "typ"
 
-#: lib/solaar/ui/diversion_rules.py:1604
+#: lib/solaar/ui/diversion_rules.py:1621
 msgid ""
 "Mouse gesture with optional initiating button followed by zero or more mouse "
 "movements."
@@ -1436,11 +1441,11 @@ msgstr ""
 "Gest myszy z opcjonalnym przyciskiem inicjującym, po którym następuje zero "
 "lub więcej ruchów myszy."
 
-#: lib/solaar/ui/diversion_rules.py:1609
+#: lib/solaar/ui/diversion_rules.py:1626
 msgid "Add movement"
 msgstr "Dodaj ruch"
 
-#: lib/solaar/ui/diversion_rules.py:1702
+#: lib/solaar/ui/diversion_rules.py:1719
 msgid ""
 "Simulate a chorded key click or depress or release.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1448,23 +1453,23 @@ msgstr ""
 "Symuluj akordowe kliknięcie klawisza, wciśnięcie lub zwolnenie.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1707
+#: lib/solaar/ui/diversion_rules.py:1724
 msgid "Add key"
 msgstr "Dodaj klawisz"
 
-#: lib/solaar/ui/diversion_rules.py:1710
+#: lib/solaar/ui/diversion_rules.py:1727
 msgid "Click"
 msgstr "Kliknij"
 
-#: lib/solaar/ui/diversion_rules.py:1713
+#: lib/solaar/ui/diversion_rules.py:1730
 msgid "Depress"
 msgstr "Wciśnij"
 
-#: lib/solaar/ui/diversion_rules.py:1716
+#: lib/solaar/ui/diversion_rules.py:1733
 msgid "Release"
 msgstr "Zwolnij"
 
-#: lib/solaar/ui/diversion_rules.py:1800
+#: lib/solaar/ui/diversion_rules.py:1817
 msgid ""
 "Simulate a mouse scroll.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1472,7 +1477,7 @@ msgstr ""
 "Symuluj przewijanie myszy.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1856
+#: lib/solaar/ui/diversion_rules.py:1873
 msgid ""
 "Simulate a mouse click.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1480,65 +1485,65 @@ msgstr ""
 "Symuluj kliknięcie myszą.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1859
+#: lib/solaar/ui/diversion_rules.py:1876
 msgid "Button"
 msgstr "Przycisk"
 
-#: lib/solaar/ui/diversion_rules.py:1860
+#: lib/solaar/ui/diversion_rules.py:1877
 msgid "Count"
 msgstr "Liczba"
 
-#: lib/solaar/ui/diversion_rules.py:1900
+#: lib/solaar/ui/diversion_rules.py:1917
 msgid "Execute a command with arguments."
 msgstr "Wykonaj polecenie z argumentami."
 
-#: lib/solaar/ui/diversion_rules.py:1903
+#: lib/solaar/ui/diversion_rules.py:1920
 msgid "Add argument"
 msgstr "Dodaj argument"
 
-#: lib/solaar/ui/diversion_rules.py:1978
+#: lib/solaar/ui/diversion_rules.py:1995
 msgid "Toggle"
 msgstr "Przełącz"
 
-#: lib/solaar/ui/diversion_rules.py:1978
+#: lib/solaar/ui/diversion_rules.py:1995
 msgid "True"
 msgstr "Prawda"
 
-#: lib/solaar/ui/diversion_rules.py:1979
+#: lib/solaar/ui/diversion_rules.py:1996
 msgid "False"
 msgstr "Fałsz"
 
-#: lib/solaar/ui/diversion_rules.py:1993
+#: lib/solaar/ui/diversion_rules.py:2010
 msgid "Unsupported setting"
 msgstr "Nieobsługiwane ustawienie"
 
-#: lib/solaar/ui/diversion_rules.py:2139 lib/solaar/ui/diversion_rules.py:2210
+#: lib/solaar/ui/diversion_rules.py:2156 lib/solaar/ui/diversion_rules.py:2227
 msgid "Device"
 msgstr "Urządzenie"
 
-#: lib/solaar/ui/diversion_rules.py:2144 lib/solaar/ui/diversion_rules.py:2176
-#: lib/solaar/ui/diversion_rules.py:2215 lib/solaar/ui/diversion_rules.py:2457
-#: lib/solaar/ui/diversion_rules.py:2475
+#: lib/solaar/ui/diversion_rules.py:2161 lib/solaar/ui/diversion_rules.py:2193
+#: lib/solaar/ui/diversion_rules.py:2232 lib/solaar/ui/diversion_rules.py:2474
+#: lib/solaar/ui/diversion_rules.py:2492
 msgid "Originating device"
 msgstr "Urządzenie inicjujące"
 
-#: lib/solaar/ui/diversion_rules.py:2165
+#: lib/solaar/ui/diversion_rules.py:2182
 msgid "Device is active and its settings can be changed."
 msgstr "Urządzenie jest aktywne i można zmienić jego ustawienia."
 
-#: lib/solaar/ui/diversion_rules.py:2234
+#: lib/solaar/ui/diversion_rules.py:2251
 msgid "Value"
 msgstr "Wartość"
 
-#: lib/solaar/ui/diversion_rules.py:2242
+#: lib/solaar/ui/diversion_rules.py:2259
 msgid "Item"
 msgstr "Pozycja"
 
-#: lib/solaar/ui/diversion_rules.py:2517
+#: lib/solaar/ui/diversion_rules.py:2534
 msgid "Change setting on device"
 msgstr "Zmień ustawienie w urządzeniu"
 
-#: lib/solaar/ui/diversion_rules.py:2534
+#: lib/solaar/ui/diversion_rules.py:2551
 msgid "Setting on device"
 msgstr "Ustawienie w urządzeniu"
 
@@ -1776,11 +1781,11 @@ msgstr "Brak sparowanych urządzeń."
 msgid "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
 msgstr[0] ""
-"Do tego odbiornika można sparować maksymalnie %(max_count)s urządzenie."
+"Można sparować maksymalnie %(max_count)s urządzenie z tym odbiornikiem."
 msgstr[1] ""
-"Do tego odbiornika można sparować maksymalnie %(max_count)s urządzenia."
+"Można sparować maksymalnie %(max_count)s urządzenia z tym odbiornikiem."
 msgstr[2] ""
-"Do tego odbiornika można sparować maksymalnie %(max_count)s urządzeń."
+"Można sparować maksymalnie %(max_count)s urządzeń z tym odbiornikiem."
 
 #: lib/solaar/ui/window.py:632
 msgid "Only one device can be paired to this receiver."
