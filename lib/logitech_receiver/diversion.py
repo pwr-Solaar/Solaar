@@ -759,6 +759,37 @@ class Key(Condition):
         return {'Key': [str(self.key), self.action]}
 
 
+class KeyIsDown(Condition):
+
+    def __init__(self, args, warn=True):
+        default_key = 0
+
+        key = None
+
+        if not args or not isinstance(args, str):
+            if warn:
+                _log.warn('rule KeyDown arguments unknown: %s' % args)
+            key = default_key
+        elif isinstance(args, str):
+            key = args
+
+        if isinstance(key, str) and key in _CONTROL:
+            self.key = _CONTROL[key]
+        else:
+            if warn:
+                _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+            self.key = default_key
+
+    def __str__(self):
+        return 'KeyIsDown: %s' % (str(self.key) if self.key else 'None')
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        return key_is_down(self.key)
+
+    def data(self):
+        return {'KeyIsDown': str(self.key)}
+
+
 def bit_test(start, end, bits):
     return lambda f, r, d: int.from_bytes(d[start:end], byteorder='big', signed=True) & bits
 
@@ -1195,6 +1226,7 @@ COMPONENTS = {
     'Setting': Setting,
     'Modifiers': Modifiers,
     'Key': Key,
+    'KeyIsDown': KeyIsDown,
     'Test': Test,
     'TestBytes': TestBytes,
     'MouseGesture': MouseGesture,
@@ -1233,10 +1265,21 @@ if True:
     ])
 
 keys_down = []
-g_keys_down = [0, 0, 0, 0]
+g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
 thumb_wheel_displacement = 0
+
+
+def key_is_down(key):
+    if key == _CONTROL.MR:
+        return mr_key_down
+    elif _CONTROL.M1 <= key <= _CONTROL.M8:
+        return bool(m_keys_down & (0x01 << (key - _CONTROL.M1)))
+    elif _CONTROL.G1 <= key <= _CONTROL.G32:
+        return bool(g_keys_down & (0x01 << (key - _CONTROL.G1)))
+    else:
+        return key in keys_down
 
 
 # process a notification
@@ -1255,15 +1298,12 @@ def process_notification(device, status, notification, feature):
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack('!4B', notification.data[:4])
-        # process 32 bits, byte by byte
-        for byte_idx in range(4):
-            new_byte, old_byte = new_g_keys_down[byte_idx], g_keys_down[byte_idx]
-            for i in range(1, 9):
-                if new_byte & (0x01 << (i - 1)) and not old_byte & (0x01 << (i - 1)):
-                    key_down = _CONTROL['G' + str(i + 8 * byte_idx)]
-                if old_byte & (0x01 << (i - 1)) and not new_byte & (0x01 << (i - 1)):
-                    key_up = _CONTROL['G' + str(i + 8 * byte_idx)]
+        new_g_keys_down = _unpack('!4I', notification.data[:4])[0]
+        for i in range(32):
+            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
+                key_down = _CONTROL['G' + str(i + 1)]
+            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
+                key_up = _CONTROL['G' + str(i + 1)]
         g_keys_down = new_g_keys_down
     # and also M keys down
     elif feature == _F.MKEYS and notification.address == 0x00:
