@@ -25,6 +25,8 @@ from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 
+import gi
+
 from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
@@ -33,6 +35,9 @@ from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
 
 from . import configuration
+
+gi.require_version('Gtk', '3.0')  # NOQA: E402
+from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 # from solaar.i18n import _
 
@@ -374,6 +379,28 @@ def setup_scanner(status_changed_callback, error_callback):
     _base.notify_on_receivers_glib(_process_receiver_event)
 
 
+def _process_add(device_info, retry):
+    try:
+        _start(device_info)
+    except OSError as e:
+        if e.errno == _errno.EACCES:
+            try:
+                import subprocess
+                output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
+                if _log.isEnabledFor(_WARNING):
+                    _log.warning('Missing permissions on %s\n%s.', device_info.path, output)
+            except Exception:
+                pass
+            if retry:
+                GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
+            else:
+                _error_callback('permissions', device_info.path)
+        else:
+            _error_callback('nodevice', device_info.path)
+    except _base.NoReceiver:
+        _error_callback('nodevice', device_info.path)
+
+
 # receiver add/remove events will start/stop listener threads
 def _process_receiver_event(action, device_info):
     assert action is not None
@@ -389,21 +416,7 @@ def _process_receiver_event(action, device_info):
         assert isinstance(l, ReceiverListener)
         l.stop()
 
-    if action == 'add':
-        # a new device was detected
-        try:
-            _start(device_info)
-        except OSError as e:
-            if e.errno == _errno.EACCES:
-                try:
-                    import subprocess
-                    output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
-                    if _log.isEnabledFor(_WARNING):
-                        _log.warning('Missing permissions on %s\n%s.', device_info.path, output)
-                except Exception:
-                    pass
-                _error_callback('permissions', device_info.path)
-            else:
-                _error_callback('nodevice', device_info.path)
-        except _base.NoReceiver:
-            _error_callback('nodevice', device_info.path)
+    if action == 'add':  # a new device was detected
+        _process_add(device_info, 3)
+
+    return False
