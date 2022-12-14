@@ -16,6 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import errno as _errno
 import time
 
 from collections import namedtuple
@@ -389,21 +390,20 @@ def _process_receiver_event(action, device_info):
         l.stop()
 
     if action == 'add':
-        # a new receiver device was detected
+        # a new device was detected
         try:
             _start(device_info)
-        except OSError:
-            # permission error, ignore this path for now
-            # If receiver has extended ACL but not writable then it is for another seat.
-            # (It would be easier to use pylibacl but adding the pylibacl dependencies
-            # for this special case is not good.)
-            try:
-                import re
-                import subprocess
-                output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path])
-                if not re.search(b'user:.+:', output):
-                    _error_callback('permissions', device_info.path)
-            except Exception:
+        except OSError as e:
+            if e.errno == _errno.EACCES:
+                try:
+                    import subprocess
+                    output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
+                    if _log.isEnabledFor(_WARNING):
+                        _log.warning('Missing permissions on %s\n%s.', device_info.path, output)
+                except Exception:
+                    pass
                 _error_callback('permissions', device_info.path)
+            else:
+                _error_callback('nodevice', device_info.path)
         except _base.NoReceiver:
             _error_callback('nodevice', device_info.path)
