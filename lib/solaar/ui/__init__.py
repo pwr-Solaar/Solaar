@@ -51,14 +51,14 @@ def _error_dialog(reason, object):
     if reason == 'permissions':
         title = _('Permissions error')
         text = (
-            _('Found a Logitech Receiver (%s), but did not have permission to open it.') % object + '\n\n' +
-            _("If you've just installed Solaar, try removing the receiver and plugging it back in.")
+            _('Found a Logitech receiver or device (%s), but did not have permission to open it.') % object + '\n\n' +
+            _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
         )
     elif reason == 'nodevice':
         title = _('Cannot connect to device error')
         text = (
             _('Found a Logitech receiver or device at %s, but encountered an error connecting to it.') % object + '\n\n' +
-            _('Try removing the device and plugging it back in or turning it off and then on.')
+            _('Try disconnecting the device and then reconnecting it or turning it off and then on.')
         )
     elif reason == 'unpair':
         title = _('Unpairing failed')
