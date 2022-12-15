@@ -73,13 +73,16 @@ notification is their string argument.
 `Report` conditions are if true if the report number in the current
 notification is their integer argument.
 
-`Key` conditions are true if the Logitech name of the last diverted key or button pressed is their
+`Key` conditions are true if the Logitech name of the current **diverted** key or button being pressed is their
 string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
 setting.  These names are also shown in the output of `solaar show` in the 'reprogrammable keys'
 section.  Only keys or buttons that have 'divertable' in their report can be diverted.
 Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+
+`KeyIsDown` conditions are true if the **diverted** key or button that is their string argument is currently down.
+Note that this only works for **diverted** keys or buttons, including diverted Gn, Mn, and MR keys.
 
 Solaar can also create special notifications in response to mouse movements on some mice.
 Setting `Key/Button Diversion` for a key or button causes the key or button to create a `Mouse Gesture`
