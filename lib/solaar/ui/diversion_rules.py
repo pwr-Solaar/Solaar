@@ -518,6 +518,7 @@ class DiversionDialog:
                         (_('Mouse process'), _DIV.MouseProcess, ''),
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
+                        (_('KeyIsDown'), _DIV.KeyIsDown, ''),
                         (_('Active'), _DIV.Active, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
