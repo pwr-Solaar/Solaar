@@ -1378,7 +1378,7 @@ class KeyUI(ConditionUI):
         self.label.set_text(
             _(
                 'Diverted key or button depressed or released.\n'
-                'Use the Key/Button Diversion setting to divert keys and buttons.'
+                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
             )
         )
         self.widgets[self.label] = (0, 0, 5, 1)
@@ -1418,6 +1418,48 @@ class KeyUI(ConditionUI):
     @classmethod
     def right_label(cls, component):
         return '%s (%04X) (%s)' % (str(component.key), int(component.key), _(component.action)) if component.key else 'None'
+
+
+class KeyIsDownUI(ConditionUI):
+
+    CLASS = _DIV.KeyIsDown
+    KEY_NAMES = map(str, _CONTROL)
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(
+            _(
+                'Diverted key or button is currently down.\n'
+                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
+            )
+        )
+        self.widgets[self.label] = (0, 0, 5, 1)
+        self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        self.key_field.set_size_request(600, 0)
+        self.key_field.connect('changed', self._on_update)
+        self.widgets[self.key_field] = (0, 1, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.key_field.set_text(str(component.key) if self.component.key else '')
+
+    def collect_value(self):
+        return self.key_field.get_text()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        icon = 'dialog-warning' if not self.component.key else ''
+        self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    @classmethod
+    def left_label(cls, component):
+        return _('KeyIsDown')
+
+    @classmethod
+    def right_label(cls, component):
+        return '%s (%04X)' % (str(component.key), int(component.key)) if component.key else 'None'
 
 
 class TestUI(ConditionUI):
@@ -2573,6 +2615,7 @@ COMPONENT_UI = {
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,
     _DIV.Key: KeyUI,
+    _DIV.KeyIsDown: KeyIsDownUI,
     _DIV.Test: TestUI,
     _DIV.TestBytes: TestBytesUI,
     _DIV.Setting: SettingUI,
