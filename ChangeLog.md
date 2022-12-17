@@ -1,3 +1,35 @@
+# 1.1.9rc1
+
+* Remove some deprecated GTK code
+* Use zero exit code for kill interrupts
+* Add rule Test condition for battery charging
+* Get wpid for 28Mz devices from udev when enumerating
+* Add Device condition to rules
+* Don't show wireless link or battery information when unknown or not present
+* Add desccriptor for G9x and LX7 mice
+* Fix bug in determining kind of devices for 27Mz receivers
+* Set initial lock status of smooth scrolling features to ignore
+* Fix glitch in configuration file update when changing versions
+* Add more debugging output for rules
+* Clean up pinging code
+* Put initial ping of direct-connected devices inside listener thread
+* Read and check before write of range settings
+* Improve pairing determination
+* Cut off determination of receiver devices when all have been found
+* Remove derived configuration fields when Solaar version changes
+* Allow device descriptors without name and codename
+* Filter and escape technical detail fields
+* Add setting for ADC power managemen
+* Correctly determine whether to ping with a long HID++ message
+* Add description for K470 keyboard from the MK470 combo (#1945)
+* Add setting value for mouse gestures
+* Update German and French translations
+* Remove old clean.sh and monitor.py tools
+* Retry opening device if permissions error encountered
+* Better handlling of IO errors at device creation
+* Add KeyIsDown rule condition to check whether a diverted key is down
+* Clean up device and receiver creation
+
 # 1.1.8
 
 * Add parameter to thumb wheel rule conditions
