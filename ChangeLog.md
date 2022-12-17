@@ -1,4 +1,4 @@
-# 1.1.8rc3
+# 1.1.8
 
 * Add parameter to thumb wheel rule conditions
 * Rename Serbian translation file
