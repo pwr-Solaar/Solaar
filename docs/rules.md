@@ -85,7 +85,7 @@ Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G K
 Note that this only works for **diverted** keys or buttons, including diverted Gn, Mn, and MR keys.
 
 Solaar can also create special notifications in response to mouse movements on some mice.
-Setting `Key/Button Diversion` for a key or button causes the key or button to create a `Mouse Gesture`
+Setting `Key/Button Diversion` for a key or button to Mouse Gestures causes the key or button to create a `Mouse Gesture`
 notification for the period that the key or button is depressed.
 Moving the mouse creates a mouse movement event.
 Stopping the mouse for a little while and moving it again creates another mouse movement event.
