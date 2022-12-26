@@ -202,6 +202,7 @@ _D('Wireless Multi-Device Keyboard K780', protocol=4.5, wpid='405B', settings=[_
 _D('Wireless Keyboard K375s', protocol=2.0, wpid='4061', settings=[_ST.K375sFnSwap])
 _D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=0xB350)
 _D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E', settings=[_ST.FnSwap])
+_D('Wireless Keyboard K470', codename='K470', protocol=4.5, wpid='4075', settings=[_ST.FnSwap])
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
 _D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
