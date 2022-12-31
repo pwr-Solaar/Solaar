@@ -1,0 +1,17 @@
+solaar version 1.1.8
+
+  3: Number Pad N545
+     Device path  : /dev/hidraw3
+     WPID         : 2006
+     Codename     : N545
+     Kind         : numpad
+     Protocol     : HID++ 1.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: 900A4D98
+          Firmware: 13.00.B0037
+        Bootloader: 02.03
+             Other: 00.01
+     The power switch is located on the base.
+     Notifications: battery status (0x100000).
+     Features: (none)
+     Battery: full, discharging.
