@@ -1,0 +1,29 @@
+solaar version 1.1.8
+
+USB and Bluetooth Devices
+
+  1: G535 Wireless Gaming Headset
+     Device path  : /dev/hidraw2
+     USB id       : 046d:0AC4
+     Codename     : G535
+     Kind         : ?
+     Protocol     : HID++ 4.2
+     Serial number:
+     Model ID:      000000000AC4
+     Unit ID:       FFFFFFFF
+          Firmware: U1  90.00.B0200
+     Supports 6 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Firmware U1  90.00.B0200 0AC4
+            Unit ID: FFFFFFFF  Model ID: 000000000AC4  Transport IDs: {'btid': '0000', 'btleid': '0000'}
+         3: DEVICE NAME            {0005} V0
+            Name: G535 Wireless Gaming Headset
+            Kind: None
+         4: SIDETONE               {8300} V0
+            Sidetone (saved): 0
+            Sidetone        : 0
+         5: ADC MEASUREMENT        {1F20} V0
+            Battery: 60% 3920mV , discharging.
+     Battery: 60% 3920mV , discharging.
