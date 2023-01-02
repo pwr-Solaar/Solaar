@@ -585,11 +585,18 @@ def _update_details(button):
             _details._text.set_markup(text)
 
         def _make_text(items):
-            text = '\n'.join('%-13s: %s' % i for i in items)
+            text = '\n'.join('%-13s: %s' % (name, value) for name, value in items)
             return '<small><tt>' + text + '</tt></small>'
+
+        def _displayable_items(items):
+            for name, value in items:
+                value = GLib.markup_escape_text(str(value).replace('\x00', '')).strip()
+                if value:
+                    yield name, value
 
         def _read_slow(device):
             items = _details_items(selected_device, True)
+            items = _displayable_items(items)
             text = _make_text(items)
             if device == _details._current_device:
                 GLib.idle_add(_set_details, text)
