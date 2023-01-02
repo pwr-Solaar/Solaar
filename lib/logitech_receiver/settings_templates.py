@@ -1192,6 +1192,18 @@ class Equalizer(_RangeFieldSetting):
             return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b'\x02')
 
 
+class ADCPower(_Setting):
+    name = 'adc_power_management'
+    label = _('Power Management')
+    description = _('Power off in minutes (0 for never).')
+    feature = _F.ADC_MEASUREMENT
+    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    validator_class = _RangeV
+    min_value = 0x00
+    max_value = 0xff
+    validator_options = {'byte_count': 1}
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1236,6 +1248,7 @@ SETTINGS = [
     Gesture2Params,  # working
     Sidetone,
     Equalizer,
+    ADCPower,
 ]
 
 #
