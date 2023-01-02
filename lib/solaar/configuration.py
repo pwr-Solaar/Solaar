@@ -35,8 +35,8 @@ _log = getLogger(__name__)
 del getLogger
 
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))
-_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 _yaml_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.yaml')
+_json_file_path = _path.join(_XDG_CONFIG_HOME, 'solaar', 'config.json')
 
 _KEY_VERSION = '_version'
 _KEY_NAME = '_NAME'
@@ -58,12 +58,12 @@ def _load():
                 loaded_config = _yaml.safe_load(config_file)
         except Exception as e:
             _log.error('failed to load from %s: %s', _yaml_file_path, e)
-    elif _path.isfile(_file_path):
+    elif _path.isfile(_json_file_path):
         try:
-            with open(_file_path) as config_file:
+            with open(_json_file_path) as config_file:
                 loaded_config = _json.load(config_file)
         except Exception as e:
-            _log.error('failed to load from %s: %s', _file_path, e)
+            _log.error('failed to load from %s: %s', _json_file_path, e)
         loaded_config = _convert_json(loaded_config)
     if _log.isEnabledFor(_DEBUG):
         _log.debug('load => %s', loaded_config)
@@ -133,10 +133,10 @@ def _convert_json(json_dict):
     return config
 
 
-def _cleanup_load(c):
+def _cleanup_load(loaded_config):
     _config = [__version__]
     try:
-        for element in c:
+        for element in loaded_config:
             if isinstance(element, dict):
                 divert = element.get('divert-keys')
                 if divert:
