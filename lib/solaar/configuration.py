@@ -112,7 +112,6 @@ def _device_entry_from_config_dict(data, discard_derived_properties):
         # remove any string entries (from bad conversions)
         data['divert-keys'] = {k: v for k, v in divert.items() if isinstance(k, int)}
     if discard_derived_properties:
-        data.pop('_NAME')
         data.pop('_absent')
         data.pop('_battery')
     return _DeviceEntry(**data)
