@@ -260,12 +260,22 @@ def create(receiver):
     assistant.set_resizable(False)
     assistant.set_role('pair-device')
 
+    if receiver.receiver_kind == 'unifying':
+        page_text = _('Unifying receivers are only compatible with Unifying devices.')
+    elif receiver.receiver_kind == 'bolt':
+        page_text = _('Bolt receivers are only compatible with Bolt devices.')
+    else:
+        page_text = _('Other receivers are only compatible with a few devices.')
+    page_text += '\n'
+    page_text += _('The device must not be paired with a nearby powered-on receiver.')
+    page_text += '\n\n'
+
     if receiver.receiver_kind == 'bolt':
-        page_text = _('Press a pairing button or key until the pairing light flashes quickly.')
+        page_text += _('Press a pairing button or key until the pairing light flashes quickly.')
         page_text += '\n'
         page_text += _('You may have to first turn the device off and on again.')
     else:
-        page_text = _('Turn on the device you want to pair.')
+        page_text += _('Turn on the device you want to pair.')
         page_text += '\n'
         page_text += _('If the device is already turned on, turn it off and on again.')
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
