@@ -61,7 +61,6 @@ class Receiver:
         self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
-        self.last_id = 0
         if self.receiver_kind == 'bolt':
             serial_reply = self.read_register(_R.bolt_uniqueId)
             self.serial = _strhex(serial_reply)
@@ -72,7 +71,6 @@ class Receiver:
             if serial_reply:
                 self.serial = _strhex(serial_reply[1:5])
                 self.max_devices = ord(serial_reply[6:7])
-                self.last_id = ord(serial_reply[7:8])
                 if self.max_devices <= 0 or self.max_devices > 6:
                     self.max_devices = product_info.get('max_devices', 1)
                 self.may_unpair = product_info.get('may_unpair', False)
@@ -80,7 +78,6 @@ class Receiver:
                 self.serial = None
                 self.max_devices = product_info.get('max_devices', 1)
                 self.may_unpair = product_info.get('may_unpair', False)
-        self.last_id = self.last_id if self.last_id else self.max_devices
 
         self.name = product_info.get('name', 'Receiver')
         self.re_pairs = product_info.get('re_pairs', False)
@@ -178,7 +175,7 @@ class Receiver:
                 _log.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
             kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
-        else:  # unifying protocol not supported, may be an old Nano receiver
+        elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
                 wpid = _strhex(device_info[3:5])
@@ -288,12 +285,17 @@ class Receiver:
     write_register = _hidpp10.write_register
 
     def __iter__(self):
-        for number in range(1, 16):  # some receivers have devices past their max # devices
+        connected_devices = self.count()
+        found_devices = 0
+        for number in range(1, 8):  # some receivers have devices past their max # devices
+            if found_devices >= connected_devices:
+                return
             if number in self._devices:
                 dev = self._devices[number]
             else:
                 dev = self.__getitem__(number)
             if dev is not None:
+                found_devices += 1
                 yield dev
 
     def __getitem__(self, key):
