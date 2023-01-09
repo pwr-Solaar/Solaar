@@ -267,12 +267,11 @@ class Setting:
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
         self._pre_read(cached)
-
         if cached and self._value is not None:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: cached value %r on %s', self.name, self._value, self._device)
             return self._value
 
         if self._device.online:
@@ -283,6 +282,8 @@ class Setting:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: read value %r on %s', self.name, self._value, self._device)
             return self._value
 
     def _pre_write(self, save=True):
@@ -302,7 +303,7 @@ class Setting:
         assert value is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: setting write %r to %s', self.name, value, self._device)
+            _log.debug('%s: write %r to %s', self.name, value, self._device)
 
         if self._device.online:
             if self._value != value:
@@ -312,11 +313,13 @@ class Setting:
             if self._validator.needs_current_value:
                 # the _validator needs the current value, possibly to merge flag values
                 current_value = self._rw.read(self._device)
+                if _log.isEnabledFor(_DEBUG):
+                    _log.debug('%s: current value %r on %s', self.name, current_value, self._device)
 
             data_bytes = self._validator.prepare_write(value, current_value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
-                    _log.debug('%s: settings prepare write(%s) => %r', self.name, value, data_bytes)
+                    _log.debug('%s: prepare write(%s) => %r', self.name, value, data_bytes)
 
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
@@ -334,10 +337,8 @@ class Setting:
     def apply(self):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: apply %s (%s)', self.name, self._value, self._device)
-
+            _log.debug('%s: apply (%s)', self.name, self._device)
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             try:
@@ -1162,7 +1163,7 @@ class RangeValidator(Validator):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
-        self.needs_current_value = False
+        self.needs_current_value = True  # read and check before write (needed for ADC power and probably a good idea anyway)
 
         self._byte_count = math.ceil(math.log(max_value + 1, 256))
         if byte_count:
@@ -1179,7 +1180,10 @@ class RangeValidator(Validator):
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError('invalid choice %r' % new_value)
-        return _int2bytes(new_value, self._byte_count)
+        current_value = self.validate_read(current_value) if current_value is not None else None
+        to_write = _int2bytes(new_value, self._byte_count)
+        # current value is known and same as value to be written return None to signal not to write it
+        return None if current_value is not None and current_value == new_value else to_write
 
     def acceptable(self, args, current):
         arg = args[0]
