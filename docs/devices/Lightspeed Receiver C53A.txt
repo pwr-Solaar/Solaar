@@ -9,5 +9,5 @@ Lightspeed Receiver
   Notifications: wireless, software present (0x000900)
   Device activity counters: (empty)
 
-Seen as part of a G PowerPlay Wireless Mouse Pad.
+Seen as part of a G PowerPlay Wireless Mouse Pad with a Candy companion chip paired a number 7
 Seen paired with a G502 Gaming Mouse 407F.
