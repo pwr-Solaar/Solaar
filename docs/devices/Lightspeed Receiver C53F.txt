@@ -1,0 +1,10 @@
+Lightspeed Receiver
+  Device path  : /dev/hidraw3
+  USB id       : 046d:C53F
+  Serial       :
+    Firmware   : 44.01.B0005
+    Bootloader : 00.02
+    Other      : AA.DE
+  Has 0 paired device(s) out of a maximum of 1.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: (empty)
