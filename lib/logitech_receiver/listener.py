@@ -168,6 +168,10 @@ class EventsListener(_threading.Thread):
         # idle reads for multiple receivers
         # idle_reads = _IDLE_READS + (ihandle % 5) * 2
 
+        if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
+            if self.receiver.ping():
+                self.receiver.status.changed(True, reason='initialization')
+
         while self._active:
             if self._queued_notifications.empty():
                 try:
