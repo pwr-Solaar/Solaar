@@ -201,6 +201,7 @@ _D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, 
 _D('Wireless Keyboard K470', codename='K470', protocol=4.5, wpid='4075', settings=[_ST.FnSwap])
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
+_D('Illuminated Keyboard', codename='Illuminated', protocol=1.0, usbid=0xc318, interface=1, settings=[_ST.RegisterFnSwap])
 _D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
