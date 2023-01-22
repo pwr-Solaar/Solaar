@@ -16,6 +16,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import platform as _platform
+
 from logging import DEBUG as _DEBUG
 from logging import getLogger
 
@@ -323,11 +325,13 @@ def _create_window_layout():
     bottom_buttons_box.add(quit_button)
     about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
-    diversion_button = _new_button(
-        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
-    )
-    bottom_buttons_box.add(diversion_button)
-    bottom_buttons_box.set_child_secondary(diversion_button, True)
+    # The diversion system won't work on macOS or Windows so don't even show the button for it.
+    if _platform.system() not in ('Darwin', 'Windows'):
+        diversion_button = _new_button(
+            _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+        )
+        bottom_buttons_box.add(diversion_button)
+        bottom_buttons_box.set_child_secondary(diversion_button, True)
 
     # solaar_version = Gtk.Label()
     # solaar_version.set_markup('<small>' + NAME + ' v' + VERSION + '</small>')
@@ -825,7 +829,11 @@ _window = None
 
 def init(show_window, hide_on_close):
     Gtk.Window.set_default_icon_name(NAME.lower())
-    Gtk.Window.set_default_icon_from_file(_icons.icon_file(NAME.lower()))
+    # GTK installed on macOS via homebrew does not support SVG icons and won't
+    # be able to load them.
+    _icon = _icons.icon_file(NAME.lower())
+    if _icon:
+        Gtk.Window.set_default_icon_from_file(_icon)
 
     global _model, _tree, _details, _info, _empty, _window
     _model = Gtk.TreeStore(*_COLUMN_TYPES)
