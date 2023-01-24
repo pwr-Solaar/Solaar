@@ -58,21 +58,13 @@ DeviceInfo = namedtuple(
 )
 del namedtuple
 
-
 # Global handle to hidapi
 _hidapi = None
 
 # hidapi binary names for various platforms
 _library_paths = (
-    'libhidapi-hidraw.so',
-    'libhidapi-hidraw.so.0',
-    'libhidapi-libusb.so',
-    'libhidapi-libusb.so.0',
-    'libhidapi-iohidmanager.so',
-    'libhidapi-iohidmanager.so.0',
-    'libhidapi.dylib',
-    'hidapi.dll',
-    'libhidapi-0.dll'
+    'libhidapi-hidraw.so', 'libhidapi-hidraw.so.0', 'libhidapi-libusb.so', 'libhidapi-libusb.so.0',
+    'libhidapi-iohidmanager.so', 'libhidapi-iohidmanager.so.0', 'libhidapi.dylib', 'hidapi.dll', 'libhidapi-0.dll'
 )
 
 for lib in _library_paths:
@@ -101,6 +93,7 @@ _hid_version = _hidapi.hid_version()
 
 # Construct device info struct based on API version
 class _cDeviceInfo(ctypes.Structure):
+
     def as_dict(self):
         return {name: getattr(self, name) for name, _t in self._fields_ if name != 'next'}
 
@@ -123,7 +116,6 @@ _cDeviceInfo_fields = [
 if _hid_version.contents.major >= 0 and _hid_version.contents.minor >= 13:
     _cDeviceInfo_fields.append(('bus_type', ctypes.c_int))
 _cDeviceInfo._fields_ = _cDeviceInfo_fields
-
 
 # Set up hidapi functions
 _hidapi.hid_init.argtypes = []
@@ -167,7 +159,6 @@ _hidapi.hid_error.restype = ctypes.c_wchar_p
 _hidapi.hid_darwin_set_open_exclusive.argtypes = [ctypes.c_int]
 _hidapi.hid_darwin_set_open_exclusive.restype = None
 
-
 # Initialize hidapi
 _hidapi.hid_init()
 atexit.register(_hidapi.hid_exit)
@@ -207,6 +198,7 @@ def _enumerate_devices():
 
 # Use a separate thread to check if devices have been removed or connected
 class _DeviceMonitor(Thread):
+
     def __init__(self, device_callback, polling_delay=5.0):
         self.device_callback = device_callback
         self.polling_delay = polling_delay
@@ -265,8 +257,7 @@ def _match(action, device, filterfn):
 
     if _log.isEnabledFor(_INFO):
         _log.info(
-            'Found device BID %X VID %04X PID %04X HID++ %s %s',
-            bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
+            'Found device BID %X VID %04X PID %04X HID++ %s %s', bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
         )
 
     if not device['hidpp_short'] and not device['hidpp_long']:
@@ -281,8 +272,8 @@ def _match(action, device, filterfn):
         d_info = DeviceInfo(
             path=device['path'].decode(),
             bus_id=bus_id,
-            vendor_id=f"{vid:04X}",
-            product_id=f"{pid:04X}",
+            vendor_id=f'{vid:04X}',
+            product_id=f'{pid:04X}',
             interface=None,
             driver=None,
             manufacturer=device['manufacturer_string'],
@@ -299,8 +290,8 @@ def _match(action, device, filterfn):
         d_info = DeviceInfo(
             path=device['path'].decode(),
             bus_id=None,
-            vendor_id=f"{vid:04X}",
-            product_id=f"{pid:04X}",
+            vendor_id=f'{vid:04X}',
+            product_id=f'{pid:04X}',
             interface=None,
             driver=None,
             manufacturer=None,
@@ -461,7 +452,7 @@ def read(device_handle, bytes_count, timeout_ms=None):
 def get_input_report(device_handle, report_id, size):
     assert device_handle
     data = ctypes.create_string_buffer(size)
-    data[0] = bytearray((report_id,))
+    data[0] = bytearray((report_id, ))
     size = _hidapi.hid_get_input_report(device_handle, data, size)
     if size < 0:
         raise HIDError(_hidapi.hid_error(device_handle))
@@ -473,7 +464,7 @@ def _readstring(device_handle, func, max_length=255):
     buf = ctypes.create_unicode_buffer(max_length)
     ret = func(device_handle, buf, max_length)
     if ret < 0:
-        raise HIDError("Error reading device property")
+        raise HIDError('Error reading device property')
     return buf.value
 
 
