@@ -184,8 +184,15 @@ def _enumerate_devices():
         p = p.contents.next
     _hidapi.hid_free_enumeration(c_devices)
 
+    keyboard_or_mouse = {d['path'] for d in devices if d['usage_page'] == 1 and d['usage'] in (6, 2)}
     unique_devices = {}
     for device in devices:
+        # On macOS we cannot access keyboard or mouse devices without special permissions. Since
+        # we don't need them anyway we remove them so opening them doesn't cause errors later.
+        if device['path'] in keyboard_or_mouse:
+            # print(f"Ignoring keyboard or mouse device: {device}")
+            continue
+
         # hidapi returns separate entries for each usage page of a device.
         # Deduplicate by path to only keep one device entry.
         if device['path'] not in unique_devices:
@@ -240,6 +247,7 @@ def _match(action, device, filterfn):
     # Check for hidpp support
     device['hidpp_short'] = False
     device['hidpp_long'] = False
+    device_handle = None
     try:
         device_handle = open_path(device['path'])
         report = get_input_report(device_handle, 0x10, 32)
@@ -253,7 +261,8 @@ def _match(action, device, filterfn):
         # raise
         pass
     finally:
-        close(device_handle)
+        if device_handle:
+            close(device_handle)
 
     if _log.isEnabledFor(_INFO):
         _log.info(
