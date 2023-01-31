@@ -138,11 +138,11 @@ for the step-by-step procedure for manual installation.
   Running other programs that modify these settings, such as logiops,
   will likely result in unexpected device behavior.
 
-- The Linux HID++ driver modifies the setting Scroll Wheel Resolution to
+- The Linux HID++ driver modifies the Scroll Wheel Resolution setting to
   implement smooth scrolling.  If Solaar later changes this setting scrolling
   can be either very fast or very slow.  To fix this problem
   click on the icon at the right edge of the setting to set it to
-  "Ignore this setting".
+  "Ignore this setting", which is the default for new devices.
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
 
 - The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
