@@ -112,6 +112,12 @@ def _device_entry_from_config_dict(data, discard_derived_properties):
         data.pop('mouse-gestures', None)
         # remove any string entries (from bad conversions)
         data['divert-keys'] = {k: v for k, v in divert.items() if isinstance(k, int)}
+    if data.get('_sensitive', None) is None:  # make scroll wheel settings default to ignore
+        data['_sensitive'] = {
+            'hires-smooth-resolution': 'ignore',
+            'hires-smooth-invert': 'ignore',
+            'hires-scroll-mode': 'ignore'
+        }
     if discard_derived_properties:
         data.pop('_absent', None)
         data.pop('_battery', None)
