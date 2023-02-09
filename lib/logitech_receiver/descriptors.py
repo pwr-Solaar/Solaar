@@ -209,6 +209,7 @@ _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
 # Mice
 
 _D('LX5 Cordless Mouse', codename='LX5', protocol=1.0, wpid='0036', registers=(_R.battery_status, ))
+_D('LX7 Cordless Laser Mouse', codename='LX7', protocol=1.0, wpid='0039', registers=(_R.battery_status, ))
 _D('Wireless Mouse EX100', codename='EX100m', protocol=1.0, wpid='003F', registers=(_R.battery_status, ))
 _D('Wireless Mouse M30', codename='M30', protocol=1.0, wpid='0085', registers=(_R.battery_status, ))
 _D('MX610 Laser Cordless Mouse', codename='MX610', protocol=1.0, wpid='1001', registers=(_R.battery_status, ))
