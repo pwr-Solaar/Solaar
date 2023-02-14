@@ -284,6 +284,8 @@ _D('PRO X Wireless', kind='mouse', codename='PRO X', wpid='4093', usbid=0xc094)
 
 _D('G9 Laser Mouse', codename='G9', usbid=0xc048, interface=1, protocol=1.0,
     settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+_D('G9x Laser Mouse', codename='G9x', usbid=0xc066, interface=1, protocol=1.0,
+    settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
 _D('G502 Gaming Mouse', codename='G502', usbid=0xc07d, interface=1)
 _D('G402 Gaming Mouse', codename='G402', usbid=0xc07e, interface=1)
 _D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)
