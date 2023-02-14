@@ -688,8 +688,8 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._icon.set_sensitive(False)
         panel._battery._text.set_sensitive(is_online)
         panel._battery._label.set_text(_('Battery'))
-        panel._battery._text.set_markup('<small>%s</small>' % _('unknown'))
-        panel._battery.set_tooltip_text(_('Battery information unknown.'))
+        panel._battery._text.set_markup('<small>%s</small>' % (_('none') if is_online else _('unknown')))
+        panel._battery.set_tooltip_text(_('Battery not found.') if is_online else _('Battery information unknown.'))
     else:
         battery_next_level = device.status.get(_K.BATTERY_NEXT_LEVEL)
         charging = device.status.get(_K.BATTERY_CHARGING)
