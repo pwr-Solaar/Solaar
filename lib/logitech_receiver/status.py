@@ -293,13 +293,14 @@ class DeviceStatus(dict):
                     _settings.apply_all_settings(d)
 
             else:
-                if was_active:
-                    battery = self.get(KEYS.BATTERY_LEVEL)
-                    self.clear()
-                    # If we had a known battery level before, assume it's not going
-                    # to change much while the device is offline.
-                    if battery is not None:
-                        self[KEYS.BATTERY_LEVEL] = battery
+                if was_active:  # don't clear status when devices go inactive
+                    ##                    battery = self.get(KEYS.BATTERY_LEVEL)
+                    ##                    self.clear()
+                    ## # If we had a known battery level before, assume it's not going
+                    ## # to change much while the device is offline.
+                    ## if battery is not None:
+                    ##     self[KEYS.BATTERY_LEVEL] = battery
+                    pass
 
         # A device that is not active on the first status notification
         # but becomes active afterwards does not produce a pop-up notification
