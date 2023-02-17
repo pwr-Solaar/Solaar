@@ -1,0 +1,137 @@
+solaar version 1.1.8
+
+Bolt Receiver
+  Device path  : /dev/hidraw2
+  USB id       : 046d:C548
+  Serial       : 31454343464242444143334635323035
+  Has 1 paired device(s) out of a maximum of 6.
+  Notifications: wireless, software present (0x000900)
+  Device activity counters: 1=28
+
+  1: Logi POP Keys
+     Device path  : None
+     WPID         : B365
+     Codename     : Logi POP Keys
+     Kind         : keyboard
+     Protocol     : HID++ 4.5
+     Serial number: D1F99582
+     Model ID:      B36500000000
+     Unit ID:       D1F99582
+        Bootloader: BL1 44.01.B0008
+          Firmware: RBK 69.01.B0008
+             Other:
+     The power switch is located on the (unknown).
+     Supports 31 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BL1 44.01.B0008 B3652BE8BAF4
+            Firmware: Firmware RBK 69.01.B0008 B3652BE8BAF4
+            Firmware: Other
+            Unit ID: D1F99582  Model ID: B36500000000  Transport IDs: {'btleid': 'B365'}
+         3: DEVICE NAME            {0005} V0
+            Name: Logi POP Keys
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: Logi POP Keys
+         7: UNIFIED BATTERY        {1004} V3
+            Battery: 100%, discharging.
+         8: REPROG CONTROLS V4     {1B04} V5
+            Key/Button Diversion (saved): {Show Desktop:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, Voice Dictation:Regular, Emoji Smiley Heart Eyes:Regular, Emoji Crying Face:Regular, Emoji Smiley:Regular, Emoji Smilie With Tears:Regular, Open Emoji Panel:Regular, Snipping Tool:Regular, Mute Microphone:Regular}
+            Key/Button Diversion        : {Show Desktop:Regular, Previous Fn:Regular, Play/Pause Fn:Regular, Next Fn:Regular, Mute Fn:Regular, Volume Down Fn:Regular, Volume Up Fn:Regular, Voice Dictation:Regular, Emoji Smiley Heart Eyes:Regular, Emoji Crying Face:Regular, Emoji Smiley:Regular, Emoji Smilie With Tears:Regular, Open Emoji Panel:Regular, Snipping Tool:Regular, Mute Microphone:Regular}
+         9: CHANGE HOST            {1814} V1
+            Change Host        : 1:astra
+        10: HOSTS INFO             {1815} V2
+            Host 0 (paired): astra
+            Host 1 (unpaired):
+            Host 2 (unpaired):
+        11: K375S FN INVERSION     {40A3} V0
+            Swap Fx function (saved): False
+            Swap Fx function        : False
+        12: LOCK KEY STATE         {4220} V0
+        13: KEYBOARD DISABLE KEYS  {4521} V0
+            Disable keys (saved): {Caps Lock:False, Insert:False, Win:False}
+            Disable keys        : {Caps Lock:False, Insert:False, Win:False}
+        14: MULTIPLATFORM          {4531} V1
+            Set OS (saved): Windows
+            Set OS        : Windows
+        15: KEYBOARD LAYOUT 2      {4540} V0
+        16: DFUCONTROL             {00C3} V0
+        17: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        18: unknown:1803           {1803} V0    internal, hidden, unknown:000010
+        19: CONFIG DEVICE PROPS    {1806} V8    internal, hidden, unknown:000010
+        20: unknown:1816           {1816} V0    internal, hidden, unknown:000010
+        21: OOBSTATE               {1805} V0    internal, hidden
+        22: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        23: unknown:1891           {1891} V7    internal, hidden, unknown:000008
+        24: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        25: unknown:1E00           {1E00} V0    hidden
+        26: unknown:1E02           {1E02} V0    internal, hidden
+        27: unknown:1602           {1602} V0
+        28: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        29: unknown:1861           {1861} V1    internal, hidden, unknown:000010
+        30: unknown:18B0           {18B0} V0    internal, hidden, unknown:000010
+     Has 20 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             is FN, FN sensitive, analytics key events, pos:1, group:0, group mask:empty
+             reporting: default
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             is FN, FN sensitive, analytics key events, pos:2, group:0, group mask:empty
+             reporting: default
+         2: Host Switch Channel 3     , default: HostSwitch Channel 3        => HostSwitch Channel 3
+             is FN, FN sensitive, analytics key events, pos:3, group:0, group mask:empty
+             reporting: default
+         3: Show Desktop              , default: Show Desktop                => Show Desktop
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:4, group:0, group mask:empty
+             reporting: default
+         4: Snipping Tool             , default: Snipping Tool               => Snipping Tool
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:5, group:0, group mask:empty
+             reporting: default
+         5: Mute Microphone           , default: Mute Microphone             => Mute Microphone
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:6, group:0, group mask:empty
+             reporting: default
+         6: Previous Fn               , default: Previous                    => Previous
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:7, group:0, group mask:empty
+             reporting: default
+         7: Play/Pause Fn             , default: Play/Pause                  => Play/Pause
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:8, group:0, group mask:empty
+             reporting: default
+         8: Next Fn                   , default: Next                        => Next
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:9, group:0, group mask:empty
+             reporting: default
+         9: Mute Fn                   , default: Mute                        => Mute
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:10, group:0, group mask:empty
+             reporting: default
+        10: Volume Down Fn            , default: Volume Down                 => Volume Down
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:11, group:0, group mask:empty
+             reporting: default
+        11: Volume Up Fn              , default: Volume Up                   => Volume Up
+             is FN, FN sensitive, reprogrammable, divertable, analytics key events, pos:12, group:0, group mask:empty
+             reporting: default
+        12: Voice Dictation           , default: Voice Dictation             => Voice Dictation
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        13: Emoji Smiley Heart Eyes   , default: Emoji Smiling Face With Heart Shaped Eyes => Emoji Smiling Face With Heart Shaped Eyes
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        14: Emoji Crying Face         , default: Emoji Loudly Crying Face    => Emoji Loudly Crying Face
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        15: Emoji Smiley              , default: Emoji Smiley                => Emoji Smiley
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        16: Emoji Smilie With Tears   , default: Emoji Smiley With Tears     => Emoji Smiley With Tears
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        17: Open Emoji Panel          , default: Open Emoji Panel            => Open Emoji Panel
+             nonstandard, reprogrammable, divertable, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        18: F Lock                    , default: Do Nothing One              => Do Nothing One
+             is FN, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+        19: FN Key                    , default: Do Nothing One              => Do Nothing One
+             nonstandard, analytics key events, pos:0, group:0, group mask:empty
+             reporting: default
+     Battery: 100%, discharging.
