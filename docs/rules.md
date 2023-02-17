@@ -112,8 +112,9 @@ or the window's Window manager class or instance name starts with their string a
 `MouseProcess` conditions are true if the process for the window under the mouse
 or the window's Window manager class or instance name starts with their string argument.
 
+`Device` conditions are true if a particular device originated the notification.
 `Active` conditions are true if a particular device is active.
-`Active` conditions take one argument, which is the Serial number or Unit ID of a device,
+`Device` and `Active` conditions take one argument, which is the Serial number or Unit ID of a device,
 as shown in Solaar's detail pane.
 
 `Setting` conditions check the value of a Solaar setting on a device.

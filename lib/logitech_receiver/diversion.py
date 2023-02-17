@@ -968,6 +968,28 @@ class Active(Condition):
         return {'Active': self.devID}
 
 
+class Device(Condition):
+
+    def __init__(self, devID, warn=True):
+        if not (isinstance(devID, str)):
+            if warn:
+                _log.warn('rule Device argument not a string: %s', devID)
+            self.devID = ''
+        self.devID = devID
+
+    def __str__(self):
+        return 'Device: ' + str(self.devID)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        dev = _Device.find(self.devID)
+        return device == dev
+
+    def data(self):
+        return {'Device': self.devID}
+
+
 class Action(RuleComponent):
 
     def __init__(self, *args):
@@ -1265,6 +1287,7 @@ COMPONENTS = {
     'TestBytes': TestBytes,
     'MouseGesture': MouseGesture,
     'Active': Active,
+    'Device': Device,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
