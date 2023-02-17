@@ -520,6 +520,7 @@ class DiversionDialog:
                         (_('Key'), _DIV.Key, ''),
                         (_('KeyIsDown'), _DIV.KeyIsDown, ''),
                         (_('Active'), _DIV.Active, ''),
+                        (_('Device'), _DIV.Device, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
                         (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
@@ -2191,6 +2192,13 @@ def _all_settings():
 class _DeviceUI:
     label_text = ''
 
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            same = not component.devID
+            device = _all_devices[component.devID]
+            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
+
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
@@ -2218,19 +2226,6 @@ class _DeviceUI:
         with self.ignore_changes():
             self.device_field.set_all_values([(d.id, d.display_name, *d.identifiers[1:]) for d in _all_devices])
 
-
-class ActiveUI(_DeviceUI, ConditionUI):
-
-    CLASS = _DIV.Active
-    label_text = _('Device is active and its settings can be changed.')
-
-    def show(self, component, editable):
-        super().show(component, editable)
-        with self.ignore_changes():
-            same = not component.devID
-            device = _all_devices[component.devID]
-            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
-
     def collect_value(self):
         device_str = self.device_field.get_value()
         same = device_str in ['', _('Originating device')]
@@ -2239,13 +2234,29 @@ class ActiveUI(_DeviceUI, ConditionUI):
         return device_value
 
     @classmethod
-    def left_label(cls, component):
-        return _('Active')
-
-    @classmethod
     def right_label(cls, component):
         device = _all_devices[component.devID]
         return device.display_name if device else shlex_quote(component.devID)
+
+
+class ActiveUI(_DeviceUI, ConditionUI):
+
+    CLASS = _DIV.Active
+    label_text = _('Device is active and its settings can be changed.')
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Active')
+
+
+class DeviceUI(_DeviceUI, ConditionUI):
+
+    CLASS = _DIV.Device
+    label_text = _('Device originated the current notification.')
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Device')
 
 
 class _SettingWithValueUI:
@@ -2612,6 +2623,7 @@ COMPONENT_UI = {
     _DIV.Process: ProcessUI,
     _DIV.MouseProcess: MouseProcessUI,
     _DIV.Active: ActiveUI,
+    _DIV.Device: DeviceUI,
     _DIV.Feature: FeatureUI,
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,
