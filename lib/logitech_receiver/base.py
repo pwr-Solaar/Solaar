@@ -106,11 +106,13 @@ def match(record, bus_id, vendor_id, product_id):
             and (record.get('product_id') is None or record.get('product_id') == product_id))
 
 
-def filter_receivers(bus_id, vendor_id, product_id):
+def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
     for record in _RECEIVER_USB_IDS:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
+    if vendor_id == 0x046D and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
+        return {'vendor_id': vendor_id, 'product_id': product_id, 'bus_id': bus_id, 'isDevice': False}
 
 
 def receivers():
@@ -118,26 +120,28 @@ def receivers():
     yield from _hid.enumerate(filter_receivers)
 
 
-def filter_devices(bus_id, vendor_id, product_id):
+def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is of interest and if so return the device record for further checking"""
+    record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
+    if record:  # known or unknown receiver
+        return record
     for record in _DEVICE_IDS:  # known devices
         if match(record, bus_id, vendor_id, product_id):
             return record
-    return _other_device_check(bus_id, vendor_id, product_id)  # USB and BT devices unknown to Solaar
+    if hidpp_short or hidpp_long:  # unknown devices that use HID++
+        return {'vendor_id': vendor_id, 'product_id': product_id, 'bus_id': bus_id, 'isDevice': True}
+    elif hidpp_short is None and hidpp_long is None:  # unknown devices in correct range of IDs
+        return _other_device_check(bus_id, vendor_id, product_id)
 
 
-def wired_devices():
-    """Enumerate all the USB-connected and Bluetooth devices attached to the machine."""
-    yield from _hid.enumerate(filter_devices)
-
-
-def filter_either(bus_id, vendor_id, product_id):
-    return filter_receivers(bus_id, vendor_id, product_id) or filter_devices(bus_id, vendor_id, product_id)
+def receivers_and_devices():
+    """Enumerate all the receivers and devices directly attached to the machine."""
+    yield from _hid.enumerate(filter)
 
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    return _hid.monitor_glib(callback, filter_either)
+    return _hid.monitor_glib(callback, filter)
 
 
 #
@@ -273,7 +277,7 @@ def _read(handle, timeout):
         report_id = ord(data[:1])
         devnumber = ord(data[1:2])
 
-        if _log.isEnabledFor(_DEBUG):
+        if _log.isEnabledFor(_DEBUG) and (report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10):  # ignore DJ input messages
             _log.debug('(%s) => r[%02X %02X %s %s]', handle, report_id, devnumber, _strhex(data[2:4]), _strhex(data[4:]))
 
         return report_id, devnumber, data[2:]
@@ -495,40 +499,29 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
 
 def ping(handle, devnumber, long_message=False):
     """Check if a device is connected to the receiver.
-
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
     if _log.isEnabledFor(_DEBUG):
         _log.debug('(%s) pinging device %d', handle, devnumber)
-
-    # import inspect as _inspect
-    # print ('\n  '.join(str(s) for s in _inspect.stack()))
-
     with acquire_timeout(handle_lock(handle), handle, 10.):
+        notifications_hook = getattr(handle, 'notifications_hook', None)
+        try:
+            _skip_incoming(handle, int(handle), notifications_hook)
+        except NoReceiver:
+            _log.warn('device or receiver disconnected')
+            return
 
         # randomize the SoftwareId and mark byte to be able to identify the ping
         # reply, and set most significant (0x8) bit in SoftwareId so that the reply
         # is always distinguishable from notifications
         request_id = 0x0018 | _random_bits(3)
         request_data = _pack('!HBBB', request_id, 0, 0, _random_bits(8))
+        write(int(handle), devnumber, request_data, long_message)
 
-        ihandle = int(handle)
-        notifications_hook = getattr(handle, 'notifications_hook', None)
-        try:
-            _skip_incoming(handle, ihandle, notifications_hook)
-        except NoReceiver:
-            _log.warn('device or receiver disconnected')
-            return
-
-        write(ihandle, devnumber, request_data, long_message)
-
-        # we consider timeout from this point
-        request_started = _timestamp()
+        request_started = _timestamp()  # we consider timeout from this point
         delta = 0
-
         while delta < _PING_TIMEOUT:
             reply = _read(handle, _PING_TIMEOUT)
-
             if reply:
                 report_id, reply_devnumber, reply_data = reply
                 if reply_devnumber == devnumber:
@@ -536,17 +529,14 @@ def ping(handle, devnumber, long_message=False):
                         # HID++ 2.0+ device, currently connected
                         return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
-                    if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2
-                                                                                                                             ]:
+                    if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and \
+                       reply_data[1:3] == request_data[:2]:  # error response
                         assert reply_data[-1:] == b'\x00'
                         error = ord(reply_data[3:4])
-
                         if error == _hidpp10.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
-
                         if error == _hidpp10.ERROR.resource_error:  # device unreachable
                             return
-
                         if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
                             _log.error('(%s) device %d error on ping request: unknown device', handle, devnumber)
                             raise NoSuchDevice(number=devnumber, request=request_id)
@@ -561,4 +551,3 @@ def ping(handle, devnumber, long_message=False):
             delta = _timestamp() - request_started
 
         _log.warn('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta, _PING_TIMEOUT, devnumber)
-        # raise DeviceUnreachable(number=devnumber, request=request_id)

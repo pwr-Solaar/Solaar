@@ -65,7 +65,7 @@ FEATURE = _NamedInts(
     DEVICE_GROUPS=0x0006,
     DEVICE_FRIENDLY_NAME=0x0007,
     KEEP_ALIVE=0x0008,
-    RESET=0x0020,  # "Config Change"
+    CONFIG_CHANGE=0x0020,
     CRYPTO_ID=0x0021,
     TARGET_SOFTWARE=0x0030,
     WIRELESS_SIGNAL_STRENGTH=0x0080,
@@ -234,6 +234,7 @@ class FeatureCallError(_KwException):
 
 
 class FeaturesArray(dict):
+
     def __init__(self, device):
         assert device is not None
         self.supported = True
@@ -259,7 +260,7 @@ class FeaturesArray(dict):
                     _log.warn('FEATURE_SET found, but failed to read features count')
                     return False
                 else:
-                    self.count = ord(count[:1])
+                    self.count = ord(count[:1]) + 1  # ROOT feature not included in count
                     self[FEATURE.ROOT] = 0
                     self[FEATURE.FEATURE_SET] = fs_index
                     return True
@@ -332,6 +333,7 @@ class ReprogrammableKey:
     - default_task {_NamedInt} -- the native function of this control
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
+
     def __init__(self, device, index, cid, tid, flags):
         self._device = device
         self.index = index
@@ -373,6 +375,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
+
     def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
         ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
         self.pos = pos
@@ -515,6 +518,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
 
 class PersistentRemappableAction():
+
     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
         self._device = device
         self.index = index
@@ -580,6 +584,7 @@ class PersistentRemappableAction():
 
 class KeysArray:
     """A sequence of key mappings supported by a HID++ 2.0 device."""
+
     def __init__(self, device, count, version):
         assert device is not None
         self.device = device
@@ -655,6 +660,7 @@ class KeysArray:
 
 
 class KeysArrayV1(KeysArray):
+
     def __init__(self, device, count, version=1):
         super().__init__(device, count, version)
         """The mapping from Control IDs to their native Task IDs.
@@ -682,6 +688,7 @@ class KeysArrayV1(KeysArray):
 
 
 class KeysArrayV4(KeysArrayV1):
+
     def __init__(self, device, count):
         super().__init__(device, count, 4)
 
@@ -702,6 +709,7 @@ class KeysArrayV4(KeysArrayV1):
 
 # we are only interested in the current host, so use 0xFF for the host throughout
 class KeysArrayPersistent(KeysArray):
+
     def __init__(self, device, count):
         super().__init__(device, count, 5)
         self._capabilities = None
@@ -886,6 +894,7 @@ ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
 
 
 class Gesture:
+
     def __init__(self, device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
@@ -1009,6 +1018,7 @@ class Param:
 
 
 class Spec:
+
     def __init__(self, device, low, high):
         self._device = device
         self.id = low
@@ -1040,6 +1050,7 @@ class Gestures:
     Right now only some information fields are supported.
     WARNING: Assumes that parameters are always global, which is not the case.
     """
+
     def __init__(self, device):
         self.device = device
         self.gestures = {}
@@ -1318,12 +1329,12 @@ def decipher_battery_voltage(report):
 
 
 def get_adc_measurement(device):
-    try:  # this feature call has been known to produce errors so be extra cautious
+    try:  # this feature call produces an error for headsets that are connected but inactive
         report = feature_request(device, FEATURE.ADC_MEASUREMENT)
         if report is not None:
             return decipher_adc_measurement(report)
     except FeatureCallError:
-        return None
+        return FEATURE.ADC_MEASUREMENT if FEATURE.ADC_MEASUREMENT in device.features else None
 
 
 def decipher_adc_measurement(report):
@@ -1347,7 +1358,8 @@ battery_functions = {
 
 
 def get_battery(device, feature):
-    """Return battery information - feature, approximate level, next, charging, voltage"""
+    """Return battery information - feature, approximate level, next, charging, voltage
+    or battery feature if there is one but it is not responding or None for no battery feature"""
     if feature is not None:
         battery_function = battery_functions.get(feature, None)
         if battery_function:
@@ -1359,7 +1371,7 @@ def get_battery(device, feature):
             result = battery_function(device)
             if result:
                 return result
-    return 0, None, None, None, None
+    return 0
 
 
 def get_keys(device):
@@ -1548,3 +1560,7 @@ def get_remaining_pairing(device):
     if result:
         result = _unpack('!B', result[:1])[0]
         return result
+
+
+def config_change(device, configuration, no_reply=False):
+    return feature_request(device, FEATURE.CONFIG_CHANGE, 0x00, configuration, no_reply=no_reply)

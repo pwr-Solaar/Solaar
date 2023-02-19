@@ -42,6 +42,7 @@ from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 
 import gi  # isort:skip
+
 gi.require_version('Gdk', '3.0')  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
@@ -337,23 +338,49 @@ def simulate_scroll(dx, dy):
     _log.warn('no way to simulate scrolling')
 
 
+def thumb_wheel_up(f, r, d, a):
+    global thumb_wheel_displacement
+    if f != _F.THUMB_WHEEL or r != 0:
+        return False
+    if a is None:
+        return signed(d[0:2]) < 0 and signed(d[0:2])
+    elif thumb_wheel_displacement <= -a:
+        thumb_wheel_displacement += a
+        return 1
+    else:
+        return False
+
+
+def thumb_wheel_down(f, r, d, a):
+    global thumb_wheel_displacement
+    if f != _F.THUMB_WHEEL or r != 0:
+        return False
+    if a is None:
+        return signed(d[0:2]) > 0 and signed(d[0:2])
+    elif thumb_wheel_displacement >= a:
+        thumb_wheel_displacement -= a
+        return 1
+    else:
+        return False
+
+
 TESTS = {
-    'crown_right': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] < 128 and d[1],
-    'crown_left': lambda f, r, d: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1],
-    'crown_right_ratchet': lambda f, r, d: f == _F.CROWN and r == 0 and d[2] < 128 and d[2],
-    'crown_left_ratchet': lambda f, r, d: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2],
-    'crown_tap': lambda f, r, d: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5],
-    'crown_start_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6],
-    'crown_end_press': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6],
-    'crown_pressed': lambda f, r, d: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6],
-    'thumb_wheel_up': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) < 0 and signed(d[0:2]),
-    'thumb_wheel_down': lambda f, r, d: f == _F.THUMB_WHEEL and r == 0 and signed(d[0:2]) > 0 and signed(d[0:2]),
-    'lowres_wheel_up': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
-    'lowres_wheel_down': lambda f, r, d: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
-    'hires_wheel_up': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
-    'hires_wheel_down': lambda f, r, d: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
-    'False': lambda f, r, d: False,
-    'True': lambda f, r, d: True,
+    'crown_right': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] < 128 and d[1], False],
+    'crown_left': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
+    'crown_right_ratchet': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] < 128 and d[2], False],
+    'crown_left_ratchet': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    'crown_tap': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
+    'crown_start_press': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
+    'crown_end_press': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
+    'crown_pressed': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
+    'thumb_wheel_up': [thumb_wheel_up, True],
+    'thumb_wheel_down': [thumb_wheel_down, True],
+    'lowres_wheel_up': [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]), False],
+    'lowres_wheel_down': [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]), False],
+    'hires_wheel_up': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]), False],
+    'hires_wheel_down': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]), False],
+    'False': [lambda f, r, d, a: False, False],
+    'True': [lambda f, r, d, a: True, False],
 }
 
 MOUSE_GESTURE_TESTS = {
@@ -368,6 +395,7 @@ COMPONENTS = {}
 
 
 class RuleComponent:
+
     def compile(self, c):
         if isinstance(c, RuleComponent):
             return c
@@ -380,6 +408,7 @@ class RuleComponent:
 
 
 class Rule(RuleComponent):
+
     def __init__(self, args, source=None, warn=True):
         self.components = [self.compile(a) for a in args]
         self.source = source
@@ -389,6 +418,8 @@ class Rule(RuleComponent):
         return 'Rule%s[%s]' % (source, ', '.join([c.__str__() for c in self.components]))
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate rule: %s', self)
         result = True
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, result)
@@ -398,11 +429,16 @@ class Rule(RuleComponent):
                 return result
         return result
 
+    def once(self, feature, notification, device, status, last_result):
+        self.evaluate(feature, notification, device, status, last_result)
+        return False
+
     def data(self):
         return {'Rule': [c.data() for c in self.components]}
 
 
 class Condition(RuleComponent):
+
     def __init__(self, *args):
         pass
 
@@ -410,10 +446,13 @@ class Condition(RuleComponent):
         return 'CONDITION'
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         return False
 
 
 class Not(Condition):
+
     def __init__(self, op, warn=True):
         if isinstance(op, list) and len(op) == 1:
             op = op[0]
@@ -424,6 +463,8 @@ class Not(Condition):
         return 'Not: ' + str(self.component)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         result = self.component.evaluate(feature, notification, device, status, last_result)
         return None if result is None else not result
 
@@ -432,6 +473,7 @@ class Not(Condition):
 
 
 class Or(Condition):
+
     def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
@@ -439,6 +481,8 @@ class Or(Condition):
         return 'Or: [' + ', '.join(str(c) for c in self.components) + ']'
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         result = False
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, last_result)
@@ -453,6 +497,7 @@ class Or(Condition):
 
 
 class And(Condition):
+
     def __init__(self, args, warn=True):
         self.components = [self.compile(a) for a in args]
 
@@ -460,6 +505,8 @@ class And(Condition):
         return 'And: [' + ', '.join(str(c) for c in self.components) + ']'
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         result = True
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, last_result)
@@ -506,6 +553,7 @@ def x11_pointer_prog():
 
 
 class Process(Condition):
+
     def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
@@ -520,6 +568,8 @@ class Process(Condition):
         return 'Process: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
         focus = x11_focus_prog()
@@ -531,6 +581,7 @@ class Process(Condition):
 
 
 class MouseProcess(Condition):
+
     def __init__(self, process, warn=True):
         self.process = process
         if wayland or not x11_setup():
@@ -545,6 +596,8 @@ class MouseProcess(Condition):
         return 'MouseProcess: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
         pointer_focus = x11_pointer_prog()
@@ -556,6 +609,7 @@ class MouseProcess(Condition):
 
 
 class Feature(Condition):
+
     def __init__(self, feature, warn=True):
         if not (isinstance(feature, str) and feature in _F):
             if warn:
@@ -567,6 +621,8 @@ class Feature(Condition):
         return 'Feature: ' + str(self.feature)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         return feature == self.feature
 
     def data(self):
@@ -574,6 +630,7 @@ class Feature(Condition):
 
 
 class Report(Condition):
+
     def __init__(self, report, warn=True):
         if not (isinstance(report, int)):
             if warn:
@@ -586,6 +643,8 @@ class Report(Condition):
         return 'Report: ' + str(self.report)
 
     def evaluate(self, report, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         return (notification.address >> 4) == self.report
 
     def data(self):
@@ -594,6 +653,7 @@ class Report(Condition):
 
 # Setting(device, setting, [key], value...)
 class Setting(Condition):
+
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -606,6 +666,8 @@ class Setting(Condition):
         return 'Setting: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, report, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         if len(self.args) < 3:
             return None
         dev = _Device.find(self.args[0]) if self.args[0] is not None else device
@@ -639,6 +701,7 @@ MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + M
 
 
 class Modifiers(Condition):
+
     def __init__(self, modifiers, warn=True):
         modifiers = [modifiers] if isinstance(modifiers, str) else modifiers
         self.desired = 0
@@ -655,6 +718,8 @@ class Modifiers(Condition):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         if gkeymap:
             current = gkeymap.get_modifier_state()  # get the current keyboard modifier
             return self.desired == (current & MODIFIER_MASK)
@@ -710,10 +775,45 @@ class Key(Condition):
         return 'Key: %s (%s)' % ((str(self.key) if self.key else 'None'), self.action)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
 
     def data(self):
         return {'Key': [str(self.key), self.action]}
+
+
+class KeyIsDown(Condition):
+
+    def __init__(self, args, warn=True):
+        default_key = 0
+
+        key = None
+
+        if not args or not isinstance(args, str):
+            if warn:
+                _log.warn('rule KeyDown arguments unknown: %s' % args)
+            key = default_key
+        elif isinstance(args, str):
+            key = args
+
+        if isinstance(key, str) and key in _CONTROL:
+            self.key = _CONTROL[key]
+        else:
+            if warn:
+                _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+            self.key = default_key
+
+    def __str__(self):
+        return 'KeyIsDown: %s' % (str(self.key) if self.key else 'None')
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        return key_is_down(self.key)
+
+    def data(self):
+        return {'KeyIsDown': str(self.key)}
 
 
 def bit_test(start, end, bits):
@@ -721,6 +821,7 @@ def bit_test(start, end, bits):
 
 
 def range_test(start, end, min, max):
+
     def range_test_helper(f, r, d):
         value = int.from_bytes(d[start:end], byteorder='big', signed=True)
         return min <= value <= max and (value if value else True)
@@ -729,25 +830,32 @@ def range_test(start, end, min, max):
 
 
 class Test(Condition):
+
     def __init__(self, test, warn=True):
-        self.test = test
+        self.test = ''
+        self.parameter = None
         if isinstance(test, str):
-            if test in MOUSE_GESTURE_TESTS:
-                if warn:
-                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
-                self.__class__ = MouseGesture
-                self.__init__(MOUSE_GESTURE_TESTS[test], warn=warn)
-            elif test in TESTS:
-                self.function = TESTS[test]
-            else:
-                if warn:
-                    _log.warn('rule Test string argument not name of a test: %s', test)
-                self.function = TESTS['False']
-        elif isinstance(test, list) and all(isinstance(t, int) for t in test):
+            test = [test]
+        if isinstance(test, list) and all(isinstance(t, int) for t in test):
             if warn:
                 _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
             self.__class__ = TestBytes
             self.__init__(test, warn=warn)
+        elif isinstance(test, list):
+            if test[0] in MOUSE_GESTURE_TESTS:
+                if warn:
+                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                self.__class__ = MouseGesture
+                self.__init__(MOUSE_GESTURE_TESTS[0][test], warn=warn)
+            elif test[0] in TESTS:
+                self.test = test[0]
+                self.function = TESTS[test[0]][0]
+                self.parameter = test[1] if len(test) > 1 else None
+            else:
+                if warn:
+                    _log.warn('rule Test name not name of a test: %s', test)
+                self.test = 'False'
+                self.function = TESTS['False'][0]
         else:
             if warn:
                 _log.warn('rule Test argument not valid %s', test)
@@ -756,13 +864,16 @@ class Test(Condition):
         return 'Test: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        return self.function(feature, notification.address, notification.data)
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        return self.function(feature, notification.address, notification.data, self.parameter)
 
     def data(self):
-        return {'Test': str(self.test)}
+        return {'Test': ([self.test, self.parameter] if self.parameter is not None else [self.test])}
 
 
 class TestBytes(Condition):
+
     def __init__(self, test, warn=True):
         self.test = test
         if (
@@ -778,6 +889,8 @@ class TestBytes(Condition):
         return 'TestBytes: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         return self.function(feature, notification.address, notification.data)
 
     def data(self):
@@ -803,6 +916,8 @@ class MouseGesture(Condition):
         return 'MouseGesture: ' + ' '.join(self.movements)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         if feature == _F.MOUSE_GESTURE:
             d = notification.data
             data = _unpack('!' + (int(len(d) / 2) * 'h'), d)
@@ -832,6 +947,7 @@ class MouseGesture(Condition):
 
 
 class Active(Condition):
+
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
@@ -843,6 +959,8 @@ class Active(Condition):
         return 'Active: ' + str(self.devID)
 
     def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
         dev = _Device.find(self.devID)
         return bool(dev and dev.ping())
 
@@ -850,7 +968,30 @@ class Active(Condition):
         return {'Active': self.devID}
 
 
+class Device(Condition):
+
+    def __init__(self, devID, warn=True):
+        if not (isinstance(devID, str)):
+            if warn:
+                _log.warn('rule Device argument not a string: %s', devID)
+            self.devID = ''
+        self.devID = devID
+
+    def __str__(self):
+        return 'Device: ' + str(self.devID)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        dev = _Device.find(self.devID)
+        return device == dev
+
+    def data(self):
+        return {'Device': self.devID}
+
+
 class Action(RuleComponent):
+
     def __init__(self, *args):
         pass
 
@@ -925,14 +1066,14 @@ class KeyPress(Action):
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode is None:
                 _log.warn('rule KeyPress key symbol not currently available %s', self)
-            elif self.needed(keycode, modifiers):
+            elif self.action != self.CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
-            if keycode and self.needed(keycode, modifiers):
+            if keycode and (self.action != self.CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
@@ -964,6 +1105,7 @@ class KeyPress(Action):
 
 
 class MouseScroll(Action):
+
     def __init__(self, amounts, warn=True):
         import numbers
         if len(amounts) == 1 and isinstance(amounts[0], list):
@@ -995,6 +1137,7 @@ class MouseScroll(Action):
 
 
 class MouseClick(Action):
+
     def __init__(self, args, warn=True):
         if len(args) == 1 and isinstance(args[0], list):
             args = args[0]
@@ -1029,6 +1172,7 @@ class MouseClick(Action):
 
 
 class Set(Action):
+
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
@@ -1068,6 +1212,7 @@ class Set(Action):
 
 
 class Execute(Action):
+
     def __init__(self, args, warn=True):
         if isinstance(args, str):
             args = [args]
@@ -1092,6 +1237,39 @@ class Execute(Action):
         return {'Execute': self.args[:]}
 
 
+class Later(Action):
+
+    def __init__(self, args, warn=True):
+        self.delay = 0
+        self.rule = Rule([])
+        self.components = []
+        if not (isinstance(args, list)):
+            args = [args]
+        if not (isinstance(args, list) and len(args) >= 1):
+            if warn:
+                _log.warn('rule Later argument not list with minimum length 1: %s', args)
+        elif not (isinstance(args[0], int)) or not 0 < args[0] < 101:
+            if warn:
+                _log.warn('rule Later argument delay not integer between 1 and 100: %s', args)
+        else:
+            self.delay = args[0]
+            self.rule = Rule(args[1:], warn=warn)
+            self.components = self.rule.components
+
+    def __str__(self):
+        return 'Later: [' + str(self.delay) + ', ' + ', '.join(str(c) for c in self.components) + ']'
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if self.delay and self.rule:
+            GLib.timeout_add_seconds(self.delay, Rule.once, self.rule, feature, notification, device, status, last_result)
+        return None
+
+    def data(self):
+        data = [c.data() for c in self.components]
+        data.insert(0, self.delay)
+        return {'Later': data}
+
+
 COMPONENTS = {
     'Rule': Rule,
     'Not': Not,
@@ -1104,15 +1282,18 @@ COMPONENTS = {
     'Setting': Setting,
     'Modifiers': Modifiers,
     'Key': Key,
+    'KeyIsDown': KeyIsDown,
     'Test': Test,
     'TestBytes': TestBytes,
     'MouseGesture': MouseGesture,
     'Active': Active,
+    'Device': Device,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
     'Set': Set,
     'Execute': Execute,
+    'Later': Later,
 }
 
 built_in_rules = Rule([])
@@ -1141,14 +1322,32 @@ if True:
     ])
 
 keys_down = []
-g_keys_down = [0, 0, 0, 0]
+g_keys_down = 0
 m_keys_down = 0
 mr_key_down = False
+thumb_wheel_displacement = 0
+
+
+def key_is_down(key):
+    if key == _CONTROL.MR:
+        return mr_key_down
+    elif _CONTROL.M1 <= key <= _CONTROL.M8:
+        return bool(m_keys_down & (0x01 << (key - _CONTROL.M1)))
+    elif _CONTROL.G1 <= key <= _CONTROL.G32:
+        return bool(g_keys_down & (0x01 << (key - _CONTROL.G1)))
+    else:
+        return key in keys_down
+
+
+def evaluate_rules(feature, notification, device, status):
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('evaluating rules on %s', notification)
+    rules.evaluate(feature, notification, device, status, True)
 
 
 # process a notification
 def process_notification(device, status, notification, feature):
-    global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up
+    global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
@@ -1162,15 +1361,12 @@ def process_notification(device, status, notification, feature):
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack('!4B', notification.data[:4])
-        # process 32 bits, byte by byte
-        for byte_idx in range(4):
-            new_byte, old_byte = new_g_keys_down[byte_idx], g_keys_down[byte_idx]
-            for i in range(1, 9):
-                if new_byte & (0x01 << (i - 1)) and not old_byte & (0x01 << (i - 1)):
-                    key_down = _CONTROL['G' + str(i + 8 * byte_idx)]
-                if old_byte & (0x01 << (i - 1)) and not new_byte & (0x01 << (i - 1)):
-                    key_up = _CONTROL['G' + str(i + 8 * byte_idx)]
+        new_g_keys_down = _unpack('!4I', notification.data[:4])[0]
+        for i in range(32):
+            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
+                key_down = _CONTROL['G' + str(i + 1)]
+            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
+                key_up = _CONTROL['G' + str(i + 1)]
         g_keys_down = new_g_keys_down
     # and also M keys down
     elif feature == _F.MKEYS and notification.address == 0x00:
@@ -1189,7 +1385,13 @@ def process_notification(device, status, notification, feature):
         if mr_key_down and not new_mr_key_down:
             key_up = _CONTROL['MR']
         mr_key_down = new_mr_key_down
-    GLib.idle_add(rules.evaluate, feature, notification, device, status, True)
+    # keep track of thumb wheel movment
+    elif feature == _F.THUMB_WHEEL and notification.address == 0x00:
+        if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
+            thumb_wheel_displacement = 0
+        thumb_wheel_displacement += signed(notification.data[0:2])
+
+    GLib.idle_add(evaluate_rules, feature, notification, device, status)
 
 
 _XDG_CONFIG_HOME = _os.environ.get('XDG_CONFIG_HOME') or _path.expanduser(_path.join('~', '.config'))

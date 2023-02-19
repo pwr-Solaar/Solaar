@@ -21,6 +21,8 @@
 import importlib
 import logging
 import os.path
+import signal
+import sys
 import tempfile
 
 from logging import INFO as _INFO
@@ -44,7 +46,6 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
             gi.require_version(gi_package, gi_version)
         return importlib.import_module(module)
     except (ImportError, ValueError):
-        import sys
         sys.exit('%s: missing required system package %s' % (NAME, os_package))
 
 
@@ -122,25 +123,21 @@ def _parse_arguments():
 
 
 # On first SIGINT, dump threads to stderr; on second, exit
-def _handlesigint(signal, stack):
-    import signal
-    import sys
+def _handlesig(signl, stack):
     import faulthandler
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
-    if _log.isEnabledFor(_INFO):
-        faulthandler.dump_traceback()
-
-    sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
+    if signl == int(signal.SIGINT):
+        if _log.isEnabledFor(_INFO):
+            faulthandler.dump_traceback()
+        sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
+    else:
+        sys.exit('')
 
 
 def main():
     _require('pyudev', 'python3-pyudev')
-
-    # handle ^C in console
-    import signal
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    signal.signal(signal.SIGINT, _handlesigint)
 
     args = _parse_arguments()
     if not args:
@@ -152,6 +149,11 @@ def main():
     gi = _require('gi', 'python3-gi (in Ubuntu) or python3-gobject (in Fedora)')
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
+    # handle ^C in console
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGINT, _handlesig)
+    signal.signal(signal.SIGTERM, _handlesig)
+
     udev_file = '42-logitech-unify-permissions.rules'
     if _log.isEnabledFor(_WARNING) \
        and not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
@@ -160,8 +162,9 @@ def main():
         _log.warning('Solaar udev file not found in expected location')
         _log.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
-        import solaar.ui as ui
         import solaar.listener as listener
+        import solaar.ui as ui
+
         listener.setup_scanner(ui.status_changed, ui.error_dialog)
 
         import solaar.upower as _upower
@@ -170,10 +173,12 @@ def main():
         else:
             _upower.watch(lambda: listener.ping_all(True))
 
+        import solaar.configuration as _configuration
+        _configuration.defer_saves = True  # allow configuration saves to be deferred
+
         # main UI event loop
         ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:
-        import sys
         from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
 

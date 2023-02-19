@@ -98,6 +98,8 @@ class _ThreadedHandle:
                 return self._local.handle
             except Exception:
                 return self._open()
+        else:
+            return -1
 
     __int__ = __index__
 
@@ -136,67 +138,44 @@ class EventsListener(_threading.Thread):
 
     Incoming packets will be passed to the callback function in sequence.
     """
+
     def __init__(self, receiver, notifications_callback):
         super().__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
-
         self.daemon = True
         self._active = False
-
         self.receiver = receiver
         self._queued_notifications = _Queue(16)
         self._notifications_callback = notifications_callback
 
-        # self.tick_period = 0
-
     def run(self):
         self._active = True
-
         # replace the handle with a threaded one
         self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
-        # get the right low-level handle for this thread
-        ihandle = int(self.receiver.handle)
         if _log.isEnabledFor(_INFO):
-            _log.info('started with %s (%d)', self.receiver, ihandle)
-
+            _log.info('started with %s (%d)', self.receiver, int(self.receiver.handle))
         self.has_started()
 
-        # last_tick = 0
-        # the first idle read -- delay it a bit, and make sure to stagger
-        # idle reads for multiple receivers
-        # idle_reads = _IDLE_READS + (ihandle % 5) * 2
+        if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
+            if self.receiver.ping():
+                self.receiver.status.changed(True, reason='initialization')
 
         while self._active:
             if self._queued_notifications.empty():
                 try:
-                    # _log.debug("read next notification")
                     n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except _base.NoReceiver:
-                    _log.warning('receiver disconnected')
+                    _log.warning('%s disconnected', self.receiver.name)
                     self.receiver.close()
                     break
-
                 if n:
                     n = _base.make_notification(*n)
             else:
-                # deliver any queued notifications
-                n = self._queued_notifications.get()
-
+                n = self._queued_notifications.get()  # deliver any queued notifications
             if n:
-                # if _log.isEnabledFor(_DEBUG):
-                #     _log.debug("%s: processing %s", self.receiver, n)
                 try:
                     self._notifications_callback(n)
                 except Exception:
                     _log.exception('processing %s', n)
-
-            # elif self.tick_period:
-            #     idle_reads -= 1
-            #     if idle_reads <= 0:
-            #         idle_reads = _IDLE_READS
-            #         now = _timestamp()
-            #         if now - last_tick >= self.tick_period:
-            #             last_tick = now
-            #             self.tick(now)
 
         del self._queued_notifications
         self.has_stopped()

@@ -13,6 +13,16 @@ Some Linux distributions distribute old versions of Solaar.
 If you are using an old version and something described here does not work you should upgrade
 using one of the methods described below.
 
+Solaar runs as a regular user process, albeit with direct access to the Linux interface
+that lets it directly communicate with the Logitech devices it manages using special
+Logitech-proprietary (HID++) commands.
+Each Logitech device implements a different subset of these commands.
+Solaar is thus only able to make the changes to devices that devices implement.
+
+Solaar is not a device driver and does not process normal input from devices.
+It is thus unable to fix problems that arise from incorrect handling of
+mouse movements or keycodes by Linux drivers or other software.
+
 Solaar can be used as a GUI application, the usual case, or via its command-line interface.
 The Solaar GUI is meant to run continuously in the background,
 monitoring devices, making changes to them, and responding to some messages they emit.
@@ -47,10 +57,6 @@ Solaar's GUI can be started in several ways
 
 For more information on Solaar's command-line interface use the help option,
 as in `solaar --help`.
-
-Solaar does not process normal input from devices. It is thus unable
-to fix problems that arise from incorrect handling of mouse movements or keycodes
-by Linux drivers or other software.
 
 Solaar has progressed past version 1.1. Problems with earlier versions should
 not be reported as bugs. Instead, upgrade to a recent version or manually install
@@ -100,9 +106,13 @@ available from the standard repositories for your distribution you can try
 one of these packages.
 
 - Arch solaar package in the [community repository][arch]
-- Ubuntu/Kubuntu 16.04+: use the solaar package from [universe repository][universe repository]
 - Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
+
+Solaar is available from some other repositories
+but they are several versions behind the current version.
+
+- for Ubuntu/Kubuntu 16.04+: the solaar package from [universe repository][universe repository]
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
 
@@ -124,8 +134,27 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
-- If some icons appear broken in the application, make sure you've properly
-  configured the Gtk theme and icon theme in your control panel.
+- Solaar expects that it has exclusive control over settings that are not ignored.
+  Running other programs that modify these settings, such as logiops,
+  will likely result in unexpected device behavior.
+
+- The Linux HID++ driver modifies the Scroll Wheel Resolution setting to
+  implement smooth scrolling.  If Solaar later changes this setting scrolling
+  can be either very fast or very slow.  To fix this problem
+  click on the icon at the right edge of the setting to set it to
+  "Ignore this setting", which is the default for new devices.
+  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+
+- The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
+  This can interfere with the Scroll Wheel Direction setting, requiring flipping this setting back and forth
+  to restore reversed scrolling.
+
+- The driver sends messages to devices that do not conform with the Logitech HID++ specification
+  resulting in reponses being sent back that look like other messages.  For some devices this causes
+  Solaar to report incorrect battery levels.
+
+- If the Python hid-parser package is not available Solaar will not recognize some devices.
+  Use pip to install hid-parser.
 
 - Solaar normally uses icon names for its icons, which in some system tray implementatations
   results in missing or wrong-sized icons.
@@ -138,21 +167,6 @@ for the step-by-step procedure for manual installation.
   in some system tray implementations. Changing to a different theme may help.
   The `--battery-icons=symbolic` option can be used to force symbolic icons.
 
-- The Linux HID++ driver modifies the setting Scroll Wheel Resolution to
-  implement smooth scrolling.  If Solaar later changes this setting scrolling
-  can be either very fast or very slow.  To fix this problem
-  click on the icon at the right edge of the setting to set it to
-  "Ignore this setting".
-  The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
-
-- The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
-  This can interfere with the Scroll Wheel Direction setting, requiring flipping this setting back and forth
-  to restore reversed scrolling.
-
-- The driver sends messages to devices that do not conform with the Logitech HID++ specification
-  resulting in reponses being sent back that look like other messages.  For some devices this causes
-  Solaar to report incorrect battery levels.
-
 - Many gaming mice and keyboards have the ONBOARD PROFILES feature.
   This feature can override other features, including polling rate and key lighting.
   To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
@@ -161,9 +175,6 @@ for the step-by-step procedure for manual installation.
 - Solaar will try to use uinput to simulate input from rules under Wayland or if Xtest is not available
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
-
-- Sometimes bluetooth connections are not torn down correctly by Linux.
-  This can result in two entries in Solaar for the same device, with only one being active.
 
 - Diverted keys remain diverted and so do not have their normal behaviour when Solaar terminates
   or a device disconnects from a host that is running Solaar.  If necessary, their normal behaviour

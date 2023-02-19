@@ -1,0 +1,49 @@
+Solaar version 1.1.5
+
+  1: G502 Gaming Mouse
+     Device path  : /dev/hidraw1
+     USB id       : 046d:C07D
+     Codename     : G502
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number:
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: U   88.02.B0017
+        Bootloader: BOT 14.00.B0007
+          Hardware: 72
+             Other:
+     Supports 19 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: FEATURE INFO           {0002} V0
+         3: DEVICE FW VERSION      {0003} V0
+            Firmware: Firmware U   88.02.B0017
+            Firmware: Bootloader BOT 14.00.B0007
+            Firmware: Hardware  72
+            Firmware: Other
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         4: DEVICE NAME            {0005} V0
+            Name: Tunable FPS Gaming Mouse G502
+            Kind: mouse
+         5: LED CONTROL            {1300} V0
+         6: unknown:18A1           {18A1} V0    internal, hidden
+         7: unknown:1E00           {1E00} V0    hidden
+         8: unknown:1E20           {1E20} V0
+         9: unknown:1EB0           {1EB0} V0    internal, hidden
+        10: ADJUSTABLE DPI         {2201} V0
+            Sensitivity (DPI)        : 800
+        11: ANGLE SNAPPING         {2230} V0
+        12: SURFACE TUNING         {2240} V0
+        13: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Polling Rate (ms)        : 1
+        14: ONBOARD PROFILES       {8100} V0
+            Device Mode: Host
+            Onboard Profiles        : Disable
+        15: MOUSE BUTTON SPY       {8110} V0
+        16: unknown:1850           {1850} V0    internal, hidden
+        17: DFUCONTROL UNSIGNED    {00C1} V0
+        18: unknown:1801           {1801} V0    internal, hidden
+     Battery: N/A, None.

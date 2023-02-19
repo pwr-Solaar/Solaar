@@ -86,6 +86,7 @@ class ReceiverStatus(dict):
     """The 'runtime' status of a receiver, mostly about the pairing process --
     is the pairing lock open or closed, any pairing errors, etc.
     """
+
     def __init__(self, receiver, changed_callback):
         assert receiver
         self._receiver = receiver
@@ -144,6 +145,7 @@ class DeviceStatus(dict):
     active/inactive, battery charge, lux, etc. It updates them mostly by
     processing incoming notification events from the device itself.
     """
+
     def __init__(self, device, changed_callback):
         assert device
         self._device = device
@@ -158,6 +160,7 @@ class DeviceStatus(dict):
         self.updated = 0
 
     def to_string(self):
+
         def _items():
             comma = False
 
@@ -237,7 +240,7 @@ class DeviceStatus(dict):
             else:
                 reason = _('Battery: %(percent)d%% (%(status)s)') % {'percent': level, 'status': status.name}
 
-        if changed or reason:
+        if changed or reason or not self._active:  # a battery response means device is active
             # update the leds on the device, if any
             _hidpp10.set_3leds(self._device, level, charging=charging, warning=bool(alert))
             self.changed(active=True, alert=alert, reason=reason, timestamp=timestamp)
@@ -290,13 +293,14 @@ class DeviceStatus(dict):
                     _settings.apply_all_settings(d)
 
             else:
-                if was_active:
-                    battery = self.get(KEYS.BATTERY_LEVEL)
-                    self.clear()
-                    # If we had a known battery level before, assume it's not going
-                    # to change much while the device is offline.
-                    if battery is not None:
-                        self[KEYS.BATTERY_LEVEL] = battery
+                if was_active:  # don't clear status when devices go inactive
+                    ##                    battery = self.get(KEYS.BATTERY_LEVEL)
+                    ##                    self.clear()
+                    ## # If we had a known battery level before, assume it's not going
+                    ## # to change much while the device is offline.
+                    ## if battery is not None:
+                    ##     self[KEYS.BATTERY_LEVEL] = battery
+                    pass
 
         # A device that is not active on the first status notification
         # but becomes active afterwards does not produce a pop-up notification

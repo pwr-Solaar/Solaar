@@ -4,6 +4,7 @@ Comment=Logitech Unifying Receiver peripherals manager
 Comment[fr]=Gestionnaire de périphériques pour les récepteurs Logitech Unifying
 Comment[hr]=Upravitelj Logitechovih uređaja povezanih putem Unifying i Nano prijemnika
 Comment[ru]=Управление приёмником Logitech Unifying Receiver
+Comment[es]=Administrador de periféricos de Logitech Receptor Unifying
 Exec=solaar
 Icon=solaar
 StartupNotify=true

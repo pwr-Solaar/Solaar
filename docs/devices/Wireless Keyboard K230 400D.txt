@@ -1,0 +1,47 @@
+  1: Wireless Keyboard K230
+     Device path  : /dev/hidraw5
+     WPID         : 400D
+     Codename     : K230
+     Kind         : keyboard
+     Protocol     : HID++ 2.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: 9BB42D7D
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQK 40.00.B0011
+     The power switch is located on the bottom left corner.
+     Supports 14 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQK 40.00.B0011 400D
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         4: DEVICE NAME            {0005}
+            Name: Wireless Keyboard K230
+            Kind: keyboard
+         5: BATTERY STATUS         {1000}
+            Battery: 70%, discharging, next level 20%.
+         6: unknown:1820           {1820}   hidden
+         7: REPROG CONTROLS        {1B00}
+         8: REPROG CONTROLS V2     {1B01}
+         9: WIRELESS DEVICE STATUS {1D4B}
+        10: REMAINING PAIRING      {1DF0}   hidden
+            Remaining Pairings: 54
+        11: unknown:1DF3           {1DF3}   hidden
+        12: ENCRYPTION             {4100}
+        13: KEYBOARD LAYOUT        {4520}
+     Has 12 reprogrammable keys:
+         0: Fn F1                      => Do Nothing One                is FN, reprogrammable
+         1: Fn F2                      => Do Nothing One                is FN, reprogrammable
+         2: Fn F3                      => Do Nothing One                is FN, reprogrammable
+         3: Fn F4                      => Do Nothing One                is FN, reprogrammable
+         4: Fn F5                      => Do Nothing One                is FN, reprogrammable
+         5: Fn F6                      => Do Nothing One                is FN, reprogrammable
+         6: Fn F7                      => Do Nothing One                is FN, reprogrammable
+         7: Fn F8                      => Do Nothing One                is FN, reprogrammable
+         8: Fn F9                      => Do Nothing One                is FN, reprogrammable
+         9: Mute                       => Mute                          is FN
+        10: Volume Down                => Volume Down                   is FN
+        11: Volume Up                  => Volume Up                     is FN
+     Battery: 70%, discharging, next level 20%.

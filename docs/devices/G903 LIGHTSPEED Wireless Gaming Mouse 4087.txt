@@ -1,0 +1,105 @@
+solaar version 1.1.8rc3+git1940-4e7b6b3
+
+  1: G903 LIGHTSPEED Wireless Gaming Mouse w/ HERO
+     Device path  : /dev/hidraw13
+     WPID         : 4087
+     Codename     : G903 LS
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number: 3EF038B9
+     Model ID:      4087C0910000
+     Unit ID:       3EF038B9
+        Bootloader: BL1 06.01.B0013
+          Firmware: MPM 23.01.B0013
+             Other:
+     The power switch is located on the base.
+     Supports 31 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Bootloader BL1 06.01.B0013 0000047072FE
+            Firmware: Firmware MPM 23.01.B0013 4087047072FE
+            Firmware: Other
+            Unit ID: 3EF038B9  Model ID: 4087C0910000  Transport IDs: {'wpid': '4087', 'usbid': 'C091'}
+         3: DEVICE NAME            {0005} V0
+            Name: G903 LIGHTSPEED Wireless Gaming Mouse w/ HERO
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: BATTERY VOLTAGE        {1001} V2
+            Battery: 90% 4079mV , discharging.
+         7: RGB EFFECTS            {8071} V0
+         8: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Onboard Profiles (saved): Enable
+            Onboard Profiles        : Enable
+         9: MOUSE BUTTON SPY       {8110} V0
+        10: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Polling Rate (ms) (saved): 1
+            Polling Rate (ms)        : 1
+        11: ADJUSTABLE DPI         {2201} V1
+            Sensitivity (DPI) (saved): 6400
+            Sensitivity (DPI)        : 6400
+        12: DFUCONTROL SIGNED      {00C2} V0
+        13: DEVICE RESET           {1802} V0    internal, hidden
+        14: unknown:1803           {1803} V0    internal, hidden
+        15: OOBSTATE               {1805} V0    internal, hidden
+        16: CONFIG DEVICE PROPS    {1806} V4    internal, hidden
+        17: unknown:1811           {1811} V0    internal, hidden
+        18: unknown:1830           {1830} V0    internal, hidden
+        19: unknown:1890           {1890} V4    internal, hidden
+        20: unknown:1891           {1891} V4    internal, hidden
+        21: unknown:18A1           {18A1} V0    internal, hidden
+        22: unknown:1801           {1801} V0    internal, hidden
+        23: unknown:18B1           {18B1} V0    internal, hidden
+        24: unknown:1DF3           {1DF3} V0    internal, hidden
+        25: unknown:1E00           {1E00} V0    hidden
+        26: unknown:1EB0           {1EB0} V0    internal, hidden
+        27: unknown:1863           {1863} V0    internal, hidden
+        28: unknown:1E22           {1E22} V0    internal, hidden
+        29: HIRES WHEEL            {2121} V0
+            Multiplier: 8
+            Has invert: Normal wheel motion
+            Has ratchet switch: Normal wheel mode
+            Low resolution mode
+            HID notification
+            Scroll Wheel Direction (saved): False
+            Scroll Wheel Direction        : False
+            Scroll Wheel Resolution (saved): False
+            Scroll Wheel Resolution        : False
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        30: unknown:18C0           {18C0} V0    internal, hidden
+     Battery: 90% 4079mV , discharging.
+
+  7: Candy companion chip
+     Device path  : /dev/hidraw14
+     Codename     : Candy
+     Kind         : touchpad
+     Protocol     : HID++ 4.2
+     Serial number: 4E4E9946
+     Model ID:      405F00000000
+     Unit ID:       34304713
+          Firmware: CC  07.00.B0010
+        Bootloader: BOT 32.00.B0010
+     Supports 12 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Firmware CC  07.00.B0010 405F
+            Firmware: Bootloader BOT 32.00.B0010 405F
+            Unit ID: 34304713  Model ID: 405F00000000  Transport IDs: {'wpid': '405F'}
+         3: DEVICE NAME            {0005} V0
+            Name: Candy companion chip
+            Kind: touchpad
+         4: unknown:18A1           {18A1} V0    internal, hidden
+         5: unknown:1E00           {1E00} V0    hidden
+         6: unknown:1EB0           {1EB0} V0    internal, hidden
+         7: DFUCONTROL SIGNED      {00C2} V0
+         8: unknown:1801           {1801} V0    internal, hidden
+         9: DEVICE RESET           {1802} V0    internal, hidden
+        10: unknown:1803           {1803} V0    internal, hidden
+        11: COLOR LED EFFECTS      {8070} V4
+     Battery status unavailable.

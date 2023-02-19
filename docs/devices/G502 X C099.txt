@@ -1,0 +1,62 @@
+Solaar version 1.1.7
+
+  1: G502 X
+     Device path  : /dev/hidraw2
+     USB id       : 046d:C099
+     Codename     : G502
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number:
+     Model ID:      C09900000000
+     Unit ID:       42004C00
+        Bootloader: BL1 59.00.B0002
+          Firmware: U1  60.00.B0009
+     Supports 22 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BL1 59.00.B0002 AB17
+            Firmware: Firmware U1  60.00.B0009 C099
+            Unit ID: 42004C00  Model ID: C09900000000  Transport IDs: {'usbid': 'C099'}
+         3: DEVICE NAME            {0005} V0
+            Name: G502 X
+            Kind: mouse
+         4: RESET                  {0020} V0
+         5: DFUCONTROL SIGNED      {00C2} V0
+         6: unknown:1801           {1801} V0    internal, hidden, unknown:000010
+         7: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+         8: OOBSTATE               {1805} V0    internal, hidden
+         9: CONFIG DEVICE PROPS    {1806} V8    internal, hidden, unknown:000010
+        10: unknown:1875           {1875} V0    internal, hidden, unknown:000010
+        11: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        12: unknown:18B1           {18B1} V0    internal, hidden, unknown:000010
+        13: unknown:18C0           {18C0} V0    internal, hidden, unknown:000010
+        14: unknown:1E00           {1E00} V0    hidden
+        15: unknown:1E22           {1E22} V0    internal, hidden, unknown:000010
+        16: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        17: HIRES WHEEL            {2121} V1
+            Multiplier: 8
+            Has invert: Normal wheel motion
+            Has ratchet switch: Normal wheel mode
+            High resolution mode
+            HID notification
+            Scroll Wheel Direction (saved): False
+            Scroll Wheel Direction        : False
+            Scroll Wheel Resolution (saved): True
+            Scroll Wheel Resolution        : True
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        18: ADJUSTABLE DPI         {2201} V2
+            Sensitivity (DPI) (saved): 1600
+            Sensitivity (DPI)        : 1600
+        19: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Polling Rate (ms) (saved): 1
+            Polling Rate (ms)        : 1
+        20: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Onboard Profiles (saved): Enable
+            Onboard Profiles        : Enable
+        21: MOUSE BUTTON SPY       {8110} V0
+     Battery status unavailable.

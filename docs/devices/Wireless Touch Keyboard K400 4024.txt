@@ -1,0 +1,53 @@
+
+  1: Wireless Touch Keyboard K400
+     Codename     : K400
+     Kind         : keyboard
+     Wireless PID : 4024
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: AC5F5069
+          Firmware: RQK 50.01.B0013
+     The power switch is located on the edge of top right corner.
+     Supports 22 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+         4: DEVICE NAME            {0005}
+         5: BATTERY STATUS         {1000}
+         6: REPROG CONTROLS        {1B00}
+         7: REPROG CONTROLS V3     {1B03}
+         8: WIRELESS DEVICE STATUS {1D4B}
+         9: unknown:1DF0           {1DF0}   hidden
+        10: unknown:1DF3           {1DF3}   internal, hidden
+        11: unknown:1E00           {1E00}   hidden
+        12: VERTICAL SCROLLING     {2100}
+        13: HI RES SCROLLING       {2120}
+        14: MOUSE POINTER          {2200}
+        15: FN INVERSION           {40A0}
+        16: NEW FN INVERSION       {40A2}
+        17: ENCRYPTION             {4100}
+        18: KEYBOARD LAYOUT        {4520}
+        19: TOUCHPAD FW ITEMS      {6010}
+        20: TOUCHPAD SW ITEMS      {6011}
+        21: TOUCHPAD WIN8 FW ITEMS {6012}
+     Has 18 reprogrammable keys:
+         0: SHOW DESKTOP               => ShowDesktop                   is FN, reprogrammable
+         1: METRO APPSWITCH            => MetroAppSwitch                is FN, reprogrammable
+         2: METRO SEARCH               => MetroSearch                   is FN, reprogrammable
+         3: METRO SHARE                => MetroShare                    is FN, reprogrammable
+         4: METRO DEVICES              => MetroDevices                  is FN, reprogrammable
+         5: METRO SETTINGS             => MetroSettings                 is FN, reprogrammable
+         6: Previous                   => Previous                      is FN
+         7: Play/Pause                 => Play/Pause                    is FN
+         8: Next                       => Next                          is FN
+         9: Mute                       => Mute                          is FN
+        10: Volume Down                => Volume Down                   is FN
+        11: Volume Up                  => Volume Up                     is FN
+        12: MEDIA PLAYER               => Music                         nonstandard, reprogrammable
+        13: Lock PC                    => WindowsLock                   nonstandard, reprogrammable
+        14: SLEEP                      => Sleep                         nonstandard, reprogrammable
+        15: LEFT CLICK                 => LeftClick                     mse
+        16: LEFT CLICK                 => LeftClick                     mse
+        17: RIGHT CLICK                => RightClick                    mse
+     Battery: 90%, discharging.

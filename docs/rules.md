@@ -44,14 +44,6 @@ Running Solaar with the `-ddd`
 option will show information about notifications, including their feature
 name, report number, and data.
 
-Solaar can also create special notifications in response to mouse movements on some mice.
-Setting the `Mouse Gestures` setting to a key enables special processing of mouse movements
-while the key is depressed.  Moving the mouse creates a mouse movement event.
-Stopping the mouse for a little while and moving it again creates another mouse movement event.
-Pressing a diverted key creates a key event.
-When the key is released the sequence of events is sent as a synthetic notification
-that can be matched with `Mouse Gesture` conditions.
-
 In response to a feature-based HID++ notification Solaar runs a sequence of
 rules.  A `Rule` is a sequence of components, which are either sub-rules,
 conditions, or actions.  Conditions and actions are dictionaries with one
@@ -81,13 +73,34 @@ notification is their string argument.
 `Report` conditions are if true if the report number in the current
 notification is their integer argument.
 
-`Key` conditions are true if the Logitech name of the last diverted key or button pressed is their
+`Key` conditions are true if the Logitech name of the current **diverted** key or button being pressed is their
 string argument.  Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively.  Logitech key and button names are shown in the `Key/Button Diversion`
 setting.  These names are also shown in the output of `solaar show` in the 'reprogrammable keys'
 section.  Only keys or buttons that have 'divertable' in their report can be diverted.
 Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+
+`KeyIsDown` conditions are true if the **diverted** key or button that is their string argument is currently down.
+Note that this only works for **diverted** keys or buttons, including diverted Gn, Mn, and MR keys.
+
+Solaar can also create special notifications in response to mouse movements on some mice.
+Setting `Key/Button Diversion` for a key or button to Mouse Gestures causes the key or button to create a `Mouse Gesture`
+notification for the period that the key or button is depressed.
+Moving the mouse creates a mouse movement event.
+Stopping the mouse for a little while and moving it again creates another mouse movement event.
+Pressing a diverted key creates a key event.
+When the key is released the sequence of events is sent as a synthetic notification
+that can be matched with `Mouse Gesture` conditions.
+
+`Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
+Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
+The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
+If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
+So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
+The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
+Directions and buttons can be mixed and chained together however you like.
+It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
 `Modifiers` conditions take either a string or a sequence of strings, which
 can only be `Shift`, `Control`, `Alt`, and `Super`.
@@ -99,8 +112,9 @@ or the window's Window manager class or instance name starts with their string a
 `MouseProcess` conditions are true if the process for the window under the mouse
 or the window's Window manager class or instance name starts with their string argument.
 
+`Device` conditions are true if a particular device originated the notification.
 `Active` conditions are true if a particular device is active.
-`Active` conditions take one argument, which is the Serial number or Unit ID of a device,
+`Device` and `Active` conditions take one argument, which is the Serial number or Unit ID of a device,
 as shown in Solaar's detail pane.
 
 `Setting` conditions check the value of a Solaar setting on a device.
@@ -148,14 +162,11 @@ A `thumb_wheel_down` test is the rotation amount of a `THUMB WHEEL` downward rot
 same but for `LOWRES WHEEL` and `HIRES WHEEL`.
 `True` and `False` tests return True and False, respectively.
 
-`Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
-Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
-The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
-If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
-So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
-The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
-Directions and buttons can be mixed and chained together however you like.
-It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
+Solaar keeps track of the total signed displacement of the current thumb wheel movement.
+This displacement is reset when the thumb wheel is inactive.
+`thumb_wheel_up` and `thumb_wheel_down` tests take an optional integer parameter.
+With a parameter the test is only true if the current thumb wheel displacement is greater than the parameter.
+The displacement is then lessened by the amount of the parameter.
 
 `Setting` conditions check device settings of devices, provided the device is on-line.
 The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
@@ -187,9 +198,11 @@ then Solaar will add keypresses to produce that keysymbol,
 e.g., simulating a left shift keypress to get "A" instead of "a".
 If a key symbol is not available in the current keymap or needs other shift-like keys,
 then Solaar cannot simulate it.
-If Solaar can determine the current key modifiers (shift, control, etc.)
-any key symbols that correspond to these modifier keys are not pressed,
-so if the shift key is currently down on a keyboard Solaar will not bother to simulate a shift key.
+Under X11 Solaar can determine the current key modifiers (shift, control, etc.).
+Any key symbols that correspond to these modifier keys are not depressed and released when clicking.
+So if the shift key is currently down on a keyboard Solaar will not bother to simulate a shift key.
+Under Wayland this check cannot be done so the net result of a `KeyPress` action that is not a `depress` or a `release`
+and that contains modifier keys might be to release the modifier keys.
 
 Simulating input in Linux is complex.
 Solaar has to try to determine which keyboard key corresponds to which input character as it cannot directly
@@ -213,6 +226,10 @@ Other simple settings take two extra arguments, a key indicating which sub-setti
 For settings that use gestures as an argument the internal name of the gesture is used,
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 All settings are supported.
+
+A `Later` action executes rule components later.
+`Later` actions take an integer delay in seconds between 1 and 100 followed by a zero or more rule components that will be executed later.
+Processing of the rest of the rule continues immediately.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
 One rule turns

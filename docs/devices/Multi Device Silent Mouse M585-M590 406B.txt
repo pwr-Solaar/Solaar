@@ -1,0 +1,111 @@
+Solaar version 1.1.7
+
+
+  2: Multi Device Silent Mouse M585/M590
+     Device path  : /dev/hidraw2
+     WPID         : 406B
+     Codename     : M585/M590
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Polling rate : 8 ms (125Hz)
+     Serial number: 37216581
+     Model ID:      B01B406B0000
+     Unit ID:       F2D653C0
+        Bootloader: BOT 48.00.B0001
+          Firmware: MPM 05.02.B0007
+             Other:
+     The power switch is located on the base.
+     Supports 34 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Bootloader BOT 48.00.B0001 00005BEB5EE001
+            Firmware: Firmware MPM 05.02.B0007 406B5BEB5EE001
+            Firmware: Other
+            Unit ID: F2D653C0  Model ID: B01B406B0000  Transport IDs: {'btleid': 'B01B', 'wpid': '406B'}
+         3: DEVICE NAME            {0005} V0
+            Name: M585/M590 Multi-Device Mouse
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: RESET                  {0020} V0
+         6: CRYPTO ID              {0021} V0
+         7: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: M585/M590
+         8: BATTERY STATUS         {1000} V0
+            Battery: 50%, discharging, next level 20%.
+         9: CHANGE HOST            {1814} V1
+            Cambiar Host        : 1:romanescu
+        10: HOSTS INFO             {1815} V1
+            Host 0 (paired): romanescu
+            Host 1 (paired): espinaca
+        11: REPROG CONTROLS V4     {1B04} V3
+            Acciones de Tecla/Botón (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Acciones de Tecla/Botón        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Desvio de Tecla/Botón (saved): {Middle Button:Normal, Back Button:Normal, Forward Button:Normal, Left Tilt:Normal, Right Tilt:Normal}
+            Desvio de Tecla/Botón        : {Middle Button:Normal, Back Button:Normal, Forward Button:Normal, Left Tilt:Normal, Right Tilt:Normal}
+        12: PERSISTENT REMAPPABLE ACTION {1C00} V0
+            Persistent Key/Button Mapping        : {Left Button:Mouse Button Left, Right Button:Mouse Button Right, Middle Button:Mouse Button Middle, Back Button:Mouse Button Back, Forward Button:Mouse Button Forward, Left Tilt:Horizontal Scroll Left, Right Tilt:Horizontal Scroll Right}
+        13: POINTER SPEED          {2205} V0
+            Pointer Speed: 1.0
+            Sensibilidad (Velocidad del puntero) (saved): 256
+            Sensibilidad (Velocidad del puntero)        : 256
+        14: VERTICAL SCROLLING     {2100} V0
+            Roller type: standard
+            Ratchet per turn: 18
+            Scroll lines: 0
+        15: DFUCONTROL SIGNED      {00C2} V0
+        16: DEVICE RESET           {1802} V0    internal, hidden
+        17: unknown:1803           {1803} V0    internal, hidden
+        18: CONFIG DEVICE PROPS    {1806} V0    internal, hidden
+        19: OOBSTATE               {1805} V0    internal, hidden
+        20: unknown:1813           {1813} V0    internal, hidden
+        21: unknown:1830           {1830} V0    internal, hidden
+        22: unknown:1861           {1861} V0    internal, hidden
+        23: unknown:1890           {1890} V0    internal, hidden
+        24: unknown:1891           {1891} V0    internal, hidden
+        25: unknown:18A1           {18A1} V0    internal, hidden
+        26: unknown:1DF3           {1DF3} V0    internal, hidden
+        27: unknown:1E00           {1E00} V0    hidden
+        28: unknown:1EB0           {1EB0} V0    internal, hidden
+        29: unknown:18B1           {18B1} V0    internal, hidden
+        30: unknown:1850           {1850} V0    internal, hidden
+        31: unknown:1F03           {1F03} V0    internal, hidden
+        32: unknown:18C0           {18C0} V0    internal, hidden
+        33: LOWRES WHEEL           {2130} V0
+            Wheel Reports: HID
+            Desvio Rueda Desplazamiento (saved): False
+            Desvio Rueda Desplazamiento        : False
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, reprogrammable, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Mouse Scroll Left Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Mouse Scroll Right Button
+             mse, reprogrammable, divertable, persistently divertable, raw XY, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:3, group mask:empty
+             reporting: default
+     Has 7 persistent remappable keys:
+         0: Left Button                => Mouse Button: Mouse Button Left
+         1: Right Button               => Mouse Button: Mouse Button Right
+         2: Middle Button              => Mouse Button: Mouse Button Middle
+         3: Back Button                => Mouse Button: Mouse Button Back
+         4: Forward Button             => Mouse Button: Mouse Button Forward
+         5: Left Tilt                  => Horizontal Scroll: Horizontal Scroll Left
+         6: Right Tilt                 => Horizontal Scroll: Horizontal Scroll Right
+     Battery: 50%, discharging, next level 20%.

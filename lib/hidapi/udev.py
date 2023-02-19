@@ -26,10 +26,11 @@ necessary.
 
 import errno as _errno
 import os as _os
+import warnings as _warnings
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
-from logging import DEBUG as _DEBUG
+from logging import INFO as _INFO
 from logging import getLogger
 from select import select as _select
 from time import sleep
@@ -43,22 +44,24 @@ from pyudev import Monitor as _Monitor
 
 _log = getLogger(__name__)
 del getLogger
-
 native_implementation = 'udev'
+fileopen = open
 
 DeviceInfo = namedtuple(
     'DeviceInfo', [
         'path',
+        'bus_id',
         'vendor_id',
         'product_id',
-        'serial',
-        'release',
-        'manufacturer',
-        'product',
         'interface',
         'driver',
-        'bus_id',
+        'manufacturer',
+        'product',
+        'serial',
+        'release',
         'isDevice',
+        'hidpp_short',
+        'hidpp_long',
     ]
 )
 del namedtuple
@@ -92,17 +95,39 @@ def exit():
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
 def _match(action, device, filterfn):
     hid_device = device.find_parent('hid')
-    if not hid_device:
+    if not hid_device:  # only HID devices are of interest to Solaar
         return
     hid_id = hid_device.get('HID_ID')
     if not hid_id:
         return  # there are reports that sometimes the id isn't set up right so be defensive
     bid, vid, pid = hid_id.split(':')
+    hid_hid_device = hid_device.find_parent('hid')
+    if hid_hid_device:
+        return  # these are devices connected through a receiver so don't pick them up here
 
-    filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16))
+    try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
+        from hid_parser import ReportDescriptor as _ReportDescriptor
+
+        # from hid_parser import Usage as _Usage
+        hidpp_short = hidpp_long = False
+        devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'
+        with fileopen(devfile, 'rb') as fd:
+            with _warnings.catch_warnings():
+                _warnings.simplefilter('ignore')
+                rd = _ReportDescriptor(fd.read())
+            hidpp_short = 0x10 in rd.input_report_ids and 6 * 8 == int(rd.get_input_report_size(0x10))
+            # and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages  # be more permissive
+            hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(rd.get_input_report_size(0x11))
+            # and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages  # be more permissive
+        if not hidpp_short and not hidpp_long:
+            return
+    except Exception as e:  # if can't process report descriptor fall back to old scheme
+        hidpp_short = hidpp_long = None
+        _log.warn('Report Descriptor not processed for BID %s VID %s PID %s: %s', bid, vid, pid, e)
+
+    filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:
         return
-
     hid_driver = filter.get('hid_driver')
     interface_number = filter.get('usb_interface')
     isDevice = filter.get('isDevice')
@@ -118,13 +143,14 @@ def _match(action, device, filterfn):
                 return
 
         intf_device = device.find_parent('usb', 'usb_interface')
-        # print ("*** usb interface", action, device, "usb_interface:", intf_device)
         usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug(
-                'Found device BID %s VID %s PID %s INTERFACE %s FILTER %s', bid, vid, pid, usb_interface, interface_number
+        # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
+        if _log.isEnabledFor(_INFO):
+            _log.info(
+                'Found device BID %s VID %s PID %s HID++ %s %s USB %s %s', bid, vid, pid, hidpp_short, hidpp_long,
+                usb_interface, interface_number
             )
-        if not (interface_number is None or interface_number == usb_interface):
+        if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
             return
         attrs = intf_device.attributes if intf_device else None
 
@@ -133,13 +159,15 @@ def _match(action, device, filterfn):
             bus_id=int(bid, 16),
             vendor_id=vid[-4:],
             product_id=pid[-4:],
-            driver=hid_driver_name,
             interface=usb_interface,
-            isDevice=isDevice,
+            driver=hid_driver_name,
+            manufacturer=attrs.get('manufacturer') if attrs else None,
+            product=attrs.get('product') if attrs else None,
             serial=hid_device.get('HID_UNIQ'),
             release=attrs.get('bcdDevice') if attrs else None,
-            manufacturer=attrs.get('manufacturer') if attrs else None,
-            product=attrs.get('product') if attrs else None
+            isDevice=isDevice,
+            hidpp_short=hidpp_short,
+            hidpp_long=hidpp_long,
         )
         return d_info
 
@@ -151,13 +179,15 @@ def _match(action, device, filterfn):
             bus_id=None,
             vendor_id=vid[-4:],
             product_id=pid[-4:],
-            driver=None,
             interface=None,
-            isDevice=isDevice,
+            driver=None,
+            manufacturer=None,
+            product=None,
             serial=None,
             release=None,
-            manufacturer=None,
-            product=None
+            isDevice=isDevice,
+            hidpp_short=None,
+            hidpp_long=None,
         )
         return d_info
 
@@ -274,6 +304,7 @@ def open(vendor_id, product_id, serial=None):
 
     :returns: an opaque device handle, or ``None``.
     """
+
     def matchfn(bid, vid, pid):
         return vid == vendor_id and pid == product_id
 

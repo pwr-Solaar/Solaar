@@ -1,0 +1,80 @@
+Solaar version 1.1.1
+
+  1: Wireless All-in-One Keyboard TK820
+     Device path  : /dev/hidraw5
+     WPID         : 4102
+     Codename     : TK820
+     Kind         : keyboard
+     Protocol     : HID++ 2.0
+     Polling rate : 8 ms (125Hz)
+     Serial number: 7D7699C9
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQK 52.00.B0025
+        Bootloader: BL  02.00.B0001
+          Hardware: 72
+             Other:
+     The power switch is located on the top right corner.
+     Supports 28 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: FEATURE INFO           {0002}
+         3: DEVICE FW VERSION      {0003}
+            Firmware: Firmware RQK 52.00.B0025 4102
+            Firmware: Bootloader BL  02.00.B0001 4102
+            Firmware: Hardware  72
+            Firmware: Other
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         4: DEVICE NAME            {0005}
+            Name: Wireless All-in-One Keyboard TK820
+            Kind: keyboard
+         5: BATTERY STATUS         {1000}
+            Battery: 20%, discharging, next level 5%.
+         6: WIRELESS DEVICE STATUS {1D4B}
+         7: unknown:1DF3           {1DF3}   internal, hidden
+         8: REPROG CONTROLS        {1B00}
+         9: unknown:1F03           {1F03}   internal, hidden
+        10: FN INVERSION           {40A0}
+            Swap Fx function (saved): True
+            Swap Fx function        : True
+        11: NEW FN INVERSION       {40A2}
+            Fn-swap: enabled
+            Fn-swap default: enabled
+        12: MOUSE POINTER          {2200}
+            DPI: 1000
+            Acceleration: low
+            Override OS ballistics
+            No vertical tuning, standard mice
+        13: DFUCONTROL LEGACY      {00C0}
+        14: unknown:1E80           {1E80}   internal, hidden
+        15: TOUCHPAD RAW XY        {6100}
+        16: unknown:1860           {1860}   internal, hidden
+        17: unknown:1E00           {1E00}   hidden
+        18: REPROG CONTROLS V3     {1B03}
+        19: unknown:1890           {1890}   internal, hidden
+        20: unknown:18E6           {18E6}   internal, hidden
+        21: unknown:18A0           {18A0}   internal, hidden
+        22: unknown:1830           {1830}   internal, hidden
+        23: unknown:1F04           {1F04}   internal, hidden
+        24: unknown:1EA1           {1EA1}   internal, hidden
+        25: unknown:18B0           {18B0}   internal, hidden
+        26: ENCRYPTION             {4100}
+        27: KEYBOARD LAYOUT        {4520}
+     Has 15 reprogrammable keys:
+         0: Fn Left Click              => ShowUI                        divertable
+         1: Metro Appswitch            => MetroAppSwitch                is FN, reprogrammable
+         2: Metro Search               => MetroSearch                   is FN, reprogrammable
+         3: unknown:00B2               => MetroShare2                   is FN, reprogrammable
+         4: unknown:00B3               => MetroDevices2                 is FN, reprogrammable
+         5: unknown:00B4               => MetroSettings2                is FN, reprogrammable
+         6: Previous                   => Previous                      is FN
+         7: Play/Pause                 => Play/Pause                    is FN
+         8: Next                       => Next                          is FN
+         9: Mute                       => Mute                          is FN
+        10: Volume Down                => Volume Down                   is FN
+        11: Volume Up                  => Volume Up                     is FN
+        12: Sleep                      => Sleep                         is FN, reprogrammable
+        13: Left Button                => Left Click                    mse
+        14: Right Button               => Right Click
+         mse
+     Battery: 20%, discharging, next level 5

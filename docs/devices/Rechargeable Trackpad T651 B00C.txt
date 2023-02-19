@@ -1,0 +1,30 @@
+Solaar version 1.1.7
+
+  1: Rechargeable Trackpad T651
+     Device path  : /dev/hidraw9
+     USB id       : 046d:B00C
+     Codename     : Rechargeable
+     Kind         : touchpad
+     Protocol     : HID++ 2.0
+     Serial number:
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RBM 05.00.B0026
+             Other:
+     Supports 9 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: FEATURE INFO           {0002} V0
+         3: DEVICE FW VERSION      {0003} V0
+            Firmware: Firmware RBM 05.00.B0026 B00C
+            Firmware: Other
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         4: DEVICE NAME            {0005} V0
+            Name: Rechargeable Trackpad T651
+            Kind: touchpad
+         5: unknown:1E00           {1E00} V0    hidden
+         6: GENERIC TEST           {1800} V0    internal, hidden
+         7: BATTERY STATUS         {1000} V0
+            Battery: 90%, discharging, next level 70%.
+         8: TOUCHPAD RAW XY        {6100} V0
+     Battery: 90%, discharging, next level 70%.

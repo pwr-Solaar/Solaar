@@ -37,6 +37,7 @@ del getLogger
 
 
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
+
     def _do_read(s, force, sb, online, sensitive):
         v = s.read(not force)
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, priority=99)
@@ -45,6 +46,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
 
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
+
     def _do_write(s, v, sb, key):
         try:
             if key is None:
@@ -72,6 +74,7 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
 
 
 class Control():
+
     def __init__(**kwargs):
         pass
 
@@ -96,6 +99,7 @@ class Control():
 
 
 class ToggleControl(Gtk.Switch, Control):
+
     def __init__(self, sbox, delegate=None):
         super().__init__(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
         self.init(sbox, delegate)
@@ -109,6 +113,7 @@ class ToggleControl(Gtk.Switch, Control):
 
 
 class SliderControl(Gtk.Scale, Control):
+
     def __init__(self, sbox, delegate=None):
         super().__init__(halign=Gtk.Align.FILL)
         self.init(sbox, delegate)
@@ -143,6 +148,7 @@ def _create_choice_control(sbox, delegate=None, choices=None):
 
 # GTK boxes have property lists, but the keys must be strings
 class ChoiceControlLittle(Gtk.ComboBoxText, Control):
+
     def __init__(self, sbox, delegate=None, choices=None):
         super().__init__(halign=Gtk.Align.FILL)
         self.init(sbox, delegate)
@@ -168,6 +174,7 @@ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
 
 
 class ChoiceControlBig(Gtk.Entry, Control):
+
     def __init__(self, sbox, delegate=None, choices=None):
         super().__init__(halign=Gtk.Align.FILL)
         self.init(sbox, delegate)
@@ -218,6 +225,7 @@ class ChoiceControlBig(Gtk.Entry, Control):
 
 
 class MapChoiceControl(Gtk.HBox, Control):
+
     def __init__(self, sbox, delegate=None):
         super().__init__(homogeneous=False, spacing=6)
         self.init(sbox, delegate)
@@ -268,6 +276,7 @@ class MapChoiceControl(Gtk.HBox, Control):
 
 
 class MultipleControl(Gtk.ListBox, Control):
+
     def __init__(self, sbox, change, button_label='...', delegate=None):
         super().__init__()
         self.init(sbox, delegate)
@@ -311,6 +320,7 @@ class MultipleControl(Gtk.ListBox, Control):
 
 
 class MultipleToggleControl(MultipleControl):
+
     def setup(self, setting):
         self._label_control_pairs = []
         for k in setting._validator.get_options():
@@ -358,6 +368,7 @@ class MultipleToggleControl(MultipleControl):
 
 
 class MultipleRangeControl(MultipleControl):
+
     def setup(self, setting):
         self._items = []
         for item in setting._validator.items:
@@ -447,6 +458,7 @@ class MultipleRangeControl(MultipleControl):
 
 
 class PackedRangeControl(MultipleRangeControl):
+
     def setup(self, setting):
         validator = setting._validator
         self._items = []
@@ -593,7 +605,7 @@ def _create_sbox(s, device):
 
 
 def _update_setting_item(sbox, value, is_online=True, sensitive=True):
-    sbox._spinner.set_visible(False)
+    #    sbox._spinner.set_visible(False)   # don't repack item box
     sbox._spinner.stop()
     if value is None:
         sbox._control.set_sensitive(False)
@@ -703,3 +715,23 @@ def _change_setting(device, setting, values):
     else:
         sbox = None
     _write_async(setting, values[-1], sbox, None, key=values[0] if len(values) > 1 else None)
+
+
+def record_setting(device, setting, values):
+    """External interface to record a setting that has changed on the device and have the GUI show the change"""
+    assert device == setting._device
+    GLib.idle_add(_record_setting, device, setting, values, priority=99)
+
+
+def _record_setting(device, setting, values):
+    if len(values) > 1:
+        setting.update_key_value(values[0], values[-1])
+        value = {values[0]: values[-1]}
+    else:
+        setting.update(values[-1])
+        value = values[-1]
+    device_path = device.receiver.path if device.receiver else device.path
+    if (device_path, device.number, setting.name) in _items:
+        sbox = _items[(device_path, device.number, setting.name)]
+        if sbox:
+            _update_setting_item(sbox, value)

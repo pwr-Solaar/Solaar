@@ -1,0 +1,40 @@
+Solaar version 1.1.6rc4
+
+  4: Wireless Keyboard Dell KB714
+     Device path  : /dev/hidraw6
+     WPID         : 4015
+     Codename     : Dell KB714
+     Kind         : keyboard
+     Protocol     : HID++ 3.0
+     Polling rate : 20 ms (50Hz)
+     Serial number: C0A37A58
+     Model ID:      000000000000
+     Unit ID:       00000000
+          Firmware: RQK 51.00.B0005
+     Supports 19 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V0
+            Firmware: Firmware RQK 51.00.B0005 4015
+            Unit ID: 00000000  Model ID: 000000000000  Transport IDs: {}
+         3: DEVICE NAME            {0005} V0
+            Name: Wireless Keyboard Dell KB714
+            Kind: keyboard
+         4: BATTERY STATUS         {1000} V0
+            Battery: 90%, discharging, next level 5%.
+         5: WIRELESS DEVICE STATUS {1D4B} V0
+         6: ENCRYPTION             {4100} V0
+         7: KEYBOARD LAYOUT        {4520} V0
+         8: unknown:1810           {1810} V0    internal, hidden
+         9: unknown:1830           {1830} V0    internal, hidden
+        10: unknown:1860           {1860} V0    internal, hidden
+        11: unknown:1890           {1890} V0    internal, hidden
+        12: unknown:18A0           {18A0} V0    internal, hidden
+        13: unknown:18B0           {18B0} V0    internal, hidden
+        14: REMAINING PAIRING      {1DF0} V0    hidden
+            Remaining Pairings: 54
+        15: unknown:1DF3           {1DF3} V0    internal, hidden
+        16: unknown:1E00           {1E00} V0    hidden
+        17: unknown:1E90           {1E90} V0    internal, hidden
+        18: DEVICE GROUPS          {0006} V0
+     Battery: 90%, discharging, next level 5%.

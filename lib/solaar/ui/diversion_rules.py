@@ -52,6 +52,7 @@ _rule_component_clipboard = None
 
 
 class RuleComponentWrapper(GObject.GObject):
+
     def __init__(self, component, level=0, editable=False):
         self.component = component
         self.level = level
@@ -86,6 +87,7 @@ class RuleComponentWrapper(GObject.GObject):
 
 
 class DiversionDialog:
+
     def __init__(self):
 
         window = Gtk.Window()
@@ -117,8 +119,8 @@ class DiversionDialog:
         window.add(vbox)
 
         geometry = Gdk.Geometry()
-        geometry.min_width = 800
-        geometry.min_height = 800
+        geometry.min_width = 600  # don't ask for so much space
+        geometry.min_height = 400
         window.set_geometry_hints(None, geometry, Gdk.WindowHints.MIN_SIZE)
         window.set_position(Gtk.WindowPosition.CENTER)
 
@@ -192,7 +194,7 @@ class DiversionDialog:
         view.connect('button-release-event', self._event_button_released)
         view.get_selection().connect('changed', self._selection_changed)
         sw.add(view)
-        sw.set_size_request(0, 600)
+        sw.set_size_request(0, 300)  # don't ask for so much height
 
         button_box = Gtk.HBox(spacing=20)
         self.save_btn = Gtk.Button.new_from_icon_name('document-save', Gtk.IconSize.BUTTON)
@@ -257,7 +259,7 @@ class DiversionDialog:
                 editable = editable or (rule_component.source is not None)
         wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
         piter = model.insert(it, pos, (wrapped, ))
-        if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or)):
+        if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
             for c in rule_component.components:
                 ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
                 self._populate_model(model, piter, c, level + 1, editable=ed)
@@ -516,7 +518,9 @@ class DiversionDialog:
                         (_('Mouse process'), _DIV.MouseProcess, ''),
                         (_('Modifiers'), _DIV.Modifiers, []),
                         (_('Key'), _DIV.Key, ''),
+                        (_('KeyIsDown'), _DIV.KeyIsDown, ''),
                         (_('Active'), _DIV.Active, ''),
+                        (_('Device'), _DIV.Device, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
                         (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
@@ -531,6 +535,7 @@ class DiversionDialog:
                         (_('Mouse click'), _DIV.MouseClick, ['left', 1]),
                         (_('Set'), _DIV.Set, [None, '', None]),
                         (_('Execute'), _DIV.Execute, ['']),
+                        (_('Later'), _DIV.Later, [1]),
                     ]
                 ],
             ]
@@ -700,6 +705,7 @@ class DiversionDialog:
 
 
 class CompletionEntry(Gtk.Entry):
+
     def __init__(self, values, *args, **kwargs):
         super().__init__(*args, **kwargs)
         CompletionEntry.add_completion_to_entry(self, values)
@@ -747,6 +753,7 @@ class SmartComboBox(Gtk.ComboBox):
     as soon as the user finishes typing any accepted name.
 
     """
+
     def __init__(
         self, all_values, blank='', completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
     ):
@@ -948,6 +955,7 @@ class DeviceInfo:
 
 
 class AllDevicesInfo:
+
     def __init__(self):
         self._devices = []
         self._lock = threading.Lock()
@@ -1115,6 +1123,42 @@ class OrUI(RuleComponentUI):
     @classmethod
     def left_label(cls, component):
         return _('Or')
+
+
+class LaterUI(RuleComponentUI):
+
+    CLASS = _DIV.Later
+    MIN_VALUE = 1
+    MAX_VALUE = 100
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(_('Number of seconds to delay.'))
+        self.widgets[self.label] = (0, 0, 1, 1)
+        self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
+        self.field.set_halign(Gtk.Align.CENTER)
+        self.field.set_valign(Gtk.Align.CENTER)
+        self.field.set_hexpand(True)
+        #        self.field.set_vexpand(True)
+        self.field.connect('changed', self._on_update)
+        self.widgets[self.field] = (0, 1, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field.set_value(component.delay)
+
+    def collect_value(self):
+        return [int(self.field.get_value())] + self.component.components
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Later')
+
+    @classmethod
+    def right_label(cls, component):
+        return str(component.delay)
 
 
 class NotUI(RuleComponentUI):
@@ -1336,7 +1380,7 @@ class KeyUI(ConditionUI):
         self.label.set_text(
             _(
                 'Diverted key or button depressed or released.\n'
-                'Use the Key/Button Diversion setting to divert keys and buttons.'
+                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
             )
         )
         self.widgets[self.label] = (0, 0, 5, 1)
@@ -1378,6 +1422,48 @@ class KeyUI(ConditionUI):
         return '%s (%04X) (%s)' % (str(component.key), int(component.key), _(component.action)) if component.key else 'None'
 
 
+class KeyIsDownUI(ConditionUI):
+
+    CLASS = _DIV.KeyIsDown
+    KEY_NAMES = map(str, _CONTROL)
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(
+            _(
+                'Diverted key or button is currently down.\n'
+                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
+            )
+        )
+        self.widgets[self.label] = (0, 0, 5, 1)
+        self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        self.key_field.set_size_request(600, 0)
+        self.key_field.connect('changed', self._on_update)
+        self.widgets[self.key_field] = (0, 1, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.key_field.set_text(str(component.key) if self.component.key else '')
+
+    def collect_value(self):
+        return self.key_field.get_text()
+
+    def _on_update(self, *args):
+        super()._on_update(*args)
+        icon = 'dialog-warning' if not self.component.key else ''
+        self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+
+    @classmethod
+    def left_label(cls, component):
+        return _('KeyIsDown')
+
+    @classmethod
+    def right_label(cls, component):
+        return '%s (%04X)' % (str(component.key), int(component.key)) if component.key else 'None'
+
+
 class TestUI(ConditionUI):
 
     CLASS = _DIV.Test
@@ -1386,36 +1472,53 @@ class TestUI(ConditionUI):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(_('Test condition on notification triggering rule processing.'))
-        self.widgets[self.label] = (0, 0, 1, 1)
-        self.field = Gtk.ComboBoxText.new_with_entry()
-        self.field.append('', '')
+        self.widgets[self.label] = (0, 0, 4, 1)
+        lbl = Gtk.Label(_('Test'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        self.widgets[lbl] = (0, 1, 1, 1)
+        lbl = Gtk.Label(_('Parameter'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        self.widgets[lbl] = (2, 1, 1, 1)
+
+        self.test = Gtk.ComboBoxText.new_with_entry()
+        self.test.append('', '')
         for t in _DIV.TESTS:
-            self.field.append(t, t)
-        self.field.set_valign(Gtk.Align.CENTER)
-        #        self.field.set_vexpand(True)
-        self.field.set_size_request(600, 0)
-        CompletionEntry.add_completion_to_entry(self.field.get_child(), _DIV.TESTS)
-        self.field.connect('changed', self._on_update)
-        self.widgets[self.field] = (0, 1, 1, 1)
+            self.test.append(t, t)
+        self.test.set_halign(Gtk.Align.END)
+        self.test.set_valign(Gtk.Align.CENTER)
+        self.test.set_hexpand(False)
+        self.test.set_size_request(300, 0)
+        CompletionEntry.add_completion_to_entry(self.test.get_child(), _DIV.TESTS)
+        self.test.connect('changed', self._on_update)
+        self.widgets[self.test] = (1, 1, 1, 1)
+
+        self.parameter = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.parameter.set_size_request(150, 0)
+        self.parameter.connect('changed', self._on_update)
+        self.widgets[self.parameter] = (3, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            self.field.set_active_id(component.test or '')
+            self.test.set_active_id(component.test)
+            self.parameter.set_text(str(component.parameter) if component.parameter is not None else '')
             if component.test not in _DIV.TESTS:
-                self.field.get_child().set_text(component.test)
+                self.test.get_child().set_text(component.test)
                 self._change_status_icon()
 
     def collect_value(self):
-        return (self.field.get_active_text() or '').strip()
+        try:
+            param = int(self.parameter.get_text()) if self.parameter.get_text() else None
+        except Exception:
+            param = self.parameter.get_text()
+        test = (self.test.get_active_text() or '').strip()
+        return [test, param] if param is not None else [test]
 
     def _on_update(self, *args):
         super()._on_update(*args)
         self._change_status_icon()
 
     def _change_status_icon(self):
-        icon = 'dialog-warning' if self.component.test not in _DIV.TESTS else ''
-        self.field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        icon = 'dialog-warning' if (self.test.get_active_text() or '').strip() not in _DIV.TESTS else ''
+        self.test.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
@@ -1423,7 +1526,7 @@ class TestUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return str(component.test)
+        return component.test + (' ' + repr(component.parameter) if component.parameter is not None else '')
 
 
 _TestBytesElement = namedtuple('TestBytesElement', ['id', 'label', 'min', 'max'])
@@ -1928,6 +2031,7 @@ def _from_named_ints(v, all_values):
 
 
 class SetValueControl(Gtk.HBox):
+
     def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
@@ -2088,6 +2192,13 @@ def _all_settings():
 class _DeviceUI:
     label_text = ''
 
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            same = not component.devID
+            device = _all_devices[component.devID]
+            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
+
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
@@ -2115,19 +2226,6 @@ class _DeviceUI:
         with self.ignore_changes():
             self.device_field.set_all_values([(d.id, d.display_name, *d.identifiers[1:]) for d in _all_devices])
 
-
-class ActiveUI(_DeviceUI, ConditionUI):
-
-    CLASS = _DIV.Active
-    label_text = _('Device is active and its settings can be changed.')
-
-    def show(self, component, editable):
-        super().show(component, editable)
-        with self.ignore_changes():
-            same = not component.devID
-            device = _all_devices[component.devID]
-            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
-
     def collect_value(self):
         device_str = self.device_field.get_value()
         same = device_str in ['', _('Originating device')]
@@ -2136,13 +2234,29 @@ class ActiveUI(_DeviceUI, ConditionUI):
         return device_value
 
     @classmethod
-    def left_label(cls, component):
-        return _('Active')
-
-    @classmethod
     def right_label(cls, component):
         device = _all_devices[component.devID]
         return device.display_name if device else shlex_quote(component.devID)
+
+
+class ActiveUI(_DeviceUI, ConditionUI):
+
+    CLASS = _DIV.Active
+    label_text = _('Device is active and its settings can be changed.')
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Active')
+
+
+class DeviceUI(_DeviceUI, ConditionUI):
+
+    CLASS = _DIV.Device
+    label_text = _('Device originated the current notification.')
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Device')
 
 
 class _SettingWithValueUI:
@@ -2505,13 +2619,16 @@ COMPONENT_UI = {
     _DIV.Not: NotUI,
     _DIV.Or: OrUI,
     _DIV.And: AndUI,
+    _DIV.Later: LaterUI,
     _DIV.Process: ProcessUI,
     _DIV.MouseProcess: MouseProcessUI,
     _DIV.Active: ActiveUI,
+    _DIV.Device: DeviceUI,
     _DIV.Feature: FeatureUI,
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,
     _DIV.Key: KeyUI,
+    _DIV.KeyIsDown: KeyIsDownUI,
     _DIV.Test: TestUI,
     _DIV.TestBytes: TestBytesUI,
     _DIV.Setting: SettingUI,

@@ -16,6 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import errno as _errno
 import time
 
 from collections import namedtuple
@@ -23,6 +24,8 @@ from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
+
+import gi
 
 from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
@@ -32,6 +35,9 @@ from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
 
 from . import configuration
+
+gi.require_version('Gtk', '3.0')  # NOQA: E402
+from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 # from solaar.i18n import _
 
@@ -69,6 +75,7 @@ def _ghost(device):
 class ReceiverListener(_listener.EventsListener):
     """Keeps the status of a Receiver.
     """
+
     def __init__(self, receiver, status_changed_callback):
         super().__init__(receiver, self._notifications_handler)
         # no reason to enable polling yet
@@ -78,9 +85,6 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
-        if receiver.isDevice:  # ping (wired) devices to see if they are really online
-            if receiver.ping():
-                receiver.status.changed(True, reason='initialization')
 
     def has_started(self):
         if _log.isEnabledFor(_INFO):
@@ -309,9 +313,7 @@ def start_all():
 
     if _log.isEnabledFor(_INFO):
         _log.info('starting receiver listening threads')
-    for device_info in _base.receivers():
-        _process_receiver_event('add', device_info)
-    for device_info in _base.wired_devices():
+    for device_info in _base.receivers_and_devices():
         _process_receiver_event('add', device_info)
 
 
@@ -341,7 +343,7 @@ def ping_all(resuming=False):
         _log.info('ping all devices%s', ' when resuming' if resuming else '')
     for l in _all_listeners.values():
         if l.receiver.isDevice:
-            if resuming:
+            if resuming and hasattr(l.receiver, 'status'):
                 l.receiver.status._active = None  # ensure that settings are pushed
             if l.receiver.ping():
                 l.receiver.status.changed(active=True, push=True)
@@ -350,7 +352,7 @@ def ping_all(resuming=False):
             count = l.receiver.count()
             if count:
                 for dev in l.receiver:
-                    if resuming:
+                    if resuming and hasattr(dev, 'status'):
                         dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
                         dev.status.changed(active=True, push=True)
@@ -374,6 +376,28 @@ def setup_scanner(status_changed_callback, error_callback):
     _base.notify_on_receivers_glib(_process_receiver_event)
 
 
+def _process_add(device_info, retry):
+    try:
+        _start(device_info)
+    except OSError as e:
+        if e.errno == _errno.EACCES:
+            try:
+                import subprocess
+                output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
+                if _log.isEnabledFor(_WARNING):
+                    _log.warning('Missing permissions on %s\n%s.', device_info.path, output)
+            except Exception:
+                pass
+            if retry:
+                GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
+            else:
+                _error_callback('permissions', device_info.path)
+        else:
+            _error_callback('nodevice', device_info.path)
+    except _base.NoReceiver:
+        _error_callback('nodevice', device_info.path)
+
+
 # receiver add/remove events will start/stop listener threads
 def _process_receiver_event(action, device_info):
     assert action is not None
@@ -389,22 +413,7 @@ def _process_receiver_event(action, device_info):
         assert isinstance(l, ReceiverListener)
         l.stop()
 
-    if action == 'add':
-        # a new receiver device was detected
-        try:
-            _start(device_info)
-        except OSError:
-            # permission error, ignore this path for now
-            # If receiver has extended ACL but not writable then it is for another seat.
-            # (It would be easier to use pylibacl but adding the pylibacl dependencies
-            # for this special case is not good.)
-            try:
-                import subprocess
-                import re
-                output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path])
-                if not re.search(b'user:.+:', output):
-                    _error_callback('permissions', device_info.path)
-            except Exception:
-                _error_callback('permissions', device_info.path)
-        except _base.NoReceiver:
-            _error_callback('nodevice', device_info.path)
+    if action == 'add':  # a new device was detected
+        _process_add(device_info, 3)
+
+    return False

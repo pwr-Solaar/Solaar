@@ -48,21 +48,19 @@ class Receiver:
     number = 0xFF
     kind = None
 
-    def __init__(self, handle, device_info):
+    def __init__(self, handle, path, product_id):
         assert handle
-        self.handle = handle
-        assert device_info
-        self.path = device_info.path
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
-        # USB product id, used for some Nano receivers
-        self.product_id = device_info.product_id
+        self.handle = handle
+        self.path = path
+        self.product_id = product_id
         product_info = _product_information(self.product_id)
         if not product_info:
-            raise Exception('Unknown receiver type', self.product_id)
+            _log.warning('Unknown receiver type: %s', self.product_id)
+            product_info = {}
         self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
         # read the serial immediately, so we can find out max_devices
-        self.last_id = 0
         if self.receiver_kind == 'bolt':
             serial_reply = self.read_register(_R.bolt_uniqueId)
             self.serial = _strhex(serial_reply)
@@ -73,27 +71,19 @@ class Receiver:
             if serial_reply:
                 self.serial = _strhex(serial_reply[1:5])
                 self.max_devices = ord(serial_reply[6:7])
-                self.last_id = ord(serial_reply[7:8])
                 if self.max_devices <= 0 or self.max_devices > 6:
                     self.max_devices = product_info.get('max_devices', 1)
-                # TODO _properly_ figure out which receivers do and which don't support unpairing
-                # This code supposes that receivers that don't unpair support a pairing request for device index 0
-                if 'unpair' in product_info:
-                    self.may_unpair = product_info['unpair']
-                else:
-                    self.may_unpair = self.write_register(_R.receiver_pairing) is None
+                self.may_unpair = product_info.get('may_unpair', False)
             else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
                 self.serial = None
                 self.max_devices = product_info.get('max_devices', 1)
                 self.may_unpair = product_info.get('may_unpair', False)
-        self.last_id = self.last_id if self.last_id else self.max_devices
 
-        self.name = product_info.get('name', '')
+        self.name = product_info.get('name', 'Receiver')
         self.re_pairs = product_info.get('re_pairs', False)
         self._str = '<%s(%s,%s%s)>' % (
             self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
         )
-        self.ex100_27mhz_wpid_fix = product_info.get('ex100_27mhz_wpid_fix', False)
 
         self._firmware = None
         self._devices = {}
@@ -179,13 +169,13 @@ class Receiver:
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
             polling_rate = ord(pair_info[2:3])
-        elif self.ex100_27mhz_wpid_fix:  # 27Mhz receiver, fill extracting WPID from udev path
+        elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
                 _log.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
-            kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n, self)]
-        else:  # unifying protocol not supported, may be an old Nano receiver
+            kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n)]
+        elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
                 wpid = _strhex(device_info[3:5])
@@ -295,12 +285,17 @@ class Receiver:
     write_register = _hidpp10.write_register
 
     def __iter__(self):
-        for number in range(1, 16):  # some receivers have devices past their max # devices
+        connected_devices = self.count()
+        found_devices = 0
+        for number in range(1, 8):  # some receivers have devices past their max # devices
+            if found_devices >= connected_devices:
+                return
             if number in self._devices:
                 dev = self._devices[number]
             else:
                 dev = self.__getitem__(number)
             if dev is not None:
+                found_devices += 1
                 yield dev
 
     def __getitem__(self, key):
@@ -391,7 +386,7 @@ class Receiver:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Receiver(handle, device_info)
+                return Receiver(handle, device_info.path, device_info.product_id)
         except OSError as e:
             _log.exception('open %s', device_info)
             if e.errno == _errno.EACCES:

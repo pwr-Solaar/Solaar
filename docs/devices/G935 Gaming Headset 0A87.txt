@@ -1,5 +1,7 @@
-1: G935 Gaming Headset
-     Device path  : /dev/hidraw3
+Solaar version 1.1.7
+
+  1: G935 Gaming Headset
+     Device path  : /dev/hidraw2
      USB id       : 046d:0A87
      Codename     : G935 Headset
      Kind         : headset
@@ -8,20 +10,24 @@
      Model ID:      000000000A87
      Unit ID:       FFFFFFFF
           Firmware: U1  29.00.B0012
-     Supports 8 HID++ 2.0 features:
-         0: ROOT                   {0000}
-         1: FEATURE SET            {0001}
-         2: DEVICE FW VERSION      {0003}
+     Supports 9 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
             Firmware: Firmware U1  29.00.B0012 0A87
-            Unit ID: FFFFFFFF  Model ID: 000000000A87  Transport IDs: {'btid': '0000', 'btleid': '0000'}
-         3: DEVICE NAME            {0005}
+	    Unit ID: FFFFFFFF  Model ID: 000000000A87
+ 	    Transport IDs: {'btid': '0000', 'btleid': '0000'}
+         3: DEVICE NAME            {0005} V0
             Name: G935 Gaming Headset
             Kind: None
-         4: COLOR LED EFFECTS      {8070}
-         5: GKEY                   {8010}
+         4: COLOR LED EFFECTS      {8070} V0
+         5: GKEY                   {8010} V0
             Divert G Keys (saved): False
             Divert G Keys        : False
-         6: EQUALIZER              {8310}
-         7: SIDETONE               {8300}
+         6: EQUALIZER              {8310} V0
+         7: SIDETONE               {8300} V0
+            Sidetone (saved): 0
             Sidetone        : 0
+         8: ADC MEASUREMENT        {1F20} V0
+            Battery status unavailable.
      Battery status unavailable.

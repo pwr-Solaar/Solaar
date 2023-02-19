@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import subprocess
 
 from glob import glob as _glob
 
@@ -7,9 +8,24 @@ try:
 except ImportError:
     from distutils.core import setup
 
-# from solaar import NAME, __version__
-__version__ = '1.1.5rc1'
 NAME = 'Solaar'
+
+with open('lib/solaar/version', 'r') as vfile:
+    version = vfile.read().strip()
+
+try:  # get commit from git describe
+    commit = subprocess.check_output(['git', 'describe', '--always'], stderr=subprocess.DEVNULL).strip().decode()
+    with open('lib/solaar/commit', 'w') as vfile:
+        vfile.write(f'{commit}\n')
+except Exception:  # get commit from Ubuntu dpkg-parsechangelog
+    try:
+        commit = subprocess.check_output(['dpkg-parsechangelog', '--show-field', 'Version'],
+                                         stderr=subprocess.DEVNULL).strip().decode()
+        commit = commit.split('~')
+        with open('lib/solaar/commit', 'w') as vfile:
+            vfile.write(f'{commit[0]}\n')
+    except Exception as e:
+        print('Exception using dpkg-parsechangelog', e)
 
 
 def _data_files():
@@ -31,7 +47,7 @@ def _data_files():
 
 setup(
     name=NAME.lower(),
-    version=__version__,
+    version=version,
     description='Linux device manager for Logitech receivers, keyboards, mice, and tablets.',
     long_description='''
 Solaar is a Linux device manager for many Logitech peripherals that connect through
@@ -59,7 +75,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     # sudo apt install python-gi python3-gi \
     #        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-ayatanaappindicator3-0.1
     # os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=[
         'evdev (>= 1.1.2)',
         'pyudev (>= 0.13)',
@@ -67,8 +83,14 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'python-xlib (>= 0.27)',
         'psutil (>= 5.4.3)',
     ],
+    extras_require={
+        'report-descriptor': ['hid-parser'],
+        'desktop-notifications': ['Notify (>= 0.7)'],
+        'git-commit': ['python-git-info'],
+    },
     package_dir={'': 'lib'},
     packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
     data_files=list(_data_files()),
+    include_package_data=True,
     scripts=_glob('bin/*'),
 )

@@ -1,5 +1,23 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.8
+
+* The thumb wheel rule conditions take an optional parameter that checks for total signed thumb wheel movement.
+
+## Version 1.1.7
+
+* Solaar responds to scroll wheel ratchet notifications by changing its scroll wheel ratcheting.
+
+* Solaar processing of report descriptors is optional, depending on whether the package hid-parser is available.
+
+## Version 1.1.6
+
+* Solaar requires Python version 3.7.
+
+* Solaar uses report descriptors to recognize unknown devices that use HID++.
+
+* The Later rule action takes an integer delay in seconds and one or more rule components.  The action immediately completes while also scheduling the rule components for later exection.
+
 ## Version 1.1.5
 
 * The Active rule condition takes the serial number or unitID of a device and checks whether the device is active.  A device is active if it is connected (via a receiver, USB or Bluetooth), not turned off, and not in a power-saving state.  This condition can be used to check whether changing a setting on the device will have any effect, as devices respond to messages only when active.

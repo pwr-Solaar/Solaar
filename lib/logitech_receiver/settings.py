@@ -22,6 +22,7 @@ from logging import DEBUG as _DEBUG
 from logging import WARNING as _WARNING
 from logging import getLogger
 from struct import unpack as _unpack
+from time import sleep as _sleep
 
 from . import hidpp20 as _hidpp20
 from .common import NamedInt as _NamedInt
@@ -61,6 +62,7 @@ def bool_or_toggle(current, new):
 
 # moved first for dependency reasons
 class Validator:
+
     @classmethod
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
@@ -265,12 +267,11 @@ class Setting:
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
         self._pre_read(cached)
-
         if cached and self._value is not None:
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: cached value %r on %s', self.name, self._value, self._device)
             return self._value
 
         if self._device.online:
@@ -281,6 +282,8 @@ class Setting:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
+            if _log.isEnabledFor(_DEBUG):
+                _log.debug('%s: read value %r on %s', self.name, self._value, self._device)
             return self._value
 
     def _pre_write(self, save=True):
@@ -290,28 +293,33 @@ class Setting:
         if self._device.persister and save:
             self._device.persister[self.name] = self._value if self.persist else None
 
+    def update(self, value, save=True):
+        self._value = value
+        self._pre_write(save)
+
     def write(self, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert value is not None
 
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: setting write %r to %s', self.name, value, self._device)
+            _log.debug('%s: write %r to %s', self.name, value, self._device)
 
         if self._device.online:
             if self._value != value:
-                self._value = value
-                self._pre_write(save)
+                self.update(value, save)
 
             current_value = None
             if self._validator.needs_current_value:
                 # the _validator needs the current value, possibly to merge flag values
                 current_value = self._rw.read(self._device)
+                if _log.isEnabledFor(_DEBUG):
+                    _log.debug('%s: current value %r on %s', self.name, current_value, self._device)
 
             data_bytes = self._validator.prepare_write(value, current_value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
-                    _log.debug('%s: settings prepare write(%s) => %r', self.name, value, data_bytes)
+                    _log.debug('%s: prepare write(%s) => %r', self.name, value, data_bytes)
 
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
@@ -329,10 +337,8 @@ class Setting:
     def apply(self):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-
         if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: apply %s (%s)', self.name, self._value, self._device)
-
+            _log.debug('%s: apply (%s)', self.name, self._device)
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             try:
@@ -355,6 +361,7 @@ class Setting:
 class Settings(Setting):
     """A setting descriptor for multiple choices, being a map from keys to values.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -407,8 +414,7 @@ class Settings(Setting):
             _log.debug('%s: settings write %r to %s', self.name, map, self._device)
 
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             for key, value in map.items():
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
@@ -419,7 +425,11 @@ class Settings(Setting):
                         return None
             return map
 
-    def write_key_value(self, key, value):
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
+
+    def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
@@ -434,8 +444,7 @@ class Settings(Setting):
             try:
                 data_bytes = self._validator.prepare_write(int(key), value)
                 # always need to write to configuration because dictionary is shared and could have changed
-                self._value[int(key)] = value
-                self._pre_write()
+                self.update_key_value(key, value, save)
             except ValueError:
                 data_bytes = value = None
             if data_bytes is not None:
@@ -452,6 +461,7 @@ class LongSettings(Setting):
     Allows multiple write requests, if the options don't fit in 16 bytes.
     The validator must return a list.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -506,8 +516,7 @@ class LongSettings(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: long settings write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             for item, value in map.items():
                 data_bytes_list = self._validator.prepare_write(self._value)
                 if data_bytes_list is not None:
@@ -520,7 +529,11 @@ class LongSettings(Setting):
                                 return None
             return map
 
-    def write_key_value(self, item, value):
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
+
+    def write_key_value(self, item, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert item is not None
@@ -533,8 +546,7 @@ class LongSettings(Setting):
             if not self._value:
                 self.read()
             data_bytes = self._validator.prepare_write_item(item, value)
-            self._value[int(item)] = value
-            self._pre_write()
+            self.update_key_value(item, value, save)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
                     _log.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
@@ -547,6 +559,7 @@ class LongSettings(Setting):
 class BitFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one bit each, being a map from options to booleans.
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -604,8 +617,7 @@ class BitFieldSetting(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: bit field settings write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
@@ -618,7 +630,11 @@ class BitFieldSetting(Setting):
                         return None
             return map
 
-    def write_key_value(self, key, value):
+    def update_key_value(self, key, value, save=True):
+        self._value[int(key)] = value
+        self._pre_write(save)
+
+    def write_key_value(self, key, value, save=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
@@ -631,8 +647,7 @@ class BitFieldSetting(Setting):
             if not self._value:
                 self.read()
             value = bool(value)
-            self._value[int(key)] = value
-            self._pre_write()
+            self.update_key_value(key, value, save)
 
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
@@ -652,6 +667,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
     """A setting descriptor for a set of choices represented by one bit each,
     each one having an offset, being a map from options to booleans.
     Needs to be instantiated for each specific device."""
+
     def _do_read(self):
         return {r: self._rw.read(self._device, r) for r in self._validator.prepare_read()}
 
@@ -663,6 +679,7 @@ class BitFieldWithOffsetAndMaskSetting(BitFieldSetting):
 class RangeFieldSetting(Setting):
     """A setting descriptor for a set of choices represented by one field each, with map from option names to range(0,n).
     Needs to be instantiated for each specific device."""
+
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
@@ -696,8 +713,7 @@ class RangeFieldSetting(Setting):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('%s: range field setting write %r to %s', self.name, map, self._device)
         if self._device.online:
-            self._value = map
-            self._pre_write(save)
+            self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if _log.isEnabledFor(_DEBUG):
@@ -709,7 +725,7 @@ class RangeFieldSetting(Setting):
                 _log.warn('%s: range field setting no data to write', self.name)
             return map
 
-    def write_key_value(self, key, value):
+    def write_key_value(self, key, value, save=True):
         assert key is not None
         assert value is not None
         if _log.isEnabledFor(_DEBUG):
@@ -719,7 +735,7 @@ class RangeFieldSetting(Setting):
                 self.read()
             map = self._value
             map[int(key)] = value
-            self.write(map)
+            self.write(map, save)
             return value
 
 
@@ -818,6 +834,7 @@ class BitFieldValidator(Validator):
             self.byte_count = byte_count
 
     def to_string(self, value):
+
         def element_to_string(key, val):
             k = next((k for k in self.options if int(key) == k), None)
             return str(k) + ':' + str(val) if k is not None else '?'
@@ -1078,6 +1095,7 @@ class ChoicesMapValidator(ChoicesValidator):
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
     def to_string(self, value):
+
         def element_to_string(key, val):
             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
             return str(k) + ':' + str(c[val]) if k is not None else '?'
@@ -1145,7 +1163,7 @@ class RangeValidator(Validator):
         assert max_value > min_value
         self.min_value = min_value
         self.max_value = max_value
-        self.needs_current_value = False
+        self.needs_current_value = True  # read and check before write (needed for ADC power and probably a good idea anyway)
 
         self._byte_count = math.ceil(math.log(max_value + 1, 256))
         if byte_count:
@@ -1162,7 +1180,10 @@ class RangeValidator(Validator):
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError('invalid choice %r' % new_value)
-        return _int2bytes(new_value, self._byte_count)
+        current_value = self.validate_read(current_value) if current_value is not None else None
+        to_write = _int2bytes(new_value, self._byte_count)
+        # current value is known and same as value to be written return None to signal not to write it
+        return None if current_value is not None and current_value == new_value else to_write
 
     def acceptable(self, args, current):
         arg = args[0]
@@ -1324,6 +1345,7 @@ class MultipleRangeValidator(Validator):
 
 class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
+
     def __init__(self, feature, name='', divert_setting_name='divert-keys'):
         self.feature = feature  # not used?
         self.name = name
@@ -1356,6 +1378,7 @@ class ActionSettingRW:
         return _int2bytes(self.key.key, 2) if self.active and self.key else b'\x00\x00'
 
     def write(self, device, data_bytes):
+
         def handler(device, n):  # Called on notification events from the device
             if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
@@ -1412,6 +1435,7 @@ class ActionSettingRW:
 
 class RawXYProcessing:
     """Special class for processing RawXY action messages initiated by pressing a key with rawXY diversion capability"""
+
     def __init__(self, device, name=''):
         self.device = device
         self.name = name
@@ -1447,12 +1471,13 @@ class RawXYProcessing:
 
     def start(self, key):
         device_key = next((k for k in self.device.keys if k.key == key), None)
-        self.keys.append(device_key)
-        if not self.active:
-            self.active = True
-            self.activate_action()
-            self.device.add_notification_handler(self.name, self.handler)
-        device_key.set_rawXY_reporting(True)
+        if device_key:
+            self.keys.append(device_key)
+            if not self.active:
+                self.active = True
+                self.activate_action()
+                self.device.add_notification_handler(self.name, self.handler)
+            device_key.set_rawXY_reporting(True)
 
     def stop(self, key):  # only stop if this is the active key
         if self.active:
@@ -1489,6 +1514,8 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
+    if device.features and _hidpp20.FEATURE.HIRES_WHEEL in device.features:
+        _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, 'persister', None)
     sensitives = persister.get('_sensitive', {}) if persister else {}
     for s in device.settings:

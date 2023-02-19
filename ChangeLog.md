@@ -1,6 +1,73 @@
-# 1.1.5rc1
+# 1.1.8
 
-* Update Turkish translation
+* Add parameter to thumb wheel rule conditions
+* Rename Serbian translation file
+* Update Polish translation
+* Improve handling of wheel notifications
+* Only record changes of scroll wheel ratchet
+* Don't mark setting as absent if there are device errors
+* More robust access to keyword exception fields
+* Add support for config change feature
+* Clean up GTK code
+* Update documentation on mouse gestures and known issues
+* Get commit information from git describe and dpkg-parsechangelog
+* Update pre-commit tools to current versions
+* Update installation instructions
+* Add 8-character commit hash to version information
+* Update solaar.desktop (#1857)
+* Get release in setup.py by reading lib/solaar/__init__.py
+* Remove version number from docs/_config.yml
+* Update solaar.desktop
+* Update es.po
+* Clarify status of C542 receiver
+* Update devices directory
+* Add description of several devices
+* Show name of disconnecting receiver or device in disconnect warning
+* Reduce standard size of rule editor window
+* Remove unnecessary dependency on typing_extensions
+
+# 1.1.7
+
+* Add dependency on typing_extension to setup.py
+* Don't defer saves in CLI and don't require Gtk in CLI
+* Be more permissive in recognizing HID++ report descriptors
+* Update Polish and Croatian translations
+* Switch scroll ratcheting in response to scroll ratchet button notification
+* Add setting to turn scroll ratchet on and off
+* Eliminate visual glitch when updating range setting
+* Make hid-parser an optional dependency
+
+# 1.1.6
+
+* Only update remaining pairings after successful pairing
+* Check for presence of status attribute when resuming
+* Update Polish and Croation translations
+* Don't add non-existant key in raw xy processing
+* Add special keys from MX Mechanical Mini
+* Fix processing of HID++ 1.0 battery reports
+* Use report descriptors to determine suitable devices
+* Handle exceptions when processing configuration file
+* Add Logitech PRO Gaming Keyboard
+* Fix bad entries in divert-keys when found
+* Correctly convert old-style diversions to new style and remove old ones
+* Add optional save argument to write_key_value methods
+* Use device name in configuration entries if device modelId is zeroes
+* Don't show normal DJ messages in debug log
+* Add Later rule action
+* Correctly record battery feature when ADC produces error
+* Print feature call errors in solaar show instead of terminating
+* Use ADC notifications to set device inactive and active
+* Add one to feature count to count ROOT feature
+* Don't check modifiers for KeyPress actions that are not clicks
+* Augment comments on what Solaar cannot do
+* Fix bug in printing closed handle
+* Use only product records to determine which receivers unpair
+* Add conditional delay to get around race with Linux HID++ driver
+
+# 1.1.5
+
+* Add G213 Prodigy Gaming Keyboard
+* Update Turkish, Croation, and zh_CN translations
 * Move old device descriptions to new locations and clean up
 * Increase minimum stopped time between mouse movements
 * Fix bug with non-recognized empty mouse movement
