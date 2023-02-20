@@ -111,7 +111,7 @@ class Device:
                 # get 27Mhz wpid and set kind based on index
                 if receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver
                     self.wpid = '00' + _strhex(link_notification.data[2:3])
-                    kind = self.get_kind_from_index(number, receiver)
+                    kind = receiver.get_kind_from_index(number)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:
                 # Not a notification, force a reading of pairing information

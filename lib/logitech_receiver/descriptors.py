@@ -209,6 +209,7 @@ _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
 # Mice
 
 _D('LX5 Cordless Mouse', codename='LX5', protocol=1.0, wpid='0036', registers=(_R.battery_status, ))
+_D('LX7 Cordless Laser Mouse', codename='LX7', protocol=1.0, wpid='0039', registers=(_R.battery_status, ))
 _D('Wireless Mouse EX100', codename='EX100m', protocol=1.0, wpid='003F', registers=(_R.battery_status, ))
 _D('Wireless Mouse M30', codename='M30', protocol=1.0, wpid='0085', registers=(_R.battery_status, ))
 _D('MX610 Laser Cordless Mouse', codename='MX610', protocol=1.0, wpid='1001', registers=(_R.battery_status, ))
@@ -282,6 +283,8 @@ _D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='408
 _D('PRO X Wireless', kind='mouse', codename='PRO X', wpid='4093', usbid=0xc094)
 
 _D('G9 Laser Mouse', codename='G9', usbid=0xc048, interface=1, protocol=1.0,
+    settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+_D('G9x Laser Mouse', codename='G9x', usbid=0xc066, interface=1, protocol=1.0,
     settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
 _D('G502 Gaming Mouse', codename='G502', usbid=0xc07d, interface=1)
 _D('G402 Gaming Mouse', codename='G402', usbid=0xc07e, interface=1)
