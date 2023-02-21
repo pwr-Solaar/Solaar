@@ -113,8 +113,14 @@ class Device:
                     self.wpid = '00' + _strhex(link_notification.data[2:3])
                     kind = receiver.get_kind_from_index(number)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
-            else:
-                # Not a notification, force a reading of pairing information
+            elif receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver doesn't have pairing registers
+                self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
+                if not self.wpid:
+                    _log.error('Unable to get wpid from udev for device %d of %s', number, receiver)
+                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
+                kind = receiver.get_kind_from_index(number)
+                self._kind = _hidpp10.DEVICE_KIND[kind]
+            else:  # get information from pairing registers
                 self.online = True
                 self.update_pairing_information()
                 self.update_extended_pairing_information()
