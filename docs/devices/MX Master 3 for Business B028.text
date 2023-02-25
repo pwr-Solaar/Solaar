@@ -1,14 +1,14 @@
-Solaar version 1.1.5
+solaar version 1.1.8
 
-  2: MX Master 3 for Business
+  1: MX Master 3 for Business
      Device path  : None
      WPID         : B028
      Codename     : MX Master 3 B
      Kind         : mouse
      Protocol     : HID++ 4.5
-     Serial number: 12617690
+     Serial number: 18F3413B
      Model ID:      B02800000000
-     Unit ID:       12617690
+     Unit ID:       18F3413B
         Bootloader: BL1 41.00.B0009
           Firmware: RBM 14.00.B0009
              Other:
@@ -20,29 +20,92 @@ Solaar version 1.1.5
             Firmware: Bootloader BL1 41.00.B0009 B0281D13EFC0
             Firmware: Firmware RBM 14.00.B0009 B0281D13EFC0
             Firmware: Other
-            Unit ID: 12617690  Model ID: B02800000000  Transport IDs: {'btleid': 'B028'}
+            Unit ID: 18F3413B  Model ID: B02800000000  Transport IDs: {'btleid': 'B028'}
          3: DEVICE NAME            {0005} V0
             Name: MX Master 3 for Business
             Kind: mouse
          4: WIRELESS DEVICE STATUS {1D4B} V0
-         5: RESET                  {0020} V0
+         5: CONFIG CHANGE          {0020} V0
          6: CRYPTO ID              {0021} V1
          7: DEVICE FRIENDLY NAME   {0007} V0
             Friendly Name: MX Master 3 B
          8: UNIFIED BATTERY        {1004} V2
-            Battery: 80%, recharging.
+            Battery: 95%, discharging.
          9: REPROG CONTROLS V4     {1B04} V5
             Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Mouse Gesture Button:Gesture Button Navigation, Smart Shift:Smart Shift}
             Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Mouse Gesture Button:Gesture Button Navigation, Smart Shift:Smart Shift}
-solaar: error: Traceback (most recent call last):
-  File "/usr/lib/python3.10/site-packages/solaar/cli/__init__.py", line 210, in run
-    m.run(c, args, _find_receiver, _find_device)
-  File "/usr/lib/python3.10/site-packages/solaar/cli/show.py", line 296, in run
-    _print_device(dev)
-  File "/usr/lib/python3.10/site-packages/solaar/cli/show.py", line 232, in _print_device
-    v = setting.val_to_string(setting._device.persister.get(setting.name))
-  File "/usr/lib/python3.10/site-packages/logitech_receiver/settings.py", line 238, in val_to_string
-    return self._validator.to_string(value)
-  File "/usr/lib/python3.10/site-packages/logitech_receiver/settings.py", line 1086, in to_string
-    return '{' + ', '.join([element_to_string(k, value[k]) for k in sorted(value)]) + '}'
-TypeError: '<' not supported between instances of 'str' and 'int'
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, Mouse Gesture Button:Regular, Smart Shift:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, Mouse Gesture Button:Regular, Smart Shift:Regular}
+        10: CHANGE HOST            {1814} V1
+            Change Host        : 1:bork
+        11: XY STATS               {2250} V1
+        12: ADJUSTABLE DPI         {2201} V2
+            Sensitivity (DPI) (saved): 1000
+            Sensitivity (DPI)        : 1000
+        13: SMART SHIFT            {2110} V0
+            Scroll Wheel Ratcheted (saved): Freespinning
+            Scroll Wheel Ratcheted        : Freespinning
+            Scroll Wheel Ratchet Speed (saved): 1
+            Scroll Wheel Ratchet Speed        : 1
+        14: HIRES WHEEL            {2121} V1
+            Multiplier: 15
+            Has invert: Normal wheel motion
+            Has ratchet switch: Free wheel mode
+            Low resolution mode
+            HID notification
+            Scroll Wheel Direction (saved): False
+            Scroll Wheel Direction        : False
+            Scroll Wheel Resolution (saved): False
+            Scroll Wheel Resolution        : False
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        15: THUMB WHEEL            {2150} V0
+            Thumb Wheel Direction (saved): False
+            Thumb Wheel Direction        : False
+            Thumb Wheel Diversion (saved): False
+            Thumb Wheel Diversion        : False
+        16: WHEEL STATS            {2251} V0
+        17: DFUCONTROL             {00C3} V0
+        18: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        19: unknown:1803           {1803} V0    internal, hidden, unknown:000010
+        20: CONFIG DEVICE PROPS    {1806} V8    internal, hidden, unknown:000010
+        21: unknown:1816           {1816} V0    internal, hidden, unknown:000010
+        22: OOBSTATE               {1805} V0    internal, hidden
+        23: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        24: unknown:1891           {1891} V6    internal, hidden, unknown:000008
+        25: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        26: unknown:1E00           {1E00} V0    hidden
+        27: unknown:1E02           {1E02} V0    internal, hidden
+        28: unknown:1602           {1602} V0
+        29: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        30: unknown:1861           {1861} V0    internal, hidden, unknown:000010
+        31: unknown:9300           {9300} V0    internal, hidden, unknown:000010
+        32: unknown:9001           {9001} V0    internal, hidden, unknown:000010
+        33: unknown:1E22           {1E22} V0    internal, hidden, unknown:000010
+        34: unknown:9205           {9205} V0    internal, hidden, unknown:000010
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, analytics key events, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: Mouse Gesture Button      , default: Gesture Button Navigation   => Gesture Button Navigation
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         6: Smart Shift               , default: Smart Shift                 => Smart Shift
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:3, group mask:empty
+             reporting: default
+     Battery: 95%, discharging.
