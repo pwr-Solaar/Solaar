@@ -133,7 +133,7 @@ def _handlesig(signl, stack):
             faulthandler.dump_traceback()
         sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
     else:
-        sys.exit('')
+        sys.exit(0)
 
 
 def main():
