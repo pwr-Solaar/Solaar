@@ -1,4 +1,4 @@
-# 1.1.9rc1
+# 1.1.9rc2
 
 * Remove some deprecated GTK code
 * Use zero exit code for kill interrupts
