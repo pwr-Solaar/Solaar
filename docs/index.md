@@ -27,7 +27,7 @@ Solaar can be used as a GUI application, the usual case, or via its command-line
 The Solaar GUI is meant to run continuously in the background,
 monitoring devices, making changes to them, and responding to some messages they emit.
 To this end, it is useful to have Solaar start at user login so that
-changes made to devices by Solaar are applied at login and through out the user's session.
+changes made to devices by Solaar are applied at login and throughout the user's session.
 
 Both Solaar interfaces are able to list the connected devices and
 show information about each device, often including battery status.
@@ -116,7 +116,7 @@ but they are several versions behind the current version.
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
 
-Solaar uses a standard system tray implementation; solaar-gnome3 is no longer required for gnome or unity integration.
+Solaar uses a standard system tray implementation; solaar-gnome3 is no longer required for Gnome or Unity integration.
 
 [ppa4]: https://launchpad.net/~trebelnik-stefina
 [ppa2]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
