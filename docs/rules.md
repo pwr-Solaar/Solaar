@@ -8,7 +8,7 @@ Solaar main window.
 
 Rule processing is an experimental feature.  Significant changes might be made in response to problems.
 
-*Note that rule processing only fully works under X11.
+Note that rule processing only fully works under X11.
 When running under Wayland with X11 libraries loaded some features will not be available.
 When running under Wayland without X11 libraries loaded even more features will not be available.
 Rule features known not to work under Wayland include process and mouse process conditions.
@@ -20,7 +20,7 @@ The easiest way to maintain write access to /dev/uinput is to use Solaar's alter
 and copying it as root into the `/etc/udev/rules.d` directory.
 You may have to reboot your system for the write permission to be set up.
 Another way to get write access to /dev/uinput is to run `sudo setfacl -m u:${USER}:rw /dev/uinput`
-but this needs to be done every time the system is rebooted.*
+but this needs to be done every time the system is rebooted.
 
 Logitech devices that use HID++ version 2.0 or greater produce feature-based
 notifications that Solaar can process using a simple rule language.  For
@@ -65,12 +65,12 @@ evaluating each of their components in order.
 An Or condition is terminated early if a component evaluates to true or the
 last evaluated sub-component of a component is an action.
 A Or condition is true if its last evaluated component evaluates to a true
-value.  `And` conditions take a sequence of components are evaluated the same
+value.  `And` conditions take a sequence of components which are evaluated the same
 as rules.
 
-`Feature` conditions are if true if the name of the feature of the current
+`Feature` conditions are true if the name of the feature of the current
 notification is their string argument.
-`Report` conditions are if true if the report number in the current
+`Report` conditions are true if the report number in the current
 notification is their integer argument.
 
 `Key` conditions are true if the Logitech name of the current **diverted** key or button being pressed is their
@@ -94,11 +94,11 @@ When the key is released the sequence of events is sent as a synthetic notificat
 that can be matched with `Mouse Gesture` conditions.
 
 `Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
-Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures'.
-The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-left`, `Mouse Up-Right`, `Mouse Down-left`, or `Mouse Down-right`, or the Logitech name of a key.
+Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures`.
+The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-Left`, `Mouse Up-Right`, `Mouse Down-Left`, or `Mouse Down-Right`, or the Logitech name of a key.
 If the first argument is the Logitech name of a key then that argument is matched against the button that was held down to initiate mouse gesture processing.
-So, for example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
-The condition `Smart Shift` -> 'Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!) moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
+For example, a Mouse Gesture condition of `Mouse Up` -> `Mouse Up` would match pressing any Mouse Gestures button, moving the mouse upwards, pausing momentarily, moving the mouse upwards again, and releasing the button.
+The condition `Smart Shift` -> `Mouse Down` -> `Back Button` would match pressing the Smart Shift button (provided that it is a Mouse Gestures button!), moving the mouse downwards, clicking the Back button (provided that it is diverted!), and then releasing the Smart Shift button.
 Directions and buttons can be mixed and chained together however you like.
 It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
@@ -107,7 +107,7 @@ can only be `Shift`, `Control`, `Alt`, and `Super`.
 Modifiers conditions are true if their argument is the current keyboard
 modifiers.
 
-`Process` conditions are true if the process for focus input window
+`Process` conditions are true if the process for the focused input window
 or the window's Window manager class or instance name starts with their string argument.
 `MouseProcess` conditions are true if the process for the window under the mouse
 or the window's Window manager class or instance name starts with their string argument.
@@ -121,7 +121,7 @@ as shown in Solaar's detail pane.
 `Setting` conditions take three or four arguments, depending on the setting:
 the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing;
-the internal name of a setting (which can be found from solaar config <device>);
+the internal name of a setting (which can be found from solaar config \`device\>);
 one or two arguments for the setting.
 For settings that use keys or buttons as an argument the Logtech name can be used
 as shown in the Solaar main window for these settings,
@@ -130,6 +130,17 @@ For settings that use gestures as an argument the internal name of the gesture i
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 For settings that need one of a set of names as an argument the name can be used or its internal integer value,
 as used in the Solaar config file.
+
+`Setting` conditions check device settings of devices, provided the device is on-line.
+The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
+or null for the device that initiated rule processing; and
+the internal name of a setting (which can be found from solaar config \<device\>).
+Most simple settings take one extra argument, the value to check the setting value against.
+Range setting can also take two arguments, which form an inclusive range to check against.
+Other settings take two arguments, a key indicating which sub-setting to check and the value to check it against.
+For settings that use gestures as an argument the internal name of the gesture is used,
+which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
+For boolean settings '~' can be used to toggle the setting.
 
 `Test` and `TestBytes` conditions are true if their test evaluates to true on the feature,
 report, and data of the current notification.
@@ -168,17 +179,6 @@ This displacement is reset when the thumb wheel is inactive.
 With a parameter the test is only true if the current thumb wheel displacement is greater than the parameter.
 The displacement is then lessened by the amount of the parameter.
 
-`Setting` conditions check device settings of devices, provided the device is on-line.
-The first arguments to the condition are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
-or null for the device that initiated rule processing; and
-the internal name of a setting (which can be found from solaar config <device>).
-Most simple settings take one extra argument, the value to check the setting value against.
-Range setting can also take two arguments, which form an inclusive range to check against.
-Other settings take two arguments, a key indicating which sub-setting to check and the value to check it against.
-For settings that use gestures as an argument the internal name of the gesture is used,
-which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
-For boolean settings '~' can be used to toggle the setting.
-
 A `KeyPress` action takes either the name of an X11 key symbol, such as "a",
 a list of X11 key symbols, such as "a" or "Control+a",
 or a two-element list with the first element as above
@@ -189,12 +189,12 @@ i.e., don't use a single `KeyPress` like 'a+b'.
 The `KeyPress` action normally both depresses and releases (clicks) the keys,
 but can also just depress the keys or just release the keys.
 Use the depress or release options with extreme care,
-ensuring that the depressed keys are later released.
-Otherwise it may become difficult to use your system.
+ensuring that the depressed keys are later released,
+otherwise it may become difficult to use your system.
 The keys are depressed in forward order and released in reverse order.
 
 If a key symbol can only be produced by a shfited or level 3 keypress, e.g., "A",
-then Solaar will add keypresses to produce that keysymbol,
+then Solaar will add keypresses to produce that key symbol,
 e.g., simulating a left shift keypress to get "A" instead of "a".
 If a key symbol is not available in the current keymap or needs other shift-like keys,
 then Solaar cannot simulate it.
@@ -219,7 +219,7 @@ A `Set` action changes a Solaar setting for a device, provided that the device i
 `Set` actions take three or four arguments, depending on the setting.
 The first two are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing; and
-the internal name of a setting (which can be found from solaar config <device>).
+the internal name of a setting (which can be found from solaar config \<device\>).
 Simple settings take one extra argument, the value to set the setting to.
 For boolean settings '~' can be used to toggle the setting.
 Other simple settings take two extra arguments, a key indicating which sub-setting to set and the value to set it to.
@@ -228,7 +228,7 @@ which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_rec
 All settings are supported.
 
 A `Later` action executes rule components later.
-`Later` actions take an integer delay in seconds between 1 and 100 followed by a zero or more rule components that will be executed later.
+`Later` actions take an integer delay in seconds between 1 and 100 followed by zero or more rule components that will be executed later.
 Processing of the rest of the rule continues immediately.
 
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
