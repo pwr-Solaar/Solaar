@@ -173,6 +173,7 @@ def get_btid(btid):
 
 # Keyboards
 
+_D('Wireless Keyboard EX110', codename='EX110', protocol=1.0, wpid='0055', registers=(_R.battery_status, ))
 _D('Wireless Keyboard S510', codename='S510', protocol=1.0, wpid='0056', registers=(_R.battery_status, ))
 _D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='0065', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK300', codename='MK300', protocol=1.0, wpid='0068', registers=(_R.battery_status, ))
