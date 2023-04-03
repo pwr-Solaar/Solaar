@@ -121,7 +121,7 @@ as shown in Solaar's detail pane.
 `Setting` conditions take three or four arguments, depending on the setting:
 the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing;
-the internal name of a setting (which can be found from solaar config \`device\>);
+the internal name of a setting (which can be found from solaar config \<device\>);
 one or two arguments for the setting.
 For settings that use keys or buttons as an argument the Logtech name can be used
 as shown in the Solaar main window for these settings,
