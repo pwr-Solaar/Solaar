@@ -316,6 +316,7 @@ _D('Wireless Rechargeable Touchpad T650', codename='T650', protocol=2.0, wpid='4
 # Headset
 
 _D('G533 Gaming Headset', codename='G533 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0a66)
+_D('G535 Gaming Headset', codename='G535 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0ac4)
 _D('G935 Gaming Headset', codename='G935 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0a87)
 _D('G733 Gaming Headset', codename='G733 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0ab5)
 _D('PRO X Wireless Gaming Headset', codename='PRO Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0aba)
