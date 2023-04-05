@@ -1,5 +1,8 @@
-# 1.1.9rc2
+# 1.1.9
 
+* Add descriptors for G535 wireless gaming headset and wireless keyboard EX110
+* Update Greek translation
+* Fix minor issues in documentation
 * Remove some deprecated GTK code
 * Use zero exit code for kill interrupts
 * Add rule Test condition for battery charging
