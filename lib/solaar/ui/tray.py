@@ -150,19 +150,16 @@ try:
     import gi
     try:
         gi.require_version('AyatanaAppIndicator3', '0.1')
+        from gi.repository import AyatanaAppIndicator3 as AppIndicator3
         ayatana_appindicator_found = True
     except ValueError:
         try:
             gi.require_version('AppIndicator3', '0.1')
+            from gi.repository import AppIndicator3
             ayatana_appindicator_found = False
         except ValueError:
             # treat unavailable versions the same as unavailable packages
             raise ImportError
-
-    if ayatana_appindicator_found:
-        from gi.repository import AyatanaAppIndicator3 as AppIndicator3
-    else:
-        from gi.repository import AppIndicator3
 
     if _log.isEnabledFor(_DEBUG):
         _log.debug('using %sAppIndicator3' % ('Ayatana ' if ayatana_appindicator_found else ''))
