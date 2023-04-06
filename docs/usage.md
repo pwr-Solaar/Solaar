@@ -120,7 +120,7 @@ devices can be remapped and they can only be remapped to a limited
 number of actions. The remapping is done by selecting a key
 or button in the left-hand box on the “Action” setting line and then
 selecting the action to be performed in the right-hand box. The default
-action is always the shown first in the list. As with all settings,
+action is always the one shown first in the list. As with all settings,
 Solaar will remember past action settings and restore them on the device
 from then on.
 
