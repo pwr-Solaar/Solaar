@@ -38,10 +38,10 @@ receivers and devices that utilize it. Different receivers and devices
 implement different portions of HID++ so even if two devices appear to be
 the same in both physical appearance and behavior they may work
 differently underneath. (For example, there are versions of the
-M510 mouse that use different versions of the HID++ protocol.)
+M510 mouse that use different versions of the HID++ protocol).
 Contrariwise, two different devices may appear different physically but
 actually look the same to software. (For example, some M185 mice look the
-same to software as some M310 mice.)
+same to software as some M310 mice).
 
 The software identity of a receiver can be determined by its USB product ID
 (reported by Solaar and also viewable in Linux using `lsusb`). The software

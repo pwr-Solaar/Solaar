@@ -54,7 +54,7 @@ to the enhancement request.
 You will have to copy the contents to a file with txt extension before attaching it.
 Or, better, install hidrd-convert and attach the output of
 `hidrd-convert -o spec /sys/class/hidraw/hidrawN/device/report_descriptor`
-(To install hidrd on Fedora use  `sudo dnf install hidrd`.)
+(To install hidrd on Fedora use  `sudo dnf install hidrd`).
 
 5. If your device or receiver connects via USB, look at the output of `lsusb`
 to find the ID of the device or receiver and also provide the output of

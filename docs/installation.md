@@ -77,7 +77,7 @@ you may need to use pip to install projects that provide the above Python packag
 Solaar runs best under X11 with the Xtest extension enabled so that Solaar rules can fake keyboard input using Xtest.
 Solaar also uses the X11 library to access the XKB extension,
 which requires installation of the X11 development package.
-(In Fedora this is `libX11-devel`.  In other distributions it may be `libX11-dev`.)
+(In Fedora this is `libX11-devel`.  In other distributions it may be `libX11-dev`).
 Solaar will run under Wayland but some parts of Solaar rules will not work.
 For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
@@ -115,14 +115,14 @@ To install Solaar for yourself only run
 `pip install --user '.[report-descriptor,git-commit]'`
 from the download directory.
 This tells pip to install Solaar into your `~/.local` directory, but does not install Solaar's udev rule.
-(See above for installing the udev rule.)
+(See above for installing the udev rule).
 Once the udev rule has been installed you can then run Solaar as `~/.local/bin/solaar`.
 
 Installing Python programs to system directories using pip is generally frowned on both
 because this runs arbitrary code as root and because this can override existing python libraries
 that other users or even the system depend on. If you want to install Solaar to /usr/local run
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
-(The umask is needed so that the created files and directories can be read and executed by everyone.)
+(The umask is needed so that the created files and directories can be read and executed by everyone).
 Then Solaar can be run as /usr/local/bin/solaar.
 You will also have to install the udev rule.
 

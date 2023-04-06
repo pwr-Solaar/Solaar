@@ -147,7 +147,7 @@ class PointerSpeed(_Setting):
 
 A setting implementation needs a name, a label, and a description.
 The name is used in the persistent settings structure to store and restore changed settings and
-should be a valid Python identifier.  (Some older settings have dashes.)
+should be a valid Python identifier.  (Some older settings have dashes).
 The label is displayed in the Solaar main window and the description is used as a tooltip there.
 The label and description should be specified as translatable strings.
 A setting implementation for a feature (for modern devices that use the HID++ 2.0 protocol)

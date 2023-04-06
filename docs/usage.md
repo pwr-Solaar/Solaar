@@ -115,7 +115,7 @@ The device can only be manipulated using the direct connection.
 
 For many devices Solaar can remap some of their keys or buttons to
 perform a different action. (This changes the information that the
-device sends when the key or button is activated.) Only some keys on some
+device sends when the key or button is activated). Only some keys on some
 devices can be remapped and they can only be remapped to a limited
 number of actions. The remapping is done by selecting a key
 or button in the left-hand box on the “Action” setting line and then
