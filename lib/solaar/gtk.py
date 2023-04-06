@@ -117,7 +117,7 @@ def _parse_arguments():
 
     if not args.action:
         if _log.isEnabledFor(logging.INFO):
-            logging.info('language %s (%s), translations path %s', _i18n.language, _i18n.encoding, _i18n.path)
+            logging.info('version %s, language %s (%s)', __version__, _i18n.language, _i18n.encoding)
 
     return args
 
