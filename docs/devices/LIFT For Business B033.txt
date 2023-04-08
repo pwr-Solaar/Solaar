@@ -1,0 +1,92 @@
+solaar version 1.1.8
+
+  2: LIFT For Business
+     Device path  : None
+     WPID         : B033
+     Codename     : LIFT B
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Serial number: A67F904D
+     Model ID:      B03300000000
+     Unit ID:       A67F904D
+        Bootloader: BL1 56.01.B0010
+          Firmware: RBM 21.01.B0010
+             Other:
+     The power switch is located on the (unknown).
+     Supports 32 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BL1 56.01.B0010 B033B0706FCD
+            Firmware: Firmware RBM 21.01.B0010 B033B0706FCD
+            Firmware: Other
+            Unit ID: A67F904D  Model ID: B03300000000  Transport IDs: {'btleid': 'B033'}
+         3: DEVICE NAME            {0005} V0
+            Name: LIFT For Business
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: CRYPTO ID              {0021} V1
+         7: DEVICE FRIENDLY NAME   {0007} V0
+            Friendly Name: LIFT B
+         8: UNIFIED BATTERY        {1004} V3
+            Battery: 100%, discharging.
+         9: REPROG CONTROLS V4     {1B04} V5
+            Key/Button Actions (saved): {Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, DPI Switch:DPI Switch}
+            Key/Button Actions        : {Middle Button:Mouse Middle Button, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, DPI Switch:DPI Switch}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, DPI Switch:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Regular, Forward Button:Regular, DPI Switch:Regular}
+        10: CHANGE HOST            {1814} V1
+            Change Host        : 1:feathora
+        11: HOSTS INFO             {1815} V2
+            Host 0 (paired): feathora
+            Host 1 (unpaired):
+            Host 2 (unpaired):
+        12: XY STATS               {2250} V1
+        13: LOWRES WHEEL           {2130} V0
+            Wheel Reports: HID
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        14: ADJUSTABLE DPI         {2201} V2
+            Sensitivity (DPI) (saved): 1600
+            Sensitivity (DPI)        : 1600
+        15: DFUCONTROL             {00C3} V0
+        16: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
+        17: unknown:1803           {1803} V0    internal, hidden, unknown:000010
+        18: CONFIG DEVICE PROPS    {1806} V8    internal, hidden, unknown:000010
+        19: unknown:1816           {1816} V0    internal, hidden, unknown:000010
+        20: OOBSTATE               {1805} V0    internal, hidden
+        21: unknown:1830           {1830} V0    internal, hidden, unknown:000010
+        22: unknown:1891           {1891} V7    internal, hidden, unknown:000008
+        23: unknown:18A1           {18A1} V0    internal, hidden, unknown:000010
+        24: unknown:1E00           {1E00} V0    hidden
+        25: unknown:1E02           {1E02} V0    internal, hidden
+        26: unknown:1E22           {1E22} V1    internal, hidden, unknown:000010
+        27: unknown:1602           {1602} V0
+        28: unknown:1EB0           {1EB0} V0    internal, hidden, unknown:000010
+        29: unknown:1861           {1861} V1    internal, hidden, unknown:000010
+        30: unknown:18B1           {18B1} V0    internal, hidden, unknown:000010
+        31: unknown:920A           {920A} V0    internal, hidden, unknown:000010
+     Has 7 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, analytics key events, pos:0, group:1, group mask:empty
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, analytics key events, pos:0, group:1, group mask:empty
+             reporting: default
+         2: Middle Button             , default: Mouse Middle Button         => Mouse Middle Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, unknown:000800, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, analytics key events, unknown:000800, pos:0, group:2, group mask:g1,g2
+             reporting: default
+         5: DPI Switch                , default: DPI Switch                  => DPI Switch
+             mse, reprogrammable, divertable, raw XY, analytics key events, pos:0, group:3, group mask:g1,g2,g3
+             reporting: default
+         6: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:4, group mask:empty
+             reporting: default
+     Battery: 100%, discharging.

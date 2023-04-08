@@ -1,5 +1,15 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.9
+
+* Solaar now exits with at 0 exit code when killed.
+
+* Two Solaar settings can interfere with the implementation of smooth scrolling in modern Linux HID++ drivers.  These settings are initially set to ignore so that this interference does not happen.
+
+* The Device rule condition checks for the device that produced a notification.
+
+* The KeyIsDown rule condition checks whether a *diverted* rule key is down.
+
 ## Version 1.1.8
 
 * The thumb wheel rule conditions take an optional parameter that checks for total signed thumb wheel movement.

@@ -70,25 +70,20 @@ assert len(_COLUMN_TYPES) == len(_COLUMN)
 
 
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
-    if toggle:
-        b = Gtk.ToggleButton()
-    else:
-        b = Gtk.Button(label) if label else Gtk.Button()
-
+    b = Gtk.ToggleButton() if toggle else Gtk.Button()
+    c = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 5)
     if icon_name:
-        image = Gtk.Image.new_from_icon_name(icon_name, icon_size)
-        b.set_image(image)
-
+        c.pack_start(Gtk.Image.new_from_icon_name(icon_name, icon_size), True, True, 0)
+    if label:
+        c.pack_start(Gtk.Label(label), True, True, 0)
+    b.add(c)
+    if clicked is not None:
+        b.connect('clicked', clicked)
     if tooltip:
         b.set_tooltip_text(tooltip)
-
     if not label and icon_size < _NORMAL_BUTTON_ICON_SIZE:
         b.set_relief(Gtk.ReliefStyle.NONE)
         b.set_focus_on_click(False)
-
-    if clicked is not None:
-        b.connect('clicked', clicked)
-
     return b
 
 

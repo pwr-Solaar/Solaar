@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: solaar 1.1.8\n"
+"Project-Id-Version: solaar 1.1.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-12 14:23+0100\n"
-"PO-Revision-Date: 2022-12-12 14:37+0100\n"
+"POT-Creation-Date: 2023-03-09 13:45+0100\n"
+"PO-Revision-Date: 2023-03-09 14:08+0100\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -73,7 +73,7 @@ msgstr "rozładowywanie"
 msgid "recharging"
 msgstr "ładowanie"
 
-#: lib/logitech_receiver/i18n.py:40 lib/solaar/ui/window.py:718
+#: lib/logitech_receiver/i18n.py:40 lib/solaar/ui/window.py:711
 msgid "charging"
 msgstr "ładowanie"
 
@@ -133,7 +133,7 @@ msgstr "za dużo urządzeń"
 msgid "sequence timeout"
 msgstr "upłynął limit czasu sekwencji"
 
-#: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:577
+#: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:572
 msgid "Firmware"
 msgstr "Firmware"
 
@@ -263,11 +263,11 @@ msgstr "niesparowane"
 msgid "powered on"
 msgstr "włączone"
 
-#: lib/logitech_receiver/settings.py:749
+#: lib/logitech_receiver/settings.py:750
 msgid "register"
 msgstr "rejestr"
 
-#: lib/logitech_receiver/settings.py:763 lib/logitech_receiver/settings.py:790
+#: lib/logitech_receiver/settings.py:764 lib/logitech_receiver/settings.py:791
 msgid "feature"
 msgstr "funkcja"
 
@@ -938,11 +938,19 @@ msgstr "Ustaw poziomy korektora."
 msgid "Hz"
 msgstr "Hz"
 
+#: lib/logitech_receiver/settings_templates.py:1197
+msgid "Power Management"
+msgstr "Zarządzanie energią"
+
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid "Power off in minutes (0 for never)."
+msgstr "Wyłączenie zasilania w minutach (0 oznacza nigdy)."
+
 #: lib/logitech_receiver/status.py:114
 msgid "No paired devices."
 msgstr "Brak sparowanych urządzeń."
 
-#: lib/logitech_receiver/status.py:115 lib/solaar/ui/window.py:620
+#: lib/logitech_receiver/status.py:115 lib/solaar/ui/window.py:622
 #, python-format
 msgid "%(count)s paired device."
 msgid_plural "%(count)s paired devices."
@@ -981,18 +989,20 @@ msgstr "Błąd uprawnień"
 
 #: lib/solaar/ui/__init__.py:54
 #, python-format
-msgid "Found a Logitech Receiver (%s), but did not have permission to open it."
+msgid ""
+"Found a Logitech receiver or device (%s), but did not have permission to "
+"open it."
 msgstr ""
-"Znaleziono odbiornik firmy Logitech (%s), ale nie ma uprawnień do otworzenia "
-"go."
+"Znaleziono odbiornik lub urządzenie firmy Logitech (%s), ale nie ma "
+"uprawnień do jego otwarcia."
 
 #: lib/solaar/ui/__init__.py:55
 msgid ""
-"If you've just installed Solaar, try removing the receiver and plugging it "
-"back in."
+"If you've just installed Solaar, try disconnecting the receiver or device "
+"and then reconnecting it."
 msgstr ""
-"Jeżeli właśnie zainstalowano Solaar, spróbuj odłączyć nadajnik i podłączyć "
-"go ponownie."
+"Jeśli właśnie zainstalowano Solaar, spróbuj odłączyć odbiornik lub "
+"urządzenie, a następnie podłączyć je ponownie."
 
 #: lib/solaar/ui/__init__.py:58
 msgid "Cannot connect to device error"
@@ -1009,11 +1019,11 @@ msgstr ""
 
 #: lib/solaar/ui/__init__.py:61
 msgid ""
-"Try removing the device and plugging it back in or turning it off and then "
-"on."
+"Try disconnecting the device and then reconnecting it or turning it off and "
+"then on."
 msgstr ""
-"Spróbuj wyjąć urządzenie i podłączyć je ponownie lub wyłączyć, a następnie "
-"włączyć."
+"Spróbuj odłączyć urządzenie, a następnie podłączyć je ponownie lub wyłączyć "
+"i ponownie włączyć."
 
 #: lib/solaar/ui/__init__.py:64
 msgid "Unpairing failed"
@@ -1057,7 +1067,7 @@ msgid "Logitech documentation"
 msgstr "Dokumentacja firmy Logitech"
 
 #: lib/solaar/ui/action.py:85 lib/solaar/ui/action.py:89
-#: lib/solaar/ui/window.py:202
+#: lib/solaar/ui/window.py:197
 msgid "Unpair"
 msgstr "Usuń sparowanie"
 
@@ -1109,12 +1119,12 @@ msgstr "Wbudowane reguły"
 msgid "User-defined rules"
 msgstr "Reguły zdefiniowane przez użytkownika"
 
-#: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1080
+#: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1082
 msgid "Rule"
 msgstr "Reguła"
 
 #: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:509
-#: lib/solaar/ui/diversion_rules.py:633
+#: lib/solaar/ui/diversion_rules.py:635
 msgid "Sub-rule"
 msgstr "Reguła podrzędna"
 
@@ -1210,13 +1220,13 @@ msgstr "Spłaszcz"
 msgid "Insert"
 msgstr "Wstaw"
 
-#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:635
-#: lib/solaar/ui/diversion_rules.py:1123
+#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:637
+#: lib/solaar/ui/diversion_rules.py:1125
 msgid "Or"
 msgstr "Lub"
 
-#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:634
-#: lib/solaar/ui/diversion_rules.py:1108
+#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:636
+#: lib/solaar/ui/diversion_rules.py:1110
 msgid "And"
 msgstr "Oraz"
 
@@ -1224,15 +1234,15 @@ msgstr "Oraz"
 msgid "Condition"
 msgstr "Warunek"
 
-#: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1289
+#: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1291
 msgid "Feature"
 msgstr "Funkcja"
 
-#: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1325
+#: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1327
 msgid "Report"
 msgstr "Zgłoszenie"
 
-#: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1201
+#: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1203
 msgid "Process"
 msgstr "Proces"
 
@@ -1240,188 +1250,208 @@ msgstr "Proces"
 msgid "Mouse process"
 msgstr "Proces myszy"
 
-#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1363
+#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1365
 msgid "Modifiers"
 msgstr "Modyfikatory"
 
-#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1416
+#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1418
 msgid "Key"
 msgstr "Klawisz"
 
-#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:2200
+#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1460
+msgid "KeyIsDown"
+msgstr "KlawiszJestWciśnięty"
+
+#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2249
 msgid "Active"
 msgstr "Aktywny"
 
-#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2243
+#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:2207
+#: lib/solaar/ui/diversion_rules.py:2259 lib/solaar/ui/diversion_rules.py:2281
+msgid "Device"
+msgstr "Urządzenie"
+
+#: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:2297
 msgid "Setting"
 msgstr "Ustawienie"
 
-#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:1432
-#: lib/solaar/ui/diversion_rules.py:1481
+#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1476
+#: lib/solaar/ui/diversion_rules.py:1525
 msgid "Test"
 msgstr "Test"
 
-#: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:1598
+#: lib/solaar/ui/diversion_rules.py:526 lib/solaar/ui/diversion_rules.py:1642
 msgid "Test bytes"
 msgstr "Bajty testowe"
 
-#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1691
+#: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1735
 msgid "Mouse Gesture"
 msgstr "Gest myszy"
 
-#: lib/solaar/ui/diversion_rules.py:529
+#: lib/solaar/ui/diversion_rules.py:531
 msgid "Action"
 msgstr "Czynność"
 
-#: lib/solaar/ui/diversion_rules.py:531 lib/solaar/ui/diversion_rules.py:1800
+#: lib/solaar/ui/diversion_rules.py:533 lib/solaar/ui/diversion_rules.py:1844
 msgid "Key press"
 msgstr "Naciśnięcie klawisza"
 
-#: lib/solaar/ui/diversion_rules.py:532 lib/solaar/ui/diversion_rules.py:1853
+#: lib/solaar/ui/diversion_rules.py:534 lib/solaar/ui/diversion_rules.py:1897
 msgid "Mouse scroll"
 msgstr "Przewijanie myszą"
 
-#: lib/solaar/ui/diversion_rules.py:533 lib/solaar/ui/diversion_rules.py:1904
+#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1948
 msgid "Mouse click"
 msgstr "Kliknięcie myszą"
 
-#: lib/solaar/ui/diversion_rules.py:534
+#: lib/solaar/ui/diversion_rules.py:536
 msgid "Set"
 msgstr "Ustaw"
 
-#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1975
+#: lib/solaar/ui/diversion_rules.py:537 lib/solaar/ui/diversion_rules.py:2019
 msgid "Execute"
 msgstr "Wykonaj"
 
-#: lib/solaar/ui/diversion_rules.py:536 lib/solaar/ui/diversion_rules.py:1155
+#: lib/solaar/ui/diversion_rules.py:538 lib/solaar/ui/diversion_rules.py:1157
 msgid "Later"
 msgstr "Później"
 
-#: lib/solaar/ui/diversion_rules.py:565
+#: lib/solaar/ui/diversion_rules.py:567
 msgid "Insert new rule"
 msgstr "Wstaw nową regułę"
 
-#: lib/solaar/ui/diversion_rules.py:585 lib/solaar/ui/diversion_rules.py:1641
-#: lib/solaar/ui/diversion_rules.py:1745 lib/solaar/ui/diversion_rules.py:1934
+#: lib/solaar/ui/diversion_rules.py:587 lib/solaar/ui/diversion_rules.py:1685
+#: lib/solaar/ui/diversion_rules.py:1789 lib/solaar/ui/diversion_rules.py:1978
 msgid "Delete"
 msgstr "Usuń"
 
-#: lib/solaar/ui/diversion_rules.py:607
+#: lib/solaar/ui/diversion_rules.py:609
 msgid "Negate"
 msgstr "Neguj"
 
-#: lib/solaar/ui/diversion_rules.py:631
+#: lib/solaar/ui/diversion_rules.py:633
 msgid "Wrap with"
 msgstr "Obwiąż"
 
-#: lib/solaar/ui/diversion_rules.py:653
+#: lib/solaar/ui/diversion_rules.py:655
 msgid "Cut"
 msgstr "Wytnij"
 
-#: lib/solaar/ui/diversion_rules.py:668
+#: lib/solaar/ui/diversion_rules.py:670
 msgid "Paste"
 msgstr "Wklej"
 
-#: lib/solaar/ui/diversion_rules.py:680
+#: lib/solaar/ui/diversion_rules.py:682
 msgid "Copy"
 msgstr "Skopiuj"
 
-#: lib/solaar/ui/diversion_rules.py:1060
+#: lib/solaar/ui/diversion_rules.py:1062
 msgid "This editor does not support the selected rule component yet."
 msgstr "Ten edytor nie obsługuje jeszcze wybranego składnika reguły."
 
-#: lib/solaar/ui/diversion_rules.py:1135
+#: lib/solaar/ui/diversion_rules.py:1137
 msgid "Number of seconds to delay."
 msgstr "Liczba sekund do opóźnienia."
 
-#: lib/solaar/ui/diversion_rules.py:1174
+#: lib/solaar/ui/diversion_rules.py:1176
 msgid "Not"
 msgstr "Nie"
 
-#: lib/solaar/ui/diversion_rules.py:1184
+#: lib/solaar/ui/diversion_rules.py:1186
 msgid "X11 active process. For use in X11 only."
 msgstr "Aktywny proces X11. Do użytku tylko w X11."
 
-#: lib/solaar/ui/diversion_rules.py:1215
+#: lib/solaar/ui/diversion_rules.py:1217
 msgid "X11 mouse process. For use in X11 only."
 msgstr "Proces myszy X11. Do użytku tylko w X11."
 
-#: lib/solaar/ui/diversion_rules.py:1232
+#: lib/solaar/ui/diversion_rules.py:1234
 msgid "MouseProcess"
 msgstr "ProcesMyszy"
 
-#: lib/solaar/ui/diversion_rules.py:1257
+#: lib/solaar/ui/diversion_rules.py:1259
 msgid "Feature name of notification triggering rule processing."
 msgstr "Nazwa funkcji powiadomienia wyzwalająca przetwarzanie reguły."
 
-#: lib/solaar/ui/diversion_rules.py:1305
+#: lib/solaar/ui/diversion_rules.py:1307
 msgid "Report number of notification triggering rule processing."
 msgstr "Numer zgłoszenia powiadomienia wyzwalającego przetwarzanie reguły."
 
-#: lib/solaar/ui/diversion_rules.py:1339
+#: lib/solaar/ui/diversion_rules.py:1341
 msgid "Active keyboard modifiers. Not always available in Wayland."
 msgstr "Aktywne modyfikatory klawiatury. Nie zawsze dostępne w Wayland."
 
-#: lib/solaar/ui/diversion_rules.py:1380
+#: lib/solaar/ui/diversion_rules.py:1382
 msgid ""
 "Diverted key or button depressed or released.\n"
-"Use the Key/Button Diversion setting to divert keys and buttons."
+"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
+"buttons."
 msgstr ""
-"Przekierowany klawisz lub przycisk wciśnięty lub zwolniony.\n"
-"Użyj ustawienia Przekierowanie klawiszy/przycisków, aby przekierować "
-"klawisze i przyciski."
+"Przekierowany klawisz lub przycisk wciśnięto lub zwolniono.\n"
+"Użyj ustawień przekierowania klawiszy/przycisków oraz przekierowania "
+"klawiszy G, aby przekierować klawisze i przyciski."
 
-#: lib/solaar/ui/diversion_rules.py:1389
+#: lib/solaar/ui/diversion_rules.py:1391
 msgid "Key down"
 msgstr "Klawisz w dół"
 
-#: lib/solaar/ui/diversion_rules.py:1392
+#: lib/solaar/ui/diversion_rules.py:1394
 msgid "Key up"
 msgstr "Klawisz w górę"
 
-#: lib/solaar/ui/diversion_rules.py:1430
+#: lib/solaar/ui/diversion_rules.py:1435
+msgid ""
+"Diverted key or button is currently down.\n"
+"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
+"buttons."
+msgstr ""
+"Przekierowany klawisz lub przycisk jest obecnie wciśnięty.\n"
+"Użyj ustawień przekierowania klawiszy/przycisków oraz przekierowania "
+"klawiszy G, aby przekierować klawisze i przyciski."
+
+#: lib/solaar/ui/diversion_rules.py:1474
 msgid "Test condition on notification triggering rule processing."
 msgstr "Warunek testowy przy powiadomieniu wyzwalający przetwarzanie reguły."
 
-#: lib/solaar/ui/diversion_rules.py:1434
+#: lib/solaar/ui/diversion_rules.py:1478
 msgid "Parameter"
 msgstr "Parametr"
 
-#: lib/solaar/ui/diversion_rules.py:1497
+#: lib/solaar/ui/diversion_rules.py:1541
 msgid "begin (inclusive)"
 msgstr "rozpocznij (włącznie)"
 
-#: lib/solaar/ui/diversion_rules.py:1498
+#: lib/solaar/ui/diversion_rules.py:1542
 msgid "end (exclusive)"
 msgstr "zakończ (wyłącznie)"
 
-#: lib/solaar/ui/diversion_rules.py:1507
+#: lib/solaar/ui/diversion_rules.py:1551
 msgid "range"
 msgstr "zakres"
 
-#: lib/solaar/ui/diversion_rules.py:1509
+#: lib/solaar/ui/diversion_rules.py:1553
 msgid "minimum"
 msgstr "minimum"
 
-#: lib/solaar/ui/diversion_rules.py:1510
+#: lib/solaar/ui/diversion_rules.py:1554
 msgid "maximum"
 msgstr "maksimum"
 
-#: lib/solaar/ui/diversion_rules.py:1512
+#: lib/solaar/ui/diversion_rules.py:1556
 #, python-format
 msgid "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
 msgstr "bajty %(0)d do %(1)d, począwszy od %(2)d do %(3)d"
 
-#: lib/solaar/ui/diversion_rules.py:1517
+#: lib/solaar/ui/diversion_rules.py:1561
 msgid "mask"
 msgstr "maska"
 
-#: lib/solaar/ui/diversion_rules.py:1518
+#: lib/solaar/ui/diversion_rules.py:1562
 #, python-format
 msgid "bytes %(0)d to %(1)d, mask %(2)d"
 msgstr "bajty %(0)d do %(1)d, maska %(2)d"
 
-#: lib/solaar/ui/diversion_rules.py:1528
+#: lib/solaar/ui/diversion_rules.py:1572
 msgid ""
 "Bit or range test on bytes in notification message triggering rule "
 "processing."
@@ -1429,11 +1459,11 @@ msgstr ""
 "Test bitowy lub zakresowy na bajtach w komunikacie powiadomienia "
 "uruchamiający przetwarzanie reguł."
 
-#: lib/solaar/ui/diversion_rules.py:1538
+#: lib/solaar/ui/diversion_rules.py:1582
 msgid "type"
 msgstr "typ"
 
-#: lib/solaar/ui/diversion_rules.py:1621
+#: lib/solaar/ui/diversion_rules.py:1665
 msgid ""
 "Mouse gesture with optional initiating button followed by zero or more mouse "
 "movements."
@@ -1441,11 +1471,11 @@ msgstr ""
 "Gest myszy z opcjonalnym przyciskiem inicjującym, po którym następuje zero "
 "lub więcej ruchów myszy."
 
-#: lib/solaar/ui/diversion_rules.py:1626
+#: lib/solaar/ui/diversion_rules.py:1670
 msgid "Add movement"
 msgstr "Dodaj ruch"
 
-#: lib/solaar/ui/diversion_rules.py:1719
+#: lib/solaar/ui/diversion_rules.py:1763
 msgid ""
 "Simulate a chorded key click or depress or release.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1453,23 +1483,23 @@ msgstr ""
 "Symuluj akordowe kliknięcie klawisza, wciśnięcie lub zwolnenie.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1724
+#: lib/solaar/ui/diversion_rules.py:1768
 msgid "Add key"
 msgstr "Dodaj klawisz"
 
-#: lib/solaar/ui/diversion_rules.py:1727
+#: lib/solaar/ui/diversion_rules.py:1771
 msgid "Click"
 msgstr "Kliknij"
 
-#: lib/solaar/ui/diversion_rules.py:1730
+#: lib/solaar/ui/diversion_rules.py:1774
 msgid "Depress"
 msgstr "Wciśnij"
 
-#: lib/solaar/ui/diversion_rules.py:1733
+#: lib/solaar/ui/diversion_rules.py:1777
 msgid "Release"
 msgstr "Zwolnij"
 
-#: lib/solaar/ui/diversion_rules.py:1817
+#: lib/solaar/ui/diversion_rules.py:1861
 msgid ""
 "Simulate a mouse scroll.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1477,7 +1507,7 @@ msgstr ""
 "Symuluj przewijanie myszy.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1873
+#: lib/solaar/ui/diversion_rules.py:1917
 msgid ""
 "Simulate a mouse click.\n"
 "On Wayland requires write access to /dev/uinput."
@@ -1485,75 +1515,75 @@ msgstr ""
 "Symuluj kliknięcie myszą.\n"
 "W Wayland wymaga dostępu do zapisu w /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1876
+#: lib/solaar/ui/diversion_rules.py:1920
 msgid "Button"
 msgstr "Przycisk"
 
-#: lib/solaar/ui/diversion_rules.py:1877
+#: lib/solaar/ui/diversion_rules.py:1921
 msgid "Count"
 msgstr "Liczba"
 
-#: lib/solaar/ui/diversion_rules.py:1917
+#: lib/solaar/ui/diversion_rules.py:1961
 msgid "Execute a command with arguments."
 msgstr "Wykonaj polecenie z argumentami."
 
-#: lib/solaar/ui/diversion_rules.py:1920
+#: lib/solaar/ui/diversion_rules.py:1964
 msgid "Add argument"
 msgstr "Dodaj argument"
 
-#: lib/solaar/ui/diversion_rules.py:1995
+#: lib/solaar/ui/diversion_rules.py:2039
 msgid "Toggle"
 msgstr "Przełącz"
 
-#: lib/solaar/ui/diversion_rules.py:1995
+#: lib/solaar/ui/diversion_rules.py:2039
 msgid "True"
 msgstr "Prawda"
 
-#: lib/solaar/ui/diversion_rules.py:1996
+#: lib/solaar/ui/diversion_rules.py:2040
 msgid "False"
 msgstr "Fałsz"
 
-#: lib/solaar/ui/diversion_rules.py:2010
+#: lib/solaar/ui/diversion_rules.py:2054
 msgid "Unsupported setting"
 msgstr "Nieobsługiwane ustawienie"
 
-#: lib/solaar/ui/diversion_rules.py:2156 lib/solaar/ui/diversion_rules.py:2227
-msgid "Device"
-msgstr "Urządzenie"
-
-#: lib/solaar/ui/diversion_rules.py:2161 lib/solaar/ui/diversion_rules.py:2193
-#: lib/solaar/ui/diversion_rules.py:2232 lib/solaar/ui/diversion_rules.py:2474
-#: lib/solaar/ui/diversion_rules.py:2492
+#: lib/solaar/ui/diversion_rules.py:2212 lib/solaar/ui/diversion_rules.py:2231
+#: lib/solaar/ui/diversion_rules.py:2286 lib/solaar/ui/diversion_rules.py:2528
+#: lib/solaar/ui/diversion_rules.py:2546
 msgid "Originating device"
 msgstr "Urządzenie inicjujące"
 
-#: lib/solaar/ui/diversion_rules.py:2182
+#: lib/solaar/ui/diversion_rules.py:2245
 msgid "Device is active and its settings can be changed."
 msgstr "Urządzenie jest aktywne i można zmienić jego ustawienia."
 
-#: lib/solaar/ui/diversion_rules.py:2251
+#: lib/solaar/ui/diversion_rules.py:2255
+msgid "Device originated the current notification."
+msgstr "Urządzenie wysłało bieżące powiadomienie."
+
+#: lib/solaar/ui/diversion_rules.py:2305
 msgid "Value"
 msgstr "Wartość"
 
-#: lib/solaar/ui/diversion_rules.py:2259
+#: lib/solaar/ui/diversion_rules.py:2313
 msgid "Item"
 msgstr "Pozycja"
 
-#: lib/solaar/ui/diversion_rules.py:2534
+#: lib/solaar/ui/diversion_rules.py:2588
 msgid "Change setting on device"
 msgstr "Zmień ustawienie w urządzeniu"
 
-#: lib/solaar/ui/diversion_rules.py:2551
+#: lib/solaar/ui/diversion_rules.py:2605
 msgid "Setting on device"
 msgstr "Ustawienie w urządzeniu"
 
 #: lib/solaar/ui/notify.py:124 lib/solaar/ui/tray.py:323
-#: lib/solaar/ui/tray.py:328 lib/solaar/ui/window.py:742
+#: lib/solaar/ui/tray.py:328 lib/solaar/ui/window.py:739
 msgid "offline"
 msgstr "wyłączone"
 
 #: lib/solaar/ui/pair_window.py:122 lib/solaar/ui/pair_window.py:256
-#: lib/solaar/ui/pair_window.py:278
+#: lib/solaar/ui/pair_window.py:288
 #, python-format
 msgid "%(receiver_name)s: pair new device"
 msgstr "%(receiver_name)s: sparuj nowe urządzenie"
@@ -1615,25 +1645,43 @@ msgid "The wireless link is not encrypted"
 msgstr "Połączenie nie jest szyfrowane"
 
 #: lib/solaar/ui/pair_window.py:264
+msgid "Unifying receivers are only compatible with Unifying devices."
+msgstr "Odbiorniki Unifying są kompatybilne tylko z urządzeniami Unifying."
+
+#: lib/solaar/ui/pair_window.py:266
+msgid "Bolt receivers are only compatible with Bolt devices."
+msgstr "Odbiorniki Bolt są kompatybilne tylko z urządzeniami Bolt."
+
+#: lib/solaar/ui/pair_window.py:268
+msgid "Other receivers are only compatible with a few devices."
+msgstr "Inne odbiorniki są kompatybilne tylko z kilkoma urządzeniami."
+
+#: lib/solaar/ui/pair_window.py:270
+msgid "The device must not be paired with a nearby powered-on receiver."
+msgstr ""
+"Urządzenia nie można parować ze znajdującym się w pobliżu włączonym "
+"odbiornikiem."
+
+#: lib/solaar/ui/pair_window.py:274
 msgid "Press a pairing button or key until the pairing light flashes quickly."
 msgstr ""
 "Naciśnij przycisk lub klawisz parowania, aż kontrolka parowania zacznie "
 "szybko migać."
 
-#: lib/solaar/ui/pair_window.py:266
+#: lib/solaar/ui/pair_window.py:276
 msgid "You may have to first turn the device off and on again."
 msgstr ""
 "Być może trzeba będzie najpierw wyłączyć i ponownie włączyć urządzenie."
 
-#: lib/solaar/ui/pair_window.py:268
+#: lib/solaar/ui/pair_window.py:278
 msgid "Turn on the device you want to pair."
 msgstr "Włącz urządzenie, które chcesz sparować."
 
-#: lib/solaar/ui/pair_window.py:270
+#: lib/solaar/ui/pair_window.py:280
 msgid "If the device is already turned on, turn it off and on again."
 msgstr "Jeśli urządzenie jest już włączone, wyłącz je i włącz ponownie."
 
-#: lib/solaar/ui/pair_window.py:273
+#: lib/solaar/ui/pair_window.py:283
 #, python-format
 msgid ""
 "\n"
@@ -1656,7 +1704,7 @@ msgstr[2] ""
 "\n"
 "Ten odbiornik ma jeszcze %d sparowań."
 
-#: lib/solaar/ui/pair_window.py:276
+#: lib/solaar/ui/pair_window.py:286
 msgid ""
 "\n"
 "Cancelling at this point will not use up a pairing."
@@ -1668,12 +1716,12 @@ msgstr ""
 msgid "No Logitech device found"
 msgstr "Nie znaleziono urządzenia Logitech"
 
-#: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:324
+#: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
 #, python-format
 msgid "About %s"
 msgstr "O programie %s"
 
-#: lib/solaar/ui/tray.py:65 lib/solaar/ui/window.py:322
+#: lib/solaar/ui/tray.py:65 lib/solaar/ui/window.py:317
 #, python-format
 msgid "Quit %s"
 msgstr "Zakończ %s"
@@ -1686,97 +1734,97 @@ msgstr "brak odbiornika"
 msgid "no status"
 msgstr "brak statusu"
 
-#: lib/solaar/ui/window.py:101
+#: lib/solaar/ui/window.py:96
 msgid "Scanning"
 msgstr "Skanowanie"
 
-#: lib/solaar/ui/window.py:134 lib/solaar/ui/window.py:687
+#: lib/solaar/ui/window.py:129
 msgid "Battery"
 msgstr "Akumulator"
 
-#: lib/solaar/ui/window.py:137
+#: lib/solaar/ui/window.py:132
 msgid "Wireless Link"
 msgstr "Połączenie bezprzewodowe"
 
-#: lib/solaar/ui/window.py:141
+#: lib/solaar/ui/window.py:136
 msgid "Lighting"
 msgstr "Podświetlenie"
 
-#: lib/solaar/ui/window.py:175
+#: lib/solaar/ui/window.py:170
 msgid "Show Technical Details"
 msgstr "Wyświetl szczegóły techniczne"
 
-#: lib/solaar/ui/window.py:191
+#: lib/solaar/ui/window.py:186
 msgid "Pair new device"
 msgstr "Sparuj nowe urządzenie"
 
-#: lib/solaar/ui/window.py:210
+#: lib/solaar/ui/window.py:205
 msgid "Select a device"
 msgstr "Wybierz urządzenie"
 
-#: lib/solaar/ui/window.py:327
+#: lib/solaar/ui/window.py:322
 msgid "Rule Editor"
 msgstr "Edytor reguł"
 
-#: lib/solaar/ui/window.py:538
+#: lib/solaar/ui/window.py:533
 msgid "Path"
 msgstr "Ścieżka"
 
-#: lib/solaar/ui/window.py:541
+#: lib/solaar/ui/window.py:536
 msgid "USB ID"
 msgstr "ID USB"
 
-#: lib/solaar/ui/window.py:544 lib/solaar/ui/window.py:546
-#: lib/solaar/ui/window.py:566 lib/solaar/ui/window.py:568
+#: lib/solaar/ui/window.py:539 lib/solaar/ui/window.py:541
+#: lib/solaar/ui/window.py:561 lib/solaar/ui/window.py:563
 msgid "Serial"
 msgstr "Nr seryjny"
 
-#: lib/solaar/ui/window.py:550
+#: lib/solaar/ui/window.py:545
 msgid "Index"
 msgstr "Indeks"
 
-#: lib/solaar/ui/window.py:552
+#: lib/solaar/ui/window.py:547
 msgid "Wireless PID"
 msgstr "PID bezprz."
 
-#: lib/solaar/ui/window.py:554
+#: lib/solaar/ui/window.py:549
 msgid "Product ID"
 msgstr "ID produktu"
 
-#: lib/solaar/ui/window.py:556
+#: lib/solaar/ui/window.py:551
 msgid "Protocol"
 msgstr "Protokół"
 
-#: lib/solaar/ui/window.py:556
+#: lib/solaar/ui/window.py:551
 msgid "Unknown"
 msgstr "Nieznany"
 
-#: lib/solaar/ui/window.py:559
+#: lib/solaar/ui/window.py:554
 #, python-format
 msgid "%(rate)d ms (%(rate_hz)dHz)"
 msgstr "%(rate)d ms (%(rate_hz)dHz)"
 
-#: lib/solaar/ui/window.py:559
+#: lib/solaar/ui/window.py:554
 msgid "Polling rate"
 msgstr "Odpytywanie"
 
-#: lib/solaar/ui/window.py:570
+#: lib/solaar/ui/window.py:565
 msgid "Unit ID"
 msgstr "ID jednostki"
 
-#: lib/solaar/ui/window.py:581
+#: lib/solaar/ui/window.py:576
 msgid "none"
 msgstr "brak"
 
-#: lib/solaar/ui/window.py:582
+#: lib/solaar/ui/window.py:577
 msgid "Notifications"
 msgstr "Powiadomienia"
 
-#: lib/solaar/ui/window.py:619
+#: lib/solaar/ui/window.py:621
 msgid "No device paired."
 msgstr "Brak sparowanych urządzeń."
 
-#: lib/solaar/ui/window.py:626
+#: lib/solaar/ui/window.py:628
 #, python-format
 msgid "Up to %(max_count)s device can be paired to this receiver."
 msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
@@ -1787,11 +1835,11 @@ msgstr[1] ""
 msgstr[2] ""
 "Można sparować maksymalnie %(max_count)s urządzeń z tym odbiornikiem."
 
-#: lib/solaar/ui/window.py:632
+#: lib/solaar/ui/window.py:634
 msgid "Only one device can be paired to this receiver."
 msgstr "Tylko jedno urządzenie może być sparowane z tym odbiornikiem."
 
-#: lib/solaar/ui/window.py:636
+#: lib/solaar/ui/window.py:638
 #, python-format
 msgid "This receiver has %d pairing remaining."
 msgid_plural "This receiver has %d pairings remaining."
@@ -1799,41 +1847,43 @@ msgstr[0] "Ten odbiornik ma jeszcze %d sparowanie."
 msgstr[1] "Ten odbiornik ma jeszcze %d sparowania."
 msgstr[2] "Ten odbiornik ma jeszcze %d sparowań."
 
-#: lib/solaar/ui/window.py:688
-msgid "unknown"
-msgstr "nieznany"
-
-#: lib/solaar/ui/window.py:689
-msgid "Battery information unknown."
-msgstr "Informacje o akumulatorze nieznane."
-
-#: lib/solaar/ui/window.py:699
+#: lib/solaar/ui/window.py:692
 msgid "Battery Voltage"
 msgstr "Napięcie akumulatora"
 
-#: lib/solaar/ui/window.py:701
+#: lib/solaar/ui/window.py:694
 msgid "Voltage reported by battery"
 msgstr "Napięcie zgłoszone przez akumulator"
 
-#: lib/solaar/ui/window.py:703
+#: lib/solaar/ui/window.py:696
 msgid "Battery Level"
 msgstr "Poziom akumulatora"
 
-#: lib/solaar/ui/window.py:705
+#: lib/solaar/ui/window.py:698
 msgid "Approximate level reported by battery"
 msgstr "Przybliżony poziom zgłoszony przez akumulator"
 
-#: lib/solaar/ui/window.py:712 lib/solaar/ui/window.py:714
+#: lib/solaar/ui/window.py:705 lib/solaar/ui/window.py:707
 msgid "next reported "
 msgstr "następny zgłoszony "
 
-#: lib/solaar/ui/window.py:715
+#: lib/solaar/ui/window.py:708
 msgid " and next level to be reported."
 msgstr " oraz następny poziom do zgłoszenia."
 
-#: lib/solaar/ui/window.py:720
+#: lib/solaar/ui/window.py:713
 msgid "last known"
 msgstr "ostatni znany"
+
+#: lib/solaar/ui/window.py:724
+msgid "encrypted"
+msgstr "szyfrowane"
+
+#: lib/solaar/ui/window.py:726
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr ""
+"Połączenie bezprzewodowe pomiędzy tym urządzeniem i odbiornikiem jest "
+"szyfrowane."
 
 #: lib/solaar/ui/window.py:728
 msgid "not encrypted"
@@ -1850,17 +1900,7 @@ msgstr ""
 "Jest to problem dotyczący zabezpieczeń urządzeń wskazujących i poważny "
 "problem dotyczący zabezpieczeń urządzeń do wprowadzania tekstu."
 
-#: lib/solaar/ui/window.py:737
-msgid "encrypted"
-msgstr "szyfrowane"
-
-#: lib/solaar/ui/window.py:739
-msgid "The wireless link between this device and its receiver is encrypted."
-msgstr ""
-"Połączenie bezprzewodowe pomiędzy tym urządzeniem i odbiornikiem jest "
-"szyfrowane."
-
-#: lib/solaar/ui/window.py:752
+#: lib/solaar/ui/window.py:748
 #, python-format
 msgid "%(light_level)d lux"
 msgstr "%(light_level)d lx"
