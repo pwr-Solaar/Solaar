@@ -266,7 +266,7 @@ def _match(action, device, filterfn):
 
     if _log.isEnabledFor(_INFO):
         _log.info(
-            'Found device BID %X VID %04X PID %04X HID++ %s %s', bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
+            'Found device BID %s VID %04X PID %04X HID++ %s %s', bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
         )
 
     if not device['hidpp_short'] and not device['hidpp_long']:
