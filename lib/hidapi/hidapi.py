@@ -257,9 +257,8 @@ def _match(action, device, filterfn):
         if len(report) == 1 + 19 and report[0] == 0x11:
             device['hidpp_long'] = True
     except HIDError as e:  # noqa: F841
-        # print(f"Device {device['path']} error: {e}")
-        # raise
-        pass
+        if _log.isEnabledFor(_INFO):
+            _log.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
     finally:
         if device_handle:
             close(device_handle)
