@@ -156,8 +156,6 @@ _hidapi.hid_get_indexed_string.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes
 _hidapi.hid_get_indexed_string.restype = ctypes.c_int
 _hidapi.hid_error.argtypes = [ctypes.c_void_p]
 _hidapi.hid_error.restype = ctypes.c_wchar_p
-_hidapi.hid_darwin_set_open_exclusive.argtypes = [ctypes.c_int]
-_hidapi.hid_darwin_set_open_exclusive.restype = None
 
 # Initialize hidapi
 _hidapi.hid_init()
@@ -167,6 +165,8 @@ atexit.register(_hidapi.hid_exit)
 # allow non-exclusive opening. On windows opening with shared access is
 # the default, for macOS we need to set it explicitly.
 if _platform.system() == 'Darwin':
+    _hidapi.hid_darwin_set_open_exclusive.argtypes = [ctypes.c_int]
+    _hidapi.hid_darwin_set_open_exclusive.restype = None
     _hidapi.hid_darwin_set_open_exclusive(0)
 
 
