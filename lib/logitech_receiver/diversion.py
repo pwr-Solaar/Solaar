@@ -1385,11 +1385,11 @@ def process_notification(device, status, notification, feature):
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack('!4I', notification.data[:4])[0]
+        new_g_keys_down = _unpack('<I', notification.data[:4])[0]
         for i in range(32):
-            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
+            if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
                 key_down = _CONTROL['G' + str(i + 1)]
-            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
+            if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
                 key_up = _CONTROL['G' + str(i + 1)]
         g_keys_down = new_g_keys_down
     # and also M keys down
