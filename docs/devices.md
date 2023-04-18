@@ -202,6 +202,7 @@ and are not being updated for new devices that are supported by Solaar.
 | MX Master        | 4041 | 2.0   |
 | MX Master 2S     | 4069 | 2.0   |
 | Cube             |      | 2.0   |
+| MX Vertical      | 407B | 2.0   |
 
 ### Mice (Nano)
 
