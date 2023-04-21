@@ -531,7 +531,6 @@ def ping(handle, devnumber, long_message=False):
 
                     if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and \
                        reply_data[1:3] == request_data[:2]:  # error response
-                        assert reply_data[-1:] == b'\x00'
                         error = ord(reply_data[3:4])
                         if error == _hidpp10.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
