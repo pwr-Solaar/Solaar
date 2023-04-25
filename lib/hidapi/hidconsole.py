@@ -135,7 +135,7 @@ def _validate_input(line, hidpp=False):
 
 def _open(args):
 
-    def matchfn(bid, vid, pid):
+    def matchfn(bid, vid, pid, _a, _b):
         if vid == 0x046d:
             return {'vid': 0x046d}
 
