@@ -206,6 +206,7 @@ _D('Illuminated Keyboard', codename='Illuminated', protocol=1.0, usbid=0xc318, i
 _D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
+_D('diNovo Edge Keyboard', codename='diNovo', protocol=1.0, wpid='C714', settings=[_ST.RegisterFnSwap])
 
 # Mice
 
