@@ -322,7 +322,19 @@ def open_path(device_path):
     """
     assert device_path
     assert device_path.startswith('/dev/hidraw')
-    return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
+
+    _log.info('OPEN PATH %s', device_path)
+    retrycount = 0
+    while (retrycount < 3):
+        retrycount += 1
+        try:
+            return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
+        except OSError as e:
+            _log.info('OPEN PATH FAILED %s ERROR %s %s', device_path, e.errno, e)
+            if e.errno == _errno.EACCES:
+                sleep(0.1)
+            else:
+                raise
 
 
 def close(device_handle):
