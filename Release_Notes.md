@@ -1,5 +1,11 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.10
+
+* The mouse click rule action can now just simulate depressing or releasing the button.
+
+* There is a new rule condition to check the hostname.
+
 ## Version 1.1.9
 
 * Solaar now exits with at 0 exit code when killed.
