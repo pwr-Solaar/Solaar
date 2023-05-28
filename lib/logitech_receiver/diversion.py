@@ -364,6 +364,15 @@ def thumb_wheel_down(f, r, d, a):
         return False
 
 
+def charging(f, r, d, a):
+    if (f == _F.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4) or \
+       (f == _F.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7)) or \
+       (f == _F.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3):
+        return 1
+    else:
+        return False
+
+
 TESTS = {
     'crown_right': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] < 128 and d[1], False],
     'crown_left': [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
@@ -379,6 +388,7 @@ TESTS = {
     'lowres_wheel_down': [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]), False],
     'hires_wheel_up': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]), False],
     'hires_wheel_down': [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]), False],
+    'charging': [charging, False],
     'False': [lambda f, r, d, a: False, False],
     'True': [lambda f, r, d, a: True, False],
 }
@@ -1361,11 +1371,11 @@ def process_notification(device, status, notification, feature):
         keys_down = new_keys_down
     # and also G keys down
     elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack('!4I', notification.data[:4])[0]
+        new_g_keys_down = _unpack('<I', notification.data[:4])[0]
         for i in range(32):
-            if new_g_keys_down & (0x01 << (i - 1)) and not g_keys_down & (0x01 << (i - 1)):
+            if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
                 key_down = _CONTROL['G' + str(i + 1)]
-            if g_keys_down & (0x01 << (i - 1)) and not new_g_keys_down & (0x01 << (i - 1)):
+            if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
                 key_up = _CONTROL['G' + str(i + 1)]
         g_keys_down = new_g_keys_down
     # and also M keys down

@@ -117,7 +117,7 @@ def _parse_arguments():
 
     if not args.action:
         if _log.isEnabledFor(logging.INFO):
-            logging.info('language %s (%s), translations path %s', _i18n.language, _i18n.encoding, _i18n.path)
+            logging.info('version %s, language %s (%s)', __version__, _i18n.language, _i18n.encoding)
 
     return args
 
@@ -133,7 +133,7 @@ def _handlesig(signl, stack):
             faulthandler.dump_traceback()
         sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
     else:
-        sys.exit('')
+        sys.exit(0)
 
 
 def main():

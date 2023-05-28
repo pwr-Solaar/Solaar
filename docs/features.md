@@ -120,9 +120,9 @@ A “read only” note means the feature is a read-only feature.
 ## Implementing a feature
 
 Features are implemented as settable features in
-lib/logitech_receiver/settings_templates.py
-some features also have direct implementation in
-lib/logitech_receiver/hidpp20.py
+`lib/logitech_receiver/settings_templates.py`.
+Some features also have direct implementation in
+`lib/logitech_receiver/hidpp20.py`.
 
 In most cases it should suffice to only implement the settable feature
 interface for each setting in the feature.  That will add one or more
@@ -202,4 +202,4 @@ device implements the feature it does not usefully support the setting.
 Settings need to be added to the `SETTINGS` list so that setting discovery can be done.
 
 For more information on implementing feature settings
-see the comments in lib/logitech_receiver/settings_templates.py.
+see the comments in `lib/logitech_receiver/settings_templates.py`.

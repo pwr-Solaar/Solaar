@@ -1,0 +1,49 @@
+solaar version 1.1.9
+
+2: G502 Proteus Spectrum Optical Mouse
+Device path  : /dev/hidraw4
+USB id       : 046d:C332
+Codename     : G502 Proteus Spectrum
+Kind         : mouse
+Protocol     : HID++ 4.2
+Polling rate : 1 ms (1000Hz)
+Serial number:
+Model ID:      C33200000000
+Unit ID:       31374706
+Firmware: U1  03.02.B0012
+Bootloader: BOT 14.00.B0007
+Supports 20 HID++ 2.0 features:
+0: ROOT                   {0000} V0
+1: FEATURE SET            {0001} V0
+2: COLOR LED EFFECTS      {8070} V3
+3: DEVICE FW VERSION      {0003} V1
+Firmware: Firmware U1  03.02.B0012 C332
+Firmware: Bootloader BOT 14.00.B0007 AABF
+Unit ID: 31374706  Model ID: C33200000000  Transport IDs: {'usbid': 'C332'}
+4: DEVICE NAME            {0005} V0
+Name: Tunable RGB Gaming Mouse G502
+Kind: mouse
+5: LED CONTROL            {1300} V0
+6: unknown:18A1           {18A1} V0    internal, hidden
+7: unknown:1E00           {1E00} V0    hidden
+8: unknown:1E20           {1E20} V0
+9: unknown:1EB0           {1EB0} V0    internal, hidden
+10: ADJUSTABLE DPI         {2201} V1
+Sensitivity (DPI) (saved): 7000
+Sensitivity (DPI)        : 7000
+11: ANGLE SNAPPING         {2230} V0
+12: SURFACE TUNING         {2240} V0
+13: REPORT RATE            {8060} V0
+Polling Rate (ms): 1
+Polling Rate (ms) (saved): 1
+Polling Rate (ms)        : 1
+14: ONBOARD PROFILES       {8100} V0
+Device Mode: On-Board
+Onboard Profiles (saved): Enable
+Onboard Profiles        : Enable
+15: MOUSE BUTTON SPY       {8110} V0
+16: unknown:1850           {1850} V0    internal, hidden
+17: DFUCONTROL UNSIGNED    {00C1} V0
+18: unknown:1801           {1801} V0    internal, hidden
+19: DEVICE RESET           {1802} V0    internal, hidden
+Battery status unavailable.

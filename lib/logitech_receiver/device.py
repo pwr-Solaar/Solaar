@@ -113,8 +113,14 @@ class Device:
                     self.wpid = '00' + _strhex(link_notification.data[2:3])
                     kind = receiver.get_kind_from_index(number)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
-            else:
-                # Not a notification, force a reading of pairing information
+            elif receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver doesn't have pairing registers
+                self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
+                if not self.wpid:
+                    _log.error('Unable to get wpid from udev for device %d of %s', number, receiver)
+                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
+                kind = receiver.get_kind_from_index(number)
+                self._kind = _hidpp10.DEVICE_KIND[kind]
+            else:  # get information from pairing registers
                 self.online = True
                 self.update_pairing_information()
                 self.update_extended_pairing_information()
@@ -164,35 +170,32 @@ class Device:
 
     @property
     def protocol(self):
-        if not self._protocol and self.online:
-            self._protocol = _base.ping(
-                self.handle or self.receiver.handle, self.number, long_message=self.bluetooth or self.hidpp_short is False
-            )
-            # if the ping failed, the peripheral is (almost) certainly offline
-            self.online = self._protocol is not None
-
-            # if _log.isEnabledFor(_DEBUG):
-            #     _log.debug("device %d protocol %s", self.number, self._protocol)
+        if not self._protocol:
+            self.ping()
         return self._protocol or 0
 
     @property
     def codename(self):
         if not self._codename:
+            if not self.online:  # be very defensive
+                self.ping()
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
                 if not self._codename:
                     self._codename = self.name.split(' ', 1)[0] if self.name else None
-            elif self.receiver:
+            if not self._codename and self.receiver:
                 codename = self.receiver.device_codename(self.number)
                 if codename:
                     self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = '? (%s)' % (self.wpid or self.product_id)
-        return self._codename if self._codename else '?? (%s)' % (self.wpid or self.product_id)
+        return self._codename or '?? (%s)' % (self.wpid or self.product_id)
 
     @property
     def name(self):
         if not self._name:
+            if not self.online:  # be very defensive
+                self.ping()
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
         return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))

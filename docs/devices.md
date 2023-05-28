@@ -24,14 +24,14 @@ If the device is supported, it will show up in the Solaar main window.
 If it is not, and there is no issue about the device in the Solaar GitHub repository,
 open an enhancement issue requesting that it be supported.
 
-The directory https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices contains edited output
-of `solaar show` on many devices and can be used to see what Solaar can do with the the device.
+The directory <https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices> contains edited output
+of `solaar show` on many devices and can be used to see what Solaar can do with the device.
 
 
 ## Adding new devices
 
 Most new HID++ devices do not need to be known to Solaar to work.
-You should be able to just run Solaar and the device will show up
+You should be able to just run Solaar and the device will show up.
 
 If your device does not show up,
 either it doesn't use HID++ or the interface it uses isn't the one Solaar normally uses.
@@ -40,25 +40,25 @@ follow these steps:
 
 1. Make sure the receiver or device is connected and active.
 
-2. Look at output of `grep -H . /sys/class/hidraw/hidraw*/device/uevent` to find
+2. Look at the output of `grep -H . /sys/class/hidraw/hidraw*/device/uevent` to find
 where information about the device is kept.
 You are looking for a line like `/sys/class/hidraw/hidrawN/device/uevent:HID_NAME=<NAME>`
-where <NAME> is the name of your receiver or device.
-`N` is the current HID raw number of your receiver or device.
+where \<NAME\> is the name of your receiver or device.
+N is the current HID raw number of your receiver or device.
 
 3. Provide the contents of the file `/sys/class/hidraw/hidrawN/device/uevent` where N was found
 above.
 
-4. Also attach contents of the file `/sys/class/hidraw/hidrawN/device/report_descriptor`
+4. Also attach the contents of the file `/sys/class/hidraw/hidrawN/device/report_descriptor`
 to the enhancement request.
 You will have to copy the contents to a file with txt extension before attaching it.
-Or, better, install hidrd-convert and attach output of
+Or, better, install hidrd-convert and attach the output of
 `hidrd-convert -o spec /sys/class/hidraw/hidrawN/device/report_descriptor`
 (To install hidrd on Fedora use  `sudo dnf install hidrd`.)
 
 5. If your device or receiver connects via USB, look at the output of `lsusb`
-to find the ID of device or receiver and also provide output of
-`lsusb -vv -d xxxx:yyyy` where xxxx:yyyy is ID of device or receiver.
+to find the ID of the device or receiver and also provide the output of
+`lsusb -vv -d xxxx:yyyy` where xxxx:yyyy is the ID of the device or receiver.
 
 If your device can connect in multiple ways - via a receiver, via USB (not just charging via a USB cable),
 via Bluetooth - do this for each way it can connect.
@@ -120,12 +120,12 @@ to be specified. Then add the receiver to the tuple of receivers (ALL).
 | 17ef:6042 | Nano       | 1                  |
 
 Some Nano receivers are only partly supported
-as they do not fully implement the full HID++ 1.0 protocol.
-Some Nano receivers are not supported at all as they do not implement the HID++ protocol.
+as they do not implement the full HID++ 1.0 protocol.
+Some Nano receivers are not supported as they do not implement the HID++ protocol at all.
 Receivers with USB ID 046d:c542 fall into this category.
 
 The receiver with USB ID 046d:c517 is an old 27 MHz receiver, supporting only
-subset of HID++ 1.0 protocol. Only hardware pairing is supported.
+a subset of the HID++ 1.0 protocol. Only hardware pairing is supported.
 
 
 
@@ -202,6 +202,7 @@ and are not being updated for new devices that are supported by Solaar.
 | MX Master        | 4041 | 2.0   |
 | MX Master 2S     | 4069 | 2.0   |
 | Cube             |      | 2.0   |
+| MX Vertical      | 407B | 2.0   |
 
 ### Mice (Nano)
 
@@ -283,4 +284,4 @@ and are not being updated for new devices that are supported by Solaar.
 | EX100 keyboard   | 0065 | 1.0   |
 | EX100 mouse      | 003f | 1.0   |
 
-* The EX100 is an old, preunifying receiver and device set, supporting only part of HID++ 1.0 features
+* The EX100 is an old, pre-Unifying receiver and device set, supporting only some HID++ 1.0 features

@@ -9,7 +9,7 @@ An easy way to install the most recent release version of  Solaar is from the Py
 First install pip, and then run
 `pip install --user 'solaar[report-descriptor,git-commit]'`.
 
-This will not install the Solaar udev rule, which you will need to copy from
+This will not install the Solaar udev rule, which you will need to install manually by copying
 `~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
 to `/etc/udev/rules.d` as root.
 
@@ -38,9 +38,9 @@ and `python3-yaml` or `python3-pyyaml` packages installed.
 
 To run the GUI Solaar also requires Gtk3 and its GObject introspection bindings.
 If you are running the system version of Python
-the Debian/Ubuntu packages you should have
-`python3-gi` and `gir1.2-gtk-3.0` installed.
-in Fedora you need `gtk3` and `python3-gobject`.
+in Debian/Ubuntu you should have the
+`python3-gi` and `gir1.2-gtk-3.0` packages installed.
+In Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
 Although the Solaar CLI does not require Gtk3,
@@ -85,7 +85,7 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 
 Solaar needs to write to HID devices for receivers and devices.
 To be able to do this without running as root requires a udev rule
-that gives seated users write access to the HID devices for Logitech receiver and devices.
+that gives seated users write access to the HID devices for Logitech receivers and devices.
 
 You can install this rule by copying, as root,
 `rules.d/42-logitech-unify-permissions.rules` from Solaar to
@@ -104,7 +104,7 @@ To run Solaar from the download directory, first install the Solaar udev rule if
 Then cd to the solaar directory and run `bin/solaar` for the GUI
 or `bin/solaar <command> <arguments>` for the CLI.
 
-Do not run Solaar as root, you may encounter problems with X11 integration and with the system tray.
+Do not run Solaar as root, as you may encounter problems with X11 integration and with the system tray.
 
 ## Installing Solaar from the download directory using Pip
 
@@ -112,18 +112,18 @@ Python programs are usually installed using [pip][pip].
 The pip instructions for Solaar are in `setup.py`, the standard place to put such instructions.
 
 To install Solaar for yourself only run
-`pip install --user '.[report-descriptor,git-commit]'`.
+`pip install --user '.[report-descriptor,git-commit]'`
 from the download directory.
-This tells pip to install into your `.local` directory, but does not install Solaar's udev rule.
+This tells pip to install Solaar into your `~/.local` directory, but does not install Solaar's udev rule.
 (See above for installing the udev rule.)
 Once the udev rule has been installed you can then run Solaar as `~/.local/bin/solaar`.
 
-Installing python programs to system directories using pip is generally frowned on both
+Installing Python programs to system directories using pip is generally frowned on both
 because this runs arbitrary code as root and because this can override existing python libraries
-that other users or even the system depend on. If you want to install solaar to /usr/local run
+that other users or even the system depend on. If you want to install Solaar to /usr/local run
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
 (The umask is needed so that the created files and directories can be read and executed by everyone.)
-Then solaar can be run as /usr/local/bin/solaar.
+Then Solaar can be run as /usr/local/bin/solaar.
 You will also have to install the udev rule.
 
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)

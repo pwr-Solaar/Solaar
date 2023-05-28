@@ -1,0 +1,44 @@
+1: G502 SE Hero Gaming Mouse
+     Device path  : /dev/hidraw7
+     USB id       : 046d:C08B
+     Codename     : G502 Hero
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number:
+     Model ID:      C08B00000000
+     Unit ID:       30324703
+          Firmware: U1  27.03.B0010
+        Bootloader: BOT 81.00.B0002
+     Supports 19 HID++ 2.0 features:
+         0: ROOT                   {0000}
+         1: FEATURE SET            {0001}
+         2: COLOR LED EFFECTS      {8070}
+         3: DEVICE FW VERSION      {0003}
+            Firmware: Firmware U1  27.03.B0010 C08B
+            Firmware: Bootloader BOT 81.00.B0002 AAE6
+            Unit ID: 30324703  Model ID: C08B00000000  Transport IDs: {'usbid': 'C08B'}
+         4: DEVICE NAME            {0005}
+            Name: G502 HERO Gaming Mouse
+            Kind: mouse
+         5: LED CONTROL            {1300}
+         6: unknown:18A1           {18A1}   internal, hidden
+         7: unknown:1E00           {1E00}   hidden
+         8: unknown:1E22           {1E22}   internal, hidden
+         9: unknown:1EB0           {1EB0}   internal, hidden
+        10: ADJUSTABLE DPI         {2201}
+            Sensitivity (DPI) (saved): 2400
+            Sensitivity (DPI)        : 2400
+        11: REPORT RATE            {8060}
+            Polling Rate (ms): 1
+            Polling Rate (ms) (saved): 1
+            Polling Rate (ms)        : 1
+        12: ONBOARD PROFILES       {8100}
+            Device Mode: Host
+        13: MOUSE BUTTON SPY       {8110}
+        14: DFUCONTROL SIGNED      {00C2}
+        15: unknown:1801           {1801}   internal, hidden
+        16: DEVICE RESET           {1802}   internal, hidden
+        17: CONFIG DEVICE PROPS    {1806}   internal, hidden
+        18: unknown:18B1           {18B1}   internal, hidden
+     Battery status unavailable.

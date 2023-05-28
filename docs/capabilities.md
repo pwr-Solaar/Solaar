@@ -106,11 +106,11 @@ Setting information is stored in the file `~/.config/solaar/config.yaml`.
 
 Updating of a setting can be turned off in the Solaar GUI by clicking on the icon
 at the right-hand edge of the setting until a red icon appears (with tooltip
-"Ignore this setting" ).
+"Ignore this setting").
 
 Solaar keeps track of settings independently on each computer.
 As a result if a device is switched between different computers
-Solaar may apply different settings for it on the different computers
+Solaar may apply different settings for it on the different computers.
 
 Querying a device for its current state can require quite a few HID++
 interactions. These interactions can temporarily slow down the device, so
@@ -182,7 +182,7 @@ This allows users to close Solaar and reopen from the tray.
 This aspect of Solaar depends on having an active system tray which may
 require some special setup when using Gnome, particularly under Wayland.
 
-If you are running gnome, you most likely need the
+If you are running Gnome, you most likely need the
 `gnome-shell-extension-appindicator` package installed.
 In Fedora, this can be done by running
 ```
@@ -199,7 +199,7 @@ You may have to log out and log in again before the system tray shows up.
 
 For many devices, Solaar shows the approximate battery level via icons that
 show up in both the main window and the system tray. In previous versions
-several heuristics to determine which icon names to use for this purpose,
+several heuristics determined which icon names to use for this purpose,
 but as more and more battery icon schemes have been developed this has
 become impossible to do well. Solaar now uses the eleven standard
 battery icon names `battery-{full,good,low,critical,empty}[-charging]` and
