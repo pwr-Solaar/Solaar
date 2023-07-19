@@ -303,6 +303,7 @@ _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D(None, kind=_DK.mouse, usbid=0xc092, interface=1)  # two mice share this ID
 _D('M500S Mouse', codename='M500S', usbid=0xc093, interface=1)
 # _D('G600 Gaming Mouse', codename='G600 Gaming', usbid=0xc24a, interface=1) # not an HID++ device
+_D('G500s Gaming Mouse', codename='G500s Gaming', usbid=0xc24e, interface=1, protocol=1.0)
 _D('G502 Proteus Spectrum Optical Mouse', codename='G502 Proteus Spectrum', usbid=0xc332, interface=1)
 _D('Logitech PRO Gaming Keyboard', codename='PRO Gaming Keyboard', usbid=0xc339, interface=1)
 
