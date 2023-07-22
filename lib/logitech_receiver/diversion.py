@@ -95,7 +95,7 @@ if _log.isEnabledFor(_INFO):
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
-    _log.warn('rules cannot access modifier keys in Wayland')
+    _log.warn('rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed')
 
 try:
     import Xlib
@@ -144,25 +144,18 @@ def x11_setup():
     return _x11
 
 
-def gnome_dbus_setup():
-    global _dbus_available
-    if _dbus_available is not None:
-        return _dbus_available
-
+def gnome_dbus_interface_setup():
+    global _dbus_interface
+    if _dbus_interface is not None:
+        return _dbus_interface
     try:
         bus = dbus.SessionBus()
         remote_object = bus.get_object("io.github.pwr_solaar.solaar.gnome", "/io/github/pwr_solaar/solaar/gnome")
-        interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar.gnome")
-
-        # Check if the interface is available by calling a method (e.g., ActiveWindow).
-        # You can use any method that you expect to exist in the D-Bus interface.
-        interface.ActiveWindow()
-
-        _dbus_available = True
+        _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar.gnome")
     except dbus.exceptions.DBusException:
-        _dbus_available = False
-
-    return _dbus_available
+        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+        _dbus_interface = False
+    return _dbus_interface
 
 
 def xkb_setup():
@@ -585,23 +578,15 @@ def x11_pointer_prog():
 
 
 def gnome_dbus_focus_prog():
-    if not gnome_dbus_setup():
+    if not gnome_dbus_interface_setup():
         return None
-    bus = dbus.SessionBus()
-    remote_object = bus.get_object("io.github.pwr_solaar.solaar.gnome", "/io/github/pwr_solaar/solaar/gnome")
-    interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar.gnome")
-
-    wm_class = interface.ActiveWindow()
+    wm_class = _dbus_interface.ActiveWindow()
     return (wm_class, ) if wm_class else None
 
 def gnome_dbus_pointer_prog():
-    if not gnome_dbus_setup():
+    if not gnome_dbus_interface_setup():
         return None
-    bus = dbus.SessionBus()
-    remote_object = bus.get_object("io.github.pwr_solaar.solaar.gnome", "/io/github/pwr_solaar/solaar/gnome")
-    interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar.gnome")
-
-    wm_class = interface.PointerOverWindow()
+    wm_class = _dbus_interface.PointerOverWindow()
     return (wm_class, ) if wm_class else None
 
 
@@ -609,9 +594,9 @@ class Process(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_setup()):
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules can only access active process in X11 or in wayland under gnome with solaar-gnome-extension - %s', self)
+                _log.warn('rules can only access active process in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self)
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule Process argument not a string: %s', process)
@@ -637,9 +622,9 @@ class MouseProcess(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_setup()):
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules cannot access active mouse process in X11 or in wayland under gnome with solaar-gnome-extension - %s', self)
+                _log.warn('rules cannot access active mouse process in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self)
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule MouseProcess argument not a string: %s', process)
