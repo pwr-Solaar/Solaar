@@ -625,7 +625,7 @@ class Process(Condition):
             _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog() if not wayland else gnome_db11_focus_prog()
+        focus = x11_focus_prog() if not wayland else gnome_dbus_focus_prog()
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
