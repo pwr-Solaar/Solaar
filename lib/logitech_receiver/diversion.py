@@ -96,7 +96,8 @@ if _log.isEnabledFor(_INFO):
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
     _log.warn(
-        'rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed'
+        'rules cannot access modifier keys in Wayland, '
+        'accessing process only works on GNOME with Solaar Gnome extension installed'
     )
 
 try:
@@ -633,7 +634,8 @@ class MouseProcess(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 _log.warn(
-                    'rules cannot access active mouse process in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
+                    'rules cannot access active mouse process '
+                    'in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
                     self
                 )
         if not isinstance(process, str):
