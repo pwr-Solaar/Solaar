@@ -28,10 +28,10 @@ from logging import getLogger
 from math import sqrt as _sqrt
 from struct import unpack as _unpack
 
+import dbus
 import evdev
 import keysyms.keysymdef as _keysymdef
 import psutil
-import dbus
 
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
@@ -95,7 +95,9 @@ if _log.isEnabledFor(_INFO):
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
-    _log.warn('rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed')
+    _log.warn(
+        'rules cannot access modifier keys in Wayland, accessing process only works on GNOME with Solaar Gnome extension installed'
+    )
 
 try:
     import Xlib
@@ -151,8 +153,8 @@ def gnome_dbus_interface_setup():
         return _dbus_interface
     try:
         bus = dbus.SessionBus()
-        remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
-        _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
+        remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
+        _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
     except dbus.exceptions.DBusException:
         _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
         _dbus_interface = False
@@ -597,7 +599,10 @@ class Process(Condition):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules can only access active process in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self)
+                _log.warn(
+                    'rules can only access active process in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
+                    self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule Process argument not a string: %s', process)
@@ -625,7 +630,10 @@ class MouseProcess(Condition):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules cannot access active mouse process in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self)
+                _log.warn(
+                    'rules cannot access active mouse process in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
+                    self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule MouseProcess argument not a string: %s', process)
