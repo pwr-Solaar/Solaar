@@ -113,6 +113,7 @@ XkbUseCoreKbd = 0x100
 
 _dbus_interface = None
 
+
 class XkbDisplay(_ctypes.Structure):
     """ opaque struct """
 
@@ -585,6 +586,7 @@ def gnome_dbus_focus_prog():
         return None
     wm_class = _dbus_interface.ActiveWindow()
     return (wm_class, ) if wm_class else None
+
 
 def gnome_dbus_pointer_prog():
     if not gnome_dbus_interface_setup():
