@@ -635,8 +635,7 @@ class MouseProcess(Condition):
             if warn:
                 _log.warn(
                     'rules cannot access active mouse process '
-                    'in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
-                    self
+                    'in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self
                 )
         if not isinstance(process, str):
             if warn:
