@@ -28,6 +28,7 @@ from logging import getLogger
 from math import sqrt as _sqrt
 from struct import unpack as _unpack
 
+import dbus
 import evdev
 import keysyms.keysymdef as _keysymdef
 import psutil
@@ -94,7 +95,10 @@ if _log.isEnabledFor(_INFO):
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
-    _log.warn('rules cannot access active process or modifier keys in Wayland')
+    _log.warn(
+        'rules cannot access modifier keys in Wayland, '
+        'accessing process only works on GNOME with Solaar Gnome extension installed'
+    )
 
 try:
     import Xlib
@@ -107,6 +111,8 @@ xdisplay = None
 Xkbdisplay = None  # xkb might be available
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
+
+_dbus_interface = None
 
 
 class XkbDisplay(_ctypes.Structure):
@@ -141,6 +147,20 @@ def x11_setup():
         _x11 = False
         xtest_available = False
     return _x11
+
+
+def gnome_dbus_interface_setup():
+    global _dbus_interface
+    if _dbus_interface is not None:
+        return _dbus_interface
+    try:
+        bus = dbus.SessionBus()
+        remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
+        _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
+    except dbus.exceptions.DBusException:
+        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+        _dbus_interface = False
+    return _dbus_interface
 
 
 def xkb_setup():
@@ -562,13 +582,30 @@ def x11_pointer_prog():
     return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
 
+def gnome_dbus_focus_prog():
+    if not gnome_dbus_interface_setup():
+        return None
+    wm_class = _dbus_interface.ActiveWindow()
+    return (wm_class, ) if wm_class else None
+
+
+def gnome_dbus_pointer_prog():
+    if not gnome_dbus_interface_setup():
+        return None
+    wm_class = _dbus_interface.PointerOverWindow()
+    return (wm_class, ) if wm_class else None
+
+
 class Process(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if wayland or not x11_setup():
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules can only access active process in X11 - %s', self)
+                _log.warn(
+                    'rules can only access active process in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
+                    self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule Process argument not a string: %s', process)
@@ -582,7 +619,7 @@ class Process(Condition):
             _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog()
+        focus = x11_focus_prog() if not wayland else gnome_dbus_focus_prog()
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
@@ -594,9 +631,12 @@ class MouseProcess(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if wayland or not x11_setup():
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules cannot access active mouse process in X11 - %s', self)
+                _log.warn(
+                    'rules cannot access active mouse process '
+                    'in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule MouseProcess argument not a string: %s', process)
@@ -610,7 +650,7 @@ class MouseProcess(Condition):
             _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
-        pointer_focus = x11_pointer_prog()
+        pointer_focus = x11_pointer_prog() if not wayland else gnome_dbus_pointer_prog()
         result = any(bool(s and s.startswith(self.process)) for s in pointer_focus) if pointer_focus else None
         return result
 
