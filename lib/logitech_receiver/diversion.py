@@ -215,7 +215,7 @@ def setup_uinput():
         _log.warn('cannot create uinput device: %s', e)
 
 
-if wayland:  # wayland can't use xtest so may as well set up uinput now
+if wayland:  # Wayland can't use xtest so may as well set up uinput now
     setup_uinput()
 
 
@@ -603,7 +603,7 @@ class Process(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 _log.warn(
-                    'rules can only access active process in X11 or in wayland under GNOME with Solaar Gnome extension - %s',
+                    'rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s',
                     self
                 )
         if not isinstance(process, str):
@@ -635,7 +635,7 @@ class MouseProcess(Condition):
             if warn:
                 _log.warn(
                     'rules cannot access active mouse process '
-                    'in X11 or in wayland under GNOME with Solaar Gnome extension - %s', self
+                    'in X11 or in Wayland under GNOME with Solaar Gnome extension - %s', self
                 )
         if not isinstance(process, str):
             if warn:

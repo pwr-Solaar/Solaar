@@ -11,7 +11,9 @@ Rule processing is an experimental feature.  Significant changes might be made i
 Note that rule processing only fully works under X11.
 When running under Wayland with X11 libraries loaded some features will not be available.
 When running under Wayland without X11 libraries loaded even more features will not be available.
-Rule features known not to work under Wayland include process and mouse process conditions.
+Rule features known not to work under Wayland include process and mouse process conditions,
+although on GNOME desktop under Wayland, you can use those with the Solaar Gnome extension installed,
+You can install it from `https://extensions.gnome.org/extension/6159/solaar-gnome-extension`.
 Under Wayland using keyboard groups may result in incorrect symbols being input for simulated input.
 Under Wayland simulating inputs when modifier keys are pressed may result in incorrect symbols being sent.
 Simulated input uses Xtest if available under X11 or uinput if the user has write access to /dev/uinput.
