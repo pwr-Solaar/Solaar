@@ -140,7 +140,6 @@ change the speed of some thumb wheels.  These notifications are only sent
 for actions that are set in Solaar to their HID++ setting (also known as diverted).
 For more information on this capability of Solaar see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
-Some features of rules do not work under Wayland.
 
 Users can edit rules using a GUI by clicking on the `Rule Editor` button in the Solaar main window.
 
