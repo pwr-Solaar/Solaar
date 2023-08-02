@@ -55,7 +55,7 @@ def _create_menu(quit_handler):
 
     # per-device menu entries will be generated as-needed
 
-    no_receiver = Gtk.MenuItem.new_with_label(_('No Logitech device found'))
+    no_receiver = Gtk.MenuItem.new_with_label(_('No supported device found'))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
