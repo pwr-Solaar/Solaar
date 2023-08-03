@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Information**
-<!-- Please update to Solaar from this repository before asking for a new feature. -->
+<!-- The version of Solaar in this repository has more features than released vesions.  Update to this version before asking for a new feature. -->
 - Solaar version (`solaar --version` and `git describe --tags`):
 - Distribution:
 - Kernel version (ex. `uname -srmo`):
