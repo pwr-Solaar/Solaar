@@ -14,8 +14,8 @@ fi
 HIDRAW=$2
 
 do_req() {
-	"$HC" --hidpp $HIDRAW | grep -v "\[1. .. 8F.. " | grep -B 1 "^>> "
-#	"$HC" --hidpp $HIDRAW | grep -v "\[1. ${DEVNUMBER} 8F..0[123]" | grep -B 1 "^>> "
+##	"$HC" $HIDRAW
+	"$HC" $HIDRAW | grep -v "^<< " | grep -v "\[1. .. 8F.. "
 }
 
 req00="$(mktemp --tmpdir req00-XXXXXX)"
