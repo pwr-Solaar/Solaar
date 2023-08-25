@@ -1040,6 +1040,29 @@ class Device(Condition):
         return {'Device': self.devID}
 
 
+class Host(Condition):
+
+    def __init__(self, host, warn=True):
+        if not (isinstance(host, str)):
+            if warn:
+                _log.warn('rule Host Name argument not a string: %s', host)
+            self.host = ''
+        self.host = host
+
+    def __str__(self):
+        return 'Host: ' + str(self.host)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        import socket
+        hostname = socket.getfqdn()
+        return hostname.startswith(self.host)
+
+    def data(self):
+        return {'Host': self.host}
+
+
 class Action(RuleComponent):
 
     def __init__(self, *args):
@@ -1338,6 +1361,7 @@ COMPONENTS = {
     'MouseGesture': MouseGesture,
     'Active': Active,
     'Device': Device,
+    'Host': Host,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,
