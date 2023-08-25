@@ -521,6 +521,7 @@ class DiversionDialog:
                         (_('KeyIsDown'), _DIV.KeyIsDown, ''),
                         (_('Active'), _DIV.Active, ''),
                         (_('Device'), _DIV.Device, ''),
+                        (_('Host'), _DIV.Host, ''),
                         (_('Setting'), _DIV.Setting, [None, '', None]),
                         (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
                         (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
@@ -2252,11 +2253,42 @@ class ActiveUI(_DeviceUI, ConditionUI):
 class DeviceUI(_DeviceUI, ConditionUI):
 
     CLASS = _DIV.Device
-    label_text = _('Device originated the current notification.')
+    label_text = _('Device that originated the current notification.')
 
     @classmethod
     def left_label(cls, component):
         return _('Device')
+
+
+class HostUI(ConditionUI):
+
+    CLASS = _DIV.Host
+
+    def create_widgets(self):
+        self.widgets = {}
+        self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
+        self.label.set_text(_('Name of host computer.'))
+        self.widgets[self.label] = (0, 0, 1, 1)
+        self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        self.field.set_size_request(600, 0)
+        self.field.connect('changed', self._on_update)
+        self.widgets[self.field] = (0, 1, 1, 1)
+
+    def show(self, component, editable):
+        super().show(component, editable)
+        with self.ignore_changes():
+            self.field.set_text(component.host)
+
+    def collect_value(self):
+        return self.field.get_text()
+
+    @classmethod
+    def left_label(cls, component):
+        return _('Host')
+
+    @classmethod
+    def right_label(cls, component):
+        return str(component.host)
 
 
 class _SettingWithValueUI:
@@ -2624,6 +2656,7 @@ COMPONENT_UI = {
     _DIV.MouseProcess: MouseProcessUI,
     _DIV.Active: ActiveUI,
     _DIV.Device: DeviceUI,
+    _DIV.Host: HostUI,
     _DIV.Feature: FeatureUI,
     _DIV.Report: ReportUI,
     _DIV.Modifiers: ModifiersUI,
