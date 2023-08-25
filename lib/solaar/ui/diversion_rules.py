@@ -29,9 +29,9 @@ from typing import Dict
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
+from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
-from logitech_receiver.diversion import KeyPress as _KeyPress
 from logitech_receiver.diversion import buttons as _buttons
 from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
 from logitech_receiver.settings import KIND as _SKIND
@@ -1770,13 +1770,13 @@ class KeyPressUI(ActionUI):
         self.add_btn.connect('clicked', self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
         self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _('Click'))
-        self.action_clicked_radio.connect('toggled', self._on_update, _KeyPress.CLICK)
+        self.action_clicked_radio.connect('toggled', self._on_update, CLICK)
         self.widgets[self.action_clicked_radio] = (0, 3, 1, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _('Depress'))
-        self.action_pressed_radio.connect('toggled', self._on_update, _KeyPress.DEPRESS)
+        self.action_pressed_radio.connect('toggled', self._on_update, DEPRESS)
         self.widgets[self.action_pressed_radio] = (1, 3, 1, 1)
         self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _('Release'))
-        self.action_released_radio.connect('toggled', self._on_update, _KeyPress.RELEASE)
+        self.action_released_radio.connect('toggled', self._on_update, RELEASE)
         self.widgets[self.action_released_radio] = (2, 3, 1, 1)
 
     def _create_field(self):
@@ -1836,8 +1836,8 @@ class KeyPressUI(ActionUI):
             self.del_btns[i].hide()
 
     def collect_value(self):
-        action = _KeyPress.CLICK if self.action_clicked_radio.get_active() else \
-                 _KeyPress.DEPRESS if self.action_pressed_radio.get_active() else _KeyPress.RELEASE
+        action = CLICK if self.action_clicked_radio.get_active() else \
+                 DEPRESS if self.action_pressed_radio.get_active() else RELEASE
         return [[f.get_text().strip() for f in self.fields if f.get_visible()], action]
 
     @classmethod
@@ -1846,8 +1846,7 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return ' + '.join(component.key_names
-                          ) + ('  (' + component.action + ')' if component.action != _KeyPress.CLICK else '')
+        return ' + '.join(component.key_names) + ('  (' + component.action + ')' if component.action != CLICK else '')
 
 
 class MouseScrollUI(ActionUI):
@@ -1911,6 +1910,7 @@ class MouseClickUI(ActionUI):
     MIN_VALUE = 1
     MAX_VALUE = 9
     BUTTONS = list(_buttons.keys())
+    ACTIONS = [CLICK, DEPRESS, RELEASE]
 
     def create_widgets(self):
         self.widgets = {}
@@ -1919,29 +1919,39 @@ class MouseClickUI(ActionUI):
         )
         self.widgets[self.label] = (0, 0, 4, 1)
         self.label_b = Gtk.Label(label=_('Button'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
-        self.label_c = Gtk.Label(label=_('Count'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.label_c = Gtk.Label(label=_('Count and Action'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
         self.field_b = CompletionEntry(self.BUTTONS)
         self.field_c = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
+        self.field_d = CompletionEntry(self.ACTIONS)
         for f in [self.field_b, self.field_c]:
             f.set_halign(Gtk.Align.CENTER)
             f.set_valign(Gtk.Align.START)
         self.field_b.connect('changed', self._on_update)
         self.field_c.connect('changed', self._on_update)
+        self.field_d.connect('changed', self._on_update)
         self.widgets[self.label_b] = (0, 1, 1, 1)
         self.widgets[self.field_b] = (1, 1, 1, 1)
         self.widgets[self.label_c] = (2, 1, 1, 1)
         self.widgets[self.field_c] = (3, 1, 1, 1)
+        self.widgets[self.field_d] = (4, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
             self.field_b.set_text(component.button)
-            self.field_c.set_value(component.count)
+            if isinstance(component.count, int):
+                self.field_c.set_value(component.count)
+                self.field_d.set_text(CLICK)
+            else:
+                self.field_c.set_value(1)
+                self.field_d.set_text(component.count)
 
     def collect_value(self):
-        b, c = self.field_b.get_text(), int(self.field_c.get_value())
+        b, c, d = self.field_b.get_text(), int(self.field_c.get_value()), self.field_d.get_text()
         if b not in self.BUTTONS:
             b = 'unknown'
+        if d != CLICK:
+            c = d
         return [b, c]
 
     @classmethod
@@ -1950,7 +1960,7 @@ class MouseClickUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return f'{component.button} (x{component.count})'
+        return f'{component.button} ({"x" if isinstance(component.count, int) else ""}{component.count})'
 
 
 class ExecuteUI(ActionUI):
