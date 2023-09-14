@@ -429,13 +429,16 @@ class Device:
 
     def request(self, request_id, *params, no_reply=False):
         if self:
+            long = self.hidpp_long is True or (
+                self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+            )
             return _base.request(
                 self.handle or self.receiver.handle,
                 self.number,
                 request_id,
                 *params,
                 no_reply=no_reply,
-                long_message=self.bluetooth or self.hidpp_short is False or self.protocol >= 2.0,
+                long_message=long,
                 protocol=self.protocol
             )
 
@@ -445,7 +448,10 @@ class Device:
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        long = self.bluetooth or self.hidpp_short is False or self._protocol is not None and self._protocol >= 2.0
+        #        long = self.bluetooth or self.hidpp_short is False or self._protocol is not None and self._protocol >= 2.0
+        long = self.hidpp_long is True or (
+            self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+        )
         protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
