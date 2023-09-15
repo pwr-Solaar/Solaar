@@ -158,8 +158,8 @@ def _open(args):
         '.. Opened handle %r, vendor %r product %r serial %r.' %
         (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle))
     )
-    if False and args.hidpp:
-        if _hid.get_manufacturer(handle) != b'Logitech':
+    if args.hidpp:
+        if _hid.get_manufacturer(handle) is not None and _hid.get_manufacturer(handle) != b'Logitech':
             sys.exit('!! Only Logitech devices support the HID++ protocol.')
         print('.. HID++ validation enabled.')
     else:
