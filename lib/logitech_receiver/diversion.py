@@ -88,6 +88,8 @@ _KEY_PRESS = 1
 _BUTTON_RELEASE = 2
 _BUTTON_PRESS = 3
 
+CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
+
 gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
 gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if _log.isEnabledFor(_INFO):
@@ -312,20 +314,36 @@ def simulate_key(code, event):  # X11 keycode but Solaar event code
 
 
 def click_xtest(button, count):
-    for _ in range(count):
-        if not simulate_xtest(button[0], _BUTTON_PRESS):
-            return False
-        if not simulate_xtest(button[0], _BUTTON_RELEASE):
-            return False
+    if isinstance(count, int):
+        for _ in range(count):
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
+    else:
+        if count != RELEASE:
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+        if count != DEPRESS:
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
     return True
 
 
 def click_uinput(button, count):
-    for _ in range(count):
-        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-            return False
-        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-            return False
+    if isinstance(count, int):
+        for _ in range(count):
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+                return False
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+                return False
+    else:
+        if count != RELEASE:
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+                return False
+        if count != DEPRESS:
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+                return False
     return True
 
 
@@ -1073,7 +1091,6 @@ class Action(RuleComponent):
 
 
 class KeyPress(Action):
-    CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
 
     def __init__(self, args, warn=True):
         self.key_names, self.action = self.regularize_args(args)
@@ -1089,11 +1106,11 @@ class KeyPress(Action):
             self.key_symbols = []
 
     def regularize_args(self, args):
-        action = self.CLICK
+        action = CLICK
         if not isinstance(args, list):
             args = [args]
         keys = args
-        if len(args) == 2 and args[1] in [self.CLICK, self.DEPRESS, self.RELEASE]:
+        if len(args) == 2 and args[1] in [CLICK, DEPRESS, RELEASE]:
             keys = [args[0]] if isinstance(args[0], str) else args[0]
             action = args[1]
         return keys, action
@@ -1139,14 +1156,14 @@ class KeyPress(Action):
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode is None:
                 _log.warn('rule KeyPress key symbol not currently available %s', self)
-            elif self.action != self.CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
+            elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
-            if keycode and (self.action != self.CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
+            if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
@@ -1155,9 +1172,9 @@ class KeyPress(Action):
             current = gkeymap.get_modifier_state()
             if _log.isEnabledFor(_INFO):
                 _log.info('KeyPress action: %s %s, group %s, modifiers %s', self.key_names, self.action, kbdgroup(), current)
-            if self.action != self.RELEASE:
+            if self.action != RELEASE:
                 self.keyDown(self.key_symbols, current)
-            if self.action != self.DEPRESS:
+            if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
             _time.sleep(0.01)
         else:
@@ -1225,9 +1242,11 @@ class MouseClick(Action):
         try:
             self.count = int(count)
         except (ValueError, TypeError):
-            if warn:
-                _log.warn('rule MouseClick action: count %s should be an integer', count)
-            self.count = 1
+            if count in [CLICK, DEPRESS, RELEASE]:
+                self.count = count
+            elif warn:
+                _log.warn('rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE', count)
+                self.count = 1
 
     def __str__(self):
         return 'MouseClick: %s (%d)' % (self.button, self.count)

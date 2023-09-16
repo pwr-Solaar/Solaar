@@ -119,6 +119,8 @@ or the window's Window manager class or instance name starts with their string a
 `Device` and `Active` conditions take one argument, which is the Serial number or Unit ID of a device,
 as shown in Solaar's detail pane.
 
+`Host' conditions are true if the computers hostname starts with the condition's argument.
+
 `Setting` conditions check the value of a Solaar setting on a device.
 `Setting` conditions take three or four arguments, depending on the setting:
 the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
@@ -214,6 +216,8 @@ to go wrong under Wayland than under X11.
 
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
+A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.
+The action simulates that number of clicks of the specified button or just one click, depress, or release of the button.
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
 An `Execute` action takes a program and arguments and executes it asynchronously.
 
