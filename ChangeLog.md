@@ -1,4 +1,4 @@
-# 1.1.10
+# 1.1.10rc3
 
 * Permit bluetooth devices in hidconsole
 * Add descriptor for Logitech MX Revolution Mouse M-RCL 124
