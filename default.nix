@@ -24,6 +24,10 @@ stdenv.mkDerivation rec{
     install -m755 -D $src/bin/solaar $out/bin/solaar
     ln -s $out/bin/solaar $out/bin/solaar-cli
 
-    install -m444 -t $udev/etc/udev/rules.d rules.d-uinput/*.rules
+    install -m444 -D $src/rules.d-uinput/*.rules $udev/etc/udev/rules.d/
+
   '';
+  postInstall = ''
+    install -m444 -t $udev/etc/udev/rules.d rules.d-uinput/*.rules
+  ''
 }
