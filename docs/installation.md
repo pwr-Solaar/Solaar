@@ -134,6 +134,33 @@ If you want to have Solaar's user messages in some other language you need to ru
 `tools/po-compile.sh` to create the translation files before running or installing Solaar
 and set the LANGUAGE environment variable appropriately when running Solaar.
 
+# NixOS
+Add this to your falke.nix
+```ǹix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    solaar = {
+      # Uncomment wat you want
+      #url = "github:pwr-Solaar/Solaar"; # For latest package
+      #url = "https://github.com/Svenum/Solaar/archive/refs/tags/VERSION.tar.gz; # For Stable Version
+    };
+  };
+
+  outputs = {nixpkgs, solaar}: {
+    nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+
+      modules = [
+        ({pkgs, ...}: {
+          environment.systemPackages = [prismlauncher.packages.${pkgs.system}.prismlauncher];
+        })
+      ];
+    };
+  }
+}
+```
+
 # Running Solaar at Startup
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
