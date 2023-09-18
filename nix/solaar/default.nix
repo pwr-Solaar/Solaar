@@ -17,9 +17,7 @@ stdenv.mkDerivation rec{
   ];
 
   installPhase = ''
-    cp ${src}/bin/solaar ${out}/bin/solaar
-    ln -s ${out}/bin/solaar ${out}/bin/solaar-cli
-
-    cp -r ${src}/lib ${out}/lib
+    install -m755 -D bin/solaar $out/bin/solaar
+    ln -s $out/bin/solaar $out/bin/solaar-cli
   '';
 }
