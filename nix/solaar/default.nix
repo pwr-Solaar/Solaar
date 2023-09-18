@@ -1,6 +1,6 @@
 {stdenv,
 lib,
-selv,
+self,
 python3
 }:
 
