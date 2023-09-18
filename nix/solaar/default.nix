@@ -1,5 +1,6 @@
 {stdenv,
 lib,
+autoPatchelfHook,
 python3
 }:
 
@@ -10,6 +11,10 @@ stdenv.mkDerivation rec{
   src = ./.;
 
   outputs = [ "out" "udev" ];
+
+  nativeBuiltInputs = [
+    autoPatchelfHook
+  ];
 
   builtInputs = [
     python3
