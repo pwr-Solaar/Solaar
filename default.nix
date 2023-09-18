@@ -1,7 +1,7 @@
 {stdenv,
 lib,
 autoPatchelfHook,
-python3
+python3Packages
 }:
 
 stdenv.mkDerivation rec{
@@ -16,15 +16,16 @@ stdenv.mkDerivation rec{
     autoPatchelfHook
   ];
 
-  builtInputs = [
-    python3
+  propagatedBuiltInputs = with python3Packages; [
+    evdev
   ];
 
   installPhase = ''
     install -m755 -D $src/bin/solaar $out/bin/solaar
     ln -s $out/bin/solaar $out/bin/solaar-cli
-  '';
-  postInstall = ''
+
+    mkdir -p $udev/etc/udev/rules.d
+
     install -m444 -t $udev/etc/udev/rules.d $src/rules.d-uinput/*.rules
   '';
 }
