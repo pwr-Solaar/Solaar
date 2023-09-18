@@ -108,6 +108,7 @@ one of these packages.
 - Arch solaar package in the [extra repository][arch]
 - Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
+- NixOS git build or stable version: see [the installation page](https://pwr-solaar.github.io/Solaar/installation#nixos)
 
 Solaar is available from some other repositories
 but they are several versions behind the current version.
