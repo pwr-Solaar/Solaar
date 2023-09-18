@@ -1,6 +1,5 @@
 {stdenv,
 lib,
-self,
 python3
 }:
 
@@ -8,7 +7,7 @@ stdenv.mkDerivation rec{
   pname = "solaar";
   version = builtins.readFile src+"/lib/solaar/version";
 
-  src = lib.cleanSource self;
+  src = ./;
 
   outputs = [ "out" "udev" ];
 
