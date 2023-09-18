@@ -10,7 +10,7 @@ stdenv.mkDerivation rec{
   pname = "solaar";
   version = builtins.readFile "${src}/lib/solaar/version";
 
-  src = src;
+  src = "$src";
 
   outputs = [ "out" "udev" ];
 
