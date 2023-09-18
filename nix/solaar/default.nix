@@ -10,6 +10,8 @@ stdenv.mkDerivation rec{
 
   src = "../../";
 
+  outputs = [ "out" "udev" ];
+
   builtInputs = [
     python3
   ];
