@@ -6,7 +6,7 @@ python3
 
 stdenv.mkDerivation rec{
   pname = "solaar";
-  version = builtins.readFile "./lib/solaar/version";
+  version = builtins.readFile "././lib/solaar/version";
 
   src = ./.;
 
