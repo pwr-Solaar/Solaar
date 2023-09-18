@@ -29,5 +29,5 @@ stdenv.mkDerivation rec{
   '';
   postInstall = ''
     install -m444 -t $udev/etc/udev/rules.d rules.d-uinput/*.rules
-  ''
+  '';
 }
