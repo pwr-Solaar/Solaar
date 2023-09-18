@@ -8,7 +8,7 @@ let
 in
 stdenv.mkDerivation rec{
   pname = "solaar";
-  version = builtins.readFile "${src}/lib/solaar/version";
+  version = builtins.readFile $src+"/lib/solaar/version";
 
   src = "$src";
 
