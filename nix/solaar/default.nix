@@ -3,11 +3,14 @@ lib,
 python3
 }:
 
+let
+  src = "../../";
+in
 stdenv.mkDerivation rec{
   pname = "solaar";
-  version = builtins.readFile "/lib/solaar/version";
+  version = builtins.readFile "${src}/lib/solaar/version";
 
-  src = "../../";
+  src = src;
 
   outputs = [ "out" "udev" ];
 
