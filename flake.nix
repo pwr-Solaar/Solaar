@@ -16,6 +16,6 @@
       import nixpkgs {
         currentSystem = "x86_64-linux";
         localSystem = "x86_64-linux";
-      }).pkgs.callPackage ./nix/solaar/default.nix {};
+      }).pkgs.callPackage ./nix/solaar {};
   };
 }
