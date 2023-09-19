@@ -915,6 +915,8 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         icon_name = _icons.battery(battery_level, charging)
         _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
+    _model.set_value(item, _COLUMN.NAME, device.codename)
+
     if selected_device_id is None or need_popup:
         select(device.receiver.path if device.receiver else device.path, device.number)
     elif selected_device_id == (device.receiver.path if device.receiver else device.path, device.number):
