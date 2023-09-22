@@ -18,5 +18,3 @@ __pycache__/
 /share/locale/
 
 /po/*.po~
-
-/result
