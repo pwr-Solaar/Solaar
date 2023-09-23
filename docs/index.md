@@ -108,6 +108,7 @@ one of these packages.
 - Arch solaar package in the [extra repository][arch]
 - Ubuntu/Kubuntu stable packages: use the [Solaar stable ppa][ppa2], courtesy of [gogo][ppa4]
 - Ubuntu/Kubuntu git build packages: use the [Solaar git ppa][ppa1], courtesy of [gogo][ppa4]
+- NixOS Flake: see [Svenum/Solaar-Flake][nix flake]
 
 Solaar is available from some other repositories
 but they are several versions behind the current version.
@@ -126,6 +127,7 @@ Solaar uses a standard system tray implementation; solaar-gnome3 is no longer re
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
 [universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
+[nix flake]: https://github.com/Svenum/Solaar-Flake
 
 ## Manual installation
 
