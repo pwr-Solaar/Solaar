@@ -1,5 +1,6 @@
-# 1.1.10rc3
+# 1.1.10
 
+* Add information about NixOS flake package
 * Permit bluetooth devices in hidconsole
 * Add descriptor for Logitech MX Revolution Mouse M-RCL 124
 * Improve determination for short and long messages
