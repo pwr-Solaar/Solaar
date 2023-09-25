@@ -5,9 +5,9 @@
 #
 #, fuzzy
 msgid   ""
-msgstr  "Project-Id-Version: solaar 1.1.9\n"
+msgstr  "Project-Id-Version: solaar 1.1.10\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2023-07-07 11:08+0200\n"
+        "POT-Creation-Date: 2023-09-25 06:09+0200\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1045,12 +1045,12 @@ msgstr  ""
 msgid   "User-defined rules"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1082
+#: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1083
 msgid   "Rule"
 msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:509
-#: lib/solaar/ui/diversion_rules.py:635
+#: lib/solaar/ui/diversion_rules.py:636
 msgid   "Sub-rule"
 msgstr  ""
 
@@ -1146,13 +1146,13 @@ msgstr  ""
 msgid   "Insert"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:637
-#: lib/solaar/ui/diversion_rules.py:1125
+#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:638
+#: lib/solaar/ui/diversion_rules.py:1126
 msgid   "Or"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:636
-#: lib/solaar/ui/diversion_rules.py:1110
+#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:637
+#: lib/solaar/ui/diversion_rules.py:1111
 msgid   "And"
 msgstr  ""
 
@@ -1160,15 +1160,15 @@ msgstr  ""
 msgid   "Condition"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1291
+#: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1292
 msgid   "Feature"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1327
+#: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1328
 msgid   "Report"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1203
+#: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1204
 msgid   "Process"
 msgstr  ""
 
@@ -1176,235 +1176,239 @@ msgstr  ""
 msgid   "Mouse process"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1365
+#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1366
 msgid   "Modifiers"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1418
+#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1419
 msgid   "Key"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1460
+#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1461
 msgid   "KeyIsDown"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2249
+#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2260
 msgid   "Active"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:2207
-#: lib/solaar/ui/diversion_rules.py:2259 lib/solaar/ui/diversion_rules.py:2281
+#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:2218
+#: lib/solaar/ui/diversion_rules.py:2270 lib/solaar/ui/diversion_rules.py:2323
 msgid   "Device"
 msgstr  ""
 
 #: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:2297
+msgid   "Host"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:2339
 msgid   "Setting"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:1476
-#: lib/solaar/ui/diversion_rules.py:1525
+#: lib/solaar/ui/diversion_rules.py:526 lib/solaar/ui/diversion_rules.py:1477
+#: lib/solaar/ui/diversion_rules.py:1526
 msgid   "Test"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:526 lib/solaar/ui/diversion_rules.py:1642
+#: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1643
 msgid   "Test bytes"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1735
+#: lib/solaar/ui/diversion_rules.py:528 lib/solaar/ui/diversion_rules.py:1736
 msgid   "Mouse Gesture"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:531
+#: lib/solaar/ui/diversion_rules.py:532
 msgid   "Action"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:533 lib/solaar/ui/diversion_rules.py:1844
+#: lib/solaar/ui/diversion_rules.py:534 lib/solaar/ui/diversion_rules.py:1845
 msgid   "Key press"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:534 lib/solaar/ui/diversion_rules.py:1897
+#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1897
 msgid   "Mouse scroll"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1948
+#: lib/solaar/ui/diversion_rules.py:536 lib/solaar/ui/diversion_rules.py:1959
 msgid   "Mouse click"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:536
+#: lib/solaar/ui/diversion_rules.py:537
 msgid   "Set"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:537 lib/solaar/ui/diversion_rules.py:2019
+#: lib/solaar/ui/diversion_rules.py:538 lib/solaar/ui/diversion_rules.py:2030
 msgid   "Execute"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:538 lib/solaar/ui/diversion_rules.py:1157
+#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:1158
 msgid   "Later"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:567
+#: lib/solaar/ui/diversion_rules.py:568
 msgid   "Insert new rule"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:587 lib/solaar/ui/diversion_rules.py:1685
-#: lib/solaar/ui/diversion_rules.py:1789 lib/solaar/ui/diversion_rules.py:1978
+#: lib/solaar/ui/diversion_rules.py:588 lib/solaar/ui/diversion_rules.py:1686
+#: lib/solaar/ui/diversion_rules.py:1790 lib/solaar/ui/diversion_rules.py:1989
 msgid   "Delete"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:609
+#: lib/solaar/ui/diversion_rules.py:610
 msgid   "Negate"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:633
+#: lib/solaar/ui/diversion_rules.py:634
 msgid   "Wrap with"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:655
+#: lib/solaar/ui/diversion_rules.py:656
 msgid   "Cut"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:670
+#: lib/solaar/ui/diversion_rules.py:671
 msgid   "Paste"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:682
+#: lib/solaar/ui/diversion_rules.py:683
 msgid   "Copy"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1062
+#: lib/solaar/ui/diversion_rules.py:1063
 msgid   "This editor does not support the selected rule component yet."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1137
+#: lib/solaar/ui/diversion_rules.py:1138
 msgid   "Number of seconds to delay."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1176
+#: lib/solaar/ui/diversion_rules.py:1177
 msgid   "Not"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1186
+#: lib/solaar/ui/diversion_rules.py:1187
 msgid   "X11 active process. For use in X11 only."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1217
+#: lib/solaar/ui/diversion_rules.py:1218
 msgid   "X11 mouse process. For use in X11 only."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1234
+#: lib/solaar/ui/diversion_rules.py:1235
 msgid   "MouseProcess"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1259
+#: lib/solaar/ui/diversion_rules.py:1260
 msgid   "Feature name of notification triggering rule processing."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1307
+#: lib/solaar/ui/diversion_rules.py:1308
 msgid   "Report number of notification triggering rule processing."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1341
+#: lib/solaar/ui/diversion_rules.py:1342
 msgid   "Active keyboard modifiers. Not always available in Wayland."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1382
+#: lib/solaar/ui/diversion_rules.py:1383
 msgid   "Diverted key or button depressed or released.\n"
         "Use the Key/Button Diversion and Divert G Keys settings to divert "
         "keys and buttons."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1391
+#: lib/solaar/ui/diversion_rules.py:1392
 msgid   "Key down"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1394
+#: lib/solaar/ui/diversion_rules.py:1395
 msgid   "Key up"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1435
+#: lib/solaar/ui/diversion_rules.py:1436
 msgid   "Diverted key or button is currently down.\n"
         "Use the Key/Button Diversion and Divert G Keys settings to divert "
         "keys and buttons."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1474
+#: lib/solaar/ui/diversion_rules.py:1475
 msgid   "Test condition on notification triggering rule processing."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1478
+#: lib/solaar/ui/diversion_rules.py:1479
 msgid   "Parameter"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1541
+#: lib/solaar/ui/diversion_rules.py:1542
 msgid   "begin (inclusive)"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1542
+#: lib/solaar/ui/diversion_rules.py:1543
 msgid   "end (exclusive)"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1551
+#: lib/solaar/ui/diversion_rules.py:1552
 msgid   "range"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1553
+#: lib/solaar/ui/diversion_rules.py:1554
 msgid   "minimum"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1554
+#: lib/solaar/ui/diversion_rules.py:1555
 msgid   "maximum"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1556
+#: lib/solaar/ui/diversion_rules.py:1557
 #, python-format
 msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1561
+#: lib/solaar/ui/diversion_rules.py:1562
 msgid   "mask"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1562
+#: lib/solaar/ui/diversion_rules.py:1563
 #, python-format
 msgid   "bytes %(0)d to %(1)d, mask %(2)d"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1572
+#: lib/solaar/ui/diversion_rules.py:1573
 msgid   "Bit or range test on bytes in notification message triggering rule "
         "processing."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1582
+#: lib/solaar/ui/diversion_rules.py:1583
 msgid   "type"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1665
+#: lib/solaar/ui/diversion_rules.py:1666
 msgid   "Mouse gesture with optional initiating button followed by zero or "
         "more mouse movements."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1670
+#: lib/solaar/ui/diversion_rules.py:1671
 msgid   "Add movement"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1763
+#: lib/solaar/ui/diversion_rules.py:1764
 msgid   "Simulate a chorded key click or depress or release.\n"
         "On Wayland requires write access to /dev/uinput."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1768
+#: lib/solaar/ui/diversion_rules.py:1769
 msgid   "Add key"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1771
+#: lib/solaar/ui/diversion_rules.py:1772
 msgid   "Click"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1774
+#: lib/solaar/ui/diversion_rules.py:1775
 msgid   "Depress"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1777
+#: lib/solaar/ui/diversion_rules.py:1778
 msgid   "Release"
 msgstr  ""
 
@@ -1413,70 +1417,74 @@ msgid   "Simulate a mouse scroll.\n"
         "On Wayland requires write access to /dev/uinput."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1917
+#: lib/solaar/ui/diversion_rules.py:1918
 msgid   "Simulate a mouse click.\n"
         "On Wayland requires write access to /dev/uinput."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1920
+#: lib/solaar/ui/diversion_rules.py:1921
 msgid   "Button"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1921
-msgid   "Count"
+#: lib/solaar/ui/diversion_rules.py:1922
+msgid   "Count and Action"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1961
+#: lib/solaar/ui/diversion_rules.py:1972
 msgid   "Execute a command with arguments."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:1964
+#: lib/solaar/ui/diversion_rules.py:1975
 msgid   "Add argument"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2039
+#: lib/solaar/ui/diversion_rules.py:2050
 msgid   "Toggle"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2039
+#: lib/solaar/ui/diversion_rules.py:2050
 msgid   "True"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2040
+#: lib/solaar/ui/diversion_rules.py:2051
 msgid   "False"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2054
+#: lib/solaar/ui/diversion_rules.py:2065
 msgid   "Unsupported setting"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2212 lib/solaar/ui/diversion_rules.py:2231
-#: lib/solaar/ui/diversion_rules.py:2286 lib/solaar/ui/diversion_rules.py:2528
-#: lib/solaar/ui/diversion_rules.py:2546
+#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2242
+#: lib/solaar/ui/diversion_rules.py:2328 lib/solaar/ui/diversion_rules.py:2570
+#: lib/solaar/ui/diversion_rules.py:2588
 msgid   "Originating device"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2245
+#: lib/solaar/ui/diversion_rules.py:2256
 msgid   "Device is active and its settings can be changed."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2255
-msgid   "Device originated the current notification."
+#: lib/solaar/ui/diversion_rules.py:2266
+msgid   "Device that originated the current notification."
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2305
+#: lib/solaar/ui/diversion_rules.py:2280
+msgid   "Name of host computer."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2347
 msgid   "Value"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2313
+#: lib/solaar/ui/diversion_rules.py:2355
 msgid   "Item"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2588
+#: lib/solaar/ui/diversion_rules.py:2630
 msgid   "Change setting on device"
 msgstr  ""
 
-#: lib/solaar/ui/diversion_rules.py:2605
+#: lib/solaar/ui/diversion_rules.py:2647
 msgid   "Setting on device"
 msgstr  ""
 
@@ -1595,7 +1603,7 @@ msgid   "\n"
 msgstr  ""
 
 #: lib/solaar/ui/tray.py:58
-msgid   "No Logitech device found"
+msgid   "No supported device found"
 msgstr  ""
 
 #: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
