@@ -534,8 +534,8 @@ def ping(handle, devnumber, long_message=False):
                         error = ord(reply_data[3:4])
                         if error == _hidpp10.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
-                        if error == _hidpp10.ERROR.resource_error:  # device unreachable
-                            return
+                        if error == _hidpp10.ERROR.resource_error or error == _hidpp10.ERROR.connection_request_failed:
+                            return  # device unreachable
                         if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
                             _log.error('(%s) device %d error on ping request: unknown device', handle, devnumber)
                             raise NoSuchDevice(number=devnumber, request=request_id)
