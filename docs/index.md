@@ -84,7 +84,7 @@ and pair and unpair a Logitech device showing the Bolt logo
 with any Bolt receiver,
 and
 can pair and unpair Lightspeed devices with Lightspeed receivers for the same model.
-Solaar can pair some Logitech devices with Logitech Nano receivers but not all Logitech
+Solaar can pair some Logitech devices with Logitech Nano receivers, but not all Logitech
 devices can be paired with Nano receivers.
 Logitech devices without a Unifying or Bolt logo
 generally cannot be paired with Unifying or Bolt receivers.
@@ -102,7 +102,7 @@ and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/d
 Up-to-date prebuilt packages are available for some Linux distros
 (e.g., Fedora 33+) in their standard repositories.
 If a recent version of Solaar is not
-available from the standard repositories for your distribution you can try
+available from the standard repositories for your distribution, you can try
 one of these packages.
 
 - Arch solaar package in the [extra repository][arch]
@@ -141,7 +141,7 @@ for the step-by-step procedure for manual installation.
   will likely result in unexpected device behavior.
 
 - The Linux HID++ driver modifies the Scroll Wheel Resolution setting to
-  implement smooth scrolling.  If Solaar later changes this setting scrolling
+  implement smooth scrolling.  If Solaar later changes this setting, scrolling
   can be either very fast or very slow.  To fix this problem
   click on the icon at the right edge of the setting to set it to
   "Ignore this setting", which is the default for new devices.
@@ -152,16 +152,16 @@ for the step-by-step procedure for manual installation.
   to restore reversed scrolling.
 
 - The driver sends messages to devices that do not conform with the Logitech HID++ specification
-  resulting in reponses being sent back that look like other messages.  For some devices this causes
+  resulting in responses being sent back that look like other messages.  For some devices this causes
   Solaar to report incorrect battery levels.
 
-- If the Python hid-parser package is not available Solaar will not recognize some devices.
+- If the Python hid-parser package is not available, Solaar will not recognize some devices.
   Use pip to install hid-parser.
 
-- Solaar normally uses icon names for its icons, which in some system tray implementatations
+- Solaar normally uses icon names for its icons, which in some system tray implementations
   results in missing or wrong-sized icons.
   The `--tray-icon-size` option forces Solaar to use icon files of appropriate size
-  for tray icons instead, which produces better results in some system tray implementatations.
+  for tray icons instead, which produces better results in some system tray implementations.
   To use icon files close to 32 pixels in size use `--tray-icon-size=32`.
 
 - The icon in the system tray can show up as 'black on black' in dark
@@ -171,17 +171,17 @@ for the step-by-step procedure for manual installation.
 
 - Many gaming mice and keyboards have the ONBOARD PROFILES feature.
   This feature can override other features, including polling rate and key lighting.
-  To make the Polling Rate and M-Key LEDs settings effective the Onboard Profiles setting has to be disabled.
+  To make the Polling Rate and M-Key LEDs settings effective, the Onboard Profiles setting has to be disabled.
   This may have other effects, such as turning off backlighting.
 
 - Solaar will try to use uinput to simulate input from rules under Wayland or if Xtest is not available
   but this needs write permission on /dev/uinput.
   For more information see [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
-- Diverted keys remain diverted and so do not have their normal behaviour when Solaar terminates
-  or a device disconnects from a host that is running Solaar.  If necessary, their normal behaviour
+- Diverted keys remain diverted and so do not have their normal behavior when Solaar terminates
+  or a device disconnects from a host that is running Solaar.  If necessary, their normal behavior
   can be reestablished by turning the device off and on again.  This is most important to restore
-  the host switching behaviour of a host switch key that was diverted, for example to switch away
+  the host switching behavior of a host switch key that was diverted, for example to switch away
   from a host that crashed or was turned off.
 
 - When a receiver-connected device changes hosts Solaar remembers which diverted keys were down on it.
@@ -191,7 +191,7 @@ for the step-by-step procedure for manual installation.
 
 ## Contributing to Solaar
 
-Conributions to Solaaar are very welcome.
+Contributions to Solaar are very welcome.
 
 Solaar has complete or partial translations of its GUI strings in several languages.
 If you want to update a translation or add a new one see [the translation page](https://pwr-solaar.github.io/Solaar/i18n) for more information.
