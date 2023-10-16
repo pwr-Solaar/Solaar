@@ -192,7 +192,7 @@ def find_paired_node_wpid(receiver_path, index):
     return None
 
 def monitor_glib(callback, filterfn):
-    raise NotImplementedError()
+    pass
 
 def enumerate(filterfn):
     """Enumerate the HID Devices.

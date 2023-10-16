@@ -25,7 +25,10 @@ from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 
-#import gi
+try:
+    import gi
+except ImportError:
+    gi = None
 
 from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
@@ -36,8 +39,11 @@ from logitech_receiver import status as _status
 
 from . import configuration
 
-#gi.require_version('Gtk', '3.0')  # NOQA: E402
-#from gi.repository import GLib  # NOQA: E402 # isort:skip
+try:
+    gi.require_version('Gtk', '3.0')  # NOQA: E402
+    from gi.repository import GLib  # NOQA: E402 # isort:skip
+except ImportError:
+    GLib = None
 
 # from solaar.i18n import _
 
@@ -373,7 +379,7 @@ def setup_scanner(status_changed_callback, error_callback):
     _status_callback = status_changed_callback
     _error_callback = error_callback
 
-    #_base.notify_on_receivers_glib(_process_receiver_event)
+    _base.notify_on_receivers_glib(_process_receiver_event)
 
 
 def _process_add(device_info, retry):
@@ -389,7 +395,8 @@ def _process_add(device_info, retry):
             except Exception:
                 pass
             if retry:
-                GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
+                if GLib is not None:
+                    GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
             else:
                 _error_callback('permissions', device_info.path)
         else:
