@@ -16,18 +16,33 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """Generic Human Interface Device API."""
+import sys
 
-from hidapi.udev import close  # noqa: F401
-from hidapi.udev import enumerate  # noqa: F401
-from hidapi.udev import find_paired_node  # noqa: F401
-from hidapi.udev import find_paired_node_wpid  # noqa: F401
-from hidapi.udev import get_manufacturer  # noqa: F401
-from hidapi.udev import get_product  # noqa: F401
-from hidapi.udev import get_serial  # noqa: F401
-from hidapi.udev import monitor_glib  # noqa: F401
-from hidapi.udev import open  # noqa: F401
-from hidapi.udev import open_path  # noqa: F401
-from hidapi.udev import read  # noqa: F401
-from hidapi.udev import write  # noqa: F401
+if sys.platform == 'linux':
+    from hidapi.udev import close  # noqa: F401
+    from hidapi.udev import enumerate  # noqa: F401
+    from hidapi.udev import find_paired_node  # noqa: F401
+    from hidapi.udev import find_paired_node_wpid  # noqa: F401
+    from hidapi.udev import get_manufacturer  # noqa: F401
+    from hidapi.udev import get_product  # noqa: F401
+    from hidapi.udev import get_serial  # noqa: F401
+    from hidapi.udev import monitor_glib  # noqa: F401
+    from hidapi.udev import open  # noqa: F401
+    from hidapi.udev import open_path  # noqa: F401
+    from hidapi.udev import read  # noqa: F401
+    from hidapi.udev import write  # noqa: F401
+else:
+    from hidapi.win_impl import close  # noqa: F401
+    from hidapi.win_impl import enumerate  # noqa: F401
+    from hidapi.win_impl import find_paired_node  # noqa: F401
+    from hidapi.win_impl import find_paired_node_wpid  # noqa: F401
+    from hidapi.win_impl import get_manufacturer  # noqa: F401
+    from hidapi.win_impl import get_product  # noqa: F401
+    from hidapi.win_impl import get_serial  # noqa: F401
+    from hidapi.win_impl import monitor_glib  # noqa: F401
+    from hidapi.win_impl import open  # noqa: F401
+    from hidapi.win_impl import open_path  # noqa: F401
+    from hidapi.win_impl import read  # noqa: F401
+    from hidapi.win_impl import write  # noqa: F401
 
 __version__ = '0.9'

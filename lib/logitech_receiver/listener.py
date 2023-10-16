@@ -140,7 +140,7 @@ class EventsListener(_threading.Thread):
     """
 
     def __init__(self, receiver, notifications_callback):
-        super().__init__(name=self.__class__.__name__ + ':' + receiver.path.split('/')[2])
+        super().__init__(name=f'{self.__class__.__name__}:{receiver.product_id}')
         self.daemon = True
         self._active = False
         self.receiver = receiver
