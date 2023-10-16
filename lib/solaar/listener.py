@@ -25,7 +25,7 @@ from logging import INFO as _INFO
 from logging import WARNING as _WARNING
 from logging import getLogger
 
-import gi
+#import gi
 
 from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
@@ -36,8 +36,8 @@ from logitech_receiver import status as _status
 
 from . import configuration
 
-gi.require_version('Gtk', '3.0')  # NOQA: E402
-from gi.repository import GLib  # NOQA: E402 # isort:skip
+#gi.require_version('Gtk', '3.0')  # NOQA: E402
+#from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 # from solaar.i18n import _
 
@@ -373,7 +373,7 @@ def setup_scanner(status_changed_callback, error_callback):
     _status_callback = status_changed_callback
     _error_callback = error_callback
 
-    _base.notify_on_receivers_glib(_process_receiver_event)
+    #_base.notify_on_receivers_glib(_process_receiver_event)
 
 
 def _process_add(device_info, retry):

@@ -16,10 +16,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """Generic Human Interface Device API."""
+import sys as _sys
 
-import platform as _platform
-
-if _platform.system() in ('Darwin', 'Windows'):
+if _sys.platform == 'darwin':
     from hidapi.hidapi import close  # noqa: F401
     from hidapi.hidapi import enumerate  # noqa: F401
     from hidapi.hidapi import find_paired_node  # noqa: F401
@@ -32,7 +31,20 @@ if _platform.system() in ('Darwin', 'Windows'):
     from hidapi.hidapi import open_path  # noqa: F401
     from hidapi.hidapi import read  # noqa: F401
     from hidapi.hidapi import write  # noqa: F401
-else:
+elif _sys.platform == 'win32':
+    from hidapi.win_impl import close  # noqa: F401
+    from hidapi.win_impl import enumerate  # noqa: F401
+    from hidapi.win_impl import find_paired_node  # noqa: F401
+    from hidapi.win_impl import find_paired_node_wpid  # noqa: F401
+    from hidapi.win_impl import get_manufacturer  # noqa: F401
+    from hidapi.win_impl import get_product  # noqa: F401
+    from hidapi.win_impl import get_serial  # noqa: F401
+    from hidapi.win_impl import monitor_glib  # noqa: F401
+    from hidapi.win_impl import open  # noqa: F401
+    from hidapi.win_impl import open_path  # noqa: F401
+    from hidapi.win_impl import read  # noqa: F401
+    from hidapi.win_impl import write  # noqa: F401
+else: # linux
     from hidapi.udev import close  # noqa: F401
     from hidapi.udev import enumerate  # noqa: F401
     from hidapi.udev import find_paired_node  # noqa: F401
@@ -45,5 +57,6 @@ else:
     from hidapi.udev import open_path  # noqa: F401
     from hidapi.udev import read  # noqa: F401
     from hidapi.udev import write  # noqa: F401
+
 
 __version__ = '0.9'

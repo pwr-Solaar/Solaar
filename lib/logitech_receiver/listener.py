@@ -17,11 +17,11 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import threading as _threading
+import sys as _sys
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import getLogger
-
 from . import base as _base
 
 # from time import time as _timestamp
@@ -140,11 +140,14 @@ class EventsListener(_threading.Thread):
     """
 
     def __init__(self, receiver, notifications_callback):
-        try:
-            path_name = receiver.path.split('/')[2]
-        except IndexError:
-            path_name = receiver.path
-        super().__init__(name=self.__class__.__name__ + ':' + path_name)
+        if _sys.platform == 'win32':
+            super().__init__(name=f'{self.__class__.__name__}:{receiver.product_id}')
+        else:
+            try:
+                path_name = receiver.path.split('/')[2]
+            except IndexError:
+                path_name = receiver.path
+            super().__init__(name=self.__class__.__name__ + ':' + path_name)
         self.daemon = True
         self._active = False
         self.receiver = receiver
