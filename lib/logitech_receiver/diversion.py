@@ -29,7 +29,6 @@ import sys as _sys
 import time as _time
 
 import dbus
-import gi
 import keysyms.keysymdef as _keysymdef
 import psutil
 
