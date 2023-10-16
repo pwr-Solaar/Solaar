@@ -23,7 +23,6 @@ import faulthandler
 import importlib
 import logging
 import os.path
-import platform
 import signal
 import sys
 import tempfile
@@ -47,13 +46,14 @@ logger = logging.getLogger(__name__)
 #
 
 
-def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
+def _require(module, os_package=None, gi=None, gi_package=None, gi_version=None):
     try:
         if gi is not None:
             gi.require_version(gi_package, gi_version)
         return importlib.import_module(module)
     except (ImportError, ValueError):
-        sys.exit('%s: missing required system package %s' % (NAME, os_package))
+        if os_package is not None:
+            sys.exit('%s: missing required system package %s' % (NAME, os_package))
 
 
 battery_icons_style = 'regular'
@@ -142,16 +142,17 @@ def _handlesig(signl, stack):
 
 
 def main():
-    if platform.system() not in ('Darwin', 'Windows'):
+    if sys.platform == 'linux':
         _require('pyudev', 'python3-pyudev')
-
+    if sys.platform == 'win32':
+        _require('hidapi')
     args = _parse_arguments()
     if not args:
         return
     if args.action:
         # if any argument, run comandline and exit
         return _cli.run(args.action, args.hidraw_path)
-
+    
     gi = _require('gi', 'python3-gi (in Ubuntu) or python3-gobject (in Fedora)')
     _require('gi.repository.Gtk', 'gir1.2-gtk-3.0', gi, 'Gtk', '3.0')
 
