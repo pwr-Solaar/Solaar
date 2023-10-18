@@ -1,5 +1,4 @@
-from typing import List, Dict, Tuple
-from enum import Enum
+from typing import List, Dict
 import hid
 import win32api
 import win32file

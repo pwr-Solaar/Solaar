@@ -39,10 +39,10 @@ from logitech_receiver import status as _status
 
 from . import configuration
 
-try:
+if gi:
     gi.require_version('Gtk', '3.0')  # NOQA: E402
     from gi.repository import GLib  # NOQA: E402 # isort:skip
-except ImportError:
+else:
     GLib = None
 
 # from solaar.i18n import _
