@@ -34,7 +34,6 @@ CM_LOCATE_DEVNODE_NORMAL = 0x00000000
 DEVPKEY_Device_InstanceId = DEVPROPKEY(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57, 256)
 
 CM_Get_Device_Interface_PropertyW = windll.cfgmgr32.CM_Get_Device_Interface_PropertyW
-CM_Get_Device_Interface_PropertyW.argtypes = (LPCWSTR, POINTER(DEVPROPKEY), PULONG, PBYTE, PULONG, ULONG)
 CM_Locate_DevNodeW = windll.cfgmgr32.CM_Locate_DevNodeW
 CM_Get_Parent = windll.cfgmgr32.CM_Get_Parent
 
