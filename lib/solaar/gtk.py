@@ -145,7 +145,7 @@ def main():
     if sys.platform == 'linux':
         _require('pyudev', 'python3-pyudev')
     if sys.platform == 'win32':
-        _require('hidapi')
+        _require('hidapi', 'pywin32')
     args = _parse_arguments()
     if not args:
         return

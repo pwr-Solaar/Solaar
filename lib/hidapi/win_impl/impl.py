@@ -92,6 +92,12 @@ def exit():
 # It is given the bus id, vendor id, and product id and returns a dictionary
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
 def _match(action, info, filterfn):
+    bus_id = None
+    # Convert hidapi bus type to linux bus ID...
+    if info['bus_type'] == 0x1:
+        bus_id = 0x3
+    elif info['bus_type'] == 0x2:
+        bus_id = 0x5
     try:
         hidpp_short = hidpp_long = False
         for path in info['path'].split(';'):
@@ -114,9 +120,9 @@ def _match(action, info, filterfn):
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
-        _log.warn('Report Descriptor not processed for BID %d VID %d PID %d: %s', info['bus_type'], info['vendor_id'], info['product_id'], e)
+        _log.warn('Report Descriptor not processed for BID %d VID %d PID %d: %s', bus_id, info['vendor_id'], info['product_id'], e)
 
-    filter = filterfn(info['bus_type'], info['vendor_id'], info['product_id'], hidpp_short, hidpp_long)
+    filter = filterfn(bus_id, info['vendor_id'], info['product_id'], hidpp_short, hidpp_long)
     if not filter:
         return
     #hid_driver = filter.get('hid_driver')
@@ -139,7 +145,7 @@ def _match(action, info, filterfn):
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
         if _log.isEnabledFor(_INFO):
             _log.info(
-                'Found device BID %d VID %d PID %d HID++ %s %s USB %s %s', info['bus_type'], info['vendor_id'], info['product_id'], hidpp_short, hidpp_long,
+                'Found device BID %d VID %d PID %d HID++ %s %s USB %s %s', bus_id, info['vendor_id'], info['product_id'], hidpp_short, hidpp_long,
                 usb_interface, interface_number
             )
         if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
@@ -147,7 +153,7 @@ def _match(action, info, filterfn):
 
         d_info = DeviceInfo(
             path=info['path'],
-            bus_id=info['bus_type'],
+            bus_id=bus_id,
             vendor_id=info['vendor_id'],
             product_id=info['product_id'],
             interface=usb_interface,

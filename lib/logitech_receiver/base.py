@@ -425,6 +425,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             # This only applies to peripheral requests, ofc.
             request_id = (request_id & 0xFFF0) | 0x08 | _random_bits(3)
 
+        # TODO: Bug here, unlisted bluetooth devices would be using receiver timeout...
         timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
         # be extra patient on long register read
         if request_id & 0xFF00 == 0x8300:
