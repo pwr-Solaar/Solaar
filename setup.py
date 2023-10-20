@@ -81,7 +81,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'psutil (>= 5.4.3)',
         'dbus-python (>=1.3.2); platform_system=="Linux"',
         'pywin32 (>=1.0); platform_system=="Windows"',
-        'hidapi (>=0.14.1); platform_system=="Windows"',
+        'hidapi (>=0.14.0); platform_system=="Windows"',
     ],
     extras_require={
         'report-descriptor': ['hid-parser; platform_system=="Linux"'],

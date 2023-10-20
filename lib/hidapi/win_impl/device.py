@@ -73,14 +73,15 @@ class SubDeviceReadTask:
 
     def finish(self, length: int, timeout: int):
         result_device_idx = -1
-
+        bytes_read = 0
+        
         for i, sub_device in enumerate(self.sub_devices):
             if not sub_device.read_pending:
                 win32event.ResetEvent(sub_device.read_ov.hEvent)
                 sub_device.read_pending = True
                 if sub_device.read_buffer.nbytes != length:
                     sub_device.read_buffer = win32file.AllocateReadBuffer(length)
-                err, _ = win32file.ReadFile(sub_device.handle, sub_device.read_buffer, sub_device.read_ov)
+                err, bytes_read = win32file.ReadFile(sub_device.handle, sub_device.read_buffer, sub_device.read_ov)
                 if err:
                     if err != winerror.ERROR_IO_PENDING:
                         raise IOError()
