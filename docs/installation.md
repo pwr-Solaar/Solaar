@@ -7,7 +7,8 @@ layout: page
 
 An easy way to install the most recent release version of  Solaar is from the PyPI repository.
 First install pip, and then run
-`pip install --user 'solaar[report-descriptor,git-commit]'`.
+`pip install --user solaar`.
+If you are using pipx add the `--system-site-packages` flag.
 
 This will not install the Solaar udev rule, which you will need to install manually by copying
 `~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
