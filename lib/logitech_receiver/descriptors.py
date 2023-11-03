@@ -175,6 +175,8 @@ def get_btid(btid):
 
 _D('Wireless Keyboard EX110', codename='EX110', protocol=1.0, wpid='0055', registers=(_R.battery_status, ))
 _D('Wireless Keyboard S510', codename='S510', protocol=1.0, wpid='0056', registers=(_R.battery_status, ))
+_D('Wireless Wave Keyboard K550', codename='K550', protocol=1.0, wpid='0060', registers=(_R.battery_status, ),
+   settings=[_ST.RegisterFnSwap])
 _D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='0065', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK300', codename='MK300', protocol=1.0, wpid='0068', registers=(_R.battery_status, ))
 _D('Number Pad N545', codename='N545', protocol=1.0, wpid='2006', registers=(_R.battery_status, ))
@@ -212,6 +214,7 @@ _D('diNovo Edge Keyboard', codename='diNovo', protocol=1.0, wpid='C714', setting
 
 _D('LX5 Cordless Mouse', codename='LX5', protocol=1.0, wpid='0036', registers=(_R.battery_status, ))
 _D('LX7 Cordless Laser Mouse', codename='LX7', protocol=1.0, wpid='0039', registers=(_R.battery_status, ))
+_D('Wireless Wave Mouse M550', codename='M550', protocol=1.0, wpid='003C', registers=(_R.battery_status, ))
 _D('Wireless Mouse EX100', codename='EX100m', protocol=1.0, wpid='003F', registers=(_R.battery_status, ))
 _D('Wireless Mouse M30', codename='M30', protocol=1.0, wpid='0085', registers=(_R.battery_status, ))
 _D('MX610 Laser Cordless Mouse', codename='MX610', protocol=1.0, wpid='1001', registers=(_R.battery_status, ))
