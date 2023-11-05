@@ -1051,8 +1051,7 @@ class Device(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('evaluate condition: %s', self)
-        dev = _Device.find(self.devID)
-        return device == dev
+        return device.unitId == self.devID or device.serial == self.devID
 
     def data(self):
         return {'Device': self.devID}
