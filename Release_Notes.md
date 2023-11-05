@@ -1,5 +1,17 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.11rc1
+
+* Solaar can dump device profiles in YAMLfor devices that support profiles and load profiles back from an edited file.  See [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities) for more information.
+
+* Solaar has settings for each LED Zone that a device supports under feature Color LED Effects.
+
+* Solaar has settings for extended report rate, backlight levels, durations, and profile selection.
+
+* Solaar now partly works in MacOS.  Please open new issues for problems.  Solaar may work in Windows.   Please open new issues for problems.  See https://github.com/pwr-Solaar/Solaar/pull/1971 for more information.  Fixing problems in MacOS or Windows may take considerable time.
+
+* Solaar works better when the Python package hid-parser is available.   Distriubtions should try have this package installed.
+
 ## Version 1.1.10
 
 * The mouse click rule action can now just simulate depressing or releasing the button.
