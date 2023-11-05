@@ -116,8 +116,9 @@ or the window's Window manager class or instance name starts with their string a
 
 `Device` conditions are true if a particular device originated the notification.
 `Active` conditions are true if a particular device is active.
-`Device` and `Active` conditions take one argument, which is the Serial number or Unit ID of a device,
+`Device` and `Active` conditions take one argument, which is the serial number or unit ID of a device,
 as shown in Solaar's detail pane.
+Some older devices do not have a useful serial number or unit ID and so cannot be tested for by these conditions.
 
 `Host' conditions are true if the computers hostname starts with the condition's argument.
 
