@@ -1,3 +1,39 @@
+# 1.1.11
+
+* Support LED Zone control feature
+* Dump and load device profiles
+* Select among profiles.
+* Support backlight levels and duration
+* Use "Report Rate" instead of "Polling" for movement report rate
+* Support extended report rate setting
+* Add stable branch to release.sh (#2236)
+* Fix changelog parsing in release.sh
+* Update installation.md with new udev rules location
+* Downgrade assertion on missing notification flag to warning
+* Write empty file if there are no rules to save
+* Be defensive in device error messages
+* Add descriptions of M650, PRO X 2, G915, MX Anywhere 2S, G305, and MX Keys S
+* Report hidraw node in debugging messages
+* Add names for new Logitech features
+* Update Spanish and French translations
+* Defend against lightspeed receivers that contact devices for basic information
+* Remove incorrect feature for M325 mice
+* Add K845 keyboard
+* Add partial support for macOS and minimal support for Windows
+* Correctly enumerate devices on receiver
+* Add wording in documentation about Logitech reusing model numbers
+* Better handling and installation of icons
+* Catch errors when pinging to try to put device online
+* Be more cautious when creating log messages to avoid exceptions
+* Correctly handle NoSuchDevice exception when pinging device
+* Fix test in rules for device equality
+* Add installation instructions for pipx and add not about other GTK system packages
+* Fix bug in NamedInt
+* Add support for MK550
+* Install udev rule files to correct placces
+* Expand expected ping responses
+* Update codename when device status changes
+
 # 1.1.10
 
 * Add information about NixOS flake package
