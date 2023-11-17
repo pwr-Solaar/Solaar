@@ -136,6 +136,19 @@ If you want to have Solaar's user messages in some other language you need to ru
 `tools/po-compile.sh` to create the translation files before running or installing Solaar
 and set the LANGUAGE environment variable appropriately when running Solaar.
 
+# Setting up Solaar's icons
+
+Solaar uses a number of custom icons, which have to be installed in a place where GTK can access them.
+
+If Solaar has never been installed, and only run from the download directory then Solaar will not be able to find the icons.
+If Solaar has only been installed for a user (e.g., via pip) then Solaar will be able to find the icons,
+but they may not show up in the system tray.
+
+One solution is to install a version of Solaar on a system-wide basis.
+A more-recent version of Solaar can then be installed for a user or Solaar can be run out of the download directory.
+Another solution is to copy the Solaar custom icons from share/solaar/icons to a place they can be found by GTK,
+likely /usr/share/icons/hicolor/scalable/apps.
+
 # Running Solaar at Startup
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
