@@ -33,47 +33,10 @@ del getLogger
 _LARGE_SIZE = 64
 Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
 # Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
-# print ("menu", int(Gtk.IconSize.MENU), Gtk.icon_size_lookup(Gtk.IconSize.MENU))
-# print ("small toolbar", int(Gtk.IconSize.SMALL_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.SMALL_TOOLBAR))
-# print ("button", int(Gtk.IconSize.BUTTON), Gtk.icon_size_lookup(Gtk.IconSize.BUTTON))
-# print ("large toolbar", int(Gtk.IconSize.LARGE_TOOLBAR), Gtk.icon_size_lookup(Gtk.IconSize.LARGE_TOOLBAR))
-# print ("dnd", int(Gtk.IconSize.DND), Gtk.icon_size_lookup(Gtk.IconSize.DND))
-# print ("dialog", int(Gtk.IconSize.DIALOG), Gtk.icon_size_lookup(Gtk.IconSize.DIALOG))
 
 TRAY_INIT = 'solaar-init'
 TRAY_OKAY = 'solaar'
 TRAY_ATTENTION = 'solaar-attention'
-
-
-def _look_for_application_icons():
-    import os.path as _path
-    import sys as _sys
-
-    from os import environ as _environ
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('sys.path[0] = %s', _sys.path[0])
-    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
-    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
-    local_share = _environ.get('XDG_DATA_HOME', _path.expanduser(_path.join('~', '.local', 'share')))
-    data_dirs = _environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')
-    repo_share = _path.normpath(_path.join(_path.dirname(__file__), '..', '..', '..', 'share'))
-    setuptools_share = _path.normpath(_path.join(_path.dirname(__file__), '..', '..', 'share'))
-    del _sys
-
-    share_solaar = [prefix_share] + list(
-        _path.join(x, 'solaar') for x in [src_share, local_share, setuptools_share, repo_share] + data_dirs.split(':')
-    )
-    for location in share_solaar:
-        location = _path.join(location, 'icons')
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('looking for icons in %s', location)
-
-        if _path.exists(_path.join(location, TRAY_ATTENTION + '.svg')):
-            yield location
-
-    del _environ
-    # del _path
-
 
 _default_theme = None
 
@@ -84,9 +47,6 @@ def _init_icon_paths():
         return
 
     _default_theme = Gtk.IconTheme.get_default()
-    for p in _look_for_application_icons():
-        _default_theme.prepend_search_path(p)
-        break  # only prepend one path - that's sufficient
     if _log.isEnabledFor(_DEBUG):
         _log.debug('icon theme paths: %s', _default_theme.get_search_path())
 
