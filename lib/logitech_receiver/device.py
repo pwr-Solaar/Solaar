@@ -478,9 +478,11 @@ class Device:
     __nonzero__ = __bool__
 
     def __str__(self):
-        return '<Device(%d,%s,%s,%s)>' % (
-            self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
-        )
+        try:
+            name = self.name or self.codename or '?'
+        except _base.NoSuchDevice:
+            name = 'name not available'
+        return '<Device(%d,%s,%s,%s)>' % (self.number, self.wpid or self.product_id, name, self.serial)
 
     __repr__ = __str__
 
