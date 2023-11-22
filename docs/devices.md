@@ -136,6 +136,9 @@ giving their product name, WPID product number, and HID++ protocol information.
 The tables concentrate on older devices that have explicit support information in Solaar
 and are not being updated for new devices that are supported by Solaar.
 
+Note that Logitech has the annoying habit of reusing Device names (e.g., M185)
+so what is important for support is the USB WPID or Bluetooth model ID.
+
 ### Keyboards (Unifying)
 
 | Device           | WPID | HID++ |
