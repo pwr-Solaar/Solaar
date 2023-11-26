@@ -7,7 +7,8 @@ layout: page
 
 An easy way to install the most recent release version of  Solaar is from the PyPI repository.
 First install pip, and then run
-`pip install --user 'solaar[report-descriptor,git-commit]'`.
+`pip install --user solaar`.
+If you are using pipx add the `--system-site-packages` flag.
 
 This will not install the Solaar udev rule, which you will need to install manually by copying
 `~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
@@ -43,6 +44,7 @@ in Debian/Ubuntu you should have the
 In Fedora you need `gtk3` and `python3-gobject`.
 You may have to install `gcc` and the Python development package (`python3-dev` or `python3-devel`,
 depending on your distribution).
+Other system packages may be required depending on your distribution, such as `python-gobject-common-devel`.
 Although the Solaar CLI does not require Gtk3,
 `solaar config` does use Gtk3 capabilities to determine whether the Solaar GUI is running
 and thus should tell the Solaar GUI to update its information about settings
@@ -133,6 +135,19 @@ You will also have to install the udev rule.
 If you want to have Solaar's user messages in some other language you need to run
 `tools/po-compile.sh` to create the translation files before running or installing Solaar
 and set the LANGUAGE environment variable appropriately when running Solaar.
+
+# Setting up Solaar's icons
+
+Solaar uses a number of custom icons, which have to be installed in a place where GTK can access them.
+
+If Solaar has never been installed, and only run from the download directory then Solaar will not be able to find the icons.
+If Solaar has only been installed for a user (e.g., via pip) then Solaar will be able to find the icons,
+but they may not show up in the system tray.
+
+One solution is to install a version of Solaar on a system-wide basis.
+A more-recent version of Solaar can then be installed for a user or Solaar can be run out of the download directory.
+Another solution is to copy the Solaar custom icons from share/solaar/icons to a place they can be found by GTK,
+likely /usr/share/icons/hicolor/scalable/apps.
 
 # Running Solaar at Startup
 

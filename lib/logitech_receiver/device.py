@@ -195,7 +195,10 @@ class Device:
     def name(self):
         if not self._name:
             if not self.online:  # be very defensive
-                self.ping()
+                try:
+                    self.ping()
+                except _base.NoSuchDevice:
+                    pass
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
         return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))
@@ -478,9 +481,11 @@ class Device:
     __nonzero__ = __bool__
 
     def __str__(self):
-        return '<Device(%d,%s,%s,%s)>' % (
-            self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
-        )
+        try:
+            name = self.name or self.codename or '?'
+        except _base.NoSuchDevice:
+            name = 'name not available'
+        return '<Device(%d,%s,%s,%s)>' % (self.number, self.wpid or self.product_id, name, self.serial)
 
     __repr__ = __str__
 

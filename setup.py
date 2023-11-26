@@ -31,15 +31,14 @@ except Exception:  # get commit from Ubuntu dpkg-parsechangelog
 def _data_files():
     from os.path import dirname as _dirname
 
-    yield 'share/solaar/icons', _glob('share/solaar/icons/solaar*.svg')
-    yield 'share/solaar/icons', _glob('share/solaar/icons/light_*.png')
-    yield 'share/icons/hicolor/scalable/apps', ['share/solaar/icons/solaar.svg']
+    yield 'share/icons/hicolor/scalable/apps', _glob('share/solaar/icons/solaar*.svg')
+    yield 'share/icons/hicolor/scalable/apps', _glob('share/solaar/icons/light_*.png')
 
     for mo in _glob('share/locale/*/LC_MESSAGES/solaar.mo'):
         yield _dirname(mo), [mo]
 
     yield 'share/applications', ['share/applications/solaar.desktop']
-    yield 'share/solaar/udev-rules.d', ['rules.d/42-logitech-unify-permissions.rules']
+    yield 'lib/udev/rules.d', ['rules.d/42-logitech-unify-permissions.rules']
     yield 'share/metainfo', ['share/solaar/io.github.pwr_solaar.solaar.metainfo.xml']
 
     del _dirname
