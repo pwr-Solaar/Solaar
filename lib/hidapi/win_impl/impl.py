@@ -25,19 +25,13 @@ necessary.
 """
 
 import errno as _errno
-import os as _os
-import warnings as _warnings
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
 from logging import INFO as _INFO
 from logging import getLogger
-from select import select as _select
 from time import sleep
-from time import time as _timestamp
 from .device import DeviceManager, enumerate_devices
-from typing import Dict
-from functools import wraps
 import hid
 
 _log = getLogger(__name__)
@@ -130,16 +124,15 @@ def _match(action, info, filterfn):
     isDevice = filter.get('isDevice')
 
     if action == 'add':
-        """
-        hid_driver_name = hid_device.get('DRIVER')
+        
+        # hid_driver_name = hid_device.get('DRIVER')
         # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
-        if hid_driver:
-            if isinstance(hid_driver, tuple):
-                if hid_driver_name not in hid_driver:
-                    return
-            elif hid_driver_name != hid_driver:
-                return
-        """
+        # if hid_driver:
+        #     if isinstance(hid_driver, tuple):
+        #         if hid_driver_name not in hid_driver:
+        #             return
+        #     elif hid_driver_name != hid_driver:
+        #         return
 
         usb_interface = info['interface_number']
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
@@ -247,16 +240,12 @@ def open_path(device_path: str):
         retrycount += 1
         try:
             return DeviceManager.get().open_path(device_path)
-        except:
-            pass
-        """
         except OSError as e:
             _log.info('OPEN PATH FAILED %s ERROR %s %s', device_path, e.errno, e)
             if e.errno == _errno.EACCES:
                 sleep(0.1)
             else:
                 raise
-        """
 
 
 def close(device_handle):
@@ -298,8 +287,8 @@ def write(device_handle, data):
         try:
             retrycount += 1
             bytes_written = DeviceManager.get().write(device_handle, data)
-        except OSError as e:
-            #if e.errno == _errno.EPIPE:
+        except OSError:
+            # if e.errno == _errno.EPIPE:
             sleep(0.1)
         else:
             break

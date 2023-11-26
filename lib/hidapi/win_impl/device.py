@@ -65,7 +65,9 @@ class SubDevice:
         return bytes_written
     
 class SubDeviceReadTask:
-    def __init__(self, sub_devices: List[SubDevice]=[]):
+    def __init__(self, sub_devices: List[SubDevice]=None):
+        if sub_devices is None:
+            sub_devices = []
         self.sub_devices = sub_devices
 
     def add(self, sub_device: SubDevice):
@@ -92,10 +94,10 @@ class SubDeviceReadTask:
 
         if result_device_idx < 0:
             wait_result = win32event.WaitForMultipleObjects(
-                [sub_device.read_ov.hEvent for sub_device in self.sub_devices],
-                False,
-                timeout if timeout >= 0 else win32event.INFINITE
-            )
+                    [sub_device.read_ov.hEvent for sub_device in self.sub_devices],
+                    False,
+                    timeout if timeout >= 0 else win32event.INFINITE
+                )
 
             if wait_result >= win32event.WAIT_OBJECT_0 and\
                 wait_result < win32event.WAIT_OBJECT_0 + len(self.sub_devices):
