@@ -1,0 +1,63 @@
+solaar version 1.1.9
+
+1: G815 Mechanical Keyboard
+Device path  : /dev/hidraw2
+USB id       : 046d:C33F
+Codename     : G815
+Kind         : keyboard
+Protocol     : HID++ 4.2
+Polling rate : 1 ms (1000Hz)
+Serial number:
+Model ID:      C33F00000000
+Unit ID:       35304716
+Bootloader: BOT 84.00.B0003
+Firmware: U1  31.02.B0018
+Other:
+Other:
+Other:
+Supports 24 HID++ 2.0 features:
+0: ROOT                   {0000} V0
+1: FEATURE SET            {0001} V0
+2: DEVICE FW VERSION      {0003} V2
+Firmware: Bootloader BOT 84.00.B0003 AAEA
+Firmware: Firmware U1  31.02.B0018 C33F
+Firmware: Other
+Firmware: Other
+Firmware: Other
+Unit ID: 35304716  Model ID: C33F00000000  Transport IDs: {'usbid': 'C33F'}
+3: DEVICE NAME            {0005} V0
+Name: G815 RGB MECHANICAL GAMING KEYBOARD
+Kind: keyboard
+4: CONFIG CHANGE          {0020} V0
+5: DFUCONTROL SIGNED      {00C2} V0
+6: DFU                    {00D0} V0
+7: REPORT HID USAGE       {1BC0} V0
+8: KEYBOARD DISABLE BY USAGE {4522} V0
+9: KEYBOARD LAYOUT 2      {4540} V0
+10: GKEY                   {8010} V0
+Divert G Keys (saved): True
+Divert G Keys        : False
+11: MKEYS                  {8020} V0
+M-Key LEDs (saved): {M1:False, M2:False, M3:False}
+M-Key LEDs        : {M1:False, M2:False, M3:False}
+12: MR                     {8030} V0
+MR-Key LED (saved): False
+MR-Key LED        : False
+13: BRIGHTNESS CONTROL     {8040} V0
+14: REPORT RATE            {8060} V0
+Polling Rate (ms): 1
+Polling Rate (ms) (saved): 1
+Polling Rate (ms)        : 1
+15: RGB EFFECTS            {8071} V0
+16: PER KEY LIGHTING V2    {8081} V2
+17: ONBOARD PROFILES       {8100} V0
+Device Mode: Host
+Onboard Profiles (saved): Disable
+Onboard Profiles        : Disable
+18: unknown:1801           {1801} V0    internal, hidden
+19: DEVICE RESET           {1802} V0    internal, hidden
+20: CONFIG DEVICE PROPS    {1806} V5    internal, hidden
+21: unknown:18B0           {18B0} V0    internal, hidden
+22: unknown:1E00           {1E00} V0    hidden
+23: unknown:1EB0           {1EB0} V0    internal, hidden
+Battery status unavailable.

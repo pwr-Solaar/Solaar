@@ -14,7 +14,7 @@ fi
 HIDRAW=$2
 
 do_req() {
-	"$HC" --hidpp $HIDRAW | grep -v "\[1. ${DEVNUMBER} 8F.. ..0[12]" | grep -B 1 "^>> "
+	"$HC" --hidpp $HIDRAW | grep "^>> " | grep -v "\[1. .. 8F.. "
 }
 
 req00="$(mktemp --tmpdir req00-XXXXXX)"
@@ -36,12 +36,19 @@ else
 fi
 rm --force "$req00" "$req00-flags" &
 
+echo SHORT REGISTERS
 # read all short registers, skipping 00
 for n in $(seq 1 255); do
 	printf "10 ${DEVNUMBER} 81%02x 000000\n" $n
 done | do_req
 
+echo LONG REGISTERS
 # read all long registers
 for n in $(seq 0 255); do
 	printf "10 ${DEVNUMBER} 83%02x 000000\n" $n
+done | do_req
+
+echo PAIRING INFORMAITON # read all pairing information
+for n in $(seq 0 255); do
+	printf "10 ${DEVNUMBER} 83B5 %02x0000\n" $n
 done | do_req

@@ -175,6 +175,8 @@ def get_btid(btid):
 
 _D('Wireless Keyboard EX110', codename='EX110', protocol=1.0, wpid='0055', registers=(_R.battery_status, ))
 _D('Wireless Keyboard S510', codename='S510', protocol=1.0, wpid='0056', registers=(_R.battery_status, ))
+_D('Wireless Wave Keyboard K550', codename='K550', protocol=1.0, wpid='0060', registers=(_R.battery_status, ),
+   settings=[_ST.RegisterFnSwap])
 _D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='0065', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK300', codename='MK300', protocol=1.0, wpid='0068', registers=(_R.battery_status, ))
 _D('Number Pad N545', codename='N545', protocol=1.0, wpid='2006', registers=(_R.battery_status, ))
@@ -206,11 +208,13 @@ _D('Illuminated Keyboard', codename='Illuminated', protocol=1.0, usbid=0xc318, i
 _D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
+_D('diNovo Edge Keyboard', codename='diNovo', protocol=1.0, wpid='C714', settings=[_ST.RegisterFnSwap])
 
 # Mice
 
 _D('LX5 Cordless Mouse', codename='LX5', protocol=1.0, wpid='0036', registers=(_R.battery_status, ))
 _D('LX7 Cordless Laser Mouse', codename='LX7', protocol=1.0, wpid='0039', registers=(_R.battery_status, ))
+_D('Wireless Wave Mouse M550', codename='M550', protocol=1.0, wpid='003C', registers=(_R.battery_status, ))
 _D('Wireless Mouse EX100', codename='EX100m', protocol=1.0, wpid='003F', registers=(_R.battery_status, ))
 _D('Wireless Mouse M30', codename='M30', protocol=1.0, wpid='0085', registers=(_R.battery_status, ))
 _D('MX610 Laser Cordless Mouse', codename='MX610', protocol=1.0, wpid='1001', registers=(_R.battery_status, ))
@@ -302,8 +306,11 @@ _D('G903 Hero Gaming Mouse', codename='G903 Hero', usbid=0xc091)
 _D(None, kind=_DK.mouse, usbid=0xc092, interface=1)  # two mice share this ID
 _D('M500S Mouse', codename='M500S', usbid=0xc093, interface=1)
 # _D('G600 Gaming Mouse', codename='G600 Gaming', usbid=0xc24a, interface=1) # not an HID++ device
+_D('G500s Gaming Mouse', codename='G500s Gaming', usbid=0xc24e, interface=1, protocol=1.0)
 _D('G502 Proteus Spectrum Optical Mouse', codename='G502 Proteus Spectrum', usbid=0xc332, interface=1)
 _D('Logitech PRO Gaming Keyboard', codename='PRO Gaming Keyboard', usbid=0xc339, interface=1)
+
+_D('Logitech MX Revolution Mouse M-RCL 124', codename='M-RCL 124', btid=0xb007, interface=1)
 
 # Trackballs
 
@@ -320,4 +327,5 @@ _D('G533 Gaming Headset', codename='G533 Headset', protocol=2.0, interface=3, ki
 _D('G535 Gaming Headset', codename='G535 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0ac4)
 _D('G935 Gaming Headset', codename='G935 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0a87)
 _D('G733 Gaming Headset', codename='G733 Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0ab5)
+_D('G733 Gaming Headset', codename='G733 Headset New', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0afe)
 _D('PRO X Wireless Gaming Headset', codename='PRO Headset', protocol=2.0, interface=3, kind=_DK.headset, usbid=0x0aba)

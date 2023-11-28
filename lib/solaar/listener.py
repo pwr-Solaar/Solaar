@@ -156,12 +156,12 @@ class ReceiverListener(_listener.EventsListener):
         if _log.isEnabledFor(_INFO):
             if device.kind is None:
                 _log.info(
-                    'status_changed %s: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
+                    'status_changed %r: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
                     alert, reason or ''
                 )
             else:
                 _log.info(
-                    'status_changed %s: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
+                    'status_changed %r: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
                     'online' if device.online else 'offline', device.status, alert, reason or ''
                 )
 
@@ -253,7 +253,7 @@ class ReceiverListener(_listener.EventsListener):
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
             if _log.isEnabledFor(_INFO):
-                _log.info('connection %s for %s (%s)', n, dev, dev.kind)
+                _log.info('connection %s for %r', n, dev)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)

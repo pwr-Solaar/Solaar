@@ -170,35 +170,35 @@ class Device:
 
     @property
     def protocol(self):
-        if not self._protocol and self.online:
-            self._protocol = _base.ping(
-                self.handle or self.receiver.handle, self.number, long_message=self.bluetooth or self.hidpp_short is False
-            )
-            # if the ping failed, the peripheral is (almost) certainly offline
-            self.online = self._protocol is not None
-
-            # if _log.isEnabledFor(_DEBUG):
-            #     _log.debug("device %d protocol %s", self.number, self._protocol)
+        if not self._protocol:
+            self.ping()
         return self._protocol or 0
 
     @property
     def codename(self):
         if not self._codename:
+            if not self.online:  # be very defensive
+                self.ping()
             if self.online and self.protocol >= 2.0:
                 self._codename = _hidpp20.get_friendly_name(self)
                 if not self._codename:
                     self._codename = self.name.split(' ', 1)[0] if self.name else None
-            elif self.receiver:
+            if not self._codename and self.receiver:
                 codename = self.receiver.device_codename(self.number)
                 if codename:
                     self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = '? (%s)' % (self.wpid or self.product_id)
-        return self._codename if self._codename else '?? (%s)' % (self.wpid or self.product_id)
+        return self._codename or '?? (%s)' % (self.wpid or self.product_id)
 
     @property
     def name(self):
         if not self._name:
+            if not self.online:  # be very defensive
+                try:
+                    self.ping()
+                except _base.NoSuchDevice:
+                    pass
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
         return self._name or self._codename or ('Unknown device %s' % (self.wpid or self.product_id))
@@ -432,13 +432,16 @@ class Device:
 
     def request(self, request_id, *params, no_reply=False):
         if self:
+            long = self.hidpp_long is True or (
+                self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+            )
             return _base.request(
                 self.handle or self.receiver.handle,
                 self.number,
                 request_id,
                 *params,
                 no_reply=no_reply,
-                long_message=self.bluetooth or self.hidpp_short is False or self.protocol >= 2.0,
+                long_message=long,
                 protocol=self.protocol
             )
 
@@ -448,7 +451,10 @@ class Device:
 
     def ping(self):
         """Checks if the device is online, returns True of False"""
-        long = self.bluetooth or self.hidpp_short is False or self._protocol is not None and self._protocol >= 2.0
+        #        long = self.bluetooth or self.hidpp_short is False or self._protocol is not None and self._protocol >= 2.0
+        long = self.hidpp_long is True or (
+            self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+        )
         protocol = _base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
@@ -475,9 +481,11 @@ class Device:
     __nonzero__ = __bool__
 
     def __str__(self):
-        return '<Device(%d,%s,%s,%s)>' % (
-            self.number, self.wpid or self.product_id, self.name or self.codename or '?', self.serial
-        )
+        try:
+            name = self.name or self.codename or '?'
+        except _base.NoSuchDevice:
+            name = 'name not available'
+        return '<Device(%d,%s,%s,%s)>' % (self.number, self.wpid or self.product_id, name, self.serial)
 
     __repr__ = __str__
 

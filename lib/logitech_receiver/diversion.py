@@ -36,6 +36,8 @@ if _platform.system() in ('Darwin', 'Windows'):
 else:
     import evdev
 
+import dbus
+
 import keysyms.keysymdef as _keysymdef
 import psutil
 
@@ -94,6 +96,8 @@ _KEY_PRESS = 1
 _BUTTON_RELEASE = 2
 _BUTTON_PRESS = 3
 
+CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
+
 gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
 gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if _log.isEnabledFor(_INFO):
@@ -101,7 +105,10 @@ if _log.isEnabledFor(_INFO):
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
-    _log.warn('rules cannot access active process or modifier keys in Wayland')
+    _log.warn(
+        'rules cannot access modifier keys in Wayland, '
+        'accessing process only works on GNOME with Solaar Gnome extension installed'
+    )
 
 try:
     import Xlib
@@ -114,6 +121,8 @@ xdisplay = None
 Xkbdisplay = None  # xkb might be available
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
+
+_dbus_interface = None
 
 
 class XkbDisplay(_ctypes.Structure):
@@ -148,6 +157,20 @@ def x11_setup():
         _x11 = False
         xtest_available = False
     return _x11
+
+
+def gnome_dbus_interface_setup():
+    global _dbus_interface
+    if _dbus_interface is not None:
+        return _dbus_interface
+    try:
+        bus = dbus.SessionBus()
+        remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
+        _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
+    except dbus.exceptions.DBusException:
+        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+        _dbus_interface = False
+    return _dbus_interface
 
 
 def xkb_setup():
@@ -209,7 +232,7 @@ def setup_uinput():
         _log.warn('cannot create uinput device: %s', e)
 
 
-if wayland:  # wayland can't use xtest so may as well set up uinput now
+if wayland:  # Wayland can't use xtest so may as well set up uinput now
     setup_uinput()
 
 
@@ -306,20 +329,36 @@ def simulate_key(code, event):  # X11 keycode but Solaar event code
 
 
 def click_xtest(button, count):
-    for _ in range(count):
-        if not simulate_xtest(button[0], _BUTTON_PRESS):
-            return False
-        if not simulate_xtest(button[0], _BUTTON_RELEASE):
-            return False
+    if isinstance(count, int):
+        for _ in range(count):
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
+    else:
+        if count != RELEASE:
+            if not simulate_xtest(button[0], _BUTTON_PRESS):
+                return False
+        if count != DEPRESS:
+            if not simulate_xtest(button[0], _BUTTON_RELEASE):
+                return False
     return True
 
 
 def click_uinput(button, count):
-    for _ in range(count):
-        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
-            return False
-        if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
-            return False
+    if isinstance(count, int):
+        for _ in range(count):
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+                return False
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+                return False
+    else:
+        if count != RELEASE:
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 1):
+                return False
+        if count != DEPRESS:
+            if not simulate_uinput(evdev.ecodes.EV_KEY, button[1], 0):
+                return False
     return True
 
 
@@ -576,13 +615,30 @@ def x11_pointer_prog():
     return (wm_class[0], wm_class[1], name) if wm_class else (name, )
 
 
+def gnome_dbus_focus_prog():
+    if not gnome_dbus_interface_setup():
+        return None
+    wm_class = _dbus_interface.ActiveWindow()
+    return (wm_class, ) if wm_class else None
+
+
+def gnome_dbus_pointer_prog():
+    if not gnome_dbus_interface_setup():
+        return None
+    wm_class = _dbus_interface.PointerOverWindow()
+    return (wm_class, ) if wm_class else None
+
+
 class Process(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if wayland or not x11_setup():
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules can only access active process in X11 - %s', self)
+                _log.warn(
+                    'rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s',
+                    self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule Process argument not a string: %s', process)
@@ -596,7 +652,7 @@ class Process(Condition):
             _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
-        focus = x11_focus_prog()
+        focus = x11_focus_prog() if not wayland else gnome_dbus_focus_prog()
         result = any(bool(s and s.startswith(self.process)) for s in focus) if focus else None
         return result
 
@@ -608,9 +664,12 @@ class MouseProcess(Condition):
 
     def __init__(self, process, warn=True):
         self.process = process
-        if wayland or not x11_setup():
+        if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn('rules cannot access active mouse process in X11 - %s', self)
+                _log.warn(
+                    'rules cannot access active mouse process '
+                    'in X11 or in Wayland under GNOME with Solaar Extension for GNOME - %s', self
+                )
         if not isinstance(process, str):
             if warn:
                 _log.warn('rule MouseProcess argument not a string: %s', process)
@@ -624,7 +683,7 @@ class MouseProcess(Condition):
             _log.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
-        pointer_focus = x11_pointer_prog()
+        pointer_focus = x11_pointer_prog() if not wayland else gnome_dbus_pointer_prog()
         result = any(bool(s and s.startswith(self.process)) for s in pointer_focus) if pointer_focus else None
         return result
 
@@ -1007,11 +1066,33 @@ class Device(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if _log.isEnabledFor(_DEBUG):
             _log.debug('evaluate condition: %s', self)
-        dev = _Device.find(self.devID)
-        return device == dev
+        return device.unitId == self.devID or device.serial == self.devID
 
     def data(self):
         return {'Device': self.devID}
+
+
+class Host(Condition):
+
+    def __init__(self, host, warn=True):
+        if not (isinstance(host, str)):
+            if warn:
+                _log.warn('rule Host Name argument not a string: %s', host)
+            self.host = ''
+        self.host = host
+
+    def __str__(self):
+        return 'Host: ' + str(self.host)
+
+    def evaluate(self, feature, notification, device, status, last_result):
+        if _log.isEnabledFor(_DEBUG):
+            _log.debug('evaluate condition: %s', self)
+        import socket
+        hostname = socket.getfqdn()
+        return hostname.startswith(self.host)
+
+    def data(self):
+        return {'Host': self.host}
 
 
 class Action(RuleComponent):
@@ -1024,7 +1105,6 @@ class Action(RuleComponent):
 
 
 class KeyPress(Action):
-    CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
 
     def __init__(self, args, warn=True):
         self.key_names, self.action = self.regularize_args(args)
@@ -1040,11 +1120,11 @@ class KeyPress(Action):
             self.key_symbols = []
 
     def regularize_args(self, args):
-        action = self.CLICK
+        action = CLICK
         if not isinstance(args, list):
             args = [args]
         keys = args
-        if len(args) == 2 and args[1] in [self.CLICK, self.DEPRESS, self.RELEASE]:
+        if len(args) == 2 and args[1] in [CLICK, DEPRESS, RELEASE]:
             keys = [args[0]] if isinstance(args[0], str) else args[0]
             action = args[1]
         return keys, action
@@ -1090,14 +1170,14 @@ class KeyPress(Action):
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode is None:
                 _log.warn('rule KeyPress key symbol not currently available %s', self)
-            elif self.action != self.CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
+            elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
     def keyUp(self, keysyms, modifiers):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
-            if keycode and (self.action != self.CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
+            if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
@@ -1106,9 +1186,9 @@ class KeyPress(Action):
             current = gkeymap.get_modifier_state()
             if _log.isEnabledFor(_INFO):
                 _log.info('KeyPress action: %s %s, group %s, modifiers %s', self.key_names, self.action, kbdgroup(), current)
-            if self.action != self.RELEASE:
+            if self.action != RELEASE:
                 self.keyDown(self.key_symbols, current)
-            if self.action != self.DEPRESS:
+            if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
             _time.sleep(0.01)
         else:
@@ -1176,9 +1256,11 @@ class MouseClick(Action):
         try:
             self.count = int(count)
         except (ValueError, TypeError):
-            if warn:
-                _log.warn('rule MouseClick action: count %s should be an integer', count)
-            self.count = 1
+            if count in [CLICK, DEPRESS, RELEASE]:
+                self.count = count
+            elif warn:
+                _log.warn('rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE', count)
+                self.count = 1
 
     def __str__(self):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
@@ -1312,6 +1394,7 @@ COMPONENTS = {
     'MouseGesture': MouseGesture,
     'Active': Active,
     'Device': Device,
+    'Host': Host,
     'KeyPress': KeyPress,
     'MouseScroll': MouseScroll,
     'MouseClick': MouseClick,

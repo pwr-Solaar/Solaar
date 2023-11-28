@@ -203,7 +203,9 @@ def run(cli_args=None, hidraw_path=None):
         else:
             c = list(_receivers(hidraw_path))
         if not c:
-            raise Exception('No devices found')
+            raise Exception(
+                'No supported device found.  Use "lsusb" and "bluetoothctl devices Connected" to list connected devices.'
+            )
         from importlib import import_module
         m = import_module('.' + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)

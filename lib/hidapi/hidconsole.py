@@ -114,8 +114,8 @@ def _validate_input(line, hidpp=False):
         if data[:1] not in b'\x10\x11':
             _error('Invalid HID++ request: first byte must be 0x10 or 0x11')
             return None
-        if data[1:2] not in b'\xFF\x01\x02\x03\x04\x05\x06':
-            _error('Invalid HID++ request: second byte must be 0xFF or one of 0x01..0x06')
+        if data[1:2] not in b'\xFF\x00\x01\x02\x03\x04\x05\x06\x07':
+            _error('Invalid HID++ request: second byte must be 0xFF or one of 0x00..0x07')
             return None
         if data[:1] == b'\x10':
             if len(data) > 7:
@@ -135,7 +135,7 @@ def _validate_input(line, hidpp=False):
 
 def _open(args):
 
-    def matchfn(bid, vid, pid):
+    def matchfn(bid, vid, pid, _a, _b):
         if vid == 0x046d:
             return {'vid': 0x046d}
 
@@ -154,13 +154,12 @@ def _open(args):
     handle = _hid.open_path(device)
     if not handle:
         sys.exit('!! Failed to open %s, aborting.' % device)
-
     print(
         '.. Opened handle %r, vendor %r product %r serial %r.' %
         (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle))
     )
     if args.hidpp:
-        if _hid.get_manufacturer(handle) != b'Logitech':
+        if _hid.get_manufacturer(handle) is not None and _hid.get_manufacturer(handle) != b'Logitech':
             sys.exit('!! Only Logitech devices support the HID++ protocol.')
         print('.. HID++ validation enabled.')
     else:

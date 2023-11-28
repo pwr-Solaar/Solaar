@@ -439,7 +439,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
 
             if reply:
                 report_id, reply_devnumber, reply_data = reply
-                if reply_devnumber == devnumber:
+                if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xff:  # BT device returning 0x00
                     if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and reply_data[1:3] == request_data[:2
                                                                                                                              ]:
                         error = ord(reply_data[3:4])
@@ -524,19 +524,18 @@ def ping(handle, devnumber, long_message=False):
             reply = _read(handle, _PING_TIMEOUT)
             if reply:
                 report_id, reply_devnumber, reply_data = reply
-                if reply_devnumber == devnumber:
+                if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xff:  # BT device returning 0x00
                     if reply_data[:2] == request_data[:2] and reply_data[4:5] == request_data[-1:]:
                         # HID++ 2.0+ device, currently connected
                         return ord(reply_data[2:3]) + ord(reply_data[3:4]) / 10.0
 
                     if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and \
                        reply_data[1:3] == request_data[:2]:  # error response
-                        assert reply_data[-1:] == b'\x00'
                         error = ord(reply_data[3:4])
                         if error == _hidpp10.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
-                        if error == _hidpp10.ERROR.resource_error:  # device unreachable
-                            return
+                        if error == _hidpp10.ERROR.resource_error or error == _hidpp10.ERROR.connection_request_failed:
+                            return  # device unreachable
                         if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
                             _log.error('(%s) device %d error on ping request: unknown device', handle, devnumber)
                             raise NoSuchDevice(number=devnumber, request=request_id)

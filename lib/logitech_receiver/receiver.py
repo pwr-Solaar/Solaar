@@ -180,6 +180,10 @@ class Receiver:
             if device_info:
                 wpid = _strhex(device_info[3:5])
                 kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+            else:
+                raise _base.NoSuchDevice(number=n, receiver=self, error='read pairing information - non-unifying')
+        else:
+            raise _base.NoSuchDevice(number=n, receiver=self, error='read pairing information')
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
@@ -238,8 +242,8 @@ class Receiver:
                 _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
             return dev
-        except _base.NoSuchDevice:
-            _log.exception('register_new_device')
+        except _base.NoSuchDevice as e:
+            _log.warn('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
 
         _log.warning('%s: looked for device %d, not found', self, number)
         self._devices[number] = None

@@ -1,3 +1,31 @@
+# 1.1.10
+
+* Add information about NixOS flake package
+* Permit bluetooth devices in hidconsole
+* Add descriptor for Logitech MX Revolution Mouse M-RCL 124
+* Improve determination for short and long messages
+* Add descriptor for G500s
+* Fix bug in scan-registers
+* Add single depress and release options for rule mouse click action
+* Add rule condition for hostname
+* Update keysym generation to current list of keysyms
+* Allow device 0 in hidconsole
+* Upgrade messages when no supported device found
+* Documentation update for the gnome extension for better Solaar rule support
+* Remove udev-acl tag from udev rules
+* Add support for process condition in Wayland
+* Update French, Chinese, and German translations
+* Add G733 Headset
+* Restore tools/clean.sh
+* Add Bluetooth Keyboard C714
+* Update several device descriptions
+* Update scan-registers.sh
+* Remove assertion on last byte of ping responses
+* Add symbolic version of solaar icon
+* Fix bug when finding name or codename
+* Update documentation
+* Put version in initial INFO logging message
+
 # 1.1.9
 
 * Add descriptors for G535 wireless gaming headset and wireless keyboard EX110

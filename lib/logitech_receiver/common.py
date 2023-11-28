@@ -44,6 +44,8 @@ class NamedInt(int):
         return int2bytes(self, count)
 
     def __eq__(self, other):
+        if other is None:
+            return False
         if isinstance(other, NamedInt):
             return int(self) == int(other) and self.name == other.name
         if isinstance(other, int):

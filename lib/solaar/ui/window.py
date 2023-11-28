@@ -818,11 +818,6 @@ _window = None
 
 def init(show_window, hide_on_close):
     Gtk.Window.set_default_icon_name(NAME.lower())
-    # GTK installed on macOS via homebrew does not support SVG icons and won't
-    # be able to load them.
-    _icon = _icons.icon_file(NAME.lower())
-    if _icon:
-        Gtk.Window.set_default_icon_from_file(_icon)
 
     global _model, _tree, _details, _info, _empty, _window
     _model = Gtk.TreeStore(*_COLUMN_TYPES)
@@ -918,6 +913,8 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         charging = device.status.get(_K.BATTERY_CHARGING)
         icon_name = _icons.battery(battery_level, charging)
         _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
+
+    _model.set_value(item, _COLUMN.NAME, device.codename)
 
     if selected_device_id is None or need_popup:
         select(device.receiver.path if device.receiver else device.path, device.number)
