@@ -19,6 +19,7 @@
 import ctypes as _ctypes
 import os as _os
 import os.path as _path
+import platform as _platform
 import sys as _sys
 import time as _time
 
@@ -28,8 +29,15 @@ from logging import getLogger
 from math import sqrt as _sqrt
 from struct import unpack as _unpack
 
+# There is no evdev on macOS or Windows. Diversion will not work without
+# it but other Solaar functionality is available.
+if _platform.system() in ('Darwin', 'Windows'):
+    evdev = None
+else:
+    import evdev
+
 import dbus
-import evdev
+
 import keysyms.keysymdef as _keysymdef
 import psutil
 
@@ -182,25 +190,32 @@ def xkb_setup():
     return Xkbdisplay
 
 
-buttons = {
-    'unknown': (None, None),
-    'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
-    'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
-    'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
-    'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
-    'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
-    'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
-    'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
-    'button8': (8, evdev.ecodes.ecodes['BTN_8']),
-    'button9': (9, evdev.ecodes.ecodes['BTN_9']),
-}
+if evdev:
+    buttons = {
+        'unknown': (None, None),
+        'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
+        'middle': (2, evdev.ecodes.ecodes['BTN_MIDDLE']),
+        'right': (3, evdev.ecodes.ecodes['BTN_RIGHT']),
+        'scroll_up': (4, evdev.ecodes.ecodes['BTN_4']),
+        'scroll_down': (5, evdev.ecodes.ecodes['BTN_5']),
+        'scroll_left': (6, evdev.ecodes.ecodes['BTN_6']),
+        'scroll_right': (7, evdev.ecodes.ecodes['BTN_7']),
+        'button8': (8, evdev.ecodes.ecodes['BTN_8']),
+        'button9': (9, evdev.ecodes.ecodes['BTN_9']),
+    }
 
-# uinput capability for keyboard keys, mouse buttons, and scrolling
-key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith('KEY') and n != 'KEY_CNT']
-for (_, evcode) in buttons.values():
-    if evcode:
-        key_events.append(evcode)
-devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
+    # uinput capability for keyboard keys, mouse buttons, and scrolling
+    key_events = [c for n, c in evdev.ecodes.ecodes.items() if n.startswith('KEY') and n != 'KEY_CNT']
+    for (_, evcode) in buttons.values():
+        if evcode:
+            key_events.append(evcode)
+    devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
+else:
+    # Just mock these since they won't be useful without evdev anyway
+    buttons = {}
+    key_events = []
+    devicecap = {}
+
 udevice = None
 
 

@@ -14,6 +14,20 @@ This will not install the Solaar udev rule, which you will need to install manua
 `~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
 to `/etc/udev/rules.d` as root.
 
+## macOS support
+
+Solaar has limited support for macOS. You can use it to pair devices and configure settings
+but the rule system and diversion will not work.
+
+After installing Solaar via pip use homebrew to install the hidapi library:
+```
+brew install hidapi
+```
+If you only want to use the CLI that's all that is needed. To use the GUI you need to also
+install GTK and its python bindings:
+```
+brew install gtk+3 pygobject3
+```
 
 # Manual installation from GitHub
 

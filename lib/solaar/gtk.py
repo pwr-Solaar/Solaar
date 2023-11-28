@@ -21,6 +21,7 @@
 import importlib
 import logging
 import os.path
+import platform
 import signal
 import sys
 import tempfile
@@ -137,7 +138,8 @@ def _handlesig(signl, stack):
 
 
 def main():
-    _require('pyudev', 'python3-pyudev')
+    if platform.system() not in ('Darwin', 'Windows'):
+        _require('pyudev', 'python3-pyudev')
 
     args = _parse_arguments()
     if not args:
