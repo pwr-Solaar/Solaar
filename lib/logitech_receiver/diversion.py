@@ -37,7 +37,6 @@ else:
     import evdev
 
 import dbus
-
 import keysyms.keysymdef as _keysymdef
 import psutil
 
