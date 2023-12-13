@@ -266,7 +266,7 @@ _D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A', usbid=0xc0
     registers=(_R.battery_status, _R.three_leds,), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
 _D('Couch Mouse M515', codename='M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M175', codename='M175', protocol=2.0, wpid='4008')
-_D('Wireless Mouse M325', codename='M325', protocol=2.0, wpid='400A', settings=[_ST.HiResScroll])
+_D('Wireless Mouse M325', codename='M325', protocol=2.0, wpid='400A')
 _D('Wireless Mouse M525', codename='M525', protocol=2.0, wpid='4013')
 _D('Wireless Mouse M345', codename='M345', protocol=2.0, wpid='4017')
 _D('Wireless Mouse M187', codename='M187', protocol=2.0, wpid='4019')
