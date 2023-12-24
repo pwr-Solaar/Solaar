@@ -1,0 +1,95 @@
+solaar version 1.1.9
+
+  1: Wireless Mobile Mouse MX Anywhere 2S
+     Device path  : /dev/hidraw1
+     USB id       : 046d:B01A
+     Codename     : Wireless
+     Kind         : mouse
+     Protocol     : HID++ 4.5
+     Serial number:
+     Model ID:      B01A406A0000
+     Unit ID:       3F714CA3
+        Bootloader: BOT 57.00.B0003
+          Firmware: MPM 13.00.B0003
+          Firmware: MPM 13.00.B0003
+             Other:
+     Supports 24 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Bootloader BOT 57.00.B0003 406AD22DCF4D01
+            Firmware: Firmware MPM 13.00.B0003 B01AD22DCF4D01
+            Firmware: Firmware MPM 13.00.B0003 406AD22DCF4D01
+            Firmware: Other
+            Unit ID: 3F714CA3  Model ID: B01A406A0000  Transport IDs: {'btleid': 'B01A', 'wpid': '406A'}
+         3: DEVICE NAME            {0005} V0
+            Name: Wireless Mobile Mouse MX Anywhere 2S
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: BATTERY STATUS         {1000} V0
+            Battery: 90%, discharging, next level 50%.
+         7: CONFIG DEVICE PROPS    {1806} V0    internal, hidden
+         8: CHANGE HOST            {1814} V1
+            Change Host        : 2:mburcheri2
+         9: REPROG CONTROLS V4     {1B04} V3
+            Key/Button Actions (saved): {Left Button:Left Click, Right Button:Right Click, Middle Button:Gesture Button Navigation, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Key/Button Actions        : {Left Button:Left Click, Right Button:Right Click, Middle Button:Gesture Button Navigation, Back Button:Mouse Back Button, Forward Button:Mouse Forward Button, Left Tilt:Mouse Scroll Left Button , Right Tilt:Mouse Scroll Right Button}
+            Key/Button Diversion (saved): {Middle Button:Regular, Back Button:Sliding DPI, Forward Button:Regular, Left Tilt:Regular, Right Tilt:Regular}
+            Key/Button Diversion        : {Middle Button:Regular, Back Button:Diverted, Forward Button:Regular, Left Tilt:Regular, Right Tilt:Regular}
+        10: ADJUSTABLE DPI         {2201} V1
+            Sensitivity (DPI) (saved): 3400
+            Sensitivity (DPI)        : 3400
+        11: VERTICAL SCROLLING     {2100} V0
+            Roller type: 3G
+            Ratchet per turn: 24
+            Scroll lines: 0
+        12: HIRES WHEEL            {2121} V0
+            Multiplier: 8
+            Has invert: Normal wheel motion
+            Has ratchet switch: Free wheel mode
+            Low resolution mode
+            HID notification
+            Scroll Wheel Direction (saved): False
+            Scroll Wheel Direction        : False
+            Scroll Wheel Resolution (saved): False
+            Scroll Wheel Resolution        : False
+            Scroll Wheel Diversion (saved): False
+            Scroll Wheel Diversion        : False
+        13: unknown:1813           {1813} V0    internal, hidden
+        14: unknown:1830           {1830} V0    internal, hidden
+        15: unknown:18A1           {18A1} V0    internal, hidden
+        16: unknown:18C0           {18C0} V0    internal, hidden
+        17: unknown:1DF3           {1DF3} V0    internal, hidden
+        18: unknown:1E00           {1E00} V0    hidden
+        19: unknown:1EB0           {1EB0} V0    internal, hidden
+        20: unknown:1803           {1803} V0    internal, hidden
+        21: unknown:1861           {1861} V0    internal, hidden
+        22: unknown:9001           {9001} V0    internal, hidden
+        23: OOBSTATE               {1805} V0    internal, hidden
+     Has 8 reprogrammable keys:
+         0: Left Button               , default: Left Click                  => Left Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         1: Right Button              , default: Right Click                 => Right Click
+             mse, pos:0, group:1, group mask:g1
+             reporting: default
+         2: Middle Button             , default: Gesture Button Navigation   => Gesture Button Navigation
+             mse, reprogrammable, divertable, raw XY, pos:0, group:2, group mask:g1,g2,g4
+             reporting: default
+         3: Back Button               , default: Mouse Back Button           => Mouse Back Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: diverted, raw XY diverted
+         4: Forward Button            , default: Mouse Forward Button        => Mouse Forward Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         5: Left Tilt                 , default: Mouse Scroll Left Button    => Mouse Scroll Left Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         6: Right Tilt                , default: Mouse Scroll Right Button   => Mouse Scroll Right Button
+             mse, reprogrammable, divertable, raw XY, pos:0, group:3, group mask:g1,g2,g3,g4
+             reporting: default
+         7: Virtual Gesture Button    , default: Virtual Gesture Button      => Virtual Gesture Button
+             divertable, virtual, raw XY, force raw XY, pos:0, group:4, group mask:empty
+             reporting: default
+     Battery: 90%, discharging, next level 50%.
