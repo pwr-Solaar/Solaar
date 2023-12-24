@@ -1,0 +1,91 @@
+solaar version 1.1.10
+
+USB and Bluetooth Devices
+
+  1: G915 WIRELESS RGB MECHANICAL GAMING KEYBOARD
+     Device path  : /dev/hidraw13
+     USB id       : 046d:C33E
+     Codename     : G915
+     Kind         : ?
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number:
+     Model ID:      B354407CC33E
+     Unit ID:       8816D0DF
+        Bootloader: BOT 77.03.B0041
+             Other:
+          Firmware: MPK 09.04.B0042
+             Other:
+             Other:
+     Supports 37 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V4
+            Firmware: Bootloader BOT 77.03.B0041 00003791543D
+            Firmware: Other
+            Firmware: Firmware MPK 09.04.B0042 C33E8A23A76B
+            Firmware: Other
+            Firmware: Other
+            Unit ID: 8816D0DF  Model ID: B354407CC33E  Transport IDs: {'btleid': 'B354', 'wpid': '407C', 'usbid': 'C33E'}
+         3: DEVICE NAME            {0005} V0
+            Name: G915 WIRELESS RGB MECHANICAL GAMING KEYBOARD
+            Kind: keyboard
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: CONFIG CHANGE          {0020} V0
+         6: BATTERY VOLTAGE        {1001} V3
+            Battery: 70% 3965mV , recharging.
+         7: CHANGE HOST            {1814} V1
+            Changer d'hôte        : 1:stagcrown
+         8: HOSTS INFO             {1815} V1
+            Host 0 (paired): stagcrown
+            Host 1 (paired):
+         9: RGB EFFECTS            {8071} V0
+        10: PER KEY LIGHTING V2    {8081} V2
+        11: REPROG CONTROLS V4     {1B04} V4
+            Interception des boutons/touches (saved): {Host Switch Channel 1:Interception, Host Switch Channel 2:Interception}
+            Interception des boutons/touches        : {Host Switch Channel 1:Interception, Host Switch Channel 2:Interception}
+        12: REPORT HID USAGE       {1BC0} V1
+        13: ENCRYPTION             {4100} V0
+        14: KEYBOARD DISABLE BY USAGE {4522} V0
+        15: KEYBOARD LAYOUT 2      {4540} V0
+        16: GKEY                   {8010} V0
+            Définir les touches G (saved): True
+            Définir les touches G        : False
+        17: MKEYS                  {8020} V0
+            LEDs de touche M (saved): {M1:False, M2:False, M3:False}
+            LEDs de touche M        : {M1:False, M2:False, M3:False}
+        18: MR                     {8030} V0
+            LED de touche MR (saved): False
+            LED de touche MR        : False
+        19: BRIGHTNESS CONTROL     {8040} V0
+        20: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Profils embarqués (saved): Enable
+            Profils embarqués        : Enable
+        21: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Taux de scrutation (ms) (saved): 1
+            Taux de scrutation (ms)        : 1
+        22: DFUCONTROL SIGNED      {00C2} V0
+        23: DFU                    {00D0} V3
+        24: DEVICE RESET           {1802} V0    internal, hidden
+        25: unknown:1803           {1803} V0    internal, hidden
+        26: CONFIG DEVICE PROPS    {1806} V8    internal, hidden
+        27: unknown:1813           {1813} V0    internal, hidden
+        28: OOBSTATE               {1805} V0    internal, hidden
+        29: unknown:1830           {1830} V0    internal, hidden
+        30: unknown:1890           {1890} V9    internal, hidden
+        31: unknown:1891           {1891} V9    internal, hidden
+        32: unknown:18A1           {18A1} V0    internal, hidden
+        33: unknown:1E00           {1E00} V0    hidden
+        34: unknown:1EB0           {1EB0} V0    internal, hidden
+        35: unknown:1861           {1861} V0    internal, hidden
+        36: unknown:18B0           {18B0} V0    internal, hidden
+     Has 2 reprogrammable keys:
+         0: Host Switch Channel 1     , default: HostSwitch Channel 1        => HostSwitch Channel 1
+             divertable, persistently divertable, pos:1, group:0, group mask:empty
+             reporting: diverted
+         1: Host Switch Channel 2     , default: HostSwitch Channel 2        => HostSwitch Channel 2
+             divertable, persistently divertable, pos:2, group:0, group mask:empty
+             reporting: diverted
+     Battery: 70% 3965mV , recharging.
