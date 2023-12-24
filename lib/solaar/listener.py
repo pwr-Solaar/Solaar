@@ -154,16 +154,20 @@ class ReceiverListener(_listener.EventsListener):
     def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
         assert device is not None
         if _log.isEnabledFor(_INFO):
-            if device.kind is None:
-                _log.info(
-                    'status_changed %r: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
-                    alert, reason or ''
-                )
-            else:
-                _log.info(
-                    'status_changed %r: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
-                    'online' if device.online else 'offline', device.status, alert, reason or ''
-                )
+            try:
+                device.ping()
+                if device.kind is None:
+                    _log.info(
+                        'status_changed %r: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
+                        alert, reason or ''
+                    )
+                else:
+                    _log.info(
+                        'status_changed %r: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
+                        'online' if device.online else 'offline', device.status, alert, reason or ''
+                    )
+            except Exception:
+                _log.info('status_changed for unknown device')
 
         if device.kind is None:
             assert device == self.receiver
@@ -253,7 +257,11 @@ class ReceiverListener(_listener.EventsListener):
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
             if _log.isEnabledFor(_INFO):
-                _log.info('connection %s for %r', n, dev)
+                try:
+                    dev.ping()
+                    _log.info('connection %s for %r', n, dev)
+                except Exception:
+                    _log.info('connection %s for unknown device, number %s', n, n.devnumber)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
