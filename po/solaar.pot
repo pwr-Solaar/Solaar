@@ -7,7 +7,7 @@
 msgid   ""
 msgstr  "Project-Id-Version: solaar 1.1.10\n"
         "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2023-09-25 06:09+0200\n"
+        "POT-Creation-Date: 2023-12-28 18:56+0100\n"
         "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
         "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1488,8 +1488,8 @@ msgstr  ""
 msgid   "Setting on device"
 msgstr  ""
 
-#: lib/solaar/ui/notify.py:124 lib/solaar/ui/tray.py:320
-#: lib/solaar/ui/tray.py:325 lib/solaar/ui/window.py:739
+#: lib/solaar/ui/notify.py:124 lib/solaar/ui/tray.py:318
+#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:739
 msgid   "offline"
 msgstr  ""
 
@@ -1616,11 +1616,11 @@ msgstr  ""
 msgid   "Quit %s"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:299 lib/solaar/ui/tray.py:307
+#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
 msgid   "no receiver"
 msgstr  ""
 
-#: lib/solaar/ui/tray.py:323
+#: lib/solaar/ui/tray.py:321
 msgid   "no status"
 msgstr  ""
 
