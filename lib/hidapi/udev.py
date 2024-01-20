@@ -123,7 +123,9 @@ def _match(action, device, filterfn):
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
-        _log.warn('Report Descriptor not processed for BID %s VID %s PID %s: %s', bid, vid, pid, e)
+        _log.warn(
+            'Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s', device.device_node, bid, vid, pid, e
+        )
 
     filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:
@@ -147,8 +149,8 @@ def _match(action, device, filterfn):
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
         if _log.isEnabledFor(_INFO):
             _log.info(
-                'Found device BID %s VID %s PID %s HID++ %s %s USB %s %s', bid, vid, pid, hidpp_short, hidpp_long,
-                usb_interface, interface_number
+                'Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s', device.device_node, bid, vid, pid, hidpp_short,
+                hidpp_long, usb_interface, interface_number
             )
         if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
             return
@@ -200,7 +202,7 @@ def find_paired_node(receiver_path, index, timeout):
     if not receiver_phys:
         return None
 
-    phys = f'{receiver_phys}:{index}'
+    phys = f'{receiver_phys}:{index}'  # noqa: E231
     timeout += _timestamp()
     delta = _timestamp()
     while delta < timeout:
@@ -221,7 +223,7 @@ def find_paired_node_wpid(receiver_path, index):
     if not receiver_phys:
         return None
 
-    phys = f'{receiver_phys}:{index}'
+    phys = f'{receiver_phys}:{index}'  # noqa: E231
     for dev in context.list_devices(subsystem='hidraw'):
         dev_phys = dev.find_parent('hid').get('HID_PHYS')
         if dev_phys and dev_phys == phys:
