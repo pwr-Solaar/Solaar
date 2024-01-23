@@ -86,7 +86,7 @@ def _print_device(dev, num=None):
     try:
         dev.ping()
     except _base.NoSuchDevice:
-        print('  %d: Device not found' % num or dev.number)
+        print('  %s: Device not found' % num or dev.number)
         return
 
     print('  %d: %s' % (num or dev.number, dev.name))
