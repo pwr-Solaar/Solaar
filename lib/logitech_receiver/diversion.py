@@ -1545,7 +1545,8 @@ def _save_config_rule_file(file_name=_file_path):
             _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
         try:
             with open(file_name, 'w') as f:
-                f.write('%YAML 1.3\n')  # Write version manually
+                if rules_to_save:
+                    f.write('%YAML 1.3\n')  # Write version manually
                 _yaml_dump_all(convert([r['Rule'] for r in rules_to_save]), f, **dump_settings)
         except Exception as e:
             _log.error('failed to save to %s\n%s', file_name, e)
