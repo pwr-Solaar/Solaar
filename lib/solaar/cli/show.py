@@ -102,7 +102,7 @@ def _print_device(dev, num=None):
     else:
         print('     Protocol     : unknown (device is offline)')
     if dev.polling_rate:
-        print('     Polling rate :', dev.polling_rate, 'ms (%dHz)' % (1000 // dev.polling_rate))
+        print('     Polling rate :', dev.polling_rate)
     print('     Serial number:', dev.serial)
     if dev.modelId:
         print('     Model ID:     ', dev.modelId)
@@ -217,8 +217,8 @@ def _print_device(dev, num=None):
                 if ids:
                     unitId, modelId, tid_map = ids
                     print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
-            elif feature == _hidpp20.FEATURE.REPORT_RATE:
-                print('            Polling Rate (ms): %d' % _hidpp20.get_polling_rate(dev))
+            elif feature == _hidpp20.FEATURE.REPORT_RATE or feature == _hidpp20.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE:
+                print('            Polling Rate: %s' % _hidpp20.get_polling_rate(dev))
             elif feature == _hidpp20.FEATURE.REMAINING_PAIRING:
                 print('            Remaining Pairings: %d' % _hidpp20.get_remaining_pairing(dev))
             elif feature == _hidpp20.FEATURE.ONBOARD_PROFILES:

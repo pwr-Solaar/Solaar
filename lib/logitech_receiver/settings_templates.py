@@ -327,14 +327,19 @@ class OnboardProfiles(_Setting):
 
 class ReportRate(_Setting):
     name = 'report_rate'
-    label = _('Polling Rate (ms)')
-    description = (
-        _('Frequency of device polling, in milliseconds') + '\n' +
-        _('May need Onboard Profiles set to Disable to be effective.')
-    )
+    label = _('Polling Rate')
+    description = (_('Frequency of device polling') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
     feature = _F.REPORT_RATE
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    choices_universe = _NamedInts.range(1, 8)
+    choices_universe = _NamedInts()
+    choices_universe[1] = '1ms'
+    choices_universe[2] = '2ms'
+    choices_universe[3] = '3ms'
+    choices_universe[4] = '4ms'
+    choices_universe[5] = '5ms'
+    choices_universe[6] = '6ms'
+    choices_universe[7] = '7ms'
+    choices_universe[8] = '8ms'
 
     class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
 
@@ -356,7 +361,49 @@ class ReportRate(_Setting):
             rate_flags = _bytes2int(reply[0:1])
             for i in range(0, 8):
                 if (rate_flags >> i) & 0x01:
-                    rate_list.append(i + 1)
+                    rate_list.append(setting_class.choices_universe[i + 1])
+            return cls(choices=_NamedInts.list(rate_list), byte_count=1) if rate_list else None
+
+
+class ExtendedReportRate(_Setting):
+    name = 'report_rate_extended'
+    label = _('Polling Frequency')
+    description = (_('Frequency of device polling') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
+    feature = _F.EXTENDED_ADJUSTABLE_REPORT_RATE
+    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30}
+    choices_universe = _NamedInts()
+    choices_universe[0] = '8ms'
+    choices_universe[1] = '4ms'
+    choices_universe[2] = '2ms'
+    choices_universe[3] = '1ms'
+    choices_universe[4] = '500us'
+    choices_universe[5] = '250us'
+    choices_universe[6] = '125us'
+
+    class _rw_class(_FeatureRW):
+
+        def read(self, device, data_bytes=b''):
+            # need connection type from device to get actual report rate
+            self.read_prefix = b'\x00' if device.receiver else b'\x01'
+            super().read(device, data_bytes)
+
+        def write(self, device, data_bytes):
+            # Host mode is required for report rate to be adjustable
+            if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
+                _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
+            return super().write(device, data_bytes)
+
+    class validator_class(_ChoicesV):
+
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(_F.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x10)
+            assert reply, 'Oops, report rate choices cannot be retrieved!'
+            rate_list = []
+            rate_flags = _bytes2int(reply[0:2])
+            for i in range(0, 6):
+                if (rate_flags & (0x01 << i)):
+                    rate_list.append(setting_class.choices_universe[i])
             return cls(choices=_NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
@@ -1222,6 +1269,7 @@ SETTINGS = [
     ThumbMode,  # working
     OnboardProfiles,
     ReportRate,  # working
+    ExtendedReportRate,
     PointerSpeed,  # simple
     AdjustableDpi,  # working
     SpeedChange,

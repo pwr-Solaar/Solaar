@@ -1555,7 +1555,13 @@ def get_polling_rate(device):
     state = feature_request(device, FEATURE.REPORT_RATE, 0x10)
     if state:
         rate = _unpack('!B', state[:1])[0]
-        return rate
+        return str(rate) + 'ms'
+    else:
+        rates = ['8ms', '4ms', '2ms', '1ms', '500us', '250us', '125us']
+        state = feature_request(device, FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
+        if state:
+            rate = _unpack('!B', state[:1])[0]
+            return rates[rate]
 
 
 def get_remaining_pairing(device):

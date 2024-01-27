@@ -168,7 +168,7 @@ class Receiver:
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
-            polling_rate = ord(pair_info[2:3])
+            polling_rate = str(ord(pair_info[2:3])) + 'ms'
         elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
