@@ -236,7 +236,7 @@ class Device:
             if not self._kind:
                 self._kind = kind
             if not self._polling_rate:
-                self._polling_rate = polling_rate
+                self._polling_rate = str(polling_rate) + 'ms'
 
     def update_extended_pairing_information(self):
         if self.receiver:

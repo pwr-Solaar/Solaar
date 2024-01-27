@@ -550,12 +550,7 @@ def _update_details(button):
                 hid_version = device.protocol
                 yield (_('Protocol'), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
                 if read_all and device.polling_rate:
-                    yield (
-                        _('Polling rate'), _('%(rate)d ms (%(rate_hz)dHz)') % {
-                            'rate': device.polling_rate,
-                            'rate_hz': 1000 // device.polling_rate
-                        }
-                    )
+                    yield (_('Polling rate'), device.polling_rate)
 
                 if read_all or not device.online:
                     yield (_('Serial'), device.serial)
