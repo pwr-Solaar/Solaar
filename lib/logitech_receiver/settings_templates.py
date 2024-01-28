@@ -213,11 +213,22 @@ class Backlight(_Setting):
     validator_options = {'choices': choices_universe}
 
 
+# MX Keys S requires some extra values, as in 11 02 0c1a 000dff000b000b003c00000000000000
+# on/off options (from current) effect (FF-no change) level (from current) durations[6] (from current)
 class Backlight2(_Setting):
     name = 'backlight'
     label = _('Backlight')
     description = _('Turn illumination on or off on keyboard.')
     feature = _F.BACKLIGHT2
+
+    class rw_class(_FeatureRW):
+        trail = None
+
+        def write(self, device, data_bytes):
+            if self.trail is None:
+                reply = device.feature_request(_F.BACKLIGHT2, 0x00)
+                self.trail = reply[1:2] + b'\xff' + reply[5:12]
+            return super().write(device, data_bytes + self.trail)
 
 
 class Backlight3(_Setting):
