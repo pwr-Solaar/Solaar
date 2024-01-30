@@ -79,6 +79,7 @@ class Device:
         self._remap_keys = None
         self._gestures = None
         self._gestures_lock = _threading.Lock()
+        self._backlight = None
         self._registers = None
         self._settings = None
         self._feature_settings_checked = False
@@ -314,6 +315,13 @@ class Device:
                     if self.online and self.protocol >= 2.0:
                         self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
+
+    @property
+    def backlight(self):
+        if self._backlight is None:
+            if self.online and self.protocol >= 2.0:
+                self._backlight = _hidpp20.get_backlight(self)
+        return self._backlight
 
     @property
     def registers(self):
