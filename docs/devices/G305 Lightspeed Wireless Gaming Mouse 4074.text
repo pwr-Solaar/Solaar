@@ -1,0 +1,58 @@
+solaar version 1.1.10
+
+  1: G305 Lightspeed Wireless Gaming Mouse
+     Device path  : /dev/hidraw7
+     WPID         : 4074
+     Codename     : G305
+     Kind         : mouse
+     Protocol     : HID++ 4.2
+     Polling rate : 1 ms (1000Hz)
+     Serial number: ED5E9515
+     Model ID:      407400000000
+     Unit ID:       F074D567
+        Bootloader: BOT 69.02.B0021
+          Firmware: RQM 68.02.B0021
+     The power switch is located on the base.
+     Supports 27 HID++ 2.0 features:
+         0: ROOT                   {0000} V0
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
+            Firmware: Bootloader BOT 69.02.B0021 4074452F3940
+            Firmware: Firmware RQM 68.02.B0021 4074452F3940
+            Unit ID: F074D567  Model ID: 407400000000  Transport IDs: {'wpid': '4074'}
+         3: DEVICE NAME            {0005} V0
+            Name: G305 Lightspeed Wireless Gaming Mouse
+            Kind: mouse
+         4: WIRELESS DEVICE STATUS {1D4B} V0
+         5: BATTERY STATUS         {1000} V0
+            Battery: 50%, discharging, next level 30%.
+         6: COLOR LED EFFECTS      {8070} V6
+         7: ONBOARD PROFILES       {8100} V0
+            Device Mode: On-Board
+            Onboard Profiles (saved): Enable
+            Onboard Profiles        : Enable
+         8: MOUSE BUTTON SPY       {8110} V0
+         9: REPORT RATE            {8060} V0
+            Polling Rate (ms): 1
+            Polling Rate (ms) (saved): 1
+            Polling Rate (ms)        : 1
+        10: MODE STATUS            {8090} V1
+        11: DFUCONTROL SIGNED      {00C2} V0
+        12: DEVICE RESET           {1802} V0    internal, hidden
+        13: unknown:1803           {1803} V0    internal, hidden
+        14: CONFIG DEVICE PROPS    {1806} V4    internal, hidden
+        15: unknown:1811           {1811} V0    internal, hidden
+        16: OOBSTATE               {1805} V0    internal, hidden
+        17: unknown:1830           {1830} V0    internal, hidden
+        18: unknown:1890           {1890} V0    internal, hidden
+        19: unknown:1DF3           {1DF3} V0    internal, hidden
+        20: unknown:1E00           {1E00} V0    hidden
+        21: unknown:1EB0           {1EB0} V0    internal, hidden
+        22: unknown:1861           {1861} V0    internal, hidden
+        23: unknown:18B1           {18B1} V0    internal, hidden
+        24: unknown:1E22           {1E22} V0    internal, hidden
+        25: unknown:1801           {1801} V0    internal, hidden
+        26: ADJUSTABLE DPI         {2201} V1
+            Sensitivity (DPI) (saved): 1600
+            Sensitivity (DPI)        : 1600
+     Battery: 50%, discharging, next level 30%.
