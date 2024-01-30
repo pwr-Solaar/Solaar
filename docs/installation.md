@@ -11,7 +11,7 @@ First install pip, and then run
 If you are using pipx add the `--system-site-packages` flag.
 
 This will not install the Solaar udev rule, which you will need to install manually by copying
-`~/.local/share/solaar/udev-rules.d/42-logitech-unify-permissions.rules`
+`~/.local/lib/udev/rules.d/42-logitech-unify-permissions.rules`
 to `/etc/udev/rules.d` as root.
 
 ## macOS support
@@ -104,7 +104,7 @@ To be able to do this without running as root requires a udev rule
 that gives seated users write access to the HID devices for Logitech receivers and devices.
 
 You can install this rule by copying, as root,
-`rules.d/42-logitech-unify-permissions.rules` from Solaar to
+[`rules.d/42-logitech-unify-permissions.rules`](/rules.d/42-logitech-unify-permissions.rules) from Solaar repo to
 `/etc/udev/rules.d`.
 You will probably also have to tell udev to reload its rule via
 `sudo udevadm control --reload-rules`.
@@ -139,7 +139,7 @@ because this runs arbitrary code as root and because this can override existing 
 that other users or even the system depend on. If you want to install Solaar to /usr/local run
 `sudo bash -c 'umask 022 ; pip install .'` in the solaar directory.
 (The umask is needed so that the created files and directories can be read and executed by everyone.)
-Then Solaar can be run as /usr/local/bin/solaar.
+Then Solaar can be run as `/usr/local/bin/solaar`.
 You will also have to install the udev rule.
 
 [pip]: https://en.wikipedia.org/wiki/Pip_(package_manager)
@@ -160,13 +160,13 @@ but they may not show up in the system tray.
 
 One solution is to install a version of Solaar on a system-wide basis.
 A more-recent version of Solaar can then be installed for a user or Solaar can be run out of the download directory.
-Another solution is to copy the Solaar custom icons from share/solaar/icons to a place they can be found by GTK,
-likely /usr/share/icons/hicolor/scalable/apps.
+Another solution is to copy the Solaar custom icons from `share/solaar/icons` to a place they can be found by GTK,
+likely `/usr/share/icons/hicolor/scalable/apps`.
 
 # Running Solaar at Startup
 
 Distributions can cause Solaar can be run automatically at user login by installing a desktop file at
 `/etc/xdg/autostart/solaar.desktop`. An example of this file content can be seen in the repository at
-[share/autostart/solaar.desktop](https://github.com/pwr-Solaar/Solaar/blob/master/share/autostart/solaar.desktop).
+[`share/autostart/solaar.desktop`](/share/autostart/solaar.desktop).
 
 If you install Solaar yourself you may need to create or modify this file or install a startup file under your home directory.
