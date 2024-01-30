@@ -321,6 +321,7 @@ _D('Wireless Trackball M570', codename='M570')
 
 _D('Wireless Touchpad', codename='Wireless Touch', protocol=2.0, wpid='4011')
 _D('Wireless Rechargeable Touchpad T650', codename='T650', protocol=2.0, wpid='4101')
+_D('G Powerplay', codename='Powerplay', protocol=2.0, kind=_DK.touchpad, wpid='405F')  # To override self-identification
 
 # Headset
 
