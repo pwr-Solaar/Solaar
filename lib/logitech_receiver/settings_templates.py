@@ -215,7 +215,7 @@ class Backlight(_Setting):
 
 # MX Keys S requires some extra values, as in 11 02 0c1a 000dff000b000b003c00000000000000
 # on/off options (from current) effect (FF-no change) level (from current) durations[6] (from current)
-class Backlight2(_Setting):
+class Backlight2X(_Setting):
     name = 'backlight'
     label = _('Backlight')
     description = _('Turn illumination on or off on keyboard.')
@@ -229,6 +229,139 @@ class Backlight2(_Setting):
                 reply = device.feature_request(_F.BACKLIGHT2, 0x00)
                 self.trail = reply[1:2] + b'\xff' + reply[5:12]
             return super().write(device, data_bytes + self.trail)
+
+
+# MX Keys S requires some extra values, as in 11 02 0c1a 000dff000b000b003c00000000000000
+# on/off options (from current) effect (FF-no change) level (from current) durations[6] (from current)
+class Backlight2(_Setting):
+    name = 'backlight'
+    label = _('Backlight')
+    description = _('Control illumination on keyboard.')
+    feature = _F.BACKLIGHT2
+    min_version = 0
+
+    class rw_class:
+
+        def __init__(self, feature):
+            self.feature = feature
+            self.kind = _FeatureRW.kind
+
+        def read(self, device):
+            backlight = device.backlight
+            if not backlight.enabled:
+                return 0xFF
+            else:
+                return backlight.mode
+
+        def write(self, device, data_bytes):
+            backlight = device.backlight
+            backlight.enabled = data_bytes[0] != 0xFF
+            if data_bytes[0] != 0xFF:
+                self.mode = data_bytes[0]
+            backlight.write()
+            return True
+
+    class validator_class(_ChoicesV):
+
+        @classmethod
+        def build(cls, setting_class, device):
+            backlight = device.backlight
+            choices = _NamedInts(Disabled=0xFF)
+            if backlight.auto_supported:
+                choices[0x1] = 'Auto'
+            if backlight.temp_supported:
+                choices[0x2] = 'Manual'
+            if backlight.perm_supported:
+                choices[0x3] = 'Software'
+            if not (backlight.auto_supported or backlight.temp_supported or backlight.perm_supported):
+                choices[0x0] = 'Enabled'
+            return cls(choices=choices, byte_count=1)
+
+
+class Backlight2Level(_Setting):
+    name = 'backlight_level'
+    label = _('Backlight Level')
+    description = _('Illumination level on keyboard in Software mode.')
+    feature = _F.BACKLIGHT2
+    min_version = 3
+
+    class rw_class:
+
+        def __init__(self, feature):
+            self.feature = feature
+            self.kind = _FeatureRW.kind
+
+        def read(self, device):
+            backlight = device.backlight
+            print('READ LEVEL', backlight.level)
+            return _int2bytes(backlight.level, 1)
+
+        def write(self, device, data_bytes):
+            print('WRITE LEVEL', data_bytes)
+            device.backlight.level = _bytes2int(data_bytes)
+            device.backlight.write()
+            return True
+
+    class validator_class(_RangeV):
+
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(_F.BACKLIGHT2, 0x20)
+            assert reply, 'Oops, backlight range cannot be retrieved!'
+            return cls(min_value=0, max_value=reply[0], byte_count=1)
+
+
+class Backlight2Duration(_Setting):
+    feature = _F.BACKLIGHT2
+    min_version = 3
+    validator_class = _RangeV
+    min_value = 0  # 1 # 5 seconds
+    max_value = 120  # actual maximum is 0x5A0 or 2 hours
+    validator_options = {'byte_count': 2}
+
+    class rw_class:
+
+        def __init__(self, feature, field):
+            self.feature = feature
+            self.kind = _FeatureRW.kind
+            self.field = field
+
+        def read(self, device):
+            backlight = device.backlight
+            return _int2bytes(getattr(backlight, self.field), 2) * 5  # use seconds instead of 5-second units
+
+        def write(self, device, data_bytes):
+            backlight = device.backlight
+            setattr(backlight, self.field, (int.from_bytes(data_bytes) + 4) // 5)  # use ceiling in 5-second units
+            backlight.write()
+            return True
+
+
+class Backlight2DurationHandsOut(Backlight2Duration):
+    name = 'backlight_duration_hands_out'
+    label = _('Backlight Delay Hands Out')
+    description = _('Delay in seconds until backlight fades out with hands away from keyboard.')
+    feature = _F.BACKLIGHT2
+    validator_class = _RangeV
+    rw_options = {'field': 'dho'}
+
+
+class Backlight2DurationHandsIn(Backlight2Duration):
+    name = 'backlight_duration_hands_in'
+    label = _('Backlight Delay Hands In')
+    description = _('Delay in seconds until backlight fades out with hands near keyboard.')
+    feature = _F.BACKLIGHT2
+    validator_class = _RangeV
+    rw_options = {'field': 'dhi'}
+
+
+class Backlight2DurationPowered(Backlight2Duration):
+    name = 'backlight_duration_powered'
+    label = _('Backlight Delay Powered')
+    description = _('Delay in seconds until backlight fades out with external power.')
+    feature = _F.BACKLIGHT2
+    validator_class = _RangeV
+    rw_options = {'field': 'dpow'}
 
 
 class Backlight3(_Setting):
@@ -1238,6 +1371,10 @@ SETTINGS = [
     SpeedChange,
     #    Backlight,  # not working - disabled temporarily
     Backlight2,  # working
+    Backlight2Level,
+    Backlight2DurationHandsOut,
+    Backlight2DurationHandsIn,
+    Backlight2DurationPowered,
     Backlight3,
     FnSwap,  # simple
     NewFnSwap,  # simple
@@ -1269,6 +1406,8 @@ SETTINGS = [
 
 def check_feature(device, sclass):
     if sclass.feature not in device.features:
+        return
+    if sclass.min_version > device.features.get_feature_version(sclass.feature):
         return
     try:
         detected = sclass.build(device)

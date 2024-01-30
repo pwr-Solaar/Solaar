@@ -1117,6 +1117,28 @@ class Gestures:
         return g.set(self.device, value) if g else None
 
 
+class Backlight:
+    """Information about the current settings of x1982 Backlight2 v3, but also works for previous versions"""
+
+    def __init__(self, device):
+        response = device.feature_request(FEATURE.BACKLIGHT2, 0x00)
+        if not response:
+            raise FeatureCallError(msg='No reply from device.')
+        self.device = device
+        self.enabled, self.options, supported, self.effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
+            '<BBBHBHHH', response[:12]
+        )
+        self.auto_supported = supported & 0x08
+        self.temp_supported = supported & 0x10
+        self.perm_supported = supported & 0x20
+        self.mode = (self.options >> 3) & 0x03
+
+    def write(self):
+        self.options = (self.options & 0x03) | (self.mode << 3)
+        data_bytes = _pack('<BBBBHHH', self.enabled, self.options, self.effects, self.level, self.dho, self.dhi, self.dpow)
+        self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
+
+
 #
 #
 #
@@ -1400,6 +1422,13 @@ def get_gestures(device):
         return device._gestures
     if FEATURE.GESTURE_2 in device.features:
         return Gestures(device)
+
+
+def get_backlight(device):
+    if getattr(device, '_backlight', None) is not None:
+        return device._backlight
+    if FEATURE.BACKLIGHT2 in device.features:
+        return Backlight(device)
 
 
 def get_mouse_pointer_info(device):

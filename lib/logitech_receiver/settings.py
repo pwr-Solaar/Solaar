@@ -207,6 +207,7 @@ class Setting:
     """A setting descriptor. Needs to be instantiated for each specific device."""
     name = label = description = ''
     feature = register = kind = None
+    min_version = 0
     persist = True
     rw_options = {}
     validator_class = BooleanValidator
