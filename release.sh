@@ -119,8 +119,8 @@ echo 'Creating tag...'
     echo
     found=no
     while read -r line; do
-        if [[ "$line" == *: ]]; then
-            [ "$line" == "$version:" ] && found=yes || found=no
+        if [[ "$line" == "# "* ]]; then
+            [ "$line" == "# $version" ] && found=yes || found=no
         fi
         [ "$found" == 'yes' ] && [ "${line:0:1}" == '*' ] && echo "$line"
     done < ChangeLog.md
