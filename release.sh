@@ -43,6 +43,8 @@ prerelease=false
 echo $version | grep '.*rc.*' >/dev/null
 [ $? -eq 0 ] && prerelease=true
 
+stable_branch=stable
+
 ref=$(git symbolic-ref HEAD)
 [ $? -ne 0 ] && echo 'Error: Failed current branch' && exit 1
 branch=${ref##*/}
@@ -132,6 +134,20 @@ echo 'Creating tag...'
 echo 'Pushing tag...'
 [ -z "$DRY_RUN" ] && git push $remote $version >/dev/null || true
 [ $? -ne 0 ] && echo -e '\nError: Failed to push tag' && exit 1
+
+# Point stable branch to latest version tag
+echo 'Updating stable branch...'
+if [ -z "$DRY_RUN" ]
+then
+    # Check if stable branch does not exist
+    git rev-list --max-count=1 $stable_branch >/dev/null 2>/dev/null
+    [ $? -ne 0 ] && echo -e '\nWarning: Creating stable branch for a first time' && git branch $stable_branch
+    # Fast forward and push stable branch
+    git checkout $stable_branch
+    git merge --ff $version
+    git push $remote $stable_branch >/dev/null || true
+    git checkout $branch
+fi
 
 # Create github release
 body() {
