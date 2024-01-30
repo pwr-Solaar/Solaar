@@ -738,7 +738,7 @@ class ReprogrammableKeys(_Settings):
 
 class DpiSlidingXY(_RawXYProcessing):
     def activate_action(self):
-        self.dpiSetting = next(filter(lambda s: s.name == "dpi", self.device.settings), None)
+        self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
         self.dpiChoices = list(self.dpiSetting.choices)
         self.otherDpiIdx = self.device.persister.get("_dpi-sliding", -1) if self.device.persister else -1
         if not isinstance(self.otherDpiIdx, int) or self.otherDpiIdx < 0 or self.otherDpiIdx >= len(self.dpiChoices):
@@ -801,7 +801,7 @@ class DpiSlidingXY(_RawXYProcessing):
 
 class MouseGesturesXY(_RawXYProcessing):
     def activate_action(self):
-        self.dpiSetting = next(filter(lambda s: s.name == "dpi", self.device.settings), None)
+        self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
         self.fsmState = "idle"
         self.initialize_data()
 
@@ -936,35 +936,66 @@ class AdjustableDpi(_Setting):
     """Pointer Speed feature"""
 
     # Assume sensorIdx 0 (there is only one sensor)
-    # [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
-    # [3] setSensorDpi(sensorIdx, dpi)
     name = "dpi"
     label = _("Sensitivity (DPI)")
     description = _("Mouse movement sensitivity")
     feature = _F.ADJUSTABLE_DPI
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
-    choices_universe = _NamedInts.range(200, 4000, str, 50)
+    choices_universe = _NamedInts.range(100, 4000, str, 50)
+    sensor_list_function = 0x10
+    sensor_list_bytes_ignore = 1
 
     class validator_class(_ChoicesV):
-        @classmethod
-        def build(cls, setting_class, device):
-            # [1] getSensorDpiList(sensorIdx)
-            reply = device.feature_request(_F.ADJUSTABLE_DPI, 0x10)
+        @staticmethod
+        def produce_dpi_list(setting_class, device, direction):
+            reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, direction, 0x00)
             assert reply, "Oops, DPI list cannot be retrieved!"
+            dpi_bytes = reply[setting_class.sensor_list_bytes_ignore :]
+            i = 1
+            while dpi_bytes[-2:] != b"\x00\x00":
+                reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, direction, i)
+                assert reply, "Oops, DPI list cannot be retrieved!"
+                dpi_bytes += reply[setting_class.sensor_list_bytes_ignore :]
+                i += 1
             dpi_list = []
-            step = None
-            for val in _unpack("!7H", reply[1 : 1 + 14]):
+            i = 0
+            while i < len(dpi_bytes):
+                val = _bytes2int(dpi_bytes[i : i + 2])
                 if val == 0:
                     break
                 if val >> 13 == 0b111:
-                    assert step is None and len(dpi_list) == 1, f"Invalid DPI list item: {val!r}"
                     step = val & 0x1FFF
+                    last = _bytes2int(dpi_bytes[i + 2 : i + 4])
+                    assert len(dpi_list) > 0 and last > dpi_list[-1], f"Invalid DPI list item: {val!r}"
+                    dpi_list += range(dpi_list[-1] + step, last + 1, step)
+                    i += 4
                 else:
                     dpi_list.append(val)
-            if step:
-                assert len(dpi_list) == 2, f"Invalid DPI list range: {dpi_list!r}"
-                dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
-            return cls(choices=_NamedInts.list(dpi_list), byte_count=3) if dpi_list else None
+                    i += 2
+            return dpi_list
+
+        @classmethod
+        def build(cls, setting_class, device):
+            y = False
+            if setting_class.feature == _F.EXTENDED_ADJUSTABLE_DPI:
+                reply = device.feature_request(setting_class.feature, 0x10, 0x00)
+                y = reply[2] & 0x01
+            reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, 0x00, 0x00)
+            assert reply, "Oops, DPI list cannot be retrieved!"
+            dpilist_x = cls.produce_dpi_list(setting_class, device, 0)
+            dpilist_y = cls.produce_dpi_list(setting_class, device, 1) if y else []
+            print("DPY LIST X", dpilist_x)
+            print("DPY LIST Y", dpilist_y)
+            setting = cls(choices=_NamedInts.list(dpilist_x), byte_count=2, write_prefix_bytes=b"\x00") if dpilist_x else None
+            setting.y = y
+            return setting
+
+        def prepare_write(self, new_value, current_value=None):
+            data_bytes = super().prepare_write(new_value, current_value)
+            if self.y:
+                bytes = data_bytes[len(self._write_prefix_bytes) :]
+                data_bytes = self._write_prefix_bytes + bytes + bytes
+            return data_bytes
 
         def validate_read(self, reply_bytes):  # special validator to use default DPI if needed
             reply_value = _bytes2int(reply_bytes[1:3])
@@ -973,6 +1004,16 @@ class AdjustableDpi(_Setting):
             valid_value = self.choices[reply_value]
             assert valid_value is not None, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
             return valid_value
+
+
+class ExtendedAdjustableDpi(AdjustableDpi):
+    # the extended version allows for two dimensions, longer dpi descriptions
+    # still assume only one sensor (and X only?)
+    name = "dpi_extended"
+    feature = _F.EXTENDED_ADJUSTABLE_DPI
+    rw_options = {"read_fnid": 0x50, "write_fnid": 0x60}
+    sensor_list_function = 0x20
+    sensor_list_bytes_ignore = 3
 
 
 class SpeedChange(_Setting):
@@ -1632,6 +1673,7 @@ SETTINGS = [
     ExtendedReportRate,
     PointerSpeed,  # simple
     AdjustableDpi,  # working
+    ExtendedAdjustableDpi,
     SpeedChange,
     #    Backlight,  # not working - disabled temporarily
     Backlight2,  # working
