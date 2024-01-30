@@ -327,8 +327,10 @@ class OnboardProfiles(_Setting):
 
 class ReportRate(_Setting):
     name = 'report_rate'
-    label = _('Polling Rate')
-    description = (_('Frequency of device polling') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
+    label = _('Report Rate')
+    description = (
+        _('Frequency of device movement reports') + '\n' + _('May need Onboard Profiles set to Disable to be effective.')
+    )
     feature = _F.REPORT_RATE
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     choices_universe = _NamedInts()
@@ -367,8 +369,10 @@ class ReportRate(_Setting):
 
 class ExtendedReportRate(_Setting):
     name = 'report_rate_extended'
-    label = _('Polling Frequency')
-    description = (_('Frequency of device polling') + '\n' + _('May need Onboard Profiles set to Disable to be effective.'))
+    label = _('Report Rate')
+    description = (
+        _('Frequency of device movement reports') + '\n' + _('May need Onboard Profiles set to Disable to be effective.')
+    )
     feature = _F.EXTENDED_ADJUSTABLE_REPORT_RATE
     rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30}
     choices_universe = _NamedInts()
