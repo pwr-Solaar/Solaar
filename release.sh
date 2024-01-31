@@ -137,7 +137,7 @@ echo 'Pushing tag...'
 
 # Point stable branch to latest version tag
 echo 'Updating stable branch...'
-if [ -z "$DRY_RUN" ]
+if [[ -z "$DRY_RUN" && $prerelease == "false" ]]
 then
     # Check if stable branch does not exist
     git rev-list --max-count=1 $stable_branch >/dev/null 2>/dev/null
