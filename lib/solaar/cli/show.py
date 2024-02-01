@@ -89,7 +89,10 @@ def _print_device(dev, num=None):
         print('  %s: Device not found' % num or dev.number)
         return
 
-    print('  %d: %s' % (num or dev.number, dev.name))
+    if num or dev.number < 8:
+        print('  %d: %s' % (num or dev.number, dev.name))
+    else:
+        print('%s' % dev.name)
     print('     Device path  :', dev.path)
     if dev.wpid:
         print('     WPID         : %s' % dev.wpid)
@@ -290,7 +293,6 @@ def run(devices, args, find_receiver, find_device):
     device_name = args.device.lower()
 
     if device_name == 'all':
-        dev_num = 1
         for d in devices:
             if isinstance(d, _receiver.Receiver):
                 _print_receiver(d)
@@ -298,17 +300,14 @@ def run(devices, args, find_receiver, find_device):
                 if count:
                     for dev in d:
                         print('')
-                        _print_device(dev)
+                        _print_device(dev, dev.number)
                         count -= 1
                         if not count:
                             break
                 print('')
             else:
-                if dev_num == 1:
-                    print('USB and Bluetooth Devices')
                 print('')
-                _print_device(d, num=dev_num)
-                dev_num += 1
+                _print_device(d)
         return
 
     dev = find_receiver(devices, device_name)
