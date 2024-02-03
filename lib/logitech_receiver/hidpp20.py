@@ -29,6 +29,8 @@ from struct import pack as _pack
 from struct import unpack as _unpack
 from typing import List
 
+import yaml as _yaml
+
 from . import special_keys
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
@@ -37,6 +39,7 @@ from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
+from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
 
 _log = getLogger(__name__)
@@ -1141,6 +1144,286 @@ class Backlight:
         self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
+ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
+ButtonMappingTypes = _NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
+ButtonFunctions = _NamedInts(
+    No_Action=0x0,
+    Tilt_Left=0x1,
+    Tilt_Right=0x2,
+    Next_DPI=0x3,
+    Previous_DPI=0x4,
+    Cycle_DPI=0x5,
+    Default_DPI=0x6,
+    Shift_DPI=0x7,
+    Next_Profile=0x8,
+    Previous_Profile=0x9,
+    Cycle_Profile=0xA,
+    G_Shift=0xB,
+    Battery_Status=0xC
+)
+ButtonButtons = special_keys.MOUSE_BUTTONS
+ButtonModifiers = special_keys.modifiers
+ButtonKeys = special_keys.USB_HID_KEYCODES
+ButtonConsumerKeys = special_keys.HID_CONSUMERCODES
+
+
+class Button:
+    """A button mapping"""
+
+    def __init__(self, **kwargs):
+        self.behavior = None
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        args = loader.construct_mapping(node)
+        return cls(**args)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping('!Button', data.__dict__, flow_style=True)
+
+    @classmethod
+    def from_bytes(cls, bytes):
+        behavior = ButtonBehaviors[bytes[0] >> 4]
+        if behavior == ButtonBehaviors.MacroExecute or behavior == ButtonBehaviors.MacroStop:
+            sector = (bytes[0] & 0x0F) << 8 + bytes[1]
+            address = bytes[2] << 8 + bytes[3]
+            result = cls(behavior=behavior, sector=sector, address=address)
+        elif behavior == ButtonBehaviors.Send:
+            mapping_type = ButtonMappingTypes[bytes[1]]
+            if mapping_type == ButtonMappingTypes.Button:
+                value = ButtonButtons[(bytes[2] << 8) + bytes[3]]
+                result = cls(behavior=behavior, type=mapping_type, value=value)
+            elif mapping_type == ButtonMappingTypes.Modifier_And_Key:
+                modifiers = ButtonModifiers[bytes[2]]
+                value = ButtonKeys[bytes[3]]
+                result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
+            elif mapping_type == ButtonMappingTypes.Consumer_Key:
+                value = ButtonConsumerKeys[(bytes[2] << 8) + bytes[3]]
+                result = cls(behavior=behavior, type=mapping_type, value=value)
+        elif behavior == ButtonBehaviors.Function:
+            value = ButtonFunctions[bytes[1]]
+            result = cls(behavior=behavior, value=value)
+        else:
+            result = cls(behavior=None)
+        return result
+
+    def to_bytes(self):
+        bytes = _int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
+        if self.behavior == ButtonBehaviors.MacroExecute or self.behavior == ButtonBehaviors.MacroStop:
+            bytes = _int2bytes(self.sector, 2) + _int2bytes(self.address, 2)
+            bytes[0] += self.behavior << 4
+        elif self.behavior == ButtonBehaviors.Send:
+            bytes += _int2bytes(self.type, 1)
+            if self.type == ButtonMappingTypes.Button:
+                bytes += _int2bytes(self.value, 2)
+            elif self.type == ButtonMappingTypes.Modifier_And_Key:
+                bytes += _int2bytes(self.modifiers, 1)
+                bytes += _int2bytes(self.value, 1)
+            elif self.type == ButtonMappingTypes.Consumer_Key:
+                bytes += _int2bytes(self.value, 2)
+        elif self.behavior == ButtonBehaviors.Function:
+            bytes += _int2bytes(self.value, 1) + b'\xff\x00'
+        else:
+            bytes = b'\xff\xff\xff\xff'
+        return bytes
+
+    def __repr__(self):
+        return '%s{%s}' % (
+            self.__class__.__name__, ', '.join([str(key) + ':' + str(val) for key, val in self.__dict__.items()])
+        )
+
+
+_yaml.SafeLoader.add_constructor('!Button', Button.from_yaml)
+_yaml.add_representer(Button, Button.to_yaml)
+
+
+# Doesn't handle light information (feature x8070)
+class OnboardProfile:
+    """A single onboard profile"""
+
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        args = loader.construct_mapping(node)
+        return cls(**args)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping('!OnboardProfile', data.__dict__)
+
+    @classmethod
+    def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes):
+        return cls(
+            sector=sector,
+            enabled=enabled,
+            report_rate=bytes[0],
+            resolution_default_index=bytes[1],
+            resolution_shift_index=bytes[2],
+            resolutions=[_unpack('<H', bytes[i * 2 + 3:i * 2 + 5])[0] for i in range(0, 5)],
+            red=bytes[13],
+            green=bytes[14],
+            blue=bytes[15],
+            power_mode=bytes[16],
+            angle_snap=bytes[17],
+            buttons=[Button.from_bytes(bytes[32 + i * 4:32 + i * 4 + 4]) for i in range(0, buttons)],
+            gbuttons=[Button.from_bytes(bytes[96 + i * 4:96 + i * 4 + 4]) for i in range(0, gbuttons)],
+            name=bytes[160:208].decode('utf-16-be').rstrip('\x00').rstrip('\uFFFF'),
+            lighting=bytes[208:len(bytes) - 2]
+        )
+
+    @classmethod
+    def from_dev(cls, dev, i, sector, s, enabled, buttons, gbuttons):
+        bytes = OnboardProfiles.read_sector(dev, sector, s)
+        return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes)
+
+    def to_bytes(self, length):
+        bytes = _int2bytes(self.report_rate, 1)
+        bytes += _int2bytes(self.resolution_default_index, 1) + _int2bytes(self.resolution_shift_index, 1)
+        bytes += b''.join([self.resolutions[i].to_bytes(2, 'little') for i in range(0, 5)])
+        bytes += _int2bytes(self.red, 1) + _int2bytes(self.green, 1) + _int2bytes(self.blue, 1)
+        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1) + b'\xff' * 14
+        for i in range(0, 16):
+            bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b'\xff\xff\xff\xff'
+        for i in range(0, 16):
+            bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b'\xff\xff\xff\xff'
+        if self.enabled:
+            bytes += self.name[0:24].ljust(24, '\x00').encode('utf-16be')
+        else:
+            bytes += b'\xff' * 48
+        bytes += self.lighting if getattr(self, 'lighting', None) else b''
+        while len(bytes) < length - 2:
+            bytes += b'\xff'
+        bytes += _int2bytes(_crc16(bytes), 2)
+        return bytes
+
+    def dump(self):
+        print(f'     Onboard Profile: {self.name}')
+        print(f'       Report Rate {self.report_rate} ms')
+        print(f'       DPI Resolutions {self.resolutions}')
+        print(f'       Default Resolution Index {self.res_index}, Shift Resolution Index {self.res_shift_index}')
+        print(f'       Colors {self.red} {self.green} {self.blue}')
+        print(f'       Power {self.power_mode}, Angle Snapping {self.angle_snap}')
+        for i in range(0, len(self.buttons)):
+            if self.buttons[i].behavior is not None:
+                print('       BUTTON', i + 1, self.buttons[i])
+        for i in range(0, len(self.gbuttons)):
+            if self.gbuttons[i].behavior is not None:
+                print('       G-BUTTON', i + 1, self.gbuttons[i])
+
+
+_yaml.SafeLoader.add_constructor('!OnboardProfile', OnboardProfile.from_yaml)
+_yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
+
+
+# Doesn't handle macros or lighting
+class OnboardProfiles:
+    """The entire onboard profiles information"""
+
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        args = loader.construct_mapping(node)
+        return cls(**args)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping('!OnboardProfiles', data.__dict__)
+
+    @classmethod
+    def get_profile_headers(cls, device):
+        i = 0
+        headers = []
+        chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
+        while chunk[0:2] != b'\xff\xff':
+            sector, enabled = _unpack('!HB', chunk[0:3])
+            headers.append((sector, enabled))
+            i += 1
+            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i * 4)
+        return headers
+
+    @classmethod
+    def from_device(cls, device):
+        response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
+        memory, profile, macro = _unpack('!BBB', response[0:3])
+        if memory != 0x01 or profile > 0x03 or macro != 0x01:
+            return
+        count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
+        gbuttons = buttons if (shift & 0x3 == 0x2) else 0
+        i = 0
+        profiles = {}
+        chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
+        while chunk[0:2] != b'\xff\xff':
+            sector, enabled = _unpack('!HB', chunk[0:3])
+            profiles[i + 1] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
+            i += 1
+            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i * 4)
+        return cls(count=count, buttons=buttons, gbuttons=gbuttons, sectors=sectors, size=size, profiles=profiles)
+
+    def to_bytes(self):
+        bytes = b''
+        for i in range(1, len(self.profiles) + 1):
+            bytes += _int2bytes(self.profiles[i].sector, 2) + _int2bytes(self.profiles[i].enabled, 1) + b'\x00'
+        bytes += b'\xff\xff\x00\x00'  # marker after last profile
+        while len(bytes) < self.size - 2:  # leave room for CRC
+            bytes += b'\xff'
+        bytes += _int2bytes(_crc16(bytes), 2)
+        return bytes
+
+    @classmethod
+    def read_sector(cls, dev, sector, s):  # doesn't check for valid sector or length
+        bytes = b''
+        o = 0
+        while o < s - 15:
+            chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, o >> 8, o & 0xFF)
+            bytes += chunk
+            o += 16
+        chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, (s - 16) >> 8, (s - 16) & 0xFF)
+        bytes += chunk[16 + o - s:]  # the last chunk has to be read in an awkward way
+        return bytes
+
+    @classmethod
+    def write_sector(cls, device, s, bs):  # doesn't check for valid sector or length
+        rbs = OnboardProfiles.read_sector(device, s, len(bs))
+        if rbs[:-2] == bs[:-2]:
+            return False
+        device.feature_request(FEATURE.ONBOARD_PROFILES, 0x60, s >> 8, s & 0xFF, 0, 0, len(bs) >> 8, len(bs) & 0xFF)
+        o = 0
+        while o < len(bs) - 1:
+            device.feature_request(FEATURE.ONBOARD_PROFILES, 0x70, bs[o:o + 16])
+            o += 16
+        device.feature_request(FEATURE.ONBOARD_PROFILES, 0x80)
+        return True
+
+    def write(self, device):  # doesn't check for valid sectors or length
+        try:
+            written = 1 if OnboardProfiles.write_sector(device, 0, self.to_bytes()) else 0
+        except Exception as e:
+            _log.warn('Exception writing onboard profile control sector')
+            raise e
+        for p in self.profiles.values():
+            try:
+                written += 1 if OnboardProfiles.write_sector(device, p.sector, p.to_bytes(self.size)) else 0
+            except Exception as e:
+                _log.warn(f'Exception writing onboard profile sector {p.sector}')
+                raise e
+        return written
+
+    def show(self):
+        print(_yaml.dump(self))
+
+
+_yaml.SafeLoader.add_constructor('!OnboardProfiles', OnboardProfiles.from_yaml)
+_yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
+
 #
 #
 #
@@ -1431,6 +1714,13 @@ def get_backlight(device):
         return device._backlight
     if FEATURE.BACKLIGHT2 in device.features:
         return Backlight(device)
+
+
+def get_profiles(device):
+    if getattr(device, '_profiles', None) is not None:
+        return device._profiles
+    if FEATURE.ONBOARD_PROFILES in device.features:
+        return OnboardProfiles.from_device(device)
 
 
 def get_mouse_pointer_info(device):

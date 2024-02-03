@@ -79,9 +79,7 @@ class Device:
         self._remap_keys = None
         self._gestures = None
         self._gestures_lock = _threading.Lock()
-        self._backlight = None
-        self._registers = None
-        self._settings = None
+        self._profiles = self._backlight = self._registers = self._settings = None
         self._feature_settings_checked = False
         self._settings_lock = _threading.Lock()
         self._polling_rate = None
@@ -322,6 +320,13 @@ class Device:
             if self.online and self.protocol >= 2.0:
                 self._backlight = _hidpp20.get_backlight(self)
         return self._backlight
+
+    @property
+    def profiles(self):
+        if self._profiles is None:
+            if self.online and self.protocol >= 2.0:
+                self._profiles = _hidpp20.get_profiles(self)
+        return self._profiles
 
     @property
     def registers(self):

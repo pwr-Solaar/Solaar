@@ -56,6 +56,15 @@ def _create_parser():
     )
     sp.set_defaults(action='probe')
 
+    sp = subparsers.add_parser('profiles', help='read or write onboard profiles', epilog='Only works on active devices.')
+    sp.add_argument(
+        'device',
+        help='device to read or write profiles of; may be a device number (1..6), a serial number, '
+        'a substring of a device\'s name'
+    )
+    sp.add_argument('profiles', nargs='?', help='file containing YAML dump of profiles')
+    sp.set_defaults(action='profiles')
+
     sp = subparsers.add_parser(
         'config',
         help='read/write device-specific settings',
@@ -198,7 +207,7 @@ def run(cli_args=None, hidraw_path=None):
     assert action in actions
 
     try:
-        if action == 'show' or action == 'probe' or action == 'config':
+        if action == 'show' or action == 'probe' or action == 'config' or action == 'profiles':
             c = list(_receivers_and_devices(hidraw_path))
         else:
             c = list(_receivers(hidraw_path))
