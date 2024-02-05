@@ -410,6 +410,14 @@ def _process_feature_notification(device, status, n, feature):
         else:
             _log.warn('%s: unknown REPROG_CONTROLS %s', device, n)
 
+    elif feature == _F.BACKLIGHT2:
+        if (n.address == 0x00):
+            level = _unpack('!B', n.data[1:2])[0]
+            from solaar.ui.config_panel import record_setting  # prevent circular import
+            setting = next((s for s in device.settings if s.name == _st.Backlight2Level.name), None)
+            if setting:
+                record_setting(device, setting, [level])
+
     elif feature == _F.REPROG_CONTROLS_V4:
         if n.address == 0x00:
             if _log.isEnabledFor(_DEBUG):
