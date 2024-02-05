@@ -42,7 +42,7 @@ def run(receivers, args, find_receiver, find_device):
     if not (dev.online and dev.profiles):
         print(f'Device {dev.name} is either offline or has no onboard profiles')
     elif not profiles_file:
-        print(f'Dumping profiles from {dev.name}')
+        print(f'#Dumping profiles from {dev.name}')
         print(_yaml.dump(dev.profiles))
     else:
         try:
