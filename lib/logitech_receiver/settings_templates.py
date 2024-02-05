@@ -466,11 +466,13 @@ class OnboardProfiles(_Setting):
                 return b'\x00\x00'
 
         def write(self, device, data_bytes):
+            from . import notifications as _notifications  # prevent circular import
             if data_bytes == b'\x00\x00':
                 result = device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x02')
             else:
                 device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x01')
                 result = device.feature_request(_F.ONBOARD_PROFILES, 0x30, data_bytes)
+                _notifications.profile_change(device, _bytes2int(data_bytes))
             return result
 
     class validator_class(_ChoicesV):
