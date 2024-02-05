@@ -444,12 +444,46 @@ class ThumbInvert(_Setting):
 class OnboardProfiles(_Setting):
     name = 'onboard_profiles'
     label = _('Onboard Profiles')
-    description = _('Enable onboard profiles, which often control report rate and keyboard lighting')
+    description = _('Enable an onboard profile, which controls report rate, sensitivity, and button actions')
     feature = _F.ONBOARD_PROFILES
-    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x10}
-    choices_universe = _NamedInts(Enable=1, Disable=2)
+    choices_universe = _NamedInts(Disabled=0)
+    for i in range(1, 6):
+        choices_universe[i] = f'Profile {i}'
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+
+    class rw_class:
+
+        def __init__(self, feature):
+            self.feature = feature
+            self.kind = _FeatureRW.kind
+
+        def read(self, device):
+            enabled = device.feature_request(_F.ONBOARD_PROFILES, 0x20)[0]
+            if enabled:
+                active = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40))[0]
+                return active[:2]
+            else:
+                return b'\x00\x00'
+
+        def write(self, device, data_bytes):
+            if data_bytes == b'\x00\x00':
+                result = device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x02')
+            else:
+                device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x01')
+                result = device.feature_request(_F.ONBOARD_PROFILES, 0x30, data_bytes)
+            return result
+
+    class validator_class(_ChoicesV):
+
+        @classmethod
+        def build(cls, setting_class, device):
+            headers = _hidpp20.OnboardProfiles.get_profile_headers(device)
+            profiles_list = [setting_class.choices_universe[0]]
+            if headers:
+                for (sector, enabled) in headers:
+                    if enabled:
+                        profiles_list.append(setting_class.choices_universe[sector])
+            return cls(choices=_NamedInts.list(profiles_list), byte_count=2) if len(profiles_list) > 1 else None
 
 
 class ReportRate(_Setting):
