@@ -45,6 +45,13 @@ from .common import int2bytes as _int2bytes
 _log = getLogger(__name__)
 del getLogger
 
+
+def hexint_presenter(dumper, data):
+    return dumper.represent_int(hex(data))
+
+
+_yaml.add_representer(int, hexint_presenter)
+
 #
 #
 #
@@ -1144,6 +1151,94 @@ class Backlight:
         self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
+LEDParam = _NamedInts(color=0, speed=1, period=2, intensity=3, ramp=4, form=5)
+LEDParamSize = {
+    LEDParam.color: 3,
+    LEDParam.speed: 1,
+    LEDParam.period: 2,
+    LEDParam.intensity: 1,
+    LEDParam.ramp: 1,
+    LEDParam.form: 1
+}
+LEDEffects = _NamedInts(
+    Disable=0x00,
+    Fixed=0x01,
+    Pulse=0x02,
+    Cycle=0x03,
+    #                        Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
+    Boot=0x08,
+    Demo=0x09,
+    Breathe=0x0A,
+    Ripple=0x0B
+)
+LEDEffectsParams = {
+    LEDEffects.Disable: {},
+    LEDEffects.Fixed: {
+        LEDParam.color: 0,
+        LEDParam.ramp: 3
+    },
+    LEDEffects.Pulse: {
+        LEDParam.color: 0,
+        LEDParam.speed: 3
+    },
+    LEDEffects.Cycle: {
+        LEDParam.period: 5,
+        LEDParam.intensity: 7
+    },
+    LEDEffects.Boot: {},
+    LEDEffects.Demo: {},
+    LEDEffects.Breathe: {
+        LEDParam.color: 0,
+        LEDParam.period: 3,
+        LEDParam.form: 5,
+        LEDParam.intensity: 6
+    },
+    LEDEffects.Ripple: {
+        LEDParam.color: 0,
+        LEDParam.period: 4
+    }
+}
+
+
+class LEDEffectSetting:
+
+    def __init__(self, **kwargs):
+        self.ID = None
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    @classmethod
+    def from_bytes(cls, bytes):
+        args = {'ID': LEDEffects[bytes[0]]}
+        if args['ID'] in LEDEffectsParams:
+            for p, b in LEDEffectsParams[args['ID']].items():
+                args[str(p)] = _bytes2int(bytes[1 + b:1 + b + LEDParamSize[p]])
+        else:
+            args['bytes'] = bytes
+        return cls(**args)
+
+    def to_bytes(self):
+        if self.ID is None:
+            return self.bytes if self.bytes else b'\xff' * 11
+        else:
+            bs = [0] * 10
+            for p, b in LEDEffectsParams[self.ID].items():
+                bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p)), LEDParamSize[p])
+            return _int2bytes(self.ID, 1) + bytes(bs)
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        args = loader.construct_mapping(node)
+        return cls(**args)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_mapping('!LEDEffectSetting', data.__dict__, flow_style=True)
+
+
+_yaml.SafeLoader.add_constructor('!LEDEffectSetting', LEDEffectSetting.from_yaml)
+_yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
+
 ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
 ButtonMappingTypes = _NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
 ButtonFunctions = _NamedInts(
@@ -1197,7 +1292,7 @@ class Button:
                 value = ButtonButtons[(bytes[2] << 8) + bytes[3]]
                 result = cls(behavior=behavior, type=mapping_type, value=value)
             elif mapping_type == ButtonMappingTypes.Modifier_And_Key:
-                modifiers = ButtonModifiers[bytes[2]]
+                modifiers = bytes[2]
                 value = ButtonKeys[bytes[3]]
                 result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
             elif mapping_type == ButtonMappingTypes.Consumer_Key:
@@ -1274,7 +1369,7 @@ class OnboardProfile:
             buttons=[Button.from_bytes(bytes[32 + i * 4:32 + i * 4 + 4]) for i in range(0, buttons)],
             gbuttons=[Button.from_bytes(bytes[96 + i * 4:96 + i * 4 + 4]) for i in range(0, gbuttons)],
             name=bytes[160:208].decode('utf-16-be').rstrip('\x00').rstrip('\uFFFF'),
-            lighting=bytes[208:len(bytes) - 2]
+            lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11:219 + i * 11]) for i in range(0, 4)]
         )
 
     @classmethod
@@ -1296,7 +1391,8 @@ class OnboardProfile:
             bytes += self.name[0:24].ljust(24, '\x00').encode('utf-16be')
         else:
             bytes += b'\xff' * 48
-        bytes += self.lighting if getattr(self, 'lighting', None) else b''
+        for i in range(0, 4):
+            bytes += self.lighting[i].to_bytes()
         while len(bytes) < length - 2:
             bytes += b'\xff'
         bytes += _int2bytes(_crc16(bytes), 2)
