@@ -1418,6 +1418,17 @@ class ADCPower(_Setting):
     validator_options = {'byte_count': 1}
 
 
+class LEDControl(_Setting):
+    name = 'led_control'
+    label = _('LED Control')
+    description = _('Switch control of LEDs between device and Solaar')
+    feature = _F.COLOR_LED_EFFECTS
+    rw_options = {'read_fnid': 0x70, 'write_fnid': 0x80}
+    choices_universe = _NamedInts(Device=0, Solaar=1)
+    validator_class = _ChoicesV
+    validator_options = {'choices': choices_universe}
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1447,6 +1458,7 @@ SETTINGS = [
     Backlight2DurationHandsIn,
     Backlight2DurationPowered,
     Backlight3,
+    LEDControl,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
