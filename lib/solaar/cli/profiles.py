@@ -16,6 +16,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import traceback as _traceback
+
 import yaml as _yaml
 
 from logitech_receiver.hidpp20 import OnboardProfiles as _OnboardProfiles
@@ -55,3 +57,4 @@ def run(receivers, args, find_receiver, find_device):
                     print(f'Wrote {written} sectors to {dev.name}')
         except Exception as exc:
             print('Profiles not written:', exc)
+            print(_traceback.format_exc())
