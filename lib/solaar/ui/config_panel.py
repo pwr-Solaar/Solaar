@@ -18,6 +18,7 @@
 
 import traceback
 
+from logging import DEBUG as _DEBUG
 from logging import WARNING as _WARNING
 from logging import getLogger
 from threading import Timer as _Timer
@@ -724,6 +725,8 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting, values):
+    if _log.isEnabledFor(_DEBUG):
+        _log.debug('on %s changing setting %s to %s', device, setting, values)
     if len(values) > 1:
         setting.update_key_value(values[0], values[-1])
         value = {values[0]: values[-1]}
