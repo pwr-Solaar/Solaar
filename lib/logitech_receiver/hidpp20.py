@@ -41,6 +41,7 @@ from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
+from .i18n import _
 
 _log = getLogger(__name__)
 del getLogger
@@ -1200,7 +1201,7 @@ LEDEffectsParams = {
 }
 
 
-class LEDEffectSetting:
+class LEDEffectSetting:  # an effect plus its parameters
 
     def __init__(self, **kwargs):
         self.ID = None
@@ -1223,7 +1224,7 @@ class LEDEffectSetting:
         else:
             bs = [0] * 10
             for p, b in LEDEffectsParams[self.ID].items():
-                bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p)), LEDParamSize[p])
+                bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
             return _int2bytes(self.ID, 1) + bytes(bs)
 
     @classmethod
@@ -1238,6 +1239,72 @@ class LEDEffectSetting:
 
 _yaml.SafeLoader.add_constructor('!LEDEffectSetting', LEDEffectSetting.from_yaml)
 _yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
+
+
+class LEDEffectInfo:  # an effect that a zone can do
+
+    def __init__(self, device, zindex, eindex):
+        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x20, zindex, eindex)
+        self.zindex, self.index, self.ID, self.capabilities, self.period = _unpack('!BBHHH', info[0:8])
+
+    def __str__(self):
+        return f'LEDEffectInfo({self.zindex}, {self.index}, {self.ID}, {self.capabilities: x}, {self.period})'
+
+
+LEDZoneLocations = _NamedInts()
+LEDZoneLocations[0x00] = _('Unknown Location')
+LEDZoneLocations[0x01] = _('Primary')
+LEDZoneLocations[0x02] = _('Logo')
+LEDZoneLocations[0x03] = _('Left Side')
+LEDZoneLocations[0x04] = _('Right Side')
+LEDZoneLocations[0x05] = _('Combined')
+LEDZoneLocations[0x06] = _('Primary 1')
+LEDZoneLocations[0x07] = _('Primary 2')
+LEDZoneLocations[0x08] = _('Primary 3')
+LEDZoneLocations[0x09] = _('Primary 4')
+LEDZoneLocations[0x0A] = _('Primary 5')
+LEDZoneLocations[0x0B] = _('Primary 6')
+
+
+class LEDZoneInfo:  # effects that a zone can do
+
+    def __init__(self, device, index):
+        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x10, index)
+        self.index, self.location, self.count = _unpack('!BHB', info[0:4])
+        self.location = LEDZoneLocations[self.location] if LEDZoneLocations[self.location] else self.location
+        self.effects = []
+        for i in range(0, self.count):
+            self.effects.append(LEDEffectInfo(device, index, i))
+
+    def to_command(self, setting):
+        for i in range(0, len(self.effects)):
+            e = self.effects[i]
+            if e.ID == setting.ID:
+                return _int2bytes(self.index) + _int2bytes(i) + setting.to_bytes()[1:]
+        return None
+
+    def __str__(self):
+        return f'LEDZoneInfo({self.index}, {self.location}, {[str(z) for z in self.effects]}'
+
+
+class LEDEffectsInfo:  # effects that the LEDs can do
+
+    def __init__(self, device):
+        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
+        self.device = device
+        self.count, _, capabilities = _unpack('!BHH', info[0:5])
+        self.readable = capabilities & 0x1
+        self.zones = []
+        for i in range(0, self.count):
+            self.zones.append(LEDZoneInfo(device, i))
+
+    def to_command(self, index, setting):
+        return self.zones[index].to_command(setting)
+
+    def __str__(self):
+        zones = '\n'.join([str(z) for z in self.zones])
+        return f'LEDEffectsInfo({self.device}, readable {self.readable}\n{zones})'
+
 
 ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
 ButtonMappingTypes = _NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
