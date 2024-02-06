@@ -1416,6 +1416,8 @@ class OnboardProfile:
 _yaml.SafeLoader.add_constructor('!OnboardProfile', OnboardProfile.from_yaml)
 _yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
 
+OnboardProfilesVersion = 1
+
 
 # Doesn't handle macros or lighting
 class OnboardProfiles:
@@ -1452,9 +1454,11 @@ class OnboardProfiles:
 
     @classmethod
     def from_device(cls, device):
+        if not device.online:  # wake the device up if necessary
+            device.ping()
         response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
-        memory, profile, macro = _unpack('!BBB', response[0:3])
-        if memory != 0x01 or profile > 0x03 or macro != 0x01:
+        memory, profile, _macro = _unpack('!BBB', response[0:3])
+        if memory != 0x01 or profile > 0x03:
             return
         count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
@@ -1464,7 +1468,16 @@ class OnboardProfiles:
         for sector, enabled in headers:
             profiles[i + 1] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
             i += 1
-        return cls(count=count, buttons=buttons, gbuttons=gbuttons, sectors=sectors, size=size, profiles=profiles)
+        return cls(
+            version=OnboardProfilesVersion,
+            name=device.name,
+            count=count,
+            buttons=buttons,
+            gbuttons=gbuttons,
+            sectors=sectors,
+            size=size,
+            profiles=profiles
+        )
 
     def to_bytes(self):
         bytes = b''
@@ -1477,7 +1490,7 @@ class OnboardProfiles:
         return bytes
 
     @classmethod
-    def read_sector(cls, dev, sector, s):  # doesn't check for valid sector or length
+    def read_sector(cls, dev, sector, s):  # doesn't check for valid sector or size
         bytes = b''
         o = 0
         while o < s - 15:
@@ -1489,7 +1502,7 @@ class OnboardProfiles:
         return bytes
 
     @classmethod
-    def write_sector(cls, device, s, bs):  # doesn't check for valid sector or length
+    def write_sector(cls, device, s, bs):  # doesn't check for valid sector or size
         rbs = OnboardProfiles.read_sector(device, s, len(bs))
         if rbs[:-2] == bs[:-2]:
             return False
@@ -1501,7 +1514,7 @@ class OnboardProfiles:
         device.feature_request(FEATURE.ONBOARD_PROFILES, 0x80)
         return True
 
-    def write(self, device):  # doesn't check for valid sectors or length
+    def write(self, device):
         try:
             written = 1 if OnboardProfiles.write_sector(device, 0, self.to_bytes()) else 0
         except Exception as e:
@@ -1509,6 +1522,8 @@ class OnboardProfiles:
             raise e
         for p in self.profiles.values():
             try:
+                if p.sector >= self.sectors:
+                    raise Exception(f'Sector {p.sector} not a writable sector')
                 written += 1 if OnboardProfiles.write_sector(device, p.sector, p.to_bytes(self.size)) else 0
             except Exception as e:
                 _log.warn(f'Exception writing onboard profile sector {p.sector}')
