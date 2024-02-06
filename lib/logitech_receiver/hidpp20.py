@@ -1299,10 +1299,10 @@ class Button:
                 value = ButtonConsumerKeys[(bytes[2] << 8) + bytes[3]]
                 result = cls(behavior=behavior, type=mapping_type, value=value)
         elif behavior == ButtonBehaviors.Function:
-            value = ButtonFunctions[bytes[1]]
+            value = ButtonFunctions[bytes[1]] if ButtonFunctions[bytes[1]] is not None else bytes[1]
             result = cls(behavior=behavior, value=value)
         else:
-            result = cls(behavior=None)
+            result = cls(behavior=bytes[0] >> 4, bytes=bytes)
         return result
 
     def to_bytes(self):
@@ -1322,7 +1322,7 @@ class Button:
         elif self.behavior == ButtonBehaviors.Function:
             bytes += _int2bytes(self.value, 1) + b'\xff\x00'
         else:
-            bytes = b'\xff\xff\xff\xff'
+            bytes = self.bytes if self.bytes else b'\xff\xff\xff\xff'
         return bytes
 
     def __repr__(self):
@@ -1335,7 +1335,6 @@ _yaml.SafeLoader.add_constructor('!Button', Button.from_yaml)
 _yaml.add_representer(Button, Button.to_yaml)
 
 
-# Doesn't handle light information (feature x8070)
 class OnboardProfile:
     """A single onboard profile"""
 
@@ -1366,9 +1365,10 @@ class OnboardProfile:
             blue=bytes[15],
             power_mode=bytes[16],
             angle_snap=bytes[17],
+            reserved=bytes[18:32],
             buttons=[Button.from_bytes(bytes[32 + i * 4:32 + i * 4 + 4]) for i in range(0, buttons)],
             gbuttons=[Button.from_bytes(bytes[96 + i * 4:96 + i * 4 + 4]) for i in range(0, gbuttons)],
-            name=bytes[160:208].decode('utf-16-be').rstrip('\x00').rstrip('\uFFFF'),
+            name=bytes[160:208].decode('utf-16le').rstrip('\x00').rstrip('\uFFFF'),
             lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11:219 + i * 11]) for i in range(0, 4)]
         )
 
@@ -1382,13 +1382,13 @@ class OnboardProfile:
         bytes += _int2bytes(self.resolution_default_index, 1) + _int2bytes(self.resolution_shift_index, 1)
         bytes += b''.join([self.resolutions[i].to_bytes(2, 'little') for i in range(0, 5)])
         bytes += _int2bytes(self.red, 1) + _int2bytes(self.green, 1) + _int2bytes(self.blue, 1)
-        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1) + b'\xff' * 14
+        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1) + self.reserved
         for i in range(0, 16):
             bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b'\xff\xff\xff\xff'
         for i in range(0, 16):
             bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b'\xff\xff\xff\xff'
         if self.enabled:
-            bytes += self.name[0:24].ljust(24, '\x00').encode('utf-16be')
+            bytes += self.name[0:24].ljust(24, '\x00').encode('utf-16le')
         else:
             bytes += b'\xff' * 48
         for i in range(0, 4):
@@ -1416,10 +1416,10 @@ class OnboardProfile:
 _yaml.SafeLoader.add_constructor('!OnboardProfile', OnboardProfile.from_yaml)
 _yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
 
-OnboardProfilesVersion = 1
+OnboardProfilesVersion = 2
 
 
-# Doesn't handle macros or lighting
+# Doesn't handle macros
 class OnboardProfiles:
     """The entire onboard profiles information"""
 
