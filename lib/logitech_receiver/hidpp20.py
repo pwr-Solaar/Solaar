@@ -1439,11 +1439,15 @@ class OnboardProfiles:
         i = 0
         headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
+        s = 0x00
+        if chunk[0:4] == b'\x00\x00\x00\x00':  # look in ROM instead
+            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
+            s = 0x01
         while chunk[0:2] != b'\xff\xff':
             sector, enabled = _unpack('!HB', chunk[0:3])
             headers.append((sector, enabled))
             i += 1
-            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i * 4)
+            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
         return headers
 
     @classmethod
@@ -1454,14 +1458,12 @@ class OnboardProfiles:
             return
         count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
-        i = 0
+        headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
-        chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
-        while chunk[0:2] != b'\xff\xff':
-            sector, enabled = _unpack('!HB', chunk[0:3])
+        i = 0
+        for sector, enabled in headers:
             profiles[i + 1] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
             i += 1
-            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i * 4)
         return cls(count=count, buttons=buttons, gbuttons=gbuttons, sectors=sectors, size=size, profiles=profiles)
 
     def to_bytes(self):
