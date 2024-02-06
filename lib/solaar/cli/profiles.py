@@ -21,6 +21,7 @@ import traceback as _traceback
 import yaml as _yaml
 
 from logitech_receiver.hidpp20 import OnboardProfiles as _OnboardProfiles
+from logitech_receiver.hidpp20 import OnboardProfilesVersion as _OnboardProfilesVersion
 
 
 def run(receivers, args, find_receiver, find_device):
@@ -50,7 +51,13 @@ def run(receivers, args, find_receiver, find_device):
                 print(f'Reading profiles from {profiles_file}')
                 profiles = _yaml.safe_load(f)
                 if not isinstance(profiles, _OnboardProfiles):
-                    print('Profiles file does not contain onboard profiles')
+                    print('Profiles file does not contain current onboard profiles')
+                elif getattr(profiles, 'version', None) != _OnboardProfilesVersion:
+                    version = getattr(profiles, 'version', None)
+                    print(f'Missing or incorrect profile version {version} in loaded profile')
+                elif getattr(profiles, 'name', None) != dev.name:
+                    name = getattr(profiles, 'name', None)
+                    print(f'Different device name {name} in loaded profile')
                 else:
                     print(f'Loading profiles into {dev.name}')
                     written = profiles.write(dev)
