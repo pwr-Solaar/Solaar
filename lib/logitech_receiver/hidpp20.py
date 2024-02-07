@@ -1254,7 +1254,12 @@ ButtonFunctions = _NamedInts(
     Previous_Profile=0x9,
     Cycle_Profile=0xA,
     G_Shift=0xB,
-    Battery_Status=0xC
+    Battery_Status=0xC,
+    Profile_Select=0xD,
+    Mode_Switch=0xE,
+    Host_Button=0xF,
+    Scroll_Down=0x10,
+    Scroll_Up=0x11
 )
 ButtonButtons = special_keys.MOUSE_BUTTONS
 ButtonModifiers = special_keys.modifiers
@@ -1300,7 +1305,8 @@ class Button:
                 result = cls(behavior=behavior, type=mapping_type, value=value)
         elif behavior == ButtonBehaviors.Function:
             value = ButtonFunctions[bytes[1]] if ButtonFunctions[bytes[1]] is not None else bytes[1]
-            result = cls(behavior=behavior, value=value)
+            data = bytes[3]
+            result = cls(behavior=behavior, value=value, data=data)
         else:
             result = cls(behavior=bytes[0] >> 4, bytes=bytes)
         return result
@@ -1320,7 +1326,7 @@ class Button:
             elif self.type == ButtonMappingTypes.Consumer_Key:
                 bytes += _int2bytes(self.value, 2)
         elif self.behavior == ButtonBehaviors.Function:
-            bytes += _int2bytes(self.value, 1) + b'\xff\x00'
+            bytes += _int2bytes(self.value, 1) + b'\xff' + (_int2bytes(self.data, 1) if self.data else b'\x00')
         else:
             bytes = self.bytes if self.bytes else b'\xff\xff\xff\xff'
         return bytes
@@ -1365,7 +1371,10 @@ class OnboardProfile:
             blue=bytes[15],
             power_mode=bytes[16],
             angle_snap=bytes[17],
-            reserved=bytes[18:32],
+            write_count=_unpack('<H', bytes[18:20])[0],
+            reserved=bytes[20:28],
+            ps_timeout=_unpack('<H', bytes[28:30])[0],
+            po_timeout=_unpack('<H', bytes[30:32])[0],
             buttons=[Button.from_bytes(bytes[32 + i * 4:32 + i * 4 + 4]) for i in range(0, buttons)],
             gbuttons=[Button.from_bytes(bytes[96 + i * 4:96 + i * 4 + 4]) for i in range(0, gbuttons)],
             name=bytes[160:208].decode('utf-16le').rstrip('\x00').rstrip('\uFFFF'),
@@ -1382,7 +1391,9 @@ class OnboardProfile:
         bytes += _int2bytes(self.resolution_default_index, 1) + _int2bytes(self.resolution_shift_index, 1)
         bytes += b''.join([self.resolutions[i].to_bytes(2, 'little') for i in range(0, 5)])
         bytes += _int2bytes(self.red, 1) + _int2bytes(self.green, 1) + _int2bytes(self.blue, 1)
-        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1) + self.reserved
+        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1)
+        bytes += self.write_count.to_bytes(2, 'little') + self.reserved
+        bytes += self.ps_timeout.to_bytes(2, 'little') + self.po_timeout.to_bytes(2, 'little')
         for i in range(0, 16):
             bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b'\xff\xff\xff\xff'
         for i in range(0, 16):
@@ -1416,7 +1427,7 @@ class OnboardProfile:
 _yaml.SafeLoader.add_constructor('!OnboardProfile', OnboardProfile.from_yaml)
 _yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
 
-OnboardProfilesVersion = 2
+OnboardProfilesVersion = 3
 
 
 # Doesn't handle macros
@@ -1458,7 +1469,7 @@ class OnboardProfiles:
             device.ping()
         response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
         memory, profile, _macro = _unpack('!BBB', response[0:3])
-        if memory != 0x01 or profile > 0x03:
+        if memory != 0x01 or profile > 0x04:
             return
         count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
