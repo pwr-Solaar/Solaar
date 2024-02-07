@@ -24,6 +24,8 @@ from struct import pack as _pack
 from struct import unpack as _unpack
 from time import time as _time
 
+import webcolors as _webcolors
+
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
@@ -32,6 +34,7 @@ from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .i18n import _
+from .settings import KIND as _KIND
 from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting
 from .settings import BitFieldValidator as _BitFieldV
@@ -1430,20 +1433,28 @@ class LEDControl(_Setting):
     validator_options = {'choices': choices_universe}
 
 
-# an LED Zone has an index, a set of possible LED effects, and an LED effect setting with parameters
-# the parameters are different for each effect
+colors = _NamedInts()
+for c, v in _webcolors.CSS3_NAMES_TO_HEX.items():
+    v = int(v[1:], 16)
+    if v not in colors:
+        colors[v] = c
+_LEDP = _hidpp20.LEDParam
+
+
+# an LED Zone has an index, a set of possible LED effects, and an LED effect setting
 # reading the current setting for a zone returns zeros on some devices
 class LEDZoneSetting(_Setting):
     name = 'led_zone_'
     label = _('LED Zone Effects')
     description = _('Set effect for LED Zone')
     feature = _F.COLOR_LED_EFFECTS
-
-    class validator_class(_HeteroV):
-
-        @classmethod
-        def build(cls, setting_class, device, effects):
-            return cls(data_class=_hidpp20.LEDEffectIndexed, options=effects)
+    color_field = {'name': _LEDP.color, 'kind': _KIND.choice, 'label': None, 'choices': colors}
+    speed_field = {'name': _LEDP.speed, 'kind': _KIND.range, 'label': _('Speed'), 'min': 0, 'max': 255}
+    period_field = {'name': _LEDP.period, 'kind': _KIND.range, 'label': _('Period'), 'min': 0, 'max': 5000}
+    intensity_field = {'name': _LEDP.intensity, 'kind': _KIND.range, 'label': _('Intensity'), 'min': 0, 'max': 100}
+    ramp_field = {'name': _LEDP.ramp, 'kind': _KIND.choice, 'label': _('Ramp'), 'choices': _hidpp20.LEDRampChoices}
+    #    form_field = { 'name': _LEDP.form, 'kind': _KIND.choice, 'label': _('Form'), 'choices': _hidpp20.LEDFormChoices }
+    possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
     @classmethod
     def build(cls, device):
@@ -1452,10 +1463,14 @@ class LEDZoneSetting(_Setting):
         for zone in zone_infos:
             prefix = zone.index.to_bytes(1)
             rw = _FeatureRW(_F.COLOR_LED_EFFECTS, read_fnid=0xE0, write_fnid=0x30, prefix=prefix)
-            validator = cls.validator_class.build(cls, device, zone.effects)
+            validator = _HeteroV(data_class=_hidpp20.LEDEffectIndexed, options=zone.effects)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
-            setting.label = _('LEDs: ') + str(_hidpp20.LEDZoneLocations[zone.location])
+            setting.label = _('LEDs') + ' ' + str(_hidpp20.LEDZoneLocations[zone.location])
+            choices = [_hidpp20.LEDEffects[e.ID][0] for e in zone.effects]
+            ID_field = {'name': 'ID', 'kind': _KIND.choice, 'label': None, 'choices': choices}
+            setting.possible_fields = [ID_field] + cls.possible_fields
+            setting.fields_map = _hidpp20.LEDEffects
             settings.append(setting)
         return settings
 

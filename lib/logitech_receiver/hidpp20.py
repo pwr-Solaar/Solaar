@@ -1152,7 +1152,17 @@ class Backlight:
         self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
-LEDParam = _NamedInts(color=0, speed=1, period=2, intensity=3, ramp=4, form=5)
+class LEDParam:
+    color = 'color'
+    speed = 'speed'
+    period = 'period'
+    intensity = 'intensity'
+    ramp = 'ramp'
+    form = 'form'
+
+
+LEDRampChoices = _NamedInts(default=0, yes=1, no=2)
+LEDFormChoices = _NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
 LEDParamSize = {
     LEDParam.color: 3,
     LEDParam.speed: 1,
@@ -1161,44 +1171,34 @@ LEDParamSize = {
     LEDParam.ramp: 1,
     LEDParam.form: 1
 }
-LEDEffects = _NamedInts(
-    Disable=0x00,
-    Fixed=0x01,
-    Pulse=0x02,
-    Cycle=0x03,
-    #                        Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
-    Boot=0x08,
-    Demo=0x09,
-    Breathe=0x0A,
-    Ripple=0x0B
-)
-LEDEffectsParams = {
-    LEDEffects.Disable: {},
-    LEDEffects.Fixed: {
+LEDEffects = {
+    0x0: [_NamedInt(0x0, _('Disable')), {}],
+    0x1: [_NamedInt(0x1, _('Fixed')), {
         LEDParam.color: 0,
         LEDParam.ramp: 3
-    },
-    LEDEffects.Pulse: {
+    }],
+    0x2: [_NamedInt(0x2, _('Pulse')), {
         LEDParam.color: 0,
         LEDParam.speed: 3
-    },
-    LEDEffects.Cycle: {
+    }],
+    0x3: [_NamedInt(0x3, _('Cycle')), {
         LEDParam.period: 5,
         LEDParam.intensity: 7
-    },
-    LEDEffects.Boot: {},
-    LEDEffects.Demo: {},
-    LEDEffects.Breathe: {
+    }],
+    0x8: [_NamedInt(0x8, _('Boot')), {}],
+    0x9: [_NamedInt(0x9, _('Demo')), {}],
+    0xA: [_NamedInt(0xA, _('Breathe')), {
         LEDParam.color: 0,
         LEDParam.period: 3,
         LEDParam.form: 5,
         LEDParam.intensity: 6
-    },
-    LEDEffects.Ripple: {
+    }],
+    0xB: [_NamedInt(0xB, _('Ripple')), {
         LEDParam.color: 0,
         LEDParam.period: 4
-    }
+    }]
 }
+# Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
 
 
 class LEDEffectSetting:  # an effect plus its parameters
@@ -1210,9 +1210,10 @@ class LEDEffectSetting:  # an effect plus its parameters
 
     @classmethod
     def from_bytes(cls, bytes):
-        args = {'ID': LEDEffects[bytes[0]]}
-        if args['ID'] in LEDEffectsParams:
-            for p, b in LEDEffectsParams[args['ID']].items():
+        effect = LEDEffects[bytes[0]] if bytes[0] in LEDEffects else None
+        args = {'ID': effect[0] if effect else None}
+        if effect:
+            for p, b in effect[1].items():
                 args[str(p)] = _bytes2int(bytes[1 + b:1 + b + LEDParamSize[p]])
         else:
             args['bytes'] = bytes
@@ -1224,7 +1225,7 @@ class LEDEffectSetting:  # an effect plus its parameters
             return self.bytes if self.bytes else b'\xff' * 11
         else:
             bs = [0] * 10
-            for p, b in LEDEffectsParams[self.ID].items():
+            for p, b in LEDEffects[self.ID][1].items():
                 bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
             return _int2bytes(ID, 1) + bytes(bs)
 
@@ -1238,7 +1239,7 @@ class LEDEffectSetting:  # an effect plus its parameters
         return dumper.represent_mapping('!LEDEffectSetting', data.__dict__, flow_style=True)
 
     def __str__(self):
-        return _yaml.dump(self).rstrip('\n')
+        return _yaml.dump(self, width=float('inf')).rstrip('\n')
 
 
 _yaml.SafeLoader.add_constructor('!LEDEffectSetting', LEDEffectSetting.from_yaml)
@@ -1253,8 +1254,8 @@ class LEDEffectIndexed(LEDEffectSetting):  # an effect plus its parameters, usin
             args = {'ID': next((ze.ID for ze in options if ze.index == bytes[0]), None)}
         else:
             args = {'ID': None}
-        if args['ID'] in LEDEffectsParams:
-            for p, b in LEDEffectsParams[args['ID']].items():
+        if args['ID'] in LEDEffects:
+            for p, b in LEDEffects[args['ID']][1].items():
                 args[str(p)] = _bytes2int(bytes[1 + b:1 + b + LEDParamSize[p]])
         else:
             args['bytes'] = bytes
