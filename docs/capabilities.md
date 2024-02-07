@@ -174,6 +174,94 @@ is sent to the Solaar rule system so that rules can detect these notifications.
 For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
 
+### Device Profiles
+
+Some mice store one or more profiles, which control aspects of the behavior of the device.
+
+Profiles can control the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, and its LED effects.  Solaar can dump the entire set of profiles into a YAML file can load an entire set of profiles from a file.  Users can edit the file to effect changes to the profiles.  Solaar has a setting that switches between profiles or disables all profiles.  When switching between profiles or using a button to change resolution Solaar keeps track of the changes in the settings for these features.
+
+A profile file has some bookkeeping information, including profile version and the name of the device, and a sequence of profiles.
+
+Each profile has the following fields:
+- enabled: Whether the profile is enabled.
+- sector: Where the profile is stored in device memory.  Sectors greater than 0xFF are in ROM and cannot be written (use the low byte as the sector to write to Flash).
+- name: A memonic name for the profile.
+- report_rate: A report rate in milliseconds from 1 to 8.
+- resolutions: A sequence of five sensor resolutions in DPI.
+- resolution_default_index: The index of the default sensor resolution (0 to 4).
+- resolution_shift_index: The index of the sensor resolution used when the DPI Shift button is pressed (0 to 4).
+- buttons: The action for each button on the mouse in normal mode.
+- gbuttons: The action for each button on the mouse in G-Shift mode.
+- angle_snap: Enable angle snapping for devices.
+- red, blue, green: Color indicator for the profile.
+- lighting: Lighting information for logo and side LEDs in normal mode, then for power saving mode.
+- ps_timeout: Delay in ms to go into power saving mode.
+- po_timeout: Delay in ms to go from power saving mode to fully off.
+- power_mode: Unknown purpose.
+- write count: Unknown purpose.
+Missing or unused parts of a profile are often a sequence of 0xFF bytes.
+
+Button actions can either perform a function (behavior: 9) or send a button click or key press (behaviour: 8).
+Functions are:
+- 0: No Action - do nothing
+- 1: Tilt Left
+- 2: Tilt Right
+- 3: Next DPI - change device resolution to the next DPI
+- 4: Previous DPI - change device resolution to the previous DPI
+- 5: Cycle DPI - change device resolution to the next DPI considered as a cycle
+- 6: Default_DPI - change device resolution to the default resolution
+- 7: Shift_DPI - change device resolution to the shift resolution
+- 8: Next Profile - change to the next enabled profile
+- 9: Previous Profile - change to the previous enabled profile
+- 10: Cycle Profile - change to the next enabled profile considered as a cycle
+- 11: G-Shift - change all buttons to their G-Shift state
+- 12: Battery Status - show battery status on the device LEDs
+- 13: Profile Select - select the n'th enabled profile
+- 14: Mode Switch
+- 15: Host Button - switch between hosts (unverified)
+- 16: Scroll Down
+- 17: Scroll Up
+Some devices might not be able to perform all functions.
+
+Buttons can send (type):
+- 0: Don't send anything.
+- 1: A button click (value) as a 16-bit bitmap, i.e., 1 is left click, 2 is right, 4 is middle, etc.
+- 2: An 8-bit USB HID keycode (value) plus an 8-bit modifier bitmap (modifiers), i.e., 0 for no modifiers, 1 for control, 2 for shift, etc.
+- 3: A 16-bit HID Consumer keycode (value).
+
+See USB_HID_KEYCODES and HID_CONSUMERCODES in lib/logitech_receiver/special_keys.py for values to use for keycodes.
+
+Buttons can also execute macros but Solaar does not provide any support for macros.
+
+Lighting information is a sequence of lighting effects, with the first for the logo LEDs and the second for the side LEDs.
+
+The fields possible in an effect are:
+- ID: The kind of effect:
+- color: A color parameter for the effect as a 24-bit RGB value.
+- intensity: How intense to make the color (1%-100%), 0 for the default (usually 100%).
+- speed: How fast to pulse in ms (one byte).
+- ramp: How to change to the color (0=default, 1=ramp up/down, 2=no ramping).
+- period: How fast to perform the effect in ms (two bytes).
+- form: The form of the breathe effect.
+- bytes: The raw bytes of other effects.
+
+The possible effects and the fields the use are:
+- 0x0: Disable - No fields.
+- 0x1: Fixed color - color, whether to ramp.
+- 0x2: Pulse a color - color, speed.
+- 0x3 Cycle through the spectrum - period, intensity, form.
+- 0x8; A boot effect - No fields.
+- 0x9: A demo effect - NO fields.
+- 0xa: breathe a color (like pulse) - color, period.
+- 0xb: Ripple - color, period.
+- null: An unknown effect.
+Only effects supported by the device can be used.
+
+To set up profiles, first run `solaar profiles <device name>`, which will output a YAML dump of the profiles on the device. Then store the YAML dump into a file and edit the file to make changes. Finally run `solaar profiles <device name> <file name>` to load the profiles back onto the device. Profiles are stored in flash memory and persist when the device is inactive or turned off. When loading profiles Solaar is careful to only write the flash memory sectors that need to be changed. Solaar also checks for correct profile version and device name before loading a profile into a device.
+
+Keep a copy of the initial dump of profiles so that it can be loaded back to the device if problems are encountered with the edited profiles. The safest changes are to take an unused or unenabled profile sector and create a new profile in it, likely mostly copying parts of another profile.
+
+
 ## System Tray
 
 Solaar's GUI normally uses an icon in the system tray.
