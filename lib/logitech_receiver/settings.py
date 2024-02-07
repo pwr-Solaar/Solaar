@@ -1231,14 +1231,8 @@ class HeteroValidator(Validator):
         to_write = new_value.to_bytes()
         return to_write
 
-    def acceptable(self, args, current):  # FIXME
-        if len(args) != 2:
-            return None
-        item = self.items[args[0]] if args[0] in self.items else None
-        if item.kind == KIND.range:
-            return None if args[1] < item.min_value or args[1] > item.max_value else args
-        elif item.kind == KIND.choice:
-            return args if args[1] in item.choices else None
+    def acceptable(self, args, current):  # should this actually do some checking?
+        return True
 
 
 class PackedRangeValidator(Validator):

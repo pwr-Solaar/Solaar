@@ -24,6 +24,7 @@ from logging import getLogger
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
+from logitech_receiver.hidpp20 import LEDEffectIndexed as _LEDEffectIndexed
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
@@ -74,6 +75,21 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
 #
 
 
+class ComboBoxText(Gtk.ComboBoxText):
+
+    def get_value(self):
+        return int(self.get_active_id())
+
+    def set_value(self, value):
+        return self.set_active_id(str(int(value)))
+
+
+class Scale(Gtk.Scale):
+
+    def get_value(self):
+        return int(super().get_value())
+
+
 class Control():
 
     def __init__(**kwargs):
@@ -93,7 +109,8 @@ class Control():
     def layout(self, sbox, label, change, spinner, failed):
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
-        sbox.pack_end(self, sbox.setting.kind == _SETTING_KIND.range, sbox.setting.kind == _SETTING_KIND.range, 0)
+        fill = sbox.setting.kind == _SETTING_KIND.range or sbox.setting.kind == _SETTING_KIND.hetero
+        sbox.pack_end(self, fill, fill, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
         return self
@@ -510,6 +527,76 @@ class PackedRangeControl(MultipleRangeControl):
         self._button.set_tooltip_text(b)
 
 
+# control an ID key that determines what else to show
+class HeteroKeyControl(Gtk.HBox, Control):
+
+    def __init__(self, sbox, delegate=None):
+        super().__init__(homogeneous=False, spacing=6)
+        self.init(sbox, delegate)
+        self._items = {}
+        for item in sbox.setting.possible_fields:
+            if item['label']:
+                item_lblbox = Gtk.Label(item['label'])
+                self.pack_start(item_lblbox, False, False, 0)
+            else:
+                item_lblbox = None
+            if item['kind'] == _SETTING_KIND.choice:
+                item_box = ComboBoxText()
+                for entry in item['choices']:
+                    item_box.append(str(int(entry)), str(entry))
+                item_box.set_active(0)
+                item_box.connect('changed', self.changed)
+                self.pack_start(item_box, False, False, 0)
+            elif item['kind'] == _SETTING_KIND.range:
+                item_box = Scale()
+                item_box.set_range(item['min'], item['max'])
+                item_box.set_round_digits(0)
+                item_box.set_digits(0)
+                item_box.set_increments(1, 5)
+                item_box.connect('value-changed', self.changed)
+                self.pack_start(item_box, True, True, 0)
+            self._items[str(item['name'])] = (item_lblbox, item_box)
+
+    def get_value(self):
+        result = {}
+        for k, (_lblbox, box) in self._items.items():
+            result[str(k)] = box.get_value()
+        result = _LEDEffectIndexed(**result)
+        return result
+
+    def set_value(self, value):
+        self.set_sensitive(False)
+        for k, v in value.__dict__.items():
+            if k in self._items:
+                (lblbox, box) = self._items[k]
+                box.set_value(v)
+        self.setup_visibles(value.ID)
+
+    def setup_visibles(self, ID):
+        fields = self.sbox.setting.fields_map[ID][1] if ID in self.sbox.setting.fields_map else {}
+        for name, (lblbox, box) in self._items.items():
+            visible = name in fields or name == 'ID'
+            if lblbox:
+                lblbox.set_visible(visible)
+            box.set_visible(visible)
+
+    def changed(self, control):
+        if self.get_sensitive() and control.get_sensitive():
+            if 'ID' in self._items and control == self._items['ID'][1]:
+                self.setup_visibles(int(self._items['ID'][1].get_value()))
+            if hasattr(control, '_timer'):
+                control._timer.cancel()
+            control._timer = _Timer(0.3, lambda: GLib.idle_add(self._write, control))
+            control._timer.start()
+
+    def _write(self, control):
+        control._timer.cancel()
+        delattr(control, '_timer')
+        new_state = self.get_value()
+        if self.sbox.setting._value != new_state:
+            _write_async(self.sbox.setting, new_state, self.sbox)
+
+
 #
 #
 #
@@ -591,6 +678,8 @@ def _create_sbox(s, device):
         control = MultipleRangeControl(sbox, change)
     elif s.kind == _SETTING_KIND.packed_range:
         control = PackedRangeControl(sbox, change)
+    elif s.kind == _SETTING_KIND.hetero:
+        control = HeteroKeyControl(sbox, change)
     else:
         if _log.isEnabledFor(_WARNING):
             _log.warn('setting %s display not implemented', s.label)
