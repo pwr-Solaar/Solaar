@@ -1218,14 +1218,15 @@ class LEDEffectSetting:  # an effect plus its parameters
             args['bytes'] = bytes
         return cls(**args)
 
-    def to_bytes(self):
-        if self.ID is None:
+    def to_bytes(self, ID=None):
+        ID = self.ID if ID is None else ID
+        if ID is None:
             return self.bytes if self.bytes else b'\xff' * 11
         else:
             bs = [0] * 10
             for p, b in LEDEffectsParams[self.ID].items():
                 bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
-            return _int2bytes(self.ID, 1) + bytes(bs)
+            return _int2bytes(ID, 1) + bytes(bs)
 
     @classmethod
     def from_yaml(cls, loader, node):
@@ -1236,9 +1237,50 @@ class LEDEffectSetting:  # an effect plus its parameters
     def to_yaml(cls, dumper, data):
         return dumper.represent_mapping('!LEDEffectSetting', data.__dict__, flow_style=True)
 
+    def __str__(self):
+        return _yaml.dump(self).rstrip('\n')
+
 
 _yaml.SafeLoader.add_constructor('!LEDEffectSetting', LEDEffectSetting.from_yaml)
 _yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
+
+
+class LEDEffectIndexed(LEDEffectSetting):  # an effect plus its parameters, using the effect indices from an effect zone
+
+    @classmethod
+    def from_bytes(cls, bytes, options=None):
+        if options:
+            args = {'ID': next((ze.ID for ze in options if ze.index == bytes[0]), None)}
+        else:
+            args = {'ID': None}
+        if args['ID'] in LEDEffectsParams:
+            for p, b in LEDEffectsParams[args['ID']].items():
+                args[str(p)] = _bytes2int(bytes[1 + b:1 + b + LEDParamSize[p]])
+        else:
+            args['bytes'] = bytes
+        args['options'] = options
+        return cls(**args)
+
+    def to_bytes(self):  # needs zone information
+        ID = next((ze.index for ze in self.options if ze.ID == self.ID), None)
+        if ID is None:
+            return self.bytes if hasattr(self, 'bytes') else b'\xff' * 11
+        else:
+            return super().to_bytes(ID)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        options = getattr(data, 'options', None)
+        if hasattr(data, 'options'):
+            delattr(data, 'options')
+        result = dumper.represent_mapping('!LEDEffectIndexed', data.__dict__, flow_style=True)
+        if options is not None:
+            data.options = options
+        return result
+
+
+_yaml.SafeLoader.add_constructor('!LEDEffectIndexed', LEDEffectIndexed.from_yaml)
+_yaml.add_representer(LEDEffectIndexed, LEDEffectIndexed.to_yaml)
 
 
 class LEDEffectInfo:  # an effect that a zone can do

@@ -40,7 +40,14 @@ del getLogger
 
 SENSITIVITY_IGNORE = 'ignore'
 KIND = _NamedInts(
-    toggle=0x01, choice=0x02, range=0x04, map_choice=0x0A, multiple_toggle=0x10, packed_range=0x20, multiple_range=0x40
+    toggle=0x01,
+    choice=0x02,
+    range=0x04,
+    map_choice=0x0A,
+    multiple_toggle=0x10,
+    packed_range=0x20,
+    multiple_range=0x40,
+    hetero=0x80
 )
 
 
@@ -344,9 +351,11 @@ class Setting:
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             try:
                 self.write(value, save=False)
-            except Exception:
+            except Exception as e:
                 if _log.isEnabledFor(_WARNING):
-                    _log.warn('%s: error applying value %s so ignore it (%s)', self.name, self._value, self._device)
+                    _log.warn(
+                        '%s: error applying value %s so ignore it (%s): %s', self.name, self._value, self._device, repr(e)
+                    )
 
     def __str__(self):
         if hasattr(self, '_value'):
@@ -1198,6 +1207,38 @@ class RangeValidator(Validator):
             return args[0] <= current and current <= args[1]
         else:
             return False
+
+
+class HeteroValidator(Validator):
+    kind = KIND.hetero
+
+    @classmethod
+    def build(cls, setting_class, device, **kwargs):
+        return cls(**kwargs)
+
+    def __init__(self, data_class=None, options=None):
+        assert data_class is not None and options is not None
+        self.data_class = data_class
+        self.options = options
+        self.needs_current_value = False
+
+    def validate_read(self, reply_bytes):
+        reply_value = self.data_class.from_bytes(reply_bytes, options=self.options)
+        return reply_value
+
+    def prepare_write(self, new_value, current_value=None):
+        new_value.options = self.options
+        to_write = new_value.to_bytes()
+        return to_write
+
+    def acceptable(self, args, current):  # FIXME
+        if len(args) != 2:
+            return None
+        item = self.items[args[0]] if args[0] in self.items else None
+        if item.kind == KIND.range:
+            return None if args[1] < item.min_value or args[1] > item.max_value else args
+        elif item.kind == KIND.choice:
+            return args if args[1] in item.choices else None
 
 
 class PackedRangeValidator(Validator):

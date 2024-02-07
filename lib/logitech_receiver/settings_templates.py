@@ -40,6 +40,7 @@ from .settings import BitFieldWithOffsetAndMaskValidator as _BitFieldOMV
 from .settings import ChoicesMapValidator as _ChoicesMapV
 from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
+from .settings import HeteroValidator as _HeteroV
 from .settings import LongSettings as _LongSettings
 from .settings import MultipleRangeValidator as _MultipleRangeV
 from .settings import PackedRangeValidator as _PackedRangeV
@@ -1429,6 +1430,36 @@ class LEDControl(_Setting):
     validator_options = {'choices': choices_universe}
 
 
+# an LED Zone has an index, a set of possible LED effects, and an LED effect setting with parameters
+# the parameters are different for each effect
+# reading the current setting for a zone returns zeros on some devices
+class LEDZoneSetting(_Setting):
+    name = 'led_zone_'
+    label = _('LED Zone Effects')
+    description = _('Set effect for LED Zone')
+    feature = _F.COLOR_LED_EFFECTS
+
+    class validator_class(_HeteroV):
+
+        @classmethod
+        def build(cls, setting_class, device, effects):
+            return cls(data_class=_hidpp20.LEDEffectIndexed, options=effects)
+
+    @classmethod
+    def build(cls, device):
+        zone_infos = _hidpp20.LEDEffectsInfo(device).zones
+        settings = []
+        for zone in zone_infos:
+            prefix = zone.index.to_bytes(1)
+            rw = _FeatureRW(_F.COLOR_LED_EFFECTS, read_fnid=0xE0, write_fnid=0x30, prefix=prefix)
+            validator = cls.validator_class.build(cls, device, zone.effects)
+            setting = cls(device, rw, validator)
+            setting.name = cls.name + str(int(zone.location))
+            setting.label = _('LEDs: ') + str(_hidpp20.LEDZoneLocations[zone.location])
+            settings.append(setting)
+        return settings
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1459,6 +1490,7 @@ SETTINGS = [
     Backlight2DurationPowered,
     Backlight3,
     LEDControl,
+    LEDZoneSetting,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
@@ -1517,7 +1549,12 @@ def check_feature_settings(device, already_known):
             known_present = device.persister and sclass.name in device.persister
             if not any(s.name == sclass.name for s in already_known) and (known_present or sclass.name not in absent):
                 setting = check_feature(device, sclass)
-                if setting:
+                if isinstance(setting, list):
+                    for s in setting:
+                        already_known.append(s)
+                    if sclass.name in newAbsent:
+                        newAbsent.remove(sclass.name)
+                elif setting:
                     already_known.append(setting)
                     if sclass.name in newAbsent:
                         newAbsent.remove(sclass.name)
