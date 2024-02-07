@@ -459,8 +459,8 @@ class OnboardProfiles(_Setting):
 
         def read(self, device):
             enabled = device.feature_request(_F.ONBOARD_PROFILES, 0x20)[0]
-            if enabled:
-                active = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40))[0]
+            if enabled == 0x01:
+                active = device.feature_request(_F.ONBOARD_PROFILES, 0x40)
                 return active[:2]
             else:
                 return b'\x00\x00'
