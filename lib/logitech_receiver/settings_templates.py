@@ -1442,7 +1442,6 @@ _LEDP = _hidpp20.LEDParam
 
 
 # an LED Zone has an index, a set of possible LED effects, and an LED effect setting
-# reading the current setting for a zone returns zeros on some devices
 class LEDZoneSetting(_Setting):
     name = 'led_zone_'
     label = _('LED Zone Effects')
@@ -1458,12 +1457,12 @@ class LEDZoneSetting(_Setting):
 
     @classmethod
     def build(cls, device):
-        infos = _hidpp20.LEDEffectsInfo(device)
+        infos = device.led_effects
         settings = []
         for zone in infos.zones:
-            prefix = zone.index.to_bytes(1)
+            prefix = _int2bytes(zone.index, 1)
             rw = _FeatureRW(_F.COLOR_LED_EFFECTS, read_fnid=0xE0, write_fnid=0x30, prefix=prefix)
-            validator = _HeteroV(data_class=_hidpp20.LEDEffectIndexed, options=zone.effects, readable=infos.readable)
+            validator = _HeteroV(data_class=_hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
             setting.label = _('LEDs') + ' ' + str(_hidpp20.LEDZoneLocations[zone.location])
