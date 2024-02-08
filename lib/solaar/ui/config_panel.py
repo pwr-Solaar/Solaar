@@ -42,7 +42,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
 
     def _do_read(s, force, sb, online, sensitive):
         v = s.read(not force)
-        GLib.idle_add(_update_setting_item, sb, v, online, sensitive, priority=99)
+        GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
     _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
@@ -124,7 +124,8 @@ class ToggleControl(Gtk.Switch, Control):
         self.connect('notify::active', self.changed)
 
     def set_value(self, value):
-        self.set_state(value)
+        if value is not None:
+            self.set_state(value)
 
     def get_value(self):
         return self.get_state()
@@ -179,7 +180,8 @@ class ChoiceControlLittle(Gtk.ComboBoxText, Control):
         return int(self.get_active_id()) if self.get_active_id() is not None else None
 
     def set_value(self, value):
-        self.set_active_id(str(int(value)))
+        if value is not None:
+            self.set_active_id(str(int(value)))
 
     def get_choice(self):
         id = self.get_value()
@@ -217,7 +219,8 @@ class ChoiceControlBig(Gtk.Entry, Control):
         return int(choice) if choice is not None else None
 
     def set_value(self, value):
-        self.set_text(str(next((x for x in self.choices if x == value), None)))
+        if value is not None:
+            self.set_text(str(next((x for x in self.choices if x == value), None)))
 
     def get_choice(self):
         key = self.get_text()
@@ -264,6 +267,8 @@ class MapChoiceControl(Gtk.HBox, Control):
             return self.valueBox.get_value()
 
     def set_value(self, value):
+        if value is None:
+            return
         self.valueBox.set_sensitive(self.get_sensitive())
         key = int(self.keyBox.get_active_id())
         if value.get(key) is not None:
@@ -370,6 +375,8 @@ class MultipleToggleControl(MultipleControl):
                 _write_async(self.sbox.setting, new_state, self.sbox, key=int(key))
 
     def set_value(self, value):
+        if value is None:
+            return
         active = 0
         total = len(self._label_control_pairs)
         to_join = []
@@ -452,6 +459,8 @@ class MultipleRangeControl(MultipleControl):
             _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
 
     def set_value(self, value):
+        if value is None:
+            return
         b = ''
         n = 0
         for ch in self._items:
@@ -512,6 +521,8 @@ class PackedRangeControl(MultipleRangeControl):
             _write_async(self.sbox.setting, self.sbox.setting._value[int(item)], self.sbox, key=int(item))
 
     def set_value(self, value):
+        if value is None:
+            return
         b = ''
         n = len(self._items)
         for h in self._items:
@@ -527,7 +538,7 @@ class PackedRangeControl(MultipleRangeControl):
         self._button.set_tooltip_text(b)
 
 
-# control an ID key that determines what else to show
+# control with an ID key that determines what else to show
 class HeteroKeyControl(Gtk.HBox, Control):
 
     def __init__(self, sbox, delegate=None):
@@ -538,6 +549,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
             if item['label']:
                 item_lblbox = Gtk.Label(item['label'])
                 self.pack_start(item_lblbox, False, False, 0)
+                item_lblbox.set_visible(False)
             else:
                 item_lblbox = None
             if item['kind'] == _SETTING_KIND.choice:
@@ -555,6 +567,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_box.set_increments(1, 5)
                 item_box.connect('value-changed', self.changed)
                 self.pack_start(item_box, True, True, 0)
+            item_box.set_visible(False)
             self._items[str(item['name'])] = (item_lblbox, item_box)
 
     def get_value(self):
@@ -566,11 +579,12 @@ class HeteroKeyControl(Gtk.HBox, Control):
 
     def set_value(self, value):
         self.set_sensitive(False)
-        for k, v in value.__dict__.items():
-            if k in self._items:
-                (lblbox, box) = self._items[k]
-                box.set_value(v)
-        self.setup_visibles(value.ID)
+        if value is not None:
+            for k, v in value.__dict__.items():
+                if k in self._items:
+                    (lblbox, box) = self._items[k]
+                    box.set_value(v)
+        self.setup_visibles(value.ID if value is not None else 0)
 
     def setup_visibles(self, ID):
         fields = self.sbox.setting.fields_map[ID][1] if ID in self.sbox.setting.fields_map else {}
@@ -694,10 +708,10 @@ def _create_sbox(s, device):
     return sbox
 
 
-def _update_setting_item(sbox, value, is_online=True, sensitive=True):
+def _update_setting_item(sbox, value, is_online=True, sensitive=True, nullOK=False):
     #    sbox._spinner.set_visible(False)   # don't repack item box
     sbox._spinner.stop()
-    if value is None:
+    if value is None and not nullOK:
         sbox._control.set_sensitive(False)
         _change_icon(False, sbox._change_icon)
         sbox._failed.set_visible(is_online)

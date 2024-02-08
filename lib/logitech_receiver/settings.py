@@ -286,7 +286,7 @@ class Setting:
             reply = self._rw.read(self._device)
             if reply:
                 self._value = self._validator.validate_read(reply)
-            if self._device.persister and self.name not in self._device.persister:
+            if self._value is not None and self._device.persister and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
@@ -1216,15 +1216,17 @@ class HeteroValidator(Validator):
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
 
-    def __init__(self, data_class=None, options=None):
+    def __init__(self, data_class=None, options=None, readable=True):
         assert data_class is not None and options is not None
         self.data_class = data_class
         self.options = options
+        self.readable = readable
         self.needs_current_value = False
 
     def validate_read(self, reply_bytes):
-        reply_value = self.data_class.from_bytes(reply_bytes, options=self.options)
-        return reply_value
+        if self.readable:
+            reply_value = self.data_class.from_bytes(reply_bytes, options=self.options)
+            return reply_value
 
     def prepare_write(self, new_value, current_value=None):
         new_value.options = self.options
