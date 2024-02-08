@@ -1229,8 +1229,7 @@ class HeteroValidator(Validator):
             return reply_value
 
     def prepare_write(self, new_value, current_value=None):
-        new_value.options = self.options
-        to_write = new_value.to_bytes()
+        to_write = new_value.to_bytes(options=self.options)
         return to_write
 
     def acceptable(self, args, current):  # should this actually do some checking?

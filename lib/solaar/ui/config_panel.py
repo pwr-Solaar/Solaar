@@ -24,7 +24,7 @@ from logging import getLogger
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
-from logitech_receiver.hidpp20 import LEDEffectIndexed as _LEDEffectIndexed
+from logitech_receiver.hidpp20 import LEDEffectSetting as _LEDEffectSetting
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
@@ -574,7 +574,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
         result = {}
         for k, (_lblbox, box) in self._items.items():
             result[str(k)] = box.get_value()
-        result = _LEDEffectIndexed(**result)
+        result = _LEDEffectSetting(**result)
         return result
 
     def set_value(self, value):

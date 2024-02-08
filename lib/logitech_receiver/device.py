@@ -1,3 +1,21 @@
+# -*- python-mode -*-
+
+## Copyright (C) 2012-2013  Daniel Pavel
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program; if not, write to the Free Software Foundation, Inc.,
+## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 import errno as _errno
 import threading as _threading
 
@@ -60,10 +78,9 @@ class Device:
         if receiver:
             assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
         self.number = number  # will be None at this point for directly connected devices
-        self.online = None
+        self.online = self.descriptor = None
 
         self.wpid = None  # the Wireless PID is unique per device model
-        self.descriptor = None
         self._kind = None  # mouse, keyboard, etc (see _hidpp10.DEVICE_KIND)
         self._codename = None  # Unifying peripherals report a codename.
         self._name = None  # the full name of the model
@@ -74,16 +91,13 @@ class Device:
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
 
-        self._firmware = None
-        self._keys = None
-        self._remap_keys = None
-        self._gestures = None
+        self._firmware = self._keys = self._remap_keys = self._gestures = None
+        self._polling_rate = self._power_switch = self._led_effects = None
+
         self._gestures_lock = _threading.Lock()
         self._profiles = self._backlight = self._registers = self._settings = None
         self._feature_settings_checked = False
         self._settings_lock = _threading.Lock()
-        self._polling_rate = None
-        self._power_switch = None
 
         # See `add_notification_handler`
         self._notification_handlers = {}
@@ -290,6 +304,12 @@ class Device:
             rate = _hidpp20.get_polling_rate(self)
             self._polling_rate = rate if rate else self._polling_rate
         return self._polling_rate
+
+    @property
+    def led_effects(self):
+        if not self._led_effects and self.online and self.protocol >= 2.0:
+            self._led_effects = _hidpp20.LEDEffectsInfo(self)
+        return self._led_effects
 
     @property
     def keys(self):
