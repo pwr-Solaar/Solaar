@@ -180,6 +180,8 @@ Some mice store one or more profiles, which control aspects of the behavior of t
 
 Profiles can control the rate at which the mouse reports movement, the resolution of the the movement reports, what the mouse buttons do, and its LED effects.  Solaar can dump the entire set of profiles into a YAML file can load an entire set of profiles from a file.  Users can edit the file to effect changes to the profiles.  Solaar has a setting that switches between profiles or disables all profiles.  When switching between profiles or using a button to change resolution Solaar keeps track of the changes in the settings for these features.
 
+When profiles are active changes cannot be made to the Report Rate setting.   Changes can be made to the Sensitivity setting and to LED settings.  To keep the profile values make these setting ignored.
+
 A profile file has some bookkeeping information, including profile version and the name of the device, and a sequence of profiles.
 
 Each profile has the following fields:

@@ -1172,8 +1172,8 @@ LEDParamSize = {
     LEDParam.form: 1
 }
 LEDEffects = {
-    0x0: [_NamedInt(0x0, _('Disable')), {}],
-    0x1: [_NamedInt(0x1, _('Fixed')), {
+    0x0: [_NamedInt(0x0, _('Disabled')), {}],
+    0x1: [_NamedInt(0x1, _('Static')), {
         LEDParam.color: 0,
         LEDParam.ramp: 3
     }],
