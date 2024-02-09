@@ -24,8 +24,6 @@ from struct import pack as _pack
 from struct import unpack as _unpack
 from time import time as _time
 
-import webcolors as _webcolors
-
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
@@ -1433,11 +1431,7 @@ class LEDControl(_Setting):
     validator_options = {'choices': choices_universe}
 
 
-colors = _NamedInts()
-for c, v in _webcolors.CSS3_NAMES_TO_HEX.items():
-    v = int(v[1:], 16)
-    if v not in colors:
-        colors[v] = c
+colors = _special_keys.COLORS
 _LEDP = _hidpp20.LEDParam
 
 
