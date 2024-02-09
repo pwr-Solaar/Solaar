@@ -1392,7 +1392,14 @@ _yaml.SafeLoader.add_constructor('!Button', Button.from_yaml)
 _yaml.add_representer(Button, Button.to_yaml)
 
 
-class OnboardProfile:
+class OnboardProfileHeader:
+
+    def __init__(self, sector, enabled):
+        self.sector = sector
+        self.enabled = enabled
+
+
+class OnboardProfile(OnboardProfileHeader):
     """A single onboard profile"""
 
     def __init__(self, **kwargs):
@@ -1433,8 +1440,8 @@ class OnboardProfile:
         )
 
     @classmethod
-    def from_dev(cls, dev, i, sector, s, enabled, buttons, gbuttons):
-        bytes = OnboardProfiles.read_sector(dev, sector, s)
+    def from_device(cls, device, sector, enabled, size, buttons, gbuttons):
+        bytes = OnboardProfiles.read_sector(device, sector, size)
         return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes)
 
     def to_bytes(self, length):
@@ -1500,8 +1507,8 @@ class OnboardProfiles:
 
     @classmethod
     def get_profile_headers(cls, device):
+        headers = {}
         i = 0
-        headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
         if chunk[0:4] == b'\x00\x00\x00\x00':  # look in ROM instead
@@ -1509,13 +1516,20 @@ class OnboardProfiles:
             s = 0x01
         while chunk[0:2] != b'\xff\xff':
             sector, enabled = _unpack('!HB', chunk[0:3])
-            headers.append((sector, enabled))
+            headers[i + 1] = OnboardProfileHeader(sector, enabled)
             i += 1
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
         return headers
 
     @classmethod
-    def from_device(cls, device):
+    def get_profiles(cls, device, size, buttons, gbuttons, headers):
+        profiles = {}
+        for i, h in headers.items():
+            profiles[i] = OnboardProfile.from_device(device, h.sector, h.enabled, size, buttons, gbuttons)
+        return profiles
+
+    @classmethod
+    def from_device(cls, device, headers_only=False):
         if not device.online:  # wake the device up if necessary
             device.ping()
         response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
@@ -1524,22 +1538,20 @@ class OnboardProfiles:
             return
         count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
-        headers = OnboardProfiles.get_profile_headers(device)
-        profiles = {}
-        i = 0
-        for sector, enabled in headers:
-            profiles[i + 1] = OnboardProfile.from_dev(device, i, sector, size, enabled, buttons, gbuttons)
-            i += 1
-        return cls(
-            version=OnboardProfilesVersion,
-            name=device.name,
-            count=count,
-            buttons=buttons,
-            gbuttons=gbuttons,
-            sectors=sectors,
-            size=size,
-            profiles=profiles
-        )
+        result = cls(name=device.name, count=count, buttons=buttons, gbuttons=gbuttons, sectors=sectors, size=size)
+        result.version = OnboardProfilesVersion
+        result.profiles = cls.get_profile_headers(device)
+        if headers_only:
+            result.headers_only = True
+        else:
+            result.profiles = cls.get_profiles(device, size, buttons, gbuttons, result.profiles)
+        return result
+
+    def complete(self, device):
+        if hasattr(self, 'headers_only'):
+            delattr(self, 'headers_only')
+        self.profiles = self.get_profiles(device, self.size, self.buttons, self.gbuttons, self.profiles)
+        return self
 
     def to_bytes(self):
         bytes = b''
@@ -1891,11 +1903,14 @@ def get_backlight(device):
         return Backlight(device)
 
 
-def get_profiles(device):
+def get_profiles(device, headers_only=False):
     if getattr(device, '_profiles', None) is not None:
-        return device._profiles
+        if not headers_only and hasattr(device._profiles, 'headers_only') and device.online:
+            return device._profiles.complete(device)
+        else:
+            return device._profiles
     if FEATURE.ONBOARD_PROFILES in device.features:
-        return OnboardProfiles.from_device(device)
+        return OnboardProfiles.from_device(device, headers_only)
 
 
 def get_mouse_pointer_info(device):

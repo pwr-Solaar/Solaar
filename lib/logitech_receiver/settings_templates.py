@@ -479,12 +479,12 @@ class OnboardProfiles(_Setting):
 
         @classmethod
         def build(cls, setting_class, device):
-            headers = _hidpp20.OnboardProfiles.get_profile_headers(device)
+            profiles = device.profile_headers
             profiles_list = [setting_class.choices_universe[0]]
-            if headers:
-                for (sector, enabled) in headers:
-                    if enabled:
-                        profiles_list.append(setting_class.choices_universe[sector])
+            if profiles:
+                for h in profiles.profiles.values():
+                    if h.enabled:
+                        profiles_list.append(setting_class.choices_universe[h.sector])
             return cls(choices=_NamedInts.list(profiles_list), byte_count=2) if len(profiles_list) > 1 else None
 
 

@@ -344,6 +344,17 @@ class Device:
         if self._profiles is None:
             if self.online and self.protocol >= 2.0:
                 self._profiles = _hidpp20.get_profiles(self)
+            return self._profiles
+        elif hasattr(self._profiles, 'headers_only'):
+            if self.online:
+                return self._profiles.complete(self)
+        return self._profiles
+
+    @property
+    def profile_headers(self):
+        if self._profiles is None:
+            if self.online and self.protocol >= 2.0:
+                self._profiles = _hidpp20.get_profiles(self, headers_only=True)
         return self._profiles
 
     @property
