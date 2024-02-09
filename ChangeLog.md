@@ -1,4 +1,4 @@
-# 1.1.11
+# 1.1.11rc1
 
 * Support LED Zone control feature
 * Dump and load device profiles
