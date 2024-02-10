@@ -819,22 +819,24 @@ def _change_setting(device, setting, values):
 
 
 def record_setting(device, setting, values):
-    """External interface to record a setting that has changed on the device and have the GUI show the change"""
-    assert device == setting._device
+    """External interface to have the GUI show a change to a setting. Doesn't write to the device"""
     GLib.idle_add(_record_setting, device, setting, values, priority=99)
 
 
-def _record_setting(device, setting, values):
+def _record_setting(device, setting_class, values):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('on %s changing setting %s to %s', device, setting, values)
-    if len(values) > 1:
-        setting.update_key_value(values[0], values[-1])
-        value = {values[0]: values[-1]}
-    else:
-        setting.update(values[-1])
-        value = values[-1]
-    device_path = device.receiver.path if device.receiver else device.path
-    if (device_path, device.number, setting.name) in _items:
-        sbox = _items[(device_path, device.number, setting.name)]
-        if sbox:
-            _update_setting_item(sbox, value)
+        logger.debug('on %s changing setting %s to %s', device, setting_class.name, values)
+    setting = next((s for s in device.settings if s.name == setting_class.name), None)
+    assert device == setting._device
+    if setting:
+        if len(values) > 1:
+            setting.update_key_value(values[0], values[-1])
+            value = {values[0]: values[-1]}
+        else:
+            setting.update(values[-1])
+            value = values[-1]
+        device_path = device.receiver.path if device.receiver else device.path
+        if (device_path, device.number, setting.name) in _items:
+            sbox = _items[(device_path, device.number, setting.name)]
+            if sbox:
+                _update_setting_item(sbox, value)
