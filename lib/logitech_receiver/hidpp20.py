@@ -1350,6 +1350,8 @@ class Button:
             elif mapping_type == ButtonMappingTypes.Consumer_Key:
                 value = ButtonConsumerKeys[(bytes[2] << 8) + bytes[3]]
                 result = cls(behavior=behavior, type=mapping_type, value=value)
+            elif mapping_type == ButtonMappingTypes.No_Action:
+                result = cls(behavior=behavior, type=mapping_type)
         elif behavior == ButtonBehaviors.Function:
             value = ButtonFunctions[bytes[1]] if ButtonFunctions[bytes[1]] is not None else bytes[1]
             data = bytes[3]
@@ -1372,6 +1374,8 @@ class Button:
                 bytes += _int2bytes(self.value, 1)
             elif self.type == ButtonMappingTypes.Consumer_Key:
                 bytes += _int2bytes(self.value, 2)
+            elif self.type == ButtonMappingTypes.No_Action:
+                bytes += b'\xff\xff'
         elif self.behavior == ButtonBehaviors.Function:
             bytes += _int2bytes(self.value, 1) + b'\xff' + (_int2bytes(self.data, 1) if self.data else b'\x00')
         else:
