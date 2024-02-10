@@ -839,4 +839,4 @@ def _record_setting(device, setting_class, values):
         if (device_path, device.number, setting.name) in _items:
             sbox = _items[(device_path, device.number, setting.name)]
             if sbox:
-                _update_setting_item(sbox, value)
+                _update_setting_item(sbox, value, sensitive=None)
