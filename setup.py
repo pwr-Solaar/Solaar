@@ -87,6 +87,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'report-descriptor': ['hid-parser'],
         'desktop-notifications': ['Notify (>= 0.7)'],
         'git-commit': ['python-git-info'],
+        'test': ['pytest'],
     },
     package_dir={'': 'lib'},
     packages=['keysyms', 'hidapi', 'logitech_receiver', 'solaar', 'solaar.ui', 'solaar.cli'],
