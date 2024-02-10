@@ -16,9 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
-from logging import getLogger
+import logging
 
 import yaml as _yaml
 
@@ -29,8 +27,7 @@ from gi.repository import GLib, Gtk, Gio  # NOQA: E402 # isort:skip
 from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
 from solaar.i18n import _  # NOQA: E402 # isort:skip
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -46,7 +43,7 @@ GLib.threads_init()
 
 
 def _error_dialog(reason, object):
-    _log.error('error: %s %s', reason, object)
+    logger.error('error: %s %s', reason, object)
 
     if reason == 'permissions':
         title = _('Permissions error')
@@ -103,8 +100,8 @@ from . import diversion_rules, notify, tray, window  # isort:skip  # noqa: E402
 
 
 def _startup(app, startup_hook, use_tray, show_window):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
 
     from solaar.tasks import TaskRunner as _TaskRunner
     global _task_runner
@@ -120,8 +117,8 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 
 def _activate(app):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('activate')
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('activate')
     if app.get_windows():
         window.popup()
     else:
@@ -134,8 +131,8 @@ def _command_line(app, command_line):
     if not args:
         _activate(app)
     elif args[0] == 'config':  # config call from remote instance
-        if _log.isEnabledFor(_INFO):
-            _log.info('remote command line %s', args)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('remote command line %s', args)
         from solaar.ui.config_panel import change_setting  # prevent circular import
         from solaar.ui.window import find_device  # prevent circular import
         dev = find_device(args[1])
@@ -147,8 +144,8 @@ def _command_line(app, command_line):
 
 
 def _shutdown(app, shutdown_hook):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('shutdown')
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('shutdown')
 
     shutdown_hook()
 
@@ -185,8 +182,8 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
 
 def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('status changed: %s (%s) %s', device, alert, reason)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('status changed: %s (%s) %s', device, alert, reason)
 
     tray.update(device)
     if alert & ALERT.ATTENTION:

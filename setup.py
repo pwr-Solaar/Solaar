@@ -81,7 +81,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         'PyYAML (>= 3.12)',
         'python-xlib (>= 0.27)',
         'psutil (>= 5.4.3)',
-        'dbus-python (>=1.3.2)',
+        'dbus-python',
     ],
     extras_require={
         'report-descriptor': ['hid-parser'],

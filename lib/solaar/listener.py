@@ -17,13 +17,10 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import errno as _errno
+import logging
 import time
 
 from collections import namedtuple
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
-from logging import WARNING as _WARNING
-from logging import getLogger
 
 import gi
 
@@ -41,8 +38,7 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 # from solaar.i18n import _
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 _R = _hidpp10.REGISTERS
 _IR = _hidpp10.INFO_SUBREGISTERS
@@ -87,12 +83,12 @@ class ReceiverListener(_listener.EventsListener):
         _status.attach_to(receiver, self._status_changed)
 
     def has_started(self):
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
         nfs = self.receiver.enable_connection_notifications()
-        if _log.isEnabledFor(_WARNING):
+        if logger.isEnabledFor(logging.WARNING):
             if not self.receiver.isDevice and not ((nfs if nfs else 0) & _hidpp10.NOTIFICATION_FLAG.wireless):
-                _log.warning(
+                logger.warning(
                     'Receiver on %s might not support connection notifications, GUI might not show its devices',
                     self.receiver.path
                 )
@@ -103,8 +99,8 @@ class ReceiverListener(_listener.EventsListener):
     def has_stopped(self):
         r, self.receiver = self.receiver, None
         assert r is not None
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: notifications listener has stopped', r)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('%s: notifications listener has stopped', r)
 
         # because udev is not notifying us about device removal,
         # make sure to clean up in _all_listeners
@@ -115,7 +111,7 @@ class ReceiverListener(_listener.EventsListener):
             try:
                 r.close()
             except Exception:
-                _log.exception('closing receiver %s' % r.path)
+                logger.exception('closing receiver %s' % r.path)
         self.status_changed_callback(r)  # , _status.ALERT.NOTIFICATION)
 
     # def tick(self, timestamp):
@@ -126,7 +122,7 @@ class ReceiverListener(_listener.EventsListener):
     #     # if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
     #     #     # if we missed a couple of polls, most likely the computer went into
     #     #     # sleep, and we have to reinitialize the receiver again
-    #     #     _log.warn("%s: possible sleep detected, closing this listener", self.receiver)
+    #     #     logger.warning("%s: possible sleep detected, closing this listener", self.receiver)
     #     #     self.stop()
     #     #     return
     #
@@ -153,25 +149,25 @@ class ReceiverListener(_listener.EventsListener):
     #                 if dev and dev.status is not None:
     #                     dev.status.poll(timestamp)
     #     except Exception as e:
-    #         _log.exception("polling", e)
+    #         logger.exception("polling", e)
 
     def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
         assert device is not None
-        if _log.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             try:
                 device.ping()
                 if device.kind is None:
-                    _log.info(
+                    logger.info(
                         'status_changed %r: %s, %s (%X) %s', device, 'present' if bool(device) else 'removed', device.status,
                         alert, reason or ''
                     )
                 else:
-                    _log.info(
+                    logger.info(
                         'status_changed %r: %s %s, %s (%X) %s', device, 'paired' if bool(device) else 'unpaired',
                         'online' if device.online else 'offline', device.status, alert, reason or ''
                     )
             except Exception:
-                _log.info('status_changed for unknown device')
+                logger.info('status_changed for unknown device')
 
         if device.kind is None:
             assert device == self.receiver
@@ -184,8 +180,8 @@ class ReceiverListener(_listener.EventsListener):
             # Device was unpaired, and isn't valid anymore.
             # We replace it with a ghost so that the UI has something to work
             # with while cleaning up.
-            if _log.isEnabledFor(_INFO):
-                _log.info('device %s was unpaired, ghosting', device)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info('device %s was unpaired, ghosting', device)
             device = _ghost(device)
 
         self.status_changed_callback(device, alert, reason)
@@ -197,8 +193,8 @@ class ReceiverListener(_listener.EventsListener):
 
     def _notifications_handler(self, n):
         assert self.receiver
-        # if _log.isEnabledFor(_DEBUG):
-        #     _log.debug("%s: handling %s", self.receiver, n)
+        # if logger.isEnabledFor(logging.DEBUG):
+        #     logger.debug("%s: handling %s", self.receiver, n)
         if n.devnumber == 0xFF:
             # a receiver notification
             _notifications.process(self.receiver, n)
@@ -206,20 +202,20 @@ class ReceiverListener(_listener.EventsListener):
 
         # a notification that came in to the device listener - strange, but nothing needs to be done here
         if self.receiver.isDevice:
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('Notification %s via device %s being ignored.', n, self.receiver)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug('Notification %s via device %s being ignored.', n, self.receiver)
             return
 
         # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
         if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
-            if _log.isEnabledFor(_INFO):
-                _log.info('ignoring DJ pairing notification %s', n)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info('ignoring DJ pairing notification %s', n)
             return
 
         # a device notification
         if not (0 < n.devnumber <= 16):  # some receivers have devices past their max # devices
-            if _log.isEnabledFor(_WARNING):
-                _log.warning('Unexpected device number (%s) in notification %s.', n.devnumber, n)
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning('Unexpected device number (%s) in notification %s.', n.devnumber, n)
             return
         already_known = n.devnumber in self.receiver
 
@@ -255,17 +251,17 @@ class ReceiverListener(_listener.EventsListener):
             dev = self.receiver[n.devnumber]
 
         if not dev:
-            _log.warn('%s: received %s for invalid device %d: %r', self.receiver, n, n.devnumber, dev)
+            logger.warning('%s: received %s for invalid device %d: %r', self.receiver, n, n.devnumber, dev)
             return
 
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
-            if _log.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 try:
                     dev.ping()
-                    _log.info('connection %s for %r', n, dev)
+                    logger.info('connection %s for %r', n, dev)
                 except Exception:
-                    _log.info('connection %s for unknown device, number %s', n, n.devnumber)
+                    logger.info('connection %s for unknown device, number %s', n, n.devnumber)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
@@ -275,15 +271,15 @@ class ReceiverListener(_listener.EventsListener):
 
         if not hasattr(dev, 'status') or dev.status is None:
             # notification before device status set up - don't process it
-            _log.warn('%s before device %s has status', n, dev)
+            logger.warning('%s before device %s has status', n, dev)
         else:
             _notifications.process(dev, n)
 
         if self.receiver.status.lock_open and not already_known:
             # this should be the first notification after a device was paired
             assert n.sub_id == 0x41, 'first notification was not a connection notification'
-            if _log.isEnabledFor(_INFO):
-                _log.info('%s: pairing detected new device', self.receiver)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info('%s: pairing detected new device', self.receiver)
             self.receiver.status.new_device = dev
         elif dev.online is None:
             dev.ping()
@@ -316,15 +312,15 @@ def _start(device_info):
         _all_listeners[device_info.path] = rl
         return rl
 
-    _log.warn('failed to open %s', device_info)
+    logger.warning('failed to open %s', device_info)
 
 
 def start_all():
     # just in case this it called twice in a row...
     stop_all()
 
-    if _log.isEnabledFor(_INFO):
-        _log.info('starting receiver listening threads')
+    if logger.isEnabledFor(logging.INFO):
+        logger.info('starting receiver listening threads')
     for device_info in _base.receivers_and_devices():
         _process_receiver_event('add', device_info)
 
@@ -334,8 +330,8 @@ def stop_all():
     _all_listeners.clear()
 
     if listeners:
-        if _log.isEnabledFor(_INFO):
-            _log.info('stopping receiver listening threads %s', listeners)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('stopping receiver listening threads %s', listeners)
 
         for l in listeners:
             l.stop()
@@ -351,8 +347,8 @@ def stop_all():
 # after a resume, the device may have been off
 # so mark its saved status to ensure that the status is pushed to the device when it comes back
 def ping_all(resuming=False):
-    if _log.isEnabledFor(_INFO):
-        _log.info('ping all devices%s', ' when resuming' if resuming else '')
+    if logger.isEnabledFor(logging.INFO):
+        logger.info('ping all devices%s', ' when resuming' if resuming else '')
     for l in _all_listeners.values():
         if l.receiver.isDevice:
             if resuming and hasattr(l.receiver, 'status'):
@@ -396,8 +392,8 @@ def _process_add(device_info, retry):
             try:
                 import subprocess
                 output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
-                if _log.isEnabledFor(_WARNING):
-                    _log.warning('Missing permissions on %s\n%s.', device_info.path, output)
+                if logger.isEnabledFor(logging.WARNING):
+                    logger.warning('Missing permissions on %s\n%s.', device_info.path, output)
             except Exception:
                 pass
             if retry:
@@ -416,8 +412,8 @@ def _process_receiver_event(action, device_info):
     assert device_info is not None
     assert _error_callback
 
-    if _log.isEnabledFor(_INFO):
-        _log.info('receiver event %s %s', action, device_info)
+    if logger.isEnabledFor(logging.INFO):
+        logger.info('receiver event %s %s', action, device_info)
 
     # whatever the action, stop any previous receivers at this path
     l = _all_listeners.pop(device_info.path, None)

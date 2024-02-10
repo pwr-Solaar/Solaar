@@ -17,10 +17,9 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import errno as _errno
+import logging
 import threading as _threading
 
-from logging import INFO as _INFO
-from logging import getLogger
 from typing import Optional
 
 import hidapi as _hid
@@ -33,8 +32,7 @@ from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
 from .settings_templates import check_feature_settings as _check_feature_settings
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 _R = _hidpp10.REGISTERS
 _IR = _hidpp10.INFO_SUBREGISTERS
@@ -129,7 +127,7 @@ class Device:
             elif receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver doesn't have pairing registers
                 self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
                 if not self.wpid:
-                    _log.error('Unable to get wpid from udev for device %d of %s', number, receiver)
+                    logger.error('Unable to get wpid from udev for device %d of %s', number, receiver)
                     raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
                 kind = receiver.get_kind_from_index(number)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
@@ -220,8 +218,8 @@ class Device:
         ids = _hidpp20.get_ids(self)
         if ids:
             self._unitId, self._modelId, self._tid_map = ids
-            if _log.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
-                _log.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
+            if logger.isEnabledFor(logging.INFO) and self._serial and self._serial != self._unitId:
+                logger.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
 
     @property
     def unitId(self):
@@ -426,12 +424,12 @@ class Device:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if not ok:
-            _log.warn('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
+            logger.warning('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits if ok else None
 
     def add_notification_handler(self, id: str, fn):
@@ -451,8 +449,8 @@ class Device:
     def remove_notification_handler(self, id: str):
         """Unregisters the notification handler under name `id`."""
 
-        if id not in self._notification_handlers and _log.isEnabledFor(_INFO):
-            _log.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
+        if id not in self._notification_handlers and logger.isEnabledFor(logging.INFO):
+            logger.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
         else:
             del self._notification_handlers[id]
 
@@ -544,11 +542,11 @@ class Device:
                     bus_id=device_info.bus_id
                 )
         except OSError as e:
-            _log.exception('open %s', device_info)
+            logger.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
                 raise
         except Exception:
-            _log.exception('open %s', device_info)
+            logger.exception('open %s', device_info)
 
     def close(self):
         handle, self.handle = self.handle, None

@@ -22,9 +22,8 @@ from solaar.i18n import _
 from ..ui import error_dialog
 from . import pair_window
 
-# from logging import getLogger
-# _log = getLogger(__name__)
-# del getLogger
+# import logging
+# logger = logging.getLogger(__name__)
 
 #
 #
@@ -97,5 +96,5 @@ def unpair(window, device):
         try:
             del receiver[device_number]
         except Exception:
-            # _log.exception("unpairing %s", device)
+            # logger.exception("unpairing %s", device)
             error_dialog('unpair', device)

@@ -16,11 +16,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
 import traceback
 
-from logging import DEBUG as _DEBUG
-from logging import WARNING as _WARNING
-from logging import getLogger
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
@@ -30,8 +28,7 @@ from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
 from solaar.ui import ui_async as _ui_async
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -695,8 +692,8 @@ def _create_sbox(s, device):
     elif s.kind == _SETTING_KIND.hetero:
         control = HeteroKeyControl(sbox, change)
     else:
-        if _log.isEnabledFor(_WARNING):
-            _log.warn('setting %s display not implemented', s.label)
+        if logger.isEnabledFor(logging.WARNING):
+            logger.warning('setting %s display not implemented', s.label)
         return None
 
     control.set_sensitive(False)  # the first read will enable it
@@ -828,8 +825,8 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting, values):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('on %s changing setting %s to %s', device, setting, values)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('on %s changing setting %s to %s', device, setting, values)
     if len(values) > 1:
         setting.update_key_value(values[0], values[-1])
         value = {values[0]: values[-1]}

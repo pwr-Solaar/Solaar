@@ -17,15 +17,13 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import ctypes as _ctypes
+import logging
 import os as _os
 import os.path as _path
 import platform as _platform
 import sys as _sys
 import time as _time
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
-from logging import getLogger
 from math import sqrt as _sqrt
 from struct import unpack as _unpack
 
@@ -54,8 +52,7 @@ import gi  # isort:skip
 gi.require_version('Gdk', '3.0')  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 # See docs/rules.md for documentation
@@ -99,12 +96,12 @@ CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
 
 gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
 gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
-if _log.isEnabledFor(_INFO):
-    _log.info('GDK Keymap %sset up', '' if gkeymap else 'not ')
+if logger.isEnabledFor(logging.INFO):
+    logger.info('GDK Keymap %sset up', '' if gkeymap else 'not ')
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
-    _log.warn(
+    logger.warning(
         'rules cannot access modifier keys in Wayland, '
         'accessing process only works on GNOME with Solaar Gnome extension installed'
     )
@@ -149,10 +146,10 @@ def x11_setup():
         NET_WM_PID = xdisplay.intern_atom('_NET_WM_PID')
         WM_CLASS = xdisplay.intern_atom('WM_CLASS')
         _x11 = True  # X11 available
-        if _log.isEnabledFor(_INFO):
-            _log.info('X11 library loaded and display set up')
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('X11 library loaded and display set up')
     except Exception:
-        _log.warn('X11 not available - some rule capabilities inoperable', exc_info=_sys.exc_info())
+        logger.warning('X11 not available - some rule capabilities inoperable', exc_info=_sys.exc_info())
         _x11 = False
         xtest_available = False
     return _x11
@@ -167,7 +164,7 @@ def gnome_dbus_interface_setup():
         remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
         _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
     except dbus.exceptions.DBusException:
-        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+        logger.warning('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
         _dbus_interface = False
     return _dbus_interface
 
@@ -181,10 +178,10 @@ def xkb_setup():
         X11Lib.XOpenDisplay.restype = _ctypes.POINTER(XkbDisplay)
         X11Lib.XkbGetState.argtypes = [_ctypes.POINTER(XkbDisplay), _ctypes.c_uint, _ctypes.POINTER(XkbStateRec)]
         Xkbdisplay = X11Lib.XOpenDisplay(None)
-        if _log.isEnabledFor(_INFO):
-            _log.info('XKB display set up')
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('XKB display set up')
     except Exception:
-        _log.warn('XKB display not available - rules cannot access keyboard group', exc_info=_sys.exc_info())
+        logger.warning('XKB display not available - rules cannot access keyboard group', exc_info=_sys.exc_info())
         Xkbdisplay = False
     return Xkbdisplay
 
@@ -224,11 +221,11 @@ def setup_uinput():
         return udevice
     try:
         udevice = evdev.uinput.UInput(events=devicecap, name='solaar-keyboard')
-        if _log.isEnabledFor(_INFO):
-            _log.info('uinput device set up')
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('uinput device set up')
         return True
     except Exception as e:
-        _log.warn('cannot create uinput device: %s', e)
+        logger.warning('cannot create uinput device: %s', e)
 
 
 if wayland:  # Wayland can't use xtest so may as well set up uinput now
@@ -297,12 +294,12 @@ def simulate_xtest(code, event):
             )
             Xlib.ext.xtest.fake_input(xdisplay, event, code)
             xdisplay.sync()
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('xtest simulated input %s %s %s', xdisplay, event, code)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug('xtest simulated input %s %s %s', xdisplay, event, code)
             return True
         except Exception as e:
             xtest_available = False
-            _log.warn('xtest fake input failed: %s', e)
+            logger.warning('xtest fake input failed: %s', e)
 
 
 def simulate_uinput(what, code, arg):
@@ -311,12 +308,12 @@ def simulate_uinput(what, code, arg):
         try:
             udevice.write(what, code, arg)
             udevice.syn()
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('uinput simulated input %s %s %s', what, code, arg)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug('uinput simulated input %s %s %s', what, code, arg)
             return True
         except Exception as e:
             udevice = None
-            _log.warn('uinput write failed: %s', e)
+            logger.warning('uinput write failed: %s', e)
 
 
 def simulate_key(code, event):  # X11 keycode but Solaar event code
@@ -324,7 +321,7 @@ def simulate_key(code, event):  # X11 keycode but Solaar event code
         return True
     if simulate_uinput(evdev.ecodes.EV_KEY, code - 8, event):
         return True
-    _log.warn('no way to simulate key input')
+    logger.warning('no way to simulate key input')
 
 
 def click_xtest(button, count):
@@ -366,7 +363,7 @@ def click(button, count):
         return True
     if click_uinput(button, count):
         return True
-    _log.warn('no way to simulate mouse click')
+    logger.warning('no way to simulate mouse click')
     return False
 
 
@@ -387,7 +384,7 @@ def simulate_scroll(dx, dy):
             success = simulate_uinput(evdev.ecodes.EV_REL, evdev.ecodes.REL_WHEEL, dy)
         if success:
             return True
-    _log.warn('no way to simulate scrolling')
+    logger.warning('no way to simulate scrolling')
 
 
 def thumb_wheel_up(f, r, d, a):
@@ -465,7 +462,7 @@ class RuleComponent:
             k, v = next(iter(c.items()))
             if k in COMPONENTS:
                 return COMPONENTS[k](v)
-        _log.warn('illegal component in rule: %s', c)
+        logger.warning('illegal component in rule: %s', c)
         return Condition()
 
 
@@ -480,8 +477,8 @@ class Rule(RuleComponent):
         return 'Rule%s[%s]' % (source, ', '.join([c.__str__() for c in self.components]))
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate rule: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate rule: %s', self)
         result = True
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, result)
@@ -508,8 +505,8 @@ class Condition(RuleComponent):
         return 'CONDITION'
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return False
 
 
@@ -525,8 +522,8 @@ class Not(Condition):
         return 'Not: ' + str(self.component)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         result = self.component.evaluate(feature, notification, device, status, last_result)
         return None if result is None else not result
 
@@ -543,8 +540,8 @@ class Or(Condition):
         return 'Or: [' + ', '.join(str(c) for c in self.components) + ']'
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         result = False
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, last_result)
@@ -567,8 +564,8 @@ class And(Condition):
         return 'And: [' + ', '.join(str(c) for c in self.components) + ']'
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         result = True
         for component in self.components:
             result = component.evaluate(feature, notification, device, status, last_result)
@@ -634,21 +631,21 @@ class Process(Condition):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn(
+                logger.warning(
                     'rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s',
                     self
                 )
         if not isinstance(process, str):
             if warn:
-                _log.warn('rule Process argument not a string: %s', process)
+                logger.warning('rule Process argument not a string: %s', process)
             self.process = str(process)
 
     def __str__(self):
         return 'Process: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
         focus = x11_focus_prog() if not wayland else gnome_dbus_focus_prog()
@@ -665,21 +662,21 @@ class MouseProcess(Condition):
         self.process = process
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
-                _log.warn(
+                logger.warning(
                     'rules cannot access active mouse process '
                     'in X11 or in Wayland under GNOME with Solaar Extension for GNOME - %s', self
                 )
         if not isinstance(process, str):
             if warn:
-                _log.warn('rule MouseProcess argument not a string: %s', process)
+                logger.warning('rule MouseProcess argument not a string: %s', process)
             self.process = str(process)
 
     def __str__(self):
         return 'MouseProcess: ' + str(self.process)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         if not isinstance(self.process, str):
             return False
         pointer_focus = x11_pointer_prog() if not wayland else gnome_dbus_pointer_prog()
@@ -695,7 +692,7 @@ class Feature(Condition):
     def __init__(self, feature, warn=True):
         if not (isinstance(feature, str) and feature in _F):
             if warn:
-                _log.warn('rule Feature argument not name of a feature: %s', feature)
+                logger.warning('rule Feature argument not name of a feature: %s', feature)
             self.feature = None
         self.feature = _F[feature]
 
@@ -703,8 +700,8 @@ class Feature(Condition):
         return 'Feature: ' + str(self.feature)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return feature == self.feature
 
     def data(self):
@@ -716,7 +713,7 @@ class Report(Condition):
     def __init__(self, report, warn=True):
         if not (isinstance(report, int)):
             if warn:
-                _log.warn('rule Report argument not an integer: %s', report)
+                logger.warning('rule Report argument not an integer: %s', report)
             self.report = -1
         else:
             self.report = report
@@ -725,8 +722,8 @@ class Report(Condition):
         return 'Report: ' + str(self.report)
 
     def evaluate(self, report, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return (notification.address >> 4) == self.report
 
     def data(self):
@@ -739,7 +736,7 @@ class Setting(Condition):
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
-                _log.warn('rule Setting argument not list with minimum length 3: %s', args)
+                logger.warning('rule Setting argument not list with minimum length 3: %s', args)
             self.args = []
         else:
             self.args = args
@@ -748,24 +745,24 @@ class Setting(Condition):
         return 'Setting: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, report, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         if len(self.args) < 3:
             return None
         dev = _Device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
-            _log.warn('Setting condition: device %s is not known', self.args[0])
+            logger.warning('Setting condition: device %s is not known', self.args[0])
             return False
         setting = next((s for s in dev.settings if s.name == self.args[1]), None)
         if setting is None:
-            _log.warn('Setting condition: setting %s is not the name of a setting for %s', self.args[1], dev.name)
+            logger.warning('Setting condition: setting %s is not the name of a setting for %s', self.args[1], dev.name)
             return None
         # should the value argument be checked to be sure it is acceptable?? needs to be careful about boolean toggle
         # TODO add compare  methods for more validators
         try:
             result = setting.compare(self.args[2:], setting.read())
         except Exception as e:
-            _log.warn('Setting condition: error when checking setting %s: %s', self.args, e)
+            logger.warning('Setting condition: error when checking setting %s: %s', self.args, e)
             result = False
         return result
 
@@ -794,19 +791,19 @@ class Modifiers(Condition):
                 self.modifiers.append(k)
             else:
                 if warn:
-                    _log.warn('unknown rule Modifier value: %s', k)
+                    logger.warning('unknown rule Modifier value: %s', k)
 
     def __str__(self):
         return 'Modifiers: ' + str(self.desired)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         if gkeymap:
             current = gkeymap.get_modifier_state()  # get the current keyboard modifier
             return self.desired == (current & MODIFIER_MASK)
         else:
-            _log.warn('no keymap so cannot determine modifier keys')
+            logger.warning('no keymap so cannot determine modifier keys')
             return False
 
     def data(self):
@@ -825,16 +822,16 @@ class Key(Condition):
 
         if not args or not isinstance(args, (list, str)):
             if warn:
-                _log.warn('rule Key arguments unknown: %s' % args)
+                logger.warning('rule Key arguments unknown: %s' % args)
             key = default_key
             action = default_action
         elif isinstance(args, str):
-            _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+            logger.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
             key = args
             action = default_action
         elif isinstance(args, list):
             if len(args) == 1:
-                _log.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+                logger.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
                 key, action = args[0], default_action
             elif len(args) >= 2:
                 key, action = args[:2]
@@ -843,22 +840,22 @@ class Key(Condition):
             self.key = _CONTROL[key]
         else:
             if warn:
-                _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+                logger.warning('rule Key key name not name of a Logitech key: %s' % key)
             self.key = default_key
 
         if isinstance(action, str) and action in (self.DOWN, self.UP):
             self.action = action
         else:
             if warn:
-                _log.warn('rule Key action unknown: %s, assuming %s' % (action, default_action))
+                logger.warning('rule Key action unknown: %s, assuming %s' % (action, default_action))
             self.action = default_action
 
     def __str__(self):
         return 'Key: %s (%s)' % ((str(self.key) if self.key else 'None'), self.action)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
 
     def data(self):
@@ -874,7 +871,7 @@ class KeyIsDown(Condition):
 
         if not args or not isinstance(args, str):
             if warn:
-                _log.warn('rule KeyDown arguments unknown: %s' % args)
+                logger.warning('rule KeyDown arguments unknown: %s' % args)
             key = default_key
         elif isinstance(args, str):
             key = args
@@ -883,15 +880,15 @@ class KeyIsDown(Condition):
             self.key = _CONTROL[key]
         else:
             if warn:
-                _log.warn('rule Key key name not name of a Logitech key: %s' % key)
+                logger.warning('rule Key key name not name of a Logitech key: %s' % key)
             self.key = default_key
 
     def __str__(self):
         return 'KeyIsDown: %s' % (str(self.key) if self.key else 'None')
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return key_is_down(self.key)
 
     def data(self):
@@ -920,13 +917,13 @@ class Test(Condition):
             test = [test]
         if isinstance(test, list) and all(isinstance(t, int) for t in test):
             if warn:
-                _log.warn('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
+                logger.warning('Test rules consisting of numbers are deprecated, converting to a TestBytes condition')
             self.__class__ = TestBytes
             self.__init__(test, warn=warn)
         elif isinstance(test, list):
             if test[0] in MOUSE_GESTURE_TESTS:
                 if warn:
-                    _log.warn('mouse movement test %s deprecated, converting to a MouseGesture', test)
+                    logger.warning('mouse movement test %s deprecated, converting to a MouseGesture', test)
                 self.__class__ = MouseGesture
                 self.__init__(MOUSE_GESTURE_TESTS[0][test], warn=warn)
             elif test[0] in TESTS:
@@ -935,19 +932,19 @@ class Test(Condition):
                 self.parameter = test[1] if len(test) > 1 else None
             else:
                 if warn:
-                    _log.warn('rule Test name not name of a test: %s', test)
+                    logger.warning('rule Test name not name of a test: %s', test)
                 self.test = 'False'
                 self.function = TESTS['False'][0]
         else:
             if warn:
-                _log.warn('rule Test argument not valid %s', test)
+                logger.warning('rule Test argument not valid %s', test)
 
     def __str__(self):
         return 'Test: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return self.function(feature, notification.address, notification.data, self.parameter)
 
     def data(self):
@@ -965,14 +962,14 @@ class TestBytes(Condition):
             self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
         else:
             if warn:
-                _log.warn('rule TestBytes argument not valid %s', test)
+                logger.warning('rule TestBytes argument not valid %s', test)
 
     def __str__(self):
         return 'TestBytes: ' + str(self.test)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return self.function(feature, notification.address, notification.data)
 
     def data(self):
@@ -991,15 +988,15 @@ class MouseGesture(Condition):
         for x in movements:
             if x not in self.MOVEMENTS and x not in _CONTROL:
                 if warn:
-                    _log.warn('rule Mouse Gesture argument not direction or name of a Logitech key: %s', x)
+                    logger.warning('rule Mouse Gesture argument not direction or name of a Logitech key: %s', x)
         self.movements = movements
 
     def __str__(self):
         return 'MouseGesture: ' + ' '.join(self.movements)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         if feature == _F.MOUSE_GESTURE:
             d = notification.data
             data = _unpack('!' + (int(len(d) / 2) * 'h'), d)
@@ -1033,7 +1030,7 @@ class Active(Condition):
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
-                _log.warn('rule Active argument not a string: %s', devID)
+                logger.warning('rule Active argument not a string: %s', devID)
             self.devID = ''
         self.devID = devID
 
@@ -1041,8 +1038,8 @@ class Active(Condition):
         return 'Active: ' + str(self.devID)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         dev = _Device.find(self.devID)
         return bool(dev and dev.ping())
 
@@ -1055,7 +1052,7 @@ class Device(Condition):
     def __init__(self, devID, warn=True):
         if not (isinstance(devID, str)):
             if warn:
-                _log.warn('rule Device argument not a string: %s', devID)
+                logger.warning('rule Device argument not a string: %s', devID)
             self.devID = ''
         self.devID = devID
 
@@ -1063,8 +1060,8 @@ class Device(Condition):
         return 'Device: ' + str(self.devID)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         return device.unitId == self.devID or device.serial == self.devID
 
     def data(self):
@@ -1076,7 +1073,7 @@ class Host(Condition):
     def __init__(self, host, warn=True):
         if not (isinstance(host, str)):
             if warn:
-                _log.warn('rule Host Name argument not a string: %s', host)
+                logger.warning('rule Host Name argument not a string: %s', host)
             self.host = ''
         self.host = host
 
@@ -1084,8 +1081,8 @@ class Host(Condition):
         return 'Host: ' + str(self.host)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('evaluate condition: %s', self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug('evaluate condition: %s', self)
         import socket
         hostname = socket.getfqdn()
         return hostname.startswith(self.host)
@@ -1109,13 +1106,13 @@ class KeyPress(Action):
         self.key_names, self.action = self.regularize_args(args)
         if not isinstance(self.key_names, list):
             if warn:
-                _log.warn('rule KeyPress keys not key names %s', self.keys_names)
+                logger.warning('rule KeyPress keys not key names %s', self.keys_names)
             self.key_symbols = []
         else:
             self.key_symbols = [XK_KEYS.get(k, None) for k in self.key_names]
         if not all(self.key_symbols):
             if warn:
-                _log.warn('rule KeyPress keys not key names %s', self.key_names)
+                logger.warning('rule KeyPress keys not key names %s', self.key_names)
             self.key_symbols = []
 
     def regularize_args(self, args):
@@ -1168,7 +1165,7 @@ class KeyPress(Action):
         for k in keysyms:
             (keycode, level) = self.keysym_to_keycode(k, modifiers)
             if keycode is None:
-                _log.warn('rule KeyPress key symbol not currently available %s', self)
+                logger.warning('rule KeyPress key symbol not currently available %s', self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
@@ -1183,15 +1180,15 @@ class KeyPress(Action):
     def evaluate(self, feature, notification, device, status, last_result):
         if gkeymap:
             current = gkeymap.get_modifier_state()
-            if _log.isEnabledFor(_INFO):
-                _log.info('KeyPress action: %s %s, group %s, modifiers %s', self.key_names, self.action, kbdgroup(), current)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info('KeyPress action: %s %s, group %s, modifiers %s', self.key_names, self.action, kbdgroup(), current)
             if self.action != RELEASE:
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
             _time.sleep(0.01)
         else:
-            _log.warn('no keymap so cannot determine which keycode to send')
+            logger.warning('no keymap so cannot determine which keycode to send')
         return None
 
     def data(self):
@@ -1215,7 +1212,7 @@ class MouseScroll(Action):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
             if warn:
-                _log.warn('rule MouseScroll argument not two numbers %s', amounts)
+                logger.warning('rule MouseScroll argument not two numbers %s', amounts)
             amounts = [0, 0]
         self.amounts = amounts
 
@@ -1228,8 +1225,8 @@ class MouseScroll(Action):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
-        if _log.isEnabledFor(_INFO):
-            _log.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('MouseScroll action: %s %s %s', self.amounts, last_result, amounts)
         dx, dy = amounts
         simulate_scroll(dx, dy)
         _time.sleep(0.01)
@@ -1249,7 +1246,7 @@ class MouseClick(Action):
         self.button = str(args[0]) if len(args) >= 0 else None
         if self.button not in buttons:
             if warn:
-                _log.warn('rule MouseClick action: button %s not known', self.button)
+                logger.warning('rule MouseClick action: button %s not known', self.button)
             self.button = None
         count = args[1] if len(args) >= 2 else 1
         try:
@@ -1258,15 +1255,15 @@ class MouseClick(Action):
             if count in [CLICK, DEPRESS, RELEASE]:
                 self.count = count
             elif warn:
-                _log.warn('rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE', count)
+                logger.warning('rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE', count)
                 self.count = 1
 
     def __str__(self):
         return 'MouseClick: %s (%d)' % (self.button, self.count)
 
     def evaluate(self, feature, notification, device, status, last_result):
-        if _log.isEnabledFor(_INFO):
-            _log.info('MouseClick action: %d %s' % (self.count, self.button))
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('MouseClick action: %d %s' % (self.count, self.button))
         if self.button and self.count:
             click(buttons[self.button], self.count)
         _time.sleep(0.01)
@@ -1281,7 +1278,7 @@ class Set(Action):
     def __init__(self, args, warn=True):
         if not (isinstance(args, list) and len(args) > 2):
             if warn:
-                _log.warn('rule Set argument not list with minimum length 3: %s', args)
+                logger.warning('rule Set argument not list with minimum length 3: %s', args)
             self.args = []
         else:
             self.args = args
@@ -1295,19 +1292,19 @@ class Set(Action):
 
         if len(self.args) < 3:
             return None
-        if _log.isEnabledFor(_INFO):
-            _log.info('Set action: %s', self.args)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('Set action: %s', self.args)
         dev = _Device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
-            _log.warn('Set action: device %s is not known', self.args[0])
+            logger.warning('Set action: device %s is not known', self.args[0])
             return None
         setting = next((s for s in dev.settings if s.name == self.args[1]), None)
         if setting is None:
-            _log.warn('Set action: setting %s is not the name of a setting for %s', self.args[1], dev.name)
+            logger.warning('Set action: setting %s is not the name of a setting for %s', self.args[1], dev.name)
             return None
         args = setting.acceptable(self.args[2:], setting.read())
         if args is None:
-            _log.warn('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
+            logger.warning('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
             return None
         _change_setting(dev, setting, args)
         return None
@@ -1323,7 +1320,7 @@ class Execute(Action):
             args = [args]
         if not (isinstance(args, list) and all(isinstance(arg), str) for arg in args):
             if warn:
-                _log.warn('rule Execute argument not list of strings: %s', args)
+                logger.warning('rule Execute argument not list of strings: %s', args)
             self.args = []
         else:
             self.args = args
@@ -1333,8 +1330,8 @@ class Execute(Action):
 
     def evaluate(self, feature, notification, device, status, last_result):
         import subprocess
-        if _log.isEnabledFor(_INFO):
-            _log.info('Execute action: %s', self.args)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
         return None
 
@@ -1352,10 +1349,10 @@ class Later(Action):
             args = [args]
         if not (isinstance(args, list) and len(args) >= 1):
             if warn:
-                _log.warn('rule Later argument not list with minimum length 1: %s', args)
+                logger.warning('rule Later argument not list with minimum length 1: %s', args)
         elif not (isinstance(args[0], int)) or not 0 < args[0] < 101:
             if warn:
-                _log.warn('rule Later argument delay not integer between 1 and 100: %s', args)
+                logger.warning('rule Later argument delay not integer between 1 and 100: %s', args)
         else:
             self.delay = args[0]
             self.rule = Rule(args[1:], warn=warn)
@@ -1446,8 +1443,8 @@ def key_is_down(key):
 
 
 def evaluate_rules(feature, notification, device, status):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('evaluating rules on %s', notification)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('evaluating rules on %s', notification)
     rules.evaluate(feature, notification, device, status, True)
 
 
@@ -1541,15 +1538,15 @@ def _save_config_rule_file(file_name=_file_path):
     # Save only user-defined rules
     rules_to_save = sum((r.data()['Rule'] for r in rules.components if r.source == file_name), [])
     if True:  # save even if there are no rules to save
-        if _log.isEnabledFor(_INFO):
-            _log.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
+        if logger.isEnabledFor(logging.INFO):
+            logger.info('saving %d rule(s) to %s', len(rules_to_save), file_name)
         try:
             with open(file_name, 'w') as f:
                 if rules_to_save:
                     f.write('%YAML 1.3\n')  # Write version manually
                 _yaml_dump_all(convert([r['Rule'] for r in rules_to_save]), f, **dump_settings)
         except Exception as e:
-            _log.error('failed to save to %s\n%s', file_name, e)
+            logger.error('failed to save to %s\n%s', file_name, e)
             return False
     return True
 
@@ -1563,13 +1560,13 @@ def _load_config_rule_file():
                 loaded_rules = []
                 for loaded_rule in _yaml_safe_load_all(config_file):
                     rule = Rule(loaded_rule, source=_file_path)
-                    if _log.isEnabledFor(_DEBUG):
-                        _log.debug('load rule: %s', rule)
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug('load rule: %s', rule)
                     loaded_rules.append(rule)
-                if _log.isEnabledFor(_INFO):
-                    _log.info('loaded %d rules from %s', len(loaded_rules), config_file.name)
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info('loaded %d rules from %s', len(loaded_rules), config_file.name)
         except Exception as e:
-            _log.error('failed to load from %s\n%s', _file_path, e)
+            logger.error('failed to load from %s\n%s', _file_path, e)
     rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
 
 

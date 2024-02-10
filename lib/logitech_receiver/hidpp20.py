@@ -18,13 +18,9 @@
 
 # Logitech Unifying Receiver API.
 
+import logging
 import threading as _threading
 
-from logging import DEBUG as _DEBUG
-from logging import ERROR as _ERROR
-from logging import INFO as _INFO
-from logging import WARNING as _WARNING
-from logging import getLogger
 from struct import pack as _pack
 from struct import unpack as _unpack
 from typing import List
@@ -43,8 +39,7 @@ from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
 from .i18n import _
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 
 def hexint_presenter(dumper, data):
@@ -271,7 +266,7 @@ class FeaturesArray(dict):
             if fs_index:
                 count = self.device.request(fs_index << 8)
                 if count is None:
-                    _log.warn('FEATURE_SET found, but failed to read features count')
+                    logger.warn('FEATURE_SET found, but failed to read features count')
                     return False
                 else:
                     self.count = ord(count[:1]) + 1  # ROOT feature not included in count
@@ -455,8 +450,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             mapped_data = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack('!H', self._cid)))
             if mapped_data:
                 cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
-                if cid != self._cid and _log.isEnabledFor(_WARNING):
-                    _log.warn(
+                if cid != self._cid and logger.isEnabledFor(logging.WARNING):
+                    logger.warn(
                         f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
                         f'with a different control ID ({cid}) than requested ({self._cid}).'
                     )
@@ -469,8 +464,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             else:
                 raise FeatureCallError(msg='No reply from device.')
         except FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
-            if _log.isEnabledFor(_WARNING):
-                _log.warn(
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warn(
                     f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
                 )
             # Clear flags and set mapping target to self
@@ -527,8 +522,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and _log.isEnabledFor(_DEBUG):
-            _log.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
+        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
 class PersistentRemappableAction():
@@ -608,8 +603,8 @@ class KeysArray:
         elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
             self.keyversion = FEATURE.REPROG_CONTROLS_V2
         else:
-            if _log.isEnabledFor(_ERROR):
-                _log.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
+            if logger.isEnabledFor(logging.ERROR):
+                logger.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
             self.keyversion = None
         self.keys = [None] * count
 
@@ -634,8 +629,8 @@ class KeysArray:
                 self.cid_to_tid[cid] = tid
                 if group != 0:  # 0 = does not belong to a group
                     self.group_cids[special_keys.CID_GROUP[group]].append(cid)
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+        elif logger.isEnabledFor(logging.WARNING):
+            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
     def _ensure_all_keys_queried(self):
         """The retrieval of key information is lazy, but for certain functionality
@@ -697,8 +692,8 @@ class KeysArrayV1(KeysArray):
             cid, tid, flags = _unpack('!HHB', keydata[:5])
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
             self.cid_to_tid[cid] = tid
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+        elif logger.isEnabledFor(logging.WARNING):
+            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 class KeysArrayV4(KeysArrayV1):
@@ -717,8 +712,8 @@ class KeysArrayV4(KeysArrayV1):
             self.cid_to_tid[cid] = tid
             if group != 0:  # 0 = does not belong to a group
                 self.group_cids[special_keys.CID_GROUP[group]].append(cid)
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+        elif logger.isEnabledFor(logging.WARNING):
+            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 # we are only interested in the current host, so use 0xFF for the host throughout
@@ -762,8 +757,8 @@ class KeysArrayPersistent(KeysArray):
             elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
                 remapped = modifiers = 0
             self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
-        elif _log.isEnabledFor(_WARNING):
-            _log.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+        elif logger.isEnabledFor(logging.WARNING):
+            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 # Gesture Ids for feature GESTURE_2
@@ -1050,8 +1045,8 @@ class Spec:
         try:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
         except FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
-            if _log.isEnabledFor(_WARNING):
-                _log.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
             return None
         return _bytes2int(value[:self.byte_count])
 
@@ -1093,12 +1088,12 @@ class Gestures:
                     self.params[param.param] = param
                 elif field_high == 0x04:
                     if field_low != 0x00:
-                        _log.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
+                        logger.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
                 elif field_high & 0xF0 == 0x40:
                     spec = Spec(device, field_low, field_high)
                     self.specs[spec.spec] = spec
                 else:
-                    _log.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
+                    logger.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
                 index += 1
 
     def gesture(self, gesture):
@@ -1581,7 +1576,7 @@ class OnboardProfiles:
         try:
             written = 1 if OnboardProfiles.write_sector(device, 0, self.to_bytes()) else 0
         except Exception as e:
-            _log.warn('Exception writing onboard profile control sector')
+            logger.warn('Exception writing onboard profile control sector')
             raise e
         for p in self.profiles.values():
             try:
@@ -1589,7 +1584,7 @@ class OnboardProfiles:
                     raise Exception(f'Sector {p.sector} not a writable sector')
                 written += 1 if OnboardProfiles.write_sector(device, p.sector, p.to_bytes(self.size)) else 0
             except Exception as e:
-                _log.warn(f'Exception writing onboard profile sector {p.sector}')
+                logger.warn(f'Exception writing onboard profile sector {p.sector}')
                 raise e
         return written
 
@@ -1639,8 +1634,8 @@ def get_firmware(device):
                     fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, '', '', None)
 
                 fw.append(fw_info)
-                # if _log.isEnabledFor(_DEBUG):
-                #     _log.debug("device %d firmware %s", devnumber, fw_info)
+                # if logger.isEnabledFor(logging.DEBUG):
+                #     logger.debug("device %d firmware %s", devnumber, fw_info)
         return tuple(fw)
 
 
@@ -1670,8 +1665,8 @@ def get_kind(device):
     kind = feature_request(device, FEATURE.DEVICE_NAME, 0x20)
     if kind:
         kind = ord(kind[:1])
-        # if _log.isEnabledFor(_DEBUG):
-        #     _log.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
+        # if logger.isEnabledFor(logging.DEBUG):
+        #     logger.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
         return DEVICE_KIND[kind]
 
 
@@ -1691,7 +1686,7 @@ def get_name(device):
             if fragment:
                 name += fragment[:name_length - len(name)]
             else:
-                _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                logger.error('failed to read whole name of %s (expected %d chars)', device, name_length)
                 return None
 
         return name.decode('utf-8')
@@ -1714,7 +1709,7 @@ def get_friendly_name(device):
                 initial_null = 0 if fragment[0] else 1  # initial null actually seen on a device
                 name += fragment[initial_null:name_length + initial_null - len(name)]
             else:
-                _log.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                logger.error('failed to read whole name of %s (expected %d chars)', device, name_length)
                 return None
 
         return name.decode('utf-8')
@@ -1730,8 +1725,8 @@ def decipher_battery_status(report):
     discharge, next, status = _unpack('!BBB', report[:3])
     discharge = None if discharge == 0 else discharge
     status = BATTERY_STATUS[status]
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('battery status %s%% charged, next %s%%, status %s', discharge, next, status)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('battery status %s%% charged, next %s%%, status %s', discharge, next, status)
     return FEATURE.BATTERY_STATUS, discharge, next, status, None
 
 
@@ -1744,8 +1739,8 @@ def get_battery_unified(device):
 def decipher_battery_unified(report):
     discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
     status = BATTERY_STATUS[status]
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('battery unified %s%% charged, level %s, charging %s', discharge, level, status)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('battery unified %s%% charged, level %s, charging %s', discharge, level, status)
     level = (
         _BATTERY_APPROX.full if level == 8  # full
         else _BATTERY_APPROX.good if level == 4  # good
@@ -1806,8 +1801,8 @@ def decipher_battery_voltage(report):
         if level[0] < voltage:
             charge_lvl = level[1]
             break
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug(
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(
             'battery voltage %d mV, charging %s, status %d = %s, level %s, type %s', voltage, status, (flags & 0x03),
             charge_sts, charge_lvl, charge_type
         )
@@ -2015,8 +2010,8 @@ def get_host_names(device):
 def set_host_name(device, name, currentName=''):
     name = bytearray(name, 'utf-8')
     currentName = bytearray(currentName, 'utf-8')
-    if _log.isEnabledFor(_INFO):
-        _log.info('Setting host name to %s', name)
+    if logger.isEnabledFor(logging.INFO):
+        logger.info('Setting host name to %s', name)
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     if state:
         flags, _ignore, _ignore, currentHost = _unpack('!BBBB', state[:4])

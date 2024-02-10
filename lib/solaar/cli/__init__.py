@@ -17,15 +17,12 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse as _argparse
+import logging
 import sys as _sys
-
-from logging import DEBUG as _DEBUG
-from logging import getLogger
 
 from solaar import NAME
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -114,12 +111,12 @@ def _receivers(dev_path=None):
             continue
         try:
             r = Receiver.open(dev_info)
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('[%s] => %s', dev_info.path, r)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug('[%s] => %s', dev_info.path, r)
             if r:
                 yield r
         except Exception as e:
-            _log.exception('opening ' + str(dev_info))
+            logger.exception('opening ' + str(dev_info))
             _sys.exit('%s: error: %s' % (NAME, str(e)))
 
 
@@ -131,12 +128,12 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             d = Device.open(dev_info) if dev_info.isDevice else Receiver.open(dev_info)
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('[%s] => %s', dev_info.path, d)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug('[%s] => %s', dev_info.path, d)
             if d is not None:
                 yield d
         except Exception as e:
-            _log.exception('opening ' + str(dev_info))
+            logger.exception('opening ' + str(dev_info))
             _sys.exit('%s: error: %s' % (NAME, str(e)))
 
 

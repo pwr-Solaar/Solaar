@@ -16,10 +16,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
 import os
 
-from logging import DEBUG as _DEBUG
-from logging import getLogger
 from time import time as _timestamp
 
 import solaar.gtk as gtk
@@ -35,8 +34,7 @@ from .about import show_window as _show_about_window
 from .window import popup as _window_popup
 from .window import toggle as _window_toggle
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 # constants
@@ -95,8 +93,8 @@ def _scroll(tray_icon, event, direction=None):
         return
     _last_scroll = now
 
-    # if _log.isEnabledFor(_DEBUG):
-    #     _log.debug("scroll direction %s", direction)
+    # if logger.isEnabledFor(logging.DEBUG):
+    #     logger.debug("scroll direction %s", direction)
 
     global _picked_device
     candidate = None
@@ -141,8 +139,8 @@ def _scroll(tray_icon, event, direction=None):
             _picked_device = None
 
     _picked_device = candidate or _picked_device
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('scroll: picked %s', _picked_device)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('scroll: picked %s', _picked_device)
     _update_tray_icon()
 
 
@@ -161,8 +159,8 @@ try:
             # treat unavailable versions the same as unavailable packages
             raise ImportError
 
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('using %sAppIndicator3' % ('Ayatana ' if ayatana_appindicator_found else ''))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('using %sAppIndicator3' % ('Ayatana ' if ayatana_appindicator_found else ''))
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
@@ -228,8 +226,8 @@ try:
 
 except ImportError:
 
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('using StatusIcon')
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('using StatusIcon')
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
@@ -339,8 +337,8 @@ def _pick_device_with_lowest_battery():
             picked = info
             picked_level = level or 0
 
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('picked device with lowest battery: %s', picked)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('picked device with lowest battery: %s', picked)
 
     return picked
 
@@ -424,7 +422,7 @@ def _remove_receiver(receiver):
 
 def _update_menu_item(index, device):
     if device is None or device.status is None:
-        _log.warn('updating an inactive device %s, assuming disconnected', device)
+        logger.warning('updating an inactive device %s, assuming disconnected', device)
         return None
 
     menu_items = _menu.get_children()
