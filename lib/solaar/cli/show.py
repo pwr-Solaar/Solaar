@@ -243,6 +243,8 @@ def _print_device(dev, num=None):
                         v = setting.val_to_string(setting.read(False))
                     except _hidpp20.FeatureCallError as e:
                         v = 'HID++ error ' + str(e)
+                    except AssertionError as e:
+                        v = 'AssertionError ' + str(e)
                     print('            %s        : %s' % (setting.label, v))
 
     if dev.online and dev.keys:
