@@ -411,9 +411,7 @@ def _process_feature_notification(device, status, n, feature):
         if (n.address == 0x00):
             level = _unpack('!B', n.data[1:2])[0]
             from solaar.ui.config_panel import record_setting  # prevent circular import
-            setting = next((s for s in device.settings if s.name == _st.Backlight2Level.name), None)
-            if setting:
-                record_setting(device, setting, [level])
+            record_setting(device, _st.Backlight2Level, [level])
 
     elif feature == _F.REPROG_CONTROLS_V4:
         if n.address == 0x00:
@@ -443,9 +441,7 @@ def _process_feature_notification(device, status, n, feature):
                 logger.info('%s: WHEEL: ratchet: %d', device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
                 from solaar.ui.config_panel import record_setting  # prevent circular import
-                setting = next((s for s in device.settings if s.name == _st.ScrollRatchet.name), None)
-                if setting:
-                    record_setting(device, setting, [2 if ratchet else 1])
+                record_setting(device, _st.ScrollRatchet, [2 if ratchet else 1])
         else:
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: unknown WHEEL %s', device, n)
@@ -456,33 +452,28 @@ def _process_feature_notification(device, status, n, feature):
                 logger.info('%s: unknown ONBOARD PROFILES %s', device, n)
         else:
             if (n.address == 0x00):
-                resolution_index = None
                 profile_sector = _unpack('!H', n.data[:2])[0]
+                if profile_sector:
+                    profile_change(device, profile_sector)
             elif (n.address == 0x10):
                 resolution_index = _unpack('!B', n.data[:1])[0]
                 profile_sector = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
-            if profile_sector:
-                profile_change(device, profile_sector, resolution_index)
+                for profile in device.profiles.profiles.values() if device.profiles else []:
+                    if profile.sector == profile_sector:
+                        from solaar.ui.config_panel import record_setting  # prevent circular import
+                        record_setting(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
 
     _diversion.process_notification(device, status, n, feature)
     return True
 
 
 # change UI to show result of onboard profile change
-def profile_change(device, profile_sector, resolution_index=None):
+def profile_change(device, profile_sector):
     from solaar.ui.config_panel import record_setting  # prevent circular import
-    setting = next((s for s in device.settings if s.name == _st.OnboardProfiles.name), None)
-    if setting:
-        record_setting(device, setting, [profile_sector])
-    from solaar.ui.config_panel import record_setting  # prevent circular import
+    record_setting(device, _st.OnboardProfiles, [profile_sector])
     for profile in device.profiles.profiles.values() if device.profiles else []:
         if profile.sector == profile_sector:
-            if resolution_index is None:
-                resolution_index = profile.resolution_default_index
-            setting = next((s for s in device.settings if s.name == _st.AdjustableDpi.name), None)
-            if setting:
-                record_setting(device, setting, [profile.resolutions[resolution_index]])
-            setting = next((s for s in device.settings if s.name == _st.ReportRate.name), None)
-            if setting:
-                record_setting(device, setting, [profile.report_rate])
+            resolution_index = profile.resolution_default_index
+            record_setting(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
+            record_setting(device, _st.ReportRate, [profile.report_rate])
             break
