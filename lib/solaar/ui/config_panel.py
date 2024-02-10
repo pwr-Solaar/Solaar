@@ -711,15 +711,15 @@ def _create_sbox(s, device):
 def _update_setting_item(sbox, value, is_online=True, sensitive=True, nullOK=False):
     #    sbox._spinner.set_visible(False)   # don't repack item box
     sbox._spinner.stop()
+    sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
     if value is None and not nullOK:
-        sbox._control.set_sensitive(False)
-        _change_icon(False, sbox._change_icon)
+        sbox._control.set_sensitive(sensitive is True)
+        _change_icon(sensitive, sbox._change_icon)
         sbox._failed.set_visible(is_online)
         return
     sbox._failed.set_visible(False)
     sbox._control.set_sensitive(False)
     sbox._control.set_value(value)
-    sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
     sbox._control.set_sensitive(sensitive is True)
     _change_icon(sensitive, sbox._change_icon)
 
