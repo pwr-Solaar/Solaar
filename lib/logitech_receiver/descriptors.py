@@ -24,10 +24,6 @@
 # - the device uses a USB interface other than 2
 # - the name or codename should be different from what the device reports
 
-from collections import namedtuple
-
-from . import settings_templates as _ST
-from .common import NamedInts as _NamedInts
 from .hidpp10 import DEVICE_KIND as _DK
 from .hidpp10 import REGISTERS as _R
 
@@ -35,11 +31,32 @@ from .hidpp10 import REGISTERS as _R
 #
 #
 
-_DeviceDescriptor = namedtuple(
-    '_DeviceDescriptor',
-    ('name', 'kind', 'wpid', 'codename', 'protocol', 'registers', 'settings', 'usbid', 'interface', 'btid')
-)
-del namedtuple
+
+class _DeviceDescriptor:
+
+    def __init__(
+        self,
+        name=None,
+        kind=None,
+        wpid=None,
+        codename=None,
+        protocol=None,
+        registers=None,
+        usbid=None,
+        interface=None,
+        btid=None
+    ):
+        self.name = name
+        self.kind = kind
+        self.wpid = wpid
+        self.codename = codename
+        self.protocol = protocol
+        self.registers = registers
+        self.usbid = usbid
+        self.interface = interface
+        self.btid = btid
+        self.settings = None
+
 
 DEVICES_WPID = {}
 DEVICES = {}
@@ -57,7 +74,6 @@ def _D(
     interface=None,
     btid=None,
 ):
-
     if kind is None:
         kind = (
             _DK.mouse if 'Mouse' in name else _DK.keyboard if 'Keyboard' in name else _DK.numpad
@@ -83,7 +99,6 @@ def _D(
         codename=codename,
         protocol=protocol,
         registers=registers,
-        settings=settings,
         usbid=usbid,
         interface=interface,
         btid=btid
@@ -157,13 +172,13 @@ def get_btid(btid):
 # The 'protocol' and 'wpid' fields are optional (they can be discovered at
 # runtime), but specifying them here speeds up device discovery and reduces the
 # USB traffic Solaar has to do to fully identify peripherals.
-# Same goes for HID++ 2.0 feature settings (like _feature_fn_swap).
 #
 # The 'registers' field indicates read-only registers, specifying a state. These
 # are valid (AFAIK) only to HID++ 1.0 devices.
 # The 'settings' field indicates a read/write register; based on them Solaar
-# generates, at runtime, the settings controls in the device panel. HID++ 1.0
-# devices may only have register-based settings; HID++ 2.0 devices may only have
+# generates, at runtime, the settings controls in the device panel.
+# Solaar now sets up this field in settings_templates.py to eliminate a imports loop.
+# HID++ 1.0 devices may only have register-based settings; HID++ 2.0 devices may only have
 # feature-based settings.
 
 # Devices are organized by kind
@@ -175,40 +190,38 @@ def get_btid(btid):
 
 _D('Wireless Keyboard EX110', codename='EX110', protocol=1.0, wpid='0055', registers=(_R.battery_status, ))
 _D('Wireless Keyboard S510', codename='S510', protocol=1.0, wpid='0056', registers=(_R.battery_status, ))
-_D('Wireless Wave Keyboard K550', codename='K550', protocol=1.0, wpid='0060', registers=(_R.battery_status, ),
-   settings=[_ST.RegisterFnSwap])
+_D('Wireless Wave Keyboard K550', codename='K550', protocol=1.0, wpid='0060', registers=(_R.battery_status, ))
 _D('Wireless Keyboard EX100', codename='EX100', protocol=1.0, wpid='0065', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK300', codename='MK300', protocol=1.0, wpid='0068', registers=(_R.battery_status, ))
 _D('Number Pad N545', codename='N545', protocol=1.0, wpid='2006', registers=(_R.battery_status, ))
 _D('Wireless Compact Keyboard K340', codename='K340', protocol=1.0, wpid='2007', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK700', codename='MK700', protocol=1.0, wpid='2008',
-   registers=(_R.battery_status, ), settings=[_ST.RegisterFnSwap])
+   registers=(_R.battery_status, ))
 _D('Wireless Wave Keyboard K350', codename='K350', protocol=1.0, wpid='200A', registers=(_R.battery_status, ))
 _D('Wireless Keyboard MK320', codename='MK320', protocol=1.0, wpid='200F', registers=(_R.battery_status, ))
 _D('Wireless Illuminated Keyboard K800', codename='K800', protocol=1.0, wpid='2010',
-    registers=(_R.battery_status, _R.three_leds), settings=[_ST.RegisterFnSwap, _ST.RegisterHandDetection])
-_D('Wireless Keyboard K520', codename='K520', protocol=1.0, wpid='2011',
-   registers=(_R.battery_status, ), settings=[_ST.RegisterFnSwap])
-_D('Wireless Solar Keyboard K750', codename='K750', protocol=2.0, wpid='4002', settings=[_ST.FnSwap])
+    registers=(_R.battery_status, _R.three_leds))
+_D('Wireless Keyboard K520', codename='K520', protocol=1.0, wpid='2011', registers=(_R.battery_status, ))
+_D('Wireless Solar Keyboard K750', codename='K750', protocol=2.0, wpid='4002')
 _D('Wireless Keyboard K270 (unifying)', codename='K270', protocol=2.0, wpid='4003')
-_D('Wireless Keyboard K360', codename='K360', protocol=2.0, wpid='4004', settings=[_ST.FnSwap])
+_D('Wireless Keyboard K360', codename='K360', protocol=2.0, wpid='4004')
 _D('Wireless Keyboard K230', codename='K230', protocol=2.0, wpid='400D')
-_D('Wireless Touch Keyboard K400', codename='K400', protocol=2.0, wpid=('400E', '4024'), settings=[_ST.FnSwap])
-_D('Wireless Keyboard MK270', codename='MK270', protocol=2.0, wpid='4023', settings=[_ST.FnSwap])
-_D('Illuminated Living-Room Keyboard K830', codename='K830', protocol=2.0, wpid='4032', settings=[_ST.NewFnSwap])
+_D('Wireless Touch Keyboard K400', codename='K400', protocol=2.0, wpid=('400E', '4024'))
+_D('Wireless Keyboard MK270', codename='MK270', protocol=2.0, wpid='4023')
+_D('Illuminated Living-Room Keyboard K830', codename='K830', protocol=2.0, wpid='4032')
 _D('Wireless Touch Keyboard K400 Plus', codename='K400 Plus', protocol=2.0, wpid='404D')
-_D('Wireless Multi-Device Keyboard K780', codename='K780', protocol=4.5, wpid='405B', settings=[_ST.NewFnSwap])
-_D('Wireless Keyboard K375s', codename='K375s', protocol=2.0, wpid='4061', settings=[_ST.K375sFnSwap])
+_D('Wireless Multi-Device Keyboard K780', codename='K780', protocol=4.5, wpid='405B')
+_D('Wireless Keyboard K375s', codename='K375s', protocol=2.0, wpid='4061')
 _D('Craft Advanced Keyboard', codename='Craft', protocol=4.5, wpid='4066', btid=0xB350)
-_D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E', settings=[_ST.FnSwap])
-_D('Wireless Keyboard K470', codename='K470', protocol=4.5, wpid='4075', settings=[_ST.FnSwap])
+_D('Wireless Illuminated Keyboard K800 new', codename='K800 new', protocol=4.5, wpid='406E')
+_D('Wireless Keyboard K470', codename='K470', protocol=4.5, wpid='4075')
 _D('MX Keys Keyboard', codename='MX Keys', protocol=4.5, wpid='408A', btid=0xB35B)
 _D('G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard', codename='G915 TKL', protocol=4.2, wpid='408E', usbid=0xC343)
-_D('Illuminated Keyboard', codename='Illuminated', protocol=1.0, usbid=0xc318, interface=1, settings=[_ST.RegisterFnSwap])
+_D('Illuminated Keyboard', codename='Illuminated', protocol=1.0, usbid=0xc318, interface=1)
 _D('G213 Prodigy Gaming Keyboard', codename='G213', usbid=0xc336, interface=1)
 _D('G512 RGB Mechanical Gaming Keyboard', codename='G512', usbid=0xc33c, interface=1)
 _D('G815 Mechanical Keyboard', codename='G815', usbid=0xc33f, interface=1)
-_D('diNovo Edge Keyboard', codename='diNovo', protocol=1.0, wpid='C714', settings=[_ST.RegisterFnSwap])
+_D('diNovo Edge Keyboard', codename='diNovo', protocol=1.0, wpid='C714')
 _D('K845 Mechanical Keyboard', codename='K845', usbid=0xc341, interface=3)
 
 # Mice
@@ -229,41 +242,25 @@ _D('MX Air', codename='MX Air', protocol=1.0, kind=_DK.mouse, wpid=('1007', '100
 _D('MX Revolution', codename='MX Revolution', protocol=1.0, kind=_DK.mouse, wpid=('1008', '100C'),
     registers=(_R.battery_charge, ))
 _D('MX620 Laser Cordless Mouse', codename='MX620', protocol=1.0, wpid=('100A', '1016'), registers=(_R.battery_charge, ))
-_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid=('100B', '100F'),
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+_D('VX Nano Cordless Laser Mouse', codename='VX Nano', protocol=1.0, wpid=('100B', '100F'), registers=(_R.battery_charge, ))
 _D('V450 Nano Cordless Laser Mouse', codename='V450 Nano', protocol=1.0, wpid='1011', registers=(_R.battery_charge, ))
-_D('V550 Nano Cordless Laser Mouse', codename='V550 Nano', protocol=1.0, wpid='1013',
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll, ])
+_D('V550 Nano Cordless Laser Mouse', codename='V550 Nano', protocol=1.0, wpid='1013', registers=(_R.battery_charge, ))
 _D('MX 1100 Cordless Laser Mouse', codename='MX 1100', protocol=1.0, kind=_DK.mouse, wpid='1014',
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
-_D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017',
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
-
-
-class _PerformanceMXDpi(_ST.RegisterDpi):
-    choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
-    validator_options = {'choices': choices_universe}
-
-
-_D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A',
-    registers=(_R.battery_status, _R.three_leds),
-   settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
-_D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpid='101B',
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+    registers=(_R.battery_charge, ))
+_D('Anywhere Mouse MX', codename='Anywhere MX', protocol=1.0, wpid='1017', registers=(_R.battery_charge, ))
+_D('Performance Mouse MX', codename='Performance MX', protocol=1.0, wpid='101A', registers=(_R.battery_status, _R.three_leds))
+_D('Marathon Mouse M705 (M-R0009)', codename='M705 (M-R0009)', protocol=1.0, wpid='101B', registers=(_R.battery_charge, ))
 _D('Wireless Mouse M350', codename='M350', protocol=1.0, wpid='101C', registers=(_R.battery_charge, ))
-_D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D',
-    registers=(_R.battery_charge, ), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
-_D('Wireless Mouse M305', codename='M305', protocol=1.0, wpid='101F',
-   registers=(_R.battery_status, ), settings=[_ST.RegisterSideScroll])
+_D('Wireless Mouse M505', codename='M505/B605', protocol=1.0, wpid='101D', registers=(_R.battery_charge, ))
+_D('Wireless Mouse M305', codename='M305', protocol=1.0, wpid='101F', registers=(_R.battery_status, ))
 _D('Wireless Mouse M215', codename='M215', protocol=1.0, wpid='1020')
 _D('G700 Gaming Mouse', codename='G700', protocol=1.0, wpid='1023', usbid=0xc06b, interface=1,
-    registers=(_R.battery_status, _R.three_leds,), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+   registers=(_R.battery_status, _R.three_leds,))
 _D('Wireless Mouse M310', codename='M310', protocol=1.0, wpid='1024', registers=(_R.battery_status, ))
-_D('Wireless Mouse M510', codename='M510', protocol=1.0, wpid='1025',
-   registers=(_R.battery_status, ), settings=[_ST.RegisterSideScroll])
+_D('Wireless Mouse M510', codename='M510', protocol=1.0, wpid='1025', registers=(_R.battery_status, ))
 _D('Fujitsu Sonic Mouse', codename='Sonic', protocol=1.0, wpid='1029')
 _D('G700s Gaming Mouse', codename='G700s', protocol=1.0, wpid='102A', usbid=0xc07c, interface=1,
-    registers=(_R.battery_status, _R.three_leds,), settings=[_ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+    registers=(_R.battery_status, _R.three_leds,))
 _D('Couch Mouse M515', codename='M515', protocol=2.0, wpid='4007')
 _D('Wireless Mouse M175', codename='M175', protocol=2.0, wpid='4008')
 _D('Wireless Mouse M325', codename='M325', protocol=2.0, wpid='400A')
@@ -274,24 +271,20 @@ _D('Touch Mouse M600', codename='M600', protocol=2.0, wpid='401A')
 _D('Wireless Mouse M150', codename='M150', protocol=2.0, wpid='4022')
 _D('Wireless Mouse M185', codename='M185', protocol=2.0, wpid='4038')
 _D('Wireless Mouse MX Master', codename='MX Master', protocol=4.5, wpid='4041', btid=0xb012)
-_D('Anywhere Mouse MX 2', codename='Anywhere MX 2', protocol=4.5, wpid='404A', settings=[_ST.HiresSmoothInvert])
+_D('Anywhere Mouse MX 2', codename='Anywhere MX 2', protocol=4.5, wpid='404A')
 _D('Wireless Mouse M510', codename='M510v2', protocol=2.0, wpid='4051')
 _D('Wireless Mouse M185 new', codename='M185n', protocol=4.5, wpid='4054')
 _D('Wireless Mouse M185/M235/M310', codename='M185/M235/M310', protocol=4.5, wpid='4055')
-_D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5, wpid='4069', btid=0xb019,
-    settings=[_ST.HiresSmoothInvert])
+_D('Wireless Mouse MX Master 2S', codename='MX Master 2S', protocol=4.5, wpid='4069', btid=0xb019)
 _D('Multi Device Silent Mouse M585/M590', codename='M585/M590', protocol=4.5, wpid='406B')
-_D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',
-    settings=[_ST.HiresSmoothInvert, _ST.PointerSpeed])
+_D('Marathon Mouse M705 (M-R0073)', codename='M705 (M-R0073)', protocol=4.5, wpid='406D',)
 _D('MX Vertical Wireless Mouse', codename='MX Vertical', protocol=4.5, wpid='407B', btid=0xb020, usbid=0xc08a)
 _D('Wireless Mouse Pebble M350', codename='Pebble', protocol=2.0, wpid='4080')
 _D('MX Master 3 Wireless Mouse', codename='MX Master 3', protocol=4.5, wpid='4082', btid=0xb023)
 _D('PRO X Wireless', kind='mouse', codename='PRO X', wpid='4093', usbid=0xc094)
 
-_D('G9 Laser Mouse', codename='G9', usbid=0xc048, interface=1, protocol=1.0,
-    settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
-_D('G9x Laser Mouse', codename='G9x', usbid=0xc066, interface=1, protocol=1.0,
-    settings=[_PerformanceMXDpi, _ST.RegisterSmoothScroll, _ST.RegisterSideScroll])
+_D('G9 Laser Mouse', codename='G9', usbid=0xc048, interface=1, protocol=1.0)
+_D('G9x Laser Mouse', codename='G9x', usbid=0xc066, interface=1, protocol=1.0)
 _D('G502 Gaming Mouse', codename='G502', usbid=0xc07d, interface=1)
 _D('G402 Gaming Mouse', codename='G402', usbid=0xc07e, interface=1)
 _D('G900 Chaos Spectrum Gaming Mouse', codename='G900', usbid=0xc081)

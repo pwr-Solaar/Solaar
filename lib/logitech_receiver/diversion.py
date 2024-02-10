@@ -43,7 +43,6 @@ from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
 from .common import NamedInt
-from .device import Device as _Device
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 
@@ -749,7 +748,7 @@ class Setting(Condition):
             logger.debug('evaluate condition: %s', self)
         if len(self.args) < 3:
             return None
-        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
+        dev = device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             logger.warning('Setting condition: device %s is not known', self.args[0])
             return False
@@ -1040,7 +1039,7 @@ class Active(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug('evaluate condition: %s', self)
-        dev = _Device.find(self.devID)
+        dev = device.find(self.devID)
         return bool(dev and dev.ping())
 
     def data(self):
@@ -1294,7 +1293,7 @@ class Set(Action):
             return None
         if logger.isEnabledFor(logging.INFO):
             logger.info('Set action: %s', self.args)
-        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
+        dev = device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             logger.warning('Set action: device %s is not known', self.args[0])
             return None

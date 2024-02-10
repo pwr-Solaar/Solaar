@@ -23,7 +23,7 @@ import hidapi as _hid
 
 from . import base as _base
 from . import hidpp10 as _hidpp10
-from .base_usb import product_information as _product_information
+from .base import product_information as _product_information
 from .common import strhex as _strhex
 from .device import Device
 
