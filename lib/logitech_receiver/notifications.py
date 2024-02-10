@@ -454,7 +454,7 @@ def _process_feature_notification(device, status, n, feature):
             if (n.address == 0x00):
                 profile_sector = _unpack('!H', n.data[:2])[0]
                 if profile_sector:
-                    profile_change(device, profile_sector)
+                    _st.profile_change(device, profile_sector)
             elif (n.address == 0x10):
                 resolution_index = _unpack('!B', n.data[:1])[0]
                 profile_sector = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
@@ -465,15 +465,3 @@ def _process_feature_notification(device, status, n, feature):
 
     _diversion.process_notification(device, status, n, feature)
     return True
-
-
-# change UI to show result of onboard profile change
-def profile_change(device, profile_sector):
-    from solaar.ui.config_panel import record_setting  # prevent circular import
-    record_setting(device, _st.OnboardProfiles, [profile_sector])
-    for profile in device.profiles.profiles.values() if device.profiles else []:
-        if profile.sector == profile_sector:
-            resolution_index = profile.resolution_default_index
-            record_setting(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
-            record_setting(device, _st.ReportRate, [profile.report_rate])
-            break
