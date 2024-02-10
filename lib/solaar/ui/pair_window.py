@@ -16,8 +16,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
-from logging import getLogger
 
 from gi.repository import GLib, Gtk
 from logitech_receiver import hidpp10 as _hidpp10
@@ -26,8 +27,7 @@ from solaar.i18n import _, ngettext
 
 from . import icons as _icons
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -71,8 +71,8 @@ def _check_lock_state(assistant, receiver, count=2):
     global address, kind, authentication, name, passcode
 
     if not assistant.is_drawable():
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('assistant %s destroyed, bailing out', assistant)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('assistant %s destroyed, bailing out', assistant)
         return False
 
     if receiver.status.get(_K.ERROR):
@@ -115,8 +115,8 @@ def _check_lock_state(assistant, receiver, count=2):
 
 
 def _show_passcode(assistant, receiver, passkey):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s show passkey: %s', receiver, passkey)
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('%s show passkey: %s', receiver, passkey)
     name = receiver.status.device_name
     authentication = receiver.status.device_authentication
     intro_text = _('%(receiver_name)s: pair new device') % {'receiver_name': receiver.name}
@@ -136,8 +136,8 @@ def _show_passcode(assistant, receiver, passkey):
 
 def _prepare(assistant, page, receiver):
     index = assistant.get_current_page()
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('prepare %s %d %s', assistant, index, page)
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('prepare %s %d %s', assistant, index, page)
 
     if index == 0:
         if receiver.receiver_kind == 'bolt':
@@ -164,8 +164,8 @@ def _prepare(assistant, page, receiver):
 
 
 def _finish(assistant, receiver):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('finish %s', assistant)
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('finish %s', assistant)
     assistant.destroy()
     receiver.status.new_device = None
     if receiver.status.lock_open:
@@ -180,8 +180,8 @@ def _finish(assistant, receiver):
 
 
 def _pairing_failed(assistant, receiver, error):
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s fail: %s', receiver, error)
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('%s fail: %s', receiver, error)
 
     assistant.commit()
 
@@ -202,8 +202,8 @@ def _pairing_failed(assistant, receiver, error):
 
 def _pairing_succeeded(assistant, receiver, device):
     assert device
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('%s success: %s', receiver, device)
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('%s success: %s', receiver, device)
 
     page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 

@@ -26,16 +26,16 @@ which is MIT licensed.
 """
 import atexit
 import ctypes
+import logging
 import platform as _platform
 
 from collections import namedtuple
 from logging import INFO as _INFO
-from logging import getLogger
 from threading import Thread
 from time import sleep
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
+
 native_implementation = 'hidapi'
 
 # Device info as expected by Solaar
@@ -257,14 +257,14 @@ def _match(action, device, filterfn):
         if len(report) == 1 + 19 and report[0] == 0x11:
             device['hidpp_long'] = True
     except HIDError as e:  # noqa: F841
-        if _log.isEnabledFor(_INFO):
-            _log.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+        if logger.isEnabledFor(_INFO):
+            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
     finally:
         if device_handle:
             close(device_handle)
 
-    if _log.isEnabledFor(_INFO):
-        _log.info(
+    if logger.isEnabledFor(_INFO):
+        logger.info(
             'Found device BID %s VID %04X PID %04X HID++ %s %s', bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
         )
 

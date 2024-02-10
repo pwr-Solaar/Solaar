@@ -25,13 +25,13 @@ necessary.
 """
 
 import errno as _errno
+import logging
 import os as _os
 import warnings as _warnings
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
 from logging import INFO as _INFO
-from logging import getLogger
 from select import select as _select
 from time import sleep
 from time import time as _timestamp
@@ -42,8 +42,8 @@ from pyudev import DeviceNotFoundError
 from pyudev import Devices as _Devices
 from pyudev import Monitor as _Monitor
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
+
 native_implementation = 'udev'
 fileopen = open
 
@@ -123,7 +123,7 @@ def _match(action, device, filterfn):
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
-        _log.warn(
+        logger.warn(
             'Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s', device.device_node, bid, vid, pid, e
         )
 
@@ -147,8 +147,8 @@ def _match(action, device, filterfn):
         intf_device = device.find_parent('usb', 'usb_interface')
         usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
-        if _log.isEnabledFor(_INFO):
-            _log.info(
+        if logger.isEnabledFor(_INFO):
+            logger.info(
                 'Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s', device.device_node, bid, vid, pid, hidpp_short,
                 hidpp_long, usb_interface, interface_number
             )
@@ -325,14 +325,14 @@ def open_path(device_path):
     assert device_path
     assert device_path.startswith('/dev/hidraw')
 
-    _log.info('OPEN PATH %s', device_path)
+    logger.info('OPEN PATH %s', device_path)
     retrycount = 0
     while (retrycount < 3):
         retrycount += 1
         try:
             return _os.open(device_path, _os.O_RDWR | _os.O_SYNC)
         except OSError as e:
-            _log.info('OPEN PATH FAILED %s ERROR %s %s', device_path, e.errno, e)
+            logger.info('OPEN PATH FAILED %s ERROR %s %s', device_path, e.errno, e)
             if e.errno == _errno.EACCES:
                 sleep(0.1)
             else:

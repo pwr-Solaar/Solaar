@@ -18,12 +18,12 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
-from logging import getLogger
 from threading import Thread as _Thread
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 try:
     from Queue import Queue as _Queue
@@ -54,8 +54,8 @@ class TaskRunner(_Thread):
     def run(self):
         self.alive = True
 
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('started')
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('started')
 
         while self.alive:
             task = self.queue.get()
@@ -65,7 +65,7 @@ class TaskRunner(_Thread):
                 try:
                     function(*args, **kwargs)
                 except Exception:
-                    _log.exception('calling %s', function)
+                    logger.exception('calling %s', function)
 
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('stopped')
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('stopped')

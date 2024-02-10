@@ -16,7 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import getLogger  # , DEBUG as _DEBUG
+import logging
 
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
@@ -26,8 +26,7 @@ from .common import int2bytes as _int2bytes
 from .common import strhex as _strhex
 from .hidpp20 import BATTERY_STATUS, FIRMWARE_KIND
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 # Constants - most of them as defined by the official Logitech HID++ 1.0
@@ -258,7 +257,7 @@ def parse_battery_status(register, reply):
         elif charging_byte & 0x22 == 0x22:
             status_text = BATTERY_STATUS.full
         else:
-            _log.warn('could not parse 0x07 battery status: %02X (level %02X)', charging_byte, status_byte)
+            logger.warn('could not parse 0x07 battery status: %02X (level %02X)', charging_byte, status_byte)
             status_text = None
 
         if charging_byte & 0x03 and status_byte == 0:

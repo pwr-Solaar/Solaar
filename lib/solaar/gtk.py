@@ -34,7 +34,7 @@ import solaar.i18n as _i18n
 
 from solaar import NAME, __version__
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -117,7 +117,7 @@ def _parse_arguments():
         logging.getLogger('').addHandler(stream_handler)
 
     if not args.action:
-        if _log.isEnabledFor(logging.INFO):
+        if logger.isEnabledFor(logging.INFO):
             logging.info('version %s, language %s (%s)', __version__, _i18n.language, _i18n.encoding)
 
     return args
@@ -130,7 +130,7 @@ def _handlesig(signl, stack):
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     if signl == int(signal.SIGINT):
-        if _log.isEnabledFor(_INFO):
+        if logger.isEnabledFor(_INFO):
             faulthandler.dump_traceback()
         sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
     else:
@@ -157,12 +157,12 @@ def main():
     signal.signal(signal.SIGTERM, _handlesig)
 
     udev_file = '42-logitech-unify-permissions.rules'
-    if _log.isEnabledFor(_WARNING) \
+    if logger.isEnabledFor(_WARNING) \
        and not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/lib/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/local/lib/udev/rules.d/' + udev_file):
-        _log.warning('Solaar udev file not found in expected location')
-        _log.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
+        logger.warning('Solaar udev file not found in expected location')
+        logger.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
         import solaar.listener as listener
         import solaar.ui as ui

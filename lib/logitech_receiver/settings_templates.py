@@ -16,10 +16,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
 from logging import WARN as _WARN
-from logging import getLogger
 from struct import pack as _pack
 from struct import unpack as _unpack
 from time import time as _time
@@ -52,8 +53,7 @@ from .settings import Setting as _Setting
 from .settings import Settings as _Settings
 from .special_keys import DISABLE as _DKEY
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 _DK = _hidpp10.DEVICE_KIND
 _R = _hidpp10.REGISTERS
@@ -803,8 +803,8 @@ class MouseGesturesXY(_RawXYProcessing):
             from .base import _HIDPP_Notification as _HIDPP_Notification
             from .diversion import process_notification as _process_notification
             self.push_mouse_event()
-            if _log.isEnabledFor(_INFO):
-                _log.info('mouse gesture notification %s', self.data)
+            if logger.isEnabledFor(_INFO):
+                logger.info('mouse gesture notification %s', self.data)
             payload = _pack('!' + (len(self.data) * 'h'), *self.data)
             notification = _HIDPP_Notification(0, 0, 0, 0, payload)
             _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
@@ -830,8 +830,8 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(1)
         self.data.append(key)
         self.lastEv = _time() * 1000  # _time_ns() / 1e6
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('mouse gesture key event %d %s', key, self.data)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('mouse gesture key event %d %s', key, self.data)
 
     def push_mouse_event(self):
         x = int(self.dx)
@@ -843,8 +843,8 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(y)
         self.dx = 0.
         self.dy = 0.
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('mouse gesture move event %d %d %s', x, y, self.data)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('mouse gesture move event %d %d %s', x, y, self.data)
 
 
 class DivertKeys(_Settings):
@@ -982,7 +982,7 @@ class SpeedChange(_Setting):
                 if speed_setting:
                     speed_setting.write(newSpeed)
                 else:
-                    _log.error('cannot save sensitivity setting on %s', self.device)
+                    logger.error('cannot save sensitivity setting on %s', self.device)
                 from solaar.ui import status_changed as _status_changed
                 _status_changed(self.device, refresh=True)  # update main window
             if self.device.persister:
@@ -1343,8 +1343,8 @@ class PersistentRemappableAction(_Settings):
             elif capabilities & 0x0023 == 0x0023:  # Key, Mouse, and HScroll Codes
                 keys = _special_keys.KEYS_KEYS_MOUSE_HSCROLL
             else:
-                if _log.isEnabledFor(_WARN):
-                    _log.warn('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
+                if logger.isEnabledFor(_WARN):
+                    logger.warn('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
                 return None
             choices = {}
             for k in remap_keys:
@@ -1359,8 +1359,8 @@ class PersistentRemappableAction(_Settings):
             reply_value = _bytes2int(reply_bytes[start:end]) & self.mask
             # Craft keyboard has a value that isn't valid so fudge these values
             if reply_value not in self.choices[key]:
-                if _log.isEnabledFor(_WARN):
-                    _log.warn('unusual persistent remappable action mapping %x: use Default', reply_value)
+                if logger.isEnabledFor(_WARN):
+                    logger.warn('unusual persistent remappable action mapping %x: use Default', reply_value)
                 reply_value = _special_keys.KEYS_Default
             return reply_value
 
@@ -1531,12 +1531,12 @@ def check_feature(device, sclass):
         return
     try:
         detected = sclass.build(device)
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
         return detected
     except Exception as e:
         from traceback import format_exc
-        _log.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, format_exc())
+        logger.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, format_exc())
         return False  # differentiate from an error-free determination that the setting is not supported
 
 

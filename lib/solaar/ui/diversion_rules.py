@@ -15,6 +15,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import logging
 import string
 import threading
 
@@ -22,7 +23,6 @@ from collections import defaultdict, namedtuple
 from contextlib import contextmanager as contextlib_contextmanager
 from copy import copy
 from dataclasses import dataclass, field
-from logging import getLogger
 from shlex import quote as shlex_quote
 from typing import Dict
 
@@ -40,8 +40,7 @@ from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
 from solaar.i18n import _
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -2190,7 +2189,7 @@ def _all_settings():
             prev_setting = settings[s.name][0]
             prev_kind = prev_setting.validator_class.kind
             if prev_kind != s.validator_class.kind:
-                _log.warning(
+                logger.warning(
                     'ignoring setting {} - same name of {}, but different kind ({} != {})'.format(
                         s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
                     )

@@ -37,10 +37,10 @@ except (ValueError, ImportError):
     available = False
 
 if available:
+    import logging
+
     from logging import INFO as _INFO
-    from logging import getLogger
-    _log = getLogger(__name__)
-    del getLogger
+    logger = logging.getLogger(__name__)
 
     from solaar import NAME
 
@@ -55,19 +55,19 @@ if available:
         global available
         if available:
             if not Notify.is_initted():
-                if _log.isEnabledFor(_INFO):
-                    _log.info('starting desktop notifications')
+                if logger.isEnabledFor(_INFO):
+                    logger.info('starting desktop notifications')
                 try:
                     return Notify.init(NAME)
                 except Exception:
-                    _log.exception('initializing desktop notifications')
+                    logger.exception('initializing desktop notifications')
                     available = False
         return available and Notify.is_initted()
 
     def uninit():
         if available and Notify.is_initted():
-            if _log.isEnabledFor(_INFO):
-                _log.info('stopping desktop notifications')
+            if logger.isEnabledFor(_INFO):
+                logger.info('stopping desktop notifications')
             _notifications.clear()
             Notify.uninit()
 
@@ -96,11 +96,11 @@ if available:
             n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
 
             try:
-                # if _log.isEnabledFor(_DEBUG):
-                #     _log.debug("showing %s", n)
+                # if logger.isEnabledFor(_DEBUG):
+                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                _log.exception('showing %s', n)
+                logger.exception('showing %s', n)
 
     def show(dev, reason=None, icon=None, progress=None):
         """Show a notification with title and text.
@@ -135,11 +135,11 @@ if available:
                 n.set_hint('value', GLib.Variant('i', progress))
 
             try:
-                # if _log.isEnabledFor(_DEBUG):
-                #     _log.debug("showing %s", n)
+                # if logger.isEnabledFor(_DEBUG):
+                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                _log.exception('showing %s', n)
+                logger.exception('showing %s', n)
 
 else:
     init = lambda: False

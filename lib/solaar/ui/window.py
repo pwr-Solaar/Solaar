@@ -16,8 +16,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
-from logging import getLogger
 
 from gi.repository import Gdk, GLib, Gtk
 from gi.repository.GObject import TYPE_PYOBJECT
@@ -36,8 +37,7 @@ from . import icons as _icons
 from .about import show_window as _show_about_window
 from .diversion_rules import show_window as _show_diversion_window
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 # constants
@@ -387,8 +387,8 @@ def _find_selected_device_id():
 def _device_selected(selection):
     model, item = selection.get_selected()
     device = model.get_value(item, _COLUMN.DEVICE) if item else None
-    # if _log.isEnabledFor(_DEBUG):
-    #     _log.debug("window tree selected device %s", device)
+    # if logger.isEnabledFor(_DEBUG):
+    #     logger.debug("window tree selected device %s", device)
     if device:
         _update_info_panel(device, full=True)
     else:
@@ -418,8 +418,8 @@ def _receiver_row(receiver_path, receiver=None):
         status_icon = None
         row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('new receiver row %s', row_data)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('new receiver row %s', row_data)
         item = _model.append(None, row_data)
         if _TREE_SEPATATOR:
             _model.append(None, _TREE_SEPATATOR)
@@ -443,7 +443,7 @@ def _device_row(receiver_path, device_number, device=None):
         new_child_index = 0
         while item:
             if _model.get_value(item, _COLUMN.PATH) != receiver_path:
-                _log.warn(
+                logger.warn(
                     'path for device row %s different from path for receiver %s', _model.get_value(item, _COLUMN.PATH),
                     receiver_path
                 )
@@ -464,8 +464,8 @@ def _device_row(receiver_path, device_number, device=None):
             receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
         )
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('new device row %s at index %d', row_data, new_child_index)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('new device row %s at index %d', row_data, new_child_index)
         item = _model.insert(receiver_row, new_child_index, row_data)
 
     return item or None
@@ -487,7 +487,7 @@ def select(receiver_path, device_number=None):
         selection = _tree.get_selection()
         selection.select_iter(item)
     else:
-        _log.warn('select(%s, %s) failed to find an item', receiver_path, device_number)
+        logger.warn('select(%s, %s) failed to find an item', receiver_path, device_number)
 
 
 def _hide(w, _ignore=None):

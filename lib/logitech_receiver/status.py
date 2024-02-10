@@ -16,9 +16,10 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
-from logging import getLogger
 from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
@@ -29,8 +30,7 @@ from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .i18n import _, ngettext
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 _R = _hidpp10.REGISTERS
 
@@ -125,8 +125,8 @@ class ReceiverStatus(dict):
     #     r = self._receiver
     #     assert r
     #
-    #     if _log.isEnabledFor(_DEBUG):
-    #         _log.debug("polling status of %s", r)
+    #     if logger.isEnabledFor(_DEBUG):
+    #         logger.debug("polling status of %s", r)
     #
     #     # make sure to read some stuff that may be read later by the UI
     #     r.serial, r.firmware, None
@@ -194,8 +194,8 @@ class DeviceStatus(dict):
     __nonzero__ = __bool__
 
     def set_battery_info(self, level, nextLevel, status, voltage, timestamp=None):
-        if _log.isEnabledFor(_DEBUG):
-            _log.debug('%s: battery %s, %s', self._device, level, status)
+        if logger.isEnabledFor(_DEBUG):
+            logger.debug('%s: battery %s, %s', self._device, level, status)
 
         if level is None:
             # Some notifications may come with no battery level info, just
@@ -230,7 +230,7 @@ class DeviceStatus(dict):
         if _hidpp20.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
             self[KEYS.ERROR] = None
         else:
-            _log.warn('%s: battery %d%%, ALERT %s', self._device, level, status)
+            logger.warn('%s: battery %d%%, ALERT %s', self._device, level, status)
             if self.get(KEYS.ERROR) != status:
                 self[KEYS.ERROR] = status
                 # only show the notification once
@@ -288,8 +288,8 @@ class DeviceStatus(dict):
                 if was_active is None or push or not was_active and (
                     not d.features or _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
                 ):
-                    if _log.isEnabledFor(_INFO):
-                        _log.info('%s pushing device settings %s', d, d.settings)
+                    if logger.isEnabledFor(_INFO):
+                        logger.info('%s pushing device settings %s', d, d.settings)
                     _settings.apply_all_settings(d)
 
             else:
@@ -314,19 +314,19 @@ class DeviceStatus(dict):
 
         self.updated = timestamp
 
-        # if _log.isEnabledFor(_DEBUG):
-        #     _log.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
+        # if logger.isEnabledFor(_DEBUG):
+        #     logger.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
         self._changed_callback(d, alert, reason)
 
     # def poll(self, timestamp):
     #     d = self._device
     #     if not d:
-    #         _log.error("polling status of invalid device")
+    #         logger.error("polling status of invalid device")
     #         return
     #
     #     if self._active:
-    #         if _log.isEnabledFor(_DEBUG):
-    #             _log.debug("polling status of %s", d)
+    #         if logger.isEnabledFor(_DEBUG):
+    #             logger.debug("polling status of %s", d)
     #
     #         # read these from the device, the UI may need them later
     #         d.protocol, d.serial, d.firmware, d.kind, d.name, d.settings, None

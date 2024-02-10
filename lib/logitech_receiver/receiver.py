@@ -17,9 +17,9 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import errno as _errno
+import logging
 
 from logging import INFO as _INFO
-from logging import getLogger
 
 import hidapi as _hid
 
@@ -29,8 +29,7 @@ from .base_usb import product_information as _product_information
 from .common import strhex as _strhex
 from .device import Device
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 _R = _hidpp10.REGISTERS
 _IR = _hidpp10.INFO_SUBREGISTERS
@@ -56,7 +55,7 @@ class Receiver:
         self.product_id = product_id
         product_info = _product_information(self.product_id)
         if not product_info:
-            _log.warning('Unknown receiver type: %s', self.product_id)
+            logger.warning('Unknown receiver type: %s', self.product_id)
             product_info = {}
         self.receiver_kind = product_info.get('receiver_kind', 'unknown')
 
@@ -131,13 +130,13 @@ class Receiver:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if ok is None:
-            _log.warn('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
+            logger.warn('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if _log.isEnabledFor(_INFO):
-            _log.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
+        if logger.isEnabledFor(_INFO):
+            logger.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits
 
     def device_codename(self, n):
@@ -172,7 +171,7 @@ class Receiver:
         elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
-                _log.error('Unable to get wpid from udev for device %d of %s', n, self)
+                logger.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
             kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n)]
         elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
@@ -219,7 +218,7 @@ class Receiver:
         elif index == 4:  # numpad
             kind = 3
         else:  # unknown device number on 27Mhz receiver
-            _log.error('failed to calculate device kind for device %d of %s', index, self)
+            logger.error('failed to calculate device kind for device %d of %s', index, self)
             raise _base.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
         return kind
 
@@ -227,7 +226,7 @@ class Receiver:
         """Scan all devices."""
         if self.handle:
             if not self.write_register(_R.receiver_connection, 0x02):
-                _log.warn('%s: failed to trigger device link notifications', self)
+                logger.warn('%s: failed to trigger device link notifications', self)
 
     def register_new_device(self, number, notification=None):
         if self._devices.get(number) is not None:
@@ -238,14 +237,14 @@ class Receiver:
 
         try:
             dev = Device(self, number, notification)
-            if _log.isEnabledFor(_INFO):
-                _log.info('%s: found new device %d (%s)', self, number, dev.wpid)
+            if logger.isEnabledFor(_INFO):
+                logger.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
             return dev
         except _base.NoSuchDevice as e:
-            _log.warn('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
+            logger.warn('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
 
-        _log.warning('%s: looked for device %d, not found', self, number)
+        logger.warning('%s: looked for device %d, not found', self, number)
         self._devices[number] = None
 
     def set_lock(self, lock_closed=True, device=0, timeout=0):
@@ -254,7 +253,7 @@ class Receiver:
             reply = self.write_register(_R.receiver_pairing, action, device, timeout)
             if reply:
                 return True
-            _log.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
+            logger.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
 
     def discover(self, cancel=False, timeout=30):  # Bolt device discovery
         assert self.receiver_kind == 'bolt'
@@ -263,7 +262,7 @@ class Receiver:
             reply = self.write_register(_R.bolt_device_discovery, timeout, action)
             if reply:
                 return True
-            _log.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
+            logger.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
 
     def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=0x00, entropy=20):  # Bolt pairing
         assert self.receiver_kind == 'bolt'
@@ -272,7 +271,7 @@ class Receiver:
             reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
             if reply:
                 return True
-            _log.warn('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
+            logger.warn('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -338,7 +337,7 @@ class Receiver:
             dev.wpid = None
             if key in self._devices:
                 del self._devices[key]
-            _log.warn('%s removed device %s', self, dev)
+            logger.warn('%s removed device %s', self, dev)
         else:
             if self.receiver_kind == 'bolt':
                 reply = self.write_register(_R.bolt_pairing, 0x03, key)
@@ -350,10 +349,10 @@ class Receiver:
                 dev.wpid = None
                 if key in self._devices:
                     del self._devices[key]
-                if _log.isEnabledFor(_INFO):
-                    _log.info('%s unpaired device %s', self, dev)
+                if logger.isEnabledFor(_INFO):
+                    logger.info('%s unpaired device %s', self, dev)
             else:
-                _log.error('%s failed to unpair device %s', self, dev)
+                logger.error('%s failed to unpair device %s', self, dev)
                 raise Exception('failed to unpair device %s: %s' % (dev.name, key))
 
     def __len__(self):
@@ -392,8 +391,8 @@ class Receiver:
             if handle:
                 return Receiver(handle, device_info.path, device_info.product_id)
         except OSError as e:
-            _log.exception('open %s', device_info)
+            logger.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
                 raise
         except Exception:
-            _log.exception('open %s', device_info)
+            logger.exception('open %s', device_info)

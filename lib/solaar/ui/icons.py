@@ -16,15 +16,15 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from logging import DEBUG as _DEBUG
-from logging import getLogger
 
 import solaar.gtk as gtk
 
 from gi.repository import Gtk
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -47,18 +47,18 @@ def _init_icon_paths():
         return
 
     _default_theme = Gtk.IconTheme.get_default()
-    if _log.isEnabledFor(_DEBUG):
-        _log.debug('icon theme paths: %s', _default_theme.get_search_path())
+    if logger.isEnabledFor(_DEBUG):
+        logger.debug('icon theme paths: %s', _default_theme.get_search_path())
 
     if gtk.battery_icons_style == 'symbolic':
         global TRAY_OKAY
         TRAY_OKAY = TRAY_INIT  # use monochrome tray icon
         if not _default_theme.has_icon('battery-good-symbolic'):
-            _log.warning('failed to detect symbolic icons')
+            logger.warning('failed to detect symbolic icons')
             gtk.battery_icons_style = 'regular'
     if gtk.battery_icons_style == 'regular':
         if not _default_theme.has_icon('battery-good'):
-            _log.warning('failed to detect icons')
+            logger.warning('failed to detect icons')
             gtk.battery_icons_style = 'solaar'
 
 
@@ -70,10 +70,10 @@ def _init_icon_paths():
 def battery(level=None, charging=False):
     icon_name = _battery_icon_name(level, charging)
     if not _default_theme.has_icon(icon_name):
-        _log.warning('icon %s not found in current theme', icon_name)
+        logger.warning('icon %s not found in current theme', icon_name)
         return TRAY_OKAY  # use Solaar icon if battery icon not available
-    elif _log.isEnabledFor(_DEBUG):
-        _log.debug('battery icon for %s:%s = %s', level, charging, icon_name)
+    elif logger.isEnabledFor(_DEBUG):
+        logger.debug('battery icon for %s:%s = %s', level, charging, icon_name)
     return icon_name
 
 
@@ -172,8 +172,8 @@ def icon_file(name, size=_LARGE_SIZE):
     theme_icon = _default_theme.lookup_icon(name, size, 0)
     if theme_icon:
         file_name = theme_icon.get_filename()
-        # if _log.isEnabledFor(_DEBUG):
-        #     _log.debug("icon %s(%d) => %s", name, size, file_name)
+        # if logger.isEnabledFor(_DEBUG):
+        #     logger.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
 
-    _log.warn('icon %s(%d) not found in current theme', name, size)
+    logger.warn('icon %s(%d) not found in current theme', name, size)

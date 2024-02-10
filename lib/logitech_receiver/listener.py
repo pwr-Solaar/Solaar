@@ -16,11 +16,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
 import threading as _threading
 
 from logging import DEBUG as _DEBUG
 from logging import INFO as _INFO
-from logging import getLogger
 
 from . import base as _base
 
@@ -32,8 +32,7 @@ try:
 except ImportError:
     from queue import Queue as _Queue
 
-_log = getLogger(__name__)
-del getLogger
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -64,10 +63,10 @@ class _ThreadedHandle:
     def _open(self):
         handle = _base.open_path(self.path)
         if handle is None:
-            _log.error('%r failed to open new handle', self)
+            logger.error('%r failed to open new handle', self)
         else:
-            # if _log.isEnabledFor(_DEBUG):
-            #     _log.debug("%r opened new handle %d", self, handle)
+            # if logger.isEnabledFor(_DEBUG):
+            #     logger.debug("%r opened new handle %d", self, handle)
             self._local.handle = handle
             self._handles.append(handle)
             return handle
@@ -76,8 +75,8 @@ class _ThreadedHandle:
         if self._local:
             self._local = None
             handles, self._handles = self._handles, []
-            if _log.isEnabledFor(_DEBUG):
-                _log.debug('%r closing %s', self, handles)
+            if logger.isEnabledFor(_DEBUG):
+                logger.debug('%r closing %s', self, handles)
             for h in handles:
                 _base.close(h)
 
@@ -155,8 +154,8 @@ class EventsListener(_threading.Thread):
         self._active = True
         # replace the handle with a threaded one
         self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
-        if _log.isEnabledFor(_INFO):
-            _log.info('started with %s (%d)', self.receiver, int(self.receiver.handle))
+        if logger.isEnabledFor(_INFO):
+            logger.info('started with %s (%d)', self.receiver, int(self.receiver.handle))
         self.has_started()
 
         if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
@@ -168,7 +167,7 @@ class EventsListener(_threading.Thread):
                 try:
                     n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except _base.NoReceiver:
-                    _log.warning('%s disconnected', self.receiver.name)
+                    logger.warning('%s disconnected', self.receiver.name)
                     self.receiver.close()
                     break
                 if n:
@@ -179,7 +178,7 @@ class EventsListener(_threading.Thread):
                 try:
                     self._notifications_callback(n)
                 except Exception:
-                    _log.exception('processing %s', n)
+                    logger.exception('processing %s', n)
 
         del self._queued_notifications
         self.has_stopped()
@@ -206,8 +205,8 @@ class EventsListener(_threading.Thread):
         # i.e. triggered by a callback handling a previous notification.
         assert _threading.current_thread() == self
         if self._active:  # and _threading.current_thread() == self:
-            # if _log.isEnabledFor(_DEBUG):
-            #     _log.debug("queueing unhandled %s", n)
+            # if logger.isEnabledFor(_DEBUG):
+            #     logger.debug("queueing unhandled %s", n)
             if not self._queued_notifications.full():
                 self._queued_notifications.put(n)
 

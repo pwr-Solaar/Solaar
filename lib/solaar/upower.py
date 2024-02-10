@@ -16,11 +16,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import INFO as _INFO
-from logging import getLogger
+import logging
 
-_log = getLogger(__name__)
-del getLogger
+from logging import INFO as _INFO
+
+logger = logging.getLogger(__name__)
 
 #
 # As suggested here: http://stackoverflow.com/a/13548984
@@ -31,8 +31,8 @@ _suspend_callback = None
 
 def _suspend():
     if _suspend_callback:
-        if _log.isEnabledFor(_INFO):
-            _log.info('received suspend event')
+        if logger.isEnabledFor(_INFO):
+            logger.info('received suspend event')
         _suspend_callback()
 
 
@@ -41,8 +41,8 @@ _resume_callback = None
 
 def _resume():
     if _resume_callback:
-        if _log.isEnabledFor(_INFO):
-            _log.info('received resume event')
+        if logger.isEnabledFor(_INFO):
+            logger.info('received resume event')
         _resume_callback()
 
 
@@ -73,12 +73,12 @@ try:
 
     bus.add_signal_receiver(_suspend_or_resume, 'PrepareForSleep', dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 
-    if _log.isEnabledFor(_INFO):
-        _log.info('connected to system dbus, watching for suspend/resume events')
+    if logger.isEnabledFor(_INFO):
+        logger.info('connected to system dbus, watching for suspend/resume events')
 
 except Exception:
     # Either:
     # - the dbus library is not available
     # - the system dbus is not running
-    _log.warn('failed to register suspend/resume callbacks')
+    logger.warn('failed to register suspend/resume callbacks')
     pass
