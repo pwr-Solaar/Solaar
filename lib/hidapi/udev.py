@@ -31,7 +31,6 @@ import warnings as _warnings
 
 # the tuple object we'll expose when enumerating devices
 from collections import namedtuple
-from logging import INFO as _INFO
 from select import select as _select
 from time import sleep
 from time import time as _timestamp
@@ -147,7 +146,7 @@ def _match(action, device, filterfn):
         intf_device = device.find_parent('usb', 'usb_interface')
         usb_interface = None if intf_device is None else intf_device.attributes.asint('bInterfaceNumber')
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info(
                 'Found device %s BID %s VID %s PID %s HID++ %s %s USB %s %s', device.device_node, bid, vid, pid, hidpp_short,
                 hidpp_long, usb_interface, interface_number

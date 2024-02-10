@@ -20,7 +20,6 @@ import errno as _errno
 import logging
 import threading as _threading
 
-from logging import INFO as _INFO
 from typing import Optional
 
 import hidapi as _hid
@@ -219,7 +218,7 @@ class Device:
         ids = _hidpp20.get_ids(self)
         if ids:
             self._unitId, self._modelId, self._tid_map = ids
-            if logger.isEnabledFor(_INFO) and self._serial and self._serial != self._unitId:
+            if logger.isEnabledFor(logging.INFO) and self._serial and self._serial != self._unitId:
                 logger.info('%s: unitId %s does not match serial %s', self, self._unitId, self._serial)
 
     @property
@@ -429,7 +428,7 @@ class Device:
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits if ok else None
 
@@ -450,7 +449,7 @@ class Device:
     def remove_notification_handler(self, id: str):
         """Unregisters the notification handler under name `id`."""
 
-        if id not in self._notification_handlers and logger.isEnabledFor(_INFO):
+        if id not in self._notification_handlers and logger.isEnabledFor(logging.INFO):
             logger.info(f'Tried to remove nonexistent notification handler {id} from device {self}.')
         else:
             del self._notification_handlers[id]

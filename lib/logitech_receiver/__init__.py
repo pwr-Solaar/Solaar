@@ -37,7 +37,6 @@ from .device import Device  # noqa: F401
 from .hidpp20 import FeatureCallError, FeatureNotSupported  # noqa: F401
 from .receiver import Receiver  # noqa: F401
 
-_DEBUG = logging.DEBUG
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.root.level)
 # if logging.root.level > logging.DEBUG:

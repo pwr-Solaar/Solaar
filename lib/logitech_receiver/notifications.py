@@ -20,8 +20,6 @@
 import logging
 import threading as _threading
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
 from struct import unpack as _unpack
 
 from . import diversion as _diversion
@@ -72,7 +70,7 @@ def _process_receiver_notification(receiver, status, n):
     if n.sub_id == 0x4A:  # pairing lock notification
         status.lock_open = bool(n.address & 0x01)
         reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: %s', receiver, reason)
         status[_K.ERROR] = None
         if status.lock_open:
@@ -89,7 +87,7 @@ def _process_receiver_notification(receiver, status, n):
         with notification_lock:
             status.discovering = n.address == 0x00
             reason = (_('discovery lock is open') if status.discovering else _('discovery lock is closed'))
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: %s', receiver, reason)
             status[_K.ERROR] = None
             if status.discovering:
@@ -123,7 +121,7 @@ def _process_receiver_notification(receiver, status, n):
             status.device_passkey = None
             status.lock_open = n.address == 0x00
             reason = (_('pairing lock is open') if status.lock_open else _('pairing lock is closed'))
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: %s', receiver, reason)
             status[_K.ERROR] = None
             if not status.lock_open:
@@ -201,24 +199,24 @@ def _process_device_notification(device, status, n):
 
 
 def _process_dj_notification(device, status, n):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s (%s) DJ %s', device, device.protocol, n)
 
     if n.sub_id == 0x40:
         # do all DJ paired notifications also show up as HID++ 1.0 notifications?
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: ignoring DJ unpaired: %s', device, n)
         return True
 
     if n.sub_id == 0x41:
         # do all DJ paired notifications also show up as HID++ 1.0 notifications?
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: ignoring DJ paired: %s', device, n)
         return True
 
     if n.sub_id == 0x42:
         connected = not n.address & 0x01
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: DJ connection: %s %s', device, connected, n)
         status.changed(active=connected, alert=_ALERT.NONE, reason=_('connected') if connected else _('disconnected'))
         return True
@@ -227,7 +225,7 @@ def _process_dj_notification(device, status, n):
 
 
 def _process_hidpp10_custom_notification(device, status, n):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s (%s) custom notification %s', device, device.protocol, n)
 
     if n.sub_id in (_R.battery_status, _R.battery_charge):
@@ -241,7 +239,7 @@ def _process_hidpp10_custom_notification(device, status, n):
     if n.sub_id == _R.keyboard_illumination:
         # message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
         # TODO anything we can do with this?
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('illumination event: %s', n)
         return True
 
@@ -279,7 +277,7 @@ def _process_hidpp10_notification(device, status, n):
             return True
         if wpid != device.wpid:
             logger.warn('%s wpid mismatch, got %s', device, wpid)
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug(
                 '%s: protocol %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, n.address,
                 bool(flags & 0x10), link_encrypted, link_established, bool(flags & 0x80)
@@ -298,7 +296,7 @@ def _process_hidpp10_notification(device, status, n):
     # power notification
     if n.sub_id == 0x4B:
         if n.address == 0x01:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('%s: device powered on', device)
             reason = status.to_string() or _('powered on')
             status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
@@ -310,7 +308,7 @@ def _process_hidpp10_notification(device, status, n):
 
 
 def _process_feature_notification(device, status, n, feature):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s: notification for feature %s, report %s, data %s', device, feature, n.address >> 4, _strhex(n.data))
 
     if feature == _F.BATTERY_STATUS:
@@ -318,7 +316,7 @@ def _process_feature_notification(device, status, n, feature):
             _ignore, discharge_level, discharge_next_level, battery_status, voltage = _hidpp20.decipher_battery_status(n.data)
             status.set_battery_info(discharge_level, discharge_next_level, battery_status, voltage)
         elif n.address == 0x10:
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: spurious BATTERY status %s', device, n)
         else:
             logger.warn('%s: unknown BATTERY %s', device, n)
@@ -363,7 +361,7 @@ def _process_feature_notification(device, status, n, feature):
                     status_text = _hidpp20.BATTERY_STATUS.recharging
                 status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x20:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: Light Check button pressed', device)
                 status.changed(alert=_ALERT.SHOW_WINDOW)
                 # first cancel any reporting
@@ -379,7 +377,7 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.WIRELESS_DEVICE_STATUS:
         if n.address == 0x00:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('wireless status: %s', n)
             reason = 'powered on' if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
@@ -390,13 +388,13 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.TOUCHMOUSE_RAW_POINTS:
         if n.address == 0x00:
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: TOUCH MOUSE points %s', device, n)
         elif n.address == 0x10:
             touch = ord(n.data[:1])
             button_down = bool(touch & 0x02)
             mouse_lifted = bool(touch & 0x01)
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s', device, button_down, mouse_lifted)
         else:
             logger.warn('%s: unknown TOUCH MOUSE %s', device, n)
@@ -404,7 +402,7 @@ def _process_feature_notification(device, status, n, feature):
     # TODO: what are REPROG_CONTROLS_V{2,3}?
     elif feature == _F.REPROG_CONTROLS:
         if n.address == 0x00:
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: reprogrammable key: %s', device, n)
         else:
             logger.warn('%s: unknown REPROG_CONTROLS %s', device, n)
@@ -419,29 +417,29 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.REPROG_CONTROLS_V4:
         if n.address == 0x00:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 cid1, cid2, cid3, cid4 = _unpack('!HHHH', n.data[:8])
                 logger.debug('%s: diverted controls pressed: 0x%x, 0x%x, 0x%x, 0x%x', device, cid1, cid2, cid3, cid4)
         elif n.address == 0x10:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 dx, dy = _unpack('!hh', n.data[:4])
                 logger.debug('%s: rawXY dx=%i dy=%i', device, dx, dy)
         elif n.address == 0x20:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('%s: received analyticsKeyEvents', device)
-        elif logger.isEnabledFor(_INFO):
+        elif logger.isEnabledFor(logging.INFO):
             logger.info('%s: unknown REPROG_CONTROLS_V4 %s', device, n)
 
     elif feature == _F.HIRES_WHEEL:
         if (n.address == 0x00):
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 flags, delta_v = _unpack('>bh', n.data[:3])
                 high_res = (flags & 0x10) != 0
                 periods = flags & 0x0f
                 logger.info('%s: WHEEL: res: %d periods: %d delta V:%-3d', device, high_res, periods, delta_v)
         elif (n.address == 0x10):
             ratchet = n.data[0]
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: WHEEL: ratchet: %d', device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
                 from solaar.ui.config_panel import record_setting  # prevent circular import
@@ -449,12 +447,12 @@ def _process_feature_notification(device, status, n, feature):
                 if setting:
                     record_setting(device, setting, [2 if ratchet else 1])
         else:
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: unknown WHEEL %s', device, n)
 
     elif feature == _F.ONBOARD_PROFILES:
         if (n.address > 0x10):
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: unknown ONBOARD PROFILES %s', device, n)
         else:
             if (n.address == 0x00):

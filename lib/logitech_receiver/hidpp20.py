@@ -21,10 +21,6 @@
 import logging
 import threading as _threading
 
-from logging import DEBUG as _DEBUG
-from logging import ERROR as _ERROR
-from logging import INFO as _INFO
-from logging import WARNING as _WARNING
 from struct import pack as _pack
 from struct import unpack as _unpack
 from typing import List
@@ -454,7 +450,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             mapped_data = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack('!H', self._cid)))
             if mapped_data:
                 cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
-                if cid != self._cid and logger.isEnabledFor(_WARNING):
+                if cid != self._cid and logger.isEnabledFor(logging.WARNING):
                     logger.warn(
                         f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
                         f'with a different control ID ({cid}) than requested ({self._cid}).'
@@ -468,7 +464,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             else:
                 raise FeatureCallError(msg='No reply from device.')
         except FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
-            if logger.isEnabledFor(_WARNING):
+            if logger.isEnabledFor(logging.WARNING):
                 logger.warn(
                     f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
                 )
@@ -526,7 +522,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and logger.isEnabledFor(_DEBUG):
+        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
@@ -607,7 +603,7 @@ class KeysArray:
         elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
             self.keyversion = FEATURE.REPROG_CONTROLS_V2
         else:
-            if logger.isEnabledFor(_ERROR):
+            if logger.isEnabledFor(logging.ERROR):
                 logger.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
             self.keyversion = None
         self.keys = [None] * count
@@ -633,7 +629,7 @@ class KeysArray:
                 self.cid_to_tid[cid] = tid
                 if group != 0:  # 0 = does not belong to a group
                     self.group_cids[special_keys.CID_GROUP[group]].append(cid)
-        elif logger.isEnabledFor(_WARNING):
+        elif logger.isEnabledFor(logging.WARNING):
             logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
     def _ensure_all_keys_queried(self):
@@ -696,7 +692,7 @@ class KeysArrayV1(KeysArray):
             cid, tid, flags = _unpack('!HHB', keydata[:5])
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
             self.cid_to_tid[cid] = tid
-        elif logger.isEnabledFor(_WARNING):
+        elif logger.isEnabledFor(logging.WARNING):
             logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
@@ -716,7 +712,7 @@ class KeysArrayV4(KeysArrayV1):
             self.cid_to_tid[cid] = tid
             if group != 0:  # 0 = does not belong to a group
                 self.group_cids[special_keys.CID_GROUP[group]].append(cid)
-        elif logger.isEnabledFor(_WARNING):
+        elif logger.isEnabledFor(logging.WARNING):
             logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
@@ -761,7 +757,7 @@ class KeysArrayPersistent(KeysArray):
             elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
                 remapped = modifiers = 0
             self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
-        elif logger.isEnabledFor(_WARNING):
+        elif logger.isEnabledFor(logging.WARNING):
             logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
@@ -1049,7 +1045,7 @@ class Spec:
         try:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
         except FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
-            if logger.isEnabledFor(_WARNING):
+            if logger.isEnabledFor(logging.WARNING):
                 logger.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
             return None
         return _bytes2int(value[:self.byte_count])
@@ -1638,7 +1634,7 @@ def get_firmware(device):
                     fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, '', '', None)
 
                 fw.append(fw_info)
-                # if logger.isEnabledFor(_DEBUG):
+                # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("device %d firmware %s", devnumber, fw_info)
         return tuple(fw)
 
@@ -1669,7 +1665,7 @@ def get_kind(device):
     kind = feature_request(device, FEATURE.DEVICE_NAME, 0x20)
     if kind:
         kind = ord(kind[:1])
-        # if logger.isEnabledFor(_DEBUG):
+        # if logger.isEnabledFor(logging.DEBUG):
         #     logger.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
         return DEVICE_KIND[kind]
 
@@ -1729,7 +1725,7 @@ def decipher_battery_status(report):
     discharge, next, status = _unpack('!BBB', report[:3])
     discharge = None if discharge == 0 else discharge
     status = BATTERY_STATUS[status]
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('battery status %s%% charged, next %s%%, status %s', discharge, next, status)
     return FEATURE.BATTERY_STATUS, discharge, next, status, None
 
@@ -1743,7 +1739,7 @@ def get_battery_unified(device):
 def decipher_battery_unified(report):
     discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
     status = BATTERY_STATUS[status]
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('battery unified %s%% charged, level %s, charging %s', discharge, level, status)
     level = (
         _BATTERY_APPROX.full if level == 8  # full
@@ -1805,7 +1801,7 @@ def decipher_battery_voltage(report):
         if level[0] < voltage:
             charge_lvl = level[1]
             break
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug(
             'battery voltage %d mV, charging %s, status %d = %s, level %s, type %s', voltage, status, (flags & 0x03),
             charge_sts, charge_lvl, charge_type
@@ -2014,7 +2010,7 @@ def get_host_names(device):
 def set_host_name(device, name, currentName=''):
     name = bytearray(name, 'utf-8')
     currentName = bytearray(currentName, 'utf-8')
-    if logger.isEnabledFor(_INFO):
+    if logger.isEnabledFor(logging.INFO):
         logger.info('Setting host name to %s', name)
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     if state:

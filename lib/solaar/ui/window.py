@@ -18,8 +18,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
-
 from gi.repository import Gdk, GLib, Gtk
 from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10 as _hidpp10
@@ -387,7 +385,7 @@ def _find_selected_device_id():
 def _device_selected(selection):
     model, item = selection.get_selected()
     device = model.get_value(item, _COLUMN.DEVICE) if item else None
-    # if logger.isEnabledFor(_DEBUG):
+    # if logger.isEnabledFor(logging.DEBUG):
     #     logger.debug("window tree selected device %s", device)
     if device:
         _update_info_panel(device, full=True)
@@ -418,7 +416,7 @@ def _receiver_row(receiver_path, receiver=None):
         status_icon = None
         row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('new receiver row %s', row_data)
         item = _model.append(None, row_data)
         if _TREE_SEPATATOR:
@@ -464,7 +462,7 @@ def _device_row(receiver_path, device_number, device=None):
             receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
         )
         assert len(row_data) == len(_TREE_SEPATATOR)
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('new device row %s at index %d', row_data, new_child_index)
         item = _model.insert(receiver_row, new_child_index, row_data)
 

@@ -18,8 +18,6 @@
 
 import logging
 
-from logging import INFO as _INFO
-
 logger = logging.getLogger(__name__)
 
 #
@@ -31,7 +29,7 @@ _suspend_callback = None
 
 def _suspend():
     if _suspend_callback:
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('received suspend event')
         _suspend_callback()
 
@@ -41,7 +39,7 @@ _resume_callback = None
 
 def _resume():
     if _resume_callback:
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('received resume event')
         _resume_callback()
 
@@ -73,7 +71,7 @@ try:
 
     bus.add_signal_receiver(_suspend_or_resume, 'PrepareForSleep', dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 
-    if logger.isEnabledFor(_INFO):
+    if logger.isEnabledFor(logging.INFO):
         logger.info('connected to system dbus, watching for suspend/resume events')
 
 except Exception:

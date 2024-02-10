@@ -19,8 +19,6 @@
 import logging
 import traceback
 
-from logging import DEBUG as _DEBUG
-from logging import WARNING as _WARNING
 from threading import Timer as _Timer
 
 from gi.repository import Gdk, GLib, Gtk
@@ -694,7 +692,7 @@ def _create_sbox(s, device):
     elif s.kind == _SETTING_KIND.hetero:
         control = HeteroKeyControl(sbox, change)
     else:
-        if logger.isEnabledFor(_WARNING):
+        if logger.isEnabledFor(logging.WARNING):
             logger.warn('setting %s display not implemented', s.label)
         return None
 
@@ -827,7 +825,7 @@ def record_setting(device, setting, values):
 
 
 def _record_setting(device, setting, values):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('on %s changing setting %s to %s', device, setting, values)
     if len(values) > 1:
         setting.update_key_value(values[0], values[-1])

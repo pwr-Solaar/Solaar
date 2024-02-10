@@ -19,8 +19,6 @@
 import logging
 import math
 
-from logging import DEBUG as _DEBUG
-from logging import WARNING as _WARNING
 from struct import unpack as _unpack
 from time import sleep as _sleep
 
@@ -140,7 +138,7 @@ class BooleanValidator(Validator):
         reply_bytes = reply_bytes[self.read_skip_byte_count:]
         if isinstance(self.mask, int):
             reply_value = ord(reply_bytes[:1]) & self.mask
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('BooleanValidator: validate read %r => %02X', reply_bytes, reply_value)
             if reply_value == self.true_value:
                 return True
@@ -199,7 +197,7 @@ class BooleanValidator(Validator):
             if current_value is not None and to_write == current_value[:len(to_write)]:
                 return None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
 
         return self.write_prefix_bytes + to_write
@@ -279,7 +277,7 @@ class Setting:
 
         self._pre_read(cached)
         if cached and self._value is not None:
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('%s: cached value %r on %s', self.name, self._value, self._device)
             return self._value
 
@@ -291,7 +289,7 @@ class Setting:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('%s: read value %r on %s', self.name, self._value, self._device)
             return self._value
 
@@ -311,7 +309,7 @@ class Setting:
         assert hasattr(self, '_device')
         assert value is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: write %r to %s', self.name, value, self._device)
 
         if self._device.online:
@@ -322,12 +320,12 @@ class Setting:
             if self._validator.needs_current_value:
                 # the _validator needs the current value, possibly to merge flag values
                 current_value = self._rw.read(self._device)
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: current value %r on %s', self.name, current_value, self._device)
 
             data_bytes = self._validator.prepare_write(value, current_value)
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: prepare write(%s) => %r', self.name, value, data_bytes)
 
                 reply = self._rw.write(self._device, data_bytes)
@@ -346,14 +344,14 @@ class Setting:
     def apply(self):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: apply (%s)', self.name, self._device)
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             try:
                 self.write(value, save=False)
             except Exception as e:
-                if logger.isEnabledFor(_WARNING):
+                if logger.isEnabledFor(logging.WARNING):
                     logger.warn(
                         '%s: error applying value %s so ignore it (%s): %s', self.name, self._value, self._device, repr(e)
                     )
@@ -376,7 +374,7 @@ class Settings(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
         self._pre_read(cached)
@@ -401,7 +399,7 @@ class Settings(Setting):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
 
         self._pre_read(cached)
@@ -421,7 +419,7 @@ class Settings(Setting):
         assert hasattr(self, '_device')
         assert map is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings write %r to %s', self.name, map, self._device)
 
         if self._device.online:
@@ -429,7 +427,7 @@ class Settings(Setting):
             for key, value in map.items():
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
-                    if logger.isEnabledFor(_DEBUG):
+                    if logger.isEnabledFor(logging.DEBUG):
                         logger.debug('%s: settings prepare map write(%s,%s) => %r', self.name, key, value, data_bytes)
                     reply = self._rw.write(self._device, int(key), data_bytes)
                     if not reply:
@@ -446,7 +444,7 @@ class Settings(Setting):
         assert key is not None
         assert value is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
@@ -459,7 +457,7 @@ class Settings(Setting):
             except ValueError:
                 data_bytes = value = None
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, value, data_bytes)
                 reply = self._rw.write(self._device, int(key), data_bytes)
                 if not reply:
@@ -476,7 +474,7 @@ class LongSettings(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
         self._pre_read(cached)
@@ -503,7 +501,7 @@ class LongSettings(Setting):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert item is not None
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r item %r from %s', self.name, self._value, item, self._device)
 
         self._pre_read(cached)
@@ -524,7 +522,7 @@ class LongSettings(Setting):
         assert hasattr(self, '_device')
         assert map is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: long settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
@@ -533,7 +531,7 @@ class LongSettings(Setting):
                 if data_bytes_list is not None:
                     for data_bytes in data_bytes_list:
                         if data_bytes is not None:
-                            if logger.isEnabledFor(_DEBUG):
+                            if logger.isEnabledFor(logging.DEBUG):
                                 logger.debug('%s: settings prepare map write(%s,%s) => %r', self.name, item, value, data_bytes)
                             reply = self._rw.write(self._device, data_bytes)
                             if not reply:
@@ -550,7 +548,7 @@ class LongSettings(Setting):
         assert item is not None
         assert value is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: long settings write item %r value %r to %s', self.name, item, value, self._device)
 
         if self._device.online:
@@ -559,7 +557,7 @@ class LongSettings(Setting):
             data_bytes = self._validator.prepare_write_item(item, value)
             self.update_key_value(item, value, save)
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
@@ -574,7 +572,7 @@ class BitFieldSetting(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
 
         self._pre_read(cached)
@@ -601,7 +599,7 @@ class BitFieldSetting(Setting):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert key is not None
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
 
         self._pre_read(cached)
@@ -625,13 +623,13 @@ class BitFieldSetting(Setting):
         assert hasattr(self, '_device')
         assert map is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: bit field settings write %r to %s', self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: settings prepare map write(%s) => %r', self.name, self._value, data_bytes)
                 # if prepare_write returns a list, write one item at a time
                 seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
@@ -651,7 +649,7 @@ class BitFieldSetting(Setting):
         assert key is not None
         assert value is not None
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: bit field settings write key %r value %r to %s', self.name, key, value, self._device)
 
         if self._device.online:
@@ -662,7 +660,7 @@ class BitFieldSetting(Setting):
 
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, str(value), data_bytes)
                 # if prepare_write returns a list, write one item at a time
                 seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
@@ -694,7 +692,7 @@ class RangeFieldSetting(Setting):
     def read(self, cached=True):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -721,25 +719,25 @@ class RangeFieldSetting(Setting):
         assert hasattr(self, '_value')
         assert hasattr(self, '_device')
         assert map is not None
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: range field setting write %r to %s', self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
-                if logger.isEnabledFor(_DEBUG):
+                if logger.isEnabledFor(logging.DEBUG):
                     logger.debug('%s: range field setting prepare map write(%s) => %r', self.name, self._value, data_bytes)
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
                     return None
-            elif logger.isEnabledFor(_WARNING):
+            elif logger.isEnabledFor(logging.WARNING):
                 logger.warn('%s: range field setting no data to write', self.name)
             return map
 
     def write_key_value(self, key, value, save=True):
         assert key is not None
         assert value is not None
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: range field setting write key %r value %r to %s', self.name, key, value, self._device)
         if self._device.online:
             if not self._value:
@@ -1465,7 +1463,7 @@ class ActionSettingRW:
                 try:
                     device.remove_notification_handler(self.name)
                 except Exception:
-                    if logger.isEnabledFor(_WARNING):
+                    if logger.isEnabledFor(logging.WARNING):
                         logger.warn('cannot disable %s on %s', self.name, device)
                 self.deactivate_action()
         return True
@@ -1527,7 +1525,7 @@ class RawXYProcessing:
                 try:
                     self.device.remove_notification_handler(self.name)
                 except Exception:
-                    if logger.isEnabledFor(_WARNING):
+                    if logger.isEnabledFor(logging.WARNING):
                         logger.warn('cannot disable %s on %s', self.name, self.device)
                 self.deactivate_action()
                 self.active = False

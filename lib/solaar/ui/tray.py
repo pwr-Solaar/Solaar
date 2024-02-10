@@ -19,7 +19,6 @@
 import logging
 import os
 
-from logging import DEBUG as _DEBUG
 from time import time as _timestamp
 
 import solaar.gtk as gtk
@@ -94,7 +93,7 @@ def _scroll(tray_icon, event, direction=None):
         return
     _last_scroll = now
 
-    # if logger.isEnabledFor(_DEBUG):
+    # if logger.isEnabledFor(logging.DEBUG):
     #     logger.debug("scroll direction %s", direction)
 
     global _picked_device
@@ -140,7 +139,7 @@ def _scroll(tray_icon, event, direction=None):
             _picked_device = None
 
     _picked_device = candidate or _picked_device
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('scroll: picked %s', _picked_device)
     _update_tray_icon()
 
@@ -160,7 +159,7 @@ try:
             # treat unavailable versions the same as unavailable packages
             raise ImportError
 
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('using %sAppIndicator3' % ('Ayatana ' if ayatana_appindicator_found else ''))
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
@@ -227,7 +226,7 @@ try:
 
 except ImportError:
 
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('using StatusIcon')
 
     def _create(menu):
@@ -338,7 +337,7 @@ def _pick_device_with_lowest_battery():
             picked = info
             picked_level = level or 0
 
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('picked device with lowest battery: %s', picked)
 
     return picked

@@ -19,9 +19,6 @@
 import logging
 import threading as _threading
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
-
 from . import base as _base
 
 # from time import time as _timestamp
@@ -65,7 +62,7 @@ class _ThreadedHandle:
         if handle is None:
             logger.error('%r failed to open new handle', self)
         else:
-            # if logger.isEnabledFor(_DEBUG):
+            # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("%r opened new handle %d", self, handle)
             self._local.handle = handle
             self._handles.append(handle)
@@ -75,7 +72,7 @@ class _ThreadedHandle:
         if self._local:
             self._local = None
             handles, self._handles = self._handles, []
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('%r closing %s', self, handles)
             for h in handles:
                 _base.close(h)
@@ -154,7 +151,7 @@ class EventsListener(_threading.Thread):
         self._active = True
         # replace the handle with a threaded one
         self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('started with %s (%d)', self.receiver, int(self.receiver.handle))
         self.has_started()
 
@@ -205,7 +202,7 @@ class EventsListener(_threading.Thread):
         # i.e. triggered by a callback handling a previous notification.
         assert _threading.current_thread() == self
         if self._active:  # and _threading.current_thread() == self:
-            # if logger.isEnabledFor(_DEBUG):
+            # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("queueing unhandled %s", n)
             if not self._queued_notifications.full():
                 self._queued_notifications.put(n)

@@ -26,9 +26,6 @@ import signal
 import sys
 import tempfile
 
-from logging import INFO as _INFO
-from logging import WARNING as _WARNING
-
 import solaar.cli as _cli
 import solaar.i18n as _i18n
 
@@ -130,7 +127,7 @@ def _handlesig(signl, stack):
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     if signl == int(signal.SIGINT):
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             faulthandler.dump_traceback()
         sys.exit('%s: exit due to keyboard interrupt' % (NAME.lower()))
     else:
@@ -157,7 +154,7 @@ def main():
     signal.signal(signal.SIGTERM, _handlesig)
 
     udev_file = '42-logitech-unify-permissions.rules'
-    if logger.isEnabledFor(_WARNING) \
+    if logger.isEnabledFor(logging.WARNING) \
        and not os.path.isfile('/etc/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/lib/udev/rules.d/' + udev_file) \
        and not os.path.isfile('/usr/local/lib/udev/rules.d/' + udev_file):

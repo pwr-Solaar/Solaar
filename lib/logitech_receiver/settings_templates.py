@@ -18,8 +18,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
 from logging import WARN as _WARN
 from struct import pack as _pack
 from struct import unpack as _unpack
@@ -803,7 +801,7 @@ class MouseGesturesXY(_RawXYProcessing):
             from .base import _HIDPP_Notification as _HIDPP_Notification
             from .diversion import process_notification as _process_notification
             self.push_mouse_event()
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('mouse gesture notification %s', self.data)
             payload = _pack('!' + (len(self.data) * 'h'), *self.data)
             notification = _HIDPP_Notification(0, 0, 0, 0, payload)
@@ -830,7 +828,7 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(1)
         self.data.append(key)
         self.lastEv = _time() * 1000  # _time_ns() / 1e6
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('mouse gesture key event %d %s', key, self.data)
 
     def push_mouse_event(self):
@@ -843,7 +841,7 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(y)
         self.dx = 0.
         self.dy = 0.
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('mouse gesture move event %d %d %s', x, y, self.data)
 
 
@@ -1531,7 +1529,7 @@ def check_feature(device, sclass):
         return
     try:
         detected = sclass.build(device)
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
         return detected
     except Exception as e:

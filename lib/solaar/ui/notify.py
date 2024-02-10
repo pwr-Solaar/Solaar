@@ -38,8 +38,6 @@ except (ValueError, ImportError):
 
 if available:
     import logging
-
-    from logging import INFO as _INFO
     logger = logging.getLogger(__name__)
 
     from solaar import NAME
@@ -55,7 +53,7 @@ if available:
         global available
         if available:
             if not Notify.is_initted():
-                if logger.isEnabledFor(_INFO):
+                if logger.isEnabledFor(logging.INFO):
                     logger.info('starting desktop notifications')
                 try:
                     return Notify.init(NAME)
@@ -66,7 +64,7 @@ if available:
 
     def uninit():
         if available and Notify.is_initted():
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('stopping desktop notifications')
             _notifications.clear()
             Notify.uninit()
@@ -96,7 +94,7 @@ if available:
             n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
 
             try:
-                # if logger.isEnabledFor(_DEBUG):
+                # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
@@ -135,7 +133,7 @@ if available:
                 n.set_hint('value', GLib.Variant('i', progress))
 
             try:
-                # if logger.isEnabledFor(_DEBUG):
+                # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("showing %s", n)
                 n.show()
             except Exception:

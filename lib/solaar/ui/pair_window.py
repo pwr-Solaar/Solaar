@@ -18,8 +18,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
-
 from gi.repository import GLib, Gtk
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.status import KEYS as _K
@@ -71,7 +69,7 @@ def _check_lock_state(assistant, receiver, count=2):
     global address, kind, authentication, name, passcode
 
     if not assistant.is_drawable():
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('assistant %s destroyed, bailing out', assistant)
         return False
 
@@ -115,7 +113,7 @@ def _check_lock_state(assistant, receiver, count=2):
 
 
 def _show_passcode(assistant, receiver, passkey):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s show passkey: %s', receiver, passkey)
     name = receiver.status.device_name
     authentication = receiver.status.device_authentication
@@ -136,7 +134,7 @@ def _show_passcode(assistant, receiver, passkey):
 
 def _prepare(assistant, page, receiver):
     index = assistant.get_current_page()
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('prepare %s %d %s', assistant, index, page)
 
     if index == 0:
@@ -164,7 +162,7 @@ def _prepare(assistant, page, receiver):
 
 
 def _finish(assistant, receiver):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('finish %s', assistant)
     assistant.destroy()
     receiver.status.new_device = None
@@ -180,7 +178,7 @@ def _finish(assistant, receiver):
 
 
 def _pairing_failed(assistant, receiver, error):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s fail: %s', receiver, error)
 
     assistant.commit()
@@ -202,7 +200,7 @@ def _pairing_failed(assistant, receiver, error):
 
 def _pairing_succeeded(assistant, receiver, device):
     assert device
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('%s success: %s', receiver, device)
 
     page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)

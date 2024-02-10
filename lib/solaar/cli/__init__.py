@@ -20,8 +20,6 @@ import argparse as _argparse
 import logging
 import sys as _sys
 
-from logging import DEBUG as _DEBUG
-
 from solaar import NAME
 
 logger = logging.getLogger(__name__)
@@ -113,7 +111,7 @@ def _receivers(dev_path=None):
             continue
         try:
             r = Receiver.open(dev_info)
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('[%s] => %s', dev_info.path, r)
             if r:
                 yield r
@@ -130,7 +128,7 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             d = Device.open(dev_info) if dev_info.isDevice else Receiver.open(dev_info)
-            if logger.isEnabledFor(_DEBUG):
+            if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('[%s] => %s', dev_info.path, d)
             if d is not None:
                 yield d

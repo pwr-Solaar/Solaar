@@ -24,8 +24,6 @@ import threading as _threading
 
 from collections import namedtuple
 from contextlib import contextmanager
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
 from random import getrandbits as _random_bits
 from struct import pack as _pack
 from time import time as _timestamp
@@ -213,7 +211,7 @@ def write(handle, devnumber, data, long_message=False):
         wdata = _pack('!BB18s', HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
         wdata = _pack('!BB5s', HIDPP_SHORT_MESSAGE_ID, devnumber, data)
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('(%s) <= w[%02X %02X %s %s]', handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
 
     try:
@@ -276,7 +274,8 @@ def _read(handle, timeout):
         report_id = ord(data[:1])
         devnumber = ord(data[1:2])
 
-        if logger.isEnabledFor(_DEBUG) and (report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10):  # ignore DJ input messages
+        if logger.isEnabledFor(logging.DEBUG
+                               ) and (report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10):  # ignore DJ input messages
             logger.debug('(%s) => r[%02X %02X %s %s]', handle, report_id, devnumber, _strhex(data[2:4]), _strhex(data[4:]))
 
         return report_id, devnumber, data[2:]
@@ -362,7 +361,7 @@ handles_lock = {}
 def handle_lock(handle):
     with request_lock:
         if handles_lock.get(handle) is None:
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('New lock %s', repr(handle))
             handles_lock[handle] = _threading.Lock()  # Serialize requests on the handle
     return handles_lock[handle]
@@ -413,7 +412,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             params = b''.join(_pack('B', p) if isinstance(p, int) else p for p in params)
         else:
             params = b''
-        # if logger.isEnabledFor(_DEBUG):
+        # if logger.isEnabledFor(logging.DEBUG):
         #     logger.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
         request_data = _pack('!H', request_id) + params
 
@@ -443,7 +442,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                                                                                                                              ]:
                         error = ord(reply_data[3:4])
 
-                        if logger.isEnabledFor(_DEBUG):
+                        if logger.isEnabledFor(logging.DEBUG):
                             logger.debug(
                                 '(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
                                 _hidpp10.ERROR[error]
@@ -480,13 +479,13 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                     n = make_notification(report_id, reply_devnumber, reply_data)
                     if n:
                         notifications_hook(n)
-                    # elif logger.isEnabledFor(_DEBUG):
+                    # elif logger.isEnabledFor(logging.DEBUG):
                     #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
-                # elif logger.isEnabledFor(_DEBUG):
+                # elif logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
             delta = _timestamp() - request_started
-            # if logger.isEnabledFor(_DEBUG):
+            # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
         logger.warn(
@@ -500,7 +499,7 @@ def ping(handle, devnumber, long_message=False):
     """Check if a device is connected to the receiver.
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('(%s) pinging device %d', handle, devnumber)
     with acquire_timeout(handle_lock(handle), handle, 10.):
         notifications_hook = getattr(handle, 'notifications_hook', None)
@@ -543,7 +542,7 @@ def ping(handle, devnumber, long_message=False):
                     n = make_notification(report_id, reply_devnumber, reply_data)
                     if n:
                         notifications_hook(n)
-                    # elif logger.isEnabledFor(_DEBUG):
+                    # elif logger.isEnabledFor(logging.DEBUG):
                     #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
             delta = _timestamp() - request_started

@@ -19,8 +19,6 @@
 import errno as _errno
 import logging
 
-from logging import INFO as _INFO
-
 import hidapi as _hid
 
 from . import base as _base
@@ -135,7 +133,7 @@ class Receiver:
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits
 
@@ -237,7 +235,7 @@ class Receiver:
 
         try:
             dev = Device(self, number, notification)
-            if logger.isEnabledFor(_INFO):
+            if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
             return dev
@@ -349,7 +347,7 @@ class Receiver:
                 dev.wpid = None
                 if key in self._devices:
                     del self._devices[key]
-                if logger.isEnabledFor(_INFO):
+                if logger.isEnabledFor(logging.INFO):
                     logger.info('%s unpaired device %s', self, dev)
             else:
                 logger.error('%s failed to unpair device %s', self, dev)

@@ -18,9 +18,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
-
 import yaml as _yaml
 
 import gi  # isort:skip
@@ -103,7 +100,7 @@ from . import diversion_rules, notify, tray, window  # isort:skip  # noqa: E402
 
 
 def _startup(app, startup_hook, use_tray, show_window):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
 
     from solaar.tasks import TaskRunner as _TaskRunner
@@ -120,7 +117,7 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 
 def _activate(app):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('activate')
     if app.get_windows():
         window.popup()
@@ -134,7 +131,7 @@ def _command_line(app, command_line):
     if not args:
         _activate(app)
     elif args[0] == 'config':  # config call from remote instance
-        if logger.isEnabledFor(_INFO):
+        if logger.isEnabledFor(logging.INFO):
             logger.info('remote command line %s', args)
         from solaar.ui.config_panel import change_setting  # prevent circular import
         from solaar.ui.window import find_device  # prevent circular import
@@ -147,7 +144,7 @@ def _command_line(app, command_line):
 
 
 def _shutdown(app, shutdown_hook):
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('shutdown')
 
     shutdown_hook()
@@ -185,7 +182,7 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
 
 def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
-    if logger.isEnabledFor(_DEBUG):
+    if logger.isEnabledFor(logging.DEBUG):
         logger.debug('status changed: %s (%s) %s', device, alert, reason)
 
     tray.update(device)

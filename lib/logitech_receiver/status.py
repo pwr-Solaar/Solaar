@@ -18,8 +18,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
-from logging import INFO as _INFO
 from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
@@ -125,7 +123,7 @@ class ReceiverStatus(dict):
     #     r = self._receiver
     #     assert r
     #
-    #     if logger.isEnabledFor(_DEBUG):
+    #     if logger.isEnabledFor(logging.DEBUG):
     #         logger.debug("polling status of %s", r)
     #
     #     # make sure to read some stuff that may be read later by the UI
@@ -194,7 +192,7 @@ class DeviceStatus(dict):
     __nonzero__ = __bool__
 
     def set_battery_info(self, level, nextLevel, status, voltage, timestamp=None):
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('%s: battery %s, %s', self._device, level, status)
 
         if level is None:
@@ -288,7 +286,7 @@ class DeviceStatus(dict):
                 if was_active is None or push or not was_active and (
                     not d.features or _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
                 ):
-                    if logger.isEnabledFor(_INFO):
+                    if logger.isEnabledFor(logging.INFO):
                         logger.info('%s pushing device settings %s', d, d.settings)
                     _settings.apply_all_settings(d)
 
@@ -314,7 +312,7 @@ class DeviceStatus(dict):
 
         self.updated = timestamp
 
-        # if logger.isEnabledFor(_DEBUG):
+        # if logger.isEnabledFor(logging.DEBUG):
         #     logger.debug("device %d changed: active=%s %s", d.number, self._active, dict(self))
         self._changed_callback(d, alert, reason)
 
@@ -325,7 +323,7 @@ class DeviceStatus(dict):
     #         return
     #
     #     if self._active:
-    #         if logger.isEnabledFor(_DEBUG):
+    #         if logger.isEnabledFor(logging.DEBUG):
     #             logger.debug("polling status of %s", d)
     #
     #         # read these from the device, the UI may need them later

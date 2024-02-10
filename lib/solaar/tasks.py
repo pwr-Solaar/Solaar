@@ -20,7 +20,6 @@
 
 import logging
 
-from logging import DEBUG as _DEBUG
 from threading import Thread as _Thread
 
 logger = logging.getLogger(__name__)
@@ -54,7 +53,7 @@ class TaskRunner(_Thread):
     def run(self):
         self.alive = True
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('started')
 
         while self.alive:
@@ -67,5 +66,5 @@ class TaskRunner(_Thread):
                 except Exception:
                     logger.exception('calling %s', function)
 
-        if logger.isEnabledFor(_DEBUG):
+        if logger.isEnabledFor(logging.DEBUG):
             logger.debug('stopped')
