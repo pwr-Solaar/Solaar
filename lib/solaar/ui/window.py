@@ -441,7 +441,7 @@ def _device_row(receiver_path, device_number, device=None):
         new_child_index = 0
         while item:
             if _model.get_value(item, _COLUMN.PATH) != receiver_path:
-                logger.warn(
+                logger.warning(
                     'path for device row %s different from path for receiver %s', _model.get_value(item, _COLUMN.PATH),
                     receiver_path
                 )
@@ -485,7 +485,7 @@ def select(receiver_path, device_number=None):
         selection = _tree.get_selection()
         selection.select_iter(item)
     else:
-        logger.warn('select(%s, %s) failed to find an item', receiver_path, device_number)
+        logger.warning('select(%s, %s) failed to find an item', receiver_path, device_number)
 
 
 def _hide(w, _ignore=None):

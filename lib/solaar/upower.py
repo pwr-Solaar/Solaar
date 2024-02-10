@@ -78,5 +78,5 @@ except Exception:
     # Either:
     # - the dbus library is not available
     # - the system dbus is not running
-    logger.warn('failed to register suspend/resume callbacks')
+    logger.warning('failed to register suspend/resume callbacks')
     pass

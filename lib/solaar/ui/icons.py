@@ -174,4 +174,4 @@ def icon_file(name, size=_LARGE_SIZE):
         #     logger.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
 
-    logger.warn('icon %s(%d) not found in current theme', name, size)
+    logger.warning('icon %s(%d) not found in current theme', name, size)

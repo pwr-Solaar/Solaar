@@ -248,7 +248,7 @@ def check_message(data):
         if report_lengths.get(report_id) == len(data):
             return True
         else:
-            logger.warn('unexpected message size: report_id %02X message %s' % (report_id, _strhex(data)))
+            logger.warning('unexpected message size: report_id %02X message %s' % (report_id, _strhex(data)))
     return False
 
 
@@ -266,7 +266,7 @@ def _read(handle, timeout):
         timeout = int(timeout * 1000)
         data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
     except Exception as reason:
-        logger.warn('read failed, assuming handle %r no longer available', handle)
+        logger.warning('read failed, assuming handle %r no longer available', handle)
         close(handle)
         raise NoReceiver(reason=reason)
 
@@ -421,7 +421,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
         try:
             _skip_incoming(handle, ihandle, notifications_hook)
         except NoReceiver:
-            logger.warn('device or receiver disconnected')
+            logger.warning('device or receiver disconnected')
             return None
         write(ihandle, devnumber, request_data, long_message)
 
@@ -488,7 +488,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("(%s) still waiting for reply, delta %f", handle, delta)
 
-        logger.warn(
+        logger.warning(
             'timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]', delta, timeout, devnumber, request_id,
             _strhex(params)
         )
@@ -506,7 +506,7 @@ def ping(handle, devnumber, long_message=False):
         try:
             _skip_incoming(handle, int(handle), notifications_hook)
         except NoReceiver:
-            logger.warn('device or receiver disconnected')
+            logger.warning('device or receiver disconnected')
             return
 
         # randomize the SoftwareId and mark byte to be able to identify the ping
@@ -547,4 +547,4 @@ def ping(handle, devnumber, long_message=False):
 
             delta = _timestamp() - request_started
 
-        logger.warn('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta, _PING_TIMEOUT, devnumber)
+        logger.warning('(%s) timeout (%0.2f/%0.2f) on device %d ping', handle, delta, _PING_TIMEOUT, devnumber)

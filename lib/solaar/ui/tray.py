@@ -422,7 +422,7 @@ def _remove_receiver(receiver):
 
 def _update_menu_item(index, device):
     if device is None or device.status is None:
-        logger.warn('updating an inactive device %s, assuming disconnected', device)
+        logger.warning('updating an inactive device %s, assuming disconnected', device)
         return None
 
     menu_items = _menu.get_children()

@@ -122,7 +122,7 @@ def _match(action, device, filterfn):
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
-        logger.warn(
+        logger.warning(
             'Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s', device.device_node, bid, vid, pid, e
         )
 

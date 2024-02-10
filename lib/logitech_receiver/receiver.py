@@ -128,7 +128,7 @@ class Receiver:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if ok is None:
-            logger.warn('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
+            logger.warning('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
@@ -224,7 +224,7 @@ class Receiver:
         """Scan all devices."""
         if self.handle:
             if not self.write_register(_R.receiver_connection, 0x02):
-                logger.warn('%s: failed to trigger device link notifications', self)
+                logger.warning('%s: failed to trigger device link notifications', self)
 
     def register_new_device(self, number, notification=None):
         if self._devices.get(number) is not None:
@@ -240,7 +240,7 @@ class Receiver:
             self._devices[number] = dev
             return dev
         except _base.NoSuchDevice as e:
-            logger.warn('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
+            logger.warning('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
 
         logger.warning('%s: looked for device %d, not found', self, number)
         self._devices[number] = None
@@ -251,7 +251,7 @@ class Receiver:
             reply = self.write_register(_R.receiver_pairing, action, device, timeout)
             if reply:
                 return True
-            logger.warn('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
+            logger.warning('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
 
     def discover(self, cancel=False, timeout=30):  # Bolt device discovery
         assert self.receiver_kind == 'bolt'
@@ -260,7 +260,7 @@ class Receiver:
             reply = self.write_register(_R.bolt_device_discovery, timeout, action)
             if reply:
                 return True
-            logger.warn('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
+            logger.warning('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
 
     def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=0x00, entropy=20):  # Bolt pairing
         assert self.receiver_kind == 'bolt'
@@ -269,7 +269,7 @@ class Receiver:
             reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
             if reply:
                 return True
-            logger.warn('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
+            logger.warning('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -335,7 +335,7 @@ class Receiver:
             dev.wpid = None
             if key in self._devices:
                 del self._devices[key]
-            logger.warn('%s removed device %s', self, dev)
+            logger.warning('%s removed device %s', self, dev)
         else:
             if self.receiver_kind == 'bolt':
                 reply = self.write_register(_R.bolt_pairing, 0x03, key)

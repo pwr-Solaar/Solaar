@@ -1342,7 +1342,7 @@ class PersistentRemappableAction(_Settings):
                 keys = _special_keys.KEYS_KEYS_MOUSE_HSCROLL
             else:
                 if logger.isEnabledFor(_WARN):
-                    logger.warn('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
+                    logger.warning('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
                 return None
             choices = {}
             for k in remap_keys:
@@ -1358,7 +1358,7 @@ class PersistentRemappableAction(_Settings):
             # Craft keyboard has a value that isn't valid so fudge these values
             if reply_value not in self.choices[key]:
                 if logger.isEnabledFor(_WARN):
-                    logger.warn('unusual persistent remappable action mapping %x: use Default', reply_value)
+                    logger.warning('unusual persistent remappable action mapping %x: use Default', reply_value)
                 reply_value = _special_keys.KEYS_Default
             return reply_value
 

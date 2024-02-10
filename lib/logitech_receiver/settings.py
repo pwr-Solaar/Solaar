@@ -144,7 +144,7 @@ class BooleanValidator(Validator):
                 return True
             if reply_value == self.false_value:
                 return False
-            logger.warn(
+            logger.warning(
                 'BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
                 self.mask
             )
@@ -162,7 +162,7 @@ class BooleanValidator(Validator):
         if reply_value == false_value:
             return False
 
-        logger.warn(
+        logger.warning(
             'BooleanValidator: reply %r mismatched %r/%r/%r', reply_bytes, self.true_value, self.false_value, self.mask
         )
         return False
@@ -352,7 +352,7 @@ class Setting:
                 self.write(value, save=False)
             except Exception as e:
                 if logger.isEnabledFor(logging.WARNING):
-                    logger.warn(
+                    logger.warning(
                         '%s: error applying value %s so ignore it (%s): %s', self.name, self._value, self._device, repr(e)
                     )
 
@@ -731,7 +731,7 @@ class RangeFieldSetting(Setting):
                 if not reply:
                     return None
             elif logger.isEnabledFor(logging.WARNING):
-                logger.warn('%s: range field setting no data to write', self.name)
+                logger.warning('%s: range field setting no data to write', self.name)
             return map
 
     def write_key_value(self, key, value, save=True):
@@ -1286,7 +1286,7 @@ class PackedRangeValidator(Validator):
         return None if type(args[1]) != int or args[1] < self.min_value or args[1] > self.max_value else args
 
     def compare(self, args, current):
-        logger.warn('compare not implemented for packed range settings')
+        logger.warning('compare not implemented for packed range settings')
         return False
 
 
@@ -1315,7 +1315,7 @@ class MultipleRangeValidator(Validator):
                 r += b'\x00' * (sub_item.length - len(value))
             v = _bytes2int(r)
             if not (sub_item.minimum < v < sub_item.maximum):
-                logger.warn(
+                logger.warning(
                     f'{self.__class__.__name__}: failed to validate read value for {item}.{sub_item}: ' +
                     f'{v} not in [{sub_item.minimum}..{sub_item.maximum}]'
                 )
@@ -1375,7 +1375,7 @@ class MultipleRangeValidator(Validator):
         return [int(item), {**args[1]}]
 
     def compare(self, args, current):
-        logger.warn('compare not implemented for multiple range settings')
+        logger.warning('compare not implemented for multiple range settings')
         return False
 
 
@@ -1437,7 +1437,7 @@ class ActionSettingRW:
 
         divertSetting = next(filter(lambda s: s.name == self.divert_setting_name, device.settings), None)
         if divertSetting is None:
-            logger.warn('setting %s not found on %s', self.divert_setting_name, device.name)
+            logger.warning('setting %s not found on %s', self.divert_setting_name, device.name)
             return None
         self.device = device
         key = _bytes2int(data_bytes)
@@ -1464,7 +1464,7 @@ class ActionSettingRW:
                     device.remove_notification_handler(self.name)
                 except Exception:
                     if logger.isEnabledFor(logging.WARNING):
-                        logger.warn('cannot disable %s on %s', self.name, device)
+                        logger.warning('cannot disable %s on %s', self.name, device)
                 self.deactivate_action()
         return True
 
@@ -1526,7 +1526,7 @@ class RawXYProcessing:
                     self.device.remove_notification_handler(self.name)
                 except Exception:
                     if logger.isEnabledFor(logging.WARNING):
-                        logger.warn('cannot disable %s on %s', self.name, self.device)
+                        logger.warning('cannot disable %s on %s', self.name, self.device)
                 self.deactivate_action()
                 self.active = False
 

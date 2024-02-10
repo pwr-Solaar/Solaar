@@ -693,7 +693,7 @@ def _create_sbox(s, device):
         control = HeteroKeyControl(sbox, change)
     else:
         if logger.isEnabledFor(logging.WARNING):
-            logger.warn('setting %s display not implemented', s.label)
+            logger.warning('setting %s display not implemented', s.label)
         return None
 
     control.set_sensitive(False)  # the first read will enable it

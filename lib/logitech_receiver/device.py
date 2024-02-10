@@ -424,7 +424,7 @@ class Device:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if not ok:
-            logger.warn('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
+            logger.warning('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))

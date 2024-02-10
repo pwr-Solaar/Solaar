@@ -79,7 +79,7 @@ def _process_receiver_notification(receiver, status, n):
         if pair_error:
             status[_K.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
             status.new_device = None
-            logger.warn('pairing error %d: %s', pair_error, error_string)
+            logger.warning('pairing error %d: %s', pair_error, error_string)
         status.changed(reason=reason)
         return True
 
@@ -96,7 +96,7 @@ def _process_receiver_notification(receiver, status, n):
             discover_error = ord(n.data[:1])
             if discover_error:
                 status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
-                logger.warn('bolt discovering error %d: %s', discover_error, discover_string)
+                logger.warning('bolt discovering error %d: %s', discover_error, discover_string)
             status.changed(reason=reason)
             return True
 
@@ -134,7 +134,7 @@ def _process_receiver_notification(receiver, status, n):
             if pair_error:
                 status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
                 status.new_device = None
-                logger.warn('pairing error %d: %s', pair_error, error_string)
+                logger.warning('pairing error %d: %s', pair_error, error_string)
             status.changed(reason=reason)
             return True
 
@@ -146,7 +146,7 @@ def _process_receiver_notification(receiver, status, n):
     elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
         return True
 
-    logger.warn('%s: unhandled notification %s', receiver, n)
+    logger.warning('%s: unhandled notification %s', receiver, n)
 
 
 #
@@ -187,12 +187,12 @@ def _process_device_notification(device, status, n):
 
     # assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
     if not device.features:
-        logger.warn('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
+        logger.warning('%s: feature notification but features not set up: %02X %s', device, n.sub_id, n)
         return False
     try:
         feature = device.features.get_feature(n.sub_id)
     except IndexError:
-        logger.warn('%s: notification from invalid feature index %02X: %s', device, n.sub_id, n)
+        logger.warning('%s: notification from invalid feature index %02X: %s', device, n.sub_id, n)
         return False
 
     return _process_feature_notification(device, status, n, feature)
@@ -221,7 +221,7 @@ def _process_dj_notification(device, status, n):
         status.changed(active=connected, alert=_ALERT.NONE, reason=_('connected') if connected else _('disconnected'))
         return True
 
-    logger.warn('%s: unrecognized DJ %s', device, n)
+    logger.warning('%s: unrecognized DJ %s', device, n)
 
 
 def _process_hidpp10_custom_notification(device, status, n):
@@ -243,7 +243,7 @@ def _process_hidpp10_custom_notification(device, status, n):
             logger.info('illumination event: %s', n)
         return True
 
-    logger.warn('%s: unrecognized %s', device, n)
+    logger.warning('%s: unrecognized %s', device, n)
 
 
 def _process_hidpp10_notification(device, status, n):
@@ -258,7 +258,7 @@ def _process_hidpp10_notification(device, status, n):
                 del device.receiver[device.number]
             status.changed(active=False, alert=_ALERT.ALL, reason=_('unpaired'))
         else:
-            logger.warn('%s: disconnection with unknown type %02X: %s', device, n.address, n)
+            logger.warning('%s: disconnection with unknown type %02X: %s', device, n.address, n)
         return True
 
     # device connection (and disconnection)
@@ -273,10 +273,10 @@ def _process_hidpp10_notification(device, status, n):
             link_established = not (flags & 0x40)
             link_encrypted = bool(flags & 0x20) or n.address == 0x10  # Bolt protocol always encrypted
         else:
-            logger.warn('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
+            logger.warning('%s: connection notification with unknown protocol %02X: %s', device.number, n.address, n)
             return True
         if wpid != device.wpid:
-            logger.warn('%s wpid mismatch, got %s', device, wpid)
+            logger.warning('%s wpid mismatch, got %s', device, wpid)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(
                 '%s: protocol %s connection notification: software=%s, encrypted=%s, link=%s, payload=%s', device, n.address,
@@ -301,10 +301,10 @@ def _process_hidpp10_notification(device, status, n):
             reason = status.to_string() or _('powered on')
             status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
         else:
-            logger.warn('%s: unknown %s', device, n)
+            logger.warning('%s: unknown %s', device, n)
         return True
 
-    logger.warn('%s: unrecognized %s', device, n)
+    logger.warning('%s: unrecognized %s', device, n)
 
 
 def _process_feature_notification(device, status, n, feature):
@@ -319,21 +319,21 @@ def _process_feature_notification(device, status, n, feature):
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: spurious BATTERY status %s', device, n)
         else:
-            logger.warn('%s: unknown BATTERY %s', device, n)
+            logger.warning('%s: unknown BATTERY %s', device, n)
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
             _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
             status.set_battery_info(level, nextl, battery_status, voltage)
         else:
-            logger.warn('%s: unknown VOLTAGE %s', device, n)
+            logger.warning('%s: unknown VOLTAGE %s', device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
             _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
             status.set_battery_info(level, nextl, battery_status, voltage)
         else:
-            logger.warn('%s: unknown UNIFIED BATTERY %s', device, n)
+            logger.warning('%s: unknown UNIFIED BATTERY %s', device, n)
 
     elif feature == _F.ADC_MEASUREMENT:
         if n.address == 0x00:
@@ -344,7 +344,7 @@ def _process_feature_notification(device, status, n, feature):
             else:  # this feature is used to signal device becoming inactive
                 status.changed(active=False)
         else:
-            logger.warn('%s: unknown ADC MEASUREMENT %s', device, n)
+            logger.warning('%s: unknown ADC MEASUREMENT %s', device, n)
 
     elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b'GOOD':
@@ -371,9 +371,9 @@ def _process_feature_notification(device, status, n, feature):
                 reports_period = 2  # seconds
                 device.feature_request(_F.SOLAR_DASHBOARD, 0x00, reports_count, reports_period)
             else:
-                logger.warn('%s: unknown SOLAR CHARGE %s', device, n)
+                logger.warning('%s: unknown SOLAR CHARGE %s', device, n)
         else:
-            logger.warn('%s: SOLAR CHARGE not GOOD? %s', device, n)
+            logger.warning('%s: SOLAR CHARGE not GOOD? %s', device, n)
 
     elif feature == _F.WIRELESS_DEVICE_STATUS:
         if n.address == 0x00:
@@ -384,7 +384,7 @@ def _process_feature_notification(device, status, n, feature):
                 alert = _ALERT.NONE
                 status.changed(active=True, alert=alert, reason=reason, push=True)
         else:
-            logger.warn('%s: unknown WIRELESS %s', device, n)
+            logger.warning('%s: unknown WIRELESS %s', device, n)
 
     elif feature == _F.TOUCHMOUSE_RAW_POINTS:
         if n.address == 0x00:
@@ -397,7 +397,7 @@ def _process_feature_notification(device, status, n, feature):
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: TOUCH MOUSE status: button_down=%s mouse_lifted=%s', device, button_down, mouse_lifted)
         else:
-            logger.warn('%s: unknown TOUCH MOUSE %s', device, n)
+            logger.warning('%s: unknown TOUCH MOUSE %s', device, n)
 
     # TODO: what are REPROG_CONTROLS_V{2,3}?
     elif feature == _F.REPROG_CONTROLS:
@@ -405,7 +405,7 @@ def _process_feature_notification(device, status, n, feature):
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: reprogrammable key: %s', device, n)
         else:
-            logger.warn('%s: unknown REPROG_CONTROLS %s', device, n)
+            logger.warning('%s: unknown REPROG_CONTROLS %s', device, n)
 
     elif feature == _F.BACKLIGHT2:
         if (n.address == 0x00):

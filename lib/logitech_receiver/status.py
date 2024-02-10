@@ -228,7 +228,7 @@ class DeviceStatus(dict):
         if _hidpp20.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
             self[KEYS.ERROR] = None
         else:
-            logger.warn('%s: battery %d%%, ALERT %s', self._device, level, status)
+            logger.warning('%s: battery %d%%, ALERT %s', self._device, level, status)
             if self.get(KEYS.ERROR) != status:
                 self[KEYS.ERROR] = status
                 # only show the notification once

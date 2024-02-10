@@ -122,7 +122,7 @@ class ReceiverListener(_listener.EventsListener):
     #     # if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
     #     #     # if we missed a couple of polls, most likely the computer went into
     #     #     # sleep, and we have to reinitialize the receiver again
-    #     #     logger.warn("%s: possible sleep detected, closing this listener", self.receiver)
+    #     #     logger.warning("%s: possible sleep detected, closing this listener", self.receiver)
     #     #     self.stop()
     #     #     return
     #
@@ -251,7 +251,7 @@ class ReceiverListener(_listener.EventsListener):
             dev = self.receiver[n.devnumber]
 
         if not dev:
-            logger.warn('%s: received %s for invalid device %d: %r', self.receiver, n, n.devnumber, dev)
+            logger.warning('%s: received %s for invalid device %d: %r', self.receiver, n, n.devnumber, dev)
             return
 
         # Apply settings every time the device connects
@@ -271,7 +271,7 @@ class ReceiverListener(_listener.EventsListener):
 
         if not hasattr(dev, 'status') or dev.status is None:
             # notification before device status set up - don't process it
-            logger.warn('%s before device %s has status', n, dev)
+            logger.warning('%s before device %s has status', n, dev)
         else:
             _notifications.process(dev, n)
 
@@ -312,7 +312,7 @@ def _start(device_info):
         _all_listeners[device_info.path] = rl
         return rl
 
-    logger.warn('failed to open %s', device_info)
+    logger.warning('failed to open %s', device_info)
 
 
 def start_all():
