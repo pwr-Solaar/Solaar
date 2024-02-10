@@ -597,7 +597,7 @@ class CrownSmooth(_Setting):
 class DivertGkeys(_Setting):
     name = 'divert-gkeys'
     label = _('Divert G and M Keys')
-    description = (_('Make G and M keys send HID++ notifications (which can trigger Solaar rules but are otherwise ignored).'))
+    description = (_('Make G and M keys send HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
     feature = _F.GKEY
     validator_options = {'true_value': 0x01, 'false_value': 0x00, 'mask': 0xff}
 
