@@ -1,5 +1,17 @@
-# 1.1.11rc1
+# 1.1.11rc2
 
+* Simplify installation of udev rules
+* Add document on implementation
+* Tidy up scrolling appearance in configuration panel
+* Correctly handle profile button with no action
+* Don't unlock setting when changed by external means
+* Refactor code to record change to setting
+* Add GitHub action for tests
+* Introduce tests with pytest
+* Simplify logger instantiation
+* Update label and tooltip for divert-gkeys setting
+* Don't lock setting when an error occurs
+* Catch assertion errors when reading setting values from devices
 * Support LED Zone control feature
 * Dump and load device profiles
 * Select among profiles.
@@ -15,7 +27,7 @@
 * Add descriptions of M650, PRO X 2, G915, MX Anywhere 2S, G305, and MX Keys S
 * Report hidraw node in debugging messages
 * Add names for new Logitech features
-* Update Spanish and French translations
+* Update Spanish, French, and Polish translations
 * Defend against lightspeed receivers that contact devices for basic information
 * Remove incorrect feature for M325 mice
 * Add K845 keyboard
