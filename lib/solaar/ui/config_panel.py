@@ -26,7 +26,8 @@ from logitech_receiver.hidpp20 import LEDEffectSetting as _LEDEffectSetting
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
-from solaar.ui import ui_async as _ui_async
+
+from .common import ui_async as _ui_async
 
 logger = logging.getLogger(__name__)
 

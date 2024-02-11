@@ -163,8 +163,9 @@ def main():
     try:
         import solaar.listener as listener
         import solaar.ui as ui
+        import solaar.ui.common as common
 
-        listener.setup_scanner(ui.status_changed, ui.error_dialog)
+        listener.setup_scanner(ui.status_changed, common.error_dialog)
 
         import solaar.upower as _upower
         if args.restart_on_wake_up:
