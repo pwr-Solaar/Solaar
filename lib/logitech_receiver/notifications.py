@@ -22,6 +22,8 @@ import threading as _threading
 
 from struct import unpack as _unpack
 
+from solaar.ui.config_panel import record_setting
+
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -410,7 +412,6 @@ def _process_feature_notification(device, status, n, feature):
     elif feature == _F.BACKLIGHT2:
         if (n.address == 0x00):
             level = _unpack('!B', n.data[1:2])[0]
-            from solaar.ui.config_panel import record_setting  # prevent circular import
             record_setting(device, _st.Backlight2Level, [level])
 
     elif feature == _F.REPROG_CONTROLS_V4:
@@ -440,7 +441,6 @@ def _process_feature_notification(device, status, n, feature):
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: WHEEL: ratchet: %d', device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
-                from solaar.ui.config_panel import record_setting  # prevent circular import
                 record_setting(device, _st.ScrollRatchet, [2 if ratchet else 1])
         else:
             if logger.isEnabledFor(logging.INFO):
@@ -460,7 +460,6 @@ def _process_feature_notification(device, status, n, feature):
                 profile_sector = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
                 for profile in device.profiles.profiles.values() if device.profiles else []:
                     if profile.sector == profile_sector:
-                        from solaar.ui.config_panel import record_setting  # prevent circular import
                         record_setting(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
 
     _diversion.process_notification(device, status, n, feature)

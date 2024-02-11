@@ -20,7 +20,6 @@ import logging
 
 import gi
 
-from gi.repository import Gdk, GLib, Gtk
 from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import NamedInt as _NamedInt
@@ -37,6 +36,9 @@ from .common import ui_async as _ui_async
 from .diversion_rules import show_window as _show_diversion_window
 
 # from solaar import __version__ as VERSION
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
