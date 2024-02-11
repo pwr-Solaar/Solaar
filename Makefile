@@ -6,7 +6,7 @@ UDEV_RULES_DEST := /etc/udev/rules.d/
 .PHONY: install_udev install_udev_uinput uninstall_udev
 
 install_udev:
-	@echo "Copying Solaar udev rules to $(UDEV_RULES_DEST)"
+	@echo "Copying Solaar udev rule to $(UDEV_RULES_DEST)"
 	sudo cp $(UDEV_RULES_SOURCE) $(UDEV_RULES_DEST)
 	sudo udevadm control --reload-rules
 
