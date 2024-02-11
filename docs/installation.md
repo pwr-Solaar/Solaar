@@ -101,7 +101,7 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 
 Solaar needs to write to HID devices and receivers.
 To achieve this without Solaar running as root, which is not recommended, requires a udev rule. Run `make install_udev` in Solaar's root folder to
-install and reload udev rule.
+install Solaar's regular udev rule and put it into effect.  You need sudo privileges to do this and will be asked for your password.  If you are using Wayland instead of X11 you may want to instead `make install_udev_uinput` so that Solaar rules can simulate input in Wayland.
 
 <details>
   <summary>Manual steps</summary>
