@@ -11,7 +11,7 @@ install_udev:
 	sudo udevadm control --reload-rules
 
 install_udev_uinput:
-	@echo "Copying Solaar udev rules (uinput) to $(UDEV_RULES_DEST)"
+	@echo "Copying Solaar udev rule (uinput) to $(UDEV_RULES_DEST)"
 	sudo cp $(UDEV_RULES_SOURCE_UINPUT) $(UDEV_RULES_DEST)
 	sudo udevadm control --reload-rules
 
