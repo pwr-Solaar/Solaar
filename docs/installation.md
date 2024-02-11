@@ -99,7 +99,7 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 
 ### Installing Solaar's udev rule
 
-Solaar needs to write to HID devices and receivers. 
+Solaar needs to write to HID devices and receivers.
 To achieve this without Solaar running as root, requires a udev rule. Run `make install_udev` in Solaar's root folder to
 install and reload udev rule.
 
@@ -107,19 +107,14 @@ install and reload udev rule.
   <summary>Manual steps</summary>
 
   You can install this rule manually by copying the file
-  [`rules.d/42-logitech-unify-permissions.rules`](/rules.d/42-logitech-unify-permissions.rules) as root from Solaar repo 
+  [`rules.d/42-logitech-unify-permissions.rules`](/rules.d/42-logitech-unify-permissions.rules) as root from Solaar repo
   to `/etc/udev/rules.d`.
   Let udev reload its rules by running
   `sudo udevadm control --reload-rules`.
 </details>
 
-Then disconnect your receivers and any USB- or Bluetooth-connected devices for the udev rule to take effect and 
+Then disconnect your receivers and any USB- or Bluetooth-connected devices for the udev rule to take effect and
 re-connect them or just reboot your computer.
-
-
-
-
-
 
 ## Running from the download directory
 
