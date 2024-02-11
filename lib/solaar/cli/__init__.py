@@ -20,6 +20,11 @@ import argparse as _argparse
 import logging
 import sys as _sys
 
+from importlib import import_module
+from traceback import extract_tb, format_exc
+
+from logitech_receiver import Device, Receiver
+from logitech_receiver.base import receivers, receivers_and_devices
 from solaar import NAME
 
 logger = logging.getLogger(__name__)
@@ -104,8 +109,6 @@ print_help = _cli_parser.print_help
 
 
 def _receivers(dev_path=None):
-    from logitech_receiver import Receiver
-    from logitech_receiver.base import receivers
     for dev_info in receivers():
         if dev_path is not None and dev_path != dev_info.path:
             continue
@@ -121,8 +124,6 @@ def _receivers(dev_path=None):
 
 
 def _receivers_and_devices(dev_path=None):
-    from logitech_receiver import Device, Receiver
-    from logitech_receiver.base import receivers_and_devices
     for dev_info in receivers_and_devices():
         if dev_path is not None and dev_path != dev_info.path:
             continue
@@ -212,13 +213,10 @@ def run(cli_args=None, hidraw_path=None):
             raise Exception(
                 'No supported device found.  Use "lsusb" and "bluetoothctl devices Connected" to list connected devices.'
             )
-        from importlib import import_module
         m = import_module('.' + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)
     except AssertionError:
-        from traceback import extract_tb
         tb_last = extract_tb(_sys.exc_info()[2])[-1]
         _sys.exit('%s: assertion failed: %s line %d' % (NAME.lower(), tb_last[0], tb_last[1]))
     except Exception:
-        from traceback import format_exc
         _sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
