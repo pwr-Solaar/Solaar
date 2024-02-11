@@ -113,7 +113,7 @@ install Solaar's regular udev rule and put it into effect.  You need sudo privil
   `sudo udevadm control --reload-rules`.
 </details>
 
-Then disconnect your receivers and any USB- or Bluetooth-connected devices for the udev rule to take effect and
+Then disconnect your Logitech receivers and any USB- or Bluetooth-connected Logitech devices and
 re-connect them or just reboot your computer.
 
 ## Running from the download directory
