@@ -100,7 +100,7 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 ### Installing Solaar's udev rule
 
 Solaar needs to write to HID devices and receivers.
-To achieve this without Solaar running as root, requires a udev rule. Run `make install_udev` in Solaar's root folder to
+To achieve this without Solaar running as root, which is not recommended, requires a udev rule. Run `make install_udev` in Solaar's root folder to
 install and reload udev rule.
 
 <details>
