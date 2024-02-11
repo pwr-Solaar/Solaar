@@ -26,6 +26,7 @@ from threading import Timer as _Timer
 
 import yaml as _yaml
 
+from gi.repository import GLib
 from logitech_receiver.common import NamedInt as _NamedInt
 from solaar import __version__
 
@@ -142,7 +143,6 @@ def save(defer=False):
     else:
         with save_lock:
             if not save_timer:
-                from gi.repository import GLib
                 save_timer = _Timer(5.0, lambda: GLib.idle_add(do_save))
                 save_timer.start()
 

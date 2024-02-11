@@ -21,7 +21,6 @@ import logging
 import gi
 import yaml as _yaml
 
-from gi.repository import Gio, GLib, Gtk
 from logitech_receiver.status import ALERT
 from solaar.i18n import _
 from solaar.tasks import TaskRunner as _TaskRunner
@@ -31,6 +30,8 @@ from solaar.ui.window import find_device
 from . import diversion_rules, notify, tray, window
 
 gi.require_version('Gtk', '3.0')
+from gi.repository import Gio, GLib, Gtk  # NOQA: E402
+
 logger = logging.getLogger(__name__)
 
 #

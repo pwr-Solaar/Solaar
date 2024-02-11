@@ -21,6 +21,7 @@ import os
 
 from time import time as _timestamp
 
+import gi
 import solaar.gtk as gtk
 
 from gi.repository import GLib, Gtk
@@ -144,7 +145,6 @@ def _scroll(tray_icon, event, direction=None):
 
 
 try:
-    import gi
     try:
         gi.require_version('AyatanaAppIndicator3', '0.1')
         from gi.repository import AyatanaAppIndicator3 as AppIndicator3

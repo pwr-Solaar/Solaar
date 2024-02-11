@@ -16,13 +16,16 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import argparse
 import os
+import os.path
+import readline
 import sys
 import time
 
 from binascii import hexlify, unhexlify
 from select import select as _select
-from threading import Lock
+from threading import Lock, Thread
 
 import hidapi as _hid
 
@@ -176,7 +179,6 @@ def _open(args):
 
 
 def _parse_arguments():
-    import argparse
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--history', help='history file (default ~/.hidconsole-history)')
     arg_parser.add_argument('--hidpp', action='store_true', help='ensure input data is a valid HID++ request')
@@ -196,9 +198,7 @@ def main():
     if interactive:
         print('.. Press ^C/^D to exit, or type hex bytes to write to the device.')
 
-        import readline
         if args.history is None:
-            import os.path
             args.history = os.path.join(os.path.expanduser('~'), '.hidconsole-history')
         try:
             readline.read_history_file(args.history)
@@ -207,7 +207,6 @@ def main():
             pass
 
     try:
-        from threading import Thread
         t = Thread(target=_continuous_read, args=(handle, ))
         t.daemon = True
         t.start()

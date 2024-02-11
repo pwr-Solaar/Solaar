@@ -21,13 +21,17 @@ import traceback
 
 from threading import Timer as _Timer
 
-from gi.repository import Gdk, GLib, Gtk
+import gi
+
 from logitech_receiver.hidpp20 import LEDEffectSetting as _LEDEffectSetting
 from logitech_receiver.settings import KIND as _SETTING_KIND
 from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
 from solaar.i18n import _, ngettext
 
 from .common import ui_async as _ui_async
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gdk, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
