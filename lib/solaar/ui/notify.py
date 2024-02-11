@@ -18,7 +18,14 @@
 
 # Optional desktop notifications.
 
+import logging
+
+from solaar import NAME
 from solaar.i18n import _
+
+from . import icons as _icons
+
+logger = logging.getLogger(__name__)
 
 #
 #
@@ -37,12 +44,6 @@ except (ValueError, ImportError):
     available = False
 
 if available:
-    import logging
-    logger = logging.getLogger(__name__)
-
-    from solaar import NAME
-
-    from . import icons as _icons
 
     # cache references to shown notifications here, so if another status comes
     # while its notification is still visible we don't create another one
