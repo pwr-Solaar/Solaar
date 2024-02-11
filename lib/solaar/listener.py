@@ -24,8 +24,9 @@ import time
 from collections import namedtuple
 
 import gi
+import logitech_receiver.device as _device
+import logitech_receiver.receiver as _receiver
 
-from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import listener as _listener
@@ -302,9 +303,9 @@ def _start(device_info):
     assert _status_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver = Receiver.open(device_info)
+        receiver = _receiver.Receiver.open(device_info)
     else:
-        receiver = Device.open(device_info)
+        receiver = _device.Device.open(device_info)
         configuration.attach_to(receiver)
 
     if receiver:

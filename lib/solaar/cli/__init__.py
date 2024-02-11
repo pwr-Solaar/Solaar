@@ -23,7 +23,9 @@ import sys as _sys
 from importlib import import_module
 from traceback import extract_tb, format_exc
 
-from logitech_receiver import Device, Receiver
+import logitech_receiver.device as _device
+import logitech_receiver.receiver as _receiver
+
 from logitech_receiver.base import receivers, receivers_and_devices
 from solaar import NAME
 
@@ -113,7 +115,7 @@ def _receivers(dev_path=None):
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            r = Receiver.open(dev_info)
+            r = _receiver.Receiver.open(dev_info)
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('[%s] => %s', dev_info.path, r)
             if r:
@@ -128,7 +130,7 @@ def _receivers_and_devices(dev_path=None):
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            d = Device.open(dev_info) if dev_info.isDevice else Receiver.open(dev_info)
+            d = _device.Device.open(dev_info) if dev_info.isDevice else _receiver.Receiver.open(dev_info)
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('[%s] => %s', dev_info.path, d)
             if d is not None:
