@@ -18,8 +18,12 @@
 
 import logging
 
-from gi.repository import GLib, Gtk
+import gi
+
 from solaar.i18n import _
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 

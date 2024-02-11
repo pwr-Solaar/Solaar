@@ -18,6 +18,7 @@
 
 import errno as _errno
 import logging
+import subprocess
 import time
 
 from collections import namedtuple
@@ -390,7 +391,6 @@ def _process_add(device_info, retry):
     except OSError as e:
         if e.errno == _errno.EACCES:
             try:
-                import subprocess
                 output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
                 if logger.isEnabledFor(logging.WARNING):
                     logger.warning('Missing permissions on %s\n%s.', device_info.path, output)
