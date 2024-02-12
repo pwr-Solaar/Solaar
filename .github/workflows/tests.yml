@@ -28,6 +28,37 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .[test]
 
-    - name: Run tests
+    - name: Run tests on Ubuntu
+      run: |
+        pytest
+
+  macos-build:
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        python-version: [3.7, 3.12]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4.3.0
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up macOS dependencies
+      run: |
+        brew install hidapi dbus gtk+3 pygobject3
+
+        brew services start dbus
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ."[test]"
+
+    - name: Run tests on macOS
       run: |
         pytest
