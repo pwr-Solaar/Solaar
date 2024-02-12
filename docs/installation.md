@@ -99,20 +99,22 @@ For more information see [the rules page](https://pwr-solaar.github.io/Solaar/ru
 
 ### Installing Solaar's udev rule
 
-Solaar needs to write to HID devices for receivers and devices.
-To be able to do this without running as root requires a udev rule
-that gives seated users write access to the HID devices for Logitech receivers and devices.
+Solaar needs to write to HID devices and receivers.
+To achieve this without Solaar running as root, which is not recommended, requires a udev rule. Run `make install_udev` in Solaar's root folder to
+install Solaar's regular udev rule and put it into effect.  You need sudo privileges to do this and will be asked for your password.  If you are using Wayland instead of X11 you may want to instead `make install_udev_uinput` so that Solaar rules can simulate input in Wayland.
 
-You can install this rule by copying, as root,
-[`rules.d/42-logitech-unify-permissions.rules`](/rules.d/42-logitech-unify-permissions.rules) from Solaar repo to
-`/etc/udev/rules.d`.
-You will probably also have to tell udev to reload its rule via
-`sudo udevadm control --reload-rules`.
+<details>
+  <summary>Manual steps</summary>
 
-For this rule to set up the correct permissions for your receivers and devices
-you will then need to either disconnect your receivers and
-any USB-connected or Bluetooth-connected devices and
-re-connect them or reboot your computer.
+  You can install this rule manually by copying the file
+  [`rules.d/42-logitech-unify-permissions.rules`](/rules.d/42-logitech-unify-permissions.rules) as root from Solaar repo
+  to `/etc/udev/rules.d`.
+  Let udev reload its rules by running
+  `sudo udevadm control --reload-rules`.
+</details>
+
+Then disconnect your Logitech receivers and any USB- or Bluetooth-connected Logitech devices and
+re-connect them for the udev rule to take effect.  Alternatively, you can just reboot your computer.
 
 ## Running from the download directory
 
