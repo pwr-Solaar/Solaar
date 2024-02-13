@@ -827,8 +827,10 @@ def _record_setting(device, setting_class, values):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('on %s changing setting %s to %s', device, setting_class.name, values)
     setting = next((s for s in device.settings if s.name == setting_class.name), None)
-    assert device == setting._device
+    if setting is None and logger.isEnabledFor(logging.DEBUG):
+        logger.debug('No setting for %s found on %s when trying to record a change made elsewhere', setting_class.name, device)
     if setting:
+        assert device == setting._device
         if len(values) > 1:
             setting.update_key_value(values[0], values[-1])
             value = {values[0]: values[-1]}
