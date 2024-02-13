@@ -24,7 +24,7 @@ import threading as _threading
 
 from struct import pack as _pack
 from struct import unpack as _unpack
-from typing import List
+from typing import List, Optional
 
 import yaml as _yaml
 
@@ -247,14 +247,16 @@ class FeaturesArray(dict):
 
     def __init__(self, device):
         assert device is not None
-        self.supported = True
+        self.supported = True  # Actually don't know whether it is supported yet
         self.device = device
         self.inverse = {}
         self.version = {}
         self.count = 0
 
-    def _check(self):
-        if self.supported is False or not self.device.online:
+    def _check(self) -> bool:
+        if not self.device.online:
+            return False
+        if self.supported is False:
             return False
         if self.device.protocol and self.device.protocol < 2.0:
             self.supported = False
@@ -263,14 +265,14 @@ class FeaturesArray(dict):
             return True
         reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
         if reply is not None:
-            fs_index = ord(reply[0:1])
+            fs_index = reply[0]
             if fs_index:
                 count = self.device.request(fs_index << 8)
                 if count is None:
                     logger.warn('FEATURE_SET found, but failed to read features count')
                     return False
                 else:
-                    self.count = ord(count[:1]) + 1  # ROOT feature not included in count
+                    self.count = count[0] + 1  # ROOT feature not included in count
                     self[FEATURE.ROOT] = 0
                     self[FEATURE.FEATURE_SET] = fs_index
                     return True
@@ -278,7 +280,7 @@ class FeaturesArray(dict):
                 self.supported = False
         return False
 
-    def get_feature(self, index):
+    def get_feature(self, index: int) -> Optional[_NamedInt]:
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
@@ -296,13 +298,15 @@ class FeaturesArray(dict):
                 feature = self.get_feature(index)
                 yield feature, index
 
-    def get_feature_version(self, feature):
+    def get_feature_version(self, feature: _NamedInt) -> Optional[int]:
         if self[feature]:
             return self.version.get(feature, 0)
 
-    __bool__ = __nonzero__ = _check
+    def __contains__(self, feature: _NamedInt) -> bool:
+        index = self.__getitem__(feature)
+        return index is not None and index is not False
 
-    def __getitem__(self, feature):
+    def __getitem__(self, feature: _NamedInt) -> Optional[int]:
         index = super().get(feature)
         if index is not None:
             return index
@@ -322,16 +326,12 @@ class FeaturesArray(dict):
             self.inverse[index] = feature
 
     def __delitem__(self, feature):
-        if type(super().get(feature)) == int:
-            self.inverse.pop(super().get(feature))
-        super().__delitem__(feature)
+        raise Exception("Don't delete features from FeatureArray")
 
-    def __contains__(self, feature):  # is a feature present
-        index = self.__getitem__(feature)
-        return index is not None and index is not False
-
-    def __len__(self):
+    def __len__(self) -> int:
         return self.count
+
+    __bool__ = __nonzero__ = _check
 
 
 class ReprogrammableKey:
