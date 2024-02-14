@@ -28,10 +28,9 @@ from typing import List, Optional
 
 import yaml as _yaml
 
-from . import special_keys
+from . import exceptions, special_keys
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
-from .common import KwException as _KwException
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts
@@ -222,21 +221,6 @@ ERROR = _NamedInts(
     busy=0x08,
     unsupported=0x09
 )
-
-#
-#
-#
-
-
-class FeatureNotSupported(_KwException):
-    """Raised when trying to request a feature not supported by the device."""
-    pass
-
-
-class FeatureCallError(_KwException):
-    """Raised if the device replied to a feature call with an error."""
-    pass
-
 
 #
 #
@@ -463,8 +447,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     mapping_flags_2 = 0
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
-                raise FeatureCallError(msg='No reply from device.')
-        except FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
+                raise exceptions.FeatureCallError(msg='No reply from device.')
+        except exceptions.FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
             if logger.isEnabledFor(logging.WARNING):
                 logger.warn(
                     f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
@@ -499,7 +483,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         bfield = 0
         for f, v in flags.items():
             if v and FLAG_TO_CAPABILITY[f] not in self.flags:
-                raise FeatureNotSupported(
+                raise exceptions.FeatureNotSupported(
                     msg=f'Tried to set mapping flag "{f}" on control "{self.key}" ' +
                     f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
                 )
@@ -512,7 +496,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     self._mapping_flags &= ~int(f)
 
         if remap != 0 and remap not in self.remappable_to:
-            raise FeatureNotSupported(
+            raise exceptions.FeatureNotSupported(
                 msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to ' +
                 f'on device {self._device}.'
             )
@@ -1045,7 +1029,7 @@ class Spec:
     def read(self):
         try:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
-        except FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
+        except exceptions.FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
             if logger.isEnabledFor(logging.WARNING):
                 logger.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
             return None
@@ -1130,7 +1114,7 @@ class Backlight:
     def __init__(self, device):
         response = device.feature_request(FEATURE.BACKLIGHT2, 0x00)
         if not response:
-            raise FeatureCallError(msg='No reply from device.')
+            raise exceptions.FeatureCallError(msg='No reply from device.')
         self.device = device
         self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
             '<BBBHBHHH', response[:12]
@@ -1819,7 +1803,7 @@ def get_adc_measurement(device):
         report = feature_request(device, FEATURE.ADC_MEASUREMENT)
         if report is not None:
             return decipher_adc_measurement(report)
-    except FeatureCallError:
+    except exceptions.FeatureCallError:
         return FEATURE.ADC_MEASUREMENT if FEATURE.ADC_MEASUREMENT in device.features else None
 
 

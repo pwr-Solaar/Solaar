@@ -16,7 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logitech_receiver import base as _base
+from logitech_receiver import exceptions
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import receiver as _receiver
@@ -85,7 +85,7 @@ def _print_device(dev, num=None):
     # try to ping the device to see if it actually exists and to wake it up
     try:
         dev.ping()
-    except _base.NoSuchDevice:
+    except exceptions.NoSuchDevice:
         print('  %s: Device not found' % num or dev.number)
         return
 

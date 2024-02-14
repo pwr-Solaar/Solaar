@@ -20,6 +20,7 @@ import logging
 import threading as _threading
 
 from . import base as _base
+from . import exceptions
 
 # from time import time as _timestamp
 
@@ -163,7 +164,7 @@ class EventsListener(_threading.Thread):
             if self._queued_notifications.empty():
                 try:
                     n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
-                except _base.NoReceiver:
+                except exceptions.NoReceiver:
                     logger.warning('%s disconnected', self.receiver.name)
                     self.receiver.close()
                     break

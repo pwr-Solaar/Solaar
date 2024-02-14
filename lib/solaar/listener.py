@@ -28,7 +28,8 @@ import logitech_receiver.device as _device
 import logitech_receiver.receiver as _receiver
 
 from logitech_receiver import base as _base
-from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import exceptions
+from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
@@ -42,8 +43,8 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
-_IR = _hidpp10.INFO_SUBREGISTERS
+_R = _hidpp10_constants.REGISTERS
+_IR = _hidpp10_constants.INFO_SUBREGISTERS
 
 #
 #
@@ -89,7 +90,7 @@ class ReceiverListener(_listener.EventsListener):
             logger.info('%s: notifications listener has started (%s)', self.receiver, self.receiver.handle)
         nfs = self.receiver.enable_connection_notifications()
         if logger.isEnabledFor(logging.WARNING):
-            if not self.receiver.isDevice and not ((nfs if nfs else 0) & _hidpp10.NOTIFICATION_FLAG.wireless):
+            if not self.receiver.isDevice and not ((nfs if nfs else 0) & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
                 logger.warning(
                     'Receiver on %s might not support connection notifications, GUI might not show its devices',
                     self.receiver.path
@@ -403,7 +404,7 @@ def _process_add(device_info, retry):
                 _error_callback('permissions', device_info.path)
         else:
             _error_callback('nodevice', device_info.path)
-    except _base.NoReceiver:
+    except exceptions.NoReceiver:
         _error_callback('nodevice', device_info.path)
 
 
