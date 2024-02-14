@@ -18,6 +18,7 @@
 
 from logitech_receiver import exceptions
 from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
@@ -46,12 +47,12 @@ def _print_receiver(receiver):
     notification_flags = _hidpp10.get_notification_flags(receiver)
     if notification_flags is not None:
         if notification_flags:
-            notification_names = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+            notification_names = _hidpp10_constants.NOTIFICATION_FLAG.flag_names(notification_flags)
             print('  Notifications: %s (0x%06X)' % (', '.join(notification_names), notification_flags))
         else:
             print('  Notifications: (none)')
 
-    activity = receiver.read_register(_hidpp10.REGISTERS.devices_activity)
+    activity = receiver.read_register(_hidpp10_constants.REGISTERS.devices_activity)
     if activity:
         activity = [(d, ord(activity[d - 1:d])) for d in range(1, receiver.max_devices)]
         activity_text = ', '.join(('%d=%d' % (d, a)) for d, a in activity if a > 0)
@@ -122,14 +123,14 @@ def _print_device(dev, num=None):
         notification_flags = _hidpp10.get_notification_flags(dev)
         if notification_flags is not None:
             if notification_flags:
-                notification_names = _hidpp10.NOTIFICATION_FLAG.flag_names(notification_flags)
+                notification_names = _hidpp10_constants.NOTIFICATION_FLAG.flag_names(notification_flags)
                 print('     Notifications: %s (0x%06X).' % (', '.join(notification_names), notification_flags))
             else:
                 print('     Notifications: (none).')
         device_features = _hidpp10.get_device_features(dev)
         if device_features is not None:
             if device_features:
-                device_features_names = _hidpp10.DEVICE_FEATURES.flag_names(device_features)
+                device_features_names = _hidpp10_constants.DEVICE_FEATURES.flag_names(device_features)
                 print('     Features: %s (0x%06X)' % (', '.join(device_features_names), device_features))
             else:
                 print('     Features: (none)')

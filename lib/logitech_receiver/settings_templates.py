@@ -26,7 +26,7 @@ from time import time as _time
 from traceback import format_exc as _format_exc
 
 from . import descriptors as _descriptors
-from . import hidpp10 as _hidpp10
+from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
 from .base import _HIDPP_Notification as _HIDPP_Notification
@@ -58,8 +58,8 @@ from .special_keys import DISABLE as _DKEY
 
 logger = logging.getLogger(__name__)
 
-_DK = _hidpp10.DEVICE_KIND
-_R = _hidpp10.REGISTERS
+_DK = _hidpp10_constants.DEVICE_KIND
+_R = _hidpp10_constants.REGISTERS
 _F = _hidpp20.FEATURE
 
 _GG = _hidpp20.GESTURE
