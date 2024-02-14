@@ -24,8 +24,8 @@
 # - the device uses a USB interface other than 2
 # - the name or codename should be different from what the device reports
 
-from .hidpp10 import DEVICE_KIND as _DK
-from .hidpp10 import REGISTERS as _R
+from .hidpp10_constants import DEVICE_KIND as _DK
+from .hidpp10_constants import REGISTERS as _R
 
 #
 #

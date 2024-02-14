@@ -30,16 +30,18 @@ from . import base as _base
 from . import descriptors as _descriptors
 from . import exceptions
 from . import hidpp10 as _hidpp10
+from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
+from . import hidpp20_constants as _hidpp20_constants
 from .common import strhex as _strhex
 from .settings_templates import check_feature_settings as _check_feature_settings
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
-_IR = _hidpp10.INFO_SUBREGISTERS
+_R = _hidpp10_constants.REGISTERS
+_IR = _hidpp10_constants.INFO_SUBREGISTERS
 
-KIND_MAP = {kind: _hidpp10.DEVICE_KIND[str(kind)] for kind in _hidpp20.DEVICE_KIND}
+KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in _hidpp20_constants.DEVICE_KIND}
 
 #
 #
@@ -124,14 +126,14 @@ class Device:
                 if receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver
                     self.wpid = '00' + _strhex(link_notification.data[2:3])
                     kind = receiver.get_kind_from_index(number)
-                self._kind = _hidpp10.DEVICE_KIND[kind]
+                self._kind = _hidpp10_constants.DEVICE_KIND[kind]
             elif receiver.receiver_kind == '27Mhz':  # 27 Mhz receiver doesn't have pairing registers
                 self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
                 if not self.wpid:
                     logger.error('Unable to get wpid from udev for device %d of %s', number, receiver)
                     raise exceptions.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
                 kind = receiver.get_kind_from_index(number)
-                self._kind = _hidpp10.DEVICE_KIND[kind]
+                self._kind = _hidpp10_constants.DEVICE_KIND[kind]
             else:  # get information from pairing registers
                 self.online = True
                 self.update_pairing_information()
@@ -415,10 +417,10 @@ class Device:
 
         if enable:
             set_flag_bits = (
-                _hidpp10.NOTIFICATION_FLAG.battery_status
-                | _hidpp10.NOTIFICATION_FLAG.keyboard_illumination
-                | _hidpp10.NOTIFICATION_FLAG.wireless
-                | _hidpp10.NOTIFICATION_FLAG.software_present
+                _hidpp10_constants.NOTIFICATION_FLAG.battery_status
+                | _hidpp10_constants.NOTIFICATION_FLAG.keyboard_illumination
+                | _hidpp10_constants.NOTIFICATION_FLAG.wireless
+                | _hidpp10_constants.NOTIFICATION_FLAG.software_present
             )
         else:
             set_flag_bits = 0
@@ -427,7 +429,7 @@ class Device:
             logger.warning('%s: failed to %s device notifications', self, 'enable' if enable else 'disable')
 
         flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
+        flag_names = None if flag_bits is None else tuple(_hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
             logger.info('%s: device notifications %s %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits if ok else None

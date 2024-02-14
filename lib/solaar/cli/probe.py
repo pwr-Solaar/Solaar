@@ -17,11 +17,11 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from logitech_receiver import base as _base
-from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver.common import strhex as _strhex
 from solaar.cli.show import _print_device, _print_receiver
 
-_R = _hidpp10.REGISTERS
+_R = _hidpp10_constants.REGISTERS
 
 
 def run(receivers, args, find_receiver, _ignore):
@@ -90,9 +90,9 @@ def run(receivers, args, find_receiver, _ignore):
         last = None
         for sub in range(0, 0xFF):
             rgst = _base.request(receiver.handle, 0xFF, 0x8100 | reg, sub, return_error=True)
-            if isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_address:
+            if isinstance(rgst, int) and rgst == _hidpp10_constants.ERROR.invalid_address:
                 break
-            elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
+            elif isinstance(rgst, int) and rgst == _hidpp10_constants.ERROR.invalid_value:
                 continue
             else:
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
@@ -104,9 +104,9 @@ def run(receivers, args, find_receiver, _ignore):
         last = None
         for sub in range(0, 0xFF):
             rgst = _base.request(receiver.handle, 0xFF, 0x8100 | (0x200 + reg), sub, return_error=True)
-            if isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_address:
+            if isinstance(rgst, int) and rgst == _hidpp10_constants.ERROR.invalid_address:
                 break
-            elif isinstance(rgst, int) and rgst == _hidpp10.ERROR.invalid_value:
+            elif isinstance(rgst, int) and rgst == _hidpp10_constants.ERROR.invalid_value:
                 continue
             else:
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:

@@ -20,10 +20,11 @@ from time import time as _timestamp
 
 from logitech_receiver import base as _base
 from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
 
-_R = _hidpp10.REGISTERS
+_R = _hidpp10_constants.REGISTERS
 
 
 def run(receivers, args, find_receiver, _ignore):
@@ -42,8 +43,8 @@ def run(receivers, args, find_receiver, _ignore):
 
     # check if it's necessary to set the notification flags
     old_notification_flags = _hidpp10.get_notification_flags(receiver) or 0
-    if not (old_notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless):
-        _hidpp10.set_notification_flags(receiver, old_notification_flags | _hidpp10.NOTIFICATION_FLAG.wireless)
+    if not (old_notification_flags & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
+        _hidpp10.set_notification_flags(receiver, old_notification_flags | _hidpp10_constants.NOTIFICATION_FLAG.wireless)
 
     # get all current devices
     known_devices = [dev.number for dev in receiver]
@@ -85,7 +86,9 @@ def run(receivers, args, find_receiver, _ignore):
         kind = receiver.status.device_kind
         print(f'Bolt Pairing: discovered {name}')
         receiver.pair_device(
-            address=address, authentication=authentication, entropy=20 if kind == _hidpp10.DEVICE_KIND.keyboard else 10
+            address=address,
+            authentication=authentication,
+            entropy=20 if kind == _hidpp10_constants.DEVICE_KIND.keyboard else 10
         )
         pairing_start = _timestamp()
         patience = 5  # the discovering notification may come slightly later, so be patient
@@ -121,7 +124,7 @@ def run(receivers, args, find_receiver, _ignore):
                 if n:
                     receiver.handle.notifications_hook(n)
 
-    if not (old_notification_flags & _hidpp10.NOTIFICATION_FLAG.wireless):
+    if not (old_notification_flags & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
         # only clear the flags if they weren't set before, otherwise a
         # concurrently running Solaar app might stop working properly
         _hidpp10.set_notification_flags(receiver, old_notification_flags)
