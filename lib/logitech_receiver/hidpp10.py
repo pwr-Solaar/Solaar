@@ -23,8 +23,8 @@ from .common import FirmwareInfo as _FirmwareInfo
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import strhex as _strhex
-from .hidpp20 import BATTERY_STATUS, FIRMWARE_KIND
 from .hidpp10_constants import REGISTERS
+from .hidpp20_constants import BATTERY_STATUS, FIRMWARE_KIND
 
 logger = logging.getLogger(__name__)
 

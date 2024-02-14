@@ -22,7 +22,7 @@ import math
 from struct import unpack as _unpack
 from time import sleep as _sleep
 
-from . import hidpp20 as _hidpp20
+from . import hidpp20_constants as _hidpp20_constants
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
@@ -1416,7 +1416,7 @@ class ActionSettingRW:
     def write(self, device, data_bytes):
 
         def handler(device, n):  # Called on notification events from the device
-            if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+            if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
                     cids = _unpack('!HHHH', n.data[:8])
                     if not self.pressed and int(self.key.key) in cids:  # trigger key pressed
@@ -1478,11 +1478,11 @@ class RawXYProcessing:
         self.keys = []  # the keys that can initiate processing
         self.initiating_key = None  # the key that did initiate processing
         self.active = False
-        self.feature_offset = device.features[_hidpp20.FEATURE.REPROG_CONTROLS_V4]
+        self.feature_offset = device.features[_hidpp20_constants.FEATURE.REPROG_CONTROLS_V4]
         assert self.feature_offset is not False
 
     def handler(self, device, n):  # Called on notification events from the device
-        if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+        if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
             if n.address == 0x00:
                 cids = _unpack('!HHHH', n.data[:8])
                 ## generalize to list of keys
@@ -1550,7 +1550,7 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
-    if device.features and _hidpp20.FEATURE.HIRES_WHEEL in device.features:
+    if device.features and _hidpp20_constants.FEATURE.HIRES_WHEEL in device.features:
         _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, 'persister', None)
     sensitives = persister.get('_sensitive', {}) if persister else {}
