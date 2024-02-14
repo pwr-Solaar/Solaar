@@ -173,7 +173,8 @@ class Receiver:
             if not wpid:
                 logger.error('Unable to get wpid from udev for device %d of %s', n, self)
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
-            kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n)]
+            kind = _hidpp10_constants.DEVICE_KIND[self.get_kind_from_index(n)]
+
         elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
@@ -197,7 +198,7 @@ class Receiver:
                 return '?', power_switch
         pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         if pair_info:
-            power_switch = _hidpp10.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
+            power_switch = _hidpp10_constants.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
         else:  # some Nano receivers?
             pair_info = self.read_register(0x2D5)
         if pair_info:

@@ -28,8 +28,8 @@ from collections import namedtuple
 
 from . import settings_templates as _ST
 from .common import NamedInts as _NamedInts
-from .hidpp10 import DEVICE_KIND as _DK
-from .hidpp10 import REGISTERS as _R
+from .hidpp10_constants import DEVICE_KIND as _DK
+from .hidpp10_constants import REGISTERS as _R
 
 #
 #

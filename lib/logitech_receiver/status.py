@@ -21,7 +21,8 @@ import logging
 from time import time as _timestamp
 
 from . import hidpp10 as _hidpp10
-from . import hidpp20 as _hidpp20
+from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp20_constants as _hidpp20_constants
 from . import settings as _settings
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import NamedInt as _NamedInt
@@ -30,7 +31,7 @@ from .i18n import _, ngettext
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
+_R = _hidpp10_constants.REGISTERS
 
 #
 #
@@ -199,11 +200,11 @@ class DeviceStatus(dict):
             # Some notifications may come with no battery level info, just
             # charging state info, so do our best to infer a level (even if it is just the last level)
             # It is not always possible to do this well
-            if status == _hidpp20.BATTERY_STATUS.full:
+            if status == _hidpp20_constants.BATTERY_STATUS.full:
                 level = _BATTERY_APPROX.full
-            elif status in (_hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.recharging):
+            elif status in (_hidpp20_constants.BATTERY_STATUS.almost_full, _hidpp20_constants.BATTERY_STATUS.recharging):
                 level = _BATTERY_APPROX.good
-            elif status == _hidpp20.BATTERY_STATUS.slow_recharge:
+            elif status == _hidpp20_constants.BATTERY_STATUS.slow_recharge:
                 level = _BATTERY_APPROX.low
             else:
                 level = self.get(KEYS.BATTERY_LEVEL)
@@ -217,15 +218,15 @@ class DeviceStatus(dict):
         old_voltage, self[KEYS.BATTERY_VOLTAGE] = self.get(KEYS.BATTERY_VOLTAGE), voltage
 
         charging = status in (
-            _hidpp20.BATTERY_STATUS.recharging, _hidpp20.BATTERY_STATUS.almost_full, _hidpp20.BATTERY_STATUS.full,
-            _hidpp20.BATTERY_STATUS.slow_recharge
+            _hidpp20_constants.BATTERY_STATUS.recharging, _hidpp20_constants.BATTERY_STATUS.almost_full, _hidpp20_constants.BATTERY_STATUS.full,
+            _hidpp20_constants.BATTERY_STATUS.slow_recharge
         )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
         changed = old_level != level or old_status != status or old_charging != charging or old_voltage != voltage
         alert, reason = ALERT.NONE, None
 
-        if _hidpp20.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
+        if _hidpp20_constants.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
             self[KEYS.ERROR] = None
         else:
             logger.warning('%s: battery %d%%, ALERT %s', self._device, level, status)
@@ -284,7 +285,7 @@ class DeviceStatus(dict):
                 # when devices request software reconfiguration
                 # and when devices become active if they don't have wireless device status feature,
                 if was_active is None or push or not was_active and (
-                    not d.features or _hidpp20.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
+                    not d.features or _hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info('%s pushing device settings %s', d, d.settings)
