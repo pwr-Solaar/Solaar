@@ -20,13 +20,14 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import hidpp20 as _hidpp20
+from logitech_receiver import hidpp20_constants as _hidpp20_constants
 from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import strhex as _strhex
 from solaar import NAME, __version__
 
-_F = _hidpp20.FEATURE
+_F = _hidpp20_constants.FEATURE
 
 
 def _print_receiver(receiver):
@@ -142,11 +143,11 @@ def _print_device(dev, num=None):
         for feature, index in dev.features.enumerate():
             flags = dev.request(0x0000, feature.bytes(2))
             flags = 0 if flags is None else ord(flags[1:2])
-            flags = _hidpp20.FEATURE_FLAG.flag_names(flags)
+            flags = _hidpp20_constants.FEATURE_FLAG.flag_names(flags)
             version = dev.features.get_feature_version(int(feature))
             version = version if version else 0
             print('        %2d: %-22s {%04X} V%s    %s ' % (index, feature, feature, version, ', '.join(flags)))
-            if feature == _hidpp20.FEATURE.HIRES_WHEEL:
+            if feature == _hidpp20_constants.FEATURE.HIRES_WHEEL:
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
@@ -163,7 +164,7 @@ def _print_device(dev, num=None):
                         print('            HID++ notification')
                     else:
                         print('            HID notification')
-            elif feature == _hidpp20.FEATURE.MOUSE_POINTER:
+            elif feature == _hidpp20_constants.FEATURE.MOUSE_POINTER:
                 mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
                 if mouse_pointer:
                     print('            DPI: %s' % mouse_pointer['dpi'])
@@ -176,13 +177,13 @@ def _print_device(dev, num=None):
                         print('            Provide vertical tuning, trackball')
                     else:
                         print('            No vertical tuning, standard mice')
-            elif feature == _hidpp20.FEATURE.VERTICAL_SCROLLING:
+            elif feature == _hidpp20_constants.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
                     print('            Roller type: %s' % vertical_scrolling_info['roller'])
                     print('            Ratchet per turn: %s' % vertical_scrolling_info['ratchet'])
                     print('            Scroll lines: %s' % vertical_scrolling_info['lines'])
-            elif feature == _hidpp20.FEATURE.HI_RES_SCROLLING:
+            elif feature == _hidpp20_constants.FEATURE.HI_RES_SCROLLING:
                 scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(dev)
                 if scrolling_mode:
                     print('            Hi-res scrolling enabled')
@@ -190,30 +191,30 @@ def _print_device(dev, num=None):
                     print('            Hi-res scrolling disabled')
                 if scrolling_resolution:
                     print('            Hi-res scrolling multiplier: %s' % scrolling_resolution)
-            elif feature == _hidpp20.FEATURE.POINTER_SPEED:
+            elif feature == _hidpp20_constants.FEATURE.POINTER_SPEED:
                 pointer_speed = _hidpp20.get_pointer_speed_info(dev)
                 if pointer_speed:
                     print('            Pointer Speed: %s' % pointer_speed)
-            elif feature == _hidpp20.FEATURE.LOWRES_WHEEL:
+            elif feature == _hidpp20_constants.FEATURE.LOWRES_WHEEL:
                 wheel_status = _hidpp20.get_lowres_wheel_status(dev)
                 if wheel_status:
                     print('            Wheel Reports: %s' % wheel_status)
-            elif feature == _hidpp20.FEATURE.NEW_FN_INVERSION:
+            elif feature == _hidpp20_constants.FEATURE.NEW_FN_INVERSION:
                 inversion = _hidpp20.get_new_fn_inversion(dev)
                 if inversion:
                     inverted, default_inverted = inversion
                     print('            Fn-swap:', 'enabled' if inverted else 'disabled')
                     print('            Fn-swap default:', 'enabled' if default_inverted else 'disabled')
-            elif feature == _hidpp20.FEATURE.HOSTS_INFO:
+            elif feature == _hidpp20_constants.FEATURE.HOSTS_INFO:
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():
                     print('            Host %s (%s): %s' % (host, 'paired' if paired else 'unpaired', name))
-            elif feature == _hidpp20.FEATURE.DEVICE_NAME:
+            elif feature == _hidpp20_constants.FEATURE.DEVICE_NAME:
                 print('            Name: %s' % _hidpp20.get_name(dev))
                 print('            Kind: %s' % _hidpp20.get_kind(dev))
-            elif feature == _hidpp20.FEATURE.DEVICE_FRIENDLY_NAME:
+            elif feature == _hidpp20_constants.FEATURE.DEVICE_FRIENDLY_NAME:
                 print('            Friendly Name: %s' % _hidpp20.get_friendly_name(dev))
-            elif feature == _hidpp20.FEATURE.DEVICE_FW_VERSION:
+            elif feature == _hidpp20_constants.FEATURE.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
                     extras = _strhex(fw.extras) if fw.extras else ''
                     print('            Firmware: %s %s %s %s' % (fw.kind, fw.name, fw.version, extras))
@@ -221,12 +222,12 @@ def _print_device(dev, num=None):
                 if ids:
                     unitId, modelId, tid_map = ids
                     print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
-            elif feature == _hidpp20.FEATURE.REPORT_RATE or feature == _hidpp20.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE:
+            elif feature == _hidpp20_constants.FEATURE.REPORT_RATE or feature == _hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE:
                 print('            Report Rate: %s' % _hidpp20.get_polling_rate(dev))
-            elif feature == _hidpp20.FEATURE.REMAINING_PAIRING:
+            elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
                 print('            Remaining Pairings: %d' % _hidpp20.get_remaining_pairing(dev))
-            elif feature == _hidpp20.FEATURE.ONBOARD_PROFILES:
-                if _hidpp20.get_onboard_mode(dev) == _hidpp20.ONBOARD_MODES.MODE_HOST:
+            elif feature == _hidpp20_constants.FEATURE.ONBOARD_PROFILES:
+                if _hidpp20.get_onboard_mode(dev) == _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
                     mode = 'Host'
                 else:
                     mode = 'On-Board'
@@ -252,9 +253,9 @@ def _print_device(dev, num=None):
         print('     Has %d reprogrammable keys:' % len(dev.keys))
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
-            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V2:
+            if dev.keys.keyversion == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V2:
                 print('        %2d: %-26s => %-27s   %s' % (k.index, k.key, k.default_task, ', '.join(k.flags)))
-            if dev.keys.keyversion == _hidpp20.FEATURE.REPROG_CONTROLS_V4:
+            if dev.keys.keyversion == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
                 print('        %2d: %-26s, default: %-27s => %-26s' % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ','.join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else 'empty'
