@@ -22,15 +22,17 @@ import logging
 import hidapi as _hid
 
 from . import base as _base
+from . import exceptions
 from . import hidpp10 as _hidpp10
+from . import hidpp10_constants as _hidpp10_constants
 from .base import product_information as _product_information
 from .common import strhex as _strhex
 from .device import Device
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
-_IR = _hidpp10.INFO_SUBREGISTERS
+_R = _hidpp10_constants.REGISTERS
+_IR = _hidpp10_constants.INFO_SUBREGISTERS
 
 #
 #
@@ -120,9 +122,9 @@ class Receiver:
 
         if enable:
             set_flag_bits = (
-                _hidpp10.NOTIFICATION_FLAG.battery_status
-                | _hidpp10.NOTIFICATION_FLAG.wireless
-                | _hidpp10.NOTIFICATION_FLAG.software_present
+                _hidpp10_constants.NOTIFICATION_FLAG.battery_status
+                | _hidpp10_constants.NOTIFICATION_FLAG.wireless
+                | _hidpp10_constants.NOTIFICATION_FLAG.software_present
             )
         else:
             set_flag_bits = 0
@@ -132,7 +134,7 @@ class Receiver:
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
-        flag_names = None if flag_bits is None else tuple(_hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits))
+        flag_names = None if flag_bits is None else tuple(_hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
             logger.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
         return flag_bits
@@ -154,33 +156,33 @@ class Receiver:
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
             if pair_info:
                 wpid = _strhex(pair_info[3:4]) + _strhex(pair_info[2:3])
-                kind = _hidpp10.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
+                kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
                 return wpid, kind, 0
             else:
-                raise _base.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
         wpid = 0
         kind = None
         polling_rate = None
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
-            kind = _hidpp10.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
+            kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
             polling_rate = str(ord(pair_info[2:3])) + 'ms'
         elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
                 logger.error('Unable to get wpid from udev for device %d of %s', n, self)
-                raise _base.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
             kind = _hidpp10.DEVICE_KIND[self.get_kind_from_index(n)]
         elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
                 wpid = _strhex(device_info[3:5])
-                kind = _hidpp10.DEVICE_KIND[0x00]  # unknown kind
+                kind = _hidpp10_constants.DEVICE_KIND[0x00]  # unknown kind
             else:
-                raise _base.NoSuchDevice(number=n, receiver=self, error='read pairing information - non-unifying')
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error='read pairing information - non-unifying')
         else:
-            raise _base.NoSuchDevice(number=n, receiver=self, error='read pairing information')
+            raise exceptions.NoSuchDevice(number=n, receiver=self, error='read pairing information')
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
@@ -217,7 +219,7 @@ class Receiver:
             kind = 3
         else:  # unknown device number on 27Mhz receiver
             logger.error('failed to calculate device kind for device %d of %s', index, self)
-            raise _base.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
+            raise exceptions.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
         return kind
 
     def notify_devices(self):
@@ -239,7 +241,7 @@ class Receiver:
                 logger.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
             return dev
-        except _base.NoSuchDevice as e:
+        except exceptions.NoSuchDevice as e:
             logger.warning('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
 
         logger.warning('%s: looked for device %d, not found', self, number)
