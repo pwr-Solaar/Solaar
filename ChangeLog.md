@@ -1,5 +1,7 @@
-# 1.1.11rc2
+# 1.1.11rc3
 
+* Better checking for setting in record_setting
+* Fix invalid func name set logo name
 * Simplify installation of udev rules
 * Add document on implementation
 * Tidy up scrolling appearance in configuration panel
