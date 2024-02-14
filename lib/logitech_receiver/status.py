@@ -218,8 +218,8 @@ class DeviceStatus(dict):
         old_voltage, self[KEYS.BATTERY_VOLTAGE] = self.get(KEYS.BATTERY_VOLTAGE), voltage
 
         charging = status in (
-            _hidpp20_constants.BATTERY_STATUS.recharging, _hidpp20_constants.BATTERY_STATUS.almost_full, _hidpp20_constants.BATTERY_STATUS.full,
-            _hidpp20_constants.BATTERY_STATUS.slow_recharge
+            _hidpp20_constants.BATTERY_STATUS.recharging, _hidpp20_constants.BATTERY_STATUS.almost_full,
+            _hidpp20_constants.BATTERY_STATUS.full, _hidpp20_constants.BATTERY_STATUS.slow_recharge
         )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 

@@ -25,6 +25,7 @@ from time import time as _time
 
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
+from . import hidpp20_constants as _hidpp20_constants
 from . import special_keys as _special_keys
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
@@ -55,9 +56,9 @@ logger = logging.getLogger(__name__)
 
 _DK = _hidpp10_constants.DEVICE_KIND
 _R = _hidpp10_constants.REGISTERS
-_F = _hidpp20.FEATURE
+_F = _hidpp20_constants.FEATURE
 
-_GG = _hidpp20.GESTURE
+_GG = _hidpp20_constants.GESTURE
 _GP = _hidpp20.PARAM
 
 # Setting classes are used to control the settings that the Solaar GUI shows and manipulates.
@@ -510,8 +511,8 @@ class ReportRate(_Setting):
 
         def write(self, device, data_bytes):
             # Host mode is required for report rate to be adjustable
-            if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
-                _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
+            if _hidpp20.get_onboard_mode(device) != _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
+                _hidpp20.set_onboard_mode(device, _hidpp20_constants.ONBOARD_MODES.MODE_HOST)
             return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
@@ -556,8 +557,8 @@ class ExtendedReportRate(_Setting):
 
         def write(self, device, data_bytes):
             # Host mode is required for report rate to be adjustable
-            if _hidpp20.get_onboard_mode(device) != _hidpp20.ONBOARD_MODES.MODE_HOST:
-                _hidpp20.set_onboard_mode(device, _hidpp20.ONBOARD_MODES.MODE_HOST)
+            if _hidpp20.get_onboard_mode(device) != _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
+                _hidpp20.set_onboard_mode(device, _hidpp20_constants.ONBOARD_MODES.MODE_HOST)
             return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
@@ -805,7 +806,7 @@ class MouseGesturesXY(_RawXYProcessing):
                 logger.info('mouse gesture notification %s', self.data)
             payload = _pack('!' + (len(self.data) * 'h'), *self.data)
             notification = _HIDPP_Notification(0, 0, 0, 0, payload)
-            _process_notification(self.device, self.device.status, notification, _hidpp20.FEATURE.MOUSE_GESTURE)
+            _process_notification(self.device, self.device.status, notification, _F.MOUSE_GESTURE)
             self.fsmState = 'idle'
 
     def move_action(self, dx, dy):
@@ -1195,7 +1196,7 @@ class Gesture2Gestures(_BitFieldOMSetting):
     feature = _F.GESTURE_2
     rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
     validator_options = {'om_method': _hidpp20.Gesture.enable_offset_mask}
-    choices_universe = _hidpp20.GESTURE
+    choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
@@ -1213,7 +1214,7 @@ class Gesture2Divert(_BitFieldOMSetting):
     feature = _F.GESTURE_2
     rw_options = {'read_fnid': 0x30, 'write_fnid': 0x40}
     validator_options = {'om_method': _hidpp20.Gesture.diversion_offset_mask}
-    choices_universe = _hidpp20.GESTURE
+    choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
