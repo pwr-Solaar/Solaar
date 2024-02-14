@@ -27,6 +27,7 @@ import solaar.configuration as _configuration
 
 from . import base as _base
 from . import descriptors as _descriptors
+from . import exceptions
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .common import strhex as _strhex
@@ -128,7 +129,7 @@ class Device:
                 self.wpid = _hid.find_paired_node_wpid(receiver.path, number)
                 if not self.wpid:
                     logger.error('Unable to get wpid from udev for device %d of %s', number, receiver)
-                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
+                    raise exceptions.NoSuchDevice(number=number, receiver=receiver, error='Not present 27Mhz device')
                 kind = receiver.get_kind_from_index(number)
                 self._kind = _hidpp10.DEVICE_KIND[kind]
             else:  # get information from pairing registers
@@ -136,7 +137,7 @@ class Device:
                 self.update_pairing_information()
                 self.update_extended_pairing_information()
                 if not self.wpid and not self._serial:  # if neither then the device almost certainly wasn't found
-                    raise _base.NoSuchDevice(number=number, receiver=receiver, error='no wpid or serial')
+                    raise exceptions.NoSuchDevice(number=number, receiver=receiver, error='no wpid or serial')
 
             # the wpid is set to None on this object when the device is unpaired
             assert self.wpid is not None, 'failed to read wpid: device %d of %s' % (number, receiver)
@@ -208,7 +209,7 @@ class Device:
             if not self.online:  # be very defensive
                 try:
                     self.ping()
-                except _base.NoSuchDevice:
+                except exceptions.NoSuchDevice:
                     pass
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
@@ -514,7 +515,7 @@ class Device:
     def __str__(self):
         try:
             name = self.name or self.codename or '?'
-        except _base.NoSuchDevice:
+        except exceptions.NoSuchDevice:
             name = 'name not available'
         return '<Device(%d,%s,%s,%s)>' % (self.number, self.wpid or self.product_id, name, self.serial)
 

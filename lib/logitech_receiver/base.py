@@ -30,12 +30,13 @@ from time import time as _timestamp
 
 import hidapi as _hid
 
-from . import hidpp10 as _hidpp10
+from . import exceptions
+from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
+from . import hidpp20_constants as _hidpp20_constants
 from .base_usb import ALL as _RECEIVER_USB_IDS
 from .base_usb import DEVICES as _DEVICE_IDS
 from .base_usb import other_device_check as _other_device_check
-from .common import KwException as _KwException
 from .common import strhex as _strhex
 
 logger = logging.getLogger(__name__)
@@ -68,29 +69,6 @@ _RECEIVER_REQUEST_TIMEOUT = 0.9
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient (no longer)
 _PING_TIMEOUT = DEFAULT_TIMEOUT
-
-#
-# Exceptions that may be raised by this API.
-#
-
-
-class NoReceiver(_KwException):
-    """Raised when trying to talk through a previously open handle, when the
-    receiver is no longer available. Should only happen if the receiver is
-    physically disconnected from the machine, or its kernel driver module is
-    unloaded."""
-    pass
-
-
-class NoSuchDevice(_KwException):
-    """Raised when trying to reach a device number not paired to the receiver."""
-    pass
-
-
-class DeviceUnreachable(_KwException):
-    """Raised when a request is made to an unreachable (turned off) device."""
-    pass
-
 
 #
 #
@@ -219,7 +197,7 @@ def write(handle, devnumber, data, long_message=False):
     except Exception as reason:
         logger.error('write failed, assuming handle %r no longer available', handle)
         close(handle)
-        raise NoReceiver(reason=reason)
+        raise exceptions.NoReceiver(reason=reason)
 
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
@@ -268,7 +246,7 @@ def _read(handle, timeout):
     except Exception as reason:
         logger.warning('read failed, assuming handle %r no longer available', handle)
         close(handle)
-        raise NoReceiver(reason=reason)
+        raise exceptions.NoReceiver(reason=reason)
 
     if data and check_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
@@ -299,7 +277,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
         except Exception as reason:
             logger.error('read failed, assuming receiver %s no longer available', handle)
             close(handle)
-            raise NoReceiver(reason=reason)
+            raise exceptions.NoReceiver(reason=reason)
 
         if data:
             if check_message(data):  # only process messages that pass check
@@ -420,7 +398,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
         notifications_hook = getattr(handle, 'notifications_hook', None)
         try:
             _skip_incoming(handle, ihandle, notifications_hook)
-        except NoReceiver:
+        except exceptions.NoReceiver:
             logger.warning('device or receiver disconnected')
             return None
         write(ihandle, devnumber, request_data, long_message)
@@ -445,15 +423,15 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                         if logger.isEnabledFor(logging.DEBUG):
                             logger.debug(
                                 '(%s) device 0x%02X error on request {%04X}: %d = %s', handle, devnumber, request_id, error,
-                                _hidpp10.ERROR[error]
+                                _hidpp10_constants.ERROR[error]
                             )
-                        return _hidpp10.ERROR[error] if return_error else None
+                        return _hidpp10_constants.ERROR[error] if return_error else None
                     if reply_data[:1] == b'\xFF' and reply_data[1:3] == request_data[:2]:
                         # a HID++ 2.0 feature call returned with an error
                         error = ord(reply_data[3:4])
                         logger.error(
                             '(%s) device %d error on feature request {%04X}: %d = %s', handle, devnumber, request_id, error,
-                            _hidpp20.ERROR[error]
+                            _hidpp20_constants.ERROR[error]
                         )
                         raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
@@ -505,7 +483,7 @@ def ping(handle, devnumber, long_message=False):
         notifications_hook = getattr(handle, 'notifications_hook', None)
         try:
             _skip_incoming(handle, int(handle), notifications_hook)
-        except NoReceiver:
+        except exceptions.NoReceiver:
             logger.warning('device or receiver disconnected')
             return
 
@@ -530,13 +508,13 @@ def ping(handle, devnumber, long_message=False):
                     if report_id == HIDPP_SHORT_MESSAGE_ID and reply_data[:1] == b'\x8F' and \
                        reply_data[1:3] == request_data[:2]:  # error response
                         error = ord(reply_data[3:4])
-                        if error == _hidpp10.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
+                        if error == _hidpp10_constants.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
-                        if error == _hidpp10.ERROR.resource_error or error == _hidpp10.ERROR.connection_request_failed:
+                        if error == _hidpp10_constants.ERROR.resource_error or error == _hidpp10_constants.ERROR.connection_request_failed:
                             return  # device unreachable
-                        if error == _hidpp10.ERROR.unknown_device:  # no paired device with that number
+                        if error == _hidpp10_constants.ERROR.unknown_device:  # no paired device with that number
                             logger.error('(%s) device %d error on ping request: unknown device', handle, devnumber)
-                            raise NoSuchDevice(number=devnumber, request=request_id)
+                            raise exceptions.NoSuchDevice(number=devnumber, request=request_id)
 
                 if notifications_hook:
                     n = make_notification(report_id, reply_devnumber, reply_data)
