@@ -32,7 +32,7 @@ def _data_files():
     from os.path import dirname as _dirname
 
     yield 'share/icons/hicolor/scalable/apps', _glob('share/solaar/icons/solaar*.svg')
-    yield 'share/icons/hicolor/32x32/apps', _glob('share/solaar/icons/light_*.png')
+    yield 'share/icons/hicolor/32x32/apps', _glob('share/solaar/icons/solaar-light_*.png')
 
     for mo in _glob('share/locale/*/LC_MESSAGES/solaar.mo'):
         yield _dirname(mo), [mo]
