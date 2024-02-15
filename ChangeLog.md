@@ -1,5 +1,7 @@
-# 1.1.11rc3
+# 1.1.11rc4
 
+* Rename light icons and install them in correct place
+* Setup macOS tests using GitHub action (#2284)
 * Better checking for setting in record_setting
 * Fix invalid func name set logo name
 * Simplify installation of udev rules
