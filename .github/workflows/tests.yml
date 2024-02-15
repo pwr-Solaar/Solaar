@@ -50,9 +50,7 @@ jobs:
 
     - name: Set up macOS dependencies
       run: |
-        brew install hidapi dbus gtk+3 pygobject3
-
-        brew services start dbus
+        brew install hidapi gtk+3 pygobject3
 
     - name: Install Python dependencies
       run: |
