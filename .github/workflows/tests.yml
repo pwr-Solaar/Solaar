@@ -26,11 +26,11 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .[test]
+        pip install -e ."[test]"
 
     - name: Run tests on Ubuntu
       run: |
-        pytest
+        pytest --cov=lib/ tests/
 
   macos-build:
     runs-on: macos-latest
@@ -59,4 +59,4 @@ jobs:
 
     - name: Run tests on macOS
       run: |
-        pytest
+        pytest --cov=lib/ tests/
