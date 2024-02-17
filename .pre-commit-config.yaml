@@ -8,19 +8,14 @@ repos:
   - id: check-yaml
   - id: check-toml
   - id: debug-statements
-  - id: double-quote-string-fixer
   - id: end-of-file-fixer
   - id: trailing-whitespace
-- repo: https://github.com/pre-commit/mirrors-yapf
-  rev: v0.32.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.2.2
   hooks:
-  - id: yapf
-- repo: https://github.com/pre-commit/mirrors-isort
-  rev: v5.10.1
-  hooks:
-  - id: isort
-- repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
-  hooks:
-  - id: flake8
-    additional_dependencies: ['flake8-bugbear']
+  - id: ruff
+    name: ruff lint
+    args: [--fix, --exit-non-zero-on-fix]
+  - id: ruff-format
+    name: ruff format
+    args: [--diff]
