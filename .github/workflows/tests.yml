@@ -20,17 +20,15 @@ jobs:
 
     - name: Install Ubuntu dependencies
       run: |
-        sudo apt update
-        sudo apt install libdbus-1-dev libglib2.0-dev
+        make install_apt
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ."[test]"
+        make install_pip PIP_ARGS='.["test"]'
 
     - name: Run tests on Ubuntu
       run: |
-        pytest --cov=lib/ tests/
+        make test
 
   macos-build:
     runs-on: macos-latest
@@ -50,13 +48,12 @@ jobs:
 
     - name: Set up macOS dependencies
       run: |
-        brew install hidapi gtk+3 pygobject3
+        make install_brew
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install ."[test]"
+        make install_pip PIP_ARGS='.["test"]'
 
     - name: Run tests on macOS
       run: |
-        pytest --cov=lib/ tests/
+        make test
