@@ -670,7 +670,7 @@ def _update_device_panel(device, panel, buttons, full=False):
     panel.set_sensitive(is_online)
 
     if device.status.get(_K.BATTERY_LEVEL) is None:
-        device.status.read_battery(device)
+        device.status.read_battery()
 
     battery_level = device.status.get(_K.BATTERY_LEVEL)
     battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)
