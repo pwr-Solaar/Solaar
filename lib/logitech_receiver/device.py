@@ -19,6 +19,7 @@
 import errno as _errno
 import logging
 import threading as _threading
+import time
 
 from typing import Optional
 
@@ -107,7 +108,6 @@ class Device:
                 self.handle = _base.open_path(self.path) if self.path else None
             except Exception:  # maybe the device wasn't set up
                 try:
-                    import time
                     time.sleep(1)
                     self.handle = _base.open_path(self.path) if self.path else None
                 except Exception:  # give up
@@ -170,8 +170,7 @@ class Device:
             # may be a 2.0 device; if not, it will fix itself later
             self.features = _hidpp20.FeaturesArray(self)
 
-    @classmethod
-    def find(self, serial):
+    def find(self, serial):  # find a device by serial number or unit ID
         assert serial, 'need serial number or unit ID to find a device'
         result = None
         for device in Device.instances:

@@ -1,6 +1,6 @@
 # Notes on Major Changes in Releases
 
-## Version 1.1.11rc2
+## Version 1.1.11
 
 * Solaar can dump device profiles in YAMLfor devices that support profiles and load profiles back from an edited file.  See [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities) for more information.
 

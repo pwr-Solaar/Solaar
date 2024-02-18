@@ -19,8 +19,8 @@
 from gi.repository import Gdk, Gtk
 from solaar.i18n import _
 
-from ..ui import error_dialog
 from . import pair_window
+from .common import error_dialog
 
 # import logging
 # logger = logging.getLogger(__name__)

@@ -17,6 +17,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import logging
+
 from gi.repository import Gtk
 from solaar import NAME, __version__
 from solaar.i18n import _
@@ -34,7 +36,7 @@ def _create():
     about.set_program_name(NAME)
     about.set_version(__version__)
     about.set_comments(_('Manages Logitech receivers,\nkeyboards, mice, and tablets.'))
-    about.set_logo_icon_name(NAME.lower())
+    about.set_icon_name(NAME.lower())
 
     about.set_copyright('© 2012-2023 Daniel Pavel and contributors to the Solaar project')
     about.set_license_type(Gtk.License.GPL_2_0)
@@ -58,11 +60,9 @@ def _create():
         )
     except TypeError:
         # gtk3 < ~3.6.4 has incorrect gi bindings
-        import logging
         logging.exception('failed to fully create the about dialog')
     except Exception:
         # the Gtk3 version may be too old, and the function does not exist
-        import logging
         logging.exception('failed to fully create the about dialog')
 
     about.set_translator_credits(

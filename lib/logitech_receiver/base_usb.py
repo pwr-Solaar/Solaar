@@ -26,7 +26,6 @@
 # USB ids of Logitech wireless receivers.
 # Only receivers supporting the HID++ protocol can go in here.
 
-from .descriptors import DEVICES as _DEVICES
 from .i18n import _
 
 # max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
@@ -205,46 +204,5 @@ ALL = (
     LIGHTSPEED_RECEIVER_C547,
     EX100_27MHZ_RECEIVER_C517,
 )
-
-_wired_device = lambda product_id, interface: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'bus_id': 0x3,
-    'usb_interface': interface,
-    'isDevice': True
-}
-
-_bt_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'bus_id': 0x5, 'isDevice': True}
-
-DEVICES = []
-
-for _ignore, d in _DEVICES.items():
-    if d.usbid:
-        DEVICES.append(_wired_device(d.usbid, d.interface if d.interface else 2))
-    if d.btid:
-        DEVICES.append(_bt_device(d.btid))
-
-
-def other_device_check(bus_id, vendor_id, product_id):
-    """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
-    This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
-    if vendor_id != 0x46d:  # Logitech
-        return
-    if bus_id == 0x3:  # USB
-        if (product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344):
-            return _wired_device(product_id, 2)
-    elif bus_id == 0x5:  # Bluetooth
-        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF):
-            return _bt_device(product_id)
-
-
-def product_information(usb_id):
-    if isinstance(usb_id, str):
-        usb_id = int(usb_id, 16)
-    for r in ALL:
-        if usb_id == r.get('product_id'):
-            return r
-    return {}
-
 
 del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver

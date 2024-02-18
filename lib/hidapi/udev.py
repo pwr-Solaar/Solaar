@@ -35,11 +35,17 @@ from select import select as _select
 from time import sleep
 from time import time as _timestamp
 
+import gi
+
+from hid_parser import ReportDescriptor as _ReportDescriptor
 from pyudev import Context as _Context
 from pyudev import Device as _Device
 from pyudev import DeviceNotFoundError
 from pyudev import Devices as _Devices
 from pyudev import Monitor as _Monitor
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +111,6 @@ def _match(action, device, filterfn):
         return  # these are devices connected through a receiver so don't pick them up here
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
-        from hid_parser import ReportDescriptor as _ReportDescriptor
-
-        # from hid_parser import Usage as _Usage
         hidpp_short = hidpp_long = False
         devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'
         with fileopen(devfile, 'rb') as fd:
@@ -236,8 +239,6 @@ def find_paired_node_wpid(receiver_path, index):
 
 
 def monitor_glib(callback, filterfn):
-    from gi.repository import GLib
-
     c = _Context()
 
     # already existing devices

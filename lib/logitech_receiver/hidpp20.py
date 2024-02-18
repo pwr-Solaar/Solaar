@@ -19,6 +19,7 @@
 # Logitech Unifying Receiver API.
 
 import logging
+import socket
 import threading as _threading
 
 from struct import pack as _pack
@@ -2003,7 +2004,6 @@ def get_host_names(device):
                         remaining = 0
                 host_names[host] = (bool(status), name)
         # update the current host's name if it doesn't match the system name
-        import socket
         hostname = socket.gethostname().partition('.')[0]
         if host_names[currentHost][1] != hostname:
             set_host_name(device, hostname, host_names[currentHost][1])

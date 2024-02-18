@@ -33,12 +33,56 @@ import hidapi as _hid
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from .base_usb import ALL as _RECEIVER_USB_IDS
-from .base_usb import DEVICES as _DEVICE_IDS
-from .base_usb import other_device_check as _other_device_check
 from .common import KwException as _KwException
 from .common import strhex as _strhex
+from .descriptors import DEVICES as _DEVICES
 
 logger = logging.getLogger(__name__)
+
+#
+#
+#
+
+_wired_device = lambda product_id, interface: {
+    'vendor_id': 0x046d,
+    'product_id': product_id,
+    'bus_id': 0x3,
+    'usb_interface': interface,
+    'isDevice': True
+}
+
+_bt_device = lambda product_id: {'vendor_id': 0x046d, 'product_id': product_id, 'bus_id': 0x5, 'isDevice': True}
+
+DEVICE_IDS = []
+
+for _ignore, d in _DEVICES.items():
+    if d.usbid:
+        DEVICE_IDS.append(_wired_device(d.usbid, d.interface if d.interface else 2))
+    if d.btid:
+        DEVICE_IDS.append(_bt_device(d.btid))
+
+
+def other_device_check(bus_id, vendor_id, product_id):
+    """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
+    This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
+    if vendor_id != 0x46d:  # Logitech
+        return
+    if bus_id == 0x3:  # USB
+        if (product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344):
+            return _wired_device(product_id, 2)
+    elif bus_id == 0x5:  # Bluetooth
+        if (product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF):
+            return _bt_device(product_id)
+
+
+def product_information(usb_id):
+    if isinstance(usb_id, str):
+        usb_id = int(usb_id, 16)
+    for r in _RECEIVER_USB_IDS:
+        if usb_id == r.get('product_id'):
+            return r
+    return {}
+
 
 #
 #
@@ -122,13 +166,13 @@ def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
     if record:  # known or unknown receiver
         return record
-    for record in _DEVICE_IDS:  # known devices
+    for record in DEVICE_IDS:  # known devices
         if match(record, bus_id, vendor_id, product_id):
             return record
     if hidpp_short or hidpp_long:  # unknown devices that use HID++
         return {'vendor_id': vendor_id, 'product_id': product_id, 'bus_id': bus_id, 'isDevice': True}
     elif hidpp_short is None and hidpp_long is None:  # unknown devices in correct range of IDs
-        return _other_device_check(bus_id, vendor_id, product_id)
+        return other_device_check(bus_id, vendor_id, product_id)
 
 
 def receivers_and_devices():

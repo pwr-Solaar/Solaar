@@ -18,14 +18,19 @@
 
 import logging
 
+import gi
 import yaml as _yaml
 
-import gi  # isort:skip
+from logitech_receiver.status import ALERT
+from solaar.i18n import _
+from solaar.tasks import TaskRunner as _TaskRunner
+from solaar.ui.config_panel import change_setting
+from solaar.ui.window import find_device
 
-gi.require_version('Gtk', '3.0')  # NOQA: E402
-from gi.repository import GLib, Gtk, Gio  # NOQA: E402 # isort:skip
-from logitech_receiver.status import ALERT  # NOQA: E402 # isort:skip
-from solaar.i18n import _  # NOQA: E402 # isort:skip
+from . import diversion_rules, notify, tray, window
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gio, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -42,68 +47,10 @@ GLib.threads_init()
 #
 
 
-def _error_dialog(reason, object):
-    logger.error('error: %s %s', reason, object)
-
-    if reason == 'permissions':
-        title = _('Permissions error')
-        text = (
-            _('Found a Logitech receiver or device (%s), but did not have permission to open it.') % object + '\n\n' +
-            _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
-        )
-    elif reason == 'nodevice':
-        title = _('Cannot connect to device error')
-        text = (
-            _('Found a Logitech receiver or device at %s, but encountered an error connecting to it.') % object + '\n\n' +
-            _('Try disconnecting the device and then reconnecting it or turning it off and then on.')
-        )
-    elif reason == 'unpair':
-        title = _('Unpairing failed')
-        text = (
-            _('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) +
-            '\n\n' + _('The receiver returned an error, with no further details.')
-        )
-    else:
-        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
-
-    assert title
-    assert text
-
-    m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
-    m.set_title(title)
-    m.run()
-    m.destroy()
-
-
-def error_dialog(reason, object):
-    assert reason is not None
-    GLib.idle_add(_error_dialog, reason, object)
-
-
-#
-#
-#
-
-_task_runner = None
-
-
-def ui_async(function, *args, **kwargs):
-    if _task_runner:
-        _task_runner(function, *args, **kwargs)
-
-
-#
-#
-#
-
-from . import diversion_rules, notify, tray, window  # isort:skip  # noqa: E402
-
-
 def _startup(app, startup_hook, use_tray, show_window):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
 
-    from solaar.tasks import TaskRunner as _TaskRunner
     global _task_runner
     _task_runner = _TaskRunner('AsyncUI')
     _task_runner.start()
@@ -133,8 +80,6 @@ def _command_line(app, command_line):
     elif args[0] == 'config':  # config call from remote instance
         if logger.isEnabledFor(logging.INFO):
             logger.info('remote command line %s', args)
-        from solaar.ui.config_panel import change_setting  # prevent circular import
-        from solaar.ui.window import find_device  # prevent circular import
         dev = find_device(args[1])
         if dev:
             setting = next((s for s in dev.settings if s.name == args[2]), None)
@@ -160,7 +105,6 @@ def _shutdown(app, shutdown_hook):
 
 def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     assert use_tray or show_window, 'need either tray or visible window'
-    # from gi.repository.Gio import ApplicationFlags as _ApplicationFlags
     APP_ID = 'io.github.pwr_solaar.solaar'
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 

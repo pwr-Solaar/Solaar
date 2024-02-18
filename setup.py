@@ -2,6 +2,7 @@
 import subprocess
 
 from glob import glob as _glob
+from os.path import dirname as _dirname
 
 try:
     from setuptools import setup
@@ -29,7 +30,6 @@ except Exception:  # get commit from Ubuntu dpkg-parsechangelog
 
 
 def _data_files():
-    from os.path import dirname as _dirname
 
     yield 'share/icons/hicolor/scalable/apps', _glob('share/solaar/icons/solaar*.svg')
     yield 'share/icons/hicolor/32x32/apps', _glob('share/solaar/icons/solaar-light_*.png')
@@ -40,8 +40,6 @@ def _data_files():
     yield 'share/applications', ['share/applications/solaar.desktop']
     yield 'lib/udev/rules.d', ['rules.d/42-logitech-unify-permissions.rules']
     yield 'share/metainfo', ['share/solaar/io.github.pwr_solaar.solaar.metainfo.xml']
-
-    del _dirname
 
 
 setup(

@@ -17,19 +17,24 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import logging
+import socket as _socket
 
 from logging import WARN as _WARN
 from struct import pack as _pack
 from struct import unpack as _unpack
 from time import time as _time
+from traceback import format_exc as _format_exc
 
+from . import descriptors as _descriptors
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
 from . import special_keys as _special_keys
+from .base import _HIDPP_Notification as _HIDPP_Notification
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
+from .diversion import process_notification as _process_notification
 from .i18n import _
 from .settings import KIND as _KIND
 from .settings import ActionSettingRW as _ActionSettingRW
@@ -187,12 +192,34 @@ class RegisterFnSwap(FnSwapVirtual):
     validator_options = {'true_value': b'\x00\x01', 'mask': b'\x00\x01'}
 
 
-class FnSwap(FnSwapVirtual):
-    feature = _F.FN_INVERSION
+class _PerformanceMXDpi(RegisterDpi):
+    choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
+    validator_options = {'choices': choices_universe}
 
 
-class NewFnSwap(FnSwapVirtual):
-    feature = _F.NEW_FN_INVERSION
+# set up register settings for devices - this is done here to break up an import loop
+_descriptors.get_wpid('0060').settings = [RegisterFnSwap]
+_descriptors.get_wpid('2008').settings = [RegisterFnSwap]
+_descriptors.get_wpid('2010').settings = [RegisterFnSwap, RegisterHandDetection]
+_descriptors.get_wpid('2011').settings = [RegisterFnSwap]
+_descriptors.get_usbid(0xc318).settings = [RegisterFnSwap]
+_descriptors.get_wpid('C714').settings = [RegisterFnSwap]
+_descriptors.get_wpid('100B').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('100F').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('1013').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('1014').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('1017').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('1023').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('4004').settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('101A').settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('101B').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('101D').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('101F').settings = [RegisterSideScroll]
+_descriptors.get_usbid(0xc06b).settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid('1025').settings = [RegisterSideScroll]
+_descriptors.get_wpid('102A').settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_usbid(0xc048).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_usbid(0xc066).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
@@ -201,6 +228,14 @@ class K375sFnSwap(FnSwapVirtual):
     feature = _F.K375S_FN_INVERSION
     rw_options = {'prefix': b'\xFF'}
     validator_options = {'true_value': b'\x01', 'false_value': b'\x00', 'read_skip_byte_count': 1}
+
+
+class FnSwap(FnSwapVirtual):
+    feature = _F.FN_INVERSION
+
+
+class NewFnSwap(FnSwapVirtual):
+    feature = _F.NEW_FN_INVERSION
 
 
 class Backlight(_Setting):
@@ -441,6 +476,18 @@ class ThumbInvert(_Setting):
     validator_options = {'true_value': b'\x00\x01', 'false_value': b'\x00\x00', 'mask': b'\x00\x01'}
 
 
+# change UI to show result of onboard profile change
+def profile_change(device, profile_sector):
+    from solaar.ui.config_panel import record_setting  # prevent circular import
+    record_setting(device, OnboardProfiles, [profile_sector])
+    for profile in device.profiles.profiles.values() if device.profiles else []:
+        if profile.sector == profile_sector:
+            resolution_index = profile.resolution_default_index
+            record_setting(device, AdjustableDpi, [profile.resolutions[resolution_index]])
+            record_setting(device, ReportRate, [profile.report_rate])
+            break
+
+
 class OnboardProfiles(_Setting):
     name = 'onboard_profiles'
     label = _('Onboard Profiles')
@@ -466,13 +513,12 @@ class OnboardProfiles(_Setting):
                 return b'\x00\x00'
 
         def write(self, device, data_bytes):
-            from . import notifications as _notifications  # prevent circular import
             if data_bytes == b'\x00\x00':
                 result = device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x02')
             else:
                 device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x01')
                 result = device.feature_request(_F.ONBOARD_PROFILES, 0x30, data_bytes)
-                _notifications.profile_change(device, _bytes2int(data_bytes))
+                profile_change(device, _bytes2int(data_bytes))
             return result
 
     class validator_class(_ChoicesV):
@@ -798,8 +844,6 @@ class MouseGesturesXY(_RawXYProcessing):
     def release_action(self):
         if self.fsmState == 'pressed':
             # emit mouse gesture notification
-            from .base import _HIDPP_Notification as _HIDPP_Notification
-            from .diversion import process_notification as _process_notification
             self.push_mouse_event()
             if logger.isEnabledFor(logging.INFO):
                 logger.info('mouse gesture notification %s', self.data)
@@ -1098,8 +1142,7 @@ class ChangeHost(_Setting):
             hostNames = _hidpp20.get_host_names(device)
             hostNames = hostNames if hostNames is not None else {}
             if currentHost not in hostNames or hostNames[currentHost][1] == '':
-                import socket  # find name of current host and use it
-                hostNames[currentHost] = (True, socket.gethostname().partition('.')[0])
+                hostNames[currentHost] = (True, _socket.gethostname().partition('.')[0])
             choices = _NamedInts()
             for host in range(0, numHosts):
                 paired, hostName = hostNames.get(host, (True, ''))
@@ -1533,8 +1576,7 @@ def check_feature(device, sclass):
             logger.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
         return detected
     except Exception as e:
-        from traceback import format_exc
-        logger.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, format_exc())
+        logger.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, _format_exc())
         return False  # differentiate from an error-free determination that the setting is not supported
 
 

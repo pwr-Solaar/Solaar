@@ -18,14 +18,20 @@
 
 import ctypes as _ctypes
 import logging
+import math
+import numbers
 import os as _os
 import os.path as _path
 import platform as _platform
+import socket
+import subprocess
 import sys as _sys
 import time as _time
 
-from math import sqrt as _sqrt
-from struct import unpack as _unpack
+import dbus
+import gi
+import keysyms.keysymdef as _keysymdef
+import psutil
 
 # There is no evdev on macOS or Windows. Diversion will not work without
 # it but other Solaar functionality is available.
@@ -34,20 +40,16 @@ if _platform.system() in ('Darwin', 'Windows'):
 else:
     import evdev
 
-import dbus
-import keysyms.keysymdef as _keysymdef
-import psutil
+from math import sqrt as _sqrt
+from struct import unpack as _unpack
 
 from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
 from .common import NamedInt
-from .device import Device as _Device
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
-
-import gi  # isort:skip
 
 gi.require_version('Gdk', '3.0')  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
@@ -749,7 +751,7 @@ class Setting(Condition):
             logger.debug('evaluate condition: %s', self)
         if len(self.args) < 3:
             return None
-        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
+        dev = device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             logger.warning('Setting condition: device %s is not known', self.args[0])
             return False
@@ -1040,7 +1042,7 @@ class Active(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug('evaluate condition: %s', self)
-        dev = _Device.find(self.devID)
+        dev = device.find(self.devID)
         return bool(dev and dev.ping())
 
     def data(self):
@@ -1083,7 +1085,6 @@ class Host(Condition):
     def evaluate(self, feature, notification, device, status, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug('evaluate condition: %s', self)
-        import socket
         hostname = socket.getfqdn()
         return hostname.startswith(self.host)
 
@@ -1207,7 +1208,6 @@ class KeyPress(Action):
 class MouseScroll(Action):
 
     def __init__(self, amounts, warn=True):
-        import numbers
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
         if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
@@ -1220,8 +1220,6 @@ class MouseScroll(Action):
         return 'MouseScroll: ' + ' '.join([str(a) for a in self.amounts])
 
     def evaluate(self, feature, notification, device, status, last_result):
-        import math
-        import numbers
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
@@ -1294,7 +1292,7 @@ class Set(Action):
             return None
         if logger.isEnabledFor(logging.INFO):
             logger.info('Set action: %s', self.args)
-        dev = _Device.find(self.args[0]) if self.args[0] is not None else device
+        dev = device.find(self.args[0]) if self.args[0] is not None else device
         if dev is None:
             logger.warning('Set action: device %s is not known', self.args[0])
             return None
@@ -1329,7 +1327,6 @@ class Execute(Action):
         return 'Execute: ' + ' '.join([a for a in self.args])
 
     def evaluate(self, feature, notification, device, status, last_result):
-        import subprocess
         if logger.isEnabledFor(logging.INFO):
             logger.info('Execute action: %s', self.args)
         subprocess.Popen(self.args)
