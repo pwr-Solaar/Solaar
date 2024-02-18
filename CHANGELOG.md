@@ -1,3 +1,93 @@
+# 1.1.12
+
+* Use bluez dbus signals to disconnect and connect bluetooth devices
+* Handle a different signal for onboard profiles directory in ROM
+* Introduce small delay in getting pairing information to let receiver settle after pairing
+* Improve testing for settings_templates, settings, hidpp20, and device and fix small bugs found
+* Add extended adjustable DPI setting
+* Improve and extend infrastructure for testing setting_templates
+* Update Greek translation
+* Implement and test per-key lighting
+* Refactor and test pair_window in GUI
+* Handle situation when read of a setting fails in GUI
+* Permit continuing when a read during pushing fails
+* Fix bug in LEDZoneSetting when effect is not implemented
+* Add tests for LEDEffect structures in hidpp20
+* Handle BRIGHTNESS_CONTROL notifications
+* Add settings for BRIGHTNESS_CONTROL and RGB_EFFECTS features
+* Fix small bugs found from testing in settings
+* Use f-strings for more exceptions and log message
+* Tests for setting_templates
+* Simple change in settings to improve testability
+* Use feature_request from the device everywhere in hidpp20
+* Fix bug in backlight 2 durations
+* Replace deprecated code constructs
+* Set up test data and classes to help test HID++ interactions
+* Use pytest to test code for logitech_receiver modules
+* Align init methods for all receiver classes
+* Start refactoring of code base
+* Allow sub-second delays in Later
+* Fix bug in setting configuration cookie due to bad documentation
+* Use ruff for code styling and linting
+* Upgrade string formating to f-string
+* Document battery-icons=solaar option
+* Tell devices to delay device sending first messages until configuration is done
+* Optimize some functions in FeaturesArray
+* Fix bug in creating features array
+* Fix bug in building battery line in show
+* Refactor diversion_rules
+* Fix bug in determining tray icon
+* Fix bug in getting friendly name
+* Move status information to Device and Receiver objects
+* Add tests for get_kind_from_index and base product information
+* Update EX100 documentation
+* Use object attributes instead of dictionary in status objects
+* Create subclasses of receiver for different variants
+* Add requirement for CONFIG_HIDRAW to documentation
+* Add some low-level tests for some hidpp20 functions, profiles, and lighting and some hidpp10 tests
+* Fix app name casing in UI
+* Add missing receiver type for Lightspeed receivers
+* Add new device types
+* Refactor device and receiver instantiation
+* Simplify naming of distribution files
+* Clean up some logging code
+* Remove duplicated code to read register
+* Introduce Hidpp20 and Hidpp10 class
+* Remove unnecessary calls of del
+* Fix bug when reading BACKLIGHT setting from device
+* Replace invalid hidpp10 and hidpp20 usages
+* Use only timer thread to save config.yaml
+* Improve README
+* Copy newer version of hid_parser
+* Reorder code in settings
+* Update installation documentation
+* Add missing license blocks
+* Clean up listener and notifications code
+* Add locks to prevent multiple persisters for device
+* Clean up configuration, device, and receiver code
+* Move battery constants common to HID++ 1.0 and 2.0 to common
+* Move mapping of device kind into hidpp20
+* Move pairing information gathering to receiver
+* update contributors
+* Expand allowable profile numbers
+* Clean up __init__ in logitech_receiver
+* Modify pre-commit args to make ruff change files
+* Fix bug in hidpp20 get host names
+* Use ruff for formatting and linting
+* Fix bug in rule Set action
+* Add notify module to logitech_receiver
+* Implement setting_changed callback and pass in to new devices and receivers
+* Add callback to call when changing a setting
+* Move exceptions, hidpp20 and hidpp10 constants into new modules
+* Streamline status code
+* Upgrade debugging in udev
+* Fix deprecated GitHub actions
+* Extend makefile and tests
+* Improve features array
+* Move ui_async to common.py
+* Improve module imports
+* Add tests of common module
+
 # 1.1.11
 
 * Rename light icons and install them in correct place
