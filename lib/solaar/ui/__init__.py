@@ -23,11 +23,10 @@ import yaml as _yaml
 
 from logitech_receiver.status import ALERT
 from solaar.i18n import _
-from solaar.tasks import TaskRunner as _TaskRunner
 from solaar.ui.config_panel import change_setting
 from solaar.ui.window import find_device
 
-from . import diversion_rules, notify, tray, window
+from . import common, diversion_rules, notify, tray, window
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gio, GLib, Gtk  # NOQA: E402
@@ -50,16 +49,11 @@ GLib.threads_init()
 def _startup(app, startup_hook, use_tray, show_window):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
-
-    global _task_runner
-    _task_runner = _TaskRunner('AsyncUI')
-    _task_runner.start()
-
+    common.start_async()
     notify.init()
     if use_tray:
         tray.init(lambda _ignore: window.destroy())
     window.init(show_window, use_tray)
-
     startup_hook()
 
 
@@ -91,14 +85,8 @@ def _command_line(app, command_line):
 def _shutdown(app, shutdown_hook):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('shutdown')
-
     shutdown_hook()
-
-    # stop the async UI processor
-    global _task_runner
-    _task_runner.stop()
-    _task_runner = None
-
+    common.stop_async()
     tray.destroy()
     notify.uninit()
 

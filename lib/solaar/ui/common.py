@@ -21,6 +21,7 @@ import logging
 import gi
 
 from solaar.i18n import _
+from solaar.tasks import TaskRunner as _TaskRunner
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import GLib, Gtk  # NOQA: E402
@@ -70,9 +71,21 @@ def error_dialog(reason, object):
 #
 #
 
-task_runner = None
+_task_runner = None
+
+
+def start_async():
+    global _task_runner
+    _task_runner = _TaskRunner('AsyncUI')
+    _task_runner.start()
+
+
+def stop_async():
+    global _task_runner
+    _task_runner.stop()
+    _task_runner = None
 
 
 def ui_async(function, *args, **kwargs):
-    if task_runner:
-        task_runner(function, *args, **kwargs)
+    if _task_runner:
+        _task_runner(function, *args, **kwargs)
