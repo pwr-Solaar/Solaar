@@ -168,7 +168,7 @@ def main():
         logger.warning('Solaar udev file not found in expected location')
         logger.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
-        _listener.setup_scanner(_ui.status_changed, _common.error_dialog)
+        _listener.setup_scanner(_ui.status_changed, _ui.setting_changed, _common.error_dialog)
 
         if args.restart_on_wake_up:
             _upower.watch(_listener.start_all, _listener.stop_all)

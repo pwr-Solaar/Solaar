@@ -301,12 +301,12 @@ _all_listeners = {}
 
 
 def _start(device_info):
-    assert _status_callback
+    assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver = _receiver.Receiver.open(device_info)
+        receiver = _receiver.Receiver.open(device_info, _setting_callback)
     else:
-        receiver = _device.Device.open(device_info)
+        receiver = _device.Device.open(device_info, _setting_callback)
         configuration.attach_to(receiver)
 
     if receiver:
@@ -374,14 +374,16 @@ def ping_all(resuming=False):
 
 
 _status_callback = None
+_setting_callback = None
 _error_callback = None
 
 
-def setup_scanner(status_changed_callback, error_callback):
-    global _status_callback, _error_callback
+def setup_scanner(status_changed_callback, setting_changed_callback, error_callback):
+    global _status_callback, _error_callback, _setting_callback
     assert _status_callback is None, 'scanner was already set-up'
 
     _status_callback = status_changed_callback
+    _setting_callback = setting_changed_callback
     _error_callback = error_callback
 
     _base.notify_on_receivers_glib(_process_receiver_event)

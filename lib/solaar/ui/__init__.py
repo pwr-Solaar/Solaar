@@ -23,7 +23,7 @@ import yaml as _yaml
 
 from logitech_receiver.status import ALERT
 from solaar.i18n import _
-from solaar.ui.config_panel import change_setting
+from solaar.ui.config_panel import change_setting, record_setting
 from solaar.ui.window import find_device
 
 from . import common, diversion_rules, notify, tray, window
@@ -131,3 +131,7 @@ def _status_changed(device, alert, reason, refresh=False):
 
 def status_changed(device, alert=ALERT.NONE, reason=None, refresh=False):
     GLib.idle_add(_status_changed, device, alert, reason, refresh)
+
+
+def setting_changed(device, setting_class, vals):
+    record_setting(device, setting_class, vals)

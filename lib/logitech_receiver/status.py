@@ -94,7 +94,7 @@ class ReceiverStatus(dict):
 
         self[KEYS.ERROR] = None
 
-    def __str__(self):
+    def to_string(self):
         count = len(self._receiver)
         return (
             _('No paired devices.')
@@ -102,6 +102,9 @@ class ReceiverStatus(dict):
                 'count': count
             }
         )
+
+    def __str__(self):
+        self.to_string()
 
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         self._changed_callback(self._receiver, alert=alert, reason=reason)
