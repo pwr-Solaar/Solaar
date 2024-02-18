@@ -39,15 +39,15 @@ Receiver
             Battery: 96%, discharging.
          7: XY STATS               {2250} V1
          8: WHEEL STATS            {2251} V0
-         9: unknown:2202           {2202} V0
+         9: unknown:2202           {2202} V0		EXTENDED_ADJUSTABLE_DPI
         10: MODE STATUS            {8090} V2
-        11: unknown:8061           {8061} V0
+        11: unknown:8061           {8061} V0		EXTENDED_ADJUSTABLE_REPORT_RATE
         12: ONBOARD PROFILES       {8100} V0
             Device Mode: On-Board
             Onboard Profiles (saved): Enable
             Onboard Profiles        : Enable
         13: MOUSE BUTTON SPY       {8110} V0
-        14: unknown:1500           {1500} V0
+        14: unknown:1500           {1500} V0		FORCE_PAIRING
         15: unknown:1801           {1801} V0    internal, hidden, unknown:000010
         16: DEVICE RESET           {1802} V0    internal, hidden, unknown:000010
         17: unknown:1803           {1803} V0    internal, hidden, unknown:000010

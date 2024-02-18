@@ -1,5 +1,21 @@
 # Notes on Major Changes in Releases
 
+## Version 1.1.12
+
+* Solaar now processes DBus disconnection and connection messages from Bluez and re-initializes devices when they reconnect, to handle to a change introduced in Bluez 5.73. The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling. Until the issue is resolved having Scroll Wheel Resolution set to true (and not ignored) may be helpful.
+
+* The credits for translations have not been kept up to date.  Translators who are not listed can update docs/i18n.ml and lib/solaar/ui/about.py.
+
+* Solaar now has settings for features BRIGHTNESS_CONTROL, RGB_EFFECTS, and PER_KEY_LIGHTING features.  The names of keys in the Per-key Lighting setting are for the standard US keyboard.  Users who wish to modify these names should look at the section Keyboard Key Names and Locations in `https://pwr-solaar.github.io/Solaar/capabilities`
+
+* A unit test test suite is being constructed using pytest.
+
+* The Solaar code for communicating with receivers and devices has been significantly modified to improve testability and organization.  Errors may have been introduced for uncommon hardware.
+
+* The Later rule action uses precision timing for delays of less than one second.
+
+* Solaar now indentifies supported devices by whether they support the HID protocols that Solaar needs.  If a device does not show up at all when running Solaar, it almost certainly cannot be supported by Solaar.
+
 ## Version 1.1.11
 
 * Solaar can dump device profiles in YAMLfor devices that support profiles and load profiles back from an edited file.  See [the capabilities page](https://pwr-solaar.github.io/Solaar/capabilities) for more information.
