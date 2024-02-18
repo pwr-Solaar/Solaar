@@ -1285,9 +1285,6 @@ class Set(Action):
         return 'Set: ' + ' '.join([str(a) for a in self.args])
 
     def evaluate(self, feature, notification, device, status, last_result):
-        # importing here to avoid circular imports
-        from solaar.ui.config_panel import change_setting as _change_setting
-
         if len(self.args) < 3:
             return None
         if logger.isEnabledFor(logging.INFO):
@@ -1304,7 +1301,9 @@ class Set(Action):
         if args is None:
             logger.warning('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
             return None
-        _change_setting(dev, setting, args)
+        setting.write(*args)
+        if device.setting_callback:
+            device.setting_callback(device, type(setting), args)
         return None
 
     def data(self):

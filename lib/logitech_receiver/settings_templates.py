@@ -479,14 +479,14 @@ class ThumbInvert(_Setting):
 
 # change UI to show result of onboard profile change
 def profile_change(device, profile_sector):
-    from solaar.ui.config_panel import record_setting  # prevent circular import
-    record_setting(device, OnboardProfiles, [profile_sector])
-    for profile in device.profiles.profiles.values() if device.profiles else []:
-        if profile.sector == profile_sector:
-            resolution_index = profile.resolution_default_index
-            record_setting(device, AdjustableDpi, [profile.resolutions[resolution_index]])
-            record_setting(device, ReportRate, [profile.report_rate])
-            break
+    if device.setting_callback:
+        device.setting_callback(device, OnboardProfiles, [profile_sector])
+        for profile in device.profiles.profiles.values() if device.profiles else []:
+            if profile.sector == profile_sector:
+                resolution_index = profile.resolution_default_index
+                device.setting_callback(device, AdjustableDpi, [profile.resolutions[resolution_index]])
+                device.setting_callback(device, ReportRate, [profile.report_rate])
+                break
 
 
 class OnboardProfiles(_Setting):
@@ -772,8 +772,8 @@ class DpiSlidingXY(_RawXYProcessing):
     def setNewDpi(self, newDpiIdx):
         newDpi = self.dpiChoices[newDpiIdx]
         self.dpiSetting.write(newDpi)
-        from solaar.ui import status_changed as _status_changed
-        _status_changed(self.device, refresh=True)  # update main window
+        if self.device.setting_callback:
+            self.device.setting_callback(self.device, type(self.dpiSetting), [newDpi])
 
     def displayNewDpi(self, newDpiIdx):
         from solaar.ui import notify as _notify  # import here to avoid circular import when running `solaar show`,
@@ -1024,10 +1024,10 @@ class SpeedChange(_Setting):
             if newSpeed is not None:
                 if speed_setting:
                     speed_setting.write(newSpeed)
+                    if self.device.setting_callback:
+                        self.device.setting_callback(self.device, type(speed_setting), [newSpeed])
                 else:
                     logger.error('cannot save sensitivity setting on %s', self.device)
-                from solaar.ui import status_changed as _status_changed
-                _status_changed(self.device, refresh=True)  # update main window
             if self.device.persister:
                 self.device.persister['_speed-change'] = currentSpeed
 

@@ -63,7 +63,8 @@ class Device:
         short=None,
         long=None,
         product_id=None,
-        bus_id=None
+        bus_id=None,
+        setting_callback=None
     ):
         assert receiver or handle
         Device.instances.append(self)
@@ -76,6 +77,7 @@ class Device:
         self.hidpp_short = short
         self.hidpp_long = long
         self.bluetooth = bus_id == 0x0005  # Bluetooth connections need long messages
+        self.setting_callback = setting_callback
 
         if receiver:
             assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
@@ -526,7 +528,7 @@ class Device:
         pass
 
     @classmethod
-    def open(self, device_info):
+    def open(self, device_info, setting_callback=None):
         """Opens a Logitech Device found attached to the machine, by Linux device path.
         :returns: An open file handle for the found receiver, or ``None``.
         """
@@ -541,7 +543,8 @@ class Device:
                     short=device_info.hidpp_short,
                     long=device_info.hidpp_long,
                     product_id=device_info.product_id,
-                    bus_id=device_info.bus_id
+                    bus_id=device_info.bus_id,
+                    setting_callback=setting_callback
                 )
         except OSError as e:
             logger.exception('open %s', device_info)

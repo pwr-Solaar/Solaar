@@ -47,12 +47,13 @@ class Receiver:
     number = 0xFF
     kind = None
 
-    def __init__(self, handle, path, product_id):
+    def __init__(self, handle, path, product_id, setting_callback=None):
         assert handle
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
         self.product_id = product_id
+        self.setting_callback = setting_callback
         product_info = _product_information(self.product_id)
         if not product_info:
             logger.warning('Unknown receiver type: %s', self.product_id)
@@ -237,7 +238,7 @@ class Receiver:
         assert notification is None or notification.sub_id == 0x41
 
         try:
-            dev = Device(self, number, notification)
+            dev = Device(self, number, notification, setting_callback=self.setting_callback)
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: found new device %d (%s)', self, number, dev.wpid)
             self._devices[number] = dev
@@ -382,7 +383,7 @@ class Receiver:
     __bool__ = __nonzero__ = lambda self: self.handle is not None
 
     @classmethod
-    def open(self, device_info):
+    def open(self, device_info, setting_callback=None):
         """Opens a Logitech Receiver found attached to the machine, by Linux device path.
 
         :returns: An open file handle for the found receiver, or ``None``.
@@ -390,7 +391,7 @@ class Receiver:
         try:
             handle = _base.open_path(device_info.path)
             if handle:
-                return Receiver(handle, device_info.path, device_info.product_id)
+                return Receiver(handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
             logger.exception('open %s', device_info)
             if e.errno == _errno.EACCES:
