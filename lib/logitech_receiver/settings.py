@@ -1447,10 +1447,10 @@ class ActionSettingRW:
                 self.active = True
                 if divertSetting:
                     divertSetting.write_key_value(int(self.key.key), 1)
+                    if self.device.setting_callback:
+                        self.device.setting_callback(device, type(divertSetting), [self.key.key, 1])
                 device.add_notification_handler(self.name, handler)
-                from solaar.ui import status_changed as _status_changed
                 self.activate_action()
-                _status_changed(device, refresh=True)  # update main window
             else:
                 logger.error('cannot enable %s on %s for key %s', self.name, device, key)
         else:  # Disable
@@ -1458,8 +1458,8 @@ class ActionSettingRW:
                 self.active = False
                 if divertSetting:
                     divertSetting.write_key_value(int(self.key.key), 0)
-                from solaar.ui import status_changed as _status_changed
-                _status_changed(device, refresh=True)  # update main window
+                    if self.device.setting_callback:
+                        self.device.setting_callback(device, type(divertSetting), [self.key.key, 0])
                 try:
                     device.remove_notification_handler(self.name)
                 except Exception:

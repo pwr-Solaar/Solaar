@@ -22,8 +22,6 @@ import threading as _threading
 
 from struct import unpack as _unpack
 
-from solaar.ui.config_panel import record_setting
-
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
 from . import hidpp20 as _hidpp20
@@ -413,7 +411,8 @@ def _process_feature_notification(device, status, n, feature):
     elif feature == _F.BACKLIGHT2:
         if (n.address == 0x00):
             level = _unpack('!B', n.data[1:2])[0]
-            record_setting(device, _st.Backlight2Level, [level])
+            if device.setting_callback:
+                device.setting_callback(device, _st.Backlight2Level, [level])
 
     elif feature == _F.REPROG_CONTROLS_V4:
         if n.address == 0x00:
@@ -442,7 +441,8 @@ def _process_feature_notification(device, status, n, feature):
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: WHEEL: ratchet: %d', device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
-                record_setting(device, _st.ScrollRatchet, [2 if ratchet else 1])
+                if device.setting_callback:
+                    device.setting_callback(device, _st.ScrollRatchet, [2 if ratchet else 1])
         else:
             if logger.isEnabledFor(logging.INFO):
                 logger.info('%s: unknown WHEEL %s', device, n)
@@ -459,9 +459,11 @@ def _process_feature_notification(device, status, n, feature):
             elif (n.address == 0x10):
                 resolution_index = _unpack('!B', n.data[:1])[0]
                 profile_sector = _unpack('!H', device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
-                for profile in device.profiles.profiles.values() if device.profiles else []:
-                    if profile.sector == profile_sector:
-                        record_setting(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
+                if device.setting_callback:
+                    for profile in device.profiles.profiles.values() if device.profiles else []:
+                        if profile.sector == profile_sector:
+                            device.setting_callback(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
+                            break
 
     _diversion.process_notification(device, status, n, feature)
     return True
