@@ -1,4 +1,4 @@
-# 1.1.12
+# 1.1.12rc1
 
 * Use bluez dbus signals to disconnect and connect bluetooth devices
 * Handle a different signal for onboard profiles directory in ROM
