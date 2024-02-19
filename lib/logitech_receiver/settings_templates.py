@@ -498,7 +498,7 @@ class OnboardProfiles(_Setting):
     description = _("Enable an onboard profile, which controls report rate, sensitivity, and button actions")
     feature = _F.ONBOARD_PROFILES
     choices_universe = _NamedInts(Disabled=0)
-    for i in range(1, 6):
+    for i in range(1, 16):
         choices_universe[i] = f"Profile {i}"
     validator_class = _ChoicesV
 
@@ -531,7 +531,7 @@ class OnboardProfiles(_Setting):
             profiles_list = [setting_class.choices_universe[0]]
             if headers:
                 for sector, enabled in headers:
-                    if enabled:
+                    if enabled and setting_class.choices_universe[sector]:
                         profiles_list.append(setting_class.choices_universe[sector])
             return cls(choices=_NamedInts.list(profiles_list), byte_count=2) if len(profiles_list) > 1 else None
 
