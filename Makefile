@@ -8,7 +8,7 @@ PIP_ARGS ?= .
 .PHONY: install_ubuntu install_macos
 .PHONY: install_apt install_brew install_pip
 .PHONY: install_udev install_udev_uinput reload_udev uninstall_udev
-.PHONY: test
+.PHONY: format lint test
 
 install_ubuntu: install_apt install_udev_uinput install_pip
 
@@ -47,6 +47,14 @@ uninstall_udev:
 	@echo "Removing Solaar udev rules from $(UDEV_RULES_DEST)"
 	sudo rm -f $(UDEV_RULES_DEST)/$(UDEV_RULE_FILE)
 	make reload_udev
+
+format:
+	@echo "Formatting Solaar code"
+	ruff format .
+
+lint:
+	@echo "Linting Solaar code"
+	ruff check . --fix
 
 test:
 	@echo "Running Solaar tests"
