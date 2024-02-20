@@ -28,7 +28,10 @@ import subprocess
 import sys as _sys
 import time as _time
 
-import dbus
+try:
+    import dbus
+except ImportError:
+    dbus = None
 import keysyms.keysymdef as _keysymdef
 import psutil
 
@@ -175,7 +178,11 @@ def gnome_dbus_interface_setup():
         remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
         _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
     except (dbus.exceptions.DBusException, ImportError):
+<<<<<<< HEAD
         logger.warning('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+=======
+        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+>>>>>>> c84bdb1f13bff05c62e948adc02ed53cff944192
         _dbus_interface = False
     return _dbus_interface
 
