@@ -173,8 +173,8 @@ def _convert_json(json_dict):
             dev[_KEY_WPID] = dev.get(_KEY_WPID) if dev.get(_KEY_WPID) else key[0]
             dev[_KEY_SERIAL] = dev.get(_KEY_SERIAL) if dev.get(_KEY_SERIAL) else key[1]
             for k, v in dev.items():
-                if type(k) == str and not k.startswith("_") and type(v) == dict:  # convert string keys to ints
-                    v = {int(dk) if type(dk) == str else dk: dv for dk, dv in v.items()}
+                if isinstance(k, str) and not k.startswith("_") and isinstance(v, dict):  # convert string keys to ints
+                    v = {int(dk) if isinstance(dk, str) else dk: dv for dk, dv in v.items()}
                 dev[k] = v
             for k in ["mouse-gestures", "dpi-sliding"]:
                 v = dev.get(k, None)

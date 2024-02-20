@@ -141,8 +141,16 @@ if available:
                 logger.exception("showing %s", n)
 
 else:
-    init = lambda: False
-    uninit = lambda: None
+
+    def init():
+        return False
+
+    def uninit():
+        return None
+
     # toggle = lambda action: False
-    alert = lambda reason: None
-    show = lambda dev, reason=None: None
+    def alert(reason):
+        return None
+
+    def show(dev, reason=None):
+        return None

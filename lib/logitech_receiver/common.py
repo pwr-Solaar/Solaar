@@ -23,7 +23,10 @@ from collections import namedtuple
 
 import yaml as _yaml
 
-is_string = lambda d: isinstance(d, str)
+
+def is_string(d):
+    return isinstance(d, str)
+
 
 #
 #

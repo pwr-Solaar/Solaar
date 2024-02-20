@@ -35,106 +35,125 @@ from .i18n import _
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
 
-_DRIVER = ("hid-generic", "generic-usb", "logitech-djreceiver")
+DRIVER = ("hid-generic", "generic-usb", "logitech-djreceiver")
 
-_bolt_receiver = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 2,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Bolt Receiver"),
-    "receiver_kind": "bolt",
-    "max_devices": 6,
-    "may_unpair": True,
-}
 
-_unifying_receiver = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 2,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Unifying Receiver"),
-    "receiver_kind": "unifying",
-    "may_unpair": True,
-}
+def _bolt_receiver(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 2,
+        "hid_driver": DRIVER,
+        "name": _("Bolt Receiver"),
+        "receiver_kind": "bolt",
+        "max_devices": 6,
+        "may_unpair": True,
+    }
 
-_nano_receiver = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Nano Receiver"),
-    "receiver_kind": "nano",
-    "may_unpair": False,
-    "re_pairs": True,
-}
 
-_nano_receiver_no_unpair = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Nano Receiver"),
-    "receiver_kind": "nano",
-    "may_unpair": False,
-    "unpair": False,
-    "re_pairs": True,
-}
+def _unifying_receiver(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 2,
+        "hid_driver": DRIVER,
+        "name": _("Unifying Receiver"),
+        "receiver_kind": "unifying",
+        "may_unpair": True,
+    }
 
-_nano_receiver_max2 = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Nano Receiver"),
-    "receiver_kind": "nano",
-    "max_devices": 2,
-    "may_unpair": False,
-    "re_pairs": True,
-}
 
-_nano_receiver_maxn = lambda product_id, max: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Nano Receiver"),
-    "receiver_kind": "nano",
-    "max_devices": max,
-    "may_unpair": False,
-    "re_pairs": True,
-}
+def _nano_receiver(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("Nano Receiver"),
+        "receiver_kind": "nano",
+        "may_unpair": False,
+        "re_pairs": True,
+    }
 
-_lenovo_receiver = lambda product_id: {
-    "vendor_id": 0x17EF,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Nano Receiver"),
-    "receiver_kind": "nano",
-    "may_unpair": False,
-}
 
-_lightspeed_receiver = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 2,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("Lightspeed Receiver"),
-    "may_unpair": False,
-}
+def _nano_receiver_no_unpair(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("Nano Receiver"),
+        "receiver_kind": "nano",
+        "may_unpair": False,
+        "unpair": False,
+        "re_pairs": True,
+    }
 
-_ex100_receiver = lambda product_id: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "usb_interface": 1,
-    "hid_driver": _DRIVER,  # noqa: F821
-    "name": _("EX100 Receiver 27 Mhz"),
-    "receiver_kind": "27Mhz",
-    "max_devices": 4,
-    "may_unpair": False,
-    "re_pairs": True,
-}
+
+def _nano_receiver_max2(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("Nano Receiver"),
+        "receiver_kind": "nano",
+        "max_devices": 2,
+        "may_unpair": False,
+        "re_pairs": True,
+    }
+
+
+def _nano_receiver_maxn(product_id, max):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("Nano Receiver"),
+        "receiver_kind": "nano",
+        "max_devices": max,
+        "may_unpair": False,
+        "re_pairs": True,
+    }
+
+
+def _lenovo_receiver(product_id):
+    return {
+        "vendor_id": 6127,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("Nano Receiver"),
+        "receiver_kind": "nano",
+        "may_unpair": False,
+    }
+
+
+def _lightspeed_receiver(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 2,
+        "hid_driver": DRIVER,
+        "name": _("Lightspeed Receiver"),
+        "may_unpair": False,
+    }
+
+
+def _ex100_receiver(product_id):
+    return {
+        "vendor_id": 1133,
+        "product_id": product_id,
+        "usb_interface": 1,
+        "hid_driver": DRIVER,
+        "name": _("EX100 Receiver 27 Mhz"),
+        "receiver_kind": "27Mhz",
+        "max_devices": 4,
+        "may_unpair": False,
+        "re_pairs": True,
+    }
+
 
 # Receivers added here should also be listed in
 # share/solaar/io.github.pwr_solaar.solaar.metainfo.xml
@@ -204,5 +223,3 @@ ALL = (
     LIGHTSPEED_RECEIVER_C547,
     EX100_27MHZ_RECEIVER_C517,
 )
-
-del _DRIVER, _unifying_receiver, _nano_receiver, _lenovo_receiver, _lightspeed_receiver

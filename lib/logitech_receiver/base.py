@@ -44,15 +44,14 @@ logger = logging.getLogger(__name__)
 #
 #
 
-_wired_device = lambda product_id, interface: {
-    "vendor_id": 0x046D,
-    "product_id": product_id,
-    "bus_id": 0x3,
-    "usb_interface": interface,
-    "isDevice": True,
-}
 
-_bt_device = lambda product_id: {"vendor_id": 0x046D, "product_id": product_id, "bus_id": 0x5, "isDevice": True}
+def _wired_device(product_id, interface):
+    return {"vendor_id": 1133, "product_id": product_id, "bus_id": 3, "usb_interface": interface, "isDevice": True}
+
+
+def _bt_device(product_id):
+    return {"vendor_id": 1133, "product_id": product_id, "bus_id": 5, "isDevice": True}
+
 
 DEVICE_IDS = []
 
@@ -243,7 +242,7 @@ def write(handle, devnumber, data, long_message=False):
     except Exception as reason:
         logger.error("write failed, assuming handle %r no longer available", handle)
         close(handle)
-        raise exceptions.NoReceiver(reason=reason)
+        raise exceptions.NoReceiver(reason=reason) from reason
 
 
 def read(handle, timeout=DEFAULT_TIMEOUT):
@@ -292,7 +291,7 @@ def _read(handle, timeout):
     except Exception as reason:
         logger.warning("read failed, assuming handle %r no longer available", handle)
         close(handle)
-        raise exceptions.NoReceiver(reason=reason)
+        raise exceptions.NoReceiver(reason=reason) from reason
 
     if data and check_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
@@ -324,7 +323,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
         except Exception as reason:
             logger.error("read failed, assuming receiver %s no longer available", handle)
             close(handle)
-            raise exceptions.NoReceiver(reason=reason)
+            raise exceptions.NoReceiver(reason=reason) from reason
 
         if data:
             if check_message(data):  # only process messages that pass check
