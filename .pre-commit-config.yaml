@@ -18,4 +18,3 @@ repos:
     args: [--fix, --exit-non-zero-on-fix]
   - id: ruff-format
     name: ruff format
-    args: [--diff]
