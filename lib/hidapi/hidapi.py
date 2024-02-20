@@ -33,6 +33,11 @@ from collections import namedtuple
 from threading import Thread
 from time import sleep
 
+import gi
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import GLib  # NOQA: E402
+
 logger = logging.getLogger(__name__)
 
 native_implementation = 'hidapi'
@@ -257,7 +262,7 @@ def _match(action, device, filterfn):
             device['hidpp_long'] = True
     except HIDError as e:  # noqa: F841
         if logger.isEnabledFor(logging.INFO):
-            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")
+            logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")  # noqa
     finally:
         if device_handle:
             close(device_handle)
@@ -279,8 +284,8 @@ def _match(action, device, filterfn):
         d_info = DeviceInfo(
             path=device['path'].decode(),
             bus_id=bus_id,
-            vendor_id=f'{vid:04X}',
-            product_id=f'{pid:04X}',
+            vendor_id=f'{vid:04X}',  # noqa
+            product_id=f'{pid:04X}',  # noqa
             interface=None,
             driver=None,
             manufacturer=device['manufacturer_string'],
@@ -297,8 +302,8 @@ def _match(action, device, filterfn):
         d_info = DeviceInfo(
             path=device['path'].decode(),
             bus_id=None,
-            vendor_id=f'{vid:04X}',
-            product_id=f'{pid:04X}',
+            vendor_id=f'{vid:04X}',  # noqa
+            product_id=f'{pid:04X}',  # noqa
             interface=None,
             driver=None,
             manufacturer=None,
@@ -323,7 +328,6 @@ def find_paired_node_wpid(receiver_path, index):
 
 
 def monitor_glib(callback, filterfn):
-    from gi.repository import GLib
 
     def device_callback(action, device):
         # print(f"device_callback({action}): {device}")

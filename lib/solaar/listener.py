@@ -18,13 +18,15 @@
 
 import errno as _errno
 import logging
+import subprocess
 import time
 
 from collections import namedtuple
 
 import gi
+import logitech_receiver.device as _device
+import logitech_receiver.receiver as _receiver
 
-from logitech_receiver import Device, Receiver
 from logitech_receiver import base as _base
 from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
@@ -302,9 +304,9 @@ def _start(device_info):
     assert _status_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver = Receiver.open(device_info)
+        receiver = _receiver.Receiver.open(device_info)
     else:
-        receiver = Device.open(device_info)
+        receiver = _device.Device.open(device_info)
         configuration.attach_to(receiver)
 
     if receiver:
@@ -391,7 +393,6 @@ def _process_add(device_info, retry):
     except OSError as e:
         if e.errno == _errno.EACCES:
             try:
-                import subprocess
                 output = subprocess.check_output(['/usr/bin/getfacl', '-p', device_info.path], text=True)
                 if logger.isEnabledFor(logging.WARNING):
                     logger.warning('Missing permissions on %s\n%s.', device_info.path, output)

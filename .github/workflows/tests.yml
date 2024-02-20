@@ -3,7 +3,7 @@ name: tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  ubuntu-tests:
     runs-on: ubuntu-latest
 
     strategy:
@@ -11,28 +11,27 @@ jobs:
         python-version: [3.7, 3.12]
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.3.0
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Install Ubuntu dependencies
       run: |
-        sudo apt update
-        sudo apt install libdbus-1-dev libglib2.0-dev
+        make install_apt
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e .[test]
+        make install_pip PIP_ARGS='.["test"]'
 
     - name: Run tests on Ubuntu
       run: |
-        pytest
+        make test
 
-  macos-build:
+  macos-tests:
     runs-on: macos-latest
 
     strategy:
@@ -40,23 +39,22 @@ jobs:
         python-version: [3.7, 3.12]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4.3.0
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up macOS dependencies
       run: |
-        brew install hidapi gtk+3 pygobject3
+        make install_brew
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install ."[test]"
+        make install_pip PIP_ARGS='.["test"]'
 
     - name: Run tests on macOS
       run: |
-        pytest
+        make test

@@ -35,11 +35,17 @@ from select import select as _select
 from time import sleep
 from time import time as _timestamp
 
+import gi
+
+from hid_parser import ReportDescriptor as _ReportDescriptor
 from pyudev import Context as _Context
 from pyudev import Device as _Device
 from pyudev import DeviceNotFoundError
 from pyudev import Devices as _Devices
 from pyudev import Monitor as _Monitor
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +99,8 @@ def exit():
 # It is given the bus id, vendor id, and product id and returns a dictionary
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
 def _match(action, device, filterfn):
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(f'Dbus event {action} {device}')
     hid_device = device.find_parent('hid')
     if not hid_device:  # only HID devices are of interest to Solaar
         return
@@ -105,9 +113,6 @@ def _match(action, device, filterfn):
         return  # these are devices connected through a receiver so don't pick them up here
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
-        from hid_parser import ReportDescriptor as _ReportDescriptor
-
-        # from hid_parser import Usage as _Usage
         hidpp_short = hidpp_long = False
         devfile = '/sys' + hid_device.get('DEVPATH') + '/report_descriptor'
         with fileopen(devfile, 'rb') as fd:
@@ -122,7 +127,7 @@ def _match(action, device, filterfn):
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
         hidpp_short = hidpp_long = None
-        logger.warning(
+        logger.info(
             'Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s', device.device_node, bid, vid, pid, e
         )
 
@@ -236,8 +241,6 @@ def find_paired_node_wpid(receiver_path, index):
 
 
 def monitor_glib(callback, filterfn):
-    from gi.repository import GLib
-
     c = _Context()
 
     # already existing devices
@@ -280,6 +283,8 @@ def monitor_glib(callback, filterfn):
             GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, filterfn)
             # print ("did io_add_watch")
 
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('Starting dbus monitoring')
     m.start()
 
 
@@ -292,6 +297,8 @@ def enumerate(filterfn):
     :returns: a list of matching ``DeviceInfo`` tuples.
     """
 
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug('Starting dbus enumeration')
     for dev in _Context().list_devices(subsystem='hidraw'):
         dev_info = _match('add', dev, filterfn)
         if dev_info:

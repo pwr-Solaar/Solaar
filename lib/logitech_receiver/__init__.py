@@ -30,10 +30,6 @@ http://6xq.net/git/lars/lshidpp.git/plain/doc/
 
 import logging
 
-from . import listener, status  # noqa: F401
-from .common import strhex  # noqa: F401
-from .device import Device  # noqa: F401
-from .receiver import Receiver  # noqa: F401
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.root.level)

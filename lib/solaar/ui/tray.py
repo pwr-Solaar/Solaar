@@ -21,6 +21,7 @@ import os
 
 from time import time as _timestamp
 
+import gi
 import solaar.gtk as gtk
 
 from gi.repository import GLib, Gtk
@@ -31,6 +32,7 @@ from solaar.i18n import _
 
 from . import icons as _icons
 from .about import show_window as _show_about_window
+from .action import make as _make
 from .window import popup as _window_popup
 from .window import toggle as _window_toggle
 
@@ -58,10 +60,8 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    from .action import make
-    menu.append(make('help-about', _('About %s') % NAME, _show_about_window, stock_id='help-about').create_menu_item())
-    menu.append(make('application-exit', _('Quit %s') % NAME, quit_handler, stock_id='application-exit').create_menu_item())
-    del make
+    menu.append(_make('help-about', _('About %s') % NAME, _show_about_window, stock_id='help-about').create_menu_item())
+    menu.append(_make('application-exit', _('Quit %s') % NAME, quit_handler, stock_id='application-exit').create_menu_item())
 
     menu.show_all()
 
@@ -145,7 +145,6 @@ def _scroll(tray_icon, event, direction=None):
 
 
 try:
-    import gi
     try:
         gi.require_version('AyatanaAppIndicator3', '0.1')
         from gi.repository import AyatanaAppIndicator3 as AppIndicator3

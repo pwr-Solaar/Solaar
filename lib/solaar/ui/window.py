@@ -18,7 +18,8 @@
 
 import logging
 
-from gi.repository import Gdk, GLib, Gtk
+import gi
+
 from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import NamedInt as _NamedInt
@@ -26,14 +27,18 @@ from logitech_receiver.common import NamedInts as _NamedInts
 from logitech_receiver.status import KEYS as _K
 from solaar import NAME
 from solaar.i18n import _, ngettext
-# from solaar import __version__ as VERSION
-from solaar.ui import ui_async as _ui_async
 
 from . import action as _action
 from . import config_panel as _config_panel
 from . import icons as _icons
 from .about import show_window as _show_about_window
+from .common import ui_async as _ui_async
 from .diversion_rules import show_window as _show_diversion_window
+
+# from solaar import __version__ as VERSION
+
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +52,6 @@ _TREE_ICON_SIZE = Gtk.IconSize.BUTTON
 _INFO_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DND
 try:
-    import gi
     gi.check_version('3.7.4')
     _CAN_SET_ROW_NONE = None
 except (ValueError, AttributeError):
@@ -666,7 +670,7 @@ def _update_device_panel(device, panel, buttons, full=False):
     panel.set_sensitive(is_online)
 
     if device.status.get(_K.BATTERY_LEVEL) is None:
-        device.status.read_battery(device)
+        device.status.read_battery()
 
     battery_level = device.status.get(_K.BATTERY_LEVEL)
     battery_voltage = device.status.get(_K.BATTERY_VOLTAGE)

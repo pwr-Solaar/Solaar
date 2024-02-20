@@ -18,6 +18,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import argparse
+import faulthandler
 import importlib
 import logging
 import os.path
@@ -26,8 +28,15 @@ import signal
 import sys
 import tempfile
 
+from traceback import format_exc
+
 import solaar.cli as _cli
+import solaar.configuration as _configuration
 import solaar.i18n as _i18n
+import solaar.listener as _listener
+import solaar.ui as _ui
+import solaar.ui.common as _common
+import solaar.upower as _upower
 
 from solaar import NAME, __version__
 
@@ -52,7 +61,6 @@ temp = tempfile.NamedTemporaryFile(prefix='Solaar_', mode='w', delete=True)
 
 
 def _parse_arguments():
-    import argparse
     arg_parser = argparse.ArgumentParser(
         prog=NAME.lower(), epilog='For more information see https://pwr-solaar.github.io/Solaar'
     )
@@ -122,7 +130,6 @@ def _parse_arguments():
 
 # On first SIGINT, dump threads to stderr; on second, exit
 def _handlesig(signl, stack):
-    import faulthandler
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
@@ -161,24 +168,18 @@ def main():
         logger.warning('Solaar udev file not found in expected location')
         logger.warning('See https://pwr-solaar.github.io/Solaar/installation for more information')
     try:
-        import solaar.listener as listener
-        import solaar.ui as ui
+        _listener.setup_scanner(_ui.status_changed, _common.error_dialog)
 
-        listener.setup_scanner(ui.status_changed, ui.error_dialog)
-
-        import solaar.upower as _upower
         if args.restart_on_wake_up:
-            _upower.watch(listener.start_all, listener.stop_all)
+            _upower.watch(_listener.start_all, _listener.stop_all)
         else:
-            _upower.watch(lambda: listener.ping_all(True))
+            _upower.watch(lambda: _listener.ping_all(True))
 
-        import solaar.configuration as _configuration
         _configuration.defer_saves = True  # allow configuration saves to be deferred
 
         # main UI event loop
-        ui.run_loop(listener.start_all, listener.stop_all, args.window != 'only', args.window != 'hide')
+        _ui.run_loop(_listener.start_all, _listener.stop_all, args.window != 'only', args.window != 'hide')
     except Exception:
-        from traceback import format_exc
         sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
 
     temp.close()

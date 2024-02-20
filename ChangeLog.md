@@ -1,4 +1,4 @@
-# 1.1.11rc4
+# 1.1.11
 
 * Rename light icons and install them in correct place
 * Setup macOS tests using GitHub action (#2284)
