@@ -29,6 +29,7 @@ from . import descriptors as _descriptors
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
+from . import notify as _notify
 from . import special_keys as _special_keys
 from .base import _HIDPP_Notification as _HIDPP_Notification
 from .common import NamedInt as _NamedInt
@@ -776,13 +777,9 @@ class DpiSlidingXY(_RawXYProcessing):
             self.device.setting_callback(self.device, type(self.dpiSetting), [newDpi])
 
     def displayNewDpi(self, newDpiIdx):
-        from solaar.ui import notify as _notify  # import here to avoid circular import when running `solaar show`,
         if _notify.available:
             reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
-            # if there is a progress percentage then the reason isn't shown
-            # asPercentage = int(float(newDpiIdx) / float(len(self.dpiChoices) - 1) * 100.)
-            # _notify.show(self.device, reason=reason, progress=asPercentage)
-            _notify.show(self.device, reason=reason)
+            _notify.show(self.device, reason)
 
     def press_action(self, key):  # start tracking
         self.starting = True
