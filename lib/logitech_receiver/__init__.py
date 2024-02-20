@@ -30,7 +30,6 @@ http://6xq.net/git/lars/lshidpp.git/plain/doc/
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.root.level)
 # if logging.root.level > logging.DEBUG:
