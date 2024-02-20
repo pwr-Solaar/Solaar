@@ -140,15 +140,20 @@ _GP = _hidpp20.PARAM
 # These settings have reader/writer classes that perform special processing instead of sending commands to the device.
 
 
-# yapf: disable
 class FnSwapVirtual(_Setting):  # virtual setting to hold fn swap strings
-    name = 'fn-swap'
-    label = _('Swap Fx function')
-    description = (_('When set, the F1..F12 keys will activate their special function,\n'
-                     'and you must hold the FN key to activate their standard function.') + '\n\n' +
-                   _('When unset, the F1..F12 keys will activate their standard function,\n'
-                     'and you must hold the FN key to activate their special function.'))
-# yapf: enable
+    name = "fn-swap"
+    label = _("Swap Fx function")
+    description = (
+        _(
+            "When set, the F1..F12 keys will activate their special function,\n"
+            "and you must hold the FN key to activate their standard function."
+        )
+        + "\n\n"
+        + _(
+            "When unset, the F1..F12 keys will activate their standard function,\n"
+            "and you must hold the FN key to activate their special function."
+        )
+    )
 
 
 class RegisterHandDetection(_Setting):

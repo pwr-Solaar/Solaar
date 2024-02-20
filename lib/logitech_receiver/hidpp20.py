@@ -1825,6 +1825,7 @@ def get_remaining_pairing(device):
     result = feature_request(device, FEATURE.REMAINING_PAIRING, 0x0)
     if result:
         result = _unpack("!B", result[:1])[0]
+        FEATURE._fallback = lambda x: "unknown:%04X" % x
         return result
 
 
