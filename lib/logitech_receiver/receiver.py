@@ -44,6 +44,7 @@ class Receiver:
 
     The paired devices are available through the sequence interface.
     """
+
     number = 0xFF
     kind = None
 
@@ -56,33 +57,36 @@ class Receiver:
         self.setting_callback = setting_callback
         product_info = _product_information(self.product_id)
         if not product_info:
-            logger.warning('Unknown receiver type: %s', self.product_id)
+            logger.warning("Unknown receiver type: %s", self.product_id)
             product_info = {}
-        self.receiver_kind = product_info.get('receiver_kind', 'unknown')
+        self.receiver_kind = product_info.get("receiver_kind", "unknown")
 
         # read the serial immediately, so we can find out max_devices
-        if self.receiver_kind == 'bolt':
+        if self.receiver_kind == "bolt":
             serial_reply = self.read_register(_R.bolt_uniqueId)
             self.serial = _strhex(serial_reply)
-            self.max_devices = product_info.get('max_devices', 1)
-            self.may_unpair = product_info.get('may_unpair', False)
+            self.max_devices = product_info.get("max_devices", 1)
+            self.may_unpair = product_info.get("may_unpair", False)
         else:
             serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
             if serial_reply:
                 self.serial = _strhex(serial_reply[1:5])
                 self.max_devices = ord(serial_reply[6:7])
                 if self.max_devices <= 0 or self.max_devices > 6:
-                    self.max_devices = product_info.get('max_devices', 1)
-                self.may_unpair = product_info.get('may_unpair', False)
+                    self.max_devices = product_info.get("max_devices", 1)
+                self.may_unpair = product_info.get("may_unpair", False)
             else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
                 self.serial = None
-                self.max_devices = product_info.get('max_devices', 1)
-                self.may_unpair = product_info.get('may_unpair', False)
+                self.max_devices = product_info.get("max_devices", 1)
+                self.may_unpair = product_info.get("may_unpair", False)
 
-        self.name = product_info.get('name', 'Receiver')
-        self.re_pairs = product_info.get('re_pairs', False)
-        self._str = '<%s(%s,%s%s)>' % (
-            self.name.replace(' ', ''), self.path, '' if isinstance(self.handle, int) else 'T', self.handle
+        self.name = product_info.get("name", "Receiver")
+        self.re_pairs = product_info.get("re_pairs", False)
+        self._str = "<%s(%s,%s%s)>" % (
+            self.name.replace(" ", ""),
+            self.path,
+            "" if isinstance(self.handle, int) else "T",
+            self.handle,
         )
 
         self._firmware = None
@@ -95,7 +99,7 @@ class Receiver:
             if d:
                 d.close()
         self._devices.clear()
-        return (handle and _base.close(handle))
+        return handle and _base.close(handle)
 
     def __del__(self):
         self.close()
@@ -131,36 +135,36 @@ class Receiver:
             set_flag_bits = 0
         ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if ok is None:
-            logger.warning('%s: failed to %s receiver notifications', self, 'enable' if enable else 'disable')
+            logger.warning("%s: failed to %s receiver notifications", self, "enable" if enable else "disable")
             return None
 
         flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(_hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
-            logger.info('%s: receiver notifications %s => %s', self, 'enabled' if enable else 'disabled', flag_names)
+            logger.info("%s: receiver notifications %s => %s", self, "enabled" if enable else "disabled", flag_names)
         return flag_bits
 
     def device_codename(self, n):
-        if self.receiver_kind == 'bolt':
+        if self.receiver_kind == "bolt":
             codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
             if codename:
-                codename = codename[3:3 + min(14, ord(codename[2:3]))]
-                return codename.decode('ascii')
+                codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
+                return codename.decode("ascii")
             return
         codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
         if codename:
-            codename = codename[2:2 + ord(codename[1:2])]
-            return codename.decode('ascii')
+            codename = codename[2 : 2 + ord(codename[1:2])]
+            return codename.decode("ascii")
 
     def device_pairing_information(self, n):
-        if self.receiver_kind == 'bolt':
+        if self.receiver_kind == "bolt":
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
             if pair_info:
                 wpid = _strhex(pair_info[3:4]) + _strhex(pair_info[2:3])
                 kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
                 return wpid, kind, 0
             else:
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error='read Bolt wpid')
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error="read Bolt wpid")
         wpid = 0
         kind = None
         polling_rate = None
@@ -168,35 +172,35 @@ class Receiver:
         if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
             kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
-            polling_rate = str(ord(pair_info[2:3])) + 'ms'
-        elif self.receiver_kind == '27Mz':  # 27Mhz receiver, fill extracting WPID from udev path
+            polling_rate = str(ord(pair_info[2:3])) + "ms"
+        elif self.receiver_kind == "27Mz":  # 27Mhz receiver, fill extracting WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
-                logger.error('Unable to get wpid from udev for device %d of %s', n, self)
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error='Not present 27Mhz device')
+                logger.error("Unable to get wpid from udev for device %d of %s", n, self)
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error="Not present 27Mhz device")
             kind = _hidpp10_constants.DEVICE_KIND[self.get_kind_from_index(n)]
 
-        elif not self.receiver_kind == 'unifying':  # unifying protocol not supported, may be an old Nano receiver
+        elif not self.receiver_kind == "unifying":  # unifying protocol not supported, may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
                 wpid = _strhex(device_info[3:5])
                 kind = _hidpp10_constants.DEVICE_KIND[0x00]  # unknown kind
             else:
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error='read pairing information - non-unifying')
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
         else:
-            raise exceptions.NoSuchDevice(number=n, receiver=self, error='read pairing information')
+            raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
         return wpid, kind, polling_rate
 
     def device_extended_pairing_information(self, n):
         serial = None
-        power_switch = '(unknown)'
-        if self.receiver_kind == 'bolt':
+        power_switch = "(unknown)"
+        if self.receiver_kind == "bolt":
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
             if pair_info:
                 serial = _strhex(pair_info[4:8])
                 return serial, power_switch
             else:
-                return '?', power_switch
+                return "?", power_switch
         pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         if pair_info:
             power_switch = _hidpp10_constants.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
@@ -220,19 +224,19 @@ class Receiver:
         elif index == 4:  # numpad
             kind = 3
         else:  # unknown device number on 27Mhz receiver
-            logger.error('failed to calculate device kind for device %d of %s', index, self)
-            raise exceptions.NoSuchDevice(number=index, receiver=self, error='Unknown 27Mhz device number')
+            logger.error("failed to calculate device kind for device %d of %s", index, self)
+            raise exceptions.NoSuchDevice(number=index, receiver=self, error="Unknown 27Mhz device number")
         return kind
 
     def notify_devices(self):
         """Scan all devices."""
         if self.handle:
             if not self.write_register(_R.receiver_connection, 0x02):
-                logger.warning('%s: failed to trigger device link notifications', self)
+                logger.warning("%s: failed to trigger device link notifications", self)
 
     def register_new_device(self, number, notification=None):
         if self._devices.get(number) is not None:
-            raise IndexError('%s: device number %d already registered' % (self, number))
+            raise IndexError("%s: device number %d already registered" % (self, number))
 
         assert notification is None or notification.devnumber == number
         assert notification is None or notification.sub_id == 0x41
@@ -240,13 +244,13 @@ class Receiver:
         try:
             dev = Device(self, number, notification, setting_callback=self.setting_callback)
             if logger.isEnabledFor(logging.INFO):
-                logger.info('%s: found new device %d (%s)', self, number, dev.wpid)
+                logger.info("%s: found new device %d (%s)", self, number, dev.wpid)
             self._devices[number] = dev
             return dev
         except exceptions.NoSuchDevice as e:
-            logger.warning('register new device failed for %s device %d error %s', e.receiver, e.number, e.error)
+            logger.warning("register new device failed for %s device %d error %s", e.receiver, e.number, e.error)
 
-        logger.warning('%s: looked for device %d, not found', self, number)
+        logger.warning("%s: looked for device %d, not found", self, number)
         self._devices[number] = None
 
     def set_lock(self, lock_closed=True, device=0, timeout=0):
@@ -255,25 +259,25 @@ class Receiver:
             reply = self.write_register(_R.receiver_pairing, action, device, timeout)
             if reply:
                 return True
-            logger.warning('%s: failed to %s the receiver lock', self, 'close' if lock_closed else 'open')
+            logger.warning("%s: failed to %s the receiver lock", self, "close" if lock_closed else "open")
 
     def discover(self, cancel=False, timeout=30):  # Bolt device discovery
-        assert self.receiver_kind == 'bolt'
+        assert self.receiver_kind == "bolt"
         if self.handle:
             action = 0x02 if cancel else 0x01
             reply = self.write_register(_R.bolt_device_discovery, timeout, action)
             if reply:
                 return True
-            logger.warning('%s: failed to %s device discovery', self, 'cancel' if cancel else 'start')
+            logger.warning("%s: failed to %s device discovery", self, "cancel" if cancel else "start")
 
-    def pair_device(self, pair=True, slot=0, address=b'\0\0\0\0\0\0', authentication=0x00, entropy=20):  # Bolt pairing
-        assert self.receiver_kind == 'bolt'
+    def pair_device(self, pair=True, slot=0, address=b"\0\0\0\0\0\0", authentication=0x00, entropy=20):  # Bolt pairing
+        assert self.receiver_kind == "bolt"
         if self.handle:
             action = 0x01 if pair is True else 0x03 if pair is False else 0x02
             reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
             if reply:
                 return True
-            logger.warning('%s: failed to %s device %s', self, 'pair' if pair else 'unpair', address)
+            logger.warning("%s: failed to %s device %s", self, "pair" if pair else "unpair", address)
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -312,7 +316,7 @@ class Receiver:
             return dev
 
         if not isinstance(key, int):
-            raise TypeError('key must be an integer')
+            raise TypeError("key must be an integer")
         if key < 1 or key > 15:  # some receivers have devices past their max # devices
             raise IndexError(key)
 
@@ -339,9 +343,9 @@ class Receiver:
             dev.wpid = None
             if key in self._devices:
                 del self._devices[key]
-            logger.warning('%s removed device %s', self, dev)
+            logger.warning("%s removed device %s", self, dev)
         else:
-            if self.receiver_kind == 'bolt':
+            if self.receiver_kind == "bolt":
                 reply = self.write_register(_R.bolt_pairing, 0x03, key)
             else:
                 reply = self.write_register(_R.receiver_pairing, 0x03, key)
@@ -352,10 +356,10 @@ class Receiver:
                 if key in self._devices:
                     del self._devices[key]
                 if logger.isEnabledFor(logging.INFO):
-                    logger.info('%s unpaired device %s', self, dev)
+                    logger.info("%s unpaired device %s", self, dev)
             else:
-                logger.error('%s failed to unpair device %s', self, dev)
-                raise Exception('failed to unpair device %s: %s' % (dev.name, key))
+                logger.error("%s failed to unpair device %s", self, dev)
+                raise Exception("failed to unpair device %s: %s" % (dev.name, key))
 
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
@@ -393,8 +397,8 @@ class Receiver:
             if handle:
                 return Receiver(handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
-            logger.exception('open %s', device_info)
+            logger.exception("open %s", device_info)
             if e.errno == _errno.EACCES:
                 raise
         except Exception:
-            logger.exception('open %s', device_info)
+            logger.exception("open %s", device_info)

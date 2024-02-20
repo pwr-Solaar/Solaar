@@ -43,7 +43,7 @@ class _ThreadedHandle:
     Closing a ThreadedHandle will close all handles.
     """
 
-    __slots__ = ('path', '_local', '_handles', '_listener')
+    __slots__ = ("path", "_local", "_handles", "_listener")
 
     def __init__(self, listener, path, handle):
         assert listener is not None
@@ -61,7 +61,7 @@ class _ThreadedHandle:
     def _open(self):
         handle = _base.open_path(self.path)
         if handle is None:
-            logger.error('%r failed to open new handle', self)
+            logger.error("%r failed to open new handle", self)
         else:
             # if logger.isEnabledFor(logging.DEBUG):
             #     logger.debug("%r opened new handle %d", self, handle)
@@ -74,7 +74,7 @@ class _ThreadedHandle:
             self._local = None
             handles, self._handles = self._handles, []
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('%r closing %s', self, handles)
+                logger.debug("%r closing %s", self, handles)
             for h in handles:
                 _base.close(h)
 
@@ -105,7 +105,7 @@ class _ThreadedHandle:
             return str(int(self))
 
     def __repr__(self):
-        return '<_ThreadedHandle(%s)>' % self.path
+        return "<_ThreadedHandle(%s)>" % self.path
 
     def __bool__(self):
         return bool(self._local)
@@ -123,7 +123,7 @@ class _ThreadedHandle:
 # a while for it to acknowledge it.
 # Forcibly closing the file handle on another thread does _not_ interrupt the
 # read on Linux systems.
-_EVENT_READ_TIMEOUT = 1.  # in seconds
+_EVENT_READ_TIMEOUT = 1.0  # in seconds
 
 # After this many reads that did not produce a packet, call the tick() method.
 # This only happens if tick_period is enabled (>0) for the Listener instance.
@@ -138,10 +138,10 @@ class EventsListener(_threading.Thread):
 
     def __init__(self, receiver, notifications_callback):
         try:
-            path_name = receiver.path.split('/')[2]
+            path_name = receiver.path.split("/")[2]
         except IndexError:
             path_name = receiver.path
-        super().__init__(name=self.__class__.__name__ + ':' + path_name)
+        super().__init__(name=self.__class__.__name__ + ":" + path_name)
         self.daemon = True
         self._active = False
         self.receiver = receiver
@@ -153,19 +153,19 @@ class EventsListener(_threading.Thread):
         # replace the handle with a threaded one
         self.receiver.handle = _ThreadedHandle(self, self.receiver.path, self.receiver.handle)
         if logger.isEnabledFor(logging.INFO):
-            logger.info('started with %s (%d)', self.receiver, int(self.receiver.handle))
+            logger.info("started with %s (%d)", self.receiver, int(self.receiver.handle))
         self.has_started()
 
         if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
             if self.receiver.ping():
-                self.receiver.status.changed(True, reason='initialization')
+                self.receiver.status.changed(True, reason="initialization")
 
         while self._active:
             if self._queued_notifications.empty():
                 try:
                     n = _base.read(self.receiver.handle, _EVENT_READ_TIMEOUT)
                 except exceptions.NoReceiver:
-                    logger.warning('%s disconnected', self.receiver.name)
+                    logger.warning("%s disconnected", self.receiver.name)
                     self.receiver.close()
                     break
                 if n:
@@ -176,7 +176,7 @@ class EventsListener(_threading.Thread):
                 try:
                     self._notifications_callback(n)
                 except Exception:
-                    logger.exception('processing %s', n)
+                    logger.exception("processing %s", n)
 
         del self._queued_notifications
         self.has_stopped()

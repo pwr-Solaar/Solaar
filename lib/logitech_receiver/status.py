@@ -58,7 +58,7 @@ def attach_to(device, changed_callback):
     assert device
     assert changed_callback
 
-    if not hasattr(device, 'status') or device.status is None:
+    if not hasattr(device, "status") or device.status is None:
         if not device.isDevice:
             device.status = ReceiverStatus(device, changed_callback)
         else:
@@ -97,10 +97,9 @@ class ReceiverStatus(dict):
     def to_string(self):
         count = len(self._receiver)
         return (
-            _('No paired devices.')
-            if count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', count) % {
-                'count': count
-            }
+            _("No paired devices.")
+            if count == 0
+            else ngettext("%(count)s paired device.", "%(count)s paired devices.", count) % {"count": count}
         )
 
     def __str__(self):
@@ -129,21 +128,20 @@ class DeviceStatus(dict):
         self._active = None  # is the device active?
 
     def to_string(self):
-
-        status = ''
+        status = ""
         battery_level = self.get(KEYS.BATTERY_LEVEL)
         if battery_level is not None:
             if isinstance(battery_level, _NamedInt):
-                status = _('Battery: %(level)s') % {'level': _(str(battery_level))}
+                status = _("Battery: %(level)s") % {"level": _(str(battery_level))}
             else:
-                status = _('Battery: %(percent)d%%') % {'percent': battery_level}
+                status = _("Battery: %(percent)d%%") % {"percent": battery_level}
             battery_status = self.get(KEYS.BATTERY_STATUS)
             if battery_status is not None:
-                status += ' (%s)' % _(str(battery_status))
+                status += " (%s)" % _(str(battery_status))
         return status
 
     def __repr__(self):
-        return '{' + ', '.join('\'%s\': %r' % (k, v) for k, v in self.items()) + '}'
+        return "{" + ", ".join("'%s': %r" % (k, v) for k, v in self.items()) + "}"
 
     def __bool__(self):
         return bool(self._active)
@@ -152,7 +150,7 @@ class DeviceStatus(dict):
 
     def set_battery_info(self, level, nextLevel, status, voltage):
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: battery %s, %s', self._device, level, status)
+            logger.debug("%s: battery %s, %s", self._device, level, status)
 
         if level is None:
             # Some notifications may come with no battery level info, just
@@ -176,8 +174,10 @@ class DeviceStatus(dict):
         old_voltage, self[KEYS.BATTERY_VOLTAGE] = self.get(KEYS.BATTERY_VOLTAGE), voltage
 
         charging = status in (
-            _hidpp20_constants.BATTERY_STATUS.recharging, _hidpp20_constants.BATTERY_STATUS.almost_full,
-            _hidpp20_constants.BATTERY_STATUS.full, _hidpp20_constants.BATTERY_STATUS.slow_recharge
+            _hidpp20_constants.BATTERY_STATUS.recharging,
+            _hidpp20_constants.BATTERY_STATUS.almost_full,
+            _hidpp20_constants.BATTERY_STATUS.full,
+            _hidpp20_constants.BATTERY_STATUS.slow_recharge,
         )
         old_charging, self[KEYS.BATTERY_CHARGING] = self.get(KEYS.BATTERY_CHARGING), charging
 
@@ -187,15 +187,15 @@ class DeviceStatus(dict):
         if _hidpp20_constants.BATTERY_OK(status) and (level is None or level > _BATTERY_ATTENTION_LEVEL):
             self[KEYS.ERROR] = None
         else:
-            logger.warning('%s: battery %d%%, ALERT %s', self._device, level, status)
+            logger.warning("%s: battery %d%%, ALERT %s", self._device, level, status)
             if self.get(KEYS.ERROR) != status:
                 self[KEYS.ERROR] = status
                 # only show the notification once
                 alert = ALERT.NOTIFICATION | ALERT.ATTENTION
             if isinstance(level, _NamedInt):
-                reason = _('Battery: %(level)s (%(status)s)') % {'level': _(level), 'status': _(status)}
+                reason = _("Battery: %(level)s (%(status)s)") % {"level": _(level), "status": _(status)}
             else:
-                reason = _('Battery: %(percent)d%% (%(status)s)') % {'percent': level, 'status': status.name}
+                reason = _("Battery: %(percent)d%% (%(status)s)") % {"percent": level, "status": status.name}
 
         if changed or reason or not self._active:  # a battery response means device is active
             # update the leds on the device, if any
@@ -241,11 +241,14 @@ class DeviceStatus(dict):
                 # Push settings for new devices (was_active is None),
                 # when devices request software reconfiguration
                 # and when devices become active if they don't have wireless device status feature,
-                if was_active is None or push or not was_active and (
-                    not d.features or _hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in d.features
+                if (
+                    was_active is None
+                    or push
+                    or not was_active
+                    and (not d.features or _hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in d.features)
                 ):
                     if logger.isEnabledFor(logging.INFO):
-                        logger.info('%s pushing device settings %s', d, d.settings)
+                        logger.info("%s pushing device settings %s", d, d.settings)
                     _settings.apply_all_settings(d)
 
             else:

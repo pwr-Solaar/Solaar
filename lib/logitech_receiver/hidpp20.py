@@ -37,9 +37,8 @@ from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
-from .hidpp20_constants import BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE
+from .hidpp20_constants import BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE, GESTURE
 from .hidpp20_constants import FIRMWARE_KIND as _FIRMWARE_KIND
-from .hidpp20_constants import GESTURE
 from .i18n import _
 
 logger = logging.getLogger(__name__)
@@ -57,7 +56,6 @@ _yaml.add_representer(int, hexint_presenter)
 
 
 class FeaturesArray(dict):
-
     def __init__(self, device):
         assert device is not None
         self.supported = True  # Actually don't know whether it is supported yet
@@ -76,13 +74,13 @@ class FeaturesArray(dict):
             return False
         if self.count > 0:
             return True
-        reply = self.device.request(0x0000, _pack('!H', FEATURE.FEATURE_SET))
+        reply = self.device.request(0x0000, _pack("!H", FEATURE.FEATURE_SET))
         if reply is not None:
             fs_index = reply[0]
             if fs_index:
                 count = self.device.request(fs_index << 8)
                 if count is None:
-                    logger.warn('FEATURE_SET found, but failed to read features count')
+                    logger.warn("FEATURE_SET found, but failed to read features count")
                     return False
                 else:
                     self.count = count[0] + 1  # ROOT feature not included in count
@@ -100,7 +98,7 @@ class FeaturesArray(dict):
         elif self._check():
             response = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
             if response:
-                feature = FEATURE[_unpack('!H', response[:2])[0]]
+                feature = FEATURE[_unpack("!H", response[:2])[0]]
                 self[feature] = index
                 self.version[feature] = response[3]
                 return feature
@@ -124,7 +122,7 @@ class FeaturesArray(dict):
         if index is not None:
             return index
         elif self._check():
-            response = self.device.request(0x0000, _pack('!H', feature))
+            response = self.device.request(0x0000, _pack("!H", feature))
             if response:
                 index = response[0]
                 self[feature] = index if index else False
@@ -261,26 +259,26 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
     def _getCidReporting(self):
         try:
-            mapped_data = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack('!H', self._cid)))
+            mapped_data = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack("!H", self._cid)))
             if mapped_data:
-                cid, mapping_flags_1, mapped_to = _unpack('!HBH', mapped_data[:5])
+                cid, mapping_flags_1, mapped_to = _unpack("!HBH", mapped_data[:5])
                 if cid != self._cid and logger.isEnabledFor(logging.WARNING):
                     logger.warn(
-                        f'REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied ' +
-                        f'with a different control ID ({cid}) than requested ({self._cid}).'
+                        f"REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied "
+                        + f"with a different control ID ({cid}) than requested ({self._cid})."
                     )
                 self._mapped_to = mapped_to if mapped_to != 0 else self._cid
                 if len(mapped_data) > 5:
-                    mapping_flags_2, = _unpack('!B', mapped_data[5:6])
+                    (mapping_flags_2,) = _unpack("!B", mapped_data[5:6])
                 else:
                     mapping_flags_2 = 0
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
-                raise exceptions.FeatureCallError(msg='No reply from device.')
+                raise exceptions.FeatureCallError(msg="No reply from device.")
         except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
                 logger.warn(
-                    f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
+                    f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults"
                 )
             # Clear flags and set mapping target to self
             self._mapping_flags = 0
@@ -306,15 +304,15 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
             special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
             special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
-            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY
+            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY,
         }
 
         bfield = 0
         for f, v in flags.items():
             if v and FLAG_TO_CAPABILITY[f] not in self.flags:
                 raise exceptions.FeatureNotSupported(
-                    msg=f'Tried to set mapping flag "{f}" on control "{self.key}" ' +
-                    f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
+                    msg=f'Tried to set mapping flag "{f}" on control "{self.key}" '
+                    + f'which does not support "{FLAG_TO_CAPABILITY[f]}" on device {self._device}.'
                 )
             bfield |= int(f) if v else 0
             bfield |= int(f) << 1  # The 'Xvalid' bit
@@ -326,22 +324,21 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
         if remap != 0 and remap not in self.remappable_to:
             raise exceptions.FeatureNotSupported(
-                msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to ' +
-                f'on device {self._device}.'
+                msg=f'Tried to remap control "{self.key}" to a control ID {remap} which it is not remappable to '
+                + f"on device {self._device}."
             )
         if remap != 0:  # update mapping if changing (even if not already read)
             self._mapped_to = remap
 
-        pkt = tuple(_pack('!HBH', self._cid, bfield & 0xff, remap))
+        pkt = tuple(_pack("!HBH", self._cid, bfield & 0xFF, remap))
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
         ret = feature_request(self._device, FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if ret is None or _unpack('!BBBBB', ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
+        if ret is None or _unpack("!BBBBB", ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
-class PersistentRemappableAction():
-
+class PersistentRemappableAction:
     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
         self._device = device
         self.index = index
@@ -364,25 +361,25 @@ class PersistentRemappableAction():
         if self.actionId == special_keys.ACTIONID.Empty:
             return None
         elif self.actionId == special_keys.ACTIONID.Key:
-            return 'Key: ' + str(self.modifiers) + str(self.remapped)
+            return "Key: " + str(self.modifiers) + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Mouse:
-            return 'Mouse Button: ' + str(self.remapped)
+            return "Mouse Button: " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Xdisp:
-            return 'X Displacement ' + str(self.remapped)
+            return "X Displacement " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Ydisp:
-            return 'Y Displacement ' + str(self.remapped)
+            return "Y Displacement " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Vscroll:
-            return 'Vertical Scroll ' + str(self.remapped)
+            return "Vertical Scroll " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Hscroll:
-            return 'Horizontal Scroll: ' + str(self.remapped)
+            return "Horizontal Scroll: " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Consumer:
-            return 'Consumer: ' + str(self.remapped)
+            return "Consumer: " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return 'Internal Action ' + str(self.remapped)
+            return "Internal Action " + str(self.remapped)
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return 'Power ' + str(self.remapped)
+            return "Power " + str(self.remapped)
         else:
-            return 'Unknown'
+            return "Unknown"
 
     @property
     def modifiers(self):
@@ -399,7 +396,7 @@ class PersistentRemappableAction():
             self._device.remap_keys._query_key(self.index)
             return self._device.remap_keys.keys[self.index].data_bytes
         else:
-            self._actionId, self._code, self._modifierMask = _unpack('!BHB', data_bytes)
+            self._actionId, self._code, self._modifierMask = _unpack("!BHB", data_bytes)
             self.cidStatus = 0x01
             feature_request(self._device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
             return True
@@ -418,7 +415,7 @@ class KeysArray:
             self.keyversion = FEATURE.REPROG_CONTROLS_V2
         else:
             if logger.isEnabledFor(logging.ERROR):
-                logger.error(f'Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.')
+                logger.error(f"Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.")
             self.keyversion = None
         self.keys = [None] * count
 
@@ -431,13 +428,13 @@ class KeysArray:
         if self.keyversion == FEATURE.REPROG_CONTROLS_V2:
             keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V2, 0x10, index)
             if keydata:
-                cid, tid, flags = _unpack('!HHB', keydata[:5])
+                cid, tid, flags = _unpack("!HHB", keydata[:5])
                 self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
                 self.cid_to_tid[cid] = tid
         elif self.keyversion == FEATURE.REPROG_CONTROLS_V4:
             keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
             if keydata:
-                cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
+                cid, tid, flags1, pos, group, gmask, flags2 = _unpack("!HHBBBBB", keydata[:9])
                 flags = flags1 | (flags2 << 8)
                 self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
                 self.cid_to_tid[cid] = tid
@@ -450,7 +447,7 @@ class KeysArray:
         """The retrieval of key information is lazy, but for certain functionality
         we need to know all keys. This function makes sure that's the case."""
         with self.lock:  # don't want two threads doing this
-            for (i, k) in enumerate(self.keys):
+            for i, k in enumerate(self.keys):
                 if k is None:
                     self._query_key(i)
 
@@ -483,7 +480,6 @@ class KeysArray:
 
 
 class KeysArrayV1(KeysArray):
-
     def __init__(self, device, count, version=1):
         super().__init__(device, count, version)
         """The mapping from Control IDs to their native Task IDs.
@@ -503,7 +499,7 @@ class KeysArrayV1(KeysArray):
             raise IndexError(index)
         keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS, 0x10, index)
         if keydata:
-            cid, tid, flags = _unpack('!HHB', keydata[:5])
+            cid, tid, flags = _unpack("!HHB", keydata[:5])
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
             self.cid_to_tid[cid] = tid
         elif logger.isEnabledFor(logging.WARNING):
@@ -511,7 +507,6 @@ class KeysArrayV1(KeysArray):
 
 
 class KeysArrayV4(KeysArrayV1):
-
     def __init__(self, device, count):
         super().__init__(device, count, 4)
 
@@ -520,7 +515,7 @@ class KeysArrayV4(KeysArrayV1):
             raise IndexError(index)
         keydata = feature_request(self.device, FEATURE.REPROG_CONTROLS_V4, 0x10, index)
         if keydata:
-            cid, tid, flags1, pos, group, gmask, flags2 = _unpack('!HHBBBBB', keydata[:9])
+            cid, tid, flags1, pos, group, gmask, flags2 = _unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
             self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
             self.cid_to_tid[cid] = tid
@@ -532,7 +527,6 @@ class KeysArrayV4(KeysArrayV1):
 
 # we are only interested in the current host, so use 0xFF for the host throughout
 class KeysArrayPersistent(KeysArray):
-
     def __init__(self, device, count):
         super().__init__(device, count, 5)
         self._capabilities = None
@@ -541,22 +535,22 @@ class KeysArrayPersistent(KeysArray):
     def capabilities(self):
         if self._capabilities is None and self.device.online:
             capabilities = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x00)
-            assert capabilities, 'Oops, persistent remappable key capabilities cannot be retrieved!'
-            self._capabilities = _unpack('!H', capabilities[:2])[0]  # flags saying what the mappings are possible
+            assert capabilities, "Oops, persistent remappable key capabilities cannot be retrieved!"
+            self._capabilities = _unpack("!H", capabilities[:2])[0]  # flags saying what the mappings are possible
         return self._capabilities
 
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
-        keydata = feature_request(self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xff)
+        keydata = feature_request(self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
-            key = _unpack('!H', keydata[:2])[0]
+            key = _unpack("!H", keydata[:2])[0]
             try:
                 mapped_data = feature_request(
-                    self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xff00, key & 0xff, 0xff
+                    self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
                 )
                 if mapped_data:
-                    _ignore, _ignore, actionId, remapped, modifiers, status = _unpack('!HBBHBB', mapped_data[:8])
+                    _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
             except Exception:
                 actionId = remapped = modifiers = status = 0
             actionId = special_keys.ACTIONID[actionId]
@@ -582,18 +576,18 @@ PARAM = _NamedInts(
     RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
     ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
 )
-PARAM._fallback = lambda x: 'unknown:%04X' % x
+PARAM._fallback = lambda x: "unknown:%04X" % x
 
 
 class SubParam:
-    __slots__ = ('id', 'length', 'minimum', 'maximum', 'widget')
+    __slots__ = ("id", "length", "minimum", "maximum", "widget")
 
     def __init__(self, id, length, minimum=None, maximum=None, widget=None):
         self.id = id
         self.length = length
         self.minimum = minimum if minimum is not None else 0
         self.maximum = maximum if maximum is not None else ((1 << 8 * length) - 1)
-        self.widget = widget if widget is not None else 'Scale'
+        self.widget = widget if widget is not None else "Scale"
 
     def __str__(self):
         return self.id
@@ -602,20 +596,21 @@ class SubParam:
         return self.id
 
 
-SUB_PARAM = {   # (byte count, minimum, maximum)
-    PARAM['ExtraCapabilities']: None,  # ignore
-    PARAM['PixelZone']: (  # TODO: replace min and max with the correct values
-        SubParam('left', 2, 0x0000, 0xFFFF, 'SpinButton'),
-        SubParam('bottom', 2, 0x0000, 0xFFFF, 'SpinButton'),
-        SubParam('width', 2, 0x0000, 0xFFFF, 'SpinButton'),
-        SubParam('height', 2, 0x0000, 0xFFFF, 'SpinButton')),
-    PARAM['RatioZone']: (  # TODO: replace min and max with the correct values
-        SubParam('left', 1, 0x00, 0xFF, 'SpinButton'),
-        SubParam('bottom', 1, 0x00, 0xFF, 'SpinButton'),
-        SubParam('width', 1, 0x00, 0xFF, 'SpinButton'),
-        SubParam('height', 1, 0x00, 0xFF, 'SpinButton')),
-    PARAM['ScaleFactor']: (
-        SubParam('scale', 2, 0x002E, 0x01FF, 'Scale'), )
+SUB_PARAM = {  # (byte count, minimum, maximum)
+    PARAM["ExtraCapabilities"]: None,  # ignore
+    PARAM["PixelZone"]: (  # TODO: replace min and max with the correct values
+        SubParam("left", 2, 0x0000, 0xFFFF, "SpinButton"),
+        SubParam("bottom", 2, 0x0000, 0xFFFF, "SpinButton"),
+        SubParam("width", 2, 0x0000, 0xFFFF, "SpinButton"),
+        SubParam("height", 2, 0x0000, 0xFFFF, "SpinButton"),
+    ),
+    PARAM["RatioZone"]: (  # TODO: replace min and max with the correct values
+        SubParam("left", 1, 0x00, 0xFF, "SpinButton"),
+        SubParam("bottom", 1, 0x00, 0xFF, "SpinButton"),
+        SubParam("width", 1, 0x00, 0xFF, "SpinButton"),
+        SubParam("height", 1, 0x00, 0xFF, "SpinButton"),
+    ),
+    PARAM["ScaleFactor"]: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
 }
 
 # Spec Ids for feature GESTURE_2
@@ -629,9 +624,9 @@ SPEC = _NamedInts(
     finger_width_and_height=7,
     finger_major_minor_axis=8,
     finger_force=9,
-    zone=10
+    zone=10,
 )
-SPEC._fallback = lambda x: 'unknown:%04X' % x
+SPEC._fallback = lambda x: "unknown:%04X" % x
 
 # Action Ids for feature GESTURE_2
 ACTION_ID = _NamedInts(
@@ -646,13 +641,12 @@ ACTION_ID = _NamedInts(
     SecondaryDrag=9,
     Zoom=10,
     ScrollHorizontalOnly=11,
-    ScrollVerticalOnly=12
+    ScrollVerticalOnly=12,
 )
-ACTION_ID._fallback = lambda x: 'unknown:%04X' % x
+ACTION_ID._fallback = lambda x: "unknown:%04X" % x
 
 
 class Gesture:
-
     def __init__(self, device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
@@ -719,7 +713,7 @@ class Gesture:
         return self.id
 
     def __repr__(self):
-        return f'<Gesture {self.gesture} index={self.index} diversion_index={self.diversion_index}>'
+        return f"<Gesture {self.gesture} index={self.index} diversion_index={self.diversion_index}>"
 
     # allow a gesture to be used as a settings reader/writer to enable and disable the gesture
     read = enabled
@@ -751,7 +745,7 @@ class Param:
     def read(self):  # returns the bytes for the parameter
         result = feature_request(self._device, FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
         if result:
-            self._value = _bytes2int(result[:self.size])
+            self._value = _bytes2int(result[: self.size])
             return self._value
 
     @property
@@ -763,7 +757,7 @@ class Param:
     def _read_default(self):
         result = feature_request(self._device, FEATURE.GESTURE_2, 0x60, self.index, 0xFF)
         if result:
-            self._default_value = _bytes2int(result[:self.size])
+            self._default_value = _bytes2int(result[: self.size])
             return self._default_value
 
     def write(self, bytes):
@@ -778,7 +772,6 @@ class Param:
 
 
 class Spec:
-
     def __init__(self, device, low, high):
         self._device = device
         self.id = low
@@ -797,12 +790,12 @@ class Spec:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
         except exceptions.FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
             if logger.isEnabledFor(logging.WARNING):
-                logger.warn(f'Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None')
+                logger.warn(f"Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None")
             return None
-        return _bytes2int(value[:self.byte_count])
+        return _bytes2int(value[: self.byte_count])
 
     def __repr__(self):
-        return f'[{self.spec}={self.value}]'
+        return f"[{self.spec}={self.value}]"
 
 
 class Gestures:
@@ -839,12 +832,12 @@ class Gestures:
                     self.params[param.param] = param
                 elif field_high == 0x04:
                     if field_low != 0x00:
-                        logger.error(f'Unimplemented GESTURE_2 grouping {field_low} {field_high} found.')
+                        logger.error(f"Unimplemented GESTURE_2 grouping {field_low} {field_high} found.")
                 elif field_high & 0xF0 == 0x40:
                     spec = Spec(device, field_low, field_high)
                     self.specs[spec.spec] = spec
                 else:
-                    logger.warn(f'Unimplemented GESTURE_2 field {field_low} {field_high} found.')
+                    logger.warn(f"Unimplemented GESTURE_2 field {field_low} {field_high} found.")
                 index += 1
 
     def gesture(self, gesture):
@@ -880,10 +873,10 @@ class Backlight:
     def __init__(self, device):
         response = device.feature_request(FEATURE.BACKLIGHT2, 0x00)
         if not response:
-            raise exceptions.FeatureCallError(msg='No reply from device.')
+            raise exceptions.FeatureCallError(msg="No reply from device.")
         self.device = device
         self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
-            '<BBBHBHHH', response[:12]
+            "<BBBHBHHH", response[:12]
         )
         self.auto_supported = supported & 0x08
         self.temp_supported = supported & 0x10
@@ -893,24 +886,24 @@ class Backlight:
     def write(self):
         self.options = (self.options & 0x07) | (self.mode << 3)
         level = self.level if self.mode == 0x3 else 0
-        data_bytes = _pack('<BBBBHHH', self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
+        data_bytes = _pack("<BBBBHHH", self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
         self.device.feature_request(FEATURE.BACKLIGHT2, 0x00)  # for testing - remove later
         self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
 class LEDParam:
-    color = 'color'
-    speed = 'speed'
-    period = 'period'
-    intensity = 'intensity'
-    ramp = 'ramp'
-    form = 'form'
+    color = "color"
+    speed = "speed"
+    period = "period"
+    intensity = "intensity"
+    ramp = "ramp"
+    form = "form"
 
 
 LEDRampChoices = _NamedInts(default=0, yes=1, no=2)
 LEDFormChoices = _NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
 LEDParamSize = {LEDParam.color: 3, LEDParam.speed: 1, LEDParam.period: 2,
-                LEDParam.intensity: 1, LEDParam.ramp: 1, LEDParam.form: 1}   # yapf: disable
+                LEDParam.intensity: 1, LEDParam.ramp: 1, LEDParam.form: 1}  # yapf: disable
 LEDEffects = {  # Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
     0x0: [_NamedInt(0x0, _('Disabled')), {}],
     0x1: [_NamedInt(0x1, _('Static')), {LEDParam.color: 0, LEDParam.ramp: 3}],
@@ -921,11 +914,10 @@ LEDEffects = {  # Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not impleme
     0xA: [_NamedInt(0xA, _('Breathe')), {LEDParam.color: 0, LEDParam.period: 3,
                                          LEDParam.form: 5, LEDParam.intensity: 6}],
     0xB: [_NamedInt(0xB, _('Ripple')), {LEDParam.color: 0, LEDParam.period: 4}]
-}   # yapf: disable
+}  # yapf: disable
 
 
 class LEDEffectSetting:  # an effect plus its parameters
-
     def __init__(self, **kwargs):
         self.ID = None
         for key, val in kwargs.items():
@@ -935,22 +927,22 @@ class LEDEffectSetting:  # an effect plus its parameters
     def from_bytes(cls, bytes, options=None):
         ID = next((ze.ID for ze in options if ze.index == bytes[0]), None) if options is not None else bytes[0]
         effect = LEDEffects[ID] if ID in LEDEffects else None
-        args = {'ID': effect[0] if effect else None}
+        args = {"ID": effect[0] if effect else None}
         if effect:
             for p, b in effect[1].items():
-                args[str(p)] = _bytes2int(bytes[1 + b:1 + b + LEDParamSize[p]])
+                args[str(p)] = _bytes2int(bytes[1 + b : 1 + b + LEDParamSize[p]])
         else:
-            args['bytes'] = bytes
+            args["bytes"] = bytes
         return cls(**args)
 
     def to_bytes(self, options=None):
         ID = self.ID
         if ID is None:
-            return self.bytes if hasattr(self, 'bytes') else b'\xff' * 11
+            return self.bytes if hasattr(self, "bytes") else b"\xff" * 11
         else:
             bs = [0] * 10
             for p, b in LEDEffects[ID][1].items():
-                bs[b:b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
+                bs[b : b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
             if options is not None:
                 ID = next((ze.index for ze in options if ze.ID == ID), None)
             result = _int2bytes(ID, 1) + bytes(bs)
@@ -962,46 +954,44 @@ class LEDEffectSetting:  # an effect plus its parameters
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping('!LEDEffectSetting', data.__dict__, flow_style=True)
+        return dumper.represent_mapping("!LEDEffectSetting", data.__dict__, flow_style=True)
 
     def __str__(self):
-        return _yaml.dump(self, width=float('inf')).rstrip('\n')
+        return _yaml.dump(self, width=float("inf")).rstrip("\n")
 
 
-_yaml.SafeLoader.add_constructor('!LEDEffectSetting', LEDEffectSetting.from_yaml)
+_yaml.SafeLoader.add_constructor("!LEDEffectSetting", LEDEffectSetting.from_yaml)
 _yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
 
 
 class LEDEffectInfo:  # an effect that a zone can do
-
     def __init__(self, device, zindex, eindex):
         info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x20, zindex, eindex)
-        self.zindex, self.index, self.ID, self.capabilities, self.period = _unpack('!BBHHH', info[0:8])
+        self.zindex, self.index, self.ID, self.capabilities, self.period = _unpack("!BBHHH", info[0:8])
 
     def __str__(self):
-        return f'LEDEffectInfo({self.zindex}, {self.index}, {self.ID}, {self.capabilities: x}, {self.period})'
+        return f"LEDEffectInfo({self.zindex}, {self.index}, {self.ID}, {self.capabilities: x}, {self.period})"
 
 
 LEDZoneLocations = _NamedInts()
-LEDZoneLocations[0x00] = _('Unknown Location')
-LEDZoneLocations[0x01] = _('Primary')
-LEDZoneLocations[0x02] = _('Logo')
-LEDZoneLocations[0x03] = _('Left Side')
-LEDZoneLocations[0x04] = _('Right Side')
-LEDZoneLocations[0x05] = _('Combined')
-LEDZoneLocations[0x06] = _('Primary 1')
-LEDZoneLocations[0x07] = _('Primary 2')
-LEDZoneLocations[0x08] = _('Primary 3')
-LEDZoneLocations[0x09] = _('Primary 4')
-LEDZoneLocations[0x0A] = _('Primary 5')
-LEDZoneLocations[0x0B] = _('Primary 6')
+LEDZoneLocations[0x00] = _("Unknown Location")
+LEDZoneLocations[0x01] = _("Primary")
+LEDZoneLocations[0x02] = _("Logo")
+LEDZoneLocations[0x03] = _("Left Side")
+LEDZoneLocations[0x04] = _("Right Side")
+LEDZoneLocations[0x05] = _("Combined")
+LEDZoneLocations[0x06] = _("Primary 1")
+LEDZoneLocations[0x07] = _("Primary 2")
+LEDZoneLocations[0x08] = _("Primary 3")
+LEDZoneLocations[0x09] = _("Primary 4")
+LEDZoneLocations[0x0A] = _("Primary 5")
+LEDZoneLocations[0x0B] = _("Primary 6")
 
 
 class LEDZoneInfo:  # effects that a zone can do
-
     def __init__(self, device, index):
         info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x10, index)
-        self.index, self.location, self.count = _unpack('!BHB', info[0:4])
+        self.index, self.location, self.count = _unpack("!BHB", info[0:4])
         self.location = LEDZoneLocations[self.location] if LEDZoneLocations[self.location] else self.location
         self.effects = []
         for i in range(0, self.count):
@@ -1015,15 +1005,14 @@ class LEDZoneInfo:  # effects that a zone can do
         return None
 
     def __str__(self):
-        return f'LEDZoneInfo({self.index}, {self.location}, {[str(z) for z in self.effects]}'
+        return f"LEDZoneInfo({self.index}, {self.location}, {[str(z) for z in self.effects]}"
 
 
 class LEDEffectsInfo:  # effects that the LEDs can do
-
     def __init__(self, device):
         info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
         self.device = device
-        self.count, _, capabilities = _unpack('!BHH', info[0:5])
+        self.count, _, capabilities = _unpack("!BHH", info[0:5])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
@@ -1033,8 +1022,8 @@ class LEDEffectsInfo:  # effects that the LEDs can do
         return self.zones[index].to_command(setting)
 
     def __str__(self):
-        zones = '\n'.join([str(z) for z in self.zones])
-        return f'LEDEffectsInfo({self.device}, readable {self.readable}\n{zones})'
+        zones = "\n".join([str(z) for z in self.zones])
+        return f"LEDEffectsInfo({self.device}, readable {self.readable}\n{zones})"
 
 
 ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
@@ -1057,7 +1046,7 @@ ButtonFunctions = _NamedInts(
     Mode_Switch=0xE,
     Host_Button=0xF,
     Scroll_Down=0x10,
-    Scroll_Up=0x11
+    Scroll_Up=0x11,
 )
 ButtonButtons = special_keys.MOUSE_BUTTONS
 ButtonModifiers = special_keys.modifiers
@@ -1080,7 +1069,7 @@ class Button:
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping('!Button', data.__dict__, flow_style=True)
+        return dumper.represent_mapping("!Button", data.__dict__, flow_style=True)
 
     @classmethod
     def from_bytes(cls, bytes):
@@ -1126,20 +1115,21 @@ class Button:
             elif self.type == ButtonMappingTypes.Consumer_Key:
                 bytes += _int2bytes(self.value, 2)
             elif self.type == ButtonMappingTypes.No_Action:
-                bytes += b'\xff\xff'
+                bytes += b"\xff\xff"
         elif self.behavior == ButtonBehaviors.Function:
-            bytes += _int2bytes(self.value, 1) + b'\xff' + (_int2bytes(self.data, 1) if self.data else b'\x00')
+            bytes += _int2bytes(self.value, 1) + b"\xff" + (_int2bytes(self.data, 1) if self.data else b"\x00")
         else:
-            bytes = self.bytes if self.bytes else b'\xff\xff\xff\xff'
+            bytes = self.bytes if self.bytes else b"\xff\xff\xff\xff"
         return bytes
 
     def __repr__(self):
-        return '%s{%s}' % (
-            self.__class__.__name__, ', '.join([str(key) + ':' + str(val) for key, val in self.__dict__.items()])
+        return "%s{%s}" % (
+            self.__class__.__name__,
+            ", ".join([str(key) + ":" + str(val) for key, val in self.__dict__.items()]),
         )
 
 
-_yaml.SafeLoader.add_constructor('!Button', Button.from_yaml)
+_yaml.SafeLoader.add_constructor("!Button", Button.from_yaml)
 _yaml.add_representer(Button, Button.to_yaml)
 
 
@@ -1157,7 +1147,7 @@ class OnboardProfile:
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping('!OnboardProfile', data.__dict__)
+        return dumper.represent_mapping("!OnboardProfile", data.__dict__)
 
     @classmethod
     def from_bytes(cls, sector, enabled, buttons, gbuttons, bytes):
@@ -1167,20 +1157,20 @@ class OnboardProfile:
             report_rate=bytes[0],
             resolution_default_index=bytes[1],
             resolution_shift_index=bytes[2],
-            resolutions=[_unpack('<H', bytes[i * 2 + 3:i * 2 + 5])[0] for i in range(0, 5)],
+            resolutions=[_unpack("<H", bytes[i * 2 + 3 : i * 2 + 5])[0] for i in range(0, 5)],
             red=bytes[13],
             green=bytes[14],
             blue=bytes[15],
             power_mode=bytes[16],
             angle_snap=bytes[17],
-            write_count=_unpack('<H', bytes[18:20])[0],
+            write_count=_unpack("<H", bytes[18:20])[0],
             reserved=bytes[20:28],
-            ps_timeout=_unpack('<H', bytes[28:30])[0],
-            po_timeout=_unpack('<H', bytes[30:32])[0],
-            buttons=[Button.from_bytes(bytes[32 + i * 4:32 + i * 4 + 4]) for i in range(0, buttons)],
-            gbuttons=[Button.from_bytes(bytes[96 + i * 4:96 + i * 4 + 4]) for i in range(0, gbuttons)],
-            name=bytes[160:208].decode('utf-16le').rstrip('\x00').rstrip('\uFFFF'),
-            lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11:219 + i * 11]) for i in range(0, 4)]
+            ps_timeout=_unpack("<H", bytes[28:30])[0],
+            po_timeout=_unpack("<H", bytes[30:32])[0],
+            buttons=[Button.from_bytes(bytes[32 + i * 4 : 32 + i * 4 + 4]) for i in range(0, buttons)],
+            gbuttons=[Button.from_bytes(bytes[96 + i * 4 : 96 + i * 4 + 4]) for i in range(0, gbuttons)],
+            name=bytes[160:208].decode("utf-16le").rstrip("\x00").rstrip("\uFFFF"),
+            lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11 : 219 + i * 11]) for i in range(0, 4)],
         )
 
     @classmethod
@@ -1191,42 +1181,42 @@ class OnboardProfile:
     def to_bytes(self, length):
         bytes = _int2bytes(self.report_rate, 1)
         bytes += _int2bytes(self.resolution_default_index, 1) + _int2bytes(self.resolution_shift_index, 1)
-        bytes += b''.join([self.resolutions[i].to_bytes(2, 'little') for i in range(0, 5)])
+        bytes += b"".join([self.resolutions[i].to_bytes(2, "little") for i in range(0, 5)])
         bytes += _int2bytes(self.red, 1) + _int2bytes(self.green, 1) + _int2bytes(self.blue, 1)
         bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1)
-        bytes += self.write_count.to_bytes(2, 'little') + self.reserved
-        bytes += self.ps_timeout.to_bytes(2, 'little') + self.po_timeout.to_bytes(2, 'little')
+        bytes += self.write_count.to_bytes(2, "little") + self.reserved
+        bytes += self.ps_timeout.to_bytes(2, "little") + self.po_timeout.to_bytes(2, "little")
         for i in range(0, 16):
-            bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b'\xff\xff\xff\xff'
+            bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b"\xff\xff\xff\xff"
         for i in range(0, 16):
-            bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b'\xff\xff\xff\xff'
+            bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b"\xff\xff\xff\xff"
         if self.enabled:
-            bytes += self.name[0:24].ljust(24, '\x00').encode('utf-16le')
+            bytes += self.name[0:24].ljust(24, "\x00").encode("utf-16le")
         else:
-            bytes += b'\xff' * 48
+            bytes += b"\xff" * 48
         for i in range(0, 4):
             bytes += self.lighting[i].to_bytes()
         while len(bytes) < length - 2:
-            bytes += b'\xff'
+            bytes += b"\xff"
         bytes += _int2bytes(_crc16(bytes), 2)
         return bytes
 
     def dump(self):
-        print(f'     Onboard Profile: {self.name}')
-        print(f'       Report Rate {self.report_rate} ms')
-        print(f'       DPI Resolutions {self.resolutions}')
-        print(f'       Default Resolution Index {self.res_index}, Shift Resolution Index {self.res_shift_index}')
-        print(f'       Colors {self.red} {self.green} {self.blue}')
-        print(f'       Power {self.power_mode}, Angle Snapping {self.angle_snap}')
+        print(f"     Onboard Profile: {self.name}")
+        print(f"       Report Rate {self.report_rate} ms")
+        print(f"       DPI Resolutions {self.resolutions}")
+        print(f"       Default Resolution Index {self.res_index}, Shift Resolution Index {self.res_shift_index}")
+        print(f"       Colors {self.red} {self.green} {self.blue}")
+        print(f"       Power {self.power_mode}, Angle Snapping {self.angle_snap}")
         for i in range(0, len(self.buttons)):
             if self.buttons[i].behavior is not None:
-                print('       BUTTON', i + 1, self.buttons[i])
+                print("       BUTTON", i + 1, self.buttons[i])
         for i in range(0, len(self.gbuttons)):
             if self.gbuttons[i].behavior is not None:
-                print('       G-BUTTON', i + 1, self.gbuttons[i])
+                print("       G-BUTTON", i + 1, self.gbuttons[i])
 
 
-_yaml.SafeLoader.add_constructor('!OnboardProfile', OnboardProfile.from_yaml)
+_yaml.SafeLoader.add_constructor("!OnboardProfile", OnboardProfile.from_yaml)
 _yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
 
 OnboardProfilesVersion = 3
@@ -1247,7 +1237,7 @@ class OnboardProfiles:
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping('!OnboardProfiles', data.__dict__)
+        return dumper.represent_mapping("!OnboardProfiles", data.__dict__)
 
     @classmethod
     def get_profile_headers(cls, device):
@@ -1255,11 +1245,11 @@ class OnboardProfiles:
         headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
-        if chunk[0:4] == b'\x00\x00\x00\x00':  # look in ROM instead
+        if chunk[0:4] == b"\x00\x00\x00\x00":  # look in ROM instead
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
             s = 0x01
-        while chunk[0:2] != b'\xff\xff':
-            sector, enabled = _unpack('!HB', chunk[0:3])
+        while chunk[0:2] != b"\xff\xff":
+            sector, enabled = _unpack("!HB", chunk[0:3])
             headers.append((sector, enabled))
             i += 1
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
@@ -1270,10 +1260,10 @@ class OnboardProfiles:
         if not device.online:  # wake the device up if necessary
             device.ping()
         response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
-        memory, profile, _macro = _unpack('!BBB', response[0:3])
+        memory, profile, _macro = _unpack("!BBB", response[0:3])
         if memory != 0x01 or profile > 0x04:
             return
-        count, oob, buttons, sectors, size, shift = _unpack('!BBBBHB', response[3:10])
+        count, oob, buttons, sectors, size, shift = _unpack("!BBBBHB", response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
         headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
@@ -1289,29 +1279,29 @@ class OnboardProfiles:
             gbuttons=gbuttons,
             sectors=sectors,
             size=size,
-            profiles=profiles
+            profiles=profiles,
         )
 
     def to_bytes(self):
-        bytes = b''
+        bytes = b""
         for i in range(1, len(self.profiles) + 1):
-            bytes += _int2bytes(self.profiles[i].sector, 2) + _int2bytes(self.profiles[i].enabled, 1) + b'\x00'
-        bytes += b'\xff\xff\x00\x00'  # marker after last profile
+            bytes += _int2bytes(self.profiles[i].sector, 2) + _int2bytes(self.profiles[i].enabled, 1) + b"\x00"
+        bytes += b"\xff\xff\x00\x00"  # marker after last profile
         while len(bytes) < self.size - 2:  # leave room for CRC
-            bytes += b'\xff'
+            bytes += b"\xff"
         bytes += _int2bytes(_crc16(bytes), 2)
         return bytes
 
     @classmethod
     def read_sector(cls, dev, sector, s):  # doesn't check for valid sector or size
-        bytes = b''
+        bytes = b""
         o = 0
         while o < s - 15:
             chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, o >> 8, o & 0xFF)
             bytes += chunk
             o += 16
         chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, (s - 16) >> 8, (s - 16) & 0xFF)
-        bytes += chunk[16 + o - s:]  # the last chunk has to be read in an awkward way
+        bytes += chunk[16 + o - s :]  # the last chunk has to be read in an awkward way
         return bytes
 
     @classmethod
@@ -1322,7 +1312,7 @@ class OnboardProfiles:
         device.feature_request(FEATURE.ONBOARD_PROFILES, 0x60, s >> 8, s & 0xFF, 0, 0, len(bs) >> 8, len(bs) & 0xFF)
         o = 0
         while o < len(bs) - 1:
-            device.feature_request(FEATURE.ONBOARD_PROFILES, 0x70, bs[o:o + 16])
+            device.feature_request(FEATURE.ONBOARD_PROFILES, 0x70, bs[o : o + 16])
             o += 16
         device.feature_request(FEATURE.ONBOARD_PROFILES, 0x80)
         return True
@@ -1331,15 +1321,15 @@ class OnboardProfiles:
         try:
             written = 1 if OnboardProfiles.write_sector(device, 0, self.to_bytes()) else 0
         except Exception as e:
-            logger.warn('Exception writing onboard profile control sector')
+            logger.warn("Exception writing onboard profile control sector")
             raise e
         for p in self.profiles.values():
             try:
                 if p.sector >= self.sectors:
-                    raise Exception(f'Sector {p.sector} not a writable sector')
+                    raise Exception(f"Sector {p.sector} not a writable sector")
                 written += 1 if OnboardProfiles.write_sector(device, p.sector, p.to_bytes(self.size)) else 0
             except Exception as e:
-                logger.warn(f'Exception writing onboard profile sector {p.sector}')
+                logger.warn(f"Exception writing onboard profile sector {p.sector}")
                 raise e
         return written
 
@@ -1347,7 +1337,7 @@ class OnboardProfiles:
         print(_yaml.dump(self))
 
 
-_yaml.SafeLoader.add_constructor('!OnboardProfiles', OnboardProfiles.from_yaml)
+_yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
 _yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 
 #
@@ -1377,16 +1367,16 @@ def get_firmware(device):
             if fw_info:
                 level = ord(fw_info[:1]) & 0x0F
                 if level == 0 or level == 1:
-                    name, version_major, version_minor, build = _unpack('!3sBBH', fw_info[1:8])
-                    version = '%02X.%02X' % (version_major, version_minor)
+                    name, version_major, version_minor, build = _unpack("!3sBBH", fw_info[1:8])
+                    version = "%02X.%02X" % (version_major, version_minor)
                     if build:
-                        version += '.B%04X' % build
-                    extras = fw_info[9:].rstrip(b'\x00') or None
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND[level], name.decode('ascii'), version, extras)
+                        version += ".B%04X" % build
+                    extras = fw_info[9:].rstrip(b"\x00") or None
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
                 elif level == _FIRMWARE_KIND.Hardware:
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Hardware, '', str(ord(fw_info[1:2])), None)
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
                 else:
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Other, '', '', None)
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Other, "", "", None)
 
                 fw.append(fw_info)
                 # if logger.isEnabledFor(logging.DEBUG):
@@ -1403,9 +1393,9 @@ def get_ids(device):
         transport_bits = ord(ids[6:7])
         offset = 0
         tid_map = {}
-        for transport, flag in [('btid', 0x1), ('btleid', 0x02), ('wpid', 0x04), ('usbid', 0x08)]:
+        for transport, flag in [("btid", 0x1), ("btleid", 0x02), ("wpid", 0x04), ("usbid", 0x08)]:
             if transport_bits & flag:
-                tid_map[transport] = modelId[offset:offset + 2].hex().upper()
+                tid_map[transport] = modelId[offset : offset + 2].hex().upper()
                 offset = offset + 2
         return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
 
@@ -1435,16 +1425,16 @@ def get_name(device):
     if name_length:
         name_length = ord(name_length[:1])
 
-        name = b''
+        name = b""
         while len(name) < name_length:
             fragment = feature_request(device, FEATURE.DEVICE_NAME, 0x10, len(name))
             if fragment:
-                name += fragment[:name_length - len(name)]
+                name += fragment[: name_length - len(name)]
             else:
-                logger.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                logger.error("failed to read whole name of %s (expected %d chars)", device, name_length)
                 return None
 
-        return name.decode('utf-8')
+        return name.decode("utf-8")
 
 
 def get_friendly_name(device):
@@ -1457,17 +1447,17 @@ def get_friendly_name(device):
     if name_length:
         name_length = ord(name_length[:1])
 
-        name = b''
+        name = b""
         while len(name) < name_length:
             fragment = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME, 0x10, len(name))
             if fragment:
                 initial_null = 0 if fragment[0] else 1  # initial null actually seen on a device
-                name += fragment[initial_null:name_length + initial_null - len(name)]
+                name += fragment[initial_null : name_length + initial_null - len(name)]
             else:
-                logger.error('failed to read whole name of %s (expected %d chars)', device, name_length)
+                logger.error("failed to read whole name of %s (expected %d chars)", device, name_length)
                 return None
 
-        return name.decode('utf-8')
+        return name.decode("utf-8")
 
 
 def get_battery_status(device):
@@ -1477,11 +1467,11 @@ def get_battery_status(device):
 
 
 def decipher_battery_status(report):
-    discharge, next, status = _unpack('!BBB', report[:3])
+    discharge, next, status = _unpack("!BBB", report[:3])
     discharge = None if discharge == 0 else discharge
     status = BATTERY_STATUS[status]
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('battery status %s%% charged, next %s%%, status %s', discharge, next, status)
+        logger.debug("battery status %s%% charged, next %s%%, status %s", discharge, next, status)
     return FEATURE.BATTERY_STATUS, discharge, next, status, None
 
 
@@ -1492,15 +1482,19 @@ def get_battery_unified(device):
 
 
 def decipher_battery_unified(report):
-    discharge, level, status, _ignore = _unpack('!BBBB', report[:4])
+    discharge, level, status, _ignore = _unpack("!BBBB", report[:4])
     status = BATTERY_STATUS[status]
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('battery unified %s%% charged, level %s, charging %s', discharge, level, status)
+        logger.debug("battery unified %s%% charged, level %s, charging %s", discharge, level, status)
     level = (
-        _BATTERY_APPROX.full if level == 8  # full
-        else _BATTERY_APPROX.good if level == 4  # good
-        else _BATTERY_APPROX.low if level == 2  # low
-        else _BATTERY_APPROX.critical if level == 1  # critical
+        _BATTERY_APPROX.full
+        if level == 8  # full
+        else _BATTERY_APPROX.good
+        if level == 4  # good
+        else _BATTERY_APPROX.low
+        if level == 2  # low
+        else _BATTERY_APPROX.critical
+        if level == 1  # critical
         else _BATTERY_APPROX.empty
     )
     return FEATURE.UNIFIED_BATTERY, discharge if discharge else level, None, status, None
@@ -1532,7 +1526,7 @@ def get_battery_voltage(device):
 
 
 def decipher_battery_voltage(report):
-    voltage, flags = _unpack('>HB', report[:3])
+    voltage, flags = _unpack(">HB", report[:3])
     status = BATTERY_STATUS.discharging
     charge_sts = ERROR.unknown
     charge_lvl = CHARGE_LEVEL.average
@@ -1545,12 +1539,12 @@ def decipher_battery_voltage(report):
     elif charge_sts == CHARGE_STATUS.full:
         charge_lvl = CHARGE_LEVEL.full
         status = BATTERY_STATUS.full
-    if (flags & (1 << 3)):
+    if flags & (1 << 3):
         charge_type = CHARGE_TYPE.fast
-    elif (flags & (1 << 4)):
+    elif flags & (1 << 4):
         charge_type = CHARGE_TYPE.slow
         status = BATTERY_STATUS.slow_recharge
-    elif (flags & (1 << 5)):
+    elif flags & (1 << 5):
         charge_lvl = CHARGE_LEVEL.critical
     for level in battery_voltage_remaining:
         if level[0] < voltage:
@@ -1558,8 +1552,13 @@ def decipher_battery_voltage(report):
             break
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(
-            'battery voltage %d mV, charging %s, status %d = %s, level %s, type %s', voltage, status, (flags & 0x03),
-            charge_sts, charge_lvl, charge_type
+            "battery voltage %d mV, charging %s, status %d = %s, level %s, type %s",
+            voltage,
+            status,
+            (flags & 0x03),
+            charge_sts,
+            charge_lvl,
+            charge_type,
         )
     return FEATURE.BATTERY_VOLTAGE, charge_lvl, None, status, voltage
 
@@ -1575,7 +1574,7 @@ def get_adc_measurement(device):
 
 def decipher_adc_measurement(report):
     # partial implementation - needs mapping to levels
-    adc, flags = _unpack('!HB', report[:3])
+    adc, flags = _unpack("!HB", report[:3])
     for level in battery_voltage_remaining:
         if level[0] < adc:
             charge_level = level[1]
@@ -1629,21 +1628,21 @@ def get_remap_keys(device):
 
 
 def get_gestures(device):
-    if getattr(device, '_gestures', None) is not None:
+    if getattr(device, "_gestures", None) is not None:
         return device._gestures
     if FEATURE.GESTURE_2 in device.features:
         return Gestures(device)
 
 
 def get_backlight(device):
-    if getattr(device, '_backlight', None) is not None:
+    if getattr(device, "_backlight", None) is not None:
         return device._backlight
     if FEATURE.BACKLIGHT2 in device.features:
         return Backlight(device)
 
 
 def get_profiles(device):
-    if getattr(device, '_profiles', None) is not None:
+    if getattr(device, "_profiles", None) is not None:
         return device._profiles
     if FEATURE.ONBOARD_PROFILES in device.features:
         return OnboardProfiles.from_device(device)
@@ -1652,39 +1651,46 @@ def get_profiles(device):
 def get_mouse_pointer_info(device):
     pointer_info = feature_request(device, FEATURE.MOUSE_POINTER)
     if pointer_info:
-        dpi, flags = _unpack('!HB', pointer_info[:3])
-        acceleration = ('none', 'low', 'med', 'high')[flags & 0x3]
+        dpi, flags = _unpack("!HB", pointer_info[:3])
+        acceleration = ("none", "low", "med", "high")[flags & 0x3]
         suggest_os_ballistics = (flags & 0x04) != 0
         suggest_vertical_orientation = (flags & 0x08) != 0
         return {
-            'dpi': dpi,
-            'acceleration': acceleration,
-            'suggest_os_ballistics': suggest_os_ballistics,
-            'suggest_vertical_orientation': suggest_vertical_orientation
+            "dpi": dpi,
+            "acceleration": acceleration,
+            "suggest_os_ballistics": suggest_os_ballistics,
+            "suggest_vertical_orientation": suggest_vertical_orientation,
         }
 
 
 def get_vertical_scrolling_info(device):
     vertical_scrolling_info = feature_request(device, FEATURE.VERTICAL_SCROLLING)
     if vertical_scrolling_info:
-        roller, ratchet, lines = _unpack('!BBB', vertical_scrolling_info[:3])
+        roller, ratchet, lines = _unpack("!BBB", vertical_scrolling_info[:3])
         roller_type = (
-            'reserved', 'standard', 'reserved', '3G', 'micro', 'normal touch pad', 'inverted touch pad', 'reserved'
+            "reserved",
+            "standard",
+            "reserved",
+            "3G",
+            "micro",
+            "normal touch pad",
+            "inverted touch pad",
+            "reserved",
         )[roller]
-        return {'roller': roller_type, 'ratchet': ratchet, 'lines': lines}
+        return {"roller": roller_type, "ratchet": ratchet, "lines": lines}
 
 
 def get_hi_res_scrolling_info(device):
     hi_res_scrolling_info = feature_request(device, FEATURE.HI_RES_SCROLLING)
     if hi_res_scrolling_info:
-        mode, resolution = _unpack('!BB', hi_res_scrolling_info[:2])
+        mode, resolution = _unpack("!BB", hi_res_scrolling_info[:2])
         return mode, resolution
 
 
 def get_pointer_speed_info(device):
     pointer_speed_info = feature_request(device, FEATURE.POINTER_SPEED)
     if pointer_speed_info:
-        pointer_speed_hi, pointer_speed_lo = _unpack('!BB', pointer_speed_info[:2])
+        pointer_speed_hi, pointer_speed_lo = _unpack("!BB", pointer_speed_info[:2])
         # if pointer_speed_lo > 0:
         #     pointer_speed_lo = pointer_speed_lo
         return pointer_speed_hi + pointer_speed_lo / 256
@@ -1693,8 +1699,8 @@ def get_pointer_speed_info(device):
 def get_lowres_wheel_status(device):
     lowres_wheel_status = feature_request(device, FEATURE.LOWRES_WHEEL)
     if lowres_wheel_status:
-        wheel_flag = _unpack('!B', lowres_wheel_status[:1])[0]
-        wheel_reporting = ('HID', 'HID++')[wheel_flag & 0x01]
+        wheel_flag = _unpack("!B", lowres_wheel_status[:1])[0]
+        wheel_reporting = ("HID", "HID++")[wheel_flag & 0x01]
         return wheel_reporting
 
 
@@ -1705,20 +1711,20 @@ def get_hires_wheel(device):
 
     if caps and mode and ratchet:
         # Parse caps
-        multi, flags = _unpack('!BB', caps[:2])
+        multi, flags = _unpack("!BB", caps[:2])
 
         has_invert = (flags & 0x08) != 0
         has_ratchet = (flags & 0x04) != 0
 
         # Parse mode
-        wheel_mode, reserved = _unpack('!BB', mode[:2])
+        wheel_mode, reserved = _unpack("!BB", mode[:2])
 
         target = (wheel_mode & 0x01) != 0
         res = (wheel_mode & 0x02) != 0
         inv = (wheel_mode & 0x04) != 0
 
         # Parse Ratchet switch
-        ratchet_mode, reserved = _unpack('!BB', ratchet[:2])
+        ratchet_mode, reserved = _unpack("!BB", ratchet[:2])
 
         ratchet = (ratchet_mode & 0x01) != 0
 
@@ -1728,7 +1734,7 @@ def get_hires_wheel(device):
 def get_new_fn_inversion(device):
     state = feature_request(device, FEATURE.NEW_FN_INVERSION, 0x00)
     if state:
-        inverted, default_inverted = _unpack('!BB', state[:2])
+        inverted, default_inverted = _unpack("!BB", state[:2])
         inverted = (inverted & 0x01) != 0
         default_inverted = (default_inverted & 0x01) != 0
         return inverted, default_inverted
@@ -1738,46 +1744,46 @@ def get_host_names(device):
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     host_names = {}
     if state:
-        capability_flags, _ignore, numHosts, currentHost = _unpack('!BBBB', state[:4])
+        capability_flags, _ignore, numHosts, currentHost = _unpack("!BBBB", state[:4])
         if capability_flags & 0x01:  # device can get host names
             for host in range(0, numHosts):
                 hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, host)
-                _ignore, status, _ignore, _ignore, nameLen, _ignore = _unpack('!BBBBBB', hostinfo[:6])
-                name = ''
+                _ignore, status, _ignore, _ignore, nameLen, _ignore = _unpack("!BBBBBB", hostinfo[:6])
+                name = ""
                 remaining = nameLen
                 while remaining > 0:
                     name_piece = feature_request(device, FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
                     if name_piece:
-                        name += name_piece[2:2 + min(remaining, 14)].decode()
+                        name += name_piece[2 : 2 + min(remaining, 14)].decode()
                         remaining = max(0, remaining - 14)
                     else:
                         remaining = 0
                 host_names[host] = (bool(status), name)
         # update the current host's name if it doesn't match the system name
-        hostname = socket.gethostname().partition('.')[0]
+        hostname = socket.gethostname().partition(".")[0]
         if host_names[currentHost][1] != hostname:
             set_host_name(device, hostname, host_names[currentHost][1])
             host_names[currentHost] = (host_names[currentHost][0], hostname)
     return host_names
 
 
-def set_host_name(device, name, currentName=''):
-    name = bytearray(name, 'utf-8')
-    currentName = bytearray(currentName, 'utf-8')
+def set_host_name(device, name, currentName=""):
+    name = bytearray(name, "utf-8")
+    currentName = bytearray(currentName, "utf-8")
     if logger.isEnabledFor(logging.INFO):
-        logger.info('Setting host name to %s', name)
+        logger.info("Setting host name to %s", name)
     state = feature_request(device, FEATURE.HOSTS_INFO, 0x00)
     if state:
-        flags, _ignore, _ignore, currentHost = _unpack('!BBBB', state[:4])
+        flags, _ignore, _ignore, currentHost = _unpack("!BBBB", state[:4])
         if flags & 0x02:
             hostinfo = feature_request(device, FEATURE.HOSTS_INFO, 0x10, currentHost)
-            _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = _unpack('!BBBBBB', hostinfo[:6])
+            _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = _unpack("!BBBBBB", hostinfo[:6])
             if name[:maxNameLen] == currentName[:maxNameLen] and False:
                 return True
             length = min(maxNameLen, len(name))
             chunk = 0
             while chunk < length:
-                response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk:chunk + 14])
+                response = feature_request(device, FEATURE.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk : chunk + 14])
                 if not response:
                     return False
                 chunk += 14
@@ -1788,7 +1794,7 @@ def get_onboard_mode(device):
     state = feature_request(device, FEATURE.ONBOARD_PROFILES, 0x20)
 
     if state:
-        mode = _unpack('!B', state[:1])[0]
+        mode = _unpack("!B", state[:1])[0]
         return mode
 
 
@@ -1800,20 +1806,20 @@ def set_onboard_mode(device, mode):
 def get_polling_rate(device):
     state = feature_request(device, FEATURE.REPORT_RATE, 0x10)
     if state:
-        rate = _unpack('!B', state[:1])[0]
-        return str(rate) + 'ms'
+        rate = _unpack("!B", state[:1])[0]
+        return str(rate) + "ms"
     else:
-        rates = ['8ms', '4ms', '2ms', '1ms', '500us', '250us', '125us']
+        rates = ["8ms", "4ms", "2ms", "1ms", "500us", "250us", "125us"]
         state = feature_request(device, FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
         if state:
-            rate = _unpack('!B', state[:1])[0]
+            rate = _unpack("!B", state[:1])[0]
             return rates[rate]
 
 
 def get_remaining_pairing(device):
     result = feature_request(device, FEATURE.REMAINING_PAIRING, 0x0)
     if result:
-        result = _unpack('!B', result[:1])[0]
+        result = _unpack("!B", result[:1])[0]
         return result
 
 

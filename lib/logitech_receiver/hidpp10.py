@@ -34,14 +34,14 @@ logger = logging.getLogger(__name__)
 
 
 def read_register(device, register_number, *params):
-    assert device is not None, 'tried to read register %02X from invalid device %s' % (register_number, device)
+    assert device is not None, "tried to read register %02X from invalid device %s" % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8100 | (int(register_number) & 0x2FF)
     return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-    assert device is not None, 'tried to write register %02X to invalid device %s' % (register_number, device)
+    assert device is not None, "tried to write register %02X to invalid device %s" % (register_number, device)
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8000 | (int(register_number) & 0x2FF)
     return device.request(request_id, *value)
@@ -83,18 +83,27 @@ def parse_battery_status(register, reply):
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
         status_text = (
-            BATTERY_STATUS.discharging if status_byte == 0x30 else
-            BATTERY_STATUS.recharging if status_byte == 0x50 else BATTERY_STATUS.full if status_byte == 0x90 else None
+            BATTERY_STATUS.discharging
+            if status_byte == 0x30
+            else BATTERY_STATUS.recharging
+            if status_byte == 0x50
+            else BATTERY_STATUS.full
+            if status_byte == 0x90
+            else None
         )
         return charge, None, status_text, None
 
     if register == REGISTERS.battery_status:
         status_byte = ord(reply[:1])
         charge = (
-            _BATTERY_APPROX.full if status_byte == 7  # full
-            else _BATTERY_APPROX.good if status_byte == 5  # good
-            else _BATTERY_APPROX.low if status_byte == 3  # low
-            else _BATTERY_APPROX.critical if status_byte == 1  # critical
+            _BATTERY_APPROX.full
+            if status_byte == 7  # full
+            else _BATTERY_APPROX.good
+            if status_byte == 5  # good
+            else _BATTERY_APPROX.low
+            if status_byte == 3  # low
+            else _BATTERY_APPROX.critical
+            if status_byte == 1  # critical
             # pure 'charging' notifications may come without a status
             else _BATTERY_APPROX.empty
         )
@@ -107,7 +116,7 @@ def parse_battery_status(register, reply):
         elif charging_byte & 0x22 == 0x22:
             status_text = BATTERY_STATUS.full
         else:
-            logger.warning('could not parse 0x07 battery status: %02X (level %02X)', charging_byte, status_byte)
+            logger.warning("could not parse 0x07 battery status: %02X (level %02X)", charging_byte, status_byte)
             status_text = None
 
         if charging_byte & 0x03 and status_byte == 0:
@@ -129,25 +138,25 @@ def get_firmware(device):
         return
 
     fw_version = _strhex(reply[1:3])
-    fw_version = '%s.%s' % (fw_version[0:2], fw_version[2:4])
+    fw_version = "%s.%s" % (fw_version[0:2], fw_version[2:4])
     reply = read_register(device, REGISTERS.firmware, 0x02)
     if reply:
-        fw_version += '.B' + _strhex(reply[1:3])
-    fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, '', fw_version, None)
+        fw_version += ".B" + _strhex(reply[1:3])
+    fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
     firmware[0] = fw
 
     reply = read_register(device, REGISTERS.firmware, 0x04)
     if reply:
         bl_version = _strhex(reply[1:3])
-        bl_version = '%s.%s' % (bl_version[0:2], bl_version[2:4])
-        bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, '', bl_version, None)
+        bl_version = "%s.%s" % (bl_version[0:2], bl_version[2:4])
+        bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
         firmware[1] = bl
 
     reply = read_register(device, REGISTERS.firmware, 0x03)
     if reply:
         o_version = _strhex(reply[1:3])
-        o_version = '%s.%s' % (o_version[0:2], o_version[2:4])
-        o = _FirmwareInfo(FIRMWARE_KIND.Other, '', o_version, None)
+        o_version = "%s.%s" % (o_version[0:2], o_version[2:4])
+        o = _FirmwareInfo(FIRMWARE_KIND.Other, "", o_version, None)
         firmware[2] = o
 
     if any(firmware):
@@ -182,8 +191,8 @@ def set_3leds(device, battery_level=None, charging=None, warning=None):
             v1, v2 = 0x20, 0x22
         if warning:
             # set the blinking flag for the leds already set
-            v1 |= (v1 >> 1)
-            v2 |= (v2 >> 1)
+            v1 |= v1 >> 1
+            v2 |= v2 >> 1
     elif charging:
         # blink all green
         v1, v2 = 0x30, 0x33

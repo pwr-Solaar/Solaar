@@ -31,19 +31,19 @@ from solaar import NAME as _NAME
 
 
 def _find_locale_path(lc_domain):
-    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..'))
-    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), '..', 'share'))
+    prefix_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), ".."))
+    src_share = _path.normpath(_path.join(_path.realpath(_sys.path[0]), "..", "share"))
 
     for location in prefix_share, src_share:
-        mo_files = _glob(_path.join(location, 'locale', '*', 'LC_MESSAGES', lc_domain + '.mo'))
+        mo_files = _glob(_path.join(location, "locale", "*", "LC_MESSAGES", lc_domain + ".mo"))
         if mo_files:
-            return _path.join(location, 'locale')
+            return _path.join(location, "locale")
 
     # del _path
 
 
 try:
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, "")
 except Exception:
     pass
 

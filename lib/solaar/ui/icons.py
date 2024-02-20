@@ -18,9 +18,9 @@
 
 import logging
 
-import solaar.gtk as gtk
-
 from gi.repository import Gtk
+
+import solaar.gtk as gtk
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +29,12 @@ logger = logging.getLogger(__name__)
 #
 
 _LARGE_SIZE = 64
-Gtk.IconSize.LARGE = Gtk.icon_size_register('large', _LARGE_SIZE, _LARGE_SIZE)
+Gtk.IconSize.LARGE = Gtk.icon_size_register("large", _LARGE_SIZE, _LARGE_SIZE)
 # Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
 
-TRAY_INIT = 'solaar-init'
-TRAY_OKAY = 'solaar'
-TRAY_ATTENTION = 'solaar-attention'
+TRAY_INIT = "solaar-init"
+TRAY_OKAY = "solaar"
+TRAY_ATTENTION = "solaar-attention"
 
 _default_theme = None
 
@@ -46,18 +46,18 @@ def _init_icon_paths():
 
     _default_theme = Gtk.IconTheme.get_default()
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('icon theme paths: %s', _default_theme.get_search_path())
+        logger.debug("icon theme paths: %s", _default_theme.get_search_path())
 
-    if gtk.battery_icons_style == 'symbolic':
+    if gtk.battery_icons_style == "symbolic":
         global TRAY_OKAY
         TRAY_OKAY = TRAY_INIT  # use monochrome tray icon
-        if not _default_theme.has_icon('battery-good-symbolic'):
-            logger.warning('failed to detect symbolic icons')
-            gtk.battery_icons_style = 'regular'
-    if gtk.battery_icons_style == 'regular':
-        if not _default_theme.has_icon('battery-good'):
-            logger.warning('failed to detect icons')
-            gtk.battery_icons_style = 'solaar'
+        if not _default_theme.has_icon("battery-good-symbolic"):
+            logger.warning("failed to detect symbolic icons")
+            gtk.battery_icons_style = "regular"
+    if gtk.battery_icons_style == "regular":
+        if not _default_theme.has_icon("battery-good"):
+            logger.warning("failed to detect icons")
+            gtk.battery_icons_style = "solaar"
 
 
 #
@@ -68,10 +68,10 @@ def _init_icon_paths():
 def battery(level=None, charging=False):
     icon_name = _battery_icon_name(level, charging)
     if not _default_theme.has_icon(icon_name):
-        logger.warning('icon %s not found in current theme', icon_name)
+        logger.warning("icon %s not found in current theme", icon_name)
         return TRAY_OKAY  # use Solaar icon if battery icon not available
     elif logger.isEnabledFor(logging.DEBUG):
-        logger.debug('battery icon for %s:%s = %s', level, charging, icon_name)
+        logger.debug("battery icon for %s:%s = %s", level, charging, icon_name)
     return icon_name
 
 
@@ -85,11 +85,13 @@ def _battery_icon_name(level, charging):
     _init_icon_paths()
 
     if level is None or level < 0:
-        return 'battery-missing' + ('-symbolic' if gtk.battery_icons_style == 'symbolic' else '')
+        return "battery-missing" + ("-symbolic" if gtk.battery_icons_style == "symbolic" else "")
 
-    level_name = _first_res(level, ((90, 'full'), (30, 'good'), (20, 'low'), (5, 'caution'), (0, 'empty')))
-    return 'battery-%s%s%s' % (
-        level_name, '-charging' if charging else '', '-symbolic' if gtk.battery_icons_style == 'symbolic' else ''
+    level_name = _first_res(level, ((90, "full"), (30, "good"), (20, "low"), (5, "caution"), (0, "empty")))
+    return "battery-%s%s%s" % (
+        level_name,
+        "-charging" if charging else "",
+        "-symbolic" if gtk.battery_icons_style == "symbolic" else "",
     )
 
 
@@ -100,8 +102,8 @@ def _battery_icon_name(level, charging):
 
 def lux(level=None):
     if level is None or level < 0:
-        return 'light_unknown'
-    return 'solaar-light_%03d' % (20 * ((level + 50) // 100))
+        return "light_unknown"
+    return "solaar-light_%03d" % (20 * ((level + 50) // 100))
 
 
 #
@@ -111,7 +113,7 @@ def lux(level=None):
 _ICON_SETS = {}
 
 
-def device_icon_set(name='_', kind=None):
+def device_icon_set(name="_", kind=None):
     icon_set = _ICON_SETS.get(name)
     if icon_set is None:
         icon_set = Gtk.IconSet.new()
@@ -119,17 +121,17 @@ def device_icon_set(name='_', kind=None):
 
         # names of possible icons, in reverse order of likelihood
         # the theme will hopefully pick up the most appropriate
-        names = ['preferences-desktop-peripherals']
+        names = ["preferences-desktop-peripherals"]
         if kind:
-            if str(kind) == 'numpad':
-                names += ('input-keyboard', 'input-dialpad')
-            elif str(kind) == 'touchpad':
-                names += ('input-mouse', 'input-tablet')
-            elif str(kind) == 'trackball':
-                names += ('input-mouse', )
-            elif str(kind) == 'headset':
-                names += ('audio-headphones', 'audio-headset')
-            names += ('input-' + str(kind), )
+            if str(kind) == "numpad":
+                names += ("input-keyboard", "input-dialpad")
+            elif str(kind) == "touchpad":
+                names += ("input-mouse", "input-tablet")
+            elif str(kind) == "trackball":
+                names += ("input-mouse",)
+            elif str(kind) == "headset":
+                names += ("audio-headphones", "audio-headset")
+            names += ("input-" + str(kind),)
         # names += (name.replace(' ', '-'),)
 
         source = Gtk.IconSource.new()
@@ -174,4 +176,4 @@ def icon_file(name, size=_LARGE_SIZE):
         #     logger.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
 
-    logger.warning('icon %s(%d) not found in current theme', name, size)
+    logger.warning("icon %s(%d) not found in current theme", name, size)

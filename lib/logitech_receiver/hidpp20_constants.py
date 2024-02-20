@@ -128,7 +128,7 @@ FEATURE = NamedInts(
     # Fake features for Solaar internal use
     MOUSE_GESTURE=0xFE00,
 )
-FEATURE._fallback = lambda x: 'unknown:%04X' % x
+FEATURE._fallback = lambda x: "unknown:%04X" % x
 
 FEATURE_FLAG = NamedInts(internal=0x20, hidden=0x40, obsolete=0x80)
 
@@ -150,7 +150,7 @@ BATTERY_STATUS = NamedInts(
     full=0x03,
     slow_recharge=0x04,
     invalid_battery=0x05,
-    thermal_error=0x06
+    thermal_error=0x06,
 )
 
 ONBOARD_MODES = NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
@@ -170,7 +170,7 @@ ERROR = NamedInts(
     invalid_feature_index=0x06,
     invalid_function=0x07,
     busy=0x08,
-    unsupported=0x09
+    unsupported=0x09,
 )
 
 # Gesture Ids for feature GESTURE_2
@@ -236,7 +236,7 @@ GESTURE = NamedInts(
     Finger10=99,
     DeviceSpecificRawData=100,
 )
-GESTURE._fallback = lambda x: 'unknown:%04X' % x
+GESTURE._fallback = lambda x: "unknown:%04X" % x
 
 # Param Ids for feature GESTURE_2
 PARAM = NamedInts(
@@ -245,4 +245,4 @@ PARAM = NamedInts(
     RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
     ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
 )
-PARAM._fallback = lambda x: 'unknown:%04X' % x
+PARAM._fallback = lambda x: "unknown:%04X" % x

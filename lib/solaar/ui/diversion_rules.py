@@ -38,6 +38,7 @@ from logitech_receiver.settings import KIND as _SKIND
 from logitech_receiver.settings import Setting as _Setting
 from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from logitech_receiver.special_keys import CONTROL as _CONTROL
+
 from solaar.i18n import _
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,6 @@ _rule_component_clipboard = None
 
 
 class RuleComponentWrapper(GObject.GObject):
-
     def __init__(self, component, level=0, editable=False):
         self.component = component
         self.level = level
@@ -61,24 +61,24 @@ class RuleComponentWrapper(GObject.GObject):
     def display_left(self):
         if isinstance(self.component, _DIV.Rule):
             if self.level == 0:
-                return _('Built-in rules') if not self.editable else _('User-defined rules')
+                return _("Built-in rules") if not self.editable else _("User-defined rules")
             if self.level == 1:
-                return '  ' + _('Rule')
-            return '  ' + _('Sub-rule')
+                return "  " + _("Rule")
+            return "  " + _("Sub-rule")
         if self.component is None:
-            return _('[empty]')
-        return '  ' + self.__component_ui().left_label(self.component)
+            return _("[empty]")
+        return "  " + self.__component_ui().left_label(self.component)
 
     def display_right(self):
         if self.component is None:
-            return ''
+            return ""
         return self.__component_ui().right_label(self.component)
 
     def display_icon(self):
         if self.component is None:
-            return ''
+            return ""
         if isinstance(self.component, _DIV.Rule) and self.level == 0:
-            return 'emblem-system' if not self.editable else 'avatar-default'
+            return "emblem-system" if not self.editable else "avatar-default"
         return self.__component_ui().icon_name()
 
     def __component_ui(self):
@@ -86,12 +86,10 @@ class RuleComponentWrapper(GObject.GObject):
 
 
 class DiversionDialog:
-
     def __init__(self):
-
         window = Gtk.Window()
-        window.set_title(_('Solaar Rule Editor'))
-        window.connect('delete-event', self._closing)
+        window.set_title(_("Solaar Rule Editor"))
+        window.connect("delete-event", self._closing)
         vbox = Gtk.VBox()
 
         self.top_panel, self.view = self._create_top_panel()
@@ -105,10 +103,12 @@ class DiversionDialog:
         self.update_ui = {}
         self.bottom_panel = self._create_bottom_panel()
         self.ui = defaultdict(lambda: UnsupportedRuleComponentUI(self.bottom_panel))
-        self.ui.update({  # one instance per type
-            rc_class: rc_ui_class(self.bottom_panel, on_update=self.on_update)
-            for rc_class, rc_ui_class in COMPONENT_UI.items()
-        })
+        self.ui.update(
+            {  # one instance per type
+                rc_class: rc_ui_class(self.bottom_panel, on_update=self.on_update)
+                for rc_class, rc_ui_class in COMPONENT_UI.items()
+            }
+        )
         vbox.pack_start(self.bottom_panel, False, False, 10)
 
         self.model = self._create_model()
@@ -125,10 +125,10 @@ class DiversionDialog:
 
         window.show_all()
 
-        window.connect('delete-event', lambda w, e: w.hide_on_delete() or True)
+        window.connect("delete-event", lambda w, e: w.hide_on_delete() or True)
 
         style = window.get_style_context()
-        style.add_class('solaar')
+        style.add_class("solaar")
         self.window = window
         self._editing_component = None
 
@@ -137,19 +137,19 @@ class DiversionDialog:
             dialog = Gtk.MessageDialog(
                 self.window,
                 type=Gtk.MessageType.QUESTION,
-                title=_('Make changes permanent?'),
+                title=_("Make changes permanent?"),
                 flags=Gtk.DialogFlags.MODAL,
             )
             dialog.set_default_size(400, 100)
             dialog.add_buttons(
-                _('Yes'),
+                _("Yes"),
                 Gtk.ResponseType.YES,
-                _('No'),
+                _("No"),
                 Gtk.ResponseType.NO,
-                _('Cancel'),
+                _("Cancel"),
                 Gtk.ResponseType.CANCEL,
             )
-            dialog.set_markup(_('If you choose No, changes will be lost when Solaar is closed.'))
+            dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
             dialog.show_all()
             response = dialog.run()
             dialog.destroy()
@@ -189,25 +189,25 @@ class DiversionDialog:
         view.set_enable_tree_lines(True)
         view.set_reorderable(False)
 
-        view.connect('key-press-event', self._event_key_pressed)
-        view.connect('button-release-event', self._event_button_released)
-        view.get_selection().connect('changed', self._selection_changed)
+        view.connect("key-press-event", self._event_key_pressed)
+        view.connect("button-release-event", self._event_button_released)
+        view.get_selection().connect("changed", self._selection_changed)
         sw.add(view)
         sw.set_size_request(0, 300)  # don't ask for so much height
 
         button_box = Gtk.HBox(spacing=20)
-        self.save_btn = Gtk.Button.new_from_icon_name('document-save', Gtk.IconSize.BUTTON)
-        self.save_btn.set_label(_('Save changes'))
+        self.save_btn = Gtk.Button.new_from_icon_name("document-save", Gtk.IconSize.BUTTON)
+        self.save_btn.set_label(_("Save changes"))
         self.save_btn.set_always_show_image(True)
         self.save_btn.set_sensitive(False)
         self.save_btn.set_valign(Gtk.Align.CENTER)
-        self.discard_btn = Gtk.Button.new_from_icon_name('document-revert', Gtk.IconSize.BUTTON)
-        self.discard_btn.set_label(_('Discard changes'))
+        self.discard_btn = Gtk.Button.new_from_icon_name("document-revert", Gtk.IconSize.BUTTON)
+        self.discard_btn.set_label(_("Discard changes"))
         self.discard_btn.set_always_show_image(True)
         self.discard_btn.set_sensitive(False)
         self.discard_btn.set_valign(Gtk.Align.CENTER)
-        self.save_btn.connect('clicked', lambda *_args: self._save_yaml_file())
-        self.discard_btn.connect('clicked', lambda *_args: self._reload_yaml_file())
+        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
+        self.discard_btn.connect("clicked", lambda *_args: self._reload_yaml_file())
         button_box.pack_start(self.save_btn, False, False, 0)
         button_box.pack_start(self.discard_btn, False, False, 0)
         button_box.set_halign(Gtk.Align.CENTER)
@@ -231,17 +231,16 @@ class DiversionDialog:
     def _create_view_columns(self):
         cell_icon = Gtk.CellRendererPixbuf()
         cell1 = Gtk.CellRendererText()
-        col1 = Gtk.TreeViewColumn('Type')
+        col1 = Gtk.TreeViewColumn("Type")
         col1.pack_start(cell_icon, False)
         col1.pack_start(cell1, True)
-        col1.set_cell_data_func(cell1, lambda _c, c, m, it, _d: c.set_property('text', m.get_value(it, 0).display_left()))
+        col1.set_cell_data_func(cell1, lambda _c, c, m, it, _d: c.set_property("text", m.get_value(it, 0).display_left()))
         cell2 = Gtk.CellRendererText()
-        col2 = Gtk.TreeViewColumn('Summary')
+        col2 = Gtk.TreeViewColumn("Summary")
         col2.pack_start(cell2, True)
-        col2.set_cell_data_func(cell2, lambda _c, c, m, it, _d: c.set_property('text', m.get_value(it, 0).display_right()))
+        col2.set_cell_data_func(cell2, lambda _c, c, m, it, _d: c.set_property("text", m.get_value(it, 0).display_right()))
         col2.set_cell_data_func(
-            cell_icon, lambda _c, c, m, it, _d: c.set_property('icon-name',
-                                                               m.get_value(it, 0).display_icon())
+            cell_icon, lambda _c, c, m, it, _d: c.set_property("icon-name", m.get_value(it, 0).display_icon())
         )
         return col1, col2
 
@@ -257,7 +256,7 @@ class DiversionDialog:
             if isinstance(rule_component, _DIV.Rule):
                 editable = editable or (rule_component.source is not None)
         wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
-        piter = model.insert(it, pos, (wrapped, ))
+        piter = model.insert(it, pos, (wrapped,))
         if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
             for c in rule_component.components:
                 ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
@@ -296,7 +295,7 @@ class DiversionDialog:
         self.bottom_panel.set_sensitive(wrapped.editable)
 
     def _event_key_pressed(self, v, e):
-        '''
+        """
         Shortcuts:
             Ctrl + I                insert component
             Ctrl + Delete           delete row
@@ -310,7 +309,7 @@ class DiversionDialog:
             Ctrl + Shift + V        paste above
             *                       flatten
             Ctrl + S                save changes
-        '''
+        """
         state = e.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
         m, it = v.get_selection().get_selected()
         wrapped = m[it][0]
@@ -321,9 +320,13 @@ class DiversionDialog:
         can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
         can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
         can_insert_only_rule = wrapped.editable and wrapped.level == 1
-        can_flatten = wrapped.editable and not isinstance(parent_c, _DIV.Not) and isinstance(
-            c, (_DIV.Rule, _DIV.And, _DIV.Or)
-        ) and wrapped.level >= 2 and len(c.components)
+        can_flatten = (
+            wrapped.editable
+            and not isinstance(parent_c, _DIV.Not)
+            and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
+            and wrapped.level >= 2
+            and len(c.components)
+        )
         can_copy = wrapped.level >= 1
         can_insert_root = wrapped.editable and wrapped.level == 0
         if state & Gdk.ModifierType.CONTROL_MASK:
@@ -333,8 +336,11 @@ class DiversionDialog:
                 self._menu_do_copy(None, m, it)
             elif can_insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
                 self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
-            elif can_insert_only_rule and isinstance(_rule_component_clipboard,
-                                                     _DIV.Rule) and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
+            elif (
+                can_insert_only_rule
+                and isinstance(_rule_component_clipboard, _DIV.Rule)
+                and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
+            ):
                 self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
             elif can_insert_root and isinstance(_rule_component_clipboard, _DIV.Rule) and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
                 self._menu_do_paste(None, m, m.iter_nth_child(it, 0))
@@ -368,21 +374,21 @@ class DiversionDialog:
             ins = self._menu_insert(m, it)
             items.append(ins)
             if c is None:  # just a placeholder
-                ins.set_label(_('Insert here'))
+                ins.set_label(_("Insert here"))
             else:
-                ins.set_label(_('Insert above'))
+                ins.set_label(_("Insert above"))
                 ins2 = self._menu_insert(m, it, below=True)
-                ins2.set_label(_('Insert below'))
+                ins2.set_label(_("Insert below"))
                 items.append(ins2)
         elif can_insert_only_rule:
             ins = self._menu_create_rule(m, it)
             items.append(ins)
             if c is None:
-                ins.set_label(_('Insert new rule here'))
+                ins.set_label(_("Insert new rule here"))
             else:
-                ins.set_label(_('Insert new rule above'))
+                ins.set_label(_("Insert new rule above"))
                 ins2 = self._menu_create_rule(m, it, below=True)
-                ins2.set_label(_('Insert new rule below'))
+                ins2.set_label(_("Insert new rule below"))
                 items.append(ins2)
         elif can_insert_root:
             ins = self._menu_create_rule(m, m.iter_nth_child(it, 0))
@@ -401,9 +407,13 @@ class DiversionDialog:
             can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
             can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
             can_insert_only_rule = wrapped.editable and wrapped.level == 1
-            can_flatten = wrapped.editable and not isinstance(parent_c, _DIV.Not) and isinstance(
-                c, (_DIV.Rule, _DIV.And, _DIV.Or)
-            ) and wrapped.level >= 2 and len(c.components)
+            can_flatten = (
+                wrapped.editable
+                and not isinstance(parent_c, _DIV.Not)
+                and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
+                and wrapped.level >= 2
+                and len(c.components)
+            )
             can_copy = wrapped.level >= 1
             can_insert_root = wrapped.editable and wrapped.level == 0
             for item in self.__get_insert_menus(m, it, c, can_insert, can_insert_only_rule, can_insert_root):
@@ -423,25 +433,25 @@ class DiversionDialog:
                 p = self._menu_paste(m, it)
                 menu.append(p)
                 if c is None:  # just a placeholder
-                    p.set_label(_('Paste here'))
+                    p.set_label(_("Paste here"))
                 else:
-                    p.set_label(_('Paste above'))
+                    p.set_label(_("Paste above"))
                     p2 = self._menu_paste(m, it, below=True)
-                    p2.set_label(_('Paste below'))
+                    p2.set_label(_("Paste below"))
                     menu.append(p2)
             elif can_insert_only_rule and isinstance(_rule_component_clipboard, _DIV.Rule):
                 p = self._menu_paste(m, it)
                 menu.append(p)
                 if c is None:
-                    p.set_label(_('Paste rule here'))
+                    p.set_label(_("Paste rule here"))
                 else:
-                    p.set_label(_('Paste rule above'))
+                    p.set_label(_("Paste rule above"))
                     p2 = self._menu_paste(m, it, below=True)
-                    p2.set_label(_('Paste rule below'))
+                    p2.set_label(_("Paste rule below"))
                     menu.append(p2)
             elif can_insert_root and isinstance(_rule_component_clipboard, _DIV.Rule):
                 p = self._menu_paste(m, m.iter_nth_child(it, 0))
-                p.set_label(_('Paste rule'))
+                p.set_label(_("Paste rule"))
                 menu.append(p)
             if menu.get_children() and can_delete:
                 menu.append(Gtk.SeparatorMenuItem(visible=True))
@@ -457,10 +467,10 @@ class DiversionDialog:
         parent_c = m[parent_it][0].component
         idx = parent_c.components.index(c)
         if isinstance(c, _DIV.Not):
-            parent_c.components = [*parent_c.components[:idx], c.component, *parent_c.components[idx + 1:]]
+            parent_c.components = [*parent_c.components[:idx], c.component, *parent_c.components[idx + 1 :]]
             children = [next(m[it].iterchildren())[0].component]
         else:
-            parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1:]]
+            parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1 :]]
             children = [child[0].component for child in m[it].iterchildren()]
         m.remove(it)
         self._populate_model(m, parent_it, children, level=wrapped.level, pos=idx)
@@ -470,8 +480,8 @@ class DiversionDialog:
         self.on_update()
 
     def _menu_flatten(self, m, it):
-        menu_flatten = Gtk.MenuItem(_('Flatten'))
-        menu_flatten.connect('activate', self._menu_do_flatten, m, it)
+        menu_flatten = Gtk.MenuItem(_("Flatten"))
+        menu_flatten.connect("activate", self._menu_do_flatten, m, it)
         menu_flatten.show()
         return menu_flatten
 
@@ -503,42 +513,42 @@ class DiversionDialog:
 
     def _menu_insert(self, m, it, below=False):
         elements = [
-            _('Insert'),
+            _("Insert"),
             [
-                (_('Sub-rule'), _DIV.Rule, []),
-                (_('Or'), _DIV.Or, []),
-                (_('And'), _DIV.And, []),
+                (_("Sub-rule"), _DIV.Rule, []),
+                (_("Or"), _DIV.Or, []),
+                (_("And"), _DIV.And, []),
                 [
-                    _('Condition'),
+                    _("Condition"),
                     [
-                        (_('Feature'), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
-                        (_('Report'), _DIV.Report, 0),
-                        (_('Process'), _DIV.Process, ''),
-                        (_('Mouse process'), _DIV.MouseProcess, ''),
-                        (_('Modifiers'), _DIV.Modifiers, []),
-                        (_('Key'), _DIV.Key, ''),
-                        (_('KeyIsDown'), _DIV.KeyIsDown, ''),
-                        (_('Active'), _DIV.Active, ''),
-                        (_('Device'), _DIV.Device, ''),
-                        (_('Host'), _DIV.Host, ''),
-                        (_('Setting'), _DIV.Setting, [None, '', None]),
-                        (_('Test'), _DIV.Test, next(iter(_DIV.TESTS))),
-                        (_('Test bytes'), _DIV.TestBytes, [0, 1, 0]),
-                        (_('Mouse Gesture'), _DIV.MouseGesture, ''),
-                    ]
+                        (_("Feature"), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
+                        (_("Report"), _DIV.Report, 0),
+                        (_("Process"), _DIV.Process, ""),
+                        (_("Mouse process"), _DIV.MouseProcess, ""),
+                        (_("Modifiers"), _DIV.Modifiers, []),
+                        (_("Key"), _DIV.Key, ""),
+                        (_("KeyIsDown"), _DIV.KeyIsDown, ""),
+                        (_("Active"), _DIV.Active, ""),
+                        (_("Device"), _DIV.Device, ""),
+                        (_("Host"), _DIV.Host, ""),
+                        (_("Setting"), _DIV.Setting, [None, "", None]),
+                        (_("Test"), _DIV.Test, next(iter(_DIV.TESTS))),
+                        (_("Test bytes"), _DIV.TestBytes, [0, 1, 0]),
+                        (_("Mouse Gesture"), _DIV.MouseGesture, ""),
+                    ],
                 ],
                 [
-                    _('Action'),
+                    _("Action"),
                     [
-                        (_('Key press'), _DIV.KeyPress, 'space'),
-                        (_('Mouse scroll'), _DIV.MouseScroll, [0, 0]),
-                        (_('Mouse click'), _DIV.MouseClick, ['left', 1]),
-                        (_('Set'), _DIV.Set, [None, '', None]),
-                        (_('Execute'), _DIV.Execute, ['']),
-                        (_('Later'), _DIV.Later, [1]),
-                    ]
+                        (_("Key press"), _DIV.KeyPress, "space"),
+                        (_("Mouse scroll"), _DIV.MouseScroll, [0, 0]),
+                        (_("Mouse click"), _DIV.MouseClick, ["left", 1]),
+                        (_("Set"), _DIV.Set, [None, "", None]),
+                        (_("Execute"), _DIV.Execute, [""]),
+                        (_("Later"), _DIV.Later, [1]),
+                    ],
                 ],
-            ]
+            ],
         ]
 
         def build(spec):
@@ -554,7 +564,7 @@ class DiversionDialog:
                 label, feature, *args = spec
                 item = Gtk.MenuItem(label)
                 args = [a.copy() if isinstance(a, list) else a for a in args]
-                item.connect('activate', self._menu_do_insert_new, m, it, feature, *args, below)
+                item.connect("activate", self._menu_do_insert_new, m, it, feature, *args, below)
                 return item
             else:
                 return None
@@ -564,8 +574,8 @@ class DiversionDialog:
         return menu_insert
 
     def _menu_create_rule(self, m, it, below=False):
-        menu_create_rule = Gtk.MenuItem(_('Insert new rule'))
-        menu_create_rule.connect('activate', self._menu_do_insert_new, m, it, _DIV.Rule, [], below)
+        menu_create_rule = Gtk.MenuItem(_("Insert new rule"))
+        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, _DIV.Rule, [], below)
         menu_create_rule.show()
         return menu_create_rule
 
@@ -584,8 +594,8 @@ class DiversionDialog:
         return c
 
     def _menu_delete(self, m, it):
-        menu_delete = Gtk.MenuItem(_('Delete'))
-        menu_delete.connect('activate', self._menu_do_delete, m, it)
+        menu_delete = Gtk.MenuItem(_("Delete"))
+        menu_delete.connect("activate", self._menu_do_delete, m, it)
         menu_delete.show()
         return menu_delete
 
@@ -606,8 +616,8 @@ class DiversionDialog:
         self.on_update()
 
     def _menu_negate(self, m, it):
-        menu_negate = Gtk.MenuItem(_('Negate'))
-        menu_negate.connect('activate', self._menu_do_negate, m, it)
+        menu_negate = Gtk.MenuItem(_("Negate"))
+        menu_negate.connect("activate", self._menu_do_negate, m, it)
         menu_negate.show()
         return menu_negate
 
@@ -630,14 +640,14 @@ class DiversionDialog:
         self.on_update()
 
     def _menu_wrap(self, m, it):
-        menu_wrap = Gtk.MenuItem(_('Wrap with'))
+        menu_wrap = Gtk.MenuItem(_("Wrap with"))
         submenu_wrap = Gtk.Menu()
-        menu_sub_rule = Gtk.MenuItem(_('Sub-rule'))
-        menu_and = Gtk.MenuItem(_('And'))
-        menu_or = Gtk.MenuItem(_('Or'))
-        menu_sub_rule.connect('activate', self._menu_do_wrap, m, it, _DIV.Rule)
-        menu_and.connect('activate', self._menu_do_wrap, m, it, _DIV.And)
-        menu_or.connect('activate', self._menu_do_wrap, m, it, _DIV.Or)
+        menu_sub_rule = Gtk.MenuItem(_("Sub-rule"))
+        menu_and = Gtk.MenuItem(_("And"))
+        menu_or = Gtk.MenuItem(_("Or"))
+        menu_sub_rule.connect("activate", self._menu_do_wrap, m, it, _DIV.Rule)
+        menu_and.connect("activate", self._menu_do_wrap, m, it, _DIV.And)
+        menu_or.connect("activate", self._menu_do_wrap, m, it, _DIV.Or)
         submenu_wrap.append(menu_sub_rule)
         submenu_wrap.append(menu_and)
         submenu_wrap.append(menu_or)
@@ -652,8 +662,8 @@ class DiversionDialog:
         _rule_component_clipboard = c
 
     def _menu_cut(self, m, it):
-        menu_cut = Gtk.MenuItem(_('Cut'))
-        menu_cut.connect('activate', self._menu_do_cut, m, it)
+        menu_cut = Gtk.MenuItem(_("Cut"))
+        menu_cut.connect("activate", self._menu_do_cut, m, it)
         menu_cut.show()
         return menu_cut
 
@@ -667,8 +677,8 @@ class DiversionDialog:
             self.on_update()
 
     def _menu_paste(self, m, it, below=False):
-        menu_paste = Gtk.MenuItem(_('Paste'))
-        menu_paste.connect('activate', self._menu_do_paste, m, it, below)
+        menu_paste = Gtk.MenuItem(_("Paste"))
+        menu_paste.connect("activate", self._menu_do_paste, m, it, below)
         menu_paste.show()
         return menu_paste
 
@@ -679,8 +689,8 @@ class DiversionDialog:
         _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
 
     def _menu_copy(self, m, it):
-        menu_copy = Gtk.MenuItem(_('Copy'))
-        menu_copy.connect('activate', self._menu_do_copy, m, it)
+        menu_copy = Gtk.MenuItem(_("Copy"))
+        menu_copy.connect("activate", self._menu_do_copy, m, it)
         menu_copy.show()
         return menu_copy
 
@@ -705,7 +715,6 @@ class DiversionDialog:
 
 
 class CompletionEntry(Gtk.Entry):
-
     def __init__(self, values, *args, **kwargs):
         super().__init__(*args, **kwargs)
         CompletionEntry.add_completion_to_entry(self, values)
@@ -717,7 +726,7 @@ class CompletionEntry(Gtk.Entry):
             liststore = Gtk.ListStore(str)
             completion = Gtk.EntryCompletion()
             completion.set_model(liststore)
-            norm = lambda s: s.replace('_', '').replace(' ', '').lower()
+            norm = lambda s: s.replace("_", "").replace(" ", "").lower()
             completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
             completion.set_text_column(0)
             entry.set_completion(completion)
@@ -725,7 +734,7 @@ class CompletionEntry(Gtk.Entry):
             liststore = completion.get_model()
             liststore.clear()
         for v in sorted(set(values), key=str.casefold):
-            liststore.append((v, ))
+            liststore.append((v,))
 
 
 class SmartComboBox(Gtk.ComboBox):
@@ -755,7 +764,7 @@ class SmartComboBox(Gtk.ComboBox):
     """
 
     def __init__(
-        self, all_values, blank='', completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
+        self, all_values, blank="", completion=False, case_insensitive=False, replace_with_default_name=False, **kwargs
     ):
         super().__init__(**kwargs)
         self._name_to_idx = {}
@@ -776,7 +785,7 @@ class SmartComboBox(Gtk.ComboBox):
                 if name != self.get_child().get_text():
                     self.get_child().set_text(name)
 
-        self.connect('changed', lambda *a: replace_with(self.get_value(invalid_as_str=False)))
+        self.connect("changed", lambda *a: replace_with(self.get_value(invalid_as_str=False)))
 
         self.set_id_column(0)
         if self.get_has_entry():
@@ -784,9 +793,9 @@ class SmartComboBox(Gtk.ComboBox):
         else:
             renderer = Gtk.CellRendererText()
             self.pack_start(renderer, True)
-            self.add_attribute(renderer, 'text', 1)
+            self.add_attribute(renderer, "text", 1)
         self.set_all_values(all_values)
-        self.set_active_id('')
+        self.set_active_id("")
 
     @classmethod
     def new_model(cls):
@@ -801,16 +810,16 @@ class SmartComboBox(Gtk.ComboBox):
         self._name_to_idx = {}
         self._value_to_idx = {}
         self._hidden_idx = set()
-        self._all_values = [v if isinstance(v, tuple) else (v, ) for v in all_values]
+        self._all_values = [v if isinstance(v, tuple) else (v,) for v in all_values]
 
         model, filtered_model = SmartComboBox.new_model()
         # creating a new model seems to be necessary to avoid firing 'changed' event once per inserted item
-        model.append(('', self._blank, True))
+        model.append(("", self._blank, True))
         self._model = model
 
         to_complete = [self._blank]
         for idx, item in enumerate(self._all_values):
-            value, *names = item if isinstance(item, tuple) else (item, )
+            value, *names = item if isinstance(item, tuple) else (item,)
             visible = visible_fn(value)
             self._include(model, idx, value, visible, *names)
             if visible:
@@ -850,7 +859,7 @@ class SmartComboBox(Gtk.ComboBox):
         if tree_iter is not None:
             t = self.get_model()[tree_iter]
             number = t[0]
-            return self._all_values[int(number)][0] if number != '' and (accept_hidden or t[2]) else None
+            return self._all_values[int(number)][0] if number != "" and (accept_hidden or t[2]) else None
         elif self.get_has_entry():
             text = self.get_child().get_text().strip()
             if text == self._blank:
@@ -885,14 +894,14 @@ class SmartComboBox(Gtk.ComboBox):
         If `value` is invalid, then the entry text is set to the provided value
         if the widget has an entry and `accept_invalid` is True, or else the blank value is set.
         """
-        idx = self._find_idx(value) if value != self._blank else ''
+        idx = self._find_idx(value) if value != self._blank else ""
         if idx is not None:
             self.set_active_id(str(idx))
         else:
             if self.get_has_entry() and accept_invalid:
-                self.get_child().set_text(str(value or '') if value != '' else self._blank)
+                self.get_child().set_text(str(value or "") if value != "" else self._blank)
             else:
-                self.set_active_id('')
+                self.set_active_id("")
 
     def show_only(self, only, include_new=False):
         """Hide items not present in `only`.
@@ -913,15 +922,14 @@ class SmartComboBox(Gtk.ComboBox):
 
 @dataclass
 class DeviceInfo:
-
-    serial: str = ''
-    unitId: str = ''
-    codename: str = ''
+    serial: str = ""
+    unitId: str = ""
+    codename: str = ""
     settings: Dict[str, _Setting] = field(default_factory=dict)
 
     @property
     def id(self):
-        return self.serial or self.unitId or ''
+        return self.serial or self.unitId or ""
 
     @property
     def identifiers(self):
@@ -929,23 +937,23 @@ class DeviceInfo:
 
     @property
     def display_name(self):
-        return f'{self.codename} ({self.id})'
+        return f"{self.codename} ({self.id})"
 
     def __post_init__(self):
-        if self.serial is None or self.serial == '?':
-            self.serial = ''
-        if self.unitId is None or self.unitId == '?':
-            self.unitId = ''
+        if self.serial is None or self.serial == "?":
+            self.serial = ""
+        if self.unitId is None or self.unitId == "?":
+            self.unitId = ""
 
     def matches(self, search):
         return search and search in (self.serial, self.unitId, self.display_name)
 
     def update(self, device):
-        for k in ('serial', 'unitId', 'codename', 'settings'):
+        for k in ("serial", "unitId", "codename", "settings"):
             if not getattr(self, k, None):
                 v = getattr(device, k, None)
-                if v and v != '?':
-                    setattr(self, k, copy(v) if k != 'settings' else {s.name: s for s in v})
+                if v and v != "?":
+                    setattr(self, k, copy(v) if k != "settings" else {s.name: s for s in v})
 
     @classmethod
     def from_device(cls, device):
@@ -955,7 +963,6 @@ class DeviceInfo:
 
 
 class AllDevicesInfo:
-
     def __init__(self):
         self._devices = []
         self._lock = threading.Lock()
@@ -976,7 +983,7 @@ class AllDevicesInfo:
         def dev_in_row(_store, _treepath, row):
             nonlocal updated
             device = _dev_model.get_value(row, 7)
-            if device and device.kind and (device.serial and device.serial != '?' or device.unitId and device.unitId != '?'):
+            if device and device.kind and (device.serial and device.serial != "?" or device.unitId and device.unitId != "?"):
                 existing = self[device.serial] or self[device.unitId]
                 if not existing:
                     updated = True
@@ -991,7 +998,6 @@ class AllDevicesInfo:
 
 
 class RuleComponentUI:
-
     CLASS = _DIV.RuleComponent
 
     def __init__(self, panel, on_update=None):
@@ -1039,11 +1045,11 @@ class RuleComponentUI:
 
     @classmethod
     def right_label(cls, _component):
-        return ''
+        return ""
 
     @classmethod
     def icon_name(cls):
-        return ''
+        return ""
 
     def _remove_panel_items(self):
         for c in self.panel.get_children():
@@ -1054,12 +1060,11 @@ class RuleComponentUI:
 
 
 class UnsupportedRuleComponentUI(RuleComponentUI):
-
     CLASS = None
 
     def create_widgets(self):
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('This editor does not support the selected rule component yet.'))
+        self.label.set_text(_("This editor does not support the selected rule component yet."))
         self.widgets[self.label] = (0, 0, 1, 1)
 
     @classmethod
@@ -1068,7 +1073,6 @@ class UnsupportedRuleComponentUI(RuleComponentUI):
 
 
 class RuleUI(RuleComponentUI):
-
     CLASS = _DIV.Rule
 
     def create_widgets(self):
@@ -1079,24 +1083,22 @@ class RuleUI(RuleComponentUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Rule')
+        return _("Rule")
 
     @classmethod
     def icon_name(cls):
-        return 'format-justify-fill'
+        return "format-justify-fill"
 
 
 class ConditionUI(RuleComponentUI):
-
     CLASS = _DIV.Condition
 
     @classmethod
     def icon_name(cls):
-        return 'dialog-question'
+        return "dialog-question"
 
 
 class AndUI(RuleComponentUI):
-
     CLASS = _DIV.And
 
     def create_widgets(self):
@@ -1107,11 +1109,10 @@ class AndUI(RuleComponentUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('And')
+        return _("And")
 
 
 class OrUI(RuleComponentUI):
-
     CLASS = _DIV.Or
 
     def create_widgets(self):
@@ -1122,11 +1123,10 @@ class OrUI(RuleComponentUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Or')
+        return _("Or")
 
 
 class LaterUI(RuleComponentUI):
-
     CLASS = _DIV.Later
     MIN_VALUE = 1
     MAX_VALUE = 100
@@ -1134,14 +1134,14 @@ class LaterUI(RuleComponentUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Number of seconds to delay.'))
+        self.label.set_text(_("Number of seconds to delay."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
         #        self.field.set_vexpand(True)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1154,7 +1154,7 @@ class LaterUI(RuleComponentUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Later')
+        return _("Later")
 
     @classmethod
     def right_label(cls, component):
@@ -1162,7 +1162,6 @@ class LaterUI(RuleComponentUI):
 
 
 class NotUI(RuleComponentUI):
-
     CLASS = _DIV.Not
 
     def create_widgets(self):
@@ -1173,21 +1172,20 @@ class NotUI(RuleComponentUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Not')
+        return _("Not")
 
 
 class ProcessUI(ConditionUI):
-
     CLASS = _DIV.Process
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('X11 active process. For use in X11 only.'))
+        self.label.set_text(_("X11 active process. For use in X11 only."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1200,7 +1198,7 @@ class ProcessUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Process')
+        return _("Process")
 
     @classmethod
     def right_label(cls, component):
@@ -1208,17 +1206,16 @@ class ProcessUI(ConditionUI):
 
 
 class MouseProcessUI(ConditionUI):
-
     CLASS = _DIV.MouseProcess
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('X11 mouse process. For use in X11 only.'))
+        self.label.set_text(_("X11 mouse process. For use in X11 only."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1231,7 +1228,7 @@ class MouseProcessUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('MouseProcess')
+        return _("MouseProcess")
 
     @classmethod
     def right_label(cls, component):
@@ -1239,7 +1236,6 @@ class MouseProcessUI(ConditionUI):
 
 
 class FeatureUI(ConditionUI):
-
     CLASS = _DIV.Feature
     FEATURES_WITH_DIVERSION = [
         str(_ALL_FEATURES.CROWN),
@@ -1256,16 +1252,16 @@ class FeatureUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Feature name of notification triggering rule processing.'))
+        self.label.set_text(_("Feature name of notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.ComboBoxText.new_with_entry()
-        self.field.append('', '')
+        self.field.append("", "")
         for feature in self.FEATURES_WITH_DIVERSION:
             self.field.append(feature, feature)
         self.field.set_valign(Gtk.Align.CENTER)
         #        self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         all_features = [str(f) for f in _ALL_FEATURES]
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 1, 1, 1)
@@ -1273,30 +1269,29 @@ class FeatureUI(ConditionUI):
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            f = str(component.feature) if component.feature else ''
+            f = str(component.feature) if component.feature else ""
             self.field.set_active_id(f)
             if f not in self.FEATURES_WITH_DIVERSION:
                 self.field.get_child().set_text(f)
 
     def collect_value(self):
-        return (self.field.get_active_text() or '').strip()
+        return (self.field.get_active_text() or "").strip()
 
     def _on_update(self, *args):
         super()._on_update(*args)
-        icon = 'dialog-warning' if not self.component.feature else ''
+        icon = "dialog-warning" if not self.component.feature else ""
         self.field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
-        return _('Feature')
+        return _("Feature")
 
     @classmethod
     def right_label(cls, component):
-        return '%s (%04X)' % (str(component.feature), int(component.feature or 0))
+        return "%s (%04X)" % (str(component.feature), int(component.feature or 0))
 
 
 class ReportUI(ConditionUI):
-
     CLASS = _DIV.Report
     MIN_VALUE = -1  # for invalid values
     MAX_VALUE = 15
@@ -1304,14 +1299,14 @@ class ReportUI(ConditionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Report number of notification triggering rule processing.'))
+        self.label.set_text(_("Report number of notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
         #        self.field.set_vexpand(True)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1324,7 +1319,7 @@ class ReportUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Report')
+        return _("Report")
 
     @classmethod
     def right_label(cls, component):
@@ -1332,13 +1327,12 @@ class ReportUI(ConditionUI):
 
 
 class ModifiersUI(ConditionUI):
-
     CLASS = _DIV.Modifiers
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Active keyboard modifiers. Not always available in Wayland.'))
+        self.label.set_text(_("Active keyboard modifiers. Not always available in Wayland."))
         self.widgets[self.label] = (0, 0, 5, 1)
         self.labels = {}
         self.switches = {}
@@ -1349,7 +1343,7 @@ class ModifiersUI(ConditionUI):
             self.widgets[switch] = (i, 2, 1, 1)
             self.labels[m] = label
             self.switches[m] = switch
-            switch.connect('notify::active', self._on_update)
+            switch.connect("notify::active", self._on_update)
 
     def show(self, component, editable):
         super().show(component, editable)
@@ -1362,15 +1356,14 @@ class ModifiersUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Modifiers')
+        return _("Modifiers")
 
     @classmethod
     def right_label(cls, component):
-        return '+'.join(component.modifiers) or 'None'
+        return "+".join(component.modifiers) or "None"
 
 
 class KeyUI(ConditionUI):
-
     CLASS = _DIV.Key
     KEY_NAMES = map(str, _CONTROL)
 
@@ -1379,26 +1372,26 @@ class KeyUI(ConditionUI):
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(
             _(
-                'Diverted key or button depressed or released.\n'
-                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
+                "Diverted key or button depressed or released.\n"
+                "Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons."
             )
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
-        self.key_field.connect('changed', self._on_update)
+        self.key_field.connect("changed", self._on_update)
         self.widgets[self.key_field] = (0, 1, 2, 1)
-        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _('Key down'))
-        self.action_pressed_radio.connect('toggled', self._on_update, _Key.DOWN)
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Key down"))
+        self.action_pressed_radio.connect("toggled", self._on_update, _Key.DOWN)
         self.widgets[self.action_pressed_radio] = (2, 1, 1, 1)
-        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _('Key up'))
-        self.action_released_radio.connect('toggled', self._on_update, _Key.UP)
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Key up"))
+        self.action_released_radio.connect("toggled", self._on_update, _Key.UP)
         self.widgets[self.action_released_radio] = (3, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            self.key_field.set_text(str(component.key) if self.component.key else '')
+            self.key_field.set_text(str(component.key) if self.component.key else "")
             if not component.action or component.action == _Key.DOWN:
                 self.action_pressed_radio.set_active(True)
             else:
@@ -1410,20 +1403,19 @@ class KeyUI(ConditionUI):
 
     def _on_update(self, *args):
         super()._on_update(*args)
-        icon = 'dialog-warning' if not self.component.key or not self.component.action else ''
+        icon = "dialog-warning" if not self.component.key or not self.component.action else ""
         self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
-        return _('Key')
+        return _("Key")
 
     @classmethod
     def right_label(cls, component):
-        return '%s (%04X) (%s)' % (str(component.key), int(component.key), _(component.action)) if component.key else 'None'
+        return "%s (%04X) (%s)" % (str(component.key), int(component.key), _(component.action)) if component.key else "None"
 
 
 class KeyIsDownUI(ConditionUI):
-
     CLASS = _DIV.KeyIsDown
     KEY_NAMES = map(str, _CONTROL)
 
@@ -1432,54 +1424,53 @@ class KeyIsDownUI(ConditionUI):
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(
             _(
-                'Diverted key or button is currently down.\n'
-                'Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons.'
+                "Diverted key or button is currently down.\n"
+                "Use the Key/Button Diversion and Divert G Keys settings to divert keys and buttons."
             )
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.key_field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.key_field.set_size_request(600, 0)
-        self.key_field.connect('changed', self._on_update)
+        self.key_field.connect("changed", self._on_update)
         self.widgets[self.key_field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            self.key_field.set_text(str(component.key) if self.component.key else '')
+            self.key_field.set_text(str(component.key) if self.component.key else "")
 
     def collect_value(self):
         return self.key_field.get_text()
 
     def _on_update(self, *args):
         super()._on_update(*args)
-        icon = 'dialog-warning' if not self.component.key else ''
+        icon = "dialog-warning" if not self.component.key else ""
         self.key_field.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
-        return _('KeyIsDown')
+        return _("KeyIsDown")
 
     @classmethod
     def right_label(cls, component):
-        return '%s (%04X)' % (str(component.key), int(component.key)) if component.key else 'None'
+        return "%s (%04X)" % (str(component.key), int(component.key)) if component.key else "None"
 
 
 class TestUI(ConditionUI):
-
     CLASS = _DIV.Test
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Test condition on notification triggering rule processing.'))
+        self.label.set_text(_("Test condition on notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 4, 1)
-        lbl = Gtk.Label(_('Test'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        lbl = Gtk.Label(_("Test"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
         self.widgets[lbl] = (0, 1, 1, 1)
-        lbl = Gtk.Label(_('Parameter'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        lbl = Gtk.Label(_("Parameter"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
         self.widgets[lbl] = (2, 1, 1, 1)
 
         self.test = Gtk.ComboBoxText.new_with_entry()
-        self.test.append('', '')
+        self.test.append("", "")
         for t in _DIV.TESTS:
             self.test.append(t, t)
         self.test.set_halign(Gtk.Align.END)
@@ -1487,19 +1478,19 @@ class TestUI(ConditionUI):
         self.test.set_hexpand(False)
         self.test.set_size_request(300, 0)
         CompletionEntry.add_completion_to_entry(self.test.get_child(), _DIV.TESTS)
-        self.test.connect('changed', self._on_update)
+        self.test.connect("changed", self._on_update)
         self.widgets[self.test] = (1, 1, 1, 1)
 
         self.parameter = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.parameter.set_size_request(150, 0)
-        self.parameter.connect('changed', self._on_update)
+        self.parameter.connect("changed", self._on_update)
         self.widgets[self.parameter] = (3, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
             self.test.set_active_id(component.test)
-            self.parameter.set_text(str(component.parameter) if component.parameter is not None else '')
+            self.parameter.set_text(str(component.parameter) if component.parameter is not None else "")
             if component.test not in _DIV.TESTS:
                 self.test.get_child().set_text(component.test)
                 self._change_status_icon()
@@ -1509,7 +1500,7 @@ class TestUI(ConditionUI):
             param = int(self.parameter.get_text()) if self.parameter.get_text() else None
         except Exception:
             param = self.parameter.get_text()
-        test = (self.test.get_active_text() or '').strip()
+        test = (self.test.get_active_text() or "").strip()
         return [test, param] if param is not None else [test]
 
     def _on_update(self, *args):
@@ -1517,51 +1508,48 @@ class TestUI(ConditionUI):
         self._change_status_icon()
 
     def _change_status_icon(self):
-        icon = 'dialog-warning' if (self.test.get_active_text() or '').strip() not in _DIV.TESTS else ''
+        icon = "dialog-warning" if (self.test.get_active_text() or "").strip() not in _DIV.TESTS else ""
         self.test.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
-        return _('Test')
+        return _("Test")
 
     @classmethod
     def right_label(cls, component):
-        return component.test + (' ' + repr(component.parameter) if component.parameter is not None else '')
+        return component.test + (" " + repr(component.parameter) if component.parameter is not None else "")
 
 
-_TestBytesElement = namedtuple('TestBytesElement', ['id', 'label', 'min', 'max'])
-_TestBytesMode = namedtuple('TestBytesMode', ['label', 'elements', 'label_fn'])
+_TestBytesElement = namedtuple("TestBytesElement", ["id", "label", "min", "max"])
+_TestBytesMode = namedtuple("TestBytesMode", ["label", "elements", "label_fn"])
 
 
 class TestBytesUI(ConditionUI):
-
     CLASS = _DIV.TestBytes
 
     _common_elements = [
-        _TestBytesElement('begin', _('begin (inclusive)'), 0, 16),
-        _TestBytesElement('end', _('end (exclusive)'), 0, 16)
+        _TestBytesElement("begin", _("begin (inclusive)"), 0, 16),
+        _TestBytesElement("end", _("end (exclusive)"), 0, 16),
     ]
 
-    _global_min = -2**31
+    _global_min = -(2**31)
     _global_max = 2**31 - 1
 
     _modes = {
-        'range':
-        _TestBytesMode(
-            _('range'),
-            _common_elements + [
-                _TestBytesElement('minimum', _('minimum'), _global_min, _global_max),  # uint32
-                _TestBytesElement('maximum', _('maximum'), _global_min, _global_max),
+        "range": _TestBytesMode(
+            _("range"),
+            _common_elements
+            + [
+                _TestBytesElement("minimum", _("minimum"), _global_min, _global_max),  # uint32
+                _TestBytesElement("maximum", _("maximum"), _global_min, _global_max),
             ],
-            lambda e: _('bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d' % {str(i): v
-                                                                               for i, v in enumerate(e)})
+            lambda e: _("bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d" % {str(i): v for i, v in enumerate(e)}),
         ),
-        'mask':
-        _TestBytesMode(
-            _('mask'), _common_elements + [_TestBytesElement('mask', _('mask'), _global_min, _global_max)],
-            lambda e: _('bytes %(0)d to %(1)d, mask %(2)d' % {str(i): v
-                                                              for i, v in enumerate(e)})
-        )
+        "mask": _TestBytesMode(
+            _("mask"),
+            _common_elements + [_TestBytesElement("mask", _("mask"), _global_min, _global_max)],
+            lambda e: _("bytes %(0)d to %(1)d, mask %(2)d" % {str(i): v for i, v in enumerate(e)}),
+        ),
     }
 
     def create_widgets(self):
@@ -1569,7 +1557,7 @@ class TestBytesUI(ConditionUI):
         self.field_labels = {}
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Bit or range test on bytes in notification message triggering rule processing.'))
+        self.label.set_text(_("Bit or range test on bytes in notification message triggering rule processing."))
         self.widgets[self.label] = (0, 0, 5, 1)
         col = 0
         mode_col = 2
@@ -1577,9 +1565,9 @@ class TestBytesUI(ConditionUI):
         mode_renderer = Gtk.CellRendererText()
         self.mode_field.set_id_column(0)
         self.mode_field.pack_start(mode_renderer, True)
-        self.mode_field.add_attribute(mode_renderer, 'text', 1)
+        self.mode_field.add_attribute(mode_renderer, "text", 1)
         self.widgets[self.mode_field] = (mode_col, 2, 1, 1)
-        mode_label = Gtk.Label(_('type'), margin_top=20)
+        mode_label = Gtk.Label(_("type"), margin_top=20)
         self.widgets[mode_label] = (mode_col, 1, 1, 1)
         for mode_id, mode in TestBytesUI._modes.items():
             self.mode_field.get_model().append([mode_id, mode.label])
@@ -1588,21 +1576,21 @@ class TestBytesUI(ConditionUI):
                     field = Gtk.SpinButton.new_with_range(element.min, element.max, 1)
                     field.set_value(0)
                     field.set_size_request(150, 0)
-                    field.connect('value-changed', self._on_update)
+                    field.connect("value-changed", self._on_update)
                     label = Gtk.Label(element.label, margin_top=20)
                     self.fields[element.id] = field
                     self.field_labels[element.id] = label
                     self.widgets[label] = (col, 1, 1, 1)
                     self.widgets[field] = (col, 2, 1, 1)
                     col += 1 if col != mode_col - 1 else 2
-        self.mode_field.connect('changed', lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
-        self.mode_field.set_active_id('range')
+        self.mode_field.connect("changed", lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
+        self.mode_field.set_active_id("range")
 
     def show(self, component, editable):
         super().show(component, editable)
 
         with self.ignore_changes():
-            mode_id = {3: 'mask', 4: 'range'}.get(len(component.test), None)
+            mode_id = {3: "mask", 4: "range"}.get(len(component.test), None)
             self._only_mode(mode_id)
             if not mode_id:
                 return
@@ -1630,31 +1618,36 @@ class TestBytesUI(ConditionUI):
         if not self.component:
             return
         begin, end, *etc = self.component.test
-        icon = 'dialog-warning' if end <= begin else ''
-        self.fields['end'].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+        icon = "dialog-warning" if end <= begin else ""
+        self.fields["end"].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         if len(self.component.test) == 4:
             *etc, minimum, maximum = self.component.test
-            icon = 'dialog-warning' if maximum < minimum else ''
-            self.fields['maximum'].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
+            icon = "dialog-warning" if maximum < minimum else ""
+            self.fields["maximum"].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
     def left_label(cls, component):
-        return _('Test bytes')
+        return _("Test bytes")
 
     @classmethod
     def right_label(cls, component):
-        mode_id = {3: 'mask', 4: 'range'}.get(len(component.test), None)
+        mode_id = {3: "mask", 4: "range"}.get(len(component.test), None)
         if not mode_id:
             return str(component.test)
         return TestBytesUI._modes[mode_id].label_fn(component.test)
 
 
 class MouseGestureUI(ConditionUI):
-
     CLASS = _DIV.MouseGesture
     MOUSE_GESTURE_NAMES = [
-        'Mouse Up', 'Mouse Down', 'Mouse Left', 'Mouse Right', 'Mouse Up-left', 'Mouse Up-right', 'Mouse Down-left',
-        'Mouse Down-right'
+        "Mouse Up",
+        "Mouse Down",
+        "Mouse Left",
+        "Mouse Right",
+        "Mouse Up-left",
+        "Mouse Up-right",
+        "Mouse Down-left",
+        "Mouse Down-right",
     ]
     MOVE_NAMES = list(map(str, _CONTROL)) + MOUSE_GESTURE_NAMES
 
@@ -1662,13 +1655,13 @@ class MouseGestureUI(ConditionUI):
         self.widgets = {}
         self.fields = []
         self.label = Gtk.Label(
-            _('Mouse gesture with optional initiating button followed by zero or more mouse movements.'),
-            halign=Gtk.Align.CENTER
+            _("Mouse gesture with optional initiating button followed by zero or more mouse movements."),
+            halign=Gtk.Align.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
-        self.add_btn = Gtk.Button(_('Add movement'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        self.add_btn.connect('clicked', self._clicked_add)
+        self.add_btn = Gtk.Button(_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
 
     def _create_field(self):
@@ -1676,20 +1669,20 @@ class MouseGestureUI(ConditionUI):
         for g in self.MOUSE_GESTURE_NAMES:
             field.append(g, g)
         CompletionEntry.add_completion_to_entry(field.get_child(), self.MOVE_NAMES)
-        field.connect('changed', self._on_update)
+        field.connect("changed", self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 1, 1, 1)
         return field
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, _btn):
-        self.component.__init__(self.collect_value() + [''], warn=False)
+        self.component.__init__(self.collect_value() + [""], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.movements) - 1].grab_focus()
 
@@ -1704,8 +1697,11 @@ class MouseGestureUI(ConditionUI):
         super()._on_update(*args)
         for i, f in enumerate(self.fields):
             if f.get_visible():
-                icon = 'dialog-warning' if i < len(self.component.movements
-                                                   ) and self.component.movements[i] not in self.MOVE_NAMES else ''
+                icon = (
+                    "dialog-warning"
+                    if i < len(self.component.movements) and self.component.movements[i] not in self.MOVE_NAMES
+                    else ""
+                )
                 f.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable):
@@ -1732,69 +1728,67 @@ class MouseGestureUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Mouse Gesture')
+        return _("Mouse Gesture")
 
     @classmethod
     def right_label(cls, component):
         if len(component.movements) == 0:
-            return 'No-op'
+            return "No-op"
         else:
-            return ' -> '.join(component.movements)
+            return " -> ".join(component.movements)
 
 
 class ActionUI(RuleComponentUI):
-
     CLASS = _DIV.Action
 
     @classmethod
     def icon_name(cls):
-        return 'go-next'
+        return "go-next"
 
 
 class KeyPressUI(ActionUI):
-
     CLASS = _DIV.KeyPress
-    KEY_NAMES = [k[3:] if k.startswith('XK_') else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
+    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
 
     def create_widgets(self):
         self.widgets = {}
         self.fields = []
         self.label = Gtk.Label(
-            _('Simulate a chorded key click or depress or release.\nOn Wayland requires write access to /dev/uinput.'),
-            halign=Gtk.Align.CENTER
+            _("Simulate a chorded key click or depress or release.\nOn Wayland requires write access to /dev/uinput."),
+            halign=Gtk.Align.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
-        self.add_btn = Gtk.Button(_('Add key'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        self.add_btn.connect('clicked', self._clicked_add)
+        self.add_btn = Gtk.Button(_("Add key"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
-        self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _('Click'))
-        self.action_clicked_radio.connect('toggled', self._on_update, CLICK)
+        self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
+        self.action_clicked_radio.connect("toggled", self._on_update, CLICK)
         self.widgets[self.action_clicked_radio] = (0, 3, 1, 1)
-        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _('Depress'))
-        self.action_pressed_radio.connect('toggled', self._on_update, DEPRESS)
+        self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _("Depress"))
+        self.action_pressed_radio.connect("toggled", self._on_update, DEPRESS)
         self.widgets[self.action_pressed_radio] = (1, 3, 1, 1)
-        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _('Release'))
-        self.action_released_radio.connect('toggled', self._on_update, RELEASE)
+        self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Release"))
+        self.action_released_radio.connect("toggled", self._on_update, RELEASE)
         self.widgets[self.action_released_radio] = (2, 3, 1, 1)
 
     def _create_field(self):
         field = CompletionEntry(self.KEY_NAMES, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
-        field.connect('changed', self._on_update)
+        field.connect("changed", self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 1, 1, 1)
         return field
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, _btn):
         keys, action = self.component.regularize_args(self.collect_value())
-        self.component.__init__([keys + [''], action], warn=False)
+        self.component.__init__([keys + [""], action], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.key_names) - 1].grab_focus()
 
@@ -1809,8 +1803,11 @@ class KeyPressUI(ActionUI):
         super()._on_update(*args)
         for i, f in enumerate(self.fields):
             if f.get_visible():
-                icon = 'dialog-warning' if i < len(self.component.key_names
-                                                   ) and self.component.key_names[i] not in self.KEY_NAMES else ''
+                icon = (
+                    "dialog-warning"
+                    if i < len(self.component.key_names) and self.component.key_names[i] not in self.KEY_NAMES
+                    else ""
+                )
                 f.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable=True):
@@ -1819,8 +1816,7 @@ class KeyPressUI(ActionUI):
             self._create_field()
             self._create_del_btn()
 
-
-#        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
+        #        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
         self.widgets[self.add_btn] = (n, 1, 1, 1)
         super().show(component, editable)
         for i in range(n):
@@ -1835,21 +1831,21 @@ class KeyPressUI(ActionUI):
             self.del_btns[i].hide()
 
     def collect_value(self):
-        action = CLICK if self.action_clicked_radio.get_active() else \
-                 DEPRESS if self.action_pressed_radio.get_active() else RELEASE
+        action = (
+            CLICK if self.action_clicked_radio.get_active() else DEPRESS if self.action_pressed_radio.get_active() else RELEASE
+        )
         return [[f.get_text().strip() for f in self.fields if f.get_visible()], action]
 
     @classmethod
     def left_label(cls, component):
-        return _('Key press')
+        return _("Key press")
 
     @classmethod
     def right_label(cls, component):
-        return ' + '.join(component.key_names) + ('  (' + component.action + ')' if component.action != CLICK else '')
+        return " + ".join(component.key_names) + ("  (" + component.action + ")" if component.action != CLICK else "")
 
 
 class MouseScrollUI(ActionUI):
-
     CLASS = _DIV.MouseScroll
     MIN_VALUE = -2000
     MAX_VALUE = 2000
@@ -1857,18 +1853,18 @@ class MouseScrollUI(ActionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(
-            _('Simulate a mouse scroll.\nOn Wayland requires write access to /dev/uinput.'), halign=Gtk.Align.CENTER
+            _("Simulate a mouse scroll.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
         )
         self.widgets[self.label] = (0, 0, 4, 1)
-        self.label_x = Gtk.Label(label='x', halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
-        self.label_y = Gtk.Label(label='y', halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
+        self.label_x = Gtk.Label(label="x", halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
+        self.label_y = Gtk.Label(label="y", halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
         self.field_x = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field_y = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         for f in [self.field_x, self.field_y]:
             f.set_halign(Gtk.Align.CENTER)
             f.set_valign(Gtk.Align.START)
-        self.field_x.connect('changed', self._on_update)
-        self.field_y.connect('changed', self._on_update)
+        self.field_x.connect("changed", self._on_update)
+        self.field_y.connect("changed", self._on_update)
         self.widgets[self.label_x] = (0, 1, 1, 1)
         self.widgets[self.field_x] = (1, 1, 1, 1)
         self.widgets[self.label_y] = (2, 1, 1, 1)
@@ -1893,18 +1889,17 @@ class MouseScrollUI(ActionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Mouse scroll')
+        return _("Mouse scroll")
 
     @classmethod
     def right_label(cls, component):
         x = y = 0
         x = cls.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0)
         y = cls.__parse(component.amounts[1] if len(component.amounts) >= 2 else 0)
-        return f'{x}, {y}'
+        return f"{x}, {y}"
 
 
 class MouseClickUI(ActionUI):
-
     CLASS = _DIV.MouseClick
     MIN_VALUE = 1
     MAX_VALUE = 9
@@ -1914,20 +1909,20 @@ class MouseClickUI(ActionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(
-            _('Simulate a mouse click.\nOn Wayland requires write access to /dev/uinput.'), halign=Gtk.Align.CENTER
+            _("Simulate a mouse click.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
         )
         self.widgets[self.label] = (0, 0, 4, 1)
-        self.label_b = Gtk.Label(label=_('Button'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
-        self.label_c = Gtk.Label(label=_('Count and Action'), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.label_b = Gtk.Label(label=_("Button"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
+        self.label_c = Gtk.Label(label=_("Count and Action"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
         self.field_b = CompletionEntry(self.BUTTONS)
         self.field_c = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
         self.field_d = CompletionEntry(self.ACTIONS)
         for f in [self.field_b, self.field_c]:
             f.set_halign(Gtk.Align.CENTER)
             f.set_valign(Gtk.Align.START)
-        self.field_b.connect('changed', self._on_update)
-        self.field_c.connect('changed', self._on_update)
-        self.field_d.connect('changed', self._on_update)
+        self.field_b.connect("changed", self._on_update)
+        self.field_c.connect("changed", self._on_update)
+        self.field_d.connect("changed", self._on_update)
         self.widgets[self.label_b] = (0, 1, 1, 1)
         self.widgets[self.field_b] = (1, 1, 1, 1)
         self.widgets[self.label_c] = (2, 1, 1, 1)
@@ -1948,14 +1943,14 @@ class MouseClickUI(ActionUI):
     def collect_value(self):
         b, c, d = self.field_b.get_text(), int(self.field_c.get_value()), self.field_d.get_text()
         if b not in self.BUTTONS:
-            b = 'unknown'
+            b = "unknown"
         if d != CLICK:
             c = d
         return [b, c]
 
     @classmethod
     def left_label(cls, component):
-        return _('Mouse click')
+        return _("Mouse click")
 
     @classmethod
     def right_label(cls, component):
@@ -1963,37 +1958,36 @@ class MouseClickUI(ActionUI):
 
 
 class ExecuteUI(ActionUI):
-
     CLASS = _DIV.Execute
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(_('Execute a command with arguments.'), halign=Gtk.Align.CENTER)
+        self.label = Gtk.Label(_("Execute a command with arguments."), halign=Gtk.Align.CENTER)
         self.widgets[self.label] = (0, 0, 5, 1)
         self.fields = []
-        self.add_btn = Gtk.Button(_('Add argument'), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn = Gtk.Button(_("Add argument"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.del_btns = []
-        self.add_btn.connect('clicked', self._clicked_add)
+        self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
 
     def _create_field(self):
         field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         field.set_size_request(150, 0)
-        field.connect('changed', self._on_update)
+        field.connect("changed", self._on_update)
         self.fields.append(field)
         self.widgets[field] = (len(self.fields) - 1, 1, 1, 1)
         return field
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_('Delete'), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         btn.set_size_request(150, 0)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
-        btn.connect('clicked', self._clicked_del, len(self.del_btns) - 1)
+        btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
         return btn
 
     def _clicked_add(self, *_args):
-        self.component.__init__(self.collect_value() + [''], warn=False)
+        self.component.__init__(self.collect_value() + [""], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.args) - 1].grab_focus()
 
@@ -2026,11 +2020,11 @@ class ExecuteUI(ActionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Execute')
+        return _("Execute")
 
     @classmethod
     def right_label(cls, component):
-        return ' '.join([shlex_quote(a) for a in component.args])
+        return " ".join([shlex_quote(a) for a in component.args])
 
 
 def _from_named_ints(v, all_values):
@@ -2041,27 +2035,27 @@ def _from_named_ints(v, all_values):
 
 
 class SetValueControl(Gtk.HBox):
-
     def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.on_change = on_change
-        self.toggle_widget = SmartComboBox([
-            *([('Toggle', _('Toggle'), '~')] if accept_toggle else []), (True, _('True'), 'True', 'yes', 'on', 't', 'y'),
-            (False, _('False'), 'False', 'no', 'off', 'f', 'n')
-        ],
-                                           case_insensitive=True)
-        self.toggle_widget.connect('changed', self._changed)
+        self.toggle_widget = SmartComboBox(
+            [
+                *([("Toggle", _("Toggle"), "~")] if accept_toggle else []),
+                (True, _("True"), "True", "yes", "on", "t", "y"),
+                (False, _("False"), "False", "no", "off", "f", "n"),
+            ],
+            case_insensitive=True,
+        )
+        self.toggle_widget.connect("changed", self._changed)
         self.range_widget = Gtk.SpinButton.new_with_range(0, 0xFFFF, 1)
-        self.range_widget.connect('value-changed', self._changed)
-        self.choice_widget = SmartComboBox([],
-                                           completion=True,
-                                           has_entry=True,
-                                           case_insensitive=True,
-                                           replace_with_default_name=True)
-        self.choice_widget.connect('changed', self._changed)
+        self.range_widget.connect("value-changed", self._changed)
+        self.choice_widget = SmartComboBox(
+            [], completion=True, has_entry=True, case_insensitive=True, replace_with_default_name=True
+        )
+        self.choice_widget.connect("changed", self._changed)
         self.sub_key_widget = SmartComboBox([])
-        self.sub_key_widget.connect('changed', self._changed)
-        self.unsupported_label = Gtk.Label(_('Unsupported setting'))
+        self.sub_key_widget.connect("changed", self._changed)
+        self.unsupported_label = Gtk.Label(_("Unsupported setting"))
         self.pack_start(self.sub_key_widget, False, False, 0)
         self.sub_key_widget.set_hexpand(False)
         self.sub_key_widget.set_size_request(120, 0)
@@ -2076,14 +2070,17 @@ class SetValueControl(Gtk.HBox):
     def _changed(self, widget, *args):
         if widget.get_visible():
             value = self.get_value()
-            if self.current_kind == 'choice':
+            if self.current_kind == "choice":
                 value = widget.get_value()
-                icon = 'dialog-warning' if widget._allowed_values and (value not in widget._allowed_values) else ''
+                icon = "dialog-warning" if widget._allowed_values and (value not in widget._allowed_values) else ""
                 widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
-            elif self.current_kind == 'range_with_key' and widget == self.sub_key_widget:
+            elif self.current_kind == "range_with_key" and widget == self.sub_key_widget:
                 key = self.sub_key_widget.get_value()
-                selected_item = next((item for item in self.sub_key_range_items
-                                      if key == item.id), None) if self.sub_key_range_items else None
+                selected_item = (
+                    next((item for item in self.sub_key_range_items if key == item.id), None)
+                    if self.sub_key_range_items
+                    else None
+                )
                 (minimum, maximum) = (selected_item.minimum, selected_item.maximum) if selected_item else (0, 0xFFFF)
                 self.range_widget.set_range(minimum, maximum)
             self.on_change(value)
@@ -2093,63 +2090,64 @@ class SetValueControl(Gtk.HBox):
             w.hide()
 
     def get_value(self):
-        if self.current_kind == 'toggle':
+        if self.current_kind == "toggle":
             return self.toggle_widget.get_value()
-        if self.current_kind == 'range':
+        if self.current_kind == "range":
             return int(self.range_widget.get_value())
-        if self.current_kind == 'range_with_key':
+        if self.current_kind == "range_with_key":
             return {self.sub_key_widget.get_value(): int(self.range_widget.get_value())}
-        if self.current_kind == 'choice':
+        if self.current_kind == "choice":
             return self.choice_widget.get_value()
         return self.unsupp_value
 
     def set_value(self, value):
-        if self.current_kind == 'toggle':
-            self.toggle_widget.set_value(value if value is not None else '')
-        elif self.current_kind == 'range':
+        if self.current_kind == "toggle":
+            self.toggle_widget.set_value(value if value is not None else "")
+        elif self.current_kind == "range":
             minimum, maximum = self.range_widget.get_range()
             try:
                 v = round(float(value))
             except (ValueError, TypeError):
                 v = minimum
             self.range_widget.set_value(max(minimum, min(maximum, v)))
-        elif self.current_kind == 'range_with_key':
+        elif self.current_kind == "range_with_key":
             if not (isinstance(value, dict) and len(value) == 1):
                 value = {None: None}
             key = next(iter(value.keys()))
-            selected_item = next((item for item in self.sub_key_range_items
-                                  if key == item.id), None) if self.sub_key_range_items else None
+            selected_item = (
+                next((item for item in self.sub_key_range_items if key == item.id), None) if self.sub_key_range_items else None
+            )
             (minimum, maximum) = (selected_item.minimum, selected_item.maximum) if selected_item else (0, 0xFFFF)
             try:
                 v = round(float(next(iter(value.values()))))
             except (ValueError, TypeError):
                 v = minimum
-            self.sub_key_widget.set_value(key or '')
+            self.sub_key_widget.set_value(key or "")
             self.range_widget.set_value(max(minimum, min(maximum, v)))
-        elif self.current_kind == 'choice':
+        elif self.current_kind == "choice":
             self.choice_widget.set_value(value)
         else:
             self.unsupp_value = value
-        if value is None or value == '':  # reset all
+        if value is None or value == "":  # reset all
             self.range_widget.set_range(0x0000, 0xFFFF)
             self.range_widget.set_value(0)
-            self.toggle_widget.set_active_id('')
-            self.sub_key_widget.set_value('')
-            self.choice_widget.set_value('')
+            self.toggle_widget.set_active_id("")
+            self.sub_key_widget.set_value("")
+            self.choice_widget.set_value("")
 
     def make_toggle(self):
-        self.current_kind = 'toggle'
+        self.current_kind = "toggle"
         self._hide_all()
         self.toggle_widget.show()
 
     def make_range(self, minimum, maximum):
-        self.current_kind = 'range'
+        self.current_kind = "range"
         self._hide_all()
         self.range_widget.set_range(minimum, maximum)
         self.range_widget.show()
 
     def make_range_with_key(self, items, labels=None):
-        self.current_kind = 'range_with_key'
+        self.current_kind = "range_with_key"
         self._hide_all()
         self.sub_key_range_items = items or None
         if not labels:
@@ -2162,7 +2160,7 @@ class SetValueControl(Gtk.HBox):
 
     def make_choice(self, values, extra=None):
         # if extra is not in values, it is ignored
-        self.current_kind = 'choice'
+        self.current_kind = "choice"
         self._hide_all()
         sort_key = int if all((v == extra or str(v).isdigit()) for v in values) else str
         if extra is not None and extra in values:
@@ -2182,7 +2180,6 @@ class SetValueControl(Gtk.HBox):
 def _all_settings():
     settings = {}
     for s in sorted(_SETTINGS, key=lambda setting: setting.label):
-
         if s.name not in settings:
             settings[s.name] = [s]
         else:
@@ -2190,7 +2187,7 @@ def _all_settings():
             prev_kind = prev_setting.validator_class.kind
             if prev_kind != s.validator_class.kind:
                 logger.warning(
-                    'ignoring setting {} - same name of {}, but different kind ({} != {})'.format(
+                    "ignoring setting {} - same name of {}, but different kind ({} != {})".format(
                         s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
                     )
                 )
@@ -2200,33 +2197,35 @@ def _all_settings():
 
 
 class _DeviceUI:
-    label_text = ''
+    label_text = ""
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
             same = not component.devID
             device = _all_devices[component.devID]
-            self.device_field.set_value(device.id if device else '' if same else component.devID or '')
+            self.device_field.set_value(device.id if device else "" if same else component.devID or "")
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(self.label_text)
         self.widgets[self.label] = (0, 0, 5, 1)
-        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        lbl = Gtk.Label(_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.widgets[lbl] = (0, 1, 1, 1)
-        self.device_field = SmartComboBox([],
-                                          completion=True,
-                                          has_entry=True,
-                                          blank=_('Originating device'),
-                                          case_insensitive=True,
-                                          replace_with_default_name=True)
-        self.device_field.set_value('')
+        self.device_field = SmartComboBox(
+            [],
+            completion=True,
+            has_entry=True,
+            blank=_("Originating device"),
+            case_insensitive=True,
+            replace_with_default_name=True,
+        )
+        self.device_field.set_value("")
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
         #        self.device_field.connect('changed', self._changed_device)
-        self.device_field.connect('changed', self._on_update)
+        self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
     def update_devices(self):
@@ -2238,7 +2237,7 @@ class _DeviceUI:
 
     def collect_value(self):
         device_str = self.device_field.get_value()
-        same = device_str in ['', _('Originating device')]
+        same = device_str in ["", _("Originating device")]
         device = None if same else _all_devices[device_str]
         device_value = device.id if device else None if same else device_str
         return device_value
@@ -2250,37 +2249,34 @@ class _DeviceUI:
 
 
 class ActiveUI(_DeviceUI, ConditionUI):
-
     CLASS = _DIV.Active
-    label_text = _('Device is active and its settings can be changed.')
+    label_text = _("Device is active and its settings can be changed.")
 
     @classmethod
     def left_label(cls, component):
-        return _('Active')
+        return _("Active")
 
 
 class DeviceUI(_DeviceUI, ConditionUI):
-
     CLASS = _DIV.Device
-    label_text = _('Device that originated the current notification.')
+    label_text = _("Device that originated the current notification.")
 
     @classmethod
     def left_label(cls, component):
-        return _('Device')
+        return _("Device")
 
 
 class HostUI(ConditionUI):
-
     CLASS = _DIV.Host
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_('Name of host computer.'))
+        self.label.set_text(_("Name of host computer."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.Entry(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.field.set_size_request(600, 0)
-        self.field.connect('changed', self._on_update)
+        self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -2293,7 +2289,7 @@ class HostUI(ConditionUI):
 
     @classmethod
     def left_label(cls, component):
-        return _('Host')
+        return _("Host")
 
     @classmethod
     def right_label(cls, component):
@@ -2301,17 +2297,15 @@ class HostUI(ConditionUI):
 
 
 class _SettingWithValueUI:
-
     ALL_SETTINGS = _all_settings()
 
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
 
     ACCEPT_TOGGLE = True
 
-    label_text = ''
+    label_text = ""
 
     def create_widgets(self):
-
         self.widgets = {}
 
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
@@ -2319,31 +2313,33 @@ class _SettingWithValueUI:
         self.widgets[self.label] = (0, 0, 5, 1)
 
         m = 20
-        lbl = Gtk.Label(_('Device'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, margin_top=m)
+        lbl = Gtk.Label(_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, margin_top=m)
         self.widgets[lbl] = (0, 1, 1, 1)
-        self.device_field = SmartComboBox([],
-                                          completion=True,
-                                          has_entry=True,
-                                          blank=_('Originating device'),
-                                          case_insensitive=True,
-                                          replace_with_default_name=True)
-        self.device_field.set_value('')
+        self.device_field = SmartComboBox(
+            [],
+            completion=True,
+            has_entry=True,
+            blank=_("Originating device"),
+            case_insensitive=True,
+            replace_with_default_name=True,
+        )
+        self.device_field.set_value("")
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
         self.device_field.set_margin_top(m)
-        self.device_field.connect('changed', self._changed_device)
-        self.device_field.connect('changed', self._on_update)
+        self.device_field.connect("changed", self._changed_device)
+        self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
-        lbl = Gtk.Label(_('Setting'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
+        lbl = Gtk.Label(_("Setting"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[lbl] = (0, 2, 1, 1)
         self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in self.ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
-        self.setting_field.connect('changed', self._changed_setting)
-        self.setting_field.connect('changed', self._on_update)
+        self.setting_field.connect("changed", self._changed_setting)
+        self.setting_field.connect("changed", self._on_update)
         self.widgets[self.setting_field] = (1, 2, 1, 1)
 
-        self.value_lbl = Gtk.Label(_('Value'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
+        self.value_lbl = Gtk.Label(_("Value"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[self.value_lbl] = (2, 2, 1, 1)
         self.value_field = SetValueControl(self._on_update, accept_toggle=self.ACCEPT_TOGGLE)
         self.value_field.set_valign(Gtk.Align.CENTER)
@@ -2351,20 +2347,18 @@ class _SettingWithValueUI:
         self.widgets[self.value_field] = (3, 2, 1, 1)
 
         self.key_lbl = Gtk.Label(
-            _('Item'), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
+            _("Item"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 1, 1, 1)
-        self.key_field = SmartComboBox([],
-                                       has_entry=True,
-                                       completion=True,
-                                       case_insensitive=True,
-                                       replace_with_default_name=True)
+        self.key_field = SmartComboBox(
+            [], has_entry=True, completion=True, case_insensitive=True, replace_with_default_name=True
+        )
         self.key_field.set_margin_top(m)
         self.key_field.hide()
         self.key_field.set_valign(Gtk.Align.CENTER)
-        self.key_field.connect('changed', self._changed_key)
-        self.key_field.connect('changed', self._on_update)
+        self.key_field.connect("changed", self._changed_key)
+        self.key_field.connect("changed", self._on_update)
         self.widgets[self.key_field] = (3, 1, 1, 1)
 
     @classmethod
@@ -2383,10 +2377,10 @@ class _SettingWithValueUI:
             setting = type(setting)
         if isinstance(setting, type) and issubclass(setting, _Setting):
             choices = UnsortedNamedInts()
-            universe = getattr(setting, 'choices_universe', None)
+            universe = getattr(setting, "choices_universe", None)
             if universe:
                 choices |= universe
-            extra = getattr(setting, 'choices_extra', None)
+            extra = getattr(setting, "choices_extra", None)
             if extra is not None:
                 choices |= NamedInts(**{str(extra): int(extra)})
             return choices, extra
@@ -2413,7 +2407,7 @@ class _SettingWithValueUI:
         if kind in cls.MULTIPLE:
             keys = UnsortedNamedInts()
             for s in settings:
-                universe = getattr(s, 'keys_universe' if kind == _SKIND.map_choice else 'choices_universe', None)
+                universe = getattr(s, "keys_universe" if kind == _SKIND.map_choice else "choices_universe", None)
                 if universe:
                     keys |= universe
             # only one key per number is used
@@ -2468,7 +2462,7 @@ class _SettingWithValueUI:
         self.key_lbl.set_visible(multiple)
         if not multiple:
             return
-        labels = getattr(setting, '_labels', {})
+        labels = getattr(setting, "_labels", {})
 
         def item(k):
             lbl = labels.get(k, None)
@@ -2503,7 +2497,7 @@ class _SettingWithValueUI:
             supported_values = None
             if device_setting:
                 val = device_setting._validator
-                choices = getattr(val, 'choices', None) or None
+                choices = getattr(val, "choices", None) or None
                 if kind == _SKIND.choice:
                     supported_values = choices
                 elif kind == _SKIND.map_choice and isinstance(choices, dict):
@@ -2514,8 +2508,8 @@ class _SettingWithValueUI:
             self.value_field.make_range(val_class.min_value, val_class.max_value)
         elif kind == _SKIND.multiple_range:
             self.value_field.make_range_with_key(
-                getattr(setting, 'sub_items_universe', {}).get(key, {}) if setting else {},
-                getattr(setting, '_labels_sub', None) if setting else None
+                getattr(setting, "sub_items_universe", {}).get(key, {}) if setting else {},
+                getattr(setting, "_labels_sub", None) if setting else None,
             )
         else:
             self.value_field.make_unsupported()
@@ -2528,22 +2522,24 @@ class _SettingWithValueUI:
         device_str = self.device_field.get_value()
         device = _all_devices[device_str]
         if device_str and not device:
-            icon = 'dialog-question' if len(device_str) == 8 and all(
-                c in string.hexdigits for c in device_str
-            ) else 'dialog-warning'
+            icon = (
+                "dialog-question"
+                if len(device_str) == 8 and all(c in string.hexdigits for c in device_str)
+                else "dialog-warning"
+            )
         else:
-            icon = ''
+            icon = ""
         self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         setting_name = self.setting_field.get_value()
         setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         multiple = kind in self.MULTIPLE
         if multiple:
             key = self.key_field.get_value(invalid_as_str=False, accept_hidden=False)
-            icon = 'dialog-warning' if key is None else ''
+            icon = "dialog-warning" if key is None else ""
             self.key_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         if kind in (_SKIND.choice, _SKIND.map_choice):
             value = self.value_field.choice_widget.get_value(invalid_as_str=False, accept_hidden=False)
-            icon = 'dialog-warning' if value is None else ''
+            icon = "dialog-warning" if value is None else ""
             self.value_field.choice_widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     def show(self, component, editable):
@@ -2552,21 +2548,21 @@ class _SettingWithValueUI:
             device_str = next(a, None)
             same = not device_str
             device = _all_devices[device_str]
-            self.device_field.set_value(device.id if device else '' if same else device_str or '')
-            setting_name = next(a, '')
+            self.device_field.set_value(device.id if device else "" if same else device_str or "")
+            setting_name = next(a, "")
             setting, _v, kind, keys = self._setting_attributes(setting_name, device)
-            self.setting_field.set_value(setting.name if setting else '')
+            self.setting_field.set_value(setting.name if setting else "")
             self._changed_setting()
             key = None
             if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
-                key = _from_named_ints(next(a, ''), keys)
+                key = _from_named_ints(next(a, ""), keys)
             self.key_field.set_value(key)
-            self.value_field.set_value(next(a, ''))
+            self.value_field.set_value(next(a, ""))
             self._update_validation()
 
     def collect_value(self):
         device_str = self.device_field.get_value()
-        same = device_str in ['', _('Originating device')]
+        same = device_str in ["", _("Originating device")]
         device = None if same else _all_devices[device_str]
         device_value = device.id if device else None if same else device_str
         setting_name = self.setting_field.get_value()
@@ -2584,7 +2580,7 @@ class _SettingWithValueUI:
         a = iter(component.args)
         device_str = next(a, None)
         device = None if not device_str else _all_devices[device_str]
-        device_disp = _('Originating device') if not device_str else device.display_name if device else shlex_quote(device_str)
+        device_disp = _("Originating device") if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
         setting, val_class, kind, keys = cls._setting_attributes(setting_name, device)
         device_setting = (device.settings if device else {}).get(setting_name, None)
@@ -2592,7 +2588,7 @@ class _SettingWithValueUI:
         if kind in cls.MULTIPLE:
             key = next(a, None)
             key = _from_named_ints(key, keys) if keys else key
-            key_label = getattr(setting, '_labels', {}).get(key, [None])[0] if setting else None
+            key_label = getattr(setting, "_labels", {}).get(key, [None])[0] if setting else None
             disp.append(key_label or key)
         value = next(a, None)
         if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
@@ -2600,7 +2596,7 @@ class _SettingWithValueUI:
             supported_values = None
             if device_setting:
                 val = device_setting._validator
-                choices = getattr(val, 'choices', None) or None
+                choices = getattr(val, "choices", None) or None
                 if kind == _SKIND.choice:
                     supported_values = choices
                 elif kind == _SKIND.map_choice and isinstance(choices, dict):
@@ -2612,21 +2608,20 @@ class _SettingWithValueUI:
             disp.append(value)
         elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
             k, v = next(iter(value.items()))
-            k = (getattr(setting, '_labels_sub', {}).get(k, (None, ))[0] if setting else None) or k
-            disp.append(f'{k}={v}')
+            k = (getattr(setting, "_labels_sub", {}).get(k, (None,))[0] if setting else None) or k
+            disp.append(f"{k}={v}")
         elif kind in (_SKIND.toggle, _SKIND.multiple_toggle):
             disp.append(_(str(value)))
         else:
             disp.append(value)
-        return device_disp + '  ' + '  '.join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
+        return device_disp + "  " + "  ".join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
 
 
 class SetUI(_SettingWithValueUI, ActionUI):
-
     CLASS = _DIV.Set
     ACCEPT_TOGGLE = True
 
-    label_text = _('Change setting on device')
+    label_text = _("Change setting on device")
 
     def show(self, component, editable):
         ActionUI.show(self, component, editable)
@@ -2639,11 +2634,10 @@ class SetUI(_SettingWithValueUI, ActionUI):
 
 
 class SettingUI(_SettingWithValueUI, ConditionUI):
-
     CLASS = _DIV.Setting
     ACCEPT_TOGGLE = False
 
-    label_text = _('Setting on device')
+    label_text = _("Setting on device")
 
     def show(self, component, editable):
         ConditionUI.show(self, component, editable)

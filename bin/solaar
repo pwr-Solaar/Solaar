@@ -32,16 +32,16 @@ def init_paths():
 
     except UnicodeError:
         sys.stderr.write(
-            'ERROR: Solaar cannot recognize encoding of filesystem path, '
-            'this may happen because non UTF-8 characters in the pathname.\n'
+            "ERROR: Solaar cannot recognize encoding of filesystem path, "
+            "this may happen because non UTF-8 characters in the pathname.\n"
         )
         sys.exit(1)
 
-    prefix = _path.normpath(_path.join(_path.realpath(decoded_path), '..'))
-    src_lib = _path.join(prefix, 'lib')
-    share_lib = _path.join(prefix, 'share', 'solaar', 'lib')
+    prefix = _path.normpath(_path.join(_path.realpath(decoded_path), ".."))
+    src_lib = _path.join(prefix, "lib")
+    share_lib = _path.join(prefix, "share", "solaar", "lib")
     for location in src_lib, share_lib:
-        init_py = _path.join(location, 'solaar', '__init__.py')
+        init_py = _path.join(location, "solaar", "__init__.py")
         # print ("sys.path[0]: checking", init_py)
         if _path.exists(init_py):
             # print ("sys.path[0]: found", location, "replacing", sys.path[0])
@@ -49,7 +49,8 @@ def init_paths():
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_paths()
     import solaar.gtk
+
     solaar.gtk.main()

@@ -35,105 +35,105 @@ from .i18n import _
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
 
-_DRIVER = ('hid-generic', 'generic-usb', 'logitech-djreceiver')
+_DRIVER = ("hid-generic", "generic-usb", "logitech-djreceiver")
 
 _bolt_receiver = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 2,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Bolt Receiver'),
-    'receiver_kind': 'bolt',
-    'max_devices': 6,
-    'may_unpair': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 2,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Bolt Receiver"),
+    "receiver_kind": "bolt",
+    "max_devices": 6,
+    "may_unpair": True,
 }
 
 _unifying_receiver = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 2,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Unifying Receiver'),
-    'receiver_kind': 'unifying',
-    'may_unpair': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 2,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Unifying Receiver"),
+    "receiver_kind": "unifying",
+    "may_unpair": True,
 }
 
 _nano_receiver = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver'),
-    'receiver_kind': 'nano',
-    'may_unpair': False,
-    're_pairs': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Nano Receiver"),
+    "receiver_kind": "nano",
+    "may_unpair": False,
+    "re_pairs": True,
 }
 
 _nano_receiver_no_unpair = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver'),
-    'receiver_kind': 'nano',
-    'may_unpair': False,
-    'unpair': False,
-    're_pairs': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Nano Receiver"),
+    "receiver_kind": "nano",
+    "may_unpair": False,
+    "unpair": False,
+    "re_pairs": True,
 }
 
 _nano_receiver_max2 = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver'),
-    'receiver_kind': 'nano',
-    'max_devices': 2,
-    'may_unpair': False,
-    're_pairs': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Nano Receiver"),
+    "receiver_kind": "nano",
+    "max_devices": 2,
+    "may_unpair": False,
+    "re_pairs": True,
 }
 
 _nano_receiver_maxn = lambda product_id, max: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver'),
-    'receiver_kind': 'nano',
-    'max_devices': max,
-    'may_unpair': False,
-    're_pairs': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Nano Receiver"),
+    "receiver_kind": "nano",
+    "max_devices": max,
+    "may_unpair": False,
+    "re_pairs": True,
 }
 
 _lenovo_receiver = lambda product_id: {
-    'vendor_id': 0x17ef,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Nano Receiver'),
-    'receiver_kind': 'nano',
-    'may_unpair': False
+    "vendor_id": 0x17EF,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Nano Receiver"),
+    "receiver_kind": "nano",
+    "may_unpair": False,
 }
 
 _lightspeed_receiver = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 2,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('Lightspeed Receiver'),
-    'may_unpair': False
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 2,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("Lightspeed Receiver"),
+    "may_unpair": False,
 }
 
 _ex100_receiver = lambda product_id: {
-    'vendor_id': 0x046d,
-    'product_id': product_id,
-    'usb_interface': 1,
-    'hid_driver': _DRIVER,  # noqa: F821
-    'name': _('EX100 Receiver 27 Mhz'),
-    'receiver_kind': '27Mhz',
-    'max_devices': 4,
-    'may_unpair': False,
-    're_pairs': True
+    "vendor_id": 0x046D,
+    "product_id": product_id,
+    "usb_interface": 1,
+    "hid_driver": _DRIVER,  # noqa: F821
+    "name": _("EX100 Receiver 27 Mhz"),
+    "receiver_kind": "27Mhz",
+    "max_devices": 4,
+    "may_unpair": False,
+    "re_pairs": True,
 }
 
 # Receivers added here should also be listed in
@@ -141,40 +141,40 @@ _ex100_receiver = lambda product_id: {
 # Look in https://github.com/torvalds/linux/blob/master/drivers/hid/hid-ids.h
 
 # Bolt receivers (marked with the yellow lightning bolt logo)
-BOLT_RECEIVER_C548 = _bolt_receiver(0xc548)
+BOLT_RECEIVER_C548 = _bolt_receiver(0xC548)
 
 # standard Unifying receivers (marked with the orange Unifying logo)
-UNIFYING_RECEIVER_C52B = _unifying_receiver(0xc52b)
-UNIFYING_RECEIVER_C532 = _unifying_receiver(0xc532)
+UNIFYING_RECEIVER_C52B = _unifying_receiver(0xC52B)
+UNIFYING_RECEIVER_C532 = _unifying_receiver(0xC532)
 
 # Nano receivers (usually sold with low-end devices)
-NANO_RECEIVER_ADVANCED = _nano_receiver_no_unpair(0xc52f)
-NANO_RECEIVER_C518 = _nano_receiver(0xc518)
-NANO_RECEIVER_C51A = _nano_receiver(0xc51a)
-NANO_RECEIVER_C51B = _nano_receiver(0xc51b)
-NANO_RECEIVER_C521 = _nano_receiver(0xc521)
-NANO_RECEIVER_C525 = _nano_receiver(0xc525)
-NANO_RECEIVER_C526 = _nano_receiver(0xc526)
-NANO_RECEIVER_C52E = _nano_receiver_no_unpair(0xc52e)
-NANO_RECEIVER_C531 = _nano_receiver(0xc531)
-NANO_RECEIVER_C534 = _nano_receiver_max2(0xc534)
-NANO_RECEIVER_C535 = _nano_receiver(0xc535)  # branded as Dell
-NANO_RECEIVER_C537 = _nano_receiver(0xc537)
+NANO_RECEIVER_ADVANCED = _nano_receiver_no_unpair(0xC52F)
+NANO_RECEIVER_C518 = _nano_receiver(0xC518)
+NANO_RECEIVER_C51A = _nano_receiver(0xC51A)
+NANO_RECEIVER_C51B = _nano_receiver(0xC51B)
+NANO_RECEIVER_C521 = _nano_receiver(0xC521)
+NANO_RECEIVER_C525 = _nano_receiver(0xC525)
+NANO_RECEIVER_C526 = _nano_receiver(0xC526)
+NANO_RECEIVER_C52E = _nano_receiver_no_unpair(0xC52E)
+NANO_RECEIVER_C531 = _nano_receiver(0xC531)
+NANO_RECEIVER_C534 = _nano_receiver_max2(0xC534)
+NANO_RECEIVER_C535 = _nano_receiver(0xC535)  # branded as Dell
+NANO_RECEIVER_C537 = _nano_receiver(0xC537)
 # NANO_RECEIVER_C542 = _nano_receiver(0xc542) # does not use HID++
 NANO_RECEIVER_6042 = _lenovo_receiver(0x6042)
 
 # Lightspeed receivers (usually sold with gaming devices)
-LIGHTSPEED_RECEIVER_C539 = _lightspeed_receiver(0xc539)
-LIGHTSPEED_RECEIVER_C53A = _lightspeed_receiver(0xc53a)
-LIGHTSPEED_RECEIVER_C53D = _lightspeed_receiver(0xc53d)
-LIGHTSPEED_RECEIVER_C53F = _lightspeed_receiver(0xc53f)
-LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xc541)
-LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xc545)
-LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xc547)
+LIGHTSPEED_RECEIVER_C539 = _lightspeed_receiver(0xC539)
+LIGHTSPEED_RECEIVER_C53A = _lightspeed_receiver(0xC53A)
+LIGHTSPEED_RECEIVER_C53D = _lightspeed_receiver(0xC53D)
+LIGHTSPEED_RECEIVER_C53F = _lightspeed_receiver(0xC53F)
+LIGHTSPEED_RECEIVER_C541 = _lightspeed_receiver(0xC541)
+LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xC545)
+LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xC547)
 
 # EX100 old style receiver pre-unifying protocol
 # EX100_27MHZ_RECEIVER_C50C = _ex100_receiver(0xc50C)  # in hid/hid-ids.h
-EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xc517)
+EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xC517)
 # EX100_27MHZ_RECEIVER_C51B = _ex100_receiver(0xc51B)  # in hid/hid-ids.h
 
 ALL = (

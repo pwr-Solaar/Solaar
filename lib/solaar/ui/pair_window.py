@@ -21,6 +21,7 @@ import logging
 from gi.repository import GLib, Gtk
 from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.status import KEYS as _K
+
 from solaar.i18n import _, ngettext
 
 from . import icons as _icons
@@ -70,7 +71,7 @@ def _check_lock_state(assistant, receiver, count=2):
 
     if not assistant.is_drawable():
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('assistant %s destroyed, bailing out', assistant)
+            logger.debug("assistant %s destroyed, bailing out", assistant)
         return False
 
     if receiver.status.get(_K.ERROR):
@@ -94,7 +95,7 @@ def _check_lock_state(assistant, receiver, count=2):
         ):
             return True
         else:
-            _pairing_failed(assistant, receiver, 'failed to open pairing lock')
+            _pairing_failed(assistant, receiver, "failed to open pairing lock")
             return False
     elif address and receiver.status.device_passkey and not passcode:
         passcode = receiver.status.device_passkey
@@ -106,7 +107,7 @@ def _check_lock_state(assistant, receiver, count=2):
             # the actual device notification may arrive later so have a little patience
             GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver, count - 1)
         else:
-            _pairing_failed(assistant, receiver, 'failed to open pairing lock')
+            _pairing_failed(assistant, receiver, "failed to open pairing lock")
         return False
 
     return True
@@ -114,20 +115,20 @@ def _check_lock_state(assistant, receiver, count=2):
 
 def _show_passcode(assistant, receiver, passkey):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('%s show passkey: %s', receiver, passkey)
+        logger.debug("%s show passkey: %s", receiver, passkey)
     name = receiver.status.device_name
     authentication = receiver.status.device_authentication
-    intro_text = _('%(receiver_name)s: pair new device') % {'receiver_name': receiver.name}
-    page_text = _('Enter passcode on %(name)s.') % {'name': name}
-    page_text += '\n'
+    intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
+    page_text = _("Enter passcode on %(name)s.") % {"name": name}
+    page_text += "\n"
     if authentication & 0x01:
-        page_text += _('Type %(passcode)s and then press the enter key.') % {'passcode': receiver.status.device_passkey}
+        page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": receiver.status.device_passkey}
     else:
-        passcode = ', '.join([
-            _('right') if bit == '1' else _('left') for bit in f'{int(receiver.status.device_passkey):010b}'
-        ])
-        page_text += _('Press %(code)s\nand then press left and right buttons simultaneously.') % {'code': passcode}
-    page = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, intro_text, 'preferences-desktop-peripherals', page_text)
+        passcode = ", ".join(
+            [_("right") if bit == "1" else _("left") for bit in f"{int(receiver.status.device_passkey):010b}"]
+        )
+        page_text += _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
+    page = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, intro_text, "preferences-desktop-peripherals", page_text)
     assistant.set_page_complete(page, True)
     assistant.next_page()
 
@@ -135,10 +136,10 @@ def _show_passcode(assistant, receiver, passkey):
 def _prepare(assistant, page, receiver):
     index = assistant.get_current_page()
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('prepare %s %d %s', assistant, index, page)
+        logger.debug("prepare %s %d %s", assistant, index, page)
 
     if index == 0:
-        if receiver.receiver_kind == 'bolt':
+        if receiver.receiver_kind == "bolt":
             if receiver.discover(timeout=_PAIRING_TIMEOUT):
                 assert receiver.status.new_device is None
                 assert receiver.status.get(_K.ERROR) is None
@@ -147,7 +148,7 @@ def _prepare(assistant, page, receiver):
                 GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
                 assistant.set_page_complete(page, True)
             else:
-                GLib.idle_add(_pairing_failed, assistant, receiver, 'discovery did not start')
+                GLib.idle_add(_pairing_failed, assistant, receiver, "discovery did not start")
         elif receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
             assert receiver.status.new_device is None
             assert receiver.status.get(_K.ERROR) is None
@@ -156,19 +157,19 @@ def _prepare(assistant, page, receiver):
             GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
             assistant.set_page_complete(page, True)
         else:
-            GLib.idle_add(_pairing_failed, assistant, receiver, 'the pairing lock did not open')
+            GLib.idle_add(_pairing_failed, assistant, receiver, "the pairing lock did not open")
     else:
         assistant.remove_page(0)
 
 
 def _finish(assistant, receiver):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('finish %s', assistant)
+        logger.debug("finish %s", assistant)
     assistant.destroy()
     receiver.status.new_device = None
     if receiver.status.lock_open:
-        if receiver.receiver_kind == 'bolt':
-            receiver.pair_device('cancel')
+        if receiver.receiver_kind == "bolt":
+            receiver.pair_device("cancel")
         else:
             receiver.set_lock()
     if receiver.status.discovering:
@@ -179,20 +180,20 @@ def _finish(assistant, receiver):
 
 def _pairing_failed(assistant, receiver, error):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('%s fail: %s', receiver, error)
+        logger.debug("%s fail: %s", receiver, error)
 
     assistant.commit()
 
-    header = _('Pairing failed') + ': ' + _(str(error)) + '.'
-    if 'timeout' in str(error):
-        text = _('Make sure your device is within range, and has a decent battery charge.')
-    elif str(error) == 'device not supported':
-        text = _('A new device was detected, but it is not compatible with this receiver.')
-    elif 'many' in str(error):
-        text = _('More paired devices than receiver can support.')
+    header = _("Pairing failed") + ": " + _(str(error)) + "."
+    if "timeout" in str(error):
+        text = _("Make sure your device is within range, and has a decent battery charge.")
+    elif str(error) == "device not supported":
+        text = _("A new device was detected, but it is not compatible with this receiver.")
+    elif "many" in str(error):
+        text = _("More paired devices than receiver can support.")
     else:
-        text = _('No further details are available about the error.')
-    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, 'dialog-error', text)
+        text = _("No further details are available about the error.")
+    _create_page(assistant, Gtk.AssistantPageType.SUMMARY, header, "dialog-error", text)
 
     assistant.next_page()
     assistant.commit()
@@ -201,11 +202,11 @@ def _pairing_failed(assistant, receiver, error):
 def _pairing_succeeded(assistant, receiver, device):
     assert device
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('%s success: %s', receiver, device)
+        logger.debug("%s success: %s", receiver, device)
 
     page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 
-    header = Gtk.Label(_('Found a new device:'))
+    header = Gtk.Label(_("Found a new device:"))
     header.set_alignment(0.5, 0)
     page.pack_start(header, False, False, 0)
 
@@ -216,21 +217,21 @@ def _pairing_succeeded(assistant, receiver, device):
     page.pack_start(device_icon, True, True, 0)
 
     device_label = Gtk.Label()
-    device_label.set_markup('<b>%s</b>' % device.name)
+    device_label.set_markup("<b>%s</b>" % device.name)
     device_label.set_alignment(0.5, 0)
     page.pack_start(device_label, True, True, 0)
 
     hbox = Gtk.HBox(False, 8)
-    hbox.pack_start(Gtk.Label(' '), False, False, 0)
-    hbox.set_property('expand', False)
-    hbox.set_property('halign', Gtk.Align.CENTER)
+    hbox.pack_start(Gtk.Label(" "), False, False, 0)
+    hbox.set_property("expand", False)
+    hbox.set_property("halign", Gtk.Align.CENTER)
     page.pack_start(hbox, False, False, 0)
 
     def _check_encrypted(dev):
         if assistant.is_drawable():
             if device.status.get(_K.LINK_ENCRYPTED) is False:
-                hbox.pack_start(Gtk.Image.new_from_icon_name('security-low', Gtk.IconSize.MENU), False, False, 0)
-                hbox.pack_start(Gtk.Label(_('The wireless link is not encrypted') + '!'), False, False, 0)
+                hbox.pack_start(Gtk.Image.new_from_icon_name("security-low", Gtk.IconSize.MENU), False, False, 0)
+                hbox.pack_start(Gtk.Label(_("The wireless link is not encrypted") + "!"), False, False, 0)
                 hbox.show_all()
             else:
                 return True
@@ -251,49 +252,53 @@ def create(receiver):
     address = name = kind = authentication = passcode = None
 
     assistant = Gtk.Assistant()
-    assistant.set_title(_('%(receiver_name)s: pair new device') % {'receiver_name': receiver.name})
-    assistant.set_icon_name('list-add')
+    assistant.set_title(_("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name})
+    assistant.set_icon_name("list-add")
 
     assistant.set_size_request(400, 240)
     assistant.set_resizable(False)
-    assistant.set_role('pair-device')
+    assistant.set_role("pair-device")
 
-    if receiver.receiver_kind == 'unifying':
-        page_text = _('Unifying receivers are only compatible with Unifying devices.')
-    elif receiver.receiver_kind == 'bolt':
-        page_text = _('Bolt receivers are only compatible with Bolt devices.')
+    if receiver.receiver_kind == "unifying":
+        page_text = _("Unifying receivers are only compatible with Unifying devices.")
+    elif receiver.receiver_kind == "bolt":
+        page_text = _("Bolt receivers are only compatible with Bolt devices.")
     else:
-        page_text = _('Other receivers are only compatible with a few devices.')
-    page_text += '\n'
-    page_text += _('The device must not be paired with a nearby powered-on receiver.')
-    page_text += '\n\n'
+        page_text = _("Other receivers are only compatible with a few devices.")
+    page_text += "\n"
+    page_text += _("The device must not be paired with a nearby powered-on receiver.")
+    page_text += "\n\n"
 
-    if receiver.receiver_kind == 'bolt':
-        page_text += _('Press a pairing button or key until the pairing light flashes quickly.')
-        page_text += '\n'
-        page_text += _('You may have to first turn the device off and on again.')
+    if receiver.receiver_kind == "bolt":
+        page_text += _("Press a pairing button or key until the pairing light flashes quickly.")
+        page_text += "\n"
+        page_text += _("You may have to first turn the device off and on again.")
     else:
-        page_text += _('Turn on the device you want to pair.')
-        page_text += '\n'
-        page_text += _('If the device is already turned on, turn it off and on again.')
+        page_text += _("Turn on the device you want to pair.")
+        page_text += "\n"
+        page_text += _("If the device is already turned on, turn it off and on again.")
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        page_text += ngettext(
-            '\n\nThis receiver has %d pairing remaining.', '\n\nThis receiver has %d pairings remaining.',
-            receiver.remaining_pairings()
-        ) % receiver.remaining_pairings()
-        page_text += _('\nCancelling at this point will not use up a pairing.')
+        page_text += (
+            ngettext(
+                "\n\nThis receiver has %d pairing remaining.",
+                "\n\nThis receiver has %d pairings remaining.",
+                receiver.remaining_pairings(),
+            )
+            % receiver.remaining_pairings()
+        )
+        page_text += _("\nCancelling at this point will not use up a pairing.")
 
-    intro_text = _('%(receiver_name)s: pair new device') % {'receiver_name': receiver.name}
+    intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
 
     page_intro = _create_page(
-        assistant, Gtk.AssistantPageType.PROGRESS, intro_text, 'preferences-desktop-peripherals', page_text
+        assistant, Gtk.AssistantPageType.PROGRESS, intro_text, "preferences-desktop-peripherals", page_text
     )
     spinner = Gtk.Spinner()
     spinner.set_visible(True)
     page_intro.pack_end(spinner, True, True, 24)
 
-    assistant.connect('prepare', _prepare, receiver)
-    assistant.connect('cancel', _finish, receiver)
-    assistant.connect('close', _finish, receiver)
+    assistant.connect("prepare", _prepare, receiver)
+    assistant.connect("cancel", _finish, receiver)
+    assistant.connect("close", _finish, receiver)
 
     return assistant

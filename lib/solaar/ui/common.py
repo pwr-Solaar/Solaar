@@ -23,32 +23,35 @@ import gi
 from solaar.i18n import _
 from solaar.tasks import TaskRunner as _TaskRunner
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
 
 def _error_dialog(reason, object):
-    logger.error('error: %s %s', reason, object)
+    logger.error("error: %s %s", reason, object)
 
-    if reason == 'permissions':
-        title = _('Permissions error')
+    if reason == "permissions":
+        title = _("Permissions error")
         text = (
-            _('Found a Logitech receiver or device (%s), but did not have permission to open it.') % object + '\n\n' +
-            _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
+            _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object
+            + "\n\n"
+            + _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
         )
-    elif reason == 'nodevice':
-        title = _('Cannot connect to device error')
+    elif reason == "nodevice":
+        title = _("Cannot connect to device error")
         text = (
-            _('Found a Logitech receiver or device at %s, but encountered an error connecting to it.') % object + '\n\n' +
-            _('Try disconnecting the device and then reconnecting it or turning it off and then on.')
+            _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object
+            + "\n\n"
+            + _("Try disconnecting the device and then reconnecting it or turning it off and then on.")
         )
-    elif reason == 'unpair':
-        title = _('Unpairing failed')
+    elif reason == "unpair":
+        title = _("Unpairing failed")
         text = (
-            _('Failed to unpair %{device} from %{receiver}.').format(device=object.name, receiver=object.receiver.name) +
-            '\n\n' + _('The receiver returned an error, with no further details.')
+            _("Failed to unpair %{device} from %{receiver}.").format(device=object.name, receiver=object.receiver.name)
+            + "\n\n"
+            + _("The receiver returned an error, with no further details.")
         )
     else:
         raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
@@ -76,7 +79,7 @@ _task_runner = None
 
 def start_async():
     global _task_runner
-    _task_runner = _TaskRunner('AsyncUI')
+    _task_runner = _TaskRunner("AsyncUI")
     _task_runner.start()
 
 

@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 #
 #
 
-SENSITIVITY_IGNORE = 'ignore'
+SENSITIVITY_IGNORE = "ignore"
 KIND = _NamedInts(
     toggle=0x01,
     choice=0x02,
@@ -44,7 +44,7 @@ KIND = _NamedInts(
     multiple_toggle=0x10,
     packed_range=0x20,
     multiple_range=0x40,
-    hetero=0x80
+    hetero=0x80,
 )
 
 
@@ -55,25 +55,24 @@ def bool_or_toggle(current, new):
         return bool(int(new))
     except (TypeError, ValueError):
         new = str(new).lower()
-    if new in ('true', 'yes', 'on', 't', 'y'):
+    if new in ("true", "yes", "on", "t", "y"):
         return True
-    if new in ('false', 'no', 'off', 'f', 'n'):
+    if new in ("false", "no", "off", "f", "n"):
         return False
-    if new in ('~', 'toggle'):
+    if new in ("~", "toggle"):
         return not current
     return None
 
 
 # moved first for dependency reasons
 class Validator:
-
     @classmethod
     def build(cls, setting_class, device, **kwargs):
         return cls(**kwargs)
 
     @classmethod
     def to_string(cls, value):
-        return (str(value))
+        return str(value)
 
     def compare(self, args, current):
         if len(args) != 1:
@@ -82,7 +81,7 @@ class Validator:
 
 
 class BooleanValidator(Validator):
-    __slots__ = ('true_value', 'false_value', 'read_skip_byte_count', 'write_prefix_bytes', 'mask', 'needs_current_value')
+    __slots__ = ("true_value", "false_value", "read_skip_byte_count", "write_prefix_bytes", "mask", "needs_current_value")
 
     kind = KIND.toggle
     default_true = 0x01
@@ -96,7 +95,7 @@ class BooleanValidator(Validator):
         false_value=default_false,
         mask=default_mask,
         read_skip_byte_count=0,
-        write_prefix_bytes=b''
+        write_prefix_bytes=b"",
     ):
         if isinstance(true_value, int):
             assert isinstance(false_value, int)
@@ -107,14 +106,14 @@ class BooleanValidator(Validator):
             assert true_value & false_value == 0
             assert true_value & mask == true_value
             assert false_value & mask == false_value
-            self.needs_current_value = (mask != self.default_mask)
+            self.needs_current_value = mask != self.default_mask
         elif isinstance(true_value, bytes):
             if false_value is None or false_value == self.default_false:
-                false_value = b'\x00' * len(true_value)
+                false_value = b"\x00" * len(true_value)
             else:
                 assert isinstance(false_value, bytes)
             if mask is None or mask == self.default_mask:
-                mask = b'\xFF' * len(true_value)
+                mask = b"\xFF" * len(true_value)
             else:
                 assert isinstance(mask, bytes)
             assert len(mask) == len(true_value) == len(false_value)
@@ -124,7 +123,7 @@ class BooleanValidator(Validator):
             assert tv != fv  # true and false might be something other than bit values
             assert tv & mv == tv
             assert fv & mv == fv
-            self.needs_current_value = any(m != 0xff for m in mask)
+            self.needs_current_value = any(m != 0xFF for m in mask)
         else:
             raise Exception("invalid mask '%r', type %s" % (mask, type(mask)))
 
@@ -135,18 +134,21 @@ class BooleanValidator(Validator):
         self.write_prefix_bytes = write_prefix_bytes
 
     def validate_read(self, reply_bytes):
-        reply_bytes = reply_bytes[self.read_skip_byte_count:]
+        reply_bytes = reply_bytes[self.read_skip_byte_count :]
         if isinstance(self.mask, int):
             reply_value = ord(reply_bytes[:1]) & self.mask
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('BooleanValidator: validate read %r => %02X', reply_bytes, reply_value)
+                logger.debug("BooleanValidator: validate read %r => %02X", reply_bytes, reply_value)
             if reply_value == self.true_value:
                 return True
             if reply_value == self.false_value:
                 return False
             logger.warning(
-                'BooleanValidator: reply %02X mismatched %02X/%02X/%02X', reply_value, self.true_value, self.false_value,
-                self.mask
+                "BooleanValidator: reply %02X mismatched %02X/%02X/%02X",
+                reply_value,
+                self.true_value,
+                self.false_value,
+                self.mask,
             )
             return False
 
@@ -163,7 +165,7 @@ class BooleanValidator(Validator):
             return False
 
         logger.warning(
-            'BooleanValidator: reply %r mismatched %r/%r/%r', reply_bytes, self.true_value, self.false_value, self.mask
+            "BooleanValidator: reply %r mismatched %r/%r/%r", reply_bytes, self.true_value, self.false_value, self.mask
         )
         return False
 
@@ -171,7 +173,7 @@ class BooleanValidator(Validator):
         if new_value is None:
             new_value = False
         else:
-            assert isinstance(new_value, bool), 'New value %s for boolean setting is not a boolean' % new_value
+            assert isinstance(new_value, bool), "New value %s for boolean setting is not a boolean" % new_value
 
         to_write = self.true_value if new_value else self.false_value
 
@@ -185,20 +187,20 @@ class BooleanValidator(Validator):
             to_write = bytearray(to_write)
             count = len(self.mask)
             for i in range(0, count):
-                b = ord(to_write[i:i + 1])
-                m = ord(self.mask[i:i + 1])
+                b = ord(to_write[i : i + 1])
+                m = ord(self.mask[i : i + 1])
                 assert b & m == b
                 # b &= m
                 if current_value is not None and self.needs_current_value:
-                    b |= ord(current_value[i:i + 1]) & (0xFF ^ m)
+                    b |= ord(current_value[i : i + 1]) & (0xFF ^ m)
                 to_write[i] = b
             to_write = bytes(to_write)
 
-            if current_value is not None and to_write == current_value[:len(to_write)]:
+            if current_value is not None and to_write == current_value[: len(to_write)]:
                 return None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('BooleanValidator: prepare_write(%s, %s) => %r', new_value, current_value, to_write)
+            logger.debug("BooleanValidator: prepare_write(%s, %s) => %r", new_value, current_value, to_write)
 
         return self.write_prefix_bytes + to_write
 
@@ -211,7 +213,8 @@ class BooleanValidator(Validator):
 
 class Setting:
     """A setting descriptor. Needs to be instantiated for each specific device."""
-    name = label = description = ''
+
+    name = label = description = ""
     feature = register = kind = None
     min_version = 0
     persist = True
@@ -223,13 +226,13 @@ class Setting:
         self._device = device
         self._rw = rw
         self._validator = validator
-        self.kind = getattr(self._validator, 'kind', None)
+        self.kind = getattr(self._validator, "kind", None)
         self._value = None
 
     @classmethod
     def build(cls, device):
-        assert cls.feature or cls.register, 'Settings require either a feature or a register'
-        rw_class = cls.rw_class if hasattr(cls, 'rw_class') else FeatureRW if cls.feature else RegisterRW
+        assert cls.feature or cls.register, "Settings require either a feature or a register"
+        rw_class = cls.rw_class if hasattr(cls, "rw_class") else FeatureRW if cls.feature else RegisterRW
         rw = rw_class(cls.feature if cls.feature else cls.register, **cls.rw_options)
         p = device.protocol
         if p == 1.0:  # HID++ 1.0 devices do not support features
@@ -247,38 +250,38 @@ class Setting:
 
     @property
     def choices(self):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
 
         return self._validator.choices if self._validator and self._validator.kind & KIND.choice else None
 
     @property
     def range(self):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
 
         if self._validator.kind == KIND.range:
             return (self._validator.min_value, self._validator.max_value)
 
     def _pre_read(self, cached, key=None):
-        if self.persist and self._value is None and getattr(self._device, 'persister', None):
+        if self.persist and self._value is None and getattr(self._device, "persister", None):
             # We haven't read a value from the device yet,
             # maybe we have something in the configuration.
             self._value = self._device.persister.get(self.name)
         if cached and self._value is not None:
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 # If this is a new device (or a new setting for an old device),
                 # make sure to save its current value for the next time.
                 self._device.persister[self.name] = self._value if self.persist else None
 
     def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
 
         self._pre_read(cached)
         if cached and self._value is not None:
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('%s: cached value %r on %s', self.name, self._value, self._device)
+                logger.debug("%s: cached value %r on %s", self.name, self._value, self._device)
             return self._value
 
         if self._device.online:
@@ -290,7 +293,7 @@ class Setting:
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('%s: read value %r on %s', self.name, self._value, self._device)
+                logger.debug("%s: read value %r on %s", self.name, self._value, self._device)
             return self._value
 
     def _pre_write(self, save=True):
@@ -305,12 +308,12 @@ class Setting:
         self._pre_write(save)
 
     def write(self, value, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert value is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: write %r to %s', self.name, value, self._device)
+            logger.debug("%s: write %r to %s", self.name, value, self._device)
 
         if self._device.online:
             if self._value != value:
@@ -321,12 +324,12 @@ class Setting:
                 # the _validator needs the current value, possibly to merge flag values
                 current_value = self._rw.read(self._device)
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: current value %r on %s', self.name, current_value, self._device)
+                    logger.debug("%s: current value %r on %s", self.name, current_value, self._device)
 
             data_bytes = self._validator.prepare_write(value, current_value)
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: prepare write(%s) => %r', self.name, value, data_bytes)
+                    logger.debug("%s: prepare write(%s) => %r", self.name, value, data_bytes)
 
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
@@ -342,10 +345,10 @@ class Setting:
         return self._validator.compare(args, current) if self._validator else None
 
     def apply(self):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: apply (%s)', self.name, self._device)
+            logger.debug("%s: apply (%s)", self.name, self._device)
         value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
         if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
             try:
@@ -353,16 +356,20 @@ class Setting:
             except Exception as e:
                 if logger.isEnabledFor(logging.WARNING):
                     logger.warning(
-                        '%s: error applying value %s so ignore it (%s): %s', self.name, self._value, self._device, repr(e)
+                        "%s: error applying value %s so ignore it (%s): %s", self.name, self._value, self._device, repr(e)
                     )
 
     def __str__(self):
-        if hasattr(self, '_value'):
-            assert hasattr(self, '_device')
-            return '<Setting([%s:%s] %s:%s=%s)>' % (
-                self._rw.kind, self._validator.kind if self._validator else None, self._device.codename, self.name, self._value
+        if hasattr(self, "_value"):
+            assert hasattr(self, "_device")
+            return "<Setting([%s:%s] %s:%s=%s)>" % (
+                self._rw.kind,
+                self._validator.kind if self._validator else None,
+                self._device.codename,
+                self.name,
+                self._value,
             )
-        return '<Setting([%s:%s] %s)>' % (self._rw.kind, self._validator.kind if self._validator else None, self.name)
+        return "<Setting([%s:%s] %s)>" % (self._rw.kind, self._validator.kind if self._validator else None, self.name)
 
     __repr__ = __str__
 
@@ -372,10 +379,10 @@ class Settings(Setting):
     Needs to be instantiated for each specific device."""
 
     def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+            logger.debug("%s: settings read %r from %s", self.name, self._value, self._device)
 
         self._pre_read(cached)
 
@@ -389,18 +396,18 @@ class Settings(Setting):
                 if reply:
                     reply_map[int(key)] = self._validator.validate_read(reply, key)
             self._value = reply_map
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def read_key(self, key, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert key is not None
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
+            logger.debug("%s: settings read %r key %r from %s", self.name, self._value, key, self._device)
 
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -410,17 +417,17 @@ class Settings(Setting):
             reply = self._rw.read(self._device, key)
             if reply:
                 self._value[int(key)] = self._validator.validate_read(reply, key)
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(key)]
 
     def write(self, map, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert map is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings write %r to %s', self.name, map, self._device)
+            logger.debug("%s: settings write %r to %s", self.name, map, self._device)
 
         if self._device.online:
             self.update(map, save)
@@ -428,7 +435,7 @@ class Settings(Setting):
                 data_bytes = self._validator.prepare_write(int(key), value)
                 if data_bytes is not None:
                     if logger.isEnabledFor(logging.DEBUG):
-                        logger.debug('%s: settings prepare map write(%s,%s) => %r', self.name, key, value, data_bytes)
+                        logger.debug("%s: settings prepare map write(%s,%s) => %r", self.name, key, value, data_bytes)
                     reply = self._rw.write(self._device, int(key), data_bytes)
                     if not reply:
                         return None
@@ -439,13 +446,13 @@ class Settings(Setting):
         self._pre_write(save)
 
     def write_key_value(self, key, value, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert key is not None
         assert value is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings write key %r value %r to %s', self.name, key, value, self._device)
+            logger.debug("%s: settings write key %r value %r to %s", self.name, key, value, self._device)
 
         if self._device.online:
             if not self._value:
@@ -458,7 +465,7 @@ class Settings(Setting):
                 data_bytes = value = None
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, value, data_bytes)
+                    logger.debug("%s: settings prepare key value write(%s,%s) => %r", self.name, key, value, data_bytes)
                 reply = self._rw.write(self._device, int(key), data_bytes)
                 if not reply:
                     return None
@@ -472,10 +479,10 @@ class LongSettings(Setting):
     Needs to be instantiated for each specific device."""
 
     def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+            logger.debug("%s: settings read %r from %s", self.name, self._value, self._device)
 
         self._pre_read(cached)
 
@@ -491,18 +498,18 @@ class LongSettings(Setting):
                 if reply:
                     reply_map[int(item)] = self._validator.validate_read_item(reply, item)
             self._value = reply_map
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
             return self._value
 
     def read_item(self, item, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert item is not None
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r item %r from %s', self.name, self._value, item, self._device)
+            logger.debug("%s: settings read %r item %r from %s", self.name, self._value, item, self._device)
 
         self._pre_read(cached)
         if cached and self._value is not None:
@@ -513,17 +520,17 @@ class LongSettings(Setting):
             reply = self._rw.read(self._device, r)
             if reply:
                 self._value[int(item)] = self._validator.validate_read_item(reply, item)
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(item)]
 
     def write(self, map, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert map is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: long settings write %r to %s', self.name, map, self._device)
+            logger.debug("%s: long settings write %r to %s", self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
             for item, value in map.items():
@@ -532,7 +539,7 @@ class LongSettings(Setting):
                     for data_bytes in data_bytes_list:
                         if data_bytes is not None:
                             if logger.isEnabledFor(logging.DEBUG):
-                                logger.debug('%s: settings prepare map write(%s,%s) => %r', self.name, item, value, data_bytes)
+                                logger.debug("%s: settings prepare map write(%s,%s) => %r", self.name, item, value, data_bytes)
                             reply = self._rw.write(self._device, data_bytes)
                             if not reply:
                                 return None
@@ -543,13 +550,13 @@ class LongSettings(Setting):
         self._pre_write(save)
 
     def write_key_value(self, item, value, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert item is not None
         assert value is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: long settings write item %r value %r to %s', self.name, item, value, self._device)
+            logger.debug("%s: long settings write item %r value %r to %s", self.name, item, value, self._device)
 
         if self._device.online:
             if not self._value:
@@ -558,7 +565,7 @@ class LongSettings(Setting):
             self.update_key_value(item, value, save)
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: settings prepare item value write(%s,%s) => %r', self.name, item, value, data_bytes)
+                    logger.debug("%s: settings prepare item value write(%s,%s) => %r", self.name, item, value, data_bytes)
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
                     return None
@@ -570,10 +577,10 @@ class BitFieldSetting(Setting):
     Needs to be instantiated for each specific device."""
 
     def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+            logger.debug("%s: settings read %r from %s", self.name, self._value, self._device)
 
         self._pre_read(cached)
 
@@ -586,7 +593,7 @@ class BitFieldSetting(Setting):
             if reply:
                 reply_map = self._validator.validate_read(reply)
             self._value = reply_map
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
@@ -596,11 +603,11 @@ class BitFieldSetting(Setting):
         return self._rw.read(self._device)
 
     def read_key(self, key, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert key is not None
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r key %r from %s', self.name, self._value, key, self._device)
+            logger.debug("%s: settings read %r key %r from %s", self.name, self._value, key, self._device)
 
         self._pre_read(cached)
 
@@ -611,7 +618,7 @@ class BitFieldSetting(Setting):
             reply = self._do_read_key(key)
             if reply:
                 self._value = self._validator.validate_read(reply)
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 self._device.persister[self.name] = self._value if self.persist else None
             return self._value[int(key)]
 
@@ -619,18 +626,18 @@ class BitFieldSetting(Setting):
         return self._rw.read(self._device, key)
 
     def write(self, map, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert map is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: bit field settings write %r to %s', self.name, map, self._device)
+            logger.debug("%s: bit field settings write %r to %s", self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: settings prepare map write(%s) => %r', self.name, self._value, data_bytes)
+                    logger.debug("%s: settings prepare map write(%s) => %r", self.name, self._value, data_bytes)
                 # if prepare_write returns a list, write one item at a time
                 seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
                 for b in seq:
@@ -644,13 +651,13 @@ class BitFieldSetting(Setting):
         self._pre_write(save)
 
     def write_key_value(self, key, value, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert key is not None
         assert value is not None
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: bit field settings write key %r value %r to %s', self.name, key, value, self._device)
+            logger.debug("%s: bit field settings write key %r value %r to %s", self.name, key, value, self._device)
 
         if self._device.online:
             if not self._value:
@@ -661,7 +668,7 @@ class BitFieldSetting(Setting):
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: settings prepare key value write(%s,%s) => %r', self.name, key, str(value), data_bytes)
+                    logger.debug("%s: settings prepare key value write(%s,%s) => %r", self.name, key, str(value), data_bytes)
                 # if prepare_write returns a list, write one item at a time
                 seq = data_bytes if isinstance(data_bytes, list) else [data_bytes]
                 for b in seq:
@@ -690,10 +697,10 @@ class RangeFieldSetting(Setting):
     Needs to be instantiated for each specific device."""
 
     def read(self, cached=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: settings read %r from %s', self.name, self._value, self._device)
+            logger.debug("%s: settings read %r from %s", self.name, self._value, self._device)
         self._pre_read(cached)
         if cached and self._value is not None:
             return self._value
@@ -703,7 +710,7 @@ class RangeFieldSetting(Setting):
             if reply:
                 reply_map = self._validator.validate_read(reply)
             self._value = reply_map
-            if getattr(self._device, 'persister', None) and self.name not in self._device.persister:
+            if getattr(self._device, "persister", None) and self.name not in self._device.persister:
                 # Don't update the persister if it already has a value,
                 # otherwise the first read might overwrite the value we wanted.
                 self._device.persister[self.name] = self._value if self.persist else None
@@ -716,29 +723,29 @@ class RangeFieldSetting(Setting):
         return self.read(cached)[int(key)]
 
     def write(self, map, save=True):
-        assert hasattr(self, '_value')
-        assert hasattr(self, '_device')
+        assert hasattr(self, "_value")
+        assert hasattr(self, "_device")
         assert map is not None
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: range field setting write %r to %s', self.name, map, self._device)
+            logger.debug("%s: range field setting write %r to %s", self.name, map, self._device)
         if self._device.online:
             self.update(map, save)
             data_bytes = self._validator.prepare_write(self._value)
             if data_bytes is not None:
                 if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('%s: range field setting prepare map write(%s) => %r', self.name, self._value, data_bytes)
+                    logger.debug("%s: range field setting prepare map write(%s) => %r", self.name, self._value, data_bytes)
                 reply = self._rw.write(self._device, data_bytes)
                 if not reply:
                     return None
             elif logger.isEnabledFor(logging.WARNING):
-                logger.warning('%s: range field setting no data to write', self.name)
+                logger.warning("%s: range field setting no data to write", self.name)
             return map
 
     def write_key_value(self, key, value, save=True):
         assert key is not None
         assert value is not None
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('%s: range field setting write key %r value %r to %s', self.name, key, value, self._device)
+            logger.debug("%s: range field setting write key %r value %r to %s", self.name, key, value, self._device)
         if self._device.online:
             if not self._value:
                 self.read()
@@ -754,9 +761,9 @@ class RangeFieldSetting(Setting):
 
 
 class RegisterRW:
-    __slots__ = ('register', )
+    __slots__ = ("register",)
 
-    kind = _NamedInt(0x01, _('register'))
+    kind = _NamedInt(0x01, _("register"))
 
     def __init__(self, register):
         assert isinstance(register, int)
@@ -770,11 +777,11 @@ class RegisterRW:
 
 
 class FeatureRW:
-    kind = _NamedInt(0x02, _('feature'))
+    kind = _NamedInt(0x02, _("feature"))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
-    def __init__(self, feature, read_fnid=0x00, write_fnid=0x10, prefix=b'', suffix=b'', read_prefix=b'', no_reply=False):
+    def __init__(self, feature, read_fnid=0x00, write_fnid=0x10, prefix=b"", suffix=b"", read_prefix=b"", no_reply=False):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
@@ -784,7 +791,7 @@ class FeatureRW:
         self.suffix = suffix
         self.read_prefix = read_prefix
 
-    def read(self, device, data_bytes=b''):
+    def read(self, device, data_bytes=b""):
         assert self.feature is not None
         return device.feature_request(self.feature, self.read_fnid, self.prefix, self.read_prefix, data_bytes)
 
@@ -797,7 +804,7 @@ class FeatureRW:
 
 
 class FeatureRWMap(FeatureRW):
-    kind = _NamedInt(0x02, _('feature'))
+    kind = _NamedInt(0x02, _("feature"))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
     default_key_byte_count = 1
@@ -808,7 +815,7 @@ class FeatureRWMap(FeatureRW):
         read_fnid=default_read_fnid,
         write_fnid=default_write_fnid,
         key_byte_count=default_key_byte_count,
-        no_reply=False
+        no_reply=False,
     ):
         assert isinstance(feature, _NamedInt)
         self.feature = feature
@@ -830,28 +837,27 @@ class FeatureRWMap(FeatureRW):
 
 
 class BitFieldValidator(Validator):
-    __slots__ = ('byte_count', 'options')
+    __slots__ = ("byte_count", "options")
 
     kind = KIND.multiple_toggle
 
     def __init__(self, options, byte_count=None):
-        assert (isinstance(options, list))
+        assert isinstance(options, list)
         self.options = options
         self.byte_count = (max(x.bit_length() for x in options) + 7) // 8
         if byte_count:
-            assert (isinstance(byte_count, int) and byte_count >= self.byte_count)
+            assert isinstance(byte_count, int) and byte_count >= self.byte_count
             self.byte_count = byte_count
 
     def to_string(self, value):
-
         def element_to_string(key, val):
             k = next((k for k in self.options if int(key) == k), None)
-            return str(k) + ':' + str(val) if k is not None else '?'
+            return str(k) + ":" + str(val) if k is not None else "?"
 
-        return '{' + ', '.join([element_to_string(k, value[k]) for k in value]) + '}'
+        return "{" + ", ".join([element_to_string(k, value[k]) for k in value]) + "}"
 
     def validate_read(self, reply_bytes):
-        r = _bytes2int(reply_bytes[:self.byte_count])
+        r = _bytes2int(reply_bytes[: self.byte_count])
         value = {int(k): False for k in self.options}
         m = 1
         for _ignore in range(8 * self.byte_count):
@@ -861,7 +867,7 @@ class BitFieldValidator(Validator):
         return value
 
     def prepare_write(self, new_value):
-        assert (isinstance(new_value, dict))
+        assert isinstance(new_value, dict)
         w = 0
         for k, v in new_value.items():
             if v:
@@ -890,13 +896,13 @@ class BitFieldValidator(Validator):
 
 
 class BitFieldWithOffsetAndMaskValidator(Validator):
-    __slots__ = ('byte_count', 'options', '_option_from_key', '_mask_from_offset', '_option_from_offset_mask')
+    __slots__ = ("byte_count", "options", "_option_from_key", "_mask_from_offset", "_option_from_offset_mask")
 
     kind = KIND.multiple_toggle
     sep = 0x01
 
     def __init__(self, options, om_method=None, byte_count=None):
-        assert (isinstance(options, list))
+        assert isinstance(options, list)
         # each element of options is an instance of a class
         # that has an id (which is used as an index in other dictionaries)
         # and where om_method is a method that returns a byte offset and byte mask
@@ -922,13 +928,13 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
             mask_to_opt[mask] = opt
         self.byte_count = (max(om_method(x)[1].bit_length() for x in options) + 7) // 8  # is this correct??
         if byte_count:
-            assert (isinstance(byte_count, int) and byte_count >= self.byte_count)
+            assert isinstance(byte_count, int) and byte_count >= self.byte_count
             self.byte_count = byte_count
 
     def prepare_read(self):
         r = []
         for offset, mask in self._mask_from_offset.items():
-            b = (offset << (8 * (self.byte_count + 1)))
+            b = offset << (8 * (self.byte_count + 1))
             b |= (self.sep << (8 * self.byte_count)) | mask
             r.append(_int2bytes(b, self.byte_count + 2))
         return r
@@ -946,8 +952,8 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         values = {int(k): False for k in self.options}
         for query, b in reply_bytes_dict.items():
             offset = _bytes2int(query[0:1])
-            b += (self.byte_count - len(b)) * b'\x00'
-            value = _bytes2int(b[:self.byte_count])
+            b += (self.byte_count - len(b)) * b"\x00"
+            value = _bytes2int(b[: self.byte_count])
             mask_to_opt = self._option_from_offset_mask.get(offset, {})
             m = 1
             for _ignore in range(8 * self.byte_count):
@@ -957,7 +963,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         return values
 
     def prepare_write(self, new_value):
-        assert (isinstance(new_value, dict))
+        assert isinstance(new_value, dict)
         w = {}
         for k, v in new_value.items():
             option = self._option_from_key[int(k)]
@@ -967,10 +973,14 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
             if v:
                 w[offset] |= mask
         return [
-            _int2bytes((offset << (8 * (2 * self.byte_count + 1)))
-                       | (self.sep << (16 * self.byte_count))
-                       | (self._mask_from_offset[offset] << (8 * self.byte_count))
-                       | value, 2 * self.byte_count + 2) for offset, value in w.items()
+            _int2bytes(
+                (offset << (8 * (2 * self.byte_count + 1)))
+                | (self.sep << (16 * self.byte_count))
+                | (self._mask_from_offset[offset] << (8 * self.byte_count))
+                | value,
+                2 * self.byte_count + 2,
+            )
+            for offset, value in w.items()
         ]
 
     def get_options(self):
@@ -999,9 +1009,10 @@ class ChoicesValidator(Validator):
     :param choices: a list of NamedInts
     :param byte_count: the size of the derived byte sequence. If None, it
     will be calculated from the choices."""
+
     kind = KIND.choice
 
-    def __init__(self, choices=None, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b''):
+    def __init__(self, choices=None, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b""):
         assert choices is not None
         assert isinstance(choices, _NamedInts)
         assert len(choices) > 1
@@ -1015,7 +1026,7 @@ class ChoicesValidator(Validator):
             self._byte_count = byte_count
         assert self._byte_count < 8
         self._read_skip_byte_count = read_skip_byte_count
-        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
+        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b""
         assert self._byte_count + self._read_skip_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) <= 14
 
@@ -1023,9 +1034,9 @@ class ChoicesValidator(Validator):
         return str(self.choices[value]) if isinstance(value, int) else str(value)
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count:self._read_skip_byte_count + self._byte_count])
+        reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count : self._read_skip_byte_count + self._byte_count])
         valid_value = self.choices[reply_value]
-        assert valid_value is not None, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+        assert valid_value is not None, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
         return valid_value
 
     def prepare_write(self, new_value, current_value=None):
@@ -1034,7 +1045,7 @@ class ChoicesValidator(Validator):
         else:
             value = self.choice(new_value)
         if value is None:
-            raise ValueError('invalid choice %r' % new_value)
+            raise ValueError("invalid choice %r" % new_value)
         assert isinstance(value, _NamedInt)
         return self._write_prefix_bytes + value.bytes(self._byte_count)
 
@@ -1064,13 +1075,13 @@ class ChoicesMapValidator(ChoicesValidator):
         self,
         choices_map,
         key_byte_count=0,
-        key_postfix_bytes=b'',
+        key_postfix_bytes=b"",
         byte_count=0,
         read_skip_byte_count=0,
-        write_prefix_bytes=b'',
+        write_prefix_bytes=b"",
         extra_default=None,
         mask=-1,
-        activate=0
+        activate=0,
     ):
         assert choices_map is not None
         assert isinstance(choices_map, dict)
@@ -1097,19 +1108,18 @@ class ChoicesMapValidator(ChoicesValidator):
         self.extra_default = extra_default
         self._key_postfix_bytes = key_postfix_bytes
         self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
-        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b''
+        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b""
         self.activate = activate
         self.mask = mask
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) + self._key_byte_count <= 14
 
     def to_string(self, value):
-
         def element_to_string(key, val):
             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
-            return str(k) + ':' + str(c[val]) if k is not None else '?'
+            return str(k) + ":" + str(c[val]) if k is not None else "?"
 
-        return '{' + ', '.join([element_to_string(k, value[k]) for k in sorted(value)]) + '}'
+        return "{" + ", ".join([element_to_string(k, value[k]) for k in sorted(value)]) + "}"
 
     def validate_read(self, reply_bytes, key):
         start = self._key_byte_count + self._read_skip_byte_count
@@ -1119,20 +1129,22 @@ class ChoicesMapValidator(ChoicesValidator):
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
         if reply_value not in self.choices[key]:
-            assert reply_value in self.choices[
-                key], '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+            assert reply_value in self.choices[key], "%s: failed to validate read value %02X" % (
+                self.__class__.__name__,
+                reply_value,
+            )
         return reply_value
 
     def prepare_key(self, key):
-        return key.to_bytes(self._key_byte_count, 'big') + self._key_postfix_bytes
+        return key.to_bytes(self._key_byte_count, "big") + self._key_postfix_bytes
 
     def prepare_write(self, key, new_value):
         choices = self.choices.get(key)
         if choices is None or (new_value not in choices and new_value != self.extra_default):
-            logger.error('invalid choice %r for %s', new_value, key)
+            logger.error("invalid choice %r for %s", new_value, key)
             return None
         new_value = new_value | self.activate
-        return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, 'big')
+        return self._write_prefix_bytes + new_value.to_bytes(self._byte_count, "big")
 
     def acceptable(self, args, current):
         if len(args) != 2:
@@ -1164,8 +1176,8 @@ class RangeValidator(Validator):
 
     @classmethod
     def build(cls, setting_class, device, **kwargs):
-        kwargs['min_value'] = setting_class.min_value
-        kwargs['max_value'] = setting_class.max_value
+        kwargs["min_value"] = setting_class.min_value
+        kwargs["max_value"] = setting_class.max_value
         return cls(**kwargs)
 
     def __init__(self, min_value=0, max_value=255, byte_count=1):
@@ -1181,14 +1193,14 @@ class RangeValidator(Validator):
         assert self._byte_count < 8
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[:self._byte_count])
-        assert reply_value >= self.min_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
-        assert reply_value <= self.max_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+        reply_value = _bytes2int(reply_bytes[: self._byte_count])
+        assert reply_value >= self.min_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
+        assert reply_value <= self.max_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
         return reply_value
 
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
-            raise ValueError('invalid choice %r' % new_value)
+            raise ValueError("invalid choice %r" % new_value)
         current_value = self.validate_read(current_value) if current_value is not None else None
         to_write = _int2bytes(new_value, self._byte_count)
         # current value is known and same as value to be written return None to signal not to write it
@@ -1242,10 +1254,10 @@ class PackedRangeValidator(Validator):
     max_value = 255
     count = 1
     rsbc = 0
-    write_prefix_bytes = b''
+    write_prefix_bytes = b""
 
     def __init__(
-        self, keys, min_value=0, max_value=255, count=1, byte_count=1, read_skip_byte_count=0, write_prefix_bytes=b''
+        self, keys, min_value=0, max_value=255, count=1, byte_count=1, read_skip_byte_count=0, write_prefix_bytes=b""
     ):
         assert max_value > min_value
         self.needs_current_value = True
@@ -1263,21 +1275,21 @@ class PackedRangeValidator(Validator):
 
     def validate_read(self, reply_bytes):
         rvs = {
-            n: _bytes2int(reply_bytes[self.rsbc + n * self.bc:self.rsbc + (n + 1) * self.bc], signed=True)
+            n: _bytes2int(reply_bytes[self.rsbc + n * self.bc : self.rsbc + (n + 1) * self.bc], signed=True)
             for n in range(self.count)
         }
         for n in range(self.count):
-            assert rvs[n] >= self.min_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, rvs[n])
-            assert rvs[n] <= self.max_value, '%s: failed to validate read value %02X' % (self.__class__.__name__, rvs[n])
+            assert rvs[n] >= self.min_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, rvs[n])
+            assert rvs[n] <= self.max_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, rvs[n])
         return rvs
 
     def prepare_write(self, new_values):
         if len(new_values) != self.count:
-            raise ValueError('wrong number of values %r' % new_values)
+            raise ValueError("wrong number of values %r" % new_values)
         for new_value in new_values:
             if new_value < self.min_value or new_value > self.max_value:
-                raise ValueError('invalid value %r' % new_value)
-        bytes = self.write_prefix_bytes + b''.join(_int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count))
+                raise ValueError("invalid value %r" % new_value)
+        bytes = self.write_prefix_bytes + b"".join(_int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count))
         return bytes
 
     def acceptable(self, args, current):
@@ -1286,7 +1298,7 @@ class PackedRangeValidator(Validator):
         return None if type(args[1]) != int or args[1] < self.min_value or args[1] > self.max_value else args
 
     def compare(self, args, current):
-        logger.warning('compare not implemented for packed range settings')
+        logger.warning("compare not implemented for packed range settings")
         return False
 
 
@@ -1310,14 +1322,14 @@ class MultipleRangeValidator(Validator):
         start = 0
         value = {}
         for sub_item in self.sub_items[item]:
-            r = reply_bytes[start:start + sub_item.length]
+            r = reply_bytes[start : start + sub_item.length]
             if len(r) < sub_item.length:
-                r += b'\x00' * (sub_item.length - len(value))
+                r += b"\x00" * (sub_item.length - len(value))
             v = _bytes2int(r)
             if not (sub_item.minimum < v < sub_item.maximum):
                 logger.warning(
-                    f'{self.__class__.__name__}: failed to validate read value for {item}.{sub_item}: ' +
-                    f'{v} not in [{sub_item.minimum}..{sub_item.maximum}]'
+                    f"{self.__class__.__name__}: failed to validate read value for {item}.{sub_item}: "
+                    + f"{v} not in [{sub_item.minimum}..{sub_item.maximum}]"
                 )
             value[str(sub_item)] = v
             start += sub_item.length
@@ -1325,7 +1337,7 @@ class MultipleRangeValidator(Validator):
 
     def prepare_write(self, value):
         seq = []
-        w = b''
+        w = b""
         for item in value.keys():
             _item = self._item_from_id[int(item)]
             b = _int2bytes(_item.index, 1)
@@ -1336,14 +1348,14 @@ class MultipleRangeValidator(Validator):
                     return None
                 if not (sub_item.minimum <= v <= sub_item.maximum):
                     raise ValueError(
-                        f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]'
+                        f"invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]"
                     )
                 b += _int2bytes(v, sub_item.length)
             if len(w) + len(b) > 15:
-                seq.append(b + b'\xFF')
-                w = b''
+                seq.append(b + b"\xFF")
+                w = b""
             w += b
-        seq.append(w + b'\xFF')
+        seq.append(w + b"\xFF")
         return seq
 
     def prepare_write_item(self, item, value):
@@ -1355,9 +1367,9 @@ class MultipleRangeValidator(Validator):
             except KeyError:
                 return None
             if not (sub_item.minimum <= v <= sub_item.maximum):
-                raise ValueError(f'invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]')
+                raise ValueError(f"invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]")
             w += _int2bytes(v, sub_item.length)
-        return w + b'\xFF'
+        return w + b"\xFF"
 
     def acceptable(self, args, current):
         # just one item, with at least one sub-item
@@ -1375,14 +1387,14 @@ class MultipleRangeValidator(Validator):
         return [int(item), {**args[1]}]
 
     def compare(self, args, current):
-        logger.warning('compare not implemented for multiple range settings')
+        logger.warning("compare not implemented for multiple range settings")
         return False
 
 
 class ActionSettingRW:
     """Special RW class for settings that turn on and off special processing when a key or button is depressed"""
 
-    def __init__(self, feature, name='', divert_setting_name='divert-keys'):
+    def __init__(self, feature, name="", divert_setting_name="divert-keys"):
         self.feature = feature  # not used?
         self.name = name
         self.divert_setting_name = divert_setting_name
@@ -1411,14 +1423,13 @@ class ActionSettingRW:
         pass
 
     def read(self, device):  # need to return bytes, as if read from device
-        return _int2bytes(self.key.key, 2) if self.active and self.key else b'\x00\x00'
+        return _int2bytes(self.key.key, 2) if self.active and self.key else b"\x00\x00"
 
     def write(self, device, data_bytes):
-
         def handler(device, n):  # Called on notification events from the device
             if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
-                    cids = _unpack('!HHHH', n.data[:8])
+                    cids = _unpack("!HHHH", n.data[:8])
                     if not self.pressed and int(self.key.key) in cids:  # trigger key pressed
                         self.pressed = True
                         self.press_action()
@@ -1432,12 +1443,12 @@ class ActionSettingRW:
                                     self.key_action(key)
                 elif n.address == 0x10:
                     if self.pressed:
-                        dx, dy = _unpack('!hh', n.data[:4])
+                        dx, dy = _unpack("!hh", n.data[:4])
                         self.move_action(dx, dy)
 
         divertSetting = next(filter(lambda s: s.name == self.divert_setting_name, device.settings), None)
         if divertSetting is None:
-            logger.warning('setting %s not found on %s', self.divert_setting_name, device.name)
+            logger.warning("setting %s not found on %s", self.divert_setting_name, device.name)
             return None
         self.device = device
         key = _bytes2int(data_bytes)
@@ -1452,7 +1463,7 @@ class ActionSettingRW:
                 device.add_notification_handler(self.name, handler)
                 self.activate_action()
             else:
-                logger.error('cannot enable %s on %s for key %s', self.name, device, key)
+                logger.error("cannot enable %s on %s for key %s", self.name, device, key)
         else:  # Disable
             if self.active:
                 self.active = False
@@ -1464,7 +1475,7 @@ class ActionSettingRW:
                     device.remove_notification_handler(self.name)
                 except Exception:
                     if logger.isEnabledFor(logging.WARNING):
-                        logger.warning('cannot disable %s on %s', self.name, device)
+                        logger.warning("cannot disable %s on %s", self.name, device)
                 self.deactivate_action()
         return True
 
@@ -1472,7 +1483,7 @@ class ActionSettingRW:
 class RawXYProcessing:
     """Special class for processing RawXY action messages initiated by pressing a key with rawXY diversion capability"""
 
-    def __init__(self, device, name=''):
+    def __init__(self, device, name=""):
         self.device = device
         self.name = name
         self.keys = []  # the keys that can initiate processing
@@ -1484,7 +1495,7 @@ class RawXYProcessing:
     def handler(self, device, n):  # Called on notification events from the device
         if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
             if n.address == 0x00:
-                cids = _unpack('!HHHH', n.data[:8])
+                cids = _unpack("!HHHH", n.data[:8])
                 ## generalize to list of keys
                 if not self.initiating_key:  # no initiating key pressed
                     for k in self.keys:
@@ -1502,7 +1513,7 @@ class RawXYProcessing:
                                 self.key_action(key)
             elif n.address == 0x10:
                 if self.initiating_key:
-                    dx, dy = _unpack('!hh', n.data[:4])
+                    dx, dy = _unpack("!hh", n.data[:4])
                     self.move_action(dx, dy)
 
     def start(self, key):
@@ -1526,7 +1537,7 @@ class RawXYProcessing:
                     self.device.remove_notification_handler(self.name)
                 except Exception:
                     if logger.isEnabledFor(logging.WARNING):
-                        logger.warning('cannot disable %s on %s', self.name, self.device)
+                        logger.warning("cannot disable %s on %s", self.name, self.device)
                 self.deactivate_action()
                 self.active = False
 
@@ -1552,8 +1563,8 @@ class RawXYProcessing:
 def apply_all_settings(device):
     if device.features and _hidpp20_constants.FEATURE.HIRES_WHEEL in device.features:
         _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
-    persister = getattr(device, 'persister', None)
-    sensitives = persister.get('_sensitive', {}) if persister else {}
+    persister = getattr(device, "persister", None)
+    sensitives = persister.get("_sensitive", {}) if persister else {}
     for s in device.settings:
         ignore = sensitives.get(s.name, False)
         if ignore != SENSITIVITY_IGNORE:

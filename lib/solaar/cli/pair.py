@@ -50,7 +50,6 @@ def run(receivers, args, find_receiver, _ignore):
     known_devices = [dev.number for dev in receiver]
 
     class _HandleWithNotificationHook(int):
-
         def notifications_hook(self, n):
             nonlocal known_devices
             assert n
@@ -68,9 +67,9 @@ def run(receivers, args, find_receiver, _ignore):
     timeout = 30  # seconds
     receiver.handle = _HandleWithNotificationHook(receiver.handle)
 
-    if receiver.receiver_kind == 'bolt':  # Bolt receivers require authentication to pair a device
+    if receiver.receiver_kind == "bolt":  # Bolt receivers require authentication to pair a device
         receiver.discover(timeout=timeout)
-        print('Bolt Pairing: long-press the pairing key or button on your device (timing out in', timeout, 'seconds).')
+        print("Bolt Pairing: long-press the pairing key or button on your device (timing out in", timeout, "seconds).")
         pairing_start = _timestamp()
         patience = 5  # the discovering notification may come slightly later, so be patient
         while receiver.status.discovering or _timestamp() - pairing_start < patience:
@@ -84,11 +83,11 @@ def run(receivers, args, find_receiver, _ignore):
         name = receiver.status.device_name
         authentication = receiver.status.device_authentication
         kind = receiver.status.device_kind
-        print(f'Bolt Pairing: discovered {name}')
+        print(f"Bolt Pairing: discovered {name}")
         receiver.pair_device(
             address=address,
             authentication=authentication,
-            entropy=20 if kind == _hidpp10_constants.DEVICE_KIND.keyboard else 10
+            entropy=20 if kind == _hidpp10_constants.DEVICE_KIND.keyboard else 10,
         )
         pairing_start = _timestamp()
         patience = 5  # the discovering notification may come slightly later, so be patient
@@ -100,12 +99,12 @@ def run(receivers, args, find_receiver, _ignore):
             if n:
                 receiver.handle.notifications_hook(n)
         if authentication & 0x01:
-            print(f'Bolt Pairing: type passkey {receiver.status.device_passkey} and then press the enter key')
+            print(f"Bolt Pairing: type passkey {receiver.status.device_passkey} and then press the enter key")
         else:
-            passkey = f'{int(receiver.status.device_passkey):010b}'
-            passkey = ', '.join(['right' if bit == '1' else 'left' for bit in passkey])
-            print(f'Bolt Pairing: press {passkey}')
-            print('and then press left and right buttons simultaneously')
+            passkey = f"{int(receiver.status.device_passkey):010b}"
+            passkey = ", ".join(["right" if bit == "1" else "left" for bit in passkey])
+            print(f"Bolt Pairing: press {passkey}")
+            print("and then press left and right buttons simultaneously")
         while receiver.status.lock_open:
             n = _base.read(receiver.handle)
             n = _base.make_notification(*n) if n else None
@@ -114,7 +113,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     else:
         receiver.set_lock(False, timeout=timeout)
-        print('Pairing: turn your new device on (timing out in', timeout, 'seconds).')
+        print("Pairing: turn your new device on (timing out in", timeout, "seconds).")
         pairing_start = _timestamp()
         patience = 5  # the lock-open notification may come slightly later, wait for it a bit
         while receiver.status.lock_open or _timestamp() - pairing_start < patience:
@@ -131,10 +130,10 @@ def run(receivers, args, find_receiver, _ignore):
 
     if receiver.status.new_device:
         dev = receiver.status.new_device
-        print('Paired device %d: %s (%s) [%s:%s]' % (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
+        print("Paired device %d: %s (%s) [%s:%s]" % (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
     else:
         error = receiver.status.get(_status.KEYS.ERROR)
         if error:
-            raise Exception('pairing failed: %s' % error)
+            raise Exception("pairing failed: %s" % error)
         else:
-            print('Paired device')  # this is better than an error
+            print("Paired device")  # this is better than an error

@@ -30,7 +30,7 @@ _suspend_callback = None
 def _suspend():
     if _suspend_callback:
         if logger.isEnabledFor(logging.INFO):
-            logger.info('received suspend event')
+            logger.info("received suspend event")
         _suspend_callback()
 
 
@@ -40,7 +40,7 @@ _resume_callback = None
 def _resume():
     if _resume_callback:
         if logger.isEnabledFor(logging.INFO):
-            logger.info('received resume event')
+            logger.info("received resume event")
         _resume_callback()
 
 
@@ -59,24 +59,25 @@ def watch(on_resume_callback=None, on_suspend_callback=None):
 try:
     import dbus
 
-    _LOGIND_BUS = 'org.freedesktop.login1'
-    _LOGIND_INTERFACE = 'org.freedesktop.login1.Manager'
+    _LOGIND_BUS = "org.freedesktop.login1"
+    _LOGIND_INTERFACE = "org.freedesktop.login1.Manager"
 
     # integration into the main GLib loop
     from dbus.mainloop.glib import DBusGMainLoop
+
     DBusGMainLoop(set_as_default=True)
 
     bus = dbus.SystemBus()
     assert bus
 
-    bus.add_signal_receiver(_suspend_or_resume, 'PrepareForSleep', dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
+    bus.add_signal_receiver(_suspend_or_resume, "PrepareForSleep", dbus_interface=_LOGIND_INTERFACE, bus_name=_LOGIND_BUS)
 
     if logger.isEnabledFor(logging.INFO):
-        logger.info('connected to system dbus, watching for suspend/resume events')
+        logger.info("connected to system dbus, watching for suspend/resume events")
 
 except Exception:
     # Either:
     # - the dbus library is not available
     # - the system dbus is not running
-    logger.warning('failed to register suspend/resume callbacks')
+    logger.warning("failed to register suspend/resume callbacks")
     pass

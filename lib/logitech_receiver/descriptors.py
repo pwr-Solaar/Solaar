@@ -33,7 +33,6 @@ from .hidpp10_constants import REGISTERS as _R
 
 
 class _DeviceDescriptor:
-
     def __init__(
         self,
         name=None,
@@ -44,7 +43,7 @@ class _DeviceDescriptor:
         registers=None,
         usbid=None,
         interface=None,
-        btid=None
+        btid=None,
     ):
         self.name = name
         self.kind = kind
@@ -76,21 +75,30 @@ def _D(
 ):
     if kind is None:
         kind = (
-            _DK.mouse if 'Mouse' in name else _DK.keyboard if 'Keyboard' in name else _DK.numpad
-            if 'Number Pad' in name else _DK.touchpad if 'Touchpad' in name else _DK.trackball if 'Trackball' in name else None
+            _DK.mouse
+            if "Mouse" in name
+            else _DK.keyboard
+            if "Keyboard" in name
+            else _DK.numpad
+            if "Number Pad" in name
+            else _DK.touchpad
+            if "Touchpad" in name
+            else _DK.trackball
+            if "Trackball" in name
+            else None
         )
-    assert kind is not None, 'descriptor for %s does not have kind set' % name
+    assert kind is not None, "descriptor for %s does not have kind set" % name
 
     if protocol is not None:
         if wpid:
-            for w in wpid if isinstance(wpid, tuple) else (wpid, ):
+            for w in wpid if isinstance(wpid, tuple) else (wpid,):
                 if protocol > 1.0:
-                    assert w[0:1] == '4', '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
+                    assert w[0:1] == "4", "%s has protocol %0.1f, wpid %s" % (name, protocol, w)
                 else:
-                    if w[0:1] == '1':
-                        assert kind == _DK.mouse, '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
-                    elif w[0:1] == '2':
-                        assert kind in (_DK.keyboard, _DK.numpad), '%s has protocol %0.1f, wpid %s' % (name, protocol, w)
+                    if w[0:1] == "1":
+                        assert kind == _DK.mouse, "%s has protocol %0.1f, wpid %s" % (name, protocol, w)
+                    elif w[0:1] == "2":
+                        assert kind in (_DK.keyboard, _DK.numpad), "%s has protocol %0.1f, wpid %s" % (name, protocol, w)
 
     device_descriptor = _DeviceDescriptor(
         name=name,
@@ -101,23 +109,23 @@ def _D(
         registers=registers,
         usbid=usbid,
         interface=interface,
-        btid=btid
+        btid=btid,
     )
 
     if usbid:
         found = get_usbid(usbid)
-        assert found is None, 'duplicate usbid in device descriptors: %s' % (found, )
+        assert found is None, "duplicate usbid in device descriptors: %s" % (found,)
     if btid:
         found = get_btid(btid)
-        assert found is None, 'duplicate btid in device descriptors: %s' % (found, )
+        assert found is None, "duplicate btid in device descriptors: %s" % (found,)
 
-    assert codename not in DEVICES, 'duplicate codename in device descriptors: %s' % (DEVICES[codename], )
+    assert codename not in DEVICES, "duplicate codename in device descriptors: %s" % (DEVICES[codename],)
     if codename:
         DEVICES[codename] = device_descriptor
 
     if wpid:
-        for w in wpid if isinstance(wpid, tuple) else (wpid, ):
-            assert w not in DEVICES_WPID, 'duplicate wpid in device descriptors: %s' % (DEVICES_WPID[w], )
+        for w in wpid if isinstance(wpid, tuple) else (wpid,):
+            assert w not in DEVICES_WPID, "duplicate wpid in device descriptors: %s" % (DEVICES_WPID[w],)
             DEVICES_WPID[w] = device_descriptor
 
 

@@ -33,7 +33,8 @@ logger = logging.getLogger(__name__)
 
 try:
     import gi
-    gi.require_version('Notify', '0.7')
+
+    gi.require_version("Notify", "0.7")
     # this import is allowed to fail, in which case the entire feature is unavailable
     from gi.repository import GLib, Notify
 
@@ -44,7 +45,6 @@ except (ValueError, ImportError):
     available = False
 
 if available:
-
     # cache references to shown notifications here, so if another status comes
     # while its notification is still visible we don't create another one
     _notifications = {}
@@ -55,18 +55,18 @@ if available:
         if available:
             if not Notify.is_initted():
                 if logger.isEnabledFor(logging.INFO):
-                    logger.info('starting desktop notifications')
+                    logger.info("starting desktop notifications")
                 try:
                     return Notify.init(NAME)
                 except Exception:
-                    logger.exception('initializing desktop notifications')
+                    logger.exception("initializing desktop notifications")
                     available = False
         return available and Notify.is_initted()
 
     def uninit():
         if available and Notify.is_initted():
             if logger.isEnabledFor(logging.INFO):
-                logger.info('stopping desktop notifications')
+                logger.info("stopping desktop notifications")
             _notifications.clear()
             Notify.uninit()
 
@@ -92,14 +92,14 @@ if available:
 
             n.update(NAME, reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
-            n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
+            n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
 
             try:
                 # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                logger.exception('showing %s', n)
+                logger.exception("showing %s", n)
 
     def show(dev, reason=None, icon=None, progress=None):
         """Show a notification with title and text.
@@ -116,11 +116,11 @@ if available:
             if reason:
                 message = reason
             elif dev.status is None:
-                message = _('unpaired')
+                message = _("unpaired")
             elif bool(dev.status):
-                message = dev.status.to_string() or _('connected')
+                message = dev.status.to_string() or _("connected")
             else:
-                message = _('offline')
+                message = _("offline")
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
@@ -129,16 +129,16 @@ if available:
             n.update(summary, message, icon_file)
             urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
             n.set_urgency(urgency)
-            n.set_hint('desktop-entry', GLib.Variant('s', NAME.lower()))
+            n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
             if progress:
-                n.set_hint('value', GLib.Variant('i', progress))
+                n.set_hint("value", GLib.Variant("i", progress))
 
             try:
                 # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                logger.exception('showing %s', n)
+                logger.exception("showing %s", n)
 
 else:
     init = lambda: False

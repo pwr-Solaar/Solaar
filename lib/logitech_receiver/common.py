@@ -31,28 +31,266 @@ is_string = lambda d: isinstance(d, str)
 
 
 def crc16(data: bytes):
-    '''
+    """
     CRC-16 (CCITT) implemented with a precomputed lookup table
-    '''
+    """
     table = [
-        0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7, 0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE,
-        0xF1EF, 0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6, 0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C,
-        0xF3FF, 0xE3DE, 0x2462, 0x3443, 0x0420, 0x1401, 0x64E6, 0x74C7, 0x44A4, 0x5485, 0xA56A, 0xB54B, 0x8528, 0x9509, 0xE5EE,
-        0xF5CF, 0xC5AC, 0xD58D, 0x3653, 0x2672, 0x1611, 0x0630, 0x76D7, 0x66F6, 0x5695, 0x46B4, 0xB75B, 0xA77A, 0x9719, 0x8738,
-        0xF7DF, 0xE7FE, 0xD79D, 0xC7BC, 0x48C4, 0x58E5, 0x6886, 0x78A7, 0x0840, 0x1861, 0x2802, 0x3823, 0xC9CC, 0xD9ED, 0xE98E,
-        0xF9AF, 0x8948, 0x9969, 0xA90A, 0xB92B, 0x5AF5, 0x4AD4, 0x7AB7, 0x6A96, 0x1A71, 0x0A50, 0x3A33, 0x2A12, 0xDBFD, 0xCBDC,
-        0xFBBF, 0xEB9E, 0x9B79, 0x8B58, 0xBB3B, 0xAB1A, 0x6CA6, 0x7C87, 0x4CE4, 0x5CC5, 0x2C22, 0x3C03, 0x0C60, 0x1C41, 0xEDAE,
-        0xFD8F, 0xCDEC, 0xDDCD, 0xAD2A, 0xBD0B, 0x8D68, 0x9D49, 0x7E97, 0x6EB6, 0x5ED5, 0x4EF4, 0x3E13, 0x2E32, 0x1E51, 0x0E70,
-        0xFF9F, 0xEFBE, 0xDFDD, 0xCFFC, 0xBF1B, 0xAF3A, 0x9F59, 0x8F78, 0x9188, 0x81A9, 0xB1CA, 0xA1EB, 0xD10C, 0xC12D, 0xF14E,
-        0xE16F, 0x1080, 0x00A1, 0x30C2, 0x20E3, 0x5004, 0x4025, 0x7046, 0x6067, 0x83B9, 0x9398, 0xA3FB, 0xB3DA, 0xC33D, 0xD31C,
-        0xE37F, 0xF35E, 0x02B1, 0x1290, 0x22F3, 0x32D2, 0x4235, 0x5214, 0x6277, 0x7256, 0xB5EA, 0xA5CB, 0x95A8, 0x8589, 0xF56E,
-        0xE54F, 0xD52C, 0xC50D, 0x34E2, 0x24C3, 0x14A0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405, 0xA7DB, 0xB7FA, 0x8799, 0x97B8,
-        0xE75F, 0xF77E, 0xC71D, 0xD73C, 0x26D3, 0x36F2, 0x0691, 0x16B0, 0x6657, 0x7676, 0x4615, 0x5634, 0xD94C, 0xC96D, 0xF90E,
-        0xE92F, 0x99C8, 0x89E9, 0xB98A, 0xA9AB, 0x5844, 0x4865, 0x7806, 0x6827, 0x18C0, 0x08E1, 0x3882, 0x28A3, 0xCB7D, 0xDB5C,
-        0xEB3F, 0xFB1E, 0x8BF9, 0x9BD8, 0xABBB, 0xBB9A, 0x4A75, 0x5A54, 0x6A37, 0x7A16, 0x0AF1, 0x1AD0, 0x2AB3, 0x3A92, 0xFD2E,
-        0xED0F, 0xDD6C, 0xCD4D, 0xBDAA, 0xAD8B, 0x9DE8, 0x8DC9, 0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
-        0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8, 0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1,
-        0x1EF0
+        0x0000,
+        0x1021,
+        0x2042,
+        0x3063,
+        0x4084,
+        0x50A5,
+        0x60C6,
+        0x70E7,
+        0x8108,
+        0x9129,
+        0xA14A,
+        0xB16B,
+        0xC18C,
+        0xD1AD,
+        0xE1CE,
+        0xF1EF,
+        0x1231,
+        0x0210,
+        0x3273,
+        0x2252,
+        0x52B5,
+        0x4294,
+        0x72F7,
+        0x62D6,
+        0x9339,
+        0x8318,
+        0xB37B,
+        0xA35A,
+        0xD3BD,
+        0xC39C,
+        0xF3FF,
+        0xE3DE,
+        0x2462,
+        0x3443,
+        0x0420,
+        0x1401,
+        0x64E6,
+        0x74C7,
+        0x44A4,
+        0x5485,
+        0xA56A,
+        0xB54B,
+        0x8528,
+        0x9509,
+        0xE5EE,
+        0xF5CF,
+        0xC5AC,
+        0xD58D,
+        0x3653,
+        0x2672,
+        0x1611,
+        0x0630,
+        0x76D7,
+        0x66F6,
+        0x5695,
+        0x46B4,
+        0xB75B,
+        0xA77A,
+        0x9719,
+        0x8738,
+        0xF7DF,
+        0xE7FE,
+        0xD79D,
+        0xC7BC,
+        0x48C4,
+        0x58E5,
+        0x6886,
+        0x78A7,
+        0x0840,
+        0x1861,
+        0x2802,
+        0x3823,
+        0xC9CC,
+        0xD9ED,
+        0xE98E,
+        0xF9AF,
+        0x8948,
+        0x9969,
+        0xA90A,
+        0xB92B,
+        0x5AF5,
+        0x4AD4,
+        0x7AB7,
+        0x6A96,
+        0x1A71,
+        0x0A50,
+        0x3A33,
+        0x2A12,
+        0xDBFD,
+        0xCBDC,
+        0xFBBF,
+        0xEB9E,
+        0x9B79,
+        0x8B58,
+        0xBB3B,
+        0xAB1A,
+        0x6CA6,
+        0x7C87,
+        0x4CE4,
+        0x5CC5,
+        0x2C22,
+        0x3C03,
+        0x0C60,
+        0x1C41,
+        0xEDAE,
+        0xFD8F,
+        0xCDEC,
+        0xDDCD,
+        0xAD2A,
+        0xBD0B,
+        0x8D68,
+        0x9D49,
+        0x7E97,
+        0x6EB6,
+        0x5ED5,
+        0x4EF4,
+        0x3E13,
+        0x2E32,
+        0x1E51,
+        0x0E70,
+        0xFF9F,
+        0xEFBE,
+        0xDFDD,
+        0xCFFC,
+        0xBF1B,
+        0xAF3A,
+        0x9F59,
+        0x8F78,
+        0x9188,
+        0x81A9,
+        0xB1CA,
+        0xA1EB,
+        0xD10C,
+        0xC12D,
+        0xF14E,
+        0xE16F,
+        0x1080,
+        0x00A1,
+        0x30C2,
+        0x20E3,
+        0x5004,
+        0x4025,
+        0x7046,
+        0x6067,
+        0x83B9,
+        0x9398,
+        0xA3FB,
+        0xB3DA,
+        0xC33D,
+        0xD31C,
+        0xE37F,
+        0xF35E,
+        0x02B1,
+        0x1290,
+        0x22F3,
+        0x32D2,
+        0x4235,
+        0x5214,
+        0x6277,
+        0x7256,
+        0xB5EA,
+        0xA5CB,
+        0x95A8,
+        0x8589,
+        0xF56E,
+        0xE54F,
+        0xD52C,
+        0xC50D,
+        0x34E2,
+        0x24C3,
+        0x14A0,
+        0x0481,
+        0x7466,
+        0x6447,
+        0x5424,
+        0x4405,
+        0xA7DB,
+        0xB7FA,
+        0x8799,
+        0x97B8,
+        0xE75F,
+        0xF77E,
+        0xC71D,
+        0xD73C,
+        0x26D3,
+        0x36F2,
+        0x0691,
+        0x16B0,
+        0x6657,
+        0x7676,
+        0x4615,
+        0x5634,
+        0xD94C,
+        0xC96D,
+        0xF90E,
+        0xE92F,
+        0x99C8,
+        0x89E9,
+        0xB98A,
+        0xA9AB,
+        0x5844,
+        0x4865,
+        0x7806,
+        0x6827,
+        0x18C0,
+        0x08E1,
+        0x3882,
+        0x28A3,
+        0xCB7D,
+        0xDB5C,
+        0xEB3F,
+        0xFB1E,
+        0x8BF9,
+        0x9BD8,
+        0xABBB,
+        0xBB9A,
+        0x4A75,
+        0x5A54,
+        0x6A37,
+        0x7A16,
+        0x0AF1,
+        0x1AD0,
+        0x2AB3,
+        0x3A92,
+        0xFD2E,
+        0xED0F,
+        0xDD6C,
+        0xCD4D,
+        0xBDAA,
+        0xAD8B,
+        0x9DE8,
+        0x8DC9,
+        0x7C26,
+        0x6C07,
+        0x5C64,
+        0x4C45,
+        0x3CA2,
+        0x2C83,
+        0x1CE0,
+        0x0CC1,
+        0xEF1F,
+        0xFF3E,
+        0xCF5D,
+        0xDF7C,
+        0xAF9B,
+        0xBFBA,
+        0x8FD9,
+        0x9FF8,
+        0x6E17,
+        0x7E36,
+        0x4E55,
+        0x5E74,
+        0x2E93,
+        0x3EB2,
+        0x0ED1,
+        0x1EF0,
     ]
 
     crc = 0xFFFF
@@ -88,7 +326,7 @@ class NamedInt(int):
             return self.name.lower() == other.lower()
         # this should catch comparisons with bytes in Py3
         if other is not None:
-            raise TypeError('Unsupported type ' + str(type(other)))
+            raise TypeError("Unsupported type " + str(type(other)))
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -100,19 +338,19 @@ class NamedInt(int):
         return self.name
 
     def __repr__(self):
-        return 'NamedInt(%d, %r)' % (int(self), self.name)
+        return "NamedInt(%d, %r)" % (int(self), self.name)
 
     @classmethod
     def from_yaml(cls, loader, node):
         args = loader.construct_mapping(node)
-        return cls(value=args['value'], name=args['name'])
+        return cls(value=args["value"], name=args["name"])
 
     @classmethod
     def to_yaml(cls, dumper, data):
-        return dumper.represent_mapping('!NamedInt', {'value': int(data), 'name': data.name}, flow_style=True)
+        return dumper.represent_mapping("!NamedInt", {"value": int(data), "name": data.name}, flow_style=True)
 
 
-_yaml.SafeLoader.add_constructor('!NamedInt', NamedInt.from_yaml)
+_yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
 _yaml.add_representer(NamedInt, NamedInt.to_yaml)
 
 
@@ -129,14 +367,14 @@ class NamedInts:
     if the value already exists in the set (int or string), ValueError will be
     raised.
     """
-    __slots__ = ('__dict__', '_values', '_indexed', '_fallback', '_is_sorted')
+
+    __slots__ = ("__dict__", "_values", "_indexed", "_fallback", "_is_sorted")
 
     def __init__(self, dict=None, **kwargs):
-
         def _readable_name(n):
             if not is_string(n):
-                raise TypeError('expected string, got ' + str(type(n)))
-            return n.replace('__', '/').replace('_', ' ')
+                raise TypeError("expected string, got " + str(type(n)))
+            return n.replace("__", "/").replace("_", " ")
 
         # print (repr(kwargs))
         elements = dict if dict else kwargs
@@ -163,13 +401,13 @@ class NamedInts:
     def flag_names(self, value):
         unknown_bits = value
         for k in self._indexed:
-            assert bin(k).count('1') == 1
+            assert bin(k).count("1") == 1
             if k & value == k:
                 unknown_bits &= ~k
                 yield str(self._indexed[k])
 
         if unknown_bits:
-            yield 'unknown:%06X' % unknown_bits
+            yield "unknown:%06X" % unknown_bits
 
     def _sort_values(self):
         self._values = sorted(self._values)
@@ -190,7 +428,7 @@ class NamedInts:
         elif is_string(index):
             if index in self.__dict__:
                 return self.__dict__[index]
-            return (next((x for x in self._values if str(x) == index), None))
+            return next((x for x in self._values if str(x) == index), None)
 
         elif isinstance(index, slice):
             values = self._values if self._is_sorted else sorted(self._values)
@@ -224,17 +462,17 @@ class NamedInts:
     def __setitem__(self, index, name):
         assert isinstance(index, int), type(index)
         if isinstance(name, NamedInt):
-            assert int(index) == int(name), repr(index) + ' ' + repr(name)
+            assert int(index) == int(name), repr(index) + " " + repr(name)
             value = name
         elif is_string(name):
             value = NamedInt(index, name)
         else:
-            raise TypeError('name must be a string')
+            raise TypeError("name must be a string")
 
         if str(value) in self.__dict__:
-            raise ValueError('%s (%d) already known' % (value, int(value)))
+            raise ValueError("%s (%d) already known" % (value, int(value)))
         if int(value) in self._indexed:
-            raise ValueError('%d (%s) already known' % (int(value), value))
+            raise ValueError("%d (%s) already known" % (int(value), value))
 
         self._values.append(value)
         self._is_sorted = False
@@ -257,14 +495,13 @@ class NamedInts:
         return len(self._values)
 
     def __repr__(self):
-        return 'NamedInts(%s)' % ', '.join(repr(v) for v in self._values)
+        return "NamedInts(%s)" % ", ".join(repr(v) for v in self._values)
 
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)
 
 
 class UnsortedNamedInts(NamedInts):
-
     def _sort_values(self):
         pass
 
@@ -276,18 +513,18 @@ class UnsortedNamedInts(NamedInts):
 def strhex(x):
     assert x is not None
     """Produce a hex-string representation of a sequence of bytes."""
-    return _hexlify(x).decode('ascii').upper()
+    return _hexlify(x).decode("ascii").upper()
 
 
 def bytes2int(x, signed=False):
-    return int.from_bytes(x, signed=signed, byteorder='big')
+    return int.from_bytes(x, signed=signed, byteorder="big")
 
 
 def int2bytes(x, count=None, signed=False):
     if count:
-        return x.to_bytes(length=count, byteorder='big', signed=signed)
+        return x.to_bytes(length=count, byteorder="big", signed=signed)
     else:
-        return x.to_bytes(length=8, byteorder='big', signed=signed).lstrip(b'\x00')
+        return x.to_bytes(length=8, byteorder="big", signed=signed).lstrip(b"\x00")
 
 
 class KwException(Exception):
@@ -306,7 +543,7 @@ class KwException(Exception):
 
 
 """Firmware information."""
-FirmwareInfo = namedtuple('FirmwareInfo', ['kind', 'name', 'version', 'extras'])
+FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
 
 BATTERY_APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 

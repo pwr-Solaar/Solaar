@@ -152,84 +152,84 @@ class FnSwapVirtual(_Setting):  # virtual setting to hold fn swap strings
 
 
 class RegisterHandDetection(_Setting):
-    name = 'hand-detection'
-    label = _('Hand Detection')
-    description = _('Turn on illumination when the hands hover over the keyboard.')
+    name = "hand-detection"
+    label = _("Hand Detection")
+    description = _("Turn on illumination when the hands hover over the keyboard.")
     register = _R.keyboard_hand_detection
-    validator_options = {'true_value': b'\x00\x00\x00', 'false_value': b'\x00\x00\x30', 'mask': b'\x00\x00\xFF'}
+    validator_options = {"true_value": b"\x00\x00\x00", "false_value": b"\x00\x00\x30", "mask": b"\x00\x00\xFF"}
 
 
 class RegisterSmoothScroll(_Setting):
-    name = 'smooth-scroll'
-    label = _('Scroll Wheel Smooth Scrolling')
-    description = _('High-sensitivity mode for vertical scroll with the wheel.')
+    name = "smooth-scroll"
+    label = _("Scroll Wheel Smooth Scrolling")
+    description = _("High-sensitivity mode for vertical scroll with the wheel.")
     register = _R.mouse_button_flags
-    validator_options = {'true_value': 0x40, 'mask': 0x40}
+    validator_options = {"true_value": 0x40, "mask": 0x40}
 
 
 class RegisterSideScroll(_Setting):
-    name = 'side-scroll'
-    label = _('Side Scrolling')
+    name = "side-scroll"
+    label = _("Side Scrolling")
     description = _(
-        'When disabled, pushing the wheel sideways sends custom button events\n'
-        'instead of the standard side-scrolling events.'
+        "When disabled, pushing the wheel sideways sends custom button events\n"
+        "instead of the standard side-scrolling events."
     )
     register = _R.mouse_button_flags
-    validator_options = {'true_value': 0x02, 'mask': 0x02}
+    validator_options = {"true_value": 0x02, "mask": 0x02}
 
 
 # different devices have different sets of permissible dpis, so this should be subclassed
 class RegisterDpi(_Setting):
-    name = 'dpi-old'
-    label = _('Sensitivity (DPI - older mice)')
-    description = _('Mouse movement sensitivity')
+    name = "dpi-old"
+    label = _("Sensitivity (DPI - older mice)")
+    description = _("Mouse movement sensitivity")
     register = _R.mouse_dpi
     choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 class RegisterFnSwap(FnSwapVirtual):
     register = _R.keyboard_fn_swap
-    validator_options = {'true_value': b'\x00\x01', 'mask': b'\x00\x01'}
+    validator_options = {"true_value": b"\x00\x01", "mask": b"\x00\x01"}
 
 
 class _PerformanceMXDpi(RegisterDpi):
     choices_universe = _NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 # set up register settings for devices - this is done here to break up an import loop
-_descriptors.get_wpid('0060').settings = [RegisterFnSwap]
-_descriptors.get_wpid('2008').settings = [RegisterFnSwap]
-_descriptors.get_wpid('2010').settings = [RegisterFnSwap, RegisterHandDetection]
-_descriptors.get_wpid('2011').settings = [RegisterFnSwap]
-_descriptors.get_usbid(0xc318).settings = [RegisterFnSwap]
-_descriptors.get_wpid('C714').settings = [RegisterFnSwap]
-_descriptors.get_wpid('100B').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('100F').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('1013').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('1014').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('1017').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('1023').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('4004').settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('101A').settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('101B').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('101D').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('101F').settings = [RegisterSideScroll]
-_descriptors.get_usbid(0xc06b).settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_wpid('1025').settings = [RegisterSideScroll]
-_descriptors.get_wpid('102A').settings = [RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_usbid(0xc048).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
-_descriptors.get_usbid(0xc066).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("0060").settings = [RegisterFnSwap]
+_descriptors.get_wpid("2008").settings = [RegisterFnSwap]
+_descriptors.get_wpid("2010").settings = [RegisterFnSwap, RegisterHandDetection]
+_descriptors.get_wpid("2011").settings = [RegisterFnSwap]
+_descriptors.get_usbid(0xC318).settings = [RegisterFnSwap]
+_descriptors.get_wpid("C714").settings = [RegisterFnSwap]
+_descriptors.get_wpid("100B").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("100F").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("1013").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("1014").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("1017").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("1023").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("4004").settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("101A").settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("101B").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("101D").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("101F").settings = [RegisterSideScroll]
+_descriptors.get_usbid(0xC06B).settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_wpid("1025").settings = [RegisterSideScroll]
+_descriptors.get_wpid("102A").settings = [RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_usbid(0xC048).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
+_descriptors.get_usbid(0xC066).settings = [_PerformanceMXDpi, RegisterSmoothScroll, RegisterSideScroll]
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 class K375sFnSwap(FnSwapVirtual):
     feature = _F.K375S_FN_INVERSION
-    rw_options = {'prefix': b'\xFF'}
-    validator_options = {'true_value': b'\x01', 'false_value': b'\x00', 'read_skip_byte_count': 1}
+    rw_options = {"prefix": b"\xFF"}
+    validator_options = {"true_value": b"\x01", "false_value": b"\x00", "read_skip_byte_count": 1}
 
 
 class FnSwap(FnSwapVirtual):
@@ -241,26 +241,25 @@ class NewFnSwap(FnSwapVirtual):
 
 
 class Backlight(_Setting):
-    name = 'backlight-qualitative'
-    label = _('Backlight')
-    description = _('Set illumination time for keyboard.')
+    name = "backlight-qualitative"
+    label = _("Backlight")
+    description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT
     choices_universe = _NamedInts(Off=0, Varying=2, VeryShort=5, Short=10, Medium=20, Long=60, VeryLong=180)
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 # MX Keys S requires some extra values, as in 11 02 0c1a 000dff000b000b003c00000000000000
 # on/off options (from current) effect (FF-no change) level (from current) durations[6] (from current)
 class Backlight2(_Setting):
-    name = 'backlight'
-    label = _('Backlight')
-    description = _('Illumination level on keyboard.  Changes made are only applied in Manual mode.')
+    name = "backlight"
+    label = _("Backlight")
+    description = _("Illumination level on keyboard.  Changes made are only applied in Manual mode.")
     feature = _F.BACKLIGHT2
     min_version = 0
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -281,30 +280,28 @@ class Backlight2(_Setting):
             return True
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             backlight = device.backlight
             choices = _NamedInts()
-            choices[0xFF] = _('Disabled')
+            choices[0xFF] = _("Disabled")
             if backlight.auto_supported:
-                choices[0x1] = _('Automatic')
+                choices[0x1] = _("Automatic")
             if backlight.perm_supported:
-                choices[0x3] = _('Manual')
+                choices[0x3] = _("Manual")
             if not (backlight.auto_supported or backlight.temp_supported or backlight.perm_supported):
-                choices[0x0] = _('Enabled')
+                choices[0x0] = _("Enabled")
             return cls(choices=choices, byte_count=1)
 
 
 class Backlight2Level(_Setting):
-    name = 'backlight_level'
-    label = _('Backlight Level')
-    description = _('Illumination level on keyboard when in Manual mode.')
+    name = "backlight_level"
+    label = _("Backlight Level")
+    description = _("Illumination level on keyboard when in Manual mode.")
     feature = _F.BACKLIGHT2
     min_version = 3
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -320,11 +317,10 @@ class Backlight2Level(_Setting):
             return True
 
     class validator_class(_RangeV):
-
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.BACKLIGHT2, 0x20)
-            assert reply, 'Oops, backlight range cannot be retrieved!'
+            assert reply, "Oops, backlight range cannot be retrieved!"
             if reply[0] > 1:
                 return cls(min_value=0, max_value=reply[0] - 1, byte_count=1)
 
@@ -335,10 +331,9 @@ class Backlight2Duration(_Setting):
     validator_class = _RangeV
     min_value = 1
     max_value = 120  # actual maximum is 2 hours
-    validator_options = {'byte_count': 2}
+    validator_options = {"byte_count": 2}
 
     class rw_class:
-
         def __init__(self, feature, field):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -358,124 +353,126 @@ class Backlight2Duration(_Setting):
 
 
 class Backlight2DurationHandsOut(Backlight2Duration):
-    name = 'backlight_duration_hands_out'
-    label = _('Backlight Delay Hands Out')
-    description = _('Delay in seconds until backlight fades out with hands away from keyboard.')
+    name = "backlight_duration_hands_out"
+    label = _("Backlight Delay Hands Out")
+    description = _("Delay in seconds until backlight fades out with hands away from keyboard.")
     feature = _F.BACKLIGHT2
     validator_class = _RangeV
-    rw_options = {'field': 'dho'}
+    rw_options = {"field": "dho"}
 
 
 class Backlight2DurationHandsIn(Backlight2Duration):
-    name = 'backlight_duration_hands_in'
-    label = _('Backlight Delay Hands In')
-    description = _('Delay in seconds until backlight fades out with hands near keyboard.')
+    name = "backlight_duration_hands_in"
+    label = _("Backlight Delay Hands In")
+    description = _("Delay in seconds until backlight fades out with hands near keyboard.")
     feature = _F.BACKLIGHT2
     validator_class = _RangeV
-    rw_options = {'field': 'dhi'}
+    rw_options = {"field": "dhi"}
 
 
 class Backlight2DurationPowered(Backlight2Duration):
-    name = 'backlight_duration_powered'
-    label = _('Backlight Delay Powered')
-    description = _('Delay in seconds until backlight fades out with external power.')
+    name = "backlight_duration_powered"
+    label = _("Backlight Delay Powered")
+    description = _("Delay in seconds until backlight fades out with external power.")
     feature = _F.BACKLIGHT2
     validator_class = _RangeV
-    rw_options = {'field': 'dpow'}
+    rw_options = {"field": "dpow"}
 
 
 class Backlight3(_Setting):
-    name = 'backlight-timed'
-    label = _('Backlight')
-    description = _('Set illumination time for keyboard.')
+    name = "backlight-timed"
+    label = _("Backlight")
+    description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT3
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20, 'suffix': 0x09}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": 0x09}
     validator_class = _RangeV
     min_value = 0
     max_value = 1000
-    validator_options = {'byte_count': 2}
+    validator_options = {"byte_count": 2}
 
 
 class HiResScroll(_Setting):
-    name = 'hi-res-scroll'
-    label = _('Scroll Wheel High Resolution')
+    name = "hi-res-scroll"
+    label = _("Scroll Wheel High Resolution")
     description = (
-        _('High-sensitivity mode for vertical scroll with the wheel.') + '\n' +
-        _('Set to ignore if scrolling is abnormally fast or slow')
+        _("High-sensitivity mode for vertical scroll with the wheel.")
+        + "\n"
+        + _("Set to ignore if scrolling is abnormally fast or slow")
     )
     feature = _F.HI_RES_SCROLLING
 
 
 class LowresMode(_Setting):
-    name = 'lowres-scroll-mode'
-    label = _('Scroll Wheel Diversion')
+    name = "lowres-scroll-mode"
+    label = _("Scroll Wheel Diversion")
     description = _(
-        'Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
+        "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored)."
     )
     feature = _F.LOWRES_WHEEL
 
 
 class HiresSmoothInvert(_Setting):
-    name = 'hires-smooth-invert'
-    label = _('Scroll Wheel Direction')
-    description = _('Invert direction for vertical scroll with wheel.')
+    name = "hires-smooth-invert"
+    label = _("Scroll Wheel Direction")
+    description = _("Invert direction for vertical scroll with wheel.")
     feature = _F.HIRES_WHEEL
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': 0x04, 'mask': 0x04}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": 0x04, "mask": 0x04}
 
 
 class HiresSmoothResolution(_Setting):
-    name = 'hires-smooth-resolution'
-    label = _('Scroll Wheel Resolution')
+    name = "hires-smooth-resolution"
+    label = _("Scroll Wheel Resolution")
     description = (
-        _('High-sensitivity mode for vertical scroll with the wheel.') + '\n' +
-        _('Set to ignore if scrolling is abnormally fast or slow')
+        _("High-sensitivity mode for vertical scroll with the wheel.")
+        + "\n"
+        + _("Set to ignore if scrolling is abnormally fast or slow")
     )
     feature = _F.HIRES_WHEEL
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': 0x02, 'mask': 0x02}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": 0x02, "mask": 0x02}
 
 
 class HiresMode(_Setting):
-    name = 'hires-scroll-mode'
-    label = _('Scroll Wheel Diversion')
+    name = "hires-scroll-mode"
+    label = _("Scroll Wheel Diversion")
     description = _(
-        'Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
+        "Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored)."
     )
     feature = _F.HIRES_WHEEL
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': 0x01, 'mask': 0x01}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": 0x01, "mask": 0x01}
 
 
 class PointerSpeed(_Setting):
-    name = 'pointer_speed'
-    label = _('Sensitivity (Pointer Speed)')
-    description = _('Speed multiplier for mouse (256 is normal multiplier).')
+    name = "pointer_speed"
+    label = _("Sensitivity (Pointer Speed)")
+    description = _("Speed multiplier for mouse (256 is normal multiplier).")
     feature = _F.POINTER_SPEED
     validator_class = _RangeV
-    min_value = 0x002e
-    max_value = 0x01ff
-    validator_options = {'byte_count': 2}
+    min_value = 0x002E
+    max_value = 0x01FF
+    validator_options = {"byte_count": 2}
 
 
 class ThumbMode(_Setting):
-    name = 'thumb-scroll-mode'
-    label = _('Thumb Wheel Diversion')
+    name = "thumb-scroll-mode"
+    label = _("Thumb Wheel Diversion")
     description = _(
-        'Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored).'
+        "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar rules but are otherwise ignored)."
     )
     feature = _F.THUMB_WHEEL
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': b'\x01\x00', 'false_value': b'\x00\x00', 'mask': b'\x01\x00'}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": b"\x01\x00", "false_value": b"\x00\x00", "mask": b"\x01\x00"}
 
 
 class ThumbInvert(_Setting):
-    name = 'thumb-scroll-invert'
-    label = _('Thumb Wheel Direction')
-    description = _('Invert thumb wheel scroll direction.')
+    name = "thumb-scroll-invert"
+    label = _("Thumb Wheel Direction")
+    description = _("Invert thumb wheel scroll direction.")
     feature = _F.THUMB_WHEEL
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': b'\x00\x01', 'false_value': b'\x00\x00', 'mask': b'\x00\x01'}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": b"\x00\x01", "false_value": b"\x00\x00", "mask": b"\x00\x01"}
 
 
 # change UI to show result of onboard profile change
@@ -491,17 +488,16 @@ def profile_change(device, profile_sector):
 
 
 class OnboardProfiles(_Setting):
-    name = 'onboard_profiles'
-    label = _('Onboard Profiles')
-    description = _('Enable an onboard profile, which controls report rate, sensitivity, and button actions')
+    name = "onboard_profiles"
+    label = _("Onboard Profiles")
+    description = _("Enable an onboard profile, which controls report rate, sensitivity, and button actions")
     feature = _F.ONBOARD_PROFILES
     choices_universe = _NamedInts(Disabled=0)
     for i in range(1, 6):
-        choices_universe[i] = f'Profile {i}'
+        choices_universe[i] = f"Profile {i}"
     validator_class = _ChoicesV
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -512,50 +508,48 @@ class OnboardProfiles(_Setting):
                 active = device.feature_request(_F.ONBOARD_PROFILES, 0x40)
                 return active[:2]
             else:
-                return b'\x00\x00'
+                return b"\x00\x00"
 
         def write(self, device, data_bytes):
-            if data_bytes == b'\x00\x00':
-                result = device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x02')
+            if data_bytes == b"\x00\x00":
+                result = device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x02")
             else:
-                device.feature_request(_F.ONBOARD_PROFILES, 0x10, b'\x01')
+                device.feature_request(_F.ONBOARD_PROFILES, 0x10, b"\x01")
                 result = device.feature_request(_F.ONBOARD_PROFILES, 0x30, data_bytes)
                 profile_change(device, _bytes2int(data_bytes))
             return result
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             headers = _hidpp20.OnboardProfiles.get_profile_headers(device)
             profiles_list = [setting_class.choices_universe[0]]
             if headers:
-                for (sector, enabled) in headers:
+                for sector, enabled in headers:
                     if enabled:
                         profiles_list.append(setting_class.choices_universe[sector])
             return cls(choices=_NamedInts.list(profiles_list), byte_count=2) if len(profiles_list) > 1 else None
 
 
 class ReportRate(_Setting):
-    name = 'report_rate'
-    label = _('Report Rate')
+    name = "report_rate"
+    label = _("Report Rate")
     description = (
-        _('Frequency of device movement reports') + '\n' + _('May need Onboard Profiles set to Disable to be effective.')
+        _("Frequency of device movement reports") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     )
     feature = _F.REPORT_RATE
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     choices_universe = _NamedInts()
-    choices_universe[1] = '1ms'
-    choices_universe[2] = '2ms'
-    choices_universe[3] = '3ms'
-    choices_universe[4] = '4ms'
-    choices_universe[5] = '5ms'
-    choices_universe[6] = '6ms'
-    choices_universe[7] = '7ms'
-    choices_universe[8] = '8ms'
+    choices_universe[1] = "1ms"
+    choices_universe[2] = "2ms"
+    choices_universe[3] = "3ms"
+    choices_universe[4] = "4ms"
+    choices_universe[5] = "5ms"
+    choices_universe[6] = "6ms"
+    choices_universe[7] = "7ms"
+    choices_universe[8] = "8ms"
 
     class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
-
         def write(self, device, data_bytes):
             # Host mode is required for report rate to be adjustable
             if _hidpp20.get_onboard_mode(device) != _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
@@ -563,13 +557,12 @@ class ReportRate(_Setting):
             return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             # if device.wpid == '408E':
             #    return None  # host mode borks the function keys on the G915 TKL keyboard
             reply = device.feature_request(_F.REPORT_RATE, 0x00)
-            assert reply, 'Oops, report rate choices cannot be retrieved!'
+            assert reply, "Oops, report rate choices cannot be retrieved!"
             rate_list = []
             rate_flags = _bytes2int(reply[0:1])
             for i in range(0, 8):
@@ -579,27 +572,26 @@ class ReportRate(_Setting):
 
 
 class ExtendedReportRate(_Setting):
-    name = 'report_rate_extended'
-    label = _('Report Rate')
+    name = "report_rate_extended"
+    label = _("Report Rate")
     description = (
-        _('Frequency of device movement reports') + '\n' + _('May need Onboard Profiles set to Disable to be effective.')
+        _("Frequency of device movement reports") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     )
     feature = _F.EXTENDED_ADJUSTABLE_REPORT_RATE
-    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30}
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = _NamedInts()
-    choices_universe[0] = '8ms'
-    choices_universe[1] = '4ms'
-    choices_universe[2] = '2ms'
-    choices_universe[3] = '1ms'
-    choices_universe[4] = '500us'
-    choices_universe[5] = '250us'
-    choices_universe[6] = '125us'
+    choices_universe[0] = "8ms"
+    choices_universe[1] = "4ms"
+    choices_universe[2] = "2ms"
+    choices_universe[3] = "1ms"
+    choices_universe[4] = "500us"
+    choices_universe[5] = "250us"
+    choices_universe[6] = "125us"
 
     class _rw_class(_FeatureRW):
-
-        def read(self, device, data_bytes=b''):
+        def read(self, device, data_bytes=b""):
             # need connection type from device to get actual report rate
-            self.read_prefix = b'\x00' if device.receiver else b'\x01'
+            self.read_prefix = b"\x00" if device.receiver else b"\x01"
             super().read(device, data_bytes)
 
         def write(self, device, data_bytes):
@@ -609,72 +601,70 @@ class ExtendedReportRate(_Setting):
             return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x10)
-            assert reply, 'Oops, report rate choices cannot be retrieved!'
+            assert reply, "Oops, report rate choices cannot be retrieved!"
             rate_list = []
             rate_flags = _bytes2int(reply[0:2])
             for i in range(0, 6):
-                if (rate_flags & (0x01 << i)):
+                if rate_flags & (0x01 << i):
                     rate_list.append(setting_class.choices_universe[i])
             return cls(choices=_NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
 class DivertCrown(_Setting):
-    name = 'divert-crown'
-    label = _('Divert crown events')
-    description = _('Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).')
+    name = "divert-crown"
+    label = _("Divert crown events")
+    description = _("Make crown send CROWN HID++ notifications (which trigger Solaar rules but are otherwise ignored).")
     feature = _F.CROWN
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': 0x02, 'false_value': 0x01, 'mask': 0xff}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": 0x02, "false_value": 0x01, "mask": 0xFF}
 
 
 class CrownSmooth(_Setting):
-    name = 'crown-smooth'
-    label = _('Crown smooth scroll')
-    description = _('Set crown smooth scroll')
+    name = "crown-smooth"
+    label = _("Crown smooth scroll")
+    description = _("Set crown smooth scroll")
     feature = _F.CROWN
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'true_value': 0x01, 'false_value': 0x02, 'read_skip_byte_count': 1, 'write_prefix_bytes': b'\x00'}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"true_value": 0x01, "false_value": 0x02, "read_skip_byte_count": 1, "write_prefix_bytes": b"\x00"}
 
 
 class DivertGkeys(_Setting):
-    name = 'divert-gkeys'
-    label = _('Divert G and M Keys')
-    description = (_('Make G and M keys send HID++ notifications (which trigger Solaar rules but are otherwise ignored).'))
+    name = "divert-gkeys"
+    label = _("Divert G and M Keys")
+    description = _("Make G and M keys send HID++ notifications (which trigger Solaar rules but are otherwise ignored).")
     feature = _F.GKEY
-    validator_options = {'true_value': 0x01, 'false_value': 0x00, 'mask': 0xff}
+    validator_options = {"true_value": 0x01, "false_value": 0x00, "mask": 0xFF}
 
     class rw_class(_FeatureRW):
-
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x20)
 
         def read(self, device):  # no way to read, so just assume not diverted
-            return b'\x00'
+            return b"\x00"
 
 
 class ScrollRatchet(_Setting):
-    name = 'scroll-ratchet'
-    label = _('Scroll Wheel Ratcheted')
-    description = _('Switch the mouse wheel between speed-controlled ratcheting and always freespin.')
+    name = "scroll-ratchet"
+    label = _("Scroll Wheel Ratcheted")
+    description = _("Switch the mouse wheel between speed-controlled ratcheting and always freespin.")
     feature = _F.SMART_SHIFT
-    choices_universe = _NamedInts(**{_('Freespinning'): 1, _('Ratcheted'): 2})
+    choices_universe = _NamedInts(**{_("Freespinning"): 1, _("Ratcheted"): 2})
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 class SmartShift(_Setting):
-    name = 'smart-shift'
-    label = _('Scroll Wheel Ratchet Speed')
+    name = "smart-shift"
+    label = _("Scroll Wheel Ratchet Speed")
     description = _(
-        'Use the mouse wheel speed to switch between ratcheted and freespinning.\n'
-        'The mouse wheel is always ratcheted at 50.'
+        "Use the mouse wheel speed to switch between ratcheted and freespinning.\n"
+        "The mouse wheel is always ratcheted at 50."
     )
     feature = _F.SMART_SHIFT
-    rw_options = {'read_fnid': 0x00, 'write_fnid': 0x10}
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
 
     class rw_class(_FeatureRW):
         MIN_VALUE = 1
@@ -710,7 +700,7 @@ class SmartShift(_Setting):
 
 class SmartShiftEnhanced(SmartShift):
     feature = _F.SMART_SHIFT_ENHANCED
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
 
 
 # the keys for the choice map are Logitech controls (from special_keys)
@@ -718,18 +708,20 @@ class SmartShiftEnhanced(SmartShift):
 # and the integer being the control number for that task (to be written to the device)
 # Solaar only remaps keys (controlled by key gmask and group), not other key reprogramming
 class ReprogrammableKeys(_Settings):
-    name = 'reprogrammable-keys'
-    label = _('Key/Button Actions')
+    name = "reprogrammable-keys"
+    label = _("Key/Button Actions")
     description = (
-        _('Change the action for the key or button.') + '  ' + _('Overridden by diversion.') + '\n' +
-        _('Changing important actions (such as for the left mouse button) can result in an unusable system.')
+        _("Change the action for the key or button.")
+        + "  "
+        + _("Overridden by diversion.")
+        + "\n"
+        + _("Changing important actions (such as for the left mouse button) can result in an unusable system.")
     )
     feature = _F.REPROG_CONTROLS_V4
     keys_universe = _special_keys.CONTROL
     choices_universe = _special_keys.CONTROL
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -737,7 +729,7 @@ class ReprogrammableKeys(_Settings):
         def read(self, device, key):
             key_index = device.keys.index(key)
             key_struct = device.keys[key_index]
-            return b'\x00\x00' + _int2bytes(int(key_struct.mapped_to), 2)
+            return b"\x00\x00" + _int2bytes(int(key_struct.mapped_to), 2)
 
         def write(self, device, key, data_bytes):
             key_index = device.keys.index(key)
@@ -746,7 +738,6 @@ class ReprogrammableKeys(_Settings):
             return True
 
     class validator_class(_ChoicesMapV):
-
         @classmethod
         def build(cls, setting_class, device):
             choices = {}
@@ -759,15 +750,14 @@ class ReprogrammableKeys(_Settings):
 
 
 class DpiSlidingXY(_RawXYProcessing):
-
     def activate_action(self):
-        self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
+        self.dpiSetting = next(filter(lambda s: s.name == "dpi", self.device.settings), None)
         self.dpiChoices = list(self.dpiSetting.choices)
-        self.otherDpiIdx = self.device.persister.get('_dpi-sliding', -1) if self.device.persister else -1
+        self.otherDpiIdx = self.device.persister.get("_dpi-sliding", -1) if self.device.persister else -1
         if not isinstance(self.otherDpiIdx, int) or self.otherDpiIdx < 0 or self.otherDpiIdx >= len(self.dpiChoices):
             self.otherDpiIdx = self.dpiChoices.index(self.dpiSetting.read())
-        self.fsmState = 'idle'
-        self.dx = 0.
+        self.fsmState = "idle"
+        self.dx = 0.0
         self.movingDpiIdx = None
 
     def setNewDpi(self, newDpiIdx):
@@ -778,40 +768,40 @@ class DpiSlidingXY(_RawXYProcessing):
 
     def displayNewDpi(self, newDpiIdx):
         if _notify.available:
-            reason = 'DPI %d [min %d, max %d]' % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
+            reason = "DPI %d [min %d, max %d]" % (self.dpiChoices[newDpiIdx], self.dpiChoices[0], self.dpiChoices[-1])
             _notify.show(self.device, reason)
 
     def press_action(self, key):  # start tracking
         self.starting = True
-        if self.fsmState == 'idle':
-            self.fsmState = 'pressed'
-            self.dx = 0.
+        if self.fsmState == "idle":
+            self.fsmState = "pressed"
+            self.dx = 0.0
             # While in 'moved' state, the index into 'dpiChoices' of the currently selected DPI setting
             self.movingDpiIdx = None
 
     def release_action(self):  # adjust DPI and stop tracking
-        if self.fsmState == 'pressed':  # Swap with other DPI
+        if self.fsmState == "pressed":  # Swap with other DPI
             thisIdx = self.dpiChoices.index(self.dpiSetting.read())
             newDpiIdx, self.otherDpiIdx = self.otherDpiIdx, thisIdx
             if self.device.persister:
-                self.device.persister['_dpi-sliding'] = self.otherDpiIdx
+                self.device.persister["_dpi-sliding"] = self.otherDpiIdx
             self.setNewDpi(newDpiIdx)
             self.displayNewDpi(newDpiIdx)
-        elif self.fsmState == 'moved':  # Set DPI according to displacement
+        elif self.fsmState == "moved":  # Set DPI according to displacement
             self.setNewDpi(self.movingDpiIdx)
-        self.fsmState = 'idle'
+        self.fsmState = "idle"
 
     def move_action(self, dx, dy):
         if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.starting:
             self.starting = False  # hack to ignore strange first movement report from MX Master 3S
             return
         currDpi = self.dpiSetting.read()
-        self.dx += float(dx) / float(currDpi) * 15.  # yields a more-or-less DPI-independent dx of about 5/cm
-        if self.fsmState == 'pressed':
-            if abs(self.dx) >= 1.:
-                self.fsmState = 'moved'
+        self.dx += float(dx) / float(currDpi) * 15.0  # yields a more-or-less DPI-independent dx of about 5/cm
+        if self.fsmState == "pressed":
+            if abs(self.dx) >= 1.0:
+                self.fsmState = "moved"
                 self.movingDpiIdx = self.dpiChoices.index(currDpi)
-        elif self.fsmState == 'moved':
+        elif self.fsmState == "moved":
             currIdx = self.dpiChoices.index(self.dpiSetting.read())
             newMovingDpiIdx = min(max(currIdx + int(self.dx), 0), len(self.dpiChoices) - 1)
             if newMovingDpiIdx != self.movingDpiIdx:
@@ -820,48 +810,47 @@ class DpiSlidingXY(_RawXYProcessing):
 
 
 class MouseGesturesXY(_RawXYProcessing):
-
     def activate_action(self):
-        self.dpiSetting = next(filter(lambda s: s.name == 'dpi', self.device.settings), None)
-        self.fsmState = 'idle'
+        self.dpiSetting = next(filter(lambda s: s.name == "dpi", self.device.settings), None)
+        self.fsmState = "idle"
         self.initialize_data()
 
     def initialize_data(self):
-        self.dx = 0.
-        self.dy = 0.
+        self.dx = 0.0
+        self.dy = 0.0
         self.lastEv = None
         self.data = []
 
     def press_action(self, key):
         self.starting = True
-        if self.fsmState == 'idle':
-            self.fsmState = 'pressed'
+        if self.fsmState == "idle":
+            self.fsmState = "pressed"
             self.initialize_data()
             self.data = [key.key]
 
     def release_action(self):
-        if self.fsmState == 'pressed':
+        if self.fsmState == "pressed":
             # emit mouse gesture notification
             self.push_mouse_event()
             if logger.isEnabledFor(logging.INFO):
-                logger.info('mouse gesture notification %s', self.data)
-            payload = _pack('!' + (len(self.data) * 'h'), *self.data)
+                logger.info("mouse gesture notification %s", self.data)
+            payload = _pack("!" + (len(self.data) * "h"), *self.data)
             notification = _HIDPP_Notification(0, 0, 0, 0, payload)
             _process_notification(self.device, self.device.status, notification, _F.MOUSE_GESTURE)
-            self.fsmState = 'idle'
+            self.fsmState = "idle"
 
     def move_action(self, dx, dy):
-        if self.fsmState == 'pressed':
+        if self.fsmState == "pressed":
             now = _time() * 1000  # _time_ns() / 1e6
             if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.starting:
                 self.starting = False  # hack to ignore strange first movement report from MX Master 3S
                 return
-            if self.lastEv is not None and now - self.lastEv > 200.:
+            if self.lastEv is not None and now - self.lastEv > 200.0:
                 self.push_mouse_event()
             dpi = self.dpiSetting.read() if self.dpiSetting else 1000
-            dx = float(dx) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+            dx = float(dx) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
             self.dx += dx
-            dy = float(dy) / float(dpi) * 15.  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
+            dy = float(dy) / float(dpi) * 15.0  # This multiplier yields a more-or-less DPI-independent dx of about 5/cm
             self.dy += dy
             self.lastEv = now
 
@@ -871,7 +860,7 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(key)
         self.lastEv = _time() * 1000  # _time_ns() / 1e6
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('mouse gesture key event %d %s', key, self.data)
+            logger.debug("mouse gesture key event %d %s", key, self.data)
 
     def push_mouse_event(self):
         x = int(self.dx)
@@ -881,24 +870,23 @@ class MouseGesturesXY(_RawXYProcessing):
         self.data.append(0)
         self.data.append(x)
         self.data.append(y)
-        self.dx = 0.
-        self.dy = 0.
+        self.dx = 0.0
+        self.dy = 0.0
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('mouse gesture move event %d %d %s', x, y, self.data)
+            logger.debug("mouse gesture move event %d %d %s", x, y, self.data)
 
 
 class DivertKeys(_Settings):
-    name = 'divert-keys'
-    label = _('Key/Button Diversion')
-    description = _('Make the key or button send HID++ notifications (Diverted) or initiate Mouse Gestures or Sliding DPI')
+    name = "divert-keys"
+    label = _("Key/Button Diversion")
+    description = _("Make the key or button send HID++ notifications (Diverted) or initiate Mouse Gestures or Sliding DPI")
     feature = _F.REPROG_CONTROLS_V4
     keys_universe = _special_keys.CONTROL
-    choices_universe = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1, _('Mouse Gestures'): 2, _('Sliding DPI'): 3})
-    choices_gesture = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1, _('Mouse Gestures'): 2})
-    choices_divert = _NamedInts(**{_('Regular'): 0, _('Diverted'): 1})
+    choices_universe = _NamedInts(**{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2, _("Sliding DPI"): 3})
+    choices_gesture = _NamedInts(**{_("Regular"): 0, _("Diverted"): 1, _("Mouse Gestures"): 2})
+    choices_divert = _NamedInts(**{_("Regular"): 0, _("Diverted"): 1})
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
@@ -906,7 +894,7 @@ class DivertKeys(_Settings):
         def read(self, device, key):
             key_index = device.keys.index(key)
             key_struct = device.keys[key_index]
-            return b'\x00\x00\x01' if 'diverted' in key_struct.mapping_flags else b'\x00\x00\x00'
+            return b"\x00\x00\x01" if "diverted" in key_struct.mapping_flags else b"\x00\x00\x00"
 
         def write(self, device, key, data_bytes):
             key_index = device.keys.index(key)
@@ -915,7 +903,6 @@ class DivertKeys(_Settings):
             return True
 
     class validator_class(_ChoicesMapV):
-
         def __init__(self, choices, key_byte_count=2, byte_count=1, mask=0x01):
             super().__init__(choices, key_byte_count, byte_count, mask)
 
@@ -936,15 +923,15 @@ class DivertKeys(_Settings):
             choices = {}
             if device.keys:
                 for k in device.keys:
-                    if 'divertable' in k.flags and 'virtual' not in k.flags:
-                        if 'raw XY' in k.flags:
+                    if "divertable" in k.flags and "virtual" not in k.flags:
+                        if "raw XY" in k.flags:
                             choices[k.key] = setting_class.choices_gesture
                             if gestures is None:
-                                gestures = MouseGesturesXY(device, name='MouseGestures')
+                                gestures = MouseGesturesXY(device, name="MouseGestures")
                             if _F.ADJUSTABLE_DPI in device.features:
                                 choices[k.key] = setting_class.choices_universe
                                 if sliding is None:
-                                    sliding = DpiSlidingXY(device, name='DpiSlding')
+                                    sliding = DpiSlidingXY(device, name="DpiSlding")
                         else:
                             choices[k.key] = setting_class.choices_divert
             if not choices:
@@ -957,36 +944,35 @@ class DivertKeys(_Settings):
 
 class AdjustableDpi(_Setting):
     """Pointer Speed feature"""
+
     # Assume sensorIdx 0 (there is only one sensor)
     # [2] getSensorDpi(sensorIdx) -> sensorIdx, dpiMSB, dpiLSB
     # [3] setSensorDpi(sensorIdx, dpi)
-    name = 'dpi'
-    label = _('Sensitivity (DPI)')
-    description = _('Mouse movement sensitivity')
+    name = "dpi"
+    label = _("Sensitivity (DPI)")
+    description = _("Mouse movement sensitivity")
     feature = _F.ADJUSTABLE_DPI
-    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30}
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = _NamedInts.range(200, 4000, str, 50)
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             # [1] getSensorDpiList(sensorIdx)
             reply = device.feature_request(_F.ADJUSTABLE_DPI, 0x10)
-            assert reply, 'Oops, DPI list cannot be retrieved!'
+            assert reply, "Oops, DPI list cannot be retrieved!"
             dpi_list = []
             step = None
-            for val in _unpack('!7H', reply[1:1 + 14]):
+            for val in _unpack("!7H", reply[1 : 1 + 14]):
                 if val == 0:
                     break
                 if val >> 13 == 0b111:
-                    assert step is None and len(dpi_list) == 1, \
-                        'Invalid DPI list item: %r' % val
-                    step = val & 0x1fff
+                    assert step is None and len(dpi_list) == 1, "Invalid DPI list item: %r" % val
+                    step = val & 0x1FFF
                 else:
                     dpi_list.append(val)
             if step:
-                assert len(dpi_list) == 2, 'Invalid DPI list range: %r' % dpi_list
+                assert len(dpi_list) == 2, "Invalid DPI list range: %r" % dpi_list
                 dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
             return cls(choices=_NamedInts.list(dpi_list), byte_count=3) if dpi_list else None
 
@@ -995,61 +981,59 @@ class AdjustableDpi(_Setting):
             if reply_value == 0:  # use default value instead
                 reply_value = _bytes2int(reply_bytes[3:5])
             valid_value = self.choices[reply_value]
-            assert valid_value is not None, '%s: failed to validate read value %02X' % (self.__class__.__name__, reply_value)
+            assert valid_value is not None, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
             return valid_value
 
 
 class SpeedChange(_Setting):
     """Implements the ability to switch Sensitivity by clicking on the DPI_Change button."""
-    name = 'speed-change'
-    label = _('Sensitivity Switching')
+
+    name = "speed-change"
+    label = _("Sensitivity Switching")
     description = _(
-        'Switch the current sensitivity and the remembered sensitivity when the key or button is pressed.\n'
-        'If there is no remembered sensitivity, just remember the current sensitivity'
+        "Switch the current sensitivity and the remembered sensitivity when the key or button is pressed.\n"
+        "If there is no remembered sensitivity, just remember the current sensitivity"
     )
     choices_universe = _special_keys.CONTROL
-    choices_extra = _NamedInt(0, _('Off'))
+    choices_extra = _NamedInt(0, _("Off"))
     feature = _F.POINTER_SPEED
-    rw_options = {'name': 'speed change'}
+    rw_options = {"name": "speed change"}
 
     class rw_class(_ActionSettingRW):
-
         def press_action(self):  # switch sensitivity
-            currentSpeed = self.device.persister.get('pointer_speed', None) if self.device.persister else None
-            newSpeed = self.device.persister.get('_speed-change', None) if self.device.persister else None
-            speed_setting = next(filter(lambda s: s.name == 'pointer_speed', self.device.settings), None)
+            currentSpeed = self.device.persister.get("pointer_speed", None) if self.device.persister else None
+            newSpeed = self.device.persister.get("_speed-change", None) if self.device.persister else None
+            speed_setting = next(filter(lambda s: s.name == "pointer_speed", self.device.settings), None)
             if newSpeed is not None:
                 if speed_setting:
                     speed_setting.write(newSpeed)
                     if self.device.setting_callback:
                         self.device.setting_callback(self.device, type(speed_setting), [newSpeed])
                 else:
-                    logger.error('cannot save sensitivity setting on %s', self.device)
+                    logger.error("cannot save sensitivity setting on %s", self.device)
             if self.device.persister:
-                self.device.persister['_speed-change'] = currentSpeed
+                self.device.persister["_speed-change"] = currentSpeed
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             key_index = device.keys.index(_special_keys.CONTROL.DPI_Change)
             key = device.keys[key_index] if key_index is not None else None
-            if key is not None and 'divertable' in key.flags:
+            if key is not None and "divertable" in key.flags:
                 keys = [setting_class.choices_extra, key.key]
                 return cls(choices=_NamedInts.list(keys), byte_count=2)
 
 
 class DisableKeyboardKeys(_BitFieldSetting):
-    name = 'disable-keyboard-keys'
-    label = _('Disable keys')
-    description = _('Disable specific keyboard keys.')
+    name = "disable-keyboard-keys"
+    label = _("Disable keys")
+    description = _("Disable specific keyboard keys.")
     feature = _F.KEYBOARD_DISABLE_KEYS
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    _labels = {k: (None, _('Disables the %s key.') % k) for k in _DKEY}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    _labels = {k: (None, _("Disables the %s key.") % k) for k in _DKEY}
     choices_universe = _DKEY
 
     class validator_class(_BitFieldV):
-
         @classmethod
         def build(cls, setting_class, device):
             mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS, 0x00)[0]
@@ -1058,46 +1042,52 @@ class DisableKeyboardKeys(_BitFieldSetting):
 
 
 class Multiplatform(_Setting):
-    name = 'multiplatform'
-    label = _('Set OS')
-    description = _('Change keys to match OS.')
+    name = "multiplatform"
+    label = _("Set OS")
+    description = _("Change keys to match OS.")
     feature = _F.MULTIPLATFORM
-    rw_options = {'read_fnid': 0x00, 'write_fnid': 0x30}
-    choices_universe = _NamedInts(**{'OS ' + str(i + 1): i for i in range(8)})
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x30}
+    choices_universe = _NamedInts(**{"OS " + str(i + 1): i for i in range(8)})
 
     # multiplatform OS bits
-    OSS = [('Linux', 0x0400), ('MacOS', 0x2000), ('Windows', 0x0100), ('iOS', 0x4000), ('Android', 0x1000), ('WebOS', 0x8000),
-           ('Chrome', 0x0800), ('WinEmb', 0x0200), ('Tizen', 0x0001)]
+    OSS = [
+        ("Linux", 0x0400),
+        ("MacOS", 0x2000),
+        ("Windows", 0x0100),
+        ("iOS", 0x4000),
+        ("Android", 0x1000),
+        ("WebOS", 0x8000),
+        ("Chrome", 0x0800),
+        ("WinEmb", 0x0200),
+        ("Tizen", 0x0001),
+    ]
 
     # the problem here is how to construct the right values for the rules Set GUI,
     # as, for example, the integer value for 'Windows' can be different on different devices
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
-
             def _str_os_versions(low, high):
-
                 def _str_os_version(version):
                     if version == 0:
-                        return ''
+                        return ""
                     elif version & 0xFF:
-                        return str(version >> 8) + '.' + str(version & 0xFF)
+                        return str(version >> 8) + "." + str(version & 0xFF)
                     else:
                         return str(version >> 8)
 
-                return '' if low == 0 and high == 0 else ' ' + _str_os_version(low) + '-' + _str_os_version(high)
+                return "" if low == 0 and high == 0 else " " + _str_os_version(low) + "-" + _str_os_version(high)
 
             infos = device.feature_request(_F.MULTIPLATFORM)
-            assert infos, 'Oops, multiplatform count cannot be retrieved!'
-            flags, _ignore, num_descriptors = _unpack('!BBB', infos[:3])
+            assert infos, "Oops, multiplatform count cannot be retrieved!"
+            flags, _ignore, num_descriptors = _unpack("!BBB", infos[:3])
             if not (flags & 0x02):  # can't set platform so don't create setting
                 return []
             descriptors = []
             for index in range(0, num_descriptors):
                 descriptor = device.feature_request(_F.MULTIPLATFORM, 0x10, index)
-                platform, _ignore, os_flags, low, high = _unpack('!BBHHH', descriptor[:8])
+                platform, _ignore, os_flags, low, high = _unpack("!BBHHH", descriptor[:8])
                 descriptors.append((platform, os_flags, low, high))
             choices = _NamedInts()
             for os_name, os_bit in setting_class.OSS:
@@ -1105,142 +1095,144 @@ class Multiplatform(_Setting):
                     os = os_name + _str_os_versions(low, high)
                     if os_bit & os_flags and platform not in choices and os not in choices:
                         choices[platform] = os
-            return cls(choices=choices, read_skip_byte_count=6, write_prefix_bytes=b'\xff') if choices else None
+            return cls(choices=choices, read_skip_byte_count=6, write_prefix_bytes=b"\xff") if choices else None
 
 
 class DualPlatform(_Setting):
-    name = 'multiplatform'
-    label = _('Set OS')
-    description = _('Change keys to match OS.')
+    name = "multiplatform"
+    label = _("Set OS")
+    description = _("Change keys to match OS.")
     choices_universe = _NamedInts()
-    choices_universe[0x00] = 'iOS, MacOS'
-    choices_universe[0x01] = 'Android, Windows'
+    choices_universe[0x00] = "iOS, MacOS"
+    choices_universe[0x01] = "Android, Windows"
     feature = _F.DUALPLATFORM
-    rw_options = {'read_fnid': 0x00, 'write_fnid': 0x20}
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x20}
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 class ChangeHost(_Setting):
-    name = 'change-host'
-    label = _('Change Host')
-    description = _('Switch connection to a different host')
+    name = "change-host"
+    label = _("Change Host")
+    description = _("Switch connection to a different host")
     persist = False  # persisting this setting is harmful
     feature = _F.CHANGE_HOST
-    rw_options = {'read_fnid': 0x00, 'write_fnid': 0x10, 'no_reply': True}
-    choices_universe = _NamedInts(**{'Host ' + str(i + 1): i for i in range(3)})
+    rw_options = {"read_fnid": 0x00, "write_fnid": 0x10, "no_reply": True}
+    choices_universe = _NamedInts(**{"Host " + str(i + 1): i for i in range(3)})
 
     class validator_class(_ChoicesV):
-
         @classmethod
         def build(cls, setting_class, device):
             infos = device.feature_request(_F.CHANGE_HOST)
-            assert infos, 'Oops, host count cannot be retrieved!'
-            numHosts, currentHost = _unpack('!BB', infos[:2])
+            assert infos, "Oops, host count cannot be retrieved!"
+            numHosts, currentHost = _unpack("!BB", infos[:2])
             hostNames = _hidpp20.get_host_names(device)
             hostNames = hostNames if hostNames is not None else {}
-            if currentHost not in hostNames or hostNames[currentHost][1] == '':
-                hostNames[currentHost] = (True, _socket.gethostname().partition('.')[0])
+            if currentHost not in hostNames or hostNames[currentHost][1] == "":
+                hostNames[currentHost] = (True, _socket.gethostname().partition(".")[0])
             choices = _NamedInts()
             for host in range(0, numHosts):
-                paired, hostName = hostNames.get(host, (True, ''))
-                choices[host] = str(host + 1) + ':' + hostName if hostName else str(host + 1)
+                paired, hostName = hostNames.get(host, (True, ""))
+                choices[host] = str(host + 1) + ":" + hostName if hostName else str(host + 1)
             return cls(choices=choices, read_skip_byte_count=1) if choices and len(choices) > 1 else None
 
 
 _GESTURE2_GESTURES_LABELS = {
-    _GG['Tap1Finger']: (_('Single tap'), _('Performs a left click.')),
-    _GG['Tap2Finger']: (_('Single tap with two fingers'), _('Performs a right click.')),
-    _GG['Tap3Finger']: (_('Single tap with three fingers'), None),
-    _GG['Click1Finger']: (None, None),
-    _GG['Click2Finger']: (None, None),
-    _GG['Click3Finger']: (None, None),
-    _GG['DoubleTap1Finger']: (_('Double tap'), _('Performs a double click.')),
-    _GG['DoubleTap2Finger']: (_('Double tap with two fingers'), None),
-    _GG['DoubleTap3Finger']: (_('Double tap with three fingers'), None),
-    _GG['Track1Finger']: (None, None),
-    _GG['TrackingAcceleration']: (None, None),
-    _GG['TapDrag1Finger']: (_('Tap and drag'), _('Drags items by dragging the finger after double tapping.')),
-    _GG['TapDrag2Finger']:
-    (_('Tap and drag with two fingers'), _('Drags items by dragging the fingers after double tapping.')),
-    _GG['Drag3Finger']: (_('Tap and drag with three fingers'), None),
-    _GG['TapGestures']: (None, None),
-    _GG['FnClickGestureSuppression']:
-    (_('Suppress tap and edge gestures'), _('Disables tap and edge gestures (equivalent to pressing Fn+LeftClick).')),
-    _GG['Scroll1Finger']: (_('Scroll with one finger'), _('Scrolls.')),
-    _GG['Scroll2Finger']: (_('Scroll with two fingers'), _('Scrolls.')),
-    _GG['Scroll2FingerHoriz']: (_('Scroll horizontally with two fingers'), _('Scrolls horizontally.')),
-    _GG['Scroll2FingerVert']: (_('Scroll vertically with two fingers'), _('Scrolls vertically.')),
-    _GG['Scroll2FingerStateless']: (_('Scroll with two fingers'), _('Scrolls.')),
-    _GG['NaturalScrolling']: (_('Natural scrolling'), _('Inverts the scrolling direction.')),
-    _GG['Thumbwheel']: (_('Thumbwheel'), _('Enables the thumbwheel.')),
-    _GG['VScrollInertia']: (None, None),
-    _GG['VScrollBallistics']: (None, None),
-    _GG['Swipe2FingerHoriz']: (None, None),
-    _GG['Swipe3FingerHoriz']: (None, None),
-    _GG['Swipe4FingerHoriz']: (None, None),
-    _GG['Swipe3FingerVert']: (None, None),
-    _GG['Swipe4FingerVert']: (None, None),
-    _GG['LeftEdgeSwipe1Finger']: (None, None),
-    _GG['RightEdgeSwipe1Finger']: (None, None),
-    _GG['BottomEdgeSwipe1Finger']: (None, None),
-    _GG['TopEdgeSwipe1Finger']: (_('Swipe from the top edge'), None),
-    _GG['LeftEdgeSwipe1Finger2']: (_('Swipe from the left edge'), None),
-    _GG['RightEdgeSwipe1Finger2']: (_('Swipe from the right edge'), None),
-    _GG['BottomEdgeSwipe1Finger2']: (_('Swipe from the bottom edge'), None),
-    _GG['TopEdgeSwipe1Finger2']: (_('Swipe from the top edge'), None),
-    _GG['LeftEdgeSwipe2Finger']: (_('Swipe two fingers from the left edge'), None),
-    _GG['RightEdgeSwipe2Finger']: (_('Swipe two fingers from the right edge'), None),
-    _GG['BottomEdgeSwipe2Finger']: (_('Swipe two fingers from the bottom edge'), None),
-    _GG['TopEdgeSwipe2Finger']: (_('Swipe two fingers from the top edge'), None),
-    _GG['Zoom2Finger']: (_('Zoom with two fingers.'), _('Pinch to zoom out; spread to zoom in.')),
-    _GG['Zoom2FingerPinch']: (_('Pinch to zoom out.'), _('Pinch to zoom out.')),
-    _GG['Zoom2FingerSpread']: (_('Spread to zoom in.'), _('Spread to zoom in.')),
-    _GG['Zoom3Finger']: (_('Zoom with three fingers.'), None),
-    _GG['Zoom2FingerStateless']: (_('Zoom with two fingers'), _('Pinch to zoom out; spread to zoom in.')),
-    _GG['TwoFingersPresent']: (None, None),
-    _GG['Rotate2Finger']: (None, None),
-    _GG['Finger1']: (None, None),
-    _GG['Finger2']: (None, None),
-    _GG['Finger3']: (None, None),
-    _GG['Finger4']: (None, None),
-    _GG['Finger5']: (None, None),
-    _GG['Finger6']: (None, None),
-    _GG['Finger7']: (None, None),
-    _GG['Finger8']: (None, None),
-    _GG['Finger9']: (None, None),
-    _GG['Finger10']: (None, None),
-    _GG['DeviceSpecificRawData']: (None, None),
+    _GG["Tap1Finger"]: (_("Single tap"), _("Performs a left click.")),
+    _GG["Tap2Finger"]: (_("Single tap with two fingers"), _("Performs a right click.")),
+    _GG["Tap3Finger"]: (_("Single tap with three fingers"), None),
+    _GG["Click1Finger"]: (None, None),
+    _GG["Click2Finger"]: (None, None),
+    _GG["Click3Finger"]: (None, None),
+    _GG["DoubleTap1Finger"]: (_("Double tap"), _("Performs a double click.")),
+    _GG["DoubleTap2Finger"]: (_("Double tap with two fingers"), None),
+    _GG["DoubleTap3Finger"]: (_("Double tap with three fingers"), None),
+    _GG["Track1Finger"]: (None, None),
+    _GG["TrackingAcceleration"]: (None, None),
+    _GG["TapDrag1Finger"]: (_("Tap and drag"), _("Drags items by dragging the finger after double tapping.")),
+    _GG["TapDrag2Finger"]: (
+        _("Tap and drag with two fingers"),
+        _("Drags items by dragging the fingers after double tapping."),
+    ),
+    _GG["Drag3Finger"]: (_("Tap and drag with three fingers"), None),
+    _GG["TapGestures"]: (None, None),
+    _GG["FnClickGestureSuppression"]: (
+        _("Suppress tap and edge gestures"),
+        _("Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."),
+    ),
+    _GG["Scroll1Finger"]: (_("Scroll with one finger"), _("Scrolls.")),
+    _GG["Scroll2Finger"]: (_("Scroll with two fingers"), _("Scrolls.")),
+    _GG["Scroll2FingerHoriz"]: (_("Scroll horizontally with two fingers"), _("Scrolls horizontally.")),
+    _GG["Scroll2FingerVert"]: (_("Scroll vertically with two fingers"), _("Scrolls vertically.")),
+    _GG["Scroll2FingerStateless"]: (_("Scroll with two fingers"), _("Scrolls.")),
+    _GG["NaturalScrolling"]: (_("Natural scrolling"), _("Inverts the scrolling direction.")),
+    _GG["Thumbwheel"]: (_("Thumbwheel"), _("Enables the thumbwheel.")),
+    _GG["VScrollInertia"]: (None, None),
+    _GG["VScrollBallistics"]: (None, None),
+    _GG["Swipe2FingerHoriz"]: (None, None),
+    _GG["Swipe3FingerHoriz"]: (None, None),
+    _GG["Swipe4FingerHoriz"]: (None, None),
+    _GG["Swipe3FingerVert"]: (None, None),
+    _GG["Swipe4FingerVert"]: (None, None),
+    _GG["LeftEdgeSwipe1Finger"]: (None, None),
+    _GG["RightEdgeSwipe1Finger"]: (None, None),
+    _GG["BottomEdgeSwipe1Finger"]: (None, None),
+    _GG["TopEdgeSwipe1Finger"]: (_("Swipe from the top edge"), None),
+    _GG["LeftEdgeSwipe1Finger2"]: (_("Swipe from the left edge"), None),
+    _GG["RightEdgeSwipe1Finger2"]: (_("Swipe from the right edge"), None),
+    _GG["BottomEdgeSwipe1Finger2"]: (_("Swipe from the bottom edge"), None),
+    _GG["TopEdgeSwipe1Finger2"]: (_("Swipe from the top edge"), None),
+    _GG["LeftEdgeSwipe2Finger"]: (_("Swipe two fingers from the left edge"), None),
+    _GG["RightEdgeSwipe2Finger"]: (_("Swipe two fingers from the right edge"), None),
+    _GG["BottomEdgeSwipe2Finger"]: (_("Swipe two fingers from the bottom edge"), None),
+    _GG["TopEdgeSwipe2Finger"]: (_("Swipe two fingers from the top edge"), None),
+    _GG["Zoom2Finger"]: (_("Zoom with two fingers."), _("Pinch to zoom out; spread to zoom in.")),
+    _GG["Zoom2FingerPinch"]: (_("Pinch to zoom out."), _("Pinch to zoom out.")),
+    _GG["Zoom2FingerSpread"]: (_("Spread to zoom in."), _("Spread to zoom in.")),
+    _GG["Zoom3Finger"]: (_("Zoom with three fingers."), None),
+    _GG["Zoom2FingerStateless"]: (_("Zoom with two fingers"), _("Pinch to zoom out; spread to zoom in.")),
+    _GG["TwoFingersPresent"]: (None, None),
+    _GG["Rotate2Finger"]: (None, None),
+    _GG["Finger1"]: (None, None),
+    _GG["Finger2"]: (None, None),
+    _GG["Finger3"]: (None, None),
+    _GG["Finger4"]: (None, None),
+    _GG["Finger5"]: (None, None),
+    _GG["Finger6"]: (None, None),
+    _GG["Finger7"]: (None, None),
+    _GG["Finger8"]: (None, None),
+    _GG["Finger9"]: (None, None),
+    _GG["Finger10"]: (None, None),
+    _GG["DeviceSpecificRawData"]: (None, None),
 }
 
 _GESTURE2_PARAMS_LABELS = {
-    _GP['ExtraCapabilities']: (None, None),  # not supported
-    _GP['PixelZone']: (_('Pixel zone'), None),  # TO DO: replace None with a short description
-    _GP['RatioZone']: (_('Ratio zone'), None),  # TO DO: replace None with a short description
-    _GP['ScaleFactor']: (_('Scale factor'), _('Sets the cursor speed.')),
+    _GP["ExtraCapabilities"]: (None, None),  # not supported
+    _GP["PixelZone"]: (_("Pixel zone"), None),  # TO DO: replace None with a short description
+    _GP["RatioZone"]: (_("Ratio zone"), None),  # TO DO: replace None with a short description
+    _GP["ScaleFactor"]: (_("Scale factor"), _("Sets the cursor speed.")),
 }
 
 _GESTURE2_PARAMS_LABELS_SUB = {
-    'left': (_('Left'), _('Left-most coordinate.')),
-    'bottom': (_('Bottom'), _('Bottom coordinate.')),
-    'width': (_('Width'), _('Width.')),
-    'height': (_('Height'), _('Height.')),
-    'scale': (_('Scale'), _('Cursor speed.')),
+    "left": (_("Left"), _("Left-most coordinate.")),
+    "bottom": (_("Bottom"), _("Bottom coordinate.")),
+    "width": (_("Width"), _("Width.")),
+    "height": (_("Height"), _("Height.")),
+    "scale": (_("Scale"), _("Cursor speed.")),
 }
 
 
 class Gesture2Gestures(_BitFieldOMSetting):
-    name = 'gesture2-gestures'
-    label = _('Gestures')
-    description = _('Tweak the mouse/touchpad behaviour.')
+    name = "gesture2-gestures"
+    label = _("Gestures")
+    description = _("Tweak the mouse/touchpad behaviour.")
     feature = _F.GESTURE_2
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
-    validator_options = {'om_method': _hidpp20.Gesture.enable_offset_mask}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_options = {"om_method": _hidpp20.Gesture.enable_offset_mask}
     choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
-
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_enabled or g.default_enabled]
@@ -1248,17 +1240,16 @@ class Gesture2Gestures(_BitFieldOMSetting):
 
 
 class Gesture2Divert(_BitFieldOMSetting):
-    name = 'gesture2-divert'
-    label = _('Gestures Diversion')
-    description = _('Divert mouse/touchpad gestures.')
+    name = "gesture2-divert"
+    label = _("Gestures Diversion")
+    description = _("Divert mouse/touchpad gestures.")
     feature = _F.GESTURE_2
-    rw_options = {'read_fnid': 0x30, 'write_fnid': 0x40}
-    validator_options = {'om_method': _hidpp20.Gesture.diversion_offset_mask}
+    rw_options = {"read_fnid": 0x30, "write_fnid": 0x40}
+    validator_options = {"om_method": _hidpp20.Gesture.diversion_offset_mask}
     choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(_BitFieldOMV):
-
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_diverted]
@@ -1266,11 +1257,11 @@ class Gesture2Divert(_BitFieldOMSetting):
 
 
 class Gesture2Params(_LongSettings):
-    name = 'gesture2-params'
-    label = _('Gesture params')
-    description = _('Change numerical parameters of a mouse/touchpad.')
+    name = "gesture2-params"
+    label = _("Gesture params")
+    description = _("Change numerical parameters of a mouse/touchpad.")
     feature = _F.GESTURE_2
-    rw_options = {'read_fnid': 0x70, 'write_fnid': 0x80}
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     choices_universe = _hidpp20.PARAM
     sub_items_universe = _hidpp20.SUB_PARAM
     # item (NamedInt) -> list/tuple of objects that have the following attributes
@@ -1280,7 +1271,6 @@ class Gesture2Params(_LongSettings):
     _labels_sub = _GESTURE2_PARAMS_LABELS_SUB
 
     class validator_class(_MultipleRangeV):
-
         @classmethod
         def build(cls, setting_class, device):
             params = _hidpp20.get_gestures(device).params.values()
@@ -1292,28 +1282,29 @@ class Gesture2Params(_LongSettings):
 
 
 class MKeyLEDs(_BitFieldSetting):
-    name = 'm-key-leds'
-    label = _('M-Key LEDs')
+    name = "m-key-leds"
+    label = _("M-Key LEDs")
     description = (
-        _('Control the M-Key LEDs.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.') + '\n' +
-        _('May need G Keys diverted to be effective.')
+        _("Control the M-Key LEDs.")
+        + "\n"
+        + _("May need Onboard Profiles set to Disable to be effective.")
+        + "\n"
+        + _("May need G Keys diverted to be effective.")
     )
     feature = _F.MKEYS
     choices_universe = _NamedInts()
     for i in range(8):
-        choices_universe[1 << i] = 'M' + str(i + 1)
-    _labels = {k: (None, _('Lights up the %s key.') % k) for k in choices_universe}
+        choices_universe[1 << i] = "M" + str(i + 1)
+    _labels = {k: (None, _("Lights up the %s key.") % k) for k in choices_universe}
 
     class rw_class(_FeatureRW):
-
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x10)
 
         def read(self, device):  # no way to read, so just assume off
-            return b'\x00'
+            return b"\x00"
 
     class validator_class(_BitFieldV):
-
         @classmethod
         def build(cls, setting_class, device):
             number = device.feature_request(setting_class.feature, 0x00)[0]
@@ -1322,32 +1313,35 @@ class MKeyLEDs(_BitFieldSetting):
 
 
 class MRKeyLED(_Setting):
-    name = 'mr-key-led'
-    label = _('MR-Key LED')
+    name = "mr-key-led"
+    label = _("MR-Key LED")
     description = (
-        _('Control the MR-Key LED.') + '\n' + _('May need Onboard Profiles set to Disable to be effective.') + '\n' +
-        _('May need G Keys diverted to be effective.')
+        _("Control the MR-Key LED.")
+        + "\n"
+        + _("May need Onboard Profiles set to Disable to be effective.")
+        + "\n"
+        + _("May need G Keys diverted to be effective.")
     )
     feature = _F.MR
 
     class rw_class(_FeatureRW):
-
         def __init__(self, feature):
             super().__init__(feature, write_fnid=0x00)
 
         def read(self, device):  # no way to read, so just assume off
-            return b'\x00'
+            return b"\x00"
 
 
 ## Only implemented for devices that can produce Key and Consumer Codes (e.g., Craft)
 ## and devices that can produce Key, Mouse, and Horizontal Scroll (e.g., M720)
 ## Only interested in current host, so use 0xFF for it
 class PersistentRemappableAction(_Settings):
-    name = 'persistent-remappable-keys'
-    label = _('Persistent Key/Button Mapping')
+    name = "persistent-remappable-keys"
+    label = _("Persistent Key/Button Mapping")
     description = (
-        _('Permanently change the mapping for the key or button.') + '\n' +
-        _('Changing important keys or buttons (such as for the left mouse button) can result in an unusable system.')
+        _("Permanently change the mapping for the key or button.")
+        + "\n"
+        + _("Changing important keys or buttons (such as for the left mouse button) can result in an unusable system.")
     )
     persist = False  # This setting is persistent in the device so no need to persist it here
     feature = _F.PERSISTENT_REMAPPABLE_ACTION
@@ -1355,14 +1349,13 @@ class PersistentRemappableAction(_Settings):
     choices_universe = _special_keys.KEYS
 
     class rw_class:
-
         def __init__(self, feature):
             self.feature = feature
             self.kind = _FeatureRW.kind
 
         def read(self, device, key):
             ks = device.remap_keys[device.remap_keys.index(key)]
-            return b'\x00\x00' + ks.data_bytes
+            return b"\x00\x00" + ks.data_bytes
 
         def write(self, device, key, data_bytes):
             ks = device.remap_keys[device.remap_keys.index(key)]
@@ -1370,7 +1363,6 @@ class PersistentRemappableAction(_Settings):
             return v
 
     class validator_class(_ChoicesMapV):
-
         @classmethod
         def build(cls, setting_class, device):
             remap_keys = device.remap_keys
@@ -1383,7 +1375,7 @@ class PersistentRemappableAction(_Settings):
                 keys = _special_keys.KEYS_KEYS_MOUSE_HSCROLL
             else:
                 if logger.isEnabledFor(_WARN):
-                    logger.warning('%s: unimplemented Persistent Remappable capability %s', device.name, hex(capabilities))
+                    logger.warning("%s: unimplemented Persistent Remappable capability %s", device.name, hex(capabilities))
                 return None
             choices = {}
             for k in remap_keys:
@@ -1399,15 +1391,15 @@ class PersistentRemappableAction(_Settings):
             # Craft keyboard has a value that isn't valid so fudge these values
             if reply_value not in self.choices[key]:
                 if logger.isEnabledFor(_WARN):
-                    logger.warning('unusual persistent remappable action mapping %x: use Default', reply_value)
+                    logger.warning("unusual persistent remappable action mapping %x: use Default", reply_value)
                 reply_value = _special_keys.KEYS_Default
             return reply_value
 
 
 class Sidetone(_Setting):
-    name = 'sidetone'
-    label = _('Sidetone')
-    description = _('Set sidetone level.')
+    name = "sidetone"
+    label = _("Sidetone")
+    description = _("Set sidetone level.")
     feature = _F.SIDETONE
     validator_class = _RangeV
     min_value = 0
@@ -1415,21 +1407,20 @@ class Sidetone(_Setting):
 
 
 class Equalizer(_RangeFieldSetting):
-    name = 'equalizer'
-    label = _('Equalizer')
-    description = _('Set equalizer levels.')
+    name = "equalizer"
+    label = _("Equalizer")
+    description = _("Set equalizer levels.")
     feature = _F.EQUALIZER
-    rw_options = {'read_fnid': 0x20, 'write_fnid': 0x30, 'read_prefix': b'\x00'}
+    rw_options = {"read_fnid": 0x20, "write_fnid": 0x30, "read_prefix": b"\x00"}
     keys_universe = []
 
     class validator_class(_PackedRangeV):
-
         @classmethod
         def build(cls, setting_class, device):
             data = device.feature_request(_F.EQUALIZER, 0x00)
             if not data:
                 return None
-            count, dbRange, _x, dbMin, dbMax = _unpack('!BBBBB', data[:5])
+            count, dbRange, _x, dbMin, dbMax = _unpack("!BBBBB", data[:5])
             if dbMin == 0:
                 dbMin = -dbRange
             if dbMax == 0:
@@ -1440,31 +1431,31 @@ class Equalizer(_RangeFieldSetting):
                 for b in range(7):
                     if g * 7 + b >= count:
                         break
-                    map[g * 7 + b] = str(int.from_bytes(freqs[2 * b + 1:2 * b + 3], 'big')) + _('Hz')
-            return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b'\x02')
+                    map[g * 7 + b] = str(int.from_bytes(freqs[2 * b + 1 : 2 * b + 3], "big")) + _("Hz")
+            return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b"\x02")
 
 
 class ADCPower(_Setting):
-    name = 'adc_power_management'
-    label = _('Power Management')
-    description = _('Power off in minutes (0 for never).')
+    name = "adc_power_management"
+    label = _("Power Management")
+    description = _("Power off in minutes (0 for never).")
     feature = _F.ADC_MEASUREMENT
-    rw_options = {'read_fnid': 0x10, 'write_fnid': 0x20}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = _RangeV
     min_value = 0x00
-    max_value = 0xff
-    validator_options = {'byte_count': 1}
+    max_value = 0xFF
+    validator_options = {"byte_count": 1}
 
 
 class LEDControl(_Setting):
-    name = 'led_control'
-    label = _('LED Control')
-    description = _('Switch control of LEDs between device and Solaar')
+    name = "led_control"
+    label = _("LED Control")
+    description = _("Switch control of LEDs between device and Solaar")
     feature = _F.COLOR_LED_EFFECTS
-    rw_options = {'read_fnid': 0x70, 'write_fnid': 0x80}
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     choices_universe = _NamedInts(Device=0, Solaar=1)
     validator_class = _ChoicesV
-    validator_options = {'choices': choices_universe}
+    validator_options = {"choices": choices_universe}
 
 
 colors = _special_keys.COLORS
@@ -1473,15 +1464,15 @@ _LEDP = _hidpp20.LEDParam
 
 # an LED Zone has an index, a set of possible LED effects, and an LED effect setting
 class LEDZoneSetting(_Setting):
-    name = 'led_zone_'
-    label = _('LED Zone Effects')
-    description = _('Set effect for LED Zone')
+    name = "led_zone_"
+    label = _("LED Zone Effects")
+    description = _("Set effect for LED Zone")
     feature = _F.COLOR_LED_EFFECTS
-    color_field = {'name': _LEDP.color, 'kind': _KIND.choice, 'label': None, 'choices': colors}
-    speed_field = {'name': _LEDP.speed, 'kind': _KIND.range, 'label': _('Speed'), 'min': 0, 'max': 255}
-    period_field = {'name': _LEDP.period, 'kind': _KIND.range, 'label': _('Period'), 'min': 100, 'max': 5000}
-    intensity_field = {'name': _LEDP.intensity, 'kind': _KIND.range, 'label': _('Intensity'), 'min': 0, 'max': 100}
-    ramp_field = {'name': _LEDP.ramp, 'kind': _KIND.choice, 'label': _('Ramp'), 'choices': _hidpp20.LEDRampChoices}
+    color_field = {"name": _LEDP.color, "kind": _KIND.choice, "label": None, "choices": colors}
+    speed_field = {"name": _LEDP.speed, "kind": _KIND.range, "label": _("Speed"), "min": 0, "max": 255}
+    period_field = {"name": _LEDP.period, "kind": _KIND.range, "label": _("Period"), "min": 100, "max": 5000}
+    intensity_field = {"name": _LEDP.intensity, "kind": _KIND.range, "label": _("Intensity"), "min": 0, "max": 100}
+    ramp_field = {"name": _LEDP.ramp, "kind": _KIND.choice, "label": _("Ramp"), "choices": _hidpp20.LEDRampChoices}
     #    form_field = { 'name': _LEDP.form, 'kind': _KIND.choice, 'label': _('Form'), 'choices': _hidpp20.LEDFormChoices }
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
@@ -1495,9 +1486,9 @@ class LEDZoneSetting(_Setting):
             validator = _HeteroV(data_class=_hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
-            setting.label = _('LEDs') + ' ' + str(_hidpp20.LEDZoneLocations[zone.location])
+            setting.label = _("LEDs") + " " + str(_hidpp20.LEDZoneLocations[zone.location])
             choices = [_hidpp20.LEDEffects[e.ID][0] for e in zone.effects]
-            ID_field = {'name': 'ID', 'kind': _KIND.choice, 'label': None, 'choices': choices}
+            ID_field = {"name": "ID", "kind": _KIND.choice, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + cls.possible_fields
             setting.fields_map = _hidpp20.LEDEffects
             settings.append(setting)
@@ -1571,10 +1562,10 @@ def check_feature(device, sclass):
     try:
         detected = sclass.build(device)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('check_feature %s [%s] detected %s', sclass.name, sclass.feature, detected)
+            logger.debug("check_feature %s [%s] detected %s", sclass.name, sclass.feature, detected)
         return detected
     except Exception as e:
-        logger.error('check_feature %s [%s] error %s\n%s', sclass.name, sclass.feature, e, _format_exc())
+        logger.error("check_feature %s [%s] error %s\n%s", sclass.name, sclass.feature, e, _format_exc())
         return False  # differentiate from an error-free determination that the setting is not supported
 
 
@@ -1585,7 +1576,7 @@ def check_feature_settings(device, already_known):
         return False
     if device.protocol and device.protocol < 2.0:
         return False
-    absent = device.persister.get('_absent', []) if device.persister else []
+    absent = device.persister.get("_absent", []) if device.persister else []
     newAbsent = []
     for sclass in SETTINGS:
         if sclass.feature:
@@ -1606,7 +1597,7 @@ def check_feature_settings(device, already_known):
                         newAbsent.append(sclass.name)
     if device.persister and newAbsent:
         absent.extend(newAbsent)
-        device.persister['_absent'] = absent
+        device.persister["_absent"] = absent
     return True
 
 
