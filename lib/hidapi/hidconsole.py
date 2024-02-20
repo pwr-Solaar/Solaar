@@ -43,7 +43,10 @@ interactive = os.isatty(0)
 prompt = "?? Input: " if interactive else ""
 start_time = time.time()
 
-strhex = lambda d: hexlify(d).decode("ascii").upper()
+
+def strhex(d):
+    return hexlify(d).decode("ascii").upper()
+
 
 #
 #

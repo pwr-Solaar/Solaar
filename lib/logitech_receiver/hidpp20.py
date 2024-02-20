@@ -130,10 +130,10 @@ class FeaturesArray(dict):
                 return index if index else False
 
     def __setitem__(self, feature, index):
-        if type(super().get(feature)) == int:
+        if isinstance(super().get(feature), int):
             self.inverse.pop(super().get(feature))
         super().__setitem__(feature, index)
-        if type(index) == int:
+        if isinstance(index, int):
             self.inverse[index] = feature
 
     def __delitem__(self, feature):
@@ -902,19 +902,24 @@ class LEDParam:
 
 LEDRampChoices = _NamedInts(default=0, yes=1, no=2)
 LEDFormChoices = _NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
-LEDParamSize = {LEDParam.color: 3, LEDParam.speed: 1, LEDParam.period: 2,
-                LEDParam.intensity: 1, LEDParam.ramp: 1, LEDParam.form: 1}  # yapf: disable
+LEDParamSize = {
+    LEDParam.color: 3,
+    LEDParam.speed: 1,
+    LEDParam.period: 2,
+    LEDParam.intensity: 1,
+    LEDParam.ramp: 1,
+    LEDParam.form: 1,
+}
 LEDEffects = {  # Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
-    0x0: [_NamedInt(0x0, _('Disabled')), {}],
-    0x1: [_NamedInt(0x1, _('Static')), {LEDParam.color: 0, LEDParam.ramp: 3}],
-    0x2: [_NamedInt(0x2, _('Pulse')), {LEDParam.color: 0, LEDParam.speed: 3}],
-    0x3: [_NamedInt(0x3, _('Cycle')), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x8: [_NamedInt(0x8, _('Boot')), {}],
-    0x9: [_NamedInt(0x9, _('Demo')), {}],
-    0xA: [_NamedInt(0xA, _('Breathe')), {LEDParam.color: 0, LEDParam.period: 3,
-                                         LEDParam.form: 5, LEDParam.intensity: 6}],
-    0xB: [_NamedInt(0xB, _('Ripple')), {LEDParam.color: 0, LEDParam.period: 4}]
-}  # yapf: disable
+    0x0: [_NamedInt(0x0, _("Disabled")), {}],
+    0x1: [_NamedInt(0x1, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
+    0x2: [_NamedInt(0x2, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
+    0x3: [_NamedInt(0x3, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x8: [_NamedInt(0x8, _("Boot")), {}],
+    0x9: [_NamedInt(0x9, _("Demo")), {}],
+    0xA: [_NamedInt(0xA, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
+    0xB: [_NamedInt(0xB, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
+}
 
 
 class LEDEffectSetting:  # an effect plus its parameters

@@ -103,6 +103,12 @@ if available:
                 return n
 
 else:
-    init = lambda: False
-    uninit = lambda: None
-    show = lambda dev, reason=None: None
+
+    def init():
+        return False
+
+    def uninit():
+        return None
+
+    def show(dev, reason=None):
+        return None

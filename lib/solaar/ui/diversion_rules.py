@@ -714,6 +714,10 @@ class DiversionDialog:
 #             return pos + length
 
 
+def norm(s):
+    return s.replace("_", "").replace(" ", "").lower()
+
+
 class CompletionEntry(Gtk.Entry):
     def __init__(self, values, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -726,7 +730,6 @@ class CompletionEntry(Gtk.Entry):
             liststore = Gtk.ListStore(str)
             completion = Gtk.EntryCompletion()
             completion.set_model(liststore)
-            norm = lambda s: s.replace("_", "").replace(" ", "").lower()
             completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][0]))
             completion.set_text_column(0)
             entry.set_completion(completion)

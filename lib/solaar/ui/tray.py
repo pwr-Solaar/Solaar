@@ -158,9 +158,9 @@ try:
             from gi.repository import AppIndicator3
 
             ayatana_appindicator_found = False
-        except ValueError:
+        except ValueError as exc:
             # treat unavailable versions the same as unavailable packages
-            raise ImportError
+            raise ImportError from exc
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("using %sAppIndicator3" % ("Ayatana " if ayatana_appindicator_found else ""))

@@ -1416,22 +1416,6 @@ if True:
                     {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
                 ]
             },
-            # {'Rule': [  # In firefox, crown emits keys that move up and down if not pressed, rotate through tabs otherwise
-            #     {'Process': 'firefox'},
-            #     {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': ['Control_R', 'Tab']}]},
-            #     {'Rule': [{'Test': 'crown_pressed'},
-            #               {'Test': 'crown_left_ratchet'},
-            #               {'KeyPress': ['Control_R', 'Shift_R', 'Tab']}]},
-            #     {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'Down'}]},
-            #     {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'Up'}]},
-            # ]},
-            # {'Rule': [  # Otherwise, crown movements emit keys that modify volume if not pressed, move between tracks otherwise
-            #     {'Feature': 'CROWN'}, {'Report': 0x0},
-            #     {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioNext'}]},
-            #     {'Rule': [{'Test': 'crown_pressed'}, {'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioPrev'}]},
-            #     {'Rule': [{'Test': 'crown_right_ratchet'}, {'KeyPress': 'XF86_AudioRaiseVolume'}]},
-            #     {'Rule': [{'Test': 'crown_left_ratchet'}, {'KeyPress': 'XF86_AudioLowerVolume'}]}
-            # ]},
         ]
     )
 

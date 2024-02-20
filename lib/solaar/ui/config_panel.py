@@ -200,7 +200,10 @@ class ChoiceControlBig(Gtk.Entry, Control):
             liststore.append((int(v), str(v)))
         completion = Gtk.EntryCompletion()
         completion.set_model(liststore)
-        norm = lambda s: s.replace("_", "").replace(" ", "").lower()
+
+        def norm(s):
+            return s.replace("_", "").replace(" ", "").lower()
+
         completion.set_match_func(lambda completion, key, it: norm(key) in norm(completion.get_model()[it][1]))
         completion.set_text_column(1)
         self.set_completion(completion)

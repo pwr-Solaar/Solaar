@@ -344,14 +344,14 @@ def stop_all():
         if logger.isEnabledFor(logging.INFO):
             logger.info("stopping receiver listening threads %s", listeners)
 
-        for l in listeners:
-            l.stop()
+        for listener_thread in listeners:
+            listener_thread.stop()
 
     configuration.save()
 
     if listeners:
-        for l in listeners:
-            l.join()
+        for listener_thread in listeners:
+            listener_thread.join()
 
 
 # ping all devices to find out whether they are connected
@@ -360,22 +360,22 @@ def stop_all():
 def ping_all(resuming=False):
     if logger.isEnabledFor(logging.INFO):
         logger.info("ping all devices%s", " when resuming" if resuming else "")
-    for l in _all_listeners.values():
-        if l.receiver.isDevice:
-            if resuming and hasattr(l.receiver, "status"):
-                l.receiver.status._active = None  # ensure that settings are pushed
-            if l.receiver.ping():
-                l.receiver.status.changed(active=True, push=True)
-            l._status_changed(l.receiver)
+    for listener_thread in _all_listeners.values():
+        if listener_thread.receiver.isDevice:
+            if resuming and hasattr(listener_thread.receiver, "status"):
+                listener_thread.receiver.status._active = None  # ensure that settings are pushed
+            if listener_thread.receiver.ping():
+                listener_thread.receiver.status.changed(active=True, push=True)
+            listener_thread._status_changed(listener_thread.receiver)
         else:
-            count = l.receiver.count()
+            count = listener_thread.receiver.count()
             if count:
-                for dev in l.receiver:
+                for dev in listener_thread.receiver:
                     if resuming and hasattr(dev, "status"):
                         dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
                         dev.status.changed(active=True, push=True)
-                    l._status_changed(dev)
+                    listener_thread._status_changed(dev)
                     count -= 1
                     if not count:
                         break
@@ -428,10 +428,10 @@ def _process_receiver_event(action, device_info):
         logger.info("receiver event %s %s", action, device_info)
 
     # whatever the action, stop any previous receivers at this path
-    l = _all_listeners.pop(device_info.path, None)
-    if l is not None:
-        assert isinstance(l, ReceiverListener)
-        l.stop()
+    listener_thread = _all_listeners.pop(device_info.path, None)
+    if listener_thread is not None:
+        assert isinstance(listener_thread, ReceiverListener)
+        listener_thread.stop()
 
     if action == "add":  # a new device was detected
         _process_add(device_info, 3)

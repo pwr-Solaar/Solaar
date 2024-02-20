@@ -121,21 +121,21 @@ def select_toggle(value, setting, key=None):
     else:
         try:
             value = bool(int(value))
-        except Exception:
+        except Exception as exc:
             if value.lower() in ("true", "yes", "on", "t", "y"):
                 value = True
             elif value.lower() in ("false", "no", "off", "f", "n"):
                 value = False
             else:
-                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value))
+                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value)) from exc
     return value
 
 
 def select_range(value, setting):
     try:
         value = int(value)
-    except ValueError:
-        raise Exception("%s: can't interpret '%s' as integer" % (setting.name, value))
+    except ValueError as exc:
+        raise Exception("%s: can't interpret '%s' as integer" % (setting.name, value)) from exc
     min, max = setting.range
     if value < min or value > max:
         raise Exception("%s: value '%s' out of bounds" % (setting.name, value))

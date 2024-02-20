@@ -1209,7 +1209,7 @@ class RangeValidator(Validator):
     def acceptable(self, args, current):
         arg = args[0]
         #  None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args)
-        return None if len(args) != 1 or type(arg) != int or arg < self.min_value or arg > self.max_value else args
+        return None if len(args) != 1 or isinstance(arg, int) or arg < self.min_value or arg > self.max_value else args
 
     def compare(self, args, current):
         if len(args) == 1:
@@ -1295,7 +1295,7 @@ class PackedRangeValidator(Validator):
     def acceptable(self, args, current):
         if len(args) != 2 or int(args[0]) < 0 or int(args[0]) >= self.count:
             return None
-        return None if type(args[1]) != int or args[1] < self.min_value or args[1] > self.max_value else args
+        return None if not isinstance(args[1], int) or args[1] < self.min_value or args[1] > self.max_value else args
 
     def compare(self, args, current):
         logger.warning("compare not implemented for packed range settings")
