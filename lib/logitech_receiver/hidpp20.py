@@ -276,7 +276,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
                 raise exceptions.FeatureCallError(msg='No reply from device.')
-        except exceptions.FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
+        except exceptions.FeatureCallError:  # if the key hasn't ever been configured then the read may fail
             if logger.isEnabledFor(logging.WARNING):
                 logger.warn(
                     f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
