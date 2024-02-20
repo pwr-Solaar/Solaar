@@ -223,7 +223,7 @@ def _print_device(dev, num=None):
                     unitId, modelId, tid_map = ids
                     print('            Unit ID: %s  Model ID: %s  Transport IDs: %s' % (unitId, modelId, tid_map))
             elif feature == _hidpp20_constants.FEATURE.REPORT_RATE or \
-                feature == _hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE:
+                 feature == _hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE:
                 print('            Report Rate: %s' % _hidpp20.get_polling_rate(dev))
             elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
                 print('            Remaining Pairings: %d' % _hidpp20.get_remaining_pairing(dev))
