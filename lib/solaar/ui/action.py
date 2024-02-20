@@ -17,6 +17,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from gi.repository import Gdk, Gtk
+
 from solaar.i18n import _
 
 from . import pair_window
@@ -36,7 +37,7 @@ def make(name, label, function, stock_id=None, *args):
     if stock_id is not None:
         action.set_stock_id(stock_id)
     if function:
-        action.connect('activate', function, *args)
+        action.connect("activate", function, *args)
     return action
 
 
@@ -45,7 +46,7 @@ def make_toggle(name, label, function, stock_id=None, *args):
     action.set_icon_name(name)
     if stock_id is not None:
         action.set_stock_id(stock_id)
-    action.connect('activate', function, *args)
+    action.connect("activate", function, *args)
     return action
 
 
@@ -80,12 +81,11 @@ def unpair(window, device):
     assert device.kind is not None
 
     qdialog = Gtk.MessageDialog(
-        window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE,
-        _('Unpair') + ' ' + device.name + ' ?'
+        window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE, _("Unpair") + " " + device.name + " ?"
     )
-    qdialog.set_icon_name('remove')
-    qdialog.add_button(_('Cancel'), Gtk.ResponseType.CANCEL)
-    qdialog.add_button(_('Unpair'), Gtk.ResponseType.ACCEPT)
+    qdialog.set_icon_name("remove")
+    qdialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+    qdialog.add_button(_("Unpair"), Gtk.ResponseType.ACCEPT)
     choice = qdialog.run()
     qdialog.destroy()
     if choice == Gtk.ResponseType.ACCEPT:
@@ -97,4 +97,4 @@ def unpair(window, device):
             del receiver[device_number]
         except Exception:
             # logger.exception("unpairing %s", device)
-            error_dialog('unpair', device)
+            error_dialog("unpair", device)

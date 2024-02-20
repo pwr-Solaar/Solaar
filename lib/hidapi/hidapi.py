@@ -35,30 +35,31 @@ from time import sleep
 
 import gi
 
-gi.require_version('Gdk', '3.0')
+gi.require_version("Gdk", "3.0")
 from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-native_implementation = 'hidapi'
+native_implementation = "hidapi"
 
 # Device info as expected by Solaar
 DeviceInfo = namedtuple(
-    'DeviceInfo', [
-        'path',
-        'bus_id',
-        'vendor_id',
-        'product_id',
-        'interface',
-        'driver',
-        'manufacturer',
-        'product',
-        'serial',
-        'release',
-        'isDevice',
-        'hidpp_short',
-        'hidpp_long',
-    ]
+    "DeviceInfo",
+    [
+        "path",
+        "bus_id",
+        "vendor_id",
+        "product_id",
+        "interface",
+        "driver",
+        "manufacturer",
+        "product",
+        "serial",
+        "release",
+        "isDevice",
+        "hidpp_short",
+        "hidpp_long",
+    ],
 )
 del namedtuple
 
@@ -67,8 +68,15 @@ _hidapi = None
 
 # hidapi binary names for various platforms
 _library_paths = (
-    'libhidapi-hidraw.so', 'libhidapi-hidraw.so.0', 'libhidapi-libusb.so', 'libhidapi-libusb.so.0',
-    'libhidapi-iohidmanager.so', 'libhidapi-iohidmanager.so.0', 'libhidapi.dylib', 'hidapi.dll', 'libhidapi-0.dll'
+    "libhidapi-hidraw.so",
+    "libhidapi-hidraw.so.0",
+    "libhidapi-libusb.so",
+    "libhidapi-libusb.so.0",
+    "libhidapi-iohidmanager.so",
+    "libhidapi-iohidmanager.so.0",
+    "libhidapi.dylib",
+    "hidapi.dll",
+    "libhidapi-0.dll",
 )
 
 for lib in _library_paths:
@@ -84,9 +92,9 @@ else:
 # Retrieve version of hdiapi library
 class _cHidApiVersion(ctypes.Structure):
     _fields_ = [
-        ('major', ctypes.c_int),
-        ('minor', ctypes.c_int),
-        ('patch', ctypes.c_int),
+        ("major", ctypes.c_int),
+        ("minor", ctypes.c_int),
+        ("patch", ctypes.c_int),
     ]
 
 
@@ -97,28 +105,27 @@ _hid_version = _hidapi.hid_version()
 
 # Construct device info struct based on API version
 class _cDeviceInfo(ctypes.Structure):
-
     def as_dict(self):
-        return {name: getattr(self, name) for name, _t in self._fields_ if name != 'next'}
+        return {name: getattr(self, name) for name, _t in self._fields_ if name != "next"}
 
 
 # Low level hdiapi device info struct
 # See https://github.com/libusb/hidapi/blob/master/hidapi/hidapi.h#L143
 _cDeviceInfo_fields = [
-    ('path', ctypes.c_char_p),
-    ('vendor_id', ctypes.c_ushort),
-    ('product_id', ctypes.c_ushort),
-    ('serial_number', ctypes.c_wchar_p),
-    ('release_number', ctypes.c_ushort),
-    ('manufacturer_string', ctypes.c_wchar_p),
-    ('product_string', ctypes.c_wchar_p),
-    ('usage_page', ctypes.c_ushort),
-    ('usage', ctypes.c_ushort),
-    ('interface_number', ctypes.c_int),
-    ('next', ctypes.POINTER(_cDeviceInfo)),
+    ("path", ctypes.c_char_p),
+    ("vendor_id", ctypes.c_ushort),
+    ("product_id", ctypes.c_ushort),
+    ("serial_number", ctypes.c_wchar_p),
+    ("release_number", ctypes.c_ushort),
+    ("manufacturer_string", ctypes.c_wchar_p),
+    ("product_string", ctypes.c_wchar_p),
+    ("usage_page", ctypes.c_ushort),
+    ("usage", ctypes.c_ushort),
+    ("interface_number", ctypes.c_int),
+    ("next", ctypes.POINTER(_cDeviceInfo)),
 ]
 if _hid_version.contents.major >= 0 and _hid_version.contents.minor >= 13:
-    _cDeviceInfo_fields.append(('bus_type', ctypes.c_int))
+    _cDeviceInfo_fields.append(("bus_type", ctypes.c_int))
 _cDeviceInfo._fields_ = _cDeviceInfo_fields
 
 # Set up hidapi functions
@@ -168,7 +175,7 @@ atexit.register(_hidapi.hid_exit)
 # Solaar opens the same device more than once which will fail unless we
 # allow non-exclusive opening. On windows opening with shared access is
 # the default, for macOS we need to set it explicitly.
-if _platform.system() == 'Darwin':
+if _platform.system() == "Darwin":
     _hidapi.hid_darwin_set_open_exclusive.argtypes = [ctypes.c_int]
     _hidapi.hid_darwin_set_open_exclusive.restype = None
     _hidapi.hid_darwin_set_open_exclusive(0)
@@ -179,7 +186,7 @@ class HIDError(Exception):
 
 
 def _enumerate_devices():
-    """ Returns all HID devices which are potentially useful to us """
+    """Returns all HID devices which are potentially useful to us"""
     devices = []
     c_devices = _hidapi.hid_enumerate(0, 0)
     p = c_devices
@@ -188,19 +195,19 @@ def _enumerate_devices():
         p = p.contents.next
     _hidapi.hid_free_enumeration(c_devices)
 
-    keyboard_or_mouse = {d['path'] for d in devices if d['usage_page'] == 1 and d['usage'] in (6, 2)}
+    keyboard_or_mouse = {d["path"] for d in devices if d["usage_page"] == 1 and d["usage"] in (6, 2)}
     unique_devices = {}
     for device in devices:
         # On macOS we cannot access keyboard or mouse devices without special permissions. Since
         # we don't need them anyway we remove them so opening them doesn't cause errors later.
-        if device['path'] in keyboard_or_mouse:
+        if device["path"] in keyboard_or_mouse:
             # print(f"Ignoring keyboard or mouse device: {device}")
             continue
 
         # hidapi returns separate entries for each usage page of a device.
         # Deduplicate by path to only keep one device entry.
-        if device['path'] not in unique_devices:
-            unique_devices[device['path']] = device
+        if device["path"] not in unique_devices:
+            unique_devices[device["path"]] = device
 
     unique_devices = unique_devices.values()
     # print("Unique devices:\n" + '\n'.join([f"{dev}" for dev in unique_devices]))
@@ -209,7 +216,6 @@ def _enumerate_devices():
 
 # Use a separate thread to check if devices have been removed or connected
 class _DeviceMonitor(Thread):
-
     def __init__(self, device_callback, polling_delay=5.0):
         self.device_callback = device_callback
         self.polling_delay = polling_delay
@@ -225,10 +231,10 @@ class _DeviceMonitor(Thread):
             current_devices = {tuple(dev.items()): dev for dev in _enumerate_devices()}
             for key, device in self.prev_devices.items():
                 if key not in current_devices:
-                    self.device_callback('remove', device)
+                    self.device_callback("remove", device)
             for key, device in current_devices.items():
                 if key not in self.prev_devices:
-                    self.device_callback('add', device)
+                    self.device_callback("add", device)
             self.prev_devices = current_devices
             sleep(self.polling_delay)
 
@@ -237,29 +243,29 @@ class _DeviceMonitor(Thread):
 # It is given the bus id, vendor id, and product id and returns a dictionary
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
 def _match(action, device, filterfn):
-    vid = device['vendor_id']
-    pid = device['product_id']
+    vid = device["vendor_id"]
+    pid = device["product_id"]
 
     # Translate hidapi bus_type to the bus_id values Solaar expects
-    if device.get('bus_type') == 0x01:
+    if device.get("bus_type") == 0x01:
         bus_id = 0x03  # USB
-    elif device.get('bus_type') == 0x02:
+    elif device.get("bus_type") == 0x02:
         bus_id = 0x05  # Bluetooth
     else:
         bus_id = None
 
     # Check for hidpp support
-    device['hidpp_short'] = False
-    device['hidpp_long'] = False
+    device["hidpp_short"] = False
+    device["hidpp_long"] = False
     device_handle = None
     try:
-        device_handle = open_path(device['path'])
+        device_handle = open_path(device["path"])
         report = get_input_report(device_handle, 0x10, 32)
         if len(report) == 1 + 6 and report[0] == 0x10:
-            device['hidpp_short'] = True
+            device["hidpp_short"] = True
         report = get_input_report(device_handle, 0x11, 32)
         if len(report) == 1 + 19 and report[0] == 0x11:
-            device['hidpp_long'] = True
+            device["hidpp_long"] = True
     except HIDError as e:  # noqa: F841
         if logger.isEnabledFor(logging.INFO):
             logger.info(f"Error opening device {device['path']} ({bus_id}/{vid:04X}/{pid:04X}) for hidpp check: {e}")  # noqa
@@ -269,41 +275,41 @@ def _match(action, device, filterfn):
 
     if logger.isEnabledFor(logging.INFO):
         logger.info(
-            'Found device BID %s VID %04X PID %04X HID++ %s %s', bus_id, vid, pid, device['hidpp_short'], device['hidpp_long']
+            "Found device BID %s VID %04X PID %04X HID++ %s %s", bus_id, vid, pid, device["hidpp_short"], device["hidpp_long"]
         )
 
-    if not device['hidpp_short'] and not device['hidpp_long']:
+    if not device["hidpp_short"] and not device["hidpp_long"]:
         return None
 
-    filter = filterfn(bus_id, vid, pid, device['hidpp_short'], device['hidpp_long'])
+    filter = filterfn(bus_id, vid, pid, device["hidpp_short"], device["hidpp_long"])
     if not filter:
         return
-    isDevice = filter.get('isDevice')
+    isDevice = filter.get("isDevice")
 
-    if action == 'add':
+    if action == "add":
         d_info = DeviceInfo(
-            path=device['path'].decode(),
+            path=device["path"].decode(),
             bus_id=bus_id,
-            vendor_id=f'{vid:04X}',  # noqa
-            product_id=f'{pid:04X}',  # noqa
+            vendor_id=f"{vid:04X}",  # noqa
+            product_id=f"{pid:04X}",  # noqa
             interface=None,
             driver=None,
-            manufacturer=device['manufacturer_string'],
-            product=device['product_string'],
-            serial=device['serial_number'],
-            release=device['release_number'],
+            manufacturer=device["manufacturer_string"],
+            product=device["product_string"],
+            serial=device["serial_number"],
+            release=device["release_number"],
             isDevice=isDevice,
-            hidpp_short=device['hidpp_short'],
-            hidpp_long=device['hidpp_long'],
+            hidpp_short=device["hidpp_short"],
+            hidpp_long=device["hidpp_long"],
         )
         return d_info
 
-    elif action == 'remove':
+    elif action == "remove":
         d_info = DeviceInfo(
-            path=device['path'].decode(),
+            path=device["path"].decode(),
             bus_id=None,
-            vendor_id=f'{vid:04X}',  # noqa
-            product_id=f'{pid:04X}',  # noqa
+            vendor_id=f"{vid:04X}",  # noqa
+            product_id=f"{pid:04X}",  # noqa
             interface=None,
             driver=None,
             manufacturer=None,
@@ -328,14 +334,13 @@ def find_paired_node_wpid(receiver_path, index):
 
 
 def monitor_glib(callback, filterfn):
-
     def device_callback(action, device):
         # print(f"device_callback({action}): {device}")
-        if action == 'add':
+        if action == "add":
             d_info = _match(action, device, filterfn)
             if d_info:
                 GLib.idle_add(callback, action, d_info)
-        elif action == 'remove':
+        elif action == "remove":
             # Removed devices will be detected by Solaar directly
             pass
 
@@ -352,7 +357,7 @@ def enumerate(filterfn):
     :returns: a list of matching ``DeviceInfo`` tuples.
     """
     for device in _enumerate_devices():
-        d_info = _match('add', device, filterfn)
+        d_info = _match("add", device, filterfn)
         if d_info:
             yield d_info
 
@@ -463,7 +468,7 @@ def read(device_handle, bytes_count, timeout_ms=None):
 def get_input_report(device_handle, report_id, size):
     assert device_handle
     data = ctypes.create_string_buffer(size)
-    data[0] = bytearray((report_id, ))
+    data[0] = bytearray((report_id,))
     size = _hidapi.hid_get_input_report(device_handle, data, size)
     if size < 0:
         raise HIDError(_hidapi.hid_error(device_handle))
@@ -475,7 +480,7 @@ def _readstring(device_handle, func, max_length=255):
     buf = ctypes.create_unicode_buffer(max_length)
     ret = func(device_handle, buf, max_length)
     if ret < 0:
-        raise HIDError('Error reading device property')
+        raise HIDError("Error reading device property")
     return buf.value
 
 

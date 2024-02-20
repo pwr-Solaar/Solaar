@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 
 try:
     import gi
-    gi.require_version('Notify', '0.7')
-    gi.require_version('Gtk', '3.0')
+
+    gi.require_version("Notify", "0.7")
+    gi.require_version("Gtk", "3.0")
     from gi.repository import GLib, Gtk, Notify  # this import is allowed to fail making the entire feature unavailable
+
     available = True
 except (ValueError, ImportError):
     available = False
@@ -39,18 +41,18 @@ if available:
         if available:
             if not Notify.is_initted():
                 if logger.isEnabledFor(logging.INFO):
-                    logger.info('starting desktop notifications')
+                    logger.info("starting desktop notifications")
                 try:
-                    return Notify.init('solaar')  # replace with better name later
+                    return Notify.init("solaar")  # replace with better name later
                 except Exception:
-                    logger.exception('initializing desktop notifications')
+                    logger.exception("initializing desktop notifications")
                     available = False
         return available and Notify.is_initted()
 
     def uninit():
         if available and Notify.is_initted():
             if logger.isEnabledFor(logging.INFO):
-                logger.info('stopping desktop notifications')
+                logger.info("stopping desktop notifications")
             _notifications.clear()
             Notify.uninit()
 
@@ -64,32 +66,32 @@ if available:
             icon_name = device_icon_name(dev.name, dev.kind) if icon is None else icon
             n.update(summary, message, icon_name)
             n.set_urgency(Notify.Urgency.NORMAL)
-            n.set_hint('desktop-entry', GLib.Variant('s', 'solaar'))  # replace with better name late
+            n.set_hint("desktop-entry", GLib.Variant("s", "solaar"))  # replace with better name late
             try:
                 # if logger.isEnabledFor(logging.DEBUG):
                 #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                logger.exception('showing %s', n)
+                logger.exception("showing %s", n)
 
     _ICON_LISTS = {}
 
-    def device_icon_list(name='_', kind=None):
+    def device_icon_list(name="_", kind=None):
         icon_list = _ICON_LISTS.get(name)
         if icon_list is None:
             # names of possible icons, in reverse order of likelihood
             # the theme will hopefully pick up the most appropriate
-            icon_list = ['preferences-desktop-peripherals']
+            icon_list = ["preferences-desktop-peripherals"]
             if kind:
-                if str(kind) == 'numpad':
-                    icon_list += ('input-keyboard', 'input-dialpad')
-                elif str(kind) == 'touchpad':
-                    icon_list += ('input-mouse', 'input-tablet')
-                elif str(kind) == 'trackball':
-                    icon_list += ('input-mouse', )
-                elif str(kind) == 'headset':
-                    icon_list += ('audio-headphones', 'audio-headset')
-                icon_list += ('input-' + str(kind), )
+                if str(kind) == "numpad":
+                    icon_list += ("input-keyboard", "input-dialpad")
+                elif str(kind) == "touchpad":
+                    icon_list += ("input-mouse", "input-tablet")
+                elif str(kind) == "trackball":
+                    icon_list += ("input-mouse",)
+                elif str(kind) == "headset":
+                    icon_list += ("audio-headphones", "audio-headset")
+                icon_list += ("input-" + str(kind),)
             _ICON_LISTS[name] = icon_list
         return icon_list
 

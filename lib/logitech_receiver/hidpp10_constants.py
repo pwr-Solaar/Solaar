@@ -16,7 +16,7 @@ DEVICE_KIND = NamedInts(
     touchpad=0x09,
     headset=0x0D,  # not from Logitech documentation
     remote_control=0x0E,  # for compatibility with HID++ 2.0
-    receiver=0x0F  # for compatibility with HID++ 2.0
+    receiver=0x0F,  # for compatibility with HID++ 2.0
 )
 
 POWER_SWITCH_LOCATION = NamedInts(
@@ -30,7 +30,7 @@ POWER_SWITCH_LOCATION = NamedInts(
     top_edge=0x09,
     right_edge=0x0A,
     left_edge=0x0B,
-    bottom_edge=0x0C
+    bottom_edge=0x0C,
 )
 
 # Some flags are used both by devices and receivers. The Logitech documentation
@@ -79,7 +79,7 @@ ERROR = NamedInts(
     resource_error=0x09,
     request_unavailable=0x0A,
     unsupported_parameter_value=0x0B,
-    wrong_pin_code=0x0C
+    wrong_pin_code=0x0C,
 )
 
 PAIRING_ERRORS = NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
@@ -96,7 +96,6 @@ REGISTERS = NamedInts(
     bolt_device_discovery=0xC0,
     bolt_pairing=0x2C1,
     bolt_uniqueId=0x02FB,
-
     # only apply to devices
     mouse_button_flags=0x01,
     keyboard_hand_detection=0x01,
@@ -106,11 +105,9 @@ REGISTERS = NamedInts(
     keyboard_illumination=0x17,
     three_leds=0x51,
     mouse_dpi=0x63,
-
     # apply to both
     notifications=0x00,
     firmware=0xF1,
-
     # notifications
     passkey_request_notification=0x4D,
     passkey_pressed_notification=0x4E,

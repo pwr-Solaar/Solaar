@@ -25,6 +25,7 @@ from logitech_receiver import hidpp10 as _hidpp10
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import NamedInts as _NamedInts
 from logitech_receiver.status import KEYS as _K
+
 from solaar import NAME
 from solaar.i18n import _, ngettext
 
@@ -37,7 +38,7 @@ from .diversion_rules import show_window as _show_diversion_window
 
 # from solaar import __version__ as VERSION
 
-gi.require_version('Gdk', '3.0')
+gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
@@ -52,10 +53,10 @@ _TREE_ICON_SIZE = Gtk.IconSize.BUTTON
 _INFO_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 _DEVICE_ICON_SIZE = Gtk.IconSize.DND
 try:
-    gi.check_version('3.7.4')
+    gi.check_version("3.7.4")
     _CAN_SET_ROW_NONE = None
 except (ValueError, AttributeError):
-    _CAN_SET_ROW_NONE = ''
+    _CAN_SET_ROW_NONE = ""
 
 # tree model columns
 _COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
@@ -78,7 +79,7 @@ def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, toolt
         c.pack_start(Gtk.Label(label), True, True, 0)
     b.add(c)
     if clicked is not None:
-        b.connect('clicked', clicked)
+        b.connect("clicked", clicked)
     if tooltip:
         b.set_tooltip_text(tooltip)
     if not label and icon_size < _NORMAL_BUTTON_ICON_SIZE:
@@ -95,11 +96,11 @@ def _create_receiver_panel():
     p._count.set_alignment(0, 0.5)
     p.pack_start(p._count, True, True, 0)
 
-    p._scanning = Gtk.Label(_('Scanning') + '...')
+    p._scanning = Gtk.Label(_("Scanning") + "...")
     p._spinner = Gtk.Spinner()
 
     bp = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
-    bp.pack_start(Gtk.Label(' '), True, True, 0)
+    bp.pack_start(Gtk.Label(" "), True, True, 0)
     bp.pack_start(p._scanning, False, False, 0)
     bp.pack_end(p._spinner, False, False, 0)
     p.pack_end(bp, False, False, 0)
@@ -128,14 +129,14 @@ def _create_device_panel():
 
         return b
 
-    p._battery = _status_line(_('Battery'))
+    p._battery = _status_line(_("Battery"))
     p.pack_start(p._battery, False, False, 0)
 
-    p._secure = _status_line(_('Wireless Link'))
-    p._secure._icon.set_from_icon_name('dialog-warning', _INFO_ICON_SIZE)
+    p._secure = _status_line(_("Wireless Link"))
+    p._secure._icon.set_from_icon_name("dialog-warning", _INFO_ICON_SIZE)
     p.pack_start(p._secure, False, False, 0)
 
-    p._lux = _status_line(_('Lighting'))
+    p._lux = _status_line(_("Lighting"))
     p.pack_start(p._lux, False, False, 0)
 
     p.pack_start(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL), False, False, 0)  # spacer
@@ -167,11 +168,11 @@ def _create_buttons_box():
 
     bb._details = _new_button(
         None,
-        'dialog-information',
+        "dialog-information",
         _SMALL_BUTTON_ICON_SIZE,
-        tooltip=_('Show Technical Details'),
+        tooltip=_("Show Technical Details"),
         toggle=True,
-        clicked=_update_details
+        clicked=_update_details,
     )
     bb.add(bb._details)
     bb.set_child_secondary(bb._details, True)
@@ -185,7 +186,7 @@ def _create_buttons_box():
         assert receiver.kind is None
         _action.pair(_window, receiver)
 
-    bb._pair = _new_button(_('Pair new device'), 'list-add', clicked=_pair_new_device)
+    bb._pair = _new_button(_("Pair new device"), "list-add", clicked=_pair_new_device)
     bb.add(bb._pair)
 
     def _unpair_current_device(trigger):
@@ -196,7 +197,7 @@ def _create_buttons_box():
         assert device.kind is not None
         _action.unpair(_window, device)
 
-    bb._unpair = _new_button(_('Unpair'), 'edit-delete', clicked=_unpair_current_device)
+    bb._unpair = _new_button(_("Unpair"), "edit-delete", clicked=_unpair_current_device)
     bb.add(bb._unpair)
 
     return bb
@@ -204,7 +205,7 @@ def _create_buttons_box():
 
 def _create_empty_panel():
     p = Gtk.Label()
-    p.set_markup('<small>' + _('Select a device') + '</small>')
+    p.set_markup("<small>" + _("Select a device") + "</small>")
     p.set_sensitive(False)
 
     return p
@@ -213,7 +214,7 @@ def _create_empty_panel():
 def _create_info_panel():
     p = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
 
-    p._title = Gtk.Label(' ')
+    p._title = Gtk.Label(" ")
     p._title.set_alignment(0, 0.5)
     p._icon = Gtk.Image()
 
@@ -256,34 +257,34 @@ def _create_tree(model):
     tree.set_row_separator_func(_is_separator, None)
 
     icon_cell_renderer = Gtk.CellRendererPixbuf()
-    icon_cell_renderer.set_property('stock-size', _TREE_ICON_SIZE)
-    icon_column = Gtk.TreeViewColumn('Icon', icon_cell_renderer)
-    icon_column.add_attribute(icon_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
-    icon_column.add_attribute(icon_cell_renderer, 'icon-name', _COLUMN.ICON)
+    icon_cell_renderer.set_property("stock-size", _TREE_ICON_SIZE)
+    icon_column = Gtk.TreeViewColumn("Icon", icon_cell_renderer)
+    icon_column.add_attribute(icon_cell_renderer, "sensitive", _COLUMN.ACTIVE)
+    icon_column.add_attribute(icon_cell_renderer, "icon-name", _COLUMN.ICON)
     tree.append_column(icon_column)
 
     name_cell_renderer = Gtk.CellRendererText()
-    name_column = Gtk.TreeViewColumn('device name', name_cell_renderer)
-    name_column.add_attribute(name_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
-    name_column.add_attribute(name_cell_renderer, 'text', _COLUMN.NAME)
+    name_column = Gtk.TreeViewColumn("device name", name_cell_renderer)
+    name_column.add_attribute(name_cell_renderer, "sensitive", _COLUMN.ACTIVE)
+    name_column.add_attribute(name_cell_renderer, "text", _COLUMN.NAME)
     name_column.set_expand(True)
     tree.append_column(name_column)
     tree.set_expander_column(name_column)
 
     status_cell_renderer = Gtk.CellRendererText()
-    status_cell_renderer.set_property('scale', 0.85)
-    status_cell_renderer.set_property('xalign', 1)
-    status_column = Gtk.TreeViewColumn('status text', status_cell_renderer)
-    status_column.add_attribute(status_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
-    status_column.add_attribute(status_cell_renderer, 'text', _COLUMN.STATUS_TEXT)
+    status_cell_renderer.set_property("scale", 0.85)
+    status_cell_renderer.set_property("xalign", 1)
+    status_column = Gtk.TreeViewColumn("status text", status_cell_renderer)
+    status_column.add_attribute(status_cell_renderer, "sensitive", _COLUMN.ACTIVE)
+    status_column.add_attribute(status_cell_renderer, "text", _COLUMN.STATUS_TEXT)
     status_column.set_expand(True)
     tree.append_column(status_column)
 
     battery_cell_renderer = Gtk.CellRendererPixbuf()
-    battery_cell_renderer.set_property('stock-size', _TREE_ICON_SIZE)
-    battery_column = Gtk.TreeViewColumn('status icon', battery_cell_renderer)
-    battery_column.add_attribute(battery_cell_renderer, 'sensitive', _COLUMN.ACTIVE)
-    battery_column.add_attribute(battery_cell_renderer, 'icon-name', _COLUMN.STATUS_ICON)
+    battery_cell_renderer.set_property("stock-size", _TREE_ICON_SIZE)
+    battery_column = Gtk.TreeViewColumn("status icon", battery_cell_renderer)
+    battery_column.add_attribute(battery_cell_renderer, "sensitive", _COLUMN.ACTIVE)
+    battery_column.add_attribute(battery_cell_renderer, "icon-name", _COLUMN.STATUS_ICON)
     tree.append_column(battery_column)
 
     return tree
@@ -296,7 +297,7 @@ def _create_window_layout():
     assert _empty is not None
 
     assert _tree.get_selection().get_mode() == Gtk.SelectionMode.SINGLE
-    _tree.get_selection().connect('changed', _device_selected)
+    _tree.get_selection().connect("changed", _device_selected)
 
     tree_scroll = Gtk.ScrolledWindow()
     tree_scroll.add(_tree)
@@ -316,12 +317,12 @@ def _create_window_layout():
     bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
     bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
     bottom_buttons_box.set_spacing(20)
-    quit_button = _new_button(_('Quit %s') % NAME, 'application-exit', _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
+    quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_('About %s') % NAME, 'help-about', _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
-        _('Rule Editor'), '', _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+        _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
     )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
@@ -345,12 +346,12 @@ def _create_window_layout():
 def _create(delete_action):
     window = Gtk.Window()
     window.set_title(NAME)
-    window.set_role('status-window')
+    window.set_role("status-window")
 
     # window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
     # window.set_skip_taskbar_hint(True)
     # window.set_skip_pager_hint(True)
-    window.connect('delete-event', delete_action)
+    window.connect("delete-event", delete_action)
 
     vbox = _create_window_layout()
     window.add(vbox)
@@ -362,7 +363,7 @@ def _create(delete_action):
     window.set_position(Gtk.WindowPosition.CENTER)
 
     style = window.get_style_context()
-    style.add_class('solaar')
+    style.add_class("solaar")
 
     return window
 
@@ -421,7 +422,7 @@ def _receiver_row(receiver_path, receiver=None):
         row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
         assert len(row_data) == len(_TREE_SEPATATOR)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('new receiver row %s', row_data)
+            logger.debug("new receiver row %s", row_data)
         item = _model.append(None, row_data)
         if _TREE_SEPATATOR:
             _model.append(None, _TREE_SEPATATOR)
@@ -446,8 +447,9 @@ def _device_row(receiver_path, device_number, device=None):
         while item:
             if _model.get_value(item, _COLUMN.PATH) != receiver_path:
                 logger.warning(
-                    'path for device row %s different from path for receiver %s', _model.get_value(item, _COLUMN.PATH),
-                    receiver_path
+                    "path for device row %s different from path for receiver %s",
+                    _model.get_value(item, _COLUMN.PATH),
+                    receiver_path,
                 )
             item_number = _model.get_value(item, _COLUMN.NUMBER)
             if item_number == device_number:
@@ -463,11 +465,18 @@ def _device_row(receiver_path, device_number, device=None):
         status_text = None
         status_icon = None
         row_data = (
-            receiver_path, device_number, bool(device.online), device.codename, icon_name, status_text, status_icon, device
+            receiver_path,
+            device_number,
+            bool(device.online),
+            device.codename,
+            icon_name,
+            status_text,
+            status_icon,
+            device,
         )
         assert len(row_data) == len(_TREE_SEPATATOR)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('new device row %s at index %d', row_data, new_child_index)
+            logger.debug("new device row %s at index %d", row_data, new_child_index)
         item = _model.insert(receiver_row, new_child_index, row_data)
 
     return item or None
@@ -489,7 +498,7 @@ def select(receiver_path, device_number=None):
         selection = _tree.get_selection()
         selection.select_iter(item)
     else:
-        logger.warning('select(%s, %s) failed to find an item', receiver_path, device_number)
+        logger.warning("select(%s, %s) failed to find an item", receiver_path, device_number)
 
 
 def _hide(w, _ignore=None):
@@ -532,57 +541,57 @@ def _update_details(button):
             # If read_all is False, only return stuff that is ~100% already
             # cached, and involves no HID++ calls.
 
-            yield (_('Path'), device.path)
+            yield (_("Path"), device.path)
             if device.kind is None:
                 # 046d is the Logitech vendor id
-                yield (_('USB ID'), '046d:' + device.product_id)
+                yield (_("USB ID"), "046d:" + device.product_id)
 
                 if read_all:
-                    yield (_('Serial'), device.serial)
+                    yield (_("Serial"), device.serial)
                 else:
-                    yield (_('Serial'), '...')
+                    yield (_("Serial"), "...")
 
             else:
                 # yield ('Codename', device.codename)
-                yield (_('Index'), device.number)
+                yield (_("Index"), device.number)
                 if device.wpid:
-                    yield (_('Wireless PID'), device.wpid)
+                    yield (_("Wireless PID"), device.wpid)
                 if device.product_id:
-                    yield (_('Product ID'), '046d:' + device.product_id)
+                    yield (_("Product ID"), "046d:" + device.product_id)
                 hid_version = device.protocol
-                yield (_('Protocol'), 'HID++ %1.1f' % hid_version if hid_version else _('Unknown'))
+                yield (_("Protocol"), "HID++ %1.1f" % hid_version if hid_version else _("Unknown"))
                 if read_all and device.polling_rate:
-                    yield (_('Polling rate'), device.polling_rate)
+                    yield (_("Polling rate"), device.polling_rate)
 
                 if read_all or not device.online:
-                    yield (_('Serial'), device.serial)
+                    yield (_("Serial"), device.serial)
                 else:
-                    yield (_('Serial'), '...')
+                    yield (_("Serial"), "...")
                 if read_all and device.unitId and device.unitId != device.serial:
-                    yield (_('Unit ID'), device.unitId)
+                    yield (_("Unit ID"), device.unitId)
 
             if read_all:
                 if device.firmware:
                     for fw in list(device.firmware):
-                        yield ('  ' + _(str(fw.kind)), (fw.name + ' ' + fw.version).strip())
+                        yield ("  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip())
             elif device.kind is None or device.online:
-                yield ('  %s' % _('Firmware'), '...')
+                yield ("  %s" % _("Firmware"), "...")
 
             flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
             if flag_bits is not None:
-                flag_names = ('(%s)' % _('none'), ) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
-                yield (_('Notifications'), ('\n%15s' % ' ').join(flag_names))
+                flag_names = ("(%s)" % _("none"),) if flag_bits == 0 else _hidpp10.NOTIFICATION_FLAG.flag_names(flag_bits)
+                yield (_("Notifications"), ("\n%15s" % " ").join(flag_names))
 
         def _set_details(text):
             _details._text.set_markup(text)
 
         def _make_text(items):
-            text = '\n'.join('%-13s: %s' % (name, value) for name, value in items)
-            return '<small><tt>' + text + '</tt></small>'
+            text = "\n".join("%-13s: %s" % (name, value) for name, value in items)
+            return "<small><tt>" + text + "</tt></small>"
 
         def _displayable_items(items):
             for name, value in items:
-                value = GLib.markup_escape_text(str(value).replace('\x00', '')).strip()
+                value = GLib.markup_escape_text(str(value).replace("\x00", "")).strip()
                 if value:
                     yield name, value
 
@@ -614,26 +623,29 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
     devices_count = len(receiver)
 
-    paired_text = _(
-        _('No device paired.')
-    ) if devices_count == 0 else ngettext('%(count)s paired device.', '%(count)s paired devices.', devices_count) % {
-        'count': devices_count
-    }
+    paired_text = (
+        _(_("No device paired."))
+        if devices_count == 0
+        else ngettext("%(count)s paired device.", "%(count)s paired devices.", devices_count) % {"count": devices_count}
+    )
 
-    if (receiver.max_devices > 0):
-        paired_text += '\n\n<small>%s</small>' % ngettext(
-            'Up to %(max_count)s device can be paired to this receiver.',
-            'Up to %(max_count)s devices can be paired to this receiver.', receiver.max_devices
-        ) % {
-            'max_count': receiver.max_devices
-        }
+    if receiver.max_devices > 0:
+        paired_text += (
+            "\n\n<small>%s</small>"
+            % ngettext(
+                "Up to %(max_count)s device can be paired to this receiver.",
+                "Up to %(max_count)s devices can be paired to this receiver.",
+                receiver.max_devices,
+            )
+            % {"max_count": receiver.max_devices}
+        )
     elif devices_count > 0:
-        paired_text += '\n\n<small>%s</small>' % _('Only one device can be paired to this receiver.')
+        paired_text += "\n\n<small>%s</small>" % _("Only one device can be paired to this receiver.")
     pairings = receiver.remaining_pairings()
-    if (pairings is not None and pairings >= 0):
-        paired_text += '\n<small>%s</small>' % (
-            ngettext('This receiver has %d pairing remaining.', 'This receiver has %d pairings remaining.', pairings) %
-            pairings
+    if pairings is not None and pairings >= 0:
+        paired_text += "\n<small>%s</small>" % (
+            ngettext("This receiver has %d pairing remaining.", "This receiver has %d pairings remaining.", pairings)
+            % pairings
         )
 
     panel._count.set_markup(paired_text)
@@ -655,8 +667,11 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
     # b._insecure.set_visible(False)
     buttons._unpair.set_visible(False)
 
-    if not is_pairing and (receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0) and \
-       (receiver.re_pairs or devices_count < receiver.max_devices):
+    if (
+        not is_pairing
+        and (receiver.remaining_pairings() is None or receiver.remaining_pairings() != 0)
+        and (receiver.re_pairs or devices_count < receiver.max_devices)
+    ):
         buttons._pair.set_sensitive(True)
     else:
         buttons._pair.set_sensitive(False)
@@ -686,28 +701,28 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._text.set_sensitive(is_online)
 
         if battery_voltage is not None:
-            panel._battery._label.set_text(_('Battery Voltage'))
-            text = '%dmV' % battery_voltage
-            tooltip_text = _('Voltage reported by battery')
+            panel._battery._label.set_text(_("Battery Voltage"))
+            text = "%dmV" % battery_voltage
+            tooltip_text = _("Voltage reported by battery")
         else:
-            panel._battery._label.set_text(_('Battery Level'))
-            text = ''
-            tooltip_text = _('Approximate level reported by battery')
+            panel._battery._label.set_text(_("Battery Level"))
+            text = ""
+            tooltip_text = _("Approximate level reported by battery")
         if battery_voltage is not None and battery_level is not None:
-            text += ', '
+            text += ", "
         if battery_level is not None:
-            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else '%d%%' % battery_level
+            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else "%d%%" % battery_level
         if battery_next_level is not None and not charging:
             if isinstance(battery_next_level, _NamedInt):
-                text += '<small> (' + _('next reported ') + _(str(battery_next_level)) + ')</small>'
+                text += "<small> (" + _("next reported ") + _(str(battery_next_level)) + ")</small>"
             else:
-                text += '<small> (' + _('next reported ') + ('%d%%' % battery_next_level) + ')</small>'
-            tooltip_text = tooltip_text + _(' and next level to be reported.')
+                text += "<small> (" + _("next reported ") + ("%d%%" % battery_next_level) + ")</small>"
+            tooltip_text = tooltip_text + _(" and next level to be reported.")
         if is_online:
             if charging:
-                text += ' <small>(%s)</small>' % _('charging')
+                text += " <small>(%s)</small>" % _("charging")
         else:
-            text += ' <small>(%s)</small>' % _('last known')
+            text += " <small>(%s)</small>" % _("last known")
 
         panel._battery._text.set_markup(text)
         panel._battery.set_tooltip_text(tooltip_text)
@@ -718,23 +733,23 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._secure.set_visible(True)
         panel._secure._icon.set_visible(True)
         if device.status.get(_K.LINK_ENCRYPTED) is True:
-            panel._secure._text.set_text(_('encrypted'))
-            panel._secure._icon.set_from_icon_name('security-high', _INFO_ICON_SIZE)
-            panel._secure.set_tooltip_text(_('The wireless link between this device and its receiver is encrypted.'))
+            panel._secure._text.set_text(_("encrypted"))
+            panel._secure._icon.set_from_icon_name("security-high", _INFO_ICON_SIZE)
+            panel._secure.set_tooltip_text(_("The wireless link between this device and its receiver is encrypted."))
         else:
-            panel._secure._text.set_text(_('not encrypted'))
-            panel._secure._icon.set_from_icon_name('security-low', _INFO_ICON_SIZE)
+            panel._secure._text.set_text(_("not encrypted"))
+            panel._secure._icon.set_from_icon_name("security-low", _INFO_ICON_SIZE)
             panel._secure.set_tooltip_text(
                 _(
-                    'The wireless link between this device and its receiver is not encrypted.\n'
-                    'This is a security issue for pointing devices, and a major security issue for text-input devices.'
+                    "The wireless link between this device and its receiver is not encrypted.\n"
+                    "This is a security issue for pointing devices, and a major security issue for text-input devices."
                 )
             )
     else:
         panel._secure.set_visible(True)
         panel._secure._icon.set_visible(False)
-        panel._secure._text.set_markup('<small>%s</small>' % _('offline'))
-        panel._secure.set_tooltip_text('')
+        panel._secure._text.set_markup("<small>%s</small>" % _("offline"))
+        panel._secure.set_tooltip_text("")
 
     if is_online:
         light_level = device.status.get(_K.LIGHT_LEVEL)
@@ -742,7 +757,7 @@ def _update_device_panel(device, panel, buttons, full=False):
             panel._lux.set_visible(False)
         else:
             panel._lux._icon.set_from_icon_name(_icons.lux(light_level), _INFO_ICON_SIZE)
-            panel._lux._text.set_text(_('%(light_level)d lux') % {'light_level': light_level})
+            panel._lux._text.set_text(_("%(light_level)d lux") % {"light_level": light_level})
             panel._lux.set_visible(True)
     else:
         panel._lux.set_visible(False)
@@ -769,7 +784,7 @@ def _update_info_panel(device, full=False):
     # a device must be paired
     assert device
 
-    _info._title.set_markup('<b>%s</b>' % device.name)
+    _info._title.set_markup("<b>%s</b>" % device.name)
     icon_name = _icons.device_icon_name(device.name, device.kind)
     _info._icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 
@@ -860,7 +875,7 @@ def update(device, need_popup=False, refresh=False):
         if is_alive and item:
             was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
             is_pairing = (not device.isDevice) and bool(device.status.lock_open)
-            _model.set_value(item, _COLUMN.STATUS_ICON, 'network-wireless' if is_pairing else _CAN_SET_ROW_NONE)
+            _model.set_value(item, _COLUMN.STATUS_ICON, "network-wireless" if is_pairing else _CAN_SET_ROW_NONE)
 
             if selected_device_id == (device.path, 0):
                 full_update = need_popup or was_pairing != is_pairing
@@ -875,7 +890,7 @@ def update(device, need_popup=False, refresh=False):
 
     else:
         path = device.receiver.path if device.receiver is not None else device.path
-        assert device.number is not None and device.number >= 0, 'invalid device number' + str(device.number)
+        assert device.number is not None and device.number >= 0, "invalid device number" + str(device.number)
         item = _device_row(path, device.number, device if bool(device) else None)
 
         if bool(device) and item:
@@ -900,11 +915,11 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
         if battery_voltage is not None and False:  # Use levels instead of voltage here
-            status_text = '%(battery_voltage)dmV' % {'battery_voltage': battery_voltage}
+            status_text = "%(battery_voltage)dmV" % {"battery_voltage": battery_voltage}
         elif isinstance(battery_level, _NamedInt):
             status_text = _(str(battery_level))
         else:
-            status_text = '%(battery_percent)d%%' % {'battery_percent': battery_level}
+            status_text = "%(battery_percent)d%%" % {"battery_percent": battery_level}
         _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
         charging = device.status.get(_K.BATTERY_CHARGING)
@@ -921,7 +936,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
 
 
 def find_device(serial):
-    assert serial, 'need serial number or unit ID to find a device'
+    assert serial, "need serial number or unit ID to find a device"
     result = None
 
     def check(_store, _treepath, row):

@@ -35,7 +35,6 @@ except ImportError:
 
 
 class TaskRunner(_Thread):
-
     def __init__(self, name):
         super().__init__(name=name)
         self.daemon = True
@@ -54,7 +53,7 @@ class TaskRunner(_Thread):
         self.alive = True
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('started')
+            logger.debug("started")
 
         while self.alive:
             task = self.queue.get()
@@ -64,7 +63,7 @@ class TaskRunner(_Thread):
                 try:
                     function(*args, **kwargs)
                 except Exception:
-                    logger.exception('calling %s', function)
+                    logger.exception("calling %s", function)
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('stopped')
+            logger.debug("stopped")

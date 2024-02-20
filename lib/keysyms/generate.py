@@ -5,39 +5,39 @@ from re import findall
 from subprocess import run
 from tempfile import TemporaryDirectory
 
-repo = 'https://github.com/freedesktop/xorg-proto-x11proto.git'
-xx = 'https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/tree/master/include/X11/'
-repo = 'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git'
-pattern = r'#define XK_(\w+)\s+0x(\w+)(?:\s+/\*\s+U\+(\w+))?'
-xf86pattern = r'#define XF86XK_(\w+)\s+0x(\w+)(?:\s+/\*\s+U\+(\w+))?'
+repo = "https://github.com/freedesktop/xorg-proto-x11proto.git"
+xx = "https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/tree/master/include/X11/"
+repo = "https://gitlab.freedesktop.org/xorg/proto/xorgproto.git"
+pattern = r"#define XK_(\w+)\s+0x(\w+)(?:\s+/\*\s+U\+(\w+))?"
+xf86pattern = r"#define XF86XK_(\w+)\s+0x(\w+)(?:\s+/\*\s+U\+(\w+))?"
 
 
 def main():
     keysymdef = {}
 
     with TemporaryDirectory() as temp:
-        run(['git', 'clone', repo, '.'], cwd=temp)
+        run(["git", "clone", repo, "."], cwd=temp)
         # text = Path(temp, 'keysymdef.h').read_text()
-        text = Path(temp, 'include/X11/keysymdef.h').read_text()
+        text = Path(temp, "include/X11/keysymdef.h").read_text()
         for name, sym, uni in findall(pattern, text):
             sym = int(sym, 16)
             uni = int(uni, 16) if uni else None
             if keysymdef.get(name, None):
-                print('KEY DUP', name)
+                print("KEY DUP", name)
             keysymdef[name] = sym
         # text = Path(temp, 'keysymdef.h').read_text()
-        text = Path(temp, 'include/X11/XF86keysym.h').read_text()
+        text = Path(temp, "include/X11/XF86keysym.h").read_text()
         for name, sym, uni in findall(xf86pattern, text):
             sym = int(sym, 16)
             uni = int(uni, 16) if uni else None
-            if keysymdef.get('XF86_' + name, None):
-                print('KEY DUP', 'XF86_' + name)
-            keysymdef['XF86_' + name] = sym
+            if keysymdef.get("XF86_" + name, None):
+                print("KEY DUP", "XF86_" + name)
+            keysymdef["XF86_" + name] = sym
 
-    with open('keysymdef.py', 'w') as f:
-        f.write('# flake8: noqa\nkeysymdef = \\\n')
+    with open("keysymdef.py", "w") as f:
+        f.write("# flake8: noqa\nkeysymdef = \\\n")
         pprint(keysymdef, f)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

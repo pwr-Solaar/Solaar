@@ -20,13 +20,16 @@ import pkgutil as _pkgutil
 import subprocess as _subprocess
 import sys as _sys
 
-NAME = 'solaar'
+NAME = "solaar"
 
 try:
-    __version__ = _subprocess.check_output(['git', 'describe', '--always'], cwd=_sys.path[0],
-                                           stderr=_subprocess.DEVNULL).strip().decode()
+    __version__ = (
+        _subprocess.check_output(["git", "describe", "--always"], cwd=_sys.path[0], stderr=_subprocess.DEVNULL)
+        .strip()
+        .decode()
+    )
 except Exception:
     try:
-        __version__ = _pkgutil.get_data('solaar', 'commit').strip().decode()
+        __version__ = _pkgutil.get_data("solaar", "commit").strip().decode()
     except Exception:
-        __version__ = _pkgutil.get_data('solaar', 'version').strip().decode()
+        __version__ = _pkgutil.get_data("solaar", "version").strip().decode()

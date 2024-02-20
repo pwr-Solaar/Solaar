@@ -27,6 +27,7 @@ import logitech_receiver.device as _device
 import logitech_receiver.receiver as _receiver
 
 from logitech_receiver.base import receivers, receivers_and_devices
+
 from solaar import NAME
 
 logger = logging.getLogger(__name__)
@@ -38,70 +39,66 @@ logger = logging.getLogger(__name__)
 
 def _create_parser():
     parser = _argparse.ArgumentParser(
-        prog=NAME.lower(),
-        add_help=False,
-        epilog='For details on individual actions, run `%s <action> --help`.' % NAME.lower()
+        prog=NAME.lower(), add_help=False, epilog="For details on individual actions, run `%s <action> --help`." % NAME.lower()
     )
-    subparsers = parser.add_subparsers(title='actions', help='optional action to perform')
+    subparsers = parser.add_subparsers(title="actions", help="optional action to perform")
 
-    sp = subparsers.add_parser('show', help='show information about devices')
+    sp = subparsers.add_parser("show", help="show information about devices")
     sp.add_argument(
-        'device',
-        nargs='?',
-        default='all',
-        help='device to show information about; may be a device number (1..6), a serial number, '
-        'a substring of a device\'s name, or "all" (the default)'
+        "device",
+        nargs="?",
+        default="all",
+        help="device to show information about; may be a device number (1..6), a serial number, "
+        'a substring of a device\'s name, or "all" (the default)',
     )
-    sp.set_defaults(action='show')
+    sp.set_defaults(action="show")
 
-    sp = subparsers.add_parser('probe', help='probe a receiver (debugging use only)')
+    sp = subparsers.add_parser("probe", help="probe a receiver (debugging use only)")
     sp.add_argument(
-        'receiver', nargs='?', help='select receiver by name substring or serial number when more than one is present'
+        "receiver", nargs="?", help="select receiver by name substring or serial number when more than one is present"
     )
-    sp.set_defaults(action='probe')
+    sp.set_defaults(action="probe")
 
-    sp = subparsers.add_parser('profiles', help='read or write onboard profiles', epilog='Only works on active devices.')
+    sp = subparsers.add_parser("profiles", help="read or write onboard profiles", epilog="Only works on active devices.")
     sp.add_argument(
-        'device',
-        help='device to read or write profiles of; may be a device number (1..6), a serial number, '
-        'a substring of a device\'s name'
+        "device",
+        help="device to read or write profiles of; may be a device number (1..6), a serial number, "
+        "a substring of a device's name",
     )
-    sp.add_argument('profiles', nargs='?', help='file containing YAML dump of profiles')
-    sp.set_defaults(action='profiles')
+    sp.add_argument("profiles", nargs="?", help="file containing YAML dump of profiles")
+    sp.set_defaults(action="profiles")
 
     sp = subparsers.add_parser(
-        'config',
-        help='read/write device-specific settings',
-        epilog='Please note that configuration only works on active devices.'
+        "config",
+        help="read/write device-specific settings",
+        epilog="Please note that configuration only works on active devices.",
     )
     sp.add_argument(
-        'device',
-        help='device to configure; may be a device number (1..6), a serial number, '
-        'or a substring of a device\'s name'
+        "device",
+        help="device to configure; may be a device number (1..6), a serial number, " "or a substring of a device's name",
     )
-    sp.add_argument('setting', nargs='?', help='device-specific setting; leave empty to list available settings')
-    sp.add_argument('value_key', nargs='?', help='new value for the setting or key for keyed settings')
-    sp.add_argument('extra_subkey', nargs='?', help='value for keyed or subkey for subkeyed settings')
-    sp.add_argument('extra2', nargs='?', help='value for subkeyed settings')
-    sp.set_defaults(action='config')
+    sp.add_argument("setting", nargs="?", help="device-specific setting; leave empty to list available settings")
+    sp.add_argument("value_key", nargs="?", help="new value for the setting or key for keyed settings")
+    sp.add_argument("extra_subkey", nargs="?", help="value for keyed or subkey for subkeyed settings")
+    sp.add_argument("extra2", nargs="?", help="value for subkeyed settings")
+    sp.set_defaults(action="config")
 
     sp = subparsers.add_parser(
-        'pair',
-        help='pair a new device',
-        epilog='The Logitech Unifying Receiver supports up to 6 paired devices at the same time.'
+        "pair",
+        help="pair a new device",
+        epilog="The Logitech Unifying Receiver supports up to 6 paired devices at the same time.",
     )
     sp.add_argument(
-        'receiver', nargs='?', help='select receiver by name substring or serial number when more than one is present'
+        "receiver", nargs="?", help="select receiver by name substring or serial number when more than one is present"
     )
-    sp.set_defaults(action='pair')
+    sp.set_defaults(action="pair")
 
-    sp = subparsers.add_parser('unpair', help='unpair a device')
+    sp = subparsers.add_parser("unpair", help="unpair a device")
     sp.add_argument(
-        'device',
-        help='device to unpair; may be a device number (1..6), a serial number, '
-        'or a substring of a device\'s name.'
+        "device",
+        help="device to unpair; may be a device number (1..6), a serial number, " "or a substring of a device's name.",
     )
-    sp.set_defaults(action='unpair')
+    sp.set_defaults(action="unpair")
 
     return parser, subparsers.choices
 
@@ -117,12 +114,12 @@ def _receivers(dev_path=None):
         try:
             r = _receiver.Receiver.open(dev_info)
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('[%s] => %s', dev_info.path, r)
+                logger.debug("[%s] => %s", dev_info.path, r)
             if r:
                 yield r
         except Exception as e:
-            logger.exception('opening ' + str(dev_info))
-            _sys.exit('%s: error: %s' % (NAME, str(e)))
+            logger.exception("opening " + str(dev_info))
+            _sys.exit("%s: error: %s" % (NAME, str(e)))
 
 
 def _receivers_and_devices(dev_path=None):
@@ -132,12 +129,12 @@ def _receivers_and_devices(dev_path=None):
         try:
             d = _device.Device.open(dev_info) if dev_info.isDevice else _receiver.Receiver.open(dev_info)
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug('[%s] => %s', dev_info.path, d)
+                logger.debug("[%s] => %s", dev_info.path, d)
             if d is not None:
                 yield d
         except Exception as e:
-            logger.exception('opening ' + str(dev_info))
-            _sys.exit('%s: error: %s' % (NAME, str(e)))
+            logger.exception("opening " + str(dev_info))
+            _sys.exit("%s: error: %s" % (NAME, str(e)))
 
 
 def _find_receiver(receivers, name):
@@ -178,7 +175,9 @@ def _find_device(receivers, name):
 
         for dev in r:
             if (
-                name == dev.serial.lower() or name == dev.codename.lower() or name == str(dev.kind).lower()
+                name == dev.serial.lower()
+                or name == dev.codename.lower()
+                or name == str(dev.kind).lower()
                 or name in dev.name.lower()
             ):
                 yield dev
@@ -191,7 +190,6 @@ def _find_device(receivers, name):
 
 
 def run(cli_args=None, hidraw_path=None):
-
     if cli_args:
         action = cli_args[0]
         args = _cli_parser.parse_args(cli_args)
@@ -199,15 +197,15 @@ def run(cli_args=None, hidraw_path=None):
         args = _cli_parser.parse_args()
         # Python 3 has an undocumented 'feature' that breaks parsing empty args
         # http://bugs.python.org/issue16308
-        if 'cmd' not in args:
+        if "cmd" not in args:
             _cli_parser.print_usage(_sys.stderr)
-            _sys.stderr.write('%s: error: too few arguments\n' % NAME.lower())
+            _sys.stderr.write("%s: error: too few arguments\n" % NAME.lower())
             _sys.exit(2)
         action = args.action
     assert action in actions
 
     try:
-        if action == 'show' or action == 'probe' or action == 'config' or action == 'profiles':
+        if action == "show" or action == "probe" or action == "config" or action == "profiles":
             c = list(_receivers_and_devices(hidraw_path))
         else:
             c = list(_receivers(hidraw_path))
@@ -215,10 +213,10 @@ def run(cli_args=None, hidraw_path=None):
             raise Exception(
                 'No supported device found.  Use "lsusb" and "bluetoothctl devices Connected" to list connected devices.'
             )
-        m = import_module('.' + action, package=__name__)
+        m = import_module("." + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)
     except AssertionError:
         tb_last = extract_tb(_sys.exc_info()[2])[-1]
-        _sys.exit('%s: assertion failed: %s line %d' % (NAME.lower(), tb_last[0], tb_last[1]))
+        _sys.exit("%s: assertion failed: %s line %d" % (NAME.lower(), tb_last[0], tb_last[1]))
     except Exception:
-        _sys.exit('%s: error: %s' % (NAME.lower(), format_exc()))
+        _sys.exit("%s: error: %s" % (NAME.lower(), format_exc()))

@@ -20,6 +20,7 @@
 import logging
 
 from gi.repository import Gtk
+
 from solaar import NAME, __version__
 from solaar.i18n import _
 
@@ -35,60 +36,64 @@ def _create():
 
     about.set_program_name(NAME)
     about.set_version(__version__)
-    about.set_comments(_('Manages Logitech receivers,\nkeyboards, mice, and tablets.'))
+    about.set_comments(_("Manages Logitech receivers,\nkeyboards, mice, and tablets."))
     about.set_icon_name(NAME.lower())
 
-    about.set_copyright('© 2012-2023 Daniel Pavel and contributors to the Solaar project')
+    about.set_copyright("© 2012-2023 Daniel Pavel and contributors to the Solaar project")
     about.set_license_type(Gtk.License.GPL_2_0)
 
-    about.set_authors(('Daniel Pavel http://github.com/pwr', ))
+    about.set_authors(("Daniel Pavel http://github.com/pwr",))
     try:
-        about.add_credit_section(_('Additional Programming'), ('Filipe Laíns', 'Peter F. Patel-Schneider'))
-        about.add_credit_section(_('GUI design'), ('Julien Gascard', 'Daniel Pavel'))
+        about.add_credit_section(_("Additional Programming"), ("Filipe Laíns", "Peter F. Patel-Schneider"))
+        about.add_credit_section(_("GUI design"), ("Julien Gascard", "Daniel Pavel"))
         about.add_credit_section(
-            _('Testing'), (
-                'Douglas Wagner',
-                'Julien Gascard',
-                'Peter Wu http://www.lekensteyn.nl/logitech-unifying.html',
-            )
+            _("Testing"),
+            (
+                "Douglas Wagner",
+                "Julien Gascard",
+                "Peter Wu http://www.lekensteyn.nl/logitech-unifying.html",
+            ),
         )
         about.add_credit_section(
-            _('Logitech documentation'), (
-                'Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower',
-                'Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28',
-            )
+            _("Logitech documentation"),
+            (
+                "Julien Danjou http://julien.danjou.info/blog/2012/logitech-unifying-upower",
+                "Nestor Lopez Casado http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28",
+            ),
         )
     except TypeError:
         # gtk3 < ~3.6.4 has incorrect gi bindings
-        logging.exception('failed to fully create the about dialog')
+        logging.exception("failed to fully create the about dialog")
     except Exception:
         # the Gtk3 version may be too old, and the function does not exist
-        logging.exception('failed to fully create the about dialog')
+        logging.exception("failed to fully create the about dialog")
 
     about.set_translator_credits(
-        '\n'.join((
-            'gogo (croatian)',
-            'Papoteur, David Geiger, Damien Lallement (français)',
-            'Michele Olivo (italiano)',
-            'Adrian Piotrowicz (polski)',
-            'Drovetto, JrBenito (Portuguese-BR)',
-            'Daniel Pavel (română)',
-            'Daniel Zippert, Emelie Snecker (svensk)',
-            'Dimitriy Ryazantcev (Russian)',
-            'El Jinete Sin Cabeza (Español)',
-        ))
+        "\n".join(
+            (
+                "gogo (croatian)",
+                "Papoteur, David Geiger, Damien Lallement (français)",
+                "Michele Olivo (italiano)",
+                "Adrian Piotrowicz (polski)",
+                "Drovetto, JrBenito (Portuguese-BR)",
+                "Daniel Pavel (română)",
+                "Daniel Zippert, Emelie Snecker (svensk)",
+                "Dimitriy Ryazantcev (Russian)",
+                "El Jinete Sin Cabeza (Español)",
+            )
+        )
     )
 
-    about.set_website('https://pwr-solaar.github.io/Solaar')
+    about.set_website("https://pwr-solaar.github.io/Solaar")
     about.set_website_label(NAME)
 
-    about.connect('response', lambda x, y: x.hide())
+    about.connect("response", lambda x, y: x.hide())
 
     def _hide(dialog, event):
         dialog.hide()
         return True
 
-    about.connect('delete-event', _hide)
+    about.connect("delete-event", _hide)
 
     return about
 

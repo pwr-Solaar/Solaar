@@ -22,13 +22,14 @@ import gi
 import yaml as _yaml
 
 from logitech_receiver.status import ALERT
+
 from solaar.i18n import _
 from solaar.ui.config_panel import change_setting, record_setting
 from solaar.ui.window import find_device
 
 from . import common, diversion_rules, notify, tray, window
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 #
 #
 
-assert Gtk.get_major_version() > 2, 'Solaar requires Gtk 3 python bindings'
+assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
 GLib.threads_init()
 
@@ -48,7 +49,7 @@ GLib.threads_init()
 
 def _startup(app, startup_hook, use_tray, show_window):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('startup registered=%s, remote=%s', app.get_is_registered(), app.get_is_remote())
+        logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
     common.start_async()
     notify.init()
     if use_tray:
@@ -59,7 +60,7 @@ def _startup(app, startup_hook, use_tray, show_window):
 
 def _activate(app):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('activate')
+        logger.debug("activate")
     if app.get_windows():
         window.popup()
     else:
@@ -68,12 +69,12 @@ def _activate(app):
 
 def _command_line(app, command_line):
     args = command_line.get_arguments()
-    args = _yaml.safe_load(''.join(args)) if args else args
+    args = _yaml.safe_load("".join(args)) if args else args
     if not args:
         _activate(app)
-    elif args[0] == 'config':  # config call from remote instance
+    elif args[0] == "config":  # config call from remote instance
         if logger.isEnabledFor(logging.INFO):
-            logger.info('remote command line %s', args)
+            logger.info("remote command line %s", args)
         dev = find_device(args[1])
         if dev:
             setting = next((s for s in dev.settings if s.name == args[2]), None)
@@ -84,7 +85,7 @@ def _command_line(app, command_line):
 
 def _shutdown(app, shutdown_hook):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('shutdown')
+        logger.debug("shutdown")
     shutdown_hook()
     common.stop_async()
     tray.destroy()
@@ -92,18 +93,18 @@ def _shutdown(app, shutdown_hook):
 
 
 def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
-    assert use_tray or show_window, 'need either tray or visible window'
-    APP_ID = 'io.github.pwr_solaar.solaar'
+    assert use_tray or show_window, "need either tray or visible window"
+    APP_ID = "io.github.pwr_solaar.solaar"
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
-    application.connect('startup', lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
-    application.connect('command-line', _command_line)
-    application.connect('activate', _activate)
-    application.connect('shutdown', _shutdown, shutdown_hook)
+    application.connect("startup", lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
+    application.connect("command-line", _command_line)
+    application.connect("activate", _activate)
+    application.connect("shutdown", _shutdown, shutdown_hook)
 
     application.register()
     if application.get_is_remote():
-        print(_('Another Solaar process is already running so just expose its window'))
+        print(_("Another Solaar process is already running so just expose its window"))
     application.run()
 
 
@@ -115,7 +116,7 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
 def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug('status changed: %s (%s) %s', device, alert, reason)
+        logger.debug("status changed: %s (%s) %s", device, alert, reason)
 
     tray.update(device)
     if alert & ALERT.ATTENTION:

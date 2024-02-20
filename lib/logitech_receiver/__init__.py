@@ -38,4 +38,4 @@ logger.setLevel(logging.root.level)
 
 del logging
 
-__version__ = '0.9'
+__version__ = "0.9"

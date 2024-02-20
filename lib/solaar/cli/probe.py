@@ -19,6 +19,7 @@
 from logitech_receiver import base as _base
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver.common import strhex as _strhex
+
 from solaar.cli.show import _print_device, _print_receiver
 
 _R = _hidpp10_constants.REGISTERS
@@ -43,49 +44,53 @@ def run(receivers, args, find_receiver, _ignore):
 
     _print_receiver(receiver)
 
-    print('')
-    print('  Register Dump')
+    print("")
+    print("  Register Dump")
     rgst = receiver.read_register(_R.notifications)
-    print('    Notifications         %#04x: %s' % (_R.notifications % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
+    print("    Notifications         %#04x: %s" % (_R.notifications % 0x100, "0x" + _strhex(rgst) if rgst else "None"))
     rgst = receiver.read_register(_R.receiver_connection)
-    print('    Connection State      %#04x: %s' % (_R.receiver_connection % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
+    print("    Connection State      %#04x: %s" % (_R.receiver_connection % 0x100, "0x" + _strhex(rgst) if rgst else "None"))
     rgst = receiver.read_register(_R.devices_activity)
-    print('    Device Activity       %#04x: %s' % (_R.devices_activity % 0x100, '0x' + _strhex(rgst) if rgst else 'None'))
+    print("    Device Activity       %#04x: %s" % (_R.devices_activity % 0x100, "0x" + _strhex(rgst) if rgst else "None"))
 
     for sub_reg in range(0, 16):
         rgst = receiver.read_register(_R.receiver_info, sub_reg)
         print(
-            '    Pairing Register %#04x %#04x: %s' %
-            (_R.receiver_info % 0x100, sub_reg, '0x' + _strhex(rgst) if rgst else 'None')
+            "    Pairing Register %#04x %#04x: %s"
+            % (_R.receiver_info % 0x100, sub_reg, "0x" + _strhex(rgst) if rgst else "None")
         )
     for device in range(0, 7):
         for sub_reg in [0x10, 0x20, 0x30, 0x50]:
             rgst = receiver.read_register(_R.receiver_info, sub_reg + device)
             print(
-                '    Pairing Register %#04x %#04x: %s' %
-                (_R.receiver_info % 0x100, sub_reg + device, '0x' + _strhex(rgst) if rgst else 'None')
+                "    Pairing Register %#04x %#04x: %s"
+                % (_R.receiver_info % 0x100, sub_reg + device, "0x" + _strhex(rgst) if rgst else "None")
             )
         rgst = receiver.read_register(_R.receiver_info, 0x40 + device)
         print(
-            '    Pairing Name     %#04x %#02x: %s' %
-            (_R.receiver_info % 0x100, 0x40 + device, rgst[2:2 + ord(rgst[1:2])] if rgst else 'None')
+            "    Pairing Name     %#04x %#02x: %s"
+            % (_R.receiver_info % 0x100, 0x40 + device, rgst[2 : 2 + ord(rgst[1:2])] if rgst else "None")
         )
         for part in range(1, 4):
             rgst = receiver.read_register(_R.receiver_info, 0x60 + device, part)
             print(
-                '    Pairing Name     %#04x %#02x %#02x: %2d %s' % (
-                    _R.receiver_info % 0x100, 0x60 + device, part, ord(rgst[2:3]) if rgst else 0,
-                    rgst[3:3 + ord(rgst[2:3])] if rgst else 'None'
+                "    Pairing Name     %#04x %#02x %#02x: %2d %s"
+                % (
+                    _R.receiver_info % 0x100,
+                    0x60 + device,
+                    part,
+                    ord(rgst[2:3]) if rgst else 0,
+                    rgst[3 : 3 + ord(rgst[2:3])] if rgst else "None",
                 )
             )
     for sub_reg in range(0, 5):
         rgst = receiver.read_register(_R.firmware, sub_reg)
         print(
-            '    Firmware         %#04x %#04x: %s' %
-            (_R.firmware % 0x100, sub_reg, '0x' + _strhex(rgst) if rgst is not None else 'None')
+            "    Firmware         %#04x %#04x: %s"
+            % (_R.firmware % 0x100, sub_reg, "0x" + _strhex(rgst) if rgst is not None else "None")
         )
 
-    print('')
+    print("")
     for reg in range(0, 0xFF):
         last = None
         for sub in range(0, 0xFF):
@@ -97,8 +102,8 @@ def run(receivers, args, find_receiver, _ignore):
             else:
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
-                        '    Register Short   %#04x %#04x: %s' %
-                        (reg, sub, '0x' + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
+                        "    Register Short   %#04x %#04x: %s"
+                        % (reg, sub, "0x" + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst
         last = None
@@ -111,7 +116,7 @@ def run(receivers, args, find_receiver, _ignore):
             else:
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
-                        '    Register Long    %#04x %#04x: %s' %
-                        (reg, sub, '0x' + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
+                        "    Register Long    %#04x %#04x: %s"
+                        % (reg, sub, "0x" + _strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst

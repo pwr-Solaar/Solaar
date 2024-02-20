@@ -41,27 +41,27 @@ def run(receivers, args, find_receiver, find_device):
         raise Exception("no online device found matching '%s'" % device_name)
 
     if not (dev.online and dev.profiles):
-        print(f'Device {dev.name} is either offline or has no onboard profiles')
+        print(f"Device {dev.name} is either offline or has no onboard profiles")
     elif not profiles_file:
-        print(f'#Dumping profiles from {dev.name}')
+        print(f"#Dumping profiles from {dev.name}")
         print(_yaml.dump(dev.profiles))
     else:
         try:
-            with open(profiles_file, 'r') as f:
-                print(f'Reading profiles from {profiles_file}')
+            with open(profiles_file, "r") as f:
+                print(f"Reading profiles from {profiles_file}")
                 profiles = _yaml.safe_load(f)
                 if not isinstance(profiles, _OnboardProfiles):
-                    print('Profiles file does not contain current onboard profiles')
-                elif getattr(profiles, 'version', None) != _OnboardProfilesVersion:
-                    version = getattr(profiles, 'version', None)
-                    print(f'Missing or incorrect profile version {version} in loaded profile')
-                elif getattr(profiles, 'name', None) != dev.name:
-                    name = getattr(profiles, 'name', None)
-                    print(f'Different device name {name} in loaded profile')
+                    print("Profiles file does not contain current onboard profiles")
+                elif getattr(profiles, "version", None) != _OnboardProfilesVersion:
+                    version = getattr(profiles, "version", None)
+                    print(f"Missing or incorrect profile version {version} in loaded profile")
+                elif getattr(profiles, "name", None) != dev.name:
+                    name = getattr(profiles, "name", None)
+                    print(f"Different device name {name} in loaded profile")
                 else:
-                    print(f'Loading profiles into {dev.name}')
+                    print(f"Loading profiles into {dev.name}")
                     written = profiles.write(dev)
-                    print(f'Wrote {written} sectors to {dev.name}')
+                    print(f"Wrote {written} sectors to {dev.name}")
         except Exception as exc:
-            print('Profiles not written:', exc)
+            print("Profiles not written:", exc)
             print(_traceback.format_exc())
