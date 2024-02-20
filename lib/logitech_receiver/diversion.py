@@ -28,8 +28,10 @@ import subprocess
 import sys as _sys
 import time as _time
 
-import dbus
-import gi
+try:
+    import dbus
+except ImportError:
+    dbus = None
 import keysyms.keysymdef as _keysymdef
 import psutil
 
@@ -51,8 +53,14 @@ from .common import NamedInt
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
 
-gi.require_version('Gdk', '3.0')  # isort:skip
-from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
+try:
+    import gi  # isort:skip
+
+    gi.require_version('Gdk', '3.0')  # isort:skip
+    from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
+except ImportError:
+    Gdk = None
+    GLib = None
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +104,14 @@ _BUTTON_PRESS = 3
 
 CLICK, DEPRESS, RELEASE = 'click', 'depress', 'release'
 
-gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
-gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
-if logger.isEnabledFor(logging.INFO):
-    logger.info('GDK Keymap %sset up', '' if gkeymap else 'not ')
+if Gdk:
+    gdisplay = Gdk.Display.get_default()  # can be None if Solaar is run without a full window system
+    gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
+    if logger.isEnabledFor(logging.INFO):
+        logger.info('GDK Keymap %sset up', '' if gkeymap else 'not ')
+else:
+    gdisplay = None
+    gkeymap = None
 
 wayland = _os.getenv('WAYLAND_DISPLAY')  # is this Wayland?
 if wayland:
@@ -165,8 +177,12 @@ def gnome_dbus_interface_setup():
         bus = dbus.SessionBus()
         remote_object = bus.get_object('org.gnome.Shell', '/io/github/pwr_solaar/solaar')
         _dbus_interface = dbus.Interface(remote_object, 'io.github.pwr_solaar.solaar')
-    except dbus.exceptions.DBusException:
+    except (dbus.exceptions.DBusException, ImportError):
+<<<<<<< HEAD
         logger.warning('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+=======
+        _log.warn('Solaar Gnome extension not installed - some rule capabilities inoperable', exc_info=_sys.exc_info())
+>>>>>>> c84bdb1f13bff05c62e948adc02ed53cff944192
         _dbus_interface = False
     return _dbus_interface
 
@@ -188,7 +204,8 @@ def xkb_setup():
     return Xkbdisplay
 
 
-if evdev:
+try:
+    import evdev
     buttons = {
         'unknown': (None, None),
         'left': (1, evdev.ecodes.ecodes['BTN_LEFT']),
@@ -208,12 +225,10 @@ if evdev:
         if evcode:
             key_events.append(evcode)
     devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
-else:
-    # Just mock these since they won't be useful without evdev anyway
+except ImportError:
     buttons = {}
     key_events = []
     devicecap = {}
-
 udevice = None
 
 
@@ -771,15 +786,17 @@ class Setting(Condition):
     def data(self):
         return {'Setting': self.args[:]}
 
-
-MODIFIERS = {
-    'Shift': int(Gdk.ModifierType.SHIFT_MASK),
-    'Control': int(Gdk.ModifierType.CONTROL_MASK),
-    'Alt': int(Gdk.ModifierType.MOD1_MASK),
-    'Super': int(Gdk.ModifierType.MOD4_MASK)
-}
-MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + MODIFIERS['Super']
-
+if Gdk is not None:
+    MODIFIERS = {
+        'Shift': int(Gdk.ModifierType.SHIFT_MASK),
+        'Control': int(Gdk.ModifierType.CONTROL_MASK),
+        'Alt': int(Gdk.ModifierType.MOD1_MASK),
+        'Super': int(Gdk.ModifierType.MOD4_MASK)
+    }
+    MODIFIER_MASK = MODIFIERS['Shift'] + MODIFIERS['Control'] + MODIFIERS['Alt'] + MODIFIERS['Super']
+else:
+    MODIFIERS = {}
+    MODIFIER_MASK = 0
 
 class Modifiers(Condition):
 
@@ -1492,6 +1509,9 @@ def process_notification(device, status, notification, feature):
         if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
             thumb_wheel_displacement = 0
         thumb_wheel_displacement += signed(notification.data[0:2])
+
+    if not GLib:
+        raise NotImplementedError('Windows not supported here')
 
     GLib.idle_add(evaluate_rules, feature, notification, device, status)
 

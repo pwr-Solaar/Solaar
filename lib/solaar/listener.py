@@ -23,7 +23,6 @@ import time
 
 from collections import namedtuple
 
-import gi
 import logitech_receiver.device as _device
 import logitech_receiver.receiver as _receiver
 
@@ -36,8 +35,13 @@ from logitech_receiver import status as _status
 
 from . import configuration
 
-gi.require_version('Gtk', '3.0')  # NOQA: E402
-from gi.repository import GLib  # NOQA: E402 # isort:skip
+try:
+    import gi  # isort:skip
+
+    gi.require_version('Gtk', '3.0')  # NOQA: E402
+    from gi.repository import GLib  # NOQA: E402 # isort:skip
+except ImportError:
+    GLib = None
 
 # from solaar.i18n import _
 
@@ -401,7 +405,8 @@ def _process_add(device_info, retry):
             except Exception:
                 pass
             if retry:
-                GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
+                if GLib is not None:
+                    GLib.timeout_add(2000.0, _process_add, device_info, retry - 1)
             else:
                 _error_callback('permissions', device_info.path)
         else:
