@@ -1301,7 +1301,10 @@ class Set(Action):
         if args is None:
             logger.warning('Set Action: invalid args %s for setting %s of %s', self.args[2:], self.args[1], self.args[0])
             return None
-        setting.write(*args)
+        if len(args) > 1:
+            setting.write_key_value(args[0], args[1])
+        else:
+            setting.write(args[0])
         if device.setting_callback:
             device.setting_callback(device, type(setting), args)
         return None
