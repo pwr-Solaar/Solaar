@@ -37,8 +37,9 @@ from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
-from .hidpp20_constants import (BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE,
-                                FIRMWARE_KIND, GESTURE)
+from .hidpp20_constants import BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE
+from .hidpp20_constants import FIRMWARE_KIND as _FIRMWARE_KIND
+from .hidpp20_constants import GESTURE
 from .i18n import _
 
 logger = logging.getLogger(__name__)
@@ -276,7 +277,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
             else:
                 raise exceptions.FeatureCallError(msg='No reply from device.')
-        except exceptions.FeatureCallError:  # if the key hasn't ever been configured then the read may fail so only produce a warning
+        except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
                 logger.warn(
                     f'Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults'
@@ -1381,11 +1382,11 @@ def get_firmware(device):
                     if build:
                         version += '.B%04X' % build
                     extras = fw_info[9:].rstrip(b'\x00') or None
-                    fw_info = _FirmwareInfo(FIRMWARE_KIND[level], name.decode('ascii'), version, extras)
-                elif level == FIRMWARE_KIND.Hardware:
-                    fw_info = _FirmwareInfo(FIRMWARE_KIND.Hardware, '', str(ord(fw_info[1:2])), None)
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND[level], name.decode('ascii'), version, extras)
+                elif level == _FIRMWARE_KIND.Hardware:
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Hardware, '', str(ord(fw_info[1:2])), None)
                 else:
-                    fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, '', '', None)
+                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Other, '', '', None)
 
                 fw.append(fw_info)
                 # if logger.isEnabledFor(logging.DEBUG):
