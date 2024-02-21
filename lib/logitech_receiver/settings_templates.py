@@ -500,6 +500,7 @@ class OnboardProfiles(_Setting):
     choices_universe = _NamedInts(Disabled=0)
     for i in range(1, 16):
         choices_universe[i] = f"Profile {i}"
+        choices_universe[i + 0x100] = f"Read-Only Profile {i}"
     validator_class = _ChoicesV
 
     class rw_class:
