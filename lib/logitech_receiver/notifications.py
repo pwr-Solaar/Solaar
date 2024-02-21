@@ -28,6 +28,7 @@ from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
+from .common import BATTERY_STATUS as _BATTERY_STATUS
 from .common import strhex as _strhex
 from .i18n import _
 from .status import ALERT as _ALERT
@@ -357,14 +358,14 @@ def _process_feature_notification(device, status, n, feature):
             charge, lux, adc = _unpack("!BHH", n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
-            status_text = _hidpp20_constants.BATTERY_STATUS.discharging
+            status_text = _BATTERY_STATUS.discharging
             if n.address == 0x00:
                 status[_K.LIGHT_LEVEL] = None
                 status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x10:
                 status[_K.LIGHT_LEVEL] = lux
                 if lux > 200:
-                    status_text = _hidpp20_constants.BATTERY_STATUS.recharging
+                    status_text = _BATTERY_STATUS.recharging
                 status.set_battery_info(charge, None, status_text, None)
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):

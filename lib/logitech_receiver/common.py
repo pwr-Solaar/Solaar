@@ -550,4 +550,19 @@ FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
 
 BATTERY_APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 
+BATTERY_STATUS = NamedInts(
+    discharging=0x00,
+    recharging=0x01,
+    almost_full=0x02,
+    full=0x03,
+    slow_recharge=0x04,
+    invalid_battery=0x05,
+    thermal_error=0x06,
+)
+
+
+def BATTERY_OK(status):
+    return status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
+
+
 del namedtuple

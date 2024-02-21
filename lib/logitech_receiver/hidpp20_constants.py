@@ -138,21 +138,6 @@ DEVICE_KIND = NamedInts(
 
 FIRMWARE_KIND = NamedInts(Firmware=0x00, Bootloader=0x01, Hardware=0x02, Other=0x03)
 
-
-def BATTERY_OK(status):
-    return status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
-
-
-BATTERY_STATUS = NamedInts(
-    discharging=0x00,
-    recharging=0x01,
-    almost_full=0x02,
-    full=0x03,
-    slow_recharge=0x04,
-    invalid_battery=0x05,
-    thermal_error=0x06,
-)
-
 ONBOARD_MODES = NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
 
 CHARGE_STATUS = NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
