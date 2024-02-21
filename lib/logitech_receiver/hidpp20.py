@@ -1764,11 +1764,11 @@ def get_host_names(device):
                     else:
                         remaining = 0
                 host_names[host] = (bool(status), name)
-        # update the current host's name if it doesn't match the system name
-        hostname = socket.gethostname().partition(".")[0]
-        if host_names[currentHost][1] != hostname:
-            set_host_name(device, hostname, host_names[currentHost][1])
-            host_names[currentHost] = (host_names[currentHost][0], hostname)
+        if host_names:  # update the current host's name if it doesn't match the system name
+            hostname = socket.gethostname().partition(".")[0]
+            if host_names[currentHost][1] != hostname:
+                set_host_name(device, hostname, host_names[currentHost][1])
+                host_names[currentHost] = (host_names[currentHost][0], hostname)
     return host_names
 
 
