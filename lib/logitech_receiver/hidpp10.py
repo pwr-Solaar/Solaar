@@ -19,12 +19,13 @@
 import logging
 
 from .common import BATTERY_APPROX as _BATTERY_APPROX
+from .common import BATTERY_STATUS as _BATTERY_STATUS
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .common import strhex as _strhex
 from .hidpp10_constants import REGISTERS
-from .hidpp20_constants import BATTERY_STATUS, FIRMWARE_KIND
+from .hidpp20_constants import FIRMWARE_KIND
 
 logger = logging.getLogger(__name__)
 
@@ -83,11 +84,11 @@ def parse_battery_status(register, reply):
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
         status_text = (
-            BATTERY_STATUS.discharging
+            _BATTERY_STATUS.discharging
             if status_byte == 0x30
-            else BATTERY_STATUS.recharging
+            else _BATTERY_STATUS.recharging
             if status_byte == 0x50
-            else BATTERY_STATUS.full
+            else _BATTERY_STATUS.full
             if status_byte == 0x90
             else None
         )
@@ -110,11 +111,11 @@ def parse_battery_status(register, reply):
 
         charging_byte = ord(reply[1:2])
         if charging_byte == 0x00:
-            status_text = BATTERY_STATUS.discharging
+            status_text = _BATTERY_STATUS.discharging
         elif charging_byte & 0x21 == 0x21:
-            status_text = BATTERY_STATUS.recharging
+            status_text = _BATTERY_STATUS.recharging
         elif charging_byte & 0x22 == 0x22:
-            status_text = BATTERY_STATUS.full
+            status_text = _BATTERY_STATUS.full
         else:
             logger.warning("could not parse 0x07 battery status: %02X (level %02X)", charging_byte, status_byte)
             status_text = None
