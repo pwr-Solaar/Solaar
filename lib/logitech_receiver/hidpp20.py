@@ -29,6 +29,7 @@ from typing import List, Optional
 import yaml as _yaml
 
 from . import exceptions, special_keys
+from . import hidpp10_constants as _hidpp10_constants
 from .common import BATTERY_APPROX as _BATTERY_APPROX
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import NamedInt as _NamedInt
@@ -37,8 +38,7 @@ from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
-from .hidpp20_constants import BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE, GESTURE
-from .hidpp20_constants import FIRMWARE_KIND as _FIRMWARE_KIND
+from .hidpp20_constants import BATTERY_STATUS, CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE, FIRMWARE_KIND, GESTURE
 from .i18n import _
 
 logger = logging.getLogger(__name__)
@@ -277,9 +277,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 raise exceptions.FeatureCallError(msg="No reply from device.")
         except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
-                logger.warn(
-                    f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults"
-                )
+                logger.warn(f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults")
             # Clear flags and set mapping target to self
             self._mapping_flags = 0
             self._mapped_to = self._cid
@@ -546,9 +544,7 @@ class KeysArrayPersistent(KeysArray):
         if keydata:
             key = _unpack("!H", keydata[:2])[0]
             try:
-                mapped_data = feature_request(
-                    self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
-                )
+                mapped_data = feature_request(self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF)
                 if mapped_data:
                     _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
             except Exception:
@@ -875,9 +871,7 @@ class Backlight:
         if not response:
             raise exceptions.FeatureCallError(msg="No reply from device.")
         self.device = device
-        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
-            "<BBBHBHHH", response[:12]
-        )
+        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack("<BBBHBHHH", response[:12])
         self.auto_supported = supported & 0x08
         self.temp_supported = supported & 0x10
         self.perm_supported = supported & 0x20
@@ -1377,11 +1371,11 @@ def get_firmware(device):
                     if build:
                         version += ".B%04X" % build
                     extras = fw_info[9:].rstrip(b"\x00") or None
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
-                elif level == _FIRMWARE_KIND.Hardware:
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
+                    fw_info = _FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
+                elif level == FIRMWARE_KIND.Hardware:
+                    fw_info = _FirmwareInfo(FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
                 else:
-                    fw_info = _FirmwareInfo(_FIRMWARE_KIND.Other, "", "", None)
+                    fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, "", "", None)
 
                 fw.append(fw_info)
                 # if logger.isEnabledFor(logging.DEBUG):
@@ -1405,6 +1399,10 @@ def get_ids(device):
         return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
 
 
+KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KIND}
+print(KIND_MAP)
+
+
 def get_kind(device):
     """Reads a device's type.
 
@@ -1417,7 +1415,7 @@ def get_kind(device):
         kind = ord(kind[:1])
         # if logger.isEnabledFor(logging.DEBUG):
         #     logger.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
-        return DEVICE_KIND[kind]
+        return KIND_MAP[DEVICE_KIND[kind]]
 
 
 def get_name(device):
