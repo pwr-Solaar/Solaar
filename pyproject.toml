@@ -1,5 +1,5 @@
 [tool.ruff]
-line-length = 127
+line-length = 140
 target-version = "py37"
 
 [tool.ruff.lint]

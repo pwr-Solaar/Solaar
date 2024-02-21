@@ -150,37 +150,38 @@ class Receiver:
             if codename:
                 codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
                 return codename.decode("ascii")
-            return
-        codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
-        if codename:
-            codename = codename[2 : 2 + ord(codename[1:2])]
-            return codename.decode("ascii")
+        else:
+            codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
+            if codename:
+                codename = codename[2 : 2 + ord(codename[1:2])]
+                return codename.decode("ascii")
 
-    def device_pairing_information(self, n):
+    def device_pairing_information(self, n: int) -> dict:
+        """Return information from pairing registers (and elsewhere when necessary)"""
         if self.receiver_kind == "bolt":
             pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
             if pair_info:
                 wpid = _strhex(pair_info[3:4]) + _strhex(pair_info[2:3])
-                kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[1:2]) & 0x0F]
-                return wpid, kind, 0
+                kind = _hidpp10_constants.DEVICE_KIND[pair_info[1] & 0x0F]
+                serial = _strhex(pair_info[4:8])
+                return {"wpid": wpid, "kind": kind, "polling": None, "serial": serial, "power_switch": "(unknown)"}
             else:
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error="read Bolt wpid")
-        wpid = 0
-        kind = None
-        polling_rate = None
+                raise exceptions.NoSuchDevice(number=n, receiver=self, error="can't read Bolt pairing register")
+        polling_rate = ""
+        serial = None
+        power_switch = "(unknown)"
         pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
-        if pair_info:  # may be either a Unifying receiver, or an Unifying-ready receiver
+        if pair_info:  # either a Unifying receiver or a Unifying-ready receiver
             wpid = _strhex(pair_info[3:5])
-            kind = _hidpp10_constants.DEVICE_KIND[ord(pair_info[7:8]) & 0x0F]
+            kind = _hidpp10_constants.DEVICE_KIND[pair_info[7] & 0x0F]
             polling_rate = str(ord(pair_info[2:3])) + "ms"
-        elif self.receiver_kind == "27Mz":  # 27Mhz receiver, fill extracting WPID from udev path
+        elif self.receiver_kind == "27Mz":  # 27Mhz receiver, extract WPID from udev path
             wpid = _hid.find_paired_node_wpid(self.path, n)
             if not wpid:
                 logger.error("Unable to get wpid from udev for device %d of %s", n, self)
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="Not present 27Mhz device")
             kind = _hidpp10_constants.DEVICE_KIND[self.get_kind_from_index(n)]
-
-        elif not self.receiver_kind == "unifying":  # unifying protocol not supported, may be an old Nano receiver
+        elif not self.receiver_kind == "unifying":  # may be an old Nano receiver
             device_info = self.read_register(_R.receiver_info, 0x04)
             if device_info:
                 wpid = _strhex(device_info[3:5])
@@ -189,32 +190,18 @@ class Receiver:
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
         else:
             raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
-        return wpid, kind, polling_rate
-
-    def device_extended_pairing_information(self, n):
-        serial = None
-        power_switch = "(unknown)"
-        if self.receiver_kind == "bolt":
-            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
-            if pair_info:
-                serial = _strhex(pair_info[4:8])
-                return serial, power_switch
-            else:
-                return "?", power_switch
         pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         if pair_info:
-            power_switch = _hidpp10_constants.POWER_SWITCH_LOCATION[ord(pair_info[9:10]) & 0x0F]
+            power_switch = _hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
         else:  # some Nano receivers?
             pair_info = self.read_register(0x2D5)
         if pair_info:
             serial = _strhex(pair_info[1:5])
-        return serial, power_switch
+        return {"wpid": wpid, "kind": kind, "polling": polling_rate, "serial": serial, "power_switch": power_switch}
 
     def get_kind_from_index(self, index):
         """Get device kind from 27Mhz device index"""
-        # accordingly to drivers/hid/hid-logitech-dj.c
-        # index 1 or 2 always mouse, index 3 always the keyboard,
-        # index 4 is used for an optional separate numpad
+        # From drivers/hid/hid-logitech-dj.c
         if index == 1:  # mouse
             kind = 2
         elif index == 2:  # mouse
@@ -242,7 +229,19 @@ class Receiver:
         assert notification is None or notification.sub_id == 0x41
 
         try:
-            dev = Device(self, number, notification, setting_callback=self.setting_callback)
+            info = self.device_pairing_information(number)
+            if notification is not None:
+                online = not bool(ord(notification.data[0:1]) & 0x40)
+                # the rest may be redundant, but keep it around for now
+                info["wpid"] = _strhex(notification.data[2:3] + notification.data[1:2])
+                kind = ord(notification.data[0:1]) & 0x0F
+                if self.receiver_kind == "27Mhz":  # get 27Mhz wpid and set kind based on index
+                    info["wpid"] = "00" + _strhex(notification.data[2:3])
+                    kind = self.get_kind_from_index(number)
+                info["kind"] = _hidpp10_constants.DEVICE_KIND[kind]
+            else:
+                online = True
+            dev = Device(self, number, online, pairing_info=info, setting_callback=self.setting_callback)
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: found new device %d (%s)", self, number, dev.wpid)
             self._devices[number] = dev
