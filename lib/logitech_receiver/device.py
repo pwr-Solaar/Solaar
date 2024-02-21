@@ -32,15 +32,12 @@ from . import exceptions
 from . import hidpp10 as _hidpp10
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
-from . import hidpp20_constants as _hidpp20_constants
 from .settings_templates import check_feature_settings as _check_feature_settings
 
 logger = logging.getLogger(__name__)
 
 _R = _hidpp10_constants.REGISTERS
 _IR = _hidpp10_constants.INFO_SUBREGISTERS
-
-KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in _hidpp20_constants.DEVICE_KIND}
 
 
 class Device:
@@ -195,8 +192,7 @@ class Device:
     @property
     def kind(self):
         if not self._kind and self.online and self.protocol >= 2.0:
-            kind = _hidpp20.get_kind(self)
-            self._kind = KIND_MAP[kind] if kind else None
+            self._kind = _hidpp20.get_kind(self)
         return self._kind or "?"
 
     @property
