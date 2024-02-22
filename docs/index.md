@@ -75,7 +75,7 @@ Please report such experiences by creating an issue in
 
 Solaar will detect all devices paired with supported Unifying, Bolt, Lightspeed, or Nano
 receivers, and at the very least display some basic information about them.
-Solaar will detect some Logitech devices that connect via a USB cable or Bluetooth.
+Solaar will detect many Logitech devices that connect via a USB cable or Bluetooth.
 
 Solaar can pair and unpair a Logitech device showing the Unifying logo
 (Solaar's version of the [logo][logo])
@@ -189,6 +189,11 @@ for the step-by-step procedure for manual installation.
   realize that the key was newly depressed.  For this reason Solaar rules that can change hosts should
   trigger on key releasing.
 
+## License
+
+This software is distributed under the terms of the
+[GNU Public License, v2](COPYING), or later.
+
 ## Contributing to Solaar
 
 Contributions to Solaar are very welcome.
@@ -201,28 +206,21 @@ If you find a bug, please check first if it has already been reported. If yes, p
 If you want to add a new feature to Solaar, feel free to open a feature request issue to discuss your proposal.
 There are also usually several open issues for enhancements that have already been requested.
 
-
-## License
-
-This software is distributed under the terms of the
-[GNU Public License, v2](COPYING).
-
-## Thanks
+## Contributors
 
 This project began as a third-hand clone of [Noah K. Tilton](https://github.com/noah)'s
 logitech-solar-k750 project on GitHub (no longer available). It was developed
-further thanks to the diggings in Logitech's HID++ protocol done by many other
-people:
+further thanks to the contributions of many other people, including:
 
-- [Julien Danjou](http://julien.danjou.info/blog/2012/logitech-k750-linux-support),
-who also provided some internal
-[Logitech documentation](http://julien.danjou.info/blog/2012/logitech-unifying-upower)
+- [Daniel Pavel](https://github.com/pwr)
+- [Filipe Lains](https://github.com/FFY00)
+- [Peter Wu](https://github.com/Lekensteyn), who also did some [reverse engineering on pairing](https://lekensteyn.nl/logitech-unifying.html)
+- Julien Danjou
 - [Lars-Dominik Braun](http://6xq.net/git/lars/lshidpp.git)
 - [Alexander Hofbauer](http://derhofbauer.at/blog/blog/2012/08/28/logitech-performance-mx)
-- [Clach04](http://bitbucket.org/clach04/logitech-unifying-receiver-tools)
-- [Peter Wu](https://lekensteyn.nl/logitech-unifying.html)
-- [Nestor Lopez Casado](http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28)
-provided some more Logitech specifications for the HID++ protocol
+- [Clach04](https://github.com/clach04)
+- [Peter F. Patel-Schneider](https://github.com/pfps)
 
-Also, thanks to Douglas Wagner, Julien Gascard, and Peter Wu for helping with
-application testing and supporting new devices.
+Thanks go to Nestor Lopez Casado, who
+provided [public Logitech specifications for the HID++ protocol](http://drive.google.com/folderview?id=0BxbRzx7vEV7eWmgwazJ3NUFfQ28).
+Also, thanks to Douglas Wagner, Julien Gascard, and others for helping with application testing and supporting new devices.
