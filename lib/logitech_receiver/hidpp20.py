@@ -1,6 +1,5 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,8 +14,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-# Logitech Unifying Receiver API.
 
 import logging
 import socket
@@ -50,10 +47,6 @@ def hexint_presenter(dumper, data):
 
 
 _yaml.add_representer(int, hexint_presenter)
-
-#
-#
-#
 
 
 class FeaturesArray(dict):
@@ -278,7 +271,9 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 raise exceptions.FeatureCallError(msg="No reply from device.")
         except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
-                logger.warn(f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults")
+                logger.warn(
+                    f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults"
+                )
             # Clear flags and set mapping target to self
             self._mapping_flags = 0
             self._mapped_to = self._cid
@@ -545,7 +540,9 @@ class KeysArrayPersistent(KeysArray):
         if keydata:
             key = _unpack("!H", keydata[:2])[0]
             try:
-                mapped_data = feature_request(self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF)
+                mapped_data = feature_request(
+                    self.device, FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
+                )
                 if mapped_data:
                     _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
             except Exception:
@@ -872,7 +869,9 @@ class Backlight:
         if not response:
             raise exceptions.FeatureCallError(msg="No reply from device.")
         self.device = device
-        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack("<BBBHBHHH", response[:12])
+        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
+            "<BBBHBHHH", response[:12]
+        )
         self.auto_supported = supported & 0x08
         self.temp_supported = supported & 0x10
         self.perm_supported = supported & 0x20
