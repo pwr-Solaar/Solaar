@@ -1,6 +1,5 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -19,10 +18,7 @@
 import json as _json
 import logging
 import os as _os
-import os.path as _path
-
-from threading import Lock as _Lock
-from threading import Timer as _Timer
+import threading
 
 import yaml as _yaml
 
@@ -33,9 +29,9 @@ from solaar import __version__
 
 logger = logging.getLogger(__name__)
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
-_yaml_file_path = _path.join(_XDG_CONFIG_HOME, "solaar", "config.yaml")
-_json_file_path = _path.join(_XDG_CONFIG_HOME, "solaar", "config.json")
+_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _os.path.expanduser(_os.path.join("~", ".config"))
+_yaml_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "config.yaml")
+_json_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "config.json")
 
 _KEY_VERSION = "_version"
 _KEY_NAME = "_NAME"
@@ -50,14 +46,14 @@ _config = []
 
 def _load():
     loaded_config = []
-    if _path.isfile(_yaml_file_path):
+    if _os.path.isfile(_yaml_file_path):
         path = _yaml_file_path
         try:
             with open(_yaml_file_path) as config_file:
                 loaded_config = _yaml.safe_load(config_file)
         except Exception as e:
             logger.error("failed to load from %s: %s", _yaml_file_path, e)
-    elif _path.isfile(_json_file_path):
+    elif _os.path.isfile(_json_file_path):
         path = _json_file_path
         try:
             with open(_json_file_path) as config_file:
@@ -126,7 +122,7 @@ def _device_entry_from_config_dict(data, discard_derived_properties):
 
 
 save_timer = None
-save_lock = _Lock()
+save_lock = threading.Lock()
 defer_saves = False  # don't allow configuration saves to be deferred
 
 
@@ -135,7 +131,7 @@ def save(defer=False):
     if not _config:
         return
     dirname = _os.path.dirname(_yaml_file_path)
-    if not _path.isdir(dirname):
+    if not _os.path.isdir(dirname):
         try:
             _os.makedirs(dirname)
         except Exception:
@@ -146,7 +142,7 @@ def save(defer=False):
     else:
         with save_lock:
             if not save_timer:
-                save_timer = _Timer(5.0, lambda: GLib.idle_add(do_save))
+                save_timer = threading.Timer(5.0, lambda: GLib.idle_add(do_save))
                 save_timer.start()
 
 
@@ -195,17 +191,17 @@ class _DeviceEntry(dict):
         super().__setitem__(key, value)
         save(defer=True)
 
-    def update(self, device, modelId):
-        if device.name and device.name != self.get(_KEY_NAME):
-            super().__setitem__(_KEY_NAME, device.name)
-        if device.wpid and device.wpid != self.get(_KEY_WPID):
-            super().__setitem__(_KEY_WPID, device.wpid)
-        if device.serial and device.serial != "?" and device.serial != self.get(_KEY_SERIAL):
-            super().__setitem__(_KEY_SERIAL, device.serial)
+    def update(self, name, wpid, serial, modelId, unitId):
+        if name and name != self.get(_KEY_NAME):
+            super().__setitem__(_KEY_NAME, name)
+        if wpid and wpid != self.get(_KEY_WPID):
+            super().__setitem__(_KEY_WPID, wpid)
+        if serial and serial != self.get(_KEY_SERIAL):
+            super().__setitem__(_KEY_SERIAL, serial)
         if modelId and modelId != self.get(_KEY_MODEL_ID):
             super().__setitem__(_KEY_MODEL_ID, modelId)
-        if device.unitId and device.unitId != self.get(_KEY_UNIT_ID):
-            super().__setitem__(_KEY_UNIT_ID, device.unitId)
+        if unitId and unitId != self.get(_KEY_UNIT_ID):
+            super().__setitem__(_KEY_UNIT_ID, unitId)
 
     def get_sensitivity(self, name):
         return self.get(_KEY_SENSITIVE, {}).get(name, False)
@@ -236,15 +232,11 @@ _yaml.add_representer(_NamedInt, named_int_representer)
 # But some devices have empty (all zero) modelIds and unitIds.  Use the device name as a backup for the modelId.
 # The worst situation is a receiver-connected device that Solaar has never seen on-line
 # that is directly connected.  Here there is no way to realize that the two devices are the same.
-# So new entries are not created for unseen off-line receiver-connected devices except for those with protocol 1.0
+# So new entries are not created for unseen off-line receiver-connected devices
 def persister(device):
     def match(wpid, serial, modelId, unitId, c):
         return (wpid and wpid == c.get(_KEY_WPID) and serial and serial == c.get(_KEY_SERIAL)) or (
-            modelId
-            and modelId != "000000000000"
-            and modelId == c.get(_KEY_MODEL_ID)
-            and unitId
-            and unitId == c.get(_KEY_UNIT_ID)
+            modelId and modelId == c.get(_KEY_MODEL_ID) and unitId and unitId == c.get(_KEY_UNIT_ID)
         )
 
     if not _config:
@@ -256,15 +248,15 @@ def persister(device):
             entry = c
             break
     if not entry:
-        if not device.online and not device.serial:  # don't create entry for offline devices without serial number
+        if not device.online:  # don't create entry for offline devices
             if logger.isEnabledFor(logging.INFO):
-                logger.info("not setting up persister for offline device %s with missing serial number", device.name)
+                logger.info("not setting up persister for offline device %s", device.name)
             return
         if logger.isEnabledFor(logging.INFO):
             logger.info("setting up persister for device %s", device.name)
         entry = _DeviceEntry()
         _config.append(entry)
-    entry.update(device, modelId)
+    entry.update(device.name, device.wpid, device.serial, modelId, device.unitId)
     return entry
 
 
