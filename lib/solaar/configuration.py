@@ -122,7 +122,7 @@ def _device_entry_from_config_dict(data, discard_derived_properties):
 
 
 save_timer = None
-save_lock = threading.Lock()
+configuration_lock = threading.Lock()
 defer_saves = False  # don't allow configuration saves to be deferred
 
 
@@ -140,7 +140,7 @@ def save(defer=False):
     if not defer or not defer_saves:
         do_save()
     else:
-        with save_lock:
+        with configuration_lock:
             if not save_timer:
                 save_timer = threading.Timer(5.0, lambda: GLib.idle_add(do_save))
                 save_timer.start()
@@ -148,7 +148,7 @@ def save(defer=False):
 
 def do_save():
     global save_timer
-    with save_lock:
+    with configuration_lock:
         if save_timer:
             save_timer.cancel()
             save_timer = None
@@ -239,25 +239,28 @@ def persister(device):
             modelId and modelId == c.get(_KEY_MODEL_ID) and unitId and unitId == c.get(_KEY_UNIT_ID)
         )
 
-    if not _config:
-        _load()
-    entry = None
-    modelId = device.modelId if device.modelId != "000000000000" else device.name if device.modelId else None
-    for c in _config:
-        if isinstance(c, _DeviceEntry) and match(device.wpid, device.serial, modelId, device.unitId, c):
-            entry = c
-            break
-    if not entry:
-        if not device.online:  # don't create entry for offline devices
+    with configuration_lock:
+        if not _config:
+            _load()
+        entry = None
+        # some devices report modelId and unitId as zero so use name and serial for them
+        modelId = device.modelId if device.modelId != "000000000000" else device._name if device.modelId else None
+        unitId = device.unitId if device.modelId != "000000000000" else device._serial if device.unitId else None
+        for c in _config:
+            if isinstance(c, _DeviceEntry) and match(device.wpid, device._serial, modelId, unitId, c):
+                entry = c
+                break
+        if not entry:
+            if not device.online:  # don't create entry for offline devices
+                if logger.isEnabledFor(logging.INFO):
+                    logger.info("not setting up persister for offline device %s", device._name)
+                return
             if logger.isEnabledFor(logging.INFO):
-                logger.info("not setting up persister for offline device %s", device.name)
-            return
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("setting up persister for device %s", device.name)
-        entry = _DeviceEntry()
-        _config.append(entry)
-    entry.update(device.name, device.wpid, device.serial, modelId, device.unitId)
-    return entry
+                logger.info("setting up persister for device %s", device.name)
+            entry = _DeviceEntry()
+            _config.append(entry)
+        entry.update(device.name, device.wpid, device.serial, modelId, unitId)
+        return entry
 
 
 def attach_to(device):
