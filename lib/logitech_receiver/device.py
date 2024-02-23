@@ -74,6 +74,7 @@ class Device:
         self._feature_settings_checked = False
         self._gestures_lock = _threading.Lock()
         self._settings_lock = _threading.Lock()
+        self._persister_lock = _threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
 
         if not self.path:
@@ -105,6 +106,7 @@ class Device:
             )
             if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
                 self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
+            self.ping()  # determine whether a direct-connected device is online
 
         if self.descriptor:
             self._name = self.descriptor.name
@@ -306,7 +308,9 @@ class Device:
     @property
     def persister(self):
         if not self._persister:
-            self._persister = _configuration.persister(self)
+            with self._persister_lock:
+                if not self._persister:
+                    self._persister = _configuration.persister(self)
         return self._persister
 
     def battery(self):  # None  or  level, next, status, voltage
