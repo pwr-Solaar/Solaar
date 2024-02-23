@@ -1,6 +1,5 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -39,21 +38,15 @@ from . import configuration
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
 
-# from solaar.i18n import _
-
 logger = logging.getLogger(__name__)
 
 _R = _hidpp10_constants.REGISTERS
 _IR = _hidpp10_constants.INFO_SUBREGISTERS
 
-#
-#
-#
 
 _GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "status", "online"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
-del namedtuple
 
 
 def _ghost(device):
@@ -62,25 +55,12 @@ def _ghost(device):
     )
 
 
-#
-#
-#
-
-# how often to poll devices that haven't updated their statuses on their own
-# (through notifications)
-# _POLL_TICK = 5 * 60  # seconds
-
-
 class ReceiverListener(_listener.EventsListener):
-    """Keeps the status of a Receiver."""
+    """Keeps the status of a Receiver or Device."""
 
     def __init__(self, receiver, status_changed_callback):
-        super().__init__(receiver, self._notifications_handler)
-        # no reason to enable polling yet
-        # self.tick_period = _POLL_TICK
-        # self._last_tick = 0
-
         assert status_changed_callback
+        super().__init__(receiver, self._notifications_handler)
         self.status_changed_callback = status_changed_callback
         _status.attach_to(receiver, self._status_changed)
 
@@ -96,7 +76,7 @@ class ReceiverListener(_listener.EventsListener):
                 )
         self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = nfs
         self.receiver.notify_devices()
-        self._status_changed(self.receiver)  # , _status.ALERT.NOTIFICATION)
+        self._status_changed(self.receiver)
 
     def has_stopped(self):
         r, self.receiver = self.receiver, None
@@ -104,8 +84,7 @@ class ReceiverListener(_listener.EventsListener):
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: notifications listener has stopped", r)
 
-        # because udev is not notifying us about device removal,
-        # make sure to clean up in _all_listeners
+        # because udev is not notifying us about device removal, make sure to clean up in _all_listeners
         _all_listeners.pop(r.path, None)
 
         # this causes problems but what is it doing (pfps) - r.status = _('The receiver was unplugged.')
@@ -114,44 +93,7 @@ class ReceiverListener(_listener.EventsListener):
                 r.close()
             except Exception:
                 logger.exception("closing receiver %s" % r.path)
-        self.status_changed_callback(r)  # , _status.ALERT.NOTIFICATION)
-
-    # def tick(self, timestamp):
-    #     if not self.tick_period:
-    #         raise Exception("tick() should not be called without a tick_period: %s", self)
-    #
-    #     # not necessary anymore, we're now using udev monitor to watch for receiver status
-    #     # if self._last_tick > 0 and timestamp - self._last_tick > _POLL_TICK * 2:
-    #     #     # if we missed a couple of polls, most likely the computer went into
-    #     #     # sleep, and we have to reinitialize the receiver again
-    #     #     logger.warning("%s: possible sleep detected, closing this listener", self.receiver)
-    #     #     self.stop()
-    #     #     return
-    #
-    #     self._last_tick = timestamp
-    #
-    #     try:
-    #         # read these in case they haven't been read already
-    #         # self.receiver.serial, self.receiver.firmware
-    #         if self.receiver.status.lock_open:
-    #             # don't mess with stuff while pairing
-    #             return
-    #
-    #         self.receiver.status.poll(timestamp)
-    #
-    #         # Iterating directly through the reciver would unnecessarily probe
-    #         # all possible devices, even unpaired ones.
-    #         # Checking for each device number in turn makes sure only already
-    #         # known devices are polled.
-    #         # This is okay because we should have already known about them all
-    #         # long before the first poll() happents, through notifications.
-    #         for number in range(1, 6):
-    #             if number in self.receiver:
-    #                 dev = self.receiver[number]
-    #                 if dev and dev.status is not None:
-    #                     dev.status.poll(timestamp)
-    #     except Exception as e:
-    #         logger.exception("polling", e)
+        self.status_changed_callback(r)
 
     def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
         assert device is not None
@@ -189,8 +131,7 @@ class ReceiverListener(_listener.EventsListener):
         # not true for wired devices - assert device.receiver == self.receiver
         if not device:
             # Device was unpaired, and isn't valid anymore.
-            # We replace it with a ghost so that the UI has something to work
-            # with while cleaning up.
+            # We replace it with a ghost so that the UI has something to work with while cleaning up.
             if logger.isEnabledFor(logging.INFO):
                 logger.info("device %s was unpaired, ghosting", device)
             device = _ghost(device)
@@ -198,8 +139,7 @@ class ReceiverListener(_listener.EventsListener):
         self.status_changed_callback(device, alert, reason)
 
         if not device:
-            # the device was just unpaired, need to update the
-            # status of the receiver as well
+            # the device was just unpaired, need to update the status of the receiver as well
             self.status_changed_callback(self.receiver)
 
     def _notifications_handler(self, n):
@@ -231,11 +171,9 @@ class ReceiverListener(_listener.EventsListener):
         already_known = n.devnumber in self.receiver
 
         # FIXME: hacky fix for kernel/hardware race condition
-        # If the device was just turned on or woken up from sleep, it may not
-        # be ready to receive commands. The "payload" bit of the wireless
-        # status notification seems to tell us this. If this is the case, we
-        # must wait a short amount of time to avoid causing a broken pipe
-        # error.
+        # If the device was just turned on or woken up from sleep, it may not be ready to receive commands.
+        # The "payload" bit of the wireless tatus notification seems to tell us this. If this is the case, we
+        # must wait a short amount of time to avoid causing a broken pipe error.
         device_ready = not bool(ord(n.data[0:1]) & 0x80) or n.sub_id != 0x41
         if not device_ready:
             time.sleep(0.01)
@@ -299,13 +237,7 @@ class ReceiverListener(_listener.EventsListener):
         return "<ReceiverListener(%s,%s)>" % (self.receiver.path, self.receiver.handle)
 
 
-#
-#
-#
-
-# all known receiver listeners
-# listeners that stop on their own may remain here
-_all_listeners = {}
+_all_listeners = {}  # all known receiver listeners, listeners that stop on their own may remain here
 
 
 def _start(device_info):
@@ -327,9 +259,7 @@ def _start(device_info):
 
 
 def start_all():
-    # just in case this it called twice in a row...
-    stop_all()
-
+    stop_all()  # just in case this it called twice in a row...
     if logger.isEnabledFor(logging.INFO):
         logger.info("starting receiver listening threads")
     for device_info in _base.receivers_and_devices():
@@ -339,24 +269,19 @@ def start_all():
 def stop_all():
     listeners = list(_all_listeners.values())
     _all_listeners.clear()
-
     if listeners:
         if logger.isEnabledFor(logging.INFO):
             logger.info("stopping receiver listening threads %s", listeners)
-
         for listener_thread in listeners:
             listener_thread.stop()
-
     configuration.save()
-
     if listeners:
         for listener_thread in listeners:
             listener_thread.join()
 
 
-# ping all devices to find out whether they are connected
-# after a resume, the device may have been off
-# so mark its saved status to ensure that the status is pushed to the device when it comes back
+# after a resume, the device may have been off so mark its saved status to ensure
+# that the status is pushed to the device when it comes back
 def ping_all(resuming=False):
     if logger.isEnabledFor(logging.INFO):
         logger.info("ping all devices%s", " when resuming" if resuming else "")
@@ -381,19 +306,17 @@ def ping_all(resuming=False):
                         break
 
 
-_status_callback = None
-_setting_callback = None
-_error_callback = None
+_status_callback = None  # GUI callback to change UI in response to changes to receiver or device status
+_setting_callback = None  # GUI callback to change UI in response to changes to status
+_error_callback = None  # GUI callback to report errors
 
 
 def setup_scanner(status_changed_callback, setting_changed_callback, error_callback):
     global _status_callback, _error_callback, _setting_callback
     assert _status_callback is None, "scanner was already set-up"
-
     _status_callback = status_changed_callback
     _setting_callback = setting_changed_callback
     _error_callback = error_callback
-
     _base.notify_on_receivers_glib(_process_receiver_event)
 
 
@@ -423,17 +346,13 @@ def _process_receiver_event(action, device_info):
     assert action is not None
     assert device_info is not None
     assert _error_callback
-
     if logger.isEnabledFor(logging.INFO):
         logger.info("receiver event %s %s", action, device_info)
-
     # whatever the action, stop any previous receivers at this path
     listener_thread = _all_listeners.pop(device_info.path, None)
     if listener_thread is not None:
         assert isinstance(listener_thread, ReceiverListener)
         listener_thread.stop()
-
-    if action == "add":  # a new device was detected
+    if action == "add":
         _process_add(device_info, 3)
-
     return False
