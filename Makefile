@@ -19,15 +19,23 @@ install_apt:
 	sudo apt update
 	sudo apt install libdbus-1-dev libglib2.0-dev
 
+install_dnf:
+	@echo "Installing Solaar dependencies via dn"
+	sudo dnf install gtk3 python3-gobject python3-dbus python3-pyudev python3-psutil python3-xlib python3-yaml
+
 install_brew:
 	@echo "Installing Solaar dependencies via brew"
 	brew update
 	brew install hidapi gtk+3 pygobject3
 
 install_pip:
-	@echo "Installing Solaar dependencies via pip"
+	@echo "Installing Solaar via pip"
 	python -m pip install --upgrade pip
 	pip install $(PIP_ARGS)
+
+install_pipx:
+	@echo "Installing Solaar via pipx"
+	pipx install --system-site-packages $(PIP_ARGS)
 
 install_udev:
 	@echo "Copying Solaar udev rule to $(UDEV_RULES_DEST)"
