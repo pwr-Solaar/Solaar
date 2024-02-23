@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -39,9 +40,6 @@ logger = logging.getLogger(__name__)
 _R = _hidpp10.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
-#
-#
-#
 
 notification_lock = _threading.Lock()
 
@@ -58,11 +56,6 @@ def process(device, notification):
         return _process_receiver_notification(device, status, notification)
 
     return _process_device_notification(device, status, notification)
-
-
-#
-#
-#
 
 
 def _process_receiver_notification(receiver, status, n):
@@ -151,21 +144,14 @@ def _process_receiver_notification(receiver, status, n):
     logger.warning("%s: unhandled notification %s", receiver, n)
 
 
-#
-#
-#
-
-
 def _process_device_notification(device, status, n):
-    # incoming packets with SubId >= 0x80 are supposedly replies from
-    # HID++ 1.0 requests, should never get here
+    # incoming packets with SubId >= 0x80 are supposedly replies from HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
     if n.sub_id == 00:  # no-op feature notification, dispose of it quickly
         return False
 
-    # Allow the device object to handle the notification using custom
-    # per-device state.
+    # Allow the device object to handle the notification using custom per-device state.
     handling_ret = device.handle_notification(n)
     if handling_ret is not None:
         return handling_ret
@@ -179,8 +165,7 @@ def _process_device_notification(device, status, n):
 
     # These notifications are from the device itself, so it must be active
     device.online = True
-    # At this point, we need to know the device's protocol, otherwise it's
-    # possible to not know how to handle it.
+    # At this point, we need to know the device's protocol, otherwise it's possible to not know how to handle it.
     assert device.protocol is not None
 
     # some custom battery events for HID++ 1.0 devices
@@ -238,19 +223,11 @@ def _process_hidpp10_custom_notification(device, status, n):
         status.set_battery_info(charge, next_charge, status_text, voltage)
         return True
 
-    if n.sub_id == _R.keyboard_illumination:
-        # message layout: 10 ix 17("address")  <??> <?> <??> <light level 1=off..5=max>
-        # TODO anything we can do with this?
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("illumination event: %s", n)
-        return True
-
     logger.warning("%s: unrecognized %s", device, n)
 
 
 def _process_hidpp10_notification(device, status, n):
-    # device unpairing
-    if n.sub_id == 0x40:
+    if n.sub_id == 0x40:  # device unpairing
         if n.address == 0x02:
             # device un-paired
             status.clear()
@@ -263,8 +240,7 @@ def _process_hidpp10_notification(device, status, n):
             logger.warning("%s: disconnection with unknown type %02X: %s", device, n.address, n)
         return True
 
-    # device connection (and disconnection)
-    if n.sub_id == 0x41:
+    if n.sub_id == 0x41:  # device connection (and disconnection)
         flags = ord(n.data[:1]) & 0xF0
         if n.address == 0x02:  # very old 27 MHz protocol
             wpid = "00" + _strhex(n.data[2:3])
@@ -296,12 +272,10 @@ def _process_hidpp10_notification(device, status, n):
     if n.sub_id == 0x49:
         # raw input event? just ignore it
         # if n.address == 0x01, no idea what it is, but they keep on coming
-        # if n.address == 0x03, appears to be an actual input event,
-        #     because they only come when input happents
+        # if n.address == 0x03, appears to be an actual input event, because they only come when input happents
         return True
 
-    # power notification
-    if n.sub_id == 0x4B:
+    if n.sub_id == 0x4B:  # power notification
         if n.address == 0x01:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: device powered on", device)
