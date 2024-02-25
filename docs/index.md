@@ -1,13 +1,37 @@
----
-title: Solaar
-layout: default
----
+<div>
+  <img src="assets/solaar.svg" width="60px"/>
 
-**Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
-that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver;
-connect directly via a USB cable; or connect via Bluetooth.
-Solaar does not work with peripherals from other companies.
+  <h1>Solaar</h1>
 
+  <p>
+    Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads<br>
+    that connect wirelessly to a Unifying, Bolt, Lightspeed or Nano receiver<br>
+    as well as many peripherals that connect via USB cable or Bluetooth.
+  </p>
+
+  <p>
+    <a href="https://pwr-solaar.github.io/Solaar/usage">Usage</a> -
+    <a href="https://pwr-solaar.github.io/Solaar/installation">Installation</a> - 
+    <a href="https://pwr-solaar.github.io/Solaar/devices">Supported devices</a>
+  </p>
+
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](../COPYING)
+
+  <p>
+    <img src="Solaar-main-window-back-divert.png" width="30%"/>
+    &#160;
+    <img src="Solaar-main-window-multiple.png" width="30%"/>
+    &#160;
+    <img src="Solaar-rule-editor.png" width="30%"/>
+  </p>
+</div>
+
+Solaar supports 
+- pairing/unpairing of devices with a receiver
+- custom button configuration
+- configuring device settings
+
+## Description
 Documentation here is for the current version of Solaar.
 Some Linux distributions distribute old versions of Solaar.
 If you are using an old version and something described here does not work you should upgrade
@@ -76,6 +100,7 @@ Please report such experiences by creating an issue in
 Solaar will detect all devices paired with supported Unifying, Bolt, Lightspeed, or Nano
 receivers, and at the very least display some basic information about them.
 Solaar will detect many Logitech devices that connect via a USB cable or Bluetooth.
+It does not work with peripherals from other companies.
 
 Solaar can pair and unpair a Logitech device showing the Unifying logo
 (Solaar's version of the [logo][logo])
