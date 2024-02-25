@@ -171,6 +171,12 @@ so what is important for support is the USB WPID or Bluetooth model ID.
 |------------------|------|-------|
 | G915 TKL         | 408E | 4.2   |
 
+### Mice (Bolt)
+
+| Device           | WPID | HID++ |
+|------------------|------|-------|
+| MX Master 3S     | B034 | 4.5   |
+
 ### Mice (Unifying)
 
 | Device           | WPID | HID++ |
