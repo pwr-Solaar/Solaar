@@ -204,6 +204,7 @@ so what is important for support is the USB WPID or Bluetooth model ID.
 | Anywhere MX 2    | 404A | 2.0   |
 | MX Master        | 4041 | 2.0   |
 | MX Master 2S     | 4069 | 2.0   |
+| MX Master 3      | 4082 | 4.5   |
 | Cube             |      | 2.0   |
 | MX Vertical      | 407B | 2.0   |
 
