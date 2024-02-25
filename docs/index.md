@@ -11,7 +11,7 @@
 
   <p>
     <a href="https://pwr-solaar.github.io/Solaar/usage">Usage</a> -
-    <a href="https://pwr-solaar.github.io/Solaar/installation">Installation</a> - 
+    <a href="https://pwr-solaar.github.io/Solaar/installation">Installation</a> -
     <a href="https://pwr-solaar.github.io/Solaar/devices">Supported devices</a>
   </p>
 
@@ -26,7 +26,7 @@
   </p>
 </div>
 
-Solaar supports 
+Solaar supports
 - pairing/unpairing of devices with a receiver
 - custom button configuration
 - configuring device settings
