@@ -11,72 +11,26 @@ Solaar supports most Logitech Nano, Unifying, and Bolt receivers.
 Solaar supports some Lightspeed receivers.
 See the receiver table below for the list of currently supported receivers.
 
-Solaar supports most recent and many older Logitech devices
-(keyboards, mice, trackballs, touchpads, and headsets)
+Solaar supports all Logitech devices (keyboards, mice, trackballs, touchpads, and headsets)
 that can connect to supported receivers.
-Solaar supports many recent Logitech devices that can connect via a USB cable,
-but some such Logitech devices are not suited for use in Solaar because they do not use the HID++ protocol.
-One example is the MX518 Gaming Mouse.
-Solaar supports most recent Logitech devices that can connect via Bluetooth.
+Solaar supports all Logitech devices that can connect via a USB cable or via Bluetooth,
+as long as the device uses the HID++ protocol.
 
 The best way to determine whether Solaar supports a device is to run Solaar while the device is connected.
 If the device is supported, it will show up in the Solaar main window.
-If it is not, and there is no issue about the device in the Solaar GitHub repository,
-open an enhancement issue requesting that it be supported.
 
 The directory <https://github.com/pwr-Solaar/Solaar/tree/master/docs/devices> contains edited output
 of `solaar show` on many devices and can be used to see what Solaar can do with the device.
 
 
-## Adding new devices
+## Supporting old devices
 
-Most new HID++ devices do not need to be known to Solaar to work.
-You should be able to just run Solaar and the device will show up.
+Some old Logitech devices use an old version of HID++.
+For Solaar to support these devices well, Solaar needs some information about them.
 
-If your device does not show up,
-either it doesn't use HID++ or the interface it uses isn't the one Solaar normally uses.
-To start the process of support for a Logitech device open an enhancement issue for Solaar and
-follow these steps:
-
-1. Make sure the receiver or device is connected and active.
-
-2. Look at the output of `grep -H . /sys/class/hidraw/hidraw*/device/uevent` to find
-where information about the device is kept.
-You are looking for a line like `/sys/class/hidraw/hidrawN/device/uevent:HID_NAME=<NAME>`
-where \<NAME\> is the name of your receiver or device.
-N is the current HID raw number of your receiver or device.
-
-3. Provide the contents of the file `/sys/class/hidraw/hidrawN/device/uevent` where N was found
-above.
-
-4. Also attach the contents of the file `/sys/class/hidraw/hidrawN/device/report_descriptor`
-to the enhancement request.
-You will have to copy the contents to a file with txt extension before attaching it.
-Or, better, install hidrd-convert and attach the output of
-`hidrd-convert -o spec /sys/class/hidraw/hidrawN/device/report_descriptor`
-(To install hidrd on Fedora use  `sudo dnf install hidrd`.)
-
-5. If your device or receiver connects via USB, look at the output of `lsusb`
-to find the ID of the device or receiver and also provide the output of
-`lsusb -vv -d xxxx:yyyy` where xxxx:yyyy is the ID of the device or receiver.
-
-If your device can connect in multiple ways - via a receiver, via USB (not just charging via a USB cable),
-via Bluetooth - do this for each way it can connect.
-
-### Adding information about a new device to the Solaar code
-
-The _D function in `../lib/logitech_receiver/descriptors.py` makes a device known to Solaar.
-The usual arguments to the _D function are the device's long name, its short name
-(codename), and its HID++ protocol version.
-Devices that use HID++ 1.0 need a tuple of known registers (registers) and settings (settings).
-Settings can be provided for Devices that use HID++ 2.0 or later,
-but Solaar can determine these from the device.
-If the device can connect to a receiver, provide its wireless product ID (wpid),
-If the device can connect via Bluetooth, provide its Bluetooth product ID (btid).
-If the device can connect via a USB cable, provide its USB product ID (usbid),
-and the interface it uses to send and receiver HID++ messages (interface - default 2).
-The use of a non-default USB interface is the main reason for requiring information about
-modern devices to be added to Solaar.
+If you have an old Logitech device that shows up in Solaar but has no settings
+and you feel that Solaar should be able to do more with the device you can
+open an enhancement request for Solaar to better support the device.
 
 
 ## Adding new receivers
@@ -129,7 +83,7 @@ a subset of the HID++ 1.0 protocol. Only hardware pairing is supported.
 
 
 
-## Supported Devices
+## Supported Devices (Historical Interest Only)
 
 The device tables below  provide a list of some of the devices that Solaar supports,
 giving their product name, WPID product number, and HID++ protocol information.
