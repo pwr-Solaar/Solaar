@@ -14,13 +14,13 @@ as well as many Logitech devices that connect via a USB cable or Bluetooth.
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../COPYING)
 
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="40%"/>
 &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="40%"/>
 
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="40%"/>
 &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="40%"/>
 
 Solaar supports:
 - pairing/unpairing of devices with receivers
