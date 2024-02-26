@@ -76,7 +76,6 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
     python_requires=">=3.7",
     install_requires=[
         'evdev (>= 1.1.2) ; platform_system=="Linux"',
-        'hid_parser (>= 0.0.3) ; platform_system=="Linux"',
         "pyudev (>= 0.13)",
         "PyYAML (>= 3.12)",
         "python-xlib (>= 0.27)",
