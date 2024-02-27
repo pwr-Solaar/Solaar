@@ -45,19 +45,21 @@ available from the standard repositories for your distribution, you can try
 one of these packages:
 
 - Arch solaar package in the [extra repository][arch]
-- Ubuntu/Kubuntu package in [Solaar stable ppa][ppa2]
+- Ubuntu/Kubuntu package in [Solaar stable ppa][ppa stable]
 - NixOS Flake package in [Svenum/Solaar-Flake][nix flake]
 
 Solaar is available from some other repositories
 but may be several versions behind the current version:
 
-- for Ubuntu/Kubuntu 16.04+: the solaar package from [universe repository][universe repository]
+- a [Debian package][debian], courtesy of Stephen Kitt
+- an Ubuntu package is available from [universe repository][ubuntu universe repository]
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
 
-[ppa2]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
+[ppa stable]: https://launchpad.net/~solaar-unifying/+archive/ubuntu/stable
 [arch]: https://www.archlinux.org/packages/extra/any/solaar/
 [gentoo]: https://packages.gentoo.org/packages/app-misc/solaar
 [mageia]: http://mageia.madb.org/package/show/release/cauldron/application/0/name/solaar
-[universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
+[ubuntu universe repository]: http://packages.ubuntu.com/search?keywords=solaar&searchon=names&suite=all&section=all
 [nix flake]: https://github.com/Svenum/Solaar-Flake
+[debian]: https://packages.debian.org/search?keywords=solaar&searchon=names&suite=all&section=all
