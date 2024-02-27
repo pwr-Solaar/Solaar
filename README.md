@@ -8,22 +8,22 @@ as well as many Logitech devices that connect via a USB cable or Bluetooth.
 <a href="https://pwr-solaar.github.io/Solaar/index">More Information</a> -
 <a href="https://pwr-solaar.github.io/Solaar/usage">Usage</a> -
 <a href="https://pwr-solaar.github.io/Solaar/capabilities">Capabilities</a> -
-<a href="https://pwr-solaar.github.io/Solaarrules">Rules</a> -
+<a href="https://pwr-solaar.github.io/Solaar/rules">Rules</a> -
 <a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a>
 
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../COPYING)
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="54%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="43%"/>
 </p>
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="49%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="45%"/>
+<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="48%"/>
 </p>
 
 Solaar supports:
