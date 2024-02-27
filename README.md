@@ -52,7 +52,7 @@ Solaar is available from some other repositories
 but may be several versions behind the current version:
 
 - a [Debian package][debian], courtesy of Stephen Kitt
-- an Ubuntu package is available from [universe repository][ubuntu universe repository]
+- a Ubuntu package is available from [universe repository][ubuntu universe repository]
 - a [Gentoo package][gentoo], courtesy of Carlos Silva and Tim Harder
 - a [Mageia package][mageia], courtesy of David Geiger
 
