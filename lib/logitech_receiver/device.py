@@ -31,6 +31,7 @@ from .settings_templates import check_feature_settings as _check_feature_setting
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
+_hidpp20 = hidpp20.Hidpp20()
 _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
@@ -43,7 +44,7 @@ class Device:
     def __init__(self, receiver, number, online, pairing_info=None, handle=None, device_info=None, setting_callback=None):
         assert receiver or device_info
         if receiver:
-            assert number > 0 and number <= 15  # some receivers have devices past their max # of devices
+            assert 0 < number <= 15  # some receivers have devices past their max # of devices
         self.number = number  # will be None at this point for directly connected devices
         self.online = online
         self.descriptor = None
@@ -142,7 +143,7 @@ class Device:
             if not self.online:  # be very defensive
                 self.ping()
             if self.online and self.protocol >= 2.0:
-                self._codename = hidpp20.get_friendly_name(self)
+                self._codename = _hidpp20.get_friendly_name(self)
                 if not self._codename:
                     self._codename = self.name.split(" ", 1)[0] if self.name else None
             if not self._codename and self.receiver:
@@ -162,11 +163,11 @@ class Device:
                 except exceptions.NoSuchDevice:
                     pass
             if self.online and self.protocol >= 2.0:
-                self._name = hidpp20.get_name(self)
+                self._name = _hidpp20.get_name(self)
         return self._name or self._codename or ("Unknown device %s" % (self.wpid or self.product_id))
 
     def get_ids(self):
-        ids = hidpp20.get_ids(self)
+        ids = _hidpp20.get_ids(self)
         if ids:
             self._unitId, self._modelId, self._tid_map = ids
             if logger.isEnabledFor(logging.INFO) and self._serial and self._serial != self._unitId:
@@ -193,14 +194,14 @@ class Device:
     @property
     def kind(self):
         if not self._kind and self.online and self.protocol >= 2.0:
-            self._kind = hidpp20.get_kind(self)
+            self._kind = _hidpp20.get_kind(self)
         return self._kind or "?"
 
     @property
     def firmware(self):
         if self._firmware is None and self.online:
             if self.protocol >= 2.0:
-                self._firmware = hidpp20.get_firmware(self)
+                self._firmware = _hidpp20.get_firmware(self)
             else:
                 self._firmware = _hidpp10.get_firmware(self)
         return self._firmware or ()
@@ -220,7 +221,7 @@ class Device:
     @property
     def polling_rate(self):
         if self.online and self.protocol >= 2.0:
-            rate = hidpp20.get_polling_rate(self)
+            rate = _hidpp20.get_polling_rate(self)
             self._polling_rate = rate if rate else self._polling_rate
         return self._polling_rate
 
@@ -234,14 +235,14 @@ class Device:
     def keys(self):
         if not self._keys:
             if self.online and self.protocol >= 2.0:
-                self._keys = hidpp20.get_keys(self) or ()
+                self._keys = _hidpp20.get_keys(self) or ()
         return self._keys
 
     @property
     def remap_keys(self):
         if self._remap_keys is None:
             if self.online and self.protocol >= 2.0:
-                self._remap_keys = hidpp20.get_remap_keys(self) or ()
+                self._remap_keys = _hidpp20.get_remap_keys(self) or ()
         return self._remap_keys
 
     @property
@@ -250,21 +251,21 @@ class Device:
             with self._gestures_lock:
                 if self._gestures is None:
                     if self.online and self.protocol >= 2.0:
-                        self._gestures = hidpp20.get_gestures(self) or ()
+                        self._gestures = _hidpp20.get_gestures(self) or ()
         return self._gestures
 
     @property
     def backlight(self):
         if self._backlight is None:
             if self.online and self.protocol >= 2.0:
-                self._backlight = hidpp20.get_backlight(self)
+                self._backlight = _hidpp20.get_backlight(self)
         return self._backlight
 
     @property
     def profiles(self):
         if self._profiles is None:
             if self.online and self.protocol >= 2.0:
-                self._profiles = hidpp20.get_profiles(self)
+                self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
 
     @property
@@ -301,7 +302,7 @@ class Device:
 
     def set_configuration(self, configuration, no_reply=False):
         if self.online and self.protocol >= 2.0:
-            hidpp20.config_change(self, configuration, no_reply=no_reply)
+            _hidpp20.config_change(self, configuration, no_reply=no_reply)
 
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
@@ -320,7 +321,7 @@ class Device:
         else:
             battery_feature = self.persister.get("_battery", None) if self.persister else None
             if battery_feature != 0:
-                result = hidpp20.get_battery(self, battery_feature)
+                result = _hidpp20.get_battery(self, battery_feature)
                 try:
                     feature, level, next, status, voltage = result
                     if self.persister and battery_feature is None:

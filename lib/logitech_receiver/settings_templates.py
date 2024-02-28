@@ -27,7 +27,7 @@ from traceback import format_exc as _format_exc
 
 from . import descriptors as _descriptors
 from . import hidpp10_constants as _hidpp10_constants
-from . import hidpp20 as _hidpp20
+from . import hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import notify as _notify
 from . import special_keys as _special_keys
@@ -60,6 +60,7 @@ from .special_keys import DISABLE as _DKEY
 
 logger = logging.getLogger(__name__)
 
+_hidpp20 = hidpp20.Hidpp20()
 _DK = _hidpp10_constants.DEVICE_KIND
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
@@ -528,7 +529,7 @@ class OnboardProfiles(_Setting):
     class validator_class(_ChoicesV):
         @classmethod
         def build(cls, setting_class, device):
-            headers = _hidpp20.OnboardProfiles.get_profile_headers(device)
+            headers = hidpp20.OnboardProfiles.get_profile_headers(device)
             profiles_list = [setting_class.choices_universe[0]]
             if headers:
                 for sector, enabled in headers:
@@ -1234,7 +1235,7 @@ class Gesture2Gestures(_BitFieldOMSetting):
     description = _("Tweak the mouse/touchpad behaviour.")
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
-    validator_options = {"om_method": _hidpp20.Gesture.enable_offset_mask}
+    validator_options = {"om_method": hidpp20.Gesture.enable_offset_mask}
     choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
@@ -1251,7 +1252,7 @@ class Gesture2Divert(_BitFieldOMSetting):
     description = _("Divert mouse/touchpad gestures.")
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x30, "write_fnid": 0x40}
-    validator_options = {"om_method": _hidpp20.Gesture.diversion_offset_mask}
+    validator_options = {"om_method": hidpp20.Gesture.diversion_offset_mask}
     choices_universe = _hidpp20_constants.GESTURE
     _labels = _GESTURE2_GESTURES_LABELS
 
@@ -1268,8 +1269,8 @@ class Gesture2Params(_LongSettings):
     description = _("Change numerical parameters of a mouse/touchpad.")
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = _hidpp20.PARAM
-    sub_items_universe = _hidpp20.SUB_PARAM
+    choices_universe = hidpp20.PARAM
+    sub_items_universe = hidpp20.SUB_PARAM
     # item (NamedInt) -> list/tuple of objects that have the following attributes
     # .id (sub-item text), .length (in bytes), .minimum and .maximum
 
@@ -1465,7 +1466,7 @@ class LEDControl(_Setting):
 
 
 colors = _special_keys.COLORS
-_LEDP = _hidpp20.LEDParam
+_LEDP = hidpp20.LEDParam
 
 
 # an LED Zone has an index, a set of possible LED effects, and an LED effect setting
@@ -1478,7 +1479,7 @@ class LEDZoneSetting(_Setting):
     speed_field = {"name": _LEDP.speed, "kind": _KIND.range, "label": _("Speed"), "min": 0, "max": 255}
     period_field = {"name": _LEDP.period, "kind": _KIND.range, "label": _("Period"), "min": 100, "max": 5000}
     intensity_field = {"name": _LEDP.intensity, "kind": _KIND.range, "label": _("Intensity"), "min": 0, "max": 100}
-    ramp_field = {"name": _LEDP.ramp, "kind": _KIND.choice, "label": _("Ramp"), "choices": _hidpp20.LEDRampChoices}
+    ramp_field = {"name": _LEDP.ramp, "kind": _KIND.choice, "label": _("Ramp"), "choices": hidpp20.LEDRampChoices}
     #    form_field = { 'name': _LEDP.form, 'kind': _KIND.choice, 'label': _('Form'), 'choices': _hidpp20.LEDFormChoices }
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
@@ -1489,14 +1490,14 @@ class LEDZoneSetting(_Setting):
         for zone in infos.zones:
             prefix = _int2bytes(zone.index, 1)
             rw = _FeatureRW(_F.COLOR_LED_EFFECTS, read_fnid=0xE0, write_fnid=0x30, prefix=prefix)
-            validator = _HeteroV(data_class=_hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
+            validator = _HeteroV(data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
-            setting.label = _("LEDs") + " " + str(_hidpp20.LEDZoneLocations[zone.location])
-            choices = [_hidpp20.LEDEffects[e.ID][0] for e in zone.effects]
+            setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
+            choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects]
             ID_field = {"name": "ID", "kind": _KIND.choice, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + cls.possible_fields
-            setting.fields_map = _hidpp20.LEDEffects
+            setting.fields_map = hidpp20.LEDEffects
             settings.append(setting)
         return settings
 

@@ -24,9 +24,8 @@ import threading as _threading
 from struct import unpack as _unpack
 
 from . import diversion as _diversion
-from . import hidpp10
+from . import hidpp10, hidpp20
 from . import hidpp10_constants as _hidpp10_constants
-from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
@@ -39,6 +38,7 @@ from .status import KEYS as _K
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
+_hidpp20 = hidpp20.Hidpp20()
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
@@ -296,7 +296,7 @@ def _process_feature_notification(device, status, n, feature):
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
-            _ignore, discharge_level, discharge_next_level, battery_status, voltage = _hidpp20.decipher_battery_status(n.data)
+            _ignore, discharge_level, discharge_next_level, battery_status, voltage = hidpp20.decipher_battery_status(n.data)
             status.set_battery_info(discharge_level, discharge_next_level, battery_status, voltage)
         elif n.address == 0x10:
             if logger.isEnabledFor(logging.INFO):
@@ -306,21 +306,21 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_voltage(n.data)
+            _ignore, level, nextl, battery_status, voltage = hidpp20.decipher_battery_voltage(n.data)
             status.set_battery_info(level, nextl, battery_status, voltage)
         else:
             logger.warning("%s: unknown VOLTAGE %s", device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            _ignore, level, nextl, battery_status, voltage = _hidpp20.decipher_battery_unified(n.data)
+            _ignore, level, nextl, battery_status, voltage = hidpp20.decipher_battery_unified(n.data)
             status.set_battery_info(level, nextl, battery_status, voltage)
         else:
             logger.warning("%s: unknown UNIFIED BATTERY %s", device, n)
 
     elif feature == _F.ADC_MEASUREMENT:
         if n.address == 0x00:
-            result = _hidpp20.decipher_adc_measurement(n.data)
+            result = hidpp20.decipher_adc_measurement(n.data)
             if result:
                 _ignore, level, nextl, battery_status, voltage = result
                 status.set_battery_info(level, nextl, battery_status, voltage)
