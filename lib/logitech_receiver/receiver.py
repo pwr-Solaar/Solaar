@@ -26,6 +26,7 @@ from .device import Device
 
 logger = logging.getLogger(__name__)
 
+_hidpp10 = hidpp10.Hidpp10()
 _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
@@ -98,7 +99,7 @@ class Receiver:
     @property
     def firmware(self):
         if self._firmware is None and self.handle:
-            self._firmware = hidpp10.get_firmware(self)
+            self._firmware = _hidpp10.get_firmware(self)
         return self._firmware
 
     # how many pairings remain (None for unknown, -1 for unlimited)
@@ -124,12 +125,12 @@ class Receiver:
             )
         else:
             set_flag_bits = 0
-        ok = hidpp10.set_notification_flags(self, set_flag_bits)
+        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
         if ok is None:
             logger.warning("%s: failed to %s receiver notifications", self, "enable" if enable else "disable")
             return None
 
-        flag_bits = hidpp10.get_notification_flags(self)
+        flag_bits = _hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: receiver notifications %s => %s", self, "enabled" if enable else "disabled", flag_names)
