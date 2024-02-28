@@ -25,6 +25,7 @@ from struct import unpack as _unpack
 
 from . import diversion as _diversion
 from . import hidpp10 as _hidpp10
+from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
@@ -37,7 +38,7 @@ from .status import KEYS as _K
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
+_R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
 
@@ -72,7 +73,7 @@ def _process_receiver_notification(receiver, status, n):
             status.new_device = None
         pair_error = ord(n.data[:1])
         if pair_error:
-            status[_K.ERROR] = error_string = _hidpp10.PAIRING_ERRORS[pair_error]
+            status[_K.ERROR] = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
             status.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         status.changed(reason=reason)
@@ -90,7 +91,7 @@ def _process_receiver_notification(receiver, status, n):
             status.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
-                status[_K.ERROR] = discover_string = _hidpp10.BOLT_PAIRING_ERRORS[discover_error]
+                status[_K.ERROR] = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
             status.changed(reason=reason)
             return True
@@ -127,7 +128,7 @@ def _process_receiver_notification(receiver, status, n):
             elif n.address == 0x02 and not pair_error:
                 status.new_device = receiver.register_new_device(n.data[7])
             if pair_error:
-                status[_K.ERROR] = error_string = _hidpp10.BOLT_PAIRING_ERRORS[pair_error]
+                status[_K.ERROR] = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
                 status.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
             status.changed(reason=reason)
