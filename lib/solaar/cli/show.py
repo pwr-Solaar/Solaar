@@ -16,8 +16,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logitech_receiver import exceptions
-from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import exceptions, hidpp10
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import hidpp20_constants as _hidpp20_constants
@@ -28,7 +27,7 @@ from logitech_receiver.common import strhex as _strhex
 
 from solaar import NAME, __version__
 
-_F = _hidpp20_constants.FEATURE
+_hidpp10 = hidpp10.Hidpp10()
 
 
 def _print_receiver(receiver):

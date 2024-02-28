@@ -18,7 +18,7 @@
 
 import logging
 
-from . import hidpp10 as _hidpp10
+from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings as _settings
@@ -32,6 +32,8 @@ from .i18n import _, ngettext
 logger = logging.getLogger(__name__)
 
 _R = _hidpp10_constants.REGISTERS
+
+_hidpp10 = hidpp10.Hidpp10()
 
 #
 #

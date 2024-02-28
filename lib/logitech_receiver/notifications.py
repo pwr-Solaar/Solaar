@@ -24,7 +24,7 @@ import threading as _threading
 from struct import unpack as _unpack
 
 from . import diversion as _diversion
-from . import hidpp10 as _hidpp10
+from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
@@ -38,6 +38,7 @@ from .status import KEYS as _K
 
 logger = logging.getLogger(__name__)
 
+_hidpp10 = hidpp10.Hidpp10()
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
@@ -220,7 +221,7 @@ def _process_hidpp10_custom_notification(device, status, n):
         # message layout: 10 ix <register> <xx> <yy> <zz> <00>
         assert n.data[-1:] == b"\x00"
         data = chr(n.address).encode() + n.data
-        charge, next_charge, status_text, voltage = _hidpp10.parse_battery_status(n.sub_id, data)
+        charge, next_charge, status_text, voltage = hidpp10.parse_battery_status(n.sub_id, data)
         status.set_battery_info(charge, next_charge, status_text, voltage)
         return True
 
