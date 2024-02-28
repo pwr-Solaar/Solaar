@@ -14,9 +14,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logitech_receiver import exceptions, hidpp10
+from logitech_receiver import exceptions, hidpp10, hidpp20
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
-from logitech_receiver import hidpp20 as _hidpp20
 from logitech_receiver import hidpp20_constants as _hidpp20_constants
 from logitech_receiver import receiver as _receiver
 from logitech_receiver import settings_templates as _settings_templates
@@ -26,6 +25,7 @@ from logitech_receiver.common import strhex as _strhex
 from solaar import NAME, __version__
 
 _hidpp10 = hidpp10.Hidpp10()
+_hidpp20 = hidpp20.Hidpp20()
 
 
 def _print_receiver(receiver):
@@ -233,7 +233,7 @@ def _print_device(dev, num=None):
                 else:
                     mode = "On-Board"
                 print("            Device Mode: %s" % mode)
-            elif _hidpp20.battery_functions.get(feature, None):
+            elif hidpp20.battery_functions.get(feature, None):
                 print("", end="       ")
                 _battery_line(dev)
             for setting in dev_settings:
@@ -247,7 +247,7 @@ def _print_device(dev, num=None):
                         print("            %s (saved): %s" % (setting.label, v))
                     try:
                         v = setting.val_to_string(setting.read(False))
-                    except _hidpp20.FeatureCallError as e:
+                    except exceptions.FeatureCallError as e:
                         v = "HID++ error " + str(e)
                     except AssertionError as e:
                         v = "AssertionError " + str(e)

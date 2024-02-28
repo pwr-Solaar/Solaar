@@ -28,15 +28,16 @@ from time import time as _timestamp
 
 import hidapi as _hid
 
-from . import exceptions
+from . import exceptions, hidpp20
 from . import hidpp10_constants as _hidpp10_constants
-from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from .base_usb import ALL as _RECEIVER_USB_IDS
 from .common import strhex as _strhex
 from .descriptors import DEVICES as _DEVICES
 
 logger = logging.getLogger(__name__)
+
+_hidpp20 = hidpp20.Hidpp20()
 
 #
 #
