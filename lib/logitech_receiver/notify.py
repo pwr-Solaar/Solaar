@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2024 Solaar contributors
 ##
 ## This program is free software; you can redistribute it and/or modify
