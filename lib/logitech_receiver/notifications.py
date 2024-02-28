@@ -38,7 +38,6 @@ from .status import KEYS as _K
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10.REGISTERS
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
