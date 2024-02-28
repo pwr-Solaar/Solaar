@@ -17,11 +17,12 @@
 from time import time as _timestamp
 
 from logitech_receiver import base as _base
-from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import notifications as _notifications
 from logitech_receiver import status as _status
 
+_hidpp10 = hidpp10.Hidpp10()
 _R = _hidpp10_constants.REGISTERS
 
 
