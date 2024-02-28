@@ -19,7 +19,7 @@
 import logging
 
 from gi.repository import GLib, Gtk
-from logitech_receiver import hidpp10 as _hidpp10
+from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver.status import KEYS as _K
 
 from solaar.i18n import _, ngettext
@@ -90,8 +90,13 @@ def _check_lock_state(assistant, receiver, count=2):
         kind = receiver.status.device_kind
         authentication = receiver.status.device_authentication
         name = receiver.status.device_name
+        entropy = 10
+        if kind == _hidpp10_constants.DEVICE_KIND.keyboard:
+            entropy = 20
         if receiver.pair_device(
-            address=address, authentication=authentication, entropy=20 if kind == _hidpp10.DEVICE_KIND.keyboard else 10
+            address=address,
+            authentication=authentication,
+            entropy=entropy,
         ):
             return True
         else:
