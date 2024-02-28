@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2020 Peter Patel-Schneider
 ##
 ## This program is free software; you can redistribute it and/or modify
