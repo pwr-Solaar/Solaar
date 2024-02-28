@@ -65,7 +65,7 @@ _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
 _GG = _hidpp20_constants.GESTURE
-_GP = _hidpp20.PARAM
+_GP = _hidpp20_constants.PARAM
 
 # Setting classes are used to control the settings that the Solaar GUI shows and manipulates.
 # Each setting class has to several class variables:
