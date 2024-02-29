@@ -155,19 +155,7 @@ class Hidpp10:
         write_register(device, REGISTERS.three_leds, v1, v2)
 
     def get_notification_flags(self, device):
-        assert device is not None
-
-        # Avoid a call if the device is not online,
-        # or the device does not support registers.
-        if device.kind is not None:
-            # peripherals with protocol >= 2.0 don't support registers
-            if device.protocol and device.protocol >= 2.0:
-                return
-
-        flags = read_register(device, REGISTERS.notifications)
-        if flags is not None:
-            assert len(flags) == 3
-            return _bytes2int(flags)
+        return self._get_register(device, REGISTERS.notifications)
 
     def set_notification_flags(self, device, *flag_bits):
         assert device is not None
@@ -185,6 +173,9 @@ class Hidpp10:
         return result is not None
 
     def get_device_features(self, device):
+        self._get_register(device, REGISTERS.mouse_button_flags)
+
+    def _get_register(self, device, register):
         assert device is not None
 
         # Avoid a call if the device is not online,
@@ -194,7 +185,7 @@ class Hidpp10:
             if device.protocol and device.protocol >= 2.0:
                 return
 
-        flags = read_register(device, REGISTERS.mouse_button_flags)
+        flags = read_register(device, register)
         if flags is not None:
             assert len(flags) == 3
             return _bytes2int(flags)
