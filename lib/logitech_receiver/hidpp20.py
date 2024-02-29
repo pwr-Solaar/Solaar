@@ -76,7 +76,7 @@ class FeaturesArray(dict):
             if fs_index:
                 count = self.device.request(fs_index << 8)
                 if count is None:
-                    logger.warn("FEATURE_SET found, but failed to read features count")
+                    logger.warning("FEATURE_SET found, but failed to read features count")
                     return False
                 else:
                     self.count = count[0] + 1  # ROOT feature not included in count
@@ -259,7 +259,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             if mapped_data:
                 cid, mapping_flags_1, mapped_to = _unpack("!HBH", mapped_data[:5])
                 if cid != self._cid and logger.isEnabledFor(logging.WARNING):
-                    logger.warn(
+                    logger.warning(
                         f"REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied "
                         + f"with a different control ID ({cid}) than requested ({self._cid})."
                     )
@@ -273,7 +273,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                 raise exceptions.FeatureCallError(msg="No reply from device.")
         except exceptions.FeatureCallError:  # if the key hasn't ever been configured only produce a warning
             if logger.isEnabledFor(logging.WARNING):
-                logger.warn(
+                logger.warning(
                     f"Feature Call Error in _getCidReporting on device {self._device} for cid {self._cid} - use defaults"
                 )
             # Clear flags and set mapping target to self
@@ -437,7 +437,7 @@ class KeysArray:
                 if group != 0:  # 0 = does not belong to a group
                     self.group_cids[special_keys.CID_GROUP[group]].append(cid)
         elif logger.isEnabledFor(logging.WARNING):
-            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+            logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
     def _ensure_all_keys_queried(self):
         """The retrieval of key information is lazy, but for certain functionality
@@ -499,7 +499,7 @@ class KeysArrayV1(KeysArray):
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
             self.cid_to_tid[cid] = tid
         elif logger.isEnabledFor(logging.WARNING):
-            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+            logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 class KeysArrayV4(KeysArrayV1):
@@ -518,7 +518,7 @@ class KeysArrayV4(KeysArrayV1):
             if group != 0:  # 0 = does not belong to a group
                 self.group_cids[special_keys.CID_GROUP[group]].append(cid)
         elif logger.isEnabledFor(logging.WARNING):
-            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+            logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 # we are only interested in the current host, so use 0xFF for the host throughout
@@ -562,7 +562,7 @@ class KeysArrayPersistent(KeysArray):
                 remapped = modifiers = 0
             self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
         elif logger.isEnabledFor(logging.WARNING):
-            logger.warn(f"Key with index {index} was expected to exist but device doesn't report it.")
+            logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
 # Param Ids for feature GESTURE_2
@@ -786,7 +786,9 @@ class Spec:
             value = feature_request(self._device, FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
         except exceptions.FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
             if logger.isEnabledFor(logging.WARNING):
-                logger.warn(f"Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None")
+                logger.warning(
+                    f"Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None"
+                )
             return None
         return _bytes2int(value[: self.byte_count])
 
@@ -833,7 +835,7 @@ class Gestures:
                     spec = Spec(device, field_low, field_high)
                     self.specs[spec.spec] = spec
                 else:
-                    logger.warn(f"Unimplemented GESTURE_2 field {field_low} {field_high} found.")
+                    logger.warning(f"Unimplemented GESTURE_2 field {field_low} {field_high} found.")
                 index += 1
 
     def gesture(self, gesture):
@@ -1322,7 +1324,7 @@ class OnboardProfiles:
         try:
             written = 1 if OnboardProfiles.write_sector(device, 0, self.to_bytes()) else 0
         except Exception as e:
-            logger.warn("Exception writing onboard profile control sector")
+            logger.warning("Exception writing onboard profile control sector")
             raise e
         for p in self.profiles.values():
             try:
@@ -1330,7 +1332,7 @@ class OnboardProfiles:
                     raise Exception(f"Sector {p.sector} not a writable sector")
                 written += 1 if OnboardProfiles.write_sector(device, p.sector, p.to_bytes(self.size)) else 0
             except Exception as e:
-                logger.warn(f"Exception writing onboard profile sector {p.sector}")
+                logger.warning(f"Exception writing onboard profile sector {p.sector}")
                 raise e
         return written
 
