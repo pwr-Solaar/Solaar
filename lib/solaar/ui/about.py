@@ -1,5 +1,3 @@
-# -*- python-mode -*-
-
 ## Copyright (C) 2012-2013  Daniel Pavel
 ## Revisions Copyright (C) Contributors to the Solaar project.
 ##
