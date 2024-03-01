@@ -28,6 +28,7 @@ from solaar.ui.config_panel import change_setting, record_setting
 from solaar.ui.window import find_device
 
 from . import common, diversion_rules, notify, tray, window
+from .about import show_window as _show_about_window
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk  # NOQA: E402
@@ -101,6 +102,17 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     application.connect("command-line", _command_line)
     application.connect("activate", _activate)
     application.connect("shutdown", _shutdown, shutdown_hook)
+
+    # Add the menu bar to the application menu
+    app_menu = Gio.Menu()
+
+    about_action = Gio.SimpleAction.new("about", None)
+    about_action.connect("activate", _show_about_window)
+    application.add_action(about_action)
+
+    app_menu.append("About", "app.about")
+
+    application.set_app_menu(app_menu)
 
     application.register()
     if application.get_is_remote():

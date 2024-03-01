@@ -98,7 +98,7 @@ def _create():
     return about
 
 
-def show_window(trigger=None):
+def show_window(trigger=None, *args, **kwargs):
     global _dialog
     if _dialog is None:
         _dialog = _create()
