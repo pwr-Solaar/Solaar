@@ -270,9 +270,9 @@ class Backlight2(_Setting):
         def read(self, device):
             backlight = device.backlight
             if not backlight.enabled:
-                return 0xFF
+                return b"\xFF"
             else:
-                return backlight.mode
+                return _int2bytes(backlight.mode, 1)
 
         def write(self, device, data_bytes):
             backlight = device.backlight
