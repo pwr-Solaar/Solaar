@@ -88,7 +88,7 @@ echo
 [[ ! $REPLY =~ ^[Yy]$ ]] && echo 'Release aborted.' && exit 1
 
 # Check if version is in the changelog
-grep '^# '"$version" ChangeLog.md >/dev/null
+grep '^# '"$version" CHANGELOG.md >/dev/null
 [ $? -ne 0 ] && echo 'Error: Version is not present in the changelog' && exit 1
 
 # Check for uncommitted changes
@@ -125,7 +125,7 @@ echo 'Creating tag...'
             [ "$line" == "# $version" ] && found=yes || found=no
         fi
         [ "$found" == 'yes' ] && [ "${line:0:1}" == '*' ] && echo "$line"
-    done < ChangeLog.md
+    done < CHANGELOG.md
 } > /tmp/solaar-changelog
 [ -z "$DRY_RUN" ] && git tag -s $version -F /tmp/solaar-changelog >/dev/null || true
 [ $? -ne 0 ] && echo -e '\nError: Failed to create tag' && exit 1
