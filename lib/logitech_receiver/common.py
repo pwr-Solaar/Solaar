@@ -561,6 +561,3 @@ BATTERY_STATUS = NamedInts(
 
 def BATTERY_OK(status):
     return status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
-
-
-del namedtuple

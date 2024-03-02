@@ -377,7 +377,6 @@ _HIDPP_Notification.__str__ = lambda self: "Notification(%02x,%d,%02X,%02X,%s)" 
     self.address,
     _strhex(self.data),
 )
-del namedtuple
 
 #
 #

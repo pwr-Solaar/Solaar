@@ -59,7 +59,6 @@ DeviceInfo = namedtuple(
         "hidpp_long",
     ],
 )
-del namedtuple
 
 # Global handle to hidapi
 _hidapi = None
