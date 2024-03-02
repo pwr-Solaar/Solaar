@@ -36,6 +36,25 @@ _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
+class DeviceFactory:
+    @staticmethod
+    def create_device(device_info, setting_callback=None):
+        """Opens a Logitech Device found attached to the machine, by Linux device path.
+        :returns: An open file handle for the found receiver, or None.
+        """
+        try:
+            handle = base.open_path(device_info.path)
+            if handle:
+                # a direct connected device might not be online (as reported by user)
+                return Device(None, None, None, handle=handle, device_info=device_info, setting_callback=setting_callback)
+        except OSError as e:
+            logger.exception("open %s", device_info)
+            if e.errno == _errno.EACCES:
+                raise
+        except Exception:
+            logger.exception("open %s", device_info)
+
+
 class Device:
     instances = []
     read_register = hidpp10.read_register
@@ -417,23 +436,6 @@ class Device:
 
     def notify_devices(self):  # no need to notify, as there are none
         pass
-
-    @classmethod
-    def open(self, device_info, setting_callback=None):
-        """Opens a Logitech Device found attached to the machine, by Linux device path.
-        :returns: An open file handle for the found receiver, or None.
-        """
-        try:
-            handle = base.open_path(device_info.path)
-            if handle:
-                # a direct connected device might not be online (as reported by user)
-                return Device(None, None, None, handle=handle, device_info=device_info, setting_callback=setting_callback)
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == _errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)
 
     def close(self):
         handle, self.handle = self.handle, None

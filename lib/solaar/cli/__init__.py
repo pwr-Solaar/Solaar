@@ -126,7 +126,7 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             if dev_info.isDevice:
-                d = _device.Device.open(dev_info)
+                d = _device.DeviceFactory.create_device(dev_info)
             else:
                 d = _receiver.ReceiverFactory.create_receiver(dev_info)
 
