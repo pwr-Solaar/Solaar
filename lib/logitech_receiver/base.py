@@ -495,7 +495,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                             error,
                             _hidpp20_constants.ERROR[error],
                         )
-                        raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
+                        raise exceptions.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                     if reply_data[:2] == request_data[:2]:
                         if devnumber == 0xFF:
