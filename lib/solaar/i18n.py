@@ -37,8 +37,6 @@ def _find_locale_path(lc_domain):
         if mo_files:
             return _path.join(location, "locale")
 
-    # del _path
-
 
 try:
     locale.setlocale(locale.LC_ALL, "")
@@ -46,7 +44,6 @@ except Exception:
     pass
 
 language, encoding = locale.getlocale()
-del locale
 
 _LOCALE_DOMAIN = _NAME.lower()
 path = _find_locale_path(_LOCALE_DOMAIN)

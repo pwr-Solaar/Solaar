@@ -68,7 +68,6 @@ DeviceInfo = namedtuple(
         "hidpp_long",
     ],
 )
-del namedtuple
 
 #
 # exposed API

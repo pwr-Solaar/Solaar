@@ -51,7 +51,6 @@ def strhex(d):
 #
 
 print_lock = Lock()
-del Lock
 
 
 def _print(marker, data, scroll=False):
