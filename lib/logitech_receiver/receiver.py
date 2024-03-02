@@ -39,9 +39,14 @@ class ReceiverFactory:
         :returns: An open file handle for the found receiver, or ``None``.
         """
         try:
+            product_info = _base.product_information(device_info.product_id)
+            if not product_info:
+                logger.warning("Unknown receiver type: %s", device_info.product_id)
+                product_info = {}
+
             handle = _base.open_path(device_info.path)
             if handle:
-                return Receiver(handle, device_info.path, device_info.product_id, setting_callback)
+                return Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
             logger.exception("open %s", device_info)
             if e.errno == _errno.EACCES:
@@ -59,17 +64,13 @@ class Receiver:
     number = 0xFF
     kind = None
 
-    def __init__(self, handle, path, product_id, setting_callback=None):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
         assert handle
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
         self.product_id = product_id
         self.setting_callback = setting_callback
-        product_info = _base.product_information(self.product_id)
-        if not product_info:
-            logger.warning("Unknown receiver type: %s", self.product_id)
-            product_info = {}
         self.receiver_kind = product_info.get("receiver_kind", "unknown")
 
         # read the serial immediately, so we can find out max_devices
