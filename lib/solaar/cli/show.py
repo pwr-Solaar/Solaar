@@ -248,7 +248,7 @@ def _print_device(dev, num=None):
                         print("            %s (saved): %s" % (setting.label, v))
                     try:
                         v = setting.val_to_string(setting.read(False))
-                    except _hidpp20.FeatureCallError as e:
+                    except exceptions.FeatureCallError as e:
                         v = "HID++ error " + str(e)
                     except AssertionError as e:
                         v = "AssertionError " + str(e)

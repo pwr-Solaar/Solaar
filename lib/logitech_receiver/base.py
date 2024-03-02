@@ -30,7 +30,6 @@ import hidapi as _hid
 
 from . import exceptions
 from . import hidpp10_constants as _hidpp10_constants
-from . import hidpp20 as _hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from .base_usb import ALL as _RECEIVER_USB_IDS
 from .common import strhex as _strhex
@@ -495,7 +494,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                             error,
                             _hidpp20_constants.ERROR[error],
                         )
-                        raise _hidpp20.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
+                        raise exceptions.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
                     if reply_data[:2] == request_data[:2]:
                         if devnumber == 0xFF:
