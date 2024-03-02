@@ -12,7 +12,7 @@ as well as many Logitech devices that connect via a USB cable or Bluetooth.
 <a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a>
 
 
-[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../COPYING)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../LICENSE.txt)
 
 <p align="center">
 <img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="54%"/>

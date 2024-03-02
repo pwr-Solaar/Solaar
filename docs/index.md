@@ -184,7 +184,7 @@ for the step-by-step procedure for manual installation.
 ## License
 
 This software is distributed under the terms of the
-[GNU Public License, v2](COPYING), or later.
+[GNU Public License, v2](LICENSE.txt), or later.
 
 ## Contributing to Solaar
 
