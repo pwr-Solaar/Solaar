@@ -31,6 +31,25 @@ _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
+class ReceiverFactory:
+    @staticmethod
+    def create_receiver(device_info, setting_callback=None):
+        """Opens a Logitech Receiver found attached to the machine, by Linux device path.
+
+        :returns: An open file handle for the found receiver, or ``None``.
+        """
+        try:
+            handle = _base.open_path(device_info.path)
+            if handle:
+                return Receiver(handle, device_info.path, device_info.product_id, setting_callback)
+        except OSError as e:
+            logger.exception("open %s", device_info)
+            if e.errno == _errno.EACCES:
+                raise
+        except Exception:
+            logger.exception("open %s", device_info)
+
+
 class Receiver:
     """A Unifying Receiver instance.
 
@@ -376,20 +395,3 @@ class Receiver:
     __repr__ = __str__
 
     __bool__ = __nonzero__ = lambda self: self.handle is not None
-
-    @classmethod
-    def open(self, device_info, setting_callback=None):
-        """Opens a Logitech Receiver found attached to the machine, by Linux device path.
-
-        :returns: An open file handle for the found receiver, or ``None``.
-        """
-        try:
-            handle = _base.open_path(device_info.path)
-            if handle:
-                return Receiver(handle, device_info.path, device_info.product_id, setting_callback)
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == _errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)

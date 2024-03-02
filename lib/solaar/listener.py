@@ -244,7 +244,7 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver = _receiver.Receiver.open(device_info, _setting_callback)
+        receiver = _receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
         receiver = _device.Device.open(device_info, _setting_callback)
         configuration.attach_to(receiver)
