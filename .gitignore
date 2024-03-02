@@ -13,8 +13,13 @@ __pycache__/
 /deb_dist/
 /MANIFEST
 
+.coverage
+/htmlcov/
+
 /docs/captures/
 /share/logitech_icons/
 /share/locale/
 
 /po/*.po~
+
+/.idea/
