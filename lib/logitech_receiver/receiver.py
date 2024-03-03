@@ -342,10 +342,7 @@ class Receiver:
                 del self._devices[key]
             logger.warning("%s removed device %s", self, dev)
         else:
-            if self.receiver_kind == "bolt":
-                reply = self.write_register(_R.bolt_pairing, 0x03, key)
-            else:
-                reply = self.write_register(_R.receiver_pairing, 0x03, key)
+            reply = self._unpair_device_per_receiver(key)
             if reply:
                 # invalidate the device
                 dev.online = False
@@ -357,6 +354,10 @@ class Receiver:
             else:
                 logger.error("%s failed to unpair device %s", self, dev)
                 raise Exception("failed to unpair device %s: %s" % (dev.name, key))
+
+    def _unpair_device_per_receiver(self, key):
+        """Receiver specific unpairing."""
+        return self.write_register(_R.receiver_pairing, 0x03, key)
 
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
@@ -427,6 +428,10 @@ class BoltReceiver(Receiver):
             if reply:
                 return True
             logger.warning("%s: failed to %s device %s", self, "pair" if pair else "unpair", address)
+
+    def _unpair_device_per_receiver(self, key):
+        """Receiver specific unpairing."""
+        return self.write_register(_R.bolt_pairing, 0x03, key)
 
 
 class UnifyingReceiver(Receiver):
