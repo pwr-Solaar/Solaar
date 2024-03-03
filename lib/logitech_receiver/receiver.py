@@ -85,6 +85,22 @@ class Receiver:
         self.setting_callback = setting_callback
         self.receiver_kind = receiver_kind
 
+        self._firmware = None
+        self._devices = {}
+        self._remaining_pairings = None
+
+        self.name = product_info.get("name", "Receiver")
+        self.re_pairs = product_info.get("re_pairs", False)
+        self._str = "<%s(%s,%s%s)>" % (
+            self.name.replace(" ", ""),
+            self.path,
+            "" if isinstance(self.handle, int) else "T",
+            self.handle,
+        )
+
+        self.initialize(product_info)
+
+    def initialize(self, product_info: dict):
         # read the serial immediately, so we can find out max_devices
         if self.receiver_kind == "bolt":
             serial_reply = self.read_register(_R.bolt_uniqueId)
@@ -103,19 +119,6 @@ class Receiver:
                 self.serial = None
                 self.max_devices = product_info.get("max_devices", 1)
                 self.may_unpair = product_info.get("may_unpair", False)
-
-        self.name = product_info.get("name", "Receiver")
-        self.re_pairs = product_info.get("re_pairs", False)
-        self._str = "<%s(%s,%s%s)>" % (
-            self.name.replace(" ", ""),
-            self.path,
-            "" if isinstance(self.handle, int) else "T",
-            self.handle,
-        )
-
-        self._firmware = None
-        self._devices = {}
-        self._remaining_pairings = None
 
     def close(self):
         handle, self.handle = self.handle, None
