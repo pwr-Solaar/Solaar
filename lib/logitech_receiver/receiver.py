@@ -176,15 +176,6 @@ class Receiver:
 
     def device_pairing_information(self, n: int) -> dict:
         """Return information from pairing registers (and elsewhere when necessary)"""
-        if self.receiver_kind == "bolt":
-            pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
-            if pair_info:
-                wpid = (pair_info[3:4] + pair_info[2:3]).hex().upper()
-                kind = hidpp10_constants.DEVICE_KIND[pair_info[1] & 0x0F]
-                serial = pair_info[4:8].hex().upper()
-                return {"wpid": wpid, "kind": kind, "polling": None, "serial": serial, "power_switch": "(unknown)"}
-            else:
-                raise exceptions.NoSuchDevice(number=n, receiver=self, error="can't read Bolt pairing register")
         polling_rate = ""
         serial = None
         power_switch = "(unknown)"
@@ -408,6 +399,16 @@ class BoltReceiver(Receiver):
         if codename:
             codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
             return codename.decode("ascii")
+
+    def device_pairing_information(self, n: int) -> dict:
+        pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+        if pair_info:
+            wpid = (pair_info[3:4] + pair_info[2:3]).hex().upper()
+            kind = hidpp10_constants.DEVICE_KIND[pair_info[1] & 0x0F]
+            serial = pair_info[4:8].hex().upper()
+            return {"wpid": wpid, "kind": kind, "polling": None, "serial": serial, "power_switch": "(unknown)"}
+        else:
+            raise exceptions.NoSuchDevice(number=n, receiver=self, error="can't read Bolt pairing register")
 
     def discover(self, cancel=False, timeout=30):
         """Discover Logitech Bolt devices."""
