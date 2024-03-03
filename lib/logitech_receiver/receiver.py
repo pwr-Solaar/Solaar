@@ -288,14 +288,8 @@ class Receiver:
     def discover(self, cancel=False, timeout=30):
         pass
 
-    def pair_device(self, pair=True, slot=0, address=b"\0\0\0\0\0\0", authentication=0x00, entropy=20):  # Bolt pairing
-        assert self.receiver_kind == "bolt"
-        if self.handle:
-            action = 0x01 if pair is True else 0x03 if pair is False else 0x02
-            reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
-            if reply:
-                return True
-            logger.warning("%s: failed to %s device %s", self, "pair" if pair else "unpair", address)
+    def pair_device(self, pair=True, slot=0, address=b"\0\0\0\0\0\0", authentication=0x00, entropy=20):
+        pass
 
     def count(self):
         count = self.read_register(_R.receiver_connection)
@@ -417,6 +411,15 @@ class BoltReceiver(Receiver):
             if reply:
                 return True
             logger.warning("%s: failed to %s device discovery", self, "cancel" if cancel else "start")
+
+    def pair_device(self, pair=True, slot=0, address=b"\0\0\0\0\0\0", authentication=0x00, entropy=20):
+        """Pair a Bolt device."""
+        if self.handle:
+            action = 0x01 if pair is True else 0x03 if pair is False else 0x02
+            reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
+            if reply:
+                return True
+            logger.warning("%s: failed to %s device %s", self, "pair" if pair else "unpair", address)
 
 
 class UnifyingReceiver(Receiver):
