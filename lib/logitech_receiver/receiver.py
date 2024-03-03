@@ -405,7 +405,7 @@ class Ex100Receiver(Receiver):
         assert notification.address == 0x02
         online = True
         encrypted = bool(notification.data[0] & 0x80)
-        kind = hidpp10_constants.DEVICE_KIND[self.get_kind_from_index(number)]
+        kind = hidpp10_constants.DEVICE_KIND[_get_kind_from_index(self, number)]
         wpid = "00" + notification.data[2:3].hex().upper()
         return online, encrypted, wpid, kind
 
@@ -414,24 +414,25 @@ class Ex100Receiver(Receiver):
         if not wpid:
             logger.error("Unable to get wpid from udev for device %d of %s", number, self)
             raise exceptions.NoSuchDevice(number=number, receiver=self, error="Not present 27Mhz device")
-        kind = hidpp10_constants.DEVICE_KIND[self.get_kind_from_index(number)]
+        kind = hidpp10_constants.DEVICE_KIND[_get_kind_from_index(self, number)]
         return {"wpid": wpid, "kind": kind, "polling": "", "serial": None, "power_switch": "(unknown)"}
 
-    def get_kind_from_index(self, index):
-        """Get device kind from 27Mhz device index"""
-        # From drivers/hid/hid-logitech-dj.c
-        if index == 1:  # mouse
-            kind = 2
-        elif index == 2:  # mouse
-            kind = 2
-        elif index == 3:  # keyboard
-            kind = 1
-        elif index == 4:  # numpad
-            kind = 3
-        else:  # unknown device number on 27Mhz receiver
-            logger.error("failed to calculate device kind for device %d of %s", index, self)
-            raise exceptions.NoSuchDevice(number=index, receiver=self, error="Unknown 27Mhz device number")
-        return kind
+
+def _get_kind_from_index(receiver, index):
+    """Get device kind from 27Mhz device index"""
+    # From drivers/hid/hid-logitech-dj.c
+    if index == 1:  # mouse
+        kind = 2
+    elif index == 2:  # mouse
+        kind = 2
+    elif index == 3:  # keyboard
+        kind = 1
+    elif index == 4:  # numpad
+        kind = 3
+    else:  # unknown device number on 27Mhz receiver
+        logger.error("failed to calculate device kind for device %d of %s", index, receiver)
+        raise exceptions.NoSuchDevice(number=index, receiver=receiver, error="Unknown 27Mhz device number")
+    return kind
 
 
 receiver_class_mapping = {
