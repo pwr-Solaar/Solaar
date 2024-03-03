@@ -169,16 +169,10 @@ class Receiver:
         return flag_bits
 
     def device_codename(self, n):
-        if self.receiver_kind == "bolt":
-            codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
-            if codename:
-                codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
-                return codename.decode("ascii")
-        else:
-            codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
-            if codename:
-                codename = codename[2 : 2 + ord(codename[1:2])]
-                return codename.decode("ascii")
+        codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
+        if codename:
+            codename = codename[2 : 2 + ord(codename[1:2])]
+            return codename.decode("ascii")
 
     def device_pairing_information(self, n: int) -> dict:
         """Return information from pairing registers (and elsewhere when necessary)"""
@@ -408,6 +402,12 @@ class BoltReceiver(Receiver):
         self.serial = serial_reply.hex().upper()
         self.max_devices = product_info.get("max_devices", 1)
         self.may_unpair = product_info.get("may_unpair", False)
+
+    def device_codename(self, n):
+        codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
+        if codename:
+            codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
+            return codename.decode("ascii")
 
     def discover(self, cancel=False, timeout=30):
         """Discover Logitech Bolt devices."""
