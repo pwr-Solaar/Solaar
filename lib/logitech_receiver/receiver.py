@@ -285,14 +285,8 @@ class Receiver:
                 return True
             logger.warning("%s: failed to %s the receiver lock", self, "close" if lock_closed else "open")
 
-    def discover(self, cancel=False, timeout=30):  # Bolt device discovery
-        assert self.receiver_kind == "bolt"
-        if self.handle:
-            action = 0x02 if cancel else 0x01
-            reply = self.write_register(_R.bolt_device_discovery, timeout, action)
-            if reply:
-                return True
-            logger.warning("%s: failed to %s device discovery", self, "cancel" if cancel else "start")
+    def discover(self, cancel=False, timeout=30):
+        pass
 
     def pair_device(self, pair=True, slot=0, address=b"\0\0\0\0\0\0", authentication=0x00, entropy=20):  # Bolt pairing
         assert self.receiver_kind == "bolt"
@@ -414,6 +408,15 @@ class Receiver:
 class BoltReceiver(Receiver):
     def __init__(self, product_info, handle, path, product_id, setting_callback=None):
         super().__init__("bolt", product_info, handle, path, product_id, setting_callback)
+
+    def discover(self, cancel=False, timeout=30):
+        """Discover Logitech Bolt devices."""
+        if self.handle:
+            action = 0x02 if cancel else 0x01
+            reply = self.write_register(_R.bolt_device_discovery, timeout, action)
+            if reply:
+                return True
+            logger.warning("%s: failed to %s device discovery", self, "cancel" if cancel else "start")
 
 
 class UnifyingReceiver(Receiver):
