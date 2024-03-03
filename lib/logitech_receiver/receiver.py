@@ -46,7 +46,19 @@ class ReceiverFactory:
 
             handle = _base.open_path(device_info.path)
             if handle:
-                return Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                receiver_kind = product_info.get("receiver_kind", "unknown")
+                if receiver_kind == "bolt":
+                    return BoltReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                elif receiver_kind == "unifying":
+                    return UnifyingReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                elif receiver_kind == "lightspeed":
+                    return LightSpeedReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                elif receiver_kind == "nano":
+                    return NanoReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                elif receiver_kind == "27Mhz":
+                    return Ex100Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                else:
+                    return Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
             logger.exception("open %s", device_info)
             if e.errno == _errno.EACCES:
@@ -64,14 +76,14 @@ class Receiver:
     number = 0xFF
     kind = None
 
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
         assert handle
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
         self.product_id = product_id
         self.setting_callback = setting_callback
-        self.receiver_kind = product_info.get("receiver_kind", "unknown")
+        self.receiver_kind = receiver_kind
 
         # read the serial immediately, so we can find out max_devices
         if self.receiver_kind == "bolt":
@@ -202,6 +214,7 @@ class Receiver:
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
         else:
             raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
+
         pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
         if pair_info:
             power_switch = hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
@@ -396,3 +409,28 @@ class Receiver:
     __repr__ = __str__
 
     __bool__ = __nonzero__ = lambda self: self.handle is not None
+
+
+class BoltReceiver(Receiver):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__("bolt", product_info, handle, path, product_id, setting_callback)
+
+
+class UnifyingReceiver(Receiver):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__("unifying", product_info, handle, path, product_id, setting_callback)
+
+
+class NanoReceiver(Receiver):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__("nano", product_info, handle, path, product_id, setting_callback)
+
+
+class LightSpeedReceiver(Receiver):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__("lightspeed", product_info, handle, path, product_id, setting_callback)
+
+
+class Ex100Receiver(Receiver):
+    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__("27Mhz", product_info, handle, path, product_id, setting_callback)
