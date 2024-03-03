@@ -84,6 +84,9 @@ class Receiver:
         self.product_id = product_id
         self.setting_callback = setting_callback
         self.receiver_kind = receiver_kind
+        self.serial = None
+        self.max_devices = None
+        self.may_unpair = None
 
         self._firmware = None
         self._devices = {}
@@ -102,23 +105,17 @@ class Receiver:
 
     def initialize(self, product_info: dict):
         # read the serial immediately, so we can find out max_devices
-        if self.receiver_kind == "bolt":
-            serial_reply = self.read_register(_R.bolt_uniqueId)
-            self.serial = serial_reply.hex().upper()
+        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
+        if serial_reply:
+            self.serial = serial_reply[1:5].hex().upper()
+            self.max_devices = ord(serial_reply[6:7])
+            if self.max_devices <= 0 or self.max_devices > 6:
+                self.max_devices = product_info.get("max_devices", 1)
+            self.may_unpair = product_info.get("may_unpair", False)
+        else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
+            self.serial = None
             self.max_devices = product_info.get("max_devices", 1)
             self.may_unpair = product_info.get("may_unpair", False)
-        else:
-            serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
-            if serial_reply:
-                self.serial = serial_reply[1:5].hex().upper()
-                self.max_devices = ord(serial_reply[6:7])
-                if self.max_devices <= 0 or self.max_devices > 6:
-                    self.max_devices = product_info.get("max_devices", 1)
-                self.may_unpair = product_info.get("may_unpair", False)
-            else:  # handle receivers that don't have a serial number specially (i.e., c534 and Bolt receivers)
-                self.serial = None
-                self.max_devices = product_info.get("max_devices", 1)
-                self.may_unpair = product_info.get("may_unpair", False)
 
     def close(self):
         handle, self.handle = self.handle, None
@@ -405,6 +402,12 @@ class Receiver:
 class BoltReceiver(Receiver):
     def __init__(self, product_info, handle, path, product_id, setting_callback=None):
         super().__init__("bolt", product_info, handle, path, product_id, setting_callback)
+
+    def initialize(self, product_info: dict):
+        serial_reply = self.read_register(_R.bolt_uniqueId)
+        self.serial = serial_reply.hex().upper()
+        self.max_devices = product_info.get("max_devices", 1)
+        self.may_unpair = product_info.get("may_unpair", False)
 
     def discover(self, cancel=False, timeout=30):
         """Discover Logitech Bolt devices."""
