@@ -134,6 +134,7 @@ def _lightspeed_receiver(product_id):
         "product_id": product_id,
         "usb_interface": 2,
         "hid_driver": DRIVER,
+        "receiver_kind": "lightspeed",
         "name": _("Lightspeed Receiver"),
         "may_unpair": False,
     }
