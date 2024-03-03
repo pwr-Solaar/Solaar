@@ -18,6 +18,8 @@
 import errno as _errno
 import logging
 
+from typing import Any, Protocol
+
 import hidapi as _hid
 
 from . import base as _base
@@ -26,9 +28,19 @@ from .device import Device
 
 logger = logging.getLogger(__name__)
 
-_hidpp10 = hidpp10.Hidpp10()
 _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
+
+
+class Hidpp10Protocol(Protocol):
+    def get_firmware(self, device) -> tuple:
+        ...
+
+    def get_notification_flags(self, device) -> Any:
+        ...
+
+    def set_notification_flags(self, device, flags) -> Any:
+        ...
 
 
 class ReceiverFactory:
@@ -46,19 +58,62 @@ class ReceiverFactory:
 
             handle = _base.open_path(device_info.path)
             if handle:
+                hidpp_instance = hidpp10.Hidpp10()
                 receiver_kind = product_info.get("receiver_kind", "unknown")
                 if receiver_kind == "bolt":
-                    return BoltReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return BoltReceiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
                 elif receiver_kind == "unifying":
-                    return UnifyingReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return UnifyingReceiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
                 elif receiver_kind == "lightspeed":
-                    return LightSpeedReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return LightSpeedReceiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
                 elif receiver_kind == "nano":
-                    return NanoReceiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return NanoReceiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
                 elif receiver_kind == "27Mhz":
-                    return Ex100Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return Ex100Receiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
                 else:
-                    return Receiver(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                    return Receiver(
+                        hidpp_instance,
+                        product_info,
+                        handle,
+                        device_info.path,
+                        device_info.product_id,
+                        setting_callback,
+                    )
         except OSError as e:
             logger.exception("open %s", device_info)
             if e.errno == _errno.EACCES:
@@ -75,9 +130,21 @@ class Receiver:
 
     number = 0xFF
     kind = None
+    read_register = hidpp10.read_register
+    write_register = hidpp10.write_register
 
-    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+    def __init__(
+        self,
+        hidpp10_instance: Hidpp10Protocol,
+        receiver_kind,
+        product_info,
+        handle,
+        path,
+        product_id,
+        setting_callback=None,
+    ):
         assert handle
+        self.hidpp10 = hidpp10_instance
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
@@ -131,7 +198,7 @@ class Receiver:
     @property
     def firmware(self):
         if self._firmware is None and self.handle:
-            self._firmware = _hidpp10.get_firmware(self)
+            self._firmware = self.hidpp10.get_firmware(self)
         return self._firmware
 
     # how many pairings remain (None for unknown, -1 for unlimited)
@@ -157,12 +224,12 @@ class Receiver:
             )
         else:
             set_flag_bits = 0
-        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+        ok = self.hidpp10.set_notification_flags(self, set_flag_bits)
         if ok is None:
             logger.warning("%s: failed to %s receiver notifications", self, "enable" if enable else "disable")
             return None
 
-        flag_bits = _hidpp10.get_notification_flags(self)
+        flag_bits = self.hidpp10.get_notification_flags(self)
         flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: receiver notifications %s => %s", self, "enabled" if enable else "disabled", flag_names)
@@ -287,9 +354,6 @@ class Receiver:
         if bool(self):
             return _base.request(self.handle, 0xFF, request_id, *params)
 
-    read_register = hidpp10.read_register
-    write_register = hidpp10.write_register
-
     def __iter__(self):
         connected_devices = self.count()
         found_devices = 0
@@ -386,8 +450,8 @@ class Receiver:
 
 
 class BoltReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("bolt", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, hidpp10_instance, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(hidpp10_instance, "bolt", product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
         serial_reply = self.read_register(_R.bolt_uniqueId)
@@ -435,20 +499,20 @@ class BoltReceiver(Receiver):
 
 
 class UnifyingReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("unifying", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, hidpp10_instance, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(hidpp10_instance, "unifying", product_info, handle, path, product_id, setting_callback)
 
 
 class NanoReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("nano", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, hidpp10_instance, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(hidpp10_instance, "nano", product_info, handle, path, product_id, setting_callback)
 
 
 class LightSpeedReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("lightspeed", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, hidpp10_instance, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(hidpp10_instance, "lightspeed", product_info, handle, path, product_id, setting_callback)
 
 
 class Ex100Receiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("27Mhz", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, hidpp10_instance, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(hidpp10_instance, "27Mhz", product_info, handle, path, product_id, setting_callback)
