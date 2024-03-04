@@ -60,12 +60,8 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(
-        _make("help-about", _("About %s") % NAME, _show_about_window, stock_id="help-about").create_menu_item()
-    )
-    menu.append(
-        _make("application-exit", _("Quit %s") % NAME, quit_handler, stock_id="application-exit").create_menu_item()
-    )
+    menu.append(_make("help-about", _("About %s") % NAME, _show_about_window, stock_id="help-about").create_menu_item())
+    menu.append(_make("application-exit", _("Quit %s") % NAME, quit_handler, stock_id="application-exit").create_menu_item())
 
     menu.show_all()
 
