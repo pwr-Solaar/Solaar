@@ -24,7 +24,7 @@ from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import NamedInts as _NamedInts
 from logitech_receiver.status import KEYS as _K
 
-from solaar import NAME, DISPLAY_NAME
+from solaar import DISPLAY_NAME, NAME
 from solaar.i18n import _, ngettext
 
 from . import action as _action

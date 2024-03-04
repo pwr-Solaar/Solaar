@@ -27,7 +27,7 @@ from logitech_receiver.status import KEYS as _K
 
 import solaar.gtk as gtk
 
-from solaar import NAME, DISPLAY_NAME
+from solaar import DISPLAY_NAME, NAME
 from solaar.i18n import _
 
 from . import icons as _icons
@@ -60,8 +60,12 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(_make("help-about", _("About %s") % DISPLAY_NAME, _show_about_window, stock_id="help-about").create_menu_item())
-    menu.append(_make("application-exit", _("Quit %s") % DISPLAY_NAME, quit_handler, stock_id="application-exit").create_menu_item())
+    menu.append(
+        _make("help-about", _("About %s") % DISPLAY_NAME, _show_about_window, stock_id="help-about").create_menu_item()
+    )
+    menu.append(
+        _make("application-exit", _("Quit %s") % DISPLAY_NAME, quit_handler, stock_id="application-exit").create_menu_item()
+    )
 
     menu.show_all()
 
