@@ -18,8 +18,7 @@ import pkgutil as _pkgutil
 import subprocess as _subprocess
 import sys as _sys
 
-NAME = "solaar"
-DISPLAY_NAME = "Solaar"
+NAME = "Solaar"
 
 try:
     __version__ = (

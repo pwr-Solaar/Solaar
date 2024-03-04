@@ -27,7 +27,7 @@ from logitech_receiver.status import KEYS as _K
 
 import solaar.gtk as gtk
 
-from solaar import DISPLAY_NAME, NAME
+from solaar import NAME
 from solaar.i18n import _
 
 from . import icons as _icons
@@ -61,10 +61,10 @@ def _create_menu(quit_handler):
     menu.append(Gtk.SeparatorMenuItem.new())
 
     menu.append(
-        _make("help-about", _("About %s") % DISPLAY_NAME, _show_about_window, stock_id="help-about").create_menu_item()
+        _make("help-about", _("About %s") % NAME, _show_about_window, stock_id="help-about").create_menu_item()
     )
     menu.append(
-        _make("application-exit", _("Quit %s") % DISPLAY_NAME, quit_handler, stock_id="application-exit").create_menu_item()
+        _make("application-exit", _("Quit %s") % NAME, quit_handler, stock_id="application-exit").create_menu_item()
     )
 
     menu.show_all()
@@ -183,10 +183,10 @@ try:
         ind = AppIndicator3.Indicator.new(
             "indicator-solaar", _icon_file(_icons.TRAY_INIT), AppIndicator3.IndicatorCategory.HARDWARE
         )
-        ind.set_title(DISPLAY_NAME)
+        ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
-        # ind.set_label(NAME, NAME)
+        # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
         ind.connect("scroll-event", _scroll)
@@ -235,9 +235,9 @@ except ImportError:
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
-        icon.set_name(NAME)
-        icon.set_title(DISPLAY_NAME)
-        icon.set_tooltip_text(DISPLAY_NAME)
+        icon.set_name(NAME.lower())
+        icon.set_title(NAME)
+        icon.set_tooltip_text(NAME)
         icon.connect("activate", _window_toggle)
         icon.connect("scroll-event", _scroll)
         icon.connect("popup-menu", lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
@@ -296,7 +296,7 @@ except ImportError:
 
 def _generate_tooltip_lines():
     if not _devices_info:
-        yield "<b>%s</b>: " % DISPLAY_NAME + _("no receiver")
+        yield "<b>%s</b>: " % NAME + _("no receiver")
         return
 
     yield from _generate_description_lines()

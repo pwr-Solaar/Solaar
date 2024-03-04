@@ -19,7 +19,7 @@ import logging
 
 from gi.repository import Gtk
 
-from solaar import DISPLAY_NAME, NAME, __version__
+from solaar import NAME, __version__
 from solaar.i18n import _
 
 #
@@ -32,7 +32,7 @@ _dialog = None
 def _create():
     about = Gtk.AboutDialog()
 
-    about.set_program_name(DISPLAY_NAME)
+    about.set_program_name(NAME)
     about.set_version(__version__)
     about.set_comments(_("Manages Logitech receivers,\nkeyboards, mice, and tablets."))
     about.set_icon_name(NAME.lower())
@@ -83,7 +83,7 @@ def _create():
     )
 
     about.set_website("https://pwr-solaar.github.io/Solaar")
-    about.set_website_label(DISPLAY_NAME)
+    about.set_website_label(NAME)
 
     about.connect("response", lambda x, y: x.hide())
 

@@ -24,7 +24,7 @@ from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import NamedInts as _NamedInts
 from logitech_receiver.status import KEYS as _K
 
-from solaar import DISPLAY_NAME, NAME
+from solaar import NAME
 from solaar.i18n import _, ngettext
 
 from . import action as _action
@@ -315,9 +315,9 @@ def _create_window_layout():
     bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
     bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
     bottom_buttons_box.set_spacing(20)
-    quit_button = _new_button(_("Quit %s") % DISPLAY_NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
+    quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_("About %s") % DISPLAY_NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
         _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
@@ -326,7 +326,7 @@ def _create_window_layout():
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
     # solaar_version = Gtk.Label()
-    # solaar_version.set_markup('<small>' + DISPLAY_NAME + ' v' + VERSION + '</small>')
+    # solaar_version.set_markup('<small>' + NAME + ' v' + VERSION + '</small>')
     # bottom_buttons_box.add(solaar_version)
     # bottom_buttons_box.set_child_secondary(solaar_version, True)
 
@@ -343,7 +343,7 @@ def _create_window_layout():
 
 def _create(delete_action):
     window = Gtk.Window()
-    window.set_title(DISPLAY_NAME)
+    window.set_title(NAME)
     window.set_role("status-window")
 
     # window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
