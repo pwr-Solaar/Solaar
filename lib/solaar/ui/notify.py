@@ -55,7 +55,7 @@ if available:
                 if logger.isEnabledFor(logging.INFO):
                     logger.info("starting desktop notifications")
                 try:
-                    return Notify.init(NAME)
+                    return Notify.init(NAME.lower())
                 except Exception:
                     logger.exception("initializing desktop notifications")
                     available = False
@@ -80,15 +80,15 @@ if available:
         assert reason
 
         if available and Notify.is_initted():
-            n = _notifications.get(NAME)
+            n = _notifications.get(NAME.lower())
             if n is None:
-                n = _notifications[NAME] = Notify.Notification()
+                n = _notifications[NAME.lower()] = Notify.Notification()
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
             icon_file = _icons.icon_file(NAME.lower()) if icon is None else _icons.icon_file(icon)
 
-            n.update(NAME, reason, icon_file)
+            n.update(NAME.lower(), reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
             n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
 

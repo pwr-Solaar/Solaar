@@ -51,7 +51,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
             gi.require_version(gi_package, gi_version)
         return importlib.import_module(module)
     except (ImportError, ValueError):
-        sys.exit("%s: missing required system package %s" % (NAME, os_package))
+        sys.exit("%s: missing required system package %s" % (NAME.lower(), os_package))
 
 
 battery_icons_style = "regular"
