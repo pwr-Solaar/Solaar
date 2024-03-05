@@ -295,7 +295,7 @@ def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
 
-    print("%s version %s" % (NAME, __version__))
+    print("%s version %s" % (NAME.lower(), __version__))
     print("")
 
     device_name = args.device.lower()

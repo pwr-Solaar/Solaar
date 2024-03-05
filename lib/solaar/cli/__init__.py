@@ -117,7 +117,7 @@ def _receivers(dev_path=None):
                 yield r
         except Exception as e:
             logger.exception("opening " + str(dev_info))
-            _sys.exit("%s: error: %s" % (NAME, str(e)))
+            _sys.exit("%s: error: %s" % (NAME.lower(), str(e)))
 
 
 def _receivers_and_devices(dev_path=None):
@@ -136,7 +136,7 @@ def _receivers_and_devices(dev_path=None):
                 yield d
         except Exception as e:
             logger.exception("opening " + str(dev_info))
-            _sys.exit("%s: error: %s" % (NAME, str(e)))
+            _sys.exit("%s: error: %s" % (NAME.lower(), str(e)))
 
 
 def _find_receiver(receivers, name):

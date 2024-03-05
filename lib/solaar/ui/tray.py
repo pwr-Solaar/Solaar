@@ -182,7 +182,7 @@ try:
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
-        # ind.set_label(NAME, NAME)
+        # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
         ind.connect("scroll-event", _scroll)
@@ -231,7 +231,7 @@ except ImportError:
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
-        icon.set_name(NAME)
+        icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
         icon.connect("activate", _window_toggle)
