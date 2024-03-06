@@ -232,7 +232,7 @@ def _pairing_succeeded(assistant, receiver, device):
 
     def _check_encrypted(dev):
         if assistant.is_drawable():
-            if device.status.get(_K.LINK_ENCRYPTED) is False:
+            if device.status.link_encrypted is False:
                 hbox.pack_start(Gtk.Image.new_from_icon_name("security-low", Gtk.IconSize.MENU), False, False, 0)
                 hbox.pack_start(Gtk.Label(_("The wireless link is not encrypted") + "!"), False, False, 0)
                 hbox.show_all()

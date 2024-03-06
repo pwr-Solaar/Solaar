@@ -727,12 +727,12 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery._text.set_markup(text)
         panel._battery.set_tooltip_text(tooltip_text)
 
-    if device.status.get(_K.LINK_ENCRYPTED) is None:
+    if device.status.link_encrypted is None:
         panel._secure.set_visible(False)
     elif is_online:
         panel._secure.set_visible(True)
         panel._secure._icon.set_visible(True)
-        if device.status.get(_K.LINK_ENCRYPTED) is True:
+        if device.status.link_encrypted is True:
             panel._secure._text.set_text(_("encrypted"))
             panel._secure._icon.set_from_icon_name("security-high", _INFO_ICON_SIZE)
             panel._secure.set_tooltip_text(_("The wireless link between this device and its receiver is encrypted."))

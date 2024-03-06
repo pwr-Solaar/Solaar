@@ -32,7 +32,7 @@ _hidpp10 = hidpp10.Hidpp10()
 
 ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
 
-KEYS = NamedInts(LINK_ENCRYPTED=5, NOTIFICATION_FLAGS=6, ERROR=7)
+KEYS = NamedInts(NOTIFICATION_FLAGS=6, ERROR=7)
 
 
 def attach_to(device, changed_callback):
@@ -87,7 +87,7 @@ class ReceiverStatus(dict):
 
 class DeviceStatus(dict):
     """Holds the 'runtime' status of a peripheral
-    Currently _active, battery -- dict entries are being moved to attributs
+    Currently _active, battery, link_encrypted -- dict entries are being moved to attributs
     Updates mostly come from incoming notification events from the device itself.
     """
 
@@ -98,6 +98,7 @@ class DeviceStatus(dict):
         self._changed_callback = changed_callback
         self._active = None  # is the device active?
         self.battery = None
+        self.link_encrypted = None
 
     def to_string(self):
         return self.battery.to_str() if self.battery is not None else ""

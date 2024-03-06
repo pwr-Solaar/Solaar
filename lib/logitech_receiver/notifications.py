@@ -265,7 +265,7 @@ def _process_hidpp10_notification(device, status, n):
                 link_established,
                 bool(flags & 0x80),
             )
-        status[_K.LINK_ENCRYPTED] = link_encrypted
+        status.link_encrypted = link_encrypted
         status.changed(active=link_established)
         return True
 
