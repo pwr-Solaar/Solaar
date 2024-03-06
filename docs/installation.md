@@ -57,6 +57,7 @@ or `bin/solaar <command> <arguments>` for the CLI.
 This is only relevant if you have problems with the easier methods above.
 
 Solaar needs a reasonably new kernel with kernel modules `hid-logitech-dj` and `hid-logitech-hidpp` loaded.
+The kernel option CONFIG_HIDRAW also needs to be enabled.
 Most of Solaar should work fine with any kernel more recent than 5.2,
 but newer kernels might be needed for some devices to be correctly recognized and handled.
 The `udev` package must be installed and its daemon running.
