@@ -33,7 +33,6 @@ from .common import Battery as _Battery
 from .common import strhex as _strhex
 from .i18n import _
 from .status import ALERT as _ALERT
-from .status import KEYS as _K
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +68,12 @@ def _process_receiver_notification(receiver, status, n):
         reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: %s", receiver, reason)
-        status[_K.ERROR] = None
+        status.error = None
         if status.lock_open:
             status.new_device = None
         pair_error = ord(n.data[:1])
         if pair_error:
-            status[_K.ERROR] = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
+            status.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
             status.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         status.changed(reason=reason)
@@ -86,13 +85,13 @@ def _process_receiver_notification(receiver, status, n):
             reason = _("discovery lock is open") if status.discovering else _("discovery lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status[_K.ERROR] = None
+            status.error = None
             if status.discovering:
                 status.counter = status.device_address = status.device_authentication = status.device_name = None
             status.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
-                status[_K.ERROR] = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
+                status.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
             status.changed(reason=reason)
             return True
@@ -120,7 +119,7 @@ def _process_receiver_notification(receiver, status, n):
             reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status[_K.ERROR] = None
+            status.error = None
             if not status.lock_open:
                 status.counter = status.device_address = status.device_authentication = status.device_name = None
             pair_error = n.data[0]
@@ -129,7 +128,7 @@ def _process_receiver_notification(receiver, status, n):
             elif n.address == 0x02 and not pair_error:
                 status.new_device = receiver.register_new_device(n.data[7])
             if pair_error:
-                status[_K.ERROR] = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
+                status.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
                 status.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
             status.changed(reason=reason)
@@ -230,7 +229,6 @@ def _process_hidpp10_notification(device, status, n):
     if n.sub_id == 0x40:  # device unpairing
         if n.address == 0x02:
             # device un-paired
-            status.clear()
             device.wpid = None
             device.status = None
             if device.number in device.receiver:

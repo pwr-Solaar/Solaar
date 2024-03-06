@@ -32,8 +32,6 @@ _hidpp10 = hidpp10.Hidpp10()
 
 ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
 
-KEYS = NamedInts(ERROR=7)
-
 
 def attach_to(device, changed_callback):
     assert device
@@ -46,7 +44,7 @@ def attach_to(device, changed_callback):
             device.status = DeviceStatus(device, changed_callback)
 
 
-class ReceiverStatus(dict):
+class ReceiverStatus:
     """The 'runtime' status of a receiver, mostly about the pairing process --
     is the pairing lock open or closed, any pairing errors, etc.
     """
@@ -57,6 +55,7 @@ class ReceiverStatus(dict):
         assert changed_callback
         self._changed_callback = changed_callback
         self.notification_flags = None
+        self.error = None
 
         self.lock_open = False
         self.discovering = False
@@ -67,8 +66,6 @@ class ReceiverStatus(dict):
         self.device_name = None
         self.device_passkey = None
         self.new_device = None
-
-        self[KEYS.ERROR] = None
 
     def to_string(self):
         count = len(self._receiver)
@@ -85,9 +82,9 @@ class ReceiverStatus(dict):
         self._changed_callback(self._receiver, alert=alert, reason=reason)
 
 
-class DeviceStatus(dict):
+class DeviceStatus:
     """Holds the 'runtime' status of a peripheral
-    Currently _active, battery, link_encrypted, notification_flags -- dict entries are being moved to attributs
+    Currently _active, battery, link_encrypted, notification_flags, error
     Updates mostly come from incoming notification events from the device itself.
     """
 
@@ -100,12 +97,10 @@ class DeviceStatus(dict):
         self.battery = None
         self.link_encrypted = None
         self.notification_flags = None
+        self.error = None
 
     def to_string(self):
         return self.battery.to_str() if self.battery is not None else ""
-
-    def __repr__(self):
-        return "{" + ", ".join("'%s': %r" % (k, v) for k, v in self.items()) + "}"
 
     def __bool__(self):
         return bool(self._active)
@@ -123,11 +118,11 @@ class DeviceStatus(dict):
 
         alert, reason = ALERT.NONE, None
         if info.ok():
-            self[KEYS.ERROR] = None
+            self.error = None
         else:
             logger.warning("%s: battery %d%%, ALERT %s", self._device, info.level, info.status)
-            if self.get(KEYS.ERROR) != info.status:
-                self[KEYS.ERROR] = info.status
+            if self.error != info.status:
+                self.error = info.status
                 alert = ALERT.NOTIFICATION | ALERT.ATTENTION
             reason = info.to_str()
 
