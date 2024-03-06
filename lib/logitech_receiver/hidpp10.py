@@ -16,8 +16,7 @@
 
 import logging
 
-from .common import BATTERY_APPROX as _BATTERY_APPROX
-from .common import BATTERY_STATUS as _BATTERY_STATUS
+from .common import Battery as _Battery
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
@@ -122,17 +121,17 @@ class Hidpp10:
             return
 
         if battery_level is not None:
-            if battery_level < _BATTERY_APPROX.critical:
+            if battery_level < _Battery.APPROX.critical:
                 # 1 orange, and force blink
                 v1, v2 = 0x22, 0x00
                 warning = True
-            elif battery_level < _BATTERY_APPROX.low:
+            elif battery_level < _Battery.APPROX.low:
                 # 1 orange
                 v1, v2 = 0x22, 0x00
-            elif battery_level < _BATTERY_APPROX.good:
+            elif battery_level < _Battery.APPROX.good:
                 # 1 green
                 v1, v2 = 0x20, 0x00
-            elif battery_level < _BATTERY_APPROX.full:
+            elif battery_level < _Battery.APPROX.full:
                 # 2 greens
                 v1, v2 = 0x20, 0x02
             else:
@@ -196,38 +195,38 @@ def parse_battery_status(register, reply):
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
         status_text = (
-            _BATTERY_STATUS.discharging
+            _Battery.STATUS.discharging
             if status_byte == 0x30
-            else _BATTERY_STATUS.recharging
+            else _Battery.STATUS.recharging
             if status_byte == 0x50
-            else _BATTERY_STATUS.full
+            else _Battery.STATUS.full
             if status_byte == 0x90
             else None
         )
-        return charge, None, status_text, None
+        return _Battery(charge, None, status_text, None)
 
     if register == REGISTERS.battery_status:
         status_byte = ord(reply[:1])
         charge = (
-            _BATTERY_APPROX.full
+            _Battery.APPROX.full
             if status_byte == 7  # full
-            else _BATTERY_APPROX.good
+            else _Battery.APPROX.good
             if status_byte == 5  # good
-            else _BATTERY_APPROX.low
+            else _Battery.APPROX.low
             if status_byte == 3  # low
-            else _BATTERY_APPROX.critical
+            else _Battery.APPROX.critical
             if status_byte == 1  # critical
             # pure 'charging' notifications may come without a status
-            else _BATTERY_APPROX.empty
+            else _Battery.APPROX.empty
         )
 
         charging_byte = ord(reply[1:2])
         if charging_byte == 0x00:
-            status_text = _BATTERY_STATUS.discharging
+            status_text = _Battery.STATUS.discharging
         elif charging_byte & 0x21 == 0x21:
-            status_text = _BATTERY_STATUS.recharging
+            status_text = _Battery.STATUS.recharging
         elif charging_byte & 0x22 == 0x22:
-            status_text = _BATTERY_STATUS.full
+            status_text = _Battery.STATUS.full
         else:
             logger.warning("could not parse 0x07 battery status: %02X (level %02X)", charging_byte, status_byte)
             status_text = None
@@ -237,4 +236,4 @@ def parse_battery_status(register, reply):
             charge = None
 
         # Return None for next charge level and voltage as these are not in HID++ 1.0 spec
-        return charge, None, status_text, None
+        return _Battery(charge, None, status_text, None)
