@@ -74,7 +74,7 @@ class ReceiverListener(_listener.EventsListener):
                     "Receiver on %s might not support connection notifications, GUI might not show its devices",
                     self.receiver.path,
                 )
-        self.receiver.status[_status.KEYS.NOTIFICATION_FLAGS] = nfs
+        self.receiver.notification_flags = nfs
         self.receiver.notify_devices()
         self._status_changed(self.receiver)
 
