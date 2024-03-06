@@ -32,7 +32,7 @@ _hidpp10 = hidpp10.Hidpp10()
 
 ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
 
-KEYS = NamedInts(NOTIFICATION_FLAGS=6, ERROR=7)
+KEYS = NamedInts(ERROR=7)
 
 
 def attach_to(device, changed_callback):
@@ -54,9 +54,9 @@ class ReceiverStatus(dict):
     def __init__(self, receiver, changed_callback):
         assert receiver
         self._receiver = receiver
-
         assert changed_callback
         self._changed_callback = changed_callback
+        self.notification_flags = None
 
         self.lock_open = False
         self.discovering = False
@@ -87,7 +87,7 @@ class ReceiverStatus(dict):
 
 class DeviceStatus(dict):
     """Holds the 'runtime' status of a peripheral
-    Currently _active, battery, link_encrypted -- dict entries are being moved to attributs
+    Currently _active, battery, link_encrypted, notification_flags -- dict entries are being moved to attributs
     Updates mostly come from incoming notification events from the device itself.
     """
 
@@ -99,6 +99,7 @@ class DeviceStatus(dict):
         self._active = None  # is the device active?
         self.battery = None
         self.link_encrypted = None
+        self.notification_flags = None
 
     def to_string(self):
         return self.battery.to_str() if self.battery is not None else ""
@@ -153,7 +154,7 @@ class DeviceStatus(dict):
                     # get cleared when the device is turned off (but not when the device
                     # goes idle, and we can't tell the difference right now).
                     if d.protocol < 2.0:
-                        self[KEYS.NOTIFICATION_FLAGS] = d.enable_connection_notifications()
+                        self.notification_flags = d.enable_connection_notifications()
                     # battery information may have changed so try to read it now
                     self.read_battery()
 

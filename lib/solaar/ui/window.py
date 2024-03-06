@@ -22,7 +22,6 @@ from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import NamedInts as _NamedInts
-from logitech_receiver.status import KEYS as _K
 
 from solaar import NAME
 from solaar.i18n import _, ngettext
@@ -575,7 +574,7 @@ def _update_details(button):
             elif device.kind is None or device.online:
                 yield ("  %s" % _("Firmware"), "...")
 
-            flag_bits = device.status.get(_K.NOTIFICATION_FLAGS)
+            flag_bits = device.status.notification_flags
             if flag_bits is not None:
                 flag_names = (
                     ("(%s)" % _("none"),) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
