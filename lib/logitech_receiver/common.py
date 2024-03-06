@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -18,8 +19,12 @@
 
 from binascii import hexlify as _hexlify
 from collections import namedtuple
+from dataclasses import dataclass
+from typing import Optional
 
 import yaml as _yaml
+
+from .i18n import _
 
 
 def is_string(d):
@@ -546,18 +551,57 @@ class KwException(Exception):
 """Firmware information."""
 FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
 
-BATTERY_APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
 
-BATTERY_STATUS = NamedInts(
-    discharging=0x00,
-    recharging=0x01,
-    almost_full=0x02,
-    full=0x03,
-    slow_recharge=0x04,
-    invalid_battery=0x05,
-    thermal_error=0x06,
-)
+@dataclass
+class Battery:
+    """Information about the current state of a battery"""
 
+    level: Optional[NamedInt | int]
+    next_level: Optional[NamedInt | int]
+    status: Optional[NamedInt]
+    voltage: Optional[int]
+    light_level: Optional[int] = None  # light level for devices with solaar recharging
 
-def BATTERY_OK(status):
-    return status not in (BATTERY_STATUS.invalid_battery, BATTERY_STATUS.thermal_error)
+    def __post_init__(self):
+        if self.level is None:  # infer level from status if needed and possible
+            if self.status == Battery.STATUS.full:
+                self.level = Battery.APPROX.full
+            elif self.status in (Battery.STATUS.almost_full, Battery.STATUS.recharging):
+                self.level = Battery.APPROX.good
+            elif self.status == Battery.STATUS.slow_recharge:
+                self.level = Battery.APPROX.low
+
+    STATUS = NamedInts(
+        discharging=0x00,
+        recharging=0x01,
+        almost_full=0x02,
+        full=0x03,
+        slow_recharge=0x04,
+        invalid_battery=0x05,
+        thermal_error=0x06,
+    )
+
+    APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
+
+    ATTENTION_LEVEL = 5
+
+    def ok(self):
+        return self.status not in (Battery.STATUS.invalid_battery, Battery.STATUS.thermal_error) and (
+            self.level is None or self.level > Battery.ATTENTION_LEVEL
+        )
+
+    def charging(self):
+        return self.status in (
+            Battery.STATUS.recharging,
+            Battery.STATUS.almost_full,
+            Battery.STATUS.full,
+            Battery.STATUS.slow_recharge,
+        )
+
+    def to_str(self):
+        if isinstance(self.level, NamedInt):
+            return _("Battery: %(level)s (%(status)s)") % {"level": _(self.level), "status": _(self.status)}
+        elif isinstance(self.level, int):
+            return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(self.status)}
+        else:
+            return ""

@@ -27,8 +27,7 @@ import yaml as _yaml
 
 from . import exceptions, special_keys
 from . import hidpp10_constants as _hidpp10_constants
-from .common import BATTERY_APPROX as _BATTERY_APPROX
-from .common import BATTERY_STATUS as _BATTERY_STATUS
+from .common import Battery
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
@@ -1730,31 +1729,31 @@ battery_functions = {
 def decipher_battery_status(report):
     discharge, next, status = _unpack("!BBB", report[:3])
     discharge = None if discharge == 0 else discharge
-    status = _BATTERY_STATUS[status]
+    status = Battery.STATUS[status]
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("battery status %s%% charged, next %s%%, status %s", discharge, next, status)
-    return FEATURE.BATTERY_STATUS, discharge, next, status, None
+    return FEATURE.BATTERY_STATUS, Battery(discharge, next, status, None)
 
 
 def decipher_battery_voltage(report):
     voltage, flags = _unpack(">HB", report[:3])
-    status = _BATTERY_STATUS.discharging
+    status = Battery.STATUS.discharging
     charge_sts = ERROR.unknown
     charge_lvl = CHARGE_LEVEL.average
     charge_type = CHARGE_TYPE.standard
     if flags & (1 << 7):
-        status = _BATTERY_STATUS.recharging
+        status = Battery.STATUS.recharging
         charge_sts = CHARGE_STATUS[flags & 0x03]
     if charge_sts is None:
         charge_sts = ERROR.unknown
     elif charge_sts == CHARGE_STATUS.full:
         charge_lvl = CHARGE_LEVEL.full
-        status = _BATTERY_STATUS.full
+        status = Battery.STATUS.full
     if flags & (1 << 3):
         charge_type = CHARGE_TYPE.fast
     elif flags & (1 << 4):
         charge_type = CHARGE_TYPE.slow
-        status = _BATTERY_STATUS.slow_recharge
+        status = Battery.STATUS.slow_recharge
     elif flags & (1 << 5):
         charge_lvl = CHARGE_LEVEL.critical
     for level in battery_voltage_remaining:
@@ -1771,26 +1770,26 @@ def decipher_battery_voltage(report):
             charge_lvl,
             charge_type,
         )
-    return FEATURE.BATTERY_VOLTAGE, charge_lvl, None, status, voltage
+    return FEATURE.BATTERY_VOLTAGE, Battery(charge_lvl, None, status, voltage)
 
 
 def decipher_battery_unified(report):
     discharge, level, status, _ignore = _unpack("!BBBB", report[:4])
-    status = _BATTERY_STATUS[status]
+    status = Battery.STATUS[status]
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("battery unified %s%% charged, level %s, charging %s", discharge, level, status)
     level = (
-        _BATTERY_APPROX.full
+        Battery.APPROX.full
         if level == 8  # full
-        else _BATTERY_APPROX.good
+        else Battery.APPROX.good
         if level == 4  # good
-        else _BATTERY_APPROX.low
+        else Battery.APPROX.low
         if level == 2  # low
-        else _BATTERY_APPROX.critical
+        else Battery.APPROX.critical
         if level == 1  # critical
-        else _BATTERY_APPROX.empty
+        else Battery.APPROX.empty
     )
-    return FEATURE.UNIFIED_BATTERY, discharge if discharge else level, None, status, None
+    return FEATURE.UNIFIED_BATTERY, Battery(discharge if discharge else level, None, status, None)
 
 
 def decipher_adc_measurement(report):
@@ -1801,5 +1800,5 @@ def decipher_adc_measurement(report):
             charge_level = level[1]
             break
     if flags & 0x01:
-        status = _BATTERY_STATUS.recharging if flags & 0x02 else _BATTERY_STATUS.discharging
-        return FEATURE.ADC_MEASUREMENT, charge_level, None, status, adc
+        status = Battery.STATUS.recharging if flags & 0x02 else Battery.STATUS.discharging
+        return FEATURE.ADC_MEASUREMENT, Battery(charge_level, None, status, adc)
