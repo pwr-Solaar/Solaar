@@ -18,7 +18,6 @@ import logging
 
 from gi.repository import GLib, Gtk
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
-from logitech_receiver.status import KEYS as _K
 
 from solaar.i18n import _, ngettext
 
@@ -72,9 +71,10 @@ def _check_lock_state(assistant, receiver, count=2):
             logger.debug("assistant %s destroyed, bailing out", assistant)
         return False
 
-    if receiver.status.get(_K.ERROR):
+    if receiver.status.error:
         # receiver.status.new_device = _fake_device(receiver)
-        _pairing_failed(assistant, receiver, receiver.status.pop(_K.ERROR))
+        _pairing_failed(assistant, receiver, receiver.status.error)
+        receiver.status.error = None
         return False
 
     if receiver.status.new_device:
@@ -145,7 +145,7 @@ def _prepare(assistant, page, receiver):
         if receiver.receiver_kind == "bolt":
             if receiver.discover(timeout=_PAIRING_TIMEOUT):
                 assert receiver.status.new_device is None
-                assert receiver.status.get(_K.ERROR) is None
+                assert receiver.status.error is None
                 spinner = page.get_children()[-1]
                 spinner.start()
                 GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
@@ -154,7 +154,7 @@ def _prepare(assistant, page, receiver):
                 GLib.idle_add(_pairing_failed, assistant, receiver, "discovery did not start")
         elif receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
             assert receiver.status.new_device is None
-            assert receiver.status.get(_K.ERROR) is None
+            assert receiver.status.error is None
             spinner = page.get_children()[-1]
             spinner.start()
             GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
@@ -178,7 +178,7 @@ def _finish(assistant, receiver):
     if receiver.status.discovering:
         receiver.discover(True)
     if not receiver.status.lock_open and not receiver.status.discovering:
-        receiver.status[_K.ERROR] = None
+        receiver.status.error = None
 
 
 def _pairing_failed(assistant, receiver, error):

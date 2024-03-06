@@ -190,7 +190,6 @@ def _create_buttons_box():
         assert _find_selected_device_id() is not None
         device = _find_selected_device()
         assert device is not None
-        assert bool(device)
         assert device.kind is not None
         _action.unpair(_window, device)
 

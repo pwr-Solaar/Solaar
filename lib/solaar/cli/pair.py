@@ -131,7 +131,7 @@ def run(receivers, args, find_receiver, _ignore):
         dev = receiver.status.new_device
         print("Paired device %d: %s (%s) [%s:%s]" % (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
     else:
-        error = receiver.status.get(_status.KEYS.ERROR)
+        error = receiver.status.get(_status.error)
         if error:
             raise Exception("pairing failed: %s" % error)
         else:
