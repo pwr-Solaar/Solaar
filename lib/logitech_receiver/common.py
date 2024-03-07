@@ -20,7 +20,7 @@
 from binascii import hexlify as _hexlify
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 import yaml as _yaml
 
@@ -556,8 +556,8 @@ FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
 class Battery:
     """Information about the current state of a battery"""
 
-    level: Optional[NamedInt | int]
-    next_level: Optional[NamedInt | int]
+    level: Optional[Union[NamedInt, int]]
+    next_level: Optional[Union[NamedInt, int]]
     status: Optional[NamedInt]
     voltage: Optional[int]
     light_level: Optional[int] = None  # light level for devices with solaar recharging
