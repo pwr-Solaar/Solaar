@@ -199,28 +199,39 @@ class DiversionDialog:
         vbox.pack_start(sw, True, True, 0)
         return vbox, view
 
+    def _add_rule(self):
+        self._menu_do_insert_new(None, self.model.get_iter_first(), _DIV.Rule, [])
+
     def _create_button_box(self):
-        button_box = Gtk.HBox(spacing=20)
-        button_box.set_margin_start(10)
-        button_box.set_margin_end(10)
+        hbox = Gtk.HBox(spacing=20)
+        hbox.set_margin_start(10)
+        hbox.set_margin_end(10)
+        hbox.set_valign(Gtk.Align.END)
+        hbox.set_size_request(0, 50)
+
+        self.insert_rule_btn = Gtk.Button.new_from_icon_name("document-revert", Gtk.IconSize.BUTTON)
+        self.insert_rule_btn.set_label(_("Insert new rule"))
+        self.insert_rule_btn.set_valign(Gtk.Align.CENTER)
+        self.insert_rule_btn.connect("clicked", lambda *_args: self._add_rule())  # TODO insert rule below
+
         self.save_btn = Gtk.Button.new_from_icon_name("document-save", Gtk.IconSize.BUTTON)
         self.save_btn.set_label(_("Save changes"))
         self.save_btn.set_always_show_image(True)
         self.save_btn.set_sensitive(False)
         self.save_btn.set_valign(Gtk.Align.CENTER)
+        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
+
         self.discard_btn = Gtk.Button.new_from_icon_name("document-revert", Gtk.IconSize.BUTTON)
         self.discard_btn.set_label(_("Discard changes"))
         self.discard_btn.set_always_show_image(True)
         self.discard_btn.set_sensitive(False)
         self.discard_btn.set_valign(Gtk.Align.CENTER)
-        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
         self.discard_btn.connect("clicked", lambda *_args: self._reload_yaml_file())
-        button_box.pack_start(self.discard_btn, False, False, 0)
-        button_box.pack_start(self.save_btn, False, False, 0)
-        button_box.set_halign(Gtk.Align.END)
-        button_box.set_valign(Gtk.Align.CENTER)
-        button_box.set_size_request(0, 50)
-        return button_box
+
+        hbox.pack_start(self.insert_rule_btn, False, False, 0)
+        hbox.pack_end(self.save_btn, False, False, 0)
+        hbox.pack_end(self.discard_btn, False, False, 0)
+        return hbox
 
     def _create_model(self):
         model = Gtk.TreeStore(RuleComponentWrapper)
