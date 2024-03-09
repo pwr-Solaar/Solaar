@@ -197,9 +197,8 @@ try:
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != "solaar":
             _ignore, _ignore, name, device = _picked_device
-            device_status = device.status
-            battery_level = device_status.battery.level if device_status.battery is not None else None
-            battery_charging = device_status.battery.charging() if device_status.battery is not None else None
+            battery_level = device.battery_info.level if device.battery_info is not None else None
+            battery_charging = device.battery_info.charging() if device.battery_info is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
 
             description = "%s: %s" % (name, device.status_string())
@@ -252,9 +251,9 @@ except ImportError:
         _icon.set_tooltip_markup(tooltip)
 
         if _picked_device and gtk.battery_icons_style != "solaar":
-            _ignore, _ignore, name, device_status = _picked_device
-            battery_level = device_status.battery.level if device_status.battery is not None else None
-            battery_charging = device_status.battery.charging() if device_status.battery is not None else None
+            _ignore, _ignore, name, device = _picked_device
+            battery_level = device.battery_info.level if device.battery_info is not None else None
+            battery_charging = device.battery_info.charging() if device.battery_info is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
         else:
             # there may be a receiver, but no peripherals
@@ -331,7 +330,7 @@ def _pick_device_with_lowest_battery():
     for info in _devices_info:
         if info[1] is None:  # is receiver
             continue
-        level = info[-1].status.battery.level if hasattr(info[-1], "status") and info[-1].status.battery is not None else None
+        level = info[-1].battery_info.level if hasattr(info[-1], "status") and info[-1].battery_info is not None else None
         # print ("checking %s -> %s", info, level)
         if level is not None and picked_level > level:
             picked = info
@@ -428,8 +427,8 @@ def _update_menu_item(index, device):
     menu_items = _menu.get_children()
     menu_item = menu_items[index]
 
-    level = device.status.battery.level if device.status.battery is not None else None
-    charging = device.status.battery.charging() if device.status.battery is not None else None
+    level = device.battery_info.level if device.battery_info is not None else None
+    charging = device.battery_info.charging() if device.battery_info is not None else None
     icon_name = _icons.battery(level, charging)
 
     menu_item.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())

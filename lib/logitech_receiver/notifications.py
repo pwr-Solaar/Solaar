@@ -222,7 +222,7 @@ def _process_hidpp10_custom_notification(device, status, n):
     if n.sub_id in (_R.battery_status, _R.battery_charge):
         assert n.data[-1:] == b"\x00"
         data = chr(n.address).encode() + n.data
-        status.set_battery_info(hidpp10.parse_battery_status(n.sub_id, data))
+        device.set_battery_info(hidpp10.parse_battery_status(n.sub_id, data))
         return True
 
     logger.warning("%s: unrecognized %s", device, n)
@@ -295,7 +295,7 @@ def _process_feature_notification(device, status, n, feature):
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
-            status.set_battery_info(hidpp20.decipher_battery_status(n.data)[1])
+            device.set_battery_info(hidpp20.decipher_battery_status(n.data)[1])
         elif n.address == 0x10:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: spurious BATTERY status %s", device, n)
@@ -304,13 +304,13 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            status.set_battery_info(hidpp20.decipher_battery_voltage(n.data)[1])
+            device.set_battery_info(hidpp20.decipher_battery_voltage(n.data)[1])
         else:
             logger.warning("%s: unknown VOLTAGE %s", device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            status.set_battery_info(hidpp20.decipher_battery_unified(n.data)[1])
+            device.set_battery_info(hidpp20.decipher_battery_unified(n.data)[1])
         else:
             logger.warning("%s: unknown UNIFIED BATTERY %s", device, n)
 
@@ -318,7 +318,7 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             result = hidpp20.decipher_adc_measurement(n.data)
             if result:
-                status.set_battery_info(result[1])
+                device.set_battery_info(result[1])
             else:  # this feature is used to signal device becoming inactive
                 status.changed(active=False)
         else:
@@ -331,11 +331,11 @@ def _process_feature_notification(device, status, n, feature):
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
             status_text = _Battery.STATUS.discharging
             if n.address == 0x00:
-                status.set_battery_info(_Battery(charge, None, status_text, None))
+                device.set_battery_info(_Battery(charge, None, status_text, None))
             elif n.address == 0x10:
                 if lux > 200:
                     status_text = _Battery.STATUS.recharging
-                status.set_battery_info(_Battery(charge, None, status_text, None, lux))
+                device.set_battery_info(_Battery(charge, None, status_text, None, lux))
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("%s: Light Check button pressed", device)
