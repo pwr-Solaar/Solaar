@@ -22,7 +22,7 @@ def run(receivers, args, find_receiver, find_device):
     device_name = args.device.lower()
     dev = next(find_device(receivers, device_name), None)
     if not dev:
-        raise Exception("no device found matching '%s'" % device_name)
+        raise Exception(f"no device found matching '{device_name}'")
 
     if not dev.receiver.may_unpair:
         print(

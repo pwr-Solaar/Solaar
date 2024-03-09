@@ -51,7 +51,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
             gi.require_version(gi_package, gi_version)
         return importlib.import_module(module)
     except (ImportError, ValueError):
-        sys.exit("%s: missing required system package %s" % (NAME.lower(), os_package))
+        sys.exit(f"{NAME.lower()}: missing required system package {os_package}")
 
 
 battery_icons_style = "regular"
@@ -134,7 +134,7 @@ def _handlesig(signl, stack):
     if signl == int(signal.SIGINT):
         if logger.isEnabledFor(logging.INFO):
             faulthandler.dump_traceback()
-        sys.exit("%s: exit due to keyboard interrupt" % (NAME.lower()))
+        sys.exit(f"{NAME.lower()}: exit due to keyboard interrupt")
     else:
         sys.exit(0)
 
@@ -180,7 +180,7 @@ def main():
         # main UI event loop
         _ui.run_loop(_listener.start_all, _listener.stop_all, args.window != "only", args.window != "hide")
     except Exception:
-        sys.exit("%s: error: %s" % (NAME.lower(), format_exc()))
+        sys.exit(f"{NAME.lower()}: error: {format_exc()}")
 
     temp.close()
 

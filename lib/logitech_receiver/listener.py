@@ -91,7 +91,7 @@ class _ThreadedHandle:
             return str(int(self))
 
     def __repr__(self):
-        return "<_ThreadedHandle(%s)>" % self.path
+        return f"<_ThreadedHandle({self.path})>"
 
     def __bool__(self):
         return bool(self._local)

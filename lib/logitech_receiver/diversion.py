@@ -493,7 +493,7 @@ class Rule(RuleComponent):
 
     def __str__(self):
         source = "(" + self.source + ")" if self.source else ""
-        return "Rule%s[%s]" % (source, ", ".join([c.__str__() for c in self.components]))
+        return f"Rule{source}[{', '.join([c.__str__() for c in self.components])}]"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -832,16 +832,16 @@ class Key(Condition):
 
         if not args or not isinstance(args, (list, str)):
             if warn:
-                logger.warning("rule Key arguments unknown: %s" % args)
+                logger.warning(f"rule Key arguments unknown: {args}")
             key = default_key
             action = default_action
         elif isinstance(args, str):
-            logger.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+            logger.debug(f'rule Key assuming action "{default_action}" for "{args}"')
             key = args
             action = default_action
         elif isinstance(args, list):
             if len(args) == 1:
-                logger.debug('rule Key assuming action "%s" for "%s"' % (default_action, args))
+                logger.debug(f'rule Key assuming action "{default_action}" for "{args}"')
                 key, action = args[0], default_action
             elif len(args) >= 2:
                 key, action = args[:2]
@@ -850,18 +850,18 @@ class Key(Condition):
             self.key = _CONTROL[key]
         else:
             if warn:
-                logger.warning("rule Key key name not name of a Logitech key: %s" % key)
+                logger.warning(f"rule Key key name not name of a Logitech key: {key}")
             self.key = default_key
 
         if isinstance(action, str) and action in (self.DOWN, self.UP):
             self.action = action
         else:
             if warn:
-                logger.warning("rule Key action unknown: %s, assuming %s" % (action, default_action))
+                logger.warning(f"rule Key action unknown: {action}, assuming {default_action}")
             self.action = default_action
 
     def __str__(self):
-        return "Key: %s (%s)" % ((str(self.key) if self.key else "None"), self.action)
+        return f"Key: {str(self.key) if self.key else 'None'} ({self.action})"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -880,7 +880,7 @@ class KeyIsDown(Condition):
 
         if not args or not isinstance(args, str):
             if warn:
-                logger.warning("rule KeyDown arguments unknown: %s" % args)
+                logger.warning(f"rule KeyDown arguments unknown: {args}")
             key = default_key
         elif isinstance(args, str):
             key = args
@@ -889,11 +889,11 @@ class KeyIsDown(Condition):
             self.key = _CONTROL[key]
         else:
             if warn:
-                logger.warning("rule Key key name not name of a Logitech key: %s" % key)
+                logger.warning(f"rule Key key name not name of a Logitech key: {key}")
             self.key = default_key
 
     def __str__(self):
-        return "KeyIsDown: %s" % (str(self.key) if self.key else "None")
+        return f"KeyIsDown: {str(self.key) if self.key else 'None'}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):

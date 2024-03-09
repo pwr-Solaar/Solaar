@@ -312,7 +312,7 @@ for i in range(1, 9):  # add in M keys - these are not really Logitech Controls
     CONTROL[0x1100 + i] = "M" + str(i)
 CONTROL[0x1200] = "MR"  # add in MR key - this is not really a Logitech Control
 
-CONTROL._fallback = lambda x: "unknown:%04X" % x
+CONTROL._fallback = lambda x: f"unknown:{x:04X}"
 
 # <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'
 TASK = _NamedInts(
@@ -562,7 +562,7 @@ TASK = _NamedInts(
     Left_Cmd=0x00FB,
     Right_Cmd=0x00FC,
 )
-TASK._fallback = lambda x: "unknown:%04X" % x
+TASK._fallback = lambda x: f"unknown:{x:04X}"
 # Capabilities and desired software handling for a control
 # Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
 # We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
@@ -597,7 +597,7 @@ DISABLE = _NamedInts(
     Insert=0x08,
     Win=0x10,  # aka Super
 )
-DISABLE._fallback = lambda x: "unknown:%02X" % x
+DISABLE._fallback = lambda x: f"unknown:{x:02X}"
 
 # HID USB Keycodes from https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 # Modified by information from Linux HID driver linux/drivers/hid/hid-input.c
@@ -1156,7 +1156,7 @@ HID_CONSUMERCODES = _NamedInts(
 )
 HID_CONSUMERCODES[0x20] = "+10"
 HID_CONSUMERCODES[0x21] = "+100"
-HID_CONSUMERCODES._fallback = lambda x: "unknown:%04X" % x
+HID_CONSUMERCODES._fallback = lambda x: f"unknown:{x:04X}"
 
 ## Information for x1c00 Persistent from https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28
 
@@ -1193,13 +1193,13 @@ MOUSE_BUTTONS = _NamedInts(
     Mouse_Button_15=0x4000,
     Mouse_Button_16=0x8000,
 )
-MOUSE_BUTTONS._fallback = lambda x: "unknown mouse button:%04X" % x
+MOUSE_BUTTONS._fallback = lambda x: f"unknown mouse button:{x:04X}"
 
 HORIZONTAL_SCROLL = _NamedInts(
     Horizontal_Scroll_Left=0x4000,
     Horizontal_Scroll_Right=0x8000,
 )
-HORIZONTAL_SCROLL._fallback = lambda x: "unknown horizontal scroll:%04X" % x
+HORIZONTAL_SCROLL._fallback = lambda x: f"unknown horizontal scroll:{x:04X}"
 
 # Construct universe for Persistent Remappable Keys setting (only for supported values)
 KEYS = _UnsortedNamedInts()

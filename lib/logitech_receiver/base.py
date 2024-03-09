@@ -273,7 +273,7 @@ def check_message(data):
         if report_lengths.get(report_id) == len(data):
             return True
         else:
-            logger.warning("unexpected message size: report_id %02X message %s" % (report_id, _strhex(data)))
+            logger.warning(f"unexpected message size: report_id {report_id:02X} message {_strhex(data)}")
     return False
 
 

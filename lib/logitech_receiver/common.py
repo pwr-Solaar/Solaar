@@ -413,7 +413,7 @@ class NamedInts:
                 yield str(self._indexed[k])
 
         if unknown_bits:
-            yield "unknown:%06X" % unknown_bits
+            yield f"unknown:{unknown_bits:06X}"
 
     def _sort_values(self):
         self._values = sorted(self._values)
@@ -501,7 +501,7 @@ class NamedInts:
         return len(self._values)
 
     def __repr__(self):
-        return "NamedInts(%s)" % ", ".join(repr(v) for v in self._values)
+        return f"NamedInts({', '.join(repr(v) for v in self._values)})"
 
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)

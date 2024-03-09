@@ -220,7 +220,7 @@ class Setting:
                 self.name,
                 self._value,
             )
-        return "<Setting([%s:%s] %s)>" % (self._rw.kind, self._validator.kind if self._validator else None, self.name)
+        return f"<Setting([{self._rw.kind}:{self._validator.kind if self._validator else None}] {self.name})>"
 
     __repr__ = __str__
 
@@ -747,7 +747,7 @@ class BooleanValidator(Validator):
             assert fv & mv == fv
             self.needs_current_value = any(m != 0xFF for m in mask)
         else:
-            raise Exception("invalid mask '%r', type %s" % (mask, type(mask)))
+            raise Exception(f"invalid mask '{mask!r}', type {type(mask)}")
 
         self.true_value = true_value
         self.false_value = false_value
@@ -795,7 +795,7 @@ class BooleanValidator(Validator):
         if new_value is None:
             new_value = False
         else:
-            assert isinstance(new_value, bool), "New value %s for boolean setting is not a boolean" % new_value
+            assert isinstance(new_value, bool), f"New value {new_value} for boolean setting is not a boolean"
 
         to_write = self.true_value if new_value else self.false_value
 
@@ -1033,7 +1033,7 @@ class ChoicesValidator(Validator):
     def validate_read(self, reply_bytes):
         reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count : self._read_skip_byte_count + self._byte_count])
         valid_value = self.choices[reply_value]
-        assert valid_value is not None, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
+        assert valid_value is not None, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         return valid_value
 
     def prepare_write(self, new_value, current_value=None):
@@ -1042,7 +1042,7 @@ class ChoicesValidator(Validator):
         else:
             value = self.choice(new_value)
         if value is None:
-            raise ValueError("invalid choice %r" % new_value)
+            raise ValueError(f"invalid choice {new_value!r}")
         assert isinstance(value, _NamedInt)
         return self._write_prefix_bytes + value.bytes(self._byte_count)
 
@@ -1191,13 +1191,13 @@ class RangeValidator(Validator):
 
     def validate_read(self, reply_bytes):
         reply_value = _bytes2int(reply_bytes[: self._byte_count])
-        assert reply_value >= self.min_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
-        assert reply_value <= self.max_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
+        assert reply_value >= self.min_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
+        assert reply_value <= self.max_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         return reply_value
 
     def prepare_write(self, new_value, current_value=None):
         if new_value < self.min_value or new_value > self.max_value:
-            raise ValueError("invalid choice %r" % new_value)
+            raise ValueError(f"invalid choice {new_value!r}")
         current_value = self.validate_read(current_value) if current_value is not None else None
         to_write = _int2bytes(new_value, self._byte_count)
         # current value is known and same as value to be written return None to signal not to write it
@@ -1276,16 +1276,16 @@ class PackedRangeValidator(Validator):
             for n in range(self.count)
         }
         for n in range(self.count):
-            assert rvs[n] >= self.min_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, rvs[n])
-            assert rvs[n] <= self.max_value, "%s: failed to validate read value %02X" % (self.__class__.__name__, rvs[n])
+            assert rvs[n] >= self.min_value, f"{self.__class__.__name__}: failed to validate read value {rvs[n]:02X}"
+            assert rvs[n] <= self.max_value, f"{self.__class__.__name__}: failed to validate read value {rvs[n]:02X}"
         return rvs
 
     def prepare_write(self, new_values):
         if len(new_values) != self.count:
-            raise ValueError("wrong number of values %r" % new_values)
+            raise ValueError(f"wrong number of values {new_values!r}")
         for new_value in new_values:
             if new_value < self.min_value or new_value > self.max_value:
-                raise ValueError("invalid value %r" % new_value)
+                raise ValueError(f"invalid value {new_value!r}")
         bytes = self.write_prefix_bytes + b"".join(_int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count))
         return bytes
 

@@ -555,7 +555,7 @@ def _update_details(button):
                 if device.product_id:
                     yield (_("Product ID"), "046d:" + device.product_id)
                 hid_version = device.protocol
-                yield (_("Protocol"), "HID++ %1.1f" % hid_version if hid_version else _("Unknown"))
+                yield (_("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown"))
                 if read_all and device.polling_rate:
                     yield (_("Polling rate"), device.polling_rate)
 
@@ -571,12 +571,12 @@ def _update_details(button):
                     for fw in list(device.firmware):
                         yield ("  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip())
             elif device.kind is None or device.online:
-                yield ("  %s" % _("Firmware"), "...")
+                yield (f"  {_('Firmware')}", "...")
 
             flag_bits = device.notification_flags
             if flag_bits is not None:
                 flag_names = (
-                    ("(%s)" % _("none"),) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
+                    (f"({_('none')})",) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
                 )
                 yield (_("Notifications"), ("\n%15s" % " ").join(flag_names))
 
@@ -638,7 +638,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
             % {"max_count": receiver.max_devices}
         )
     elif devices_count > 0:
-        paired_text += "\n\n<small>%s</small>" % _("Only one device can be paired to this receiver.")
+        paired_text += f"\n\n<small>{_('Only one device can be paired to this receiver.')}</small>"
     pairings = receiver.remaining_pairings()
     if pairings is not None and pairings >= 0:
         paired_text += "\n<small>%s</small>" % (
@@ -718,9 +718,9 @@ def _update_device_panel(device, panel, buttons, full=False):
             tooltip_text = tooltip_text + _(" and next level to be reported.")
         if is_online:
             if charging:
-                text += " <small>(%s)</small>" % _("charging")
+                text += f" <small>({_('charging')})</small>"
         else:
-            text += " <small>(%s)</small>" % _("last known")
+            text += f" <small>({_('last known')})</small>"
 
         panel._battery._text.set_markup(text)
         panel._battery.set_tooltip_text(tooltip_text)
@@ -746,7 +746,7 @@ def _update_device_panel(device, panel, buttons, full=False):
     else:
         panel._secure.set_visible(True)
         panel._secure._icon.set_visible(False)
-        panel._secure._text.set_markup("<small>%s</small>" % _("offline"))
+        panel._secure._text.set_markup(f"<small>{_('offline')}</small>")
         panel._secure.set_tooltip_text("")
 
     if is_online:
@@ -782,7 +782,7 @@ def _update_info_panel(device, full=False):
     # a device must be paired
     assert device
 
-    _info._title.set_markup("<b>%s</b>" % device.name)
+    _info._title.set_markup(f"<b>{device.name}</b>")
     icon_name = _icons.device_icon_name(device.name, device.kind)
     _info._icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 

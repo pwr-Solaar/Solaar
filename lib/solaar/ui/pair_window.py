@@ -220,7 +220,7 @@ def _pairing_succeeded(assistant, receiver, device):
     page.pack_start(device_icon, True, True, 0)
 
     device_label = Gtk.Label()
-    device_label.set_markup("<b>%s</b>" % device.name)
+    device_label.set_markup(f"<b>{device.name}</b>")
     device_label.set_alignment(0.5, 0)
     page.pack_start(device_label, True, True, 0)
 

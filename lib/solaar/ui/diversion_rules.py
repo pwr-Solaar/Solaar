@@ -1283,7 +1283,7 @@ class FeatureUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return "%s (%04X)" % (str(component.feature), int(component.feature or 0))
+        return f"{str(component.feature)} ({int(component.feature or 0):04X})"
 
 
 class ReportUI(ConditionUI):
@@ -1407,7 +1407,7 @@ class KeyUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return "%s (%04X) (%s)" % (str(component.key), int(component.key), _(component.action)) if component.key else "None"
+        return f"{str(component.key)} ({int(component.key):04X}) ({_(component.action)})" if component.key else "None"
 
 
 class KeyIsDownUI(ConditionUI):
@@ -1448,7 +1448,7 @@ class KeyIsDownUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return "%s (%04X)" % (str(component.key), int(component.key)) if component.key else "None"
+        return f"{str(component.key)} ({int(component.key):04X})" if component.key else "None"
 
 
 class TestUI(ConditionUI):

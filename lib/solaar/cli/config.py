@@ -97,7 +97,7 @@ def select_choice(value, choices, setting, key):
     elif lvalue in ("higher", "lower"):
         old_value = setting.read() if key is None else setting.read_key(key)
         if old_value is None:
-            raise Exception("%s: could not read current value" % setting.name)
+            raise Exception(f"{setting.name}: could not read current value")
         if lvalue == "lower":
             lower_values = choices[:old_value]
             value = lower_values[-1] if lower_values else choices[:][0]
@@ -109,7 +109,7 @@ def select_choice(value, choices, setting, key):
     elif lvalue in ("lowest", "min", "last"):
         value = choices[:][0]
     else:
-        raise Exception("%s: possible values are [%s]" % (setting.name, ", ".join(str(v) for v in choices)))
+        raise Exception(f"{setting.name}: possible values are [{', '.join(str(v) for v in choices)}]")
     return value
 
 
@@ -125,7 +125,7 @@ def select_toggle(value, setting, key=None):
             elif value.lower() in ("false", "no", "off", "f", "n"):
                 value = False
             else:
-                raise Exception("%s: don't know how to interpret '%s' as boolean" % (setting.name, value)) from exc
+                raise Exception(f"{setting.name}: don't know how to interpret '{value}' as boolean") from exc
     return value
 
 
@@ -133,10 +133,10 @@ def select_range(value, setting):
     try:
         value = int(value)
     except ValueError as exc:
-        raise Exception("%s: can't interpret '%s' as integer" % (setting.name, value)) from exc
+        raise Exception(f"{setting.name}: can't interpret '{value}' as integer") from exc
     min, max = setting.range
     if value < min or value > max:
-        raise Exception("%s: value '%s' out of bounds" % (setting.name, value))
+        raise Exception(f"{setting.name}: value '{value}' out of bounds")
     return value
 
 
@@ -153,14 +153,14 @@ def run(receivers, args, find_receiver, find_device):
         dev = None
 
     if not dev:
-        raise Exception("no online device found matching '%s'" % device_name)
+        raise Exception(f"no online device found matching '{device_name}'")
 
     if not args.setting:  # print all settings, so first set them all up
         if not dev.settings:
-            raise Exception("no settings for %s" % dev.name)
+            raise Exception(f"no settings for {dev.name}")
         _configuration.attach_to(dev)
         #        _settings.apply_all_settings(dev)
-        print(dev.name, "(%s) [%s:%s]" % (dev.codename, dev.wpid, dev.serial))
+        print(dev.name, f"({dev.codename}) [{dev.wpid}:{dev.serial}]")
         for s in dev.settings:
             print("")
             _print_setting(s)
@@ -176,7 +176,7 @@ def run(receivers, args, find_receiver, find_device):
                 except Exception:
                     setting = None
     if setting is None:
-        raise Exception("no setting '%s' for %s" % (args.setting, dev.name))
+        raise Exception(f"no setting '{args.setting}' for {dev.name}")
 
     if args.value_key is None:
         #        setting.apply()
@@ -203,7 +203,7 @@ def run(receivers, args, find_receiver, find_device):
     if message is not None:
         print(message)
         if result is None:
-            raise Exception("%s: failed to set value '%s' [%r]" % (setting.name, str(value), value))
+            raise Exception(f"{setting.name}: failed to set value '{str(value)}' [{value!r}]")
 
     # if the Solaar UI is running tell it to also perform the set, otherwise save the change in the configuration file
     if remote:
@@ -219,19 +219,19 @@ def set(dev, setting, args, save):
     if setting.kind == _settings.KIND.toggle:
         value = select_toggle(args.value_key, setting)
         args.value_key = value
-        message = "Setting %s of %s to %s" % (setting.name, dev.name, value)
+        message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
     elif setting.kind == _settings.KIND.range:
         value = select_range(args.value_key, setting)
         args.value_key = value
-        message = "Setting %s of %s to %s" % (setting.name, dev.name, value)
+        message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
     elif setting.kind == _settings.KIND.choice:
         value = select_choice(args.value_key, setting.choices, setting, None)
         args.value_key = int(value)
-        message = "Setting %s of %s to %s" % (setting.name, dev.name, value)
+        message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
     elif setting.kind == _settings.KIND.map_choice:
@@ -248,8 +248,8 @@ def set(dev, setting, args, save):
             args.extra_subkey = int(value)
             args.value_key = str(int(k))
         else:
-            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        message = "Setting %s of %s key %r to %r" % (setting.name, dev.name, k, value)
+            raise Exception(f"{setting.name}: key '{key}' not in setting")
+        message = f"Setting {setting.name} of {dev.name} key {k!r} to {value!r}"
         result = setting.write_key_value(int(k), value, save=save)
 
     elif setting.kind == _settings.KIND.multiple_toggle:
@@ -267,18 +267,18 @@ def set(dev, setting, args, save):
             args.extra_subkey = value
             args.value_key = str(int(k))
         else:
-            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        message = "Setting %s key %r to %r" % (setting.name, k, value)
+            raise Exception(f"{setting.name}: key '{key}' not in setting")
+        message = f"Setting {setting.name} key {k!r} to {value!r}"
         result = setting.write_key_value(str(int(k)), value, save=save)
 
     elif setting.kind == _settings.KIND.multiple_range:
         if args.extra_subkey is None:
-            raise Exception("%s: setting needs both key and value to set" % (setting.name))
+            raise Exception(f"{setting.name}: setting needs both key and value to set")
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
         if args.extra2 is None or to_int(args.extra2) is None:
-            raise Exception("%s: setting needs an integer value, not %s" % (setting.name, args.extra2))
+            raise Exception(f"{setting.name}: setting needs an integer value, not {args.extra2}")
         if not setting._value:  # ensure that there are values to look through
             setting.read()
         k = next((k for k in setting._value if key == ikey or key.isdigit() and ikey == int(key)), None)
@@ -289,8 +289,8 @@ def set(dev, setting, args, save):
             item[args.extra_subkey] = to_int(args.extra2)
             args.value_key = str(int(k))
         else:
-            raise Exception("%s: key '%s' not in setting" % (setting.name, key))
-        message = "Setting %s key %s parameter %s to %r" % (setting.name, k, args.extra_subkey, item[args.extra_subkey])
+            raise Exception(f"{setting.name}: key '{key}' not in setting")
+        message = f"Setting {setting.name} key {k} parameter {args.extra_subkey} to {item[args.extra_subkey]!r}"
         result = setting.write_key_value(int(k), item, save=save)
         value = item
 

@@ -32,14 +32,14 @@ logger = logging.getLogger(__name__)
 
 
 def read_register(device, register_number, *params):
-    assert device is not None, "tried to read register %02X from invalid device %s" % (register_number, device)
+    assert device is not None, f"tried to read register {register_number:02X} from invalid device {device}"
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8100 | (int(register_number) & 0x2FF)
     return device.request(request_id, *params)
 
 
 def write_register(device, register_number, *value):
-    assert device is not None, "tried to write register %02X to invalid device %s" % (register_number, device)
+    assert device is not None, f"tried to write register {register_number:02X} to invalid device {device}"
     # support long registers by adding a 2 in front of the register number
     request_id = 0x8000 | (int(register_number) & 0x2FF)
     return device.request(request_id, *value)
@@ -87,7 +87,7 @@ class Hidpp10:
             return
 
         fw_version = _strhex(reply[1:3])
-        fw_version = "%s.%s" % (fw_version[0:2], fw_version[2:4])
+        fw_version = f"{fw_version[0:2]}.{fw_version[2:4]}"
         reply = read_register(device, REGISTERS.firmware, 0x02)
         if reply:
             fw_version += ".B" + _strhex(reply[1:3])
@@ -97,14 +97,14 @@ class Hidpp10:
         reply = read_register(device, REGISTERS.firmware, 0x04)
         if reply:
             bl_version = _strhex(reply[1:3])
-            bl_version = "%s.%s" % (bl_version[0:2], bl_version[2:4])
+            bl_version = f"{bl_version[0:2]}.{bl_version[2:4]}"
             bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
             firmware[1] = bl
 
         reply = read_register(device, REGISTERS.firmware, 0x03)
         if reply:
             o_version = _strhex(reply[1:3])
-            o_version = "%s.%s" % (o_version[0:2], o_version[2:4])
+            o_version = f"{o_version[0:2]}.{o_version[2:4]}"
             o = _FirmwareInfo(FIRMWARE_KIND.Other, "", o_version, None)
             firmware[2] = o
 

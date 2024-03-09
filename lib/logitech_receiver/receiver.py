@@ -312,7 +312,7 @@ class Receiver:
                     logger.info("%s unpaired device %s", self, dev)
             else:
                 logger.error("%s failed to unpair device %s", self, dev)
-                raise Exception("failed to unpair device %s: %s" % (dev.name, key))
+                raise Exception(f"failed to unpair device {dev.name}: {key}")
 
     def _unpair_device_per_receiver(self, key):
         """Receiver specific unpairing."""
