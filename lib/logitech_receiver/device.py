@@ -94,6 +94,7 @@ class Device:
         self._profiles = self._backlight = self._registers = self._settings = None
         self.notification_flags = None
         self.battery_info = None
+        self.link_encrypted = None
 
         self._feature_settings_checked = False
         self._gestures_lock = _threading.Lock()
@@ -361,7 +362,6 @@ class Device:
             info.level = self.battery_info.level
 
         changed = self.battery_info != info
-        print("SBI", changed, info, self.battery_info)
         self.battery_info, old_info = info, self.battery_info
 
         alert, reason = ALERT.NONE, None
