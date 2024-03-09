@@ -463,6 +463,9 @@ class Device:
 
     __nonzero__ = __bool__
 
+    def status_string(self):
+        return self.status.battery.to_str() if hasattr(self, "status") and self.status.battery is not None else ""
+
     def __str__(self):
         try:
             name = self.name or self.codename or "?"

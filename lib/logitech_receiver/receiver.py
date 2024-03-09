@@ -26,6 +26,7 @@ import hidapi as _hid
 from . import base as _base
 from . import exceptions, hidpp10, hidpp10_constants
 from .device import Device
+from .i18n import _, ngettext
 
 logger = logging.getLogger(__name__)
 
@@ -330,6 +331,14 @@ class Receiver:
 
     def __hash__(self):
         return self.path.__hash__()
+
+    def status_string(self):
+        count = len(self)
+        return (
+            _("No paired devices.")
+            if count == 0
+            else ngettext("%(count)s paired device.", "%(count)s paired devices.", count) % {"count": count}
+        )
 
     def __str__(self):
         return "<%s(%s,%s%s)>" % (

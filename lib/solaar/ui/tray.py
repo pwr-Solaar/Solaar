@@ -196,12 +196,13 @@ try:
 
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != "solaar":
-            _ignore, _ignore, name, device_status = _picked_device
+            _ignore, _ignore, name, device = _picked_device
+            device_status = device.status
             battery_level = device_status.battery.level if device_status.battery is not None else None
             battery_charging = device_status.battery.charging() if device_status.battery is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
 
-            description = "%s: %s" % (name, device_status.to_string())
+            description = "%s: %s" % (name, device.status_string())
         else:
             # there may be a receiver, but no peripherals
             tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
@@ -302,19 +303,19 @@ def _generate_description_lines():
         yield _("no receiver")
         return
 
-    for _ignore, number, name, status in _devices_info:
+    for _ignore, number, name, device in _devices_info:
         if number is None:  # receiver
             continue
 
-        p = status.to_string()
+        p = device.status_string()
         if p:  # does it have any properties to print?
             yield "<b>%s</b>" % name
-            if status:
+            if device.online:
                 yield "\t%s" % p
             else:
                 yield "\t%s <small>(" % p + _("offline") + ")</small>"
         else:
-            if status:
+            if device.online:
                 yield "<b>%s</b> <small>(" % name + _("no status") + ")</small>"
             else:
                 yield "<b>%s</b> <small>(" % name + _("offline") + ")</small>"
@@ -330,7 +331,7 @@ def _pick_device_with_lowest_battery():
     for info in _devices_info:
         if info[1] is None:  # is receiver
             continue
-        level = info[-1].battery.level if info[-1].battery is not None else None
+        level = info[-1].status.battery.level if hasattr(info[-1], "status") and info[-1].status.battery is not None else None
         # print ("checking %s -> %s", info, level)
         if level is not None and picked_level > level:
             picked = info
@@ -366,7 +367,7 @@ def _add_device(device):
                 break
             index = index + 1
 
-    new_device_info = (receiver_path, device.number, device.name, device.status)
+    new_device_info = (receiver_path, device.number, device.name, device)
     _devices_info.insert(index, new_device_info)
 
     label_prefix = "   "
@@ -431,7 +432,7 @@ def _update_menu_item(index, device):
     charging = device.status.battery.charging() if device.status.battery is not None else None
     icon_name = _icons.battery(level, charging)
 
-    menu_item.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status.to_string())
+    menu_item.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
     image_widget = menu_item.get_image()
     image_widget.set_sensitive(bool(device.online))
     _update_menu_icon(image_widget, icon_name)

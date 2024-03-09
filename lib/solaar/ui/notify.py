@@ -116,7 +116,7 @@ if available:
             elif dev.status is None:
                 message = _("unpaired")
             elif bool(dev.status):
-                message = dev.status.to_string() or _("connected")
+                message = dev.status_string() or _("connected")
             else:
                 message = _("offline")
 

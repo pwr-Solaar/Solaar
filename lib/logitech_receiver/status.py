@@ -22,7 +22,6 @@ from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings as _settings
 from .common import Battery, NamedInts
-from .i18n import _, ngettext
 
 logger = logging.getLogger(__name__)
 
@@ -66,17 +65,6 @@ class ReceiverStatus:
     #        self.device_passkey = None
     #        self.new_device = None
 
-    def to_string(self):
-        count = len(self._receiver)
-        return (
-            _("No paired devices.")
-            if count == 0
-            else ngettext("%(count)s paired device.", "%(count)s paired devices.", count) % {"count": count}
-        )
-
-    def __str__(self):
-        self.to_string()
-
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         self._changed_callback(self._receiver, alert=alert, reason=reason)
 
@@ -97,9 +85,6 @@ class DeviceStatus:
         self.link_encrypted = None
         #        self.notification_flags = None
         self.battery_error = None
-
-    def to_string(self):
-        return self.battery.to_str() if self.battery is not None else ""
 
     def __bool__(self):
         return bool(self._active)
