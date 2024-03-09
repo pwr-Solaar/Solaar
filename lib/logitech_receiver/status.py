@@ -21,7 +21,7 @@ from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings as _settings
-from .common import Battery, NamedInts
+from .common import NamedInts
 
 logger = logging.getLogger(__name__)
 
@@ -52,19 +52,6 @@ class ReceiverStatus:
         assert changed_callback
         self._changed_callback = changed_callback
 
-    #        self.notification_flags = None
-    #        self.error = None
-
-    #        self.lock_open = False
-    #        self.discovering = False
-    #        self.counter = None
-    #        self.device_address = None
-    #        self.device_authentication = None
-    #        self.device_kind = None
-    #        self.device_name = None
-    #        self.device_passkey = None
-    #        self.new_device = None
-
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         self._changed_callback(self._receiver, alert=alert, reason=reason)
 
@@ -81,45 +68,12 @@ class DeviceStatus:
         assert changed_callback
         self._changed_callback = changed_callback
         self._active = None  # is the device active?
-        self.battery = None
         self.link_encrypted = None
-        #        self.notification_flags = None
-        self.battery_error = None
 
     def __bool__(self):
         return bool(self._active)
 
     __nonzero__ = __bool__
-
-    def set_battery_info(self, info):
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s: battery %s, %s", self._device, info.level, info.status)
-        if info.level is None and self.battery:  # use previous level if missing from new information
-            info.level = self.battery.level
-
-        changed = self.battery != info
-        self.battery = info
-
-        alert, reason = ALERT.NONE, None
-        if info.ok():
-            self.battery_error = None
-        else:
-            logger.warning("%s: battery %d%%, ALERT %s", self._device, info.level, info.status)
-            if self.battery_error != info.status:
-                self.battery_error = info.status
-                alert = ALERT.NOTIFICATION | ALERT.ATTENTION
-            reason = info.to_str()
-
-        if changed or reason or not self._active:  # a battery response means device is active
-            # update the leds on the device, if any
-            _hidpp10.set_3leds(self._device, info.level, charging=info.charging(), warning=bool(alert))
-            self.changed(active=True, alert=alert, reason=reason)
-
-    # Retrieve and regularize battery status
-    def read_battery(self):
-        if self._active:
-            battery = self._device.battery()
-            self.set_battery_info(battery if battery is not None else Battery(None, None, None, None))
 
     def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
         d = self._device
@@ -135,7 +89,7 @@ class DeviceStatus:
                     if d.protocol < 2.0:
                         self._device.notification_flags = d.enable_connection_notifications()
                     # battery information may have changed so try to read it now
-                    self.read_battery()
+                    self._device.read_battery()
 
                 # Push settings for new devices when devices request software reconfiguration
                 # and when devices become active if they don't have wireless device status feature,

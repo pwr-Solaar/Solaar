@@ -605,3 +605,6 @@ class Battery:
             return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(self.status)}
         else:
             return ""
+
+
+ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)

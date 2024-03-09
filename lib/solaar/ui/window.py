@@ -682,17 +682,17 @@ def _update_device_panel(device, panel, buttons, full=False):
     is_online = bool(device.online)
     panel.set_sensitive(is_online)
 
-    if device.status.battery is None or device.status.battery.level is None:
-        device.status.read_battery()
+    if device.battery_info is None or device.battery_info.level is None:
+        device.read_battery()
 
-    battery_level = device.status.battery.level if device.status.battery is not None else None
-    battery_voltage = device.status.battery.voltage if device.status.battery is not None else None
+    battery_level = device.battery_info.level if device.battery_info is not None else None
+    battery_voltage = device.battery_info.voltage if device.battery_info is not None else None
     if battery_level is None and battery_voltage is None:
         panel._battery.set_visible(False)
     else:
         panel._battery.set_visible(True)
-        battery_next_level = device.status.battery.next_level
-        charging = device.status.battery.charging() if device.status.battery is not None else None
+        battery_next_level = device.battery_info.next_level
+        charging = device.battery_info.charging() if device.battery_info is not None else None
         icon_name = _icons.battery(battery_level, charging)
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(True)
@@ -750,7 +750,7 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._secure.set_tooltip_text("")
 
     if is_online:
-        light_level = device.status.battery.light_level if device.status.battery is not None else None
+        light_level = device.battery_info.light_level if device.battery_info is not None else None
         if light_level is None:
             panel._lux.set_visible(False)
         else:
@@ -906,8 +906,8 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     is_online = bool(device.online)
     _model.set_value(item, _COLUMN.ACTIVE, is_online)
 
-    battery_level = device.status.battery.level if device.status.battery is not None else None
-    battery_voltage = device.status.battery.voltage if device.status.battery is not None else None
+    battery_level = device.battery_info.level if device.battery_info is not None else None
+    battery_voltage = device.battery_info.voltage if device.battery_info is not None else None
     if battery_level is None:
         _model.set_value(item, _COLUMN.STATUS_TEXT, _CAN_SET_ROW_NONE)
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
@@ -920,7 +920,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
             status_text = "%(battery_percent)d%%" % {"battery_percent": battery_level}
         _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
-        charging = device.status.battery.charging() if device.status.battery is not None else None
+        charging = device.battery_info.charging() if device.battery_info is not None else None
         icon_name = _icons.battery(battery_level, charging)
         _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 

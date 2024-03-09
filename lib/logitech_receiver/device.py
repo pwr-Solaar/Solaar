@@ -26,6 +26,7 @@ import hidapi as _hid
 import solaar.configuration as _configuration
 
 from . import base, descriptors, exceptions, hidpp10, hidpp10_constants, hidpp20
+from .common import ALERT, Battery
 from .settings_templates import check_feature_settings as _check_feature_settings
 
 logger = logging.getLogger(__name__)
@@ -92,6 +93,7 @@ class Device:
         self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
         self._profiles = self._backlight = self._registers = self._settings = None
         self.notification_flags = None
+        self.battery_info = None
 
         self._feature_settings_checked = False
         self._gestures_lock = _threading.Lock()
@@ -351,6 +353,36 @@ class Device:
                     if self.persister and battery_feature is None:
                         self.persister["_battery"] = result
 
+    def set_battery_info(self, info):
+        """Update battery information for device, calling changed callback if necessary"""
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s: battery %s, %s", self, info.level, info.status)
+        if info.level is None and self.battery_info:  # use previous level if missing from new information
+            info.level = self.battery_info.level
+
+        changed = self.battery_info != info
+        print("SBI", changed, info, self.battery_info)
+        self.battery_info, old_info = info, self.battery_info
+
+        alert, reason = ALERT.NONE, None
+        if not info.ok():
+            logger.warning("%s: battery %d%%, ALERT %s", self, info.level, info.status)
+            if old_info.status != info.status:
+                alert = ALERT.NOTIFICATION | ALERT.ATTENTION
+            reason = info.to_str()
+
+        if changed or reason:
+            # update the leds on the device, if any
+            _hidpp10.set_3leds(self, info.level, charging=info.charging(), warning=bool(alert))
+            if hasattr(self, "status"):
+                self.status.changed(active=True, alert=alert, reason=reason)
+
+    # Retrieve and regularize battery status
+    def read_battery(self):
+        if self.online:
+            battery = self.battery()
+            self.set_battery_info(battery if battery is not None else Battery(None, None, None, None))
+
     def enable_connection_notifications(self, enable=True):
         """Enable or disable device (dis)connection notifications on this
         receiver."""
@@ -464,7 +496,7 @@ class Device:
     __nonzero__ = __bool__
 
     def status_string(self):
-        return self.status.battery.to_str() if hasattr(self, "status") and self.status.battery is not None else ""
+        return self.battery_info.to_str() if hasattr(self, "status") and self.battery_info is not None else ""
 
     def __str__(self):
         try:
