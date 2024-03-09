@@ -155,7 +155,7 @@ def _open(args):
     print(".. Opening device", device)
     handle = _hid.open_path(device)
     if not handle:
-        sys.exit("!! Failed to open %s, aborting." % device)
+        sys.exit(f"!! Failed to open {device}, aborting.")
     print(
         ".. Opened handle %r, vendor %r product %r serial %r."
         % (handle, _hid.get_manufacturer(handle), _hid.get_product(handle), _hid.get_serial(handle))
@@ -243,7 +243,7 @@ def main():
             time.sleep(1)
 
     finally:
-        print(".. Closing handle %r" % handle)
+        print(f".. Closing handle {handle!r}")
         _hid.close(handle)
         if interactive:
             readline.write_history_file(args.history)

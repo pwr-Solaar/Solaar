@@ -32,7 +32,7 @@ def run(receivers, args, find_receiver, _ignore):
         receiver_name = args.receiver.lower()
         receiver = find_receiver(receivers, receiver_name)
         if not receiver:
-            raise Exception("no receiver found matching '%s'" % receiver_name)
+            raise Exception(f"no receiver found matching '{receiver_name}'")
     else:
         receiver = receivers[0]
 
@@ -131,6 +131,6 @@ def run(receivers, args, find_receiver, _ignore):
     else:
         error = receiver.pairing.error
         if error:
-            raise Exception("pairing failed: %s" % error)
+            raise Exception(f"pairing failed: {error}")
         else:
             print("Paired device")  # this is better than an error

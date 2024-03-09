@@ -577,7 +577,7 @@ PARAM = _NamedInts(
     RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
     ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
 )
-PARAM._fallback = lambda x: "unknown:%04X" % x
+PARAM._fallback = lambda x: f"unknown:{x:04X}"
 
 
 class SubParam:
@@ -627,7 +627,7 @@ SPEC = _NamedInts(
     finger_force=9,
     zone=10,
 )
-SPEC._fallback = lambda x: "unknown:%04X" % x
+SPEC._fallback = lambda x: f"unknown:{x:04X}"
 
 # Action Ids for feature GESTURE_2
 ACTION_ID = _NamedInts(
@@ -644,7 +644,7 @@ ACTION_ID = _NamedInts(
     ScrollHorizontalOnly=11,
     ScrollVerticalOnly=12,
 )
-ACTION_ID._fallback = lambda x: "unknown:%04X" % x
+ACTION_ID._fallback = lambda x: f"unknown:{x:04X}"
 
 
 class Gesture:
@@ -1396,9 +1396,9 @@ class Hidpp20:
                     level = ord(fw_info[:1]) & 0x0F
                     if level == 0 or level == 1:
                         name, version_major, version_minor, build = _unpack("!3sBBH", fw_info[1:8])
-                        version = "%02X.%02X" % (version_major, version_minor)
+                        version = f"{version_major:02X}.{version_minor:02X}"
                         if build:
-                            version += ".B%04X" % build
+                            version += f".B{build:04X}"
                         extras = fw_info[9:].rstrip(b"\x00") or None
                         fw_info = _FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
                     elif level == FIRMWARE_KIND.Hardware:
@@ -1716,7 +1716,7 @@ class Hidpp20:
         result = feature_request(device, FEATURE.REMAINING_PAIRING, 0x0)
         if result:
             result = _unpack("!B", result[:1])[0]
-            FEATURE._fallback = lambda x: "unknown:%04X" % x
+            FEATURE._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
     def config_change(self, device, configuration, no_reply=False):

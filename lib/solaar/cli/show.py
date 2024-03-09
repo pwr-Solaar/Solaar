@@ -33,11 +33,11 @@ def _print_receiver(receiver):
 
     print(receiver.name)
     print("  Device path  :", receiver.path)
-    print("  USB id       : 046d:%s" % receiver.product_id)
+    print(f"  USB id       : 046d:{receiver.product_id}")
     print("  Serial       :", receiver.serial)
     pending = _hidpp10.get_configuration_pending_flags(receiver)
     if pending:
-        print("  C Pending    : %02x" % pending)
+        print(f"  C Pending    : {pending:02x}")
     if receiver.firmware:
         for f in receiver.firmware:
             print("    %-11s: %s" % (f.kind, f.version))
@@ -50,7 +50,7 @@ def _print_receiver(receiver):
     if notification_flags is not None:
         if notification_flags:
             notification_names = _hidpp10_constants.NOTIFICATION_FLAG.flag_names(notification_flags)
-            print("  Notifications: %s (0x%06X)" % (", ".join(notification_names), notification_flags))
+            print(f"  Notifications: {', '.join(notification_names)} (0x{notification_flags:06X})")
         else:
             print("  Notifications: (none)")
 
@@ -76,9 +76,9 @@ def _battery_line(dev):
         level, nextLevel, status, voltage = battery.level, battery.next_level, battery.status, battery.voltage
         text = _battery_text(level)
         if voltage is not None:
-            text = text + (" %smV " % voltage)
+            text = text + f" {voltage}mV "
         nextText = "" if nextLevel is None else ", next level " + _battery_text(nextLevel)
-        print("     Battery: %s, %s%s." % (text, status, nextText))
+        print(f"     Battery: {text}, {status}{nextText}.")
     else:
         print("     Battery status unavailable.")
 
@@ -89,22 +89,22 @@ def _print_device(dev, num=None):
     try:
         dev.ping()
     except exceptions.NoSuchDevice:
-        print("  %s: Device not found" % num or dev.number)
+        print(f"  {num}: Device not found" or dev.number)
         return
 
     if num or dev.number < 8:
         print("  %d: %s" % (num or dev.number, dev.name))
     else:
-        print("%s" % dev.name)
+        print(f"{dev.name}")
     print("     Device path  :", dev.path)
     if dev.wpid:
-        print("     WPID         : %s" % dev.wpid)
+        print(f"     WPID         : {dev.wpid}")
     if dev.product_id:
-        print("     USB id       : 046d:%s" % dev.product_id)
+        print(f"     USB id       : 046d:{dev.product_id}")
     print("     Codename     :", dev.codename)
     print("     Kind         :", dev.kind)
     if dev.protocol:
-        print("     Protocol     : HID++ %1.1f" % dev.protocol)
+        print(f"     Protocol     : HID++ {dev.protocol:1.1f}")
     else:
         print("     Protocol     : unknown (device is offline)")
     if dev.polling_rate:
@@ -119,26 +119,26 @@ def _print_device(dev, num=None):
             print("       %11s:" % fw.kind, (fw.name + " " + fw.version).strip())
 
     if dev.power_switch_location:
-        print("     The power switch is located on the %s." % dev.power_switch_location)
+        print(f"     The power switch is located on the {dev.power_switch_location}.")
 
     if dev.online:
         notification_flags = _hidpp10.get_notification_flags(dev)
         if notification_flags is not None:
             if notification_flags:
                 notification_names = _hidpp10_constants.NOTIFICATION_FLAG.flag_names(notification_flags)
-                print("     Notifications: %s (0x%06X)." % (", ".join(notification_names), notification_flags))
+                print(f"     Notifications: {', '.join(notification_names)} (0x{notification_flags:06X}).")
             else:
                 print("     Notifications: (none).")
         device_features = _hidpp10.get_device_features(dev)
         if device_features is not None:
             if device_features:
                 device_features_names = _hidpp10_constants.DEVICE_FEATURES.flag_names(device_features)
-                print("     Features: %s (0x%06X)" % (", ".join(device_features_names), device_features))
+                print(f"     Features: {', '.join(device_features_names)} (0x{device_features:06X})")
             else:
                 print("     Features: (none)")
 
     if dev.online and dev.features:
-        print("     Supports %d HID++ 2.0 features:" % len(dev.features))
+        print(f"     Supports {len(dev.features)} HID++ 2.0 features:")
         dev_settings = []
         _settings_templates.check_feature_settings(dev, dev_settings)
         for feature, index in dev.features.enumerate():
@@ -152,7 +152,7 @@ def _print_device(dev, num=None):
                 wheel = _hidpp20.get_hires_wheel(dev)
                 if wheel:
                     multi, has_invert, has_switch, inv, res, target, ratchet = wheel
-                    print("            Multiplier: %s" % multi)
+                    print(f"            Multiplier: {multi}")
                     if has_invert:
                         print("            Has invert:", "Inverse wheel motion" if inv else "Normal wheel motion")
                     if has_switch:
@@ -168,8 +168,8 @@ def _print_device(dev, num=None):
             elif feature == _hidpp20_constants.FEATURE.MOUSE_POINTER:
                 mouse_pointer = _hidpp20.get_mouse_pointer_info(dev)
                 if mouse_pointer:
-                    print("            DPI: %s" % mouse_pointer["dpi"])
-                    print("            Acceleration: %s" % mouse_pointer["acceleration"])
+                    print(f"            DPI: {mouse_pointer['dpi']}")
+                    print(f"            Acceleration: {mouse_pointer['acceleration']}")
                     if mouse_pointer["suggest_os_ballistics"]:
                         print("            Use OS ballistics")
                     else:
@@ -181,9 +181,9 @@ def _print_device(dev, num=None):
             elif feature == _hidpp20_constants.FEATURE.VERTICAL_SCROLLING:
                 vertical_scrolling_info = _hidpp20.get_vertical_scrolling_info(dev)
                 if vertical_scrolling_info:
-                    print("            Roller type: %s" % vertical_scrolling_info["roller"])
-                    print("            Ratchet per turn: %s" % vertical_scrolling_info["ratchet"])
-                    print("            Scroll lines: %s" % vertical_scrolling_info["lines"])
+                    print(f"            Roller type: {vertical_scrolling_info['roller']}")
+                    print(f"            Ratchet per turn: {vertical_scrolling_info['ratchet']}")
+                    print(f"            Scroll lines: {vertical_scrolling_info['lines']}")
             elif feature == _hidpp20_constants.FEATURE.HI_RES_SCROLLING:
                 scrolling_mode, scrolling_resolution = _hidpp20.get_hi_res_scrolling_info(dev)
                 if scrolling_mode:
@@ -191,15 +191,15 @@ def _print_device(dev, num=None):
                 else:
                     print("            Hi-res scrolling disabled")
                 if scrolling_resolution:
-                    print("            Hi-res scrolling multiplier: %s" % scrolling_resolution)
+                    print(f"            Hi-res scrolling multiplier: {scrolling_resolution}")
             elif feature == _hidpp20_constants.FEATURE.POINTER_SPEED:
                 pointer_speed = _hidpp20.get_pointer_speed_info(dev)
                 if pointer_speed:
-                    print("            Pointer Speed: %s" % pointer_speed)
+                    print(f"            Pointer Speed: {pointer_speed}")
             elif feature == _hidpp20_constants.FEATURE.LOWRES_WHEEL:
                 wheel_status = _hidpp20.get_lowres_wheel_status(dev)
                 if wheel_status:
-                    print("            Wheel Reports: %s" % wheel_status)
+                    print(f"            Wheel Reports: {wheel_status}")
             elif feature == _hidpp20_constants.FEATURE.NEW_FN_INVERSION:
                 inversion = _hidpp20.get_new_fn_inversion(dev)
                 if inversion:
@@ -209,28 +209,28 @@ def _print_device(dev, num=None):
             elif feature == _hidpp20_constants.FEATURE.HOSTS_INFO:
                 host_names = _hidpp20.get_host_names(dev)
                 for host, (paired, name) in host_names.items():
-                    print("            Host %s (%s): %s" % (host, "paired" if paired else "unpaired", name))
+                    print(f"            Host {host} ({'paired' if paired else 'unpaired'}): {name}")
             elif feature == _hidpp20_constants.FEATURE.DEVICE_NAME:
-                print("            Name: %s" % _hidpp20.get_name(dev))
-                print("            Kind: %s" % _hidpp20.get_kind(dev))
+                print(f"            Name: {_hidpp20.get_name(dev)}")
+                print(f"            Kind: {_hidpp20.get_kind(dev)}")
             elif feature == _hidpp20_constants.FEATURE.DEVICE_FRIENDLY_NAME:
-                print("            Friendly Name: %s" % _hidpp20.get_friendly_name(dev))
+                print(f"            Friendly Name: {_hidpp20.get_friendly_name(dev)}")
             elif feature == _hidpp20_constants.FEATURE.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
                     extras = _strhex(fw.extras) if fw.extras else ""
-                    print("            Firmware: %s %s %s %s" % (fw.kind, fw.name, fw.version, extras))
+                    print(f"            Firmware: {fw.kind} {fw.name} {fw.version} {extras}")
                 ids = _hidpp20.get_ids(dev)
                 if ids:
                     unitId, modelId, tid_map = ids
-                    print("            Unit ID: %s  Model ID: %s  Transport IDs: %s" % (unitId, modelId, tid_map))
+                    print(f"            Unit ID: {unitId}  Model ID: {modelId}  Transport IDs: {tid_map}")
             elif (
                 feature == _hidpp20_constants.FEATURE.REPORT_RATE
                 or feature == _hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE
             ):
-                print("            Report Rate: %s" % _hidpp20.get_polling_rate(dev))
+                print(f"            Report Rate: {_hidpp20.get_polling_rate(dev)}")
             elif feature == _hidpp20_constants.FEATURE.CONFIG_CHANGE:
                 response = dev.feature_request(_hidpp20_constants.FEATURE.CONFIG_CHANGE, 0x10)
-                print("            Configuration: %s" % response.hex())
+                print(f"            Configuration: {response.hex()}")
             elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
                 print("            Remaining Pairings: %d" % _hidpp20.get_remaining_pairing(dev))
             elif feature == _hidpp20_constants.FEATURE.ONBOARD_PROFILES:
@@ -238,7 +238,7 @@ def _print_device(dev, num=None):
                     mode = "Host"
                 else:
                     mode = "On-Board"
-                print("            Device Mode: %s" % mode)
+                print(f"            Device Mode: {mode}")
             elif hidpp20.battery_functions.get(feature, None):
                 print("", end="       ")
                 _battery_line(dev)
@@ -250,17 +250,17 @@ def _print_device(dev, num=None):
                         and setting._device.persister.get(setting.name) is not None
                     ):
                         v = setting.val_to_string(setting._device.persister.get(setting.name))
-                        print("            %s (saved): %s" % (setting.label, v))
+                        print(f"            {setting.label} (saved): {v}")
                     try:
                         v = setting.val_to_string(setting.read(False))
                     except exceptions.FeatureCallError as e:
                         v = "HID++ error " + str(e)
                     except AssertionError as e:
                         v = "AssertionError " + str(e)
-                    print("            %s        : %s" % (setting.label, v))
+                    print(f"            {setting.label}        : {v}")
 
     if dev.online and dev.keys:
-        print("     Has %d reprogrammable keys:" % len(dev.keys))
+        print(f"     Has {len(dev.keys)} reprogrammable keys:")
         for k in dev.keys:
             # TODO: add here additional variants for other REPROG_CONTROLS
             if dev.keys.keyversion == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V2:
@@ -272,9 +272,9 @@ def _print_device(dev, num=None):
                 print("             %s, pos:%d, group:%1d, group mask:%s" % (", ".join(k.flags), k.pos, k.group, gmask_fmt))
                 report_fmt = ", ".join(k.mapping_flags)
                 report_fmt = report_fmt if report_fmt else "default"
-                print("             reporting: %s" % (report_fmt))
+                print(f"             reporting: {report_fmt}")
     if dev.online and dev.remap_keys:
-        print("     Has %d persistent remappable keys:" % len(dev.remap_keys))
+        print(f"     Has {len(dev.remap_keys)} persistent remappable keys:")
         for k in dev.remap_keys:
             print("        %2d: %-26s => %s%s" % (k.index, k.key, k.action, " (remapped)" if k.cidStatus else ""))
     if dev.online and dev.gestures:
@@ -301,7 +301,7 @@ def run(devices, args, find_receiver, find_device):
     assert devices
     assert args.device
 
-    print("%s version %s" % (NAME.lower(), __version__))
+    print(f"{NAME.lower()} version {__version__}")
     print("")
 
     device_name = args.device.lower()
@@ -331,6 +331,6 @@ def run(devices, args, find_receiver, find_device):
 
     dev = next(find_device(devices, device_name), None)
     if not dev:
-        raise Exception("no device found matching '%s'" % device_name)
+        raise Exception(f"no device found matching '{device_name}'")
 
     _print_device(dev)

@@ -972,12 +972,12 @@ class AdjustableDpi(_Setting):
                 if val == 0:
                     break
                 if val >> 13 == 0b111:
-                    assert step is None and len(dpi_list) == 1, "Invalid DPI list item: %r" % val
+                    assert step is None and len(dpi_list) == 1, f"Invalid DPI list item: {val!r}"
                     step = val & 0x1FFF
                 else:
                     dpi_list.append(val)
             if step:
-                assert len(dpi_list) == 2, "Invalid DPI list range: %r" % dpi_list
+                assert len(dpi_list) == 2, f"Invalid DPI list range: {dpi_list!r}"
                 dpi_list = range(dpi_list[0], dpi_list[1] + 1, step)
             return cls(choices=_NamedInts.list(dpi_list), byte_count=3) if dpi_list else None
 
@@ -986,7 +986,7 @@ class AdjustableDpi(_Setting):
             if reply_value == 0:  # use default value instead
                 reply_value = _bytes2int(reply_bytes[3:5])
             valid_value = self.choices[reply_value]
-            assert valid_value is not None, "%s: failed to validate read value %02X" % (self.__class__.__name__, reply_value)
+            assert valid_value is not None, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
             return valid_value
 
 

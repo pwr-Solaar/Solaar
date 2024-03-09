@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 def _create_parser():
     parser = _argparse.ArgumentParser(
-        prog=NAME.lower(), add_help=False, epilog="For details on individual actions, run `%s <action> --help`." % NAME.lower()
+        prog=NAME.lower(), add_help=False, epilog=f"For details on individual actions, run `{NAME.lower()} <action> --help`."
     )
     subparsers = parser.add_subparsers(title="actions", help="optional action to perform")
 
@@ -117,7 +117,7 @@ def _receivers(dev_path=None):
                 yield r
         except Exception as e:
             logger.exception("opening " + str(dev_info))
-            _sys.exit("%s: error: %s" % (NAME.lower(), str(e)))
+            _sys.exit(f"{NAME.lower()}: error: {str(e)}")
 
 
 def _receivers_and_devices(dev_path=None):
@@ -136,7 +136,7 @@ def _receivers_and_devices(dev_path=None):
                 yield d
         except Exception as e:
             logger.exception("opening " + str(dev_info))
-            _sys.exit("%s: error: %s" % (NAME.lower(), str(e)))
+            _sys.exit(f"{NAME.lower()}: error: {str(e)}")
 
 
 def _find_receiver(receivers, name):
@@ -201,7 +201,7 @@ def run(cli_args=None, hidraw_path=None):
         # http://bugs.python.org/issue16308
         if "cmd" not in args:
             _cli_parser.print_usage(_sys.stderr)
-            _sys.stderr.write("%s: error: too few arguments\n" % NAME.lower())
+            _sys.stderr.write(f"{NAME.lower()}: error: too few arguments\n")
             _sys.exit(2)
         action = args.action
     assert action in actions
@@ -221,4 +221,4 @@ def run(cli_args=None, hidraw_path=None):
         tb_last = extract_tb(_sys.exc_info()[2])[-1]
         _sys.exit("%s: assertion failed: %s line %d" % (NAME.lower(), tb_last[0], tb_last[1]))
     except Exception:
-        _sys.exit("%s: error: %s" % (NAME.lower(), format_exc()))
+        _sys.exit(f"{NAME.lower()}: error: {format_exc()}")

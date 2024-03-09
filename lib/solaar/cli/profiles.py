@@ -36,7 +36,7 @@ def run(receivers, args, find_receiver, find_device):
         dev = None
 
     if not dev:
-        raise Exception("no online device found matching '%s'" % device_name)
+        raise Exception(f"no online device found matching '{device_name}'")
 
     if not (dev.online and dev.profiles):
         print(f"Device {dev.name} is either offline or has no onboard profiles")

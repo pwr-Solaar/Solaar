@@ -89,7 +89,7 @@ class ReceiverListener(_listener.EventsListener):
             try:
                 r.close()
             except Exception:
-                logger.exception("closing receiver %s" % r.path)
+                logger.exception(f"closing receiver {r.path}")
         self.status_changed_callback(r)
 
     def _status_changed(self, device, alert=None, reason=None):
@@ -226,7 +226,7 @@ class ReceiverListener(_listener.EventsListener):
             dev.ping()
 
     def __str__(self):
-        return "<ReceiverListener(%s,%s)>" % (self.receiver.path, self.receiver.handle)
+        return f"<ReceiverListener({self.receiver.path},{self.receiver.handle})>"
 
 
 _all_listeners = {}  # all known receiver listeners, listeners that stop on their own may remain here

@@ -160,7 +160,7 @@ try:
             raise ImportError from exc
 
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("using %sAppIndicator3" % ("Ayatana " if ayatana_appindicator_found else ""))
+        logger.debug(f"using {'Ayatana ' if ayatana_appindicator_found else ''}AppIndicator3")
 
     # Defense against AppIndicator3 bug that treats files in current directory as icon files
     # https://bugs.launchpad.net/ubuntu/+source/libappindicator/+bug/1363277
@@ -200,7 +200,7 @@ try:
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
-            description = "%s: %s" % (name, device.status_string())
+            description = f"{name}: {device.status_string()}"
         else:
             # there may be a receiver, but no peripherals
             tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_INIT
@@ -290,7 +290,7 @@ except ImportError:
 
 def _generate_tooltip_lines():
     if not _devices_info:
-        yield "<b>%s</b>: " % NAME + _("no receiver")
+        yield f"<b>{NAME}</b>: " + _("no receiver")
         return
 
     yield from _generate_description_lines()
@@ -307,16 +307,16 @@ def _generate_description_lines():
 
         p = device.status_string()
         if p:  # does it have any properties to print?
-            yield "<b>%s</b>" % name
+            yield f"<b>{name}</b>"
             if device.online:
-                yield "\t%s" % p
+                yield f"\t{p}"
             else:
-                yield "\t%s <small>(" % p + _("offline") + ")</small>"
+                yield f"\t{p} <small>(" + _("offline") + ")</small>"
         else:
             if device.online:
-                yield "<b>%s</b> <small>(" % name + _("no status") + ")</small>"
+                yield f"<b>{name}</b> <small>(" + _("no status") + ")</small>"
             else:
-                yield "<b>%s</b> <small>(" % name + _("offline") + ")</small>"
+                yield f"<b>{name}</b> <small>(" + _("offline") + ")</small>"
 
 
 def _pick_device_with_lowest_battery():
