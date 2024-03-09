@@ -18,6 +18,7 @@
 import errno as _errno
 import logging
 
+from dataclasses import dataclass
 from typing import Optional
 
 import hidapi as _hid
@@ -31,6 +32,22 @@ logger = logging.getLogger(__name__)
 _hidpp10 = hidpp10.Hidpp10()
 _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
+
+
+@dataclass
+class Pairing:
+    """Information about the current or most recent pairing"""
+
+    lock_open: bool = False
+    discovering: bool = False
+    counter: Optional[int] = None
+    device_address: Optional[bytes] = None
+    device_authentication: Optional[int] = None
+    device_kind: Optional[int] = None
+    device_name: Optional[str] = None
+    device_passkey: Optional[str] = None
+    new_device: Optional[Device] = None
+    error: Optional[any] = None
 
 
 class Receiver:
@@ -57,6 +74,8 @@ class Receiver:
         self.name = product_info.get("name", "Receiver")
         self.may_unpair = product_info.get("may_unpair", False)
         self.re_pairs = product_info.get("re_pairs", False)
+        self.notification_flags = None
+        self.pairing = Pairing()
         self.initialize(product_info)
 
     def initialize(self, product_info: dict):

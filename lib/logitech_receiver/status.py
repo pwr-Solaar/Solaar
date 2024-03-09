@@ -45,27 +45,26 @@ def attach_to(device, changed_callback):
 
 
 class ReceiverStatus:
-    """The 'runtime' status of a receiver, mostly about the pairing process --
-    is the pairing lock open or closed, any pairing errors, etc.
-    """
+    """The 'runtime' status of a receiver, currently vestigial."""
 
     def __init__(self, receiver, changed_callback):
         assert receiver
         self._receiver = receiver
         assert changed_callback
         self._changed_callback = changed_callback
-        self.notification_flags = None
-        self.error = None
 
-        self.lock_open = False
-        self.discovering = False
-        self.counter = None
-        self.device_address = None
-        self.device_authentication = None
-        self.device_kind = None
-        self.device_name = None
-        self.device_passkey = None
-        self.new_device = None
+    #        self.notification_flags = None
+    #        self.error = None
+
+    #        self.lock_open = False
+    #        self.discovering = False
+    #        self.counter = None
+    #        self.device_address = None
+    #        self.device_authentication = None
+    #        self.device_kind = None
+    #        self.device_name = None
+    #        self.device_passkey = None
+    #        self.new_device = None
 
     def to_string(self):
         count = len(self._receiver)
@@ -96,8 +95,8 @@ class DeviceStatus:
         self._active = None  # is the device active?
         self.battery = None
         self.link_encrypted = None
-        self.notification_flags = None
-        self.error = None
+        #        self.notification_flags = None
+        self.battery_error = None
 
     def to_string(self):
         return self.battery.to_str() if self.battery is not None else ""
@@ -118,11 +117,11 @@ class DeviceStatus:
 
         alert, reason = ALERT.NONE, None
         if info.ok():
-            self.error = None
+            self.battery_error = None
         else:
             logger.warning("%s: battery %d%%, ALERT %s", self._device, info.level, info.status)
-            if self.error != info.status:
-                self.error = info.status
+            if self.battery_error != info.status:
+                self.battery_error = info.status
                 alert = ALERT.NOTIFICATION | ALERT.ATTENTION
             reason = info.to_str()
 
@@ -149,7 +148,7 @@ class DeviceStatus:
                     # get cleared when the device is turned off (but not when the device
                     # goes idle, and we can't tell the difference right now).
                     if d.protocol < 2.0:
-                        self.notification_flags = d.enable_connection_notifications()
+                        self._device.notification_flags = d.enable_connection_notifications()
                     # battery information may have changed so try to read it now
                     self.read_battery()
 
