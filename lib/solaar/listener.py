@@ -188,12 +188,12 @@ class ReceiverListener(_listener.EventsListener):
                     if self.receiver.read_register(_R.receiver_info, _IR.pairing_information + n.devnumber - 1) is None:
                         return
                 dev = self.receiver.register_new_device(n.devnumber, n)
-            elif self.receiver.status.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
+            elif self.receiver.pairing.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
                 dev = self.receiver[n.devnumber]
                 del self.receiver[n.devnumber]  # get rid of information on device re-paired away
                 self._status_changed(dev)  # signal that this device has changed
                 dev = self.receiver.register_new_device(n.devnumber, n)
-                self.receiver.status.new_device = self.receiver[n.devnumber]
+                self.receiver.pairing.new_device = self.receiver[n.devnumber]
             else:
                 dev = self.receiver[n.devnumber]
         else:
@@ -224,12 +224,13 @@ class ReceiverListener(_listener.EventsListener):
         else:
             _notifications.process(dev, n)
 
-        if self.receiver.status.lock_open and not already_known:
+        if self.receiver.pairing.lock_open and not already_known:
             # this should be the first notification after a device was paired
-            assert n.sub_id == 0x41, "first notification was not a connection notification"
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("first notification was not a connection notification")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: pairing detected new device", self.receiver)
-            self.receiver.status.new_device = dev
+            self.receiver.pairing.new_device = dev
         elif dev.online is None:
             dev.ping()
 

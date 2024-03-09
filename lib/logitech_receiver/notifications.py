@@ -64,34 +64,35 @@ def _process_receiver_notification(receiver, status, n):
     assert n.sub_id & 0x40 == 0x40
 
     if n.sub_id == 0x4A:  # pairing lock notification
-        status.lock_open = bool(n.address & 0x01)
-        reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
+        receiver.pairing.lock_open = bool(n.address & 0x01)
+        reason = _("pairing lock is open") if receiver.pairing.lock_open else _("pairing lock is closed")
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: %s", receiver, reason)
-        status.error = None
-        if status.lock_open:
-            status.new_device = None
+        receiver.pairing.error = None
+        if receiver.pairing.lock_open:
+            receiver.pairing.new_device = None
         pair_error = ord(n.data[:1])
         if pair_error:
-            status.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
-            status.new_device = None
+            receiver.pairing.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
+            receiver.pairing.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         status.changed(reason=reason)
         return True
 
     elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
         with notification_lock:
-            status.discovering = n.address == 0x00
-            reason = _("discovery lock is open") if status.discovering else _("discovery lock is closed")
+            receiver.pairing.discovering = n.address == 0x00
+            reason = _("discovery lock is open") if receiver.pairing.discovering else _("discovery lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status.error = None
-            if status.discovering:
-                status.counter = status.device_address = status.device_authentication = status.device_name = None
-            status.device_passkey = None
+            receiver.pairing.error = None
+            if receiver.pairing.discovering:
+                receiver.pairing.counter = receiver.pairing.device_address = None
+                receiver.pairing.device_authentication = receiver.pairing.device_name = None
+            receiver.pairing.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
-                status.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
+                receiver.pairing.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
             status.changed(reason=reason)
             return True
@@ -99,44 +100,46 @@ def _process_receiver_notification(receiver, status, n):
     elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
         with notification_lock:
             counter = n.address + n.data[0] * 256  # notification counter
-            if status.counter is None:
-                status.counter = counter
+            if receiver.pairing.counter is None:
+                receiver.pairing.counter = counter
             else:
-                if not status.counter == counter:
+                if not receiver.pairing.counter == counter:
                     return None
             if n.data[1] == 0:
-                status.device_kind = n.data[3]
-                status.device_address = n.data[6:12]
-                status.device_authentication = n.data[14]
+                receiver.pairing.device_kind = n.data[3]
+                receiver.pairing.device_address = n.data[6:12]
+                receiver.pairing.device_authentication = n.data[14]
             elif n.data[1] == 1:
-                status.device_name = n.data[3 : 3 + n.data[2]].decode("utf-8")
+                receiver.pairing.device_name = n.data[3 : 3 + n.data[2]].decode("utf-8")
             return True
 
     elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
         with notification_lock:
-            status.device_passkey = None
-            status.lock_open = n.address == 0x00
-            reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
+            receiver.pairing.device_passkey = None
+            receiver.pairing.lock_open = n.address == 0x00
+            reason = _("pairing lock is open") if receiver.pairing.lock_open else _("pairing lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status.error = None
-            if not status.lock_open:
-                status.counter = status.device_address = status.device_authentication = status.device_name = None
+            receiver.pairing.error = None
+            if not receiver.pairing.lock_open:
+                receiver.pairing.counter = (
+                    receiver.pairing.device_address
+                ) = receiver.pairing.device_authentication = receiver.pairing.device_name = None
             pair_error = n.data[0]
-            if status.lock_open:
-                status.new_device = None
+            if receiver.pairing.lock_open:
+                receiver.pairing.new_device = None
             elif n.address == 0x02 and not pair_error:
-                status.new_device = receiver.register_new_device(n.data[7])
+                receiver.pairing.new_device = receiver.register_new_device(n.data[7])
             if pair_error:
-                status.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
-                status.new_device = None
+                receiver.pairing.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
+                receiver.pairing.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
             status.changed(reason=reason)
             return True
 
     elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
         with notification_lock:
-            status.device_passkey = n.data[0:6].decode("utf-8")
+            receiver.pairing.device_passkey = n.data[0:6].decode("utf-8")
             return True
 
     elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing

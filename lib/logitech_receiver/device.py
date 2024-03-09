@@ -91,6 +91,7 @@ class Device:
         self._persister = None  # persister holds settings
         self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
         self._profiles = self._backlight = self._registers = self._settings = None
+        self.notification_flags = None
 
         self._feature_settings_checked = False
         self._gestures_lock = _threading.Lock()

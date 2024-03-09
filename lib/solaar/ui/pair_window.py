@@ -71,23 +71,23 @@ def _check_lock_state(assistant, receiver, count=2):
             logger.debug("assistant %s destroyed, bailing out", assistant)
         return False
 
-    if receiver.status.error:
-        # receiver.status.new_device = _fake_device(receiver)
-        _pairing_failed(assistant, receiver, receiver.status.error)
-        receiver.status.error = None
+    if receiver.pairing.error:
+        # receiver.pairing.new_device = _fake_device(receiver)
+        _pairing_failed(assistant, receiver, receiver.pairing.error)
+        receiver.pairing.error = None
         return False
 
-    if receiver.status.new_device:
+    if receiver.pairing.new_device:
         receiver.remaining_pairings(False)  # Update remaining pairings
-        device, receiver.status.new_device = receiver.status.new_device, None
+        device, receiver.pairing.new_device = receiver.pairing.new_device, None
         _pairing_succeeded(assistant, receiver, device)
         return False
-    elif receiver.status.device_address and receiver.status.device_name and not address:
-        address = receiver.status.device_address
-        name = receiver.status.device_name
-        kind = receiver.status.device_kind
-        authentication = receiver.status.device_authentication
-        name = receiver.status.device_name
+    elif receiver.pairing.device_address and receiver.pairing.device_name and not address:
+        address = receiver.pairing.device_address
+        name = receiver.pairing.device_name
+        kind = receiver.pairing.device_kind
+        authentication = receiver.pairing.device_authentication
+        name = receiver.pairing.device_name
         entropy = 10
         if kind == _hidpp10_constants.DEVICE_KIND.keyboard:
             entropy = 20
@@ -100,12 +100,12 @@ def _check_lock_state(assistant, receiver, count=2):
         else:
             _pairing_failed(assistant, receiver, "failed to open pairing lock")
             return False
-    elif address and receiver.status.device_passkey and not passcode:
-        passcode = receiver.status.device_passkey
+    elif address and receiver.pairing.device_passkey and not passcode:
+        passcode = receiver.pairing.device_passkey
         _show_passcode(assistant, receiver, passcode)
         return True
 
-    if not receiver.status.lock_open and not receiver.status.discovering:
+    if not receiver.pairing.lock_open and not receiver.pairing.discovering:
         if count > 0:
             # the actual device notification may arrive later so have a little patience
             GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver, count - 1)
@@ -119,16 +119,16 @@ def _check_lock_state(assistant, receiver, count=2):
 def _show_passcode(assistant, receiver, passkey):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s show passkey: %s", receiver, passkey)
-    name = receiver.status.device_name
-    authentication = receiver.status.device_authentication
+    name = receiver.pairing.device_name
+    authentication = receiver.pairing.device_authentication
     intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
     page_text = _("Enter passcode on %(name)s.") % {"name": name}
     page_text += "\n"
     if authentication & 0x01:
-        page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": receiver.status.device_passkey}
+        page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": receiver.pairing.device_passkey}
     else:
         passcode = ", ".join(
-            [_("right") if bit == "1" else _("left") for bit in f"{int(receiver.status.device_passkey):010b}"]
+            [_("right") if bit == "1" else _("left") for bit in f"{int(receiver.pairing.device_passkey):010b}"]
         )
         page_text += _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
     page = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, intro_text, "preferences-desktop-peripherals", page_text)
@@ -144,8 +144,8 @@ def _prepare(assistant, page, receiver):
     if index == 0:
         if receiver.receiver_kind == "bolt":
             if receiver.discover(timeout=_PAIRING_TIMEOUT):
-                assert receiver.status.new_device is None
-                assert receiver.status.error is None
+                assert receiver.pairing.new_device is None
+                assert receiver.pairing.error is None
                 spinner = page.get_children()[-1]
                 spinner.start()
                 GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
@@ -153,8 +153,8 @@ def _prepare(assistant, page, receiver):
             else:
                 GLib.idle_add(_pairing_failed, assistant, receiver, "discovery did not start")
         elif receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
-            assert receiver.status.new_device is None
-            assert receiver.status.error is None
+            assert receiver.pairing.new_device is None
+            assert receiver.pairing.error is None
             spinner = page.get_children()[-1]
             spinner.start()
             GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
@@ -169,16 +169,16 @@ def _finish(assistant, receiver):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("finish %s", assistant)
     assistant.destroy()
-    receiver.status.new_device = None
-    if receiver.status.lock_open:
+    receiver.pairing.new_device = None
+    if receiver.pairing.lock_open:
         if receiver.receiver_kind == "bolt":
             receiver.pair_device("cancel")
         else:
             receiver.set_lock()
-    if receiver.status.discovering:
+    if receiver.pairing.discovering:
         receiver.discover(True)
-    if not receiver.status.lock_open and not receiver.status.discovering:
-        receiver.status.error = None
+    if not receiver.pairing.lock_open and not receiver.pairing.discovering:
+        receiver.pairing.error = None
 
 
 def _pairing_failed(assistant, receiver, error):

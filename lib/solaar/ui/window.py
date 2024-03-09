@@ -573,7 +573,7 @@ def _update_details(button):
             elif device.kind is None or device.online:
                 yield ("  %s" % _("Firmware"), "...")
 
-            flag_bits = device.status.notification_flags
+            flag_bits = device.notification_flags
             if flag_bits is not None:
                 flag_names = (
                     ("(%s)" % _("none"),) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
@@ -648,7 +648,7 @@ def _update_receiver_panel(receiver, panel, buttons, full=False):
 
     panel._count.set_markup(paired_text)
 
-    is_pairing = receiver.status.lock_open
+    is_pairing = receiver.pairing.lock_open
     if is_pairing:
         panel._scanning.set_visible(True)
         if not panel._spinner.get_visible():
@@ -872,7 +872,7 @@ def update(device, need_popup=False, refresh=False):
 
         if is_alive and item:
             was_pairing = bool(_model.get_value(item, _COLUMN.STATUS_ICON))
-            is_pairing = (not device.isDevice) and bool(device.status.lock_open)
+            is_pairing = (not device.isDevice) and bool(device.pairing.lock_open)
             _model.set_value(item, _COLUMN.STATUS_ICON, "network-wireless" if is_pairing else _CAN_SET_ROW_NONE)
 
             if selected_device_id == (device.path, 0):
