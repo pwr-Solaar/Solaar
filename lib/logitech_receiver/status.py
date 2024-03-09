@@ -68,7 +68,6 @@ class DeviceStatus:
         assert changed_callback
         self._changed_callback = changed_callback
         self._active = None  # is the device active?
-        self.link_encrypted = None
 
     def __bool__(self):
         return bool(self._active)
