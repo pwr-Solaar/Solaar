@@ -26,7 +26,7 @@ install_dnf:
 install_brew:
 	@echo "Installing Solaar dependencies via brew"
 	brew update
-	brew install hidapi gtk+3 pygobject3
+	brew install hidapi gtk+3 pygobject3 gobject-introspection
 
 install_pip:
 	@echo "Installing Solaar via pip"

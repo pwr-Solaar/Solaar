@@ -17,6 +17,8 @@
 # Base low-level functions used by the API proper.
 # Unlikely to be used directly unless you're expanding the API.
 
+from __future__ import annotations
+
 import logging
 import threading as _threading
 
@@ -74,9 +76,10 @@ def other_device_check(bus_id, vendor_id, product_id):
             return _bt_device(product_id)
 
 
-def product_information(usb_id):
+def product_information(usb_id: int | str) -> dict:
     if isinstance(usb_id, str):
         usb_id = int(usb_id, 16)
+
     for r in _RECEIVER_USB_IDS:
         if usb_id == r.get("product_id"):
             return r
