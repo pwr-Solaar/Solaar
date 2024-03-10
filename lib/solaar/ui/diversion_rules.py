@@ -83,6 +83,27 @@ class RuleComponentWrapper(GObject.GObject):
         return COMPONENT_UI.get(type(self.component), UnsupportedRuleComponentUI)
 
 
+def _create_close_dialog(window: Gtk.Window) -> Gtk.MessageDialog:
+    """Creates rule editor close dialog, when unsaved changes are present."""
+    dialog = Gtk.MessageDialog(
+        window,
+        type=Gtk.MessageType.QUESTION,
+        title=_("Make changes permanent?"),
+        flags=Gtk.DialogFlags.MODAL,
+    )
+    dialog.set_default_size(400, 100)
+    dialog.add_buttons(
+        _("Yes"),
+        Gtk.ResponseType.YES,
+        _("No"),
+        Gtk.ResponseType.NO,
+        _("Cancel"),
+        Gtk.ResponseType.CANCEL,
+    )
+    dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
+    return dialog
+
+
 class DiversionDialog:
     def __init__(self):
         window = Gtk.Window()
@@ -130,37 +151,21 @@ class DiversionDialog:
         self.window = window
         self._editing_component = None
 
-    def _closing(self, w, e):
+    def _closing(self, window: Gtk.Window, e: Gdk.Event):
         if self.dirty:
-            dialog = Gtk.MessageDialog(
-                self.window,
-                type=Gtk.MessageType.QUESTION,
-                title=_("Make changes permanent?"),
-                flags=Gtk.DialogFlags.MODAL,
-            )
-            dialog.set_default_size(400, 100)
-            dialog.add_buttons(
-                _("Yes"),
-                Gtk.ResponseType.YES,
-                _("No"),
-                Gtk.ResponseType.NO,
-                _("Cancel"),
-                Gtk.ResponseType.CANCEL,
-            )
-            dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
-            dialog.show_all()
+            dialog = _create_close_dialog(window)
             response = dialog.run()
             dialog.destroy()
             if response == Gtk.ResponseType.NO:
-                w.hide()
+                window.hide()
             elif response == Gtk.ResponseType.YES:
                 self._save_yaml_file()
-                w.hide()
+                window.hide()
             else:
                 # don't close
                 return True
         else:
-            w.hide()
+            window.hide()
 
     def _reload_yaml_file(self):
         self.discard_btn.set_sensitive(False)
