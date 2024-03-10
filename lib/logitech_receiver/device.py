@@ -25,7 +25,7 @@ from typing import Optional
 import hidapi as _hid
 import solaar.configuration as _configuration
 
-from . import base, descriptors, exceptions, hidpp10, hidpp10_constants, hidpp20
+from . import base, descriptors, exceptions, hidpp10, hidpp10_constants, hidpp20, hidpp20_constants, settings
 from .common import ALERT, Battery
 from .settings_templates import check_feature_settings as _check_feature_settings
 
@@ -66,7 +66,7 @@ class Device:
         if receiver:
             assert 0 < number <= 15  # some receivers have devices past their max # of devices
         self.number = number  # will be None at this point for directly connected devices
-        self.online = online
+        self.online = online  # is the device online? - gates many atempts to contact the device
         self.descriptor = None
         self.isDevice = True  # some devices act as receiver so we need a property to distinguish them
         self.may_unpair = False
@@ -95,6 +95,7 @@ class Device:
         self.notification_flags = None
         self.battery_info = None
         self.link_encrypted = None
+        self._active = None  # lags self.online - is used to help determine when to setup devices
 
         self._feature_settings_checked = False
         self._gestures_lock = _threading.Lock()
@@ -375,7 +376,7 @@ class Device:
             # update the leds on the device, if any
             _hidpp10.set_3leds(self, info.level, charging=info.charging(), warning=bool(alert))
             if hasattr(self, "status"):
-                self.status.changed(active=True, alert=alert, reason=reason)
+                self.changed(active=True, alert=alert, reason=reason)
 
     # Retrieve and regularize battery status
     def read_battery(self):
@@ -407,6 +408,33 @@ class Device:
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: device notifications %s %s", self, "enabled" if enable else "disabled", flag_names)
         return flag_bits if ok else None
+
+    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
+        """The status of the device had changed, so invoke the status callback.
+        Also push notifications and settings to the device when necessary."""
+        changed_callback = self.status._changed_callback
+        if active is not None:
+            self.online = active
+            was_active, self._active = self._active, active
+            if active:
+                if not was_active:
+                    if self.protocol < 2.0:  # Make sure to set notification flags on the device
+                        self.notification_flags = self.enable_connection_notifications()
+                    self.read_battery()  # battery information may have changed so try to read it now
+                # Push settings for new devices when devices request software reconfiguration
+                # and when devices become active if they don't have wireless device status feature,
+                if (
+                    was_active is None
+                    or not was_active
+                    or push
+                    and (not self.features or hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in self.features)
+                ):
+                    if logger.isEnabledFor(logging.INFO):
+                        logger.info("%s pushing device settings %s", self, self.settings)
+                    settings.apply_all_settings(self)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
+        changed_callback(self, alert, reason)
 
     def add_notification_handler(self, id: str, fn):
         """Adds the notification handling callback `fn` to this device under name `id`.

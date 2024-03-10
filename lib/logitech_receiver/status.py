@@ -19,8 +19,6 @@ import logging
 
 from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
-from . import hidpp20_constants as _hidpp20_constants
-from . import settings as _settings
 from .common import NamedInts
 
 logger = logging.getLogger(__name__)
@@ -52,9 +50,6 @@ class ReceiverStatus:
         assert changed_callback
         self._changed_callback = changed_callback
 
-    def changed(self, alert=ALERT.NOTIFICATION, reason=None):
-        self._changed_callback(self._receiver, alert=alert, reason=reason)
-
 
 class DeviceStatus:
     """Holds the 'runtime' status of a peripheral
@@ -73,35 +68,3 @@ class DeviceStatus:
         return bool(self._active)
 
     __nonzero__ = __bool__
-
-    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
-        d = self._device
-
-        if active is not None:
-            d.online = active
-            was_active, self._active = self._active, active
-            if active:
-                if not was_active:
-                    # Make sure to set notification flags on the device, they
-                    # get cleared when the device is turned off (but not when the device
-                    # goes idle, and we can't tell the difference right now).
-                    if d.protocol < 2.0:
-                        self._device.notification_flags = d.enable_connection_notifications()
-                    # battery information may have changed so try to read it now
-                    self._device.read_battery()
-
-                # Push settings for new devices when devices request software reconfiguration
-                # and when devices become active if they don't have wireless device status feature,
-                if (
-                    was_active is None
-                    or push
-                    or not was_active
-                    and (not d.features or _hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in d.features)
-                ):
-                    if logger.isEnabledFor(logging.INFO):
-                        logger.info("%s pushing device settings %s", d, d.settings)
-                    _settings.apply_all_settings(d)
-
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("device %d changed: active=%s %s", d.number, self._active, self.battery)
-        self._changed_callback(d, alert, reason)

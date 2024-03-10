@@ -133,7 +133,7 @@ class EventsListener(threading.Thread):
 
         if self.receiver.isDevice:  # ping (wired or BT) devices to see if they are really online
             if self.receiver.ping():
-                self.receiver.status.changed(True, reason="initialization")
+                self.receiver.changed(active=True, reason="initialization")
 
         while self._active:
             if self._queued_notifications.empty():

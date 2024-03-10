@@ -25,6 +25,7 @@ import hidapi as _hid
 
 from . import base as _base
 from . import exceptions, hidpp10, hidpp10_constants
+from .common import ALERT
 from .device import Device
 from .i18n import _, ngettext
 
@@ -101,6 +102,10 @@ class Receiver:
 
     def __del__(self):
         self.close()
+
+    def changed(self, alert=ALERT.NOTIFICATION, reason=None):
+        """The status of the device had changed, so invoke the status callback"""
+        self.status._changed_callback(self, alert=alert, reason=reason)
 
     @property
     def firmware(self):
