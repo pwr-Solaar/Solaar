@@ -116,6 +116,14 @@ def _create_selected_rule_edit_panel() -> Gtk.Grid:
     return grid
 
 
+def _menu_do_copy(_mitem: Gtk.MenuItem, m: Gtk.TreeStore, it: Gtk.TreeIter):
+    global _rule_component_clipboard
+
+    wrapped = m[it][0]
+    c = wrapped.component
+    _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+
+
 class DiversionDialog:
     def __init__(self):
         window = Gtk.Window()
@@ -337,7 +345,7 @@ class DiversionDialog:
             if can_delete and e.keyval in [Gdk.KEY_x, Gdk.KEY_X]:
                 self._menu_do_cut(None, m, it)
             elif can_copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and c is not None:
-                self._menu_do_copy(None, m, it)
+                _menu_do_copy(None, m, it)
             elif can_insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
                 self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
             elif (
@@ -686,15 +694,9 @@ class DiversionDialog:
         menu_paste.show()
         return menu_paste
 
-    def _menu_do_copy(self, _mitem, m, it):
-        global _rule_component_clipboard
-        wrapped = m[it][0]
-        c = wrapped.component
-        _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
-
     def _menu_copy(self, m, it):
         menu_copy = Gtk.MenuItem(_("Copy"))
-        menu_copy.connect("activate", self._menu_do_copy, m, it)
+        menu_copy.connect("activate", _menu_do_copy, m, it)
         menu_copy.show()
         return menu_copy
 
