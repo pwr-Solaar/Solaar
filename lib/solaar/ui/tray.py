@@ -23,7 +23,6 @@ import gi
 
 from gi.repository import GLib, Gtk
 from gi.repository.Gdk import ScrollDirection
-from logitech_receiver.status import KEYS as _K
 
 import solaar.gtk as gtk
 
@@ -182,7 +181,7 @@ try:
         ind.set_title(NAME)
         ind.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         # ind.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), '') # works poorly for XFCE 16
-        # ind.set_label(NAME, NAME)
+        # ind.set_label(NAME.lower(), NAME.lower())
 
         ind.set_menu(menu)
         ind.connect("scroll-event", _scroll)
@@ -198,8 +197,8 @@ try:
     def _update_tray_icon():
         if _picked_device and gtk.battery_icons_style != "solaar":
             _ignore, _ignore, name, device_status = _picked_device
-            battery_level = device_status.get(_K.BATTERY_LEVEL)
-            battery_charging = device_status.get(_K.BATTERY_CHARGING)
+            battery_level = device_status.battery.level if device_status.battery is not None else None
+            battery_charging = device_status.battery.charging() if device_status.battery is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
 
             description = "%s: %s" % (name, device_status.to_string())
@@ -231,7 +230,7 @@ except ImportError:
 
     def _create(menu):
         icon = Gtk.StatusIcon.new_from_icon_name(_icons.TRAY_INIT)
-        icon.set_name(NAME)
+        icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
         icon.connect("activate", _window_toggle)
@@ -253,8 +252,8 @@ except ImportError:
 
         if _picked_device and gtk.battery_icons_style != "solaar":
             _ignore, _ignore, name, device_status = _picked_device
-            battery_level = device_status.get(_K.BATTERY_LEVEL)
-            battery_charging = device_status.get(_K.BATTERY_CHARGING)
+            battery_level = device_status.battery.level if device_status.battery is not None else None
+            battery_charging = device_status.battery.charging() if device_status.battery is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
         else:
             # there may be a receiver, but no peripherals
@@ -331,7 +330,7 @@ def _pick_device_with_lowest_battery():
     for info in _devices_info:
         if info[1] is None:  # is receiver
             continue
-        level = info[-1].get(_K.BATTERY_LEVEL)
+        level = info[-1].battery.level if info[-1].battery is not None else None
         # print ("checking %s -> %s", info, level)
         if level is not None and picked_level > level:
             picked = info
@@ -428,8 +427,8 @@ def _update_menu_item(index, device):
     menu_items = _menu.get_children()
     menu_item = menu_items[index]
 
-    level = device.status.get(_K.BATTERY_LEVEL)
-    charging = device.status.get(_K.BATTERY_CHARGING)
+    level = device.status.battery.level if device.status.battery is not None else None
+    charging = device.status.battery.charging() if device.status.battery is not None else None
     icon_name = _icons.battery(level, charging)
 
     menu_item.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status.to_string())

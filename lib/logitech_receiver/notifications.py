@@ -29,11 +29,10 @@ from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
-from .common import BATTERY_STATUS as _BATTERY_STATUS
+from .common import Battery as _Battery
 from .common import strhex as _strhex
 from .i18n import _
 from .status import ALERT as _ALERT
-from .status import KEYS as _K
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +68,12 @@ def _process_receiver_notification(receiver, status, n):
         reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: %s", receiver, reason)
-        status[_K.ERROR] = None
+        status.error = None
         if status.lock_open:
             status.new_device = None
         pair_error = ord(n.data[:1])
         if pair_error:
-            status[_K.ERROR] = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
+            status.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
             status.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         status.changed(reason=reason)
@@ -86,13 +85,13 @@ def _process_receiver_notification(receiver, status, n):
             reason = _("discovery lock is open") if status.discovering else _("discovery lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status[_K.ERROR] = None
+            status.error = None
             if status.discovering:
                 status.counter = status.device_address = status.device_authentication = status.device_name = None
             status.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
-                status[_K.ERROR] = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
+                status.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
             status.changed(reason=reason)
             return True
@@ -120,7 +119,7 @@ def _process_receiver_notification(receiver, status, n):
             reason = _("pairing lock is open") if status.lock_open else _("pairing lock is closed")
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: %s", receiver, reason)
-            status[_K.ERROR] = None
+            status.error = None
             if not status.lock_open:
                 status.counter = status.device_address = status.device_authentication = status.device_name = None
             pair_error = n.data[0]
@@ -129,7 +128,7 @@ def _process_receiver_notification(receiver, status, n):
             elif n.address == 0x02 and not pair_error:
                 status.new_device = receiver.register_new_device(n.data[7])
             if pair_error:
-                status[_K.ERROR] = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
+                status.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
                 status.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
             status.changed(reason=reason)
@@ -218,11 +217,9 @@ def _process_hidpp10_custom_notification(device, status, n):
         logger.debug("%s (%s) custom notification %s", device, device.protocol, n)
 
     if n.sub_id in (_R.battery_status, _R.battery_charge):
-        # message layout: 10 ix <register> <xx> <yy> <zz> <00>
         assert n.data[-1:] == b"\x00"
         data = chr(n.address).encode() + n.data
-        charge, next_charge, status_text, voltage = hidpp10.parse_battery_status(n.sub_id, data)
-        status.set_battery_info(charge, next_charge, status_text, voltage)
+        status.set_battery_info(hidpp10.parse_battery_status(n.sub_id, data))
         return True
 
     logger.warning("%s: unrecognized %s", device, n)
@@ -232,7 +229,6 @@ def _process_hidpp10_notification(device, status, n):
     if n.sub_id == 0x40:  # device unpairing
         if n.address == 0x02:
             # device un-paired
-            status.clear()
             device.wpid = None
             device.status = None
             if device.number in device.receiver:
@@ -267,7 +263,7 @@ def _process_hidpp10_notification(device, status, n):
                 link_established,
                 bool(flags & 0x80),
             )
-        status[_K.LINK_ENCRYPTED] = link_encrypted
+        status.link_encrypted = link_encrypted
         status.changed(active=link_established)
         return True
 
@@ -296,8 +292,7 @@ def _process_feature_notification(device, status, n, feature):
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
-            _ignore, discharge_level, discharge_next_level, battery_status, voltage = hidpp20.decipher_battery_status(n.data)
-            status.set_battery_info(discharge_level, discharge_next_level, battery_status, voltage)
+            status.set_battery_info(hidpp20.decipher_battery_status(n.data)[1])
         elif n.address == 0x10:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: spurious BATTERY status %s", device, n)
@@ -306,15 +301,13 @@ def _process_feature_notification(device, status, n, feature):
 
     elif feature == _F.BATTERY_VOLTAGE:
         if n.address == 0x00:
-            _ignore, level, nextl, battery_status, voltage = hidpp20.decipher_battery_voltage(n.data)
-            status.set_battery_info(level, nextl, battery_status, voltage)
+            status.set_battery_info(hidpp20.decipher_battery_voltage(n.data)[1])
         else:
             logger.warning("%s: unknown VOLTAGE %s", device, n)
 
     elif feature == _F.UNIFIED_BATTERY:
         if n.address == 0x00:
-            _ignore, level, nextl, battery_status, voltage = hidpp20.decipher_battery_unified(n.data)
-            status.set_battery_info(level, nextl, battery_status, voltage)
+            status.set_battery_info(hidpp20.decipher_battery_unified(n.data)[1])
         else:
             logger.warning("%s: unknown UNIFIED BATTERY %s", device, n)
 
@@ -322,8 +315,7 @@ def _process_feature_notification(device, status, n, feature):
         if n.address == 0x00:
             result = hidpp20.decipher_adc_measurement(n.data)
             if result:
-                _ignore, level, nextl, battery_status, voltage = result
-                status.set_battery_info(level, nextl, battery_status, voltage)
+                status.set_battery_info(result[1])
             else:  # this feature is used to signal device becoming inactive
                 status.changed(active=False)
         else:
@@ -334,15 +326,13 @@ def _process_feature_notification(device, status, n, feature):
             charge, lux, adc = _unpack("!BHH", n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
-            status_text = _BATTERY_STATUS.discharging
+            status_text = _Battery.STATUS.discharging
             if n.address == 0x00:
-                status[_K.LIGHT_LEVEL] = None
-                status.set_battery_info(charge, None, status_text, None)
+                status.set_battery_info(_Battery(charge, None, status_text, None))
             elif n.address == 0x10:
-                status[_K.LIGHT_LEVEL] = lux
                 if lux > 200:
-                    status_text = _BATTERY_STATUS.recharging
-                status.set_battery_info(charge, None, status_text, None)
+                    status_text = _Battery.STATUS.recharging
+                status.set_battery_info(_Battery(charge, None, status_text, None, lux))
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("%s: Light Check button pressed", device)

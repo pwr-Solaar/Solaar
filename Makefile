@@ -17,7 +17,7 @@ install_macos: install_brew install_pip
 install_apt:
 	@echo "Installing Solaar dependencies via apt"
 	sudo apt update
-	sudo apt install libdbus-1-dev libglib2.0-dev libcairo2-dev libgirepository1.0-dev gir1.2-gtk-3.0
+	sudo apt install libdbus-1-dev libglib2.0-dev libgtk-3-dev libgirepository1.0-dev
 
 install_dnf:
 	@echo "Installing Solaar dependencies via dn"

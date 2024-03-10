@@ -342,10 +342,10 @@ class Device:
             if battery_feature != 0:
                 result = _hidpp20.get_battery(self, battery_feature)
                 try:
-                    feature, level, next, status, voltage = result
+                    feature, battery = result
                     if self.persister and battery_feature is None:
                         self.persister["_battery"] = feature
-                    return level, next, status, voltage
+                    return battery
                 except Exception:
                     if self.persister and battery_feature is None:
                         self.persister["_battery"] = result
