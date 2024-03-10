@@ -27,7 +27,7 @@ from typing import Dict
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
-from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE
+from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE, Report
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
@@ -520,7 +520,15 @@ class DiversionDialog:
         if isinstance(new_c, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Not)):
             self.view.expand_row(m.get_path(new_iter), True)
 
-    def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
+    def _menu_do_insert_new(
+        self,
+        _mitem: Gtk.MenuItem,
+        m: Gtk.TreeStore,
+        it: Gtk.TreeIter,
+        cls: Report,
+        initial_value: int,
+        below: bool = False,
+    ):
         new_c = cls(initial_value, warn=False)
         return self._menu_do_insert(_mitem, m, it, new_c, below=below)
 
