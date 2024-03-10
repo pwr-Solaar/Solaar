@@ -291,7 +291,7 @@ def ping_all(resuming=False):
             if resuming and hasattr(listener_thread.receiver, "status"):
                 listener_thread.receiver.status._active = None  # ensure that settings are pushed
             if listener_thread.receiver.ping():
-                listener_thread.receiver.status.changed(active=True, push=True)
+                listener_thread.receiver.changed(active=True, push=True)
             listener_thread._status_changed(listener_thread.receiver)
         else:
             count = listener_thread.receiver.count()
@@ -300,7 +300,7 @@ def ping_all(resuming=False):
                     if resuming and hasattr(dev, "status"):
                         dev.status._active = None  # ensure that settings are pushed
                     if dev.ping():
-                        dev.status.changed(active=True, push=True)
+                        dev.changed(active=True, push=True)
                     listener_thread._status_changed(dev)
                     count -= 1
                     if not count:

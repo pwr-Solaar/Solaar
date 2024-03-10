@@ -76,7 +76,7 @@ def _process_receiver_notification(receiver, status, n):
             receiver.pairing.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
             receiver.pairing.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
-        status.changed(reason=reason)
+        receiver.changed(reason=reason)
         return True
 
     elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
@@ -94,7 +94,7 @@ def _process_receiver_notification(receiver, status, n):
             if discover_error:
                 receiver.pairing.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
-            status.changed(reason=reason)
+            receiver.changed(reason=reason)
             return True
 
     elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
@@ -134,7 +134,7 @@ def _process_receiver_notification(receiver, status, n):
                 receiver.pairing.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
                 receiver.pairing.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
-            status.changed(reason=reason)
+            receiver.changed(reason=reason)
             return True
 
     elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
@@ -209,7 +209,7 @@ def _process_dj_notification(device, status, n):
         connected = not n.address & 0x01
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: DJ connection: %s %s", device, connected, n)
-        status.changed(active=connected, alert=_ALERT.NONE, reason=_("connected") if connected else _("disconnected"))
+        device.changed(active=connected, alert=_ALERT.NONE, reason=_("connected") if connected else _("disconnected"))
         return True
 
     logger.warning("%s: unrecognized DJ %s", device, n)
@@ -233,10 +233,10 @@ def _process_hidpp10_notification(device, status, n):
         if n.address == 0x02:
             # device un-paired
             device.wpid = None
-            device.status = None
             if device.number in device.receiver:
                 del device.receiver[device.number]
-            status.changed(active=False, alert=_ALERT.ALL, reason=_("unpaired"))
+            device.changed(active=False, alert=_ALERT.ALL, reason=_("unpaired"))
+            device.status = None
         else:
             logger.warning("%s: disconnection with unknown type %02X: %s", device, n.address, n)
         return True
@@ -267,7 +267,7 @@ def _process_hidpp10_notification(device, status, n):
                 bool(flags & 0x80),
             )
         device.link_encrypted = link_encrypted
-        status.changed(active=link_established)
+        device.changed(active=link_established)
         return True
 
     if n.sub_id == 0x49:
@@ -281,7 +281,7 @@ def _process_hidpp10_notification(device, status, n):
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: device powered on", device)
             reason = device.status_string() or _("powered on")
-            status.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
+            device.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
         else:
             logger.warning("%s: unknown %s", device, n)
         return True
@@ -320,7 +320,7 @@ def _process_feature_notification(device, status, n, feature):
             if result:
                 device.set_battery_info(result[1])
             else:  # this feature is used to signal device becoming inactive
-                status.changed(active=False)
+                device.changed(active=False)
         else:
             logger.warning("%s: unknown ADC MEASUREMENT %s", device, n)
 
@@ -339,7 +339,7 @@ def _process_feature_notification(device, status, n, feature):
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("%s: Light Check button pressed", device)
-                status.changed(alert=_ALERT.SHOW_WINDOW)
+                device.changed(alert=_ALERT.SHOW_WINDOW)
                 # first cancel any reporting
                 # device.feature_request(_F.SOLAR_DASHBOARD)
                 # trigger a new report chain
@@ -358,7 +358,7 @@ def _process_feature_notification(device, status, n, feature):
             reason = "powered on" if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
                 alert = _ALERT.NONE
-                status.changed(active=True, alert=alert, reason=reason, push=True)
+                device.changed(active=True, alert=alert, reason=reason, push=True)
         else:
             logger.warning("%s: unknown WIRELESS %s", device, n)
 
