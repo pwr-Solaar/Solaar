@@ -495,20 +495,20 @@ class Rule(RuleComponent):
         source = "(" + self.source + ")" if self.source else ""
         return "Rule%s[%s]" % (source, ", ".join([c.__str__() for c in self.components]))
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate rule: %s", self)
         result = True
         for component in self.components:
-            result = component.evaluate(feature, notification, device, status, result)
+            result = component.evaluate(feature, notification, device, result)
             if not isinstance(component, Action) and result is None:
                 return None
             if isinstance(component, Condition) and not result:
                 return result
         return result
 
-    def once(self, feature, notification, device, status, last_result):
-        self.evaluate(feature, notification, device, status, last_result)
+    def once(self, feature, notification, device, last_result):
+        self.evaluate(feature, notification, device, last_result)
         return False
 
     def data(self):
@@ -522,7 +522,7 @@ class Condition(RuleComponent):
     def __str__(self):
         return "CONDITION"
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return False
@@ -538,10 +538,10 @@ class Not(Condition):
     def __str__(self):
         return "Not: " + str(self.component)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        result = self.component.evaluate(feature, notification, device, status, last_result)
+        result = self.component.evaluate(feature, notification, device, last_result)
         return None if result is None else not result
 
     def data(self):
@@ -555,12 +555,12 @@ class Or(Condition):
     def __str__(self):
         return "Or: [" + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         result = False
         for component in self.components:
-            result = component.evaluate(feature, notification, device, status, last_result)
+            result = component.evaluate(feature, notification, device, last_result)
             if not isinstance(component, Action) and result is None:
                 return None
             if isinstance(component, Condition) and result:
@@ -578,12 +578,12 @@ class And(Condition):
     def __str__(self):
         return "And: [" + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         result = True
         for component in self.components:
-            result = component.evaluate(feature, notification, device, status, last_result)
+            result = component.evaluate(feature, notification, device, last_result)
             if not isinstance(component, Action) and result is None:
                 return None
             if isinstance(component, Condition) and not result:
@@ -657,7 +657,7 @@ class Process(Condition):
     def __str__(self):
         return "Process: " + str(self.process)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
@@ -688,7 +688,7 @@ class MouseProcess(Condition):
     def __str__(self):
         return "MouseProcess: " + str(self.process)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if not isinstance(self.process, str):
@@ -712,7 +712,7 @@ class Feature(Condition):
     def __str__(self):
         return "Feature: " + str(self.feature)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return feature == self.feature
@@ -733,7 +733,7 @@ class Report(Condition):
     def __str__(self):
         return "Report: " + str(self.report)
 
-    def evaluate(self, report, notification, device, status, last_result):
+    def evaluate(self, report, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return (notification.address >> 4) == self.report
@@ -755,7 +755,7 @@ class Setting(Condition):
     def __str__(self):
         return "Setting: " + " ".join([str(a) for a in self.args])
 
-    def evaluate(self, report, notification, device, status, last_result):
+    def evaluate(self, report, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if len(self.args) < 3:
@@ -806,7 +806,7 @@ class Modifiers(Condition):
     def __str__(self):
         return "Modifiers: " + str(self.desired)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if gkeymap:
@@ -863,7 +863,7 @@ class Key(Condition):
     def __str__(self):
         return "Key: %s (%s)" % ((str(self.key) if self.key else "None"), self.action)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return bool(self.key and self.key == (key_down if self.action == self.DOWN else key_up))
@@ -895,7 +895,7 @@ class KeyIsDown(Condition):
     def __str__(self):
         return "KeyIsDown: %s" % (str(self.key) if self.key else "None")
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return key_is_down(self.key)
@@ -949,7 +949,7 @@ class Test(Condition):
     def __str__(self):
         return "Test: " + str(self.test)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return self.function(feature, notification.address, notification.data, self.parameter)
@@ -979,7 +979,7 @@ class TestBytes(Condition):
     def __str__(self):
         return "TestBytes: " + str(self.test)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return self.function(feature, notification.address, notification.data)
@@ -1012,7 +1012,7 @@ class MouseGesture(Condition):
     def __str__(self):
         return "MouseGesture: " + " ".join(self.movements)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         if feature == _F.MOUSE_GESTURE:
@@ -1054,7 +1054,7 @@ class Active(Condition):
     def __str__(self):
         return "Active: " + str(self.devID)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         dev = device.find(self.devID)
@@ -1075,7 +1075,7 @@ class Device(Condition):
     def __str__(self):
         return "Device: " + str(self.devID)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         return device.unitId == self.devID or device.serial == self.devID
@@ -1095,7 +1095,7 @@ class Host(Condition):
     def __str__(self):
         return "Host: " + str(self.host)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
         hostname = socket.getfqdn()
@@ -1109,7 +1109,7 @@ class Action(RuleComponent):
     def __init__(self, *args):
         pass
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         return None
 
 
@@ -1189,7 +1189,7 @@ class KeyPress(Action):
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if gkeymap:
             current = gkeymap.get_modifier_state()
             if logger.isEnabledFor(logging.INFO):
@@ -1209,10 +1209,10 @@ class KeyPress(Action):
 
 # KeyDown is dangerous as the key can auto-repeat and make your system unusable
 # class KeyDown(KeyPress):
-#    def evaluate(self, feature, notification, device, status, last_result):
+#    def evaluate(self, feature, notification, device, last_result):
 #        super().keyDown(self.keys, current_key_modifiers)
 # class KeyUp(KeyPress):
-#    def evaluate(self, feature, notification, device, status, last_result):
+#    def evaluate(self, feature, notification, device, last_result):
 #        super().keyUp(self.keys, current_key_modifiers)
 
 
@@ -1229,7 +1229,7 @@ class MouseScroll(Action):
     def __str__(self):
         return "MouseScroll: " + " ".join([str(a) for a in self.amounts])
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         amounts = self.amounts
         if isinstance(last_result, numbers.Number):
             amounts = [math.floor(last_result * a) for a in self.amounts]
@@ -1268,7 +1268,7 @@ class MouseClick(Action):
     def __str__(self):
         return "MouseClick: %s (%d)" % (self.button, self.count)
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
             logger.info("MouseClick action: %d %s" % (self.count, self.button))
         if self.button and self.count:
@@ -1292,7 +1292,7 @@ class Set(Action):
     def __str__(self):
         return "Set: " + " ".join([str(a) for a in self.args])
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if len(self.args) < 3:
             return None
         if logger.isEnabledFor(logging.INFO):
@@ -1335,7 +1335,7 @@ class Execute(Action):
     def __str__(self):
         return "Execute: " + " ".join([a for a in self.args])
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
             logger.info("Execute action: %s", self.args)
         subprocess.Popen(self.args)
@@ -1366,9 +1366,9 @@ class Later(Action):
     def __str__(self):
         return "Later: [" + str(self.delay) + ", " + ", ".join(str(c) for c in self.components) + "]"
 
-    def evaluate(self, feature, notification, device, status, last_result):
+    def evaluate(self, feature, notification, device, last_result):
         if self.delay and self.rule:
-            GLib.timeout_add_seconds(self.delay, Rule.once, self.rule, feature, notification, device, status, last_result)
+            GLib.timeout_add_seconds(self.delay, Rule.once, self.rule, feature, notification, device, last_result)
         return None
 
     def data(self):
@@ -1435,14 +1435,14 @@ def key_is_down(key):
         return key in keys_down
 
 
-def evaluate_rules(feature, notification, device, status):
+def evaluate_rules(feature, notification, device):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s", notification)
-    rules.evaluate(feature, notification, device, status, True)
+    rules.evaluate(feature, notification, device, True)
 
 
 # process a notification
-def process_notification(device, status, notification, feature):
+def process_notification(device, notification, feature):
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
@@ -1487,7 +1487,7 @@ def process_notification(device, status, notification, feature):
             thumb_wheel_displacement = 0
         thumb_wheel_displacement += signed(notification.data[0:2])
 
-    GLib.idle_add(evaluate_rules, feature, notification, device, status)
+    GLib.idle_add(evaluate_rules, feature, notification, device)
 
 
 _XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
