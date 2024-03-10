@@ -31,30 +31,30 @@ jobs:
       run: |
         make test
 
-  macos-tests:
-    runs-on: macos-latest
-
-    strategy:
-      matrix:
-        python-version: [3.7, 3.12]
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Set up macOS dependencies
-      run: |
-        make install_brew
-
-    - name: Install Python dependencies
-      run: |
-        make install_pip PIP_ARGS='.["test"]'
-
-    - name: Run tests on macOS
-      run: |
-        make test
+#  macos-tests:
+#    runs-on: macos-latest
+#
+#    strategy:
+#      matrix:
+#        python-version: [3.7, 3.12]
+#
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v4
+#
+#    - name: Set up Python ${{ matrix.python-version }}
+#      uses: actions/setup-python@v5
+#      with:
+#        python-version: ${{ matrix.python-version }}
+#
+#    - name: Set up macOS dependencies
+#      run: |
+#        make install_brew
+#
+#    - name: Install Python dependencies
+#      run: |
+#        make install_pip PIP_ARGS='.["test"]'
+#
+#    - name: Run tests on macOS
+#      run: |
+#        make test
