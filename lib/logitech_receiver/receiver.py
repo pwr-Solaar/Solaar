@@ -66,7 +66,8 @@ class Receiver:
         self.handle = handle
         self.path = path
         self.product_id = product_id
-        self.setting_callback = setting_callback
+        self.setting_callback = setting_callback  # for changes to settings
+        self.status_callback = None  # for changes to other potentially visible aspects
         self.receiver_kind = receiver_kind
         self.serial = None
         self.max_devices = None
@@ -105,7 +106,8 @@ class Receiver:
 
     def changed(self, alert=ALERT.NOTIFICATION, reason=None):
         """The status of the device had changed, so invoke the status callback"""
-        self.status._changed_callback(self, alert=alert, reason=reason)
+        if self.status_callback is not None:
+            self.status_callback(self, alert=alert, reason=reason)
 
     @property
     def firmware(self):

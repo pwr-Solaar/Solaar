@@ -19,7 +19,7 @@ import logging
 import gi
 import yaml as _yaml
 
-from logitech_receiver.status import ALERT
+from logitech_receiver.common import ALERT
 
 from solaar.i18n import _
 from solaar.ui.config_panel import change_setting, record_setting
@@ -115,6 +115,8 @@ def _status_changed(device, alert, reason, refresh=False):
     assert device is not None
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("status changed: %s (%s) %s", device, alert, reason)
+    if alert is None:
+        alert = ALERT.NONE
 
     tray.update(device)
     if alert & ALERT.ATTENTION:

@@ -841,7 +841,7 @@ class MouseGesturesXY(_RawXYProcessing):
                 logger.info("mouse gesture notification %s", self.data)
             payload = _pack("!" + (len(self.data) * "h"), *self.data)
             notification = _HIDPP_Notification(0, 0, 0, 0, payload)
-            _process_notification(self.device, self.device.status, notification, _F.MOUSE_GESTURE)
+            _process_notification(self.device, notification, _F.MOUSE_GESTURE)
             self.fsmState = "idle"
 
     def move_action(self, dx, dy):

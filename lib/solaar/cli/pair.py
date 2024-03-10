@@ -20,7 +20,6 @@ from logitech_receiver import base as _base
 from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import notifications as _notifications
-from logitech_receiver import status as _status
 
 _hidpp10 = hidpp10.Hidpp10()
 _R = _hidpp10_constants.REGISTERS
@@ -38,7 +37,6 @@ def run(receivers, args, find_receiver, _ignore):
         receiver = receivers[0]
 
     assert receiver
-    receiver.status = _status.ReceiverStatus(receiver, lambda *args, **kwargs: None)
 
     # check if it's necessary to set the notification flags
     old_notification_flags = _hidpp10.get_notification_flags(receiver) or 0

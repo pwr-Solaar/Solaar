@@ -31,7 +31,6 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
-from logitech_receiver import status as _status
 
 from . import configuration
 
@@ -44,15 +43,13 @@ _R = _hidpp10_constants.REGISTERS
 _IR = _hidpp10_constants.INFO_SUBREGISTERS
 
 
-_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "status", "online"))
+_GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 
 
 def _ghost(device):
-    return _GHOST_DEVICE(
-        receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, status=None, online=False
-    )
+    return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False)
 
 
 class ReceiverListener(_listener.EventsListener):
@@ -62,7 +59,7 @@ class ReceiverListener(_listener.EventsListener):
         assert status_changed_callback
         super().__init__(receiver, self._notifications_handler)
         self.status_changed_callback = status_changed_callback
-        _status.attach_to(receiver, self._status_changed)
+        receiver.status_callback = self._status_changed
 
     def has_started(self):
         if logger.isEnabledFor(logging.INFO):
@@ -95,32 +92,30 @@ class ReceiverListener(_listener.EventsListener):
                 logger.exception("closing receiver %s" % r.path)
         self.status_changed_callback(r)
 
-    def _status_changed(self, device, alert=_status.ALERT.NONE, reason=None):
+    def _status_changed(self, device, alert=None, reason=None):
         assert device is not None
         if logger.isEnabledFor(logging.INFO):
             try:
-                device.ping()
                 if device.kind is None:
                     logger.info(
-                        "status_changed %r: %s, %s (%X) %s",
+                        "status_changed %r: %s (%X) %s",
                         device,
                         "present" if bool(device) else "removed",
-                        device.status,
-                        alert,
+                        alert if alert is not None else 0,
                         reason or "",
                     )
                 else:
+                    device.ping()
                     logger.info(
-                        "status_changed %r: %s %s, %s (%X) %s",
+                        "status_changed %r: %s %s (%X) %s",
                         device,
                         "paired" if bool(device) else "unpaired",
                         "online" if device.online else "offline",
-                        device.status,
-                        alert,
+                        alert if alert is not None else 0,
                         reason or "",
                     )
-            except Exception:
-                logger.info("status_changed for unknown device")
+            except Exception as e:
+                logger.info("status_changed for unknown device: %s", e)
 
         if device.kind is None:
             assert device == self.receiver
@@ -214,15 +209,11 @@ class ReceiverListener(_listener.EventsListener):
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
-            _status.attach_to(dev, self._status_changed)
+            dev.status_callback = self._status_changed
             # the receiver changed status as well
             self._status_changed(self.receiver)
 
-        if not hasattr(dev, "status") or dev.status is None:
-            # notification before device status set up - don't process it
-            logger.warning("%s before device %s has status", n, dev)
-        else:
-            _notifications.process(dev, n)
+        _notifications.process(dev, n)
 
         if self.receiver.pairing.lock_open and not already_known:
             # this should be the first notification after a device was paired
@@ -297,8 +288,8 @@ def ping_all(resuming=False):
             count = listener_thread.receiver.count()
             if count:
                 for dev in listener_thread.receiver:
-                    if resuming and hasattr(dev, "status"):
-                        dev.status._active = None  # ensure that settings are pushed
+                    if resuming:
+                        dev._active = None  # ensure that settings are pushed
                     if dev.ping():
                         dev.changed(active=True, push=True)
                     listener_thread._status_changed(dev)

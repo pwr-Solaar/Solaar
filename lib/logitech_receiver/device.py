@@ -77,7 +77,8 @@ class Device:
         self.hidpp_short = device_info.hidpp_short if device_info else None
         self.hidpp_long = device_info.hidpp_long if device_info else None
         self.bluetooth = device_info.bus_id == 0x0005 if device_info else False  # Bluetooth needs long messages
-        self.setting_callback = setting_callback
+        self.setting_callback = setting_callback  # for changes to settings
+        self.status_callback = None  # for changes to other potentially visible aspects
         self.wpid = pairing_info["wpid"] if pairing_info else None  # the Wireless PID is unique per device model
         self._kind = pairing_info["kind"] if pairing_info else None  # mouse, keyboard, etc (see hidpp10.DEVICE_KIND)
         self._serial = pairing_info["serial"] if pairing_info else None  # serial number (an 8-char hex string)
@@ -412,7 +413,6 @@ class Device:
     def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
         """The status of the device had changed, so invoke the status callback.
         Also push notifications and settings to the device when necessary."""
-        changed_callback = self.status._changed_callback
         if active is not None:
             self.online = active
             was_active, self._active = self._active, active
@@ -434,7 +434,8 @@ class Device:
                     settings.apply_all_settings(self)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
-        changed_callback(self, alert, reason)
+        if self.status_callback is not None:
+            self.status_callback(self, alert, reason)
 
     def add_notification_handler(self, id: str, fn):
         """Adds the notification handling callback `fn` to this device under name `id`.

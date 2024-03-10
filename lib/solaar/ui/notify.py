@@ -113,20 +113,21 @@ if available:
 
             if reason:
                 message = reason
-            elif dev.status is None:
-                message = _("unpaired")
-            elif bool(dev.status):
-                message = dev.status_string() or _("connected")
             else:
-                message = _("offline")
+                message = _("unspecified reason")
+            # elif dev.status is None:
+            #     message = _("unpaired")
+            # elif bool(dev.status):
+            #     message = dev.status_string() or _("connected")
+            # else:
+            #     message = _("offline")
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
             icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None else _icons.icon_file(icon)
 
             n.update(summary, message, icon_file)
-            urgency = Notify.Urgency.LOW if dev.status else Notify.Urgency.NORMAL
-            n.set_urgency(urgency)
+            n.set_urgency(Notify.Urgency.NORMAL)
             n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
             if progress:
                 n.set_hint("value", GLib.Variant("i", progress))

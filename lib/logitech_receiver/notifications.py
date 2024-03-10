@@ -15,8 +15,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Handles incoming events from the receiver/devices, updating the related
-# status object as appropriate.
+# Handles incoming events from the receiver/devices, updating the object as appropriate.
 
 import logging
 import threading as _threading
@@ -29,10 +28,10 @@ from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
+from .common import ALERT as _ALERT
 from .common import Battery as _Battery
 from .common import strhex as _strhex
 from .i18n import _
-from .status import ALERT as _ALERT
 
 logger = logging.getLogger(__name__)
 
@@ -49,17 +48,12 @@ def process(device, notification):
     assert device
     assert notification
 
-    assert hasattr(device, "status")
-    status = device.status
-    assert status is not None
-
     if not device.isDevice:
-        return _process_receiver_notification(device, status, notification)
+        return _process_receiver_notification(device, notification)
+    return _process_device_notification(device, notification)
 
-    return _process_device_notification(device, status, notification)
 
-
-def _process_receiver_notification(receiver, status, n):
+def _process_receiver_notification(receiver, n):
     # supposedly only 0x4x notifications arrive for the receiver
     assert n.sub_id & 0x40 == 0x40
 
@@ -148,7 +142,7 @@ def _process_receiver_notification(receiver, status, n):
     logger.warning("%s: unhandled notification %s", receiver, n)
 
 
-def _process_device_notification(device, status, n):
+def _process_device_notification(device, n):
     # incoming packets with SubId >= 0x80 are supposedly replies from HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
@@ -163,9 +157,9 @@ def _process_device_notification(device, status, n):
     # 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
     if n.sub_id >= 0x40:
         if n.report_id == _DJ_MESSAGE_ID:
-            return _process_dj_notification(device, status, n)
+            return _process_dj_notification(device, n)
         else:
-            return _process_hidpp10_notification(device, status, n)
+            return _process_hidpp10_notification(device, n)
 
     # These notifications are from the device itself, so it must be active
     device.online = True
@@ -174,7 +168,7 @@ def _process_device_notification(device, status, n):
 
     # some custom battery events for HID++ 1.0 devices
     if device.protocol < 2.0:
-        return _process_hidpp10_custom_notification(device, status, n)
+        return _process_hidpp10_custom_notification(device, n)
 
     # assuming 0x00 to 0x3F are feature (HID++ 2.0) notifications
     if not device.features:
@@ -186,10 +180,10 @@ def _process_device_notification(device, status, n):
         logger.warning("%s: notification from invalid feature index %02X: %s", device, n.sub_id, n)
         return False
 
-    return _process_feature_notification(device, status, n, feature)
+    return _process_feature_notification(device, n, feature)
 
 
-def _process_dj_notification(device, status, n):
+def _process_dj_notification(device, n):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s (%s) DJ %s", device, device.protocol, n)
 
@@ -215,7 +209,7 @@ def _process_dj_notification(device, status, n):
     logger.warning("%s: unrecognized DJ %s", device, n)
 
 
-def _process_hidpp10_custom_notification(device, status, n):
+def _process_hidpp10_custom_notification(device, n):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s (%s) custom notification %s", device, device.protocol, n)
 
@@ -228,7 +222,7 @@ def _process_hidpp10_custom_notification(device, status, n):
     logger.warning("%s: unrecognized %s", device, n)
 
 
-def _process_hidpp10_notification(device, status, n):
+def _process_hidpp10_notification(device, n):
     if n.sub_id == 0x40:  # device unpairing
         if n.address == 0x02:
             # device un-paired
@@ -236,7 +230,7 @@ def _process_hidpp10_notification(device, status, n):
             if device.number in device.receiver:
                 del device.receiver[device.number]
             device.changed(active=False, alert=_ALERT.ALL, reason=_("unpaired"))
-            device.status = None
+        ##            device.status = None
         else:
             logger.warning("%s: disconnection with unknown type %02X: %s", device, n.address, n)
         return True
@@ -289,7 +283,7 @@ def _process_hidpp10_notification(device, status, n):
     logger.warning("%s: unrecognized %s", device, n)
 
 
-def _process_feature_notification(device, status, n, feature):
+def _process_feature_notification(device, n, feature):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s: notification for feature %s, report %s, data %s", device, feature, n.address >> 4, _strhex(n.data))
 
@@ -440,5 +434,5 @@ def _process_feature_notification(device, status, n, feature):
                             device.setting_callback(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
                             break
 
-    _diversion.process_notification(device, status, n, feature)
+    _diversion.process_notification(device, n, feature)
     return True
