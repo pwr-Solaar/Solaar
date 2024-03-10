@@ -400,7 +400,7 @@ class DiversionDialog:
         return items
 
     def _event_button_released(self, v, e):
-        if e.button == 3:  # right click
+        if e.button == Gdk.BUTTON_SECONDARY:  # right click
             m, it = v.get_selection().get_selected()
             wrapped = m[it][0]
             c = wrapped.component
