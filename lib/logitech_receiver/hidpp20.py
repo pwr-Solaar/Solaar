@@ -1469,8 +1469,7 @@ class Hidpp20:
             while len(name) < name_length:
                 fragment = feature_request(device, FEATURE.DEVICE_FRIENDLY_NAME, 0x10, len(name))
                 if fragment:
-                    initial_null = 0 if fragment[0] else 1  # initial null actually seen on a device
-                    name += fragment[initial_null : name_length + initial_null - len(name)]
+                    name += fragment[1 : name_length - len(name) + 1]
                 else:
                     logger.error("failed to read whole name of %s (expected %d chars)", device, name_length)
                     return None
