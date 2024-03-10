@@ -104,6 +104,22 @@ def _create_close_dialog(window: Gtk.Window) -> Gtk.MessageDialog:
     return dialog
 
 
+def _create_selected_rule_edit_panel() -> Gtk.Grid:
+    """Creates the edit Condition/Actions panel for a rule.
+
+    Shows the UI for the selected rule component.
+    """
+    grid = Gtk.Grid()
+    grid.set_margin_start(10)
+    grid.set_margin_end(10)
+    grid.set_row_spacing(10)
+    grid.set_column_spacing(10)
+    grid.set_halign(Gtk.Align.CENTER)
+    grid.set_valign(Gtk.Align.CENTER)
+    grid.set_size_request(0, 120)
+    return grid
+
+
 class DiversionDialog:
     def __init__(self):
         window = Gtk.Window()
@@ -120,15 +136,15 @@ class DiversionDialog:
 
         self.type_ui = {}
         self.update_ui = {}
-        self.bottom_panel = self._create_bottom_panel()
-        self.ui = defaultdict(lambda: UnsupportedRuleComponentUI(self.bottom_panel))
+        self.selected_rule_edit_panel = _create_selected_rule_edit_panel()
+        self.ui = defaultdict(lambda: UnsupportedRuleComponentUI(self.selected_rule_edit_panel))
         self.ui.update(
             {  # one instance per type
-                rc_class: rc_ui_class(self.bottom_panel, on_update=self.on_update)
+                rc_class: rc_ui_class(self.selected_rule_edit_panel, on_update=self.on_update)
                 for rc_class, rc_ui_class in COMPONENT_UI.items()
             }
         )
-        vbox.pack_start(self.bottom_panel, False, False, 10)
+        vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
 
         self.model = self._create_model()
         self.view.set_model(self.model)
@@ -171,8 +187,8 @@ class DiversionDialog:
         self.discard_btn.set_sensitive(False)
         self.save_btn.set_sensitive(False)
         self.dirty = False
-        for c in self.bottom_panel.get_children():
-            self.bottom_panel.remove(c)
+        for c in self.selected_rule_edit_panel.get_children():
+            self.selected_rule_edit_panel.remove(c)
         _DIV._load_config_rule_file()
         self.model = self._create_model()
         self.view.set_model(self.model)
@@ -269,17 +285,6 @@ class DiversionDialog:
         elif isinstance(rule_component, _DIV.Not):
             self._populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
-    def _create_bottom_panel(self):
-        grid = Gtk.Grid()
-        grid.set_margin_start(10)
-        grid.set_margin_end(10)
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_halign(Gtk.Align.CENTER)
-        grid.set_valign(Gtk.Align.CENTER)
-        grid.set_size_request(0, 120)
-        return grid
-
     def on_update(self):
         self.view.queue_draw()
         self.dirty = True
@@ -287,7 +292,7 @@ class DiversionDialog:
         self.discard_btn.set_sensitive(True)
 
     def _selection_changed(self, selection):
-        self.bottom_panel.set_sensitive(False)
+        self.selected_rule_edit_panel.set_sensitive(False)
         (model, it) = selection.get_selected()
         if it is None:
             return
@@ -295,7 +300,7 @@ class DiversionDialog:
         component = wrapped.component
         self._editing_component = component
         self.ui[type(component)].show(component, wrapped.editable)
-        self.bottom_panel.set_sensitive(wrapped.editable)
+        self.selected_rule_edit_panel.set_sensitive(wrapped.editable)
 
     def _event_key_pressed(self, v, e):
         """
