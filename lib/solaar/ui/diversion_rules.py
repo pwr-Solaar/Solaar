@@ -41,10 +41,6 @@ from solaar.i18n import _
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 _diversion_dialog = None
 _rule_component_clipboard = None
 
@@ -706,20 +702,6 @@ class DiversionDialog:
         for rc in self.ui.values():
             rc.update_devices()
         self.view.queue_draw()
-
-
-## Not currently used
-#
-# class HexEntry(Gtk.Entry, Gtk.Editable):
-#
-#     def do_insert_text(self, new_text, length, pos):
-#         new_text = new_text.upper()
-#         from string import hexdigits
-#         if any(c for c in new_text if c not in hexdigits):
-#             return pos
-#         else:
-#             self.get_buffer().insert_text(pos, new_text, length)
-#             return pos + length
 
 
 def norm(s):
