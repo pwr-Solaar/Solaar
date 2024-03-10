@@ -33,6 +33,16 @@ def test_named_int_comparison():
     assert named_int != named_int_unequal_name
     assert named_int != named_int_unequal_value
     assert named_int != named_int_unequal
+    assert named_int is not None
+    assert named_int == 0
+    assert named_int == "entry"
+
+
+def test_named_int_conversions():
+    named_int = common.NamedInt(2, "two")
+
+    assert named_int.bytes() == b"\x00\x02"
+    assert str(named_int) == "two"
 
 
 @pytest.fixture
@@ -53,6 +63,32 @@ def test_named_ints(named_ints):
     assert named_ints.full.name == "full"
 
     assert len(named_ints) == 5
+    assert 5 in named_ints
+    assert 6 not in named_ints
+    assert "critical" in named_ints
+    assert "easy" not in named_ints
+    assert common.NamedInt(5, "critical") in named_ints
+    assert common.NamedInt(5, "five") not in named_ints
+    assert common.NamedInt(6, "critical") not in named_ints
+    assert named_ints[5] == "critical"
+    assert named_ints["critical"] == "critical"
+    assert named_ints[66] is None
+
+
+def test_named_ints_list():
+    named_ints_list = common.NamedInts.list([0, 5, 20, 50, 90])
+
+    assert len(named_ints_list) == 5
+    assert 50 in named_ints_list
+    assert 60 not in named_ints_list
+
+
+def test_named_ints_range(named_ints):
+    named_ints_range = common.NamedInts.range(0, 5)
+
+    assert len(named_ints_range) == 6
+    assert 4 in named_ints_range
+    assert 6 not in named_ints_range
 
 
 @pytest.mark.parametrize(
@@ -84,3 +120,23 @@ def test_int2bytes():
     result = common.int2bytes(value)
 
     assert result == expected
+
+
+def test_battery():
+    battery = common.Battery(None, None, common.Battery.STATUS.full, None)
+
+    assert battery.status == common.Battery.STATUS.full
+    assert battery.level == common.Battery.APPROX.full
+    assert battery.ok()
+    assert battery.charging()
+    assert battery.to_str() == "Battery: full (full)"
+
+
+def test_battery_2():
+    battery = common.Battery(50, None, common.Battery.STATUS.discharging, None)
+
+    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.level == 50
+    assert battery.ok()
+    assert not battery.charging()
+    assert battery.to_str() == "Battery: 50% (discharging)"
