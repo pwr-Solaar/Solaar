@@ -200,7 +200,6 @@ try:
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
             tray_icon_name = _icons.battery(battery_level, battery_charging)
-
             description = "%s: %s" % (name, device.status_string())
         else:
             # there may be a receiver, but no peripherals
@@ -330,8 +329,7 @@ def _pick_device_with_lowest_battery():
     for info in _devices_info:
         if info[1] is None:  # is receiver
             continue
-        level = info[-1].battery_info.level if hasattr(info[-1], "status") and info[-1].battery_info is not None else None
-        # print ("checking %s -> %s", info, level)
+        level = info[-1].battery_info.level if info[-1].battery_info is not None else None
         if level is not None and picked_level > level:
             picked = info
             picked_level = level or 0
@@ -446,7 +444,7 @@ def _update_menu_item(index, device):
 _picked_device = None
 
 # cached list of devices and some of their properties
-# contains tuples of (receiver path, device number, name, status)
+# contains tuples of (receiver path, device number, name, device)
 _devices_info = []
 
 _menu = None
