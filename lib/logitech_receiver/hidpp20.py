@@ -128,7 +128,7 @@ class FeaturesArray(dict):
         if isinstance(super().get(feature), int):
             self.inverse.pop(super().get(feature))
         super().__setitem__(feature, index)
-        if isinstance(index, int):
+        if index is not False:
             self.inverse[index] = feature
 
     def __delitem__(self, feature):
