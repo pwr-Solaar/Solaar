@@ -70,7 +70,7 @@ def _battery_text(level):
 def _battery_line(dev):
     battery = dev.battery()
     if battery is not None:
-        level, nextLevel, status, voltage = battery
+        level, nextLevel, status, voltage = battery.level, battery.next_level, battery.status, battery.voltage
         text = _battery_text(level)
         if voltage is not None:
             text = text + (" %smV " % voltage)
