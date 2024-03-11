@@ -41,10 +41,6 @@ from solaar.i18n import _
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 _diversion_dialog = None
 _rule_component_clipboard = None
 
@@ -83,6 +79,51 @@ class RuleComponentWrapper(GObject.GObject):
         return COMPONENT_UI.get(type(self.component), UnsupportedRuleComponentUI)
 
 
+def _create_close_dialog(window: Gtk.Window) -> Gtk.MessageDialog:
+    """Creates rule editor close dialog, when unsaved changes are present."""
+    dialog = Gtk.MessageDialog(
+        window,
+        type=Gtk.MessageType.QUESTION,
+        title=_("Make changes permanent?"),
+        flags=Gtk.DialogFlags.MODAL,
+    )
+    dialog.set_default_size(400, 100)
+    dialog.add_buttons(
+        _("Yes"),
+        Gtk.ResponseType.YES,
+        _("No"),
+        Gtk.ResponseType.NO,
+        _("Cancel"),
+        Gtk.ResponseType.CANCEL,
+    )
+    dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
+    return dialog
+
+
+def _create_selected_rule_edit_panel() -> Gtk.Grid:
+    """Creates the edit Condition/Actions panel for a rule.
+
+    Shows the UI for the selected rule component.
+    """
+    grid = Gtk.Grid()
+    grid.set_margin_start(10)
+    grid.set_margin_end(10)
+    grid.set_row_spacing(10)
+    grid.set_column_spacing(10)
+    grid.set_halign(Gtk.Align.CENTER)
+    grid.set_valign(Gtk.Align.CENTER)
+    grid.set_size_request(0, 120)
+    return grid
+
+
+def _menu_do_copy(_mitem: Gtk.MenuItem, m: Gtk.TreeStore, it: Gtk.TreeIter):
+    global _rule_component_clipboard
+
+    wrapped = m[it][0]
+    c = wrapped.component
+    _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+
+
 class DiversionDialog:
     def __init__(self):
         window = Gtk.Window()
@@ -99,15 +140,15 @@ class DiversionDialog:
 
         self.type_ui = {}
         self.update_ui = {}
-        self.bottom_panel = self._create_bottom_panel()
-        self.ui = defaultdict(lambda: UnsupportedRuleComponentUI(self.bottom_panel))
+        self.selected_rule_edit_panel = _create_selected_rule_edit_panel()
+        self.ui = defaultdict(lambda: UnsupportedRuleComponentUI(self.selected_rule_edit_panel))
         self.ui.update(
             {  # one instance per type
-                rc_class: rc_ui_class(self.bottom_panel, on_update=self.on_update)
+                rc_class: rc_ui_class(self.selected_rule_edit_panel, on_update=self.on_update)
                 for rc_class, rc_ui_class in COMPONENT_UI.items()
             }
         )
-        vbox.pack_start(self.bottom_panel, False, False, 10)
+        vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
 
         self.model = self._create_model()
         self.view.set_model(self.model)
@@ -130,44 +171,28 @@ class DiversionDialog:
         self.window = window
         self._editing_component = None
 
-    def _closing(self, w, e):
+    def _closing(self, window: Gtk.Window, e: Gdk.Event):
         if self.dirty:
-            dialog = Gtk.MessageDialog(
-                self.window,
-                type=Gtk.MessageType.QUESTION,
-                title=_("Make changes permanent?"),
-                flags=Gtk.DialogFlags.MODAL,
-            )
-            dialog.set_default_size(400, 100)
-            dialog.add_buttons(
-                _("Yes"),
-                Gtk.ResponseType.YES,
-                _("No"),
-                Gtk.ResponseType.NO,
-                _("Cancel"),
-                Gtk.ResponseType.CANCEL,
-            )
-            dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
-            dialog.show_all()
+            dialog = _create_close_dialog(window)
             response = dialog.run()
             dialog.destroy()
             if response == Gtk.ResponseType.NO:
-                w.hide()
+                window.hide()
             elif response == Gtk.ResponseType.YES:
                 self._save_yaml_file()
-                w.hide()
+                window.hide()
             else:
                 # don't close
                 return True
         else:
-            w.hide()
+            window.hide()
 
     def _reload_yaml_file(self):
         self.discard_btn.set_sensitive(False)
         self.save_btn.set_sensitive(False)
         self.dirty = False
-        for c in self.bottom_panel.get_children():
-            self.bottom_panel.remove(c)
+        for c in self.selected_rule_edit_panel.get_children():
+            self.selected_rule_edit_panel.remove(c)
         _DIV._load_config_rule_file()
         self.model = self._create_model()
         self.view.set_model(self.model)
@@ -264,17 +289,6 @@ class DiversionDialog:
         elif isinstance(rule_component, _DIV.Not):
             self._populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
-    def _create_bottom_panel(self):
-        grid = Gtk.Grid()
-        grid.set_margin_start(10)
-        grid.set_margin_end(10)
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_halign(Gtk.Align.CENTER)
-        grid.set_valign(Gtk.Align.CENTER)
-        grid.set_size_request(0, 120)
-        return grid
-
     def on_update(self):
         self.view.queue_draw()
         self.dirty = True
@@ -282,7 +296,7 @@ class DiversionDialog:
         self.discard_btn.set_sensitive(True)
 
     def _selection_changed(self, selection):
-        self.bottom_panel.set_sensitive(False)
+        self.selected_rule_edit_panel.set_sensitive(False)
         (model, it) = selection.get_selected()
         if it is None:
             return
@@ -290,7 +304,7 @@ class DiversionDialog:
         component = wrapped.component
         self._editing_component = component
         self.ui[type(component)].show(component, wrapped.editable)
-        self.bottom_panel.set_sensitive(wrapped.editable)
+        self.selected_rule_edit_panel.set_sensitive(wrapped.editable)
 
     def _event_key_pressed(self, v, e):
         """
@@ -331,7 +345,7 @@ class DiversionDialog:
             if can_delete and e.keyval in [Gdk.KEY_x, Gdk.KEY_X]:
                 self._menu_do_cut(None, m, it)
             elif can_copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and c is not None:
-                self._menu_do_copy(None, m, it)
+                _menu_do_copy(None, m, it)
             elif can_insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
                 self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
             elif (
@@ -394,7 +408,7 @@ class DiversionDialog:
         return items
 
     def _event_button_released(self, v, e):
-        if e.button == 3:  # right click
+        if e.button == Gdk.BUTTON_SECONDARY:  # right click
             m, it = v.get_selection().get_selected()
             wrapped = m[it][0]
             c = wrapped.component
@@ -680,15 +694,9 @@ class DiversionDialog:
         menu_paste.show()
         return menu_paste
 
-    def _menu_do_copy(self, _mitem, m, it):
-        global _rule_component_clipboard
-        wrapped = m[it][0]
-        c = wrapped.component
-        _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
-
     def _menu_copy(self, m, it):
         menu_copy = Gtk.MenuItem(_("Copy"))
-        menu_copy.connect("activate", self._menu_do_copy, m, it)
+        menu_copy.connect("activate", _menu_do_copy, m, it)
         menu_copy.show()
         return menu_copy
 
@@ -696,20 +704,6 @@ class DiversionDialog:
         for rc in self.ui.values():
             rc.update_devices()
         self.view.queue_draw()
-
-
-## Not currently used
-#
-# class HexEntry(Gtk.Entry, Gtk.Editable):
-#
-#     def do_insert_text(self, new_text, length, pos):
-#         new_text = new_text.upper()
-#         from string import hexdigits
-#         if any(c for c in new_text if c not in hexdigits):
-#             return pos
-#         else:
-#             self.get_buffer().insert_text(pos, new_text, length)
-#             return pos + length
 
 
 def norm(s):
