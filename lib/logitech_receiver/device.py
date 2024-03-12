@@ -376,8 +376,7 @@ class Device:
         if changed or reason:
             # update the leds on the device, if any
             _hidpp10.set_3leds(self, info.level, charging=info.charging(), warning=bool(alert))
-            if hasattr(self, "status"):
-                self.changed(active=True, alert=alert, reason=reason)
+            self.changed(active=True, alert=alert, reason=reason)
 
     # Retrieve and regularize battery status
     def read_battery(self):
@@ -525,7 +524,7 @@ class Device:
     __nonzero__ = __bool__
 
     def status_string(self):
-        return self.battery_info.to_str() if hasattr(self, "status") and self.battery_info is not None else ""
+        return self.battery_info.to_str() if self.battery_info is not None else ""
 
     def __str__(self):
         try:
