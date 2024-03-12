@@ -24,7 +24,9 @@ from copy import copy
 from dataclasses import dataclass
 from dataclasses import field
 from shlex import quote as shlex_quote
+from typing import Any
 from typing import Dict
+from typing import Optional
 
 from gi.repository import Gdk
 from gi.repository import GObject
@@ -130,6 +132,36 @@ def _menu_do_copy(_mitem: Gtk.MenuItem, m: Gtk.TreeStore, it: Gtk.TreeIter):
     wrapped = m[it][0]
     c = wrapped.component
     _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+
+
+def _populate_model(
+    model: Gtk.TreeStore,
+    it: Gtk.TreeIter,
+    rule_component: Any,
+    level: int = 0,
+    pos: int = -1,
+    editable: Optional[bool] = None,
+):
+    if isinstance(rule_component, list):
+        for c in rule_component:
+            _populate_model(model, it, c, level=level, pos=pos, editable=editable)
+            if pos >= 0:
+                pos += 1
+        return
+    if editable is None:
+        editable = model[it][0].editable if it is not None else False
+        if isinstance(rule_component, _DIV.Rule):
+            editable = editable or (rule_component.source is not None)
+    wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
+    piter = model.insert(it, pos, (wrapped,))
+    if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
+        for c in rule_component.components:
+            ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
+            _populate_model(model, piter, c, level + 1, editable=ed)
+        if len(rule_component.components) == 0:
+            _populate_model(model, piter, None, level + 1, editable=editable)
+    elif isinstance(rule_component, _DIV.Not):
+        _populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
 
 class DiversionDialog:
@@ -256,7 +288,7 @@ class DiversionDialog:
         if len(_DIV.rules.components) == 1:
             # only built-in rules - add empty user rule list
             _DIV.rules.components.insert(0, _DIV.Rule([], source=_DIV._file_path))
-        self._populate_model(model, None, _DIV.rules.components)
+        _populate_model(model, None, _DIV.rules.components)
         return model
 
     def _create_view_columns(self):
@@ -274,28 +306,6 @@ class DiversionDialog:
             cell_icon, lambda _c, c, m, it, _d: c.set_property("icon-name", m.get_value(it, 0).display_icon())
         )
         return col1, col2
-
-    def _populate_model(self, model, it, rule_component, level=0, pos=-1, editable=None):
-        if isinstance(rule_component, list):
-            for c in rule_component:
-                self._populate_model(model, it, c, level=level, pos=pos, editable=editable)
-                if pos >= 0:
-                    pos += 1
-            return
-        if editable is None:
-            editable = model[it][0].editable if it is not None else False
-            if isinstance(rule_component, _DIV.Rule):
-                editable = editable or (rule_component.source is not None)
-        wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
-        piter = model.insert(it, pos, (wrapped,))
-        if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
-            for c in rule_component.components:
-                ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
-                self._populate_model(model, piter, c, level + 1, editable=ed)
-            if len(rule_component.components) == 0:
-                self._populate_model(model, piter, None, level + 1, editable=editable)
-        elif isinstance(rule_component, _DIV.Not):
-            self._populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
     def on_update(self):
         self.view.queue_draw()
@@ -493,7 +503,7 @@ class DiversionDialog:
             parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1 :]]
             children = [child[0].component for child in m[it].iterchildren()]
         m.remove(it)
-        self._populate_model(m, parent_it, children, level=wrapped.level, pos=idx)
+        _populate_model(m, parent_it, children, level=wrapped.level, pos=idx)
         new_iter = m.iter_nth_child(parent_it, idx)
         self.view.expand_row(m.get_path(parent_it), True)
         self.view.get_selection().select_iter(new_iter)
@@ -518,7 +528,7 @@ class DiversionDialog:
             new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
-        self._populate_model(m, parent_it, new_c, level=wrapped.level, pos=idx)
+        _populate_model(m, parent_it, new_c, level=wrapped.level, pos=idx)
         self.on_update()
         if len(parent_c.components) == 1:
             m.remove(it)  # remove placeholder in the end
@@ -607,7 +617,7 @@ class DiversionDialog:
         idx = parent_c.components.index(c)
         parent_c.components.pop(idx)
         if len(parent_c.components) == 0:  # placeholder
-            self._populate_model(m, parent_it, None, level=wrapped.level)
+            _populate_model(m, parent_it, None, level=wrapped.level)
         m.remove(it)
         self.view.get_selection().select_iter(m.iter_nth_child(parent_it, max(0, min(idx, len(parent_c.components) - 1))))
         self.on_update()
@@ -650,7 +660,7 @@ class DiversionDialog:
             new_c = cls([c], warn=False)
             parent_c.component = new_c
             m.remove(it)
-            self._populate_model(m, parent_it, new_c, level=wrapped.level, pos=0)
+            _populate_model(m, parent_it, new_c, level=wrapped.level, pos=0)
             self.view.expand_row(m.get_path(parent_it), True)
             self.view.get_selection().select_iter(m.iter_nth_child(parent_it, 0))
         else:
