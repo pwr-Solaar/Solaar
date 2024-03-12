@@ -27,7 +27,7 @@ from typing import Dict
 from gi.repository import Gdk, GObject, Gtk
 from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
-from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE
+from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE, Report
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons
@@ -131,10 +131,10 @@ class DiversionDialog:
         window.connect("delete-event", self._closing)
         vbox = Gtk.VBox()
 
-        self.top_panel, self.view = self._create_top_panel()
+        rules_panel, self.view = self._create_rules_panel()
         for col in self._create_view_columns():
             self.view.append_column(col)
-        vbox.pack_start(self.top_panel, True, True, 0)
+        vbox.pack_start(rules_panel, True, True, 0)
 
         self.dirty = False  # if dirty, there are pending changes to be saved
 
@@ -149,6 +149,9 @@ class DiversionDialog:
             }
         )
         vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
+
+        button_box = self._create_button_box()
+        vbox.pack_start(button_box, True, True, 0)
 
         self.model = self._create_model()
         self.view.set_model(self.model)
@@ -204,7 +207,7 @@ class DiversionDialog:
             self.save_btn.set_sensitive(False)
             self.discard_btn.set_sensitive(False)
 
-    def _create_top_panel(self):
+    def _create_rules_panel(self):
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         view = Gtk.TreeView()
@@ -217,31 +220,43 @@ class DiversionDialog:
         view.get_selection().connect("changed", self._selection_changed)
         sw.add(view)
         sw.set_size_request(0, 300)  # don't ask for so much height
+        vbox = Gtk.VBox()
+        vbox.pack_start(sw, True, True, 0)
+        return vbox, view
 
-        button_box = Gtk.HBox(spacing=20)
+    def _add_rule(self):
+        self._menu_do_insert_new(None, self.model.get_iter_first(), _DIV.Rule, [])
+
+    def _create_button_box(self):
+        hbox = Gtk.HBox(spacing=20)
+        hbox.set_margin_start(10)
+        hbox.set_margin_end(10)
+        hbox.set_valign(Gtk.Align.END)
+        hbox.set_size_request(0, 50)
+
+        self.insert_rule_btn = Gtk.Button.new_from_icon_name("document-revert", Gtk.IconSize.BUTTON)
+        self.insert_rule_btn.set_label(_("Insert new rule"))
+        self.insert_rule_btn.set_valign(Gtk.Align.CENTER)
+        self.insert_rule_btn.connect("clicked", lambda *_args: self._add_rule())  # TODO insert rule below
+
         self.save_btn = Gtk.Button.new_from_icon_name("document-save", Gtk.IconSize.BUTTON)
         self.save_btn.set_label(_("Save changes"))
         self.save_btn.set_always_show_image(True)
         self.save_btn.set_sensitive(False)
         self.save_btn.set_valign(Gtk.Align.CENTER)
+        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
+
         self.discard_btn = Gtk.Button.new_from_icon_name("document-revert", Gtk.IconSize.BUTTON)
         self.discard_btn.set_label(_("Discard changes"))
         self.discard_btn.set_always_show_image(True)
         self.discard_btn.set_sensitive(False)
         self.discard_btn.set_valign(Gtk.Align.CENTER)
-        self.save_btn.connect("clicked", lambda *_args: self._save_yaml_file())
         self.discard_btn.connect("clicked", lambda *_args: self._reload_yaml_file())
-        button_box.pack_start(self.save_btn, False, False, 0)
-        button_box.pack_start(self.discard_btn, False, False, 0)
-        button_box.set_halign(Gtk.Align.CENTER)
-        button_box.set_valign(Gtk.Align.CENTER)
-        button_box.set_size_request(0, 50)
 
-        vbox = Gtk.VBox()
-        vbox.pack_start(button_box, False, False, 0)
-        vbox.pack_start(sw, True, True, 0)
-
-        return vbox, view
+        hbox.pack_start(self.insert_rule_btn, False, False, 0)
+        hbox.pack_end(self.save_btn, False, False, 0)
+        hbox.pack_end(self.discard_btn, False, False, 0)
+        return hbox
 
     def _create_model(self):
         model = Gtk.TreeStore(RuleComponentWrapper)
@@ -519,7 +534,15 @@ class DiversionDialog:
         if isinstance(new_c, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Not)):
             self.view.expand_row(m.get_path(new_iter), True)
 
-    def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
+    def _menu_do_insert_new(
+        self,
+        _mitem: Gtk.MenuItem,
+        m: Gtk.TreeStore,
+        it: Gtk.TreeIter,
+        cls: Report,
+        initial_value: int,
+        below: bool = False,
+    ):
         new_c = cls(initial_value, warn=False)
         return self._menu_do_insert(_mitem, m, it, new_c, below=below)
 
