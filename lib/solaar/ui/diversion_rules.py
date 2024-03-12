@@ -17,17 +17,25 @@ import logging
 import string
 import threading
 
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from collections import namedtuple
 from contextlib import contextmanager as contextlib_contextmanager
 from copy import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from shlex import quote as shlex_quote
 from typing import Dict
 
-from gi.repository import Gdk, GObject, Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Gtk
 from logitech_receiver import diversion as _DIV
-from logitech_receiver.common import NamedInt, NamedInts, UnsortedNamedInts
-from logitech_receiver.diversion import CLICK, DEPRESS, RELEASE
+from logitech_receiver.common import NamedInt
+from logitech_receiver.common import NamedInts
+from logitech_receiver.common import UnsortedNamedInts
+from logitech_receiver.diversion import CLICK
+from logitech_receiver.diversion import DEPRESS
+from logitech_receiver.diversion import RELEASE
 from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import Key as _Key
 from logitech_receiver.diversion import buttons as _buttons

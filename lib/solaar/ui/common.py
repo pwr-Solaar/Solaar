@@ -22,7 +22,8 @@ from solaar.i18n import _
 from solaar.tasks import TaskRunner as _TaskRunner
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk  # NOQA: E402
+from gi.repository import GLib  # NOQA: E402
+from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 

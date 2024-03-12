@@ -19,7 +19,8 @@ import logging
 import queue
 import threading
 
-from . import base, exceptions
+from . import base
+from . import exceptions
 
 logger = logging.getLogger(__name__)
 

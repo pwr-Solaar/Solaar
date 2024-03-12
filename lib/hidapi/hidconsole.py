@@ -21,9 +21,11 @@ import readline
 import sys
 import time
 
-from binascii import hexlify, unhexlify
+from binascii import hexlify
+from binascii import unhexlify
 from select import select as _select
-from threading import Lock, Thread
+from threading import Lock
+from threading import Thread
 
 import hidapi as _hid
 

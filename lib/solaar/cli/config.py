@@ -188,7 +188,8 @@ def run(receivers, args, find_receiver, find_device):
         import gi
 
         gi.require_version("Gtk", "3.0")
-        from gi.repository import Gio, Gtk
+        from gi.repository import Gio
+        from gi.repository import Gtk
 
         if Gtk.init_check()[0]:  # can Gtk be initialized?
             APP_ID = "io.github.pwr_solaar.solaar"

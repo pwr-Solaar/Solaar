@@ -19,7 +19,8 @@ import logging
 
 from gi.repository import Gtk
 
-from solaar import NAME, __version__
+from solaar import NAME
+from solaar import __version__
 from solaar.i18n import _
 
 #

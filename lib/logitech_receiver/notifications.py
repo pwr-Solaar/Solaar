@@ -23,8 +23,9 @@ import threading as _threading
 from struct import unpack as _unpack
 
 from . import diversion as _diversion
-from . import hidpp10, hidpp20
+from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID

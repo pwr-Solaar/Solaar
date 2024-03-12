@@ -9,7 +9,16 @@ import textwrap
 import typing
 import warnings
 
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, TextIO, Tuple, Union
+from typing import Any
+from typing import Dict
+from typing import Iterable
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import TextIO
+from typing import Tuple
+from typing import Union
 
 if sys.version_info >= (3, 8):
     from typing import Literal

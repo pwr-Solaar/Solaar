@@ -36,7 +36,8 @@ import solaar.ui as _ui
 import solaar.ui.common as _common
 import solaar.upower as _upower
 
-from solaar import NAME, __version__
+from solaar import NAME
+from solaar import __version__
 
 logger = logging.getLogger(__name__)
 

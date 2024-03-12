@@ -2,7 +2,8 @@ from unittest import mock
 
 import pytest
 
-from logitech_receiver import exceptions, receiver
+from logitech_receiver import exceptions
+from logitech_receiver import receiver
 
 
 @pytest.mark.parametrize(

@@ -18,7 +18,8 @@ from logitech_receiver import base as _base
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver.common import strhex as _strhex
 
-from solaar.cli.show import _print_device, _print_receiver
+from solaar.cli.show import _print_device
+from solaar.cli.show import _print_receiver
 
 _R = _hidpp10_constants.REGISTERS
 

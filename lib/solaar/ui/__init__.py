@@ -22,13 +22,20 @@ import yaml as _yaml
 from logitech_receiver.common import ALERT
 
 from solaar.i18n import _
-from solaar.ui.config_panel import change_setting, record_setting
+from solaar.ui.config_panel import change_setting
+from solaar.ui.config_panel import record_setting
 from solaar.ui.window import find_device
 
-from . import common, diversion_rules, notify, tray, window
+from . import common
+from . import diversion_rules
+from . import notify
+from . import tray
+from . import window
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gio, GLib, Gtk  # NOQA: E402
+from gi.repository import Gio  # NOQA: E402
+from gi.repository import GLib  # NOQA: E402
+from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
