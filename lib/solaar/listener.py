@@ -279,8 +279,8 @@ def ping_all(resuming=False):
         logger.info("ping all devices%s", " when resuming" if resuming else "")
     for listener_thread in _all_listeners.values():
         if listener_thread.receiver.isDevice:
-            if resuming and hasattr(listener_thread.receiver, "status"):
-                listener_thread.receiver.status._active = None  # ensure that settings are pushed
+            if resuming:
+                listener_thread.receiver._active = None  # ensure that settings are pushed
             if listener_thread.receiver.ping():
                 listener_thread.receiver.changed(active=True, push=True)
             listener_thread._status_changed(listener_thread.receiver)
