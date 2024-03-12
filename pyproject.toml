@@ -12,4 +12,5 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
+force-single-line = true
 lines-between-types = 1
