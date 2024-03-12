@@ -91,6 +91,9 @@ class FeaturesArray(dict):
         if feature is not None:
             return feature
         elif self._check():
+            feature = self.inverse.get(index)
+            if feature is not None:
+                return feature
             response = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
             if response:
                 feature = FEATURE[_unpack("!H", response[:2])[0]]
@@ -117,6 +120,9 @@ class FeaturesArray(dict):
         if index is not None:
             return index
         elif self._check():
+            index = super().get(feature)
+            if index is not None:
+                return index
             response = self.device.request(0x0000, _pack("!H", feature))
             if response:
                 index = response[0]
