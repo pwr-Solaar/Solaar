@@ -24,7 +24,8 @@ from logitech_receiver.common import NamedInt as _NamedInt
 from logitech_receiver.common import NamedInts as _NamedInts
 
 from solaar import NAME
-from solaar.i18n import _, ngettext
+from solaar.i18n import _
+from solaar.i18n import ngettext
 
 from . import action as _action
 from . import config_panel as _config_panel
@@ -36,7 +37,9 @@ from .diversion_rules import show_window as _show_diversion_window
 # from solaar import __version__ as VERSION
 
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gdk, GLib, Gtk  # NOQA: E402
+from gi.repository import Gdk  # NOQA: E402
+from gi.repository import GLib  # NOQA: E402
+from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 

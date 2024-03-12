@@ -21,12 +21,14 @@ import threading as _threading
 
 from struct import pack as _pack
 from struct import unpack as _unpack
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
 import yaml as _yaml
 
-from . import exceptions, special_keys
+from . import exceptions
 from . import hidpp10_constants as _hidpp10_constants
+from . import special_keys
 from .common import Battery
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import NamedInt as _NamedInt
@@ -35,7 +37,14 @@ from .common import UnsortedNamedInts as _UnsortedNamedInts
 from .common import bytes2int as _bytes2int
 from .common import crc16 as _crc16
 from .common import int2bytes as _int2bytes
-from .hidpp20_constants import CHARGE_LEVEL, CHARGE_STATUS, CHARGE_TYPE, DEVICE_KIND, ERROR, FEATURE, FIRMWARE_KIND, GESTURE
+from .hidpp20_constants import CHARGE_LEVEL
+from .hidpp20_constants import CHARGE_STATUS
+from .hidpp20_constants import CHARGE_TYPE
+from .hidpp20_constants import DEVICE_KIND
+from .hidpp20_constants import ERROR
+from .hidpp20_constants import FEATURE
+from .hidpp20_constants import FIRMWARE_KIND
+from .hidpp20_constants import GESTURE
 from .i18n import _
 
 logger = logging.getLogger(__name__)

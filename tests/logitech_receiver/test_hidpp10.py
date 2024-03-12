@@ -1,6 +1,7 @@
 import pytest
 
-from lib.logitech_receiver import hidpp10, hidpp10_constants
+from lib.logitech_receiver import hidpp10
+from lib.logitech_receiver import hidpp10_constants
 
 
 class FakeDevice:

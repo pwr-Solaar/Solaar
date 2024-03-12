@@ -30,8 +30,9 @@ from time import time as _timestamp
 
 import hidapi as _hid
 
-from . import exceptions, hidpp20
+from . import exceptions
 from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from .base_usb import ALL as _RECEIVER_USB_IDS
 from .common import strhex as _strhex

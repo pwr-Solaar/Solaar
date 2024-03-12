@@ -16,10 +16,12 @@
 
 import logging
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib
+from gi.repository import Gtk
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 
-from solaar.i18n import _, ngettext
+from solaar.i18n import _
+from solaar.i18n import ngettext
 
 from . import icons as _icons
 

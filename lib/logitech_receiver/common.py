@@ -20,7 +20,8 @@
 from binascii import hexlify as _hexlify
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional
+from typing import Union
 
 import yaml as _yaml
 

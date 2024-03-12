@@ -23,7 +23,9 @@ try:
 
     gi.require_version("Notify", "0.7")
     gi.require_version("Gtk", "3.0")
-    from gi.repository import GLib, Gtk, Notify  # this import is allowed to fail making the entire feature unavailable
+    from gi.repository import GLib  # this import is allowed to fail making the entire feature unavailable
+    from gi.repository import Gtk  # this import is allowed to fail making the entire feature unavailable
+    from gi.repository import Notify  # this import is allowed to fail making the entire feature unavailable
 
     available = True
 except (ValueError, ImportError):

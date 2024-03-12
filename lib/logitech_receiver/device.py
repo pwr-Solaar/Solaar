@@ -25,8 +25,16 @@ from typing import Optional
 import hidapi as _hid
 import solaar.configuration as _configuration
 
-from . import base, descriptors, exceptions, hidpp10, hidpp10_constants, hidpp20, hidpp20_constants, settings
-from .common import ALERT, Battery
+from . import base
+from . import descriptors
+from . import exceptions
+from . import hidpp10
+from . import hidpp10_constants
+from . import hidpp20
+from . import hidpp20_constants
+from . import settings
+from .common import ALERT
+from .common import Battery
 from .settings_templates import check_feature_settings as _check_feature_settings
 
 logger = logging.getLogger(__name__)

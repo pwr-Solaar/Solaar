@@ -19,12 +19,14 @@ import logging
 import sys as _sys
 
 from importlib import import_module
-from traceback import extract_tb, format_exc
+from traceback import extract_tb
+from traceback import format_exc
 
 import logitech_receiver.device as _device
 import logitech_receiver.receiver as _receiver
 
-from logitech_receiver.base import receivers, receivers_and_devices
+from logitech_receiver.base import receivers
+from logitech_receiver.base import receivers_and_devices
 
 from solaar import NAME
 

@@ -5,7 +5,8 @@ from unittest import mock
 
 import pytest
 
-from lib.logitech_receiver import hidpp20, hidpp20_constants
+from lib.logitech_receiver import hidpp20
+from lib.logitech_receiver import hidpp20_constants
 
 DEVICE = "test_device"
 _hidpp20 = hidpp20.Hidpp20()

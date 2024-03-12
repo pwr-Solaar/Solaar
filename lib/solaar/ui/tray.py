@@ -21,7 +21,8 @@ from time import time as _timestamp
 
 import gi
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib
+from gi.repository import Gtk
 from gi.repository.Gdk import ScrollDirection
 
 import solaar.gtk as gtk

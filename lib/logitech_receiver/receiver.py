@@ -24,10 +24,13 @@ from typing import Optional
 import hidapi as _hid
 
 from . import base as _base
-from . import exceptions, hidpp10, hidpp10_constants
+from . import exceptions
+from . import hidpp10
+from . import hidpp10_constants
 from .common import ALERT
 from .device import Device
-from .i18n import _, ngettext
+from .i18n import _
+from .i18n import ngettext
 
 logger = logging.getLogger(__name__)
 
