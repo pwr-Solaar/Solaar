@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 from unittest import mock
 
 import pytest
 
+from lib.logitech_receiver import common
 from lib.logitech_receiver import hidpp20
 from lib.logitech_receiver import hidpp20_constants
 
