@@ -1131,20 +1131,21 @@ class OrUI(RuleComponentUI):
 
 class LaterUI(RuleComponentUI):
     CLASS = _DIV.Later
-    MIN_VALUE = 1
+    MIN_VALUE = 0.01
     MAX_VALUE = 100
 
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
-        self.label.set_text(_("Number of seconds to delay."))
+        self.label.set_text(_("Number of seconds to delay.  Delay between 0 and 1 is done with higher precision."))
         self.widgets[self.label] = (0, 0, 1, 1)
         self.field = Gtk.SpinButton.new_with_range(self.MIN_VALUE, self.MAX_VALUE, 1)
+        self.field.set_digits(3)
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
         #        self.field.set_vexpand(True)
-        self.field.connect("changed", self._on_update)
+        self.field.connect("value-changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
     def show(self, component, editable):
@@ -1153,7 +1154,7 @@ class LaterUI(RuleComponentUI):
             self.field.set_value(component.delay)
 
     def collect_value(self):
-        return [int(self.field.get_value())] + self.component.components
+        return [float(int((self.field.get_value() + 0.0001) * 1000)) / 1000] + self.component.components
 
     @classmethod
     def left_label(cls, component):
