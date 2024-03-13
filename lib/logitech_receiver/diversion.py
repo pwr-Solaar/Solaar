@@ -1355,9 +1355,9 @@ class Later(Action):
         if not (isinstance(args, list) and len(args) >= 1):
             if warn:
                 logger.warning("rule Later argument not list with minimum length 1: %s", args)
-        elif not (isinstance(args[0], int)) or not 0 < args[0] < 101:
+        elif not (isinstance(args[0], (int, float))) or not 0.01 <= args[0] <= 100:
             if warn:
-                logger.warning("rule Later argument delay not integer between 1 and 100: %s", args)
+                logger.warning("rule Later delay not between 0.01 and 100: %s", args)
         else:
             self.delay = args[0]
             self.rule = Rule(args[1:], warn=warn)
@@ -1368,7 +1368,10 @@ class Later(Action):
 
     def evaluate(self, feature, notification, device, last_result):
         if self.delay and self.rule:
-            GLib.timeout_add_seconds(self.delay, Rule.once, self.rule, feature, notification, device, last_result)
+            if self.delay >= 1:
+                GLib.timeout_add_seconds(int(self.delay), Rule.once, self.rule, feature, notification, device, last_result)
+            else:
+                GLib.timeout_add(int(self.delay * 1000), Rule.once, self.rule, feature, notification, device, last_result)
         return None
 
     def data(self):
