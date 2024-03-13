@@ -379,8 +379,6 @@ class NamedInts:
 
     def __init__(self, dict=None, **kwargs):
         def _readable_name(n):
-            if not is_string(n):
-                raise TypeError("expected string, got " + str(type(n)))
             return n.replace("__", "/").replace("_", " ")
 
         # print (repr(kwargs))
