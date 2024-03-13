@@ -13,7 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from collections import namedtuple
+from dataclasses import dataclass
 
 from gi.repository import Gtk
 from logitech_receiver import diversion as _DIV
@@ -379,34 +379,45 @@ class TestUI(ConditionUI):
         return component.test + (" " + repr(component.parameter) if component.parameter is not None else "")
 
 
-_TestBytesElement = namedtuple("TestBytesElement", ["id", "label", "min", "max"])
-_TestBytesMode = namedtuple("TestBytesMode", ["label", "elements", "label_fn"])
+@dataclass
+class TestBytesElement:
+    id: str
+    label: str
+    min: int
+    max: int
+
+
+@dataclass
+class TestBytesMode:
+    label: str
+    elements: list
+    label_fn: callable
 
 
 class TestBytesUI(ConditionUI):
     CLASS = _DIV.TestBytes
 
     _common_elements = [
-        _TestBytesElement("begin", _("begin (inclusive)"), 0, 16),
-        _TestBytesElement("end", _("end (exclusive)"), 0, 16),
+        TestBytesElement("begin", _("begin (inclusive)"), 0, 16),
+        TestBytesElement("end", _("end (exclusive)"), 0, 16),
     ]
 
     _global_min = -(2**31)
     _global_max = 2**31 - 1
 
     _modes = {
-        "range": _TestBytesMode(
+        "range": TestBytesMode(
             _("range"),
             _common_elements
             + [
-                _TestBytesElement("minimum", _("minimum"), _global_min, _global_max),  # uint32
-                _TestBytesElement("maximum", _("maximum"), _global_min, _global_max),
+                TestBytesElement("minimum", _("minimum"), _global_min, _global_max),  # uint32
+                TestBytesElement("maximum", _("maximum"), _global_min, _global_max),
             ],
             lambda e: _("bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d" % {str(i): v for i, v in enumerate(e)}),
         ),
-        "mask": _TestBytesMode(
+        "mask": TestBytesMode(
             _("mask"),
-            _common_elements + [_TestBytesElement("mask", _("mask"), _global_min, _global_max)],
+            _common_elements + [TestBytesElement("mask", _("mask"), _global_min, _global_max)],
             lambda e: _("bytes %(0)d to %(1)d, mask %(2)d" % {str(i): v for i, v in enumerate(e)}),
         ),
     }
