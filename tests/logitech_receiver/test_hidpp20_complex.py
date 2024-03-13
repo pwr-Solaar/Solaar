@@ -1,9 +1,13 @@
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Any
+from typing import Optional
 
 import pytest
 
-from lib.logitech_receiver import hidpp20, hidpp20_constants, special_keys
+from lib.logitech_receiver import hidpp20
+from lib.logitech_receiver import hidpp20_constants
+from lib.logitech_receiver import special_keys
 
 
 @dataclass
