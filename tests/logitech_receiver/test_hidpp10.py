@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
+from typing import List
 from typing import Optional
 
 import pytest
@@ -27,8 +28,8 @@ class Device:
     kind: str = "fake"
     protocol: float = 1.0
     isDevice: bool = False  # incorrect, but useful here
-    registers: list[common.NamedInt] = field(default_factory=list)
-    responses: list[Response] = field(default_factory=list)
+    registers: List[common.NamedInt] = field(default_factory=list)
+    responses: List[Response] = field(default_factory=list)
 
     def request(self, id, params=None, no_reply=False):
         if params is None:
