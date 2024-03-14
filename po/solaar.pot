@@ -1,0 +1,1918 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid   ""
+msgstr  "Project-Id-Version: solaar 1.1.11\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2024-03-14 13:23+0700\n"
+        "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+        "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+        "Language-Team: LANGUAGE <LL@li.org>\n"
+        "Language: \n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: lib/logitech_receiver/base_usb.py:45
+msgid   "Bolt Receiver"
+msgstr  ""
+
+#: lib/logitech_receiver/base_usb.py:58
+msgid   "Unifying Receiver"
+msgstr  ""
+
+#: lib/logitech_receiver/base_usb.py:70 lib/logitech_receiver/base_usb.py:83
+#: lib/logitech_receiver/base_usb.py:97 lib/logitech_receiver/base_usb.py:111
+#: lib/logitech_receiver/base_usb.py:125
+msgid   "Nano Receiver"
+msgstr  ""
+
+#: lib/logitech_receiver/base_usb.py:138
+msgid   "Lightspeed Receiver"
+msgstr  ""
+
+#: lib/logitech_receiver/base_usb.py:149
+msgid   "EX100 Receiver 27 Mhz"
+msgstr  ""
+
+#: lib/logitech_receiver/common.py:604
+#, python-format
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  ""
+
+#: lib/logitech_receiver/common.py:606
+#, python-format
+msgid   "Battery: %(percent)d%% (%(status)s)"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:926
+#: lib/logitech_receiver/settings_templates.py:291
+msgid   "Disabled"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:927
+msgid   "Static"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:928
+msgid   "Pulse"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:929
+msgid   "Cycle"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:930
+msgid   "Boot"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:931
+msgid   "Demo"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:932
+msgid   "Breathe"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:933
+msgid   "Ripple"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:994
+msgid   "Unknown Location"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:995
+msgid   "Primary"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:996
+msgid   "Logo"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:997
+msgid   "Left Side"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:998
+msgid   "Right Side"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:999
+msgid   "Combined"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1000
+msgid   "Primary 1"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1001
+msgid   "Primary 2"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1002
+msgid   "Primary 3"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1003
+msgid   "Primary 4"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1004
+msgid   "Primary 5"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:1005
+msgid   "Primary 6"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:28
+msgid   "empty"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:29
+msgid   "critical"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:30
+msgid   "low"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:31
+msgid   "average"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:32
+msgid   "good"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:33
+msgid   "full"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:35
+msgid   "discharging"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:36
+msgid   "recharging"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:37
+msgid   "charging"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:38
+msgid   "not charging"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:39
+msgid   "almost full"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:40
+msgid   "charged"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:41
+msgid   "slow recharge"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:42
+msgid   "invalid battery"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:43
+msgid   "thermal error"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:44
+msgid   "error"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:45
+msgid   "standard"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:46
+msgid   "fast"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:47
+msgid   "slow"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:49
+msgid   "device timeout"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:50
+msgid   "device not supported"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:51
+msgid   "too many devices"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:52
+msgid   "sequence timeout"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:54
+msgid   "Firmware"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:55
+msgid   "Bootloader"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:56
+msgid   "Hardware"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:57
+msgid   "Other"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:59
+msgid   "Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:60
+msgid   "Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:61
+msgid   "Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:62
+msgid   "Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:63
+msgid   "Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:64
+msgid   "Mouse Gesture Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:65
+msgid   "Smart Shift"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:66
+msgid   "DPI Switch"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:67
+msgid   "Left Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:68
+msgid   "Right Tilt"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:69
+msgid   "Left Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:70
+msgid   "Right Click"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:71
+msgid   "Mouse Middle Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:72
+msgid   "Mouse Back Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:73
+msgid   "Mouse Forward Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Gesture Button Navigation"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Mouse Scroll Left Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Mouse Scroll Right Button"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:78
+msgid   "pressed"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "released"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid   "pairing lock is closed"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid   "pairing lock is open"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:80
+msgid   "discovery lock is closed"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:80
+msgid   "discovery lock is open"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:207
+msgid   "connected"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:207
+msgid   "disconnected"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:233
+msgid   "unpaired"
+msgstr  ""
+
+#: lib/logitech_receiver/notifications.py:280
+msgid   "powered on"
+msgstr  ""
+
+#: lib/logitech_receiver/receiver.py:345
+msgid   "No paired devices."
+msgstr  ""
+
+#: lib/logitech_receiver/receiver.py:347 lib/solaar/ui/window.py:630
+#, python-format
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/logitech_receiver/settings.py:617
+msgid   "register"
+msgstr  ""
+
+#: lib/logitech_receiver/settings.py:631 lib/logitech_receiver/settings.py:658
+msgid   "feature"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:144
+msgid   "Swap Fx function"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:147
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:152
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:160
+msgid   "Hand Detection"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:161
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:168
+msgid   "Scroll Wheel Smooth Scrolling"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:169
+#: lib/logitech_receiver/settings_templates.py:402
+#: lib/logitech_receiver/settings_templates.py:431
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:176
+msgid   "Side Scrolling"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:178
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:188
+msgid   "Sensitivity (DPI - older mice)"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:189
+#: lib/logitech_receiver/settings_templates.py:958
+msgid   "Mouse movement sensitivity"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:249
+#: lib/logitech_receiver/settings_templates.py:261
+#: lib/logitech_receiver/settings_templates.py:388
+msgid   "Backlight"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:250
+#: lib/logitech_receiver/settings_templates.py:389
+msgid   "Set illumination time for keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:262
+msgid   "Illumination level on keyboard.  Changes made are only applied in "
+        "Manual mode."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:293
+msgid   "Automatic"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:295
+msgid   "Manual"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:297
+msgid   "Enabled"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:303
+msgid   "Backlight Level"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:304
+msgid   "Illumination level on keyboard when in Manual mode."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:361
+msgid   "Backlight Delay Hands Out"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:362
+msgid   "Delay in seconds until backlight fades out with hands away from "
+        "keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:370
+msgid   "Backlight Delay Hands In"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:371
+msgid   "Delay in seconds until backlight fades out with hands near keyboard."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:379
+msgid   "Backlight Delay Powered"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:380
+msgid   "Delay in seconds until backlight fades out with external power."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:400
+msgid   "Scroll Wheel High Resolution"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:404
+#: lib/logitech_receiver/settings_templates.py:433
+msgid   "Set to ignore if scrolling is abnormally fast or slow"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:411
+#: lib/logitech_receiver/settings_templates.py:442
+msgid   "Scroll Wheel Diversion"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:413
+msgid   "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:420
+msgid   "Scroll Wheel Direction"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:421
+msgid   "Invert direction for vertical scroll with wheel."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:429
+msgid   "Scroll Wheel Resolution"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:444
+msgid   "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:453
+msgid   "Sensitivity (Pointer Speed)"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:454
+msgid   "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:464
+msgid   "Thumb Wheel Diversion"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:466
+msgid   "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
+        "Solaar rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:475
+msgid   "Thumb Wheel Direction"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:476
+msgid   "Invert thumb wheel scroll direction."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:496
+msgid   "Onboard Profiles"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:497
+msgid   "Enable an onboard profile, which controls report rate, sensitivity, "
+        "and button actions"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:541
+#: lib/logitech_receiver/settings_templates.py:581
+msgid   "Report Rate"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+msgid   "Frequency of device movement reports"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+#: lib/logitech_receiver/settings_templates.py:1295
+#: lib/logitech_receiver/settings_templates.py:1326
+msgid   "May need Onboard Profiles set to Disable to be effective."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:623
+msgid   "Divert crown events"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:624
+msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:632
+msgid   "Crown smooth scroll"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:633
+msgid   "Set crown smooth scroll"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:641
+msgid   "Divert G and M Keys"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:642
+msgid   "Make G and M keys send HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:656
+msgid   "Scroll Wheel Ratcheted"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:657
+msgid   "Switch the mouse wheel between speed-controlled ratcheting and "
+        "always freespin."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid   "Freespinning"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid   "Ratcheted"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:666
+msgid   "Scroll Wheel Ratchet Speed"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:668
+msgid   "Use the mouse wheel speed to switch between ratcheted and "
+        "freespinning.\n"
+        "The mouse wheel is always ratcheted at 50."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:717
+msgid   "Key/Button Actions"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:719
+msgid   "Change the action for the key or button."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:721
+msgid   "Overridden by diversion."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:723
+msgid   "Changing important actions (such as for the left mouse button) can "
+        "result in an unusable system."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:886
+msgid   "Key/Button Diversion"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:887
+msgid   "Make the key or button send HID++ notifications (Diverted) or "
+        "initiate Mouse Gestures or Sliding DPI"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid   "Diverted"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+msgid   "Mouse Gestures"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid   "Regular"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:890
+msgid   "Sliding DPI"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:957
+msgid   "Sensitivity (DPI)"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:997
+msgid   "Sensitivity Switching"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:999
+msgid   "Switch the current sensitivity and the remembered sensitivity when "
+        "the key or button is pressed.\n"
+        "If there is no remembered sensitivity, just remember the current "
+        "sensitivity"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1003
+msgid   "Off"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1034
+msgid   "Disable keys"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1035
+msgid   "Disable specific keyboard keys."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1038
+#, python-format
+msgid   "Disables the %s key."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1051
+#: lib/logitech_receiver/settings_templates.py:1108
+msgid   "Set OS"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1052
+#: lib/logitech_receiver/settings_templates.py:1109
+msgid   "Change keys to match OS."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1121
+msgid   "Change Host"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1122
+msgid   "Switch connection to a different host"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid   "Performs a left click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid   "Single tap"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid   "Performs a right click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid   "Single tap with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1148
+msgid   "Single tap with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid   "Double tap"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid   "Performs a double click."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1153
+msgid   "Double tap with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1154
+msgid   "Double tap with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1157
+msgid   "Drags items by dragging the finger after double tapping."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1157
+msgid   "Tap and drag"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1159
+msgid   "Tap and drag with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1160
+msgid   "Drags items by dragging the fingers after double tapping."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1162
+msgid   "Tap and drag with three fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1165
+msgid   "Suppress tap and edge gestures"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1166
+msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1168
+msgid   "Scroll with one finger"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1168
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid   "Scrolls."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid   "Scroll with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid   "Scroll horizontally with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid   "Scrolls horizontally."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid   "Scroll vertically with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid   "Scrolls vertically."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid   "Inverts the scrolling direction."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid   "Natural scrolling"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid   "Enables the thumbwheel."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid   "Thumbwheel"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1185
+#: lib/logitech_receiver/settings_templates.py:1189
+msgid   "Swipe from the top edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1186
+msgid   "Swipe from the left edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1187
+msgid   "Swipe from the right edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1188
+msgid   "Swipe from the bottom edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1190
+msgid   "Swipe two fingers from the left edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1191
+msgid   "Swipe two fingers from the right edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1192
+msgid   "Swipe two fingers from the bottom edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1193
+msgid   "Swipe two fingers from the top edge"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1194
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid   "Pinch to zoom out; spread to zoom in."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1194
+msgid   "Zoom with two fingers."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1195
+msgid   "Pinch to zoom out."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1196
+msgid   "Spread to zoom in."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1197
+msgid   "Zoom with three fingers."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid   "Zoom with two fingers"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1216
+msgid   "Pixel zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1217
+msgid   "Ratio zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid   "Scale factor"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid   "Sets the cursor speed."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid   "Left"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid   "Left-most coordinate."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid   "Bottom"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid   "Bottom coordinate."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid   "Width"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid   "Width."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid   "Height"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid   "Height."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid   "Cursor speed."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid   "Scale"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1232
+msgid   "Gestures"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1233
+msgid   "Tweak the mouse/touchpad behaviour."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1249
+msgid   "Gestures Diversion"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1250
+msgid   "Divert mouse/touchpad gestures."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1266
+msgid   "Gesture params"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1267
+msgid   "Change numerical parameters of a mouse/touchpad."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1291
+msgid   "M-Key LEDs"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1293
+msgid   "Control the M-Key LEDs."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1297
+#: lib/logitech_receiver/settings_templates.py:1328
+msgid   "May need G Keys diverted to be effective."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1303
+#, python-format
+msgid   "Lights up the %s key."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1322
+msgid   "MR-Key LED"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1324
+msgid   "Control the MR-Key LED."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1345
+msgid   "Persistent Key/Button Mapping"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1347
+msgid   "Permanently change the mapping for the key or button."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1349
+msgid   "Changing important keys or buttons (such as for the left mouse "
+        "button) can result in an unusable system."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1406
+msgid   "Sidetone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1407
+msgid   "Set sidetone level."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1416
+msgid   "Equalizer"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1417
+msgid   "Set equalizer levels."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1439
+msgid   "Hz"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1445
+msgid   "Power Management"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1446
+msgid   "Power off in minutes (0 for never)."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1457
+msgid   "LED Control"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1458
+msgid   "Switch control of LEDs between device and Solaar"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1473
+msgid   "LED Zone Effects"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1474
+msgid   "Set effect for LED Zone"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1477
+msgid   "Speed"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1478
+msgid   "Period"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1479
+msgid   "Intensity"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1480
+msgid   "Ramp"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1494
+msgid   "LEDs"
+msgstr  ""
+
+#: lib/solaar/ui/__init__.py:112
+msgid   "Another Solaar process is already running so just expose its window"
+msgstr  ""
+
+#: lib/solaar/ui/about.py:38
+msgid   "Manages Logitech receivers,\n"
+        "keyboards, mice, and tablets."
+msgstr  ""
+
+#: lib/solaar/ui/about.py:46
+msgid   "Additional Programming"
+msgstr  ""
+
+#: lib/solaar/ui/about.py:47
+msgid   "GUI design"
+msgstr  ""
+
+#: lib/solaar/ui/about.py:49
+msgid   "Testing"
+msgstr  ""
+
+#: lib/solaar/ui/about.py:57
+msgid   "Logitech documentation"
+msgstr  ""
+
+#: lib/solaar/ui/action.py:83 lib/solaar/ui/action.py:87
+#: lib/solaar/ui/window.py:199
+msgid   "Unpair"
+msgstr  ""
+
+#: lib/solaar/ui/action.py:86 lib/solaar/ui/diversion_rules.py:104
+msgid   "Cancel"
+msgstr  ""
+
+#: lib/solaar/ui/common.py:35
+msgid   "Permissions error"
+msgstr  ""
+
+#: lib/solaar/ui/common.py:37
+#, python-format
+msgid   "Found a Logitech receiver or device (%s), but did not have "
+        "permission to open it."
+msgstr  ""
+
+#: lib/solaar/ui/common.py:39
+msgid   "If you've just installed Solaar, try disconnecting the receiver or "
+        "device and then reconnecting it."
+msgstr  ""
+
+#: lib/solaar/ui/common.py:42
+msgid   "Cannot connect to device error"
+msgstr  ""
+
+#: lib/solaar/ui/common.py:44
+#, python-format
+msgid   "Found a Logitech receiver or device at %s, but encountered an error "
+        "connecting to it."
+msgstr  ""
+
+#: lib/solaar/ui/common.py:46
+msgid   "Try disconnecting the device and then reconnecting it or turning it "
+        "off and then on."
+msgstr  ""
+
+#: lib/solaar/ui/common.py:49
+msgid   "Unpairing failed"
+msgstr  ""
+
+#: lib/solaar/ui/common.py:51
+#, python-brace-format
+msgid   "Failed to unpair %{device} from %{receiver}."
+msgstr  ""
+
+#: lib/solaar/ui/common.py:53
+msgid   "The receiver returned an error, with no further details."
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:231
+msgid   "Complete - ENTER to change"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:231
+msgid   "Incomplete"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:476 lib/solaar/ui/config_panel.py:529
+#, python-format
+msgid   "%d value"
+msgid_plural    "%d values"
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/solaar/ui/config_panel.py:612
+msgid   "Changes allowed"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:613
+msgid   "No changes allowed"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:614
+msgid   "Ignore this setting"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:659
+msgid   "Working"
+msgstr  ""
+
+#: lib/solaar/ui/config_panel.py:662
+msgid   "Read/write operation failed."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:66
+msgid   "Built-in rules"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:66
+msgid   "User-defined rules"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:1089
+msgid   "Rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:69 lib/solaar/ui/diversion_rules.py:538
+#: lib/solaar/ui/diversion_rules.py:665
+msgid   "Sub-rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:71
+msgid   "[empty]"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:95
+msgid   "Make changes permanent?"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:100
+msgid   "Yes"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:102
+msgid   "No"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:107
+msgid   "If you choose No, changes will be lost when Solaar is closed."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:138
+msgid   "Solaar Rule Editor"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:231
+msgid   "Save changes"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:236
+msgid   "Discard changes"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:397
+msgid   "Insert here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:399
+msgid   "Insert above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:401
+msgid   "Insert below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:407
+msgid   "Insert new rule here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:409
+msgid   "Insert new rule above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:411
+msgid   "Insert new rule below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:456
+msgid   "Paste here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:458
+msgid   "Paste above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:460
+msgid   "Paste below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:466
+msgid   "Paste rule here"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:468
+msgid   "Paste rule above"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:470
+msgid   "Paste rule below"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:474
+msgid   "Paste rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:503
+msgid   "Flatten"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:536
+msgid   "Insert"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:667
+#: lib/solaar/ui/diversion_rules.py:1129
+msgid   "Or"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:540 lib/solaar/ui/diversion_rules.py:666
+#: lib/solaar/ui/diversion_rules.py:1115
+msgid   "And"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:542
+msgid   "Condition"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:544 lib/solaar/ui/diversion_rules.py:1290
+msgid   "Feature"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:545 lib/solaar/ui/diversion_rules.py:1325
+msgid   "Report"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:546 lib/solaar/ui/diversion_rules.py:1204
+msgid   "Process"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:547
+msgid   "Mouse process"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:548 lib/solaar/ui/diversion_rules.py:1362
+msgid   "Modifiers"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:549 lib/solaar/ui/diversion_rules.py:1414
+msgid   "Key"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:550 lib/solaar/ui/diversion_rules.py:1455
+msgid   "KeyIsDown"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:551 lib/solaar/ui/diversion_rules.py:2260
+msgid   "Active"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:552 lib/solaar/ui/diversion_rules.py:2217
+#: lib/solaar/ui/diversion_rules.py:2269 lib/solaar/ui/diversion_rules.py:2319
+msgid   "Device"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:553 lib/solaar/ui/diversion_rules.py:2295
+msgid   "Host"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:554 lib/solaar/ui/diversion_rules.py:2337
+msgid   "Setting"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:555 lib/solaar/ui/diversion_rules.py:1470
+#: lib/solaar/ui/diversion_rules.py:1519
+msgid   "Test"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:556 lib/solaar/ui/diversion_rules.py:1633
+msgid   "Test bytes"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:557 lib/solaar/ui/diversion_rules.py:1734
+msgid   "Mouse Gesture"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:561
+msgid   "Action"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:563 lib/solaar/ui/diversion_rules.py:1844
+msgid   "Key press"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:564 lib/solaar/ui/diversion_rules.py:1895
+msgid   "Mouse scroll"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:565 lib/solaar/ui/diversion_rules.py:1956
+msgid   "Mouse click"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:566
+msgid   "Set"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:567 lib/solaar/ui/diversion_rules.py:2026
+msgid   "Execute"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:568 lib/solaar/ui/diversion_rules.py:1160
+msgid   "Later"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:597
+msgid   "Insert new rule"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:617 lib/solaar/ui/diversion_rules.py:1681
+#: lib/solaar/ui/diversion_rules.py:1786 lib/solaar/ui/diversion_rules.py:1985
+msgid   "Delete"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:639
+msgid   "Negate"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:663
+msgid   "Wrap with"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:685
+msgid   "Cut"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:700
+msgid   "Paste"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:706
+msgid   "Copy"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1070
+msgid   "This editor does not support the selected rule component yet."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1140
+msgid   "Number of seconds to delay."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1178
+msgid   "Not"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1187
+msgid   "X11 active process. For use in X11 only."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1217
+msgid   "X11 mouse process. For use in X11 only."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1234
+msgid   "MouseProcess"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1258
+msgid   "Feature name of notification triggering rule processing."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1305
+msgid   "Report number of notification triggering rule processing."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1338
+msgid   "Active keyboard modifiers. Not always available in Wayland."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1378
+msgid   "Diverted key or button depressed or released.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1387
+msgid   "Key down"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1390
+msgid   "Key up"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1430
+msgid   "Diverted key or button is currently down.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1468
+msgid   "Test condition on notification triggering rule processing."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1472
+msgid   "Parameter"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1534
+msgid   "begin (inclusive)"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1535
+msgid   "end (exclusive)"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1543
+msgid   "range"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1546
+msgid   "minimum"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1547
+msgid   "maximum"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1549
+#, python-format
+msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1552 lib/solaar/ui/diversion_rules.py:1553
+msgid   "mask"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1554
+#, python-format
+msgid   "bytes %(0)d to %(1)d, mask %(2)d"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1563
+msgid   "Bit or range test on bytes in notification message triggering rule "
+        "processing."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1573
+msgid   "type"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1661
+msgid   "Mouse gesture with optional initiating button followed by zero or "
+        "more mouse movements."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1666
+msgid   "Add movement"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1760
+msgid   "Simulate a chorded key click or depress or release.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1765
+msgid   "Add key"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1768
+msgid   "Click"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1771
+msgid   "Depress"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1774
+msgid   "Release"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1859
+msgid   "Simulate a mouse scroll.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1915
+msgid   "Simulate a mouse click.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1918
+msgid   "Button"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1919
+msgid   "Count and Action"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1968
+msgid   "Execute a command with arguments."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1971
+msgid   "Add argument"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2046
+msgid   "Toggle"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2047
+msgid   "True"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2048
+msgid   "False"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2061
+msgid   "Unsupported setting"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2243
+#: lib/solaar/ui/diversion_rules.py:2325 lib/solaar/ui/diversion_rules.py:2568
+#: lib/solaar/ui/diversion_rules.py:2586
+msgid   "Originating device"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2256
+msgid   "Device is active and its settings can be changed."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2265
+msgid   "Device that originated the current notification."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2278
+msgid   "Name of host computer."
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2345
+msgid   "Value"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2353
+msgid   "Item"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2627
+msgid   "Change setting on device"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2643
+msgid   "Setting on device"
+msgstr  ""
+
+#: lib/solaar/ui/notify.py:118
+msgid   "unspecified reason"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:126 lib/solaar/ui/pair_window.py:260
+#: lib/solaar/ui/pair_window.py:296
+#, python-format
+msgid   "%(receiver_name)s: pair new device"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:127
+#, python-format
+msgid   "Enter passcode on %(name)s."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:130
+#, python-format
+msgid   "Type %(passcode)s and then press the enter key."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:133
+msgid   "left"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:133
+msgid   "right"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:135
+#, python-format
+msgid   "Press %(code)s\n"
+        "and then press left and right buttons simultaneously."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:192
+msgid   "Pairing failed"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:194
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:196
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:198
+msgid   "More paired devices than receiver can support."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:200
+msgid   "No further details are available about the error."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:214
+msgid   "Found a new device:"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:239
+msgid   "The wireless link is not encrypted"
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:268
+msgid   "Unifying receivers are only compatible with Unifying devices."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:270
+msgid   "Bolt receivers are only compatible with Bolt devices."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:272
+msgid   "Other receivers are only compatible with a few devices."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:274
+msgid   "The device must not be paired with a nearby powered-on receiver."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:278
+msgid   "Press a pairing button or key until the pairing light flashes "
+        "quickly."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:280
+msgid   "You may have to first turn the device off and on again."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:282
+msgid   "Turn on the device you want to pair."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:284
+msgid   "If the device is already turned on, turn it off and on again."
+msgstr  ""
+
+#: lib/solaar/ui/pair_window.py:288
+#, python-format
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/solaar/ui/pair_window.py:294
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:58
+msgid   "No supported device found"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:321
+#, python-format
+msgid   "About %s"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
+#, python-format
+msgid   "Quit %s"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:294 lib/solaar/ui/tray.py:302
+msgid   "no receiver"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:315 lib/solaar/ui/tray.py:320
+msgid   "offline"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:318
+msgid   "no status"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:99
+msgid   "Scanning"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:132
+msgid   "Battery"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:135
+msgid   "Wireless Link"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:139
+msgid   "Lighting"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:173
+msgid   "Show Technical Details"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:189
+msgid   "Pair new device"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:207
+msgid   "Select a device"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:324
+msgid   "Rule Editor"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:543
+msgid   "Path"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:546
+msgid   "USB ID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:549 lib/solaar/ui/window.py:551
+#: lib/solaar/ui/window.py:566 lib/solaar/ui/window.py:568
+msgid   "Serial"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:555
+msgid   "Index"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:557
+msgid   "Wireless PID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:559
+msgid   "Product ID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:561
+msgid   "Protocol"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:561
+msgid   "Unknown"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:563
+msgid   "Polling rate"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:570
+msgid   "Unit ID"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:584
+msgid   "Notifications"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:628
+msgid   "No device paired."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:637
+#, python-format
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/solaar/ui/window.py:648
+#, python-format
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       ""
+msgstr[1]       ""
+
+#: lib/solaar/ui/window.py:705
+msgid   "Battery Voltage"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:707
+msgid   "Voltage reported by battery"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:709
+msgid   "Battery Level"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:711
+msgid   "Approximate level reported by battery"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:718 lib/solaar/ui/window.py:720
+msgid   "next reported "
+msgstr  ""
+
+#: lib/solaar/ui/window.py:721
+msgid   " and next level to be reported."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:737
+msgid   "encrypted"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:739
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:741
+msgid   "not encrypted"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:745
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "This is a security issue for pointing devices, and a major security "
+        "issue for text-input devices."
+msgstr  ""
+
+#: lib/solaar/ui/window.py:761
+#, python-format
+msgid   "%(light_level)d lux"
+msgstr  ""
