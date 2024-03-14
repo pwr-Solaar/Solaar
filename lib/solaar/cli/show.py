@@ -232,7 +232,7 @@ def _print_device(dev, num=None):
             ):
                 print(f"            Report Rate: {_hidpp20.get_polling_rate(dev)}")
             elif feature == _hidpp20_constants.FEATURE.CONFIG_CHANGE:
-                response = dev.feature_request(_hidpp20_constants.FEATURE.CONFIG_CHANGE, 0x10)
+                response = dev.feature_request(_hidpp20_constants.FEATURE.CONFIG_CHANGE, 0x00)
                 print(f"            Configuration: {response.hex()}")
             elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
                 print("            Remaining Pairings: %d" % _hidpp20.get_remaining_pairing(dev))
