@@ -147,7 +147,7 @@ class FeaturesArray(dict):
             self.inverse[index] = feature
 
     def __delitem__(self, feature):
-        raise Exception("Don't delete features from FeatureArray")
+        raise ValueError("Don't delete features from FeatureArray")
 
     def __len__(self) -> int:
         return self.count
