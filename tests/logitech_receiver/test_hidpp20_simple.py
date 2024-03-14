@@ -12,6 +12,18 @@ from lib.logitech_receiver import hidpp20_constants
 
 
 @dataclass
+class Dumper:
+    def represent_int(arg):
+        return arg
+
+
+def test_hexint_presenter():
+    result = hidpp20.hexint_presenter(Dumper, 18)
+
+    assert result == "0x12"
+
+
+@dataclass
 class Device:
     name: str = "TEST DEVICE"
 
