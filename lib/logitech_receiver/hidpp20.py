@@ -1729,7 +1729,7 @@ class Hidpp20:
             return result
 
     def config_change(self, device, configuration, no_reply=False):
-        return feature_request(device, FEATURE.CONFIG_CHANGE, 0x00, configuration, no_reply=no_reply)
+        return feature_request(device, FEATURE.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
 
 
 battery_functions = {

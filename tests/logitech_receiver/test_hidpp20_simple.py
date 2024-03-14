@@ -389,7 +389,7 @@ def test_get_remaining_pairing(mock_feature_request):
 
 
 def test_config_change(mock_feature_request):
-    responses = [Response("03FFFF", None, hidpp20.FEATURE.CONFIG_CHANGE, 0x0, (0x2,))]
+    responses = [Response("03FFFF", None, hidpp20.FEATURE.CONFIG_CHANGE, 0x10, (0x2,))]
     mock_feature_request.side_effect = partial(feature_request, responses)
 
     result = _hidpp20.config_change(None, 0x2)
