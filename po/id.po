@@ -1,0 +1,1967 @@
+# Indonesian translations for solaar package.
+# Copyright (C) 2024 THE solaar'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the solaar package.
+# Ferdina kusumah <ferdina.kusumah@gmail.com>, 2024.
+#
+msgid   ""
+msgstr  "Project-Id-Version: solaar 1.1.11\n"
+        "Report-Msgid-Bugs-To: \n"
+        "POT-Creation-Date: 2024-03-14 13:11+0700\n"
+        "PO-Revision-Date: 2024-03-14 09:00+0700\n"
+        "Last-Translator: Ferdina Kusumah <ferdina.kusumah@gmail.com>\n"
+        "Language-Team: none\n"
+        "Language: id\n"
+        "MIME-Version: 1.0\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
+        "Content-Transfer-Encoding: 8bit\n"
+        "Plural-Forms: nplurals=1; plural=0;\n"
+        "X-Generator: Poedit 3.0\n"
+
+#: lib/logitech_receiver/base_usb.py:45
+msgid   "Bolt Receiver"
+msgstr  "Reseptor bolt"
+
+#: lib/logitech_receiver/base_usb.py:58
+msgid   "Unifying Receiver"
+msgstr  "Reseptor unifying"
+
+#: lib/logitech_receiver/base_usb.py:70 lib/logitech_receiver/base_usb.py:83
+#: lib/logitech_receiver/base_usb.py:97 lib/logitech_receiver/base_usb.py:111
+#: lib/logitech_receiver/base_usb.py:125
+msgid   "Nano Receiver"
+msgstr  "Reseptor nano"
+
+#: lib/logitech_receiver/base_usb.py:138
+msgid   "Lightspeed Receiver"
+msgstr  "Reseptor lightspeed"
+
+#: lib/logitech_receiver/base_usb.py:149
+msgid   "EX100 Receiver 27 Mhz"
+msgstr  "Reseptor EX100 27 Mhz"
+
+#: lib/logitech_receiver/common.py:604
+#, python-format
+msgid   "Battery: %(level)s (%(status)s)"
+msgstr  "Baterai: %(level)s (%(status)s)"
+
+#: lib/logitech_receiver/common.py:606
+#, python-format
+msgid   "Battery: %(percent)d%% (%(status)s)"
+msgstr  "Baterai: %(percent)d%% (%(status)s)"
+
+#: lib/logitech_receiver/hidpp20.py:926
+#: lib/logitech_receiver/settings_templates.py:291
+msgid   "Disabled"
+msgstr  "Dinonaktifkan"
+
+#: lib/logitech_receiver/hidpp20.py:927
+msgid   "Static"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:928
+msgid   "Pulse"
+msgstr  "Pulsa"
+
+#: lib/logitech_receiver/hidpp20.py:929
+msgid   "Cycle"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:930
+msgid   "Boot"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:931
+msgid   "Demo"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:932
+msgid   "Breathe"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:933
+msgid   "Ripple"
+msgstr  ""
+
+#: lib/logitech_receiver/hidpp20.py:994
+msgid   "Unknown Location"
+msgstr  "Lokasi tidak ditemukan"
+
+#: lib/logitech_receiver/hidpp20.py:995
+msgid   "Primary"
+msgstr  "Utama"
+
+#: lib/logitech_receiver/hidpp20.py:996
+msgid   "Logo"
+msgstr  "Logo"
+
+#: lib/logitech_receiver/hidpp20.py:997
+msgid   "Left Side"
+msgstr  "Sisi kiri"
+
+#: lib/logitech_receiver/hidpp20.py:998
+msgid   "Right Side"
+msgstr  "Sisi kanan"
+
+#: lib/logitech_receiver/hidpp20.py:999
+msgid   "Combined"
+msgstr  "Kombinasi"
+
+#: lib/logitech_receiver/hidpp20.py:1000
+msgid   "Primary 1"
+msgstr  "Utama 1"
+
+#: lib/logitech_receiver/hidpp20.py:1001
+msgid   "Primary 2"
+msgstr  "Utama 2"
+
+#: lib/logitech_receiver/hidpp20.py:1002
+msgid   "Primary 3"
+msgstr  "Utama 3"
+
+#: lib/logitech_receiver/hidpp20.py:1003
+msgid   "Primary 4"
+msgstr  "Utama 4"
+
+#: lib/logitech_receiver/hidpp20.py:1004
+msgid   "Primary 5"
+msgstr  "Utama 5"
+
+#: lib/logitech_receiver/hidpp20.py:1005
+msgid   "Primary 6"
+msgstr  "Utama 6"
+
+#: lib/logitech_receiver/i18n.py:28
+msgid   "empty"
+msgstr  "habis"
+
+#: lib/logitech_receiver/i18n.py:29
+msgid   "critical"
+msgstr  "hampir habis"
+
+#: lib/logitech_receiver/i18n.py:30
+msgid   "low"
+msgstr  "rendah"
+
+#: lib/logitech_receiver/i18n.py:31
+msgid   "average"
+msgstr  "setengah"
+
+#: lib/logitech_receiver/i18n.py:32
+msgid   "good"
+msgstr  "baik"
+
+#: lib/logitech_receiver/i18n.py:33
+msgid   "full"
+msgstr  "penuh"
+
+#: lib/logitech_receiver/i18n.py:35
+msgid   "discharging"
+msgstr  "pemakaian"
+
+#: lib/logitech_receiver/i18n.py:36
+msgid   "recharging"
+msgstr  "pengisian ulang"
+
+#: lib/logitech_receiver/i18n.py:37
+msgid   "charging"
+msgstr  "pengisian daya"
+
+#: lib/logitech_receiver/i18n.py:38
+msgid   "not charging"
+msgstr  "tidak mengisi daya"
+
+#: lib/logitech_receiver/i18n.py:39
+msgid   "almost full"
+msgstr  "hampir penuh"
+
+#: lib/logitech_receiver/i18n.py:40
+msgid   "charged"
+msgstr  "mengisi"
+
+#: lib/logitech_receiver/i18n.py:41
+msgid   "slow recharge"
+msgstr  "pengisian lambat"
+
+#: lib/logitech_receiver/i18n.py:42
+msgid   "invalid battery"
+msgstr  "baterai tidak valid"
+
+#: lib/logitech_receiver/i18n.py:43
+msgid   "thermal error"
+msgstr  "kesalahan termal"
+
+#: lib/logitech_receiver/i18n.py:44
+msgid   "error"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:45
+msgid   "standard"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:46
+msgid   "fast"
+msgstr  "cepat"
+
+#: lib/logitech_receiver/i18n.py:47
+msgid   "slow"
+msgstr  "lambat"
+
+#: lib/logitech_receiver/i18n.py:49
+msgid   "device timeout"
+msgstr  "batas waktu perangkat habis"
+
+#: lib/logitech_receiver/i18n.py:50
+msgid   "device not supported"
+msgstr  "perangkat tidak didukung"
+
+#: lib/logitech_receiver/i18n.py:51
+msgid   "too many devices"
+msgstr  "terlalu banyak perangkat"
+
+#: lib/logitech_receiver/i18n.py:52
+msgid   "sequence timeout"
+msgstr  "batas waktu urutan habis"
+
+#: lib/logitech_receiver/i18n.py:54
+msgid   "Firmware"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:55
+msgid   "Bootloader"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:56
+msgid   "Hardware"
+msgstr  "Perangkat keras"
+
+#: lib/logitech_receiver/i18n.py:57
+msgid   "Other"
+msgstr  "Lainnya"
+
+#: lib/logitech_receiver/i18n.py:59
+msgid   "Left Button"
+msgstr  "Tombol Kiri"
+
+#: lib/logitech_receiver/i18n.py:60
+msgid   "Right Button"
+msgstr  "Tombol Kanan"
+
+#: lib/logitech_receiver/i18n.py:61
+msgid   "Middle Button"
+msgstr  "Tombol Tengah"
+
+#: lib/logitech_receiver/i18n.py:62
+msgid   "Back Button"
+msgstr  "Tombol kembali"
+
+#: lib/logitech_receiver/i18n.py:63
+msgid   "Forward Button"
+msgstr  "Tombol Depan"
+
+#: lib/logitech_receiver/i18n.py:64
+msgid   "Mouse Gesture Button"
+msgstr  "Tombol Gerakan Mouse"
+
+#: lib/logitech_receiver/i18n.py:65
+msgid   "Smart Shift"
+msgstr  "Pergeseran Cerdas"
+
+#: lib/logitech_receiver/i18n.py:66
+msgid   "DPI Switch"
+msgstr  ""
+
+#: lib/logitech_receiver/i18n.py:67
+msgid   "Left Tilt"
+msgstr  "Kemiringan Kiri"
+
+#: lib/logitech_receiver/i18n.py:68
+msgid   "Right Tilt"
+msgstr  "Kemiringan Kanan"
+
+#: lib/logitech_receiver/i18n.py:69
+msgid   "Left Click"
+msgstr  "Klik Kiri"
+
+#: lib/logitech_receiver/i18n.py:70
+msgid   "Right Click"
+msgstr  "Klik Kanan"
+
+#: lib/logitech_receiver/i18n.py:71
+msgid   "Mouse Middle Button"
+msgstr  "Tombol Tengah Mouse"
+
+#: lib/logitech_receiver/i18n.py:72
+msgid   "Mouse Back Button"
+msgstr  "Tombol Kembali Mouse"
+
+#: lib/logitech_receiver/i18n.py:73
+msgid   "Mouse Forward Button"
+msgstr  "Tombol Depan Mouse"
+
+#: lib/logitech_receiver/i18n.py:74
+msgid   "Gesture Button Navigation"
+msgstr  "Navigasi Tombol Gerakan"
+
+#: lib/logitech_receiver/i18n.py:75
+msgid   "Mouse Scroll Left Button"
+msgstr  "Tombol Gulir Kiri Mouse"
+
+#: lib/logitech_receiver/i18n.py:76
+msgid   "Mouse Scroll Right Button"
+msgstr  "Tombol Gulir Kanan Mouse"
+
+#: lib/logitech_receiver/i18n.py:78
+msgid   "pressed"
+msgstr  "ditekan"
+
+#: lib/logitech_receiver/i18n.py:79
+msgid   "released"
+msgstr  "dilepaskan"
+
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid   "pairing lock is closed"
+msgstr  "kunci penyandingan ditutup"
+
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid   "pairing lock is open"
+msgstr  "kunci penyandingan terbuka"
+
+#: lib/logitech_receiver/notifications.py:80
+msgid   "discovery lock is closed"
+msgstr  "kunci penemuan ditutup"
+
+#: lib/logitech_receiver/notifications.py:80
+msgid   "discovery lock is open"
+msgstr  "kunci penemuan terbuka"
+
+#: lib/logitech_receiver/notifications.py:207
+msgid   "connected"
+msgstr  "terhubung"
+
+#: lib/logitech_receiver/notifications.py:207
+msgid   "disconnected"
+msgstr  "terputus"
+
+#: lib/logitech_receiver/notifications.py:233
+msgid   "unpaired"
+msgstr  "tidak berpasangan"
+
+#: lib/logitech_receiver/notifications.py:280
+msgid   "powered on"
+msgstr  "dihidupkan"
+
+#: lib/logitech_receiver/receiver.py:345
+msgid   "No paired devices."
+msgstr  "Tidak ada perangkat yang dipasangkan"
+
+#: lib/logitech_receiver/receiver.py:347 lib/solaar/ui/window.py:630
+#, python-format
+msgid   "%(count)s paired device."
+msgid_plural    "%(count)s paired devices."
+msgstr[0]       "%(count)s perangkat yang dipasangkan."
+
+#: lib/logitech_receiver/settings.py:617
+msgid   "register"
+msgstr  "daftar"
+
+#: lib/logitech_receiver/settings.py:631 lib/logitech_receiver/settings.py:658
+msgid   "feature"
+msgstr  "fitur"
+
+#: lib/logitech_receiver/settings_templates.py:144
+msgid   "Swap Fx function"
+msgstr  "Tukar fungsi Fx"
+
+#: lib/logitech_receiver/settings_templates.py:147
+msgid   "When set, the F1..F12 keys will activate their special function,\n"
+        "and you must hold the FN key to activate their standard function."
+msgstr  "Jika disetel, tombol F1..F12 akan mengaktifkan fungsi khususnya,\n"
+        "dan Anda harus menahan tombol FN untuk mengaktifkan fungsi "
+        "standarnya."
+
+#: lib/logitech_receiver/settings_templates.py:152
+msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
+        "and you must hold the FN key to activate their special function."
+msgstr  "Jika tidak disetel, tombol F1..F12 akan mengaktifkan fungsi "
+        "standarnya,\n"
+        "dan Anda harus menahan tombol FN untuk mengaktifkan fungsi khususnya."
+
+#: lib/logitech_receiver/settings_templates.py:160
+msgid   "Hand Detection"
+msgstr  "Deteksi Tangan"
+
+#: lib/logitech_receiver/settings_templates.py:161
+msgid   "Turn on illumination when the hands hover over the keyboard."
+msgstr  "Nyalakan penerangan saat tangan melayang di atas keyboard."
+
+#: lib/logitech_receiver/settings_templates.py:168
+msgid   "Scroll Wheel Smooth Scrolling"
+msgstr  "Roda Gulir Pengguliran Halus"
+
+#: lib/logitech_receiver/settings_templates.py:169
+#: lib/logitech_receiver/settings_templates.py:402
+#: lib/logitech_receiver/settings_templates.py:431
+msgid   "High-sensitivity mode for vertical scroll with the wheel."
+msgstr  "Mode sensitivitas tinggi untuk gulir vertikal dengan roda."
+
+#: lib/logitech_receiver/settings_templates.py:176
+msgid   "Side Scrolling"
+msgstr  "Menggulir Sisi"
+
+#: lib/logitech_receiver/settings_templates.py:178
+msgid   "When disabled, pushing the wheel sideways sends custom button "
+        "events\n"
+        "instead of the standard side-scrolling events."
+msgstr  "Saat dinonaktifkan, mendorong roda ke samping akan mengirimkan "
+        "tombol khususacara\n"
+        "bukannya acara side-scrolling standar."
+
+#: lib/logitech_receiver/settings_templates.py:188
+msgid   "Sensitivity (DPI - older mice)"
+msgstr  "Sensitivitas (DPI - older mouse)"
+
+#: lib/logitech_receiver/settings_templates.py:189
+#: lib/logitech_receiver/settings_templates.py:958
+msgid   "Mouse movement sensitivity"
+msgstr  "Sensitivitas gerakan mouse"
+
+#: lib/logitech_receiver/settings_templates.py:249
+#: lib/logitech_receiver/settings_templates.py:261
+#: lib/logitech_receiver/settings_templates.py:388
+msgid   "Backlight"
+msgstr  "Lampu latar"
+
+#: lib/logitech_receiver/settings_templates.py:250
+#: lib/logitech_receiver/settings_templates.py:389
+msgid   "Set illumination time for keyboard."
+msgstr  "Atur waktu penerangan untuk keyboard."
+
+#: lib/logitech_receiver/settings_templates.py:262
+msgid   "Illumination level on keyboard.  Changes made are only applied in "
+        "Manual mode."
+msgstr  "Tingkat penerangan pada keyboard. Perubahan yang dilakukan hanya "
+        "diterapkan di Mode manual."
+
+#: lib/logitech_receiver/settings_templates.py:293
+msgid   "Automatic"
+msgstr  "Otomatis"
+
+#: lib/logitech_receiver/settings_templates.py:295
+msgid   "Manual"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:297
+msgid   "Enabled"
+msgstr  "Difungsikan"
+
+#: lib/logitech_receiver/settings_templates.py:303
+msgid   "Backlight Level"
+msgstr  "Tingkat Lampu Latar"
+
+#: lib/logitech_receiver/settings_templates.py:304
+msgid   "Illumination level on keyboard when in Manual mode."
+msgstr  "Tingkat penerangan pada keyboard saat dalam mode Manual."
+
+#: lib/logitech_receiver/settings_templates.py:361
+msgid   "Backlight Delay Hands Out"
+msgstr  "Penundaan Lampu Latar Hands Out"
+
+#: lib/logitech_receiver/settings_templates.py:362
+msgid   "Delay in seconds until backlight fades out with hands away from "
+        "keyboard."
+msgstr  "Tunda dalam hitungan detik hingga cahaya latar memudar dengan tangan "
+        "menjauhipapan ketik."
+
+#: lib/logitech_receiver/settings_templates.py:370
+msgid   "Backlight Delay Hands In"
+msgstr  "Penundaan Lampu Latar Masuk"
+
+#: lib/logitech_receiver/settings_templates.py:371
+msgid   "Delay in seconds until backlight fades out with hands near keyboard."
+msgstr  "Tunda dalam hitungan detik hingga lampu latar memudar dengan tangan "
+        "di dekat keyboard."
+
+#: lib/logitech_receiver/settings_templates.py:379
+msgid   "Backlight Delay Powered"
+msgstr  "Penundaan Lampu Latar Didukung"
+
+#: lib/logitech_receiver/settings_templates.py:380
+msgid   "Delay in seconds until backlight fades out with external power."
+msgstr  "Penundaan dalam hitungan detik hingga lampu latar memudar dengan "
+        "daya eksternal."
+
+#: lib/logitech_receiver/settings_templates.py:400
+msgid   "Scroll Wheel High Resolution"
+msgstr  "Resolusi Tinggi Scroll Wheel"
+
+#: lib/logitech_receiver/settings_templates.py:404
+#: lib/logitech_receiver/settings_templates.py:433
+msgid   "Set to ignore if scrolling is abnormally fast or slow"
+msgstr  "Setel ke abaikan jika pengguliran terlalu cepat atau lambat"
+
+#: lib/logitech_receiver/settings_templates.py:411
+#: lib/logitech_receiver/settings_templates.py:442
+msgid   "Scroll Wheel Diversion"
+msgstr  "Pengalihan Scroll Wheel"
+
+#: lib/logitech_receiver/settings_templates.py:413
+msgid   "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  "Buat roda gulir mengirimkan notifikasi LOWRES_WHEEL HID++ (yang mana "
+        "memicu aturan Solaar tetapi sebaliknya diabaikan)."
+
+#: lib/logitech_receiver/settings_templates.py:420
+msgid   "Scroll Wheel Direction"
+msgstr  "Arah Scroll Wheel"
+
+#: lib/logitech_receiver/settings_templates.py:421
+msgid   "Invert direction for vertical scroll with wheel."
+msgstr  "Balikkan arah untuk gulir vertikal scroll with wheel."
+
+#: lib/logitech_receiver/settings_templates.py:429
+msgid   "Scroll Wheel Resolution"
+msgstr  "Resolusi Scroll Wheel"
+
+#: lib/logitech_receiver/settings_templates.py:444
+msgid   "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
+        "trigger Solaar rules but are otherwise ignored)."
+msgstr  "Buat roda gulir mengirimkan notifikasi HIRES_WHEEL HID++ (yang mana "
+        "memicu aturan Solaar tetapi sebaliknya diabaikan)."
+
+#: lib/logitech_receiver/settings_templates.py:453
+msgid   "Sensitivity (Pointer Speed)"
+msgstr  "Sensitivitas (Kecepatan Pointer)"
+
+#: lib/logitech_receiver/settings_templates.py:454
+msgid   "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr  "Pengganda kecepatan untuk mouse (256 adalah pengganda normal)."
+
+#: lib/logitech_receiver/settings_templates.py:464
+msgid   "Thumb Wheel Diversion"
+msgstr  "Pengalihan Roda Jempol"
+
+#: lib/logitech_receiver/settings_templates.py:466
+msgid   "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
+        "Solaar rules but are otherwise ignored)."
+msgstr  "Buat roda jempol mengirimkan notifikasi THUMB_WHEEL HID++ (yang "
+        "memicuPeraturan Solar tetapi sebaliknya diabaikan)."
+
+#: lib/logitech_receiver/settings_templates.py:475
+msgid   "Thumb Wheel Direction"
+msgstr  "Arah Roda Ibu Jari"
+
+#: lib/logitech_receiver/settings_templates.py:476
+msgid   "Invert thumb wheel scroll direction."
+msgstr  "Balikkan arah gulir roda ibu jari."
+
+#: lib/logitech_receiver/settings_templates.py:496
+msgid   "Onboard Profiles"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:497
+msgid   "Enable an onboard profile, which controls report rate, sensitivity, "
+        "and button actions"
+msgstr  "Aktifkan profil onboard, yang mengontrol kecepatan laporan, "
+        "sensitivitas, dan tindakan tombol"
+
+#: lib/logitech_receiver/settings_templates.py:541
+#: lib/logitech_receiver/settings_templates.py:581
+msgid   "Report Rate"
+msgstr  "Tingkat Laporan"
+
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+msgid   "Frequency of device movement reports"
+msgstr  "Frekuensi laporan pergerakan perangkat"
+
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+#: lib/logitech_receiver/settings_templates.py:1295
+#: lib/logitech_receiver/settings_templates.py:1326
+msgid   "May need Onboard Profiles set to Disable to be effective."
+msgstr  "Mungkin perlu Profil Onboard diatur ke Nonaktifkan agar efektif."
+
+#: lib/logitech_receiver/settings_templates.py:623
+msgid   "Divert crown events"
+msgstr  "Alihkan acara mahkota"
+
+#: lib/logitech_receiver/settings_templates.py:624
+msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "Buat mahkota mengirimkan notifikasi CROWN HID++ (yang memicu "
+        "Solaarperaturan tetapi sebaliknya diabaikan)."
+
+#: lib/logitech_receiver/settings_templates.py:632
+msgid   "Crown smooth scroll"
+msgstr  "Gulir halus mahkota"
+
+#: lib/logitech_receiver/settings_templates.py:633
+msgid   "Set crown smooth scroll"
+msgstr  "Setel mahkota gulir halus"
+
+#: lib/logitech_receiver/settings_templates.py:641
+msgid   "Divert G and M Keys"
+msgstr  "Alihkan Tombol G dan M"
+
+#: lib/logitech_receiver/settings_templates.py:642
+msgid   "Make G and M keys send HID++ notifications (which trigger Solaar "
+        "rules but are otherwise ignored)."
+msgstr  "Buat kunci G dan M mengirimkan notifikasi HID++ (yang memicu "
+        "Solaarperaturan tetapi sebaliknya diabaikan)."
+
+#: lib/logitech_receiver/settings_templates.py:656
+msgid   "Scroll Wheel Ratcheted"
+msgstr  "Roda Gulir Bergerigi"
+
+#: lib/logitech_receiver/settings_templates.py:657
+msgid   "Switch the mouse wheel between speed-controlled ratcheting and "
+        "always freespin."
+msgstr  "Ganti roda mouse antara ratcheting yang dikontrol kecepatan dan "
+        "selalu berputar bebas."
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid   "Freespinning"
+msgstr  "Putar bebas"
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid   "Ratcheted"
+msgstr  "Digeser"
+
+#: lib/logitech_receiver/settings_templates.py:666
+msgid   "Scroll Wheel Ratchet Speed"
+msgstr  "Kecepatan Ratchet Roda Gulir"
+
+#: lib/logitech_receiver/settings_templates.py:668
+msgid   "Use the mouse wheel speed to switch between ratcheted and "
+        "freespinning.\n"
+        "The mouse wheel is always ratcheted at 50."
+msgstr  "Gunakan kecepatan roda mouse untuk beralih antara ratcheted dan "
+        "berputar bebas.\n"
+        "Roda tikus selalu diputar pada kecepatan 50."
+
+#: lib/logitech_receiver/settings_templates.py:717
+msgid   "Key/Button Actions"
+msgstr  "Tindakan Kunci/Tombol"
+
+#: lib/logitech_receiver/settings_templates.py:719
+msgid   "Change the action for the key or button."
+msgstr  "Ubah tindakan untuk kunci atau tombol tersebut."
+
+#: lib/logitech_receiver/settings_templates.py:721
+msgid   "Overridden by diversion."
+msgstr  "Ditimpa oleh pengalihan."
+
+#: lib/logitech_receiver/settings_templates.py:723
+msgid   "Changing important actions (such as for the left mouse button) can "
+        "result in an unusable system."
+msgstr  "Mengubah tindakan penting (misalnya tombol kiri mouse) dapat "
+        "menghasilkan sistem yang tidak dapat digunakan."
+
+#: lib/logitech_receiver/settings_templates.py:886
+msgid   "Key/Button Diversion"
+msgstr  "Pengalihan Kunci/Tombol"
+
+#: lib/logitech_receiver/settings_templates.py:887
+msgid   "Make the key or button send HID++ notifications (Diverted) or "
+        "initiate Mouse Gestures or Sliding DPI"
+msgstr  "Buat kunci atau tombol mengirimkan notifikasi HID++ (Dialihkan) "
+        "ataumemulai Gerakan Mouse atau DPI Geser"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid   "Diverted"
+msgstr  "Dialihkan"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+msgid   "Mouse Gestures"
+msgstr  "Gerakan Mouse"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid   "Regular"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:890
+msgid   "Sliding DPI"
+msgstr  "DPI geser"
+
+#: lib/logitech_receiver/settings_templates.py:957
+msgid   "Sensitivity (DPI)"
+msgstr  "Sensitivitas (DPI)"
+
+#: lib/logitech_receiver/settings_templates.py:997
+msgid   "Sensitivity Switching"
+msgstr  "Peralihan Sensitivitas"
+
+#: lib/logitech_receiver/settings_templates.py:999
+msgid   "Switch the current sensitivity and the remembered sensitivity when "
+        "the key or button is pressed.\n"
+        "If there is no remembered sensitivity, just remember the current "
+        "sensitivity"
+msgstr  "Ganti sensitivitas saat ini dan sensitivitas yang diingat ketika "
+        "tombol atau tombol ditekan.\n"
+        "Jika tidak ada kepekaan yang diingat, ingat saja arusnyakepekaan"
+
+#: lib/logitech_receiver/settings_templates.py:1003
+msgid   "Off"
+msgstr  "Mati"
+
+#: lib/logitech_receiver/settings_templates.py:1034
+msgid   "Disable keys"
+msgstr  "Nonaktifkan kunci"
+
+#: lib/logitech_receiver/settings_templates.py:1035
+msgid   "Disable specific keyboard keys."
+msgstr  "Nonaktifkan tombol keyboard tertentu."
+
+#: lib/logitech_receiver/settings_templates.py:1038
+#, python-format
+msgid   "Disables the %s key."
+msgstr  "Menonaktifkan kunci %s."
+
+#: lib/logitech_receiver/settings_templates.py:1051
+#: lib/logitech_receiver/settings_templates.py:1108
+msgid   "Set OS"
+msgstr  "Atur OS"
+
+#: lib/logitech_receiver/settings_templates.py:1052
+#: lib/logitech_receiver/settings_templates.py:1109
+msgid   "Change keys to match OS."
+msgstr  "Ubah kunci agar sesuai dengan OS."
+
+#: lib/logitech_receiver/settings_templates.py:1121
+msgid   "Change Host"
+msgstr  "Ganti Host"
+
+#: lib/logitech_receiver/settings_templates.py:1122
+msgid   "Switch connection to a different host"
+msgstr  "Alihkan koneksi ke host lain"
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid   "Performs a left click."
+msgstr  "Melakukan klik kiri."
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid   "Single tap"
+msgstr  "Ketuk sekali"
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid   "Performs a right click."
+msgstr  "Melakukan klik kanan."
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid   "Single tap with two fingers"
+msgstr  "Ketuk satu kali dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1148
+msgid   "Single tap with three fingers"
+msgstr  "Ketuk satu kali dengan tiga jari"
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid   "Double tap"
+msgstr  "Ketuk dua kali"
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid   "Performs a double click."
+msgstr  "Melakukan klik dua kali."
+
+#: lib/logitech_receiver/settings_templates.py:1153
+msgid   "Double tap with two fingers"
+msgstr  "Ketuk dua kali dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1154
+msgid   "Double tap with three fingers"
+msgstr  "Ketuk dua kali dengan tiga jari"
+
+#: lib/logitech_receiver/settings_templates.py:1157
+msgid   "Drags items by dragging the finger after double tapping."
+msgstr  "Menyeret item dengan menyeret jari setelah mengetuk dua kali."
+
+#: lib/logitech_receiver/settings_templates.py:1157
+msgid   "Tap and drag"
+msgstr  "Ketuk dan seret"
+
+#: lib/logitech_receiver/settings_templates.py:1159
+msgid   "Tap and drag with two fingers"
+msgstr  "Ketuk dan seret dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1160
+msgid   "Drags items by dragging the fingers after double tapping."
+msgstr  "Menyeret item dengan menyeret jari setelah mengetuk dua kali."
+
+#: lib/logitech_receiver/settings_templates.py:1162
+msgid   "Tap and drag with three fingers"
+msgstr  "Ketuk dan seret dengan tiga jari"
+
+#: lib/logitech_receiver/settings_templates.py:1165
+msgid   "Suppress tap and edge gestures"
+msgstr  "Menekan gerakan ketuk dan tepi"
+
+#: lib/logitech_receiver/settings_templates.py:1166
+msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr  "Menonaktifkan gerakan ketuk dan tepi (setara dengan menekan Fn+Klik "
+        "Kiri)."
+
+#: lib/logitech_receiver/settings_templates.py:1168
+msgid   "Scroll with one finger"
+msgstr  "Gulir dengan satu jari"
+
+#: lib/logitech_receiver/settings_templates.py:1168
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid   "Scrolls."
+msgstr  "Penggulir"
+
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid   "Scroll with two fingers"
+msgstr  "Gulir dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid   "Scroll horizontally with two fingers"
+msgstr  "Gulir secara horizontal dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid   "Scrolls horizontally."
+msgstr  "Menggulir secara horizontal."
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid   "Scroll vertically with two fingers"
+msgstr  "Gulir secara vertikal dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid   "Scrolls vertically."
+msgstr  "Gulir secara vertikal."
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid   "Inverts the scrolling direction."
+msgstr  "Membalikkan arah pengguliran."
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid   "Natural scrolling"
+msgstr  "Pengguliran alami"
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid   "Enables the thumbwheel."
+msgstr  "Mengaktifkan roda jempol."
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid   "Thumbwheel"
+msgstr  "Roda jempol"
+
+#: lib/logitech_receiver/settings_templates.py:1185
+#: lib/logitech_receiver/settings_templates.py:1189
+msgid   "Swipe from the top edge"
+msgstr  "Geser dari tepi atas"
+
+#: lib/logitech_receiver/settings_templates.py:1186
+msgid   "Swipe from the left edge"
+msgstr  "Geser dari tepi kiri"
+
+#: lib/logitech_receiver/settings_templates.py:1187
+msgid   "Swipe from the right edge"
+msgstr  "Geser dari tepi kanan"
+
+#: lib/logitech_receiver/settings_templates.py:1188
+msgid   "Swipe from the bottom edge"
+msgstr  "Geser dari tepi bawah"
+
+#: lib/logitech_receiver/settings_templates.py:1190
+msgid   "Swipe two fingers from the left edge"
+msgstr  "Geser dua jari dari tepi kiri"
+
+#: lib/logitech_receiver/settings_templates.py:1191
+msgid   "Swipe two fingers from the right edge"
+msgstr  "Geser dua jari dari tepi kanan"
+
+#: lib/logitech_receiver/settings_templates.py:1192
+msgid   "Swipe two fingers from the bottom edge"
+msgstr  "Geser dua jari dari tepi bawah"
+
+#: lib/logitech_receiver/settings_templates.py:1193
+msgid   "Swipe two fingers from the top edge"
+msgstr  "Geser dua jari dari tepi atas"
+
+#: lib/logitech_receiver/settings_templates.py:1194
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid   "Pinch to zoom out; spread to zoom in."
+msgstr  "Jepit untuk memperkecil; sebarkan untuk memperbesar."
+
+#: lib/logitech_receiver/settings_templates.py:1194
+msgid   "Zoom with two fingers."
+msgstr  "Perbesar dengan dua jari."
+
+#: lib/logitech_receiver/settings_templates.py:1195
+msgid   "Pinch to zoom out."
+msgstr  "Jepit untuk memperkecil."
+
+#: lib/logitech_receiver/settings_templates.py:1196
+msgid   "Spread to zoom in."
+msgstr  "Sebarkan untuk memperbesar."
+
+#: lib/logitech_receiver/settings_templates.py:1197
+msgid   "Zoom with three fingers."
+msgstr  "Perbesar dengan tiga jari."
+
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid   "Zoom with two fingers"
+msgstr  "Zoom dengan dua jari"
+
+#: lib/logitech_receiver/settings_templates.py:1216
+msgid   "Pixel zone"
+msgstr  "Zona piksel"
+
+#: lib/logitech_receiver/settings_templates.py:1217
+msgid   "Ratio zone"
+msgstr  "Zona rasio"
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid   "Scale factor"
+msgstr  "Faktor skala"
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid   "Sets the cursor speed."
+msgstr  "Mengatur kecepatan kursor."
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid   "Left"
+msgstr  "Kiri"
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid   "Left-most coordinate."
+msgstr  "Koordinat paling kiri."
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid   "Bottom"
+msgstr  "Dasar"
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid   "Bottom coordinate."
+msgstr  "Koordinat bawah."
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid   "Width"
+msgstr  "Lebar"
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid   "Width."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid   "Height"
+msgstr  "Tinggi"
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid   "Height."
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid   "Cursor speed."
+msgstr  "Kecepatan kursor."
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid   "Scale"
+msgstr  "Skala"
+
+#: lib/logitech_receiver/settings_templates.py:1232
+msgid   "Gestures"
+msgstr  "Gestur"
+
+#: lib/logitech_receiver/settings_templates.py:1233
+msgid   "Tweak the mouse/touchpad behaviour."
+msgstr  "Sesuaikan perilaku mouse/touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1249
+msgid   "Gestures Diversion"
+msgstr  "Pengalihan Gerakan"
+
+#: lib/logitech_receiver/settings_templates.py:1250
+msgid   "Divert mouse/touchpad gestures."
+msgstr  "Alihkan gerakan mouse/touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1266
+msgid   "Gesture params"
+msgstr  "Param isyarat"
+
+#: lib/logitech_receiver/settings_templates.py:1267
+msgid   "Change numerical parameters of a mouse/touchpad."
+msgstr  "Ubah parameter numerik mouse/touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1291
+msgid   "M-Key LEDs"
+msgstr  "LED M-Key"
+
+#: lib/logitech_receiver/settings_templates.py:1293
+msgid   "Control the M-Key LEDs."
+msgstr  "Kontrol LED M-Key."
+
+#: lib/logitech_receiver/settings_templates.py:1297
+#: lib/logitech_receiver/settings_templates.py:1328
+msgid   "May need G Keys diverted to be effective."
+msgstr  "Mungkin perlu tombol G dialihkan agar efektif."
+
+#: lib/logitech_receiver/settings_templates.py:1303
+#, python-format
+msgid   "Lights up the %s key."
+msgstr  "Nyalakan tombol %s."
+
+#: lib/logitech_receiver/settings_templates.py:1322
+msgid   "MR-Key LED"
+msgstr  "LED Kunci MR"
+
+#: lib/logitech_receiver/settings_templates.py:1324
+msgid   "Control the MR-Key LED."
+msgstr  "Kontrol LED MR-Key."
+
+#: lib/logitech_receiver/settings_templates.py:1345
+msgid   "Persistent Key/Button Mapping"
+msgstr  "Pemetaan Kunci/Tombol Persisten"
+
+#: lib/logitech_receiver/settings_templates.py:1347
+msgid   "Permanently change the mapping for the key or button."
+msgstr  "Ubah pemetaan kunci atau tombol secara permanen."
+
+#: lib/logitech_receiver/settings_templates.py:1349
+msgid   "Changing important keys or buttons (such as for the left mouse "
+        "button) can result in an unusable system."
+msgstr  "Mengganti tombol atau tombol penting (misalnya untuk mouse sebelah "
+        "kiritombol) dapat mengakibatkan sistem tidak dapat digunakan."
+
+#: lib/logitech_receiver/settings_templates.py:1406
+msgid   "Sidetone"
+msgstr  "Nada samping"
+
+#: lib/logitech_receiver/settings_templates.py:1407
+msgid   "Set sidetone level."
+msgstr  "Setel level nada samping."
+
+#: lib/logitech_receiver/settings_templates.py:1416
+msgid   "Equalizer"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1417
+msgid   "Set equalizer levels."
+msgstr  "Tetapkan level equalizer."
+
+#: lib/logitech_receiver/settings_templates.py:1439
+msgid   "Hz"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1445
+msgid   "Power Management"
+msgstr  "Manajemen daya"
+
+#: lib/logitech_receiver/settings_templates.py:1446
+msgid   "Power off in minutes (0 for never)."
+msgstr  "Matikan dalam hitungan menit (0 untuk tidak pernah)."
+
+#: lib/logitech_receiver/settings_templates.py:1457
+msgid   "LED Control"
+msgstr  "Kontrol LED"
+
+#: lib/logitech_receiver/settings_templates.py:1458
+msgid   "Switch control of LEDs between device and Solaar"
+msgstr  "Ganti kontrol LED antara perangkat dan Solar"
+
+#: lib/logitech_receiver/settings_templates.py:1473
+msgid   "LED Zone Effects"
+msgstr  "Efek Zona LED"
+
+#: lib/logitech_receiver/settings_templates.py:1474
+msgid   "Set effect for LED Zone"
+msgstr  "Atur efek untuk Zona LED"
+
+#: lib/logitech_receiver/settings_templates.py:1477
+msgid   "Speed"
+msgstr  "Kecepatan"
+
+#: lib/logitech_receiver/settings_templates.py:1478
+msgid   "Period"
+msgstr  "Periode"
+
+#: lib/logitech_receiver/settings_templates.py:1479
+msgid   "Intensity"
+msgstr  "Intensitas"
+
+#: lib/logitech_receiver/settings_templates.py:1480
+msgid   "Ramp"
+msgstr  ""
+
+#: lib/logitech_receiver/settings_templates.py:1494
+msgid   "LEDs"
+msgstr  ""
+
+#: lib/solaar/ui/__init__.py:112
+msgid   "Another Solaar process is already running so just expose its window"
+msgstr  "Proses Solaar lain sudah berjalan jadi buka saja jendelanya"
+
+#: lib/solaar/ui/about.py:38
+msgid   "Manages Logitech receivers,\n"
+        "keyboards, mice, and tablets."
+msgstr  "Mengelola receiver Logitech,\n"
+        "keyboard, mouse, dan tablet."
+
+#: lib/solaar/ui/about.py:46
+msgid   "Additional Programming"
+msgstr  "Pemrograman Tambahan"
+
+#: lib/solaar/ui/about.py:47
+msgid   "GUI design"
+msgstr  "desain GUI"
+
+#: lib/solaar/ui/about.py:49
+msgid   "Testing"
+msgstr  "Pengujian"
+
+#: lib/solaar/ui/about.py:57
+msgid   "Logitech documentation"
+msgstr  "Dokumentasi Logitech"
+
+#: lib/solaar/ui/action.py:83 lib/solaar/ui/action.py:87
+#: lib/solaar/ui/window.py:199
+msgid   "Unpair"
+msgstr  "Lepaskan pasangan"
+
+#: lib/solaar/ui/action.py:86 lib/solaar/ui/diversion_rules.py:104
+msgid   "Cancel"
+msgstr  "Membatalkan"
+
+#: lib/solaar/ui/common.py:35
+msgid   "Permissions error"
+msgstr  "Kesalahan izin"
+
+#: lib/solaar/ui/common.py:37
+#, python-format
+msgid   "Found a Logitech receiver or device (%s), but did not have "
+        "permission to open it."
+msgstr  "Menemukan receiver atau perangkat Logitech (%s), namun tidak "
+        "memiliki izin untuk membukanya."
+
+#: lib/solaar/ui/common.py:39
+msgid   "If you've just installed Solaar, try disconnecting the receiver or "
+        "device and then reconnecting it."
+msgstr  "Kalau baru install Solaar, coba cabut receivernya atauperangkat dan "
+        "kemudian menyambungkannya kembali."
+
+#: lib/solaar/ui/common.py:42
+msgid   "Cannot connect to device error"
+msgstr  "Tidak dapat terhubung ke perangkat kesalahan"
+
+#: lib/solaar/ui/common.py:44
+#, python-format
+msgid   "Found a Logitech receiver or device at %s, but encountered an error "
+        "connecting to it."
+msgstr  "Menemukan receiver atau perangkat Logitech di %s, namun mengalami "
+        "kesalahanmenghubungkannya."
+
+#: lib/solaar/ui/common.py:46
+msgid   "Try disconnecting the device and then reconnecting it or turning it "
+        "off and then on."
+msgstr  "Coba putuskan sambungan perangkat lalu sambungkan kembali atau "
+        "putarmati lalu hidupkan."
+
+#: lib/solaar/ui/common.py:49
+msgid   "Unpairing failed"
+msgstr  "Pembatalan pasangan gagal"
+
+#: lib/solaar/ui/common.py:51
+#, python-brace-format
+msgid   "Failed to unpair %{device} from %{receiver}."
+msgstr  "Gagal melepaskan pasangan %{device} dari %{receiver}."
+
+#: lib/solaar/ui/common.py:53
+msgid   "The receiver returned an error, with no further details."
+msgstr  "Penerima mengembalikan kesalahan, tanpa rincian lebih lanjut."
+
+#: lib/solaar/ui/config_panel.py:231
+msgid   "Complete - ENTER to change"
+msgstr  "Selesai - ENTER untuk mengubah"
+
+#: lib/solaar/ui/config_panel.py:231
+msgid   "Incomplete"
+msgstr  "Tidak lengkap"
+
+#: lib/solaar/ui/config_panel.py:476 lib/solaar/ui/config_panel.py:529
+#, python-format
+msgid   "%d value"
+msgid_plural    "%d values"
+msgstr[0]       "%d nilai"
+
+#: lib/solaar/ui/config_panel.py:612
+msgid   "Changes allowed"
+msgstr  "Perubahan diperbolehkan"
+
+#: lib/solaar/ui/config_panel.py:613
+msgid   "No changes allowed"
+msgstr  "Tidak ada perubahan yang diizinkan"
+
+#: lib/solaar/ui/config_panel.py:614
+msgid   "Ignore this setting"
+msgstr  "Abaikan pengaturan ini"
+
+#: lib/solaar/ui/config_panel.py:659
+msgid   "Working"
+msgstr  "Bekerja"
+
+#: lib/solaar/ui/config_panel.py:662
+msgid   "Read/write operation failed."
+msgstr  "Operasi baca/tulis gagal."
+
+#: lib/solaar/ui/diversion_rules.py:66
+msgid   "Built-in rules"
+msgstr  "Aturan bawaan"
+
+#: lib/solaar/ui/diversion_rules.py:66
+msgid   "User-defined rules"
+msgstr  "Aturan yang ditentukan pengguna"
+
+#: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:1089
+msgid   "Rule"
+msgstr  "Aturan"
+
+#: lib/solaar/ui/diversion_rules.py:69 lib/solaar/ui/diversion_rules.py:538
+#: lib/solaar/ui/diversion_rules.py:665
+msgid   "Sub-rule"
+msgstr  "Sub-aturan"
+
+#: lib/solaar/ui/diversion_rules.py:71
+msgid   "[empty]"
+msgstr  "[kosong]"
+
+#: lib/solaar/ui/diversion_rules.py:95
+msgid   "Make changes permanent?"
+msgstr  "Membuat perubahan permanen?"
+
+#: lib/solaar/ui/diversion_rules.py:100
+msgid   "Yes"
+msgstr  "Ya"
+
+#: lib/solaar/ui/diversion_rules.py:102
+msgid   "No"
+msgstr  "Tidak"
+
+#: lib/solaar/ui/diversion_rules.py:107
+msgid   "If you choose No, changes will be lost when Solaar is closed."
+msgstr  "Jika Anda memilih Tidak, perubahan akan hilang saat Solaar ditutup."
+
+#: lib/solaar/ui/diversion_rules.py:138
+msgid   "Solaar Rule Editor"
+msgstr  "Editor Aturan Surya"
+
+#: lib/solaar/ui/diversion_rules.py:231
+msgid   "Save changes"
+msgstr  "Simpan perubahan"
+
+#: lib/solaar/ui/diversion_rules.py:236
+msgid   "Discard changes"
+msgstr  "Membuang perubahan"
+
+#: lib/solaar/ui/diversion_rules.py:397
+msgid   "Insert here"
+msgstr  "Masukkan di sini"
+
+#: lib/solaar/ui/diversion_rules.py:399
+msgid   "Insert above"
+msgstr  "Masukkan di atas"
+
+#: lib/solaar/ui/diversion_rules.py:401
+msgid   "Insert below"
+msgstr  "Masuk di bawah"
+
+#: lib/solaar/ui/diversion_rules.py:407
+msgid   "Insert new rule here"
+msgstr  "Masukkan aturan baru di sini"
+
+#: lib/solaar/ui/diversion_rules.py:409
+msgid   "Insert new rule above"
+msgstr  "Masukkan aturan baru di atas"
+
+#: lib/solaar/ui/diversion_rules.py:411
+msgid   "Insert new rule below"
+msgstr  "Masukkan aturan baru di bawah"
+
+#: lib/solaar/ui/diversion_rules.py:456
+msgid   "Paste here"
+msgstr  "Tempel di sini"
+
+#: lib/solaar/ui/diversion_rules.py:458
+msgid   "Paste above"
+msgstr  "Tempel di atas"
+
+#: lib/solaar/ui/diversion_rules.py:460
+msgid   "Paste below"
+msgstr  "Tempel di bawah"
+
+#: lib/solaar/ui/diversion_rules.py:466
+msgid   "Paste rule here"
+msgstr  "Tempel aturan di sini"
+
+#: lib/solaar/ui/diversion_rules.py:468
+msgid   "Paste rule above"
+msgstr  "Tempel aturan di atas"
+
+#: lib/solaar/ui/diversion_rules.py:470
+msgid   "Paste rule below"
+msgstr  "Tempel aturan di bawah"
+
+#: lib/solaar/ui/diversion_rules.py:474
+msgid   "Paste rule"
+msgstr  "Tempel aturan"
+
+#: lib/solaar/ui/diversion_rules.py:503
+msgid   "Flatten"
+msgstr  "Meratakan"
+
+#: lib/solaar/ui/diversion_rules.py:536
+msgid   "Insert"
+msgstr  "Menyisipkan"
+
+#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:667
+#: lib/solaar/ui/diversion_rules.py:1129
+msgid   "Or"
+msgstr  "Atau"
+
+#: lib/solaar/ui/diversion_rules.py:540 lib/solaar/ui/diversion_rules.py:666
+#: lib/solaar/ui/diversion_rules.py:1115
+msgid   "And"
+msgstr  "Dan"
+
+#: lib/solaar/ui/diversion_rules.py:542
+msgid   "Condition"
+msgstr  "Kondisi"
+
+#: lib/solaar/ui/diversion_rules.py:544 lib/solaar/ui/diversion_rules.py:1290
+msgid   "Feature"
+msgstr  "Fitur"
+
+#: lib/solaar/ui/diversion_rules.py:545 lib/solaar/ui/diversion_rules.py:1325
+msgid   "Report"
+msgstr  "Laporan"
+
+#: lib/solaar/ui/diversion_rules.py:546 lib/solaar/ui/diversion_rules.py:1204
+msgid   "Process"
+msgstr  "Proses"
+
+#: lib/solaar/ui/diversion_rules.py:547
+msgid   "Mouse process"
+msgstr  "Proses tikus"
+
+#: lib/solaar/ui/diversion_rules.py:548 lib/solaar/ui/diversion_rules.py:1362
+msgid   "Modifiers"
+msgstr  "Pengubah"
+
+#: lib/solaar/ui/diversion_rules.py:549 lib/solaar/ui/diversion_rules.py:1414
+msgid   "Key"
+msgstr  "Kunci"
+
+#: lib/solaar/ui/diversion_rules.py:550 lib/solaar/ui/diversion_rules.py:1455
+msgid   "KeyIsDown"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:551 lib/solaar/ui/diversion_rules.py:2260
+msgid   "Active"
+msgstr  "Aktif"
+
+#: lib/solaar/ui/diversion_rules.py:552 lib/solaar/ui/diversion_rules.py:2217
+#: lib/solaar/ui/diversion_rules.py:2269 lib/solaar/ui/diversion_rules.py:2319
+msgid   "Device"
+msgstr  "Perangkat"
+
+#: lib/solaar/ui/diversion_rules.py:553 lib/solaar/ui/diversion_rules.py:2295
+msgid   "Host"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:554 lib/solaar/ui/diversion_rules.py:2337
+msgid   "Setting"
+msgstr  "Pengaturan"
+
+#: lib/solaar/ui/diversion_rules.py:555 lib/solaar/ui/diversion_rules.py:1470
+#: lib/solaar/ui/diversion_rules.py:1519
+msgid   "Test"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:556 lib/solaar/ui/diversion_rules.py:1633
+msgid   "Test bytes"
+msgstr  "Uji byte"
+
+#: lib/solaar/ui/diversion_rules.py:557 lib/solaar/ui/diversion_rules.py:1734
+msgid   "Mouse Gesture"
+msgstr  "Gerakan Mouse"
+
+#: lib/solaar/ui/diversion_rules.py:561
+msgid   "Action"
+msgstr  "Aksi"
+
+#: lib/solaar/ui/diversion_rules.py:563 lib/solaar/ui/diversion_rules.py:1844
+msgid   "Key press"
+msgstr  "Tekan tombol"
+
+#: lib/solaar/ui/diversion_rules.py:564 lib/solaar/ui/diversion_rules.py:1895
+msgid   "Mouse scroll"
+msgstr  "Gulir mouse"
+
+#: lib/solaar/ui/diversion_rules.py:565 lib/solaar/ui/diversion_rules.py:1956
+msgid   "Mouse click"
+msgstr  "Klik mouse"
+
+#: lib/solaar/ui/diversion_rules.py:566
+msgid   "Set"
+msgstr  "Mengatur"
+
+#: lib/solaar/ui/diversion_rules.py:567 lib/solaar/ui/diversion_rules.py:2026
+msgid   "Execute"
+msgstr  "Menjalankan"
+
+#: lib/solaar/ui/diversion_rules.py:568 lib/solaar/ui/diversion_rules.py:1160
+msgid   "Later"
+msgstr  "Nanti"
+
+#: lib/solaar/ui/diversion_rules.py:597
+msgid   "Insert new rule"
+msgstr  "Masukkan aturan baru"
+
+#: lib/solaar/ui/diversion_rules.py:617 lib/solaar/ui/diversion_rules.py:1681
+#: lib/solaar/ui/diversion_rules.py:1786 lib/solaar/ui/diversion_rules.py:1985
+msgid   "Delete"
+msgstr  "Menghapus"
+
+#: lib/solaar/ui/diversion_rules.py:639
+msgid   "Negate"
+msgstr  "Meniadakan"
+
+#: lib/solaar/ui/diversion_rules.py:663
+msgid   "Wrap with"
+msgstr  "Bungkus dengan"
+
+#: lib/solaar/ui/diversion_rules.py:685
+msgid   "Cut"
+msgstr  "Potong"
+
+#: lib/solaar/ui/diversion_rules.py:700
+msgid   "Paste"
+msgstr  "Tempel"
+
+#: lib/solaar/ui/diversion_rules.py:706
+msgid   "Copy"
+msgstr  "Salin"
+
+#: lib/solaar/ui/diversion_rules.py:1070
+msgid   "This editor does not support the selected rule component yet."
+msgstr  "Editor ini belum mendukung komponen aturan yang dipilih."
+
+#: lib/solaar/ui/diversion_rules.py:1140
+msgid   "Number of seconds to delay."
+msgstr  "Jumlah detik untuk ditunda."
+
+#: lib/solaar/ui/diversion_rules.py:1178
+msgid   "Not"
+msgstr  "Bukan"
+
+#: lib/solaar/ui/diversion_rules.py:1187
+msgid   "X11 active process. For use in X11 only."
+msgstr  "Proses aktif X11. Hanya untuk digunakan di X11."
+
+#: lib/solaar/ui/diversion_rules.py:1217
+msgid   "X11 mouse process. For use in X11 only."
+msgstr  "Proses mouse X11. Hanya untuk digunakan di X11."
+
+#: lib/solaar/ui/diversion_rules.py:1234
+msgid   "MouseProcess"
+msgstr  "Proses Tikus"
+
+#: lib/solaar/ui/diversion_rules.py:1258
+msgid   "Feature name of notification triggering rule processing."
+msgstr  "Nama fitur notifikasi yang memicu pemrosesan aturan."
+
+#: lib/solaar/ui/diversion_rules.py:1305
+msgid   "Report number of notification triggering rule processing."
+msgstr  "Laporkan jumlah pemberitahuan yang memicu pemrosesan aturan."
+
+#: lib/solaar/ui/diversion_rules.py:1338
+msgid   "Active keyboard modifiers. Not always available in Wayland."
+msgstr  "Pengubah keyboard aktif. Tidak selalu tersedia di Wayland."
+
+#: lib/solaar/ui/diversion_rules.py:1378
+msgid   "Diverted key or button depressed or released.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  "Tombol atau tombol yang dialihkan ditekan atau dilepaskan.\n"
+        "Gunakan pengaturan Pengalihan Tombol/Tombol dan Pengalihan Tombol G "
+        "untuk mengalihkankunci dan tombol."
+
+#: lib/solaar/ui/diversion_rules.py:1387
+msgid   "Key down"
+msgstr  "Kunci bawah"
+
+#: lib/solaar/ui/diversion_rules.py:1390
+msgid   "Key up"
+msgstr  "Kunci atas"
+
+#: lib/solaar/ui/diversion_rules.py:1430
+msgid   "Diverted key or button is currently down.\n"
+        "Use the Key/Button Diversion and Divert G Keys settings to divert "
+        "keys and buttons."
+msgstr  "Tombol atau tombol yang dialihkan sedang tidak aktif.\n"
+        "Gunakan pengaturan Pengalihan Tombol/Tombol dan Pengalihan Tombol G "
+        "untuk mengalihkankunci dan tombol."
+
+#: lib/solaar/ui/diversion_rules.py:1468
+msgid   "Test condition on notification triggering rule processing."
+msgstr  "Uji kondisi pada notifikasi yang memicu pemrosesan aturan."
+
+#: lib/solaar/ui/diversion_rules.py:1472
+msgid   "Parameter"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1534
+msgid   "begin (inclusive)"
+msgstr  "mulai (inklusif)"
+
+#: lib/solaar/ui/diversion_rules.py:1535
+msgid   "end (exclusive)"
+msgstr  "akhir (eksklusif)"
+
+#: lib/solaar/ui/diversion_rules.py:1543
+msgid   "range"
+msgstr  "jangkauan"
+
+#: lib/solaar/ui/diversion_rules.py:1546
+msgid   "minimum"
+msgstr  "minimum"
+
+#: lib/solaar/ui/diversion_rules.py:1547
+msgid   "maximum"
+msgstr  "maksimum"
+
+#: lib/solaar/ui/diversion_rules.py:1549
+#, python-format
+msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
+msgstr  "byte %(0)d hingga %(1)d, mulai dari %(2)d hingga %(3)d"
+
+#: lib/solaar/ui/diversion_rules.py:1552 lib/solaar/ui/diversion_rules.py:1553
+msgid   "mask"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:1554
+#, python-format
+msgid   "bytes %(0)d to %(1)d, mask %(2)d"
+msgstr  "byte %(0)d hingga %(1)d, sembunyikan %(2)d"
+
+#: lib/solaar/ui/diversion_rules.py:1563
+msgid   "Bit or range test on bytes in notification message triggering rule "
+        "processing."
+msgstr  "Pengujian bit atau rentang pada byte dalam aturan pemicu pesan "
+        "notifikasipengolahan."
+
+#: lib/solaar/ui/diversion_rules.py:1573
+msgid   "type"
+msgstr  "jenis"
+
+#: lib/solaar/ui/diversion_rules.py:1661
+msgid   "Mouse gesture with optional initiating button followed by zero or "
+        "more mouse movements."
+msgstr  "Gerakan mouse dengan tombol memulai opsional diikuti dengan nol atau "
+        "lebih banyak gerakan tikus."
+
+#: lib/solaar/ui/diversion_rules.py:1666
+msgid   "Add movement"
+msgstr  "Tambahkan gerakan"
+
+#: lib/solaar/ui/diversion_rules.py:1760
+msgid   "Simulate a chorded key click or depress or release.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "Simulasikan klik atau tekan atau lepaskan kunci chord.\n"
+        "On Wayland memerlukan akses tulis ke /dev/uinput."
+
+#: lib/solaar/ui/diversion_rules.py:1765
+msgid   "Add key"
+msgstr  "Tambahkan kunci"
+
+#: lib/solaar/ui/diversion_rules.py:1768
+msgid   "Click"
+msgstr  "Klik"
+
+#: lib/solaar/ui/diversion_rules.py:1771
+msgid   "Depress"
+msgstr  "Menekan"
+
+#: lib/solaar/ui/diversion_rules.py:1774
+msgid   "Release"
+msgstr  "Melepaskan"
+
+#: lib/solaar/ui/diversion_rules.py:1859
+msgid   "Simulate a mouse scroll.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "Simulasikan gulir mouse.\n"
+        "On Wayland memerlukan akses tulis ke /dev/uinput."
+
+#: lib/solaar/ui/diversion_rules.py:1915
+msgid   "Simulate a mouse click.\n"
+        "On Wayland requires write access to /dev/uinput."
+msgstr  "Simulasikan klik mouse.\n"
+        "On Wayland memerlukan akses tulis ke /dev/uinput."
+
+#: lib/solaar/ui/diversion_rules.py:1918
+msgid   "Button"
+msgstr  "Tombol"
+
+#: lib/solaar/ui/diversion_rules.py:1919
+msgid   "Count and Action"
+msgstr  "Hitungan dan Tindakan"
+
+#: lib/solaar/ui/diversion_rules.py:1968
+msgid   "Execute a command with arguments."
+msgstr  "Jalankan perintah dengan argumen."
+
+#: lib/solaar/ui/diversion_rules.py:1971
+msgid   "Add argument"
+msgstr  "Tambahkan argumen"
+
+#: lib/solaar/ui/diversion_rules.py:2046
+msgid   "Toggle"
+msgstr  "Beralih"
+
+#: lib/solaar/ui/diversion_rules.py:2047
+msgid   "True"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2048
+msgid   "False"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2061
+msgid   "Unsupported setting"
+msgstr  "Pengaturan tidak didukung"
+
+#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2243
+#: lib/solaar/ui/diversion_rules.py:2325 lib/solaar/ui/diversion_rules.py:2568
+#: lib/solaar/ui/diversion_rules.py:2586
+msgid   "Originating device"
+msgstr  "Perangkat asal"
+
+#: lib/solaar/ui/diversion_rules.py:2256
+msgid   "Device is active and its settings can be changed."
+msgstr  "Perangkat aktif dan pengaturannya dapat diubah."
+
+#: lib/solaar/ui/diversion_rules.py:2265
+msgid   "Device that originated the current notification."
+msgstr  "Perangkat yang memunculkan notifikasi saat ini."
+
+#: lib/solaar/ui/diversion_rules.py:2278
+msgid   "Name of host computer."
+msgstr  "Nama komputer induk."
+
+#: lib/solaar/ui/diversion_rules.py:2345
+msgid   "Value"
+msgstr  "Nilai"
+
+#: lib/solaar/ui/diversion_rules.py:2353
+msgid   "Item"
+msgstr  ""
+
+#: lib/solaar/ui/diversion_rules.py:2627
+msgid   "Change setting on device"
+msgstr  "Ubah pengaturan pada perangkat"
+
+#: lib/solaar/ui/diversion_rules.py:2643
+msgid   "Setting on device"
+msgstr  "Pengaturan pada perangkat"
+
+#: lib/solaar/ui/notify.py:118
+msgid   "unspecified reason"
+msgstr  "alasan yang tidak ditentukan"
+
+#: lib/solaar/ui/pair_window.py:126 lib/solaar/ui/pair_window.py:260
+#: lib/solaar/ui/pair_window.py:296
+#, python-format
+msgid   "%(receiver_name)s: pair new device"
+msgstr  "%(receiver_name)s: memasangkan perangkat baru"
+
+#: lib/solaar/ui/pair_window.py:127
+#, python-format
+msgid   "Enter passcode on %(name)s."
+msgstr  "Masukkan kode sandi pada %(name)s."
+
+#: lib/solaar/ui/pair_window.py:130
+#, python-format
+msgid   "Type %(passcode)s and then press the enter key."
+msgstr  "Ketik %(passcode)s lalu tekan tombol enter."
+
+#: lib/solaar/ui/pair_window.py:133
+msgid   "left"
+msgstr  "Kiri"
+
+#: lib/solaar/ui/pair_window.py:133
+msgid   "right"
+msgstr  "Kanan"
+
+#: lib/solaar/ui/pair_window.py:135
+#, python-format
+msgid   "Press %(code)s\n"
+        "and then press left and right buttons simultaneously."
+msgstr  "Tekan %(code)s\n"
+        "lalu tekan tombol kiri dan kanan secara bersamaan."
+
+#: lib/solaar/ui/pair_window.py:192
+msgid   "Pairing failed"
+msgstr  "Pemasangan gagal"
+
+#: lib/solaar/ui/pair_window.py:194
+msgid   "Make sure your device is within range, and has a decent battery "
+        "charge."
+msgstr  "Pastikan perangkat Anda berada dalam jangkauan dan memiliki baterai "
+        "yang layakmengenakan biaya."
+
+#: lib/solaar/ui/pair_window.py:196
+msgid   "A new device was detected, but it is not compatible with this "
+        "receiver."
+msgstr  "Perangkat baru terdeteksi, tetapi tidak kompatibel dengan "
+        "inipenerima."
+
+#: lib/solaar/ui/pair_window.py:198
+msgid   "More paired devices than receiver can support."
+msgstr  "Lebih banyak perangkat berpasangan daripada yang dapat didukung oleh "
+        "receiver."
+
+#: lib/solaar/ui/pair_window.py:200
+msgid   "No further details are available about the error."
+msgstr  "Tidak ada rincian lebih lanjut yang tersedia tentang kesalahan "
+        "tersebut."
+
+#: lib/solaar/ui/pair_window.py:214
+msgid   "Found a new device:"
+msgstr  "Menemukan perangkat baru:"
+
+#: lib/solaar/ui/pair_window.py:239
+msgid   "The wireless link is not encrypted"
+msgstr  "Tautan nirkabel tidak dienkripsi"
+
+#: lib/solaar/ui/pair_window.py:268
+msgid   "Unifying receivers are only compatible with Unifying devices."
+msgstr  "Penerima Unifying hanya kompatibel dengan perangkat Unifying."
+
+#: lib/solaar/ui/pair_window.py:270
+msgid   "Bolt receivers are only compatible with Bolt devices."
+msgstr  "Penerima Bolt hanya kompatibel dengan perangkat Bolt."
+
+#: lib/solaar/ui/pair_window.py:272
+msgid   "Other receivers are only compatible with a few devices."
+msgstr  "Receiver lain hanya kompatibel dengan beberapa perangkat."
+
+#: lib/solaar/ui/pair_window.py:274
+msgid   "The device must not be paired with a nearby powered-on receiver."
+msgstr  "Perangkat tidak boleh dipasangkan dengan receiver terdekat yang "
+        "aktif."
+
+#: lib/solaar/ui/pair_window.py:278
+msgid   "Press a pairing button or key until the pairing light flashes "
+        "quickly."
+msgstr  "Tekan tombol atau kunci penyandingan hingga lampu penyandingan "
+        "berkedipdengan cepat."
+
+#: lib/solaar/ui/pair_window.py:280
+msgid   "You may have to first turn the device off and on again."
+msgstr  "Anda mungkin harus mematikan dan menghidupkan kembali perangkat "
+        "terlebih dahulu."
+
+#: lib/solaar/ui/pair_window.py:282
+msgid   "Turn on the device you want to pair."
+msgstr  "Nyalakan perangkat yang ingin Anda pasangkan."
+
+#: lib/solaar/ui/pair_window.py:284
+msgid   "If the device is already turned on, turn it off and on again."
+msgstr  "Jika perangkat sudah dihidupkan, matikan dan hidupkan kembali."
+
+#: lib/solaar/ui/pair_window.py:288
+#, python-format
+msgid   "\n"
+        "\n"
+        "This receiver has %d pairing remaining."
+msgid_plural    "\n"
+        "\n"
+        "This receiver has %d pairings remaining."
+msgstr[0]       "\n"
+        "\n"
+        "Penerima ini memiliki %d sisa penyandingan."
+
+#: lib/solaar/ui/pair_window.py:294
+msgid   "\n"
+        "Cancelling at this point will not use up a pairing."
+msgstr  "\n"
+        "Membatalkan pada saat ini tidak akan menghabiskan pasangan."
+
+#: lib/solaar/ui/tray.py:58
+msgid   "No supported device found"
+msgstr  "Tidak ditemukan perangkat yang didukung"
+
+#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:321
+#, python-format
+msgid   "About %s"
+msgstr  "Tentang %s"
+
+#: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
+#, python-format
+msgid   "Quit %s"
+msgstr  "Keluar %s"
+
+#: lib/solaar/ui/tray.py:294 lib/solaar/ui/tray.py:302
+msgid   "no receiver"
+msgstr  "tidak ada penerima"
+
+#: lib/solaar/ui/tray.py:315 lib/solaar/ui/tray.py:320
+msgid   "offline"
+msgstr  ""
+
+#: lib/solaar/ui/tray.py:318
+msgid   "no status"
+msgstr  "tidak ada status"
+
+#: lib/solaar/ui/window.py:99
+msgid   "Scanning"
+msgstr  "Memindai"
+
+#: lib/solaar/ui/window.py:132
+msgid   "Battery"
+msgstr  "Baterai"
+
+#: lib/solaar/ui/window.py:135
+msgid   "Wireless Link"
+msgstr  "Tautan Nirkabel"
+
+#: lib/solaar/ui/window.py:139
+msgid   "Lighting"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:173
+msgid   "Show Technical Details"
+msgstr  "Tampilkan Detail Teknis"
+
+#: lib/solaar/ui/window.py:189
+msgid   "Pair new device"
+msgstr  "Pasangkan perangkat baru"
+
+#: lib/solaar/ui/window.py:207
+msgid   "Select a device"
+msgstr  "Pilih perangkat"
+
+#: lib/solaar/ui/window.py:324
+msgid   "Rule Editor"
+msgstr  "Editor Aturan"
+
+#: lib/solaar/ui/window.py:543
+msgid   "Path"
+msgstr  "Path"
+
+#: lib/solaar/ui/window.py:546
+msgid   "USB ID"
+msgstr  "ID USB"
+
+#: lib/solaar/ui/window.py:549 lib/solaar/ui/window.py:551
+#: lib/solaar/ui/window.py:566 lib/solaar/ui/window.py:568
+msgid   "Serial"
+msgstr  ""
+
+#: lib/solaar/ui/window.py:555
+msgid   "Index"
+msgstr  "Indeks"
+
+#: lib/solaar/ui/window.py:557
+msgid   "Wireless PID"
+msgstr  "PID Nirkabel"
+
+#: lib/solaar/ui/window.py:559
+msgid   "Product ID"
+msgstr  "ID Produk"
+
+#: lib/solaar/ui/window.py:561
+msgid   "Protocol"
+msgstr  "Protokol"
+
+#: lib/solaar/ui/window.py:561
+msgid   "Unknown"
+msgstr  "Tidak Diketahui"
+
+#: lib/solaar/ui/window.py:563
+msgid   "Polling rate"
+msgstr  "Tingkat pemungutan suara"
+
+#: lib/solaar/ui/window.py:570
+msgid   "Unit ID"
+msgstr  "ID Satuan"
+
+#: lib/solaar/ui/window.py:584
+msgid   "Notifications"
+msgstr  "Pemberitahuan"
+
+#: lib/solaar/ui/window.py:628
+msgid   "No device paired."
+msgstr  "Tidak ada perangkat yang dipasangkan."
+
+#: lib/solaar/ui/window.py:637
+#, python-format
+msgid   "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0]       "Hingga %(max_count)s perangkat dapat dipasangkan ke receiver "
+        "ini."
+
+#: lib/solaar/ui/window.py:648
+#, python-format
+msgid   "This receiver has %d pairing remaining."
+msgid_plural    "This receiver has %d pairings remaining."
+msgstr[0]       "Penerima ini memiliki %d sisa penyandingan."
+
+#: lib/solaar/ui/window.py:705
+msgid   "Battery Voltage"
+msgstr  "Tegangan Baterai"
+
+#: lib/solaar/ui/window.py:707
+msgid   "Voltage reported by battery"
+msgstr  "Tegangan dilaporkan oleh baterai"
+
+#: lib/solaar/ui/window.py:709
+msgid   "Battery Level"
+msgstr  "Tingkat Baterai"
+
+#: lib/solaar/ui/window.py:711
+msgid   "Approximate level reported by battery"
+msgstr  "Perkiraan level yang dilaporkan oleh baterai"
+
+#: lib/solaar/ui/window.py:718 lib/solaar/ui/window.py:720
+msgid   "next reported "
+msgstr  "selanjutnya dilaporkan "
+
+#: lib/solaar/ui/window.py:721
+msgid   " and next level to be reported."
+msgstr  " dan tingkat selanjutnya yang akan dilaporkan."
+
+#: lib/solaar/ui/window.py:737
+msgid   "encrypted"
+msgstr  "terenkripsi"
+
+#: lib/solaar/ui/window.py:739
+msgid   "The wireless link between this device and its receiver is encrypted."
+msgstr  "Hubungan nirkabel antara perangkat ini dan penerimanya dienkripsi."
+
+#: lib/solaar/ui/window.py:741
+msgid   "not encrypted"
+msgstr  "tidak dienkripsi"
+
+#: lib/solaar/ui/window.py:745
+msgid   "The wireless link between this device and its receiver is not "
+        "encrypted.\n"
+        "This is a security issue for pointing devices, and a major security "
+        "issue for text-input devices."
+msgstr  "Hubungan nirkabel antara perangkat ini dan penerimanya tidak "
+        "terenkripsi.\n"
+        "Ini adalah masalah keamanan untuk perangkat penunjuk, dan merupakan "
+        "masalah keamanan utamamasalah untuk perangkat input teks."
+
+#: lib/solaar/ui/window.py:761
+#, python-format
+msgid   "%(light_level)d lux"
+msgstr  "%(light_level)d mewah"
