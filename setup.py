@@ -92,7 +92,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "dev": ["ruff"],
     },
     package_dir={"": "lib"},
-    packages=["keysyms", "hidapi", "logitech_receiver", "solaar", "solaar.ui", "solaar.cli"],
+    packages=["keysyms", "hidapi", "logitech_receiver", "solaar", "solaar.ui", "solaar.ui.about", "solaar.cli"],
     data_files=list(_data_files()),
     include_package_data=True,
     scripts=_glob("bin/*"),

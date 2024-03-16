@@ -28,14 +28,12 @@ from solaar import NAME
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
+from . import about
 from . import action as _action
 from . import config_panel as _config_panel
 from . import icons as _icons
-from .about import show_window as _show_about_window
 from .common import ui_async as _ui_async
 from .diversion_rules import show_window as _show_diversion_window
-
-# from solaar import __version__ as VERSION
 
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk  # NOQA: E402
@@ -307,7 +305,7 @@ def _create_window_layout():
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show_window)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
         _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
