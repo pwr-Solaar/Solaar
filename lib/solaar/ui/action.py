@@ -24,6 +24,21 @@ from . import pair_window
 from .common import error_dialog
 
 
+def make_image_menu_item(label, icon_name, function, *args):
+    box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+    label = Gtk.Label(label=label)
+    icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.LARGE_TOOLBAR) if icon_name is not None else Gtk.Image()
+    box.add(icon)
+    box.add(label)
+    menu_item = Gtk.MenuItem()
+    menu_item.add(box)
+    menu_item.show_all()
+    menu_item.connect("activate", function, *args)
+    menu_item.label = label
+    menu_item.icon = icon
+    return menu_item
+
+
 def make(name, label, function, stock_id=None, *args):
     action = Gtk.Action(name=name, label=label, tooltip=label, stock_id=None)
     action.set_icon_name(name)

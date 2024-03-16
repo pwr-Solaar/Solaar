@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -32,39 +33,29 @@ from solaar.i18n import _
 
 from . import icons as _icons
 from .about import show_window as _show_about_window
-from .action import make as _make
+from .action import make_image_menu_item
 from .window import popup as _window_popup
 from .window import toggle as _window_toggle
 
 logger = logging.getLogger(__name__)
 
-#
-# constants
-#
-
 _TRAY_ICON_SIZE = 48
 _MENU_ICON_SIZE = Gtk.IconSize.LARGE_TOOLBAR
 
-#
-#
-#
-
 
 def _create_menu(quit_handler):
-    menu = Gtk.Menu()
-
     # per-device menu entries will be generated as-needed
+    menu = Gtk.Menu()
 
     no_receiver = Gtk.MenuItem.new_with_label(_("No supported device found"))
     no_receiver.set_sensitive(False)
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(_make("help-about", _("About %s") % NAME, _show_about_window, stock_id="help-about").create_menu_item())
-    menu.append(_make("application-exit", _("Quit %s") % NAME, quit_handler, stock_id="application-exit").create_menu_item())
+    menu.append(make_image_menu_item(_("About %s") % NAME, "help-about", _show_about_window))
+    menu.append(make_image_menu_item(_("Quit %s") % NAME, "application-exit", quit_handler))
 
     menu.show_all()
-
     return menu
 
 
@@ -85,16 +76,12 @@ def _scroll(tray_icon, event, direction=None):
     if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
         return
 
-    # scroll events come way too fast (at least 5-6 at once)
-    # so take a little break between them
+    # scroll events come way too fast (at least 5-6 at once) so take a little break between them
     global _last_scroll
     now = now or _timestamp()
     if now - _last_scroll < 0.33:  # seconds
         return
     _last_scroll = now
-
-    # if logger.isEnabledFor(logging.DEBUG):
-    #     logger.debug("scroll direction %s", direction)
 
     global _picked_device
     candidate = None
@@ -212,12 +199,6 @@ try:
         # icon_file = _icons.icon_file(icon_name, _TRAY_ICON_SIZE)
         _icon.set_icon_full(_icon_file(tray_icon_name), description)
 
-    def _update_menu_icon(image_widget, icon_name):
-        image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
-        # icon_file = _icons.icon_file(icon_name, _MENU_ICON_SIZE)
-        # image_widget.set_from_file(icon_file)
-        # image_widget.set_pixel_size(_TRAY_ICON_SIZE)
-
     def attention(reason=None):
         if _icon.get_status() != AppIndicator3.IndicatorStatus.ATTENTION:
             # _icon.set_attention_icon_full(_icon_file(_icons.TRAY_ATTENTION), reason or '') # works poorly for XFCe 16
@@ -260,9 +241,6 @@ except ImportError:
             tray_icon_name = _icons.TRAY_OKAY if _devices_info else _icons.TRAY_ATTENTION
         _icon.set_from_icon_name(tray_icon_name)
 
-    def _update_menu_icon(image_widget, icon_name):
-        image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
-
     _icon_before_attention = None
 
     def _blink(count):
@@ -282,11 +260,6 @@ except ImportError:
         if _icon_before_attention is None:
             _icon_before_attention = _icon.get_icon_name()
             GLib.idle_add(_blink, 9)
-
-
-#
-#
-#
 
 
 def _generate_tooltip_lines():
@@ -341,11 +314,6 @@ def _pick_device_with_lowest_battery():
     return picked
 
 
-#
-#
-#
-
-
 def _add_device(device):
     assert device
 
@@ -368,11 +336,8 @@ def _add_device(device):
     new_device_info = (receiver_path, device.number, device.name, device)
     _devices_info.insert(index, new_device_info)
 
-    label_prefix = "   "
-    new_menu_item = Gtk.ImageMenuItem.new_with_label((label_prefix if device.number else "") + device.name)
-    new_menu_item.set_image(Gtk.Image())
-    new_menu_item.show_all()
-    new_menu_item.connect("activate", _window_popup, receiver_path, device.number)
+    label = ("   " if device.number else "") + device.name
+    new_menu_item = make_image_menu_item(label, None, _window_popup, receiver_path, device.number)
     _menu.insert(new_menu_item, index)
 
     return index
@@ -393,17 +358,11 @@ def _remove_device(index):
 
 def _add_receiver(receiver):
     index = len(_devices_info)
-
     new_receiver_info = (receiver.path, None, receiver.name, None)
     _devices_info.insert(index, new_receiver_info)
-
-    new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
     icon_name = _icons.device_icon_name(receiver.name, receiver.kind)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_name, _MENU_ICON_SIZE))
-    new_menu_item.show_all()
-    new_menu_item.connect("activate", _window_popup, receiver.path)
+    new_menu_item = make_image_menu_item(receiver.name, icon_name, _window_popup, receiver.path)
     _menu.insert(new_menu_item, index)
-
     return 0
 
 
@@ -422,23 +381,16 @@ def _update_menu_item(index, device):
     if device is None:
         logger.warning("updating an inactive device %s, assuming disconnected", device)
         return None
-
     menu_items = _menu.get_children()
     menu_item = menu_items[index]
-
     level = device.battery_info.level if device.battery_info is not None else None
     charging = device.battery_info.charging() if device.battery_info is not None else None
     icon_name = _icons.battery(level, charging)
-
-    menu_item.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
-    image_widget = menu_item.get_image()
+    menu_item.label.set_label(("  " if 0 < device.number <= 6 else "") + device.name + ": " + device.status_string())
+    image_widget = menu_item.icon
     image_widget.set_sensitive(bool(device.online))
-    _update_menu_icon(image_widget, icon_name)
+    image_widget.set_from_icon_name(icon_name, _MENU_ICON_SIZE)
 
-
-#
-#
-#
 
 # for which device to show the battery info in systray, if more than one
 # it's actually an entry in _devices_info
