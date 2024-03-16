@@ -1147,7 +1147,7 @@ class SetValueControl(Gtk.HBox):
         self.choice_widget.connect("changed", self._changed)
         self.sub_key_widget = SmartComboBox([])
         self.sub_key_widget.connect("changed", self._changed)
-        self.unsupported_label = Gtk.Label(_("Unsupported setting"))
+        self.unsupported_label = Gtk.Label(label=_("Unsupported setting"))
         self.pack_start(self.sub_key_widget, False, False, 0)
         self.sub_key_widget.set_hexpand(False)
         self.sub_key_widget.set_size_request(120, 0)
@@ -1303,7 +1303,7 @@ class _DeviceUI:
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(self.label_text)
         self.widgets[self.label] = (0, 0, 5, 1)
-        lbl = Gtk.Label(_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
+        lbl = Gtk.Label(label=_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True)
         self.widgets[lbl] = (0, 1, 1, 1)
         self.device_field = SmartComboBox(
             [],
@@ -1405,7 +1405,7 @@ class _SettingWithValueUI:
         self.widgets[self.label] = (0, 0, 5, 1)
 
         m = 20
-        lbl = Gtk.Label(_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, margin_top=m)
+        lbl = Gtk.Label(label=_("Device"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, margin_top=m)
         self.widgets[lbl] = (0, 1, 1, 1)
         self.device_field = SmartComboBox(
             [],
@@ -1423,7 +1423,7 @@ class _SettingWithValueUI:
         self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
-        lbl = Gtk.Label(_("Setting"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
+        lbl = Gtk.Label(label=_("Setting"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
         self.widgets[lbl] = (0, 2, 1, 1)
         self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in self.ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
@@ -1431,7 +1431,9 @@ class _SettingWithValueUI:
         self.setting_field.connect("changed", self._on_update)
         self.widgets[self.setting_field] = (1, 2, 1, 1)
 
-        self.value_lbl = Gtk.Label(_("Value"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
+        self.value_lbl = Gtk.Label(
+            label=_("Value"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False
+        )
         self.widgets[self.value_lbl] = (2, 2, 1, 1)
         self.value_field = SetValueControl(self._on_update, accept_toggle=self.ACCEPT_TOGGLE)
         self.value_field.set_valign(Gtk.Align.CENTER)
@@ -1439,7 +1441,7 @@ class _SettingWithValueUI:
         self.widgets[self.value_field] = (3, 2, 1, 1)
 
         self.key_lbl = Gtk.Label(
-            _("Item"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
+            label=_("Item"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False, margin_top=m
         )
         self.key_lbl.hide()
         self.widgets[self.key_lbl] = (2, 1, 1, 1)
