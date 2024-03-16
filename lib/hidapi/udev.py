@@ -100,21 +100,21 @@ def _match(action, device, filterfn):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f"Dbus event {action} {device}")
     hid_device = device.find_parent("hid")
-    if not hid_device:  # only HID devices are of interest to Solaar
+    if hid_device is None:  # only HID devices are of interest to Solaar
         return
-    hid_id = hid_device.get("HID_ID")
+    hid_id = hid_device.properties.get("HID_ID")
     if not hid_id:
         return  # there are reports that sometimes the id isn't set up right so be defensive
     bid, vid, pid = hid_id.split(":")
     hid_hid_device = hid_device.find_parent("hid")
-    if hid_hid_device:
+    if hid_hid_device is not None:
         return  # these are devices connected through a receiver so don't pick them up here
 
     try:  # if report descriptor does not indicate HID++ capabilities then this device is not of interest to Solaar
         from hid_parser import ReportDescriptor as _ReportDescriptor
 
         hidpp_short = hidpp_long = False
-        devfile = "/sys" + hid_device.get("DEVPATH") + "/report_descriptor"
+        devfile = "/sys" + hid_device.properties.get("DEVPATH") + "/report_descriptor"
         with fileopen(devfile, "rb") as fd:
             with _warnings.catch_warnings():
                 _warnings.simplefilter("ignore")
@@ -139,7 +139,7 @@ def _match(action, device, filterfn):
     isDevice = filter.get("isDevice")
 
     if action == "add":
-        hid_driver_name = hid_device.get("DRIVER")
+        hid_driver_name = hid_device.properties.get("DRIVER")
         # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
         if hid_driver:
             if isinstance(hid_driver, tuple):
@@ -165,7 +165,7 @@ def _match(action, device, filterfn):
             )
         if not (hidpp_short or hidpp_long or interface_number is None or interface_number == usb_interface):
             return
-        attrs = intf_device.attributes if intf_device else None
+        attrs = intf_device.attributes if intf_device is not None else None
 
         d_info = DeviceInfo(
             path=device.device_node,
@@ -176,7 +176,7 @@ def _match(action, device, filterfn):
             driver=hid_driver_name,
             manufacturer=attrs.get("manufacturer") if attrs else None,
             product=attrs.get("product") if attrs else None,
-            serial=hid_device.get("HID_UNIQ"),
+            serial=hid_device.properties.get("HID_UNIQ"),
             release=attrs.get("bcdDevice") if attrs else None,
             isDevice=isDevice,
             hidpp_short=hidpp_short,
