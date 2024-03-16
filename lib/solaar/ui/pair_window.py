@@ -37,27 +37,27 @@ address = kind = authentication = name = passcode = None
 
 
 def _create_page(assistant, kind, header=None, icon_name=None, text=None):
-    p = Gtk.VBox(False, 8)
+    p = Gtk.VBox(homogeneous=False, spacing=8)
     assistant.append_page(p)
     assistant.set_page_type(p, kind)
 
     if header:
-        item = Gtk.HBox(False, 16)
+        item = Gtk.HBox(homogeneous=False, spacing=16)
         p.pack_start(item, False, True, 0)
 
-        label = Gtk.Label(header)
-        label.set_alignment(0, 0)
+        label = Gtk.Label(label=header)
+        # deprecated - not needed label.set_alignment(0, 0)
         label.set_line_wrap(True)
         item.pack_start(label, True, True, 0)
 
         if icon_name:
             icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
-            icon.set_alignment(1, 0)
+            # deprecated - not needed icon.set_alignment(1, 0)
             item.pack_start(icon, False, False, 0)
 
     if text:
-        label = Gtk.Label(text)
-        label.set_alignment(0, 0)
+        label = Gtk.Label(label=text)
+        # deprecated - not needed label.set_alignment(0, 0)
         label.set_line_wrap(True)
         p.pack_start(label, False, False, 0)
 
@@ -211,23 +211,23 @@ def _pairing_succeeded(assistant, receiver, device):
 
     page = _create_page(assistant, Gtk.AssistantPageType.SUMMARY)
 
-    header = Gtk.Label(_("Found a new device:"))
-    header.set_alignment(0.5, 0)
+    header = Gtk.Label(label=_("Found a new device:"))
+    # deprecated - not needed header.set_alignment(0.5, 0)
     page.pack_start(header, False, False, 0)
 
     device_icon = Gtk.Image()
-    icon_set = _icons.device_icon_set(device.name, device.kind)
-    device_icon.set_from_icon_set(icon_set, Gtk.IconSize.LARGE)
-    device_icon.set_alignment(0.5, 1)
+    icon_name = _icons.device_icon_name(device.name, device.kind)
+    device_icon.set_from_icon_name(icon_name, _icons.LARGE_SIZE)
+    # deprecated - not needed device_icon.set_alignment(0.5, 1)
     page.pack_start(device_icon, True, True, 0)
 
     device_label = Gtk.Label()
     device_label.set_markup(f"<b>{device.name}</b>")
-    device_label.set_alignment(0.5, 0)
+    # deprecated - not needed device_label.set_alignment(0.5, 0)
     page.pack_start(device_label, True, True, 0)
 
-    hbox = Gtk.HBox(False, 8)
-    hbox.pack_start(Gtk.Label(" "), False, False, 0)
+    hbox = Gtk.HBox(homogeneous=False, spacing=8)
+    hbox.pack_start(Gtk.Label(label=" "), False, False, 0)
     hbox.set_property("expand", False)
     hbox.set_property("halign", Gtk.Align.CENTER)
     page.pack_start(hbox, False, False, 0)
@@ -236,7 +236,7 @@ def _pairing_succeeded(assistant, receiver, device):
         if assistant.is_drawable():
             if device.link_encrypted is False:
                 hbox.pack_start(Gtk.Image.new_from_icon_name("security-low", Gtk.IconSize.MENU), False, False, 0)
-                hbox.pack_start(Gtk.Label(_("The wireless link is not encrypted") + "!"), False, False, 0)
+                hbox.pack_start(Gtk.Label(label=_("The wireless link is not encrypted") + "!"), False, False, 0)
                 hbox.show_all()
             else:
                 return True

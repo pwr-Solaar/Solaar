@@ -197,7 +197,7 @@ class ModifiersUI(ConditionUI):
         self.switches = {}
         for i, m in enumerate(_DIV.MODIFIERS):
             switch = Gtk.Switch(halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
-            label = Gtk.Label(m, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+            label = Gtk.Label(label=m, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
             self.widgets[label] = (i, 1, 1, 1)
             self.widgets[switch] = (i, 2, 1, 1)
             self.labels[m] = label
@@ -323,9 +323,9 @@ class TestUI(ConditionUI):
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(_("Test condition on notification triggering rule processing."))
         self.widgets[self.label] = (0, 0, 4, 1)
-        lbl = Gtk.Label(_("Test"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        lbl = Gtk.Label(label=_("Test"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
         self.widgets[lbl] = (0, 1, 1, 1)
-        lbl = Gtk.Label(_("Parameter"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
+        lbl = Gtk.Label(label=_("Parameter"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=False, vexpand=False)
         self.widgets[lbl] = (2, 1, 1, 1)
 
         self.test = Gtk.ComboBoxText.new_with_entry()
@@ -437,7 +437,7 @@ class TestBytesUI(ConditionUI):
         self.mode_field.pack_start(mode_renderer, True)
         self.mode_field.add_attribute(mode_renderer, "text", 1)
         self.widgets[self.mode_field] = (mode_col, 2, 1, 1)
-        mode_label = Gtk.Label(_("type"), margin_top=20)
+        mode_label = Gtk.Label(label=_("type"), margin_top=20)
         self.widgets[mode_label] = (mode_col, 1, 1, 1)
         for mode_id, mode in TestBytesUI._modes.items():
             self.mode_field.get_model().append([mode_id, mode.label])
@@ -447,7 +447,7 @@ class TestBytesUI(ConditionUI):
                     field.set_value(0)
                     field.set_size_request(150, 0)
                     field.connect("value-changed", self._on_update)
-                    label = Gtk.Label(element.label, margin_top=20)
+                    label = Gtk.Label(label=element.label, margin_top=20)
                     self.fields[element.id] = field
                     self.field_labels[element.id] = label
                     self.widgets[label] = (col, 1, 1, 1)
@@ -525,12 +525,12 @@ class MouseGestureUI(ConditionUI):
         self.widgets = {}
         self.fields = []
         self.label = Gtk.Label(
-            _("Mouse gesture with optional initiating button followed by zero or more mouse movements."),
+            label=_("Mouse gesture with optional initiating button followed by zero or more mouse movements."),
             halign=Gtk.Align.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
-        self.add_btn = Gtk.Button(_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn = Gtk.Button(label=_("Add movement"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
 
@@ -545,7 +545,7 @@ class MouseGestureUI(ConditionUI):
         return field
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
         btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)

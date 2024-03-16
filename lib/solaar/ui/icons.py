@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,14 +23,7 @@ import solaar.gtk as gtk
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
-_LARGE_SIZE = 64
-Gtk.IconSize.LARGE = Gtk.icon_size_register("large", _LARGE_SIZE, _LARGE_SIZE)
-# Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
-
+LARGE_SIZE = Gtk.IconSize.DIALOG  # was 64
 TRAY_INIT = "solaar-init"
 TRAY_OKAY = "solaar"
 TRAY_ATTENTION = "solaar-attention"
@@ -56,11 +50,6 @@ def _init_icon_paths():
         if not _default_theme.has_icon("battery-good"):
             logger.warning("failed to detect icons")
             gtk.battery_icons_style = "solaar"
-
-
-#
-#
-#
 
 
 def battery(level=None, charging=False):
@@ -93,20 +82,11 @@ def _battery_icon_name(level, charging):
     )
 
 
-#
-#
-#
-
-
 def lux(level=None):
     if level is None or level < 0:
         return "light_unknown"
     return "solaar-light_%03d" % (20 * ((level + 50) // 100))
 
-
-#
-#
-#
 
 _ICON_SETS = {}
 
@@ -114,64 +94,43 @@ _ICON_SETS = {}
 def device_icon_set(name="_", kind=None):
     icon_set = _ICON_SETS.get(name)
     if icon_set is None:
-        icon_set = Gtk.IconSet.new()
-        _ICON_SETS[name] = icon_set
-
-        # names of possible icons, in reverse order of likelihood
-        # the theme will hopefully pick up the most appropriate
-        names = ["preferences-desktop-peripherals"]
+        # names of possible icons, in reverse desirability
+        icon_set = ["preferences-desktop-peripherals"]
         if kind:
             if str(kind) == "numpad":
-                names += ("input-keyboard", "input-dialpad")
+                icon_set += ("input-keyboard", "input-dialpad")
             elif str(kind) == "touchpad":
-                names += ("input-mouse", "input-tablet")
+                icon_set += ("input-mouse", "input-tablet")
             elif str(kind) == "trackball":
-                names += ("input-mouse",)
+                icon_set += ("input-mouse",)
             elif str(kind) == "headset":
-                names += ("audio-headphones", "audio-headset")
-            names += ("input-" + str(kind),)
-        # names += (name.replace(' ', '-'),)
-
-        source = Gtk.IconSource.new()
-        for n in names:
-            source.set_icon_name(n)
-            icon_set.add_source(source)
-        icon_set.names = names
-
+                icon_set += ("audio-headphones", "audio-headset")
+            icon_set += ("input-" + str(kind),)
+        # icon_set += (name.replace(' ', '-'),)
+        _ICON_SETS[name] = icon_set
     return icon_set
 
 
-def device_icon_file(name, kind=None, size=_LARGE_SIZE):
-    _init_icon_paths()
-
-    icon_set = device_icon_set(name, kind)
-    assert icon_set
-    for n in reversed(icon_set.names):
-        if _default_theme.has_icon(n):
-            return _default_theme.lookup_icon(n, size, 0).get_filename()
+def device_icon_file(name, kind=None, size=LARGE_SIZE):
+    icon_name = device_icon_name(name, kind)
+    return _default_theme.lookup_icon(icon_name, size, 0).get_filename() if icon_name is not None else None
 
 
 def device_icon_name(name, kind=None):
     _init_icon_paths()
-
     icon_set = device_icon_set(name, kind)
     assert icon_set
-    for n in reversed(icon_set.names):
+    for n in reversed(icon_set):
         if _default_theme.has_icon(n):
             return n
 
 
-def icon_file(name, size=_LARGE_SIZE):
+def icon_file(name, size=LARGE_SIZE):
     _init_icon_paths()
-
     # has_icon() somehow returned False while lookup_icon returns non-None.
-    # I guess it happens because share/solaar/icons/ has no hicolor and
-    # resolution subdirs
+    # I guess it happens because share/solaar/icons/ has no hicolor and resolution subdirs
     theme_icon = _default_theme.lookup_icon(name, size, 0)
     if theme_icon:
         file_name = theme_icon.get_filename()
-        # if logger.isEnabledFor(logging.DEBUG):
-        #     logger.debug("icon %s(%d) => %s", name, size, file_name)
         return file_name
-
     logger.warning("icon %s(%d) not found in current theme", name, size)

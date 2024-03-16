@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,16 +23,24 @@ from solaar.i18n import _
 from . import pair_window
 from .common import error_dialog
 
-# import logging
-# logger = logging.getLogger(__name__)
 
-#
-#
-#
+def make_image_menu_item(label, icon_name, function, *args):
+    box = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 6)
+    label = Gtk.Label(label=label)
+    icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.LARGE_TOOLBAR) if icon_name is not None else Gtk.Image()
+    box.add(icon)
+    box.add(label)
+    menu_item = Gtk.MenuItem()
+    menu_item.add(box)
+    menu_item.show_all()
+    menu_item.connect("activate", function, *args)
+    menu_item.label = label
+    menu_item.icon = icon
+    return menu_item
 
 
 def make(name, label, function, stock_id=None, *args):
-    action = Gtk.Action(name, label, label, None)
+    action = Gtk.Action(name=name, label=label, tooltip=label, stock_id=None)
     action.set_icon_name(name)
     if stock_id is not None:
         action.set_stock_id(stock_id)
@@ -41,25 +50,12 @@ def make(name, label, function, stock_id=None, *args):
 
 
 def make_toggle(name, label, function, stock_id=None, *args):
-    action = Gtk.ToggleAction(name, label, label, None)
+    action = Gtk.ToggleAction(name=name, label=label, tooltip=label, stock_id=None)
     action.set_icon_name(name)
     if stock_id is not None:
         action.set_stock_id(stock_id)
     action.connect("activate", function, *args)
     return action
-
-
-#
-#
-#
-
-# def _toggle_notifications(action):
-#     if action.get_active():
-#         notify.init('Solaar')
-#     else:
-#         notify.uninit()
-#     action.set_sensitive(notify.available)
-# toggle_notifications = make_toggle('notifications', 'Notifications', _toggle_notifications)
 
 
 def pair(window, receiver):
@@ -80,7 +76,11 @@ def unpair(window, device):
     assert device.kind is not None
 
     qdialog = Gtk.MessageDialog(
-        window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.NONE, _("Unpair") + " " + device.name + " ?"
+        transient_for=window,
+        flags=0,
+        message_type=Gtk.MessageType.QUESTION,
+        buttons=Gtk.ButtonsType.NONE,
+        text=_("Unpair") + " " + device.name + " ?",
     )
     qdialog.set_icon_name("remove")
     qdialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
@@ -95,5 +95,4 @@ def unpair(window, device):
         try:
             del receiver[device_number]
         except Exception:
-            # logger.exception("unpairing %s", device)
             error_dialog("unpair", device)
