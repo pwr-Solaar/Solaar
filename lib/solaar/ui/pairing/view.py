@@ -12,18 +12,11 @@ from solaar.ui import icons as _icons
 logger = logging.getLogger(__name__)
 
 
-PAIRING_TIMEOUT_SECONDS = 30
-STATUS_CHECK_MILLISECONDS = 500
-
-
 class PresenterProtocol(Protocol):
-    def handle_toggle_credits(self, event=None) -> None:
+    def handle_prepare(self, assistant, page) -> None:
         ...
 
-    def handle_prepare(self, receiver) -> None:
-        ...
-
-    def handle_finish(self, receiver, assistant) -> None:
+    def handle_close(self, assistant) -> None:
         ...
 
 
@@ -57,7 +50,7 @@ class PairingView:
         self.window = window
         self.assistant: Union[Gtk.Assistant, None] = None
 
-    def init_ui(self, presenter: PresenterProtocol, receiver, page_title: str, page_text: str) -> None:
+    def init_ui(self, presenter: PresenterProtocol, page_title: str, page_text: str) -> None:
         self.assistant = Gtk.Assistant()
         self.assistant.set_title(page_title)
         self.assistant.set_icon_name("list-add")
@@ -82,9 +75,9 @@ class PairingView:
         spinner.set_visible(True)
         page_intro.pack_end(spinner, True, True, 24)
 
-        self.assistant.connect("prepare", presenter.handle_prepare, receiver, self.show_check_lock_state)
-        self.assistant.connect("cancel", presenter.handle_finish, receiver)
-        self.assistant.connect("close", presenter.handle_finish, receiver)
+        self.assistant.connect("prepare", presenter.handle_prepare)
+        self.assistant.connect("cancel", presenter.handle_close)
+        self.assistant.connect("close", presenter.handle_close)
 
     def show_check_lock_state(self, page):
         spinner = page.get_children()[-1]
@@ -100,10 +93,7 @@ class PairingView:
         self.assistant.set_page_complete(passcode_page, True)
         self.assistant.next_page()
 
-    def show_pairing_succeeded(self, receiver, device, glib_timeout_add):
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s success: %s", receiver, device)
-
+    def show_pairing_succeeded(self, device, handle_check_and_show_encryption_cb):
         pairing_success_page = _create_page_view()
         pairing_success_page.show_all()
         self.assistant.append_page(pairing_success_page)
@@ -129,22 +119,18 @@ class PairingView:
         hbox.set_property("expand", False)
         hbox.set_property("halign", Gtk.Align.CENTER)
         pairing_success_page.pack_start(hbox, False, False, 0)
-
-        def _check_encrypted(device):
-            if self.assistant.is_drawable():
-                if device.link_encrypted is False:
-                    hbox.pack_start(Gtk.Image.new_from_icon_name("security-low", Gtk.IconSize.MENU), False, False, 0)
-                    hbox.pack_start(Gtk.Label(_("The wireless link is not encrypted") + "!"), False, False, 0)
-                    hbox.show_all()
-                else:
-                    return True
-
-        glib_timeout_add(STATUS_CHECK_MILLISECONDS, _check_encrypted, device)
+        handle_check_and_show_encryption_cb(device, hbox)
 
         pairing_success_page.show_all()
 
         self.assistant.next_page()
         self.assistant.commit()
+
+    def show_encryption(self, view):
+        if self.assistant.is_drawable():
+            view.pack_start(Gtk.Image.new_from_icon_name("security-low", Gtk.IconSize.MENU), False, False, 0)
+            view.pack_start(Gtk.Label(_("The wireless link is not encrypted") + "!"), False, False, 0)
+            view.show_all()
 
     def show_pairing_failed(self, title, text):
         self.assistant.commit()
@@ -157,7 +143,23 @@ class PairingView:
         self.assistant.next_page()
         self.assistant.commit()
 
+    def is_drawable(self):
+        is_drawable = self.assistant.is_drawable()
+        if not is_drawable:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("assistant %s destroyed, bailing out", self.assistant)
+        return is_drawable
+
+    def get_current_page(self) -> int:
+        return self.assistant.get_current_page()
+
+    def remove_page(self, page):
+        self.assistant.remove_page(page)
+
     def show_finished(self):
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("finish %s", self.assistant)
+
         self.assistant.destroy()
 
     def mainloop(self) -> None:

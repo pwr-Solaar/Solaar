@@ -16,6 +16,7 @@
 
 import logging
 
+from functools import partial
 from typing import Optional
 
 from gi.repository import GLib
@@ -29,7 +30,7 @@ PAIRING_TIMEOUT_SECONDS = 30
 STATUS_CHECK_MILLISECONDS = 500
 
 
-def _create_page_text(receiver_kind: str, remaining_pairings: Optional[int] = None) -> str:
+def _create_pairing_page_text(receiver_kind: str, remaining_pairings: Optional[int] = None) -> str:
     if receiver_kind == "unifying":
         page_text = _("Unifying receivers are only compatible with Unifying devices.")
     elif receiver_kind == "bolt":
@@ -62,6 +63,19 @@ def _create_page_text(receiver_kind: str, remaining_pairings: Optional[int] = No
     return page_text
 
 
+def _create_pairing_failed_text(error) -> tuple[str, str]:
+    header = _("Pairing failed") + ": " + _(str(error)) + "."
+    if "timeout" in str(error):
+        text = _("Make sure your device is within range, and has a decent battery charge.")
+    elif str(error) == "device not supported":
+        text = _("A new device was detected, but it is not compatible with this receiver.")
+    elif "many" in str(error):
+        text = _("More paired devices than receiver can support.")
+    else:
+        text = _("No further details are available about the error.")
+    return header, text
+
+
 class PairingModel:
     def __init__(self, receiver, device_kind_keyboard):
         self.receiver = receiver
@@ -72,49 +86,42 @@ class PairingModel:
         self.name = None
         self.passcode = None
 
-    def get_receiver_name(self) -> str:
-        return self.receiver.name
+    def glib_timeout_add(self, func, *args):
+        return partial(GLib.timeout_add, STATUS_CHECK_MILLISECONDS, func, *args)
 
-    def get_pairing_failed(self) -> str:
-        return self.receiver.pairing.error
-
-    def prepare(
-        self, receiver, assistant, page, show_check_lock_state_cb, handle_check_lock_state_cb, handle_pairing_failed_cb
+    def prepare_pairing(
+        self,
+        page,
+        show_check_lock_state_cb,
+        show_pairing_failed_cb,
+        handle_check_lock_state_cb,
     ):
-        if receiver.receiver_kind == "bolt":
-            if receiver.discover(timeout=PAIRING_TIMEOUT_SECONDS):
-                assert receiver.pairing.new_device is None
-                assert receiver.pairing.error is None
-
-                GLib.timeout_add(STATUS_CHECK_MILLISECONDS, handle_check_lock_state_cb, assistant, receiver)
+        if self.receiver.receiver_kind == "bolt":
+            if self.receiver.discover(timeout=PAIRING_TIMEOUT_SECONDS):
+                assert self.receiver.pairing.new_device is None
+                assert self.receiver.pairing.error is None
+                GLib.timeout_add(STATUS_CHECK_MILLISECONDS, handle_check_lock_state_cb)
                 show_check_lock_state_cb(page)
             else:
-                GLib.idle_add(handle_pairing_failed_cb, receiver, "discovery did not start")
-        elif receiver.set_lock(False, timeout=PAIRING_TIMEOUT_SECONDS):
-            assert receiver.pairing.new_device is None
-            assert receiver.pairing.error is None
-
-            GLib.timeout_add(STATUS_CHECK_MILLISECONDS, handle_check_lock_state_cb, assistant, receiver)
+                error_msg = "discovery did not start"
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("%s fail: %s", self.receiver, error_msg)
+                title, text = _create_pairing_failed_text(error_msg)
+                GLib.idle_add(show_pairing_failed_cb, title, text)
+        elif self.receiver.set_lock(False, timeout=PAIRING_TIMEOUT_SECONDS):
+            assert self.receiver.pairing.new_device is None
+            assert self.receiver.pairing.error is None
+            GLib.timeout_add(STATUS_CHECK_MILLISECONDS, handle_check_lock_state_cb)
             show_check_lock_state_cb(page)
         else:
-            GLib.idle_add(handle_pairing_failed_cb, receiver, "the pairing lock did not open")
-
-    def create_pairing_failed_text(self, error) -> tuple[str, str]:
-        header = _("Pairing failed") + ": " + _(str(error)) + "."
-        if "timeout" in str(error):
-            text = _("Make sure your device is within range, and has a decent battery charge.")
-        elif str(error) == "device not supported":
-            text = _("A new device was detected, but it is not compatible with this receiver.")
-        elif "many" in str(error):
-            text = _("More paired devices than receiver can support.")
-        else:
-            text = _("No further details are available about the error.")
-        return header, text
+            error_msg = "the pairing lock did not open"
+            title, text = _create_pairing_failed_text(error_msg)
+            GLib.idle_add(show_pairing_failed_cb, title, text)
 
     def create_page_text(self):
         receiver_kind = self.receiver.receiver_kind
         remaining_pairings = self.receiver.remaining_pairings()
-        return _create_page_text(receiver_kind, remaining_pairings)
+        return _create_pairing_page_text(receiver_kind, remaining_pairings)
 
     def create_page_title(self) -> str:
         return _("%(receiver_name)s: pair new device") % {"receiver_name": self.receiver.name}
@@ -128,42 +135,26 @@ class PairingModel:
         page_text = _("Enter passcode on %(name)s.") % {"name": name}
         page_text += "\n"
         if authentication & 0x01:
-            page_text += _("Type %(passcode)s and then press the enter key.") % {
-                "passcode": self.receiver.pairing.device_passkey
-            }
+            page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": device_passkey}
         else:
             passcode = ", ".join([_("right") if bit == "1" else _("left") for bit in f"{int(device_passkey):010b}"])
             page_text += _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
         return page_title, page_text
 
-    def finish(self):
-        self.receiver.pairing.new_device = None
-        if self.receiver.pairing.lock_open:
-            if self.receiver.receiver_kind == "bolt":
-                self.receiver.pair_device("cancel")
-            else:
-                self.receiver.set_lock()
-        if self.receiver.pairing.discovering:
-            self.receiver.discover(True)
-        if not self.receiver.pairing.lock_open and not self.receiver.pairing.discovering:
-            self.receiver.pairing.error = None
-
     def check_lock_state(
         self,
-        assistant,
-        receiver,
+        pairing_failed_cb,
+        pairing_succeeded_cb,
+        show_passcode_cb,
         count=2,
-        pairing_failed_cb=None,
-        pairing_succeeded_cb=None,
-        show_passcode_cb=None,
     ):
-        if not assistant.is_drawable():
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("assistant %s destroyed, bailing out", assistant)
-            return False
+        receiver = self.receiver
 
         if receiver.pairing.error:
-            pairing_failed_cb(receiver, receiver.pairing.error)
+            error_msg = receiver.pairing.error
+            title, text = _create_pairing_failed_text(error_msg)
+            pairing_failed_cb(title, text)
+
             receiver.pairing.error = None
             return False
 
@@ -171,7 +162,7 @@ class PairingModel:
             receiver.remaining_pairings(False)  # Update remaining pairings
             device = receiver.pairing.new_device
             receiver.pairing.new_device = None
-            pairing_succeeded_cb(receiver, device)
+            pairing_succeeded_cb(device)
             return False
         elif receiver.pairing.device_address and receiver.pairing.device_name and not self.address:
             self.address = receiver.pairing.device_address
@@ -190,7 +181,9 @@ class PairingModel:
             ):
                 return True
             else:
-                pairing_failed_cb(receiver, "failed to open pairing lock")
+                error_msg = "failed to open pairing lock"
+                title, text = _create_pairing_failed_text(error_msg)
+                pairing_failed_cb(title, text)
                 return False
         elif self.address and receiver.pairing.device_passkey and not self.passcode:
             passcode = receiver.pairing.device_passkey
@@ -206,15 +199,32 @@ class PairingModel:
                 GLib.timeout_add(
                     STATUS_CHECK_MILLISECONDS,
                     self.check_lock_state,
-                    assistant,
-                    receiver,
-                    count - 1,
                     pairing_failed_cb,
                     pairing_succeeded_cb,
                     show_passcode_cb,
+                    count - 1,
                 )
             else:
-                pairing_failed_cb(receiver, "failed to open pairing lock")
+                error_msg = "failed to open pairing lock"
+                title, text = _create_pairing_failed_text(error_msg)
+                pairing_failed_cb(title, text)
             return False
 
         return True
+
+    def is_device_link_encrypted(self, device) -> bool:
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("%s success: %s", self.receiver, device)
+        return device.link_encrypted
+
+    def finish(self):
+        self.receiver.pairing.new_device = None
+        if self.receiver.pairing.lock_open:
+            if self.receiver.receiver_kind == "bolt":
+                self.receiver.pair_device("cancel")
+            else:
+                self.receiver.set_lock()
+        if self.receiver.pairing.discovering:
+            self.receiver.discover(True)
+        if not self.receiver.pairing.lock_open and not self.receiver.pairing.discovering:
+            self.receiver.pairing.error = None

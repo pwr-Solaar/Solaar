@@ -20,27 +20,22 @@ import logging
 
 from typing import Protocol
 
-from gi.repository import GLib
-
 from solaar.ui.pairing.model import PairingModel
 
 logger = logging.getLogger(__name__)
 
 
 class PairingViewProtocol(Protocol):
-    def init_ui(self, presenter: Presenter, title: str, text: str) -> None:
+    def init_ui(self, presenter, page_title: str, page_text: str) -> None:
         ...
 
-    def show_prepare(self, assistant, page):
+    def show_pairing_succeeded(self, device, handle_check_and_show_encryption_cb):
         ...
 
-    def show_pairing_succeeded(self, receiver, device, glib_timeout_add):
+    def show_pairing_failed(self, title, text):
         ...
 
-    def show_pairing_failed(self, receiver, error, title, text):
-        ...
-
-    def show_finished(self, receiver):
+    def show_finished(self):
         ...
 
     def show_check_lock_state(self, page):
@@ -52,7 +47,16 @@ class PairingViewProtocol(Protocol):
     def show_passkey(self, page_title: str, page_text: str):
         ...
 
+    def show_encryption(self, is_link_encrypted):
+        ...
+
+    def remove_page(self, page):
+        ...
+
     def mainloop(self) -> None:
+        ...
+
+    def is_drawable(self):
         ...
 
 
@@ -61,55 +65,42 @@ class Presenter:
         self.model = model
         self.view = view
 
-    def handle_prepare(self, assistant, page, receiver, show_check_lock_state_cb) -> None:
-        index = assistant.get_current_page()
+    def handle_prepare(self, assistant, page) -> None:
+        page_index = self.view.get_current_page()
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("prepare %s %d %s", assistant, index, page)
-
-        if index == 0:
-            self.model.prepare(
-                receiver,
-                assistant,
-                page,
-                show_check_lock_state_cb,
-                self.handle_check_lock_state,
-                self.handle_pairing_failed,
+            logger.debug("prepare %s %d %s", assistant, page_index, page)
+        if page_index == 0:
+            self.model.prepare_pairing(
+                page, self.view.show_check_lock_state, self.view.show_pairing_failed, self.handle_check_lock_state
             )
         else:
-            assistant.remove_page(0)
+            self.view.remove_page(0)
 
-    def handle_check_lock_state(self, assistant, receiver, count=2):
+    def handle_check_lock_state(self, count=2):
+        if not self.view.is_drawable():
+            return False
+
         self.model.check_lock_state(
-            assistant,
-            receiver,
-            count,
-            pairing_failed_cb=self.handle_pairing_failed,
-            pairing_succeeded_cb=self.handle_pairing_succeeded,
-            show_passcode_cb=self.handle_passcode,
+            pairing_failed_cb=self.view.show_pairing_failed,
+            pairing_succeeded_cb=self.handle_show_pairing_succeeded,
+            show_passcode_cb=self.view.show_passkey,
+            count=count,
         )
 
-    def handle_passcode(self, page_title: str, page_text: str):
-        self.view.show_passkey(page_title, page_text)
+    def handle_show_pairing_succeeded(self, device):
+        encryption_check_and_show_func = self.model.glib_timeout_add(self.handle_encryption_check_and_show)
+        self.view.show_pairing_succeeded(device, encryption_check_and_show_func)
 
-    def handle_pairing_succeeded(self, receiver, device):
-        self.view.show_pairing_succeeded(receiver, device, GLib.timeout_add)
+    def handle_encryption_check_and_show(self, device, hbox):
+        if not self.model.is_device_link_encrypted(device):
+            self.view.show_encryption(hbox)
 
-    def handle_pairing_failed(self, receiver, error):
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("%s fail: %s", receiver, error)
-        title, text = self.model.create_pairing_failed_text(error)
-        self.view.show_pairing_failed(title, text)
-
-    def handle_finish(self, receiver, assistant) -> None:
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("finish %s", assistant)
-
+    def handle_close(self, _assistant) -> None:
         self.view.show_finished()
         self.model.finish()
 
     def run(self) -> None:
-        title = self.model.create_page_title()
-        text = self.model.create_page_text()
-        receiver = self.model.receiver
-        self.view.init_ui(self, receiver, title, text)
+        pairing_window_title = self.model.create_page_title()
+        pairing_window_text = self.model.create_page_text()
+        self.view.init_ui(self, pairing_window_title, pairing_window_text)
         self.view.mainloop()
