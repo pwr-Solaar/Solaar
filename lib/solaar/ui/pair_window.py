@@ -16,6 +16,8 @@
 
 import logging
 
+from typing import Optional
+
 from gi.repository import GLib
 from gi.repository import Gtk
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
@@ -249,6 +251,39 @@ def _pairing_succeeded(assistant, receiver, device):
     assistant.commit()
 
 
+def _create_page_text(receiver_kind: str, remaining_pairings: Optional[int] = None) -> str:
+    if receiver_kind == "unifying":
+        page_text = _("Unifying receivers are only compatible with Unifying devices.")
+    elif receiver_kind == "bolt":
+        page_text = _("Bolt receivers are only compatible with Bolt devices.")
+    else:
+        page_text = _("Other receivers are only compatible with a few devices.")
+    page_text += "\n"
+    page_text += _("The device must not be paired with a nearby powered-on receiver.")
+    page_text += "\n\n"
+
+    if receiver_kind == "bolt":
+        page_text += _("Press a pairing button or key until the pairing light flashes quickly.")
+        page_text += "\n"
+        page_text += _("You may have to first turn the device off and on again.")
+    else:
+        page_text += _("Turn on the device you want to pair.")
+        page_text += "\n"
+        page_text += _("If the device is already turned on, turn it off and on again.")
+
+    if remaining_pairings and remaining_pairings >= 0:
+        page_text += (
+            ngettext(
+                "\n\nThis receiver has %d pairing remaining.",
+                "\n\nThis receiver has %d pairings remaining.",
+                remaining_pairings,
+            )
+            % remaining_pairings
+        )
+        page_text += _("\nCancelling at this point will not use up a pairing.")
+    return page_text
+
+
 def create(receiver):
     assert receiver is not None
     assert receiver.kind is None
@@ -264,34 +299,8 @@ def create(receiver):
     assistant.set_resizable(False)
     assistant.set_role("pair-device")
 
-    if receiver.receiver_kind == "unifying":
-        page_text = _("Unifying receivers are only compatible with Unifying devices.")
-    elif receiver.receiver_kind == "bolt":
-        page_text = _("Bolt receivers are only compatible with Bolt devices.")
-    else:
-        page_text = _("Other receivers are only compatible with a few devices.")
-    page_text += "\n"
-    page_text += _("The device must not be paired with a nearby powered-on receiver.")
-    page_text += "\n\n"
-
-    if receiver.receiver_kind == "bolt":
-        page_text += _("Press a pairing button or key until the pairing light flashes quickly.")
-        page_text += "\n"
-        page_text += _("You may have to first turn the device off and on again.")
-    else:
-        page_text += _("Turn on the device you want to pair.")
-        page_text += "\n"
-        page_text += _("If the device is already turned on, turn it off and on again.")
-    if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        page_text += (
-            ngettext(
-                "\n\nThis receiver has %d pairing remaining.",
-                "\n\nThis receiver has %d pairings remaining.",
-                receiver.remaining_pairings(),
-            )
-            % receiver.remaining_pairings()
-        )
-        page_text += _("\nCancelling at this point will not use up a pairing.")
+    remaining_pairings = receiver.remaining_pairings()
+    page_text = _create_page_text(receiver.receiver_kind, remaining_pairings)
 
     intro_text = _("%(receiver_name)s: pair new device") % {"receiver_name": receiver.name}
 
