@@ -45,12 +45,12 @@ class KeyPressUI(ActionUI):
         self.widgets = {}
         self.fields = []
         self.label = Gtk.Label(
-            _("Simulate a chorded key click or depress or release.\nOn Wayland requires write access to /dev/uinput."),
+            label=_("Simulate a chorded key click or depress or release.\nOn Wayland requires write access to /dev/uinput."),
             halign=Gtk.Align.CENTER,
         )
         self.widgets[self.label] = (0, 0, 5, 1)
         self.del_btns = []
-        self.add_btn = Gtk.Button(_("Add key"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn = Gtk.Button(label=_("Add key"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
         self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
@@ -71,7 +71,7 @@ class KeyPressUI(ActionUI):
         return field_entry
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
         btn.connect("clicked", self._clicked_del, len(self.del_btns) - 1)
@@ -144,7 +144,7 @@ class MouseScrollUI(ActionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(
-            _("Simulate a mouse scroll.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
+            label=_("Simulate a mouse scroll.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
         )
         self.widgets[self.label] = (0, 0, 4, 1)
         self.label_x = Gtk.Label(label="x", halign=Gtk.Align.END, valign=Gtk.Align.END, hexpand=True)
@@ -200,7 +200,7 @@ class MouseClickUI(ActionUI):
     def create_widgets(self):
         self.widgets = {}
         self.label = Gtk.Label(
-            _("Simulate a mouse click.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
+            label=_("Simulate a mouse click.\nOn Wayland requires write access to /dev/uinput."), halign=Gtk.Align.CENTER
         )
         self.widgets[self.label] = (0, 0, 4, 1)
         self.label_b = Gtk.Label(label=_("Button"), halign=Gtk.Align.END, valign=Gtk.Align.CENTER, hexpand=True)
@@ -253,10 +253,10 @@ class ExecuteUI(ActionUI):
 
     def create_widgets(self):
         self.widgets = {}
-        self.label = Gtk.Label(_("Execute a command with arguments."), halign=Gtk.Align.CENTER)
+        self.label = Gtk.Label(label=_("Execute a command with arguments."), halign=Gtk.Align.CENTER)
         self.widgets[self.label] = (0, 0, 5, 1)
         self.fields = []
-        self.add_btn = Gtk.Button(_("Add argument"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
+        self.add_btn = Gtk.Button(label=_("Add argument"), halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
         self.del_btns = []
         self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
@@ -270,7 +270,7 @@ class ExecuteUI(ActionUI):
         return field_entry
 
     def _create_del_btn(self):
-        btn = Gtk.Button(_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
+        btn = Gtk.Button(label=_("Delete"), halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
         btn.set_size_request(150, 0)
         self.del_btns.append(btn)
         self.widgets[btn] = (len(self.del_btns) - 1, 2, 1, 1)
