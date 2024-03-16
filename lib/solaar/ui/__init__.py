@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -39,17 +40,9 @@ from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
-GLib.threads_init()
-
-#
-#
-#
+# deprecated and no longer needed  GLib.threads_init()
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -111,11 +104,6 @@ def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
     if application.get_is_remote():
         print(_("Another Solaar process is already running so just expose its window"))
     application.run()
-
-
-#
-#
-#
 
 
 def _status_changed(device, alert, reason, refresh=False):

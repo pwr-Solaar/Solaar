@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -43,10 +44,6 @@ from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-#
-# constants
-#
-
 _SMALL_BUTTON_ICON_SIZE = Gtk.IconSize.MENU
 _NORMAL_BUTTON_ICON_SIZE = Gtk.IconSize.BUTTON
 _TREE_ICON_SIZE = Gtk.IconSize.BUTTON
@@ -65,10 +62,6 @@ _TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
 assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
 assert len(_COLUMN_TYPES) == len(_COLUMN)
 
-#
-# create UI layout
-#
-
 
 def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, tooltip=None, toggle=False, clicked=None):
     b = Gtk.ToggleButton() if toggle else Gtk.Button()
@@ -76,7 +69,7 @@ def _new_button(label, icon_name=None, icon_size=_NORMAL_BUTTON_ICON_SIZE, toolt
     if icon_name:
         c.pack_start(Gtk.Image.new_from_icon_name(icon_name, icon_size), True, True, 0)
     if label:
-        c.pack_start(Gtk.Label(label), True, True, 0)
+        c.pack_start(Gtk.Label(label=label), True, True, 0)
     b.add(c)
     if clicked is not None:
         b.connect("clicked", clicked)
@@ -92,15 +85,16 @@ def _create_receiver_panel():
     p = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
 
     p._count = Gtk.Label()
-    p._count.set_padding(24, 0)
-    p._count.set_alignment(0, 0.5)
+    # deprecated - see below  p._count.set_padding(24, 0)
+    p._count.set_margin_top(24)
+    # deprecated - not needed  p._count.set_alignment(0, 0.5)
     p.pack_start(p._count, True, True, 0)
 
-    p._scanning = Gtk.Label(_("Scanning") + "...")
+    p._scanning = Gtk.Label(label=_("Scanning") + "...")
     p._spinner = Gtk.Spinner()
 
     bp = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
-    bp.pack_start(Gtk.Label(" "), True, True, 0)
+    bp.pack_start(Gtk.Label(label=" "), True, True, 0)
     bp.pack_start(p._scanning, False, False, 0)
     bp.pack_end(p._spinner, False, False, 0)
     p.pack_end(bp, False, False, 0)
@@ -115,8 +109,8 @@ def _create_device_panel():
         b = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 8)
         b.set_size_request(10, 28)
 
-        b._label = Gtk.Label(label_text)
-        b._label.set_alignment(0, 0.5)
+        b._label = Gtk.Label(label=label_text)
+        # deprecated - not needed  b._label.set_alignment(0, 0.5)
         b._label.set_size_request(170, 10)
         b.pack_start(b._label, False, False, 0)
 
@@ -124,8 +118,8 @@ def _create_device_panel():
         b.pack_start(b._icon, False, False, 0)
 
         b._text = Gtk.Label()
-        b._text.set_alignment(0, 0.5)
-        b.pack_start(b._text, True, True, 0)
+        # deprecated - not needed b._text.set_alignment(0, 0.5)
+        b.pack_start(b._text, False, False, 0)
 
         return b
 
@@ -154,8 +148,10 @@ def _create_details_panel():
     p.set_state_flags(Gtk.StateFlags.ACTIVE, True)
 
     p._text = Gtk.Label()
-    p._text.set_padding(6, 4)
-    p._text.set_alignment(0, 0)
+    # deprecated - see below   p._text.set_padding(6, 4)
+    p._text.set_margin_start(6)
+    p._text.set_margin_end(4)
+    # deprecated - not needed    p._text.set_alignment(0, 0)
     p._text.set_selectable(True)
     p.add(p._text)
 
@@ -163,7 +159,7 @@ def _create_details_panel():
 
 
 def _create_buttons_box():
-    bb = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
+    bb = Gtk.HButtonBox()
     bb.set_layout(Gtk.ButtonBoxStyle.END)
 
     bb._details = _new_button(
@@ -213,8 +209,8 @@ def _create_empty_panel():
 def _create_info_panel():
     p = Gtk.Box.new(Gtk.Orientation.VERTICAL, 4)
 
-    p._title = Gtk.Label(" ")
-    p._title.set_alignment(0, 0.5)
+    p._title = Gtk.Label(label=" ")
+    # deprecated - not needed p._title.set_alignment(0, 0.5)
     p._icon = Gtk.Image()
 
     b1 = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 4)
@@ -313,7 +309,7 @@ def _create_window_layout():
     panel.pack_start(_info, True, True, 0)
     panel.pack_start(_empty, True, True, 0)
 
-    bottom_buttons_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
+    bottom_buttons_box = Gtk.HButtonBox()
     bottom_buttons_box.set_layout(Gtk.ButtonBoxStyle.START)
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
@@ -365,11 +361,6 @@ def _create(delete_action):
     style.add_class("solaar")
 
     return window
-
-
-#
-# window updates
-#
 
 
 def _find_selected_device():
@@ -481,11 +472,6 @@ def _device_row(receiver_path, device_number, device=None):
     return item or None
 
 
-#
-#
-#
-
-
 def select(receiver_path, device_number=None):
     assert _window
     assert receiver_path is not None
@@ -522,11 +508,6 @@ def toggle(trigger=None):
         _hide(_window)
     else:
         _window.present()
-
-
-#
-#
-#
 
 
 def _update_details(button):
@@ -808,7 +789,6 @@ def _update_info_panel(device, full=False):
         _update_details(_info._buttons._details)
 
 
-#
 # window layout:
 #  +--------------------------------+
 #  |  tree      | receiver  | empty |

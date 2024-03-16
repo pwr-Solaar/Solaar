@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -37,10 +38,6 @@ from gi.repository import Gtk  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
     def _do_read(s, force, sb, online, sensitive):
@@ -70,11 +67,6 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
         sbox._spinner.set_visible(True)
         sbox._spinner.start()
     _ui_async(_do_write, setting, value, sbox, key)
-
-
-#
-#
-#
 
 
 class ComboBoxText(Gtk.ComboBoxText):
@@ -303,8 +295,8 @@ class MultipleControl(Gtk.ListBox, Control):
         self.set_no_show_all(True)
         self._showing = True
         self.setup(sbox.setting)  # set up the data and boxes for the sub-controls
-        btn = Gtk.Button(button_label)
-        btn.set_alignment(1.0, 0.5)
+        btn = Gtk.Button(label=button_label)
+        # deprecated - not needed btn.set_alignment(1.0, 0.5)
         btn.connect("clicked", self.toggle_display)
         self._button = btn
         hbox = Gtk.HBox(homogeneous=False, spacing=6)
@@ -349,15 +341,15 @@ class MultipleToggleControl(MultipleControl):
                 l1, l2 = setting._labels.get(k, (None, None))
                 lbl_text = l1 if l1 else lbl_text
                 lbl_tooltip = l2 if l2 else lbl_tooltip
-            lbl = Gtk.Label(lbl_text)
+            lbl = Gtk.Label(label=lbl_text)
             h.set_tooltip_text(lbl_tooltip or " ")
             control = Gtk.Switch()
             control._setting_key = int(k)
             control.connect("notify::active", self.toggle_notify)
             h.pack_start(lbl, False, False, 0)
             h.pack_end(control, False, False, 0)
-            lbl.set_alignment(0.0, 0.5)
-            lbl.set_margin_left(30)
+            # deprecated - not needed lbl.set_alignment(0.0, 0.5)
+            lbl.set_margin_start(30)
             self.add(h)
             self._label_control_pairs.append((lbl, control))
 
@@ -397,7 +389,7 @@ class MultipleRangeControl(MultipleControl):
                 l1, l2 = setting._labels.get(int(item), (None, None))
                 lbl_text = l1 if l1 else lbl_text
                 lbl_tooltip = l2 if l2 else lbl_tooltip
-            item_lbl = Gtk.Label(lbl_text)
+            item_lbl = Gtk.Label(label=lbl_text)
             self.add(item_lbl)
             self.set_tooltip_text(lbl_tooltip or " ")
             item_lb = Gtk.ListBox()
@@ -411,11 +403,11 @@ class MultipleRangeControl(MultipleControl):
                     l1, l2 = setting._labels_sub.get(str(sub_item), (None, None))
                     lbl_text = l1 if l1 else lbl_text
                     lbl_tooltip = l2 if l2 else lbl_tooltip
-                sub_item_lbl = Gtk.Label(lbl_text)
+                sub_item_lbl = Gtk.Label(label=lbl_text)
                 h.set_tooltip_text(lbl_tooltip or " ")
                 h.pack_start(sub_item_lbl, False, False, 0)
-                sub_item_lbl.set_margin_left(30)
-                sub_item_lbl.set_alignment(0.0, 0.5)
+                sub_item_lbl.set_margin_start(30)
+                # deprecated - not needed sub_item_lbl.set_alignment(0.0, 0.5)
                 if sub_item.widget == "Scale":
                     control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, sub_item.minimum, sub_item.maximum, 1)
                     control.set_round_digits(0)
@@ -484,7 +476,7 @@ class PackedRangeControl(MultipleRangeControl):
         self._items = []
         for item in range(validator.count):
             h = Gtk.HBox(homogeneous=False, spacing=0)
-            lbl = Gtk.Label(str(validator.keys[item]))
+            lbl = Gtk.Label(label=str(validator.keys[item]))
             control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, validator.min_value, validator.max_value, 1)
             control.set_round_digits(0)
             control.set_digits(0)
@@ -493,8 +485,8 @@ class PackedRangeControl(MultipleRangeControl):
             h.pack_end(control, True, True, 0)
             h._setting_item = validator.keys[item]
             h.control = control
-            lbl.set_alignment(0.0, 0.5)
-            lbl.set_margin_left(30)
+            # deprecated - not needed lbl.set_alignment(0.0, 0.5)
+            lbl.set_margin_start(30)
             self.add(h)
             self._items.append(h)
 
@@ -539,7 +531,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
         self._items = {}
         for item in sbox.setting.possible_fields:
             if item["label"]:
-                item_lblbox = Gtk.Label(item["label"])
+                item_lblbox = Gtk.Label(label=item["label"])
                 self.pack_start(item_lblbox, False, False, 0)
                 item_lblbox.set_visible(False)
             else:
@@ -651,8 +643,8 @@ def _create_sbox(s, device):
     sbox.kind = s.kind
     if s.description:
         sbox.set_tooltip_text(s.description)
-    lbl = Gtk.Label(s.label)
-    lbl.set_alignment(0.0, 0.5)
+    lbl = Gtk.Label(label=s.label)
+    # deprecated - not needed lbl.set_alignment(0.0, 0.5)
     label = Gtk.EventBox()
     label.add(lbl)
     spinner = Gtk.Spinner()
@@ -722,10 +714,6 @@ def _disable_listbox_highlight_bg(lb):
     for child in lb.get_children():
         child.override_background_color(Gtk.StateFlags.PRELIGHT, colour)
 
-
-#
-#
-#
 
 # config panel
 _box = None

@@ -1,4 +1,5 @@
 ## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) 2014-2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -22,12 +23,8 @@ import solaar.gtk as gtk
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
-_LARGE_SIZE = 64
-Gtk.IconSize.LARGE = Gtk.icon_size_register("large", _LARGE_SIZE, _LARGE_SIZE)
+LARGE_SIZE = 64
+# deprecated and no longer needed Gtk.IconSize.LARGE = Gtk.icon_size_register("large", _LARGE_SIZE, _LARGE_SIZE)
 # Gtk.IconSize.XLARGE = Gtk.icon_size_register('x-large', _LARGE_SIZE * 2, _LARGE_SIZE * 2)
 
 TRAY_INIT = "solaar-init"
@@ -56,11 +53,6 @@ def _init_icon_paths():
         if not _default_theme.has_icon("battery-good"):
             logger.warning("failed to detect icons")
             gtk.battery_icons_style = "solaar"
-
-
-#
-#
-#
 
 
 def battery(level=None, charging=False):
@@ -93,22 +85,16 @@ def _battery_icon_name(level, charging):
     )
 
 
-#
-#
-#
-
-
 def lux(level=None):
     if level is None or level < 0:
         return "light_unknown"
     return "solaar-light_%03d" % (20 * ((level + 50) // 100))
 
 
-#
-#
-#
-
 _ICON_SETS = {}
+
+
+# determine what icon name to map a kind of peripheral into based on the kind and the icons in the default theme
 
 
 def device_icon_set(name="_", kind=None):
@@ -131,6 +117,7 @@ def device_icon_set(name="_", kind=None):
                 names += ("audio-headphones", "audio-headset")
             names += ("input-" + str(kind),)
         # names += (name.replace(' ', '-'),)
+        print("ICON NAMES FOR", str(kind), names)
 
         source = Gtk.IconSource.new()
         for n in names:
@@ -141,7 +128,7 @@ def device_icon_set(name="_", kind=None):
     return icon_set
 
 
-def device_icon_file(name, kind=None, size=_LARGE_SIZE):
+def device_icon_file(name, kind=None, size=LARGE_SIZE):
     _init_icon_paths()
 
     icon_set = device_icon_set(name, kind)
@@ -161,7 +148,7 @@ def device_icon_name(name, kind=None):
             return n
 
 
-def icon_file(name, size=_LARGE_SIZE):
+def icon_file(name, size=LARGE_SIZE):
     _init_icon_paths()
 
     # has_icon() somehow returned False while lookup_icon returns non-None.
