@@ -14,12 +14,11 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from gi.repository import Gdk
 from gi.repository import Gtk
 
 from solaar.i18n import _
 
-from . import pair_window
+from . import pairing
 from .common import error_dialog
 
 # import logging
@@ -66,13 +65,7 @@ def pair(window, receiver):
     assert receiver
     assert receiver.kind is None
 
-    pair_dialog = pair_window.create(receiver)
-    pair_dialog.set_transient_for(window)
-    pair_dialog.set_destroy_with_parent(True)
-    pair_dialog.set_modal(True)
-    pair_dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG)
-    pair_dialog.set_position(Gtk.WindowPosition.CENTER)
-    pair_dialog.present()
+    pairing.show_window(receiver, window)
 
 
 def unpair(window, device):
