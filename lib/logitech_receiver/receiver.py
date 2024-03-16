@@ -363,8 +363,8 @@ class Receiver:
 class BoltReceiver(Receiver):
     """Bolt receivers use a different pairing prototol and have different pairing registers"""
 
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("bolt", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
         serial_reply = self.read_register(_R.bolt_uniqueId)
@@ -411,25 +411,25 @@ class BoltReceiver(Receiver):
 
 
 class UnifyingReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("unifying", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
 
 class NanoReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("nano", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
 
 class LightSpeedReceiver(Receiver):
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("lightspeed", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
 
 class Ex100Receiver(Receiver):
     """A very old style receiver, somewhat different from newer receivers"""
 
-    def __init__(self, product_info, handle, path, product_id, setting_callback=None):
-        super().__init__("27Mhz", product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
         self.serial = None
@@ -491,9 +491,9 @@ class ReceiverFactory:
                 if not product_info:
                     logger.warning("Unknown receiver type: %s", device_info.product_id)
                     product_info = {}
-                receiver_kind = product_info.get("receiver_kind", "unknown")
-                receiver_class = receiver_class_mapping.get(receiver_kind, Receiver)
-                return receiver_class(product_info, handle, device_info.path, device_info.product_id, setting_callback)
+                kind = product_info.get("receiver_kind", "unknown")
+                rclass = receiver_class_mapping.get(kind, Receiver)
+                return rclass(kind, product_info, handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
             logger.exception("open %s", device_info)
             if e.errno == _errno.EACCES:
