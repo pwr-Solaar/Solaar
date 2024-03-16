@@ -216,8 +216,8 @@ def _pairing_succeeded(assistant, receiver, device):
     page.pack_start(header, False, False, 0)
 
     device_icon = Gtk.Image()
-    icon_set = _icons.device_icon_set(device.name, device.kind)
-    device_icon.set_from_icon_set(icon_set, _icons.LARGE_SIZE)
+    icon_name = _icons.device_icon_name(device.name, device.kind)
+    device_icon.set_from_icon_name(icon_name, _icons.LARGE_SIZE)
     # deprecated - not needed device_icon.set_alignment(0.5, 1)
     page.pack_start(device_icon, True, True, 0)
 

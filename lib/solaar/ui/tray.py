@@ -398,8 +398,8 @@ def _add_receiver(receiver):
     _devices_info.insert(index, new_receiver_info)
 
     new_menu_item = Gtk.ImageMenuItem.new_with_label(receiver.name)
-    icon_set = _icons.device_icon_set(receiver.name)
-    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_set.names[0], _MENU_ICON_SIZE))
+    icon_name = _icons.device_icon_name(receiver.name, receiver.kind)
+    new_menu_item.set_image(Gtk.Image().new_from_icon_name(icon_name, _MENU_ICON_SIZE))
     new_menu_item.show_all()
     new_menu_item.connect("activate", _window_popup, receiver.path)
     _menu.insert(new_menu_item, index)
