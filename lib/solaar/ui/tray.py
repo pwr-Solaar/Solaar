@@ -30,8 +30,8 @@ import solaar.gtk as gtk
 from solaar import NAME
 from solaar.i18n import _
 
+from . import about
 from . import icons as _icons
-from .about import show_window as _show_about_window
 from .action import make as _make
 from .window import popup as _window_popup
 from .window import toggle as _window_toggle
@@ -60,7 +60,7 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(_make("help-about", _("About %s") % NAME, _show_about_window, stock_id="help-about").create_menu_item())
+    menu.append(_make("help-about", _("About %s") % NAME, about.show_window, stock_id="help-about").create_menu_item())
     menu.append(_make("application-exit", _("Quit %s") % NAME, quit_handler, stock_id="application-exit").create_menu_item())
 
     menu.show_all()
