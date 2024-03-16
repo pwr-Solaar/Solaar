@@ -172,7 +172,7 @@ class Hidpp10:
         return result is not None
 
     def get_device_features(self, device):
-        return self._get_register(device, REGISTERS.mouse_button_flags)
+        self._get_register(device, REGISTERS.mouse_button_flags)
 
     def _get_register(self, device, register):
         assert device is not None
