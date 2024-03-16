@@ -29,11 +29,8 @@ from . import icons as _icons
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-_PAIRING_TIMEOUT = 30  # seconds
-_STATUS_CHECK = 500  # milliseconds
+PAIRING_TIMEOUT_SECONDS = 30
+STATUS_CHECK_MILLISECONDS = 500
 
 address = kind = authentication = name = passcode = None
 
@@ -112,7 +109,7 @@ def _check_lock_state(assistant, receiver, count=2):
     if not receiver.pairing.lock_open and not receiver.pairing.discovering:
         if count > 0:
             # the actual device notification may arrive later so have a little patience
-            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver, count - 1)
+            GLib.timeout_add(STATUS_CHECK_MILLISECONDS, _check_lock_state, assistant, receiver, count - 1)
         else:
             _pairing_failed(assistant, receiver, "failed to open pairing lock")
         return False
@@ -147,21 +144,21 @@ def _prepare(assistant, page, receiver):
 
     if index == 0:
         if receiver.receiver_kind == "bolt":
-            if receiver.discover(timeout=_PAIRING_TIMEOUT):
+            if receiver.discover(timeout=PAIRING_TIMEOUT_SECONDS):
                 assert receiver.pairing.new_device is None
                 assert receiver.pairing.error is None
                 spinner = page.get_children()[-1]
                 spinner.start()
-                GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
+                GLib.timeout_add(STATUS_CHECK_MILLISECONDS, _check_lock_state, assistant, receiver)
                 assistant.set_page_complete(page, True)
             else:
                 GLib.idle_add(_pairing_failed, assistant, receiver, "discovery did not start")
-        elif receiver.set_lock(False, timeout=_PAIRING_TIMEOUT):
+        elif receiver.set_lock(False, timeout=PAIRING_TIMEOUT_SECONDS):
             assert receiver.pairing.new_device is None
             assert receiver.pairing.error is None
             spinner = page.get_children()[-1]
             spinner.start()
-            GLib.timeout_add(_STATUS_CHECK, _check_lock_state, assistant, receiver)
+            GLib.timeout_add(STATUS_CHECK_MILLISECONDS, _check_lock_state, assistant, receiver)
             assistant.set_page_complete(page, True)
         else:
             GLib.idle_add(_pairing_failed, assistant, receiver, "the pairing lock did not open")
@@ -243,7 +240,7 @@ def _pairing_succeeded(assistant, receiver, device):
             else:
                 return True
 
-    GLib.timeout_add(_STATUS_CHECK, _check_encrypted, device)
+    GLib.timeout_add(STATUS_CHECK_MILLISECONDS, _check_encrypted, device)
 
     page.show_all()
 
