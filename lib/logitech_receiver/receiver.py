@@ -249,6 +249,9 @@ class Receiver:
         if bool(self):
             return _base.request(self.handle, 0xFF, request_id, *params)
 
+    def reset_pairing(self):
+        self.pairing = Pairing()
+
     read_register = hidpp10.read_register
     write_register = hidpp10.write_register
 
