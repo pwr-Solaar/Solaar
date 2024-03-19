@@ -13,6 +13,8 @@ from solaar.ui import pair_window
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk  # NOQA: E402
 
+gtk_init = Gtk.init_check()[0]
+
 
 @dataclass
 class Device:
@@ -78,6 +80,7 @@ class Assistant:
         pass
 
 
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
 @pytest.mark.parametrize(
     "receiver, lock_open, discovering, page_type",
     [
@@ -124,6 +127,7 @@ def test_check_lock_state_drawable(assistant, expected_result):
     assert result == expected_result
 
 
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
 @pytest.mark.parametrize(
     "receiver, count, expected_result",
     [
@@ -197,6 +201,7 @@ def test_finish(receiver, pair_device, set_lock, discover, error, mocker):
     assert receiver.pairing.error == error
 
 
+@pytest.mark.skipif(not gtk_init, reason="requires Gtk")
 @pytest.mark.parametrize("error", ["timeout", "device not supported", "too many devices"])
 def test_create_failure_page(error, mocker):
     spy_create = mocker.spy(pair_window, "_create_page")
