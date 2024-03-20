@@ -79,7 +79,7 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
 
 @dataclass
 class Receiver:
-    path: str = "1"
+    path: str = "11"
     handle: int = 0x11
 
     def device_codename(self, number):
@@ -109,7 +109,7 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1023, pi_407B, pi_DDDD],
         [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
-        [None, 0x11, 0x11, 0x11, 0x11, 0x11],
+        [0x11, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, "Wireless Keyboard K520", "Craft Advanced Keyboard", "G700 Gaming Mouse", "MX Vertical Wireless Mouse", None],
         ["? (CCCC)", "K520", "Craft", "G700", "MX Vertical", "ABABABABABABABADED"],
         [1.0, 1.0, 4.5, 1.0, 4.5, 4.5],
@@ -123,10 +123,11 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         ],
     ),
 )
-def test_Device_receiver(number, pairing_info, responses, handle, _name, codename, protocol, name, mock_base):
+def test_Device_receiver(number, pairing_info, responses, handle, _name, codename, protocol, name, mock_base, mock_hid):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
     mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
+    mock_hid.side_effect = lambda x, y, z: x
 
     test_device = device.Device(Receiver(), number, True, pairing_info, handle=handle)
 
@@ -159,11 +160,26 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     ),
 )
 def test_Device_ids(
-    number, pairing_info, responses, handle, unitId, modelId, tid_map, kind, firmware, serial, id, psl, rate, mock_base
+    number,
+    pairing_info,
+    responses,
+    handle,
+    unitId,
+    modelId,
+    tid_map,
+    kind,
+    firmware,
+    serial,
+    id,
+    psl,
+    rate,
+    mock_base,
+    mock_hid,
 ):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
     mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
+    mock_hid.side_effect = lambda x, y, z: x
 
     test_device = device.Device(Receiver(), number, True, pairing_info, handle=handle)
 
