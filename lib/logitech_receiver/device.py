@@ -184,8 +184,8 @@ class Device:
                 if codename:
                     self._codename = codename
                 elif self.protocol < 2.0:
-                    self._codename = "? (%s)" % (self.wpid or self.product_id)
-        return self._codename or "?? (%s)" % (self.wpid or self.product_id)
+                    self._codename = "? (%s)" % (self.wpid or hex(self.product_id)[2:].upper())
+        return self._codename or "?? (%s)" % (self.wpid or hex(self.product_id)[2:].upper())
 
     @property
     def name(self):
@@ -539,7 +539,7 @@ class Device:
 
     def __str__(self):
         try:
-            name = self.name or self.codename or "?"
+            name = self._name or self._codename or "?"
         except exceptions.NoSuchDevice:
             name = "name not available"
         return "<Device(%d,%s,%s,%s)>" % (self.number, self.wpid or self.product_id, name, self.serial)
