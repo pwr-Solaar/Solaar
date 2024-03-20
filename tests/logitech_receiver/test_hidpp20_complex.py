@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
+from struct import pack
 from typing import Any
-from typing import Optional
 
 import pytest
 
@@ -10,13 +10,7 @@ from lib.logitech_receiver import hidpp20
 from lib.logitech_receiver import hidpp20_constants
 from lib.logitech_receiver import special_keys
 
-
-@dataclass
-class Response:
-    response: Optional[str]
-    request_id: int
-    params: Any
-    no_reply: bool = False
+from . import hidpp
 
 
 @dataclass
@@ -29,10 +23,11 @@ class Device:
     def request(self, id, *params, no_reply=False):
         if params is None:
             params = []
+        params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
         print("REQUEST ", self.name, hex(id), params)
         for r in self.responses:
-            if id == r.request_id and params == r.params:
-                print("RESPONSE", self.name, hex(r.request_id), r.params, r.response)
+            if id == r.id and params == bytes.fromhex(r.params):
+                print("RESPONSE", self.name, hex(r.id), r.params, r.response)
                 return bytes.fromhex(r.response) if r.response is not None else None
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
@@ -43,21 +38,9 @@ class Device:
 device_offline = Device("REGISTERS", False)
 device_registers = Device("OFFLINE", True, 1.0)
 device_nofeatures = Device("NOFEATURES", True, 4.5)
-device_zerofeatures = Device("ZEROFEATURES", True, 4.5, [Response("0000", 0x0000, (b"\x00\x01",))])
-device_broken = Device("BROKEN", True, 4.5, [Response("0500", 0x0000, (b"\x00\x01",)), Response(None, 0x0100, ())])
-responses_standard = [
-    Response("0100", 0x0000, (b"\x00\x01",)),
-    Response("05000300", 0x0000, (b"\x1b\x04",)),
-    Response("0500", 0x0100, ()),
-    Response("01000000", 0x0110, (0x02,)),
-    Response("1B040003", 0x0110, (0x05,)),
-    Response("00110012AB010203CD00", 0x0510, (0,)),
-    Response("01110022AB010203CD00", 0x0510, (1,)),
-    Response("03110032AB010204CD00", 0x0510, (3,)),
-    Response("00010111AB010203CD00", 0x0510, (2,)),
-    Response("00030333AB010203CD00", 0x0510, (4,)),
-]
-device_standard = Device("STANDARD", True, 4.5, responses_standard)
+device_zerofeatures = Device("ZEROFEATURES", True, 4.5, [hidpp.Response("0000", 0x0000, "0001")])
+device_broken = Device("BROKEN", True, 4.5, [hidpp.Response("0500", 0x0000, "0001"), hidpp.Response(None, 0x0100)])
+device_standard = Device("STANDARD", True, 4.5, hidpp.r_keyboard_2)
 
 
 @pytest.mark.parametrize(
@@ -68,7 +51,7 @@ device_standard = Device("STANDARD", True, 4.5, responses_standard)
         (device_nofeatures, False, 0),
         (device_zerofeatures, False, 0),
         (device_broken, False, 0),
-        (device_standard, True, 6),
+        (device_standard, True, 9),
     ],
 )
 def test_FeaturesArray_check(device, expected_result, expected_count):
@@ -88,7 +71,7 @@ def test_FeaturesArray_check(device, expected_result, expected_count):
     "device, expected0, expected1, expected2, expected5, expected5v",
     [
         (device_zerofeatures, None, None, None, None, None),
-        (device_standard, 0x0000, 0x0001, 0x0100, hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 3),
+        (device_standard, 0x0000, 0x0001, 0x1000, hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 3),
     ],
 )
 def test_FeaturesArray_get_feature(device, expected0, expected1, expected2, expected5, expected5v):
@@ -119,10 +102,13 @@ def test_FeaturesArray_get_feature(device, expected0, expected1, expected2, expe
             [
                 (hidpp20_constants.FEATURE.ROOT, 0),
                 (hidpp20_constants.FEATURE.FEATURE_SET, 1),
-                (common.NamedInt(256, "unknown:0100"), 2),
-                (None, 3),
-                (None, 4),
+                (hidpp20_constants.FEATURE.BATTERY_STATUS, 2),
+                (hidpp20_constants.FEATURE.DEVICE_FW_VERSION, 3),
+                (common.NamedInt(256, "unknown:0100"), 4),
                 (hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 5),
+                (None, 6),
+                (None, 7),
+                (None, 8),
             ],
         ),
     ],
@@ -273,25 +259,25 @@ def test_KeysArrayV4_index(key, index):
 
 
 responses_key = [
-    Response("0A00", 0x0100, ()),
-    Response("01000000", 0x0000, (b"\x00\x01",)),
-    Response("09000300", 0x0000, (b"\x1b\x04",)),
-    Response("00500038010001010400000000000000", 0x0910, (0,)),
-    Response("00510039010001010400000000000000", 0x0910, (1,)),
-    Response("0052003A310003070500000000000000", 0x0910, (2,)),
-    Response("0053003C310002030500000000000000", 0x0910, (3,)),
-    Response("0056003E310002030500000000000000", 0x0910, (4,)),
-    Response("00C300A9310003070500000000000000", 0x0910, (5,)),
-    Response("00C4009D310003070500000000000000", 0x0910, (6,)),
-    Response("00D700B4A00004000300000000000000", 0x0910, (7,)),
-    Response("00500000000000000000000000000000", 0x0920, (0, 0x50)),
-    Response("00510000000000000000000000000000", 0x0920, (0, 0x51)),
-    Response("00520000500000000000000000000000", 0x0920, (0, 0x52)),
-    Response("00530000000000000000000000000000", 0x0920, (0, 0x53)),
-    Response("00560000000000000000000000000000", 0x0920, (0, 0x56)),
-    Response("00C30000000000000000000000000000", 0x0920, (0, 0xC3)),
-    Response("00C40000500000000000000000000000", 0x0920, (0, 0xC4)),
-    Response("00D70000510000000000000000000000", 0x0920, (0, 0xD7)),
+    hidpp.Response("0A00", 0x0100),
+    hidpp.Response("01000000", 0x0000, "0001"),
+    hidpp.Response("09000300", 0x0000, "1b04"),
+    hidpp.Response("00500038010001010400000000000000", 0x0910, "00"),
+    hidpp.Response("00510039010001010400000000000000", 0x0910, "01"),
+    hidpp.Response("0052003A310003070500000000000000", 0x0910, "02"),
+    hidpp.Response("0053003C310002030500000000000000", 0x0910, "03"),
+    hidpp.Response("0056003E310002030500000000000000", 0x0910, "04"),
+    hidpp.Response("00C300A9310003070500000000000000", 0x0910, "05"),
+    hidpp.Response("00C4009D310003070500000000000000", 0x0910, "06"),
+    hidpp.Response("00D700B4A00004000300000000000000", 0x0910, "07"),
+    hidpp.Response("00500000000000000000000000000000", 0x0920, "0050"),
+    hidpp.Response("00510000000000000000000000000000", 0x0920, "0051"),
+    hidpp.Response("00520000500000000000000000000000", 0x0920, "0052"),
+    hidpp.Response("00530000000000000000000000000000", 0x0920, "0053"),
+    hidpp.Response("00560000000000000000000000000000", 0x0920, "0056"),
+    hidpp.Response("00C30000000000000000000000000000", 0x0920, "00C3"),
+    hidpp.Response("00C40000500000000000000000000000", 0x0920, "00C4"),
+    hidpp.Response("00D70000510000000000000000000000", 0x0920, "00D7"),
 ]
 device_key = Device("KEY", True, 4.5, responses=responses_key)
 
