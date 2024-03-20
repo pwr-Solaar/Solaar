@@ -41,7 +41,6 @@ def replace_number(responses, number):  # change the devnumber for a list of res
 
 def ping(responses, handle, devnumber, long_message=False):
     print("PING ", hex(handle), hex(devnumber) if devnumber else devnumber)
-    print(responses)
     for r in responses:
         if handle == r.handle and devnumber == r.devnumber and r.id == 0x0010:
             print("RESPONSE", hex(r.handle), hex(r.devnumber), r.response)
