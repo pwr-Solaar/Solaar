@@ -648,9 +648,8 @@ class FeatureRW:
 
     def write(self, device, data_bytes):
         assert self.feature is not None
-        reply = device.feature_request(
-            self.feature, self.write_fnid, self.prefix, data_bytes, self.suffix, no_reply=self.no_reply
-        )
+        write_bytes = self.prefix + (data_bytes.to_bytes(1) if isinstance(data_bytes, int) else data_bytes) + self.suffix
+        reply = device.feature_request(self.feature, self.write_fnid, write_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
 
