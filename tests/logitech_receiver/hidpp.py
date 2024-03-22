@@ -16,9 +16,15 @@
 
 """HID++ data and functions common to several logitech_receiver test files"""
 
+
 from dataclasses import dataclass
+from dataclasses import field
 from struct import pack
+from typing import Any
 from typing import Optional
+
+from logitech_receiver import device
+from logitech_receiver import hidpp20
 
 
 def open_path(path: Optional[str]) -> Optional[int]:
@@ -117,3 +123,41 @@ r_mouse_3 = [  # a HID++ 2.0 mouse
     Response("414241424142414241424142414241", 0x0510, "00"),  # name - first 15 characters
     Response("444544000000000000000000000000", 0x0510, "0F"),  # name - last 3 characters
 ]
+
+
+@dataclass
+class Device:
+    name: str = "TESTD"
+    online: bool = True
+    protocol: float = 2.0
+    codename: str = "TESTC"
+    responses: Any = field(default_factory=list)
+    feature: Optional[int] = None
+    features: Any = None
+    _backlight: Any = None
+    _keys: Any = None
+
+    def __post_init__(self):
+        self.features = hidpp20.FeaturesArray(self)
+        self.responses += [Response("010001", 0x0000, "0001"), Response("20", 0x0100)]
+        if self.feature is not None:
+            self.responses.append(Response("040001", 0x0000, f"{self.feature:0>4X}"))
+
+    def request(self, id, *params, no_reply=False):
+        if params is None:
+            params = []
+        params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
+        print("REQUEST ", self.name, hex(id), params.hex())
+        for r in self.responses:
+            if id == r.id and params == bytes.fromhex(r.params):
+                print("RESPONSE", self.name, hex(r.id), r.params, r.response)
+                return bytes.fromhex(r.response) if r.response is not None else None
+
+    def feature_request(self, feature, function=0x00, *params, no_reply=False):
+        if self.protocol >= 2.0:
+            return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+
+    read_register = device.Device.read_register
+    write_register = device.Device.write_register
+    backlight = device.Device.backlight
+    keys = device.Device.keys
