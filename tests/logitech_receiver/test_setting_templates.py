@@ -445,6 +445,43 @@ tests = [
         hidpp.Response("0201", 0x0400),
         hidpp.Response(True, 0x0410, "00"),
     ],
+    [
+        FeatureTest(settings_templates.BrightnessControl, 0x10, 0x20, 0x20, "0020", False),
+        [0, 80],
+        hidpp.Response("040003", 0x0000, "8040"),  # BRIGHTNESS_CONTROL
+        hidpp.Response("00505100000000", 0x0400),  # 0 to 80, all acceptable, no separate on/off
+        hidpp.Response("10", 0x0410),  # brightness 16
+        hidpp.Response("0020", 0x0420, "0020"),  # set brightness 32
+    ],
+    [
+        FeatureTest(settings_templates.BrightnessControl, 0x10, 0x00, 0x20, "0000", False),
+        [0, 80],
+        hidpp.Response("040003", 0x0000, "8040"),  # BRIGHTNESS_CONTROL
+        hidpp.Response("00505104000000", 0x0400),  # 0 to 80, all acceptable, separate on/off
+        hidpp.Response("10", 0x0410),  # brightness 16
+        hidpp.Response("01", 0x0430),  # on
+        hidpp.Response("00", 0x0440),  # set off
+        hidpp.Response("0000", 0x0420, "0000"),  # set brightness 0
+    ],
+    [
+        FeatureTest(settings_templates.BrightnessControl, 0x00, 0x20, 0x20, "0020", False),
+        [0, 80],
+        hidpp.Response("040003", 0x0000, "8040"),  # BRIGHTNESS_CONTROL
+        hidpp.Response("00505104000000", 0x0400),  # 0 to 80, all acceptable, separate on/off
+        hidpp.Response("10", 0x0410),  # brightness 16
+        hidpp.Response("00", 0x0430),  # off
+        hidpp.Response("01", 0x0440),  # set on
+        hidpp.Response("0020", 0x0420, "0020"),  # set brightness 32
+    ],
+    [
+        FeatureTest(settings_templates.BrightnessControl, 0x20, 0x08, 0x40, "00", False),
+        [0, 80],
+        hidpp.Response("040003", 0x0000, "8040"),  # BRIGHTNESS_CONTROL
+        hidpp.Response("00504104001000", 0x0400),  # 16 to 80, all acceptable, separate on/off
+        hidpp.Response("20", 0x0410),  # brightness 32
+        hidpp.Response("01", 0x0430),  # on
+        hidpp.Response("00", 0x0440, "00"),  # set off
+    ],
 ]
 
 

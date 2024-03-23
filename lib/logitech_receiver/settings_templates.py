@@ -1466,6 +1466,50 @@ class LEDControl(_Setting):
     validator_options = {"choices": choices_universe}
 
 
+class BrightnessControl(_Setting):
+    name = "brightness_control"
+    label = _("Brightness Control")
+    description = _("Control overall brightness")
+    feature = _F.BRIGHTNESS_CONTROL
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
+    validator_class = _RangeV
+
+    def __init__(self, device, rw, validator):
+        super().__init__(device, rw, validator)
+        rw.on_off = validator.on_off
+        rw.min_nonzero_value = validator.min_value
+        validator.min_value = 0 if validator.on_off else validator.min_value
+
+    class rw_class(_FeatureRW):
+        def read(self, device, data_bytes=b""):
+            if self.on_off:
+                reply = device.feature_request(self.feature, 0x30)
+                if not reply[0] & 0x01:
+                    return b"\x00\x00"
+            return super().read(device, data_bytes)
+
+        def write(self, device, data_bytes):
+            if self.on_off:
+                off = int.from_bytes(data_bytes, byteorder="big") < self.min_nonzero_value
+                reply = device.feature_request(self.feature, 0x40, b"\x00" if off else b"\x01", no_reply=False)
+                if off:
+                    return reply
+            return super().write(device, data_bytes)
+
+    class validator_class(_RangeV):
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(_F.BRIGHTNESS_CONTROL)
+            assert reply, "Oops, brightness range cannot be retrieved!"
+            if reply:
+                max_value = int.from_bytes(reply[0:2], byteorder="big")
+                min_value = int.from_bytes(reply[4:6], byteorder="big")
+                on_off = bool(reply[3] & 0x04)  # separate on/off control
+                validator = cls(min_value=min_value, max_value=max_value, byte_count=2)
+                validator.on_off = on_off
+                return validator
+
+
 colors = _special_keys.COLORS
 _LEDP = hidpp20.LEDParam
 
@@ -1534,6 +1578,7 @@ SETTINGS = [
     Backlight3,
     LEDControl,
     LEDZoneSetting,
+    BrightnessControl,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working
