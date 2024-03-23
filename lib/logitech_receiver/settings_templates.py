@@ -334,7 +334,7 @@ class Backlight2Duration(_Setting):
     min_version = 3
     validator_class = _RangeV
     min_value = 1
-    max_value = 120  # actual maximum is 2 hours
+    max_value = 600  # 10 minutes - actual maximum is 2 hours
     validator_options = {"byte_count": 2}
 
     class rw_class:
@@ -345,7 +345,7 @@ class Backlight2Duration(_Setting):
 
         def read(self, device):
             backlight = device.backlight
-            return _int2bytes(getattr(backlight, self.field), 2) * 5  # use seconds instead of 5-second units
+            return _int2bytes(getattr(backlight, self.field) * 5, 2)  # use seconds instead of 5-second units
 
         def write(self, device, data_bytes):
             backlight = device.backlight
