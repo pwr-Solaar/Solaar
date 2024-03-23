@@ -349,7 +349,7 @@ class Backlight2Duration(_Setting):
 
         def write(self, device, data_bytes):
             backlight = device.backlight
-            new_duration = (int.from_bytes(data_bytes) + 4) // 5  # use ceiling in 5-second units
+            new_duration = (int.from_bytes(data_bytes, byteorder="big") + 4) // 5  # use ceiling in 5-second units
             if new_duration != getattr(backlight, self.field):
                 setattr(backlight, self.field, new_duration)
                 backlight.write()
