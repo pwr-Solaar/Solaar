@@ -381,17 +381,15 @@ simple_tests = [
         hidpp.Response("05", 0x0C30, "05"),
     ),
     Setup(
-        FeatureTest(settings_templates.AdjustableDpi, 800, 400, 0x30, "000190"),
+        FeatureTest(settings_templates.AdjustableDpi, 800, 400, version=0x03),
         common.NamedInts.list([400, 800, 1600]),
-        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
         hidpp.Response("000190032006400000", 0x0410, "000000"),
         hidpp.Response("000320", 0x0420),
         hidpp.Response("000190", 0x0430, "000190"),
     ),
     Setup(
-        FeatureTest(settings_templates.AdjustableDpi, 256, 512, 0x30, "000200"),
+        FeatureTest(settings_templates.AdjustableDpi, 256, 512, version=0x03),
         common.NamedInts.list([256, 512]),
-        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
         hidpp.Response("000100e10002000000", 0x0410, "000000"),
         hidpp.Response("000100", 0x0420),
         hidpp.Response("000200", 0x0430, "000200"),
@@ -399,35 +397,12 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.AdjustableDpi, 400, 800, version=0x03),
         common.NamedInts.list([400, 800, 1200, 1600]),
-        hidpp.Response("000190E19006400000000000000000", 0x0410),
+        hidpp.Response("000190E19006400000000000000000", 0x0410, "000000"),
         hidpp.Response("000190", 0x0420),
         hidpp.Response("000320", 0x0430, "000320"),
     ),
     Setup(
-        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, 0x60, "000200"),
-        common.NamedInts.list([256, 512]),
-        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
-        hidpp.Response("000000", 0x0910, "00"),  # no y direction
-        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
-        hidpp.Response("000100", 0x0950),
-        hidpp.Response("000200", 0x0960, "000200"),
-    ),
-    Setup(
-        FeatureTest(settings_templates.ExtendedAdjustableDpi, 0x64, 0x164, 0x60, "0001640164"),
-        common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
-        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
-        hidpp.Response("000001", 0x0910, "00"),  # supports y direction
-        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
-        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
-        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
-        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000100"),
-        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000101"),
-        hidpp.Response("00000000000000000000000000000000", 0x0920, "000102"),
-        hidpp.Response("000064", 0x0950),
-        hidpp.Response("0001640164", 0x0960, "0001640164"),
-    ),
-    Setup(
-        FeatureTest(settings_templates.Multiplatform, 0, 1, 0x30, "FF01"),
+        FeatureTest(settings_templates.Multiplatform, 0, 1),
         common.NamedInts(**{"MacOS 0.1-0.5": 0, "iOS 0.1-0.7": 1, "Linux 0.2-0.9": 2, "Windows 0.3-0.9": 3}),
         hidpp.Response("020004000001", 0x0400),
         hidpp.Response("00FF200000010005", 0x0410, "00"),
@@ -620,6 +595,48 @@ key_tests = [
         hidpp.Response("02FF0000", 0x0410, "02FF0000"),  # write one value
         hidpp.Response("00", 0x0470, "00"),  # finish
     ),
+    Setup(
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, {0: 256}, {0: 512}, 2, offset=0x9),
+        {common.NamedInt(0, "X"): common.NamedInts.list([256, 512])},
+        hidpp.Response("000000", 0x0910, "00"),  # no y direction, no lod
+        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
+        hidpp.Response("00010000000000000000", 0x0950),
+        hidpp.Response("000100000000", 0x0960, "000100000000"),
+        hidpp.Response("000200000000", 0x0960, "000200000000"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, {0: 0x64, 1: 0xE4}, {0: 0x164}, 2, offset=0x9),
+        {
+            common.NamedInt(0, "X"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
+            common.NamedInt(1, "Y"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164]),
+        },
+        hidpp.Response("000001", 0x0910, "00"),  # supports y direction, no lod
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
+        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
+        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000100"),
+        hidpp.Response("000001E4E0400124E040016400000000", 0x0920, "000101"),
+        hidpp.Response("000064007400E4007400", 0x0950),
+        hidpp.Response("00006400E400", 0x0960, "00006400E400"),
+        hidpp.Response("00016400E400", 0x0960, "00016400E400"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, {0: 0x64, 1: 0xE4, 2: 1}, {1: 0x164}, 2, offset=0x9),
+        {
+            common.NamedInt(0, "X"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
+            common.NamedInt(1, "Y"): common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164]),
+            common.NamedInt(2, "LOD"): common.NamedInts(LOW=0, MEDIUM=1, HIGH=2),
+        },
+        hidpp.Response("000003", 0x0910, "00"),  # supports y direction and lod
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
+        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
+        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000100"),
+        hidpp.Response("000001E4E0400124E040016400000000", 0x0920, "000101"),
+        hidpp.Response("000064007400E4007401", 0x0950),
+        hidpp.Response("00006400E401", 0x0960, "00006400E401"),
+        hidpp.Response("000064016401", 0x0960, "000064016401"),
+    ),
 ]
 
 
@@ -630,7 +647,7 @@ def test_key_template(test, mocker):
     spy_request = mocker.spy(device, "request")
 
     setting = settings_templates.check_feature(device, tst.sclass)
-    assert setting
+    assert setting is not None
     if isinstance(setting, list):
         setting = setting[0]
     if isinstance(test.choices, dict):
