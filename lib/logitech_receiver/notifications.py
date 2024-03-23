@@ -437,5 +437,19 @@ def _process_feature_notification(device, n, feature):
                             device.setting_callback(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
                             break
 
+    elif feature == _F.BRIGHTNESS_CONTROL:
+        if n.address > 0x10:
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("%s: unknown BRIGHTNESS CONTROL %s", device, n)
+        else:
+            if n.address == 0x00:
+                brightness = _unpack("!H", n.data[:2])[0]
+                device.setting_callback(device, _st.BrightnessControl, [brightness])
+            elif n.address == 0x10:
+                brightness = n.data[0] & 0x01
+                if brightness:
+                    brightness = _unpack("!H", device.feature_request(_F.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
+                device.setting_callback(device, _st.BrightnessControl, [brightness])
+
     _diversion.process_notification(device, n, feature)
     return True
