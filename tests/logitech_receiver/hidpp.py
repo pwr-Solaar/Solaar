@@ -136,6 +136,7 @@ class Device:
     features: Any = None
     _backlight: Any = None
     _keys: Any = None
+    setting_callback = None
 
     def __post_init__(self):
         self.features = hidpp20.FeaturesArray(self)

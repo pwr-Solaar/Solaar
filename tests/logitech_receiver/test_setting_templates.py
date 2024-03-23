@@ -28,8 +28,9 @@ from solaar import configuration
 
 from . import hidpp
 
-# TODO OnboardProfiles, Report Rate, ExtendedReportRate, DpiSlidingXY, MouseGesturesXY, DivertKeys
-# TODO SpeedChange and onward
+# TODO hard MouseGesturesXY, SpeedChange, Gesture2Gestures, Gesture2Divert, Gesture2Params,
+# TODO hard PersistentRemappableAction, LEDControl, LEDZoneSetting,
+# TODO DisableKeyboardKeys, Multiplatform, DualPlatform, ChangeHost, MKeyLEDs, MRKeyLED, SideTone, Equalized, ADCPower
 
 
 @dataclass
@@ -131,16 +132,22 @@ tests = [
         hidpp.Response("05", 0x0610, "05"),
     ],
     [
-        FeatureTest(settings_templates.Backlight2DurationHandsOut, 0x20, 0x40, 0x10, "0118FF000D0040006000", None),
+        FeatureTest(settings_templates.Backlight2DurationHandsOut, 80, 160, 0x10, "0118FF00200040006000", None),
         hidpp.Response("040003", 0x0000, "1982"),  # BACKLIGHT2
-        hidpp.Response("011830000000200040006000", 0x0400),
-        hidpp.Response("0118FF000000040004000600", 0x0410, "0118FF000D0040006000"),
+        hidpp.Response("011830000000100040006000", 0x0400),
+        hidpp.Response("0118FF00200040006000", 0x0410, "0118FF00200040006000"),
     ],
     [
-        FeatureTest(settings_templates.Backlight2DurationPowered, 0x60, 0x70, 0x10, "0118FF00200040001700", None),
+        FeatureTest(settings_templates.Backlight2DurationHandsIn, 320, 160, 0x10, "0118FF00200020006000", None),
         hidpp.Response("040003", 0x0000, "1982"),  # BACKLIGHT2
         hidpp.Response("011830000000200040006000", 0x0400),
-        hidpp.Response("0118FF00200040001700", 0x0410, "0118FF00200040001700"),
+        hidpp.Response("0118FF00200020006000", 0x0410, "0118FF00200020006000"),
+    ],
+    [
+        FeatureTest(settings_templates.Backlight2DurationPowered, 480, 80, 0x10, "0118FF00200040001000", None),
+        hidpp.Response("040003", 0x0000, "1982"),  # BACKLIGHT2
+        hidpp.Response("011830000000200040006000", 0x0400),
+        hidpp.Response("0118FF00200040001000", 0x0410, "0118FF00200040001000"),
     ],
     [
         FeatureTest(settings_templates.HiResScroll, True, False, 0x10, "00"),
@@ -266,9 +273,9 @@ tests = [
     ],
     [
         FeatureTest(settings_templates.Backlight2, 0x03, 0xFF, 0x10, "0018ff00000000000000", None),
-        common.NamedInts(Disabled=0xFF, Manual=0x03),
+        common.NamedInts(Disabled=0xFF, Automatic=0x01, Manual=0x03),
         hidpp.Response("040001", 0x0000, "1982"),  # BACKLIGHT2
-        hidpp.Response("011830000000000000000000", 0x0400),
+        hidpp.Response("011838000000000000000000", 0x0400),
         hidpp.Response("001801", 0x0410, "0018ff00000000000000"),
     ],
     [
@@ -288,29 +295,80 @@ tests = [
         hidpp.Response("05", 0x0420),
     ],
     [
-        FeatureTest(settings_templates.AdjustableDpi, 800, 400, 0x30, "000190"),
-        common.NamedInts.list([400, 800, 1600]),
-        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
-        hidpp.Response("000190032006400000", 0x0410, "000000"),
-        hidpp.Response("000320", 0x0420),
-        hidpp.Response("000190", 0x0430, "000190"),
+        FeatureTest(settings_templates.OnboardProfiles, 2, 1, 0x30, "0001", None),
+        common.NamedInts(**{"Disabled": 0, "Profile 1": 1, "Profile 2": 2}),
+        hidpp.Response("0C0003", 0x0000, "8100"),  # ONBOARD_PROFILES
+        hidpp.Response("00010100000201FFFFFFFFFFFFFFFFFF", 0x0C50, "00000000"),
+        hidpp.Response("000201FFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000004"),
+        hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000008"),
+        hidpp.Response("01", 0x0C20),
+        hidpp.Response("0002", 0x0C40),
+        hidpp.Response("01", 0x0C10, "01"),
+        hidpp.Response("0001", 0x0C30, "0001"),
     ],
     [
-        FeatureTest(settings_templates.AdjustableDpi, 256, 512, 0x30, "000200"),
-        common.NamedInts.list([256, 512]),
-        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
-        hidpp.Response("000100e10002000000", 0x0410, "000000"),
-        hidpp.Response("000100", 0x0420),
-        hidpp.Response("000200", 0x0430, "000200"),
+        FeatureTest(settings_templates.OnboardProfiles, 1, 0, 0x10, "02", None),
+        common.NamedInts(**{"Disabled": 0, "Profile 1": 1, "Profile 2": 2}),
+        hidpp.Response("0C0003", 0x0000, "8100"),  # ONBOARD_PROFILES
+        hidpp.Response("00010100000201FFFFFFFFFFFFFFFFFF", 0x0C50, "00000000"),
+        hidpp.Response("000201FFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000004"),
+        hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000008"),
+        hidpp.Response("01", 0x0C20),
+        hidpp.Response("0001", 0x0C40),
+        hidpp.Response("02", 0x0C10, "02"),
     ],
     [
-        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, 0x60, "000200"),
-        common.NamedInts.list([256, 512]),
-        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
-        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
-        hidpp.Response("000100", 0x0950),
-        hidpp.Response("000200", 0x0960, "000200"),
+        FeatureTest(settings_templates.ReportRate, 1, 5, 0x20, "05"),
+        common.NamedInts(**{"1ms": 1, "2ms": 2, "5ms": 5, "6ms": 6}),
+        hidpp.Response("0C0003", 0x0000, "8060"),  # REPORT_RATE
+        hidpp.Response("33", 0x0C00),
+        hidpp.Response("01", 0x0C10),
+        hidpp.Response("05", 0x0C20, "05"),
     ],
+    [
+        FeatureTest(settings_templates.ExtendedReportRate, 1, 5, 0x30, "05"),
+        common.NamedInts(**{"8ms": 0, "4ms": 1, "500us": 4, "250us": 5}),
+        hidpp.Response("0C0003", 0x0000, "8061"),  # EXTENDED_REPORT_RATE
+        hidpp.Response("33", 0x0C10),
+        hidpp.Response("01", 0x0C20),
+        hidpp.Response("05", 0x0C30, "05"),
+    ],
+    #    [
+    #        FeatureTest(settings_templates.AdjustableDpi, 800, 400, 0x30, "000190"),
+    #        common.NamedInts.list([400, 800, 1600]),
+    #        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
+    #        hidpp.Response("000190032006400000", 0x0410, "000000"),
+    #        hidpp.Response("000320", 0x0420),
+    #        hidpp.Response("000190", 0x0430, "000190"),
+    #    ],
+    #    [
+    #        FeatureTest(settings_templates.AdjustableDpi, 256, 512, 0x30, "000200"),
+    #        common.NamedInts.list([256, 512]),
+    #        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
+    #        hidpp.Response("000100e10002000000", 0x0410, "000000"),
+    #        hidpp.Response("000100", 0x0420),
+    #        hidpp.Response("000200", 0x0430, "000200"),
+    #    ],
+    #    [
+    #        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, 0x60, "000200"),
+    #        common.NamedInts.list([256, 512]),
+    #        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
+    #        hidpp.Response("000000", 0x0910, "00"),  # no y direction
+    #        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
+    #        hidpp.Response("000100", 0x0950),
+    #        hidpp.Response("000200", 0x0960, "000200"),
+    #    ],
+    #    [
+    #        FeatureTest(settings_templates.ExtendedAdjustableDpi, 0x64, 0x164, 0x60, "0001640164"),
+    #        common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
+    #        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
+    #        hidpp.Response("000001", 0x0910, "00"),  # supports y direction
+    #        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
+    #        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
+    #        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
+    #        hidpp.Response("000064", 0x0950),
+    #        hidpp.Response("0001640164", 0x0960, "0001640164"),
+    #    ],
 ]
 
 
@@ -362,6 +420,20 @@ tests = [
         hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button current
         hidpp.Response("00510000500000000000000000000000", 0x0520, "0051"),  # right button current
         hidpp.Response("00C40000000000000000000000000000", 0x0520, "00C4"),  # smart shift current
+        hidpp.Response("0051000051", 0x0530, "0051000051"),
+    ],
+    [
+        FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 1}, 0x30, "00C4030000"),
+        {common.NamedInt(0xC4, "Smart Shift"): [0, 1, 2]},
+        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
+        hidpp.Response("03", 0x0500),
+        hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
+        hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
+        hidpp.Response("00C4009D310003070500000000000000", 0x0510, "02"),  # smart shift
+        hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button current
+        hidpp.Response("00510000500000000000000000000000", 0x0520, "0051"),  # right button current
+        hidpp.Response("00C40000000000000000000000000000", 0x0520, "00C4"),  # smart shift current
+        hidpp.Response("00C4030000", 0x0530, "00C4030000"),
     ],
 ]
 
@@ -420,7 +492,6 @@ def XX_action_template(test, mocker):  # needs settings to be set up!!
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
-    print("SETTING", setting)
     value = setting.read(cached=False)
     cached_value = setting.read(cached=True)
     write_value = setting.write(test[0].write_value)
