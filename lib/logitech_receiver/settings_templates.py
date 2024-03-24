@@ -45,6 +45,7 @@ from .settings import BitFieldWithOffsetAndMaskValidator as _BitFieldOMV
 from .settings import ChoicesMapValidator as _ChoicesMapV
 from .settings import ChoicesValidator as _ChoicesV
 from .settings import FeatureRW as _FeatureRW
+from .settings import FeatureRWMap as _FeatureRWMap
 from .settings import HeteroValidator as _HeteroV
 from .settings import LongSettings as _LongSettings
 from .settings import MultipleRangeValidator as _MultipleRangeV
@@ -1573,6 +1574,61 @@ class RGBEffectSetting(LEDZoneSetting):
         return cls.setup(device, 0xE0, 0x10, b"\x01")
 
 
+class PerKeyLighting(_Settings):
+    name = "per-key-lighting"
+    label = _("Per-key Lighting")
+    description = _("Control per-key lighting.")
+    feature = _F.PER_KEY_LIGHTING_V2
+    keys_universe = _NamedInts.range(1, 254)
+    choices_universe = _special_keys.COLORS
+
+    def read(self, cached=True):
+        self._pre_read(cached)
+        if cached and self._value is not None:
+            return self._value
+        reply_map = {}
+        for key in self._validator.choices:
+            reply_map[int(key)] = 0xFFFFFF  # can't read so fake a value of white
+        self._value = reply_map
+        return reply_map
+
+    def write(self, map, save=True):
+        if self._device.online:
+            self.update(map, save)
+            data_bytes = b""
+            for key, value in map.items():
+                data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
+                if len(data_bytes) >= 16:  # up to four values are packed into a request
+                    self._device.feature_request(self.feature, 0x10, data_bytes)
+                    data_bytes = b""
+            if len(data_bytes) > 0:
+                self._device.feature_request(self.feature, 0x10, data_bytes)
+        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+        return map
+
+    def write_key_value(self, key, value, save=True):
+        result = super().write_key_value(key, value, save)
+        if self._device.online:
+            self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
+        return result
+
+    class rw_class(_FeatureRWMap):
+        pass
+
+    class validator_class(_ChoicesMapV):
+        @classmethod
+        def build(cls, setting_class, device):
+            choices_map = {}
+            key_bitmap = device.feature_request(setting_class.feature, 0x00, 0x00, 0x00)[2:]
+            key_bitmap += device.feature_request(setting_class.feature, 0x00, 0x00, 0x01)[2:]
+            key_bitmap += device.feature_request(setting_class.feature, 0x00, 0x00, 0x02)[2:]
+            for i in range(1, 255):
+                if (key_bitmap[i // 8] >> i % 8) & 0x01:
+                    choices_map[setting_class.keys_universe[i]] = setting_class.choices_universe
+            result = cls(choices_map) if choices_map else None
+            return result
+
+
 SETTINGS = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
@@ -1607,6 +1663,7 @@ SETTINGS = [
     RGBControl,
     RGBEffectSetting,
     BrightnessControl,
+    PerKeyLighting,
     FnSwap,  # simple
     NewFnSwap,  # simple
     K375sFnSwap,  # working

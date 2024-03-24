@@ -610,6 +610,7 @@ responses_remappable_action = responses_reprog_controls + [
     hidpp.Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set
 ]
 
+
 tests = [
     [
         FeatureTest(
@@ -642,6 +643,23 @@ tests = [
         },
     ]
     + responses_remappable_action,
+    [
+        FeatureTest(settings_templates.PerKeyLighting, {0x01: 0xFFFFFF, 0x02: 0xFFFFFF}, {0x02: 0xFF0000}, 0x70, "00"),
+        {
+            common.NamedInt(1, "1"): special_keys.COLORS,
+            common.NamedInt(2, "2"): special_keys.COLORS,
+            common.NamedInt(9, "9"): special_keys.COLORS,
+            common.NamedInt(10, "10"): special_keys.COLORS,
+            common.NamedInt(113, "113"): special_keys.COLORS,
+            common.NamedInt(114, "114"): special_keys.COLORS,
+        },
+        hidpp.Response("040001", 0x0000, "8081"),  # PER_KEY_LIGHTING_V2
+        hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),
+        hidpp.Response("00000600000000000000000000000000", 0x0400, "0001"),
+        hidpp.Response("00000000000000000000000000000000", 0x0400, "0002"),
+        hidpp.Response("02FF0000", 0x0410, "02FF0000"),
+        hidpp.Response("00", 0x0470, "00"),
+    ],
 ]
 
 
@@ -651,7 +669,6 @@ def test_key_template(test, mocker):
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
-    print("SETTING", setting)
     assert setting is not None
     if isinstance(setting, list):
         setting = setting[0]
@@ -664,6 +681,7 @@ def test_key_template(test, mocker):
     value = setting.read(cached=False)
     for k, v in test[0].initial_value.items():
         assert value[k] == v
+    setting.write(setting._value)
 
     for key, value in test[0].write_value.items():
         write_value = setting.write_key_value(key, value)
