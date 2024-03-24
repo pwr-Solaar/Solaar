@@ -125,6 +125,8 @@ r_mouse_3 = [  # a HID++ 2.0 mouse
 ]
 
 
+# A fake device that uses provided data (responses) to respond to HID++ commands.
+# Some methods from the real device are used to set up data structures needed for settings
 @dataclass
 class Device:
     name: str = "TESTD"
@@ -134,9 +136,16 @@ class Device:
     responses: Any = field(default_factory=list)
     feature: Optional[int] = None
     features: Any = None
-    _backlight: Any = None
-    _keys: Any = None
-    setting_callback = None
+    setting_callback: Any = None
+    _backlight = None
+    _keys = None
+    _remap_keys = None
+
+    read_register = device.Device.read_register
+    write_register = device.Device.write_register
+    backlight = device.Device.backlight
+    keys = device.Device.keys
+    remap_keys = device.Device.remap_keys
 
     def __post_init__(self):
         self.features = hidpp20.FeaturesArray(self)
@@ -152,13 +161,8 @@ class Device:
         for r in self.responses:
             if id == r.id and params == bytes.fromhex(r.params):
                 print("RESPONSE", self.name, hex(r.id), r.params, r.response)
-                return bytes.fromhex(r.response) if r.response is not None else None
+                return bytes.fromhex(r.response) if isinstance(r.response, str) else r.response
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
-
-    read_register = device.Device.read_register
-    write_register = device.Device.write_register
-    backlight = device.Device.backlight
-    keys = device.Device.keys

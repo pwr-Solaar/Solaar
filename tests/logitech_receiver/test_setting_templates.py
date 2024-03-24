@@ -14,6 +14,10 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""The tests work by creating a faked device (from the hidpp module) that uses provided data as responses to HID++ commands.
+The device uses some methods from the real device to set up data structures that are needed for some tests.
+"""
+
 from dataclasses import dataclass
 from struct import pack
 from typing import Any
@@ -24,13 +28,14 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import hidpp20
 from logitech_receiver import settings_templates
+from logitech_receiver import special_keys
 from solaar import configuration
 
 from . import hidpp
 
-# TODO hard MouseGesturesXY, SpeedChange, Gesture2Gestures, Gesture2Divert, Gesture2Params,
-# TODO hard PersistentRemappableAction, LEDControl, LEDZoneSetting,
-# TODO DisableKeyboardKeys, Multiplatform, DualPlatform, ChangeHost, MKeyLEDs, MRKeyLED, SideTone, Equalized, ADCPower
+# TODO DpiSlidingXY, MouseGesturesXY, SpeedChange
+# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params, MKeyLEDs, Equalizer, LEDZoneSetting
+# TODO future RGB..., RGB..., BrightnessControl
 
 
 @dataclass
@@ -150,6 +155,12 @@ tests = [
         hidpp.Response("0118FF00200040001000", 0x0410, "0118FF00200040001000"),
     ],
     [
+        FeatureTest(settings_templates.Backlight3, 0x50, 0x70, 0x20, "007009"),
+        hidpp.Response("040001", 0x0000, "1983"),  # BACKLIGHT3
+        hidpp.Response("50", 0x0410),
+        hidpp.Response("70", 0x0420, "007009"),
+    ],
+    [
         FeatureTest(settings_templates.HiResScroll, True, False, 0x10, "00"),
         hidpp.Response("040001", 0x0000, "2120"),  # HI_RES_SCROLLING
         hidpp.Response("01", 0x0400),
@@ -238,6 +249,42 @@ tests = [
         hidpp.Response("0005", 0x0410),
         hidpp.Response("00FF", 0x0420, "00FF"),
     ],
+    [
+        FeatureTest(settings_templates.DisableKeyboardKeys, {1: True, 8: True}, {1: False, 8: True}, 0x20, "08"),
+        hidpp.Response("040003", 0x0000, "4521"),  # KEYBOARD_DISABLE_KEYS
+        hidpp.Response("09", 0x0400),
+        hidpp.Response("09", 0x0410),
+        hidpp.Response("08", 0x0420, "08"),
+    ],
+    [
+        FeatureTest(settings_templates.DualPlatform, 0, 1, 0x20, "01"),
+        hidpp.Response("040003", 0x0000, "4530"),  # DUALPLATFORM
+        hidpp.Response("00", 0x0400),
+        hidpp.Response("01", 0x0420, "01"),
+    ],
+    [
+        FeatureTest(settings_templates.MRKeyLED, False, True, 0x00, "01"),
+        hidpp.Response("040003", 0x0000, "8030"),  # MR
+        hidpp.Response("01", 0x0400, "01"),
+    ],
+    [
+        FeatureTest(settings_templates.Sidetone, 5, 0xA, 0x10, "0A"),
+        hidpp.Response("040003", 0x0000, "8300"),  # SIDETONE
+        hidpp.Response("05", 0x0400),
+        hidpp.Response("0A", 0x0410, "0A"),
+    ],
+    [
+        FeatureTest(settings_templates.ADCPower, 5, 0xA, 0x20, "0A"),
+        hidpp.Response("040003", 0x0000, "1F20"),  # ADC_MEASUREMENT
+        hidpp.Response("05", 0x0410),
+        hidpp.Response("0A", 0x0420, "0A"),
+    ],
+    [
+        FeatureTest(settings_templates.LEDControl, 0, 1, 0x80, "01"),
+        hidpp.Response("040003", 0x0000, "8070"),  # COLOR_LED_EFFECTS
+        hidpp.Response("00", 0x0470),
+        hidpp.Response("01", 0x0480, "01"),
+    ],
 ]
 
 
@@ -261,6 +308,11 @@ def test_simple_template(test, mocker):
     params = bytes.fromhex(test[0].write_params)
     no_reply = {"no_reply": test[0].no_reply} if test[0].no_reply is not None else {}
     spy_feature_request.assert_called_with(test[0].sclass.feature, test[0].write_fnid, params, **no_reply)
+
+
+@pytest.fixture
+def mock_gethostname(mocker):
+    mocker.patch("socket.gethostname", return_value="ABCDEF.foo.org")
 
 
 tests = [
@@ -369,11 +421,35 @@ tests = [
     #        hidpp.Response("000064", 0x0950),
     #        hidpp.Response("0001640164", 0x0960, "0001640164"),
     #    ],
+    [
+        FeatureTest(settings_templates.Multiplatform, 0, 1, 0x30, "FF01"),
+        common.NamedInts(**{"MacOS 0.1-0.5": 0, "iOS 0.1-0.7": 1, "Linux 0.2-0.9": 2, "Windows 0.3-0.9": 3}),
+        hidpp.Response("040003", 0x0000, "4531"),  # MULTIPLATFORM
+        hidpp.Response("020004000001", 0x0400),
+        hidpp.Response("00FF200000010005", 0x0410, "00"),
+        hidpp.Response("01FF400000010007", 0x0410, "01"),
+        hidpp.Response("02FF040000020009", 0x0410, "02"),
+        hidpp.Response("03FF010000030009", 0x0410, "03"),
+        hidpp.Response("FF01", 0x0430, "FF01"),
+    ],
+    [
+        FeatureTest(settings_templates.ChangeHost, 1, 0, 0x10, "00", True),
+        common.NamedInts(**{"1:ABCDEF": 0, "2:GHIJKL": 1}),
+        hidpp.Response("040003", 0x0000, "1814"),  # CHANGE_HOST
+        hidpp.Response("050003", 0x0000, "1815"),  # HOSTS_INFO
+        hidpp.Response("01000200", 0x0500),
+        hidpp.Response("000100000600", 0x0510, "00"),
+        hidpp.Response("000041424344454600", 0x0530, "0000"),
+        hidpp.Response("000100000600", 0x0510, "01"),
+        hidpp.Response("00004748494A4B4C00", 0x0530, "0100"),
+        hidpp.Response("0201", 0x0400),
+        hidpp.Response(True, 0x0410, "00"),
+    ],
 ]
 
 
 @pytest.mark.parametrize("test", tests)
-def test_variable_template(test, mocker):
+def test_variable_template(test, mocker, mock_gethostname):
     setup_responses = [hidpp.Response("010001", 0x0000, "0001"), hidpp.Response("20", 0x0100)]
     device = hidpp.Device(responses=test[2:] + setup_responses)
     device.persister = configuration._DeviceEntry()
@@ -381,7 +457,10 @@ def test_variable_template(test, mocker):
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
+    print("CH", setting)
+    print("CH", setting.choices)
     value = setting.read(cached=False)
+    print("CV", value)
     cached_value = setting.read(cached=True)
     write_value = setting.write(test[0].write_value)
 
@@ -393,6 +472,7 @@ def test_variable_template(test, mocker):
     if isinstance(test[1], list):
         assert setting._validator.min_value == test[1][0]
         assert setting._validator.max_value == test[1][1]
+    print("VALYE", value, test[0].initial_value)
     assert value == test[0].initial_value
     assert cached_value == test[0].initial_value
     assert write_value == test[0].write_value
@@ -401,6 +481,30 @@ def test_variable_template(test, mocker):
     no_reply = {"no_reply": test[0].no_reply} if test[0].no_reply is not None else {}
     spy_feature_request.assert_called_with(test[0].sclass.feature, test[0].write_fnid, params, **no_reply)
 
+
+responses_reprog_controls = [
+    hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
+    hidpp.Response("03", 0x0500),
+    hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
+    hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
+    hidpp.Response("00C4009D310003070500000000000000", 0x0510, "02"),  # smart shift
+    hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button current
+    hidpp.Response("00510000500000000000000000000000", 0x0520, "0051"),  # right button current
+    hidpp.Response("00C40000000000000000000000000000", 0x0520, "00C4"),  # smart shift current
+    hidpp.Response("0051000051", 0x0530, "0051000051"),  # right button set
+]
+
+responses_remappable_action = responses_reprog_controls + [
+    hidpp.Response("040001", 0x0000, "1C00"),  # PERSISTENT_REMAPPABLE_ACTION
+    hidpp.Response("0041", 0x0400),
+    hidpp.Response("0201", 0x0410),
+    hidpp.Response("02", 0x0400),
+    hidpp.Response("0050", 0x0420, "00FF"),  # left button
+    hidpp.Response("0051", 0x0420, "01FF"),  # right button
+    hidpp.Response("0050000100500000", 0x0430, "0050FF"),  # left button current
+    hidpp.Response("0051000100500001", 0x0430, "0051FF"),  # right button current
+    hidpp.Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set
+]
 
 tests = [
     [
@@ -412,29 +516,28 @@ tests = [
             common.NamedInt(0x51, "Right Button"): [0x51, 0x50],
             common.NamedInt(0xC4, "Smart Shift"): [0xC4, 0x50, 0x51],
         },
-        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
-        hidpp.Response("03", 0x0500),
-        hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
-        hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
-        hidpp.Response("00C4009D310003070500000000000000", 0x0510, "02"),  # smart shift
-        hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button current
-        hidpp.Response("00510000500000000000000000000000", 0x0520, "0051"),  # right button current
-        hidpp.Response("00C40000000000000000000000000000", 0x0520, "00C4"),  # smart shift current
-        hidpp.Response("0051000051", 0x0530, "0051000051"),
-    ],
+    ]
+    + responses_reprog_controls,
     [
         FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 1}, 0x30, "00C4030000"),
         {common.NamedInt(0xC4, "Smart Shift"): [0, 1, 2]},
-        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
-        hidpp.Response("03", 0x0500),
-        hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
-        hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
-        hidpp.Response("00C4009D310003070500000000000000", 0x0510, "02"),  # smart shift
-        hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button current
-        hidpp.Response("00510000500000000000000000000000", 0x0520, "0051"),  # right button current
-        hidpp.Response("00C40000000000000000000000000000", 0x0520, "00C4"),  # smart shift current
-        hidpp.Response("00C4030000", 0x0530, "00C4030000"),
-    ],
+    ]
+    + responses_reprog_controls
+    + [hidpp.Response("00C4030000", 0x0530, "00C4030000")],
+    [
+        FeatureTest(
+            settings_templates.PersistentRemappableAction,
+            {80: 16797696, 81: 16797696},
+            {0x51: 16797952},
+            0x40,
+            "0051FF01005100",
+        ),
+        {
+            common.NamedInt(80, "Left Button"): special_keys.KEYS_KEYS_CONSUMER,
+            common.NamedInt(81, "Right Button"): special_keys.KEYS_KEYS_CONSUMER,
+        },
+    ]
+    + responses_remappable_action,
 ]
 
 
