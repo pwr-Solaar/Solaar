@@ -200,15 +200,13 @@ class Setting:
         assert hasattr(self, "_device")
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("%s: apply (%s)", self.name, self._device)
-        value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
-        if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
-            try:
+        try:
+            value = self.read(self.persist)  # Don't use persisted value if setting doesn't persist
+            if self.persist and value is not None:  # If setting doesn't persist no need to write value just read
                 self.write(value, save=False)
-            except Exception as e:
-                if logger.isEnabledFor(logging.WARNING):
-                    logger.warning(
-                        "%s: error applying value %s so ignore it (%s): %s", self.name, self._value, self._device, repr(e)
-                    )
+        except Exception as e:
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("%s: error applying %s so ignore it (%s): %s", self.name, self._value, self._device, repr(e))
 
     def __str__(self):
         if hasattr(self, "_value"):

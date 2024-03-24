@@ -1564,8 +1564,8 @@ class RGBControl(_Setting):
 
 class RGBEffectSetting(LEDZoneSetting):
     name = "rgb_zone_"
-    label = _("RGB Zone Effects")
-    description = _("Set effect for RGB Zone")
+    label = _("LED Zone Effects")
+    description = _("Set effect for LED Zone")
     feature = _F.RGB_EFFECTS
 
     @classmethod
