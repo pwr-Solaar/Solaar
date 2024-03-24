@@ -475,9 +475,9 @@ class NamedInts:
             raise TypeError("name must be a string")
 
         if str(value) in self.__dict__:
-            raise ValueError(f"{value} ({int(int(value))}) already known")
+            raise ValueError(f"{value} ({int(value)}) already known")
         if int(value) in self._indexed:
-            raise ValueError(f"{int(int(value))} ({value}) already known")
+            raise ValueError(f"{int(value)} ({value}) already known")
 
         self._values.append(value)
         self._is_sorted = False

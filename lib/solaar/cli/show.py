@@ -64,7 +64,7 @@ def _print_receiver(receiver):
         print("  Device activity counters:", activity_text or "(empty)")
 
 
-def _battery_text(level):
+def _battery_text(level) -> str:
     if level is None:
         return "N/A"
     elif isinstance(level, _NamedInt):
