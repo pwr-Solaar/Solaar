@@ -25,6 +25,7 @@ from typing import Optional
 
 from logitech_receiver import device
 from logitech_receiver import hidpp20
+from solaar import configuration
 
 
 def open_path(path: Optional[str]) -> Optional[int]:
@@ -137,17 +138,17 @@ class Device:
     feature: Optional[int] = None
     features: Any = None
     setting_callback: Any = None
-    _backlight = None
-    _keys = None
-    _remap_keys = None
+    _backlight = _keys = _remap_keys = _led_effects = None
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register
     backlight = device.Device.backlight
     keys = device.Device.keys
     remap_keys = device.Device.remap_keys
+    led_effects = device.Device.led_effects
 
     def __post_init__(self):
+        self.persister = configuration._DeviceEntry()
         self.features = hidpp20.FeaturesArray(self)
         self.responses += [Response("010001", 0x0000, "0001"), Response("20", 0x0100)]
         if self.feature is not None:
