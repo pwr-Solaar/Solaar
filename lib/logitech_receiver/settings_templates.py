@@ -1529,12 +1529,12 @@ class LEDZoneSetting(_Setting):
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
     @classmethod
-    def setup(cls, device, read_fnid, write_fnid):
+    def setup(cls, device, read_fnid, write_fnid, suffix):
         infos = device.led_effects
         settings = []
         for zone in infos.zones:
             prefix = _int2bytes(zone.index, 1)
-            rw = _FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix)
+            rw = _FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix, suffix=suffix)
             validator = _HeteroV(data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
@@ -1548,7 +1548,7 @@ class LEDZoneSetting(_Setting):
 
     @classmethod
     def build(cls, device):
-        return cls.setup(device, 0xE0, 0x30)
+        return cls.setup(device, 0xE0, 0x30, b"")
 
 
 class RGBControl(_Setting):
@@ -1570,7 +1570,7 @@ class RGBEffectSetting(LEDZoneSetting):
 
     @classmethod
     def build(cls, device):
-        return cls.setup(device, 0xE0, 0x10)
+        return cls.setup(device, 0xE0, 0x10, b"\x01")
 
 
 SETTINGS = [
