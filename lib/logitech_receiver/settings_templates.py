@@ -388,7 +388,7 @@ class Backlight3(_Setting):
     label = _("Backlight")
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT3
-    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": 0x09}
+    rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": b"\x09"}
     validator_class = _RangeV
     min_value = 0
     max_value = 1000

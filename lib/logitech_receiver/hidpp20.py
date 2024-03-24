@@ -555,13 +555,12 @@ class KeysArrayPersistent(KeysArray):
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
             key = _unpack("!H", keydata[:2])[0]
-            try:
-                mapped_data = self.device.feature_request(
-                    FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
-                )
-                if mapped_data:
-                    _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
-            except Exception:
+            mapped_data = self.device.feature_request(
+                FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
+            )
+            if mapped_data:
+                _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
+            else:
                 actionId = remapped = modifiers = status = 0
             actionId = special_keys.ACTIONID[actionId]
             if actionId == special_keys.ACTIONID.Key:
