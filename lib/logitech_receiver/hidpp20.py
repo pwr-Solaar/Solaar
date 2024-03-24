@@ -909,6 +909,7 @@ class LEDParam:
     intensity = "intensity"
     ramp = "ramp"
     form = "form"
+    saturation = "saturation"
 
 
 LEDRampChoices = _NamedInts(default=0, yes=1, no=2)
@@ -920,19 +921,23 @@ LEDParamSize = {
     LEDParam.intensity: 1,
     LEDParam.ramp: 1,
     LEDParam.form: 1,
+    LEDParam.saturation: 1,
 }
 # not implemented from x8070 Wave=4, Stars=5, Press=6, Audio=7
-# not implemented from x8071 Custom=12, Kitt=13, Decomposition=14, FrameActive=15, FramePassive=16,
-#  HSVPulsing=20, CycleC=21, WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
+# not implemented from x8071 Custom=12, Kitt=13, HSVPulsing=20, WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
 LEDEffects = {
-    0x0: [_NamedInt(0x0, _("Disabled")), {}],
-    0x1: [_NamedInt(0x1, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
-    0x2: [_NamedInt(0x2, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
-    0x3: [_NamedInt(0x3, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x8: [_NamedInt(0x8, _("Boot")), {}],
-    0x9: [_NamedInt(0x9, _("Demo")), {}],
-    0xA: [_NamedInt(0xA, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
-    0xB: [_NamedInt(0xB, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
+    0x00: [_NamedInt(0x00, _("Disabled")), {}],
+    0x01: [_NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
+    0x02: [_NamedInt(0x02, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
+    0x03: [_NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x08: [_NamedInt(0x08, _("Boot")), {}],
+    0x09: [_NamedInt(0x09, _("Demo")), {}],
+    0x0A: [_NamedInt(0x0A, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
+    0x0B: [_NamedInt(0x0B, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
+    0x0E: [_NamedInt(0x0E, _("Decomposition")), {LEDParam.period: 6, LEDParam.intensity: 8}],
+    0x0F: [_NamedInt(0x0F, _("Signature1")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x10: [_NamedInt(0x10, _("Signature2")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x15: [_NamedInt(0x15, _("CycleS")), {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8}],
 }
 
 
