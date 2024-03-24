@@ -1539,7 +1539,7 @@ class LEDZoneSetting(_Setting):
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
             setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
-            choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects]
+            choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
             ID_field = {"name": "ID", "kind": _KIND.choice, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + cls.possible_fields
             setting.fields_map = hidpp20.LEDEffects
@@ -1578,6 +1578,8 @@ SETTINGS = [
     Backlight3,
     LEDControl,
     LEDZoneSetting,
+    RGBControl,
+    RGBEffectSetting,
     BrightnessControl,
     FnSwap,  # simple
     NewFnSwap,  # simple
