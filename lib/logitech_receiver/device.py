@@ -261,7 +261,10 @@ class Device:
     @property
     def led_effects(self):
         if not self._led_effects and self.online and self.protocol >= 2.0:
-            self._led_effects = hidpp20.LEDEffectsInfo(self)
+            if hidpp20_constants.FEATURE.COLOR_LED_EFFECTS in self.features:
+                self._led_effects = hidpp20.LEDEffectsInfo(self)
+            elif hidpp20_constants.FEATURE.RGB_EFFECTS in self.features:
+                self._led_effects = hidpp20.RGBEffectsInfo(self)
         return self._led_effects
 
     @property
