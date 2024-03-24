@@ -29,13 +29,12 @@ from logitech_receiver import common
 from logitech_receiver import hidpp20
 from logitech_receiver import settings_templates
 from logitech_receiver import special_keys
-from solaar import configuration
 
 from . import hidpp
 
 # TODO DpiSlidingXY, MouseGesturesXY, SpeedChange
-# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params, MKeyLEDs, Equalizer, LEDZoneSetting
-# TODO future RGB..., RGB..., BrightnessControl
+# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params, MKeyLEDs, Equalizer
+# future per-key lighting
 
 
 @dataclass
@@ -84,9 +83,7 @@ tests = [
 
 @pytest.mark.parametrize("test", tests)
 def test_register_template(test, mocker):
-    device = hidpp.Device(responses=test[1:])
-    device.persister = configuration._DeviceEntry()
-    device.protocol = 1.0
+    device = hidpp.Device(protocol=1.0, responses=test[1:])
     spy_request = mocker.spy(device, "request")
 
     setting = test[0].sclass.build(device)
@@ -285,18 +282,95 @@ tests = [
         hidpp.Response("00", 0x0470),
         hidpp.Response("01", 0x0480, "01"),
     ],
+    [
+        FeatureTest(
+            settings_templates.LEDZoneSetting,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x50, period=0x100),
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x50, period=0x101),
+            0x30,
+            "000000000000000101500000",
+        ),
+        hidpp.Response("040001", 0x0000, "8070"),  # COLOR_LED_EFFECTS
+        hidpp.Response("0100000001", 0x0400),
+        hidpp.Response("00000102", 0x0410, "00FF00"),
+        hidpp.Response("0000000300040005", 0x0420, "000000"),
+        hidpp.Response("0001000B00080009", 0x0420, "000100"),
+        hidpp.Response("000000000000010050", 0x04E0, "00"),
+        hidpp.Response("000000000000000101500000", 0x0430, "000000000000000101500000"),
+    ],
+    [
+        FeatureTest(settings_templates.RGBControl, 0, 1, 0x50, "0101"),
+        hidpp.Response("040003", 0x0000, "8071"),  # RGB_EFFECTS
+        hidpp.Response("0000", 0x0450),
+        hidpp.Response("010100", 0x0450, "0101"),
+    ],
+    [
+        FeatureTest(
+            settings_templates.RGBEffectSetting,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x50, period=0x100),
+            hidpp20.LEDEffectSetting(ID=2, color=0x505050, speed=0x50),
+            0x10,
+            "000150505050000000000000",
+        ),
+        hidpp.Response("040003", 0x0000, "8071"),  # RGB_EFFECTS
+        hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
+        hidpp.Response("0000000102", 0x0400, "00FF00"),
+        hidpp.Response("0000000300040005", 0x0400, "000000"),
+        hidpp.Response("0001000200080009", 0x0400, "000100"),
+        hidpp.Response("000000000000010050", 0x04E0, "00"),
+        hidpp.Response("000150505050000000000000", 0x0410, "000150505050000000000000"),
+    ],
+    [
+        FeatureTest(
+            settings_templates.RGBEffectSetting,
+            None,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
+            0x10,
+            "000000000000000101600000",
+        ),
+        hidpp.Response("040003", 0x0000, "8071"),  # RGB_EFFECTS
+        hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
+        hidpp.Response("0000000102", 0x0400, "00FF00"),
+        hidpp.Response("0000000300040005", 0x0400, "000000"),
+        hidpp.Response("0001000200080009", 0x0400, "000100"),
+        hidpp.Response("000000000000000101600000", 0x0410, "000000000000000101600000"),
+    ],
+    [
+        FeatureTest(
+            settings_templates.RGBEffectSetting,
+            None,
+            hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
+            0x10,
+            "000200000000000101600000",
+        ),
+        hidpp.Response("0A0000", 0x0000, "8071"),  # RGB_EFFECTS
+        hidpp.Response("FF000200020004000000000000000000", 0x0A00, "FFFF00"),
+        hidpp.Response("00000002040000000000000000000000", 0x0A00, "00FF00"),
+        hidpp.Response("00000000000000000000000000000000", 0x0A00, "000000"),
+        hidpp.Response("00010001000000000000000000000000", 0x0A00, "000100"),
+        hidpp.Response("00020003C00503E00000000000000000", 0x0A00, "000200"),
+        hidpp.Response("0003000AC0011E0B0000000000000000", 0x0A00, "000300"),
+        hidpp.Response("01000001070000000000000000000000", 0x0A00, "01FF00"),
+        hidpp.Response("01000000000000000000000000000000", 0x0A00, "010000"),
+        hidpp.Response("01010001000000000000000000000000", 0x0A00, "010100"),
+        hidpp.Response("0102000AC0011E0B0000000000000000", 0x0A00, "010200"),
+        hidpp.Response("01030003C00503E00000000000000000", 0x0A00, "010300"),
+        hidpp.Response("01040004DCE1001E0000000000000000", 0x0A00, "010400"),
+        hidpp.Response("0105000B000000320000000000000000", 0x0A00, "010500"),
+        hidpp.Response("0106000C001B02340000000000000000", 0x0A00, "010600"),
+        hidpp.Response("000200000000000101600000", 0x0A10, "000200000000000101600000"),
+    ],
 ]
 
 
 @pytest.mark.parametrize("test", tests)
 def test_simple_template(test, mocker):
-    setup_responses = [hidpp.Response("010001", 0x0000, "0001"), hidpp.Response("20", 0x0100)]
-    device = hidpp.Device(responses=test[1:] + setup_responses)
-    device.persister = configuration._DeviceEntry()
-    device.features = hidpp20.FeaturesArray(device)
+    device = hidpp.Device(responses=test[1:])
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
+    if isinstance(setting, list):
+        setting = setting[0]
     value = setting.read(cached=False)
     cached_value = setting.read(cached=True)
     write_value = setting.write(test[0].write_value)
@@ -487,17 +561,11 @@ tests = [
 
 @pytest.mark.parametrize("test", tests)
 def test_variable_template(test, mocker, mock_gethostname):
-    setup_responses = [hidpp.Response("010001", 0x0000, "0001"), hidpp.Response("20", 0x0100)]
-    device = hidpp.Device(responses=test[2:] + setup_responses)
-    device.persister = configuration._DeviceEntry()
-    device.features = hidpp20.FeaturesArray(device)
+    device = hidpp.Device(responses=test[2:])
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
-    print("CH", setting)
-    print("CH", setting.choices)
     value = setting.read(cached=False)
-    print("CV", value)
     cached_value = setting.read(cached=True)
     write_value = setting.write(test[0].write_value)
 
@@ -509,7 +577,6 @@ def test_variable_template(test, mocker, mock_gethostname):
     if isinstance(test[1], list):
         assert setting._validator.min_value == test[1][0]
         assert setting._validator.max_value == test[1][1]
-    print("VALYE", value, test[0].initial_value)
     assert value == test[0].initial_value
     assert cached_value == test[0].initial_value
     assert write_value == test[0].write_value
@@ -580,14 +647,14 @@ tests = [
 
 @pytest.mark.parametrize("test", tests)
 def test_key_template(test, mocker):
-    setup_responses = [hidpp.Response("010001", 0x0000, "0001"), hidpp.Response("20", 0x0100)]
-    device = hidpp.Device(responses=test[2:] + setup_responses)
-    device.persister = configuration._DeviceEntry()
-    device.features = hidpp20.FeaturesArray(device)
+    device = hidpp.Device(responses=test[2:])
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
+    print("SETTING", setting)
     assert setting is not None
+    if isinstance(setting, list):
+        setting = setting[0]
     assert len(setting.choices) == len(test[1])
     for k, v in setting.choices.items():
         assert len(v) == len(test[1][k])
@@ -625,10 +692,7 @@ tests = [  # needs settings to be set up!!
 
 @pytest.mark.parametrize("test", tests)
 def XX_action_template(test, mocker):  # needs settings to be set up!!
-    setup_responses = [hidpp.Response("010001", 0x0000, "0001"), hidpp.Response("20", 0x0100)]
-    device = hidpp.Device(responses=test[2:] + setup_responses)
-    device.persister = configuration._DeviceEntry()
-    device.features = hidpp20.FeaturesArray(device)
+    device = hidpp.Device(responses=test[2:])
     spy_feature_request = mocker.spy(device, "feature_request")
 
     setting = settings_templates.check_feature(device, test[0].sclass)
