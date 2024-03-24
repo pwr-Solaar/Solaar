@@ -33,6 +33,6 @@ def run(receivers, args, find_receiver, find_device):
         # query these now, it's last chance to get them
         number, codename, wpid, serial = dev.number, dev.codename, dev.wpid, dev.serial
         dev.receiver._unpair_device(number, True)  # force an unpair
-        print("Unpaired %d: %s (%s) [%s:%s]" % (number, dev.name, codename, wpid, serial))
+        print(f"Unpaired {int(number)}: {dev.name} ({codename}) [{wpid}:{serial}]")
     except Exception as e:
         raise e

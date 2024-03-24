@@ -397,7 +397,7 @@ def write(device_handle, data):
         else:
             break
     if bytes_written != len(data):
-        raise OSError(_errno.EIO, "written %d bytes out of expected %d" % (bytes_written, len(data)))
+        raise OSError(_errno.EIO, f"written {int(bytes_written)} bytes out of expected {len(data)}")
 
 
 def read(device_handle, bytes_count, timeout_ms=-1):
@@ -422,7 +422,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
 
     if xlist:
         assert xlist == [device_handle]
-        raise OSError(_errno.EIO, "exception on file descriptor %d" % device_handle)
+        raise OSError(_errno.EIO, f"exception on file descriptor {int(device_handle)}")
 
     if rlist:
         assert rlist == [device_handle]

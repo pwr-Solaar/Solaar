@@ -555,7 +555,7 @@ def _update_details(button):
                 flag_names = (
                     (f"({_('none')})",) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
                 )
-                yield (_("Notifications"), ("\n%15s" % " ").join(flag_names))
+                yield (_("Notifications"), (f"\n{' ':15}").join(flag_names))
 
         def _set_details(text):
             _details._text.set_markup(text)
@@ -677,7 +677,7 @@ def _update_device_panel(device, panel, buttons, full=False):
 
         if battery_voltage is not None:
             panel._battery._label.set_text(_("Battery Voltage"))
-            text = "%dmV" % battery_voltage
+            text = f"{int(battery_voltage)}mV"
             tooltip_text = _("Voltage reported by battery")
         else:
             panel._battery._label.set_text(_("Battery Level"))
@@ -686,12 +686,12 @@ def _update_device_panel(device, panel, buttons, full=False):
         if battery_voltage is not None and battery_level is not None:
             text += ", "
         if battery_level is not None:
-            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else "%d%%" % battery_level
+            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else f"{int(battery_level)}%"
         if battery_next_level is not None and not charging:
             if isinstance(battery_next_level, _NamedInt):
                 text += "<small> (" + _("next reported ") + _(str(battery_next_level)) + ")</small>"
             else:
-                text += "<small> (" + _("next reported ") + ("%d%%" % battery_next_level) + ")</small>"
+                text += "<small> (" + _("next reported ") + f"{int(battery_next_level)}%" + ")</small>"
             tooltip_text = tooltip_text + _(" and next level to be reported.")
         if is_online:
             if charging:
@@ -889,11 +889,11 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, _COLUMN.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
         if battery_voltage is not None and False:  # Use levels instead of voltage here
-            status_text = "%(battery_voltage)dmV" % {"battery_voltage": battery_voltage}
+            status_text = f"{int(battery_voltage)}mV"
         elif isinstance(battery_level, _NamedInt):
             status_text = _(str(battery_level))
         else:
-            status_text = "%(battery_percent)d%%" % {"battery_percent": battery_level}
+            status_text = f"{int(battery_level)}%"
         _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
         charging = device.battery_info.charging() if device.battery_info is not None else None
