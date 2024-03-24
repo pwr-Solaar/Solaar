@@ -1455,17 +1455,6 @@ class ADCPower(_Setting):
     validator_options = {"byte_count": 1}
 
 
-class LEDControl(_Setting):
-    name = "led_control"
-    label = _("LED Control")
-    description = _("Switch control of LEDs between device and Solaar")
-    feature = _F.COLOR_LED_EFFECTS
-    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = _NamedInts(Device=0, Solaar=1)
-    validator_class = _ChoicesV
-    validator_options = {"choices": choices_universe}
-
-
 class BrightnessControl(_Setting):
     name = "brightness_control"
     label = _("Brightness Control")
@@ -1510,6 +1499,17 @@ class BrightnessControl(_Setting):
                 return validator
 
 
+class LEDControl(_Setting):
+    name = "led_control"
+    label = _("LED Control")
+    description = _("Switch control of LEDs between device and Solaar")
+    feature = _F.COLOR_LED_EFFECTS
+    rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
+    choices_universe = _NamedInts(Device=0, Solaar=1)
+    validator_class = _ChoicesV
+    validator_options = {"choices": choices_universe}
+
+
 colors = _special_keys.COLORS
 _LEDP = hidpp20.LEDParam
 
@@ -1529,12 +1529,12 @@ class LEDZoneSetting(_Setting):
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
     @classmethod
-    def build(cls, device):
+    def setup(cls, device, read_fnid, write_fnid):
         infos = device.led_effects
         settings = []
         for zone in infos.zones:
             prefix = _int2bytes(zone.index, 1)
-            rw = _FeatureRW(_F.COLOR_LED_EFFECTS, read_fnid=0xE0, write_fnid=0x30, prefix=prefix)
+            rw = _FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix)
             validator = _HeteroV(data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable)
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
@@ -1545,6 +1545,32 @@ class LEDZoneSetting(_Setting):
             setting.fields_map = hidpp20.LEDEffects
             settings.append(setting)
         return settings
+
+    @classmethod
+    def build(cls, device):
+        return cls.setup(device, 0xE0, 0x30)
+
+
+class RGBControl(_Setting):
+    name = "rgb_control"
+    label = _("RGB Control")
+    description = _("Switch control of RGB zones between device and Solaar")
+    feature = _F.RGB_EFFECTS
+    rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
+    choices_universe = _NamedInts(Device=0, Solaar=1)
+    validator_class = _ChoicesV
+    validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
+
+
+class RGBEffectSetting(LEDZoneSetting):
+    name = "rgb_zone_"
+    label = _("RGB Zone Effects")
+    description = _("Set effect for RGB Zone")
+    feature = _F.RGB_EFFECTS
+
+    @classmethod
+    def build(cls, device):
+        return cls.setup(device, 0xE0, 0x10)
 
 
 SETTINGS = [
