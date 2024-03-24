@@ -1266,11 +1266,11 @@ class MouseClick(Action):
                 self.count = 1
 
     def __str__(self):
-        return "MouseClick: %s (%d)" % (self.button, self.count)
+        return f"MouseClick: {self.button} ({int(self.count)})"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
-            logger.info("MouseClick action: %d %s" % (self.count, self.button))
+            logger.info(f"MouseClick action: {int(self.count)} {self.button}")
         if self.button and self.count:
             click(buttons[self.button], self.count)
         _time.sleep(0.01)

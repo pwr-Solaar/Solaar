@@ -45,9 +45,9 @@ def _print_receiver(receiver):
         for f in receiver.firmware:
             print("    %-11s: %s" % (f.kind, f.version))
 
-    print("  Has", paired_count, "paired device(s) out of a maximum of %d." % receiver.max_devices)
+    print("  Has", paired_count, f"paired device(s) out of a maximum of {int(receiver.max_devices)}.")
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
-        print("  Has %d successful pairing(s) remaining." % receiver.remaining_pairings())
+        print(f"  Has {int(receiver.remaining_pairings())} successful pairing(s) remaining.")
 
     notification_flags = _hidpp10.get_notification_flags(receiver)
     if notification_flags is not None:
@@ -60,7 +60,7 @@ def _print_receiver(receiver):
     activity = receiver.read_register(_hidpp10_constants.REGISTERS.devices_activity)
     if activity:
         activity = [(d, ord(activity[d - 1 : d])) for d in range(1, receiver.max_devices)]
-        activity_text = ", ".join(("%d=%d" % (d, a)) for d, a in activity if a > 0)
+        activity_text = ", ".join(f"{int(d)}={int(a)}" for d, a in activity if a > 0)
         print("  Device activity counters:", activity_text or "(empty)")
 
 
@@ -70,7 +70,7 @@ def _battery_text(level):
     elif isinstance(level, _NamedInt):
         return str(level)
     else:
-        return "%d%%" % level
+        return f"{int(level)}%"
 
 
 def _battery_line(dev):
@@ -96,7 +96,7 @@ def _print_device(dev, num=None):
         return
 
     if num or dev.number < 8:
-        print("  %d: %s" % (num or dev.number, dev.name))
+        print(f"  {int(num or dev.number)}: {dev.name}")
     else:
         print(f"{dev.name}")
     print("     Device path  :", dev.path)
@@ -119,7 +119,7 @@ def _print_device(dev, num=None):
         print("     Unit ID:      ", dev.unitId)
     if dev.firmware:
         for fw in dev.firmware:
-            print("       %11s:" % fw.kind, (fw.name + " " + fw.version).strip())
+            print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
 
     if dev.power_switch_location:
         print(f"     The power switch is located on the {dev.power_switch_location}.")
@@ -235,7 +235,7 @@ def _print_device(dev, num=None):
                 response = dev.feature_request(_hidpp20_constants.FEATURE.CONFIG_CHANGE, 0x00)
                 print(f"            Configuration: {response.hex()}")
             elif feature == _hidpp20_constants.FEATURE.REMAINING_PAIRING:
-                print("            Remaining Pairings: %d" % _hidpp20.get_remaining_pairing(dev))
+                print(f"            Remaining Pairings: {int(_hidpp20.get_remaining_pairing(dev))}")
             elif feature == _hidpp20_constants.FEATURE.ONBOARD_PROFILES:
                 if _hidpp20.get_onboard_mode(dev) == _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
                     mode = "Host"
@@ -272,7 +272,7 @@ def _print_device(dev, num=None):
                 print("        %2d: %-26s, default: %-27s => %-26s" % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ",".join(k.group_mask)
                 gmask_fmt = gmask_fmt if gmask_fmt else "empty"
-                print("             %s, pos:%d, group:%1d, group mask:%s" % (", ".join(k.flags), k.pos, k.group, gmask_fmt))
+                print(f"             {', '.join(k.flags)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}")
                 report_fmt = ", ".join(k.mapping_flags)
                 report_fmt = report_fmt if report_fmt else "default"
                 print(f"             reporting: {report_fmt}")

@@ -203,7 +203,7 @@ class Receiver:
 
     def register_new_device(self, number, notification=None):
         if self._devices.get(number) is not None:
-            raise IndexError("%s: device number %d already registered" % (self, number))
+            raise IndexError(f"{self}: device number {int(number)} already registered")
 
         assert notification is None or notification.devnumber == number
         assert notification is None or notification.sub_id == 0x41

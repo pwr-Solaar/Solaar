@@ -542,7 +542,7 @@ class Device:
             name = self._name or self._codename or "?"
         except exceptions.NoSuchDevice:
             name = "name not available"
-        return "<Device(%d,%s,%s,%s)>" % (self.number, self.wpid or self.product_id, name, self.serial)
+        return f"<Device({int(self.number)},{self.wpid or self.product_id},{name},{self.serial})>"
 
     __repr__ = __str__
 

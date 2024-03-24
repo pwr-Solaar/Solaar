@@ -85,7 +85,7 @@ def _battery_icon_name(level, charging):
 def lux(level=None):
     if level is None or level < 0:
         return "light_unknown"
-    return "solaar-light_%03d" % (20 * ((level + 50) // 100))
+    return f"solaar-light_{int(20 * ((level + 50) // 100)):03}"
 
 
 _ICON_SETS = {}

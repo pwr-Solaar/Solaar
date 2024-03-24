@@ -221,6 +221,6 @@ def run(cli_args=None, hidraw_path=None):
         m.run(c, args, _find_receiver, _find_device)
     except AssertionError:
         tb_last = extract_tb(_sys.exc_info()[2])[-1]
-        _sys.exit("%s: assertion failed: %s line %d" % (NAME.lower(), tb_last[0], tb_last[1]))
+        _sys.exit(f"{NAME.lower()}: assertion failed: {tb_last[0]} line {int(tb_last[1])}")
     except Exception:
         _sys.exit(f"{NAME.lower()}: error: {format_exc()}")

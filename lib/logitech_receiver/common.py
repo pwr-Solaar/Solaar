@@ -345,7 +345,7 @@ class NamedInt(int):
         return self.name
 
     def __repr__(self):
-        return "NamedInt(%d, %r)" % (int(self), self.name)
+        return f"NamedInt({int(self)}, {self.name!r})"
 
     @classmethod
     def from_yaml(cls, loader, node):
@@ -475,9 +475,9 @@ class NamedInts:
             raise TypeError("name must be a string")
 
         if str(value) in self.__dict__:
-            raise ValueError("%s (%d) already known" % (value, int(value)))
+            raise ValueError(f"{value} ({int(int(value))}) already known")
         if int(value) in self._indexed:
-            raise ValueError("%d (%s) already known" % (int(value), value))
+            raise ValueError(f"{int(int(value))} ({value}) already known")
 
         self._values.append(value)
         self._is_sorted = False

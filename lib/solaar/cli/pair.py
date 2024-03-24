@@ -127,7 +127,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     if receiver.pairing.new_device:
         dev = receiver.pairing.new_device
-        print("Paired device %d: %s (%s) [%s:%s]" % (dev.number, dev.name, dev.codename, dev.wpid, dev.serial))
+        print(f"Paired device {int(dev.number)}: {dev.name} ({dev.codename}) [{dev.wpid}:{dev.serial}]")
     else:
         error = receiver.pairing.error
         if error:
