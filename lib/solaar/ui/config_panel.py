@@ -41,7 +41,12 @@ logger = logging.getLogger(__name__)
 
 def _read_async(setting, force_read, sbox, device_is_online, sensitive):
     def _do_read(s, force, sb, online, sensitive):
-        v = s.read(not force)
+        try:
+            v = s.read(not force)
+        except Exception as e:
+            v = None
+            if logger.isEnabledFor(logging.WARNING):
+                logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
     _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
@@ -564,6 +569,8 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 if k in self._items:
                     (lblbox, box) = self._items[k]
                     box.set_value(v)
+        else:
+            self.sbox._failed.set_visible(True)
         self.setup_visibles(value.ID if value is not None else 0)
 
     def setup_visibles(self, ID):
