@@ -980,6 +980,9 @@ class LEDEffectSetting:  # an effect plus its parameters
     def to_yaml(cls, dumper, data):
         return dumper.represent_mapping("!LEDEffectSetting", data.__dict__, flow_style=True)
 
+    def __eq__(self, other):
+        return type(self) == type(other) and self.to_bytes() == other.to_bytes()
+
     def __str__(self):
         return _yaml.dump(self, width=float("inf")).rstrip("\n")
 
