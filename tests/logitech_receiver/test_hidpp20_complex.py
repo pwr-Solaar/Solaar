@@ -319,3 +319,121 @@ def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remap
     assert mapped_to == expected_mapped_to
     if expected_remappable_to is not None:
         assert list(remappable_to) == expected_remappable_to
+
+
+@pytest.mark.parametrize(
+    "hex, ID, color, speed, period, intensity, ramp, form",
+    [
+        ("FFFFFFFFFFFFFFFFFFFFFF", None, None, None, None, None, None, None),
+        ("0000000000000000000000", common.NamedInt(0x0, "Disabled"), None, None, None, None, None, None),
+        ("0120304010000000000000", common.NamedInt(0x1, "Static"), 0x203040, None, None, None, 0x10, None),
+        ("0220304010000000000000", common.NamedInt(0x2, "Pulse"), 0x203040, 0x10, None, None, None, None),
+        ("0800000000000000000000", common.NamedInt(0x8, "Boot"), None, None, None, None, None, None),
+        ("0300000000005000000000", common.NamedInt(0x3, "Cycle"), None, None, 0x5000, 0x00, None, None),
+        ("0A20304010005020000000", common.NamedInt(0xA, "Breathe"), 0x203040, None, 0x1000, 0x20, None, 0x50),
+        ("0B20304000100000000000", common.NamedInt(0xB, "Ripple"), 0x203040, None, 0x1000, None, None, None),
+    ],
+)
+def test_LEDEffectSetting(hex, ID, color, speed, period, intensity, ramp, form):
+    byt = bytes.fromhex(hex)
+    setting = hidpp20.LEDEffectSetting.from_bytes(byt)
+
+    assert setting.ID == ID
+    if ID is None:
+        assert setting.bytes == byt
+    else:
+        assert getattr(setting, "color", None) == color
+        assert getattr(setting, "speed", None) == speed
+        assert getattr(setting, "period", None) == period
+        assert getattr(setting, "intensity", None) == intensity
+        assert getattr(setting, "ramp", None) == ramp
+        assert getattr(setting, "form", None) == form
+    assert setting.to_bytes() == byt
+
+
+@pytest.mark.parametrize(
+    "feature, function, response, ID, capabilities, period",
+    [
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x20, hidpp.Response("0102000300040005", 0x0420, "010200"), 3, 4, 5],
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x20, hidpp.Response("0102000700080009", 0x0420, "010200"), 7, 8, 9],
+    ],
+)
+def test_LEDEffectInfo(feature, function, response, ID, capabilities, period):
+    device = hidpp.Device(feature=feature, responses=[response])
+
+    info = hidpp20.LEDEffectInfo(feature, function, device, 1, 2)
+
+    assert info.zindex == 1
+    assert info.index == 2
+    assert info.ID == ID
+    assert info.capabilities == capabilities
+    assert info.period == period
+
+
+zone_responses_1 = [
+    hidpp.Response("00000102", 0x0410, "00FF00"),
+    hidpp.Response("0000000300040005", 0x0420, "000000"),
+    hidpp.Response("0001000B00080009", 0x0420, "000100"),
+]
+zone_responses_2 = [
+    hidpp.Response("0000000102", 0x0400, "00FF00"),
+    hidpp.Response("0000000300040005", 0x0400, "000000"),
+    hidpp.Response("0001000200080009", 0x0400, "000100"),
+]
+
+
+@pytest.mark.parametrize(
+    "feature, function, offset, effect_function, responses, index, location, count, id_1",
+    [
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, zone_responses_1, 0, 1, 2, 0xB],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, zone_responses_2, 0, 1, 2, 2],
+    ],
+)
+def test_LEDZoneInfo(feature, function, offset, effect_function, responses, index, location, count, id_1):
+    device = hidpp.Device(feature=feature, responses=responses)
+
+    zone = hidpp20.LEDZoneInfo(feature, function, offset, effect_function, device, index)
+
+    assert zone.index == index
+    assert zone.location == location
+    assert zone.count == count
+    assert len(zone.effects) == count
+    assert zone.effects[1].ID == id_1
+
+
+@pytest.mark.parametrize(
+    "responses, setting, expected_command",
+    [
+        [zone_responses_1, hidpp20.LEDEffectSetting(ID=0), None],
+        [zone_responses_1, hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50), "000000000000000020500000"],
+        [zone_responses_1, hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20), "000180808000002000000000"],
+    ],
+)
+def test_LEDZoneInfo_to_command(responses, setting, expected_command):
+    device = hidpp.Device(feature=hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, responses=responses)
+    zone = hidpp20.LEDZoneInfo(hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, 0)
+
+    command = zone.to_command(setting)
+
+    assert command == (bytes.fromhex(expected_command) if expected_command is not None else None)
+
+
+effects_responses_1 = [hidpp.Response("0100000001", 0x0400)] + zone_responses_1
+effects_responses_2 = [hidpp.Response("FFFF0100000001", 0x0400, "FFFF00")] + zone_responses_2
+
+
+@pytest.mark.parametrize(
+    "feature, cls, responses, readable, count, count_0",
+    [
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, hidpp20.LEDEffectsInfo, effects_responses_1, 1, 1, 2],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, effects_responses_2, 1, 1, 2],
+    ],
+)
+def test_LEDEffectsInfo(feature, cls, responses, readable, count, count_0):
+    device = hidpp.Device(feature=feature, responses=responses)
+
+    effects = cls(device)
+
+    assert effects.readable == readable
+    assert effects.count == count
+    assert effects.zones[0].count == count_0
