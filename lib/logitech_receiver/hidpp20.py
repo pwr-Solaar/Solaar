@@ -921,7 +921,10 @@ LEDParamSize = {
     LEDParam.ramp: 1,
     LEDParam.form: 1,
 }
-LEDEffects = {  # Wave=0x04, Stars=0x05, Press=0x06, Audio=0x07,   # not implemented
+# not implemented from x8070 Wave=4, Stars=5, Press=6, Audio=7
+# not implemented from x8071 Custom=12, Kitt=13, Decomposition=14, FrameActive=15, FramePassive=16,
+#  HSVPulsing=20, CycleC=21, WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
+LEDEffects = {
     0x0: [_NamedInt(0x0, _("Disabled")), {}],
     0x1: [_NamedInt(0x1, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
     0x2: [_NamedInt(0x2, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
@@ -981,8 +984,8 @@ _yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
 
 
 class LEDEffectInfo:  # an effect that a zone can do
-    def __init__(self, device, zindex, eindex):
-        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x20, zindex, eindex)
+    def __init__(self, feature, function, device, zindex, eindex):
+        info = device.feature_request(feature, function, zindex, eindex, 0x00)
         self.zindex, self.index, self.ID, self.capabilities, self.period = _unpack("!BBHHH", info[0:8])
 
     def __str__(self):
@@ -1005,34 +1008,35 @@ LEDZoneLocations[0x0B] = _("Primary 6")
 
 
 class LEDZoneInfo:  # effects that a zone can do
-    def __init__(self, device, index):
-        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x10, index)
-        self.index, self.location, self.count = _unpack("!BHB", info[0:4])
+    def __init__(self, feature, function, offset, effect_function, device, index):
+        info = device.feature_request(feature, function, index, 0xFF, 0x00)
+        self.location, self.count = _unpack("!HB", info[1 + offset : 4 + offset])
+        self.index = index
         self.location = LEDZoneLocations[self.location] if LEDZoneLocations[self.location] else self.location
         self.effects = []
         for i in range(0, self.count):
-            self.effects.append(LEDEffectInfo(device, index, i))
+            self.effects.append(LEDEffectInfo(feature, effect_function, device, index, i))
 
     def to_command(self, setting):
         for i in range(0, len(self.effects)):
             e = self.effects[i]
             if e.ID == setting.ID:
-                return _int2bytes(self.index) + _int2bytes(i) + setting.to_bytes()[1:]
+                return _int2bytes(self.index, 1) + _int2bytes(i, 1) + setting.to_bytes()[1:]
         return None
 
     def __str__(self):
         return f"LEDZoneInfo({self.index}, {self.location}, {[str(z) for z in self.effects]}"
 
 
-class LEDEffectsInfo:  # effects that the LEDs can do
+class LEDEffectsInfo:  # effects that the LEDs can do, using COLOR_LED_EFFECTS
     def __init__(self, device):
-        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
         self.device = device
+        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
         self.count, _, capabilities = _unpack("!BHH", info[0:5])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
-            self.zones.append(LEDZoneInfo(device, i))
+            self.zones.append(LEDZoneInfo(FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, i))
 
     def to_command(self, index, setting):
         return self.zones[index].to_command(setting)
@@ -1040,6 +1044,17 @@ class LEDEffectsInfo:  # effects that the LEDs can do
     def __str__(self):
         zones = "\n".join([str(z) for z in self.zones])
         return f"LEDEffectsInfo({self.device}, readable {self.readable}\n{zones})"
+
+
+class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_EFFECTS
+    def __init__(self, device):
+        self.device = device
+        info = device.feature_request(FEATURE.RGB_EFFECTS, 0x00, 0xFF, 0xFF, 0x00)
+        _, _, self.count, _, capabilities = _unpack("!BBBHH", info[0:7])
+        self.readable = capabilities & 0x1
+        self.zones = []
+        for i in range(0, self.count):
+            self.zones.append(LEDZoneInfo(FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
 
 
 ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
