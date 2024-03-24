@@ -773,7 +773,10 @@ class DpiSlidingXY(_RawXYProcessing):
 
     def displayNewDpi(self, newDpiIdx):
         if _notify.available:
-            reason = f"DPI {int(self.dpiChoices[newDpiIdx])} [min {int(self.dpiChoices[0])}, max {int(self.dpiChoices[-1])}]"
+            selected_dpi = self.dpiChoices[newDpiIdx]
+            min_dpi = self.dpiChoices[0]
+            max_dpi = self.dpiChoices[-1]
+            reason = f"DPI {selected_dpi} [min {min_dpi}, max {max_dpi}]"
             _notify.show(self.device, reason)
 
     def press_action(self, key):  # start tracking
