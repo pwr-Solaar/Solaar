@@ -310,7 +310,7 @@ tests = [
             hidpp20.LEDEffectSetting(ID=3, intensity=0x50, period=0x100),
             hidpp20.LEDEffectSetting(ID=2, color=0x505050, speed=0x50),
             0x10,
-            "000150505050000000000000",
+            "00015050505000000000000001",
         ),
         hidpp.Response("040003", 0x0000, "8071"),  # RGB_EFFECTS
         hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
@@ -318,7 +318,7 @@ tests = [
         hidpp.Response("0000000300040005", 0x0400, "000000"),
         hidpp.Response("0001000200080009", 0x0400, "000100"),
         hidpp.Response("000000000000010050", 0x04E0, "00"),
-        hidpp.Response("000150505050000000000000", 0x0410, "000150505050000000000000"),
+        hidpp.Response("00015050505000000000000001", 0x0410, "00015050505000000000000001"),
     ],
     [
         FeatureTest(
@@ -326,14 +326,14 @@ tests = [
             None,
             hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
             0x10,
-            "000000000000000101600000",
+            "00000000000000010160000001",
         ),
         hidpp.Response("040003", 0x0000, "8071"),  # RGB_EFFECTS
         hidpp.Response("FFFF0100000001", 0x0400, "FFFF00"),
         hidpp.Response("0000000102", 0x0400, "00FF00"),
         hidpp.Response("0000000300040005", 0x0400, "000000"),
         hidpp.Response("0001000200080009", 0x0400, "000100"),
-        hidpp.Response("000000000000000101600000", 0x0410, "000000000000000101600000"),
+        hidpp.Response("00000000000000010160000001", 0x0410, "00000000000000010160000001"),
     ],
     [
         FeatureTest(
@@ -341,7 +341,7 @@ tests = [
             None,
             hidpp20.LEDEffectSetting(ID=3, intensity=0x60, period=0x101),
             0x10,
-            "000200000000000101600000",
+            "00020000000000010160000001",
         ),
         hidpp.Response("0A0000", 0x0000, "8071"),  # RGB_EFFECTS
         hidpp.Response("FF000200020004000000000000000000", 0x0A00, "FFFF00"),
@@ -358,7 +358,7 @@ tests = [
         hidpp.Response("01040004DCE1001E0000000000000000", 0x0A00, "010400"),
         hidpp.Response("0105000B000000320000000000000000", 0x0A00, "010500"),
         hidpp.Response("0106000C001B02340000000000000000", 0x0A00, "010600"),
-        hidpp.Response("000200000000000101600000", 0x0A10, "000200000000000101600000"),
+        hidpp.Response("00020000000000010160000001", 0x0A10, "00020000000000010160000001"),
     ],
 ]
 
