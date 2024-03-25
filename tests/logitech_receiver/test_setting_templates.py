@@ -381,18 +381,20 @@ simple_tests = [
         hidpp.Response("05", 0x0C30, "05"),
     ),
     Setup(
-        FeatureTest(settings_templates.AdjustableDpi, 800, 400, version=0x03),
+        FeatureTest(settings_templates.AdjustableDpi, 800, 400, 0x30, "000190"),
         common.NamedInts.list([400, 800, 1600]),
-        hidpp.Response("000190032006400000000000000000", 0x0410),
+        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
+        hidpp.Response("000190032006400000", 0x0410, "000000"),
         hidpp.Response("000320", 0x0420),
         hidpp.Response("000190", 0x0430, "000190"),
     ),
     Setup(
-        FeatureTest(settings_templates.AdjustableDpi, 1600, 400, version=0x03),
-        common.NamedInts.list([400, 800, 1600]),
-        hidpp.Response("000190032006400000000000000000", 0x0410),
-        hidpp.Response("0000000640", 0x0420),
-        hidpp.Response("000190", 0x0430, "000190"),
+        FeatureTest(settings_templates.AdjustableDpi, 256, 512, 0x30, "000200"),
+        common.NamedInts.list([256, 512]),
+        hidpp.Response("040003", 0x0000, "2201"),  # ADJUSTABLE_DPI
+        hidpp.Response("000100e10002000000", 0x0410, "000000"),
+        hidpp.Response("000100", 0x0420),
+        hidpp.Response("000200", 0x0430, "000200"),
     ),
     Setup(
         FeatureTest(settings_templates.AdjustableDpi, 400, 800, version=0x03),
@@ -401,26 +403,31 @@ simple_tests = [
         hidpp.Response("000190", 0x0420),
         hidpp.Response("000320", 0x0430, "000320"),
     ),
-    #    Setup(
-    #        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, version=0x09),
-    #        common.NamedInts.list([256, 512]),
-    #        hidpp.Response("000000", 0x0910, "00"),  # no y direction
-    #        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
-    #        hidpp.Response("000100", 0x0950),
-    #        hidpp.Response("000200", 0x0960, "000200"),
-    #    ),
-    #    Setup(
-    #        FeatureTest(settings_templates.ExtendedAdjustableDpi, 0x64, 0x164, version=0x09),
-    #        common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
-    #        hidpp.Response("000001", 0x0910, "00"),  # supports y direction
-    #        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
-    #        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
-    #        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
-    #        hidpp.Response("000064", 0x0950),
-    #        hidpp.Response("0001640164", 0x0960, "0001640164"),
-    #    ),
     Setup(
-        FeatureTest(settings_templates.Multiplatform, 0, 1),
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, 0x60, "000200"),
+        common.NamedInts.list([256, 512]),
+        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
+        hidpp.Response("000000", 0x0910, "00"),  # no y direction
+        hidpp.Response("0000000100e10002000000", 0x0920, "000000"),
+        hidpp.Response("000100", 0x0950),
+        hidpp.Response("000200", 0x0960, "000200"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.ExtendedAdjustableDpi, 0x64, 0x164, 0x60, "0001640164"),
+        common.NamedInts.list([0x064, 0x074, 0x084, 0x0A4, 0x0C4, 0x0E4, 0x0124, 0x0164, 0x01C4]),
+        hidpp.Response("090000", 0x0000, "2202"),  # EXTENDED_ADJUSTABLE_DPI
+        hidpp.Response("000001", 0x0910, "00"),  # supports y direction
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000000"),
+        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000001"),
+        hidpp.Response("00000000000000000000000000000000", 0x0920, "000002"),
+        hidpp.Response("0000000064E0100084E02000C4E02000", 0x0920, "000100"),
+        hidpp.Response("000001E4E0400124E0400164E06001C4", 0x0920, "000101"),
+        hidpp.Response("00000000000000000000000000000000", 0x0920, "000102"),
+        hidpp.Response("000064", 0x0950),
+        hidpp.Response("0001640164", 0x0960, "0001640164"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.Multiplatform, 0, 1, 0x30, "FF01"),
         common.NamedInts(**{"MacOS 0.1-0.5": 0, "iOS 0.1-0.7": 1, "Linux 0.2-0.9": 2, "Windows 0.3-0.9": 3}),
         hidpp.Response("020004000001", 0x0400),
         hidpp.Response("00FF200000010005", 0x0410, "00"),
