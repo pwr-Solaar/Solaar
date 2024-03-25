@@ -505,6 +505,9 @@ class NamedInts:
     def __or__(self, other):
         return NamedInts(**self.__dict__, **other.__dict__)
 
+    def __eq__(self, other):
+        return type(self) == type(other) and self._values == other._values
+
 
 class UnsortedNamedInts(NamedInts):
     def _sort_values(self):

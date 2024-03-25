@@ -136,7 +136,8 @@ class Device:
     codename: str = "TESTC"
     responses: Any = field(default_factory=list)
     feature: Optional[int] = None
-    features: Any = None
+    offset: Optional[int] = 4
+    version: Optional[int] = 0
     setting_callback: Any = None
     _backlight = _keys = _remap_keys = _led_effects = None
 
@@ -150,15 +151,15 @@ class Device:
     def __post_init__(self):
         self.persister = configuration._DeviceEntry()
         self.features = hidpp20.FeaturesArray(self)
-        self.responses += [Response("010001", 0x0000, "0001"), Response("20", 0x0100)]
+        self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
         if self.feature is not None:
-            self.responses.append(Response("040001", 0x0000, f"{self.feature:0>4X}"))
+            self.responses.append(Response(f"{self.offset:0>2X}00{self.version:0>2X}", 0x0000, f"{self.feature:0>4X}"))
 
     def request(self, id, *params, no_reply=False):
         if params is None:
             params = []
         params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
-        print("REQUEST ", self.name, hex(id), params.hex())
+        print("REQUEST ", self.name, hex(id), params.hex().upper())
         for r in self.responses:
             if id == r.id and params == bytes.fromhex(r.params):
                 print("RESPONSE", self.name, hex(r.id), r.params, r.response)
