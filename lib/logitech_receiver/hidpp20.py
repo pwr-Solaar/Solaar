@@ -1377,6 +1377,79 @@ _yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 #
 
 
+class ExtendedDpi:
+    """Information about the DPI possibilities from EXTENDED_ADJUSTABLE_DPI feature"""
+
+    def __init__(self, device):
+        self._device = device
+        self.has_y = False
+        reply = device.feature_request(FEATURE.EXTENDED_ADJUSTABLE_DPI.feature, 0x10, 0x00)
+        self.levels = reply[1]
+        self.has_y = bool(reply[2] & 0x01)
+        self.has_lod = bool(reply[2] & 0x02)
+        self.has_profile = bool(reply[2] & 0x08)
+        dpilist_x = self.produce_dpi_list(FEATURE.EXTENDED_ADJUSTABLE_DPI, 0x20, device, 0)
+        dpilist_y = self.produce_dpi_list(FEATURE.EXTENDED_ADJUSTABLE_DPI, 0x20, device, 1) if self.has_y else []
+        print("DPY LIST X", dpilist_x)
+        print("DPY LIST Y", dpilist_y)
+        self.read()
+
+    @staticmethod
+    def produce_dpi_list(feature, function, device, direction):
+        reply = device.feature_request(feature, function, 0x00, direction, 0x00)
+        assert reply, "Oops, DPI list cannot be retrieved!"
+        dpi_bytes = reply[3:]
+        i = 1
+        while dpi_bytes[-2:] != b"\x00\x00":
+            reply = device.feature_request(feature, function, 0x00, direction, i)
+            assert reply, "Oops, DPI list cannot be retrieved!"
+            dpi_bytes += reply[3:]
+            i += 1
+        dpi_list = []
+        i = 0
+        while i < len(dpi_bytes):
+            val = _bytes2int(dpi_bytes[i : i + 2])
+            if val == 0:
+                break
+            if val >> 13 == 0b111:
+                step = val & 0x1FFF
+                last = _bytes2int(dpi_bytes[i + 2 : i + 4])
+                assert len(dpi_list) > 0 and last > dpi_list[-1], f"Invalid DPI list item: {val!r}"
+                dpi_list += range(dpi_list[-1] + step, last + 1, step)
+                i += 4
+            else:
+                dpi_list.append(val)
+                i += 2
+        return dpi_list
+
+    def read_list(self, reply, size):
+        list = []
+        for i in range(0, self.levels * size + 1, size):
+            if reply[i : i + 1] != b"\x00\x00":
+                list.append(_bytes2int(reply[i : i + size]))
+        return list
+
+    def read(self):
+        reply = self._device.feature_request(self.feature, 0x50, 0x00)
+        self.x = _bytes2int(reply[1:3])
+        self.y = _bytes2int(reply[5:7])
+        self.lod = reply[9]
+        self.default_x = _bytes2int(reply[3:5])
+        self.default_y = _bytes2int(reply[7:9])
+        self.x_list = self.read_list(self._device.feature_request(self.feature, 0x30, 0x00, 0)[2:], 2)
+        self.y_list = self.read_list(self._device.feature_request(self.feature, 0x30, 0x00, 1)[2:], 2)
+        self.lod_list = self.read_list(self._device.feature_request(self.feature, 0x40, 0x00)[1:], 1)
+
+    def set(self, x, y, lod):
+        self.x = x
+        self.y = y
+        self.lod = lod
+
+    def write_current(self):
+        data_bytes = _int2bytes(self.x, 2) + _int2bytes(self.y, 2) + _int2bytes(self.lod, 1)
+        return self._device.feature_request(self.feature, 0x60, 0x00, data_bytes)
+
+
 def feature_request(device, feature, function=0x00, *params, no_reply=False):
     if device.online and device.features:
         if feature in device.features:

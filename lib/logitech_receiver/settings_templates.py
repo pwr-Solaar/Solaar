@@ -932,70 +932,47 @@ class DivertKeys(_Settings):
             return validator
 
 
-class AdjustableDpi(_Setting):
-    """Pointer Speed feature"""
+def produce_dpi_list(feature, function, ignore, device, direction):
+    dpi_bytes = b""
+    for i in range(0, 0x100):  # there will be only a very few iterations performed
+        reply = device.feature_request(feature, function, 0x00, direction, i)
+        assert reply, "Oops, DPI list cannot be retrieved!"
+        dpi_bytes += reply[ignore:]
+        if dpi_bytes[-2:] == b"\x00\x00":
+            break
+    dpi_list = []
+    i = 0
+    while i < len(dpi_bytes):
+        val = _bytes2int(dpi_bytes[i : i + 2])
+        if val == 0:
+            break
+        if val >> 13 == 0b111:
+            step = val & 0x1FFF
+            last = _bytes2int(dpi_bytes[i + 2 : i + 4])
+            assert len(dpi_list) > 0 and last > dpi_list[-1], f"Invalid DPI list item: {val!r}"
+            dpi_list += range(dpi_list[-1] + step, last + 1, step)
+            i += 4
+        else:
+            dpi_list.append(val)
+            i += 2
+    return dpi_list
 
-    # Assume sensorIdx 0 (there is only one sensor)
+
+class AdjustableDpi(_Setting):
     name = "dpi"
     label = _("Sensitivity (DPI)")
     description = _("Mouse movement sensitivity")
     feature = _F.ADJUSTABLE_DPI
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = _NamedInts.range(100, 4000, str, 50)
-    sensor_list_function = 0x10
-    sensor_list_bytes_ignore = 1
 
     class validator_class(_ChoicesV):
-        @staticmethod
-        def produce_dpi_list(setting_class, device, direction):
-            reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, direction, 0x00)
-            assert reply, "Oops, DPI list cannot be retrieved!"
-            dpi_bytes = reply[setting_class.sensor_list_bytes_ignore :]
-            i = 1
-            while dpi_bytes[-2:] != b"\x00\x00":
-                reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, direction, i)
-                assert reply, "Oops, DPI list cannot be retrieved!"
-                dpi_bytes += reply[setting_class.sensor_list_bytes_ignore :]
-                i += 1
-            dpi_list = []
-            i = 0
-            while i < len(dpi_bytes):
-                val = _bytes2int(dpi_bytes[i : i + 2])
-                if val == 0:
-                    break
-                if val >> 13 == 0b111:
-                    step = val & 0x1FFF
-                    last = _bytes2int(dpi_bytes[i + 2 : i + 4])
-                    assert len(dpi_list) > 0 and last > dpi_list[-1], f"Invalid DPI list item: {val!r}"
-                    dpi_list += range(dpi_list[-1] + step, last + 1, step)
-                    i += 4
-                else:
-                    dpi_list.append(val)
-                    i += 2
-            return dpi_list
-
         @classmethod
         def build(cls, setting_class, device):
-            y = False
-            if setting_class.feature == _F.EXTENDED_ADJUSTABLE_DPI:
-                reply = device.feature_request(setting_class.feature, 0x10, 0x00)
-                y = reply[2] & 0x01
-            reply = device.feature_request(setting_class.feature, setting_class.sensor_list_function, 0x00, 0x00, 0x00)
-            assert reply, "Oops, DPI list cannot be retrieved!"
-            dpilist_x = cls.produce_dpi_list(setting_class, device, 0)
-            dpilist_y = cls.produce_dpi_list(setting_class, device, 1) if y else []
-            print("DPY LIST X", dpilist_x)
-            print("DPY LIST Y", dpilist_y)
-            setting = cls(choices=_NamedInts.list(dpilist_x), byte_count=2, write_prefix_bytes=b"\x00") if dpilist_x else None
-            setting.y = y
+            dpilist = produce_dpi_list(setting_class.feature, 0x10, 1, device, 0)
+            setting = cls(choices=_NamedInts.list(dpilist), byte_count=2, write_prefix_bytes=b"\x00") if dpilist else None
+            setting.dpilist = dpilist
             return setting
-
-        def prepare_write(self, new_value, current_value=None):
-            data_bytes = super().prepare_write(new_value, current_value)
-            if self.y:
-                bytes = data_bytes[len(self._write_prefix_bytes) :]
-                data_bytes = self._write_prefix_bytes + bytes + bytes
-            return data_bytes
 
         def validate_read(self, reply_bytes):  # special validator to use default DPI if needed
             reply_value = _bytes2int(reply_bytes[1:3])
@@ -1006,14 +983,80 @@ class AdjustableDpi(_Setting):
             return valid_value
 
 
-class ExtendedAdjustableDpi(AdjustableDpi):
-    # the extended version allows for two dimensions, longer dpi descriptions
-    # still assume only one sensor (and X only?)
+class ExtendedAdjustableDpi(_Setting):
+    # the extended version allows for two dimensions, longer dpi descriptions, but still assume only one sensor
     name = "dpi_extended"
+    label = _("Sensitivity (DPI)")
+    description = _("Mouse movement sensitivity") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     feature = _F.EXTENDED_ADJUSTABLE_DPI
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x60}
-    sensor_list_function = 0x20
-    sensor_list_bytes_ignore = 3
+    keys_universe = _NamedInts(X=0, Y=1, LOD=2)
+    choices_universe = _NamedInts.range(100, 4000, str, 50)
+    choices_universe[0] = "LOW"
+    choices_universe[1] = "MEDIUM"
+    choices_universe[2] = "HIGH"
+    keys = _NamedInts(X=0, Y=1, LOD=2)
+
+    def write_key_value(self, key, value, save=True):
+        if isinstance(self._value, dict):
+            self._value[key] = value
+        else:
+            self._value = {key: value}
+        result = self.write(self._value, save)
+        return result[key] if isinstance(result, dict) else result
+
+    class validator_class(_ChoicesMapV):
+        @classmethod
+        def build(cls, setting_class, device):
+            reply = device.feature_request(setting_class.feature, 0x10, 0x00)
+            y = bool(reply[2] & 0x01)
+            lod = bool(reply[2] & 0x02)
+            choices_map = {}
+            dpilist_x = produce_dpi_list(setting_class.feature, 0x20, 3, device, 0)
+            choices_map[setting_class.keys["X"]] = _NamedInts.list(dpilist_x)
+            if y:
+                dpilist_y = produce_dpi_list(setting_class.feature, 0x20, 3, device, 1)
+                choices_map[setting_class.keys["Y"]] = _NamedInts.list(dpilist_y)
+            if lod:
+                choices_map[setting_class.keys["LOD"]] = _NamedInts(LOW=0, MEDIUM=1, HIGH=2)
+            validator = cls(choices_map=choices_map, byte_count=2, write_prefix_bytes=b"\x00")
+            validator.y = y
+            validator.lod = lod
+            validator.keys = setting_class.keys
+            return validator
+
+        def validate_read(self, reply_bytes):  # special validator to read entire setting
+            dpi_x = _bytes2int(reply_bytes[3:5]) if reply_bytes[1:3] == 0 else _bytes2int(reply_bytes[1:3])
+            assert dpi_x in self.choices[0], f"{self.__class__.__name__}: failed to validate dpi_x value {dpi_x:04X}"
+            value = {self.keys["X"]: dpi_x}
+            if self.y:
+                dpi_y = _bytes2int(reply_bytes[7:9]) if reply_bytes[5:7] == 0 else _bytes2int(reply_bytes[5:7])
+                assert dpi_y in self.choices[1], f"{self.__class__.__name__}: failed to validate dpi_y value {dpi_y:04X}"
+                value[self.keys["Y"]] = dpi_y
+            if self.lod:
+                lod = reply_bytes[9]
+                assert lod in self.choices[2], f"{self.__class__.__name__}: failed to validate lod value {lod:02X}"
+                value[self.keys["LOD"]] = lod
+            return value
+
+        def prepare_write(self, new_value, current_value=None):  # special preparer to write entire setting
+            data_bytes = self._write_prefix_bytes
+            if new_value[self.keys["X"]] not in self.choices[self.keys["X"]]:
+                raise ValueError(f"invalid value {new_value!r}")
+            data_bytes += _int2bytes(new_value[0], 2)
+            if self.y:
+                if new_value[self.keys["Y"]] not in self.choices[self.keys["Y"]]:
+                    raise ValueError(f"invalid value {new_value!r}")
+                data_bytes += _int2bytes(new_value[self.keys["Y"]], 2)
+            else:
+                data_bytes += b"\x00\x00"
+            if self.lod:
+                if new_value[self.keys["LOD"]] not in self.choices[self.keys["LOD"]]:
+                    raise ValueError(f"invalid value {new_value!r}")
+                data_bytes += _int2bytes(new_value[self.keys["LOD"]], 1)
+            else:
+                data_bytes += b"\x00"
+            return data_bytes
 
 
 class SpeedChange(_Setting):
