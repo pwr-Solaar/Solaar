@@ -51,7 +51,7 @@ connect via a USB cable or via bluetooth can be determined by their USB or
 Bluetooth product ID.
 
 
-# Pairing and Unpairing
+## Pairing and Unpairing
 
 Solaar is able to pair and unpair devices with
 receivers as supported by the device and receiver.
@@ -173,6 +173,18 @@ When the button is released a `MOUSE_GESTURE` notification with the mouse moveme
 is sent to the Solaar rule system so that rules can detect these notifications.
 For more information on Mouse Gestures rule conditions see
 [the rules page](https://pwr-solaar.github.io/Solaar/rules).
+
+### Keyboard Key Names and Locations
+
+Solaar uses the standard Logitech names for keyboard keys.  Some Logitech keyboards have different icons on some of their keys and have different functionality than suggested by these names.
+
+Solaar is uses the standard US keyboard layout.  This currently only matters for the `Per-key Lighting` setting.  Users who want to have the key names for this setting reflect the keyboard layout that they use can create and edit `~/.config/solaar/keys.yaml` which contains a YAML dictionary of key names and locations.  For example, switching the `Y` and `Z` keys can be done  as:
+
+	Z: 25
+	Y: 26
+
+This is an experimental feature and may be modified or even eliminated.
+
 
 ### Device Profiles
 
