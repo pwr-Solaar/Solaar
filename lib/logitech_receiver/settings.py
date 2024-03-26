@@ -1280,7 +1280,7 @@ class PackedRangeValidator(Validator):
     def prepare_write(self, new_values):
         if len(new_values) != self.count:
             raise ValueError(f"wrong number of values {new_values!r}")
-        for new_value in new_values:
+        for new_value in new_values.values():
             if new_value < self.min_value or new_value > self.max_value:
                 raise ValueError(f"invalid value {new_value!r}")
         bytes = self.write_prefix_bytes + b"".join(_int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count))
