@@ -555,13 +555,6 @@ class ReportRate(_Setting):
     choices_universe[7] = "7ms"
     choices_universe[8] = "8ms"
 
-    class _rw_class(_FeatureRW):  # no longer needed - set Onboard Profiles to disable
-        def write(self, device, data_bytes):
-            # Host mode is required for report rate to be adjustable
-            if _hidpp20.get_onboard_mode(device) != _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
-                _hidpp20.set_onboard_mode(device, _hidpp20_constants.ONBOARD_MODES.MODE_HOST)
-            return super().write(device, data_bytes)
-
     class validator_class(_ChoicesV):
         @classmethod
         def build(cls, setting_class, device):
@@ -593,18 +586,6 @@ class ExtendedReportRate(_Setting):
     choices_universe[4] = "500us"
     choices_universe[5] = "250us"
     choices_universe[6] = "125us"
-
-    class _rw_class(_FeatureRW):
-        def read(self, device, data_bytes=b""):
-            # need connection type from device to get actual report rate
-            self.read_prefix = b"\x00" if device.receiver else b"\x01"
-            super().read(device, data_bytes)
-
-        def write(self, device, data_bytes):
-            # Host mode is required for report rate to be adjustable
-            if _hidpp20.get_onboard_mode(device) != _hidpp20_constants.ONBOARD_MODES.MODE_HOST:
-                _hidpp20.set_onboard_mode(device, _hidpp20_constants.ONBOARD_MODES.MODE_HOST)
-            return super().write(device, data_bytes)
 
     class validator_class(_ChoicesV):
         @classmethod
