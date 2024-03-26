@@ -32,7 +32,7 @@ from logitech_receiver import special_keys
 from . import hidpp
 
 # TODO DpiSlidingXY, MouseGesturesXY, SpeedChange
-# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params, MKeyLEDs, Equalizer
+# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params
 
 
 class Setup:
@@ -240,6 +240,11 @@ simple_tests = [
         hidpp.Response("01", 0x0420, "01"),
     ),
     Setup(
+        FeatureTest(settings_templates.MKeyLEDs, {1: False, 2: False, 4: False}, {1: False, 2: True, 4: True}),
+        hidpp.Response("03", 0x0400),
+        hidpp.Response("06", 0x0410, "06"),
+    ),
+    Setup(
         FeatureTest(settings_templates.MRKeyLED, False, True),
         hidpp.Response("01", 0x0400, "01"),
     ),
@@ -375,20 +380,27 @@ simple_tests = [
         hidpp.Response("01", 0x0C20),
         hidpp.Response("05", 0x0C30, "05"),
     ),
-    #    Setup(
-    #        FeatureTest(settings_templates.AdjustableDpi, 800, 400, version=0x03),
-    #        common.NamedInts.list([400, 800, 1600]),
-    #        hidpp.Response("000190032006400000", 0x0410, "000000"),
-    #        hidpp.Response("000320", 0x0420),
-    #        hidpp.Response("000190", 0x0430, "000190"),
-    #    ),
-    #    Setup(
-    #        FeatureTest(settings_templates.AdjustableDpi, 256, 512, version=0x03),
-    #        common.NamedInts.list([256, 512]),
-    #        hidpp.Response("000100e10002000000", 0x0410, "000000"),
-    #        hidpp.Response("000100", 0x0420),
-    #        hidpp.Response("000200", 0x0430, "000200"),
-    #    ),
+    Setup(
+        FeatureTest(settings_templates.AdjustableDpi, 800, 400, version=0x03),
+        common.NamedInts.list([400, 800, 1600]),
+        hidpp.Response("000190032006400000000000000000", 0x0410),
+        hidpp.Response("000320", 0x0420),
+        hidpp.Response("000190", 0x0430, "000190"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.AdjustableDpi, 1600, 400, version=0x03),
+        common.NamedInts.list([400, 800, 1600]),
+        hidpp.Response("000190032006400000000000000000", 0x0410),
+        hidpp.Response("0000000640", 0x0420),
+        hidpp.Response("000190", 0x0430, "000190"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.AdjustableDpi, 400, 800, version=0x03),
+        common.NamedInts.list([400, 800, 1200, 1600]),
+        hidpp.Response("000190E19006400000000000000000", 0x0410),
+        hidpp.Response("000190", 0x0420),
+        hidpp.Response("000320", 0x0430, "000320"),
+    ),
     #    Setup(
     #        FeatureTest(settings_templates.ExtendedAdjustableDpi, 256, 512, version=0x09),
     #        common.NamedInts.list([256, 512]),
@@ -534,6 +546,13 @@ key_tests = [
         hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
     ),
     Setup(
+        FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 2}, 2, offset=0x05),
+        {common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Regular=0, Diverted=1, Mouse_Gestures=2)},
+        *responses_reprog_controls,
+        hidpp.Response("00C4300000", 0x0530, "00C4300000"),  # Smart Shift write
+        hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
+    ),
+    Setup(
         FeatureTest(settings_templates.PersistentRemappableAction, {80: 16797696, 81: 16797696}, {0x51: 16797952}, 3),
         {
             common.NamedInt(80, "Left Button"): special_keys.KEYS_KEYS_CONSUMER,
@@ -551,6 +570,24 @@ key_tests = [
         hidpp.Response("0050FF01005000", 0x0440, "0050FF01005000"),  # left button write
         hidpp.Response("0051FF01005000", 0x0440, "0051FF01005000"),  # right button write
         hidpp.Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set write
+    ),
+    Setup(
+        FeatureTest(settings_templates.Equalizer, {0: 0x10, 1: 0x14}, {1: 0x20}, 2),
+        [16, 32],
+        hidpp.Response("0220001020", 0x0400),
+        hidpp.Response("0001000200000000000000", 0x0410, "00"),
+        hidpp.Response("1014", 0x0420, "00"),
+        hidpp.Response("1014", 0x0430, "021014"),
+        hidpp.Response("1020", 0x0430, "021020"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.Equalizer, {0: -0x20, 1: 0x10}, {1: 0x18}, 2),
+        [-32, 32],
+        hidpp.Response("0220000000", 0x0400),
+        hidpp.Response("0000800100000000000000", 0x0410, "00"),
+        hidpp.Response("E010", 0x0420, "00"),
+        hidpp.Response("E010", 0x0430, "02E010"),
+        hidpp.Response("E018", 0x0430, "02E018"),
     ),
     Setup(
         FeatureTest(
@@ -589,7 +626,11 @@ def test_key_template(test, mocker):
     assert setting
     if isinstance(setting, list):
         setting = setting[0]
-    assert setting.choices == test.choices
+    if isinstance(test.choices, dict):
+        assert setting.choices == test.choices
+    elif isinstance(test.choices, list):
+        assert setting._validator.min_value == test.choices[0]
+        assert setting._validator.max_value == test.choices[1]
 
     value = setting.read(cached=False)
     assert value == tst.initial_value

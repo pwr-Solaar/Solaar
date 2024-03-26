@@ -139,7 +139,8 @@ class Device:
     offset: Optional[int] = 4
     version: Optional[int] = 0
     setting_callback: Any = None
-    _backlight = _keys = _remap_keys = _led_effects = None
+    settings = []
+    sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = None
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register
@@ -154,6 +155,9 @@ class Device:
         self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
         if self.feature is not None:
             self.responses.append(Response(f"{self.offset:0>2X}00{self.version:0>2X}", 0x0000, f"{self.feature:0>4X}"))
+        if self.setting_callback is None:
+            self.setting_callback = lambda x, y, z: None
+        self.add_notification_handler = lambda x, y: None
 
     def request(self, id, *params, no_reply=False):
         if params is None:
