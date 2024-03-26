@@ -1579,7 +1579,7 @@ class PerKeyLighting(_Settings):
     label = _("Per-key Lighting")
     description = _("Control per-key lighting.")
     feature = _F.PER_KEY_LIGHTING_V2
-    keys_universe = _NamedInts.range(1, 254)
+    keys_universe = _special_keys.KEYCODES
     choices_universe = _special_keys.COLORS
 
     def read(self, cached=True):
@@ -1607,7 +1607,7 @@ class PerKeyLighting(_Settings):
         return map
 
     def write_key_value(self, key, value, save=True):
-        result = super().write_key_value(key, value, save)
+        result = super().write_key_value(int(key), value, save)
         if self._device.online:
             self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
         return result
@@ -1624,7 +1624,8 @@ class PerKeyLighting(_Settings):
             key_bitmap += device.feature_request(setting_class.feature, 0x00, 0x00, 0x02)[2:]
             for i in range(1, 255):
                 if (key_bitmap[i // 8] >> i % 8) & 0x01:
-                    choices_map[setting_class.keys_universe[i]] = setting_class.choices_universe
+                    key = setting_class.keys_universe[i] if i in setting_class.keys_universe else _NamedInt(i, "KEY " + str(i))
+                    choices_map[key] = setting_class.choices_universe
             result = cls(choices_map) if choices_map else None
             return result
 

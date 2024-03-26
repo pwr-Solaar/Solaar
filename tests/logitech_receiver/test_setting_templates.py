@@ -560,12 +560,12 @@ key_tests = [
             5,
         ),
         {
-            common.NamedInt(1, "1"): special_keys.COLORS,
-            common.NamedInt(2, "2"): special_keys.COLORS,
-            common.NamedInt(9, "9"): special_keys.COLORS,
-            common.NamedInt(10, "10"): special_keys.COLORS,
-            common.NamedInt(113, "113"): special_keys.COLORS,
-            common.NamedInt(114, "114"): special_keys.COLORS,
+            common.NamedInt(1, "A"): special_keys.COLORS,
+            common.NamedInt(2, "B"): special_keys.COLORS,
+            common.NamedInt(9, "I"): special_keys.COLORS,
+            common.NamedInt(10, "J"): special_keys.COLORS,
+            common.NamedInt(113, "KEY 113"): special_keys.COLORS,
+            common.NamedInt(114, "KEY 114"): special_keys.COLORS,
         },
         hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
         hidpp.Response("00000600000000000000000000000000", 0x0400, "0001"),  # second group of keys
@@ -586,7 +586,7 @@ def test_key_template(test, mocker):
     spy_request = mocker.spy(device, "request")
 
     setting = settings_templates.check_feature(device, tst.sclass)
-    assert setting is not None
+    assert setting
     if isinstance(setting, list):
         setting = setting[0]
     assert setting.choices == test.choices

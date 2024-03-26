@@ -17,8 +17,15 @@
 # Reprogrammable keys information
 # Mostly from Logitech documentation, but with some edits for better Lunix compatibility
 
+import os as _os
+
+import yaml as _yaml
+
 from .common import NamedInts as _NamedInts
 from .common import UnsortedNamedInts as _UnsortedNamedInts
+
+_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _os.path.expanduser(_os.path.join("~", ".config"))
+_keys_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
 
 # <controls.xml awk -F\" '/<Control /{sub(/^LD_FINFO_(CTRLID_)?/, "", $2);printf("\t%s=0x%04X,\n", $2, $4)}' | sort -t= -k2
 CONTROL = _NamedInts(
@@ -1392,3 +1399,139 @@ COLORS = _UnsortedNamedInts(
         "light green": 0x90EE90,
     }
 )
+
+KEYCODES = _NamedInts(
+    {
+        "A": 1,
+        "B": 2,
+        "C": 3,
+        "D": 4,
+        "E": 5,
+        "F": 6,
+        "G": 7,
+        "H": 8,
+        "I": 9,
+        "J": 10,
+        "K": 11,
+        "L": 12,
+        "M": 13,
+        "N": 14,
+        "O": 15,
+        "P": 16,
+        "Q": 17,
+        "R": 18,
+        "S": 19,
+        "T": 20,
+        "U": 21,
+        "V": 22,
+        "W": 23,
+        "X": 24,
+        "Y": 25,
+        "Z": 26,
+        "1": 27,
+        "2": 28,
+        "3": 29,
+        "4": 30,
+        "5": 31,
+        "6": 32,
+        "7": 33,
+        "8": 34,
+        "9": 35,
+        "0": 36,
+        "ENTER": 37,
+        "ESC": 38,
+        "BACKSPACE": 39,
+        "TAB": 40,
+        "SPACE": 41,
+        "-": 42,
+        "=": 43,
+        "[": 44,
+        "]": 45,
+        "\\": 45,
+        "~": 47,
+        ";": 48,
+        "'": 49,
+        "`": 50,
+        ",": 51,
+        ".": 52,
+        "/": 53,
+        "CAPS LOCK": 54,
+        "F1": 55,
+        "F2": 56,
+        "F3": 57,
+        "F4": 58,
+        "F5": 59,
+        "F6": 60,
+        "F7": 61,
+        "F8": 62,
+        "F9": 63,
+        "F10": 64,
+        "F11": 65,
+        "F12": 66,
+        "PRINT": 67,
+        "SCROLL LOCK": 68,
+        "PASTE": 69,
+        "INSERT": 70,
+        "HOME": 71,
+        "PAGE UP": 72,
+        "DELETE": 73,
+        "END": 74,
+        "PAGE DOWN": 75,
+        "RIGHT": 76,
+        "LEFT": 77,
+        "DOWN": 78,
+        "UP": 79,
+        "NUMLOCK": 80,
+        "KEYPAD /": 81,
+        "KEYPAD *": 82,
+        "KEYPAD -": 83,
+        "KEYPAD +": 84,
+        "KEYPAD ENTER": 85,
+        "KEYPAD 1": 86,
+        "KEYPAD 2": 87,
+        "KEYPAD 3": 88,
+        "KEYPAD 4": 89,
+        "KEYPAD 5": 90,
+        "KEYPAD 6": 91,
+        "KEYPAD 7": 92,
+        "KEYPAD 8": 93,
+        "KEYPAD 9": 94,
+        "KEYPAD 0": 95,
+        "KEYPAD .": 96,
+        "COMPOSE": 98,
+        "POWER": 99,
+        "LEFT CTRL": 104,
+        "LEFT SHIFT": 105,
+        "LEFT ALT": 106,
+        "LEFT WINDOWS": 107,
+        "RIGHT CTRL": 108,
+        "RIGHT SHIFT": 109,
+        "RIGHT ALTGR": 110,
+        "RIGHT WINDOWS": 111,
+        "BRIGHTNESS": 153,
+        "PAUSE": 155,
+        "MUTE": 156,
+        "NEXT": 157,
+        "PREVIOUS": 158,
+        "G1": 180,
+        "G2": 181,
+        "G3": 182,
+        "G4": 183,
+        "G5": 184,
+        "LOGO": 210,
+    }
+)
+
+
+# load in override dictionary for KEYCODES
+try:
+    with open(_keys_file_path) as keys_file:
+        keys = _yaml.safe_load(keys_file)
+        if isinstance(keys, dict):
+            keys = _NamedInts(**keys)
+            for k in KEYCODES:
+                if int(k) not in keys and str(k) not in keys:
+                    keys[int(k)] = str(k)
+            KEYCODES = keys
+except Exception as e:
+    print(e)
