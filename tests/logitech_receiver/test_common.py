@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from lib.logitech_receiver import common
+from logitech_receiver import common
 
 
 def test_crc16():

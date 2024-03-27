@@ -5,10 +5,10 @@ from typing import Any
 
 import pytest
 
-from lib.logitech_receiver import common
-from lib.logitech_receiver import hidpp20
-from lib.logitech_receiver import hidpp20_constants
-from lib.logitech_receiver import special_keys
+from logitech_receiver import common
+from logitech_receiver import hidpp20
+from logitech_receiver import hidpp20_constants
+from logitech_receiver import special_keys
 
 from . import hidpp
 
