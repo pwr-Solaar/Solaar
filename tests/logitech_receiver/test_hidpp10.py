@@ -6,10 +6,10 @@ from typing import Optional
 
 import pytest
 
-from lib.logitech_receiver import common
-from lib.logitech_receiver import hidpp10
-from lib.logitech_receiver import hidpp10_constants
-from lib.logitech_receiver import hidpp20_constants
+from logitech_receiver import common
+from logitech_receiver import hidpp10
+from logitech_receiver import hidpp10_constants
+from logitech_receiver import hidpp20_constants
 
 _hidpp10 = hidpp10.Hidpp10()
 

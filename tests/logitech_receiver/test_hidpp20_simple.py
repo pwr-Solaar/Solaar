@@ -2,9 +2,9 @@ from dataclasses import dataclass
 
 import pytest
 
-from lib.logitech_receiver import common
-from lib.logitech_receiver import hidpp20
-from lib.logitech_receiver import hidpp20_constants
+from logitech_receiver import common
+from logitech_receiver import hidpp20
+from logitech_receiver import hidpp20_constants
 
 from . import hidpp
 
