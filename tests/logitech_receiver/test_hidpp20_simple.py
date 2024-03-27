@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 import pytest
 
 from logitech_receiver import common
@@ -7,19 +5,6 @@ from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 
 from . import hidpp
-
-
-@dataclass
-class Dumper:
-    def represent_int(arg):
-        return arg
-
-
-def test_hexint_presenter():
-    result = hidpp20.hexint_presenter(Dumper, 18)
-
-    assert result == "0x12"
-
 
 _hidpp20 = hidpp20.Hidpp20()
 

@@ -52,13 +52,6 @@ logger = logging.getLogger(__name__)
 KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KIND}
 
 
-def hexint_presenter(dumper, data):
-    return dumper.represent_int(hex(data))
-
-
-_yaml.add_representer(int, hexint_presenter)
-
-
 class FeaturesArray(dict):
     def __init__(self, device):
         assert device is not None
