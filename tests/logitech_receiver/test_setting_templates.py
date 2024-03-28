@@ -31,8 +31,7 @@ from logitech_receiver import special_keys
 
 from . import hidpp
 
-# TODO DpiSlidingXY, MouseGesturesXY, SpeedChange
-# TODO Gesture2Gestures, Gesture2Divert, Gesture2Params
+# TODO action part of DpiSlidingXY, MouseGesturesXY, SpeedChange
 
 
 class Setup:
@@ -456,6 +455,17 @@ simple_tests = [
         hidpp.Response("01", 0x0430),  # on
         hidpp.Response("00", 0x0440, "00"),  # set off
     ),
+    Setup(
+        FeatureTest(settings_templates.SpeedChange, 0, None, 0),  # need to set up all settings to successfully write
+        common.NamedInts(**{"Off": 0, "DPI Change": 0xED}),
+        hidpp.Response("040001", 0x0000, "2205"),  # POINTER_SPEED
+        hidpp.Response("0100", 0x0400),
+        hidpp.Response("0120", 0x0410, "0120"),
+        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
+        hidpp.Response("01", 0x0500),
+        hidpp.Response("00ED009D310003070500000000000000", 0x0510, "00"),  # DPI Change
+        hidpp.Response("00ED0000000000000000000000000000", 0x0520, "00ED"),  # DPI Change current
+    ),
 ]
 
 
@@ -471,22 +481,22 @@ def test_simple_template(test, mocker, mock_gethostname):
     spy_request = mocker.spy(device, "request")
 
     setting = settings_templates.check_feature(device, tst.sclass)
-
-    assert setting
-
+    assert setting is not None
     if isinstance(setting, list):
         setting = setting[0]
-    value = setting.read(cached=False)
-    cached_value = setting.read(cached=True)
-    write_value = setting.write(tst.write_value)
-
-    if isinstance(test.choices, common.NamedInts):
-        assert setting.choices == test.choices
     if isinstance(test.choices, list):
         assert setting._validator.min_value == test.choices[0]
         assert setting._validator.max_value == test.choices[1]
+    elif test.choices is not None:
+        assert setting.choices == test.choices
+
+    value = setting.read(cached=False)
     assert value == tst.initial_value
+
+    cached_value = setting.read(cached=True)
     assert cached_value == tst.initial_value
+
+    write_value = setting.write(tst.write_value) if tst.write_value is not None else None
     assert write_value == tst.write_value
 
     for i in range(0 - tst.matched_calls, 0):
@@ -529,8 +539,9 @@ key_tests = [
     ),
     Setup(
         FeatureTest(settings_templates.DivertKeys, {0xC4: 0}, {0xC4: 2}, 2, offset=0x05),
-        {common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Regular=0, Diverted=1, Mouse_Gestures=2)},
+        {common.NamedInt(0xC4, "Smart Shift"): common.NamedInts(Regular=0, Diverted=1, Mouse_Gestures=2, Sliding_DPI=3)},
         *responses_reprog_controls,
+        hidpp.Response("0A0001", 0x0000, "2201"),  # ADJUSTABLE_DPI
         hidpp.Response("00C4300000", 0x0530, "00C4300000"),  # Smart Shift write
         hidpp.Response("00C4030000", 0x0530, "00C4030000"),  # Smart Shift divert write
     ),
@@ -554,13 +565,54 @@ key_tests = [
         hidpp.Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set write
     ),
     Setup(
-        FeatureTest(settings_templates.Equalizer, {0: 0x10, 1: 0x14}, {1: 0x20}, 2),
-        [16, 32],
-        hidpp.Response("0220001020", 0x0400),
-        hidpp.Response("0001000200000000000000", 0x0410, "00"),
-        hidpp.Response("1014", 0x0420, "00"),
-        hidpp.Response("1014", 0x0430, "021014"),
-        hidpp.Response("1020", 0x0430, "021020"),
+        FeatureTest(
+            settings_templates.Gesture2Gestures,
+            {
+                1: True,
+                2: True,
+                30: True,
+                10: True,
+                45: False,
+                42: True,
+                43: True,
+                64: False,
+                65: False,
+                67: False,
+                84: True,
+                34: False,
+            },
+            {45: True},
+            4,
+        ),
+        *hidpp.responses_gestures,
+        hidpp.Response("0001FF6F", 0x0420, "0001FF6F"),  # write
+        hidpp.Response("01010F04", 0x0420, "01010F04"),
+        hidpp.Response("0001FF7F", 0x0420, "0001FF7F"),  # write 45
+        hidpp.Response("01010F04", 0x0420, "01010F04"),
+    ),
+    Setup(
+        FeatureTest(
+            settings_templates.Gesture2Divert,
+            {1: False, 2: False, 10: False, 44: False, 64: False, 65: False, 67: False, 84: False, 85: False, 100: False},
+            {44: True},
+            4,
+        ),
+        *hidpp.responses_gestures,
+        hidpp.Response("0001FF00", 0x0440, "0001FF00"),  # write
+        hidpp.Response("01010300", 0x0440, "01010300"),
+        hidpp.Response("0001FF08", 0x0440, "0001FF08"),  # write 44
+        hidpp.Response("01010300", 0x0440, "01010300"),
+    ),
+    Setup(
+        FeatureTest(
+            settings_templates.Gesture2Params,
+            {4: {"scale": 256}},
+            {4: {"scale": 128}},
+            2,
+        ),
+        *hidpp.responses_gestures,
+        hidpp.Response("000100FF000000000000000000000000", 0x0480, "000100FF"),
+        hidpp.Response("000080FF000000000000000000000000", 0x0480, "000080FF"),
     ),
     Setup(
         FeatureTest(settings_templates.Equalizer, {0: -0x20, 1: 0x10}, {1: 0x18}, 2),
@@ -650,17 +702,17 @@ def test_key_template(test, mocker):
     assert setting is not None
     if isinstance(setting, list):
         setting = setting[0]
-    if isinstance(test.choices, dict):
-        assert setting.choices == test.choices
-    elif isinstance(test.choices, list):
+    if isinstance(test.choices, list):
         assert setting._validator.min_value == test.choices[0]
         assert setting._validator.max_value == test.choices[1]
+    elif test.choices is not None:
+        assert setting.choices == test.choices
 
     value = setting.read(cached=False)
     assert value == tst.initial_value
 
-    wvalue = setting.write(value)
-    assert wvalue == tst.initial_value
+    write_value = setting.write(value)
+    assert write_value == tst.initial_value
 
     for key, value in tst.write_value.items():
         write_value = setting.write_key_value(key, value)
@@ -671,21 +723,6 @@ def test_key_template(test, mocker):
         print("MATCH", i, hex(spy_request.call_args_list[i][0][0]), param, hex(test.responses[i].id), test.responses[i].params)
         assert spy_request.call_args_list[i][0][0] == test.responses[i].id
         assert param == test.responses[i].params
-
-
-failing_tests = [  # needs settings to be set up!!
-    Setup(
-        FeatureTest(settings_templates.SpeedChange, 0, 0xED),
-        common.NamedInts(**{"Off": 0, "DPI Change": 0xED}),
-        hidpp.Response("040001", 0x0000, "2205"),  # POINTER_SPEED
-        hidpp.Response("0100", 0x0400),
-        hidpp.Response("0120", 0x0410, "0120"),
-        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
-        hidpp.Response("01", 0x0500),
-        hidpp.Response("00ED009D310003070500000000000000", 0x0510, "00"),  # DPI Change
-        hidpp.Response("00ED0000000000000000000000000000", 0x0520, "00ED"),  # DPI Change current
-    ),
-]
 
 
 @pytest.mark.parametrize("test", simple_tests + key_tests)

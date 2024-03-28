@@ -1471,7 +1471,7 @@ class ActionSettingRW:
                     if logger.isEnabledFor(logging.WARNING):
                         logger.warning("cannot disable %s on %s", self.name, device)
                 self.deactivate_action()
-        return True
+        return data_bytes
 
 
 class RawXYProcessing:

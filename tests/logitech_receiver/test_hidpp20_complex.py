@@ -340,47 +340,7 @@ def test_KeysArrayPersistent_key(key, expected_index, expected_mapped_to):
     assert mapped_to == expected_mapped_to
 
 
-# TODO SubParam, Gesture, Param, Gestures
-
-responses_gestures = [
-    hidpp.Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
-    hidpp.Response("A302A11EA30A4105822C852DAD2AAD2B", 0x0400, "0008"),
-    hidpp.Response("8F408F418F434204AF54912282558264", 0x0400, "0010"),
-    hidpp.Response("01000000000000000000000000000000", 0x0400, "0018"),
-    hidpp.Response("6F000000000000000000000000000000", 0x0410, "0001FF"),  # item 0 enable
-    hidpp.Response("01000000000000000000000000000000", 0x0410, "000101"),
-    hidpp.Response("02000000000000000000000000000000", 0x0410, "000102"),
-    hidpp.Response("04000000000000000000000000000000", 0x0410, "000104"),
-    hidpp.Response("08000000000000000000000000000000", 0x0410, "000108"),
-    hidpp.Response("00000000000000000000000000000000", 0x0410, "000110"),
-    hidpp.Response("20000000000000000000000000000000", 0x0410, "000120"),
-    hidpp.Response("40000000000000000000000000000000", 0x0410, "000140"),
-    hidpp.Response("00000000000000000000000000000000", 0x0410, "000180"),
-    hidpp.Response("00000000000000000000000000000000", 0x0410, "010101"),
-    hidpp.Response("00000000000000000000000000000000", 0x0410, "010102"),
-    hidpp.Response("04000000000000000000000000000000", 0x0410, "010104"),
-    hidpp.Response("00000000000000000000000000000000", 0x0410, "010108"),
-    hidpp.Response("04000000000000000000000000000000", 0x0410, "01010F"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000101"),  # item 1 divert
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000102"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000104"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000108"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000110"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000120"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000140"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "000180"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "010101"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "010102"),
-    hidpp.Response("00000000000000000000000000000000", 0x0430, "0001FF"),
-    hidpp.Response("08000000000000000000000000000000", 0x0450, "03FF"),
-    hidpp.Response("08000000000000000000000000000000", 0x0450, "01FF"),
-    hidpp.Response("08000000000000000000000000000000", 0x0450, "02FF"),
-    hidpp.Response("5C020000000000000000000000000000", 0x0450, "05FF"),
-    hidpp.Response("00040000000000000000000000000000", 0x0450, "04FF"),
-    hidpp.Response("01000000000000000000000000000000", 0x0460, "00FF"),
-    hidpp.Response("01000000000000000000000000000000", 0x0470, "00FF"),
-]
-device_gestures = hidpp.Device("GESTURES", responses=responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
+device_gestures = hidpp.Device("GESTURES", responses=hidpp.responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
 
 
 def test_Gestures():
@@ -397,8 +357,6 @@ def test_Gestures():
     assert len(gestures.params) == 1
     assert gestures.params[4].value == 256
     assert gestures.params[4].default_value == 256
-
-    print("SPEC", gestures.specs)
     assert len(gestures.specs) == 5
     assert gestures.specs[2].value == 8
     assert gestures.specs[4].value == 4

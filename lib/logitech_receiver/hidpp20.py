@@ -343,7 +343,6 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
 class PersistentRemappableAction:
     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
-        print("PRA", index, cid, actionId, remapped, modifierMask, cidStatus)
         self._device = device
         self.index = index
         self._cid = cid
@@ -544,7 +543,6 @@ class KeysArrayPersistent(KeysArray):
         return self._capabilities
 
     def _query_key(self, index: int):
-        print("QK", index)
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
