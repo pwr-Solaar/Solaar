@@ -25,6 +25,14 @@ from logitech_receiver import device
 from . import hidpp
 
 
+@pytest.fixture
+def mock_base():
+    with mock.patch("logitech_receiver.base.open_path", return_value=None) as mock_open_path:
+        with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
+            with mock.patch("logitech_receiver.base.ping", return_value=None) as mock_ping:
+                yield mock_open_path, mock_request, mock_ping
+
+
 @dataclass
 class DeviceInfo:
     path: str
@@ -35,6 +43,8 @@ class DeviceInfo:
     bus_id: int = 0x0003  # USB
 
 
+di_bad_handle = DeviceInfo(None, product_id=0xCCCC)
+di_error = DeviceInfo(None, product_id=0xCCCC)
 di_CCCC = DeviceInfo("11", product_id=0xCCCC)
 di_C318 = DeviceInfo("11", product_id=0xC318)
 di_B530 = DeviceInfo("11", product_id=0xB350, bus_id=0x0005)
@@ -43,12 +53,18 @@ di_C08A = DeviceInfo("11", product_id=0xC08A)
 di_DDDD = DeviceInfo("11", product_id=0xDDDD)
 
 
-@pytest.fixture
-def mock_base():
-    with mock.patch("logitech_receiver.base.open_path", return_value=None) as mock_open_path:
-        with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
-            with mock.patch("logitech_receiver.base.ping", return_value=None) as mock_ping:
-                yield mock_open_path, mock_request, mock_ping
+@pytest.mark.parametrize(
+    "device_info, responses, success",
+    [(di_bad_handle, hidpp.r_empty, False), (di_error, hidpp.r_empty, False), (di_CCCC, hidpp.r_empty, True)],
+)
+def test_DeviceFactory(device_info, responses, success, mock_base):
+    mock_base[0].side_effect = hidpp.open_path
+    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[2].side_effect = partial(hidpp.ping, responses)
+
+    test_device = device.DeviceFactory.create_device(device_info)
+
+    assert bool(test_device) == success
 
 
 @pytest.mark.parametrize(
@@ -98,7 +114,7 @@ def mock_hid():
 pi_CCCC = {"wpid": "CCCC", "kind": 0, "serial": None, "polling": "1ms", "power_switch": "top"}
 pi_2011 = {"wpid": "2011", "kind": 1, "serial": "1234", "polling": "2ms", "power_switch": "bottom"}
 pi_4066 = {"wpid": "4066", "kind": 1, "serial": "5678", "polling": "4ms", "power_switch": "left"}
-pi_1023 = {"wpid": "1023", "kind": 2, "serial": "1234", "polling": "8ms", "power_switch": "right"}
+pi_1007 = {"wpid": "1007", "kind": 2, "serial": "1234", "polling": "8ms", "power_switch": "right"}
 pi_407B = {"wpid": "407B", "kind": 2, "serial": "5678", "polling": "1ms", "power_switch": "left"}
 pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power_switch": "top"}
 
@@ -107,17 +123,17 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
     "number, pairing_info, responses, handle, _name, codename, protocol, name",
     zip(
         range(1, 7),
-        [pi_CCCC, pi_2011, pi_4066, pi_1023, pi_407B, pi_DDDD],
+        [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
         [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
         [0x11, 0x11, 0x11, 0x11, 0x11, 0x11],
-        [None, "Wireless Keyboard K520", "Craft Advanced Keyboard", "G700 Gaming Mouse", "MX Vertical Wireless Mouse", None],
-        ["? (CCCC)", "K520", "Craft", "G700", "MX Vertical", "ABABABABABABABADED"],
+        [None, "Wireless Keyboard K520", "Craft Advanced Keyboard", "MX Air", "MX Vertical Wireless Mouse", None],
+        ["? (CCCC)", "K520", "Craft", "MX Air", "MX Vertical", "ABABABABABABABADED"],
         [1.0, 1.0, 4.5, 1.0, 4.5, 4.5],
         [
             "? (CCCC)",
             "Wireless Keyboard K520",
             "Craft Advanced Keyboard",
-            "G700 Gaming Mouse",
+            "MX Air",
             "MX Vertical Wireless Mouse",
             "ABABABABABABABADED",
         ],
@@ -145,7 +161,7 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     "number, pairing_info, responses, handle, unitId, modelId, tid_map, kind, firmware, serial, id, psl, rate",
     zip(
         range(1, 7),
-        [pi_CCCC, pi_2011, pi_4066, pi_1023, pi_407B, pi_DDDD],
+        [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
         [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
         [None, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, None, "12345678", None, None, "12345679"],  # unitId

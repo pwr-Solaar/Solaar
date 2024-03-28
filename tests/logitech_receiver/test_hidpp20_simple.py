@@ -1,3 +1,19 @@
+## Copyright (C) 2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program; if not, write to the Free Software Foundation, Inc.,
+## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 import pytest
 
 from logitech_receiver import common
@@ -145,11 +161,11 @@ def test_get_battery_none():
     assert battery.status == common.Battery.STATUS.discharging
 
 
-# get_keys is complex
-# get_remap_keys is comples
-# get_gestures is complex
-# get_backlight is complex
-# get_profiles is complex
+# get_keys is in test_hidpp20_complex
+# get_remap_keys is in test_hidpp20_complex
+# TODO get_gestures is complex
+# get_backlight is in test_hidpp20_complex
+# get_profiles is in test_hidpp20_complex
 
 
 def test_get_mouse_pointer_info():
