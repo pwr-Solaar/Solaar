@@ -1372,10 +1372,6 @@ class OnboardProfiles:
 _yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
 _yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 
-#
-#
-#
-
 
 def feature_request(device, feature, function=0x00, *params, no_reply=False):
     if device.online and device.features:
