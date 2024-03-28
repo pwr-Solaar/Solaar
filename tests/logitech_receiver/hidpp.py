@@ -18,6 +18,7 @@
 
 
 import errno
+import threading
 
 from dataclasses import dataclass
 from dataclasses import field
@@ -129,6 +130,46 @@ r_mouse_3 = [  # a HID++ 2.0 mouse
     Response("444544000000000000000000000000", 0x0510, "0F"),  # name - last 3 characters
 ]
 
+responses_gestures = [  # the commented-out messages are not used by either the setting or other testing
+    Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
+    Response("A302A11EA30A4105822C852DAD2AAD2B", 0x0400, "0008"),
+    Response("8F408F418F434204AF54912282558264", 0x0400, "0010"),
+    Response("01000000000000000000000000000000", 0x0400, "0018"),
+    Response("01000000000000000000000000000000", 0x0410, "000101"),  # enable
+    #    Response("02000000000000000000000000000000", 0x0410, "000102"),
+    #    Response("04000000000000000000000000000000", 0x0410, "000104"),
+    #    Response("08000000000000000000000000000000", 0x0410, "000108"),
+    Response("00000000000000000000000000000000", 0x0410, "000110"),
+    #    Response("20000000000000000000000000000000", 0x0410, "000120"),
+    #    Response("40000000000000000000000000000000", 0x0410, "000140"),
+    #    Response("00000000000000000000000000000000", 0x0410, "000180"),
+    #    Response("00000000000000000000000000000000", 0x0410, "010101"),
+    #    Response("00000000000000000000000000000000", 0x0410, "010102"),
+    #    Response("04000000000000000000000000000000", 0x0410, "010104"),
+    #    Response("00000000000000000000000000000000", 0x0410, "010108"),
+    Response("6F000000000000000000000000000000", 0x0410, "0001FF"),
+    Response("04000000000000000000000000000000", 0x0410, "01010F"),
+    Response("00000000000000000000000000000000", 0x0430, "000101"),  # divert
+    #    Response("00000000000000000000000000000000", 0x0430, "000102"),
+    #    Response("00000000000000000000000000000000", 0x0430, "000104"),
+    #    Response("00000000000000000000000000000000", 0x0430, "000108"),
+    Response("00000000000000000000000000000000", 0x0430, "000110"),
+    #    Response("00000000000000000000000000000000", 0x0430, "000120"),
+    #    Response("00000000000000000000000000000000", 0x0430, "000140"),
+    #    Response("00000000000000000000000000000000", 0x0430, "000180"),
+    #    Response("00000000000000000000000000000000", 0x0430, "010101"),
+    #    Response("00000000000000000000000000000000", 0x0430, "010102"),
+    Response("00000000000000000000000000000000", 0x0430, "0001FF"),
+    Response("00000000000000000000000000000000", 0x0430, "010103"),
+    Response("08000000000000000000000000000000", 0x0450, "01FF"),
+    Response("08000000000000000000000000000000", 0x0450, "02FF"),
+    Response("08000000000000000000000000000000", 0x0450, "03FF"),
+    Response("00040000000000000000000000000000", 0x0450, "04FF"),
+    Response("5C020000000000000000000000000000", 0x0450, "05FF"),
+    Response("01000000000000000000000000000000", 0x0460, "00FF"),
+    Response("01000000000000000000000000000000", 0x0470, "00FF"),
+]
+
 
 # A fake device that uses provided data (responses) to respond to HID++ commands.
 # Some methods from the real device are used to set up data structures needed for settings
@@ -145,7 +186,8 @@ class Device:
     wpid: Optional[str] = "0000"
     setting_callback: Any = None
     settings = []
-    sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = None
+    sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
+    _gestures_lock = threading.Lock()
 
     read_register = device.Device.read_register
     write_register = device.Device.write_register
@@ -153,6 +195,7 @@ class Device:
     keys = device.Device.keys
     remap_keys = device.Device.remap_keys
     led_effects = device.Device.led_effects
+    gestures = device.Device.gestures
     __hash__ = device.Device.__hash__
 
     def __post_init__(self):
