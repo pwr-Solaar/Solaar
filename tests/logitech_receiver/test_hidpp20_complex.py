@@ -1,9 +1,21 @@
-from dataclasses import dataclass
-from dataclasses import field
-from struct import pack
-from typing import Any
+## Copyright (C) 2024  Solaar Contributors https://pwr-solaar.github.io/Solaar/
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program; if not, write to the Free Software Foundation, Inc.,
+## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import pytest
+import yaml
 
 from logitech_receiver import common
 from logitech_receiver import hidpp20
@@ -12,35 +24,14 @@ from logitech_receiver import special_keys
 
 from . import hidpp
 
+_hidpp20 = hidpp20.Hidpp20()
 
-@dataclass
-class Device:
-    name: str = "DEVICE"
-    online: bool = True
-    protocol: float = 2.0
-    responses: Any = field(default_factory=list)
-
-    def request(self, id, *params, no_reply=False):
-        if params is None:
-            params = []
-        params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
-        print("REQUEST ", self.name, hex(id), params)
-        for r in self.responses:
-            if id == r.id and params == bytes.fromhex(r.params):
-                print("RESPONSE", self.name, hex(r.id), r.params, r.response)
-                return bytes.fromhex(r.response) if r.response is not None else None
-
-    def feature_request(self, feature, function=0x00, *params, no_reply=False):
-        if self.protocol >= 2.0:
-            return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
-
-
-device_offline = Device("REGISTERS", False)
-device_registers = Device("OFFLINE", True, 1.0)
-device_nofeatures = Device("NOFEATURES", True, 4.5)
-device_zerofeatures = Device("ZEROFEATURES", True, 4.5, [hidpp.Response("0000", 0x0000, "0001")])
-device_broken = Device("BROKEN", True, 4.5, [hidpp.Response("0500", 0x0000, "0001"), hidpp.Response(None, 0x0100)])
-device_standard = Device("STANDARD", True, 4.5, hidpp.r_keyboard_2)
+device_offline = hidpp.Device("REGISTERS", False)
+device_registers = hidpp.Device("OFFLINE", True, 1.0)
+device_nofeatures = hidpp.Device("NOFEATURES", True, 4.5)
+device_zerofeatures = hidpp.Device("ZEROFEATURES", True, 4.5, [hidpp.Response("0000", 0x0000, "0001")])
+device_broken = hidpp.Device("BROKEN", True, 4.5, [hidpp.Response("0500", 0x0000, "0001"), hidpp.Response(None, 0x0100)])
+device_standard = hidpp.Device("STANDARD", True, 4.5, hidpp.r_keyboard_2)
 
 
 @pytest.mark.parametrize(
@@ -202,9 +193,6 @@ def test_ReprogrammableKeyV4_key(device, index, cid, tid, flags, pos, group, gma
     assert list(key.group_mask) == group_names
 
 
-# mapped_to requires ensuring that all keys are set up, so this is done below
-
-
 @pytest.mark.parametrize(
     "device, index", [(device_zerofeatures, -1), (device_zerofeatures, 5), (device_standard, -1), (device_standard, 6)]
 )
@@ -259,27 +247,25 @@ def test_KeysArrayV4_index(key, index):
 
 
 responses_key = [
-    hidpp.Response("0A00", 0x0100),
-    hidpp.Response("01000000", 0x0000, "0001"),
-    hidpp.Response("09000300", 0x0000, "1b04"),
-    hidpp.Response("00500038010001010400000000000000", 0x0910, "00"),
-    hidpp.Response("00510039010001010400000000000000", 0x0910, "01"),
-    hidpp.Response("0052003A310003070500000000000000", 0x0910, "02"),
-    hidpp.Response("0053003C310002030500000000000000", 0x0910, "03"),
-    hidpp.Response("0056003E310002030500000000000000", 0x0910, "04"),
-    hidpp.Response("00C300A9310003070500000000000000", 0x0910, "05"),
-    hidpp.Response("00C4009D310003070500000000000000", 0x0910, "06"),
-    hidpp.Response("00D700B4A00004000300000000000000", 0x0910, "07"),
-    hidpp.Response("00500000000000000000000000000000", 0x0920, "0050"),
-    hidpp.Response("00510000000000000000000000000000", 0x0920, "0051"),
-    hidpp.Response("00520000500000000000000000000000", 0x0920, "0052"),
-    hidpp.Response("00530000000000000000000000000000", 0x0920, "0053"),
-    hidpp.Response("00560000000000000000000000000000", 0x0920, "0056"),
-    hidpp.Response("00C30000000000000000000000000000", 0x0920, "00C3"),
-    hidpp.Response("00C40000500000000000000000000000", 0x0920, "00C4"),
-    hidpp.Response("00D70000510000000000000000000000", 0x0920, "00D7"),
+    hidpp.Response("08", 0x0500),
+    hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),
+    hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),
+    hidpp.Response("0052003A310003070500000000000000", 0x0510, "02"),
+    hidpp.Response("0053003C310002030500000000000000", 0x0510, "03"),
+    hidpp.Response("0056003E310002030500000000000000", 0x0510, "04"),
+    hidpp.Response("00C300A9310003070500000000000000", 0x0510, "05"),
+    hidpp.Response("00C4009D310003070500000000000000", 0x0510, "06"),
+    hidpp.Response("00D700B4A00004000300000000000000", 0x0510, "07"),
+    hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),
+    hidpp.Response("00510000000000000000000000000000", 0x0520, "0051"),
+    hidpp.Response("00520000500000000000000000000000", 0x0520, "0052"),
+    hidpp.Response("00530000000000000000000000000000", 0x0520, "0053"),
+    hidpp.Response("00560000000000000000000000000000", 0x0520, "0056"),
+    hidpp.Response("00C30000000000000000000000000000", 0x0520, "00C3"),
+    hidpp.Response("00C40000500000000000000000000000", 0x0520, "00C4"),
+    hidpp.Response("00D70000510000000000000000000000", 0x0520, "00D7"),
 ]
-device_key = Device("KEY", True, 4.5, responses=responses_key)
+device_key = hidpp.Device("KEY", responses=responses_key, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
 
 
 @pytest.mark.parametrize(
@@ -306,19 +292,138 @@ device_key = Device("KEY", True, 4.5, responses=responses_key)
     ],
 )
 def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
-    device_key.features = hidpp20.FeaturesArray(device_key)
-    device_key.features[hidpp20_constants.FEATURE.REPROG_CONTROLS_V4]
-    device_key.keys = hidpp20.KeysArrayV4(device_key, 8)
-    device_key.keys._ensure_all_keys_queried()
+    device_key._keys = _hidpp20.get_keys(device_key)
+    device_key._keys._ensure_all_keys_queried()
 
-    index = device_key.keys.index(key)
-    mapped_to = device_key.keys[expected_index].mapped_to
-    remappable_to = device_key.keys[expected_index].remappable_to
+    index = device_key._keys.index(key)
+    mapped_to = device_key._keys[expected_index].mapped_to
+    remappable_to = device_key._keys[expected_index].remappable_to
 
     assert index == expected_index
     assert mapped_to == expected_mapped_to
     if expected_remappable_to is not None:
         assert list(remappable_to) == expected_remappable_to
+
+
+responses_remap = [
+    hidpp.Response("0041", 0x0400),
+    hidpp.Response("03", 0x0410),
+    hidpp.Response("0301", 0x0410, "00"),
+    hidpp.Response("0050", 0x0420, "00FF"),
+    hidpp.Response("0050000200010001", 0x0430, "0050FF"),  # Left Button
+    hidpp.Response("0051", 0x0420, "01FF"),
+    hidpp.Response("0051000200010000", 0x0430, "0051FF"),  # Left Button
+    hidpp.Response("0052", 0x0420, "02FF"),
+    hidpp.Response("0052000100510000", 0x0430, "0052FF"),  # key DOWN
+    hidpp.Response("050002", 0x0000, "1B04"),  # REPROGRAMMABLE_KEYS_V4
+] + responses_key
+
+device_remap = hidpp.Device("REMAP", responses=responses_remap, feature=hidpp20_constants.FEATURE.PERSISTENT_REMAPPABLE_ACTION)
+
+
+@pytest.mark.parametrize(
+    "key, expected_index, expected_mapped_to",
+    [
+        (special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left")),
+        (special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left")),
+        (special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN")),
+    ],
+)
+def test_KeysArrayPersistent_key(key, expected_index, expected_mapped_to):
+    device_remap._remap_keys = _hidpp20.get_remap_keys(device_remap)
+    device_remap._remap_keys._ensure_all_keys_queried()
+
+    index = device_remap._remap_keys.index(key)
+    mapped_to = device_remap._remap_keys[expected_index].remapped
+
+    assert index == expected_index
+    assert mapped_to == expected_mapped_to
+
+
+# TODO SubParam, Gesture, Param, Gestures
+
+responses_gestures = [
+    hidpp.Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
+    hidpp.Response("A302A11EA30A4105822C852DAD2AAD2B", 0x0400, "0008"),
+    hidpp.Response("8F408F418F434204AF54912282558264", 0x0400, "0010"),
+    hidpp.Response("01000000000000000000000000000000", 0x0400, "0018"),
+    hidpp.Response("6F000000000000000000000000000000", 0x0410, "0001FF"),  # item 0 enable
+    hidpp.Response("01000000000000000000000000000000", 0x0410, "000101"),
+    hidpp.Response("02000000000000000000000000000000", 0x0410, "000102"),
+    hidpp.Response("04000000000000000000000000000000", 0x0410, "000104"),
+    hidpp.Response("08000000000000000000000000000000", 0x0410, "000108"),
+    hidpp.Response("00000000000000000000000000000000", 0x0410, "000110"),
+    hidpp.Response("20000000000000000000000000000000", 0x0410, "000120"),
+    hidpp.Response("40000000000000000000000000000000", 0x0410, "000140"),
+    hidpp.Response("00000000000000000000000000000000", 0x0410, "000180"),
+    hidpp.Response("00000000000000000000000000000000", 0x0410, "010101"),
+    hidpp.Response("00000000000000000000000000000000", 0x0410, "010102"),
+    hidpp.Response("04000000000000000000000000000000", 0x0410, "010104"),
+    hidpp.Response("00000000000000000000000000000000", 0x0410, "010108"),
+    hidpp.Response("04000000000000000000000000000000", 0x0410, "01010F"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000101"),  # item 1 divert
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000102"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000104"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000108"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000110"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000120"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000140"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "000180"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "010101"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "010102"),
+    hidpp.Response("00000000000000000000000000000000", 0x0430, "0001FF"),
+    hidpp.Response("08000000000000000000000000000000", 0x0450, "03FF"),
+    hidpp.Response("08000000000000000000000000000000", 0x0450, "01FF"),
+    hidpp.Response("08000000000000000000000000000000", 0x0450, "02FF"),
+    hidpp.Response("5C020000000000000000000000000000", 0x0450, "05FF"),
+    hidpp.Response("00040000000000000000000000000000", 0x0450, "04FF"),
+    hidpp.Response("01000000000000000000000000000000", 0x0460, "00FF"),
+    hidpp.Response("01000000000000000000000000000000", 0x0470, "00FF"),
+]
+device_gestures = hidpp.Device("GESTURES", responses=responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
+
+
+def test_Gestures():
+    gestures = _hidpp20.get_gestures(device_gestures)
+
+    assert gestures
+    assert len(gestures.gestures) == 17
+    assert gestures.gestures[20].enabled() is None
+    assert gestures.gestures[20].diverted() is None
+    assert gestures.gestures[1].enabled() is True
+    assert gestures.gestures[1].diverted() is False
+    assert gestures.gestures[45].enabled() is False
+    assert gestures.gestures[45].diverted() is None
+    assert len(gestures.params) == 1
+    assert gestures.params[4].value == 256
+    assert gestures.params[4].default_value == 256
+
+    print("SPEC", gestures.specs)
+    assert len(gestures.specs) == 5
+    assert gestures.specs[2].value == 8
+    assert gestures.specs[4].value == 4
+
+
+responses_backlight = [
+    hidpp.Response("010118000001020003000400", 0x0400),
+    hidpp.Response("0101FF00020003000400", 0x0410, "0101FF00020003000400"),
+]
+
+device_backlight = hidpp.Device("BACKLIGHT", responses=responses_backlight, feature=hidpp20_constants.FEATURE.BACKLIGHT2)
+
+
+def test_Backlight():
+    backlight = _hidpp20.get_backlight(device_backlight)
+    result = backlight.write()
+
+    assert backlight
+    assert backlight.auto_supported
+    assert backlight.temp_supported
+    assert not backlight.perm_supported
+    assert backlight.dho == 0x0002
+    assert backlight.dhi == 0x0003
+    assert backlight.dpow == 0x0004
+    assert result is not None
 
 
 @pytest.mark.parametrize(
@@ -429,7 +534,7 @@ effects_responses_2 = [hidpp.Response("FFFF0100000001", 0x0400, "FFFF00")] + zon
         [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, effects_responses_2, 1, 1, 2],
     ],
 )
-def test_LEDEffectsInfo(feature, cls, responses, readable, count, count_0):
+def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
     device = hidpp.Device(feature=feature, responses=responses)
 
     effects = cls(device)
@@ -437,3 +542,150 @@ def test_LEDEffectsInfo(feature, cls, responses, readable, count, count_0):
     assert effects.readable == readable
     assert effects.count == count
     assert effects.zones[0].count == count_0
+
+
+def test_led_setting_bytes():
+    ebytes = bytes.fromhex("0A01020300500407000000")
+
+    setting = hidpp20.LEDEffectSetting.from_bytes(ebytes)
+
+    assert setting.ID == 0x0A
+    assert setting.color == 0x010203
+    assert setting.period == 0x0050
+    assert setting.form == 0x04
+    assert setting.intensity == 0x07
+
+    bytes_out = setting.to_bytes()
+
+    assert ebytes == bytes_out
+
+
+def test_led_setting_yaml():
+    ebytes = bytes.fromhex("0A01020300500407000000")
+    #  eyaml = (
+    #     "!LEDEffectSetting {ID: !NamedInt {name: Breathe, value: 0xa}, color: 0x10203, "
+    #      "form: 0x4, intensity: 0x7, period: 0x50} "
+    #  )
+
+    setting = hidpp20.LEDEffectSetting.from_bytes(ebytes)
+
+    assert setting.ID == 0x0A
+    assert setting.color == 0x010203
+    assert setting.period == 0x0050
+    assert setting.form == 0x04
+    assert setting.intensity == 0x07
+
+    yaml_out = yaml.dump(setting)
+
+    #    assert eyaml == re.compile(r"\s+").sub(" ", yaml_out)
+
+    setting = yaml.safe_load(yaml_out)
+
+    assert setting.to_bytes() == ebytes
+
+
+def test_button_bytes_1():
+    bbytes = bytes.fromhex("8000FFFF")
+
+    button = hidpp20.Button.from_bytes(bbytes)
+
+    assert button.behavior == 0x8
+    assert button.type == 0x00
+
+    bytes_out = button.to_bytes()
+
+    assert bbytes == bytes_out
+
+
+def test_button_bytes_2():
+    bbytes = bytes.fromhex("900aFF00")
+
+    button = hidpp20.Button.from_bytes(bbytes)
+
+    assert button.behavior == 0x9
+
+    bytes_out = button.to_bytes()
+
+    assert bbytes == bytes_out
+
+
+def test_button_bytes_3():
+    bbytes = bytes.fromhex("80020454")
+
+    button = hidpp20.Button.from_bytes(bbytes)
+
+    assert button.behavior == 0x8
+    assert button.modifiers == 0x04
+
+    bytes_out = button.to_bytes()
+
+    assert bbytes == bytes_out
+
+
+@pytest.fixture
+def profile_bytes():
+    return bytes.fromhex(
+        "01010290018003000700140028FFFFFF"
+        "FFFF0000000000000000000000000000"
+        "8000FFFF900aFF00800204548000FFFF"
+        "900aFF00800204548000FFFF900aFF00"
+        "800204548000FFFF900aFF0080020454"
+        "8000FFFF900aFF00800204548000FFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "54004500370000000000000000000000"
+        "00000000000000000000000000000000"
+        "00000000000000000000000000000000"
+        "0A01020300500407000000FFFFFFFFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        "FFFFFFFFFFFFFFFFFFFFFFFFFF7C81"
+    )
+
+
+def test_profile_bytes(profile_bytes):
+    pbytes = profile_bytes
+    profile = hidpp20.OnboardProfile.from_bytes(2, 1, 16, 0, pbytes)
+
+    assert profile.sector == 2
+    assert profile.resolutions == [0x0190, 0x0380, 0x0700, 0x1400, 0x2800]
+    assert profile.buttons[0].to_bytes() == bytes.fromhex("8000FFFF")
+    assert profile.lighting[0].to_bytes() == bytes.fromhex("0A01020300500407000000")
+    assert profile.name == "TE7"
+
+    bytes_out = profile.to_bytes(255)
+
+    assert pbytes == bytes_out
+
+
+responses_profiles = [
+    hidpp.Response("0104010101020100FE0200", 0x0400),
+    hidpp.Response("000101FF", 0x0450, "00000000"),
+    hidpp.Response("FFFFFFFF", 0x0450, "00000004"),
+    hidpp.Response("01010290018003000700140028FFFFFF", 0x0450, "00010000"),
+    hidpp.Response("FFFF0000000000000000000000000000", 0x0450, "00010010"),
+    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "00010020"),
+    hidpp.Response("900aFF00800204548000FFFF900aFF00", 0x0450, "00010030"),
+    hidpp.Response("800204548000FFFF900aFF0080020454", 0x0450, "00010040"),
+    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "00010050"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010060"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010070"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010080"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010090"),
+    hidpp.Response("54004500370000000000000000000000", 0x0450, "000100A0"),
+    hidpp.Response("00000000000000000000000000000000", 0x0450, "000100B0"),
+    hidpp.Response("00000000000000000000000000000000", 0x0450, "000100C0"),
+    hidpp.Response("0A01020300500407000000FFFFFFFFFF", 0x0450, "000100D0"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "000100E0"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81", 0x0450, "000100EE"),
+]
+
+device_onb = hidpp.Device("ONB", True, 4.5, responses=responses_profiles, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
+
+
+def test_profiles():
+    device_onb._profiles = None
+    profiles = _hidpp20.get_profiles(device_onb)
+
+    assert profiles

@@ -343,6 +343,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
 class PersistentRemappableAction:
     def __init__(self, device, index, cid, actionId, remapped, modifierMask, cidStatus):
+        print("PRA", index, cid, actionId, remapped, modifierMask, cidStatus)
         self._device = device
         self.index = index
         self._cid = cid
@@ -543,6 +544,7 @@ class KeysArrayPersistent(KeysArray):
         return self._capabilities
 
     def _query_key(self, index: int):
+        print("QK", index)
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
@@ -891,8 +893,7 @@ class Backlight:
         self.options = (self.options & 0x07) | (self.mode << 3)
         level = self.level if self.mode == 0x3 else 0
         data_bytes = _pack("<BBBBHHH", self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
-        self.device.feature_request(FEATURE.BACKLIGHT2, 0x00)  # for testing - remove later
-        self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
+        return self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
 class LEDParam:

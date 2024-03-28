@@ -17,6 +17,8 @@
 """HID++ data and functions common to several logitech_receiver test files"""
 
 
+import errno
+
 from dataclasses import dataclass
 from dataclasses import field
 from struct import pack
@@ -28,8 +30,10 @@ from logitech_receiver import hidpp20
 from solaar import configuration
 
 
-def open_path(path: Optional[str]) -> Optional[int]:
-    return int(path, 16) if path is not None else None
+def open_path(path: Optional[str]) -> int:
+    if path is None:
+        raise OSError(errno.ACCESS, "Fake access error")
+    return int(path, 16)  # can raise exception
 
 
 @dataclass
@@ -133,11 +137,12 @@ class Device:
     name: str = "TESTD"
     online: bool = True
     protocol: float = 2.0
-    codename: str = "TESTC"
     responses: Any = field(default_factory=list)
+    codename: str = "TESTC"
     feature: Optional[int] = None
     offset: Optional[int] = 4
     version: Optional[int] = 0
+    wpid: Optional[str] = "0000"
     setting_callback: Any = None
     settings = []
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = None
@@ -148,12 +153,13 @@ class Device:
     keys = device.Device.keys
     remap_keys = device.Device.remap_keys
     led_effects = device.Device.led_effects
+    __hash__ = device.Device.__hash__
 
     def __post_init__(self):
         self.persister = configuration._DeviceEntry()
-        self.features = hidpp20.FeaturesArray(self)
-        self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
         if self.feature is not None:
+            self.features = hidpp20.FeaturesArray(self)
+            self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
             self.responses.append(Response(f"{self.offset:0>2X}00{self.version:0>2X}", 0x0000, f"{self.feature:0>4X}"))
         if self.setting_callback is None:
             self.setting_callback = lambda x, y, z: None
@@ -168,6 +174,7 @@ class Device:
             if id == r.id and params == bytes.fromhex(r.params):
                 print("RESPONSE", self.name, hex(r.id), r.params, r.response)
                 return bytes.fromhex(r.response) if isinstance(r.response, str) else r.response
+        print("RESPONSE", self.name, None)
 
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
