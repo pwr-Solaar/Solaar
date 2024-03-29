@@ -19,7 +19,6 @@ The device uses some methods from the real device to set up data structures that
 """
 
 from dataclasses import dataclass
-from struct import pack
 from typing import Any
 
 import pytest
@@ -499,11 +498,7 @@ def test_simple_template(test, mocker, mock_gethostname):
     write_value = setting.write(tst.write_value) if tst.write_value is not None else None
     assert write_value == tst.write_value
 
-    for i in range(0 - tst.matched_calls, 0):
-        param = b"".join(pack("B", p) if isinstance(p, int) else p for p in spy_request.call_args_list[i][0][1:]).hex().upper()
-        print("MATCH", i, hex(spy_request.call_args_list[i][0][0]), param, hex(test.responses[i].id), test.responses[i].params)
-        assert spy_request.call_args_list[i][0][0] == test.responses[i].id
-        assert param == test.responses[i].params
+    hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
 
 
 responses_reprog_controls = [
@@ -718,11 +713,7 @@ def test_key_template(test, mocker):
         write_value = setting.write_key_value(key, value)
         assert write_value == value
 
-    for i in range(0 - tst.matched_calls, 0):
-        param = b"".join(pack("B", p) if isinstance(p, int) else p for p in spy_request.call_args_list[i][0][1:]).hex().upper()
-        print("MATCH", i, hex(spy_request.call_args_list[i][0][0]), param, hex(test.responses[i].id), test.responses[i].params)
-        assert spy_request.call_args_list[i][0][0] == test.responses[i].id
-        assert param == test.responses[i].params
+    hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
 
 
 @pytest.mark.parametrize("test", simple_tests + key_tests)
