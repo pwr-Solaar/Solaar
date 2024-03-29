@@ -16,6 +16,7 @@
 
 from dataclasses import dataclass
 from functools import partial
+from typing import Optional
 from unittest import mock
 
 import pytest
@@ -44,7 +45,7 @@ class DeviceInfo:
 
 
 di_bad_handle = DeviceInfo(None, product_id=0xCCCC)
-di_error = DeviceInfo(None, product_id=0xCCCC)
+di_error = DeviceInfo(11, product_id=0xCCCC)
 di_CCCC = DeviceInfo("11", product_id=0xCCCC)
 di_C318 = DeviceInfo("11", product_id=0xC318)
 di_B530 = DeviceInfo("11", product_id=0xB350, bus_id=0x0005)
@@ -55,16 +56,19 @@ di_DDDD = DeviceInfo("11", product_id=0xDDDD)
 
 @pytest.mark.parametrize(
     "device_info, responses, success",
-    [(di_bad_handle, hidpp.r_empty, False), (di_error, hidpp.r_empty, False), (di_CCCC, hidpp.r_empty, True)],
+    [(di_bad_handle, hidpp.r_empty, None), (di_error, hidpp.r_empty, False), (di_CCCC, hidpp.r_empty, True)],
 )
 def test_DeviceFactory(device_info, responses, success, mock_base):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, responses)
     mock_base[2].side_effect = partial(hidpp.ping, responses)
 
-    test_device = device.DeviceFactory.create_device(device_info)
-
-    assert bool(test_device) == success
+    if success is None:
+        with pytest.raises(Exception):  # noqa: B017
+            test_device = device.DeviceFactory.create_device(device_info)
+    else:
+        test_device = device.DeviceFactory.create_device(device_info)
+        assert bool(test_device) == success
 
 
 @pytest.mark.parametrize(
@@ -92,14 +96,19 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
     assert test_device.number == number
     assert test_device._protocol == protocol
 
+    assert bool(test_device)
+    test_device.__del__()
+    assert not bool(test_device)
+
 
 @dataclass
 class Receiver:
     path: str = "11"
     handle: int = 0x11
+    codename: Optional[str] = None
 
     def device_codename(self, number):
-        return None
+        return self.codename
 
     def __contains__(self, dev):
         return True
@@ -120,17 +129,18 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
 
 
 @pytest.mark.parametrize(
-    "number, pairing_info, responses, handle, _name, codename, protocol, name",
+    "number, pairing_info, responses, handle, _name, codename, p, p2, name",
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
         [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
         [0x11, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, "Wireless Keyboard K520", "Craft Advanced Keyboard", "MX Air", "MX Vertical Wireless Mouse", None],
-        ["? (CCCC)", "K520", "Craft", "MX Air", "MX Vertical", "ABABABABABABABADED"],
+        ["CODE", "K520", "Craft", "MX Air", "MX Vertical", "CODE"],
+        [None, 1.0, 4.5, 1.0, 4.5, None],
         [1.0, 1.0, 4.5, 1.0, 4.5, 4.5],
         [
-            "? (CCCC)",
+            "CODE",
             "Wireless Keyboard K520",
             "Craft Advanced Keyboard",
             "MX Air",
@@ -139,22 +149,28 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         ],
     ),
 )
-def test_Device_receiver(number, pairing_info, responses, handle, _name, codename, protocol, name, mock_base, mock_hid):
+def test_Device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name, mock_base, mock_hid):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
     mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
     mock_hid.side_effect = lambda x, y, z: x
 
-    test_device = device.Device(Receiver(), number, True, pairing_info, handle=handle)
+    test_device = device.Device(Receiver(codename="CODE"), number, True, pairing_info, handle=handle)
+    test_device.receiver.device = test_device
 
     assert test_device.handle == handle
     assert test_device._name == _name
     assert test_device.codename == codename
     assert test_device.number == number
-    assert test_device._protocol == protocol
-    assert test_device.protocol == (protocol or 0)
+    assert test_device._protocol == p
+    assert test_device.protocol == p2
     assert test_device.codename == codename
     assert test_device.name == name
+    assert test_device == test_device
+    assert not (test_device != test_device)
+    assert bool(test_device)
+
+    test_device.__del__()
 
 
 @pytest.mark.parametrize(
@@ -209,5 +225,22 @@ def test_Device_ids(
     assert test_device.power_switch_location == psl
     assert test_device.polling_rate == rate
 
+
+""" TODO
+302-305	profiles
+309-314	registers
+318-337 settings
+340-341 set configuration
+344	reset
+348-352	persister
+355-368 battery
+372-390 set_battery_info
+394-396 read_battery
+401-420	enable_connection_notifications
+425-451	changed
+465	add_notification_handler
+470-473	remove_notification_handler
+476-480	handle_notification
+"""
 
 # IMPORTANT TODO - battery

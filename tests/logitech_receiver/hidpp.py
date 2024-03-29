@@ -33,7 +33,7 @@ from solaar import configuration
 
 def open_path(path: Optional[str]) -> int:
     if path is None:
-        raise OSError(errno.ACCESS, "Fake access error")
+        raise OSError(errno.EACCES, "Fake access error")
     return int(path, 16)  # can raise exception
 
 

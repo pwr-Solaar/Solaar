@@ -100,8 +100,8 @@ c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch
 @pytest.mark.parametrize(
     "device_info, responses, handle, serial, max_devices, ",
     [
-        (DeviceInfo(None), [], None, None, None),
-        (DeviceInfo(None), [], None, None, None),
+        (DeviceInfo(None), [], False, None, None),
+        (DeviceInfo(11), [], None, None, None),
         (DeviceInfo("11"), responses_unifying, 0x11, "16CC9CB4", 6),
         (DeviceInfo("12", product_id=0xC534), responses_c534, 0x12, "16CC9CB4", 2),
         (DeviceInfo("12", product_id=0xC539), responses_c534, 0x12, "16CC9CB4", 2),
@@ -113,11 +113,14 @@ def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial,
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, responses)
 
-    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
-
-    if handle is None:
+    if handle is False:
+        with pytest.raises(Exception):  # noqa: B017
+            r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+    elif handle is None:
+        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
         assert r is None
     else:
+        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
         assert r.handle == handle
         assert r.serial == serial
         assert r.max_devices == max_devices
