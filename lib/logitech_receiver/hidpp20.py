@@ -357,7 +357,7 @@ class PersistentRemappableAction:
 
     @property
     def actionType(self) -> _NamedInt:
-        return special_keys.ACTIONID[self._actionId]
+        return special_keys.ACTIONID[self.actionId]
 
     @property
     def action(self):
@@ -399,7 +399,7 @@ class PersistentRemappableAction:
             self._device.remap_keys._query_key(self.index)
             return self._device.remap_keys.keys[self.index].data_bytes
         else:
-            self._actionId, self._code, self._modifierMask = _unpack("!BHB", data_bytes)
+            self.actionId, self.remapped, self._modifierMask = _unpack("!BHB", data_bytes)
             self.cidStatus = 0x01
             self._device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
             return True
@@ -421,30 +421,6 @@ class KeysArray:
                 logger.error(f"Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.")
             self.keyversion = None
         self.keys = [None] * count
-
-    def _query_key(self, index: int):
-        """Queries the device for a given key and stores it in self.keys."""
-        if index < 0 or index >= len(self.keys):
-            raise IndexError(index)
-
-        # TODO: add here additional variants for other REPROG_CONTROLS
-        if self.keyversion == FEATURE.REPROG_CONTROLS_V2:
-            keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS_V2, 0x10, index)
-            if keydata:
-                cid, tid, flags = _unpack("!HHB", keydata[:5])
-                self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
-                self.cid_to_tid[cid] = tid
-        elif self.keyversion == FEATURE.REPROG_CONTROLS_V4:
-            keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x10, index)
-            if keydata:
-                cid, tid, flags1, pos, group, gmask, flags2 = _unpack("!HHBBBBB", keydata[:9])
-                flags = flags1 | (flags2 << 8)
-                self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
-                self.cid_to_tid[cid] = tid
-                if group != 0:  # 0 = does not belong to a group
-                    self.group_cids[special_keys.CID_GROUP[group]].append(cid)
-        elif logger.isEnabledFor(logging.WARNING):
-            logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
     def _ensure_all_keys_queried(self):
         """The retrieval of key information is lazy, but for certain functionality
@@ -482,7 +458,7 @@ class KeysArray:
         return len(self.keys)
 
 
-class KeysArrayV1(KeysArray):
+class KeysArrayV2(KeysArray):
     def __init__(self, device, count, version=1):
         super().__init__(device, count, version)
         """The mapping from Control IDs to their native Task IDs.
@@ -509,7 +485,7 @@ class KeysArrayV1(KeysArray):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
-class KeysArrayV4(KeysArrayV1):
+class KeysArrayV4(KeysArrayV2):
     def __init__(self, device, count):
         super().__init__(device, count, 4)
 
@@ -548,9 +524,7 @@ class KeysArrayPersistent(KeysArray):
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
             key = _unpack("!H", keydata[:2])[0]
-            mapped_data = self.device.feature_request(
-                FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key & 0xFF00, key & 0xFF, 0xFF
-            )
+            mapped_data = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key >> 8, key & 0xFF, 0xFF)
             if mapped_data:
                 _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
             else:
@@ -723,9 +697,7 @@ class Gesture:
 
 
 class Param:
-    param_index = {}
-
-    def __init__(self, device, low, high):
+    def __init__(self, device, low, high, next_param_index):
         self._device = device
         self.id = low
         self.param = PARAM[low]
@@ -733,8 +705,7 @@ class Param:
         self.show_in_ui = bool(high & 0x1F)
         self._value = None
         self._default_value = None
-        self.index = Param.param_index.get(device, 0)
-        Param.param_index[device] = self.index + 1
+        self.index = next_param_index
 
     @property
     def sub_params(self):
@@ -814,7 +785,7 @@ class Gestures:
         self.params = {}
         self.specs = {}
         index = 0
-        next_gesture_index = next_divsn_index = 0
+        next_gesture_index = next_divsn_index = next_param_index = 0
         field_high = 0x00
         while field_high != 0x01:  # end of fields
             # retrieve the next eight fields
@@ -832,7 +803,8 @@ class Gestures:
                     next_divsn_index = next_divsn_index if gesture.diversion_index is None else next_divsn_index + 1
                     self.gestures[gesture.gesture] = gesture
                 elif field_high & 0xF0 == 0x30 or field_high & 0xF0 == 0x20:
-                    param = Param(device, field_low, field_high)
+                    param = Param(device, field_low, field_high, next_param_index)
+                    next_param_index = next_param_index + 1
                     self.params[param.param] = param
                 elif field_high == 0x04:
                     if field_low != 0x00:
@@ -849,26 +821,26 @@ class Gestures:
 
     def gesture_enabled(self, gesture):  # is the gesture enabled?
         g = self.gestures.get(gesture, None)
-        return g.enabled(self.device) if g else None
+        return g.enabled() if g else None
 
     def enable_gesture(self, gesture):
         g = self.gestures.get(gesture, None)
-        return g.set(self.device, True) if g else None
+        return g.set(True) if g else None
 
     def disable_gesture(self, gesture):
         g = self.gestures.get(gesture, None)
-        return g.set(self.device, False) if g else None
+        return g.set(False) if g else None
 
     def param(self, param):
         return self.params.get(param, None)
 
     def get_param(self, param):
         g = self.params.get(param, None)
-        return g.get(self.device) if g else None
+        return g.read() if g else None
 
     def set_param(self, param, value):
         g = self.params.get(param, None)
-        return g.set(self.device, value) if g else None
+        return g.write(value) if g else None
 
 
 class Backlight:
@@ -1546,7 +1518,7 @@ class Hidpp20:
         count = None
         if FEATURE.REPROG_CONTROLS_V2 in device.features:
             count = device.feature_request(FEATURE.REPROG_CONTROLS_V2)
-            return KeysArrayV1(device, ord(count[:1]))
+            return KeysArrayV2(device, ord(count[:1]))
         elif FEATURE.REPROG_CONTROLS_V4 in device.features:
             count = device.feature_request(FEATURE.REPROG_CONTROLS_V4)
             return KeysArrayV4(device, ord(count[:1]))
