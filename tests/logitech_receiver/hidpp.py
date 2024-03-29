@@ -130,6 +130,61 @@ r_mouse_3 = [  # a HID++ 2.0 mouse
     Response("444544000000000000000000000000", 0x0510, "0F"),  # name - last 3 characters
 ]
 
+responses_key = [
+    Response("08", 0x0500),  # Reprogrammable Keys V4 count
+    Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
+    Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
+    Response("0052003A310003070500000000000000", 0x0510, "02"),  # middle button
+    Response("0053003C710002030100000000000000", 0x0510, "03"),  # back button
+    Response("0056003E710002030100000000000000", 0x0510, "04"),  # forward button
+    Response("00C300A9310003070300000000000000", 0x0510, "05"),  # smart shift?
+    Response("00C4009D310003070500000000000000", 0x0510, "06"),  # ?
+    Response("00D700B4A00004000300000000000000", 0x0510, "07"),  # ?
+    Response("00500000000000000000000000000000", 0x0520, "0050"),  # left button
+    Response("00510000000000000000000000000000", 0x0520, "0051"),  # ...
+    Response("00520100500000000000000000000000", 0x0520, "0052"),
+    Response("00530500000000000000000000000000", 0x0520, "0053"),
+    Response("00561100000000000000000000000000", 0x0520, "0056"),
+    Response("00C30000000000000000000000000000", 0x0520, "00C3"),
+    Response("00C40000500000000000000000000000", 0x0520, "00C4"),
+    Response("00D70000510000000000000000000000", 0x0520, "00D7"),
+    Response("0041", 0x0400),  # flags
+    Response("0401", 0x0410),  # count
+    Response("0050", 0x0420, "00FF"),  # left button
+    Response("0051", 0x0420, "01FF"),  # right button
+    Response("0052", 0x0420, "02FF"),  # middle button
+    Response("0053", 0x0420, "03FF"),  # back button
+    Response("0050000100500000", 0x0430, "0050FF"),  # left button current
+    Response("0051000100500001", 0x0430, "0051FF"),  # right button current
+    Response("0052000100500001", 0x0430, "0052FF"),  # middle button current
+    Response("0053000100500001", 0x0430, "0053FF"),  # back button current
+    Response("0050FF01005000", 0x0440, "0050FF01005000"),  # left button write
+    Response("0051FF01005000", 0x0440, "0051FF01005000"),  # right button write
+    Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set write
+]
+
+responses_XX = [  # a viable set of responses for Reprogrammable Keys V4
+    Response(4.2, 0x0010),  # ping
+    Response("010001", 0x0000, "0001"),  # feature set at 0x01
+    Response("020003", 0x0000, "1000"),  # battery status at 0x02
+    Response("030001", 0x0000, "0003"),  # device information at 0x03
+    Response("040003", 0x0000, "0100"),  # unknown 0100 at 0x04
+    Response("050003", 0x0000, "1B04"),  # reprogrammable keys V4 at 0x05
+    Response("08", 0x0100),  # 8 features
+    Response("00010001", 0x0110, "01"),  # feature set at 0x01
+    Response("10000001", 0x0110, "02"),  # battery status at 0x02
+    Response("00030001", 0x0110, "03"),  # device information at 0x03
+    Response("01000003", 0x0110, "04"),  # unknown 0100 at 0x04
+    Response("1B040003", 0x0110, "05"),  # reprogrammable keys V4 at 0x05
+    Response("0212345678000D1234567890ABAA01", 0x0300),  # device information
+    Response("05", 0x0500),  # reprogrammable keys V4
+    Response("00500038610000010100", 0x0510, "00"),  # left button
+    Response("00510039600000010100", 0x0510, "01"),  # right button
+    Response("0052003A110000020300", 0x0510, "02"),  # middle button
+    Response("0053003C710101030700", 0x0510, "03"),  # back button
+    Response("0056003E710102030700", 0x0510, "04"),  # forward button
+]
+
 responses_gestures = [  # the commented-out messages are not used by either the setting or other testing
     Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
     Response("A302A11EA30A4105822C852DAD2AAD2B", 0x0400, "0008"),
@@ -168,6 +223,14 @@ responses_gestures = [  # the commented-out messages are not used by either the 
     Response("5C020000000000000000000000000000", 0x0450, "05FF"),
     Response("01000000000000000000000000000000", 0x0460, "00FF"),
     Response("01000000000000000000000000000000", 0x0470, "00FF"),
+    Response("01", 0x0420, "00010101"),  # set index 1
+    Response("00", 0x0420, "00010100"),  # unset index 1
+    Response("01", 0x0420, "00011010"),  # set index 4
+    Response("00", 0x0420, "00011000"),  # unset index 4
+    Response("01", 0x0440, "00010101"),  # divert index 1
+    Response("00", 0x0440, "00010100"),  # undivert index 1
+    Response("000080FF", 0x0480, "000080FF"),  # write param 0
+    Response("000180FF", 0x0480, "000180FF"),  # write param 0
 ]
 
 
@@ -222,3 +285,11 @@ class Device:
     def feature_request(self, feature, function=0x00, *params, no_reply=False):
         if self.protocol >= 2.0:
             return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+
+
+def match_requests(number, responses, call_args_list):
+    for i in range(0 - number, 0):
+        param = b"".join(pack("B", p) if isinstance(p, int) else p for p in call_args_list[i][0][1:]).hex().upper()
+        print("MATCH", i, hex(call_args_list[i][0][0]), param, hex(responses[i].id), responses[i].params)
+        assert call_args_list[i][0][0] == responses[i].id
+        assert param == responses[i].params

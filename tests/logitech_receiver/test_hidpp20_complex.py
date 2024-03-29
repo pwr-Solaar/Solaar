@@ -18,6 +18,7 @@ import pytest
 import yaml
 
 from logitech_receiver import common
+from logitech_receiver import exceptions
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
@@ -172,8 +173,21 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
 @pytest.mark.parametrize(
     "device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names",
     [
-        (device_standard, 2, 1, 1, 0x30, 0, 1, 3, "Volume Up", ["reprogrammable", "divertable"], ["g1", "g2"]),
-        (device_standard, 1, 2, 2, 0x20, 1, 2, 1, "Volume Down", ["divertable"], ["g1"]),
+        (device_standard, 1, 0x51, 0x39, 0x60, 0, 1, 1, "Right Click", ["divertable", "persistently divertable"], ["g1"]),
+        (device_standard, 2, 0x52, 0x3A, 0x11, 1, 2, 3, "Mouse Middle Button", ["mse", "reprogrammable"], ["g1", "g2"]),
+        (
+            device_standard,
+            3,
+            0x53,
+            0x3C,
+            0x110,
+            2,
+            2,
+            7,
+            "Mouse Back Button",
+            ["reprogrammable", "raw XY"],
+            ["g1", "g2", "g3"],
+        ),
     ],
 )
 def test_ReprogrammableKeyV4_key(device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names):
@@ -194,22 +208,140 @@ def test_ReprogrammableKeyV4_key(device, index, cid, tid, flags, pos, group, gma
 
 
 @pytest.mark.parametrize(
+    "responses, index, mapped_to, remappable_to, mapping_flags",
+    [
+        (hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), []),
+        (hidpp.responses_key, 2, "Left Click", None, ["diverted"]),
+        (hidpp.responses_key, 3, "Mouse Back Button", None, ["diverted", "persistently diverted"]),
+        (hidpp.responses_key, 4, "Mouse Forward Button", None, ["diverted", "raw XY diverted"]),
+    ],
+)
+# these fields need access all the key data, so start by setting up a device and its key data
+def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, mapping_flags):
+    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+    device._keys = _hidpp20.get_keys(device)
+
+    key = device.keys[index]
+
+    assert key.mapped_to == mapped_to
+    assert (key.remappable_to == remappable_to) or remappable_to is None
+    assert list(key.mapping_flags) == mapping_flags
+
+
+@pytest.mark.parametrize(
+    "responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets",
+    [
+        (hidpp.responses_key, 1, True, False, True, 0x52, ["0051080000"]),
+        (hidpp.responses_key, 2, False, True, False, 0x51, ["0052020000", "0052200000", "0052000051"]),
+        (hidpp.responses_key, 3, False, True, True, 0x50, ["0053020000", "00530C0000", "0053300000", "0053000050"]),
+        (hidpp.responses_key, 4, False, False, False, 0x50, ["0056020000", "0056080000", "0056200000", "0056000050"]),
+    ],
+)
+def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets, mocker):
+    responses += [hidpp.Response(r, 0x530, r) for r in sets]
+    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+    device._keys = _hidpp20.get_keys(device)
+    device._keys._ensure_all_keys_queried()  # do this now so that the last requests are sets
+    spy_request = mocker.spy(device, "request")
+
+    key = device.keys[index]
+    _mapping_flags = list(key.mapping_flags)
+
+    if "divertable" in key.flags or not diverted:
+        key.set_diverted(diverted)
+    else:
+        with pytest.raises(exceptions.FeatureNotSupported):
+            key.set_diverted(diverted)
+    assert ("diverted" in list(key.mapping_flags)) == (diverted and "divertable" in key.flags)
+
+    if "persistently divertable" in key.flags or not persistently_diverted:
+        key.set_persistently_diverted(persistently_diverted)
+    else:
+        with pytest.raises(exceptions.FeatureNotSupported):
+            key.set_persistently_diverted(persistently_diverted)
+    assert ("persistently diverted" in key.mapping_flags) == (persistently_diverted and "persistently divertable" in key.flags)
+
+    if "raw XY" in key.flags or not rawXY_reporting:
+        key.set_rawXY_reporting(rawXY_reporting)
+    else:
+        with pytest.raises(exceptions.FeatureNotSupported):
+            key.set_rawXY_reporting(rawXY_reporting)
+    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw XY" in key.flags)
+
+    if remap in key.remappable_to or remap == 0:
+        key.remap(remap)
+    else:
+        with pytest.raises(exceptions.FeatureNotSupported):
+            key.remap(remap)
+    assert (key.mapped_to == remap) or (remap not in key.remappable_to and remap != 0)
+
+    hidpp.match_requests(len(sets), responses, spy_request.call_args_list)
+
+
+@pytest.mark.parametrize(
+    "r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap",
+    [
+        (hidpp.responses_key, 1, 0x0051, 0x02, 0x0002, 0x01, 0, "Mouse Button: 2", "Cntrl+", "02000201", "01000400"),
+        (hidpp.responses_key, 2, 0x0052, 0x01, 0x0001, 0x00, 1, "Key: 1", "", "01000100", "02005004"),
+        (hidpp.responses_key, 3, 0x0053, 0x02, 0x0001, 0x00, 1, "Mouse Button: 1", "", "02000100", "7FFFFFFF"),
+    ],
+)
+def test_RemappableAction(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
+    if int(remap, 16) == special_keys.KEYS_Default:
+        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x450, f"{cid:04X}" + "FF")]
+    else:
+        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x440, f"{cid:04X}" + "FF" + remap)]
+    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+    key = hidpp20.PersistentRemappableAction(device, index, cid, actionId, remapped, mask, status)
+    spy_request = mocker.spy(device, "request")
+
+    assert key._device == device
+    assert key.index == index
+    assert key._cid == cid
+    assert key.actionId == actionId
+    assert key.remapped == remapped
+    assert key._modifierMask == mask
+    assert key.cidStatus == status
+    assert key.key == special_keys.CONTROL[cid]
+    assert key.actionType == special_keys.ACTIONID[actionId]
+    assert key.action == action
+    assert key.modifiers == modifiers
+    assert key.data_bytes.hex().upper() == byts
+
+    key.remap(bytes.fromhex(remap))
+    assert key.data_bytes.hex().upper() == (byts if int(remap, 16) == special_keys.KEYS_Default else remap)
+
+    if int(remap, 16) != special_keys.KEYS_Default:
+        hidpp.match_requests(1, responses, spy_request.call_args_list)
+
+
+# KeysArray methods tested in KeysArrayV4
+
+# KeysArrayV2 not tested as there is no documentation
+
+
+@pytest.mark.parametrize(
     "device, index", [(device_zerofeatures, -1), (device_zerofeatures, 5), (device_standard, -1), (device_standard, 6)]
 )
-def test_KeysArrayV4_query_key_indexerror(device, index):
+def test_KeysArrayV4_index_error(device, index):
     keysarray = hidpp20.KeysArrayV4(device, 5)
+
+    with pytest.raises(IndexError):
+        keysarray[index]
 
     with pytest.raises(IndexError):
         keysarray._query_key(index)
 
 
-@pytest.mark.parametrize("device, index, cid", [(device_standard, 0, 0x0011), (device_standard, 4, 0x0003)])
-def test_KeysArrayV4_query_key(device, index, cid):
+@pytest.mark.parametrize("device, index, top, cid", [(device_standard, 0, 2, 0x0011), (device_standard, 4, 5, 0x0003)])
+def test_KeysArrayV4_query_key(device, index, top, cid):
     keysarray = hidpp20.KeysArrayV4(device, 5)
 
     keysarray._query_key(index)
 
     assert keysarray.keys[index]._cid == cid
+    assert len(keysarray[index:top]) == top - index
+    assert len(list(keysarray)) == 5
 
 
 @pytest.mark.parametrize(
@@ -246,26 +378,7 @@ def test_KeysArrayV4_index(key, index):
     assert result == index
 
 
-responses_key = [
-    hidpp.Response("08", 0x0500),
-    hidpp.Response("00500038010001010400000000000000", 0x0510, "00"),
-    hidpp.Response("00510039010001010400000000000000", 0x0510, "01"),
-    hidpp.Response("0052003A310003070500000000000000", 0x0510, "02"),
-    hidpp.Response("0053003C310002030500000000000000", 0x0510, "03"),
-    hidpp.Response("0056003E310002030500000000000000", 0x0510, "04"),
-    hidpp.Response("00C300A9310003070500000000000000", 0x0510, "05"),
-    hidpp.Response("00C4009D310003070500000000000000", 0x0510, "06"),
-    hidpp.Response("00D700B4A00004000300000000000000", 0x0510, "07"),
-    hidpp.Response("00500000000000000000000000000000", 0x0520, "0050"),
-    hidpp.Response("00510000000000000000000000000000", 0x0520, "0051"),
-    hidpp.Response("00520000500000000000000000000000", 0x0520, "0052"),
-    hidpp.Response("00530000000000000000000000000000", 0x0520, "0053"),
-    hidpp.Response("00560000000000000000000000000000", 0x0520, "0056"),
-    hidpp.Response("00C30000000000000000000000000000", 0x0520, "00C3"),
-    hidpp.Response("00C40000500000000000000000000000", 0x0520, "00C4"),
-    hidpp.Response("00D70000510000000000000000000000", 0x0520, "00D7"),
-]
-device_key = hidpp.Device("KEY", responses=responses_key, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+device_key = hidpp.Device("KEY", responses=hidpp.responses_key, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
 
 
 @pytest.mark.parametrize(
@@ -316,47 +429,169 @@ responses_remap = [
     hidpp.Response("0052", 0x0420, "02FF"),
     hidpp.Response("0052000100510000", 0x0430, "0052FF"),  # key DOWN
     hidpp.Response("050002", 0x0000, "1B04"),  # REPROGRAMMABLE_KEYS_V4
-] + responses_key
-
-device_remap = hidpp.Device("REMAP", responses=responses_remap, feature=hidpp20_constants.FEATURE.PERSISTENT_REMAPPABLE_ACTION)
+] + hidpp.responses_key
 
 
 @pytest.mark.parametrize(
-    "key, expected_index, expected_mapped_to",
+    "device, index", [(device_zerofeatures, -1), (device_zerofeatures, 5), (device_standard, -1), (device_standard, 6)]
+)
+def test_KeysArrayPersistent_index_error(device, index):
+    keysarray = hidpp20.KeysArrayPersistent(device, 5)
+
+    with pytest.raises(IndexError):
+        keysarray[index]
+
+    with pytest.raises(IndexError):
+        keysarray._query_key(index)
+
+
+@pytest.mark.parametrize(
+    "responses, key, index, mapped_to, capabilities",
     [
-        (special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left")),
-        (special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left")),
-        (special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN")),
+        (responses_remap, special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (responses_remap, special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (responses_remap, special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN"), 0x41),
     ],
 )
-def test_KeysArrayPersistent_key(key, expected_index, expected_mapped_to):
-    device_remap._remap_keys = _hidpp20.get_remap_keys(device_remap)
-    device_remap._remap_keys._ensure_all_keys_queried()
+def test_KeysArrayPersistent_key(responses, key, index, mapped_to, capabilities):
+    device = hidpp.Device("REMAP", responses=responses, feature=hidpp20_constants.FEATURE.PERSISTENT_REMAPPABLE_ACTION)
+    device._remap_keys = _hidpp20.get_remap_keys(device)
+    device._remap_keys._ensure_all_keys_queried()
 
-    index = device_remap._remap_keys.index(key)
-    mapped_to = device_remap._remap_keys[expected_index].remapped
-
-    assert index == expected_index
-    assert mapped_to == expected_mapped_to
+    assert device._remap_keys.index(key) == index
+    assert device._remap_keys[index].remapped == mapped_to
+    assert device._remap_keys.capabilities == capabilities
 
 
-device_gestures = hidpp.Device("GESTURES", responses=hidpp.responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
+@pytest.mark.parametrize(
+    "id, length, minimum, maximum, widget, min, max, wid, string",
+    [
+        ("left", 1, 5, 8, "Widget", 5, 8, "Widget", "left"),
+        ("left", 1, None, None, None, 0, 255, "Scale", "left"),
+    ],
+)
+def test_SubParam(id, length, minimum, maximum, widget, min, max, wid, string):
+    subparam = hidpp20.SubParam(id, length, minimum, maximum, widget)
+
+    assert subparam.id == id
+    assert subparam.length == length
+    assert subparam.minimum == min
+    assert subparam.maximum == max
+    assert subparam.widget == wid
+    assert subparam.__str__() == string
+    assert subparam.__repr__() == string
+
+
+@pytest.mark.parametrize(
+    "device, low, high, next_index, next_diversion_index, name, cbe, si, sdi, eom, dom",
+    [
+        (device_standard, 0x01, 0x01, 5, 10, "Tap1Finger", True, 5, None, (0, 0x20), (None, None)),
+        (device_standard, 0x03, 0x02, 6, 11, "Tap3Finger", False, None, 11, (None, None), (1, 0x08)),
+    ],
+)
+def test_Gesture(device, low, high, next_index, next_diversion_index, name, cbe, si, sdi, eom, dom):
+    gesture = hidpp20.Gesture(device, low, high, next_index, next_diversion_index)
+
+    assert gesture._device == device
+    assert gesture.id == low
+    assert gesture.gesture == name
+    assert gesture.can_be_enabled == cbe
+    assert gesture.can_be_enabled == cbe
+    assert gesture.index == si
+    assert gesture.diversion_index == sdi
+    assert gesture.enable_offset_mask() == eom
+    assert gesture.diversion_offset_mask() == dom
+    assert gesture.as_int() == low
+    assert int(gesture) == low
+
+
+@pytest.mark.parametrize(
+    "responses, gest, enabled, diverted, set_result, unset_result, divert_result, undivert_result",
+    [
+        (hidpp.responses_gestures, 20, None, None, None, None, None, None),
+        (hidpp.responses_gestures, 1, True, False, "01", "00", "01", "00"),
+        (hidpp.responses_gestures, 45, False, None, "01", "00", None, None),
+    ],
+)
+def test_Gesture_set(responses, gest, enabled, diverted, set_result, unset_result, divert_result, undivert_result):
+    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    gestures = _hidpp20.get_gestures(device)
+
+    gesture = gestures.gesture(gest)
+
+    assert gesture.enabled() == enabled
+    assert gesture.diverted() == diverted
+    assert gesture.set(True) == (bytes.fromhex(set_result) if set_result is not None else None)
+    assert gesture.set(False) == (bytes.fromhex(unset_result) if unset_result is not None else None)
+    assert gesture.divert(True) == (bytes.fromhex(divert_result) if divert_result is not None else None)
+    assert gesture.divert(False) == (bytes.fromhex(undivert_result) if undivert_result is not None else None)
+
+
+@pytest.mark.parametrize(
+    "responses, prm, id, index, size, value, default_value, write1, write2",
+    [
+        (hidpp.responses_gestures, 4, common.NamedInt(4, "ScaleFactor"), 0, 2, 256, 256, "0080", "0180"),
+    ],
+)
+def test_Param(responses, prm, id, index, size, value, default_value, write1, write2):
+    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    gestures = _hidpp20.get_gestures(device)
+
+    param = gestures.param(prm)
+
+    assert param.id == id
+    assert param.index == index
+    assert param.size == size
+    assert param.value == value
+    assert param.default_value == default_value
+    assert str(param) == id
+    assert int(param) == id
+    assert param.write(bytes.fromhex(write1)).hex().upper() == f"{index:02X}" + write1 + "FF"
+    assert param.write(bytes.fromhex(write2)).hex().upper() == f"{index:02X}" + write2 + "FF"
+
+
+@pytest.mark.parametrize(
+    "responses, id, s, byte_count, value, string",
+    [
+        (hidpp.responses_gestures, 1, "DVI field width", 1, 8, "[DVI field width=8]"),
+        (hidpp.responses_gestures, 2, "field widths", 1, 8, "[field widths=8]"),
+        (hidpp.responses_gestures, 3, "period unit", 2, 2048, "[period unit=2048]"),
+    ],
+)
+def test_Spec(responses, id, s, byte_count, value, string):
+    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    gestures = _hidpp20.get_gestures(device)
+
+    spec = gestures.specs[id]
+
+    assert spec.id == id
+    assert spec.spec == s
+    assert spec.byte_count == byte_count
+    assert spec.value == value
+    assert repr(spec) == string
 
 
 def test_Gestures():
-    gestures = _hidpp20.get_gestures(device_gestures)
+    device = hidpp.Device("GESTURES", responses=hidpp.responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    gestures = _hidpp20.get_gestures(device)
 
     assert gestures
+
     assert len(gestures.gestures) == 17
-    assert gestures.gestures[20].enabled() is None
-    assert gestures.gestures[20].diverted() is None
-    assert gestures.gestures[1].enabled() is True
-    assert gestures.gestures[1].diverted() is False
-    assert gestures.gestures[45].enabled() is False
-    assert gestures.gestures[45].diverted() is None
+    assert gestures.gesture(20) == gestures.gestures[20]
+    assert gestures.gesture_enabled(20) is None
+    assert gestures.gesture_enabled(1) is True
+    assert gestures.gesture_enabled(45) is False
+    assert gestures.enable_gesture(20) is None
+    assert gestures.enable_gesture(45) == bytes.fromhex("01")
+    assert gestures.disable_gesture(20) is None
+    assert gestures.disable_gesture(45) == bytes.fromhex("00")
+
     assert len(gestures.params) == 1
-    assert gestures.params[4].value == 256
-    assert gestures.params[4].default_value == 256
+    assert gestures.param(4) == gestures.params[4]
+    assert gestures.get_param(4) == 256
+    assert gestures.set_param(4, 128) is None
+
     assert len(gestures.specs) == 5
     assert gestures.specs[2].value == 8
     assert gestures.specs[4].value == 4
@@ -647,3 +882,6 @@ def test_profiles():
     profiles = _hidpp20.get_profiles(device_onb)
 
     assert profiles
+
+
+# OnboardProfiles needs more testing
