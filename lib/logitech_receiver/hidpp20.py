@@ -1078,8 +1078,8 @@ class Button:
     def from_bytes(cls, bytes):
         behavior = ButtonBehaviors[bytes[0] >> 4]
         if behavior == ButtonBehaviors.MacroExecute or behavior == ButtonBehaviors.MacroStop:
-            sector = (bytes[0] & 0x0F) << 8 + bytes[1]
-            address = bytes[2] << 8 + bytes[3]
+            sector = ((bytes[0] & 0x0F) << 8) + bytes[1]
+            address = (bytes[2] << 8) + bytes[3]
             result = cls(behavior=behavior, sector=sector, address=address)
         elif behavior == ButtonBehaviors.Send:
             mapping_type = ButtonMappingTypes[bytes[1]]
@@ -1106,8 +1106,7 @@ class Button:
     def to_bytes(self):
         bytes = _int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
         if self.behavior == ButtonBehaviors.MacroExecute or self.behavior == ButtonBehaviors.MacroStop:
-            bytes = _int2bytes(self.sector, 2) + _int2bytes(self.address, 2)
-            bytes[0] += self.behavior << 4
+            bytes = _int2bytes((self.behavior << 12) + self.sector, 2) + _int2bytes(self.address, 2)
         elif self.behavior == ButtonBehaviors.Send:
             bytes += _int2bytes(self.type, 1)
             if self.type == ButtonMappingTypes.Button:
@@ -1193,10 +1192,10 @@ class OnboardProfile:
             bytes += self.buttons[i].to_bytes() if i < len(self.buttons) else b"\xff\xff\xff\xff"
         for i in range(0, 16):
             bytes += self.gbuttons[i].to_bytes() if i < len(self.gbuttons) else b"\xff\xff\xff\xff"
-        if self.enabled:
-            bytes += self.name[0:24].ljust(24, "\x00").encode("utf-16le")
-        else:
+        if self.name == "":
             bytes += b"\xff" * 48
+        else:
+            bytes += self.name[0:24].ljust(24, "\x00").encode("utf-16le")
         for i in range(0, 4):
             bytes += self.lighting[i].to_bytes()
         while len(bytes) < length - 2:
