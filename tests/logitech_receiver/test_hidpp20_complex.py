@@ -630,6 +630,7 @@ def test_Backlight():
         ("0300000000005000000000", common.NamedInt(0x3, "Cycle"), None, None, 0x5000, 0x00, None, None),
         ("0A20304010005020000000", common.NamedInt(0xA, "Breathe"), 0x203040, None, 0x1000, 0x20, None, 0x50),
         ("0B20304000100000000000", common.NamedInt(0xB, "Ripple"), 0x203040, None, 0x1000, None, None, None),
+        ("0A01020300500407000000", common.NamedInt(0xA, "Breathe"), 0x010203, None, 0x0050, 0x07, None, 0x04),
     ],
 )
 def test_LEDEffectSetting(hex, ID, color, speed, period, intensity, ramp, form):
@@ -646,7 +647,10 @@ def test_LEDEffectSetting(hex, ID, color, speed, period, intensity, ramp, form):
         assert getattr(setting, "intensity", None) == intensity
         assert getattr(setting, "ramp", None) == ramp
         assert getattr(setting, "form", None) == form
+
     assert setting.to_bytes() == byt
+    assert yaml.safe_load(yaml.dump(setting)) == setting
+    assert yaml.safe_load(str(setting)) == setting
 
 
 @pytest.mark.parametrize(
@@ -737,119 +741,90 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
     assert effects.zones[0].count == count_0
 
 
-def test_led_setting_bytes():
-    ebytes = bytes.fromhex("0A01020300500407000000")
+@pytest.mark.parametrize(
+    "hex, behavior, sector, address, typ, val, modifiers, data, byt",
+    [
+        ("05010203", 0x0, 0x501, 0x0203, None, None, None, None, None),
+        ("15020304", 0x1, 0x502, 0x0304, None, None, None, None, None),
+        ("8000FFFF", 0x8, None, None, 0x00, None, None, None, None),
+        ("80010102", 0x8, None, None, 0x01, 0x0102, None, None, None),
+        ("80020454", 0x8, None, None, 0x02, 0x54, 0x04, None, None),
+        ("80030454", 0x8, None, None, 0x03, 0x0454, None, None, None),
+        ("900AFF01", 0x9, None, None, None, 0x0A, None, 0x01, None),
+        ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xA0"),
+    ],
+)
+def test_button_bytes(hex, behavior, sector, address, typ, val, modifiers, data, byt):
+    button = hidpp20.Button.from_bytes(bytes.fromhex(hex))
 
-    setting = hidpp20.LEDEffectSetting.from_bytes(ebytes)
-
-    assert setting.ID == 0x0A
-    assert setting.color == 0x010203
-    assert setting.period == 0x0050
-    assert setting.form == 0x04
-    assert setting.intensity == 0x07
-
-    bytes_out = setting.to_bytes()
-
-    assert ebytes == bytes_out
-
-
-def test_led_setting_yaml():
-    ebytes = bytes.fromhex("0A01020300500407000000")
-    #  eyaml = (
-    #     "!LEDEffectSetting {ID: !NamedInt {name: Breathe, value: 0xa}, color: 0x10203, "
-    #      "form: 0x4, intensity: 0x7, period: 0x50} "
-    #  )
-
-    setting = hidpp20.LEDEffectSetting.from_bytes(ebytes)
-
-    assert setting.ID == 0x0A
-    assert setting.color == 0x010203
-    assert setting.period == 0x0050
-    assert setting.form == 0x04
-    assert setting.intensity == 0x07
-
-    yaml_out = yaml.dump(setting)
-
-    #    assert eyaml == re.compile(r"\s+").sub(" ", yaml_out)
-
-    setting = yaml.safe_load(yaml_out)
-
-    assert setting.to_bytes() == ebytes
+    assert getattr(button, "behavior", None) == behavior
+    assert getattr(button, "sector", None) == sector
+    assert getattr(button, "address", None) == address
+    assert getattr(button, "type", None) == typ
+    assert getattr(button, "value", None) == val
+    assert getattr(button, "modifiers", None) == modifiers
+    assert getattr(button, "data", None) == data
+    assert getattr(button, "bytes", None) == byt
+    assert button.to_bytes().hex().upper() == hex
+    assert yaml.safe_load(yaml.dump(button)).to_bytes().hex().upper() == hex
 
 
-def test_button_bytes_1():
-    bbytes = bytes.fromhex("8000FFFF")
-
-    button = hidpp20.Button.from_bytes(bbytes)
-
-    assert button.behavior == 0x8
-    assert button.type == 0x00
-
-    bytes_out = button.to_bytes()
-
-    assert bbytes == bytes_out
-
-
-def test_button_bytes_2():
-    bbytes = bytes.fromhex("900aFF00")
-
-    button = hidpp20.Button.from_bytes(bbytes)
-
-    assert button.behavior == 0x9
-
-    bytes_out = button.to_bytes()
-
-    assert bbytes == bytes_out
-
-
-def test_button_bytes_3():
-    bbytes = bytes.fromhex("80020454")
-
-    button = hidpp20.Button.from_bytes(bbytes)
-
-    assert button.behavior == 0x8
-    assert button.modifiers == 0x04
-
-    bytes_out = button.to_bytes()
-
-    assert bbytes == bytes_out
-
-
-@pytest.fixture
-def profile_bytes():
-    return bytes.fromhex(
-        "01010290018003000700140028FFFFFF"
-        "FFFF0000000000000000000000000000"
-        "8000FFFF900aFF00800204548000FFFF"
-        "900aFF00800204548000FFFF900aFF00"
-        "800204548000FFFF900aFF0080020454"
-        "8000FFFF900aFF00800204548000FFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        "54004500370000000000000000000000"
-        "00000000000000000000000000000000"
-        "00000000000000000000000000000000"
-        "0A01020300500407000000FFFFFFFFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        "FFFFFFFFFFFFFFFFFFFFFFFFFF7C81"
-    )
+hex1 = (
+    "01010290018003000700140028FFFFFF"
+    "FFFF0000000000000000000000000000"
+    "8000FFFF900AFF00800204548000FFFF"
+    "900AFF00800204548000FFFF900AFF00"
+    "800204548000FFFF900AFF0080020454"
+    "8000FFFF900AFF00800204548000FFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "54004500370000000000000000000000"
+    "00000000000000000000000000000000"
+    "00000000000000000000000000000000"
+    "0A01020300500407000000FFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFF7C81"
+)
+hex2 = (
+    "01010290018003000700140028FFFFFF"
+    "FFFF0000000000000000000000000000"
+    "8000FFFF900AFF00800204548000FFFF"
+    "900AFF00800204548000FFFF900AFF00"
+    "800204548000FFFF900AFF0080020454"
+    "8000FFFF900AFF00800204548000FFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "0A01020300500407000000FFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFF27C9"
+)
 
 
-def test_profile_bytes(profile_bytes):
-    pbytes = profile_bytes
-    profile = hidpp20.OnboardProfile.from_bytes(2, 1, 16, 0, pbytes)
+@pytest.mark.parametrize(
+    "hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting",
+    [
+        (hex1, "TE7", 2, 1, 16, 0, [0x0190, 0x0380, 0x0700, 0x1400, 0x2800], "8000FFFF", "0A01020300500407000000"),
+        (hex2, "", 2, 1, 16, 0, [0x0190, 0x0380, 0x0700, 0x1400, 0x2800], "8000FFFF", "0A01020300500407000000"),
+    ],
+)
+def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
+    profile = hidpp20.OnboardProfile.from_bytes(sector, enabled, buttons, gbuttons, bytes.fromhex(hex))
 
-    assert profile.sector == 2
-    assert profile.resolutions == [0x0190, 0x0380, 0x0700, 0x1400, 0x2800]
-    assert profile.buttons[0].to_bytes() == bytes.fromhex("8000FFFF")
-    assert profile.lighting[0].to_bytes() == bytes.fromhex("0A01020300500407000000")
-    assert profile.name == "TE7"
+    assert profile.name == name
+    assert profile.sector == sector
+    assert profile.resolutions == resolutions
+    assert profile.buttons[0].to_bytes().hex().upper() == button
+    assert profile.lighting[0].to_bytes().hex().upper() == lighting
 
-    bytes_out = profile.to_bytes(255)
-
-    assert pbytes == bytes_out
+    assert profile.to_bytes(len(hex) // 2).hex().upper() == hex
+    assert yaml.safe_load(yaml.dump(profile)).to_bytes(len(hex) // 2).hex().upper() == hex
 
 
 responses_profiles = [
@@ -871,17 +846,52 @@ responses_profiles = [
     hidpp.Response("00000000000000000000000000000000", 0x0450, "000100C0"),
     hidpp.Response("0A01020300500407000000FFFFFFFFFF", 0x0450, "000100D0"),
     hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "000100E0"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81", 0x0450, "000100EE"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0450, "000100EE"),
+]
+responses_profiles_rom = [
+    hidpp.Response("0104010101020100FE0200", 0x0400),
+    hidpp.Response("00000000", 0x0450, "00000000"),
+    hidpp.Response("010101FF", 0x0450, "01000000"),
+    hidpp.Response("FFFFFFFF", 0x0450, "01000004"),
+    hidpp.Response("01010290018003000700140028FFFFFF", 0x0450, "01010000"),
+    hidpp.Response("FFFF0000000000000000000000000000", 0x0450, "01010010"),
+    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "01010020"),
+    hidpp.Response("900aFF00800204548000FFFF900aFF00", 0x0450, "01010030"),
+    hidpp.Response("800204548000FFFF900aFF0080020454", 0x0450, "01010040"),
+    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "01010050"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010060"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010070"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010080"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010090"),
+    hidpp.Response("54004500370000000000000000000000", 0x0450, "010100A0"),
+    hidpp.Response("00000000000000000000000000000000", 0x0450, "010100B0"),
+    hidpp.Response("00000000000000000000000000000000", 0x0450, "010100C0"),
+    hidpp.Response("0A01020300500407000000FFFFFFFFFF", 0x0450, "010100D0"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "010100E0"),
+    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0450, "010100EE"),
 ]
 
-device_onb = hidpp.Device("ONB", True, 4.5, responses=responses_profiles, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
 
-
-def test_profiles():
-    device_onb._profiles = None
-    profiles = _hidpp20.get_profiles(device_onb)
+@pytest.mark.parametrize(
+    "responses, name, count, buttons, gbuttons, sectors, size",
+    [
+        (responses_profiles, "ONB", 1, 2, 2, 1, 254),
+        (responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
+    ],
+)
+def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
+    device = hidpp.Device(name, True, 4.5, responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
+    device._profiles = None
+    profiles = _hidpp20.get_profiles(device)
 
     assert profiles
+    assert profiles.version == hidpp20.OnboardProfilesVersion
+    assert profiles.name == name
+    assert profiles.count == count
+    assert profiles.buttons == buttons
+    assert profiles.gbuttons == gbuttons
+    assert profiles.sectors == sectors
+    assert profiles.size == size
+    assert len(profiles.profiles) == count
 
-
-# OnboardProfiles needs more testing
+    assert yaml.safe_load(yaml.dump(profiles)).to_bytes().hex() == profiles.to_bytes().hex()
