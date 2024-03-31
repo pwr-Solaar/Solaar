@@ -25,12 +25,13 @@ import pytest
 
 from logitech_receiver import common
 from logitech_receiver import hidpp20
+from logitech_receiver import hidpp20_constants
 from logitech_receiver import settings_templates
 from logitech_receiver import special_keys
 
 from . import hidpp
 
-# TODO action part of DpiSlidingXY, MouseGesturesXY, SpeedChange
+# TODO action part of DpiSlidingXY, MouseGesturesXY
 
 
 class Setup:
@@ -457,13 +458,7 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.SpeedChange, 0, None, 0),  # need to set up all settings to successfully write
         common.NamedInts(**{"Off": 0, "DPI Change": 0xED}),
-        hidpp.Response("040001", 0x0000, "2205"),  # POINTER_SPEED
-        hidpp.Response("0100", 0x0400),
-        hidpp.Response("0120", 0x0410, "0120"),
-        hidpp.Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
-        hidpp.Response("01", 0x0500),
-        hidpp.Response("00ED009D310003070500000000000000", 0x0510, "00"),  # DPI Change
-        hidpp.Response("00ED0000000000000000000000000000", 0x0520, "00ED"),  # DPI Change current
+        *hidpp.responses_speedchange,
     ),
 ]
 
@@ -714,6 +709,30 @@ def test_key_template(test, mocker):
         assert write_value == value
 
     hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
+
+
+@pytest.mark.parametrize(
+    "responses, currentSpeed, newSpeed",
+    [
+        (hidpp.responses_speedchange, 100, 200),
+        (hidpp.responses_speedchange, None, 250),
+    ],
+)
+def test_SpeedChange_action(responses, currentSpeed, newSpeed, mocker):
+    device = hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.POINTER_SPEED)
+    spy_setting_callback = mocker.spy(device, "setting_callback")
+    settings_templates.check_feature_settings(device, device.settings)  # need to set up all the settings
+    device.persister = {"pointer_speed": currentSpeed, "_speed-change": newSpeed}
+    speed_setting = next(filter(lambda s: s.name == "speed-change", device.settings), None)
+    pointer_setting = next(filter(lambda s: s.name == "pointer_speed", device.settings), None)
+
+    speed_setting.write(237)
+    speed_setting._rw.press_action()
+
+    if newSpeed is not None and speed_setting is not None:
+        spy_setting_callback.assert_any_call(device, type(pointer_setting), [newSpeed])
+    assert device.persister["_speed-change"] == currentSpeed
+    assert device.persister["pointer_speed"] == newSpeed
 
 
 @pytest.mark.parametrize("test", simple_tests + key_tests)
