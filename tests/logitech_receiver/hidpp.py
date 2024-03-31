@@ -233,6 +233,16 @@ responses_gestures = [  # the commented-out messages are not used by either the 
     Response("000180FF", 0x0480, "000180FF"),  # write param 0
 ]
 
+responses_speedchange = [
+    Response("0100", 0x0400),
+    Response("0120", 0x0410, "0120"),
+    Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
+    Response("01", 0x0500),
+    Response("00ED009D310003070500000000000000", 0x0510, "00"),  # DPI Change
+    Response("00ED0000000000000000000000000000", 0x0520, "00ED"),  # DPI Change current
+    Response("060000", 0x0000, "2205"),  # POINTER_SPEED
+]
+
 
 # A fake device that uses provided data (responses) to respond to HID++ commands.
 # Some methods from the real device are used to set up data structures needed for settings
@@ -248,7 +258,6 @@ class Device:
     version: Optional[int] = 0
     wpid: Optional[str] = "0000"
     setting_callback: Any = None
-    settings = []
     sliding = profiles = _backlight = _keys = _remap_keys = _led_effects = _gestures = None
     _gestures_lock = threading.Lock()
 
@@ -263,6 +272,7 @@ class Device:
 
     def __post_init__(self):
         self.persister = configuration._DeviceEntry()
+        self.settings = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
             self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
