@@ -21,13 +21,15 @@ from unittest import mock
 
 import pytest
 
+from logitech_receiver import common
 from logitech_receiver import device
+from logitech_receiver import hidpp20
 
 from . import hidpp
 
 
 @pytest.fixture
-def mock_base():
+def mock_base():  # allow override of base functions
     with mock.patch("logitech_receiver.base.open_path", return_value=None) as mock_open_path:
         with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
             with mock.patch("logitech_receiver.base.ping", return_value=None) as mock_ping:
@@ -72,7 +74,29 @@ def test_DeviceFactory(device_info, responses, success, mock_base):
 
 
 @pytest.mark.parametrize(
-    "device_info, responses, handle, _name, _codename, number, protocol",
+    "device_info, responses, codename, name, kind",
+    [
+        (di_CCCC, hidpp.r_empty, "?? (CCCC)", "Unknown device CCCC", "?"),
+        (di_C318, hidpp.r_keyboard_1, "?? (C318)", "Unknown device C318", "?"),
+        (di_B530, hidpp.r_keyboard_2, "ABCDEFGHIJKLMNOPQR", "ABCDEFGHIJKLMNOPQR", common.NamedInt(1, "keyboard")),
+    ],
+)
+def test_Device_name(device_info, responses, codename, name, kind, mock_base):
+    mock_base[0].side_effect = hidpp.open_path
+    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[2].side_effect = partial(hidpp.ping, responses)
+    test_device = device.DeviceFactory.create_device(device_info)
+    test_device._codename = None
+    test_device._name = None
+    test_device._kind = None
+
+    assert test_device.codename == codename
+    assert test_device.name == name
+    assert test_device.kind == kind
+
+
+@pytest.mark.parametrize(
+    "device_info, responses, handle, _name, _codename, number, protocol, registers",
     zip(
         [di_CCCC, di_C318, di_B530, di_C068, di_C08A, di_DDDD],
         [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
@@ -81,9 +105,10 @@ def test_DeviceFactory(device_info, responses, success, mock_base):
         [None, "Illuminated", "Craft", "G700", "MX Vertical", None],
         [0xFF, 0x0, 0xFF, 0x0, 0xFF, 0xFF],
         [1.0, 1.0, 4.5, 1.0, 4.5, 4.5],
+        [None, [], [], (common.NamedInt(7, "battery status"), common.NamedInt(81, "three leds")), [], None],
     ),
 )
-def test_Device_info(device_info, responses, handle, _name, _codename, number, protocol, mock_base):
+def test_Device_info(device_info, responses, handle, _name, _codename, number, protocol, registers, mock_base):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, responses)
     mock_base[2].side_effect = partial(hidpp.ping, responses)
@@ -95,6 +120,7 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
     assert test_device._codename == _codename
     assert test_device.number == number
     assert test_device._protocol == protocol
+    assert test_device.registers == registers
 
     assert bool(test_device)
     test_device.__del__()
@@ -174,7 +200,7 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
 
 
 @pytest.mark.parametrize(
-    "number, pairing_info, responses, handle, unitId, modelId, tid_map, kind, firmware, serial, id, psl, rate",
+    "number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate",
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
@@ -192,55 +218,77 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     ),
 )
 def test_Device_ids(
-    number,
-    pairing_info,
-    responses,
-    handle,
-    unitId,
-    modelId,
-    tid_map,
-    kind,
-    firmware,
-    serial,
-    id,
-    psl,
-    rate,
-    mock_base,
-    mock_hid,
+    number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate, mock_base, mock_hid
 ):
     mock_base[0].side_effect = hidpp.open_path
     mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
     mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
     mock_hid.side_effect = lambda x, y, z: x
 
-    test_device = device.Device(Receiver(), number, True, pairing_info, handle=handle)
+    test_device = device.Device(Receiver(), number, True, info, handle=handle)
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
-    assert test_device.tid_map == tid_map
+    assert test_device.tid_map == tid
     assert test_device.kind == kind
-
     assert test_device.firmware == firmware or len(test_device.firmware) > 0 and firmware is True
     assert test_device.id == id
     assert test_device.power_switch_location == psl
     assert test_device.polling_rate == rate
 
 
+class TestDevice(device.Device):  # a fully functional Device but its HID++ functions look at local data
+    def __init__(self, responses, *args, **kwargs):
+        self.responses = responses
+        super().__init__(*args, **kwargs)
+
+    request = hidpp.Device.request
+    ping = hidpp.Device.ping
+
+
+@pytest.mark.parametrize(
+    "device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles",
+    [
+        (di_CCCC, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
+        (di_C318, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
+        (di_B530, hidpp.r_keyboard_1, 2.0, type(None), 0, 0, 0, None, None),
+        (di_B530, hidpp.complex_responses_1, 4.5, hidpp20.LEDEffectsInfo, 0, 0, 0, None, None),
+        (di_B530, hidpp.complex_responses_2, 4.5, hidpp20.RGBEffectsInfo, 8, 3, 1, True, True),
+    ],
+)
+def test_Device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles):
+    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+    test_device._name = "TestDevice"
+    test_device._protocol = protocol
+
+    assert type(test_device.led_effects) == led
+    if keys is None:
+        assert test_device.keys == keys
+    else:
+        assert len(test_device.keys) == keys
+    if remap is None:
+        assert test_device.remap_keys == remap
+    else:
+        assert len(test_device.remap_keys) == remap
+    assert (test_device.gestures is None) == (gestures is None)
+    assert (test_device.backlight is None) == (backlight is None)
+    assert (test_device.profiles is None) == (profiles is None)
+
+
 """ TODO
-302-305	profiles
-309-314	registers
-318-337 settings
-340-341 set configuration
-344	reset
-348-352	persister
-355-368 battery
-372-390 set_battery_info
-394-396 read_battery
-401-420	enable_connection_notifications
-425-451	changed
-465	add_notification_handler
-470-473	remove_notification_handler
-476-480	handle_notification
+
+ settings
+ set configuration
+	reset
+	persister
+ battery
+ set_battery_info
+ read_battery
+	enable_connection_notifications
+	changed
+	add_notification_handler
+	remove_notification_handler
+	handle_notification
 """
 
 # IMPORTANT TODO - battery

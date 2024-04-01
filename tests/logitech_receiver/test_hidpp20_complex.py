@@ -418,20 +418,6 @@ def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remap
         assert list(remappable_to) == expected_remappable_to
 
 
-responses_remap = [
-    hidpp.Response("0041", 0x0400),
-    hidpp.Response("03", 0x0410),
-    hidpp.Response("0301", 0x0410, "00"),
-    hidpp.Response("0050", 0x0420, "00FF"),
-    hidpp.Response("0050000200010001", 0x0430, "0050FF"),  # Left Button
-    hidpp.Response("0051", 0x0420, "01FF"),
-    hidpp.Response("0051000200010000", 0x0430, "0051FF"),  # Left Button
-    hidpp.Response("0052", 0x0420, "02FF"),
-    hidpp.Response("0052000100510000", 0x0430, "0052FF"),  # key DOWN
-    hidpp.Response("050002", 0x0000, "1B04"),  # REPROGRAMMABLE_KEYS_V4
-] + hidpp.responses_key
-
-
 @pytest.mark.parametrize(
     "device, index", [(device_zerofeatures, -1), (device_zerofeatures, 5), (device_standard, -1), (device_standard, 6)]
 )
@@ -448,9 +434,9 @@ def test_KeysArrayPersistent_index_error(device, index):
 @pytest.mark.parametrize(
     "responses, key, index, mapped_to, capabilities",
     [
-        (responses_remap, special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
-        (responses_remap, special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
-        (responses_remap, special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN"), 0x41),
+        (hidpp.responses_remap, special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (hidpp.responses_remap, special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (hidpp.responses_remap, special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN"), 0x41),
     ],
 )
 def test_KeysArrayPersistent_key(responses, key, index, mapped_to, capabilities):
@@ -672,27 +658,15 @@ def test_LEDEffectInfo(feature, function, response, ID, capabilities, period):
     assert info.period == period
 
 
-zone_responses_1 = [
-    hidpp.Response("00000102", 0x0410, "00FF00"),
-    hidpp.Response("0000000300040005", 0x0420, "000000"),
-    hidpp.Response("0001000B00080009", 0x0420, "000100"),
-]
-zone_responses_2 = [
-    hidpp.Response("0000000102", 0x0400, "00FF00"),
-    hidpp.Response("0000000300040005", 0x0400, "000000"),
-    hidpp.Response("0001000200080009", 0x0400, "000100"),
-]
-
-
 @pytest.mark.parametrize(
     "feature, function, offset, effect_function, responses, index, location, count, id_1",
     [
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, zone_responses_1, 0, 1, 2, 0xB],
-        [hidpp20_constants.FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, zone_responses_2, 0, 1, 2, 2],
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, hidpp.zone_responses_1, 0, 1, 2, 0xB],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, hidpp.zone_responses_2, 0, 1, 2, 2],
     ],
 )
 def test_LEDZoneInfo(feature, function, offset, effect_function, responses, index, location, count, id_1):
-    device = hidpp.Device(feature=feature, responses=responses)
+    device = hidpp.Device(feature=feature, responses=responses, offset=0x07)
 
     zone = hidpp20.LEDZoneInfo(feature, function, offset, effect_function, device, index)
 
@@ -706,13 +680,13 @@ def test_LEDZoneInfo(feature, function, offset, effect_function, responses, inde
 @pytest.mark.parametrize(
     "responses, setting, expected_command",
     [
-        [zone_responses_1, hidpp20.LEDEffectSetting(ID=0), None],
-        [zone_responses_1, hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50), "000000000000000020500000"],
-        [zone_responses_1, hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20), "000180808000002000000000"],
+        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=0), None],
+        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50), "000000000000000020500000"],
+        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20), "000180808000002000000000"],
     ],
 )
 def test_LEDZoneInfo_to_command(responses, setting, expected_command):
-    device = hidpp.Device(feature=hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, responses=responses)
+    device = hidpp.Device(feature=hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, responses=responses, offset=0x07)
     zone = hidpp20.LEDZoneInfo(hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, 0)
 
     command = zone.to_command(setting)
@@ -720,19 +694,15 @@ def test_LEDZoneInfo_to_command(responses, setting, expected_command):
     assert command == (bytes.fromhex(expected_command) if expected_command is not None else None)
 
 
-effects_responses_1 = [hidpp.Response("0100000001", 0x0400)] + zone_responses_1
-effects_responses_2 = [hidpp.Response("FFFF0100000001", 0x0400, "FFFF00")] + zone_responses_2
-
-
 @pytest.mark.parametrize(
     "feature, cls, responses, readable, count, count_0",
     [
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, hidpp20.LEDEffectsInfo, effects_responses_1, 1, 1, 2],
-        [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, effects_responses_2, 1, 1, 2],
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, hidpp20.LEDEffectsInfo, hidpp.effects_responses_1, 1, 1, 2],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, hidpp.effects_responses_2, 1, 1, 2],
     ],
 )
 def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
-    device = hidpp.Device(feature=feature, responses=responses)
+    device = hidpp.Device(feature=feature, responses=responses, offset=0x07)
 
     effects = cls(device)
 
@@ -827,60 +797,15 @@ def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, res
     assert yaml.safe_load(yaml.dump(profile)).to_bytes(len(hex) // 2).hex().upper() == hex
 
 
-responses_profiles = [
-    hidpp.Response("0104010101020100FE0200", 0x0400),
-    hidpp.Response("000101FF", 0x0450, "00000000"),
-    hidpp.Response("FFFFFFFF", 0x0450, "00000004"),
-    hidpp.Response("01010290018003000700140028FFFFFF", 0x0450, "00010000"),
-    hidpp.Response("FFFF0000000000000000000000000000", 0x0450, "00010010"),
-    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "00010020"),
-    hidpp.Response("900aFF00800204548000FFFF900aFF00", 0x0450, "00010030"),
-    hidpp.Response("800204548000FFFF900aFF0080020454", 0x0450, "00010040"),
-    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "00010050"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010060"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010070"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010080"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "00010090"),
-    hidpp.Response("54004500370000000000000000000000", 0x0450, "000100A0"),
-    hidpp.Response("00000000000000000000000000000000", 0x0450, "000100B0"),
-    hidpp.Response("00000000000000000000000000000000", 0x0450, "000100C0"),
-    hidpp.Response("0A01020300500407000000FFFFFFFFFF", 0x0450, "000100D0"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "000100E0"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0450, "000100EE"),
-]
-responses_profiles_rom = [
-    hidpp.Response("0104010101020100FE0200", 0x0400),
-    hidpp.Response("00000000", 0x0450, "00000000"),
-    hidpp.Response("010101FF", 0x0450, "01000000"),
-    hidpp.Response("FFFFFFFF", 0x0450, "01000004"),
-    hidpp.Response("01010290018003000700140028FFFFFF", 0x0450, "01010000"),
-    hidpp.Response("FFFF0000000000000000000000000000", 0x0450, "01010010"),
-    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "01010020"),
-    hidpp.Response("900aFF00800204548000FFFF900aFF00", 0x0450, "01010030"),
-    hidpp.Response("800204548000FFFF900aFF0080020454", 0x0450, "01010040"),
-    hidpp.Response("8000FFFF900aFF00800204548000FFFF", 0x0450, "01010050"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010060"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010070"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010080"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "01010090"),
-    hidpp.Response("54004500370000000000000000000000", 0x0450, "010100A0"),
-    hidpp.Response("00000000000000000000000000000000", 0x0450, "010100B0"),
-    hidpp.Response("00000000000000000000000000000000", 0x0450, "010100C0"),
-    hidpp.Response("0A01020300500407000000FFFFFFFFFF", 0x0450, "010100D0"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0450, "010100E0"),
-    hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0450, "010100EE"),
-]
-
-
 @pytest.mark.parametrize(
     "responses, name, count, buttons, gbuttons, sectors, size",
     [
-        (responses_profiles, "ONB", 1, 2, 2, 1, 254),
-        (responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
+        (hidpp.responses_profiles, "ONB", 1, 2, 2, 1, 254),
+        (hidpp.responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
     ],
 )
 def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
-    device = hidpp.Device(name, True, 4.5, responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
+    device = hidpp.Device(name, True, 4.5, responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES, offset=0x9)
     device._profiles = None
     profiles = _hidpp20.get_profiles(device)
 
