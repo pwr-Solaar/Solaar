@@ -37,6 +37,21 @@ def open_path(path: Optional[str]) -> int:
     return int(path, 16)  # can raise exception
 
 
+def ping(responses, handle, devnumber, long_message=False):
+    for r in responses:
+        if handle == r.handle and devnumber == r.devnumber and r.id == 0x0010:
+            return r.response
+
+
+def request(responses, handle, devnumber, id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+    params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
+    print("REQUEST ", hex(handle), hex(devnumber), hex(id), params.hex())
+    for r in responses:
+        if handle == r.handle and devnumber == r.devnumber and r.id == id and bytes.fromhex(r.params) == params:
+            print("RESPONSE", hex(r.handle), hex(r.devnumber), hex(r.id), r.params, r.response)
+            return bytes.fromhex(r.response) if r.response is not None else None
+
+
 @dataclass
 class Response:
     response: Optional[str]
@@ -51,21 +66,8 @@ def replace_number(responses, number):  # change the devnumber for a list of res
     return [Response(r.response, r.id, r.params, r.handle, number, r.no_reply) for r in responses]
 
 
-def ping(responses, handle, devnumber, long_message=False):
-    print("PING ", hex(handle), hex(devnumber) if devnumber else devnumber)
-    for r in responses:
-        if handle == r.handle and devnumber == r.devnumber and r.id == 0x0010:
-            print("RESPONSE", hex(r.handle), hex(r.devnumber), r.response)
-            return r.response
-
-
-def request(responses, handle, devnumber, id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
-    params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
-    print("REQUEST ", hex(handle), hex(devnumber), hex(id), params.hex())
-    for r in responses:
-        if handle == r.handle and devnumber == r.devnumber and r.id == id and bytes.fromhex(r.params) == params:
-            print("RESPONSE", hex(r.handle), hex(r.devnumber), hex(r.id), r.params, r.response)
-            return bytes.fromhex(r.response) if r.response is not None else None
+def adjust_responses_index(index, responses):  # change index-4 responses to index
+    return [Response(r.response, r.id - 0x400 + (index << 8), r.params, r.handle, r.devnumber, r.no_reply) for r in responses]
 
 
 r_empty = [  # a HID++ device with no responses except for ping
@@ -87,18 +89,30 @@ r_keyboard_2 = [  # a HID++ 2.0 keyboard
     Response("030001", 0x0000, "0003"),  # device information at 0x03
     Response("040003", 0x0000, "0100"),  # unknown 0100 at 0x04
     Response("050003", 0x0000, "1B04"),  # reprogrammable keys V4 at 0x05
+    Response("060003", 0x0000, "0007"),  # device friendly name at 0x06
+    Response("070003", 0x0000, "0005"),  # device name at 0x07
     Response("08", 0x0100),  # 8 features
     Response("00010001", 0x0110, "01"),  # feature set at 0x01
     Response("10000001", 0x0110, "02"),  # battery status at 0x02
     Response("00030001", 0x0110, "03"),  # device information at 0x03
     Response("01000003", 0x0110, "04"),  # unknown 0100 at 0x04
     Response("1B040003", 0x0110, "05"),  # reprogrammable keys V4 at 0x05
+    Response("00070003", 0x0000, "06"),  # device friendly name at 0x06
+    Response("00050003", 0x0000, "07"),  # device name at 0x07
     Response("0212345678000D1234567890ABAA01", 0x0300),  # device information
+    Response("04", 0x0500),  # reprogrammable keys V4
     Response("00110012AB010203CD00", 0x0510, "00"),  # reprogrammable keys V4
     Response("01110022AB010203CD00", 0x0510, "01"),  # reprogrammable keys V4
     Response("00010111AB010203CD00", 0x0510, "02"),  # reprogrammable keys V4
     Response("03110032AB010204CD00", 0x0510, "03"),  # reprogrammable keys V4
     Response("00030333AB010203CD00", 0x0510, "04"),  # reprogrammable keys V4
+    Response("12", 0x0600),  # friendly namme
+    Response("004142434445464748494A4B4C4D4E", 0x0610, "00"),
+    Response("0E4F50515253000000000000000000", 0x0610, "0E"),
+    Response("12", 0x0700),  # name and kind
+    Response("4142434445464748494A4B4C4D4E4F", 0x0710, "00"),
+    Response("505152530000000000000000000000", 0x0710, "0F"),
+    Response("00", 0x0720),
 ]
 
 r_mouse_1 = [  # a HID++ 1.0 mouse
@@ -130,7 +144,8 @@ r_mouse_3 = [  # a HID++ 2.0 mouse
     Response("444544000000000000000000000000", 0x0510, "0F"),  # name - last 3 characters
 ]
 
-responses_key = [
+
+responses_key = [  # responses for Reprogrammable Keys V4 at 0x05
     Response("08", 0x0500),  # Reprogrammable Keys V4 count
     Response("00500038010001010400000000000000", 0x0510, "00"),  # left button
     Response("00510039010001010400000000000000", 0x0510, "01"),  # right button
@@ -163,27 +178,18 @@ responses_key = [
     Response("0051FF01005100", 0x0440, "0051FF01005100"),  # right button set write
 ]
 
-responses_XX = [  # a viable set of responses for Reprogrammable Keys V4
-    Response(4.2, 0x0010),  # ping
-    Response("010001", 0x0000, "0001"),  # feature set at 0x01
-    Response("020003", 0x0000, "1000"),  # battery status at 0x02
-    Response("030001", 0x0000, "0003"),  # device information at 0x03
-    Response("040003", 0x0000, "0100"),  # unknown 0100 at 0x04
-    Response("050003", 0x0000, "1B04"),  # reprogrammable keys V4 at 0x05
-    Response("08", 0x0100),  # 8 features
-    Response("00010001", 0x0110, "01"),  # feature set at 0x01
-    Response("10000001", 0x0110, "02"),  # battery status at 0x02
-    Response("00030001", 0x0110, "03"),  # device information at 0x03
-    Response("01000003", 0x0110, "04"),  # unknown 0100 at 0x04
-    Response("1B040003", 0x0110, "05"),  # reprogrammable keys V4 at 0x05
-    Response("0212345678000D1234567890ABAA01", 0x0300),  # device information
-    Response("05", 0x0500),  # reprogrammable keys V4
-    Response("00500038610000010100", 0x0510, "00"),  # left button
-    Response("00510039600000010100", 0x0510, "01"),  # right button
-    Response("0052003A110000020300", 0x0510, "02"),  # middle button
-    Response("0053003C710101030700", 0x0510, "03"),  # back button
-    Response("0056003E710102030700", 0x0510, "04"),  # forward button
-]
+responses_remap = [  # responses for Persistent Remappable Actions at 0x04 and reprogrammable keys at 0x05
+    Response("0041", 0x0400),
+    Response("03", 0x0410),
+    Response("0301", 0x0410, "00"),
+    Response("0050", 0x0420, "00FF"),
+    Response("0050000200010001", 0x0430, "0050FF"),  # Left Button
+    Response("0051", 0x0420, "01FF"),
+    Response("0051000200010000", 0x0430, "0051FF"),  # Left Button
+    Response("0052", 0x0420, "02FF"),
+    Response("0052000100510000", 0x0430, "0052FF"),  # key DOWN
+    Response("050002", 0x0000, "1B04"),  # REPROGRAMMABLE_KEYS_V4
+] + responses_key
 
 responses_gestures = [  # the commented-out messages are not used by either the setting or other testing
     Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
@@ -233,8 +239,91 @@ responses_gestures = [  # the commented-out messages are not used by either the 
     Response("000180FF", 0x0480, "000180FF"),  # write param 0
 ]
 
+zone_responses_1 = [  # responses for COLOR LED EFFECTS
+    Response("00000102", 0x0710, "00FF00"),
+    Response("0000000300040005", 0x0720, "000000"),
+    Response("0001000B00080009", 0x0720, "000100"),
+]
+zone_responses_2 = [  # responses for RGB EFFECTS
+    Response("0000000102", 0x0700, "00FF00"),
+    Response("0000000300040005", 0x0700, "000000"),
+    Response("0001000200080009", 0x0700, "000100"),
+]
+effects_responses_1 = [Response("0100000001", 0x0700)] + zone_responses_1
+effects_responses_2 = [Response("FFFF0100000001", 0x0700, "FFFF00")] + zone_responses_2
+
+responses_profiles = [  # OnboardProfile in RAM
+    Response("0104010101020100FE0200", 0x0900),
+    Response("000101FF", 0x0950, "00000000"),
+    Response("FFFFFFFF", 0x0950, "00000004"),
+    Response("01010290018003000700140028FFFFFF", 0x0950, "00010000"),
+    Response("FFFF0000000000000000000000000000", 0x0950, "00010010"),
+    Response("8000FFFF900aFF00800204548000FFFF", 0x0950, "00010020"),
+    Response("900aFF00800204548000FFFF900aFF00", 0x0950, "00010030"),
+    Response("800204548000FFFF900aFF0080020454", 0x0950, "00010040"),
+    Response("8000FFFF900aFF00800204548000FFFF", 0x0950, "00010050"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "00010060"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "00010070"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "00010080"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "00010090"),
+    Response("54004500370000000000000000000000", 0x0950, "000100A0"),
+    Response("00000000000000000000000000000000", 0x0950, "000100B0"),
+    Response("00000000000000000000000000000000", 0x0950, "000100C0"),
+    Response("0A01020300500407000000FFFFFFFFFF", 0x0950, "000100D0"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "000100E0"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0950, "000100EE"),
+]
+responses_profiles_rom = [  # OnboardProfile in ROM
+    Response("0104010101020100FE0200", 0x0900),
+    Response("00000000", 0x0950, "00000000"),
+    Response("010101FF", 0x0950, "01000000"),
+    Response("FFFFFFFF", 0x0950, "01000004"),
+    Response("01010290018003000700140028FFFFFF", 0x0950, "01010000"),
+    Response("FFFF0000000000000000000000000000", 0x0950, "01010010"),
+    Response("8000FFFF900aFF00800204548000FFFF", 0x0950, "01010020"),
+    Response("900aFF00800204548000FFFF900aFF00", 0x0950, "01010030"),
+    Response("800204548000FFFF900aFF0080020454", 0x0950, "01010040"),
+    Response("8000FFFF900aFF00800204548000FFFF", 0x0950, "01010050"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "01010060"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "01010070"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "01010080"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "01010090"),
+    Response("54004500370000000000000000000000", 0x0950, "010100A0"),
+    Response("00000000000000000000000000000000", 0x0950, "010100B0"),
+    Response("00000000000000000000000000000000", 0x0950, "010100C0"),
+    Response("0A01020300500407000000FFFFFFFFFF", 0x0950, "010100D0"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0950, "010100E0"),
+    Response("FFFFFFFFFFFFFFFFFFFFFFFFFF7C81AB", 0x0950, "010100EE"),
+]
+
+complex_responses_1 = [  # COLOR_LED_EFFECTS
+    Response(4.2, 0x0010),  # ping
+    Response("010001", 0x0000, "0001"),  # FEATURE SET at x01
+    Response("0A", 0x0100),  # 10 features
+    Response("070001", 0x0000, "8070"),  # COLOR_LED_EFFECTS at 0x07
+    *effects_responses_1,
+]
+
+complex_responses_2 = [  # RGB_EFFECTS + reprogrammable keys + persistent actions
+    Response(4.2, 0x0010),  # ping
+    Response("010001", 0x0000, "0001"),  # FEATURE SET at x01
+    Response("0A", 0x0100),  # 10 features
+    Response("070001", 0x0000, "8071"),  # RGB_EFFECTS at 0x07
+    *effects_responses_2,
+    Response("040001", 0x0000, "1C00"),  # Persistent Remappable Actions at 0x04
+    *responses_remap,
+    Response("080001", 0x0000, "6501"),  # Gestures at 0x08
+    *adjust_responses_index(8, responses_gestures),
+    Response("060003", 0x0000, "1982"),  # Backlight 2 at 0x06
+    Response("010118000001020003000400", 0x0600),
+    Response("090003", 0x0000, "8100"),  # Onboard Profiles at 0x09
+    *responses_profiles,
+]
+
 responses_speedchange = [
     Response("0100", 0x0400),
+    Response("010001", 0x0000, "0001"),  # FEATURE SET at x01
+    Response("0A", 0x0100),  # 10 features
     Response("0120", 0x0410, "0120"),
     Response("050001", 0x0000, "1B04"),  # REPROG_CONTROLS_V4
     Response("01", 0x0500),
@@ -269,9 +358,13 @@ class Device:
     led_effects = device.Device.led_effects
     gestures = device.Device.gestures
     __hash__ = device.Device.__hash__
+    feature_request = device.Device.feature_request
 
     def __post_init__(self):
+        self._name = self.name
+        self._protocol = self.protocol
         self.persister = configuration._DeviceEntry()
+        self.features = hidpp20.FeaturesArray(self)
         self.settings = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
@@ -281,20 +374,18 @@ class Device:
             self.setting_callback = lambda x, y, z: None
         self.add_notification_handler = lambda x, y: None
 
-    def request(self, id, *params, no_reply=False):
-        if params is None:
-            params = []
+    def request(self, id, *params, no_reply=False, long_message=False, protocol=2.0):
         params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
-        print("REQUEST ", self.name, hex(id), params.hex().upper())
+        print("REQUEST ", self._name, hex(id), params.hex().upper())
         for r in self.responses:
             if id == r.id and params == bytes.fromhex(r.params):
-                print("RESPONSE", self.name, hex(r.id), r.params, r.response)
+                print("RESPONSE", self._name, hex(r.id), r.params, r.response)
                 return bytes.fromhex(r.response) if isinstance(r.response, str) else r.response
-        print("RESPONSE", self.name, None)
+        print("RESPONSE", self._name, None)
 
-    def feature_request(self, feature, function=0x00, *params, no_reply=False):
-        if self.protocol >= 2.0:
-            return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+    def ping(self, handle=None, devnumber=None, long_message=False):
+        print("PING", self._protocol)
+        return self._protocol
 
 
 def match_requests(number, responses, call_args_list):

@@ -348,6 +348,7 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.OnboardProfiles, 0, 1, offset=0x0C),
         common.NamedInts(**{"Disabled": 0, "Profile 1": 1, "Profile 2": 2}),
+        hidpp.Response("01030001010101000101", 0x0C00),
         hidpp.Response("00010100000201FFFFFFFFFFFFFFFFFF", 0x0C50, "00000000"),
         hidpp.Response("000201FFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000004"),
         hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000008"),
@@ -358,6 +359,7 @@ simple_tests = [
     Setup(
         FeatureTest(settings_templates.OnboardProfiles, 1, 0, offset=0x0C),
         common.NamedInts(**{"Disabled": 0, "Profile 1": 1, "Profile 2": 2}),
+        hidpp.Response("01030001010101000101", 0x0C00),
         hidpp.Response("00010100000201FFFFFFFFFFFFFFFFFF", 0x0C50, "00000000"),
         hidpp.Response("000201FFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000004"),
         hidpp.Response("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0x0C50, "00000008"),
