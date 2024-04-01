@@ -4,1970 +4,2215 @@
 # Automatically generated, 2014.
 # Giannis Tsagatakis <jtsagata@gmail.com>
 # Vangelis Skarmoutsos <skarmoutsosv@gmail.com>, 2017
-#
-msgid   ""
-msgstr  "Project-Id-Version: solaar 0.9.2\n"
-        "Report-Msgid-Bugs-To: \n"
-        "POT-Creation-Date: 2023-12-28 17:40+0100\n"
-        "PO-Revision-Date: 2023-04-02 23:47+0300\n"
-        "Last-Translator: Vangelis Skarmoutsos <skarmoutsosv@gmail.com>\n"
-        "Language-Team: none\n"
-        "Language: el\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-        "X-Generator: Poedit 3.1.1\n"
+# Athanasios Nektarios Karachalios Stagkas <nasos.karachalios.stagkas@proton.me> 2023-2024
+msgid ""
+msgstr ""
+"Project-Id-Version: solaar 0.9.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-14 13:23+0700\n"
+"PO-Revision-Date: 2024-04-01 03:51+0300\n"
+"Last-Translator: Vangelis Skarmoutsos <skarmoutsosv@gmail.com>\n"
+"Language-Team: none\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
 
-#: lib/logitech_receiver/base_usb.py:46
-msgid   "Bolt Receiver"
-msgstr  "Δέκτης Bolt"
+#: lib/logitech_receiver/base_usb.py:45
+msgid "Bolt Receiver"
+msgstr "Δέκτης Bolt"
 
-#: lib/logitech_receiver/base_usb.py:57
-msgid   "Unifying Receiver"
-msgstr  "Δέκτης Unifying"
+#: lib/logitech_receiver/base_usb.py:58
+msgid "Unifying Receiver"
+msgstr "Δέκτης Unifying"
 
-#: lib/logitech_receiver/base_usb.py:67 lib/logitech_receiver/base_usb.py:78
-#: lib/logitech_receiver/base_usb.py:90 lib/logitech_receiver/base_usb.py:102
-#: lib/logitech_receiver/base_usb.py:114
-msgid   "Nano Receiver"
-msgstr  "Δέκτης Nano"
+#: lib/logitech_receiver/base_usb.py:70 lib/logitech_receiver/base_usb.py:83
+#: lib/logitech_receiver/base_usb.py:97 lib/logitech_receiver/base_usb.py:111
+#: lib/logitech_receiver/base_usb.py:125
+msgid "Nano Receiver"
+msgstr "Δέκτης Nano"
 
-#: lib/logitech_receiver/base_usb.py:124
-msgid   "Lightspeed Receiver"
-msgstr  "Δέκτης Lightspeed"
+#: lib/logitech_receiver/base_usb.py:138
+msgid "Lightspeed Receiver"
+msgstr "Δέκτης Lightspeed"
 
-#: lib/logitech_receiver/base_usb.py:133
-msgid   "EX100 Receiver 27 Mhz"
-msgstr  "Δέκτης EX100 27 Mhz"
+#: lib/logitech_receiver/base_usb.py:149
+msgid "EX100 Receiver 27 Mhz"
+msgstr "Δέκτης EX100 27 Mhz"
+
+#: lib/logitech_receiver/common.py:604
+#, python-format
+msgid "Battery: %(level)s (%(status)s)"
+msgstr "Μπαταρία: %(level)s (%(status)s)"
+
+#: lib/logitech_receiver/common.py:606
+#, python-format
+msgid "Battery: %(percent)d%% (%(status)s)"
+msgstr "Μπαταρία: %(percent)d%% (%(status)s)"
+
+#: lib/logitech_receiver/hidpp20.py:926
+#: lib/logitech_receiver/settings_templates.py:291
+msgid "Disabled"
+msgstr "Απενεργοποιημένο"
+
+#: lib/logitech_receiver/hidpp20.py:927
+msgid "Static"
+msgstr "Στατικό"
+
+#: lib/logitech_receiver/hidpp20.py:928
+msgid "Pulse"
+msgstr "Παλμός"
+
+#: lib/logitech_receiver/hidpp20.py:929
+msgid "Cycle"
+msgstr "Κύκλος"
+
+#: lib/logitech_receiver/hidpp20.py:930
+msgid "Boot"
+msgstr "Εκκίνηση"
+
+#: lib/logitech_receiver/hidpp20.py:931
+msgid "Demo"
+msgstr "Ντέμο"
+
+#: lib/logitech_receiver/hidpp20.py:932
+msgid "Breathe"
+msgstr "Αναπνοή"
+
+#: lib/logitech_receiver/hidpp20.py:933
+msgid "Ripple"
+msgstr "Κυματισμός"
+
+#: lib/logitech_receiver/hidpp20.py:994
+msgid "Unknown Location"
+msgstr "Άγνωστη τοποθεσία"
+
+#: lib/logitech_receiver/hidpp20.py:995
+msgid "Primary"
+msgstr "Πρωτεύον"
+
+#: lib/logitech_receiver/hidpp20.py:996
+msgid "Logo"
+msgstr "Λογότυπο"
+
+#: lib/logitech_receiver/hidpp20.py:997
+msgid "Left Side"
+msgstr "Αριστερή Πλεύση"
+
+#: lib/logitech_receiver/hidpp20.py:998
+msgid "Right Side"
+msgstr "Δεξιά Πλεύση"
+
+#: lib/logitech_receiver/hidpp20.py:999
+msgid "Combined"
+msgstr "Συνδυασμένο"
+
+#: lib/logitech_receiver/hidpp20.py:1000
+msgid "Primary 1"
+msgstr "Πρωτεύον 1"
+
+#: lib/logitech_receiver/hidpp20.py:1001
+msgid "Primary 2"
+msgstr "Πρωτεύον 2"
+
+#: lib/logitech_receiver/hidpp20.py:1002
+msgid "Primary 3"
+msgstr "Πρωτεύον 3"
+
+#: lib/logitech_receiver/hidpp20.py:1003
+msgid "Primary 4"
+msgstr "Πρωτεύον 4"
+
+#: lib/logitech_receiver/hidpp20.py:1004
+msgid "Primary 5"
+msgstr "Πρωτεύον 5"
+
+#: lib/logitech_receiver/hidpp20.py:1005
+msgid "Primary 6"
+msgstr "Πρωτεύον 6"
+
+#: lib/logitech_receiver/i18n.py:28
+msgid "empty"
+msgstr "άδεια"
+
+#: lib/logitech_receiver/i18n.py:29
+msgid "critical"
+msgstr "κρίσιμη"
 
 #: lib/logitech_receiver/i18n.py:30
-msgid   "empty"
-msgstr  "άδεια"
+msgid "low"
+msgstr "χαμηλή"
 
 #: lib/logitech_receiver/i18n.py:31
-msgid   "critical"
-msgstr  "κρίσιμη"
+msgid "average"
+msgstr "μέση τιμή"
 
 #: lib/logitech_receiver/i18n.py:32
-msgid   "low"
-msgstr  "χαμηλή"
+msgid "good"
+msgstr "καλή"
 
 #: lib/logitech_receiver/i18n.py:33
-msgid   "average"
-msgstr  "μέση τιμή"
-
-#: lib/logitech_receiver/i18n.py:34
-msgid   "good"
-msgstr  "καλή"
+msgid "full"
+msgstr "γεμάτη"
 
 #: lib/logitech_receiver/i18n.py:35
-msgid   "full"
-msgstr  "γεμάτη"
+msgid "discharging"
+msgstr "εκφορτίζεται"
+
+#: lib/logitech_receiver/i18n.py:36
+msgid "recharging"
+msgstr "επαναφορτίζεται"
+
+#: lib/logitech_receiver/i18n.py:37
+msgid "charging"
+msgstr "φορτίζεται"
 
 #: lib/logitech_receiver/i18n.py:38
-msgid   "discharging"
-msgstr  "εκφορτίζεται"
+msgid "not charging"
+msgstr "χωρίς φόρτιση"
 
 #: lib/logitech_receiver/i18n.py:39
-msgid   "recharging"
-msgstr  "επαναφορτίζεται"
+msgid "almost full"
+msgstr "σχεδόν γεμάτη"
 
-#: lib/logitech_receiver/i18n.py:40 lib/solaar/ui/window.py:711
-msgid   "charging"
-msgstr  "φορτίζεται"
+#: lib/logitech_receiver/i18n.py:40
+msgid "charged"
+msgstr "φορτισμένο"
 
 #: lib/logitech_receiver/i18n.py:41
-msgid   "not charging"
-msgstr  "χωρίς φόρτιση"
+msgid "slow recharge"
+msgstr "αργή επαναφόρτιση"
 
 #: lib/logitech_receiver/i18n.py:42
-msgid   "almost full"
-msgstr  "σχεδόν γεμάτη"
+msgid "invalid battery"
+msgstr "μη έγκυρη μπαταρία"
 
 #: lib/logitech_receiver/i18n.py:43
-msgid   "charged"
-msgstr  "φορτισμένο"
+msgid "thermal error"
+msgstr "θερμικό σφάλμα"
 
 #: lib/logitech_receiver/i18n.py:44
-msgid   "slow recharge"
-msgstr  "αργή επαναφόρτιση"
+msgid "error"
+msgstr "σφάλμα"
 
 #: lib/logitech_receiver/i18n.py:45
-msgid   "invalid battery"
-msgstr  "μη έγκυρη μπαταρία"
+msgid "standard"
+msgstr "πρότυπο"
 
 #: lib/logitech_receiver/i18n.py:46
-msgid   "thermal error"
-msgstr  "θερμικό σφάλμα"
+msgid "fast"
+msgstr "γρήγορο"
 
 #: lib/logitech_receiver/i18n.py:47
-msgid   "error"
-msgstr  "σφάλμα"
-
-#: lib/logitech_receiver/i18n.py:48
-msgid   "standard"
-msgstr  "πρότυπο"
+msgid "slow"
+msgstr "αργό"
 
 #: lib/logitech_receiver/i18n.py:49
-msgid   "fast"
-msgstr  "γρήγορο"
+msgid "device timeout"
+msgstr "ορίου χρόνου συσκευής"
 
 #: lib/logitech_receiver/i18n.py:50
-msgid   "slow"
-msgstr  "αργό"
+msgid "device not supported"
+msgstr "η συσκευή δεν υποστηρίζεται"
 
-#: lib/logitech_receiver/i18n.py:53
-msgid   "device timeout"
-msgstr  "ορίου χρόνου συσκευής"
+#: lib/logitech_receiver/i18n.py:51
+msgid "too many devices"
+msgstr "πάρα πολλές συσκευές"
+
+#: lib/logitech_receiver/i18n.py:52
+msgid "sequence timeout"
+msgstr "ορίου χρόνου ακολουθίας"
 
 #: lib/logitech_receiver/i18n.py:54
-msgid   "device not supported"
-msgstr  "η συσκευή δεν υποστηρίζεται"
+msgid "Firmware"
+msgstr "Firmware"
 
 #: lib/logitech_receiver/i18n.py:55
-msgid   "too many devices"
-msgstr  "πάρα πολλές συσκευές"
+msgid "Bootloader"
+msgstr "Bootloader"
 
 #: lib/logitech_receiver/i18n.py:56
-msgid   "sequence timeout"
-msgstr  "ορίου χρόνου ακολουθίας"
+msgid "Hardware"
+msgstr "Υλισμικό"
 
-#: lib/logitech_receiver/i18n.py:59 lib/solaar/ui/window.py:572
-msgid   "Firmware"
-msgstr  "Firmware"
+#: lib/logitech_receiver/i18n.py:57
+msgid "Other"
+msgstr "Άλλο"
+
+#: lib/logitech_receiver/i18n.py:59
+msgid "Left Button"
+msgstr "Αριστερό κουμπί"
 
 #: lib/logitech_receiver/i18n.py:60
-msgid   "Bootloader"
-msgstr  "Bootloader"
+msgid "Right Button"
+msgstr "Δεξί κουμπί"
 
 #: lib/logitech_receiver/i18n.py:61
-msgid   "Hardware"
-msgstr  "Υλισμικό"
+msgid "Middle Button"
+msgstr "Κεντρικό κουμπί"
 
 #: lib/logitech_receiver/i18n.py:62
-msgid   "Other"
-msgstr  "Άλλο"
+msgid "Back Button"
+msgstr "Πίσω κουμπί"
+
+#: lib/logitech_receiver/i18n.py:63
+msgid "Forward Button"
+msgstr "Εμπρός Κουμπί"
+
+#: lib/logitech_receiver/i18n.py:64
+msgid "Mouse Gesture Button"
+msgstr "Κουμπί χειρονομιών ποντικιού"
 
 #: lib/logitech_receiver/i18n.py:65
-msgid   "Left Button"
-msgstr  "Αριστερό κουμπί"
+msgid "Smart Shift"
+msgstr "Έξυπνος Διακόπτης"
 
 #: lib/logitech_receiver/i18n.py:66
-msgid   "Right Button"
-msgstr  "Δεξί κουμπί"
+msgid "DPI Switch"
+msgstr "Διακόπτης DPI"
 
 #: lib/logitech_receiver/i18n.py:67
-msgid   "Middle Button"
-msgstr  "Κεντρικό κουμπί"
+msgid "Left Tilt"
+msgstr "Αριστερή κλίση"
 
 #: lib/logitech_receiver/i18n.py:68
-msgid   "Back Button"
-msgstr  "Πίσω κουμπί"
+msgid "Right Tilt"
+msgstr "Δεξιά κλίση"
 
 #: lib/logitech_receiver/i18n.py:69
-msgid   "Forward Button"
-msgstr  "Εμπρός Κουμπί"
+msgid "Left Click"
+msgstr "Αριστερό κλικ"
 
 #: lib/logitech_receiver/i18n.py:70
-msgid   "Mouse Gesture Button"
-msgstr  "Κουμπί χειρονομιών ποντικιού"
+msgid "Right Click"
+msgstr "Δεξί κλικ"
 
 #: lib/logitech_receiver/i18n.py:71
-msgid   "Smart Shift"
-msgstr  "Έξυπνος Διακόπτης"
+msgid "Mouse Middle Button"
+msgstr "Μεσαίο κουμπί ποντικιού"
 
 #: lib/logitech_receiver/i18n.py:72
-msgid   "DPI Switch"
-msgstr  "Διακόπτης DPI"
+msgid "Mouse Back Button"
+msgstr "Πίσω κουμπί ποντικιού"
 
 #: lib/logitech_receiver/i18n.py:73
-msgid   "Left Tilt"
-msgstr  "Αριστερή κλίση"
+msgid "Mouse Forward Button"
+msgstr "Εμπρός κουμπί ποντικιού"
 
 #: lib/logitech_receiver/i18n.py:74
-msgid   "Right Tilt"
-msgstr  "Δεξιά κλίση"
+msgid "Gesture Button Navigation"
+msgstr "Πλοήγηση με κουμπιά χειρονομιών"
 
 #: lib/logitech_receiver/i18n.py:75
-msgid   "Left Click"
-msgstr  "Αριστερό κλικ"
+msgid "Mouse Scroll Left Button"
+msgstr "Κύλιση ποντικιού Αριστερό κουμπί"
 
 #: lib/logitech_receiver/i18n.py:76
-msgid   "Right Click"
-msgstr  "Δεξί κλικ"
-
-#: lib/logitech_receiver/i18n.py:77
-msgid   "Mouse Middle Button"
-msgstr  "Μεσαίο κουμπί ποντικιού"
+msgid "Mouse Scroll Right Button"
+msgstr "Κύλιση ποντικιού Δεξί κουμπί"
 
 #: lib/logitech_receiver/i18n.py:78
-msgid   "Mouse Back Button"
-msgstr  "Πίσω κουμπί ποντικιού"
+msgid "pressed"
+msgstr "πατημένο"
 
 #: lib/logitech_receiver/i18n.py:79
-msgid   "Mouse Forward Button"
-msgstr  "Εμπρός κουμπί ποντικιού"
+msgid "released"
+msgstr "αφημένο"
 
-#: lib/logitech_receiver/i18n.py:80
-msgid   "Gesture Button Navigation"
-msgstr  "Πλοήγηση με κουμπιά χειρονομιών"
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid "pairing lock is closed"
+msgstr "η δικλείδα σύζευξης είναι κλειστή"
 
-#: lib/logitech_receiver/i18n.py:81
-msgid   "Mouse Scroll Left Button"
-msgstr  "Κύλιση ποντικιού Αριστερό κουμπί"
+#: lib/logitech_receiver/notifications.py:63
+#: lib/logitech_receiver/notifications.py:115
+msgid "pairing lock is open"
+msgstr "η δικλείδα σύζευξης είναι ανοιχτή"
 
-#: lib/logitech_receiver/i18n.py:82
-msgid   "Mouse Scroll Right Button"
-msgstr  "Κύλιση ποντικιού Δεξί κουμπί"
+#: lib/logitech_receiver/notifications.py:80
+msgid "discovery lock is closed"
+msgstr "η δικλείδα ανακάλυψης είναι κλειστή"
 
-#: lib/logitech_receiver/i18n.py:85
-msgid   "pressed"
-msgstr  "πατημένο"
+#: lib/logitech_receiver/notifications.py:80
+msgid "discovery lock is open"
+msgstr "η δικλείδα ανακάλυψης είναι ανοιχτή"
 
-#: lib/logitech_receiver/i18n.py:86
-msgid   "released"
-msgstr  "αφημένο"
+#: lib/logitech_receiver/notifications.py:207
+msgid "connected"
+msgstr "συνδεμένη"
 
-#: lib/logitech_receiver/notifications.py:75
-#: lib/logitech_receiver/notifications.py:126
-msgid   "pairing lock is closed"
-msgstr  "η δικλείδα σύζευξης είναι κλειστή"
+#: lib/logitech_receiver/notifications.py:207
+msgid "disconnected"
+msgstr "αποσυνδεδεμένη"
 
-#: lib/logitech_receiver/notifications.py:75
-#: lib/logitech_receiver/notifications.py:126
-msgid   "pairing lock is open"
-msgstr  "η δικλείδα σύζευξης είναι ανοιχτή"
+#: lib/logitech_receiver/notifications.py:233
+msgid "unpaired"
+msgstr "διαχωρισμένη"
 
-#: lib/logitech_receiver/notifications.py:92
-msgid   "discovery lock is closed"
-msgstr  "η δικλείδα ανακάλυψης είναι κλειστή"
+#: lib/logitech_receiver/notifications.py:280
+msgid "powered on"
+msgstr "ανοιχτή"
 
-#: lib/logitech_receiver/notifications.py:92
-msgid   "discovery lock is open"
-msgstr  "η δικλείδα ανακάλυψης είναι ανοιχτή"
+#: lib/logitech_receiver/receiver.py:345
+msgid "No paired devices."
+msgstr "Δεν έχω συνταιριασμένες συσκευές."
 
-#: lib/logitech_receiver/notifications.py:224 lib/solaar/ui/notify.py:122
-msgid   "connected"
-msgstr  "συνδεμένη"
+#: lib/logitech_receiver/receiver.py:347 lib/solaar/ui/window.py:630
+#, python-format
+msgid "%(count)s paired device."
+msgid_plural "%(count)s paired devices."
+msgstr[0] "%(count)s συζευγμένη συσκευή."
+msgstr[1] "%(count)s συζευγμένες συσκευές."
 
-#: lib/logitech_receiver/notifications.py:224
-msgid   "disconnected"
-msgstr  "αποσυνδεδεμένη"
+#: lib/logitech_receiver/settings.py:617
+msgid "register"
+msgstr "καταχώρηση"
 
-#: lib/logitech_receiver/notifications.py:262 lib/solaar/ui/notify.py:120
-msgid   "unpaired"
-msgstr  "διαχωρισμένη"
+#: lib/logitech_receiver/settings.py:631 lib/logitech_receiver/settings.py:658
+msgid "feature"
+msgstr "χαρακτηριστικό"
 
-#: lib/logitech_receiver/notifications.py:304
-msgid   "powered on"
-msgstr  "ανοιχτή"
+#: lib/logitech_receiver/settings_templates.py:144
+msgid "Swap Fx function"
+msgstr "Αντιστροφή λειτουργιών Fx"
 
-#: lib/logitech_receiver/settings.py:750
-msgid   "register"
-msgstr  "καταχώρηση"
+#: lib/logitech_receiver/settings_templates.py:147
+msgid ""
+"When set, the F1..F12 keys will activate their special function,\n"
+"and you must hold the FN key to activate their standard function."
+msgstr ""
+"Όταν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν τις ειδικές τους "
+"λειτουργίες,\n"
+"και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την τυπική "
+"λειτουργία τους."
 
-#: lib/logitech_receiver/settings.py:764 lib/logitech_receiver/settings.py:791
-msgid   "feature"
-msgstr  "χαρακτηριστικό"
+#: lib/logitech_receiver/settings_templates.py:152
+msgid ""
+"When unset, the F1..F12 keys will activate their standard function,\n"
+"and you must hold the FN key to activate their special function."
+msgstr ""
+"Όταν δεν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν την τυπική "
+"λειτουργία τους,\n"
+"και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την ειδική "
+"λειτουργία τους."
 
-#: lib/logitech_receiver/settings_templates.py:139
-msgid   "Swap Fx function"
-msgstr  "Αντιστροφή λειτουργιών Fx"
+#: lib/logitech_receiver/settings_templates.py:160
+msgid "Hand Detection"
+msgstr "Ανίχνευση χεριού"
 
-#: lib/logitech_receiver/settings_templates.py:140
-msgid   "When set, the F1..F12 keys will activate their special function,\n"
-        "and you must hold the FN key to activate their standard function."
-msgstr  "Όταν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν τις "
-        "ειδικές τους λειτουργίες,\n"
-        "και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την "
-        "τυπική λειτουργία τους."
+#: lib/logitech_receiver/settings_templates.py:161
+msgid "Turn on illumination when the hands hover over the keyboard."
+msgstr "Άνοιγμα φωτισμού όταν τα χέρια βρεθούν πάνω από το πληκτρολόγιο."
 
-#: lib/logitech_receiver/settings_templates.py:142
-msgid   "When unset, the F1..F12 keys will activate their standard function,\n"
-        "and you must hold the FN key to activate their special function."
-msgstr  "Όταν δεν είναι ορισμένο, τα πλήκτρα F1..F12 θα ενεργοποιήσουν την "
-        "τυπική λειτουργία τους,\n"
-        "και πρέπει να κρατήσετε το πλήκτρο FN για να ενεργοποιήσετε την "
-        "ειδική λειτουργία τους."
+#: lib/logitech_receiver/settings_templates.py:168
+msgid "Scroll Wheel Smooth Scrolling"
+msgstr "Ομαλή κύλιση του τροχού κύλισης"
 
-#: lib/logitech_receiver/settings_templates.py:149
-msgid   "Hand Detection"
-msgstr  "Ανίχνευση χεριού"
+#: lib/logitech_receiver/settings_templates.py:169
+#: lib/logitech_receiver/settings_templates.py:402
+#: lib/logitech_receiver/settings_templates.py:431
+msgid "High-sensitivity mode for vertical scroll with the wheel."
+msgstr "Κατάσταση υψηλής ευαισθησίας για κατακόρυφη ολίσθηση με τον τροχό."
 
-#: lib/logitech_receiver/settings_templates.py:150
-msgid   "Turn on illumination when the hands hover over the keyboard."
-msgstr  "Άνοιγμα φωτισμού όταν τα χέρια βρεθούν πάνω από το πληκτρολόγιο."
-
-#: lib/logitech_receiver/settings_templates.py:157
-msgid   "Scroll Wheel Smooth Scrolling"
-msgstr  "Ομαλή κύλιση του τροχού κύλισης"
-
-#: lib/logitech_receiver/settings_templates.py:158
-#: lib/logitech_receiver/settings_templates.py:239
-#: lib/logitech_receiver/settings_templates.py:267
-msgid   "High-sensitivity mode for vertical scroll with the wheel."
-msgstr  "Κατάσταση υψηλής ευαισθησίας για κατακόρυφη ολίσθηση με τον τροχό."
-
-#: lib/logitech_receiver/settings_templates.py:165
-msgid   "Side Scrolling"
-msgstr  "Πλάγια κύλιση"
-
-#: lib/logitech_receiver/settings_templates.py:167
-msgid   "When disabled, pushing the wheel sideways sends custom button "
-        "events\n"
-        "instead of the standard side-scrolling events."
-msgstr  "Όταν είναι απενεργοποιημένο, πιέζοντας τον τροχό στο πλάι στέλνει "
-        "προσαρμοσμένα γεγονότα κουμπιού\n"
-        "αντί των τυπικών γεγονότων πλάγιας ολίσθησης."
-
-#: lib/logitech_receiver/settings_templates.py:177
-msgid   "Sensitivity (DPI - older mice)"
-msgstr  "Ευαισθησία (DPI - παλαιά ποντίκια)"
+#: lib/logitech_receiver/settings_templates.py:176
+msgid "Side Scrolling"
+msgstr "Πλάγια κύλιση"
 
 #: lib/logitech_receiver/settings_templates.py:178
-#: lib/logitech_receiver/settings_templates.py:712
-msgid   "Mouse movement sensitivity"
-msgstr  "Ευαισθησία κίνησης ποντικιού"
+msgid ""
+"When disabled, pushing the wheel sideways sends custom button events\n"
+"instead of the standard side-scrolling events."
+msgstr ""
+"Όταν είναι απενεργοποιημένο, πιέζοντας τον τροχό στο πλάι στέλνει "
+"προσαρμοσμένα γεγονότα κουμπιού\n"
+"αντί των τυπικών γεγονότων πλάγιας ολίσθησης."
 
-#: lib/logitech_receiver/settings_templates.py:208
-#: lib/logitech_receiver/settings_templates.py:218
-#: lib/logitech_receiver/settings_templates.py:225
-msgid   "Backlight"
-msgstr  "Οπίσθιος φωτισμός"
+#: lib/logitech_receiver/settings_templates.py:188
+msgid "Sensitivity (DPI - older mice)"
+msgstr "Ευαισθησία (DPI - παλαιά ποντίκια)"
 
-#: lib/logitech_receiver/settings_templates.py:209
-#: lib/logitech_receiver/settings_templates.py:226
-msgid   "Set illumination time for keyboard."
-msgstr  "Ρύθμιση χρόνου φωτισμού για το πληκτρολόγιο."
-
-#: lib/logitech_receiver/settings_templates.py:219
-msgid   "Turn illumination on or off on keyboard."
-msgstr  "Ενεργοποίηση ή απενεργοποίηση του φωτισμού στο πληκτρολόγιο."
-
-#: lib/logitech_receiver/settings_templates.py:237
-msgid   "Scroll Wheel High Resolution"
-msgstr  "Τροχός κύλισης υψηλής ανάλυσης"
-
-#: lib/logitech_receiver/settings_templates.py:240
-#: lib/logitech_receiver/settings_templates.py:268
-msgid   "Set to ignore if scrolling is abnormally fast or slow"
-msgstr  "Ρύθμιση για να αγνοείται εάν η κύλιση είναι ασυνήθιστα γρήγορη ή αργή"
-
-#: lib/logitech_receiver/settings_templates.py:247
-#: lib/logitech_receiver/settings_templates.py:277
-msgid   "Scroll Wheel Diversion"
-msgstr  "Εκτροπή τροχού κύλισης"
+#: lib/logitech_receiver/settings_templates.py:189
+#: lib/logitech_receiver/settings_templates.py:958
+msgid "Mouse movement sensitivity"
+msgstr "Ευαισθησία κίνησης ποντικιού"
 
 #: lib/logitech_receiver/settings_templates.py:249
-msgid   "Make scroll wheel send LOWRES_WHEEL HID++ notifications (which "
-        "trigger Solaar rules but are otherwise ignored)."
-msgstr  "Κάντε τον τροχό κύλισης να στέλνει ειδοποιήσεις LOWRES_WHEEL HID++ "
-        "(οι οποίες ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται κατά τα "
-        "άλλα)."
+#: lib/logitech_receiver/settings_templates.py:261
+#: lib/logitech_receiver/settings_templates.py:388
+msgid "Backlight"
+msgstr "Οπίσθιος φωτισμός"
 
-#: lib/logitech_receiver/settings_templates.py:256
-msgid   "Scroll Wheel Direction"
-msgstr  "Κατεύθυνση τροχού κύλισης"
+#: lib/logitech_receiver/settings_templates.py:250
+#: lib/logitech_receiver/settings_templates.py:389
+msgid "Set illumination time for keyboard."
+msgstr "Ρύθμιση χρόνου φωτισμού για το πληκτρολόγιο."
 
-#: lib/logitech_receiver/settings_templates.py:257
-msgid   "Invert direction for vertical scroll with wheel."
-msgstr  "Αντιστροφή κατεύθυνσης για κάθετη κύλιση με τον τροχό."
+#: lib/logitech_receiver/settings_templates.py:262
+msgid ""
+"Illumination level on keyboard.  Changes made are only applied in Manual "
+"mode."
+msgstr ""
+"Επίπεδο φωτισμού στο πληκτρολόγιο.  Οι αλλαγές που πραγματοποιούνται "
+"εφαρμόζονται μόνο στη χειροκίνητη λειτουργία."
 
-#: lib/logitech_receiver/settings_templates.py:265
-msgid   "Scroll Wheel Resolution"
-msgstr  "Ανάλυση τροχού κύλισης"
+#: lib/logitech_receiver/settings_templates.py:293
+msgid "Automatic"
+msgstr "Αυτόματο"
 
-#: lib/logitech_receiver/settings_templates.py:279
-msgid   "Make scroll wheel send HIRES_WHEEL HID++ notifications (which "
-        "trigger Solaar rules but are otherwise ignored)."
-msgstr  "Κάντε τον τροχό κύλισης να στέλνει ειδοποιήσεις HIRES_WHEEL HID++ "
-        "(οι οποίες ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται "
-        "διαφορετικά)."
+#: lib/logitech_receiver/settings_templates.py:295
+msgid "Manual"
+msgstr "Χειροκίνητο"
 
-#: lib/logitech_receiver/settings_templates.py:288
-msgid   "Sensitivity (Pointer Speed)"
-msgstr  "Ευαισθησία (ταχύτητα δείκτη)"
+#: lib/logitech_receiver/settings_templates.py:297
+msgid "Enabled"
+msgstr "Ενεργοποιημένο"
 
-#: lib/logitech_receiver/settings_templates.py:289
-msgid   "Speed multiplier for mouse (256 is normal multiplier)."
-msgstr  "Πολλαπλασιαστής ταχύτητας για το ποντίκι (256 είναι ο κανονικός "
-        "πολλαπλασιαστής)."
+#: lib/logitech_receiver/settings_templates.py:303
+msgid "Backlight Level"
+msgstr "Επίπεδο οπίσθιου φωτισμού"
 
-#: lib/logitech_receiver/settings_templates.py:299
-msgid   "Thumb Wheel Diversion"
-msgstr  "Εκτροπή τροχού αντίχειρα"
+#: lib/logitech_receiver/settings_templates.py:304
+msgid "Illumination level on keyboard when in Manual mode."
+msgstr ""
+"Επίπεδο φωτισμού στο πληκτρολόγιο όταν βρίσκεται σε χειροκίνητη λειτουργία."
 
-#: lib/logitech_receiver/settings_templates.py:301
-msgid   "Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger "
-        "Solaar rules but are otherwise ignored)."
-msgstr  "Κάντε τον τροχό αντίχειρα να στέλνει ειδοποιήσεις THUMB_WHEEL HID++ "
-        "(οι οποίες ενεργοποιούν τους κανόνες του Solaar αλλά αγνοούνται "
-        "διαφορετικά)."
+#: lib/logitech_receiver/settings_templates.py:361
+msgid "Backlight Delay Hands Out"
+msgstr "Καθυστέρηση οπίσθιου φωτισμού Χέρια Εκτός"
 
-#: lib/logitech_receiver/settings_templates.py:310
-msgid   "Thumb Wheel Direction"
-msgstr  "Κατεύθυνση τροχού αντίχειρα"
+#: lib/logitech_receiver/settings_templates.py:362
+msgid ""
+"Delay in seconds until backlight fades out with hands away from keyboard."
+msgstr ""
+"Καθυστέρηση σε δευτερόλεπτα μέχρι να σβήσει ο οπίσθιος φωτισμός με τα χέρια "
+"μακριά από το πληκτρολόγιο."
 
-#: lib/logitech_receiver/settings_templates.py:311
-msgid   "Invert thumb wheel scroll direction."
-msgstr  "Αντιστροφή της κατεύθυνσης κύλισης του τροχού αντίχειρα."
+#: lib/logitech_receiver/settings_templates.py:370
+msgid "Backlight Delay Hands In"
+msgstr "Καθυστέρηση οπίσθιου φωτισμού Χέρια Eντός"
 
-#: lib/logitech_receiver/settings_templates.py:319
-msgid   "Onboard Profiles"
-msgstr  "Ενσωματωμένα Προφίλ"
+#: lib/logitech_receiver/settings_templates.py:371
+msgid "Delay in seconds until backlight fades out with hands near keyboard."
+msgstr ""
+"Καθυστέρηση σε δευτερόλεπτα μέχρι να σβήσει ο οπίσθιος φωτισμός με τα χέρια "
+"κοντά στο πληκτρολόγιο."
 
-#: lib/logitech_receiver/settings_templates.py:320
-msgid   "Enable onboard profiles, which often control report rate and "
-        "keyboard lighting"
-msgstr  "Ενεργοποίηση ενσωματωμένων προφίλ, τα οποία συχνά ελέγχουν το ρυθμό "
-        "αναφοράς και το φωτισμό του πληκτρολογίου"
+#: lib/logitech_receiver/settings_templates.py:379
+msgid "Backlight Delay Powered"
+msgstr "Καθυστέρηση οπίσθιου φωτισμού Με τροφοδοσία"
 
-#: lib/logitech_receiver/settings_templates.py:330
-msgid   "Polling Rate (ms)"
-msgstr  "Ρυθμός κλήσεων (ms)"
+#: lib/logitech_receiver/settings_templates.py:380
+msgid "Delay in seconds until backlight fades out with external power."
+msgstr ""
+"Καθυστέρηση σε δευτερόλεπτα μέχρι να σβήσει ο οπίσθιος φωτισμός με εξωτερική "
+"τροφοδοσία."
 
-#: lib/logitech_receiver/settings_templates.py:332
-msgid   "Frequency of device polling, in milliseconds"
-msgstr  "Συχνότητα κλήσης της συσκευής, σε χιλιοστά του δευτερολέπτου"
+#: lib/logitech_receiver/settings_templates.py:400
+msgid "Scroll Wheel High Resolution"
+msgstr "Τροχός κύλισης υψηλής ανάλυσης"
 
-#: lib/logitech_receiver/settings_templates.py:333
-#: lib/logitech_receiver/settings_templates.py:1046
-#: lib/logitech_receiver/settings_templates.py:1076
-msgid   "May need Onboard Profiles set to Disable to be effective."
-msgstr  "Ενδέχεται να χρειαστεί να θέσετε τα Προφίλ Ενσωματωμένου σε "
-        "Απενεργοποίηση για να είναι αποτελεσματικά."
+#: lib/logitech_receiver/settings_templates.py:404
+#: lib/logitech_receiver/settings_templates.py:433
+msgid "Set to ignore if scrolling is abnormally fast or slow"
+msgstr "Ρύθμιση για να αγνοείται εάν η κύλιση είναι ασυνήθιστα γρήγορη ή αργή"
 
-#: lib/logitech_receiver/settings_templates.py:365
-msgid   "Divert crown events"
-msgstr  "Εκτροπή εκδηλώσεων crown"
+#: lib/logitech_receiver/settings_templates.py:411
+#: lib/logitech_receiver/settings_templates.py:442
+msgid "Scroll Wheel Diversion"
+msgstr "Εκτροπή τροχού κύλισης"
 
-#: lib/logitech_receiver/settings_templates.py:366
-msgid   "Make crown send CROWN HID++ notifications (which trigger Solaar "
-        "rules but are otherwise ignored)."
-msgstr  "Κάντε το crown να στέλνει ειδοποιήσεις CROWN HID++ (οι οποίες "
-        "ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται κατά τα άλλα)."
+#: lib/logitech_receiver/settings_templates.py:413
+msgid ""
+"Make scroll wheel send LOWRES_WHEEL HID++ notifications (which trigger "
+"Solaar rules but are otherwise ignored)."
+msgstr ""
+"Κάντε τον τροχό κύλισης να στέλνει ειδοποιήσεις LOWRES_WHEEL HID++ (οι "
+"οποίες ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται κατά τα άλλα)."
 
-#: lib/logitech_receiver/settings_templates.py:374
-msgid   "Crown smooth scroll"
-msgstr  "Ομαλή κύλιση Crown"
+#: lib/logitech_receiver/settings_templates.py:420
+msgid "Scroll Wheel Direction"
+msgstr "Κατεύθυνση τροχού κύλισης"
 
-#: lib/logitech_receiver/settings_templates.py:375
-msgid   "Set crown smooth scroll"
-msgstr  "Ρύθμιση ομαλής κύλισης Crown"
+#: lib/logitech_receiver/settings_templates.py:421
+msgid "Invert direction for vertical scroll with wheel."
+msgstr "Αντιστροφή κατεύθυνσης για κάθετη κύλιση με τον τροχό."
 
-#: lib/logitech_receiver/settings_templates.py:383
-msgid   "Divert G Keys"
-msgstr  "Εκτροπή πλήκτρων G"
+#: lib/logitech_receiver/settings_templates.py:429
+msgid "Scroll Wheel Resolution"
+msgstr "Ανάλυση τροχού κύλισης"
 
-#: lib/logitech_receiver/settings_templates.py:385
-msgid   "Make G keys send GKEY HID++ notifications (which trigger Solaar "
-        "rules but are otherwise ignored)."
-msgstr  "Κάντε τα κλειδιά G να στέλνουν ειδοποιήσεις GKEY HID++ (οι οποίες "
-        "ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται κατά τα άλλα)."
+#: lib/logitech_receiver/settings_templates.py:444
+msgid ""
+"Make scroll wheel send HIRES_WHEEL HID++ notifications (which trigger Solaar "
+"rules but are otherwise ignored)."
+msgstr ""
+"Κάντε τον τροχό κύλισης να στέλνει ειδοποιήσεις HIRES_WHEEL HID++ (οι οποίες "
+"ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται διαφορετικά)."
 
-#: lib/logitech_receiver/settings_templates.py:386
-msgid   "May also make M keys and MR key send HID++ notifications"
-msgstr  "Μπορεί επίσης να κάνει τα κλειδιά M και MR να στέλνουν ειδοποιήσεις "
-        "HID++"
+#: lib/logitech_receiver/settings_templates.py:453
+msgid "Sensitivity (Pointer Speed)"
+msgstr "Ευαισθησία (ταχύτητα δείκτη)"
 
-#: lib/logitech_receiver/settings_templates.py:402
-msgid   "Scroll Wheel Ratcheted"
-msgstr  "Τροχός κύλισης Αγκιστρωμένος"
+#: lib/logitech_receiver/settings_templates.py:454
+msgid "Speed multiplier for mouse (256 is normal multiplier)."
+msgstr ""
+"Πολλαπλασιαστής ταχύτητας για το ποντίκι (256 είναι ο κανονικός "
+"πολλαπλασιαστής)."
 
-#: lib/logitech_receiver/settings_templates.py:403
-msgid   "Switch the mouse wheel between speed-controlled ratcheting and "
-        "always freespin."
-msgstr  "Αλλάξτε τον τροχό του ποντικιού μεταξύ ρυθμιζόμενης ταχύτητας "
-        "Αγκιστρωμένου και πάντα ελεύθερης περιστροφής."
-
-#: lib/logitech_receiver/settings_templates.py:405
-msgid   "Freespinning"
-msgstr  "Ελεύθερη περιστροφή"
-
-#: lib/logitech_receiver/settings_templates.py:405
-msgid   "Ratcheted"
-msgstr  "Αγκιστρωμένη"
-
-#: lib/logitech_receiver/settings_templates.py:412
-msgid   "Scroll Wheel Ratchet Speed"
-msgstr  "Ταχύτητα Αγκιστρωμένου Τροχού Κύλισης"
-
-#: lib/logitech_receiver/settings_templates.py:414
-msgid   "Use the mouse wheel speed to switch between ratcheted and "
-        "freespinning.\n"
-        "The mouse wheel is always ratcheted at 50."
-msgstr  "Χρησιμοποιήστε την ταχύτητα του τροχού του ποντικιού για να "
-        "εναλλάσσεστε ανάμεσα σε Αγκιστρωμένου και ελεύθερη περιστροφή.\n"
-        "Ο τροχός του ποντικιού είναι πάντα ρυθμισμένος στο 50."
-
-#: lib/logitech_receiver/settings_templates.py:463
-msgid   "Key/Button Actions"
-msgstr  "Ενέργειες πλήκτρων/κουμπιών"
-
-#: lib/logitech_receiver/settings_templates.py:465
-msgid   "Change the action for the key or button."
-msgstr  "Αλλαγή της ενέργειας για το πλήκτρο ή το κουμπί."
-
-#: lib/logitech_receiver/settings_templates.py:465
-msgid   "Overridden by diversion."
-msgstr  "Παρακάμπτεται από εκτροπή."
+#: lib/logitech_receiver/settings_templates.py:464
+msgid "Thumb Wheel Diversion"
+msgstr "Εκτροπή τροχού αντίχειρα"
 
 #: lib/logitech_receiver/settings_templates.py:466
-msgid   "Changing important actions (such as for the left mouse button) can "
-        "result in an unusable system."
-msgstr  "Η αλλαγή σημαντικών ενεργειών (όπως για το αριστερό κουμπί του "
-        "ποντικιού) μπορεί να οδηγήσει σε ένα σύστημα που δεν μπορεί να "
-        "χρησιμοποιηθεί."
+msgid ""
+"Make thumb wheel send THUMB_WHEEL HID++ notifications (which trigger Solaar "
+"rules but are otherwise ignored)."
+msgstr ""
+"Κάντε τον τροχό αντίχειρα να στέλνει ειδοποιήσεις THUMB_WHEEL HID++ (οι "
+"οποίες ενεργοποιούν τους κανόνες του Solaar αλλά αγνοούνται διαφορετικά)."
 
-#: lib/logitech_receiver/settings_templates.py:639
-msgid   "Key/Button Diversion"
-msgstr  "Εκτροπή πλήκτρων/κουμπιών"
+#: lib/logitech_receiver/settings_templates.py:475
+msgid "Thumb Wheel Direction"
+msgstr "Κατεύθυνση τροχού αντίχειρα"
 
-#: lib/logitech_receiver/settings_templates.py:640
-msgid   "Make the key or button send HID++ notifications (Diverted) or "
-        "initiate Mouse Gestures or Sliding DPI"
-msgstr  "Κάντε το πλήκτρο ή το κουμπί να στέλνει ειδοποιήσεις HID++ (εκτροπή) "
-        "ή να ξεκινάει χειρονομίες ποντικιού ή συρόμενο DPI"
+#: lib/logitech_receiver/settings_templates.py:476
+msgid "Invert thumb wheel scroll direction."
+msgstr "Αντιστροφή της κατεύθυνσης κύλισης του τροχού αντίχειρα."
 
-#: lib/logitech_receiver/settings_templates.py:643
-#: lib/logitech_receiver/settings_templates.py:644
-#: lib/logitech_receiver/settings_templates.py:645
-msgid   "Diverted"
-msgstr  "Εκτρεπόμενο"
+#: lib/logitech_receiver/settings_templates.py:496
+msgid "Onboard Profiles"
+msgstr "Ενσωματωμένα Προφίλ"
 
-#: lib/logitech_receiver/settings_templates.py:643
-#: lib/logitech_receiver/settings_templates.py:644
-msgid   "Mouse Gestures"
-msgstr  "Χειρονομίες ποντικιού"
+#: lib/logitech_receiver/settings_templates.py:497
+msgid ""
+"Enable an onboard profile, which controls report rate, sensitivity, and "
+"button actions"
+msgstr ""
+"Ενεργοποιήστε ένα ενσωματωμένο προφίλ, το οποίο ελέγχει το ρυθμό αναφοράς, "
+"την ευαισθησία και τις ενέργειες των κουμπιών"
 
-#: lib/logitech_receiver/settings_templates.py:643
-#: lib/logitech_receiver/settings_templates.py:644
-#: lib/logitech_receiver/settings_templates.py:645
-msgid   "Regular"
-msgstr  "Κανονικό"
+#: lib/logitech_receiver/settings_templates.py:541
+#: lib/logitech_receiver/settings_templates.py:581
+msgid "Report Rate"
+msgstr "Ρυθμός αναφοράς"
 
-#: lib/logitech_receiver/settings_templates.py:643
-msgid   "Sliding DPI"
-msgstr  "Ολίσθαινόμενο DPI"
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+msgid "Frequency of device movement reports"
+msgstr "Συχνότητα των αναφορών κίνησης της συσκευής"
 
-#: lib/logitech_receiver/settings_templates.py:711
-msgid   "Sensitivity (DPI)"
-msgstr  "Ευαισθησία (DPI)"
+#: lib/logitech_receiver/settings_templates.py:543
+#: lib/logitech_receiver/settings_templates.py:583
+#: lib/logitech_receiver/settings_templates.py:1295
+#: lib/logitech_receiver/settings_templates.py:1326
+msgid "May need Onboard Profiles set to Disable to be effective."
+msgstr ""
+"Ενδέχεται να χρειαστεί να θέσετε τα Προφίλ Ενσωματωμένου σε Απενεργοποίηση "
+"για να είναι αποτελεσματικά."
 
-#: lib/logitech_receiver/settings_templates.py:752
-msgid   "Sensitivity Switching"
-msgstr  "Εναλλαγή ευαισθησίας"
+#: lib/logitech_receiver/settings_templates.py:623
+msgid "Divert crown events"
+msgstr "Εκτροπή εκδηλώσεων crown"
 
-#: lib/logitech_receiver/settings_templates.py:754
-msgid   "Switch the current sensitivity and the remembered sensitivity when "
-        "the key or button is pressed.\n"
-        "If there is no remembered sensitivity, just remember the current "
-        "sensitivity"
-msgstr  "Εναλλαγή της τρέχουσας ευαισθησίας και της ευαισθησίας που έχει "
-        "απομνημονευθεί όταν πατηθεί το πλήκτρο ή το κουμπί.\n"
-        "Εάν δεν υπάρχει απομνημονευμένη ευαισθησία, απλά θυμηθείτε την "
-        "τρέχουσα ευαισθησία"
+#: lib/logitech_receiver/settings_templates.py:624
+msgid ""
+"Make crown send CROWN HID++ notifications (which trigger Solaar rules but "
+"are otherwise ignored)."
+msgstr ""
+"Κάντε το crown να στέλνει ειδοποιήσεις CROWN HID++ (οι οποίες ενεργοποιούν "
+"τους κανόνες Solaar αλλά αγνοούνται κατά τα άλλα)."
 
-#: lib/logitech_receiver/settings_templates.py:758
-msgid   "Off"
-msgstr  "Απενεργοποίηση"
+#: lib/logitech_receiver/settings_templates.py:632
+msgid "Crown smooth scroll"
+msgstr "Ομαλή κύλιση Crown"
 
-#: lib/logitech_receiver/settings_templates.py:791
-msgid   "Disable keys"
-msgstr  "Απενεργοποίηση πλήκτρων"
+#: lib/logitech_receiver/settings_templates.py:633
+msgid "Set crown smooth scroll"
+msgstr "Ρύθμιση ομαλής κύλισης Crown"
 
-#: lib/logitech_receiver/settings_templates.py:792
-msgid   "Disable specific keyboard keys."
-msgstr  "Απενεργοποίηση συγκεκριμένων πλήκτρων πληκτρολογίου."
+#: lib/logitech_receiver/settings_templates.py:641
+msgid "Divert G and M Keys"
+msgstr "Εκτροπή πλήκτρων G και M"
 
-#: lib/logitech_receiver/settings_templates.py:795
+#: lib/logitech_receiver/settings_templates.py:642
+msgid ""
+"Make G and M keys send HID++ notifications (which trigger Solaar rules but "
+"are otherwise ignored)."
+msgstr ""
+"Κάντε τα πλήκτρα G και M να στέλνουν ειδοποιήσεις HID++ (οι οποίες "
+"ενεργοποιούν τους κανόνες Solaar αλλά αγνοούνται κατά τα άλλα)."
+
+#: lib/logitech_receiver/settings_templates.py:656
+msgid "Scroll Wheel Ratcheted"
+msgstr "Τροχός κύλισης Αγκιστρωμένος"
+
+#: lib/logitech_receiver/settings_templates.py:657
+msgid ""
+"Switch the mouse wheel between speed-controlled ratcheting and always "
+"freespin."
+msgstr ""
+"Αλλάξτε τον τροχό του ποντικιού μεταξύ ρυθμιζόμενης ταχύτητας Αγκιστρωμένου "
+"και πάντα ελεύθερης περιστροφής."
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid "Freespinning"
+msgstr "Ελεύθερη περιστροφή"
+
+#: lib/logitech_receiver/settings_templates.py:659
+msgid "Ratcheted"
+msgstr "Αγκιστρωμένη"
+
+#: lib/logitech_receiver/settings_templates.py:666
+msgid "Scroll Wheel Ratchet Speed"
+msgstr "Ταχύτητα Αγκιστρωμένου Τροχού Κύλισης"
+
+#: lib/logitech_receiver/settings_templates.py:668
+msgid ""
+"Use the mouse wheel speed to switch between ratcheted and freespinning.\n"
+"The mouse wheel is always ratcheted at 50."
+msgstr ""
+"Χρησιμοποιήστε την ταχύτητα του τροχού του ποντικιού για να εναλλάσσεστε "
+"ανάμεσα σε Αγκιστρωμένου και ελεύθερη περιστροφή.\n"
+"Ο τροχός του ποντικιού είναι πάντα ρυθμισμένος στο 50."
+
+#: lib/logitech_receiver/settings_templates.py:717
+msgid "Key/Button Actions"
+msgstr "Ενέργειες πλήκτρων/κουμπιών"
+
+#: lib/logitech_receiver/settings_templates.py:719
+msgid "Change the action for the key or button."
+msgstr "Αλλαγή της ενέργειας για το πλήκτρο ή το κουμπί."
+
+#: lib/logitech_receiver/settings_templates.py:721
+msgid "Overridden by diversion."
+msgstr "Παρακάμπτεται από εκτροπή."
+
+#: lib/logitech_receiver/settings_templates.py:723
+msgid ""
+"Changing important actions (such as for the left mouse button) can result in "
+"an unusable system."
+msgstr ""
+"Η αλλαγή σημαντικών ενεργειών (όπως για το αριστερό κουμπί του ποντικιού) "
+"μπορεί να οδηγήσει σε ένα σύστημα που δεν μπορεί να χρησιμοποιηθεί."
+
+#: lib/logitech_receiver/settings_templates.py:886
+msgid "Key/Button Diversion"
+msgstr "Εκτροπή πλήκτρων/κουμπιών"
+
+#: lib/logitech_receiver/settings_templates.py:887
+msgid ""
+"Make the key or button send HID++ notifications (Diverted) or initiate Mouse "
+"Gestures or Sliding DPI"
+msgstr ""
+"Κάντε το πλήκτρο ή το κουμπί να στέλνει ειδοποιήσεις HID++ (εκτροπή) ή να "
+"ξεκινάει χειρονομίες ποντικιού ή συρόμενο DPI"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid "Diverted"
+msgstr "Εκτρεπόμενο"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+msgid "Mouse Gestures"
+msgstr "Χειρονομίες ποντικιού"
+
+#: lib/logitech_receiver/settings_templates.py:890
+#: lib/logitech_receiver/settings_templates.py:891
+#: lib/logitech_receiver/settings_templates.py:892
+msgid "Regular"
+msgstr "Κανονικό"
+
+#: lib/logitech_receiver/settings_templates.py:890
+msgid "Sliding DPI"
+msgstr "Ολίσθαινόμενο DPI"
+
+#: lib/logitech_receiver/settings_templates.py:957
+msgid "Sensitivity (DPI)"
+msgstr "Ευαισθησία (DPI)"
+
+#: lib/logitech_receiver/settings_templates.py:997
+msgid "Sensitivity Switching"
+msgstr "Εναλλαγή ευαισθησίας"
+
+#: lib/logitech_receiver/settings_templates.py:999
+msgid ""
+"Switch the current sensitivity and the remembered sensitivity when the key "
+"or button is pressed.\n"
+"If there is no remembered sensitivity, just remember the current sensitivity"
+msgstr ""
+"Εναλλαγή της τρέχουσας ευαισθησίας και της ευαισθησίας που έχει "
+"απομνημονευθεί όταν πατηθεί το πλήκτρο ή το κουμπί.\n"
+"Εάν δεν υπάρχει απομνημονευμένη ευαισθησία, απλά θυμηθείτε την τρέχουσα "
+"ευαισθησία"
+
+#: lib/logitech_receiver/settings_templates.py:1003
+msgid "Off"
+msgstr "Απενεργοποίηση"
+
+#: lib/logitech_receiver/settings_templates.py:1034
+msgid "Disable keys"
+msgstr "Απενεργοποίηση πλήκτρων"
+
+#: lib/logitech_receiver/settings_templates.py:1035
+msgid "Disable specific keyboard keys."
+msgstr "Απενεργοποίηση συγκεκριμένων πλήκτρων πληκτρολογίου."
+
+#: lib/logitech_receiver/settings_templates.py:1038
 #, python-format
-msgid   "Disables the %s key."
-msgstr  "Απενεργοποίηση του πλήκτρου %s."
-
-#: lib/logitech_receiver/settings_templates.py:809
-#: lib/logitech_receiver/settings_templates.py:860
-msgid   "Set OS"
-msgstr  "Ορισμός λειτουργικού συστήματος"
-
-#: lib/logitech_receiver/settings_templates.py:810
-#: lib/logitech_receiver/settings_templates.py:861
-msgid   "Change keys to match OS."
-msgstr  "Αλλάξτε τα πλήκτρα για να ταιριάζουν με το λειτουργικό σύστημα."
-
-#: lib/logitech_receiver/settings_templates.py:873
-msgid   "Change Host"
-msgstr  "Αλλαγή κεντρικού υπολογιστή"
-
-#: lib/logitech_receiver/settings_templates.py:874
-msgid   "Switch connection to a different host"
-msgstr  "Αλλαγή σύνδεσης σε διαφορετικό κεντρικό υπολογιστή"
-
-#: lib/logitech_receiver/settings_templates.py:900
-msgid   "Performs a left click."
-msgstr  "Πραγματοποιεί αριστερό κλικ."
-
-#: lib/logitech_receiver/settings_templates.py:900
-msgid   "Single tap"
-msgstr  "Απλό πάτημα"
-
-#: lib/logitech_receiver/settings_templates.py:901
-msgid   "Performs a right click."
-msgstr  "Πραγματοποιεί δεξί κλικ."
-
-#: lib/logitech_receiver/settings_templates.py:901
-msgid   "Single tap with two fingers"
-msgstr  "Απλό πάτημα με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:902
-msgid   "Single tap with three fingers"
-msgstr  "Απλό πάτημα με τρία δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:906
-msgid   "Double tap"
-msgstr  "Διπλό πάτημα"
-
-#: lib/logitech_receiver/settings_templates.py:906
-msgid   "Performs a double click."
-msgstr  "Πραγματοποιεί διπλό κλικ."
-
-#: lib/logitech_receiver/settings_templates.py:907
-msgid   "Double tap with two fingers"
-msgstr  "Διπλό πάτημα με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:908
-msgid   "Double tap with three fingers"
-msgstr  "Διπλό πάτημα με τρία δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:911
-msgid   "Drags items by dragging the finger after double tapping."
-msgstr  "Σύρετε αντικείμενα σύροντας το δάχτυλο μετά από διπλό πάτημα."
-
-#: lib/logitech_receiver/settings_templates.py:911
-msgid   "Tap and drag"
-msgstr  "Πάτημα και σύρσιμο"
-
-#: lib/logitech_receiver/settings_templates.py:913
-msgid   "Drags items by dragging the fingers after double tapping."
-msgstr  "Σύρετε αντικείμενα σύροντας τα δάχτυλα μετά από διπλό πάτημα."
-
-#: lib/logitech_receiver/settings_templates.py:913
-msgid   "Tap and drag with two fingers"
-msgstr  "Πάτημα και σύρσιμο με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:914
-msgid   "Tap and drag with three fingers"
-msgstr  "Πάτημα και σύρσιμο με τρία δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:917
-msgid   "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
-msgstr  "Απενεργοποιεί τις χειρονομίες tap και edge (ισοδύναμο με το πάτημα "
-        "των πλήκτρων Fn+LeftClick)."
-
-#: lib/logitech_receiver/settings_templates.py:917
-msgid   "Suppress tap and edge gestures"
-msgstr  "Καταστολή χειρονομιών tap και edge"
-
-#: lib/logitech_receiver/settings_templates.py:918
-msgid   "Scroll with one finger"
-msgstr  "Κύλιση με ένα δάχτυλο"
-
-#: lib/logitech_receiver/settings_templates.py:918
-#: lib/logitech_receiver/settings_templates.py:919
-#: lib/logitech_receiver/settings_templates.py:922
-msgid   "Scrolls."
-msgstr  "Κύλιση."
-
-#: lib/logitech_receiver/settings_templates.py:919
-#: lib/logitech_receiver/settings_templates.py:922
-msgid   "Scroll with two fingers"
-msgstr  "Κύλιση με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:920
-msgid   "Scroll horizontally with two fingers"
-msgstr  "Οριζόντια κύλιση με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:920
-msgid   "Scrolls horizontally."
-msgstr  "Κύλιση οριζόντια."
-
-#: lib/logitech_receiver/settings_templates.py:921
-msgid   "Scroll vertically with two fingers"
-msgstr  "Κατακόρυφη κύλιση με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:921
-msgid   "Scrolls vertically."
-msgstr  "Κατακόρυφη Κύλιση."
-
-#: lib/logitech_receiver/settings_templates.py:923
-msgid   "Inverts the scrolling direction."
-msgstr  "Αναστροφή της κατεύθυνσης κύλισης."
-
-#: lib/logitech_receiver/settings_templates.py:923
-msgid   "Natural scrolling"
-msgstr  "Φυσική κύλιση"
-
-#: lib/logitech_receiver/settings_templates.py:924
-msgid   "Enables the thumbwheel."
-msgstr  "Ενεργοποίηση του τροχού αντίχειρα."
-
-#: lib/logitech_receiver/settings_templates.py:924
-msgid   "Thumbwheel"
-msgstr  "Τροχός Αντίχειρα"
-
-#: lib/logitech_receiver/settings_templates.py:935
-#: lib/logitech_receiver/settings_templates.py:939
-msgid   "Swipe from the top edge"
-msgstr  "Σύρσιμο από την επάνω άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:936
-msgid   "Swipe from the left edge"
-msgstr  "Σύρσιμο από την αριστερή άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:937
-msgid   "Swipe from the right edge"
-msgstr  "Σύρσιμο από τη δεξιά άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:938
-msgid   "Swipe from the bottom edge"
-msgstr  "Σύρσιμο από την κάτω άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:940
-msgid   "Swipe two fingers from the left edge"
-msgstr  "Σύρσιμο δύο δάχτυλων από την αριστερή άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:941
-msgid   "Swipe two fingers from the right edge"
-msgstr  "Σύρσιμο δύο δάχτυλων από τη δεξιά άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:942
-msgid   "Swipe two fingers from the bottom edge"
-msgstr  "Σύρσιμο δύο δάχτυλων από την κάτω άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:943
-msgid   "Swipe two fingers from the top edge"
-msgstr  "Σύρσιμο δύο δάχτυλων από την επάνω άκρη"
-
-#: lib/logitech_receiver/settings_templates.py:944
-#: lib/logitech_receiver/settings_templates.py:948
-msgid   "Pinch to zoom out; spread to zoom in."
-msgstr  "Τσιμπήστε για σμίκρυνση, απλώστε για μεγέθυνση."
-
-#: lib/logitech_receiver/settings_templates.py:944
-msgid   "Zoom with two fingers."
-msgstr  "Ζουμ με δύο δάχτυλα."
-
-#: lib/logitech_receiver/settings_templates.py:945
-msgid   "Pinch to zoom out."
-msgstr  "Τσιμπήστε για σμίκρυνση."
-
-#: lib/logitech_receiver/settings_templates.py:946
-msgid   "Spread to zoom in."
-msgstr  "Απλώστε για μεγέθυνση."
-
-#: lib/logitech_receiver/settings_templates.py:947
-msgid   "Zoom with three fingers."
-msgstr  "Ζουμ με τρία δάχτυλα."
-
-#: lib/logitech_receiver/settings_templates.py:948
-msgid   "Zoom with two fingers"
-msgstr  "Ζουμ με δύο δάχτυλα"
-
-#: lib/logitech_receiver/settings_templates.py:966
-msgid   "Pixel zone"
-msgstr  "Ζώνη pixel"
-
-#: lib/logitech_receiver/settings_templates.py:967
-msgid   "Ratio zone"
-msgstr  "Ζώνη αναλογίας"
-
-#: lib/logitech_receiver/settings_templates.py:968
-msgid   "Scale factor"
-msgstr  "Συντελεστής κλίμακας"
-
-#: lib/logitech_receiver/settings_templates.py:968
-msgid   "Sets the cursor speed."
-msgstr  "Ορίζει την ταχύτητα του δρομέα."
-
-#: lib/logitech_receiver/settings_templates.py:972
-msgid   "Left"
-msgstr  "Αριστερά"
-
-#: lib/logitech_receiver/settings_templates.py:972
-msgid   "Left-most coordinate."
-msgstr  "Αριστερότερη συντεταγμένη."
-
-#: lib/logitech_receiver/settings_templates.py:973
-msgid   "Bottom"
-msgstr  "Κάτω"
-
-#: lib/logitech_receiver/settings_templates.py:973
-msgid   "Bottom coordinate."
-msgstr  "Κάτωθεν συντεταγμένη."
-
-#: lib/logitech_receiver/settings_templates.py:974
-msgid   "Width"
-msgstr  "Πλάτος"
-
-#: lib/logitech_receiver/settings_templates.py:974
-msgid   "Width."
-msgstr  "Πλάτος."
-
-#: lib/logitech_receiver/settings_templates.py:975
-msgid   "Height"
-msgstr  "Ύψος"
-
-#: lib/logitech_receiver/settings_templates.py:975
-msgid   "Height."
-msgstr  "Ύψος."
-
-#: lib/logitech_receiver/settings_templates.py:976
-msgid   "Cursor speed."
-msgstr  "Ταχύτητα δρομέα."
-
-#: lib/logitech_receiver/settings_templates.py:976
-msgid   "Scale"
-msgstr  "Κλίμακα"
-
-#: lib/logitech_receiver/settings_templates.py:982
-msgid   "Gestures"
-msgstr  "Χειρονομίες"
-
-#: lib/logitech_receiver/settings_templates.py:983
-msgid   "Tweak the mouse/touchpad behaviour."
-msgstr  "Ρύθμιση της συμπεριφοράς του ποντικιού/του touchpad."
-
-#: lib/logitech_receiver/settings_templates.py:1000
-msgid   "Gestures Diversion"
-msgstr  "Χειρονομίες εκτροπής"
-
-#: lib/logitech_receiver/settings_templates.py:1001
-msgid   "Divert mouse/touchpad gestures."
-msgstr  "Εκτροπή χειρονομιών του ποντικιού/του touchpad."
-
-#: lib/logitech_receiver/settings_templates.py:1018
-msgid   "Gesture params"
-msgstr  "Παράμετροι χειρονομιών"
-
-#: lib/logitech_receiver/settings_templates.py:1019
-msgid   "Change numerical parameters of a mouse/touchpad."
-msgstr  "Αλλαγή των αριθμητικών παραμέτρων ενός ποντικιού/του touchpad."
-
-#: lib/logitech_receiver/settings_templates.py:1044
-msgid   "M-Key LEDs"
-msgstr  "Λυχνίες LED M-Key"
-
-#: lib/logitech_receiver/settings_templates.py:1046
-msgid   "Control the M-Key LEDs."
-msgstr  "Έλεγχος των λυχνιών LED του M-Key."
-
-#: lib/logitech_receiver/settings_templates.py:1047
-#: lib/logitech_receiver/settings_templates.py:1077
-msgid   "May need G Keys diverted to be effective."
-msgstr  "Μπορεί να χρειαστεί εκτροπή των πλήκτρων G  για να είναι "
-        "αποτελεσματική."
-
-#: lib/logitech_receiver/settings_templates.py:1053
-#, python-format
-msgid   "Lights up the %s key."
-msgstr  "Ανάβει το πλήκτρο %s."
-
-#: lib/logitech_receiver/settings_templates.py:1074
-msgid   "MR-Key LED"
-msgstr  "MR-Πλήκτρο LED"
-
-#: lib/logitech_receiver/settings_templates.py:1076
-msgid   "Control the MR-Key LED."
-msgstr  "Έλεγχος της λυχνίας LED πλήκτρου MR."
-
-#: lib/logitech_receiver/settings_templates.py:1095
-msgid   "Persistent Key/Button Mapping"
-msgstr  "Μόνιμη αντιστοίχιση πλήκτρων/κουμπιών"
-
-#: lib/logitech_receiver/settings_templates.py:1097
-msgid   "Permanently change the mapping for the key or button."
-msgstr  "Μόνιμη αλλαγή της αντιστοίχισης για το πλήκτρο ή το κουμπί."
-
-#: lib/logitech_receiver/settings_templates.py:1098
-msgid   "Changing important keys or buttons (such as for the left mouse "
-        "button) can result in an unusable system."
-msgstr  "Η αλλαγή σημαντικών πλήκτρων ή κουμπιών (όπως για παράδειγμα του "
-        "αριστερού κουμπιού του ποντικιού) μπορεί να οδηγήσει σε ένα άχρηστο "
-        "σύστημα."
+msgid "Disables the %s key."
+msgstr "Απενεργοποίηση του πλήκτρου %s."
+
+#: lib/logitech_receiver/settings_templates.py:1051
+#: lib/logitech_receiver/settings_templates.py:1108
+msgid "Set OS"
+msgstr "Ορισμός λειτουργικού συστήματος"
+
+#: lib/logitech_receiver/settings_templates.py:1052
+#: lib/logitech_receiver/settings_templates.py:1109
+msgid "Change keys to match OS."
+msgstr "Αλλάξτε τα πλήκτρα για να ταιριάζουν με το λειτουργικό σύστημα."
+
+#: lib/logitech_receiver/settings_templates.py:1121
+msgid "Change Host"
+msgstr "Αλλαγή κεντρικού υπολογιστή"
+
+#: lib/logitech_receiver/settings_templates.py:1122
+msgid "Switch connection to a different host"
+msgstr "Αλλαγή σύνδεσης σε διαφορετικό κεντρικό υπολογιστή"
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid "Performs a left click."
+msgstr "Πραγματοποιεί αριστερό κλικ."
+
+#: lib/logitech_receiver/settings_templates.py:1146
+msgid "Single tap"
+msgstr "Απλό πάτημα"
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid "Performs a right click."
+msgstr "Πραγματοποιεί δεξί κλικ."
+
+#: lib/logitech_receiver/settings_templates.py:1147
+msgid "Single tap with two fingers"
+msgstr "Απλό πάτημα με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1148
+msgid "Single tap with three fingers"
+msgstr "Απλό πάτημα με τρία δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid "Double tap"
+msgstr "Διπλό πάτημα"
+
+#: lib/logitech_receiver/settings_templates.py:1152
+msgid "Performs a double click."
+msgstr "Πραγματοποιεί διπλό κλικ."
+
+#: lib/logitech_receiver/settings_templates.py:1153
+msgid "Double tap with two fingers"
+msgstr "Διπλό πάτημα με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1154
+msgid "Double tap with three fingers"
+msgstr "Διπλό πάτημα με τρία δάχτυλα"
 
 #: lib/logitech_receiver/settings_templates.py:1157
-msgid   "Sidetone"
-msgstr  "Sidetone"
+msgid "Drags items by dragging the finger after double tapping."
+msgstr "Σύρετε αντικείμενα σύροντας το δάχτυλο μετά από διπλό πάτημα."
 
-#: lib/logitech_receiver/settings_templates.py:1158
-msgid   "Set sidetone level."
-msgstr  "Ορισμός επιπέδου sidetone."
+#: lib/logitech_receiver/settings_templates.py:1157
+msgid "Tap and drag"
+msgstr "Πάτημα και σύρσιμο"
 
-#: lib/logitech_receiver/settings_templates.py:1167
-msgid   "Equalizer"
-msgstr  "Ισοσταθμιστής"
+#: lib/logitech_receiver/settings_templates.py:1159
+msgid "Tap and drag with two fingers"
+msgstr "Πάτημα και σύρσιμο με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1160
+msgid "Drags items by dragging the fingers after double tapping."
+msgstr "Σύρετε αντικείμενα σύροντας τα δάχτυλα μετά από διπλό πάτημα."
+
+#: lib/logitech_receiver/settings_templates.py:1162
+msgid "Tap and drag with three fingers"
+msgstr "Πάτημα και σύρσιμο με τρία δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1165
+msgid "Suppress tap and edge gestures"
+msgstr "Καταστολή χειρονομιών tap και edge"
+
+#: lib/logitech_receiver/settings_templates.py:1166
+msgid "Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."
+msgstr ""
+"Απενεργοποιεί τις χειρονομίες tap και edge (ισοδύναμο με το πάτημα των "
+"πλήκτρων Fn+LeftClick)."
 
 #: lib/logitech_receiver/settings_templates.py:1168
-msgid   "Set equalizer levels."
-msgstr  "Ρύθμιση επιπέδων ισοσταθμιστή."
+msgid "Scroll with one finger"
+msgstr "Κύλιση με ένα δάχτυλο"
+
+#: lib/logitech_receiver/settings_templates.py:1168
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid "Scrolls."
+msgstr "Κύλιση."
+
+#: lib/logitech_receiver/settings_templates.py:1169
+#: lib/logitech_receiver/settings_templates.py:1172
+msgid "Scroll with two fingers"
+msgstr "Κύλιση με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid "Scroll horizontally with two fingers"
+msgstr "Οριζόντια κύλιση με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1170
+msgid "Scrolls horizontally."
+msgstr "Κύλιση οριζόντια."
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid "Scroll vertically with two fingers"
+msgstr "Κατακόρυφη κύλιση με δύο δάχτυλα"
+
+#: lib/logitech_receiver/settings_templates.py:1171
+msgid "Scrolls vertically."
+msgstr "Κατακόρυφη Κύλιση."
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid "Inverts the scrolling direction."
+msgstr "Αναστροφή της κατεύθυνσης κύλισης."
+
+#: lib/logitech_receiver/settings_templates.py:1173
+msgid "Natural scrolling"
+msgstr "Φυσική κύλιση"
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid "Enables the thumbwheel."
+msgstr "Ενεργοποίηση του τροχού αντίχειρα."
+
+#: lib/logitech_receiver/settings_templates.py:1174
+msgid "Thumbwheel"
+msgstr "Τροχός Αντίχειρα"
+
+#: lib/logitech_receiver/settings_templates.py:1185
+#: lib/logitech_receiver/settings_templates.py:1189
+msgid "Swipe from the top edge"
+msgstr "Σύρσιμο από την επάνω άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1186
+msgid "Swipe from the left edge"
+msgstr "Σύρσιμο από την αριστερή άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1187
+msgid "Swipe from the right edge"
+msgstr "Σύρσιμο από τη δεξιά άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1188
+msgid "Swipe from the bottom edge"
+msgstr "Σύρσιμο από την κάτω άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1190
+msgid "Swipe two fingers from the left edge"
+msgstr "Σύρσιμο δύο δάχτυλων από την αριστερή άκρη"
 
 #: lib/logitech_receiver/settings_templates.py:1191
-msgid   "Hz"
-msgstr  "Hz"
+msgid "Swipe two fingers from the right edge"
+msgstr "Σύρσιμο δύο δάχτυλων από τη δεξιά άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1192
+msgid "Swipe two fingers from the bottom edge"
+msgstr "Σύρσιμο δύο δάχτυλων από την κάτω άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1193
+msgid "Swipe two fingers from the top edge"
+msgstr "Σύρσιμο δύο δάχτυλων από την επάνω άκρη"
+
+#: lib/logitech_receiver/settings_templates.py:1194
+#: lib/logitech_receiver/settings_templates.py:1198
+msgid "Pinch to zoom out; spread to zoom in."
+msgstr "Τσιμπήστε για σμίκρυνση, απλώστε για μεγέθυνση."
+
+#: lib/logitech_receiver/settings_templates.py:1194
+msgid "Zoom with two fingers."
+msgstr "Ζουμ με δύο δάχτυλα."
+
+#: lib/logitech_receiver/settings_templates.py:1195
+msgid "Pinch to zoom out."
+msgstr "Τσιμπήστε για σμίκρυνση."
+
+#: lib/logitech_receiver/settings_templates.py:1196
+msgid "Spread to zoom in."
+msgstr "Απλώστε για μεγέθυνση."
 
 #: lib/logitech_receiver/settings_templates.py:1197
-msgid   "Power Management"
-msgstr  "Διαχείριση ενέργειας"
+msgid "Zoom with three fingers."
+msgstr "Ζουμ με τρία δάχτυλα."
 
 #: lib/logitech_receiver/settings_templates.py:1198
-msgid   "Power off in minutes (0 for never)."
-msgstr  "Απενεργοποίηση σε λεπτά (0 για ποτέ)."
+msgid "Zoom with two fingers"
+msgstr "Ζουμ με δύο δάχτυλα"
 
-#: lib/logitech_receiver/status.py:114
-msgid   "No paired devices."
-msgstr  "Δεν έχω συνταιριασμένες συσκευές."
+#: lib/logitech_receiver/settings_templates.py:1216
+msgid "Pixel zone"
+msgstr "Ζώνη pixel"
 
-#: lib/logitech_receiver/status.py:115 lib/solaar/ui/window.py:622
+#: lib/logitech_receiver/settings_templates.py:1217
+msgid "Ratio zone"
+msgstr "Ζώνη αναλογίας"
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid "Scale factor"
+msgstr "Συντελεστής κλίμακας"
+
+#: lib/logitech_receiver/settings_templates.py:1218
+msgid "Sets the cursor speed."
+msgstr "Ορίζει την ταχύτητα του δρομέα."
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid "Left"
+msgstr "Αριστερά"
+
+#: lib/logitech_receiver/settings_templates.py:1222
+msgid "Left-most coordinate."
+msgstr "Αριστερότερη συντεταγμένη."
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid "Bottom"
+msgstr "Κάτω"
+
+#: lib/logitech_receiver/settings_templates.py:1223
+msgid "Bottom coordinate."
+msgstr "Κάτωθεν συντεταγμένη."
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid "Width"
+msgstr "Πλάτος"
+
+#: lib/logitech_receiver/settings_templates.py:1224
+msgid "Width."
+msgstr "Πλάτος."
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid "Height"
+msgstr "Ύψος"
+
+#: lib/logitech_receiver/settings_templates.py:1225
+msgid "Height."
+msgstr "Ύψος."
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid "Cursor speed."
+msgstr "Ταχύτητα δρομέα."
+
+#: lib/logitech_receiver/settings_templates.py:1226
+msgid "Scale"
+msgstr "Κλίμακα"
+
+#: lib/logitech_receiver/settings_templates.py:1232
+msgid "Gestures"
+msgstr "Χειρονομίες"
+
+#: lib/logitech_receiver/settings_templates.py:1233
+msgid "Tweak the mouse/touchpad behaviour."
+msgstr "Ρύθμιση της συμπεριφοράς του ποντικιού/του touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1249
+msgid "Gestures Diversion"
+msgstr "Χειρονομίες εκτροπής"
+
+#: lib/logitech_receiver/settings_templates.py:1250
+msgid "Divert mouse/touchpad gestures."
+msgstr "Εκτροπή χειρονομιών του ποντικιού/του touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1266
+msgid "Gesture params"
+msgstr "Παράμετροι χειρονομιών"
+
+#: lib/logitech_receiver/settings_templates.py:1267
+msgid "Change numerical parameters of a mouse/touchpad."
+msgstr "Αλλαγή των αριθμητικών παραμέτρων ενός ποντικιού/του touchpad."
+
+#: lib/logitech_receiver/settings_templates.py:1291
+msgid "M-Key LEDs"
+msgstr "Λυχνίες LED M-Key"
+
+#: lib/logitech_receiver/settings_templates.py:1293
+msgid "Control the M-Key LEDs."
+msgstr "Έλεγχος των λυχνιών LED του M-Key."
+
+#: lib/logitech_receiver/settings_templates.py:1297
+#: lib/logitech_receiver/settings_templates.py:1328
+msgid "May need G Keys diverted to be effective."
+msgstr ""
+"Μπορεί να χρειαστεί εκτροπή των πλήκτρων G  για να είναι αποτελεσματική."
+
+#: lib/logitech_receiver/settings_templates.py:1303
 #, python-format
-msgid   "%(count)s paired device."
-msgid_plural    "%(count)s paired devices."
-msgstr[0]       "%(count)s συζευγμένη συσκευή."
-msgstr[1]       "%(count)s συζευγμένες συσκευές."
+msgid "Lights up the %s key."
+msgstr "Ανάβει το πλήκτρο %s."
 
-#: lib/logitech_receiver/status.py:170
-#, python-format
-msgid   "Battery: %(level)s"
-msgstr  "Μπαταρία: %(level)s"
+#: lib/logitech_receiver/settings_templates.py:1322
+msgid "MR-Key LED"
+msgstr "MR-Πλήκτρο LED"
 
-#: lib/logitech_receiver/status.py:172
-#, python-format
-msgid   "Battery: %(percent)d%%"
-msgstr  "Μπαταρία: %(percent)d%%"
+#: lib/logitech_receiver/settings_templates.py:1324
+msgid "Control the MR-Key LED."
+msgstr "Έλεγχος της λυχνίας LED πλήκτρου MR."
 
-#: lib/logitech_receiver/status.py:184
-#, python-format
-msgid   "Lighting: %(level)s lux"
-msgstr  "Φωτισμός: %(level)s lux"
+#: lib/logitech_receiver/settings_templates.py:1345
+msgid "Persistent Key/Button Mapping"
+msgstr "Μόνιμη αντιστοίχιση πλήκτρων/κουμπιών"
 
-#: lib/logitech_receiver/status.py:239
-#, python-format
-msgid   "Battery: %(level)s (%(status)s)"
-msgstr  "Μπαταρία: %(level)s (%(status)s)"
+#: lib/logitech_receiver/settings_templates.py:1347
+msgid "Permanently change the mapping for the key or button."
+msgstr "Μόνιμη αλλαγή της αντιστοίχισης για το πλήκτρο ή το κουμπί."
 
-#: lib/logitech_receiver/status.py:241
-#, python-format
-msgid   "Battery: %(percent)d%% (%(status)s)"
-msgstr  "Μπαταρία: %(percent)d%% (%(status)s)"
+#: lib/logitech_receiver/settings_templates.py:1349
+msgid ""
+"Changing important keys or buttons (such as for the left mouse button) can "
+"result in an unusable system."
+msgstr ""
+"Η αλλαγή σημαντικών πλήκτρων ή κουμπιών (όπως για παράδειγμα του αριστερού "
+"κουμπιού του ποντικιού) μπορεί να οδηγήσει σε ένα άχρηστο σύστημα."
 
-#: lib/solaar/ui/__init__.py:52
-msgid   "Permissions error"
-msgstr  "Σφάλμα δικαιωμάτων"
+#: lib/logitech_receiver/settings_templates.py:1406
+msgid "Sidetone"
+msgstr "Sidetone"
 
-#: lib/solaar/ui/__init__.py:54
-#, python-format
-msgid   "Found a Logitech receiver or device (%s), but did not have "
-        "permission to open it."
-msgstr  "Βρέθηκε ένας δέκτης ή μια συσκευή Logitech (%s), αλλά δεν είχατε την "
-        "άδεια να την ανοίξετε."
+#: lib/logitech_receiver/settings_templates.py:1407
+msgid "Set sidetone level."
+msgstr "Ορισμός επιπέδου sidetone."
 
-#: lib/solaar/ui/__init__.py:55
-msgid   "If you've just installed Solaar, try disconnecting the receiver or "
-        "device and then reconnecting it."
-msgstr  "Εάν μόλις εγκαταστήσατε το Solaar, δοκιμάστε να αποσυνδέσετε το "
-        "δέκτη ή τη συσκευή και στη συνέχεια να το επανασυνδέσετε."
+#: lib/logitech_receiver/settings_templates.py:1416
+msgid "Equalizer"
+msgstr "Ισοσταθμιστής"
 
-#: lib/solaar/ui/__init__.py:58
-msgid   "Cannot connect to device error"
-msgstr  "Δεν είναι δυνατή η σύνδεση σφάλμα συσκευής"
+#: lib/logitech_receiver/settings_templates.py:1417
+msgid "Set equalizer levels."
+msgstr "Ρύθμιση επιπέδων ισοσταθμιστή."
 
-#: lib/solaar/ui/__init__.py:60
-#, python-format
-msgid   "Found a Logitech receiver or device at %s, but encountered an error "
-        "connecting to it."
-msgstr  "Βρέθηκε ένας δέκτης ή μια συσκευή Logitech στη διεύθυνση %s, αλλά "
-        "παρουσιάστηκε σφάλμα σύνδεσης."
+#: lib/logitech_receiver/settings_templates.py:1439
+msgid "Hz"
+msgstr "Hz"
 
-#: lib/solaar/ui/__init__.py:61
-msgid   "Try disconnecting the device and then reconnecting it or turning it "
-        "off and then on."
-msgstr  "Δοκιμάστε να αποσυνδέσετε τη συσκευή και στη συνέχεια να την "
-        "επανασυνδέσετε ή να την απενεργοποιήσετε και στη συνέχεια να την "
-        "ενεργοποιήσετε."
+#: lib/logitech_receiver/settings_templates.py:1445
+msgid "Power Management"
+msgstr "Διαχείριση ενέργειας"
 
-#: lib/solaar/ui/__init__.py:64
-msgid   "Unpairing failed"
-msgstr  "Αποτυχία διαχωρισμού"
+#: lib/logitech_receiver/settings_templates.py:1446
+msgid "Power off in minutes (0 for never)."
+msgstr "Απενεργοποίηση σε λεπτά (0 για ποτέ)."
 
-#: lib/solaar/ui/__init__.py:66
-#, python-brace-format
-msgid   "Failed to unpair %{device} from %{receiver}."
-msgstr  "Απέτυχα να διαχωρίσω την συσκευή %{device} από τον %{receiver}."
+#: lib/logitech_receiver/settings_templates.py:1457
+msgid "LED Control"
+msgstr "Έλεγχος LED"
 
-#: lib/solaar/ui/__init__.py:67
-msgid   "The receiver returned an error, with no further details."
-msgstr  "Ο δέκτης επέστρεψε ένα λάθος, χωρίς άλλες πληροφορίες."
+#: lib/logitech_receiver/settings_templates.py:1458
+msgid "Switch control of LEDs between device and Solaar"
+msgstr "Εναλλαγή ελέγχου των LED μεταξύ συσκευής και Solaar"
 
-#: lib/solaar/ui/__init__.py:177
-msgid   "Another Solaar process is already running so just expose its window"
-msgstr  "Μια άλλη διεργασία Solaar εκτελείται ήδη, οπότε απλά ανοίξτε το "
-        "παράθυρό της"
+#: lib/logitech_receiver/settings_templates.py:1473
+msgid "LED Zone Effects"
+msgstr "Εφέ ζώνης LED"
 
-#: lib/solaar/ui/about.py:36
-msgid   "Manages Logitech receivers,\n"
-        "keyboards, mice, and tablets."
-msgstr  "Διαχειρίζεται δέκτες Logitech,\n"
-        "πληκτρολόγια, ποντίκια και τάμπλετ."
+#: lib/logitech_receiver/settings_templates.py:1474
+msgid "Set effect for LED Zone"
+msgstr "Ρύθμιση εφέ για τη ζώνη LED"
 
-#: lib/solaar/ui/about.py:44
-msgid   "Additional Programming"
-msgstr  "Πρόσθετος προγραμματισμός"
+#: lib/logitech_receiver/settings_templates.py:1477
+msgid "Speed"
+msgstr "Ταχύτητα"
 
-#: lib/solaar/ui/about.py:45
-msgid   "GUI design"
-msgstr  "Σχεδιασμός GUI"
+#: lib/logitech_receiver/settings_templates.py:1478
+msgid "Period"
+msgstr "Περίοδος"
+
+#: lib/logitech_receiver/settings_templates.py:1479
+msgid "Intensity"
+msgstr "Ένταση"
+
+#: lib/logitech_receiver/settings_templates.py:1480
+msgid "Ramp"
+msgstr "Κλίμακα"
+
+#: lib/logitech_receiver/settings_templates.py:1494
+msgid "LEDs"
+msgstr "Λυχνίες LED"
+
+#: lib/solaar/ui/__init__.py:112
+msgid "Another Solaar process is already running so just expose its window"
+msgstr ""
+"Μια άλλη διεργασία Solaar εκτελείται ήδη, οπότε απλά ανοίξτε το παράθυρό της"
+
+#: lib/solaar/ui/about.py:38
+msgid ""
+"Manages Logitech receivers,\n"
+"keyboards, mice, and tablets."
+msgstr ""
+"Διαχειρίζεται δέκτες Logitech,\n"
+"πληκτρολόγια, ποντίκια και τάμπλετ."
+
+#: lib/solaar/ui/about.py:46
+msgid "Additional Programming"
+msgstr "Πρόσθετος προγραμματισμός"
 
 #: lib/solaar/ui/about.py:47
-msgid   "Testing"
-msgstr  "Δοκιμές"
+msgid "GUI design"
+msgstr "Σχεδιασμός GUI"
 
-#: lib/solaar/ui/about.py:54
-msgid   "Logitech documentation"
-msgstr  "Τεκμηρίωση Logitech"
+#: lib/solaar/ui/about.py:49
+msgid "Testing"
+msgstr "Δοκιμές"
 
-#: lib/solaar/ui/action.py:85 lib/solaar/ui/action.py:89
-#: lib/solaar/ui/window.py:197
-msgid   "Unpair"
-msgstr  "Διαχωρισμός"
+#: lib/solaar/ui/about.py:57
+msgid "Logitech documentation"
+msgstr "Τεκμηρίωση Logitech"
 
-#: lib/solaar/ui/action.py:88 lib/solaar/ui/diversion_rules.py:150
-msgid   "Cancel"
-msgstr  "Ακύρωση"
+#: lib/solaar/ui/action.py:83 lib/solaar/ui/action.py:87
+#: lib/solaar/ui/window.py:199
+msgid "Unpair"
+msgstr "Διαχωρισμός"
 
-#: lib/solaar/ui/config_panel.py:212
-msgid   "Complete - ENTER to change"
-msgstr  "Ολοκλήρωση - ENTER για αλλαγή"
+#: lib/solaar/ui/action.py:86 lib/solaar/ui/diversion_rules.py:104
+msgid "Cancel"
+msgstr "Ακύρωση"
 
-#: lib/solaar/ui/config_panel.py:212
-msgid   "Incomplete"
-msgstr  "Ελλιπής"
+#: lib/solaar/ui/common.py:35
+msgid "Permissions error"
+msgstr "Σφάλμα δικαιωμάτων"
 
-#: lib/solaar/ui/config_panel.py:455 lib/solaar/ui/config_panel.py:507
+#: lib/solaar/ui/common.py:37
 #, python-format
-msgid   "%d value"
-msgid_plural    "%d values"
-msgstr[0]       "%d Τιμή"
-msgstr[1]       "%d τιμές"
+msgid ""
+"Found a Logitech receiver or device (%s), but did not have permission to "
+"open it."
+msgstr ""
+"Βρέθηκε ένας δέκτης ή μια συσκευή Logitech (%s), αλλά δεν είχατε την άδεια "
+"να την ανοίξετε."
 
-#: lib/solaar/ui/config_panel.py:518
-msgid   "Changes allowed"
-msgstr  "Επιτρεπτές αλλαγές"
+#: lib/solaar/ui/common.py:39
+msgid ""
+"If you've just installed Solaar, try disconnecting the receiver or device "
+"and then reconnecting it."
+msgstr ""
+"Εάν μόλις εγκαταστήσατε το Solaar, δοκιμάστε να αποσυνδέσετε το δέκτη ή τη "
+"συσκευή και στη συνέχεια να το επανασυνδέσετε."
 
-#: lib/solaar/ui/config_panel.py:519
-msgid   "No changes allowed"
-msgstr  "Μη επιτρεπτές αλλαγές"
+#: lib/solaar/ui/common.py:42
+msgid "Cannot connect to device error"
+msgstr "Δεν είναι δυνατή η σύνδεση σφάλμα συσκευής"
 
-#: lib/solaar/ui/config_panel.py:520
-msgid   "Ignore this setting"
-msgstr  "Αγνόηση αυτής της ρύθμισης"
+#: lib/solaar/ui/common.py:44
+#, python-format
+msgid ""
+"Found a Logitech receiver or device at %s, but encountered an error "
+"connecting to it."
+msgstr ""
+"Βρέθηκε ένας δέκτης ή μια συσκευή Logitech στη διεύθυνση %s, αλλά "
+"παρουσιάστηκε σφάλμα σύνδεσης."
 
-#: lib/solaar/ui/config_panel.py:565
-msgid   "Working"
-msgstr  "Εργάζεται"
+#: lib/solaar/ui/common.py:46
+msgid ""
+"Try disconnecting the device and then reconnecting it or turning it off and "
+"then on."
+msgstr ""
+"Δοκιμάστε να αποσυνδέσετε τη συσκευή και στη συνέχεια να την επανασυνδέσετε "
+"ή να την απενεργοποιήσετε και στη συνέχεια να την ενεργοποιήσετε."
 
-#: lib/solaar/ui/config_panel.py:568
-msgid   "Read/write operation failed."
-msgstr  "Αποτυχία λειτουργίας ανάγνωσης/εγγραφής."
+#: lib/solaar/ui/common.py:49
+msgid "Unpairing failed"
+msgstr "Αποτυχία διαχωρισμού"
 
-#: lib/solaar/ui/diversion_rules.py:65
-msgid   "Built-in rules"
-msgstr  "Ενσωματωμένοι κανόνες"
+#: lib/solaar/ui/common.py:51
+#, python-brace-format
+msgid "Failed to unpair %{device} from %{receiver}."
+msgstr "Απέτυχα να διαχωρίσω την συσκευή %{device} από τον %{receiver}."
 
-#: lib/solaar/ui/diversion_rules.py:65
-msgid   "User-defined rules"
-msgstr  "Κανόνες που ορίζονται από το χρήστη"
+#: lib/solaar/ui/common.py:53
+msgid "The receiver returned an error, with no further details."
+msgstr "Ο δέκτης επέστρεψε ένα λάθος, χωρίς άλλες πληροφορίες."
 
-#: lib/solaar/ui/diversion_rules.py:67 lib/solaar/ui/diversion_rules.py:1083
-msgid   "Rule"
-msgstr  "Κανόνας"
+#: lib/solaar/ui/config_panel.py:231
+msgid "Complete - ENTER to change"
+msgstr "Ολοκλήρωση - ENTER για αλλαγή"
 
-#: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:509
-#: lib/solaar/ui/diversion_rules.py:636
-msgid   "Sub-rule"
-msgstr  "Υποκανόνας"
+#: lib/solaar/ui/config_panel.py:231
+msgid "Incomplete"
+msgstr "Ελλιπής"
 
-#: lib/solaar/ui/diversion_rules.py:70
-msgid   "[empty]"
-msgstr  "[κενό]"
+#: lib/solaar/ui/config_panel.py:476 lib/solaar/ui/config_panel.py:529
+#, python-format
+msgid "%d value"
+msgid_plural "%d values"
+msgstr[0] "%d Τιμή"
+msgstr[1] "%d τιμές"
 
-#: lib/solaar/ui/diversion_rules.py:94
-msgid   "Solaar Rule Editor"
-msgstr  "Συντάκτης κανόνων Solaar"
+#: lib/solaar/ui/config_panel.py:612
+msgid "Changes allowed"
+msgstr "Επιτρεπτές αλλαγές"
 
-#: lib/solaar/ui/diversion_rules.py:141
-msgid   "Make changes permanent?"
-msgstr  "Να κάνετε τις αλλαγές μόνιμες;"
+#: lib/solaar/ui/config_panel.py:613
+msgid "No changes allowed"
+msgstr "Μη επιτρεπτές αλλαγές"
 
-#: lib/solaar/ui/diversion_rules.py:146
-msgid   "Yes"
-msgstr  "Ναι"
+#: lib/solaar/ui/config_panel.py:614
+msgid "Ignore this setting"
+msgstr "Αγνόηση αυτής της ρύθμισης"
 
-#: lib/solaar/ui/diversion_rules.py:148
-msgid   "No"
-msgstr  "Όχι"
+#: lib/solaar/ui/config_panel.py:659
+msgid "Working"
+msgstr "Εργάζεται"
 
-#: lib/solaar/ui/diversion_rules.py:153
-msgid   "If you choose No, changes will be lost when Solaar is closed."
-msgstr  "Αν επιλέξετε Όχι, οι αλλαγές θα χαθούν όταν κλείσει το Solaar."
+#: lib/solaar/ui/config_panel.py:662
+msgid "Read/write operation failed."
+msgstr "Αποτυχία λειτουργίας ανάγνωσης/εγγραφής."
 
-#: lib/solaar/ui/diversion_rules.py:201
-msgid   "Save changes"
-msgstr  "Αποθήκευση αλλαγών"
+#: lib/solaar/ui/diversion_rules.py:66
+msgid "Built-in rules"
+msgstr "Ενσωματωμένοι κανόνες"
 
-#: lib/solaar/ui/diversion_rules.py:206
-msgid   "Discard changes"
-msgstr  "Απόρριψη αλλαγών"
+#: lib/solaar/ui/diversion_rules.py:66
+msgid "User-defined rules"
+msgstr "Κανόνες που ορίζονται από το χρήστη"
 
-#: lib/solaar/ui/diversion_rules.py:372
-msgid   "Insert here"
-msgstr  "Εισαγωγή εδώ"
+#: lib/solaar/ui/diversion_rules.py:68 lib/solaar/ui/diversion_rules.py:1089
+msgid "Rule"
+msgstr "Κανόνας"
 
-#: lib/solaar/ui/diversion_rules.py:374
-msgid   "Insert above"
-msgstr  "Εισαγωγή επάνω"
+#: lib/solaar/ui/diversion_rules.py:69 lib/solaar/ui/diversion_rules.py:538
+#: lib/solaar/ui/diversion_rules.py:665
+msgid "Sub-rule"
+msgstr "Υποκανόνας"
 
-#: lib/solaar/ui/diversion_rules.py:376
-msgid   "Insert below"
-msgstr  "Εισαγωγή από κάτω"
+#: lib/solaar/ui/diversion_rules.py:71
+msgid "[empty]"
+msgstr "[κενό]"
 
-#: lib/solaar/ui/diversion_rules.py:382
-msgid   "Insert new rule here"
-msgstr  "Εισαγωγή νέου κανόνα εδώ"
+#: lib/solaar/ui/diversion_rules.py:95
+msgid "Make changes permanent?"
+msgstr "Να κάνετε τις αλλαγές μόνιμες;"
 
-#: lib/solaar/ui/diversion_rules.py:384
-msgid   "Insert new rule above"
-msgstr  "Εισαγωγή νέου κανόνα επάνω"
+#: lib/solaar/ui/diversion_rules.py:100
+msgid "Yes"
+msgstr "Ναι"
 
-#: lib/solaar/ui/diversion_rules.py:386
-msgid   "Insert new rule below"
-msgstr  "Εισαγωγή νέου κανόνα από κάτω"
+#: lib/solaar/ui/diversion_rules.py:102
+msgid "No"
+msgstr "Όχι"
 
-#: lib/solaar/ui/diversion_rules.py:427
-msgid   "Paste here"
-msgstr  "Επικόλληση εδώ"
+#: lib/solaar/ui/diversion_rules.py:107
+msgid "If you choose No, changes will be lost when Solaar is closed."
+msgstr "Αν επιλέξετε Όχι, οι αλλαγές θα χαθούν όταν κλείσει το Solaar."
 
-#: lib/solaar/ui/diversion_rules.py:429
-msgid   "Paste above"
-msgstr  "Επικόλληση επάνω"
+#: lib/solaar/ui/diversion_rules.py:138
+msgid "Solaar Rule Editor"
+msgstr "Συντάκτης κανόνων Solaar"
 
-#: lib/solaar/ui/diversion_rules.py:431
-msgid   "Paste below"
-msgstr  "Επικόλληση από κάτω"
+#: lib/solaar/ui/diversion_rules.py:231
+msgid "Save changes"
+msgstr "Αποθήκευση αλλαγών"
 
-#: lib/solaar/ui/diversion_rules.py:437
-msgid   "Paste rule here"
-msgstr  "Επικόλληση κανόνα εδώ"
+#: lib/solaar/ui/diversion_rules.py:236
+msgid "Discard changes"
+msgstr "Απόρριψη αλλαγών"
 
-#: lib/solaar/ui/diversion_rules.py:439
-msgid   "Paste rule above"
-msgstr  "Επικόλληση κανόνα επάνω"
+#: lib/solaar/ui/diversion_rules.py:397
+msgid "Insert here"
+msgstr "Εισαγωγή εδώ"
 
-#: lib/solaar/ui/diversion_rules.py:441
-msgid   "Paste rule below"
-msgstr  "Επικόλληση κανόνα από κάτω"
+#: lib/solaar/ui/diversion_rules.py:399
+msgid "Insert above"
+msgstr "Εισαγωγή επάνω"
 
-#: lib/solaar/ui/diversion_rules.py:445
-msgid   "Paste rule"
-msgstr  "Επικόλληση κανόνα"
+#: lib/solaar/ui/diversion_rules.py:401
+msgid "Insert below"
+msgstr "Εισαγωγή από κάτω"
+
+#: lib/solaar/ui/diversion_rules.py:407
+msgid "Insert new rule here"
+msgstr "Εισαγωγή νέου κανόνα εδώ"
+
+#: lib/solaar/ui/diversion_rules.py:409
+msgid "Insert new rule above"
+msgstr "Εισαγωγή νέου κανόνα επάνω"
+
+#: lib/solaar/ui/diversion_rules.py:411
+msgid "Insert new rule below"
+msgstr "Εισαγωγή νέου κανόνα από κάτω"
+
+#: lib/solaar/ui/diversion_rules.py:456
+msgid "Paste here"
+msgstr "Επικόλληση εδώ"
+
+#: lib/solaar/ui/diversion_rules.py:458
+msgid "Paste above"
+msgstr "Επικόλληση επάνω"
+
+#: lib/solaar/ui/diversion_rules.py:460
+msgid "Paste below"
+msgstr "Επικόλληση από κάτω"
+
+#: lib/solaar/ui/diversion_rules.py:466
+msgid "Paste rule here"
+msgstr "Επικόλληση κανόνα εδώ"
+
+#: lib/solaar/ui/diversion_rules.py:468
+msgid "Paste rule above"
+msgstr "Επικόλληση κανόνα επάνω"
+
+#: lib/solaar/ui/diversion_rules.py:470
+msgid "Paste rule below"
+msgstr "Επικόλληση κανόνα από κάτω"
 
 #: lib/solaar/ui/diversion_rules.py:474
-msgid   "Flatten"
-msgstr  "Ισοπέδωση"
+msgid "Paste rule"
+msgstr "Επικόλληση κανόνα"
 
-#: lib/solaar/ui/diversion_rules.py:507
-msgid   "Insert"
-msgstr  "Εισαγωγή"
+#: lib/solaar/ui/diversion_rules.py:503
+msgid "Flatten"
+msgstr "Ισοπέδωση"
 
-#: lib/solaar/ui/diversion_rules.py:510 lib/solaar/ui/diversion_rules.py:638
-#: lib/solaar/ui/diversion_rules.py:1126
-msgid   "Or"
-msgstr  "Ή"
+#: lib/solaar/ui/diversion_rules.py:536
+msgid "Insert"
+msgstr "Εισαγωγή"
 
-#: lib/solaar/ui/diversion_rules.py:511 lib/solaar/ui/diversion_rules.py:637
-#: lib/solaar/ui/diversion_rules.py:1111
-msgid   "And"
-msgstr  "Και"
+#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:667
+#: lib/solaar/ui/diversion_rules.py:1129
+msgid "Or"
+msgstr "Ή"
 
-#: lib/solaar/ui/diversion_rules.py:513
-msgid   "Condition"
-msgstr  "Συνθήκη"
+#: lib/solaar/ui/diversion_rules.py:540 lib/solaar/ui/diversion_rules.py:666
+#: lib/solaar/ui/diversion_rules.py:1115
+msgid "And"
+msgstr "Και"
 
-#: lib/solaar/ui/diversion_rules.py:515 lib/solaar/ui/diversion_rules.py:1292
-msgid   "Feature"
-msgstr  "Χαρακτηριστικό"
+#: lib/solaar/ui/diversion_rules.py:542
+msgid "Condition"
+msgstr "Συνθήκη"
 
-#: lib/solaar/ui/diversion_rules.py:516 lib/solaar/ui/diversion_rules.py:1328
-msgid   "Report"
-msgstr  "Αναφορά"
+#: lib/solaar/ui/diversion_rules.py:544 lib/solaar/ui/diversion_rules.py:1290
+msgid "Feature"
+msgstr "Χαρακτηριστικό"
 
-#: lib/solaar/ui/diversion_rules.py:517 lib/solaar/ui/diversion_rules.py:1204
-msgid   "Process"
-msgstr  "Διεργασία"
+#: lib/solaar/ui/diversion_rules.py:545 lib/solaar/ui/diversion_rules.py:1325
+msgid "Report"
+msgstr "Αναφορά"
 
-#: lib/solaar/ui/diversion_rules.py:518
-msgid   "Mouse process"
-msgstr  "Διεργασία ποντικιού"
+#: lib/solaar/ui/diversion_rules.py:546 lib/solaar/ui/diversion_rules.py:1204
+msgid "Process"
+msgstr "Διεργασία"
 
-#: lib/solaar/ui/diversion_rules.py:519 lib/solaar/ui/diversion_rules.py:1366
-msgid   "Modifiers"
-msgstr  "Τροποποιητικοί Παράγοντες"
+#: lib/solaar/ui/diversion_rules.py:547
+msgid "Mouse process"
+msgstr "Διεργασία ποντικιού"
 
-#: lib/solaar/ui/diversion_rules.py:520 lib/solaar/ui/diversion_rules.py:1419
-msgid   "Key"
-msgstr  "Πλήκτρο"
+#: lib/solaar/ui/diversion_rules.py:548 lib/solaar/ui/diversion_rules.py:1362
+msgid "Modifiers"
+msgstr "Τροποποιητικοί Παράγοντες"
 
-#: lib/solaar/ui/diversion_rules.py:521 lib/solaar/ui/diversion_rules.py:1461
-msgid   "KeyIsDown"
-msgstr  "ΤοΠλήκτροΕίναιΠατημένο"
+#: lib/solaar/ui/diversion_rules.py:549 lib/solaar/ui/diversion_rules.py:1414
+msgid "Key"
+msgstr "Πλήκτρο"
 
-#: lib/solaar/ui/diversion_rules.py:522 lib/solaar/ui/diversion_rules.py:2260
-msgid   "Active"
-msgstr  "Ενεργό"
+#: lib/solaar/ui/diversion_rules.py:550 lib/solaar/ui/diversion_rules.py:1455
+msgid "KeyIsDown"
+msgstr "ΤοΠλήκτροΕίναιΠατημένο"
 
-#: lib/solaar/ui/diversion_rules.py:523 lib/solaar/ui/diversion_rules.py:2218
-#: lib/solaar/ui/diversion_rules.py:2270 lib/solaar/ui/diversion_rules.py:2323
-msgid   "Device"
-msgstr  "Συσκευή"
+#: lib/solaar/ui/diversion_rules.py:551 lib/solaar/ui/diversion_rules.py:2260
+msgid "Active"
+msgstr "Ενεργό"
 
-#: lib/solaar/ui/diversion_rules.py:524 lib/solaar/ui/diversion_rules.py:2297
-msgid   "Host"
-msgstr  ""
+#: lib/solaar/ui/diversion_rules.py:552 lib/solaar/ui/diversion_rules.py:2217
+#: lib/solaar/ui/diversion_rules.py:2269 lib/solaar/ui/diversion_rules.py:2319
+msgid "Device"
+msgstr "Συσκευή"
 
-#: lib/solaar/ui/diversion_rules.py:525 lib/solaar/ui/diversion_rules.py:2339
-msgid   "Setting"
-msgstr  "Ρύθμιση"
+#: lib/solaar/ui/diversion_rules.py:553 lib/solaar/ui/diversion_rules.py:2295
+msgid "Host"
+msgstr "ΟικοδεσπότηςΥποδοχέας"
 
-#: lib/solaar/ui/diversion_rules.py:526 lib/solaar/ui/diversion_rules.py:1477
-#: lib/solaar/ui/diversion_rules.py:1526
-msgid   "Test"
-msgstr  "Δοκιμή"
+#: lib/solaar/ui/diversion_rules.py:554 lib/solaar/ui/diversion_rules.py:2337
+msgid "Setting"
+msgstr "Ρύθμιση"
 
-#: lib/solaar/ui/diversion_rules.py:527 lib/solaar/ui/diversion_rules.py:1643
-msgid   "Test bytes"
-msgstr  "Δοκιμαστικά bytes"
+#: lib/solaar/ui/diversion_rules.py:555 lib/solaar/ui/diversion_rules.py:1470
+#: lib/solaar/ui/diversion_rules.py:1519
+msgid "Test"
+msgstr "Δοκιμή"
 
-#: lib/solaar/ui/diversion_rules.py:528 lib/solaar/ui/diversion_rules.py:1736
-msgid   "Mouse Gesture"
-msgstr  "Χειρονομία ποντικιού"
+#: lib/solaar/ui/diversion_rules.py:556 lib/solaar/ui/diversion_rules.py:1633
+msgid "Test bytes"
+msgstr "Δοκιμαστικά bytes"
 
-#: lib/solaar/ui/diversion_rules.py:532
-msgid   "Action"
-msgstr  "Ενέργεια"
+#: lib/solaar/ui/diversion_rules.py:557 lib/solaar/ui/diversion_rules.py:1734
+msgid "Mouse Gesture"
+msgstr "Χειρονομία ποντικιού"
 
-#: lib/solaar/ui/diversion_rules.py:534 lib/solaar/ui/diversion_rules.py:1845
-msgid   "Key press"
-msgstr  "Πάτημα πλήκτρου"
+#: lib/solaar/ui/diversion_rules.py:561
+msgid "Action"
+msgstr "Ενέργεια"
 
-#: lib/solaar/ui/diversion_rules.py:535 lib/solaar/ui/diversion_rules.py:1897
-msgid   "Mouse scroll"
-msgstr  "Κύλιση ποντικιού"
+#: lib/solaar/ui/diversion_rules.py:563 lib/solaar/ui/diversion_rules.py:1844
+msgid "Key press"
+msgstr "Πάτημα πλήκτρου"
 
-#: lib/solaar/ui/diversion_rules.py:536 lib/solaar/ui/diversion_rules.py:1959
-msgid   "Mouse click"
-msgstr  "Κλικ ποντικιού"
+#: lib/solaar/ui/diversion_rules.py:564 lib/solaar/ui/diversion_rules.py:1895
+msgid "Mouse scroll"
+msgstr "Κύλιση ποντικιού"
 
-#: lib/solaar/ui/diversion_rules.py:537
-msgid   "Set"
-msgstr  "Ορισμός"
+#: lib/solaar/ui/diversion_rules.py:565 lib/solaar/ui/diversion_rules.py:1956
+msgid "Mouse click"
+msgstr "Κλικ ποντικιού"
 
-#: lib/solaar/ui/diversion_rules.py:538 lib/solaar/ui/diversion_rules.py:2030
-msgid   "Execute"
-msgstr  "Εκτέλεση"
+#: lib/solaar/ui/diversion_rules.py:566
+msgid "Set"
+msgstr "Ορισμός"
 
-#: lib/solaar/ui/diversion_rules.py:539 lib/solaar/ui/diversion_rules.py:1158
-msgid   "Later"
-msgstr  "Αργότερα"
+#: lib/solaar/ui/diversion_rules.py:567 lib/solaar/ui/diversion_rules.py:2026
+msgid "Execute"
+msgstr "Εκτέλεση"
 
-#: lib/solaar/ui/diversion_rules.py:568
-msgid   "Insert new rule"
-msgstr  "Εισαγωγή νέου κανόνα"
+#: lib/solaar/ui/diversion_rules.py:568 lib/solaar/ui/diversion_rules.py:1160
+msgid "Later"
+msgstr "Αργότερα"
 
-#: lib/solaar/ui/diversion_rules.py:588 lib/solaar/ui/diversion_rules.py:1686
-#: lib/solaar/ui/diversion_rules.py:1790 lib/solaar/ui/diversion_rules.py:1989
-msgid   "Delete"
-msgstr  "Διαγραφή"
+#: lib/solaar/ui/diversion_rules.py:597
+msgid "Insert new rule"
+msgstr "Εισαγωγή νέου κανόνα"
 
-#: lib/solaar/ui/diversion_rules.py:610
-msgid   "Negate"
-msgstr  "Αρνηση"
+#: lib/solaar/ui/diversion_rules.py:617 lib/solaar/ui/diversion_rules.py:1681
+#: lib/solaar/ui/diversion_rules.py:1786 lib/solaar/ui/diversion_rules.py:1985
+msgid "Delete"
+msgstr "Διαγραφή"
 
-#: lib/solaar/ui/diversion_rules.py:634
-msgid   "Wrap with"
-msgstr  "Τύλιγμα με"
+#: lib/solaar/ui/diversion_rules.py:639
+msgid "Negate"
+msgstr "Αρνηση"
 
-#: lib/solaar/ui/diversion_rules.py:656
-msgid   "Cut"
-msgstr  "Αποκοπή"
+#: lib/solaar/ui/diversion_rules.py:663
+msgid "Wrap with"
+msgstr "Τύλιγμα με"
 
-#: lib/solaar/ui/diversion_rules.py:671
-msgid   "Paste"
-msgstr  "Επικόλληση"
+#: lib/solaar/ui/diversion_rules.py:685
+msgid "Cut"
+msgstr "Αποκοπή"
 
-#: lib/solaar/ui/diversion_rules.py:683
-msgid   "Copy"
-msgstr  "Αντιγραφή"
+#: lib/solaar/ui/diversion_rules.py:700
+msgid "Paste"
+msgstr "Επικόλληση"
 
-#: lib/solaar/ui/diversion_rules.py:1063
-msgid   "This editor does not support the selected rule component yet."
-msgstr  "Αυτός ο συντάκτης δεν υποστηρίζει ακόμη την επιλεγμένη συνιστώσα "
-        "κανόνα."
+#: lib/solaar/ui/diversion_rules.py:706
+msgid "Copy"
+msgstr "Αντιγραφή"
 
-#: lib/solaar/ui/diversion_rules.py:1138
-msgid   "Number of seconds to delay."
-msgstr  "Αριθμός δευτερολέπτων καθυστέρησης."
+#: lib/solaar/ui/diversion_rules.py:1070
+msgid "This editor does not support the selected rule component yet."
+msgstr ""
+"Αυτός ο συντάκτης δεν υποστηρίζει ακόμη την επιλεγμένη συνιστώσα κανόνα."
 
-#: lib/solaar/ui/diversion_rules.py:1177
-msgid   "Not"
-msgstr  "Μη"
+#: lib/solaar/ui/diversion_rules.py:1140
+msgid "Number of seconds to delay."
+msgstr "Αριθμός δευτερολέπτων καθυστέρησης."
+
+#: lib/solaar/ui/diversion_rules.py:1178
+msgid "Not"
+msgstr "Μη"
 
 #: lib/solaar/ui/diversion_rules.py:1187
-msgid   "X11 active process. For use in X11 only."
-msgstr  "Ενεργή διαδικασία X11. Για χρήση μόνο στο X11."
+msgid "X11 active process. For use in X11 only."
+msgstr "Ενεργή διαδικασία X11. Για χρήση μόνο στο X11."
 
-#: lib/solaar/ui/diversion_rules.py:1218
-msgid   "X11 mouse process. For use in X11 only."
-msgstr  "Διαδικασία ποντικιού X11. Για χρήση μόνο στο X11."
+#: lib/solaar/ui/diversion_rules.py:1217
+msgid "X11 mouse process. For use in X11 only."
+msgstr "Διαδικασία ποντικιού X11. Για χρήση μόνο στο X11."
 
-#: lib/solaar/ui/diversion_rules.py:1235
-msgid   "MouseProcess"
-msgstr  "ΔιαδικασίαΠοντικιού"
+#: lib/solaar/ui/diversion_rules.py:1234
+msgid "MouseProcess"
+msgstr "ΔιαδικασίαΠοντικιού"
 
-#: lib/solaar/ui/diversion_rules.py:1260
-msgid   "Feature name of notification triggering rule processing."
-msgstr  "Όνομα χαρακτηριστικού της ειδοποίησης που ενεργοποιεί την "
-        "επεξεργασία κανόνα."
+#: lib/solaar/ui/diversion_rules.py:1258
+msgid "Feature name of notification triggering rule processing."
+msgstr ""
+"Όνομα χαρακτηριστικού της ειδοποίησης που ενεργοποιεί την επεξεργασία κανόνα."
 
-#: lib/solaar/ui/diversion_rules.py:1308
-msgid   "Report number of notification triggering rule processing."
-msgstr  "Αριθμός αναφοράς της ειδοποίησης που ενεργοποιεί την επεξεργασία του "
-        "κανόνα."
+#: lib/solaar/ui/diversion_rules.py:1305
+msgid "Report number of notification triggering rule processing."
+msgstr ""
+"Αριθμός αναφοράς της ειδοποίησης που ενεργοποιεί την επεξεργασία του κανόνα."
 
-#: lib/solaar/ui/diversion_rules.py:1342
-msgid   "Active keyboard modifiers. Not always available in Wayland."
-msgstr  "Ενεργοί τροποποιούμενοι παράγοντες πληκτρολογίου. Δεν είναι πάντα "
-        "διαθέσιμο στο Wayland."
+#: lib/solaar/ui/diversion_rules.py:1338
+msgid "Active keyboard modifiers. Not always available in Wayland."
+msgstr ""
+"Ενεργοί τροποποιούμενοι παράγοντες πληκτρολογίου. Δεν είναι πάντα διαθέσιμο "
+"στο Wayland."
 
-#: lib/solaar/ui/diversion_rules.py:1383
-msgid   "Diverted key or button depressed or released.\n"
-        "Use the Key/Button Diversion and Divert G Keys settings to divert "
-        "keys and buttons."
-msgstr  "Εκτροπή πλήκτρου ή κουμπιού πατημένο ή απελευθερωμένο.\n"
-        "Χρησιμοποιήστε τις ρυθμίσεις εκτροπής πλήκτρων/κουμπιών και εκτροπής "
-        "πλήκτρων G για να εκτρέψετε πλήκτρα και κουμπιά."
+#: lib/solaar/ui/diversion_rules.py:1378
+msgid ""
+"Diverted key or button depressed or released.\n"
+"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
+"buttons."
+msgstr ""
+"Εκτροπή πλήκτρου ή κουμπιού πατημένο ή απελευθερωμένο.\n"
+"Χρησιμοποιήστε τις ρυθμίσεις εκτροπής πλήκτρων/κουμπιών και εκτροπής "
+"πλήκτρων G για να εκτρέψετε πλήκτρα και κουμπιά."
 
-#: lib/solaar/ui/diversion_rules.py:1392
-msgid   "Key down"
-msgstr  "Πλήκτρο κάτω"
+#: lib/solaar/ui/diversion_rules.py:1387
+msgid "Key down"
+msgstr "Πλήκτρο κάτω"
 
-#: lib/solaar/ui/diversion_rules.py:1395
-msgid   "Key up"
-msgstr  "Πλήκτρο πάνω"
+#: lib/solaar/ui/diversion_rules.py:1390
+msgid "Key up"
+msgstr "Πλήκτρο πάνω"
 
-#: lib/solaar/ui/diversion_rules.py:1436
-msgid   "Diverted key or button is currently down.\n"
-        "Use the Key/Button Diversion and Divert G Keys settings to divert "
-        "keys and buttons."
-msgstr  "Το πλήκτρο ή το κουμπί εκτροπής είναι προς το παρόν κατεβασμένο.\n"
-        "Χρησιμοποιήστε τις ρυθμίσεις εκτροπής πλήκτρων/κουμπιών και εκτροπής "
-        "πλήκτρων G για να εκτρέψετε πλήκτρα και κουμπιά."
+#: lib/solaar/ui/diversion_rules.py:1430
+msgid ""
+"Diverted key or button is currently down.\n"
+"Use the Key/Button Diversion and Divert G Keys settings to divert keys and "
+"buttons."
+msgstr ""
+"Το πλήκτρο ή το κουμπί εκτροπής είναι προς το παρόν κατεβασμένο.\n"
+"Χρησιμοποιήστε τις ρυθμίσεις εκτροπής πλήκτρων/κουμπιών και εκτροπής "
+"πλήκτρων G για να εκτρέψετε πλήκτρα και κουμπιά."
 
-#: lib/solaar/ui/diversion_rules.py:1475
-msgid   "Test condition on notification triggering rule processing."
-msgstr  "Συνθήκη δοκιμής για την ειδοποίηση που ενεργοποιεί την επεξεργασία "
-        "κανόνα."
+#: lib/solaar/ui/diversion_rules.py:1468
+msgid "Test condition on notification triggering rule processing."
+msgstr ""
+"Συνθήκη δοκιμής για την ειδοποίηση που ενεργοποιεί την επεξεργασία κανόνα."
 
-#: lib/solaar/ui/diversion_rules.py:1479
-msgid   "Parameter"
-msgstr  "Παράμετρος"
+#: lib/solaar/ui/diversion_rules.py:1472
+msgid "Parameter"
+msgstr "Παράμετρος"
 
-#: lib/solaar/ui/diversion_rules.py:1542
-msgid   "begin (inclusive)"
-msgstr  "αρχή ( συμπεριλαμβανομένου)"
+#: lib/solaar/ui/diversion_rules.py:1534
+msgid "begin (inclusive)"
+msgstr "αρχή ( συμπεριλαμβανομένου)"
+
+#: lib/solaar/ui/diversion_rules.py:1535
+msgid "end (exclusive)"
+msgstr "τέλος ( αποκλειστικό)"
 
 #: lib/solaar/ui/diversion_rules.py:1543
-msgid   "end (exclusive)"
-msgstr  "τέλος ( αποκλειστικό)"
+msgid "range"
+msgstr "εύρος"
 
-#: lib/solaar/ui/diversion_rules.py:1552
-msgid   "range"
-msgstr  "εύρος"
+#: lib/solaar/ui/diversion_rules.py:1546
+msgid "minimum"
+msgstr "ελάχιστο"
+
+#: lib/solaar/ui/diversion_rules.py:1547
+msgid "maximum"
+msgstr "μέγιστο"
+
+#: lib/solaar/ui/diversion_rules.py:1549
+#, python-format
+msgid "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
+msgstr "bytes %(0)d έως %(1)d, από %(2)d έως %(3)d"
+
+#: lib/solaar/ui/diversion_rules.py:1552 lib/solaar/ui/diversion_rules.py:1553
+msgid "mask"
+msgstr "μάσκα"
 
 #: lib/solaar/ui/diversion_rules.py:1554
-msgid   "minimum"
-msgstr  "ελάχιστο"
-
-#: lib/solaar/ui/diversion_rules.py:1555
-msgid   "maximum"
-msgstr  "μέγιστο"
-
-#: lib/solaar/ui/diversion_rules.py:1557
 #, python-format
-msgid   "bytes %(0)d to %(1)d, ranging from %(2)d to %(3)d"
-msgstr  "bytes %(0)d έως %(1)d, από %(2)d έως %(3)d"
-
-#: lib/solaar/ui/diversion_rules.py:1562
-msgid   "mask"
-msgstr  "μάσκα"
+msgid "bytes %(0)d to %(1)d, mask %(2)d"
+msgstr "bytes %(0)d έως %(1)d, μάσκα %(2)d"
 
 #: lib/solaar/ui/diversion_rules.py:1563
-#, python-format
-msgid   "bytes %(0)d to %(1)d, mask %(2)d"
-msgstr  "bytes %(0)d έως %(1)d, μάσκα %(2)d"
+msgid ""
+"Bit or range test on bytes in notification message triggering rule "
+"processing."
+msgstr ""
+"Δοκιμή bit ή εύρους σε bytes στο μήνυμα ειδοποίησης που ενεργοποιεί την "
+"επεξεργασία κανόνα."
 
 #: lib/solaar/ui/diversion_rules.py:1573
-msgid   "Bit or range test on bytes in notification message triggering rule "
-        "processing."
-msgstr  "Δοκιμή bit ή εύρους σε bytes στο μήνυμα ειδοποίησης που ενεργοποιεί "
-        "την επεξεργασία κανόνα."
+msgid "type"
+msgstr "τύπος"
 
-#: lib/solaar/ui/diversion_rules.py:1583
-msgid   "type"
-msgstr  "τύπος"
+#: lib/solaar/ui/diversion_rules.py:1661
+msgid ""
+"Mouse gesture with optional initiating button followed by zero or more mouse "
+"movements."
+msgstr ""
+"Χειρονομία ποντικιού με προαιρετικό κουμπί εκκίνησης που ακολουθείται από "
+"μηδέν ή περισσότερες κινήσεις του ποντικιού."
 
 #: lib/solaar/ui/diversion_rules.py:1666
-msgid   "Mouse gesture with optional initiating button followed by zero or "
-        "more mouse movements."
-msgstr  "Χειρονομία ποντικιού με προαιρετικό κουμπί εκκίνησης που "
-        "ακολουθείται από μηδέν ή περισσότερες κινήσεις του ποντικιού."
+msgid "Add movement"
+msgstr "Προσθήκη κίνησης"
 
-#: lib/solaar/ui/diversion_rules.py:1671
-msgid   "Add movement"
-msgstr  "Προσθήκη κίνησης"
+#: lib/solaar/ui/diversion_rules.py:1760
+msgid ""
+"Simulate a chorded key click or depress or release.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
+"Προσομοίωση ενός χορδισμένου πλήκτρου κλικ ή πάτημα ή απελευθέρωση.\n"
+"Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1764
-msgid   "Simulate a chorded key click or depress or release.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  "Προσομοίωση ενός χορδισμένου πλήκτρου κλικ ή πάτημα ή απελευθέρωση.\n"
-        "Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
+#: lib/solaar/ui/diversion_rules.py:1765
+msgid "Add key"
+msgstr "Προσθήκη πλήκτρου"
 
-#: lib/solaar/ui/diversion_rules.py:1769
-msgid   "Add key"
-msgstr  "Προσθήκη πλήκτρου"
+#: lib/solaar/ui/diversion_rules.py:1768
+msgid "Click"
+msgstr "Κλικ"
 
-#: lib/solaar/ui/diversion_rules.py:1772
-msgid   "Click"
-msgstr  "Κλικ"
+#: lib/solaar/ui/diversion_rules.py:1771
+msgid "Depress"
+msgstr "Απελευθέρωση"
 
-#: lib/solaar/ui/diversion_rules.py:1775
-msgid   "Depress"
-msgstr  "Απελευθέρωση"
+#: lib/solaar/ui/diversion_rules.py:1774
+msgid "Release"
+msgstr "Αποδέσμευση"
 
-#: lib/solaar/ui/diversion_rules.py:1778
-msgid   "Release"
-msgstr  "Αποδέσμευση"
+#: lib/solaar/ui/diversion_rules.py:1859
+msgid ""
+"Simulate a mouse scroll.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
+"Προσομοίωση κύλισης ποντικιού.\n"
+"Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
 
-#: lib/solaar/ui/diversion_rules.py:1861
-msgid   "Simulate a mouse scroll.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  "Προσομοίωση κύλισης ποντικιού.\n"
-        "Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
+#: lib/solaar/ui/diversion_rules.py:1915
+msgid ""
+"Simulate a mouse click.\n"
+"On Wayland requires write access to /dev/uinput."
+msgstr ""
+"Προσομοίωση ενός κλικ του ποντικιού.\n"
+"Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
 
 #: lib/solaar/ui/diversion_rules.py:1918
-msgid   "Simulate a mouse click.\n"
-        "On Wayland requires write access to /dev/uinput."
-msgstr  "Προσομοίωση ενός κλικ του ποντικιού.\n"
-        "Στο Wayland απαιτεί πρόσβαση εγγραφής στο /dev/uinput."
+msgid "Button"
+msgstr "Κουμπί"
 
-#: lib/solaar/ui/diversion_rules.py:1921
-msgid   "Button"
-msgstr  "Κουμπί"
+#: lib/solaar/ui/diversion_rules.py:1919
+msgid "Count and Action"
+msgstr "Καταμέτρηση και Δράση"
 
-#: lib/solaar/ui/diversion_rules.py:1922
-msgid   "Count and Action"
-msgstr  ""
+#: lib/solaar/ui/diversion_rules.py:1968
+msgid "Execute a command with arguments."
+msgstr "Εκτέλεση μιας εντολής με ορίσματα."
 
-#: lib/solaar/ui/diversion_rules.py:1972
-msgid   "Execute a command with arguments."
-msgstr  "Εκτέλεση μιας εντολής με ορίσματα."
+#: lib/solaar/ui/diversion_rules.py:1971
+msgid "Add argument"
+msgstr "Προσθήκη ορίσματος"
 
-#: lib/solaar/ui/diversion_rules.py:1975
-msgid   "Add argument"
-msgstr  "Προσθήκη ορίσματος"
+#: lib/solaar/ui/diversion_rules.py:2046
+msgid "Toggle"
+msgstr "Εναλλαγή"
 
-#: lib/solaar/ui/diversion_rules.py:2050
-msgid   "Toggle"
-msgstr  "Εναλλαγή"
+#: lib/solaar/ui/diversion_rules.py:2047
+msgid "True"
+msgstr "Αληθές"
 
-#: lib/solaar/ui/diversion_rules.py:2050
-msgid   "True"
-msgstr  "Αληθές"
+#: lib/solaar/ui/diversion_rules.py:2048
+msgid "False"
+msgstr "Ψευδές"
 
-#: lib/solaar/ui/diversion_rules.py:2051
-msgid   "False"
-msgstr  "Ψευδές"
+#: lib/solaar/ui/diversion_rules.py:2061
+msgid "Unsupported setting"
+msgstr "Μη υποστηριζόμενη ρύθμιση"
 
-#: lib/solaar/ui/diversion_rules.py:2065
-msgid   "Unsupported setting"
-msgstr  "Μη υποστηριζόμενη ρύθμιση"
-
-#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2242
-#: lib/solaar/ui/diversion_rules.py:2328 lib/solaar/ui/diversion_rules.py:2570
-#: lib/solaar/ui/diversion_rules.py:2588
-msgid   "Originating device"
-msgstr  "Συσκευή προέλευσης"
+#: lib/solaar/ui/diversion_rules.py:2223 lib/solaar/ui/diversion_rules.py:2243
+#: lib/solaar/ui/diversion_rules.py:2325 lib/solaar/ui/diversion_rules.py:2568
+#: lib/solaar/ui/diversion_rules.py:2586
+msgid "Originating device"
+msgstr "Συσκευή προέλευσης"
 
 #: lib/solaar/ui/diversion_rules.py:2256
-msgid   "Device is active and its settings can be changed."
-msgstr  "Η συσκευή είναι ενεργή και οι ρυθμίσεις της μπορούν να αλλάξουν."
+msgid "Device is active and its settings can be changed."
+msgstr "Η συσκευή είναι ενεργή και οι ρυθμίσεις της μπορούν να αλλάξουν."
 
-#: lib/solaar/ui/diversion_rules.py:2266
-msgid   "Device that originated the current notification."
-msgstr  ""
+#: lib/solaar/ui/diversion_rules.py:2265
+msgid "Device that originated the current notification."
+msgstr "Συσκευή από την οποία προήλθε η τρέχουσα ειδοποίηση."
 
-#: lib/solaar/ui/diversion_rules.py:2280
-msgid   "Name of host computer."
-msgstr  ""
+#: lib/solaar/ui/diversion_rules.py:2278
+msgid "Name of host computer."
+msgstr "Όνομα του υπολογιστή υποδοχής."
 
-#: lib/solaar/ui/diversion_rules.py:2347
-msgid   "Value"
-msgstr  "Τιμή"
+#: lib/solaar/ui/diversion_rules.py:2345
+msgid "Value"
+msgstr "Τιμή"
 
-#: lib/solaar/ui/diversion_rules.py:2355
-msgid   "Item"
-msgstr  "Στοιχείο"
+#: lib/solaar/ui/diversion_rules.py:2353
+msgid "Item"
+msgstr "Στοιχείο"
 
-#: lib/solaar/ui/diversion_rules.py:2630
-msgid   "Change setting on device"
-msgstr  "Αλλαγή ρύθμισης στη συσκευή"
+#: lib/solaar/ui/diversion_rules.py:2627
+msgid "Change setting on device"
+msgstr "Αλλαγή ρύθμισης στη συσκευή"
 
-#: lib/solaar/ui/diversion_rules.py:2647
-msgid   "Setting on device"
-msgstr  "Ρύθμιση στη συσκευή"
+#: lib/solaar/ui/diversion_rules.py:2643
+msgid "Setting on device"
+msgstr "Ρύθμιση στη συσκευή"
 
-#: lib/solaar/ui/notify.py:124 lib/solaar/ui/tray.py:318
-#: lib/solaar/ui/tray.py:323 lib/solaar/ui/window.py:739
-msgid   "offline"
-msgstr  "εκτός σύνδεσης"
+#: lib/solaar/ui/notify.py:118
+msgid "unspecified reason"
+msgstr "αδιευκρίνιστος λόγος"
 
-#: lib/solaar/ui/pair_window.py:122 lib/solaar/ui/pair_window.py:256
-#: lib/solaar/ui/pair_window.py:288
+#: lib/solaar/ui/pair_window.py:126 lib/solaar/ui/pair_window.py:260
+#: lib/solaar/ui/pair_window.py:296
 #, python-format
-msgid   "%(receiver_name)s: pair new device"
-msgstr  "%(receiver_name)s: ζεύξη νέας συσκευής"
+msgid "%(receiver_name)s: pair new device"
+msgstr "%(receiver_name)s: ζεύξη νέας συσκευής"
 
-#: lib/solaar/ui/pair_window.py:123
+#: lib/solaar/ui/pair_window.py:127
 #, python-format
-msgid   "Enter passcode on %(name)s."
-msgstr  "Πληκτρολογήστε τον κωδικό πρόσβασης στο %(name)s."
+msgid "Enter passcode on %(name)s."
+msgstr "Πληκτρολογήστε τον κωδικό πρόσβασης στο %(name)s."
 
-#: lib/solaar/ui/pair_window.py:126
+#: lib/solaar/ui/pair_window.py:130
 #, python-format
-msgid   "Type %(passcode)s and then press the enter key."
-msgstr  "Πληκτρολογήστε %(passcode)s και, στη συνέχεια, πατήστε το πλήκτρο "
-        "enter."
+msgid "Type %(passcode)s and then press the enter key."
+msgstr ""
+"Πληκτρολογήστε %(passcode)s και, στη συνέχεια, πατήστε το πλήκτρο enter."
 
-#: lib/solaar/ui/pair_window.py:129
-msgid   "left"
-msgstr  "αριστερά"
+#: lib/solaar/ui/pair_window.py:133
+msgid "left"
+msgstr "αριστερά"
 
-#: lib/solaar/ui/pair_window.py:129
-msgid   "right"
-msgstr  "δεξιά"
+#: lib/solaar/ui/pair_window.py:133
+msgid "right"
+msgstr "δεξιά"
 
-#: lib/solaar/ui/pair_window.py:131
+#: lib/solaar/ui/pair_window.py:135
 #, python-format
-msgid   "Press %(code)s\n"
-        "and then press left and right buttons simultaneously."
-msgstr  "Πατήστε %(code)s\n"
-        "και στη συνέχεια πατήστε ταυτόχρονα το αριστερό και το δεξί κουμπί."
-
-#: lib/solaar/ui/pair_window.py:188
-msgid   "Pairing failed"
-msgstr  "Αποτυχία συνταιρίασματος"
-
-#: lib/solaar/ui/pair_window.py:190
-msgid   "Make sure your device is within range, and has a decent battery "
-        "charge."
-msgstr  "Σιγουρέψου ότι η συσκευή είναι εντός εμβέλειας, και έχει επαρκώς "
-        "φορτισμένη μπαταρία."
+msgid ""
+"Press %(code)s\n"
+"and then press left and right buttons simultaneously."
+msgstr ""
+"Πατήστε %(code)s\n"
+"και στη συνέχεια πατήστε ταυτόχρονα το αριστερό και το δεξί κουμπί."
 
 #: lib/solaar/ui/pair_window.py:192
-msgid   "A new device was detected, but it is not compatible with this "
-        "receiver."
-msgstr  "Εντοπίστηκε μια συσκευή, αλλά δεν είναι συμβατή με αυτόν τον δέκτη."
+msgid "Pairing failed"
+msgstr "Αποτυχία συνταιρίασματος"
 
 #: lib/solaar/ui/pair_window.py:194
-msgid   "More paired devices than receiver can support."
-msgstr  "Περισσότερες συζευγμένες συσκευές από όσες μπορεί να υποστηρίξει ο "
-        "δέκτης."
+msgid "Make sure your device is within range, and has a decent battery charge."
+msgstr ""
+"Σιγουρέψου ότι η συσκευή είναι εντός εμβέλειας, και έχει επαρκώς φορτισμένη "
+"μπαταρία."
 
 #: lib/solaar/ui/pair_window.py:196
-msgid   "No further details are available about the error."
-msgstr  "Δεν υπάρχουν άλλες πληροφορίες για το σφάλμα."
+msgid "A new device was detected, but it is not compatible with this receiver."
+msgstr "Εντοπίστηκε μια συσκευή, αλλά δεν είναι συμβατή με αυτόν τον δέκτη."
 
-#: lib/solaar/ui/pair_window.py:210
-msgid   "Found a new device:"
-msgstr  "Βρήκα μια νέα συσκευή:"
+#: lib/solaar/ui/pair_window.py:198
+msgid "More paired devices than receiver can support."
+msgstr ""
+"Περισσότερες συζευγμένες συσκευές από όσες μπορεί να υποστηρίξει ο δέκτης."
 
-#: lib/solaar/ui/pair_window.py:235
-msgid   "The wireless link is not encrypted"
-msgstr  "Η ασύρματη σύνδεση είναι χωρίς κρυπτογράφηση"
+#: lib/solaar/ui/pair_window.py:200
+msgid "No further details are available about the error."
+msgstr "Δεν υπάρχουν άλλες πληροφορίες για το σφάλμα."
 
-#: lib/solaar/ui/pair_window.py:264
-msgid   "Unifying receivers are only compatible with Unifying devices."
-msgstr  "Οι δέκτες Unifying είναι συμβατοί μόνο με συσκευές Unifying."
+#: lib/solaar/ui/pair_window.py:214
+msgid "Found a new device:"
+msgstr "Βρήκα μια νέα συσκευή:"
 
-#: lib/solaar/ui/pair_window.py:266
-msgid   "Bolt receivers are only compatible with Bolt devices."
-msgstr  "Οι δέκτες Bolt είναι συμβατοί μόνο με συσκευές Bolt."
+#: lib/solaar/ui/pair_window.py:239
+msgid "The wireless link is not encrypted"
+msgstr "Η ασύρματη σύνδεση είναι χωρίς κρυπτογράφηση"
 
 #: lib/solaar/ui/pair_window.py:268
-msgid   "Other receivers are only compatible with a few devices."
-msgstr  "Άλλοι δέκτες είναι συμβατοί μόνο με λίγες συσκευές."
+msgid "Unifying receivers are only compatible with Unifying devices."
+msgstr "Οι δέκτες Unifying είναι συμβατοί μόνο με συσκευές Unifying."
 
 #: lib/solaar/ui/pair_window.py:270
-msgid   "The device must not be paired with a nearby powered-on receiver."
-msgstr  "Η συσκευή δεν πρέπει να είναι συνδεδεμένη με έναν κοντινό "
-        "ενεργοποιημένο δέκτη."
+msgid "Bolt receivers are only compatible with Bolt devices."
+msgstr "Οι δέκτες Bolt είναι συμβατοί μόνο με συσκευές Bolt."
+
+#: lib/solaar/ui/pair_window.py:272
+msgid "Other receivers are only compatible with a few devices."
+msgstr "Άλλοι δέκτες είναι συμβατοί μόνο με λίγες συσκευές."
 
 #: lib/solaar/ui/pair_window.py:274
-msgid   "Press a pairing button or key until the pairing light flashes "
-        "quickly."
-msgstr  "Πιέστε ένα κουμπί ή πλήκτρο ζεύξης μέχρι να αναβοσβήσει γρήγορα η "
-        "φωτεινή ένδειξη ζεύξης."
-
-#: lib/solaar/ui/pair_window.py:276
-msgid   "You may have to first turn the device off and on again."
-msgstr  "Ίσως χρειαστεί πρώτα να απενεργοποιήσετε και να ενεργοποιήσετε ξανά "
-        "τη συσκευή."
+msgid "The device must not be paired with a nearby powered-on receiver."
+msgstr ""
+"Η συσκευή δεν πρέπει να είναι συνδεδεμένη με έναν κοντινό ενεργοποιημένο "
+"δέκτη."
 
 #: lib/solaar/ui/pair_window.py:278
-msgid   "Turn on the device you want to pair."
-msgstr  "Άνοιξε την συσκευή που θέλεις να συνταιριάξεις."
+msgid "Press a pairing button or key until the pairing light flashes quickly."
+msgstr ""
+"Πιέστε ένα κουμπί ή πλήκτρο ζεύξης μέχρι να αναβοσβήσει γρήγορα η φωτεινή "
+"ένδειξη ζεύξης."
 
 #: lib/solaar/ui/pair_window.py:280
-msgid   "If the device is already turned on, turn it off and on again."
-msgstr  "Εάν η συσκευή είναι ήδη ενεργοποιημένη, απενεργοποιήστε την και "
-        "ενεργοποιήστε την ξανά."
+msgid "You may have to first turn the device off and on again."
+msgstr ""
+"Ίσως χρειαστεί πρώτα να απενεργοποιήσετε και να ενεργοποιήσετε ξανά τη "
+"συσκευή."
 
-#: lib/solaar/ui/pair_window.py:283
+#: lib/solaar/ui/pair_window.py:282
+msgid "Turn on the device you want to pair."
+msgstr "Άνοιξε την συσκευή που θέλεις να συνταιριάξεις."
+
+#: lib/solaar/ui/pair_window.py:284
+msgid "If the device is already turned on, turn it off and on again."
+msgstr ""
+"Εάν η συσκευή είναι ήδη ενεργοποιημένη, απενεργοποιήστε την και "
+"ενεργοποιήστε την ξανά."
+
+#: lib/solaar/ui/pair_window.py:288
 #, python-format
-msgid   "\n"
-        "\n"
-        "This receiver has %d pairing remaining."
-msgid_plural    "\n"
-        "\n"
-        "This receiver has %d pairings remaining."
-msgstr[0]       "\n"
-        "\n"
-        "Αυτός ο δέκτης έχει %d ζεύξη που απομένει."
-msgstr[1]       "\n"
-        "\n"
-        "Αυτός ο δέκτης έχει %d ζεύξεις που απομένουν."
+msgid ""
+"\n"
+"\n"
+"This receiver has %d pairing remaining."
+msgid_plural ""
+"\n"
+"\n"
+"This receiver has %d pairings remaining."
+msgstr[0] ""
+"\n"
+"\n"
+"Αυτός ο δέκτης έχει %d ζεύξη που απομένει."
+msgstr[1] ""
+"\n"
+"\n"
+"Αυτός ο δέκτης έχει %d ζεύξεις που απομένουν."
 
-#: lib/solaar/ui/pair_window.py:286
-msgid   "\n"
-        "Cancelling at this point will not use up a pairing."
-msgstr  "\n"
-        "Η ακύρωση σε αυτό το σημείο δεν θα χρησιμοποιήσει μια αντιστοίχιση."
+#: lib/solaar/ui/pair_window.py:294
+msgid ""
+"\n"
+"Cancelling at this point will not use up a pairing."
+msgstr ""
+"\n"
+"Η ακύρωση σε αυτό το σημείο δεν θα χρησιμοποιήσει μια αντιστοίχιση."
 
 #: lib/solaar/ui/tray.py:58
-msgid   "No supported device found"
-msgstr  ""
+msgid "No supported device found"
+msgstr "Δεν βρέθηκε υποστηριζόμενη συσκευή"
+
+#: lib/solaar/ui/tray.py:63 lib/solaar/ui/window.py:321
+#, python-format
+msgid "About %s"
+msgstr "Περί %s"
 
 #: lib/solaar/ui/tray.py:64 lib/solaar/ui/window.py:319
 #, python-format
-msgid   "About %s"
-msgstr  "Περί %s"
+msgid "Quit %s"
+msgstr "Έξοδος %s"
 
-#: lib/solaar/ui/tray.py:65 lib/solaar/ui/window.py:317
-#, python-format
-msgid   "Quit %s"
-msgstr  "Έξοδος %s"
+#: lib/solaar/ui/tray.py:294 lib/solaar/ui/tray.py:302
+msgid "no receiver"
+msgstr "χωρίς δέκτη"
 
-#: lib/solaar/ui/tray.py:297 lib/solaar/ui/tray.py:305
-msgid   "no receiver"
-msgstr  "χωρίς δέκτη"
+#: lib/solaar/ui/tray.py:315 lib/solaar/ui/tray.py:320
+msgid "offline"
+msgstr "εκτός σύνδεσης"
 
-#: lib/solaar/ui/tray.py:321
-msgid   "no status"
-msgstr  "χωρίς κατάσταση"
+#: lib/solaar/ui/tray.py:318
+msgid "no status"
+msgstr "χωρίς κατάσταση"
 
-#: lib/solaar/ui/window.py:96
-msgid   "Scanning"
-msgstr  "Σάρωση"
-
-#: lib/solaar/ui/window.py:129
-msgid   "Battery"
-msgstr  "Μπαταρία"
+#: lib/solaar/ui/window.py:99
+msgid "Scanning"
+msgstr "Σάρωση"
 
 #: lib/solaar/ui/window.py:132
-msgid   "Wireless Link"
-msgstr  "Ασύρματη ζεύξη"
+msgid "Battery"
+msgstr "Μπαταρία"
 
-#: lib/solaar/ui/window.py:136
-msgid   "Lighting"
-msgstr  "Φωτισμός"
+#: lib/solaar/ui/window.py:135
+msgid "Wireless Link"
+msgstr "Ασύρματη ζεύξη"
 
-#: lib/solaar/ui/window.py:170
-msgid   "Show Technical Details"
-msgstr  "Εμφάνιση τεχνικών λεπτομερειών"
+#: lib/solaar/ui/window.py:139
+msgid "Lighting"
+msgstr "Φωτισμός"
 
-#: lib/solaar/ui/window.py:186
-msgid   "Pair new device"
-msgstr  "Συνταίριασμα νέας συσκευής"
+#: lib/solaar/ui/window.py:173
+msgid "Show Technical Details"
+msgstr "Εμφάνιση τεχνικών λεπτομερειών"
 
-#: lib/solaar/ui/window.py:205
-msgid   "Select a device"
-msgstr  "Επέλεξε μια συσκευή"
+#: lib/solaar/ui/window.py:189
+msgid "Pair new device"
+msgstr "Συνταίριασμα νέας συσκευής"
 
-#: lib/solaar/ui/window.py:322
-msgid   "Rule Editor"
-msgstr  "Συντάκτης κανόνων"
+#: lib/solaar/ui/window.py:207
+msgid "Select a device"
+msgstr "Επέλεξε μια συσκευή"
 
-#: lib/solaar/ui/window.py:533
-msgid   "Path"
-msgstr  "Διαδρομή"
+#: lib/solaar/ui/window.py:324
+msgid "Rule Editor"
+msgstr "Συντάκτης κανόνων"
 
-#: lib/solaar/ui/window.py:536
-msgid   "USB ID"
-msgstr  "USB ID"
+#: lib/solaar/ui/window.py:543
+msgid "Path"
+msgstr "Διαδρομή"
 
-#: lib/solaar/ui/window.py:539 lib/solaar/ui/window.py:541
-#: lib/solaar/ui/window.py:561 lib/solaar/ui/window.py:563
-msgid   "Serial"
-msgstr  "Serial"
+#: lib/solaar/ui/window.py:546
+msgid "USB ID"
+msgstr "USB ID"
 
-#: lib/solaar/ui/window.py:545
-msgid   "Index"
-msgstr  "Index"
+#: lib/solaar/ui/window.py:549 lib/solaar/ui/window.py:551
+#: lib/solaar/ui/window.py:566 lib/solaar/ui/window.py:568
+msgid "Serial"
+msgstr "Serial"
 
-#: lib/solaar/ui/window.py:547
-msgid   "Wireless PID"
-msgstr  "Wireless PID"
+#: lib/solaar/ui/window.py:555
+msgid "Index"
+msgstr "Index"
 
-#: lib/solaar/ui/window.py:549
-msgid   "Product ID"
-msgstr  "Αναγνωριστικό προϊόντος"
+#: lib/solaar/ui/window.py:557
+msgid "Wireless PID"
+msgstr "Wireless PID"
 
-#: lib/solaar/ui/window.py:551
-msgid   "Protocol"
-msgstr  "Πρωτόκολλο"
+#: lib/solaar/ui/window.py:559
+msgid "Product ID"
+msgstr "Αναγνωριστικό προϊόντος"
 
-#: lib/solaar/ui/window.py:551
-msgid   "Unknown"
-msgstr  "Άγνωστο"
+#: lib/solaar/ui/window.py:561
+msgid "Protocol"
+msgstr "Πρωτόκολλο"
 
-#: lib/solaar/ui/window.py:554
-#, python-format
-msgid   "%(rate)d ms (%(rate_hz)dHz)"
-msgstr  "%(rate)d ms (%(rate_hz)dHz)"
+#: lib/solaar/ui/window.py:561
+msgid "Unknown"
+msgstr "Άγνωστο"
 
-#: lib/solaar/ui/window.py:554
-msgid   "Polling rate"
-msgstr  "Ρυθμός ανανέωσης"
+#: lib/solaar/ui/window.py:563
+msgid "Polling rate"
+msgstr "Ρυθμός ανανέωσης"
 
-#: lib/solaar/ui/window.py:565
-msgid   "Unit ID"
-msgstr  "Unit ID"
+#: lib/solaar/ui/window.py:570
+msgid "Unit ID"
+msgstr "Unit ID"
 
-#: lib/solaar/ui/window.py:576
-msgid   "none"
-msgstr  "καμία"
-
-#: lib/solaar/ui/window.py:577
-msgid   "Notifications"
-msgstr  "Ειδοποιήσεις"
-
-#: lib/solaar/ui/window.py:621
-msgid   "No device paired."
-msgstr  "Δεν υπάρχει αντιστοιχισμένη συσκευή."
+#: lib/solaar/ui/window.py:584
+msgid "Notifications"
+msgstr "Ειδοποιήσεις"
 
 #: lib/solaar/ui/window.py:628
+msgid "No device paired."
+msgstr "Δεν υπάρχει αντιστοιχισμένη συσκευή."
+
+#: lib/solaar/ui/window.py:637
 #, python-format
-msgid   "Up to %(max_count)s device can be paired to this receiver."
-msgid_plural    "Up to %(max_count)s devices can be paired to this receiver."
-msgstr[0]       "Έως και %(max_count)s συσκευή μπορεί να συνδεθεί με αυτόν "
-        "τον δέκτη."
-msgstr[1]       "Έως και %(max_count)s συσκευές μπορούν να αντιστοιχιστούν σε "
-        "αυτόν τον δέκτη."
+msgid "Up to %(max_count)s device can be paired to this receiver."
+msgid_plural "Up to %(max_count)s devices can be paired to this receiver."
+msgstr[0] ""
+"Έως και %(max_count)s συσκευή μπορεί να συνδεθεί με αυτόν τον δέκτη."
+msgstr[1] ""
+"Έως και %(max_count)s συσκευές μπορούν να αντιστοιχιστούν σε αυτόν τον δέκτη."
 
-#: lib/solaar/ui/window.py:634
-msgid   "Only one device can be paired to this receiver."
-msgstr  "Μόνο μία συσκευή μπορεί να συνδεθεί με αυτόν τον δέκτη."
-
-#: lib/solaar/ui/window.py:638
+#: lib/solaar/ui/window.py:648
 #, python-format
-msgid   "This receiver has %d pairing remaining."
-msgid_plural    "This receiver has %d pairings remaining."
-msgstr[0]       "Αυτός ο δέκτης έχει %d ζεύξη που απομένει."
-msgstr[1]       "Αυτός ο δέκτης έχει %d ζεύξεις που απομένουν."
+msgid "This receiver has %d pairing remaining."
+msgid_plural "This receiver has %d pairings remaining."
+msgstr[0] "Αυτός ο δέκτης έχει %d ζεύξη που απομένει."
+msgstr[1] "Αυτός ο δέκτης έχει %d ζεύξεις που απομένουν."
 
-#: lib/solaar/ui/window.py:692
-msgid   "Battery Voltage"
-msgstr  "Τάση μπαταρίας"
+#: lib/solaar/ui/window.py:705
+msgid "Battery Voltage"
+msgstr "Τάση μπαταρίας"
 
-#: lib/solaar/ui/window.py:694
-msgid   "Voltage reported by battery"
-msgstr  "Τάση που αναφέρεται από την μπαταρία"
+#: lib/solaar/ui/window.py:707
+msgid "Voltage reported by battery"
+msgstr "Τάση που αναφέρεται από την μπαταρία"
 
-#: lib/solaar/ui/window.py:696
-msgid   "Battery Level"
-msgstr  "Στάθμη μπαταρίας"
+#: lib/solaar/ui/window.py:709
+msgid "Battery Level"
+msgstr "Στάθμη μπαταρίας"
 
-#: lib/solaar/ui/window.py:698
-msgid   "Approximate level reported by battery"
-msgstr  "Προσεγγιστικό επίπεδο που αναφέρεται από την μπαταρία"
+#: lib/solaar/ui/window.py:711
+msgid "Approximate level reported by battery"
+msgstr "Προσεγγιστικό επίπεδο που αναφέρεται από την μπαταρία"
 
-#: lib/solaar/ui/window.py:705 lib/solaar/ui/window.py:707
-msgid   "next reported "
-msgstr  "επόμενο αναφερόμενο "
+#: lib/solaar/ui/window.py:718 lib/solaar/ui/window.py:720
+msgid "next reported "
+msgstr "επόμενο αναφερόμενο "
 
-#: lib/solaar/ui/window.py:708
-msgid   " and next level to be reported."
-msgstr  " και το επόμενο επίπεδο που θα αναφερθεί."
+#: lib/solaar/ui/window.py:721
+msgid " and next level to be reported."
+msgstr " και το επόμενο επίπεδο που θα αναφερθεί."
 
-#: lib/solaar/ui/window.py:713
-msgid   "last known"
-msgstr  "τελευταία γνωστή"
+#: lib/solaar/ui/window.py:737
+msgid "encrypted"
+msgstr "κρυπτογραφημένη"
 
-#: lib/solaar/ui/window.py:724
-msgid   "encrypted"
-msgstr  "κρυπτογραφημένη"
+#: lib/solaar/ui/window.py:739
+msgid "The wireless link between this device and its receiver is encrypted."
+msgstr ""
+"Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη είναι  "
+"κρυπτογραφημένη."
 
-#: lib/solaar/ui/window.py:726
-msgid   "The wireless link between this device and its receiver is encrypted."
-msgstr  "Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη είναι  "
-        "κρυπτογραφημένη."
+#: lib/solaar/ui/window.py:741
+msgid "not encrypted"
+msgstr "χωρίς κρυπτογράφηση"
 
-#: lib/solaar/ui/window.py:728
-msgid   "not encrypted"
-msgstr  "χωρίς κρυπτογράφηση"
+#: lib/solaar/ui/window.py:745
+msgid ""
+"The wireless link between this device and its receiver is not encrypted.\n"
+"This is a security issue for pointing devices, and a major security issue "
+"for text-input devices."
+msgstr ""
+"Η ασύρματη σύνδεση μεταξύ αυτής της συσκευής και του δέκτη της δεν είναι "
+"κρυπτογραφημένη.\n"
+"Αυτό είναι ένα ζήτημα ασφάλειας για τις συσκευές επισήμανσης και ένα "
+"σημαντικό ζήτημα ασφάλειας για τις συσκευές εισαγωγής κειμένου."
 
-#: lib/solaar/ui/window.py:732
-msgid   "The wireless link between this device and its receiver is not "
-        "encrypted.\n"
-        "This is a security issue for pointing devices, and a major security "
-        "issue for text-input devices."
-msgstr  "Η ασύρματη σύνδεση μεταξύ αυτής της συσκευής και του δέκτη της δεν "
-        "είναι κρυπτογραφημένη.\n"
-        "Αυτό είναι ένα ζήτημα ασφάλειας για τις συσκευές επισήμανσης και ένα "
-        "σημαντικό ζήτημα ασφάλειας για τις συσκευές εισαγωγής κειμένου."
-
-#: lib/solaar/ui/window.py:748
+#: lib/solaar/ui/window.py:761
 #, python-format
-msgid   "%(light_level)d lux"
-msgstr  "%(light_level)d lux"
+msgid "%(light_level)d lux"
+msgstr "%(light_level)d lux"
 
-#~ msgid        " paired devices."
-#~ msgstr       " συνταιριασμένες συσκευές."
+#~ msgid "Turn illumination on or off on keyboard."
+#~ msgstr "Ενεργοποίηση ή απενεργοποίηση του φωτισμού στο πληκτρολόγιο."
 
-#~ msgid        "1 paired device."
-#~ msgstr       "Μία συνταιριασμένη συσκευή"
+#~ msgid "Polling Rate (ms)"
+#~ msgstr "Ρυθμός κλήσεων (ms)"
 
-#~ msgid        "Count"
-#~ msgstr       "Πλήθος"
-
-#~ msgid        "Device originated the current notification."
-#~ msgstr       "Η συσκευή από την οποία προήλθε η τρέχουσα ειδοποίηση."
+#~ msgid "May also make M keys and MR key send HID++ notifications"
+#~ msgstr ""
+#~ "Μπορεί επίσης να κάνει τα κλειδιά M και MR να στέλνουν ειδοποιήσεις HID++"
 
 #, python-format
-#~ msgid        "Found a Logitech Receiver (%s), but did not have permission "
-#~      "to open it."
-#~ msgstr       "Βρέθηκε ένας δέκτης Logitech (%s), αλλά δεν έχετε δικαίωμα "
-#~      "να τον ανοίξετε."
-
-#~ msgid        "Found a new device"
-#~ msgstr       "Βρέθηκε νέα συσκευή"
-
-#~ msgid        "If the device is already turned on,\n"
-#~      "turn if off and on again."
-#~ msgstr       "Αν η συσκευή είναι ήδη ανοικτή,\n"
-#~      "κλείσε την και μετά άνοιξε την ξανά."
-
-#~ msgid        "If you've just installed Solaar, try removing the receiver "
-#~      "and plugging it back in."
-#~ msgstr       "Εάν μόλις κάνατε εγκατάσταση του  Solaar, δοκιμάστε να "
-#~      "αφαιρέσετε τον δέκτη και να τον ξανασυνδέσετε."
-
-#~ msgid        "No Logitech device found"
-#~ msgstr       "Δεν βρέθηκε συσκευή Logitech"
-
-#~ msgid        "No Logitech receiver found"
-#~ msgstr       "Δεν βρέθηκε δέκτης Logitech"
-
-#~ msgid        "No device paired"
-#~ msgstr       "Χωρίς συνταιριασμένες συσκευές"
-
-#~ msgid        "Only one device can be paired to this receiver"
-#~ msgstr       "Μόνο μία συσκευή μπορεί να συνταιριαστεί σε αυτόν τον δέκτη"
-
-#~ msgid        "Shows status of devices connected\n"
-#~      "through wireless Logitech receivers."
-#~ msgstr       "Δείχνει την κατάσταση των συσκευών που συνδέονται\n"
-#~      "ασύρματα σε δέκτες Logitech."
-
-#~ msgid        "Smooth Scrolling"
-#~ msgstr       "Ομαλή κύλιση"
+#~ msgid "Battery: %(level)s"
+#~ msgstr "Μπαταρία: %(level)s"
 
 #, python-format
-#~ msgid        "The receiver only supports %d paired device(s)."
-#~ msgstr       "Ο δέκτης υποστηρίζει μέχρι %d συνταιριασμένες συσκευές."
+#~ msgid "Battery: %(percent)d%%"
+#~ msgstr "Μπαταρία: %(percent)d%%"
 
-#~ msgid        "The receiver was unplugged."
-#~ msgstr       "Ο δέκτης αποσυνδέθηκε."
+#, python-format
+#~ msgid "Lighting: %(level)s lux"
+#~ msgstr "Φωτισμός: %(level)s lux"
 
-#~ msgid        "The wireless link between this device and its receiver is "
-#~      "not encrypted.\n"
-#~      "\n"
-#~      "For pointing devices (mice, trackballs, trackpads), this is a minor "
-#~      "security issue.\n"
-#~      "\n"
-#~      "It is, however, a major security issue for text-input devices "
-#~      "(keyboards, numpads),\n"
-#~      "because typed text can be sniffed inconspicuously by 3rd parties "
-#~      "within range."
-#~ msgstr       "Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη της "
-#~      "είναι χωρίς κρυπτογράφηση.\n"
-#~      "\n"
-#~      "Για συσκευές κατάδειξης (ποντίκια, ιχνόσφαιρες, επιφάνειες αφής), "
-#~      "αυτό είναι ένα μικρό πρόβλημα ασφάλειας.\n"
-#~      "\n"
-#~      "Είναι όμως μεγάλο πρόβλημα ασφάλειας για συσκευές εισαγωγής κειμένου "
-#~      "(πληκτρολόγια),\n"
-#~      "μιας και το κείμενο μπορεί να υποκλαπεί από κακόβουλους εντός "
-#~      "εμβέλειας."
+#, python-format
+#~ msgid "%(rate)d ms (%(rate_hz)dHz)"
+#~ msgstr "%(rate)d ms (%(rate_hz)dHz)"
 
-#~ msgid        "USB id"
-#~ msgstr       "USB id"
+#~ msgid "none"
+#~ msgstr "καμία"
 
-#~ msgid        "Up to %d devices can be paired to this receiver"
-#~ msgstr       "Μέχρι %d συσκευές μπορούν να συνταιριαστούν σε αυτόν τον "
-#~      "δέκτη"
+#~ msgid "Only one device can be paired to this receiver."
+#~ msgstr "Μόνο μία συσκευή μπορεί να συνδεθεί με αυτόν τον δέκτη."
 
-#~ msgid        "closed"
-#~ msgstr       "κλειστή"
+#~ msgid "last known"
+#~ msgstr "τελευταία γνωστή"
 
-#~ msgid        "height"
-#~ msgstr       "ύψος"
+#~ msgid " paired devices."
+#~ msgstr " συνταιριασμένες συσκευές."
 
-#~ msgid        "lux"
-#~ msgstr       "lux"
+#~ msgid "1 paired device."
+#~ msgstr "Μία συνταιριασμένη συσκευή"
 
-#~ msgid        "open"
-#~ msgstr       "ανοιχτή"
+#~ msgid "Count"
+#~ msgstr "Πλήθος"
 
-#~ msgid        "pair new device"
-#~ msgstr       "συνταίριασε μια νέα συσκευή"
+#~ msgid "Device originated the current notification."
+#~ msgstr "Η συσκευή από την οποία προήλθε η τρέχουσα ειδοποίηση."
 
-#~ msgid        "paired devices"
-#~ msgstr       "συνταιριασμένες συσκευές"
+#, python-format
+#~ msgid ""
+#~ "Found a Logitech Receiver (%s), but did not have permission to open it."
+#~ msgstr ""
+#~ "Βρέθηκε ένας δέκτης Logitech (%s), αλλά δεν έχετε δικαίωμα να τον "
+#~ "ανοίξετε."
 
-#~ msgid        "pairing lock is "
-#~ msgstr       "το κλείδωμα ταιριάσματος είναι"
+#~ msgid "Found a new device"
+#~ msgstr "Βρέθηκε νέα συσκευή"
 
-#~ msgid        "unknown"
-#~ msgstr       "άγνωστο"
+#~ msgid ""
+#~ "If the device is already turned on,\n"
+#~ "turn if off and on again."
+#~ msgstr ""
+#~ "Αν η συσκευή είναι ήδη ανοικτή,\n"
+#~ "κλείσε την και μετά άνοιξε την ξανά."
 
-#~ msgid        "width"
-#~ msgstr       "πλάτος"
+#~ msgid ""
+#~ "If you've just installed Solaar, try removing the receiver and plugging "
+#~ "it back in."
+#~ msgstr ""
+#~ "Εάν μόλις κάνατε εγκατάσταση του  Solaar, δοκιμάστε να αφαιρέσετε τον "
+#~ "δέκτη και να τον ξανασυνδέσετε."
+
+#~ msgid "No Logitech device found"
+#~ msgstr "Δεν βρέθηκε συσκευή Logitech"
+
+#~ msgid "No Logitech receiver found"
+#~ msgstr "Δεν βρέθηκε δέκτης Logitech"
+
+#~ msgid "No device paired"
+#~ msgstr "Χωρίς συνταιριασμένες συσκευές"
+
+#~ msgid "Only one device can be paired to this receiver"
+#~ msgstr "Μόνο μία συσκευή μπορεί να συνταιριαστεί σε αυτόν τον δέκτη"
+
+#~ msgid ""
+#~ "Shows status of devices connected\n"
+#~ "through wireless Logitech receivers."
+#~ msgstr ""
+#~ "Δείχνει την κατάσταση των συσκευών που συνδέονται\n"
+#~ "ασύρματα σε δέκτες Logitech."
+
+#~ msgid "Smooth Scrolling"
+#~ msgstr "Ομαλή κύλιση"
+
+#, python-format
+#~ msgid "The receiver only supports %d paired device(s)."
+#~ msgstr "Ο δέκτης υποστηρίζει μέχρι %d συνταιριασμένες συσκευές."
+
+#~ msgid "The receiver was unplugged."
+#~ msgstr "Ο δέκτης αποσυνδέθηκε."
+
+#~ msgid ""
+#~ "The wireless link between this device and its receiver is not encrypted.\n"
+#~ "\n"
+#~ "For pointing devices (mice, trackballs, trackpads), this is a minor "
+#~ "security issue.\n"
+#~ "\n"
+#~ "It is, however, a major security issue for text-input devices (keyboards, "
+#~ "numpads),\n"
+#~ "because typed text can be sniffed inconspicuously by 3rd parties within "
+#~ "range."
+#~ msgstr ""
+#~ "Η ασύρματη ζεύξη μεταξύ αυτής της συσκευής και του δέκτη της είναι χωρίς "
+#~ "κρυπτογράφηση.\n"
+#~ "\n"
+#~ "Για συσκευές κατάδειξης (ποντίκια, ιχνόσφαιρες, επιφάνειες αφής), αυτό "
+#~ "είναι ένα μικρό πρόβλημα ασφάλειας.\n"
+#~ "\n"
+#~ "Είναι όμως μεγάλο πρόβλημα ασφάλειας για συσκευές εισαγωγής κειμένου "
+#~ "(πληκτρολόγια),\n"
+#~ "μιας και το κείμενο μπορεί να υποκλαπεί από κακόβουλους εντός εμβέλειας."
+
+#~ msgid "USB id"
+#~ msgstr "USB id"
+
+#~ msgid "Up to %d devices can be paired to this receiver"
+#~ msgstr "Μέχρι %d συσκευές μπορούν να συνταιριαστούν σε αυτόν τον δέκτη"
+
+#~ msgid "closed"
+#~ msgstr "κλειστή"
+
+#~ msgid "height"
+#~ msgstr "ύψος"
+
+#~ msgid "lux"
+#~ msgstr "lux"
+
+#~ msgid "open"
+#~ msgstr "ανοιχτή"
+
+#~ msgid "pair new device"
+#~ msgstr "συνταίριασε μια νέα συσκευή"
+
+#~ msgid "paired devices"
+#~ msgstr "συνταιριασμένες συσκευές"
+
+#~ msgid "pairing lock is "
+#~ msgstr "το κλείδωμα ταιριάσματος είναι"
+
+#~ msgid "unknown"
+#~ msgstr "άγνωστο"
+
+#~ msgid "width"
+#~ msgstr "πλάτος"
