@@ -100,7 +100,7 @@ class Device:
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
         self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
-        self._profiles = self._backlight = self._registers = self._settings = None
+        self._profiles = self._backlight = self.registers = self._settings = None
         self.notification_flags = None
         self.battery_info = None
         self.link_encrypted = None
@@ -150,6 +150,7 @@ class Device:
             if self._kind is None:
                 self._kind = self.descriptor.kind
             self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
+            self.registers = self.descriptor.registers if self.descriptor.registers else []
 
         if self._protocol is not None:
             self.features = None if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
@@ -197,7 +198,7 @@ class Device:
                     pass
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self._codename or ("Unknown device %s" % (self.wpid or self.product_id))
+        return self._name or self._codename or ("Unknown device %s" % (self.wpid or hex(self.product_id)[2:].upper()))
 
     def get_ids(self):
         ids = _hidpp20.get_ids(self)
@@ -303,15 +304,6 @@ class Device:
             if self.online and self.protocol >= 2.0:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
-
-    @property
-    def registers(self):
-        if not self._registers:
-            if self.descriptor and self.descriptor.registers:
-                self._registers = list(self.descriptor.registers)
-            else:
-                self._registers = []
-        return self._registers
 
     @property
     def settings(self):
