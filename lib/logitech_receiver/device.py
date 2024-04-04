@@ -305,6 +305,21 @@ class Device:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
 
+    def set_configuration(self, configuration, no_reply=False):
+        if self.online and self.protocol >= 2.0:
+            _hidpp20.config_change(self, configuration, no_reply=no_reply)
+
+    def reset(self, no_reply=False):
+        self.set_configuration(0, no_reply)
+
+    @property
+    def persister(self):
+        if not self._persister:
+            with self._persister_lock:
+                if not self._persister:
+                    self._persister = _configuration.persister(self)
+        return self._persister
+
     @property
     def settings(self):
         if not self._settings:
@@ -327,21 +342,6 @@ class Device:
                 if not self._feature_settings_checked:
                     self._feature_settings_checked = _check_feature_settings(self, self._settings)
         return self._settings
-
-    def set_configuration(self, configuration, no_reply=False):
-        if self.online and self.protocol >= 2.0:
-            _hidpp20.config_change(self, configuration, no_reply=no_reply)
-
-    def reset(self, no_reply=False):
-        self.set_configuration(0, no_reply)
-
-    @property
-    def persister(self):
-        if not self._persister:
-            with self._persister_lock:
-                if not self._persister:
-                    self._persister = _configuration.persister(self)
-        return self._persister
 
     def battery(self):  # None  or  level, next, status, voltage
         if self.protocol < 2.0:
@@ -368,6 +368,8 @@ class Device:
 
         changed = self.battery_info != info
         self.battery_info, old_info = info, self.battery_info
+        if old_info is None:
+            old_info = Battery(None, None, None, None)
 
         alert, reason = ALERT.NONE, None
         if not info.ok():
@@ -386,30 +388,6 @@ class Device:
         if self.online:
             battery = self.battery()
             self.set_battery_info(battery if battery is not None else Battery(None, None, None, None))
-
-    def enable_connection_notifications(self, enable=True):
-        """Enable or disable device (dis)connection notifications on this
-        receiver."""
-        if not bool(self.receiver) or self.protocol >= 2.0:
-            return False
-
-        if enable:
-            set_flag_bits = (
-                hidpp10_constants.NOTIFICATION_FLAG.battery_status
-                | hidpp10_constants.NOTIFICATION_FLAG.ui
-                | hidpp10_constants.NOTIFICATION_FLAG.configuration_complete
-            )
-        else:
-            set_flag_bits = 0
-        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
-        if not ok:
-            logger.warning("%s: failed to %s device notifications", self, "enable" if enable else "disable")
-
-        flag_bits = _hidpp10.get_notification_flags(self)
-        if logger.isEnabledFor(logging.INFO):
-            flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
-            logger.info("%s: device notifications %s %s", self, "enabled" if enable else "disabled", flag_names)
-        return flag_bits if ok else None
 
     def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
         """The status of the device had changed, so invoke the status callback.
@@ -441,6 +419,30 @@ class Device:
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
         if self.status_callback is not None:
             self.status_callback(self, alert, reason)
+
+    def enable_connection_notifications(self, enable=True):
+        """Enable or disable device (dis)connection notifications on this
+        receiver."""
+        if not bool(self.receiver) or self.protocol >= 2.0:
+            return False
+
+        if enable:
+            set_flag_bits = (
+                hidpp10_constants.NOTIFICATION_FLAG.battery_status
+                | hidpp10_constants.NOTIFICATION_FLAG.ui
+                | hidpp10_constants.NOTIFICATION_FLAG.configuration_complete
+            )
+        else:
+            set_flag_bits = 0
+        ok = _hidpp10.set_notification_flags(self, set_flag_bits)
+        if not ok:
+            logger.warning("%s: failed to %s device notifications", self, "enable" if enable else "disable")
+
+        flag_bits = _hidpp10.get_notification_flags(self)
+        if logger.isEnabledFor(logging.INFO):
+            flag_names = None if flag_bits is None else tuple(hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits))
+            logger.info("%s: device notifications %s %s", self, "enabled" if enable else "disabled", flag_names)
+        return flag_bits if ok else None
 
     def add_notification_handler(self, id: str, fn):
         """Adds the notification handling callback `fn` to this device under name `id`.
