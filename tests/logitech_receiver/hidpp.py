@@ -80,25 +80,28 @@ r_keyboard_1 = [  # a HID++ 1.0 keyboard
     Response("003412", 0x81F1, "02"),  # firmware
     Response("002345", 0x81F1, "03"),  # firmware
     Response("003456", 0x81F1, "04"),  # firmware
+    Response("050050", 0x8107),  # battery status
 ]
 
 r_keyboard_2 = [  # a HID++ 2.0 keyboard
     Response(4.2, 0x0010),  # ping
     Response("010001", 0x0000, "0001"),  # feature set at 0x01
-    Response("020003", 0x0000, "1000"),  # battery status at 0x02
+    Response("020003", 0x0000, "0020"),  # CONFIG_CHANGE at 0x02
     Response("030001", 0x0000, "0003"),  # device information at 0x03
     Response("040003", 0x0000, "0100"),  # unknown 0100 at 0x04
     Response("050003", 0x0000, "1B04"),  # reprogrammable keys V4 at 0x05
     Response("060003", 0x0000, "0007"),  # device friendly name at 0x06
     Response("070003", 0x0000, "0005"),  # device name at 0x07
+    Response("080003", 0x0000, "1000"),  # battery status at 0x08
     Response("08", 0x0100),  # 8 features
     Response("00010001", 0x0110, "01"),  # feature set at 0x01
-    Response("10000001", 0x0110, "02"),  # battery status at 0x02
+    Response("00200003", 0x0110, "02"),  # CONFIG_CHANGE at 0x02
     Response("00030001", 0x0110, "03"),  # device information at 0x03
     Response("01000003", 0x0110, "04"),  # unknown 0100 at 0x04
     Response("1B040003", 0x0110, "05"),  # reprogrammable keys V4 at 0x05
     Response("00070003", 0x0000, "06"),  # device friendly name at 0x06
     Response("00050003", 0x0000, "07"),  # device name at 0x07
+    Response("10000001", 0x0110, "08"),  # battery status at 0x02
     Response("0212345678000D1234567890ABAA01", 0x0300),  # device information
     Response("04", 0x0500),  # reprogrammable keys V4
     Response("00110012AB010203CD00", 0x0510, "00"),  # reprogrammable keys V4
@@ -113,6 +116,7 @@ r_keyboard_2 = [  # a HID++ 2.0 keyboard
     Response("4142434445464748494A4B4C4D4E4F", 0x0710, "00"),
     Response("505152530000000000000000000000", 0x0710, "0F"),
     Response("00", 0x0720),
+    Response("12345678", 0x0800),  # battery status
 ]
 
 r_mouse_1 = [  # a HID++ 1.0 mouse
@@ -299,6 +303,7 @@ responses_profiles_rom = [  # OnboardProfile in ROM
 complex_responses_1 = [  # COLOR_LED_EFFECTS
     Response(4.2, 0x0010),  # ping
     Response("010001", 0x0000, "0001"),  # FEATURE SET at x01
+    Response("020001", 0x0000, "0020"),  # CONFIG_CHANGE at x02
     Response("0A", 0x0100),  # 10 features
     Response("070001", 0x0000, "8070"),  # COLOR_LED_EFFECTS at 0x07
     *effects_responses_1,
@@ -307,6 +312,7 @@ complex_responses_1 = [  # COLOR_LED_EFFECTS
 complex_responses_2 = [  # RGB_EFFECTS + reprogrammable keys + persistent actions
     Response(4.2, 0x0010),  # ping
     Response("010001", 0x0000, "0001"),  # FEATURE SET at x01
+    Response("020001", 0x0000, "0020"),  # CONFIG_CHANGE at x02
     Response("0A", 0x0100),  # 10 features
     Response("070001", 0x0000, "8071"),  # RGB_EFFECTS at 0x07
     *effects_responses_2,

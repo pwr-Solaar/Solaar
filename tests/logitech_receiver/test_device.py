@@ -251,15 +251,17 @@ class TestDevice(device.Device):  # a fully functional Device but its HID++ func
     [
         (di_CCCC, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
         (di_C318, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
-        (di_B530, hidpp.r_keyboard_1, 2.0, type(None), 0, 0, 0, None, None),
+        (di_B530, hidpp.r_keyboard_1, 1.0, type(None), None, None, None, None, None),
+        (di_B530, hidpp.r_keyboard_2, 2.0, type(None), 4, 0, 0, None, None),
         (di_B530, hidpp.complex_responses_1, 4.5, hidpp20.LEDEffectsInfo, 0, 0, 0, None, None),
         (di_B530, hidpp.complex_responses_2, 4.5, hidpp20.RGBEffectsInfo, 8, 3, 1, True, True),
     ],
 )
-def test_Device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles):
+def test_Device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles, mocker):
     test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
+    spy_request = mocker.spy(test_device, "request")
 
     assert type(test_device.led_effects) == led
     if keys is None:
@@ -274,18 +276,57 @@ def test_Device_complex(device_info, responses, protocol, led, keys, remap, gest
     assert (test_device.backlight is None) == (backlight is None)
     assert (test_device.profiles is None) == (profiles is None)
 
+    test_device.set_configuration(55)
+    if protocol > 1.0:
+        spy_request.assert_called_with(0x210, 55, no_reply=False)
+    test_device.reset()
+    if protocol > 1.0:
+        spy_request.assert_called_with(0x210, 0, no_reply=False)
+
+
+@pytest.mark.parametrize(
+    "device_info, responses, protocol, p, persister, settings",
+    [
+        (di_CCCC, hidpp.r_empty, 1.0, None, None, 0),
+        (di_C318, hidpp.r_empty, 1.0, {}, {}, 0),
+        (di_C318, hidpp.r_keyboard_1, 1.0, {"n": "n"}, {"n": "n"}, 1),
+        (di_B530, hidpp.r_keyboard_2, 4.5, {"m": "m"}, {"m": "m"}, 1),
+        (di_C068, hidpp.r_mouse_1, 1.0, {"o": "o"}, {"o": "o"}, 2),
+        (di_C08A, hidpp.r_mouse_2, 4.5, {"p": "p"}, {"p": "p"}, 0),
+    ],
+)
+def test_Device_settings(device_info, responses, protocol, p, persister, settings, mocker):
+    mocker.patch("solaar.configuration.persister", return_value=p)
+    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+    test_device._name = "TestDevice"
+    test_device._protocol = protocol
+
+    assert test_device.persister == persister
+    assert len(test_device.settings) == settings
+
+
+@pytest.mark.parametrize(
+    "device_info, responses, protocol, battery, changed",
+    [
+        (di_C318, hidpp.r_empty, 1.0, None, {"active": True, "alert": 0, "reason": None}),
+        (di_C318, hidpp.r_keyboard_1, 1.0, common.Battery(50, None, 0, None), {"active": True, "alert": 0, "reason": None}),
+        (di_B530, hidpp.r_keyboard_2, 4.5, common.Battery(18, 52, None, None), {"active": True, "alert": 0, "reason": None}),
+    ],
+)
+def test_Device_battery(device_info, responses, protocol, battery, changed, mocker):
+    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+    test_device._name = "TestDevice"
+    test_device._protocol = protocol
+    spy_changed = mocker.spy(test_device, "changed")
+
+    assert test_device.battery() == battery
+    test_device.read_battery()
+    spy_changed.assert_called_with(**changed)
+
 
 """ TODO
-
- settings
- set configuration
-	reset
-	persister
- battery
- set_battery_info
- read_battery
-	enable_connection_notifications
 	changed
+	enable_connection_notifications
 	add_notification_handler
 	remove_notification_handler
 	handle_notification
