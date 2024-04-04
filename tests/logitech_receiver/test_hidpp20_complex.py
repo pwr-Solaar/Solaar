@@ -63,7 +63,7 @@ def test_FeaturesArray_check(device, expected_result, expected_count):
     "device, expected0, expected1, expected2, expected5, expected5v",
     [
         (device_zerofeatures, None, None, None, None, None),
-        (device_standard, 0x0000, 0x0001, 0x1000, hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 3),
+        (device_standard, 0x0000, 0x0001, 0x0020, hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 3),
     ],
 )
 def test_FeaturesArray_get_feature(device, expected0, expected1, expected2, expected5, expected5v):
@@ -94,13 +94,13 @@ def test_FeaturesArray_get_feature(device, expected0, expected1, expected2, expe
             [
                 (hidpp20_constants.FEATURE.ROOT, 0),
                 (hidpp20_constants.FEATURE.FEATURE_SET, 1),
-                (hidpp20_constants.FEATURE.BATTERY_STATUS, 2),
+                (hidpp20_constants.FEATURE.CONFIG_CHANGE, 2),
                 (hidpp20_constants.FEATURE.DEVICE_FW_VERSION, 3),
                 (common.NamedInt(256, "unknown:0100"), 4),
                 (hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, 5),
                 (None, 6),
                 (None, 7),
-                (None, 8),
+                (hidpp20_constants.FEATURE.BATTERY_STATUS, 8),
             ],
         ),
     ],
