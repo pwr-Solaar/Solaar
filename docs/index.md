@@ -133,6 +133,10 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
+- Bluez 5.73 interacts badly with Solaar (and with the Linux driver for Logitech devices).
+  Bluetooth-connected devices will revert to default settings when reconnecting after going into power-saving mode or being turned off.
+  One way to recover is to quit Solaar and restart it.
+
 - Solaar expects that it has exclusive control over settings that are not ignored.
   Running other programs that modify these settings, such as logiops,
   will likely result in unexpected device behavior.
