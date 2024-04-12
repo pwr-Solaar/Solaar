@@ -20,6 +20,7 @@ import logging
 import time
 
 from dataclasses import dataclass
+from typing import Callable
 from typing import Optional
 
 import hidapi as _hid
@@ -62,6 +63,8 @@ class Receiver:
     The paired devices are available through the sequence interface.
     """
 
+    read_register: Callable = hidpp10.read_register
+    write_register: Callable = hidpp10.write_register
     number = 0xFF
     kind = None
 
@@ -254,9 +257,6 @@ class Receiver:
 
     def reset_pairing(self):
         self.pairing = Pairing()
-
-    read_register = hidpp10.read_register
-    write_register = hidpp10.write_register
 
     def __iter__(self):
         connected_devices = self.count()

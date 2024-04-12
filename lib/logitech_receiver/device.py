@@ -20,6 +20,7 @@ import logging
 import threading as _threading
 import time
 
+from typing import Callable
 from typing import Optional
 
 import hidapi as _hid
@@ -66,8 +67,8 @@ class DeviceFactory:
 
 class Device:
     instances = []
-    read_register = hidpp10.read_register
-    write_register = hidpp10.write_register
+    read_register: Callable = hidpp10.read_register
+    write_register: Callable = hidpp10.write_register
 
     def __init__(self, receiver, number, online, pairing_info=None, handle=None, device_info=None, setting_callback=None):
         assert receiver or device_info

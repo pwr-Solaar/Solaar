@@ -27,6 +27,7 @@ from typing import Optional
 import yaml as _yaml
 
 from solaar.i18n import _
+from typing_extensions import Protocol
 
 from . import exceptions
 from . import hidpp10_constants as _hidpp10_constants
@@ -51,6 +52,30 @@ from .hidpp20_constants import GESTURE
 logger = logging.getLogger(__name__)
 
 KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KIND}
+
+
+class Device(Protocol):
+    def feature_request(self, feature: FEATURE) -> Any:
+        ...
+
+    def request(self) -> Any:
+        ...
+
+    @property
+    def features(self) -> Any:
+        ...
+
+    @property
+    def _gestures(self) -> Any:
+        ...
+
+    @property
+    def _backlight(self) -> Any:
+        ...
+
+    @property
+    def _profiles(self) -> Any:
+        ...
 
 
 class FeaturesArray(dict):
@@ -159,7 +184,7 @@ class ReprogrammableKey:
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
 
-    def __init__(self, device, index, cid, tid, flags):
+    def __init__(self, device: Device, index, cid, tid, flags):
         self._device = device
         self.index = index
         self._cid = cid
@@ -201,7 +226,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
 
-    def __init__(self, device, index, cid, tid, flags, pos, group, gmask):
+    def __init__(self, device: Device, index, cid, tid, flags, pos, group, gmask):
         ReprogrammableKey.__init__(self, device, index, cid, tid, flags)
         self.pos = pos
         self.group = group
@@ -460,7 +485,7 @@ class KeysArray:
 
 
 class KeysArrayV2(KeysArray):
-    def __init__(self, device, count, version=1):
+    def __init__(self, device: Device, count, version=1):
         super().__init__(device, count, version)
         """The mapping from Control IDs to their native Task IDs.
         For example, Control "Left Button" is mapped to Task "Left Click".
@@ -1417,7 +1442,7 @@ class Hidpp20:
                     offset = offset + 2
             return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
 
-    def get_kind(self, device):
+    def get_kind(self, device: Device):
         """Reads a device's type.
 
         :see DEVICE_KIND:
@@ -1431,7 +1456,7 @@ class Hidpp20:
             #     logger.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
             return KIND_MAP[DEVICE_KIND[kind]]
 
-    def get_name(self, device):
+    def get_name(self, device: Device):
         """Reads a device's name.
 
         :returns: a string with the device name, or ``None`` if the device is not
@@ -1452,7 +1477,7 @@ class Hidpp20:
 
             return name.decode("utf-8")
 
-    def get_friendly_name(self, device):
+    def get_friendly_name(self, device: Device):
         """Reads a device's friendly name.
 
         :returns: a string with the device name, or ``None`` if the device is not
@@ -1473,22 +1498,22 @@ class Hidpp20:
 
             return name.decode("utf-8")
 
-    def get_battery_status(self, device):
+    def get_battery_status(self, device: Device):
         report = device.feature_request(FEATURE.BATTERY_STATUS)
         if report:
             return decipher_battery_status(report)
 
-    def get_battery_unified(self, device):
+    def get_battery_unified(self, device: Device):
         report = device.feature_request(FEATURE.UNIFIED_BATTERY, 0x10)
         if report is not None:
             return decipher_battery_unified(report)
 
-    def get_battery_voltage(self, device):
+    def get_battery_voltage(self, device: Device):
         report = device.feature_request(FEATURE.BATTERY_VOLTAGE)
         if report is not None:
             return decipher_battery_voltage(report)
 
-    def get_adc_measurement(self, device):
+    def get_adc_measurement(self, device: Device):
         try:  # this feature call produces an error for headsets that are connected but inactive
             report = device.feature_request(FEATURE.ADC_MEASUREMENT)
             if report is not None:
@@ -1513,7 +1538,7 @@ class Hidpp20:
                     return result
         return 0
 
-    def get_keys(self, device):
+    def get_keys(self, device: Device):
         # TODO: add here additional variants for other REPROG_CONTROLS
         count = None
         if FEATURE.REPROG_CONTROLS_V2 in device.features:
@@ -1524,30 +1549,30 @@ class Hidpp20:
             return KeysArrayV4(device, ord(count[:1]))
         return None
 
-    def get_remap_keys(self, device):
+    def get_remap_keys(self, device: Device):
         count = device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x10)
         if count:
             return KeysArrayPersistent(device, ord(count[:1]))
 
-    def get_gestures(self, device):
+    def get_gestures(self, device: Device):
         if getattr(device, "_gestures", None) is not None:
             return device._gestures
         if FEATURE.GESTURE_2 in device.features:
             return Gestures(device)
 
-    def get_backlight(self, device):
+    def get_backlight(self, device: Device):
         if getattr(device, "_backlight", None) is not None:
             return device._backlight
         if FEATURE.BACKLIGHT2 in device.features:
             return Backlight(device)
 
-    def get_profiles(self, device):
+    def get_profiles(self, device: Device):
         if getattr(device, "_profiles", None) is not None:
             return device._profiles
         if FEATURE.ONBOARD_PROFILES in device.features:
             return OnboardProfiles.from_device(device)
 
-    def get_mouse_pointer_info(self, device):
+    def get_mouse_pointer_info(self, device: Device):
         pointer_info = device.feature_request(FEATURE.MOUSE_POINTER)
         if pointer_info:
             dpi, flags = _unpack("!HB", pointer_info[:3])
@@ -1561,7 +1586,7 @@ class Hidpp20:
                 "suggest_vertical_orientation": suggest_vertical_orientation,
             }
 
-    def get_vertical_scrolling_info(self, device):
+    def get_vertical_scrolling_info(self, device: Device):
         vertical_scrolling_info = device.feature_request(FEATURE.VERTICAL_SCROLLING)
         if vertical_scrolling_info:
             roller, ratchet, lines = _unpack("!BBB", vertical_scrolling_info[:3])
@@ -1577,13 +1602,13 @@ class Hidpp20:
             )[roller]
             return {"roller": roller_type, "ratchet": ratchet, "lines": lines}
 
-    def get_hi_res_scrolling_info(self, device):
+    def get_hi_res_scrolling_info(self, device: Device):
         hi_res_scrolling_info = device.feature_request(FEATURE.HI_RES_SCROLLING)
         if hi_res_scrolling_info:
             mode, resolution = _unpack("!BB", hi_res_scrolling_info[:2])
             return mode, resolution
 
-    def get_pointer_speed_info(self, device):
+    def get_pointer_speed_info(self, device: Device):
         pointer_speed_info = device.feature_request(FEATURE.POINTER_SPEED)
         if pointer_speed_info:
             pointer_speed_hi, pointer_speed_lo = _unpack("!BB", pointer_speed_info[:2])
@@ -1591,14 +1616,14 @@ class Hidpp20:
             #     pointer_speed_lo = pointer_speed_lo
             return pointer_speed_hi + pointer_speed_lo / 256
 
-    def get_lowres_wheel_status(self, device):
+    def get_lowres_wheel_status(self, device: Device):
         lowres_wheel_status = device.feature_request(FEATURE.LOWRES_WHEEL)
         if lowres_wheel_status:
             wheel_flag = _unpack("!B", lowres_wheel_status[:1])[0]
             wheel_reporting = ("HID", "HID++")[wheel_flag & 0x01]
             return wheel_reporting
 
-    def get_hires_wheel(self, device):
+    def get_hires_wheel(self, device: Device):
         caps = device.feature_request(FEATURE.HIRES_WHEEL, 0x00)
         mode = device.feature_request(FEATURE.HIRES_WHEEL, 0x10)
         ratchet = device.feature_request(FEATURE.HIRES_WHEEL, 0x030)
@@ -1624,7 +1649,7 @@ class Hidpp20:
 
             return multi, has_invert, has_ratchet, inv, res, target, ratchet
 
-    def get_new_fn_inversion(self, device):
+    def get_new_fn_inversion(self, device: Device):
         state = device.feature_request(FEATURE.NEW_FN_INVERSION, 0x00)
         if state:
             inverted, default_inverted = _unpack("!BB", state[:2])
@@ -1632,7 +1657,7 @@ class Hidpp20:
             default_inverted = (default_inverted & 0x01) != 0
             return inverted, default_inverted
 
-    def get_host_names(self, device):
+    def get_host_names(self, device: Device):
         state = device.feature_request(FEATURE.HOSTS_INFO, 0x00)
         host_names = {}
         if state:
@@ -1658,7 +1683,7 @@ class Hidpp20:
                     host_names[currentHost] = (host_names[currentHost][0], hostname)
         return host_names
 
-    def set_host_name(self, device, name, currentName=""):
+    def set_host_name(self, device: Device, name, currentName=""):
         name = bytearray(name, "utf-8")
         currentName = bytearray(currentName, "utf-8")
         if logger.isEnabledFor(logging.INFO):
@@ -1680,18 +1705,18 @@ class Hidpp20:
                     chunk += 14
             return True
 
-    def get_onboard_mode(self, device):
+    def get_onboard_mode(self, device: Device):
         state = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x20)
 
         if state:
             mode = _unpack("!B", state[:1])[0]
             return mode
 
-    def set_onboard_mode(self, device, mode):
+    def set_onboard_mode(self, device: Device, mode):
         state = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x10, mode)
         return state
 
-    def get_polling_rate(self, device):
+    def get_polling_rate(self, device: Device):
         state = device.feature_request(FEATURE.REPORT_RATE, 0x10)
         if state:
             rate = _unpack("!B", state[:1])[0]
@@ -1703,14 +1728,14 @@ class Hidpp20:
                 rate = _unpack("!B", state[:1])[0]
                 return rates[rate]
 
-    def get_remaining_pairing(self, device):
+    def get_remaining_pairing(self, device: Device):
         result = device.feature_request(FEATURE.REMAINING_PAIRING, 0x0)
         if result:
             result = _unpack("!B", result[:1])[0]
             FEATURE._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
-    def config_change(self, device, configuration, no_reply=False):
+    def config_change(self, device: Device, configuration, no_reply=False):
         return device.feature_request(FEATURE.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
 
 

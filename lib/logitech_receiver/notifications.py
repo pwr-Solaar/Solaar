@@ -37,8 +37,6 @@ from .common import strhex as _strhex
 
 logger = logging.getLogger(__name__)
 
-_hidpp10 = hidpp10.Hidpp10()
-_hidpp20 = hidpp20.Hidpp20()
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
 
