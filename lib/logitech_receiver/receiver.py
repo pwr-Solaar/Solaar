@@ -32,7 +32,7 @@ from . import base as _base
 from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
-from .common import ALERT
+from .common import Alert
 from .device import Device
 
 logger = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ class Receiver:
     def __del__(self):
         self.close()
 
-    def changed(self, alert=ALERT.NOTIFICATION, reason=None):
+    def changed(self, alert=Alert.NOTIFICATION, reason=None):
         """The status of the device had changed, so invoke the status callback"""
         if self.status_callback is not None:
             self.status_callback(self, alert=alert, reason=reason)

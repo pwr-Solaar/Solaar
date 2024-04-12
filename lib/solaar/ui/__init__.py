@@ -20,7 +20,7 @@ import logging
 import gi
 import yaml as _yaml
 
-from logitech_receiver.common import ALERT
+from logitech_receiver.common import Alert
 
 from solaar.i18n import _
 from solaar.ui.config_panel import change_setting
@@ -109,21 +109,21 @@ def _status_changed(device, alert, reason, refresh=False):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("status changed: %s (%s) %s", device, alert, reason)
     if alert is None:
-        alert = ALERT.NONE
+        alert = Alert.NONE
 
     tray.update(device)
-    if alert & ALERT.ATTENTION:
+    if alert & Alert.ATTENTION:
         tray.attention(reason)
 
-    need_popup = alert & ALERT.SHOW_WINDOW
+    need_popup = alert & Alert.SHOW_WINDOW
     window.update(device, need_popup, refresh)
     diversion_rules.update_devices()
 
-    if alert & (ALERT.NOTIFICATION | ALERT.ATTENTION):
+    if alert & (Alert.NOTIFICATION | Alert.ATTENTION):
         notify.show(device, reason)
 
 
-def status_changed(device, alert=ALERT.NONE, reason=None, refresh=False):
+def status_changed(device, alert=Alert.NONE, reason=None, refresh=False):
     GLib.idle_add(_status_changed, device, alert, reason, refresh)
 
 

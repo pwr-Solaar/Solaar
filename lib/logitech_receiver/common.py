@@ -18,23 +18,14 @@
 # Some common functions and types.
 
 from binascii import hexlify as _hexlify
-from collections import namedtuple
 from dataclasses import dataclass
+from enum import IntEnum
 from typing import Optional
 from typing import Union
 
 import yaml as _yaml
 
 from solaar.i18n import _
-
-
-def is_string(d):
-    return isinstance(d, str)
-
-
-#
-#
-#
 
 
 def crc16(data: bytes):
@@ -314,7 +305,7 @@ class NamedInt(int):
     (case-insensitive)."""
 
     def __new__(cls, value, name):
-        assert is_string(name)
+        assert isinstance(name, str)
         obj = int.__new__(cls, value)
         obj.name = str(name)
         return obj
@@ -329,7 +320,7 @@ class NamedInt(int):
             return int(self) == int(other) and self.name == other.name
         if isinstance(other, int):
             return int(self) == int(other)
-        if is_string(other):
+        if isinstance(other, str):
             return self.name.lower() == other.lower()
         # this should catch comparisons with bytes in Py3
         if other is not None:
@@ -430,7 +421,7 @@ class NamedInts:
                 self._sort_values()
                 return value
 
-        elif is_string(index):
+        elif isinstance(index, str):
             if index in self.__dict__:
                 return self.__dict__[index]
             return next((x for x in self._values if str(x) == index), None)
@@ -469,7 +460,7 @@ class NamedInts:
         if isinstance(name, NamedInt):
             assert int(index) == int(name), repr(index) + " " + repr(name)
             value = name
-        elif is_string(name):
+        elif isinstance(name, str):
             value = NamedInt(index, name)
         else:
             raise TypeError("name must be a string")
@@ -490,7 +481,7 @@ class NamedInts:
             return self[value] == value
         elif isinstance(value, int):
             return value in self._indexed
-        elif is_string(value):
+        elif isinstance(value, str):
             return value in self.__dict__ or value in self._values
 
     def __iter__(self):
@@ -550,63 +541,81 @@ class KwException(Exception):
             return self.args[0].get(k)  # was self.args[0][k]
 
 
-"""Firmware information."""
-FirmwareInfo = namedtuple("FirmwareInfo", ["kind", "name", "version", "extras"])
+@dataclass
+class FirmwareInfo:
+    kind: str
+    name: str
+    version: str
+    extras: str
+
+
+class BatteryStatus(IntEnum):
+    DISCHARGING = 0x00
+    RECHARGING = 0x01
+    ALMOST_FULL = 0x02
+    FULL = 0x03
+    SLOW_RECHARGE = 0x04
+    INVALID_BATTERY = 0x05
+    THERMAL_ERROR = 0x06
+
+
+class BatteryLevelApproximation(IntEnum):
+    EMPTY = 0
+    CRITICAL = 5
+    LOW = 20
+    GOOD = 50
+    FULL = 90
 
 
 @dataclass
 class Battery:
     """Information about the current state of a battery"""
 
-    level: Optional[Union[NamedInt, int]]
+    ATTENTION_LEVEL = 5
+
+    level: Optional[Union[BatteryLevelApproximation, int]]
     next_level: Optional[Union[NamedInt, int]]
-    status: Optional[NamedInt]
+    status: Optional[BatteryStatus]
     voltage: Optional[int]
     light_level: Optional[int] = None  # light level for devices with solaar recharging
 
     def __post_init__(self):
         if self.level is None:  # infer level from status if needed and possible
-            if self.status == Battery.STATUS.full:
-                self.level = Battery.APPROX.full
-            elif self.status in (Battery.STATUS.almost_full, Battery.STATUS.recharging):
-                self.level = Battery.APPROX.good
-            elif self.status == Battery.STATUS.slow_recharge:
-                self.level = Battery.APPROX.low
+            if self.status == BatteryStatus.FULL:
+                self.level = BatteryLevelApproximation.FULL
+            elif self.status in (BatteryStatus.ALMOST_FULL, BatteryStatus.RECHARGING):
+                self.level = BatteryLevelApproximation.GOOD
+            elif self.status == BatteryStatus.SLOW_RECHARGE:
+                self.level = BatteryLevelApproximation.LOW
 
-    STATUS = NamedInts(
-        discharging=0x00,
-        recharging=0x01,
-        almost_full=0x02,
-        full=0x03,
-        slow_recharge=0x04,
-        invalid_battery=0x05,
-        thermal_error=0x06,
-    )
-
-    APPROX = NamedInts(empty=0, critical=5, low=20, good=50, full=90)
-
-    ATTENTION_LEVEL = 5
-
-    def ok(self):
-        return self.status not in (Battery.STATUS.invalid_battery, Battery.STATUS.thermal_error) and (
+    def ok(self) -> bool:
+        return self.status not in (BatteryStatus.INVALID_BATTERY, BatteryStatus.THERMAL_ERROR) and (
             self.level is None or self.level > Battery.ATTENTION_LEVEL
         )
 
-    def charging(self):
+    def charging(self) -> bool:
         return self.status in (
-            Battery.STATUS.recharging,
-            Battery.STATUS.almost_full,
-            Battery.STATUS.full,
-            Battery.STATUS.slow_recharge,
+            BatteryStatus.RECHARGING,
+            BatteryStatus.ALMOST_FULL,
+            BatteryStatus.FULL,
+            BatteryStatus.SLOW_RECHARGE,
         )
 
-    def to_str(self):
-        if isinstance(self.level, NamedInt):
-            return _("Battery: %(level)s (%(status)s)") % {"level": _(self.level), "status": _(self.status)}
+    def to_str(self) -> str:
+        if isinstance(self.level, BatteryLevelApproximation):
+            level = self.level.name.lower()
+            status = self.status.name.lower().replace("_", " ")
+            return _("Battery: %(level)s (%(status)s)") % {"level": _(level), "status": _(status)}
         elif isinstance(self.level, int):
-            return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(self.status)}
+            status = self.status.name.lower().replace("_", " ")
+            return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
         else:
             return ""
 
 
-ALERT = NamedInts(NONE=0x00, NOTIFICATION=0x01, SHOW_WINDOW=0x02, ATTENTION=0x04, ALL=0xFF)
+class Alert(IntEnum):
+    NONE = 0x00
+    NOTIFICATION = 0x01
+    SHOW_WINDOW = 0x02
+    ATTENTION = 0x04
+    ALL = 0xFF

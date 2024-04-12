@@ -218,11 +218,17 @@ def test_kw_exception():
 @pytest.mark.parametrize(
     "status, expected_level, expected_ok, expected_charging, expected_string",
     [
-        (common.Battery.STATUS.full, common.Battery.APPROX.full, True, True, "Battery: full (full)"),
-        (common.Battery.STATUS.almost_full, common.Battery.APPROX.good, True, True, "Battery: good (almost full)"),
-        (common.Battery.STATUS.recharging, common.Battery.APPROX.good, True, True, "Battery: good (recharging)"),
-        (common.Battery.STATUS.slow_recharge, common.Battery.APPROX.low, True, True, "Battery: low (slow recharge)"),
-        (common.Battery.STATUS.discharging, None, True, False, ""),
+        (common.BatteryStatus.FULL, common.BatteryLevelApproximation.FULL, True, True, "Battery: full (full)"),
+        (common.BatteryStatus.ALMOST_FULL, common.BatteryLevelApproximation.GOOD, True, True, "Battery: good (almost full)"),
+        (common.BatteryStatus.RECHARGING, common.BatteryLevelApproximation.GOOD, True, True, "Battery: good (recharging)"),
+        (
+            common.BatteryStatus.SLOW_RECHARGE,
+            common.BatteryLevelApproximation.LOW,
+            True,
+            True,
+            "Battery: low (slow recharge)",
+        ),
+        (common.BatteryStatus.DISCHARGING, None, True, False, ""),
     ],
 )
 def test_battery(status, expected_level, expected_ok, expected_charging, expected_string):
@@ -236,9 +242,9 @@ def test_battery(status, expected_level, expected_ok, expected_charging, expecte
 
 
 def test_battery_2():
-    battery = common.Battery(50, None, common.Battery.STATUS.discharging, None)
+    battery = common.Battery(50, None, common.BatteryStatus.DISCHARGING, None)
 
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
     assert battery.level == 50
     assert battery.ok()
     assert not battery.charging()

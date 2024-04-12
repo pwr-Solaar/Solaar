@@ -96,7 +96,7 @@ def test_get_battery_status():
     assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_get_battery_voltage():
@@ -107,7 +107,7 @@ def test_get_battery_voltage():
 
     assert feature == hidpp20_constants.FEATURE.BATTERY_VOLTAGE
     assert battery.level == 90
-    assert battery.status == common.Battery.STATUS.recharging
+    assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
 
 
@@ -119,7 +119,7 @@ def test_get_battery_unified():
 
     assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
     assert battery.level == 80
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_get_adc_measurement():
@@ -130,7 +130,7 @@ def test_get_adc_measurement():
 
     assert feature == hidpp20_constants.FEATURE.ADC_MEASUREMENT
     assert battery.level == 90
-    assert battery.status == common.Battery.STATUS.recharging
+    assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
 
 
@@ -143,7 +143,7 @@ def test_get_battery():
     assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_get_battery_none():
@@ -158,7 +158,7 @@ def test_get_battery_none():
 
     assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
     assert battery.level == 80
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 # get_keys is in test_hidpp20_complex
@@ -379,7 +379,7 @@ def test_decipher_battery_status():
     assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_decipher_battery_voltage():
@@ -389,7 +389,7 @@ def test_decipher_battery_voltage():
 
     assert feature == hidpp20_constants.FEATURE.BATTERY_VOLTAGE
     assert battery.level == 90
-    assert battery.status == common.Battery.STATUS.recharging
+    assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
 
 
@@ -400,7 +400,7 @@ def test_decipher_battery_unified():
 
     assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
     assert battery.level == 80
-    assert battery.status == common.Battery.STATUS.discharging
+    assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_decipher_adc_measurement():
@@ -410,5 +410,5 @@ def test_decipher_adc_measurement():
 
     assert feature == hidpp20_constants.FEATURE.ADC_MEASUREMENT
     assert battery.level == 90
-    assert battery.status == common.Battery.STATUS.recharging
+    assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000

@@ -34,7 +34,7 @@ from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
-from .common import ALERT
+from .common import Alert
 from .common import Battery
 from .settings_templates import check_feature_settings as _check_feature_settings
 
@@ -375,11 +375,11 @@ class Device:
         if old_info is None:
             old_info = Battery(None, None, None, None)
 
-        alert, reason = ALERT.NONE, None
+        alert, reason = Alert.NONE, None
         if not info.ok():
             logger.warning("%s: battery %d%%, ALERT %s", self, info.level, info.status)
             if old_info.status != info.status:
-                alert = ALERT.NOTIFICATION | ALERT.ATTENTION
+                alert = Alert.NOTIFICATION | Alert.ATTENTION
             reason = info.to_str()
 
         if changed or reason:
@@ -393,7 +393,7 @@ class Device:
             battery = self.battery()
             self.set_battery_info(battery if battery is not None else Battery(None, None, None, None))
 
-    def changed(self, active=None, alert=ALERT.NONE, reason=None, push=False):
+    def changed(self, active=None, alert=Alert.NONE, reason=None, push=False):
         """The status of the device had changed, so invoke the status callback.
         Also push notifications and settings to the device when necessary."""
         if active is not None:

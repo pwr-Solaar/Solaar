@@ -31,8 +31,9 @@ from . import hidpp20
 from . import hidpp20_constants as _hidpp20_constants
 from . import settings_templates as _st
 from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
-from .common import ALERT as _ALERT
+from .common import Alert
 from .common import Battery as _Battery
+from .common import BatteryStatus
 from .common import strhex as _strhex
 
 logger = logging.getLogger(__name__)
@@ -203,7 +204,7 @@ def _process_dj_notification(device, n):
         connected = not n.address & 0x01
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: DJ connection: %s %s", device, connected, n)
-        device.changed(active=connected, alert=_ALERT.NONE, reason=_("connected") if connected else _("disconnected"))
+        device.changed(active=connected, alert=Alert.NONE, reason=_("connected") if connected else _("disconnected"))
         return True
 
     logger.warning("%s: unrecognized DJ %s", device, n)
@@ -229,7 +230,7 @@ def _process_hidpp10_notification(device, n):
             device.wpid = None
             if device.number in device.receiver:
                 del device.receiver[device.number]
-            device.changed(active=False, alert=_ALERT.ALL, reason=_("unpaired"))
+            device.changed(active=False, alert=Alert.ALL, reason=_("unpaired"))
         ##            device.status = None
         else:
             logger.warning("%s: disconnection with unknown type %02X: %s", device, n.address, n)
@@ -277,7 +278,7 @@ def _process_hidpp10_notification(device, n):
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: device powered on", device)
             reason = device.status_string() or _("powered on")
-            device.changed(active=True, alert=_ALERT.NOTIFICATION, reason=reason)
+            device.changed(active=True, alert=Alert.NOTIFICATION, reason=reason)
         else:
             logger.warning("%s: unknown %s", device, n)
         return True
@@ -325,17 +326,17 @@ def _process_feature_notification(device, n, feature):
             charge, lux, adc = _unpack("!BHH", n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
-            status_text = _Battery.STATUS.discharging
+            status_text = BatteryStatus.DISCHARGING
             if n.address == 0x00:
                 device.set_battery_info(_Battery(charge, None, status_text, None))
             elif n.address == 0x10:
                 if lux > 200:
-                    status_text = _Battery.STATUS.recharging
+                    status_text = BatteryStatus.RECHARGING
                 device.set_battery_info(_Battery(charge, None, status_text, None, lux))
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("%s: Light Check button pressed", device)
-                device.changed(alert=_ALERT.SHOW_WINDOW)
+                device.changed(alert=Alert.SHOW_WINDOW)
                 # first cancel any reporting
                 # device.feature_request(_F.SOLAR_DASHBOARD)
                 # trigger a new report chain
@@ -353,7 +354,7 @@ def _process_feature_notification(device, n, feature):
                 logger.debug("wireless status: %s", n)
             reason = "powered on" if n.data[2] == 1 else None
             if n.data[1] == 1:  # device is asking for software reconfiguration so need to change status
-                alert = _ALERT.NONE
+                alert = Alert.NONE
                 device.changed(active=True, alert=alert, reason=reason, push=True)
         else:
             logger.warning("%s: unknown WIRELESS %s", device, n)
