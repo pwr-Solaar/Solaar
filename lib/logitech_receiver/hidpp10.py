@@ -22,7 +22,7 @@ from typing import Any
 from typing_extensions import Protocol
 
 from .common import Battery
-from .common import BatteryChargeApproximation
+from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareInfo as _FirmwareInfo
 from .common import bytes2int as _bytes2int
@@ -158,17 +158,17 @@ class Hidpp10:
             return
 
         if battery_level is not None:
-            if battery_level < BatteryChargeApproximation.CRITICAL:
+            if battery_level < BatteryLevelApproximation.CRITICAL:
                 # 1 orange, and force blink
                 v1, v2 = 0x22, 0x00
                 warning = True
-            elif battery_level < BatteryChargeApproximation.LOW:
+            elif battery_level < BatteryLevelApproximation.LOW:
                 # 1 orange
                 v1, v2 = 0x22, 0x00
-            elif battery_level < BatteryChargeApproximation.GOOD:
+            elif battery_level < BatteryLevelApproximation.GOOD:
                 # 1 green
                 v1, v2 = 0x20, 0x00
-            elif battery_level < BatteryChargeApproximation.FULL:
+            elif battery_level < BatteryLevelApproximation.FULL:
                 # 2 greens
                 v1, v2 = 0x20, 0x02
             else:
@@ -228,18 +228,18 @@ class Hidpp10:
 
 
 def parse_battery_status(register, reply) -> Battery | None:
-    def status_byte_to_charge(status_byte_: int) -> BatteryChargeApproximation:
+    def status_byte_to_charge(status_byte_: int) -> BatteryLevelApproximation:
         if status_byte_ == 7:
-            charge_ = BatteryChargeApproximation.FULL
+            charge_ = BatteryLevelApproximation.FULL
         elif status_byte_ == 5:
-            charge_ = BatteryChargeApproximation.GOOD
+            charge_ = BatteryLevelApproximation.GOOD
         elif status_byte_ == 3:
-            charge_ = BatteryChargeApproximation.LOW
+            charge_ = BatteryLevelApproximation.LOW
         elif status_byte_ == 1:
-            charge_ = BatteryChargeApproximation.CRITICAL
+            charge_ = BatteryLevelApproximation.CRITICAL
         else:
             # pure 'charging' notifications may come without a status
-            charge_ = BatteryChargeApproximation.EMPTY
+            charge_ = BatteryLevelApproximation.EMPTY
         return charge_
 
     def status_byte_to_battery_status(status_byte_: int) -> BatteryStatus:
