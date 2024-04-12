@@ -45,6 +45,19 @@ def write_register(device, register_number, *value):
     return device.request(request_id, *value)
 
 
+def get_configuration_pending_flags(receiver):
+    assert not receiver.isDevice
+    result = read_register(receiver, REGISTERS.devices_configuration)
+    if result is not None:
+        return ord(result[:1])
+
+
+def set_configuration_pending_flags(receiver, devices):
+    assert not receiver.isDevice
+    result = write_register(receiver, REGISTERS.devices_configuration, devices)
+    return result is not None
+
+
 class Hidpp10:
     def get_battery(self, device):
         assert device is not None
@@ -188,17 +201,6 @@ class Hidpp10:
         if flags is not None:
             assert len(flags) == 3
             return _bytes2int(flags)
-
-    def get_configuration_pending_flags(self, receiver):
-        assert not receiver.isDevice
-        result = read_register(receiver, REGISTERS.devices_configuration)
-        if result is not None:
-            return ord(result[:1])
-
-    def set_configuration_pending_flags(self, receiver, devices):
-        assert not receiver.isDevice
-        result = write_register(receiver, REGISTERS.devices_configuration, devices)
-        return result is not None
 
 
 def parse_battery_status(register, reply):

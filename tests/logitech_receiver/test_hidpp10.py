@@ -299,7 +299,7 @@ def test_get_register(device, register, expected_result):
     ],
 )
 def test_get_configuration_pending_flags(device, expected_result):
-    result = _hidpp10.get_configuration_pending_flags(device)
+    result = hidpp10.get_configuration_pending_flags(device)
 
     assert result == expected_result
 
@@ -312,6 +312,6 @@ def test_get_configuration_pending_flags(device, expected_result):
     ],
 )
 def test_set_configuration_pending_flags(device, expected_result):
-    result = _hidpp10.set_configuration_pending_flags(device, 0x00)
+    result = hidpp10.set_configuration_pending_flags(device, 0x00)
 
     assert result == expected_result
