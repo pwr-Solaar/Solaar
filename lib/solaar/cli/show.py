@@ -38,7 +38,7 @@ def _print_receiver(receiver):
     print("  Device path  :", receiver.path)
     print(f"  USB id       : 046d:{receiver.product_id}")
     print("  Serial       :", receiver.serial)
-    pending = _hidpp10.get_configuration_pending_flags(receiver)
+    pending = hidpp10.get_configuration_pending_flags(receiver)
     if pending:
         print(f"  C Pending    : {pending:02x}")
     if receiver.firmware:

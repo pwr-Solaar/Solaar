@@ -85,7 +85,7 @@ class Receiver:
         self.notification_flags = None
         self.pairing = Pairing()
         self.initialize(product_info)
-        _hidpp10.set_configuration_pending_flags(self, 0xFF)
+        hidpp10.set_configuration_pending_flags(self, 0xFF)
 
     def initialize(self, product_info: dict):
         # read the receiver information subregister, so we can find out max_devices

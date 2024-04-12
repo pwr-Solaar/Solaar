@@ -417,7 +417,7 @@ class Device:
                         self.set_configuration(0x11)  # signal end of configuration
                     self.read_battery()  # battery information may have changed so try to read it now
             elif was_active and self.receiver:  # need to set configuration pending flag in receiver
-                hidpp10.Hidpp10().set_configuration_pending_flags(self.receiver, 0xFF)
+                hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("device %d changed: active=%s %s", self.number, self._active, self.battery_info)
         if self.status_callback is not None:
