@@ -17,6 +17,7 @@
 
 import errno as _errno
 import logging
+import time
 
 from dataclasses import dataclass
 from typing import Optional
@@ -209,6 +210,7 @@ class Receiver:
         assert notification is None or notification.sub_id == 0x41
 
         try:
+            time.sleep(0.05)  # let receiver settle
             info = self.device_pairing_information(number)
             if notification is not None:
                 online, _e, nwpid, nkind = self.notification_information(number, notification)
