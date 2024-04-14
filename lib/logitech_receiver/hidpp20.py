@@ -1247,7 +1247,7 @@ class OnboardProfiles:
         headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
-        if chunk[0:4] == b"\x00\x00\x00\x00":  # look in ROM instead
+        if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xFF\xFF\xFF\xFF":  # look in ROM instead
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
             s = 0x01
         while chunk[0:2] != b"\xff\xff":

@@ -775,6 +775,25 @@ hex2 = (
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     "FFFFFFFFFFFFFFFFFFFFFFFFFF27C9"
 )
+hex3 = (
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    "FFFFFFFFFFFFFFFFFFFFFFFFFF2307"
+)
 
 
 @pytest.mark.parametrize(
@@ -782,6 +801,7 @@ hex2 = (
     [
         (hex1, "TE7", 2, 1, 16, 0, [0x0190, 0x0380, 0x0700, 0x1400, 0x2800], "8000FFFF", "0A01020300500407000000"),
         (hex2, "", 2, 1, 16, 0, [0x0190, 0x0380, 0x0700, 0x1400, 0x2800], "8000FFFF", "0A01020300500407000000"),
+        (hex3, "", 2, 1, 16, 0, [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF], "FFFFFFFF", "FFFFFFFFFFFFFFFFFFFFFF"),
     ],
 )
 def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, resolutions, button, lighting):
@@ -802,6 +822,7 @@ def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, res
     [
         (hidpp.responses_profiles, "ONB", 1, 2, 2, 1, 254),
         (hidpp.responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
+        (hidpp.responses_profiles_rom_2, "ONB", 1, 2, 2, 1, 254),
     ],
 )
 def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
