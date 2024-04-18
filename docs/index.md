@@ -133,20 +133,21 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
-- Bluez 5.73 interacts badly with Solaar (and with the Linux driver for Logitech devices).
-  Bluetooth-connected devices will revert to default settings when reconnecting after going into power-saving mode or being turned off.
-  One way to recover is to quit Solaar and restart it.
-
-- Solaar expects that it has exclusive control over settings that are not ignored.
-  Running other programs that modify these settings, such as logiops,
-  will likely result in unexpected device behavior.
+- Bluez 5.73 does not remove Bluetooth devices when they disconnect.
+  Solaar 1.1.12 processes the DBus disconnection and connection messages from Bluez and does re-initialize devices when they reconnect.
+  The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling.
+  Until the problem is resolved having Scroll Wheel Resolution set to true (and not ignored) may be helpful.
 
 - The Linux HID++ driver modifies the Scroll Wheel Resolution setting to
-  implement smooth scrolling.  If Solaar later changes this setting, scrolling
+  implement smooth scrolling.  If Solaar changes this setting, scrolling
   can be either very fast or very slow.  To fix this problem
   click on the icon at the right edge of the setting to set it to
   "Ignore this setting", which is the default for new devices.
   The mouse has to be reset (e.g., by turning it off and on again) before this fix will take effect.
+
+- Solaar expects that it has exclusive control over settings that are not ignored.
+  Running other programs that modify these settings, such as logiops,
+  will likely result in unexpected device behavior.
 
 - The driver also sets the scrolling direction to its normal setting when implementing smooth scrolling.
   This can interfere with the Scroll Wheel Direction setting, requiring flipping this setting back and forth

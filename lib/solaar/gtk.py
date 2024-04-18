@@ -30,11 +30,11 @@ from traceback import format_exc
 
 import solaar.cli as _cli
 import solaar.configuration as _configuration
+import solaar.dbus as _dbus
 import solaar.i18n as _i18n
 import solaar.listener as _listener
 import solaar.ui as _ui
 import solaar.ui.common as _common
-import solaar.upower as _upower
 
 from solaar import NAME
 from solaar import __version__
@@ -172,9 +172,9 @@ def main():
         _listener.setup_scanner(_ui.status_changed, _ui.setting_changed, _common.error_dialog)
 
         if args.restart_on_wake_up:
-            _upower.watch(_listener.start_all, _listener.stop_all)
+            _dbus.watch_suspend_resume(_listener.start_all, _listener.stop_all)
         else:
-            _upower.watch(lambda: _listener.ping_all(True))
+            _dbus.watch_suspend_resume(lambda: _listener.ping_all(True))
 
         _configuration.defer_saves = True  # allow configuration saves to be deferred
 
