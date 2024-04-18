@@ -44,6 +44,7 @@ class DeviceInfo:
     hidpp_short: bool = False
     hidpp_long: bool = True
     bus_id: int = 0x0003  # USB
+    serial: str = "aa:aa:aa;aa"
 
 
 di_bad_handle = DeviceInfo(None, product_id=0xCCCC)
@@ -258,7 +259,7 @@ class TestDevice(device.Device):  # a fully functional Device but its HID++ func
     ],
 )
 def test_Device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles, mocker):
-    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+    test_device = TestDevice(responses, None, None, True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
     spy_request = mocker.spy(test_device, "request")
@@ -297,7 +298,7 @@ def test_Device_complex(device_info, responses, protocol, led, keys, remap, gest
 )
 def test_Device_settings(device_info, responses, protocol, p, persister, settings, mocker):
     mocker.patch("solaar.configuration.persister", return_value=p)
-    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+    test_device = TestDevice(responses, None, None, True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
 

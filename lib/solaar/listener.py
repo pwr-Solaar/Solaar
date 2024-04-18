@@ -21,6 +21,7 @@ import subprocess
 import time
 
 from collections import namedtuple
+from functools import partial
 
 import gi
 import logitech_receiver.device as _device
@@ -33,6 +34,8 @@ from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
 
 from . import configuration
+from . import dbus
+from . import i18n
 
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
@@ -52,8 +55,8 @@ def _ghost(device):
     return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False)
 
 
-class ReceiverListener(_listener.EventsListener):
-    """Keeps the status of a Receiver or Device."""
+class SolaarListener(_listener.EventsListener):
+    """Keeps the status of a Receiver or Device (member name is receiver but it can also be a device)."""
 
     def __init__(self, receiver, status_changed_callback):
         assert status_changed_callback
@@ -226,7 +229,28 @@ class ReceiverListener(_listener.EventsListener):
             dev.ping()
 
     def __str__(self):
-        return f"<ReceiverListener({self.receiver.path},{self.receiver.handle})>"
+        return f"<SolaarListener({self.receiver.path},{self.receiver.handle})>"
+
+
+def _process_bluez_dbus(device, path, dictionary, signature):
+    """Process bluez dbus property changed signals for device status changes to discover disconnections and connections"""
+    if device:
+        if dictionary.get("Connected") is not None:
+            connected = dictionary.get("Connected")
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("bluez dbus for %s: %s", device, "CONNECTED" if connected else "DISCONNECTED")
+            device.changed(connected, reason=i18n._("connected") if connected else i18n._("disconnected"))
+    elif device is not None:
+        if logger.isEnabledFor(logging.INFO):
+            logger.info("bluez cleanup for %s", device)
+        _cleanup_bluez_dbus(device)
+
+
+def _cleanup_bluez_dbus(device):
+    """Remove dbus signal receiver for device"""
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("bluez cleanup for %s", device)
+    dbus.watch_bluez_connect(device.hid_serial, None)
 
 
 _all_listeners = {}  # all known receiver listeners, listeners that stop on their own may remain here
@@ -239,10 +263,14 @@ def _start(device_info):
         receiver = _receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
         receiver = _device.DeviceFactory.create_device(device_info, _setting_callback)
-        configuration.attach_to(receiver)
+        if receiver:
+            configuration.attach_to(receiver)
+            if receiver.bluetooth and receiver.hid_serial:
+                dbus.watch_bluez_connect(receiver.hid_serial, partial(_process_bluez_dbus, receiver))
+                receiver.cleanups.append(_cleanup_bluez_dbus)
 
     if receiver:
-        rl = ReceiverListener(receiver, _status_callback)
+        rl = SolaarListener(receiver, _status_callback)
         rl.start()
         _all_listeners[device_info.path] = rl
         return rl
@@ -343,7 +371,7 @@ def _process_receiver_event(action, device_info):
     # whatever the action, stop any previous receivers at this path
     listener_thread = _all_listeners.pop(device_info.path, None)
     if listener_thread is not None:
-        assert isinstance(listener_thread, ReceiverListener)
+        assert isinstance(listener_thread, SolaarListener)
         listener_thread.stop()
     if action == "add":
         _process_add(device_info, 3)

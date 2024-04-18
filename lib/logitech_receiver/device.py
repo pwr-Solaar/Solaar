@@ -85,6 +85,7 @@ class Device:
         self.hidpp_short = device_info.hidpp_short if device_info else None
         self.hidpp_long = device_info.hidpp_long if device_info else None
         self.bluetooth = device_info.bus_id == 0x0005 if device_info else False  # Bluetooth needs long messages
+        self.hid_serial = device_info.serial if device_info else None
         self.setting_callback = setting_callback  # for changes to settings
         self.status_callback = None  # for changes to other potentially visible aspects
         self.wpid = pairing_info["wpid"] if pairing_info else None  # the Wireless PID is unique per device model
@@ -111,6 +112,7 @@ class Device:
         self._settings_lock = _threading.Lock()
         self._persister_lock = _threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
+        self.cleanups = []  # functions to run on the device when it is closed
 
         if not self.path:
             self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else None
@@ -510,6 +512,9 @@ class Device:
         handle, self.handle = self.handle, None
         if self in Device.instances:
             Device.instances.remove(self)
+        if hasattr(self, "cleanups"):
+            for cleanup in self.cleanups:
+                cleanup(self)
         return handle and base.close(handle)
 
     def __index__(self):
