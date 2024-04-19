@@ -101,7 +101,8 @@ class Device:
         self._tid_map = None  # map from transports to product identifiers
         self._persister = None  # persister holds settings
         self._led_effects = self._firmware = self._keys = self._remap_keys = self._gestures = None
-        self._profiles = self._backlight = self.registers = self._settings = None
+        self._profiles = self._backlight = self._settings = None
+        self.registers = []
         self.notification_flags = None
         self.battery_info = None
         self.link_encrypted = None

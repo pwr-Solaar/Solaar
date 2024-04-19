@@ -106,7 +106,7 @@ def test_Device_name(device_info, responses, codename, name, kind, mock_base):
         [None, "Illuminated", "Craft", "G700", "MX Vertical", None],
         [0xFF, 0x0, 0xFF, 0x0, 0xFF, 0xFF],
         [1.0, 1.0, 4.5, 1.0, 4.5, 4.5],
-        [None, [], [], (common.NamedInt(7, "battery status"), common.NamedInt(81, "three leds")), [], None],
+        [[], [], [], (common.NamedInt(7, "battery status"), common.NamedInt(81, "three leds")), [], []],
     ),
 )
 def test_Device_info(device_info, responses, handle, _name, _codename, number, protocol, registers, mock_base):
