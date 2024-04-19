@@ -1584,7 +1584,7 @@ _LEDP = hidpp20.LEDParam
 class LEDZoneSetting(_Setting):
     name = "led_zone_"
     label = _("LED Zone Effects")
-    description = _("Set effect for LED Zone")
+    description = _("Set effect for LED Zone") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
     feature = _F.COLOR_LED_EFFECTS
     color_field = {"name": _LEDP.color, "kind": _KIND.choice, "label": None, "choices": colors}
     speed_field = {"name": _LEDP.speed, "kind": _KIND.range, "label": _("Speed"), "min": 0, "max": 255}
