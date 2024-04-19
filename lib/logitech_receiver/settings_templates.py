@@ -1568,7 +1568,7 @@ class BrightnessControl(_Setting):
 class LEDControl(_Setting):
     name = "led_control"
     label = _("LED Control")
-    description = _("Switch control of LEDs between device and Solaar")
+    description = _("Switch control of LED zones between device and Solaar")
     feature = _F.COLOR_LED_EFFECTS
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     choices_universe = _NamedInts(Device=0, Solaar=1)
@@ -1584,7 +1584,7 @@ _LEDP = hidpp20.LEDParam
 class LEDZoneSetting(_Setting):
     name = "led_zone_"
     label = _("LED Zone Effects")
-    description = _("Set effect for LED Zone") + "\n" + _("May need Onboard Profiles set to Disable to be effective.")
+    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.COLOR_LED_EFFECTS
     color_field = {"name": _LEDP.color, "kind": _KIND.choice, "label": None, "choices": colors}
     speed_field = {"name": _LEDP.speed, "kind": _KIND.range, "label": _("Speed"), "min": 0, "max": 255}
@@ -1619,8 +1619,8 @@ class LEDZoneSetting(_Setting):
 
 class RGBControl(_Setting):
     name = "rgb_control"
-    label = _("RGB Control")
-    description = _("Switch control of RGB zones between device and Solaar")
+    label = _("LED Control")
+    description = _("Switch control of LED zones between device and Solaar")
     feature = _F.RGB_EFFECTS
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
     choices_universe = _NamedInts(Device=0, Solaar=1)
@@ -1631,7 +1631,7 @@ class RGBControl(_Setting):
 class RGBEffectSetting(LEDZoneSetting):
     name = "rgb_zone_"
     label = _("LED Zone Effects")
-    description = _("Set effect for LED Zone")
+    description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.RGB_EFFECTS
 
     @classmethod
