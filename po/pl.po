@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.1.12\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-19 11:48+0200\n"
-"PO-Revision-Date: 2024-04-19 12:08+0200\n"
+"POT-Creation-Date: 2024-04-19 22:45+0200\n"
+"PO-Revision-Date: 2024-04-19 22:52+0200\n"
 "Last-Translator: Matthaiks\n"
 "Language-Team: none\n"
 "Language: pl\n"
@@ -1129,18 +1129,25 @@ msgid "Control overall brightness"
 msgstr "Steruj ogólną jasnością"
 
 #: lib/logitech_receiver/settings_templates.py:1570
+#: lib/logitech_receiver/settings_templates.py:1622
 msgid "LED Control"
 msgstr "Sterowanie diodami LED"
 
 #: lib/logitech_receiver/settings_templates.py:1571
-msgid "Switch control of LEDs between device and Solaar"
-msgstr ""
-"Przełącz sterowanie diodami LED pomiędzy urządzeniem a programem Solaar"
+#: lib/logitech_receiver/settings_templates.py:1623
+msgid "Switch control of LED zones between device and Solaar"
+msgstr "Przełącz sterowanie strefami LED pomiędzy urządzeniem a Solaar"
 
 #: lib/logitech_receiver/settings_templates.py:1586
 #: lib/logitech_receiver/settings_templates.py:1633
 msgid "LED Zone Effects"
 msgstr "Efekty strefowe diod LED"
+
+#: lib/logitech_receiver/settings_templates.py:1587
+#: lib/logitech_receiver/settings_templates.py:1634
+msgid "LED Control needs to be set to Solaar to be effective."
+msgstr ""
+"Sterowanie diodami LED musi być ustawione na Solaar, aby było skuteczne."
 
 #: lib/logitech_receiver/settings_templates.py:1587
 #: lib/logitech_receiver/settings_templates.py:1634
@@ -1167,21 +1174,13 @@ msgstr "Narastanie"
 msgid "LEDs"
 msgstr "Diody LED"
 
-#: lib/logitech_receiver/settings_templates.py:1622
-msgid "RGB Control"
-msgstr "Sterowanie RGB"
-
-#: lib/logitech_receiver/settings_templates.py:1623
-msgid "Switch control of RGB zones between device and Solaar"
-msgstr "Przełącz sterowanie strefami RGB pomiędzy urządzeniem a Solaar"
-
 #: lib/logitech_receiver/settings_templates.py:1644
 msgid "Per-key Lighting"
 msgstr "Podświetlenie poszczególnych klawiszy"
 
 #: lib/logitech_receiver/settings_templates.py:1645
 msgid "Control per-key lighting."
-msgstr "Steruj podświetleniem poszczególnych klawiszy"
+msgstr "Steruj podświetleniem poszczególnych klawiszy."
 
 #: lib/solaar/ui/__init__.py:103
 msgid "Another Solaar process is already running so just expose its window"
