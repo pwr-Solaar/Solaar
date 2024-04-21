@@ -24,14 +24,15 @@ from typing import Optional
 
 import hidapi as _hid
 
+from solaar.i18n import _
+from solaar.i18n import ngettext
+
 from . import base as _base
 from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from .common import ALERT
 from .device import Device
-from solaar.i18n import _
-from solaar.i18n import ngettext
 
 logger = logging.getLogger(__name__)
 

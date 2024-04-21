@@ -26,6 +26,8 @@ from typing import Optional
 
 import yaml as _yaml
 
+from solaar.i18n import _
+
 from . import exceptions
 from . import hidpp10_constants as _hidpp10_constants
 from . import special_keys
@@ -45,7 +47,6 @@ from .hidpp20_constants import ERROR
 from .hidpp20_constants import FEATURE
 from .hidpp20_constants import FIRMWARE_KIND
 from .hidpp20_constants import GESTURE
-from solaar.i18n import _
 
 logger = logging.getLogger(__name__)
 

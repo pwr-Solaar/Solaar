@@ -23,6 +23,8 @@ from struct import unpack as _unpack
 from time import time as _time
 from traceback import format_exc as _format_exc
 
+from solaar.i18n import _
+
 from . import descriptors as _descriptors
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20
@@ -35,7 +37,6 @@ from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .diversion import process_notification as _process_notification
-from solaar.i18n import _
 from .settings import KIND as _KIND
 from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting
