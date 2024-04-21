@@ -204,11 +204,7 @@ class SolaarListener(_listener.EventsListener):
         # Apply settings every time the device connects
         if n.sub_id == 0x41:
             if logger.isEnabledFor(logging.INFO):
-                try:
-                    dev.ping()
-                    logger.info("connection %s for %r", n, dev)
-                except Exception:
-                    logger.info("connection %s for unknown device, number %s", n, n.devnumber)
+                logger.info("connection %s for device wpid %s kind %s serial %s", n, dev.wpid, dev.kind, dev._serial)
             # If there are saved configs, bring the device's settings up-to-date.
             # They will be applied when the device is marked as online.
             configuration.attach_to(dev)
