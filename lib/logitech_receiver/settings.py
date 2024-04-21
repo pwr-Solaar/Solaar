@@ -20,12 +20,13 @@ import math
 from struct import unpack as _unpack
 from time import sleep as _sleep
 
+from solaar.i18n import _
+
 from . import hidpp20_constants as _hidpp20_constants
 from .common import NamedInt as _NamedInt
 from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
-from .i18n import _
 
 logger = logging.getLogger(__name__)
 

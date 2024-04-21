@@ -22,6 +22,8 @@ import threading as _threading
 
 from struct import unpack as _unpack
 
+from solaar.i18n import _
+
 from . import diversion as _diversion
 from . import hidpp10
 from . import hidpp10_constants as _hidpp10_constants
@@ -32,7 +34,6 @@ from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import ALERT as _ALERT
 from .common import Battery as _Battery
 from .common import strhex as _strhex
-from .i18n import _
 
 logger = logging.getLogger(__name__)
 
