@@ -55,3 +55,30 @@ def test_load_rule_config(rule_config):
     for components, expected_components in zip(user_configured_rules.components, expected_rules):
         for component, expected_component in zip(components.components, expected_components):
             assert isinstance(component, expected_component)
+
+
+def test_diversion_rule():
+    args = [
+        {
+            "Rule": [  # Implement problematic keys for Craft and MX Master
+                {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+            ]
+        },
+    ]
+
+    rule = diversion.Rule(args)
+
+    assert len(rule.components) == 1
+    root_rule = rule.components[0]
+    assert isinstance(root_rule, diversion.Rule)
+
+    assert len(root_rule.components) == 2
+    for component in root_rule.components:
+        assert isinstance(component, diversion.Rule)
+        assert len(component.components) == 2
+
+        key = component.components[0]
+        assert isinstance(key, diversion.Key)
+        key = component.components[1]
+        assert isinstance(key, diversion.KeyPress)
