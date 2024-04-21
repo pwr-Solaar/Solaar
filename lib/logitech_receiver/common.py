@@ -25,7 +25,7 @@ from typing import Union
 
 import yaml as _yaml
 
-from .i18n import _
+from solaar.i18n import _
 
 
 def is_string(d):

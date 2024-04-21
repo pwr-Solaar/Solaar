@@ -45,7 +45,7 @@ from .hidpp20_constants import ERROR
 from .hidpp20_constants import FEATURE
 from .hidpp20_constants import FIRMWARE_KIND
 from .hidpp20_constants import GESTURE
-from .i18n import _
+from solaar.i18n import _
 
 logger = logging.getLogger(__name__)
 

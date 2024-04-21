@@ -35,7 +35,7 @@ from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .diversion import process_notification as _process_notification
-from .i18n import _
+from solaar.i18n import _
 from .settings import KIND as _KIND
 from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting

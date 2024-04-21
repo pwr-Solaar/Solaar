@@ -30,8 +30,8 @@ from . import hidpp10
 from . import hidpp10_constants
 from .common import ALERT
 from .device import Device
-from .i18n import _
-from .i18n import ngettext
+from solaar.i18n import _
+from solaar.i18n import ngettext
 
 logger = logging.getLogger(__name__)
 
