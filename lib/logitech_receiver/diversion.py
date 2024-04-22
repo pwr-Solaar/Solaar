@@ -45,6 +45,7 @@ from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
+from . import language_switcher
 from .common import NamedInt
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
@@ -53,6 +54,7 @@ gi.require_version("Gdk", "3.0")  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
+_switcher = language_switcher.LanguageSwitcher()
 
 #
 # See docs/rules.md for documentation
@@ -1490,7 +1492,9 @@ def process_notification(device, notification, feature):
             thumb_wheel_displacement = 0
         thumb_wheel_displacement += signed(notification.data[0:2])
 
+    _switcher.evaluate()
     GLib.idle_add(evaluate_rules, feature, notification, device)
+    _switcher.set_previous_language()
 
 
 _XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))

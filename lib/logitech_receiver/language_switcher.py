@@ -50,4 +50,3 @@ class LanguageSwitcher:
         if current_language != 'us':
             self.remember_language(current_language)
             self.switch_language_to_english()
-

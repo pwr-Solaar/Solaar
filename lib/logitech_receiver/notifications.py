@@ -34,7 +34,6 @@ from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
 from .common import ALERT as _ALERT
 from .common import Battery as _Battery
 from .common import strhex as _strhex
-from . import language_switcher
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,6 @@ _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
 _R = _hidpp10_constants.REGISTERS
 _F = _hidpp20_constants.FEATURE
-_switcher = language_switcher.LanguageSwitcher()
 
 notification_lock = _threading.Lock()
 
@@ -453,7 +451,5 @@ def _process_feature_notification(device, n, feature):
                     brightness = _unpack("!H", device.feature_request(_F.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
                 device.setting_callback(device, _st.BrightnessControl, [brightness])
 
-    _switcher.evaluate()
     _diversion.process_notification(device, n, feature)
-    _switcher.set_previous_language()
     return True
