@@ -1,12 +1,17 @@
-# 1.1.12rc1
-
+# 1.1.12rc2
+* Check for existence of keys file before opening
+* Perform translation for all translatable strings.
+* Add included hid_parser to packages installed
+* Improve label and description for LED zone settings
+* Add message about Onboard Profiles to LED Zone settings
+* Initialize device registers to empty list
 * Use bluez dbus signals to disconnect and connect bluetooth devices
 * Handle a different signal for onboard profiles directory in ROM
 * Introduce small delay in getting pairing information to let receiver settle after pairing
 * Improve testing for settings_templates, settings, hidpp20, and device and fix small bugs found
 * Add extended adjustable DPI setting
 * Improve and extend infrastructure for testing setting_templates
-* Update Greek translation
+* Update Greek, Polish, and Russian translations
 * Implement and test per-key lighting
 * Refactor and test pair_window in GUI
 * Handle situation when read of a setting fails in GUI
