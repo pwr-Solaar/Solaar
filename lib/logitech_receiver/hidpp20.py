@@ -1172,7 +1172,7 @@ class OnboardProfile:
             po_timeout=_unpack("<H", bytes[30:32])[0],
             buttons=[Button.from_bytes(bytes[32 + i * 4 : 32 + i * 4 + 4]) for i in range(0, buttons)],
             gbuttons=[Button.from_bytes(bytes[96 + i * 4 : 96 + i * 4 + 4]) for i in range(0, gbuttons)],
-            name=bytes[160:208].decode("utf-16le").rstrip("\x00").rstrip("\uFFFF"),
+            name=bytes[160:208].decode("utf-16le").rstrip("\x00").rstrip("\uffff"),
             lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11 : 219 + i * 11]) for i in range(0, 4)],
         )
 
@@ -1248,7 +1248,7 @@ class OnboardProfiles:
         headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
-        if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xFF\xFF\xFF\xFF":  # look in ROM instead
+        if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xff\xff\xff\xff":  # look in ROM instead
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
             s = 0x01
         while chunk[0:2] != b"\xff\xff":

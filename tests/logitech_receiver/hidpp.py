@@ -16,7 +16,6 @@
 
 """HID++ data and functions common to several logitech_receiver test files"""
 
-
 import errno
 import threading
 

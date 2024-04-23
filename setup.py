@@ -82,7 +82,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "psutil (>= 5.4.3)",
         'dbus-python ; platform_system=="Linux"',
         "PyGObject",
-        "xkbgroup"
+        "xkbgroup",
     ],
     extras_require={
         "report-descriptor": ["hid-parser"],

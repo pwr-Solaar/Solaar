@@ -3,6 +3,8 @@ import time
 from xkbgroup import XKeyboard
 
 logger = logging.getLogger(__name__)
+
+
 class LanguageSwitcher:
     def __init__(self):
         self.xkb = XKeyboard()
@@ -24,7 +26,7 @@ class LanguageSwitcher:
     def switch_language_to_english(self):
         """Switches the keyboard layout to English."""
         try:
-            self.xkb.group_symbol = 'us'
+            self.xkb.group_symbol = "us"
             logger.debug("Switched keyboard layout to English.")
         except Exception as e:
             logger.error(f"Failed to switch to English layout: {e}")
@@ -47,6 +49,6 @@ class LanguageSwitcher:
         current_language = self.get_current_language()
         logger.debug(f"Current language: {current_language}")
 
-        if current_language != 'us':
+        if current_language != "us":
             self.remember_language(current_language)
             self.switch_language_to_english()
