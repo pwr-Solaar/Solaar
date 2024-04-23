@@ -1510,7 +1510,6 @@ def process_notification(device, notification, feature):
     GLib.idle_add(switch_and_evaluate, feature, notification, device)
 
 
-
 _XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
 _file_path = _path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 

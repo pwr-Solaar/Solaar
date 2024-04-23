@@ -6,6 +6,7 @@ from xkbgroup import XKeyboard
 
 logger = logging.getLogger(__name__)
 
+
 # it would be better to use xkbgroup to switch language, but I don't know how to work with it
 class LanguageSwitcher:
     def __init__(self):
@@ -15,7 +16,6 @@ class LanguageSwitcher:
         except X11Error as e:
             logger.error(f"Cannot initialize XKeyboard: {e}")
         self.previous_layout = None
-
 
     def get_current_layout(self):
         """Gets the current keyboard layout (language)."""
@@ -36,6 +36,7 @@ class LanguageSwitcher:
         except Exception as e:
             logger.error(f"Failed to get current keyboard layout: {e}")
             return None
+
     def remember_layout(self, language):
         """Remembers the previous language."""
         self.previous_layout = language

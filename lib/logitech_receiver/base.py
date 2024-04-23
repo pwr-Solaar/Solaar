@@ -473,7 +473,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                 if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xFF:  # BT device returning 0x00
                     if (
                         report_id == HIDPP_SHORT_MESSAGE_ID
-                        and reply_data[:1] == b"\x8F"
+                        and reply_data[:1] == b"\x8f"
                         and reply_data[1:3] == request_data[:2]
                     ):
                         error = ord(reply_data[3:4])
@@ -488,7 +488,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                                 _hidpp10_constants.ERROR[error],
                             )
                         return _hidpp10_constants.ERROR[error] if return_error else None
-                    if reply_data[:1] == b"\xFF" and reply_data[1:3] == request_data[:2]:
+                    if reply_data[:1] == b"\xff" and reply_data[1:3] == request_data[:2]:
                         # a HID++ 2.0 feature call returned with an error
                         error = ord(reply_data[3:4])
                         logger.error(
@@ -577,7 +577,7 @@ def ping(handle, devnumber, long_message=False):
 
                     if (
                         report_id == HIDPP_SHORT_MESSAGE_ID
-                        and reply_data[:1] == b"\x8F"
+                        and reply_data[:1] == b"\x8f"
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
