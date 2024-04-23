@@ -1494,7 +1494,7 @@ def process_notification(device, notification, feature):
 
     _switcher.evaluate()
     GLib.idle_add(evaluate_rules, feature, notification, device)
-    # _switcher.set_previous_language()
+    _switcher.set_previous_language()
 
 
 _XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
