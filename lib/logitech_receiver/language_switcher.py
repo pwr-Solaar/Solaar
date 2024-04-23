@@ -1,5 +1,6 @@
 import logging
-import time
+
+from xkbgroup import X11Error
 from xkbgroup import XKeyboard
 
 logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class LanguageSwitcher:
         if not self.xkb:
             logger.warning("X11 display not accessible. Skipping get_current_language.")
             return None
-            
+
         """Sets the keyboard layout back to the previously remembered language."""
         if self.previous_language:
             try:
