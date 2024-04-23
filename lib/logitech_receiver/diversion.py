@@ -24,6 +24,7 @@ import platform as _platform
 import socket
 import subprocess
 import sys as _sys
+import threading
 import time as _time
 
 import dbus
@@ -45,6 +46,7 @@ from yaml import add_representer as _yaml_add_representer
 from yaml import dump_all as _yaml_dump_all
 from yaml import safe_load_all as _yaml_safe_load_all
 
+from . import language_switcher as _language_switcher
 from .common import NamedInt
 from .hidpp20 import FEATURE as _F
 from .special_keys import CONTROL as _CONTROL
@@ -53,7 +55,7 @@ gi.require_version("Gdk", "3.0")  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
-
+switcher = _language_switcher.LanguageSwitcher()
 #
 # See docs/rules.md for documentation
 #
@@ -1490,7 +1492,23 @@ def process_notification(device, notification, feature):
             thumb_wheel_displacement = 0
         thumb_wheel_displacement += signed(notification.data[0:2])
 
-    GLib.idle_add(evaluate_rules, feature, notification, device)
+    def switch_and_evaluate(feature, notification, device):
+        done_switching = threading.Event()
+
+        def switch_language():
+            switcher.evaluate()
+            done_switching.set()
+
+        def evaluate_rules():
+            done_switching.wait()  # Wait until the language has been switched
+            rules.evaluate(feature, notification, device, True)
+            switcher.set_previous_language()
+
+        GLib.idle_add(switch_language)
+        GLib.idle_add(evaluate_rules)
+
+    GLib.idle_add(switch_and_evaluate, feature, notification, device)
+
 
 
 _XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
