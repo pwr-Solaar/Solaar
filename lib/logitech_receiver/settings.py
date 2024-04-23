@@ -733,7 +733,7 @@ class BooleanValidator(Validator):
             else:
                 assert isinstance(false_value, bytes)
             if mask is None or mask == self.default_mask:
-                mask = b"\xFF" * len(true_value)
+                mask = b"\xff" * len(true_value)
             else:
                 assert isinstance(mask, bytes)
             assert len(mask) == len(true_value) == len(false_value)
@@ -1347,10 +1347,10 @@ class MultipleRangeValidator(Validator):
                     )
                 b += _int2bytes(v, sub_item.length)
             if len(w) + len(b) > 15:
-                seq.append(b + b"\xFF")
+                seq.append(b + b"\xff")
                 w = b""
             w += b
-        seq.append(w + b"\xFF")
+        seq.append(w + b"\xff")
         return seq
 
     def prepare_write_item(self, item, value):
@@ -1364,7 +1364,7 @@ class MultipleRangeValidator(Validator):
             if not (sub_item.minimum <= v <= sub_item.maximum):
                 raise ValueError(f"invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]")
             w += _int2bytes(v, sub_item.length)
-        return w + b"\xFF"
+        return w + b"\xff"
 
     def acceptable(self, args, current):
         # just one item, with at least one sub-item

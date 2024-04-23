@@ -119,7 +119,7 @@ def _validate_input(line, hidpp=False):
         if data[:1] not in b"\x10\x11":
             _error("Invalid HID++ request: first byte must be 0x10 or 0x11")
             return None
-        if data[1:2] not in b"\xFF\x00\x01\x02\x03\x04\x05\x06\x07":
+        if data[1:2] not in b"\xff\x00\x01\x02\x03\x04\x05\x06\x07":
             _error("Invalid HID++ request: second byte must be 0xFF or one of 0x00..0x07")
             return None
         if data[:1] == b"\x10":
@@ -232,7 +232,7 @@ def main():
             # wait for some kind of reply
             if args.hidpp and not interactive:
                 rlist, wlist, xlist = _select([handle], [], [], 1)
-                if data[1:2] == b"\xFF":
+                if data[1:2] == b"\xff":
                     # the receiver will reply very fast, in a few milliseconds
                     time.sleep(0.010)
                 else:

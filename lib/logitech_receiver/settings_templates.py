@@ -162,7 +162,7 @@ class RegisterHandDetection(_Setting):
     label = _("Hand Detection")
     description = _("Turn on illumination when the hands hover over the keyboard.")
     register = _R.keyboard_hand_detection
-    validator_options = {"true_value": b"\x00\x00\x00", "false_value": b"\x00\x00\x30", "mask": b"\x00\x00\xFF"}
+    validator_options = {"true_value": b"\x00\x00\x00", "false_value": b"\x00\x00\x30", "mask": b"\x00\x00\xff"}
 
 
 class RegisterSmoothScroll(_Setting):
@@ -234,7 +234,7 @@ _descriptors.get_usbid(0xC066).settings = [_PerformanceMXDpi, RegisterSmoothScro
 # just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
 class K375sFnSwap(FnSwapVirtual):
     feature = _F.K375S_FN_INVERSION
-    rw_options = {"prefix": b"\xFF"}
+    rw_options = {"prefix": b"\xff"}
     validator_options = {"true_value": b"\x01", "false_value": b"\x00", "read_skip_byte_count": 1}
 
 
@@ -273,7 +273,7 @@ class Backlight2(_Setting):
         def read(self, device):
             backlight = device.backlight
             if not backlight.enabled:
-                return b"\xFF"
+                return b"\xff"
             else:
                 return _int2bytes(backlight.mode, 1)
 

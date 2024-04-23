@@ -383,7 +383,7 @@ def test_decipher_battery_status():
 
 
 def test_decipher_battery_voltage():
-    report = b"\x10\x00\xFF\xff\xff"
+    report = b"\x10\x00\xff\xff\xff"
 
     feature, battery = hidpp20.decipher_battery_voltage(report)
 
