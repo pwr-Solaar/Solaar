@@ -118,9 +118,9 @@ def _process_receiver_notification(receiver, n):
                 logger.info("%s: %s", receiver, reason)
             receiver.pairing.error = None
             if not receiver.pairing.lock_open:
-                receiver.pairing.counter = (
-                    receiver.pairing.device_address
-                ) = receiver.pairing.device_authentication = receiver.pairing.device_name = None
+                receiver.pairing.counter = receiver.pairing.device_address = receiver.pairing.device_authentication = (
+                    receiver.pairing.device_name
+                ) = None
             pair_error = n.data[0]
             if receiver.pairing.lock_open:
                 receiver.pairing.new_device = None

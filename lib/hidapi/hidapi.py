@@ -22,6 +22,7 @@ See https://github.com/libusb/hidapi for how to obtain binaries.
 Parts of this code are adapted from https://github.com/apmorton/pyhidapi
 which is MIT licensed.
 """
+
 import atexit
 import ctypes
 import logging

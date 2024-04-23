@@ -721,7 +721,7 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
         ("80020454", 0x8, None, None, 0x02, 0x54, 0x04, None, None),
         ("80030454", 0x8, None, None, 0x03, 0x0454, None, None, None),
         ("900AFF01", 0x9, None, None, None, 0x0A, None, 0x01, None),
-        ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xA0"),
+        ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xa0"),
     ],
 )
 def test_button_bytes(hex, behavior, sector, address, typ, val, modifiers, data, byt):
