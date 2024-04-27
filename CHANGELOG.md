@@ -1,4 +1,4 @@
-# 1.1.12rc2
+# 1.1.12
 * Check for existence of keys file before opening
 * Perform translation for all translatable strings.
 * Add included hid_parser to packages installed
@@ -11,7 +11,7 @@
 * Improve testing for settings_templates, settings, hidpp20, and device and fix small bugs found
 * Add extended adjustable DPI setting
 * Improve and extend infrastructure for testing setting_templates
-* Update Greek, Polish, and Russian translations
+* Update Greek, Polish, Russian, and Traditional Chinese translations
 * Implement and test per-key lighting
 * Refactor and test pair_window in GUI
 * Handle situation when read of a setting fails in GUI
