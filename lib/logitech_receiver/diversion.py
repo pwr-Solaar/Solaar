@@ -1547,23 +1547,29 @@ def _save_config_rule_file(file_name=_file_path):
     return True
 
 
-def _load_config_rule_file():
+def load_config_rule_file():
+    """Loads user configured rules."""
     global rules
-    loaded_rules = []
+
     if _path.isfile(_file_path):
-        try:
-            with open(_file_path) as config_file:
-                loaded_rules = []
-                for loaded_rule in _yaml_safe_load_all(config_file):
-                    rule = Rule(loaded_rule, source=_file_path)
-                    if logger.isEnabledFor(logging.DEBUG):
-                        logger.debug("load rule: %s", rule)
-                    loaded_rules.append(rule)
-                if logger.isEnabledFor(logging.INFO):
-                    logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
-        except Exception as e:
-            logger.error("failed to load from %s\n%s", _file_path, e)
-    rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
+        rules = _load_rule_config(_file_path)
 
 
-_load_config_rule_file()
+def _load_rule_config(file_path: str) -> Rule:
+    loaded_rules = []
+    try:
+        with open(file_path) as config_file:
+            loaded_rules = []
+            for loaded_rule in _yaml_safe_load_all(config_file):
+                rule = Rule(loaded_rule, source=file_path)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("load rule: %s", rule)
+                loaded_rules.append(rule)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
+    except Exception as e:
+        logger.error("failed to load from %s\n%s", file_path, e)
+    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
+
+
+load_config_rule_file()
