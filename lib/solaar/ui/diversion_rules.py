@@ -229,7 +229,7 @@ class DiversionDialog:
         self.dirty = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        _DIV._load_config_rule_file()
+        _DIV.load_config_rule_file()
         self.model = self._create_model()
         self.view.set_model(self.model)
         self.view.expand_all()
