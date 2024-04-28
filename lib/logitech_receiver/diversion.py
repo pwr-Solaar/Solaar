@@ -1515,7 +1515,15 @@ _file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 rules = built_in_rules
 
 
-def _save_config_rule_file(file_name=_file_path):
+def save_rule_config_file(file_name=_file_path) -> bool:
+    """Writes user configured rules into a file.
+
+    Returns
+    -------
+    bool
+        True, if write was successful, False otherwise.
+    """
+
     # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
     class inline_list(list):
         pass
@@ -1563,8 +1571,8 @@ def _save_config_rule_file(file_name=_file_path):
     return True
 
 
-def load_config_rule_file():
-    """Loads user configured rules."""
+def load_rule_config_file():
+    """Loads user configured rules from file."""
     global rules
 
     if os.path.isfile(_file_path):
@@ -1585,7 +1593,8 @@ def _load_rule_config(file_path: str) -> Rule:
                 logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
     except Exception as e:
         logger.error("failed to load from %s\n%s", file_path, e)
-    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
+    user_rules = Rule(loaded_rules, source=file_path)
+    return Rule([user_rules, built_in_rules])
 
 
-load_config_rule_file()
+load_rule_config_file()
