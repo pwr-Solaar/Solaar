@@ -1400,6 +1400,10 @@ COLORS = _UnsortedNamedInts(
     }
 )
 
+COLORSPLUS = _UnsortedNamedInts({"No change": -1})
+for i in COLORS:
+    COLORSPLUS[int(i)] = str(i)
+
 KEYCODES = _NamedInts(
     {
         "A": 1,

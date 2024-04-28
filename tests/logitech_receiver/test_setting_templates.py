@@ -110,6 +110,7 @@ class FeatureTest:
     matched_calls: int = 1
     offset: int = 0x04
     version: int = 0x00
+    rewrite: bool = False
 
 
 simple_tests = [
@@ -596,12 +597,7 @@ key_tests = [
         hidpp.Response("01010300", 0x0440, "01010300"),
     ),
     Setup(
-        FeatureTest(
-            settings_templates.Gesture2Params,
-            {4: {"scale": 256}},
-            {4: {"scale": 128}},
-            2,
-        ),
+        FeatureTest(settings_templates.Gesture2Params, {4: {"scale": 256}}, {4: {"scale": 128}}, 2),
         *hidpp.responses_gestures,
         hidpp.Response("000100FF000000000000000000000000", 0x0480, "000100FF"),
         hidpp.Response("000080FF000000000000000000000000", 0x0480, "000080FF"),
@@ -616,27 +612,87 @@ key_tests = [
         hidpp.Response("E018", 0x0430, "02E018"),
     ),
     Setup(
+        FeatureTest(settings_templates.PerKeyLighting, {1: -1, 2: -1, 9: -1, 10: -1, 113: -1}, {2: 0xFF0000}, 5, 4, 0, 1),
+        {
+            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
+            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
+            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
+            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
+            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
+        },
+        hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
+        hidpp.Response("00000200000000000000000000000000", 0x0400, "0001"),  # second group of keys
+        hidpp.Response("00000000000000000000000000000000", 0x0400, "0002"),  # last group of keys
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("02FF0000", 0x0410, "02FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("02FF0000", 0x0410, "02FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+    ),
+    Setup(
         FeatureTest(
             settings_templates.PerKeyLighting,
-            {1: 0xFFFFFF, 2: 0xFFFFFF, 9: 0xFFFFFF, 10: 0xFFFFFF, 113: 0xFFFFFF, 114: 0xFFFFFF},
-            {2: 0xFF0000},
-            5,
+            {1: -1, 2: -1, 9: -1, 10: -1, 113: -1},
+            {2: 0xFF0000, 9: 0xFF0000, 10: 0xFF0000},
+            9,
+            4,
+            0,
+            1,
         ),
         {
-            common.NamedInt(1, "A"): special_keys.COLORS,
-            common.NamedInt(2, "B"): special_keys.COLORS,
-            common.NamedInt(9, "I"): special_keys.COLORS,
-            common.NamedInt(10, "J"): special_keys.COLORS,
-            common.NamedInt(113, "KEY 113"): special_keys.COLORS,
-            common.NamedInt(114, "KEY 114"): special_keys.COLORS,
+            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
+            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
+            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
+            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
+            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
+        },
+        hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
+        hidpp.Response("00000200000000000000000000000000", 0x0400, "0001"),  # second group of keys
+        hidpp.Response("00000000000000000000000000000000", 0x0400, "0002"),  # last group of keys
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("02FF0000", 0x0410, "02FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("09FF0000", 0x0410, "09FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("0AFF0000", 0x0410, "0AFF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("02FF000009FF00000AFF0000", 0x0410, "02FF000009FF00000AFF0000"),  # write three values
+        hidpp.Response("00", 0x0470, "00"),  # finish
+    ),
+    Setup(
+        FeatureTest(
+            settings_templates.PerKeyLighting,
+            {1: -1, 2: -1, 9: -1, 10: -1, 113: -1, 114: -1},
+            {2: 0xFF0000, 9: 0xFF0000, 10: 0xFF0000, 113: 0xFF0000, 114: 0x00FF00},
+            14,
+            4,
+            0,
+            1,
+        ),
+        {
+            common.NamedInt(1, "A"): special_keys.COLORSPLUS,
+            common.NamedInt(2, "B"): special_keys.COLORSPLUS,
+            common.NamedInt(9, "I"): special_keys.COLORSPLUS,
+            common.NamedInt(10, "J"): special_keys.COLORSPLUS,
+            common.NamedInt(113, "KEY 113"): special_keys.COLORSPLUS,
+            common.NamedInt(114, "KEY 114"): special_keys.COLORSPLUS,
         },
         hidpp.Response("00000606000000000000000000000000", 0x0400, "0000"),  # first group of keys
         hidpp.Response("00000600000000000000000000000000", 0x0400, "0001"),  # second group of keys
         hidpp.Response("00000000000000000000000000000000", 0x0400, "0002"),  # last group of keys
-        hidpp.Response("01FFFFFF02FFFFFF09FFFFFF0AFFFFFF", 0x0410, "01FFFFFF02FFFFFF09FFFFFF0AFFFFFF"),  # write first 4 values
-        hidpp.Response("71FFFFFF72FFFFFF", 0x0410, "71FFFFFF72FFFFFF"),  # write last two values
         hidpp.Response("00", 0x0470, "00"),  # finish
         hidpp.Response("02FF0000", 0x0410, "02FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("09FF0000", 0x0410, "09FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("0AFF0000", 0x0410, "0AFF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("71FF0000", 0x0410, "71FF0000"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("7200FF00", 0x0410, "7200FF00"),  # write one value
+        hidpp.Response("00", 0x0470, "00"),  # finish
+        hidpp.Response("02FF000009FF00000AFF000071FF0000", 0x0410, "02FF000009FF00000AFF000071FF0000"),  # write four values
+        hidpp.Response("7200FF00", 0x0410, "7200FF00"),  # write one value
         hidpp.Response("00", 0x0470, "00"),  # finish
     ),
     Setup(
@@ -690,6 +746,7 @@ def test_key_template(test, mocker):
     device = hidpp.Device(responses=test.responses, feature=tst.sclass.feature, offset=tst.offset, version=tst.version)
     spy_request = mocker.spy(device, "request")
 
+    print("FEATURE", tst.sclass.feature)
     setting = settings_templates.check_feature(device, tst.sclass)
     assert setting is not None
     if isinstance(setting, list):
@@ -706,9 +763,13 @@ def test_key_template(test, mocker):
     write_value = setting.write(value)
     assert write_value == tst.initial_value
 
-    for key, value in tst.write_value.items():
-        write_value = setting.write_key_value(key, value)
-        assert write_value == value
+    for key, val in tst.write_value.items():
+        write_value = setting.write_key_value(key, val)
+        assert write_value == val
+        value[key] = val
+
+    if tst.rewrite:
+        write_value = setting.write(value)
 
     hidpp.match_requests(tst.matched_calls, test.responses, spy_request.call_args_list)
 
