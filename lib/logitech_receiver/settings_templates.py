@@ -1646,7 +1646,7 @@ class PerKeyLighting(_Settings):
     description = _("Control per-key lighting.")
     feature = _F.PER_KEY_LIGHTING_V2
     keys_universe = _special_keys.KEYCODES
-    choices_universe = _special_keys.COLORS
+    choices_universe = _special_keys.COLORSPLUS
 
     def read(self, cached=True):
         self._pre_read(cached)
@@ -1654,7 +1654,7 @@ class PerKeyLighting(_Settings):
             return self._value
         reply_map = {}
         for key in self._validator.choices:
-            reply_map[int(key)] = 0xFFFFFF  # can't read so fake a value of white
+            reply_map[int(key)] = _special_keys.COLORSPLUS["No change"]  # this signals no change
         self._value = reply_map
         return reply_map
 
@@ -1663,7 +1663,8 @@ class PerKeyLighting(_Settings):
             self.update(map, save)
             data_bytes = b""
             for key, value in map.items():
-                data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
+                if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change
+                    data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
                 if len(data_bytes) >= 16:  # up to four values are packed into a request
                     self._device.feature_request(self.feature, 0x10, data_bytes)
                     data_bytes = b""
@@ -1673,10 +1674,13 @@ class PerKeyLighting(_Settings):
         return map
 
     def write_key_value(self, key, value, save=True):
-        result = super().write_key_value(int(key), value, save)
-        if self._device.online:
-            self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
-        return result
+        if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change
+            result = super().write_key_value(int(key), value, save)
+            if self._device.online:
+                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
+            return result
+        else:
+            return True
 
     class rw_class(_FeatureRWMap):
         pass
