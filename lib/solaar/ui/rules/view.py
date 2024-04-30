@@ -110,7 +110,7 @@ class RulesView:
         )
         return col1, col2
 
-    def create_close_dialog(self, window: Gtk.Window) -> Gtk.MessageDialog:
+    def show_close_dialog(self, window: Gtk.Window, yes_callback: Callable) -> Gtk.MessageDialog:
         """Creates rule editor close dialog, when unsaved changes are present."""
         dialog = Gtk.MessageDialog(
             window,
@@ -128,4 +128,16 @@ class RulesView:
             Gtk.ResponseType.CANCEL,
         )
         dialog.set_markup(_("If you choose No, changes will be lost when Solaar is closed."))
+
+        response = dialog.run()
+
+        dialog.destroy()
+        if response == Gtk.ResponseType.NO:
+            window.hide()
+        elif response == Gtk.ResponseType.YES:
+            yes_callback()
+            window.hide()
+        else:
+            # don't close
+            return True
         return dialog
