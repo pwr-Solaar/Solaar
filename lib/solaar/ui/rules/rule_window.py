@@ -91,39 +91,6 @@ class DiversionDialog:
         self.window = window
         self._editing_component = None
 
-    def handle_close(self, window: Gtk.Window, e: Gdk.Event):
-        if self.rule_model.unsaved_changes:
-            dialog = self.rule_view.create_close_dialog(window)
-            response = dialog.run()
-            dialog.destroy()
-            if response == Gtk.ResponseType.NO:
-                window.hide()
-            elif response == Gtk.ResponseType.YES:
-                self.handle_save_yaml_file()
-                window.hide()
-            else:
-                # don't close
-                return True
-        else:
-            window.hide()
-
-    def handle_reload_yaml_file(self):
-        self.rule_view.discard_btn.set_sensitive(False)
-        self.rule_view.save_btn.set_sensitive(False)
-        self.rule_model.unsaved_changes = False
-        for c in self.selected_rule_edit_panel.get_children():
-            self.selected_rule_edit_panel.remove(c)
-        self._load_rules_func()
-        self.model = self._create_model_func()
-        self.tree_view.set_model(self.model)
-        self.tree_view.expand_all()
-
-    def handle_save_yaml_file(self):
-        if self._save_rules_func():
-            self.rule_model.unsaved_changes = False
-            self.rule_view.save_btn.set_sensitive(False)
-            self.rule_view.discard_btn.set_sensitive(False)
-
     def _create_top_panel(self):
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
@@ -158,6 +125,44 @@ class DiversionDialog:
         self.rule_model.unsaved_changes = True
         self.rule_view.save_btn.set_sensitive(True)
         self.rule_view.discard_btn.set_sensitive(True)
+
+    def update_devices(self):
+        for rc in self.ui.values():
+            rc.update_devices()
+        self.tree_view.queue_draw()
+
+    def handle_close(self, window: Gtk.Window, _e: Gdk.Event):
+        if self.rule_model.unsaved_changes:
+            dialog = self.rule_view.create_close_dialog(window)
+            response = dialog.run()
+            dialog.destroy()
+            if response == Gtk.ResponseType.NO:
+                window.hide()
+            elif response == Gtk.ResponseType.YES:
+                self.handle_save_yaml_file()
+                window.hide()
+            else:
+                # don't close
+                return True
+        else:
+            window.hide()
+
+    def handle_reload_yaml_file(self):
+        self.rule_view.discard_btn.set_sensitive(False)
+        self.rule_view.save_btn.set_sensitive(False)
+        self.rule_model.unsaved_changes = False
+        for c in self.selected_rule_edit_panel.get_children():
+            self.selected_rule_edit_panel.remove(c)
+        self._load_rules_func()
+        self.model = self._create_model_func()
+        self.tree_view.set_model(self.model)
+        self.tree_view.expand_all()
+
+    def handle_save_yaml_file(self):
+        if self._save_rules_func():
+            self.rule_model.unsaved_changes = False
+            self.rule_view.save_btn.set_sensitive(False)
+            self.rule_view.discard_btn.set_sensitive(False)
 
     def handle_selection_changed(self, selection):
         self.selected_rule_edit_panel.set_sensitive(False)
@@ -565,8 +570,3 @@ class DiversionDialog:
         menu_copy.connect("activate", _menu_do_copy, m, it)
         menu_copy.show()
         return menu_copy
-
-    def update_devices(self):
-        for rc in self.ui.values():
-            rc.update_devices()
-        self.tree_view.queue_draw()
