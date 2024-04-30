@@ -117,8 +117,7 @@ class DiversionDialog:
     def on_update(self):
         self.tree_view.queue_draw()
         self.rule_model.unsaved_changes = True
-        self.rule_view.save_btn.set_sensitive(True)
-        self.rule_view.discard_btn.set_sensitive(True)
+        self.rule_view.set_save_discard_buttons_status(True)
 
     def update_devices(self):
         for rc in self.ui.values():
@@ -169,7 +168,6 @@ class DiversionDialog:
 
     def handle_reload_yaml_file(self):
         self.rule_view.discard_btn.set_sensitive(False)
-        self.rule_view.save_btn.set_sensitive(False)
         self.rule_model.unsaved_changes = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
@@ -181,8 +179,7 @@ class DiversionDialog:
     def handle_save_yaml_file(self):
         if self._save_rules_func():
             self.rule_model.unsaved_changes = False
-            self.rule_view.save_btn.set_sensitive(False)
-            self.rule_view.discard_btn.set_sensitive(False)
+            self.rule_view.set_save_discard_buttons_status(False)
 
     def handle_selection_changed(self, selection):
         self.selected_rule_edit_panel.set_sensitive(False)

@@ -71,6 +71,11 @@ class RulesView:
         discard_btn.connect("clicked", callback)
         return discard_btn
 
+    def set_save_discard_buttons_status(self, enable: bool):
+        """Enable or disable the save and discard buttons."""
+        self.save_btn.set_sensitive(enable)
+        self.discard_btn.set_sensitive(enable)
+
     def create_save_discard_button_box(self):
         pass
 
