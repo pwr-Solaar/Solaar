@@ -1661,16 +1661,34 @@ class PerKeyLighting(_Settings):
     def write(self, map, save=True):
         if self._device.online:
             self.update(map, save)
-            data_bytes = b""
+            table = {}
             for key, value in map.items():
-                if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change
-                    data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
-                if len(data_bytes) >= 16:  # up to four values are packed into a request
+                if value in table:
+                    table[value].append(key)  # keys will be in order from small to large
+                else:
+                    table[value] = [key]
+            if len(table) == 1:  # use range update
+                for value, keys in table.items():  # only one, of course
+                    if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change, so don't update at all
+                        data_bytes = keys[0].to_bytes(1, "big") + keys[-1].to_bytes(1, "big") + value.to_bytes(3, "big")
+                        self._device.feature_request(self.feature, 0x50, data_bytes)  # range update command to update all keys
+                        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+            else:
+                data_bytes = b""
+                for value, keys in table.items():  # only one, of course
+                    if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change, so ignore it
+                        while len(keys) > 3:  # use an optimized update command that can update up to 13 keys
+                            data = value.to_bytes(3, "big") + b"".join([key.to_bytes(1, "big") for key in keys[0:13]])
+                            self._device.feature_request(self.feature, 0x60, data)  # single-value multiple-keys update
+                            keys = keys[13:]
+                        for key in keys:
+                            data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
+                            if len(data_bytes) >= 16:  # up to four values are packed into a regular update
+                                self._device.feature_request(self.feature, 0x10, data_bytes)
+                                data_bytes = b""
+                if len(data_bytes) > 0:  # update any remaining keys
                     self._device.feature_request(self.feature, 0x10, data_bytes)
-                    data_bytes = b""
-            if len(data_bytes) > 0:
-                self._device.feature_request(self.feature, 0x10, data_bytes)
-        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
         return map
 
     def write_key_value(self, key, value, save=True):
