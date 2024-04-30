@@ -29,16 +29,6 @@ from threading import Thread
 
 import hidapi as _hid
 
-#
-#
-#
-
-try:
-    read_packet = raw_input
-except NameError:
-    # Python 3 equivalent of raw_input
-    read_packet = input
-
 interactive = os.isatty(0)
 prompt = "?? Input: " if interactive else ""
 start_time = time.time()
@@ -217,7 +207,7 @@ def main():
             sys.stdout.write("\033[300B")  # move cusor at most 300 lines down, don't scroll
 
         while t.is_alive():
-            line = read_packet(prompt)
+            line = input(prompt)
             line = line.strip().replace(" ", "")
             # print ("line", line)
             if not line:
