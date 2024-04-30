@@ -39,10 +39,12 @@ from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
 from solaar.i18n import _
 from solaar.ui import rule_actions
 from solaar.ui import rule_conditions
-from solaar.ui import rule_window
 from solaar.ui.rule_base import RuleComponentUI
 from solaar.ui.rule_base import norm
 from solaar.ui.rule_conditions import ConditionUI
+from solaar.ui.rules import rule_window
+from solaar.ui.rules.model import RulesModel
+from solaar.ui.rules.view import RulesView
 
 logger = logging.getLogger(__name__)
 
@@ -1203,7 +1205,11 @@ def show_window(model):
     GObject.type_register(RuleComponentWrapper)
     _dev_model = model
     if _diversion_dialog is None:
+        rules_model = RulesModel()
+        rules_view = RulesView()
         _diversion_dialog = rule_window.DiversionDialog(
+            rules_model,
+            rules_view,
             COMPONENT_UI,
             UnsupportedRuleComponentUI,
             create_model_func=_create_model,
