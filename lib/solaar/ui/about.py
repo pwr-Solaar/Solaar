@@ -37,6 +37,7 @@ def _create():
     about.set_version(__version__)
     about.set_comments(_("Manages Logitech receivers,\nkeyboards, mice, and tablets."))
     about.set_icon_name(NAME.lower())
+    about.set_logo_icon_name(NAME.lower())
 
     about.set_copyright("© 2012-2023 Daniel Pavel and contributors to the Solaar project")
     about.set_license_type(Gtk.License.GPL_2_0)
