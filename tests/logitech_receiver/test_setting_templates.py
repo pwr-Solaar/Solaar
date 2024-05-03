@@ -119,6 +119,19 @@ simple_tests = [
         hidpp.Response("FF0101", 0x0610, "FF01"),
     ),
     Setup(
+        FeatureTest(settings_templates.K375sFnSwap, False, True, offset=0x06),
+        hidpp.Response("050001", 0x0000, "1815"),  # HOSTS_INFO
+        hidpp.Response("FF0001", 0x0600, "FF"),
+        hidpp.Response("FF0101", 0x0610, "FF01"),
+    ),
+    Setup(
+        FeatureTest(settings_templates.K375sFnSwap, False, True, offset=0x06),
+        hidpp.Response("050001", 0x0000, "1815"),  # HOSTS_INFO
+        hidpp.Response("07050301", 0x0500),  # current host is 0x01, i.e., host 2
+        hidpp.Response("010001", 0x0600, "01"),
+        hidpp.Response("010101", 0x0610, "0101"),
+    ),
+    Setup(
         FeatureTest(settings_templates.FnSwap, True, False),
         hidpp.Response("01", 0x0400),
         hidpp.Response("00", 0x0410, "00"),
@@ -473,6 +486,7 @@ def mock_gethostname(mocker):
 @pytest.mark.parametrize("test", simple_tests)
 def test_simple_template(test, mocker, mock_gethostname):
     tst = test.test
+    print("TEST", tst.sclass.feature)
     device = hidpp.Device(responses=test.responses, feature=tst.sclass.feature, offset=tst.offset, version=tst.version)
     spy_request = mocker.spy(device, "request")
 
