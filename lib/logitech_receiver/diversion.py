@@ -27,11 +27,11 @@ import sys
 import time
 
 from typing import Dict
+from typing import Optional
 from typing import Tuple
 
 import gi
 import psutil
-import yaml
 
 from keysyms import keysymdef
 
@@ -41,6 +41,8 @@ if platform.system() in ("Darwin", "Windows"):
     evdev = None
 else:
     import evdev
+
+import yaml
 
 from .common import NamedInt
 from .hidpp20 import FEATURE
@@ -1429,19 +1431,6 @@ COMPONENTS = {
     "Later": Later,
 }
 
-built_in_rules = Rule([])
-if True:
-    built_in_rules = Rule(
-        [
-            {
-                "Rule": [  # Implement problematic keys for Craft and MX Master
-                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
-                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
-                ]
-            },
-        ]
-    )
-
 
 def key_is_down(key):
     if key == CONTROL.MR:
@@ -1512,52 +1501,56 @@ def process_notification(device, notification, feature):
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
 _file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 
-rules = built_in_rules
 
+class RuleStorage:
+    def __init__(self, default_rules):
+        self.default_rules = default_rules
+        self.rules = []
 
-def save_rule_config_file(file_name=_file_path) -> bool:
-    """Writes user configured rules into a file.
+    def save_config(self, file_name=_file_path) -> bool:
+        """Writes user configured rules into a file.
 
-    Returns
-    -------
-    bool
-        True, if write was successful, False otherwise.
-    """
+        Returns
+        -------
+        bool
+            True, if write was successful, False otherwise.
+        """
 
-    # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
-    class inline_list(list):
-        pass
+        # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
+        class inline_list(list):
+            pass
 
-    def blockseq_rep(dumper, data):
-        return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
+        def blockseq_rep(dumper, data):
+            return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
-    yaml.add_representer(inline_list, blockseq_rep)
+        yaml.add_representer(inline_list, blockseq_rep)
 
-    def convert(elem):
-        if isinstance(elem, list):
-            if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
-                # All diversion classes that expect a list of scalars also support a single scalar without a list
-                return elem[0]
-            if all(isinstance(c, (int, str, float)) for c in elem):
-                return inline_list([convert(c) for c in elem])
-            return [convert(c) for c in elem]
-        if isinstance(elem, dict):
-            return {k: convert(v) for k, v in elem.items()}
-        if isinstance(elem, NamedInt):
-            return int(elem)
-        return elem
+        def convert(elem):
+            if isinstance(elem, list):
+                if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
+                    # All diversion classes that expect a list of scalars also support a single scalar without a list
+                    return elem[0]
+                if all(isinstance(c, (int, str, float)) for c in elem):
+                    return inline_list([convert(c) for c in elem])
+                return [convert(c) for c in elem]
+            if isinstance(elem, dict):
+                return {k: convert(v) for k, v in elem.items()}
+            if isinstance(elem, NamedInt):
+                return int(elem)
+            return elem
 
-    # YAML format settings
-    dump_settings = {
-        "encoding": "utf-8",
-        "explicit_start": True,
-        "explicit_end": True,
-        "default_flow_style": False,
-        # 'version': (1, 3),  # it would be printed for every rule
-    }
-    # Save only user-defined rules
-    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == file_name), [])
-    if True:  # save even if there are no rules to save
+        # YAML format settings
+        dump_settings = {
+            "encoding": "utf-8",
+            "explicit_start": True,
+            "explicit_end": True,
+            "default_flow_style": False,
+            # 'version': (1, 3),  # it would be printed for every rule
+        }
+        # Save only user-defined rules
+        rule_components = self.rules.components
+
+        rules_to_save = sum((r.data()["Rule"] for r in rule_components if r.source == file_name), [])
         if logger.isEnabledFor(logging.INFO):
             logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
         try:
@@ -1568,18 +1561,20 @@ def save_rule_config_file(file_name=_file_path) -> bool:
         except Exception as e:
             logger.error("failed to save to %s\n%s", file_name, e)
             return False
-    return True
+        return True
+
+    def load_config(self):
+        """Loads user configured rules."""
+        if os.path.isfile(_file_path):
+            self.rules = _load_rule_config(_file_path, self.default_rules)
+        else:
+            raise FileNotFoundError(f"Rule file '{_file_path}' not found")
 
 
-def load_rule_config_file():
-    """Loads user configured rules from file."""
-    global rules
+def _load_rule_config(file_path: str, default_rules: Optional[Rule]) -> Rule:
+    if default_rules is None:
+        default_rules = Rule([])
 
-    if os.path.isfile(_file_path):
-        rules = _load_rule_config(_file_path)
-
-
-def _load_rule_config(file_path: str) -> Rule:
     loaded_rules = []
     try:
         with open(file_path) as config_file:
@@ -1594,7 +1589,21 @@ def _load_rule_config(file_path: str) -> Rule:
     except Exception as e:
         logger.error("failed to load from %s\n%s", file_path, e)
     user_rules = Rule(loaded_rules, source=file_path)
-    return Rule([user_rules, built_in_rules])
+    return Rule([user_rules, default_rules])
 
 
-load_rule_config_file()
+built_in_rules = Rule([])
+if True:
+    built_in_rules = Rule(
+        [
+            {
+                "Rule": [  # Implement problematic keys for Craft and MX Master
+                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+                ]
+            },
+        ]
+    )
+
+rule_storage = RuleStorage(built_in_rules)
+rule_storage.load_config()
