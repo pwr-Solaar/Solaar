@@ -13,8 +13,21 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from typing import Callable
 
 
 class RulesModel:
-    def __init__(self):
+    def __init__(self, load_rules_func: Callable, save_rules_func: Callable[..., bool]):
+        self.load_rules = load_rules_func
+        self.save_rules = save_rules_func
         self.unsaved_changes = False
+
+    def load_rules(self):
+        self.load_rules()
+        self.unsaved_changes = False
+
+    def save_rules(self) -> bool:
+        success = self.save_rules()
+        if success:
+            self.unsaved_changes = False
+        return success

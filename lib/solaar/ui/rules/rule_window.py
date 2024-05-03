@@ -36,16 +36,12 @@ class DiversionDialog:
         unsupported_rule_component_ui,
         create_model_func: Callable,
         populate_model_func: Callable,
-        load_rules_func: Callable,
-        save_rules_func: Callable[..., bool],
     ):
         self.rule_model = model
         self.rule_view = view
         self._unsupported_rule_component_ui = unsupported_rule_component_ui
         self._create_model_func = create_model_func
         self._populate_model_func = populate_model_func
-        self._load_rules_func = load_rules_func
-        self._save_rules_func = save_rules_func
 
         window = self.rule_view.create_main_window()
         window.connect("delete-event", self.handle_close)
@@ -156,17 +152,15 @@ class DiversionDialog:
     def handle_reload_yaml_file(self):
         self.rule_view.set_save_discard_buttons_status(False)
 
-        self.rule_model.unsaved_changes = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        self._load_rules_func()
+        self.rule_model.load_rules()
         self.model = self._create_model_func()
         self.tree_view.set_model(self.model)
         self.tree_view.expand_all()
 
     def handle_save_yaml_file(self):
-        if self._save_rules_func():
-            self.rule_model.unsaved_changes = False
+        if self.rule_model.save_rules():
             self.rule_view.set_save_discard_buttons_status(False)
 
     def handle_selection_changed(self, selection: Gtk.TreeSelection):

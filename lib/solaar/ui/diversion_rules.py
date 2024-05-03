@@ -1205,7 +1205,10 @@ def show_window(model):
     GObject.type_register(RuleComponentWrapper)
     _dev_model = model
     if _diversion_dialog is None:
-        rules_model = RulesModel()
+        rules_model = RulesModel(
+            load_rules_func=_DIV.load_rule_config_file,
+            save_rules_func=_DIV.save_rule_config_file,
+        )
         rules_view = RulesView()
         _diversion_dialog = rule_window.DiversionDialog(
             rules_model,
@@ -1214,8 +1217,6 @@ def show_window(model):
             UnsupportedRuleComponentUI,
             create_model_func=_create_model,
             populate_model_func=_populate_model,
-            load_rules_func=_DIV.load_rule_config_file,
-            save_rules_func=_DIV.save_rule_config_file,
         )
     update_devices()
     _diversion_dialog.window.present()
