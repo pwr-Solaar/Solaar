@@ -231,11 +231,24 @@ _descriptors.get_usbid(0xC066).settings = [_PerformanceMXDpi, RegisterSmoothScro
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
-# just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
+# can't just use the first byte = 0xFF (for current host) because of a bug in the firmware of the MX Keys S
 class K375sFnSwap(FnSwapVirtual):
     feature = _F.K375S_FN_INVERSION
-    rw_options = {"prefix": b"\xFF"}
     validator_options = {"true_value": b"\x01", "false_value": b"\x00", "read_skip_byte_count": 1}
+
+    class rw_class(_FeatureRW):
+        def find_current_host(self, device):
+            if not self.prefix:
+                response = device.feature_request(_F.HOSTS_INFO, 0x00)
+                self.prefix = response[3:4] if response else b"\xFF"
+
+        def read(self, device, data_bytes=b""):
+            self.find_current_host(device)
+            return super().read(device, data_bytes)
+
+        def write(self, device, data_bytes):
+            self.find_current_host(device)
+            return super().write(device, data_bytes)
 
 
 class FnSwap(FnSwapVirtual):
