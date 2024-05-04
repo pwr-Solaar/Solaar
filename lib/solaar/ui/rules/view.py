@@ -76,9 +76,6 @@ class RulesView:
         self.save_btn.set_sensitive(enable)
         self.discard_btn.set_sensitive(enable)
 
-    def create_save_discard_button_box(self):
-        pass
-
     def create_selected_rule_edit_panel(self) -> Gtk.Grid:
         """Creates the edit Condition/Actions panel for a rule.
 

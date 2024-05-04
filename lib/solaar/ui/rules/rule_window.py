@@ -18,13 +18,55 @@ import dataclasses
 from collections import defaultdict
 from typing import Any
 from typing import Callable
+from typing import Optional
 
 from gi.repository import Gdk
 from gi.repository import Gtk
 from logitech_receiver import diversion as _DIV
 
 from solaar.i18n import _
+from solaar.ui import diversion_rules
 from solaar.ui import rule_conditions
+
+
+def _create_model(rules: _DIV.Rule) -> Gtk.TreeStore:
+    """Converts a Rules instance into a Gtk.TreeStore."""
+    model = Gtk.TreeStore(diversion_rules.RuleComponentWrapper)
+    if len(rules.components) == 1:
+        # only built-in rules - add empty user rule list
+        rules.components.insert(0, _DIV.Rule([], source=_DIV._CONFIG_FILE_PATH))
+    _populate_model(model, None, rules.components)
+    return model
+
+
+def _populate_model(
+    model: Gtk.TreeStore,
+    it: Gtk.TreeIter,
+    rule_component: Any,
+    level: int = 0,
+    pos: int = -1,
+    editable: Optional[bool] = None,
+):
+    if isinstance(rule_component, list):
+        for c in rule_component:
+            _populate_model(model, it, c, level=level, pos=pos, editable=editable)
+            if pos >= 0:
+                pos += 1
+        return
+    if editable is None:
+        editable = model[it][0].editable if it is not None else False
+        if isinstance(rule_component, _DIV.Rule):
+            editable = editable or (rule_component.source is not None)
+    wrapped = diversion_rules.RuleComponentWrapper(rule_component, level, editable=editable)
+    piter = model.insert(it, pos, (wrapped,))
+    if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
+        for c in rule_component.components:
+            ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
+            _populate_model(model, piter, c, level + 1, editable=ed)
+        if len(rule_component.components) == 0:
+            _populate_model(model, piter, None, level + 1, editable=editable)
+    elif isinstance(rule_component, _DIV.Not):
+        _populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
 
 class DiversionDialog:
@@ -34,14 +76,12 @@ class DiversionDialog:
         view,
         component_ui: dict,
         unsupported_rule_component_ui,
-        create_model_func: Callable,
-        populate_model_func: Callable,
     ):
         self.rule_model = model
         self.rule_view = view
+        self.model = None
         self._unsupported_rule_component_ui = unsupported_rule_component_ui
-        self._create_model_func = create_model_func
-        self._populate_model_func = populate_model_func
+        self.action_menu = None
 
         window = self.rule_view.create_main_window()
         window.connect("delete-event", self.handle_close)
@@ -52,7 +92,7 @@ class DiversionDialog:
             self.tree_view.append_column(col)
         vbox.pack_start(top_panel, True, True, 0)
 
-        self.action_menu = ActionMenu(window, self.tree_view, populate_model_func, on_update=self.on_update)
+        self.action_menu = ActionMenu(window, self.tree_view, on_update=self.on_update)
 
         self.selected_rule_edit_panel = self.rule_view.create_selected_rule_edit_panel()
         self.ui = defaultdict(lambda: self._unsupported_rule_component_ui(self.selected_rule_edit_panel))
@@ -64,18 +104,22 @@ class DiversionDialog:
         )
         vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
 
-        self.model = self._create_model_func()
-        self.tree_view.set_model(self.model)
+        self.tree_model = _create_model(_DIV.rule_storage.rules)
+        self.tree_view.set_model(self.tree_model)
         self.tree_view.expand_all()
 
         window.add(vbox)
-        window.show_all()
         window.connect("delete-event", lambda w, e: w.hide_on_delete() or True)
 
         style = window.get_style_context()
         style.add_class("solaar")
         self.window = window
-        self._editing_component = None
+        window.show_all()
+
+    def handle_rule_update(self, rules):
+        self.tree_model = _create_model(rules)
+        self.tree_view.set_model(self.tree_model)
+        self.tree_view.expand_all()
 
     def _create_top_panel(self):
         sw = Gtk.ScrolledWindow()
@@ -154,9 +198,9 @@ class DiversionDialog:
 
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        self.rule_model.load_rules()
-        self.model = self._create_model_func()
-        self.tree_view.set_model(self.model)
+        loaded_rules = self.rule_model.load_rules()
+        self.tree_model = _create_model(loaded_rules)
+        self.tree_view.set_model(self.tree_model)
         self.tree_view.expand_all()
 
     def handle_save_yaml_file(self):
@@ -171,9 +215,11 @@ class DiversionDialog:
             return
         wrapped = model[it][0]
         component = wrapped.component
-        self._editing_component = component
         self.ui[type(component)].show(component, wrapped.editable)
         self.selected_rule_edit_panel.set_sensitive(wrapped.editable)
+
+    def run(self):
+        self.view.init_ui()
 
 
 @dataclasses.dataclass
@@ -212,10 +258,9 @@ def allowed_actions(m: Gtk.TreeStore, it: Gtk.TreeIter) -> AllowedActions:
 
 
 class ActionMenu:
-    def __init__(self, window, tree_view, populate_model_func, on_update):
+    def __init__(self, window, tree_view, on_update):
         self.window = window
         self.tree_view = tree_view
-        self._populate_model_func = populate_model_func
         self._on_update = on_update
         self._clipboard = None
 
@@ -244,7 +289,7 @@ class ActionMenu:
             elif enabled_actions.copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and enabled_actions.c is not None:
                 self.handle_copy(None, m, it)
             elif enabled_actions.insert and self._clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
-                self.handle_paster(
+                self.handle_paste(
                     None, m, it, below=enabled_actions.c is not None and not (state & Gdk.ModifierType.SHIFT_MASK)
                 )
             elif (
@@ -252,11 +297,11 @@ class ActionMenu:
                 and isinstance(self._clipboard, _DIV.Rule)
                 and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
             ):
-                self.handle_paster(
+                self.handle_paste(
                     None, m, it, below=enabled_actions.c is not None and not (state & Gdk.ModifierType.SHIFT_MASK)
                 )
             elif enabled_actions.insert_root and isinstance(self._clipboard, _DIV.Rule) and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
-                self.handle_paster(None, m, m.iter_nth_child(it, 0))
+                self.handle_paste(None, m, m.iter_nth_child(it, 0))
             elif enabled_actions.delete and e.keyval in [Gdk.KEY_KP_Delete, Gdk.KEY_Delete]:
                 self.handle_delete(None, m, it)
             elif (enabled_actions.insert or enabled_actions.insert_only_rule or enabled_actions.insert_root) and e.keyval in [
@@ -472,7 +517,7 @@ class ActionMenu:
 
     def create_menu_paste(self, m: Gtk.TreeStore, it: Gtk.TreeIter, below=False) -> Gtk.MenuItem:
         menu_paste = Gtk.MenuItem(_("Paste"))
-        menu_paste.connect("activate", self.handle_paster, m, it, below)
+        menu_paste.connect("activate", self.handle_paste, m, it, below)
         menu_paste.show()
         return menu_paste
 
@@ -495,7 +540,7 @@ class ActionMenu:
             parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1 :]]
             children = [child[0].component for child in m[it].iterchildren()]
         m.remove(it)
-        self._populate_model_func(m, parent_it, children, level=wrapped.level, pos=idx)
+        _populate_model(m, parent_it, children, level=wrapped.level, pos=idx)
         new_iter = m.iter_nth_child(parent_it, idx)
         self.tree_view.expand_row(m.get_path(parent_it), True)
         self.tree_view.get_selection().select_iter(new_iter)
@@ -509,7 +554,7 @@ class ActionMenu:
         idx = parent_c.components.index(c)
         parent_c.components.pop(idx)
         if len(parent_c.components) == 0:  # placeholder
-            self._populate_model_func(m, parent_it, None, level=wrapped.level)
+            _populate_model(m, parent_it, None, level=wrapped.level)
         m.remove(it)
         self.tree_view.get_selection().select_iter(m.iter_nth_child(parent_it, max(0, min(idx, len(parent_c.components) - 1))))
         self._on_update()
@@ -525,10 +570,10 @@ class ActionMenu:
         else:
             idx = parent_c.components.index(c)
         if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
+            new_c.source = _DIV._CONFIG_FILE_PATH  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
-        self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=idx)
+        _populate_model(m, parent_it, new_c, level=wrapped.level, pos=idx)
         self._on_update()
         if len(parent_c.components) == 1:
             m.remove(it)  # remove placeholder in the end
@@ -566,7 +611,7 @@ class ActionMenu:
             new_c = cls([c], warn=False)
             parent_c.component = new_c
             m.remove(it)
-            self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=0)
+            _populate_model(m, parent_it, new_c, level=wrapped.level, pos=0)
             self.tree_view.expand_row(m.get_path(parent_it), True)
             self.tree_view.get_selection().select_iter(m.iter_nth_child(parent_it, 0))
         else:
@@ -585,7 +630,7 @@ class ActionMenu:
         self._on_update()
         self._clipboard = c
 
-    def handle_paster(self, _mitem, m: Gtk.TreeStore, it: Gtk.TreeIter, below=False):
+    def handle_paste(self, _mitem, m: Gtk.TreeStore, it: Gtk.TreeIter, below=False):
         c = self._clipboard
         self._clipboard = None
         if c:

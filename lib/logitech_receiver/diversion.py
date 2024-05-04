@@ -26,6 +26,7 @@ import subprocess
 import sys
 import time
 
+from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Tuple
@@ -1446,10 +1447,9 @@ def key_is_down(key):
 def evaluate_rules(feature, notification, device):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("evaluating rules on %s", notification)
-    rules.evaluate(feature, notification, device, True)
+    rule_storage.rules.evaluate(feature, notification, device, True)
 
 
-# process a notification
 def process_notification(device, notification, feature):
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
@@ -1499,16 +1499,17 @@ def process_notification(device, notification, feature):
 
 
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
-_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
+_CONFIG_FILE_PATH = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 
 
 class RuleStorage:
-    def __init__(self, default_rules):
+    def __init__(self, yml_file_path: str, default_rules: Optional[Rule] = None):
         self.default_rules = default_rules
+        self._yml_file_path = yml_file_path
         self.rules = []
 
-    def save_config(self, file_name=_file_path) -> bool:
-        """Writes user configured rules into a file.
+    def save_config(self) -> bool:
+        """Writes user configured rules into a YAML file.
 
         Returns
         -------
@@ -1516,65 +1517,76 @@ class RuleStorage:
             True, if write was successful, False otherwise.
         """
 
-        # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
-        class inline_list(list):
-            pass
-
         def blockseq_rep(dumper, data):
             return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
-        yaml.add_representer(inline_list, blockseq_rep)
+        yaml.add_representer(_inline_list, blockseq_rep)
 
-        def convert(elem):
-            if isinstance(elem, list):
-                if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
-                    # All diversion classes that expect a list of scalars also support a single scalar without a list
-                    return elem[0]
-                if all(isinstance(c, (int, str, float)) for c in elem):
-                    return inline_list([convert(c) for c in elem])
-                return [convert(c) for c in elem]
-            if isinstance(elem, dict):
-                return {k: convert(v) for k, v in elem.items()}
-            if isinstance(elem, NamedInt):
-                return int(elem)
-            return elem
-
-        # YAML format settings
-        dump_settings = {
-            "encoding": "utf-8",
-            "explicit_start": True,
-            "explicit_end": True,
-            "default_flow_style": False,
-            # 'version': (1, 3),  # it would be printed for every rule
-        }
         # Save only user-defined rules
         rule_components = self.rules.components
+        return _save_rule_config(self._yml_file_path, rule_components)
 
-        rules_to_save = sum((r.data()["Rule"] for r in rule_components if r.source == file_name), [])
-        if logger.isEnabledFor(logging.INFO):
-            logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
+    def load_config(self) -> Rule:
+        """Loads user configured rules from YAML file."""
+        if self.default_rules is None:
+            default_rules = Rule([])
+        else:
+            default_rules = self.default_rules
+
+        if not os.path.isfile(self._yml_file_path):
+            return default_rules
+
+        user_defined_rules = _load_rule_config(self._yml_file_path)
+        all_rules = Rule([user_defined_rules, default_rules])
+        self.rules = all_rules
+        return all_rules
+
+
+class _inline_list(list):
+    pass
+    """This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)"""
+
+
+def _save_rule_config(file_path: str, rules: Rule) -> bool:
+    def convert(elem: Any) -> Any:
+        if isinstance(elem, list):
+            if len(elem) == 1 and isinstance(elem[0], (int, str, float)):
+                # All diversion classes that expect a list of scalars also support a single scalar without a list
+                return elem[0]
+            if all(isinstance(c, (int, str, float)) for c in elem):
+                return _inline_list([convert(c) for c in elem])
+            return [convert(c) for c in elem]
+        if isinstance(elem, dict):
+            return {k: convert(v) for k, v in elem.items()}
+        if isinstance(elem, NamedInt):
+            return int(elem)
+        return elem
+
+    # YAML format settings
+    dump_settings = {
+        "encoding": "utf-8",
+        "explicit_start": True,
+        "explicit_end": True,
+        "default_flow_style": False,
+        # 'version': (1, 3),  # it would be printed for every rule
+    }
+    rules_to_save = sum((r.data()["Rule"] for r in rules if r.source == file_path), [])
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("saving %d rule(s) to %s", len(rules_to_save), file_path)
         try:
-            with open(file_name, "w") as f:
+            with open(file_path, "w") as f:
                 if rules_to_save:
                     f.write("%YAML 1.3\n")  # Write version manually
-                yaml.dump_all(convert([r["Rule"] for r in rules_to_save]), f, **dump_settings)
+                content_to_save = convert([r["Rule"] for r in rules_to_save])
+                yaml.dump_all(content_to_save, f, **dump_settings)
         except Exception as e:
-            logger.error("failed to save to %s\n%s", file_name, e)
+            logger.error("failed to save to %s\n%s", file_path, e)
             return False
         return True
 
-    def load_config(self):
-        """Loads user configured rules."""
-        if os.path.isfile(_file_path):
-            self.rules = _load_rule_config(_file_path, self.default_rules)
-        else:
-            raise FileNotFoundError(f"Rule file '{_file_path}' not found")
 
-
-def _load_rule_config(file_path: str, default_rules: Optional[Rule]) -> Rule:
-    if default_rules is None:
-        default_rules = Rule([])
-
+def _load_rule_config(file_path: str) -> Rule:
+    """Loads user defined rules from a YAML file."""
     loaded_rules = []
     try:
         with open(file_path) as config_file:
@@ -1588,22 +1600,19 @@ def _load_rule_config(file_path: str, default_rules: Optional[Rule]) -> Rule:
                 logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
     except Exception as e:
         logger.error("failed to load from %s\n%s", file_path, e)
-    user_rules = Rule(loaded_rules, source=file_path)
-    return Rule([user_rules, default_rules])
+    return Rule(loaded_rules, source=file_path)
 
 
-built_in_rules = Rule([])
-if True:
-    built_in_rules = Rule(
-        [
-            {
-                "Rule": [  # Implement problematic keys for Craft and MX Master
-                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
-                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
-                ]
-            },
-        ]
-    )
+built_in_rules = Rule(
+    [
+        {
+            "Rule": [  # Implement problematic keys for Craft and MX Master
+                {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+            ]
+        },
+    ]
+)
 
-rule_storage = RuleStorage(built_in_rules)
+rule_storage = RuleStorage(_CONFIG_FILE_PATH, built_in_rules)
 rule_storage.load_config()
