@@ -15,7 +15,6 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import dataclasses
 
-from collections import defaultdict
 from typing import Any
 from typing import Callable
 from typing import Optional
@@ -27,6 +26,7 @@ from logitech_receiver import diversion as _DIV
 from solaar.i18n import _
 from solaar.ui import diversion_rules
 from solaar.ui import rule_conditions
+from solaar.ui.rules.handler import EventHandler
 
 
 def _create_model(rules: _DIV.Rule) -> Gtk.TreeStore:
@@ -70,95 +70,45 @@ def _populate_model(
 
 
 class DiversionDialog:
-    def __init__(
-        self,
-        model,
-        view,
-        component_ui: dict,
-        unsupported_rule_component_ui,
-    ):
-        self.rule_model = model
-        self.rule_view = view
-        self.model = None
-        self._unsupported_rule_component_ui = unsupported_rule_component_ui
+    def __init__(self, model, view):
+        self._model = model
+        self._view = view
+
         self.action_menu = None
 
-        window = self.rule_view.create_main_window()
-        window.connect("delete-event", self.handle_close)
-        vbox = Gtk.VBox()
-
-        top_panel, self.tree_view = self._create_top_panel()
-        for col in self.rule_view.create_view_columns():
-            self.tree_view.append_column(col)
-        vbox.pack_start(top_panel, True, True, 0)
-
-        self.action_menu = ActionMenu(window, self.tree_view, on_update=self.on_update)
-
-        self.selected_rule_edit_panel = self.rule_view.create_selected_rule_edit_panel()
-        self.ui = defaultdict(lambda: self._unsupported_rule_component_ui(self.selected_rule_edit_panel))
-        self.ui.update(
-            {  # one instance per type
-                rc_class: rc_ui_class(self.selected_rule_edit_panel, on_update=self.on_update)
-                for rc_class, rc_ui_class in component_ui.items()
-            }
+        # Init UI
+        event_handler = EventHandler(
+            handle_event_key_pressed=self.handle_event_key_pressed,
+            handle_event_button_released=self.handle_event_button_released,
+            handle_selection_changed=self.handle_selection_changed,
+            handle_save_yaml_file=self.handle_save_yaml_file,
+            handle_reload_yaml_file=self.handle_reload_yaml_file,
+            handle_close=self.handle_close,
         )
-        vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
+        self._view.init_ui(event_handler, self.on_update)
 
-        self.tree_model = _create_model(_DIV.rule_storage.rules)
-        self.tree_view.set_model(self.tree_model)
-        self.tree_view.expand_all()
+        self.action_menu = ActionMenu(self._view.window, self._view.tree_view, on_update=self.on_update)
 
-        window.add(vbox)
-        window.connect("delete-event", lambda w, e: w.hide_on_delete() or True)
+        self.handle_rule_update(self._model.rules)
 
-        style = window.get_style_context()
-        style.add_class("solaar")
-        self.window = window
-        window.show_all()
+    def handle_rule_update(self, rules: _DIV.Rule):
+        """Updates rule view given rules.
 
-    def handle_rule_update(self, rules):
-        self.tree_model = _create_model(rules)
-        self.tree_view.set_model(self.tree_model)
-        self.tree_view.expand_all()
-
-    def _create_top_panel(self):
-        sw = Gtk.ScrolledWindow()
-        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
-
-        tree_view = self.rule_view.create_tree_view(
-            callback_key_pressed=self.handle_event_key_pressed,
-            callback_event_button_released=self.handle_event_button_released,
-            callback_selection_changed=self.handle_selection_changed,
-        )
-
-        sw.add(tree_view)
-        sw.set_size_request(0, 300)  # don't ask for so much height
-
-        self.rule_view.save_btn = self.rule_view.create_save_button(lambda *_args: self.handle_save_yaml_file())
-        self.rule_view.discard_btn = self.rule_view.create_discard_button(lambda *_args: self.handle_reload_yaml_file())
-
-        button_box = Gtk.HBox(spacing=20)
-        button_box.pack_start(self.rule_view.save_btn, False, False, 0)
-        button_box.pack_start(self.rule_view.discard_btn, False, False, 0)
-        button_box.set_halign(Gtk.Align.CENTER)
-        button_box.set_valign(Gtk.Align.CENTER)
-        button_box.set_size_request(0, 50)
-
-        vbox = Gtk.VBox()
-        vbox.pack_start(button_box, False, False, 0)
-        vbox.pack_start(sw, True, True, 0)
-
-        return vbox, tree_view
+        Removes all existing rules and adds new ones.
+        """
+        self._view.clear_selected_rule_edit_panel()
+        tree_model = _create_model(rules)
+        self._view.update_tree_view(tree_model)
 
     def on_update(self):
-        self.tree_view.queue_draw()
-        self.rule_model.unsaved_changes = True
-        self.rule_view.set_save_discard_buttons_status(True)
+        self._view.tree_view.queue_draw()
+        self._model.unsaved_changes = True
+        self._view.set_save_discard_buttons_status(True)
 
     def update_devices(self):
-        for rc in self.ui.values():
+        for rc in self._view.ui.values():
             rc.update_devices()
-        self.tree_view.queue_draw()
+        self._view.tree_view.queue_draw()
 
     def handle_event_key_pressed(self, v: Gtk.TreeView, e: Gdk.EventKey):
         """
@@ -179,7 +129,6 @@ class DiversionDialog:
         self.action_menu.create_menu_event_key_pressed(
             v,
             e,
-            unsaved_changes=self.rule_model.unsaved_changes,
             save_callback=self.handle_save_yaml_file,
         )
 
@@ -188,38 +137,36 @@ class DiversionDialog:
             self.action_menu.create_context_menu(v, e)
 
     def handle_close(self, window: Gtk.Window, _e: Gdk.Event):
-        if self.rule_model.unsaved_changes:
-            self.rule_view.show_close_dialog(window, self.handle_save_yaml_file)
+        if self._model.unsaved_changes:
+            self._view.show_close_dialog(window, self.handle_save_yaml_file)
         else:
-            window.hide()
+            self._view.close()
 
     def handle_reload_yaml_file(self):
-        self.rule_view.set_save_discard_buttons_status(False)
+        self._view.set_save_discard_buttons_status(False)
 
-        for c in self.selected_rule_edit_panel.get_children():
-            self.selected_rule_edit_panel.remove(c)
-        loaded_rules = self.rule_model.load_rules()
-        self.tree_model = _create_model(loaded_rules)
-        self.tree_view.set_model(self.tree_model)
-        self.tree_view.expand_all()
+        loaded_rules = self._model.load_rules()
+        self.handle_rule_update(loaded_rules)
 
     def handle_save_yaml_file(self):
-        if self.rule_model.save_rules():
-            self.rule_view.set_save_discard_buttons_status(False)
+        if self._model.save_rules():
+            self._view.set_save_discard_buttons_status(False)
 
     def handle_selection_changed(self, selection: Gtk.TreeSelection):
-        self.selected_rule_edit_panel.set_sensitive(False)
+        self._view.selected_rule_edit_panel.set_sensitive(False)
 
         (model, it) = selection.get_selected()
         if it is None:
             return
         wrapped = model[it][0]
         component = wrapped.component
-        self.ui[type(component)].show(component, wrapped.editable)
-        self.selected_rule_edit_panel.set_sensitive(wrapped.editable)
+
+        # TODO fix None not allowed
+        self._view.ui[type(component)].show(component, wrapped.editable)
+        self._view.selected_rule_edit_panel.set_sensitive(wrapped.editable)
 
     def run(self):
-        self.view.init_ui()
+        self._view.show()
 
 
 @dataclasses.dataclass
@@ -264,7 +211,7 @@ class ActionMenu:
         self._on_update = on_update
         self._clipboard = None
 
-    def create_menu_event_key_pressed(self, v: Gtk.TreeView, e: Gdk.EventKey, unsaved_changes: bool, save_callback: Callable):
+    def create_menu_event_key_pressed(self, v: Gtk.TreeView, e: Gdk.EventKey, save_callback: Callable):
         """
         Shortcuts:
             Ctrl + I                insert component
@@ -314,7 +261,7 @@ class ActionMenu:
                 menu.show_all()
                 rect = self.tree_view.get_cell_area(m.get_path(it), self.tree_view.get_column(1))
                 menu.popup_at_rect(self.window.get_window(), rect, Gdk.Gravity.WEST, Gdk.Gravity.CENTER, e)
-            elif unsaved_changes and e.keyval in [Gdk.KEY_s, Gdk.KEY_S]:
+            elif e.keyval in [Gdk.KEY_s, Gdk.KEY_S]:
                 save_callback()
         else:
             if enabled_actions.wrap:
@@ -329,7 +276,7 @@ class ActionMenu:
             if enabled_actions.flatten and e.keyval in [Gdk.KEY_asterisk, Gdk.KEY_KP_Multiply]:
                 self.create_menu_do_flatten(None, m, it)
 
-    def create_context_menu(self, v, e):
+    def create_context_menu(self, v: Gtk.TreeView, e: Gdk.EventButton):
         """Creates right-click dialog."""
         menu = Gtk.Menu()
         m, it = v.get_selection().get_selected()

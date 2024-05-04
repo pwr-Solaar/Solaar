@@ -13,22 +13,97 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from collections import defaultdict
 from typing import Callable
 
 from gi.repository import Gdk
 from gi.repository import Gtk
 
 from solaar.i18n import _
+from solaar.ui.rules.handler import EventHandler
 
 
 class RulesView:
-    def __init__(self):
+    def __init__(
+        self,
+        component_ui: dict,
+        unsupported_rule_component_ui,
+    ):
+        self._component_ui = component_ui
+        self._unsupported_rule_component_ui = unsupported_rule_component_ui
+
         self.window = None
+        self.tree_view = None
         self.save_btn = None
         self.discard_btn = None
 
-    def init_ui(self):
-        pass
+        self.ui = None
+
+    def init_ui(self, event_handler: EventHandler, on_update: Callable):
+        window = self.create_main_window()
+        window.connect("delete-event", event_handler.handle_close)
+        vbox = Gtk.VBox()
+
+        top_panel, self.tree_view = self.create_top_panel(event_handler)
+        for col in self.create_view_columns():
+            self.tree_view.append_column(col)
+        vbox.pack_start(top_panel, True, True, 0)
+
+        self.selected_rule_edit_panel = self.create_selected_rule_edit_panel()
+        vbox.pack_start(self.selected_rule_edit_panel, False, False, 10)
+
+        self.ui = defaultdict(lambda: self._unsupported_rule_component_ui(self.selected_rule_edit_panel))
+        self.ui.update(
+            {  # one instance per type
+                rc_class: rc_ui_class(self.selected_rule_edit_panel, on_update=on_update)
+                for rc_class, rc_ui_class in self._component_ui.items()
+            }
+        )
+
+        window.add(vbox)
+        window.connect("delete-event", lambda w, e: w.hide_on_delete() or True)
+
+        style = window.get_style_context()
+        style.add_class("solaar")
+        window.show_all()
+        self.window = window
+
+    def clear_selected_rule_edit_panel(self):
+        for child in self.selected_rule_edit_panel.get_children():
+            self.selected_rule_edit_panel.remove(child)
+
+    def update_tree_view(self, rules_tree: Gtk.TreeStore):
+        self.tree_view.set_model(rules_tree)
+        self.tree_view.expand_all()
+
+    def create_top_panel(self, event: EventHandler):
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+
+        tree_view = self.create_tree_view(
+            callback_key_pressed=event.handle_event_key_pressed,
+            callback_event_button_released=event.handle_event_button_released,
+            callback_selection_changed=event.handle_selection_changed,
+        )
+
+        sw.add(tree_view)
+        sw.set_size_request(0, 300)  # don't ask for so much height
+
+        self.save_btn = self.create_save_button(lambda *_args: event.handle_save_yaml_file())
+        self.discard_btn = self.create_discard_button(lambda *_args: event.handle_reload_yaml_file())
+
+        button_box = Gtk.HBox(spacing=20)
+        button_box.pack_start(self.save_btn, False, False, 0)
+        button_box.pack_start(self.discard_btn, False, False, 0)
+        button_box.set_halign(Gtk.Align.CENTER)
+        button_box.set_valign(Gtk.Align.CENTER)
+        button_box.set_size_request(0, 50)
+
+        vbox = Gtk.VBox()
+        vbox.pack_start(button_box, False, False, 0)
+        vbox.pack_start(sw, True, True, 0)
+
+        return vbox, tree_view
 
     def create_main_window(self) -> Gtk.Window:
         window = Gtk.Window()
@@ -98,6 +173,7 @@ class RulesView:
         col1.pack_start(cell_icon, False)
         col1.pack_start(cell1, True)
         col1.set_cell_data_func(cell1, lambda _c, c, m, it, _d: c.set_property("text", m.get_value(it, 0).display_left()))
+
         cell2 = Gtk.CellRendererText()
         col2 = Gtk.TreeViewColumn("Summary")
         col2.pack_start(cell2, True)
@@ -107,7 +183,7 @@ class RulesView:
         )
         return col1, col2
 
-    def show_close_dialog(self, window: Gtk.Window, yes_callback: Callable) -> Gtk.MessageDialog:
+    def show_close_dialog(self, window: Gtk.Window, save_callback: Callable) -> Gtk.MessageDialog:
         """Creates rule editor close dialog, when unsaved changes are present."""
         dialog = Gtk.MessageDialog(
             window,
@@ -132,9 +208,16 @@ class RulesView:
         if response == Gtk.ResponseType.NO:
             window.hide()
         elif response == Gtk.ResponseType.YES:
-            yes_callback()
+            save_callback()
             window.hide()
         else:
             # don't close
             return True
         return dialog
+
+    def show(self):
+        """Shows the main window."""
+        self.window.present()
+
+    def close(self):
+        self.window.hide()

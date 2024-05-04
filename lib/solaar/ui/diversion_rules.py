@@ -1169,12 +1169,10 @@ def show_window(model):
             load_rules_func=_DIV.rule_storage.load_config,
             save_rules_func=_DIV.rule_storage.save_config,
         )
-        rules_view = RulesView()
+        rules_view = RulesView(COMPONENT_UI, UnsupportedRuleComponentUI)
         _diversion_dialog = rule_window.DiversionDialog(
             rules_model,
             rules_view,
-            COMPONENT_UI,
-            UnsupportedRuleComponentUI,
         )
     update_devices()
-    _diversion_dialog.window.present()
+    _diversion_dialog.run()

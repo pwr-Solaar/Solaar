@@ -31,6 +31,16 @@ class RulesModel:
         return loaded_rules
 
     def save_rules(self) -> bool:
+        """Save rules to file, when there are unsaved changes.
+
+        Returns
+        -------
+        bool
+            True if latest config is saved, False otherwise.
+        """
+        if not self.unsaved_changes:
+            return True
+
         success = self._save_rules()
         if success:
             self.unsaved_changes = False
