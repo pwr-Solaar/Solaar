@@ -18,10 +18,6 @@ from shlex import quote as shlex_quote
 
 from gi.repository import Gtk
 from logitech_receiver import diversion as _DIV
-from logitech_receiver.diversion import CLICK
-from logitech_receiver.diversion import DEPRESS
-from logitech_receiver.diversion import RELEASE
-from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
 from logitech_receiver.diversion import buttons as _buttons
 
 from solaar.i18n import _
@@ -39,7 +35,7 @@ class ActionUI(RuleComponentUI):
 
 class KeyPressUI(ActionUI):
     CLASS = _DIV.KeyPress
-    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
+    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in _DIV.XK_KEYS.items() if isinstance(v, int)]
 
     def create_widgets(self):
         self.widgets = {}
@@ -54,13 +50,13 @@ class KeyPressUI(ActionUI):
         self.add_btn.connect("clicked", self._clicked_add)
         self.widgets[self.add_btn] = (1, 1, 1, 1)
         self.action_clicked_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Click"))
-        self.action_clicked_radio.connect("toggled", self._on_update, CLICK)
+        self.action_clicked_radio.connect("toggled", self._on_update, _DIV.CLICK)
         self.widgets[self.action_clicked_radio] = (0, 3, 1, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_clicked_radio, _("Depress"))
-        self.action_pressed_radio.connect("toggled", self._on_update, DEPRESS)
+        self.action_pressed_radio.connect("toggled", self._on_update, _DIV.DEPRESS)
         self.widgets[self.action_pressed_radio] = (1, 3, 1, 1)
         self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Release"))
-        self.action_released_radio.connect("toggled", self._on_update, RELEASE)
+        self.action_released_radio.connect("toggled", self._on_update, _DIV.RELEASE)
         self.widgets[self.action_released_radio] = (2, 3, 1, 1)
 
     def _create_field(self):
@@ -123,7 +119,11 @@ class KeyPressUI(ActionUI):
 
     def collect_value(self):
         action = (
-            CLICK if self.action_clicked_radio.get_active() else DEPRESS if self.action_pressed_radio.get_active() else RELEASE
+            _DIV.CLICK
+            if self.action_clicked_radio.get_active()
+            else _DIV.DEPRESS
+            if self.action_pressed_radio.get_active()
+            else _DIV.RELEASE
         )
         return [[f.get_text().strip() for f in self.fields if f.get_visible()], action]
 
@@ -133,7 +133,7 @@ class KeyPressUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return " + ".join(component.key_names) + ("  (" + component.action + ")" if component.action != CLICK else "")
+        return " + ".join(component.key_names) + ("  (" + component.action + ")" if component.action != _DIV.CLICK else "")
 
 
 class MouseScrollUI(ActionUI):
@@ -195,7 +195,7 @@ class MouseClickUI(ActionUI):
     MIN_VALUE = 1
     MAX_VALUE = 9
     BUTTONS = list(_buttons.keys())
-    ACTIONS = [CLICK, DEPRESS, RELEASE]
+    ACTIONS = [_DIV.CLICK, _DIV.DEPRESS, _DIV.RELEASE]
 
     def create_widgets(self):
         self.widgets = {}
@@ -226,7 +226,7 @@ class MouseClickUI(ActionUI):
             self.field_b.set_text(component.button)
             if isinstance(component.count, int):
                 self.field_c.set_value(component.count)
-                self.field_d.set_text(CLICK)
+                self.field_d.set_text(_DIV.CLICK)
             else:
                 self.field_c.set_value(1)
                 self.field_d.set_text(component.count)
@@ -235,7 +235,7 @@ class MouseClickUI(ActionUI):
         b, c, d = self.field_b.get_text(), int(self.field_c.get_value()), self.field_d.get_text()
         if b not in self.BUTTONS:
             b = "unknown"
-        if d != CLICK:
+        if d != _DIV.CLICK:
             c = d
         return [b, c]
 
