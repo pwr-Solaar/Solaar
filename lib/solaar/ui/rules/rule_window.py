@@ -24,6 +24,11 @@ from solaar.ui.rules.handler import EventHandler
 
 
 class DiversionDialog:
+    """A presenter class for the Rule window.
+
+    This class is responsible for handling events and updating the view.
+    """
+
     def __init__(self, model, view, create_model_cb: Callable, populate_model_cb: Callable):
         self._model = model
         self._view = view
@@ -67,7 +72,8 @@ class DiversionDialog:
         self._view.tree_view.queue_draw()
 
     def handle_event_key_pressed(self, v: Gtk.TreeView, e: Gdk.EventKey):
-        """
+        """Handles key press events in the tree view.
+
         Shortcuts:
             Ctrl + I                insert component
             Ctrl + Delete           delete row
@@ -90,10 +96,12 @@ class DiversionDialog:
         )
 
     def handle_event_button_released(self, v: Gtk.TreeView, e: Gdk.EventKey):
+        """Handles button release events in the tree view."""
         if e.button == Gdk.BUTTON_SECONDARY:  # right click
             self.action_menu.create_context_menu(v, e)
 
     def handle_close(self, window: Gtk.Window, _e: Gdk.Event):
+        """Handles the close event of the window."""
         if self._model.unsaved_changes:
             self._view.show_close_with_unsaved_changes_dialog(window, self.handle_save_yaml_file)
         else:

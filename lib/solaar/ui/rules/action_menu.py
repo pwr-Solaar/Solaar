@@ -47,6 +47,8 @@ def allowed_actions(m: Gtk.TreeStore, it: Gtk.TreeIter) -> AllowedActions:
 
 
 class ActionMenu:
+    """Handles right-click context menu and keyboard shortcuts."""
+
     def __init__(self, tree_view: Gtk.TreeView, on_update_cb: Callable, populate_model_cb: Callable):
         self.tree_view = tree_view
         self._on_update = on_update_cb
