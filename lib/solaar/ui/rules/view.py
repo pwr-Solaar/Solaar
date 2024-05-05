@@ -146,7 +146,7 @@ class RulesView:
         discard_btn.connect("clicked", callback)
         return discard_btn
 
-    def set_save_discard_buttons_status(self, enable: bool):
+    def set_save_discard_buttons_active(self, enable: bool):
         """Enable or disable the save and discard buttons."""
         self.save_btn.set_sensitive(enable)
         self.discard_btn.set_sensitive(enable)
@@ -183,7 +183,7 @@ class RulesView:
         )
         return col1, col2
 
-    def show_close_dialog(self, window: Gtk.Window, save_callback: Callable) -> Gtk.MessageDialog:
+    def show_close_with_unsaved_changes_dialog(self, window: Gtk.Window, save_callback: Callable) -> Gtk.MessageDialog:
         """Creates rule editor close dialog, when unsaved changes are present."""
         dialog = Gtk.MessageDialog(
             window,

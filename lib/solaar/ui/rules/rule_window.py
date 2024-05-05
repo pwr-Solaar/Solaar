@@ -59,7 +59,7 @@ class DiversionDialog:
     def on_update(self):
         self._view.tree_view.queue_draw()
         self._model.unsaved_changes = True
-        self._view.set_save_discard_buttons_status(True)
+        self._view.set_save_discard_buttons_active(True)
 
     def update_devices(self):
         for rc in self._view.ui.values():
@@ -89,25 +89,29 @@ class DiversionDialog:
             save_callback=self.handle_save_yaml_file,
         )
 
-    def handle_event_button_released(self, v, e):
+    def handle_event_button_released(self, v: Gtk.TreeView, e: Gdk.EventKey):
         if e.button == Gdk.BUTTON_SECONDARY:  # right click
             self.action_menu.create_context_menu(v, e)
 
     def handle_close(self, window: Gtk.Window, _e: Gdk.Event):
         if self._model.unsaved_changes:
-            self._view.show_close_dialog(window, self.handle_save_yaml_file)
+            self._view.show_close_with_unsaved_changes_dialog(window, self.handle_save_yaml_file)
         else:
             self._view.close()
 
     def handle_reload_yaml_file(self):
-        self._view.set_save_discard_buttons_status(False)
+        if self._model.unsaved_changes:
+            self._view.show_reload_with_unsaved_changes_dialog()
+            return
+
+        self._view.set_save_discard_buttons_active(False)
 
         loaded_rules = self._model.load_rules()
         self.handle_rule_update(loaded_rules)
 
     def handle_save_yaml_file(self):
-        if self._model.save_rules():
-            self._view.set_save_discard_buttons_status(False)
+        if self._model.unsaved_changes and self._model.save_rules():
+            self._view.set_save_discard_buttons_active(False)
 
     def handle_selection_changed(self, selection: Gtk.TreeSelection):
         self._view.selected_rule_edit_panel.set_sensitive(False)

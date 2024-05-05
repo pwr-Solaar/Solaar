@@ -1499,7 +1499,7 @@ def process_notification(device, notification, feature):
 
 
 _XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
-_CONFIG_FILE_PATH = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
+_RULES_FILE_PATH = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 
 
 class RuleStorage:
@@ -1614,5 +1614,5 @@ built_in_rules = Rule(
     ]
 )
 
-rule_storage = RuleStorage(_CONFIG_FILE_PATH, built_in_rules)
+rule_storage = RuleStorage(_RULES_FILE_PATH, built_in_rules)
 rule_storage.load_config()
