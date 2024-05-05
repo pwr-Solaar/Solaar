@@ -22,7 +22,9 @@ from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
 from shlex import quote as shlex_quote
+from typing import Any
 from typing import Dict
+from typing import Optional
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -1157,6 +1159,47 @@ def update_devices():
         _diversion_dialog.update_devices()
 
 
+def _create_model(rules: _DIV.Rule) -> Gtk.TreeStore:
+    """Converts a Rules instance into a Gtk.TreeStore."""
+    if len(rules.components) == 1:
+        # only built-in rules - add empty user rule list
+        rules.components.insert(0, _DIV.Rule([], source=_DIV._CONFIG_FILE_PATH))
+
+    model = Gtk.TreeStore(RuleComponentWrapper)
+    _populate_model(model, None, rules.components)
+    return model
+
+
+def _populate_model(
+    model: Gtk.TreeStore,
+    it: Gtk.TreeIter,
+    rule_component: Any,
+    level: int = 0,
+    pos: int = -1,
+    editable: Optional[bool] = None,
+):
+    if isinstance(rule_component, list):
+        for c in rule_component:
+            _populate_model(model, it, c, level=level, pos=pos, editable=editable)
+            if pos >= 0:
+                pos += 1
+        return
+    if editable is None:
+        editable = model[it][0].editable if it is not None else False
+        if isinstance(rule_component, _DIV.Rule):
+            editable = editable or (rule_component.source is not None)
+    wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
+    piter = model.insert(it, pos, (wrapped,))
+    if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
+        for c in rule_component.components:
+            ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
+            _populate_model(model, piter, c, level + 1, editable=ed)
+        if len(rule_component.components) == 0:
+            _populate_model(model, piter, None, level + 1, editable=editable)
+    elif isinstance(rule_component, _DIV.Not):
+        _populate_model(model, piter, rule_component.component, level + 1, editable=editable)
+
+
 def show_window(model):
     global _diversion_dialog
     global _dev_model
@@ -1170,9 +1213,6 @@ def show_window(model):
             save_rules_func=_DIV.rule_storage.save_config,
         )
         rules_view = RulesView(COMPONENT_UI, UnsupportedRuleComponentUI)
-        _diversion_dialog = rule_window.DiversionDialog(
-            rules_model,
-            rules_view,
-        )
+        _diversion_dialog = rule_window.DiversionDialog(rules_model, rules_view, _create_model, _populate_model)
     update_devices()
     _diversion_dialog.run()
