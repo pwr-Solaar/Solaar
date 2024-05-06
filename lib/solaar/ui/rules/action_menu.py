@@ -361,7 +361,7 @@ class ActionMenu:
         else:
             idx = parent_c.components.index(c)
         if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._CONFIG_FILE_PATH  # new rules will be saved to the YAML file
+            new_c.source = _DIV._RULES_FILE_PATH  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
         self._populate_model(m, parent_it, new_c, level=wrapped.level, pos=idx)

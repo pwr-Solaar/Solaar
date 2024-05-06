@@ -1163,7 +1163,7 @@ def _create_model(rules: _DIV.Rule) -> Gtk.TreeStore:
     """Converts a Rules instance into a Gtk.TreeStore."""
     if len(rules.components) == 1:
         # only built-in rules - add empty user rule list
-        rules.components.insert(0, _DIV.Rule([], source=_DIV._CONFIG_FILE_PATH))
+        rules.components.insert(0, _DIV.Rule([], source=_DIV._RULES_FILE_PATH))
 
     model = Gtk.TreeStore(RuleComponentWrapper)
     _populate_model(model, None, rules.components)
