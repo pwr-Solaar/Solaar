@@ -9,6 +9,19 @@ from logitech_receiver import diversion
 from logitech_receiver.diversion import rule_storage
 
 
+def test_load_builtin_rules(rule_config):
+    expected_rules = [
+        [diversion.Key, diversion.KeyPress],
+        [diversion.Key, diversion.KeyPress],
+    ]
+
+    with mock.patch("os.path.isfile", return_value=False):
+        loaded_rules = rule_storage.load_config()
+
+    assert len(loaded_rules.components) == 1  # predefined and user configured rules
+    assert_expected_rules(loaded_rules, expected_rules)
+
+
 @pytest.fixture
 def rule_config():
     rule_content = """
@@ -36,20 +49,22 @@ def rule_config():
     return textwrap.dedent(rule_content)
 
 
-def test_load_rule_config(rule_config):
+def test_load_rule_from_yaml_file(rule_config):
     expected_rules = [
-        [
-            diversion.MouseGesture,
-            diversion.KeyPress,
-        ],
+        [diversion.MouseGesture, diversion.KeyPress],
         [diversion.MouseGesture, diversion.KeyPress],
         [diversion.Test, diversion.KeyPress],
     ]
 
-    with mock.patch("builtins.open", new=mock_open(read_data=rule_config)):
-        loaded_rules = rule_storage.load_config()
+    with mock.patch("os.path.isfile", return_value=True):
+        with mock.patch("builtins.open", new=mock_open(read_data=rule_config)):
+            loaded_rules = rule_storage.load_config()
 
     assert len(loaded_rules.components) == 2  # predefined and user configured rules
+    assert_expected_rules(loaded_rules, expected_rules)
+
+
+def assert_expected_rules(loaded_rules, expected_rules):
     user_configured_rules = loaded_rules.components[0]
     assert isinstance(user_configured_rules, diversion.Rule)
 
