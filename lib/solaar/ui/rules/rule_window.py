@@ -132,4 +132,5 @@ class DiversionDialog:
         self._view.set_rule_edit_panel_sensitive(wrapped.editable)
 
     def run(self):
+        self.handle_update_of_rule_view(self._model.load_rules())
         self._view.show()

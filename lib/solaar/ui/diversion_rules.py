@@ -1208,7 +1208,6 @@ def show_window(model):
     _dev_model = model
     if _diversion_dialog is None:
         rules_model = RulesModel(
-            _DIV.rule_storage.rules,
             load_rules_func=_DIV.rule_storage.load_config,
             save_rules_func=_DIV.rule_storage.save_config,
         )

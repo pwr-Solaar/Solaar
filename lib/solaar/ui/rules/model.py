@@ -19,16 +19,17 @@ from typing import Callable
 
 
 class RulesModel:
-    def __init__(self, rules, load_rules_func: Callable[[], Any], save_rules_func: Callable[[], bool]):
-        self.rules = rules
+    def __init__(self, load_rules_func: Callable[[], Any], save_rules_func: Callable[[], bool]):
         self._load_rules = load_rules_func
         self._save_rules = save_rules_func
+
         self.unsaved_changes = False
+        self.rules = load_rules_func()
 
     def load_rules(self) -> Any:
-        loaded_rules = self._load_rules()
+        self.rules = self._load_rules()
         self.unsaved_changes = False
-        return loaded_rules
+        return self.rules
 
     def save_rules(self) -> bool:
         """Save rules to file, when there are unsaved changes.
