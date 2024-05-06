@@ -223,7 +223,7 @@ class MouseClickUI(ActionUI):
     def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
-            self.field_b.set_text(component.button)
+            self.field_b.set_text(str(component.button) if component.button else "")
             if isinstance(component.count, int):
                 self.field_c.set_value(component.count)
                 self.field_d.set_text(_DIV.CLICK)
