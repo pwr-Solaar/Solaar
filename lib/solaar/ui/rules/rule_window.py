@@ -29,14 +29,12 @@ class DiversionDialog:
     This class is responsible for handling events and updating the view.
     """
 
-    def __init__(self, model, view, create_model_cb: Callable, populate_model_cb: Callable):
+    def __init__(self, model, view, convert_to_model_func: Callable, populate_model_func: Callable):
         self._model = model
         self._view = view
+        self._convert_to_model = convert_to_model_func
 
         self._model.set_state_change_callback(self._view.set_save_discard_buttons_sensitive)
-
-        # TODO model handling
-        self._create_model = create_model_cb
 
         # Init UI
         event_handler = EventHandler(
@@ -51,14 +49,14 @@ class DiversionDialog:
         self.handle_update_of_rule_view(self._model.rules)
 
         self.action_menu = ActionMenu(
-            self._view.tree_view, on_update_cb=self.handle_view_update, populate_model_cb=populate_model_cb
+            self._view.tree_view, on_update_func=self.handle_view_update, populate_model_func=populate_model_func
         )
 
     def handle_update_of_rule_view(self, rules):
         """Updates view with given rules."""
         self._view.clear_selected_rule_edit_panel()
 
-        tree_model = self._create_model(rules)
+        tree_model = self._convert_to_model(rules)
         self._view.update_tree_view(tree_model)
 
     def handle_view_update(self):

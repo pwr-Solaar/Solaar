@@ -38,7 +38,6 @@ class RulesView:
 
         self.tree_view = None
         self.selected_rule_edit_panel = None
-
         self.ui = None
 
     def init_ui(self, event_handler: EventHandler, on_update: Callable):

@@ -2,6 +2,7 @@ import dataclasses
 
 from typing import Any
 from typing import Callable
+from typing import List
 
 from gi.repository import Gdk
 from gi.repository import Gtk
@@ -49,10 +50,11 @@ def allowed_actions(m: Gtk.TreeStore, it: Gtk.TreeIter) -> AllowedActions:
 class ActionMenu:
     """Handles right-click context menu and keyboard shortcuts."""
 
-    def __init__(self, tree_view: Gtk.TreeView, on_update_cb: Callable, populate_model_cb: Callable):
+    def __init__(self, tree_view: Gtk.TreeView, on_update_func: Callable, populate_model_func: Callable):
         self.tree_view = tree_view
-        self._on_update = on_update_cb
-        self._populate_model = populate_model_cb
+        self._on_update = on_update_func
+        self._populate_model = populate_model_func
+
         self._clipboard = None
 
     def create_menu_event_key_pressed(self, window: Gtk.Window, v: Gtk.TreeView, e: Gdk.EventKey, save_callback: Callable):
@@ -233,7 +235,7 @@ class ActionMenu:
         menu_insert.show_all()
         return menu_insert
 
-    def _get_insert_menus(self, m: Gtk.TreeStore, it: Gtk.TreeIter, enabled_actions: AllowedActions) -> list:
+    def _get_insert_menus(self, m: Gtk.TreeStore, it: Gtk.TreeIter, enabled_actions: AllowedActions) -> List[Gtk.MenuItem]:
         items = []
         if enabled_actions.insert:
             ins = self.create_insert_menu(m, it)
