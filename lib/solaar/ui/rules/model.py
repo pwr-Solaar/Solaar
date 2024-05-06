@@ -19,7 +19,7 @@ from typing import Callable
 
 
 class RulesModel:
-    def __init__(self, load_rules_func: Callable[[], Any], save_rules_func: Callable[[], bool]):
+    def __init__(self, load_rules_func: Callable[[], Any], save_rules_func: Callable[[Any], bool]):
         self._load_rules = load_rules_func
         self._save_rules = save_rules_func
 
@@ -49,7 +49,7 @@ class RulesModel:
         if not self.unsaved_changes:
             return True
 
-        success = self._save_rules()
+        success = self._save_rules(self.rules)
         if success:
             self.unsaved_changes = False
         return success

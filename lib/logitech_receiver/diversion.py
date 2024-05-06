@@ -1508,7 +1508,7 @@ class RuleStorage:
         self._yml_file_path = yml_file_path
         self.rules = []
 
-    def save_config(self) -> bool:
+    def save_config(self, user_rules: Rule) -> bool:
         """Writes user configured rules into a YAML file.
 
         Returns
@@ -1523,7 +1523,7 @@ class RuleStorage:
         yaml.add_representer(_inline_list, blockseq_rep)
 
         # Save only user-defined rules
-        rule_components = self.rules.components
+        rule_components = user_rules.components
         return _save_rule_config(self._yml_file_path, rule_components)
 
     def load_config(self) -> Rule:
