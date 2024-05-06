@@ -23,12 +23,19 @@ class RulesModel:
         self._load_rules = load_rules_func
         self._save_rules = save_rules_func
 
+        self._signal_state_is_dirty = None
+
         self.unsaved_changes = False
         self.rules = load_rules_func()
+
+    def set_state_change_callback(self, signal: Callable):
+        self._signal_state_is_dirty = signal
 
     def load_rules(self) -> Any:
         self.rules = self._load_rules()
         self.unsaved_changes = False
+        if self._signal_state_is_dirty:
+            self._signal_state_is_dirty(False)
         return self.rules
 
     def save_rules(self) -> bool:

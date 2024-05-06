@@ -33,9 +33,10 @@ class RulesView:
         self._unsupported_rule_component_ui = unsupported_rule_component_ui
 
         self.window = None
-        self.tree_view = None
         self.save_btn = None
         self.discard_btn = None
+
+        self.tree_view = None
         self.selected_rule_edit_panel = None
 
         self.ui = None
@@ -94,7 +95,7 @@ class RulesView:
         sw.set_size_request(0, 300)  # don't ask for so much height
 
         self.save_btn = self.create_save_button(lambda *_args: event.handle_save_yaml_file())
-        self.discard_btn = self.create_discard_button(lambda *_args: event.handle_reload_yaml_file())
+        self.discard_btn = self.create_discard_button(lambda *_args: event.handle_discard_rule_changes())
         button_box = Gtk.HBox(spacing=20)
         button_box.pack_start(self.save_btn, False, False, 0)
         button_box.pack_start(self.discard_btn, False, False, 0)
@@ -189,10 +190,10 @@ class RulesView:
         )
         return col1, col2
 
-    def show_close_with_unsaved_changes_dialog(self, window: Gtk.Window, save_callback: Callable) -> Gtk.MessageDialog:
+    def show_close_with_unsaved_changes_dialog(self, save_callback: Callable) -> Gtk.MessageDialog:
         """Creates rule editor close dialog, when unsaved changes are present."""
         dialog = Gtk.MessageDialog(
-            window,
+            self.window,
             type=Gtk.MessageType.QUESTION,
             title=_("Make changes permanent?"),
             flags=Gtk.DialogFlags.MODAL,
@@ -212,10 +213,10 @@ class RulesView:
 
         dialog.destroy()
         if response == Gtk.ResponseType.NO:
-            window.hide()
+            self.window.hide()
         elif response == Gtk.ResponseType.YES:
             save_callback()
-            window.hide()
+            self.window.hide()
         else:
             # don't close
             return True

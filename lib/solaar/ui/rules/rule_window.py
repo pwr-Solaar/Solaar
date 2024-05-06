@@ -33,6 +33,8 @@ class DiversionDialog:
         self._model = model
         self._view = view
 
+        self._model.set_state_change_callback(self._view.set_save_discard_buttons_sensitive)
+
         # TODO model handling
         self._create_model = create_model_cb
 
@@ -42,13 +44,15 @@ class DiversionDialog:
             handle_event_button_released=self.handle_event_button_released,
             handle_selection_changed=self.handle_selection_changed,
             handle_save_yaml_file=self.handle_save_yaml_file,
-            handle_reload_yaml_file=self.handle_reload_yaml_file,
+            handle_discard_rule_changes=self.handle_discard_rule_changes,
             handle_close=self.handle_close,
         )
-        self._view.init_ui(event_handler, self.on_update)
+        self._view.init_ui(event_handler, self.handle_view_update)
         self.handle_update_of_rule_view(self._model.rules)
 
-        self.action_menu = ActionMenu(self._view.tree_view, on_update_cb=self.on_update, populate_model_cb=populate_model_cb)
+        self.action_menu = ActionMenu(
+            self._view.tree_view, on_update_cb=self.handle_view_update, populate_model_cb=populate_model_cb
+        )
 
     def handle_update_of_rule_view(self, rules):
         """Updates view with given rules."""
@@ -57,8 +61,8 @@ class DiversionDialog:
         tree_model = self._create_model(rules)
         self._view.update_tree_view(tree_model)
 
-    def on_update(self):
-        """Updates the view with the current state of the model."""
+    def handle_view_update(self):
+        """Draws the view with the current state of the model."""
         self._view.draw_tree_view()
         self._model.unsaved_changes = True
         self._view.set_save_discard_buttons_sensitive(True)
@@ -100,17 +104,12 @@ class DiversionDialog:
     def handle_close(self, window: Gtk.Window, _e: Gdk.Event):
         """Handles the close event of the window."""
         if self._model.unsaved_changes:
-            self._view.show_close_with_unsaved_changes_dialog(window, self.handle_save_yaml_file)
+            self._view.show_close_with_unsaved_changes_dialog(self.handle_save_yaml_file)
         else:
             self._view.close()
 
-    def handle_reload_yaml_file(self):
-        if self._model.unsaved_changes:
-            self._view.show_reload_with_unsaved_changes_dialog()
-            return
-
-        self._view.set_save_discard_buttons_sensitive(False)
-
+    def handle_discard_rule_changes(self):
+        # self._view.set_save_discard_buttons_sensitive(False)
         loaded_rules = self._model.load_rules()
         self.handle_update_of_rule_view(loaded_rules)
 

@@ -25,5 +25,5 @@ class EventHandler:
     handle_event_button_released: Callable
     handle_selection_changed: Callable
     handle_save_yaml_file: Callable
-    handle_reload_yaml_file: Callable
+    handle_discard_rule_changes: Callable
     handle_close: Callable
