@@ -36,6 +36,7 @@ class RulesView:
         self.tree_view = None
         self.save_btn = None
         self.discard_btn = None
+        self.selected_rule_edit_panel = None
 
         self.ui = None
 
@@ -44,7 +45,12 @@ class RulesView:
         window.connect("delete-event", event_handler.handle_close)
         vbox = Gtk.VBox()
 
-        top_panel, self.tree_view = self.create_top_panel(event_handler)
+        self.tree_view = self.create_tree_view(
+            callback_key_pressed=event_handler.handle_event_key_pressed,
+            callback_event_button_released=event_handler.handle_event_button_released,
+            callback_selection_changed=event_handler.handle_selection_changed,
+        )
+        top_panel = self.create_top_panel(event_handler, self.tree_view)
         for col in self.create_view_columns():
             self.tree_view.append_column(col)
         vbox.pack_start(top_panel, True, True, 0)
@@ -76,22 +82,19 @@ class RulesView:
         self.tree_view.set_model(rules_tree)
         self.tree_view.expand_all()
 
-    def create_top_panel(self, event: EventHandler):
+    def draw_tree_view(self):
+        self.tree_view.queue_draw()
+
+    def create_top_panel(self, event: EventHandler, tree_view: Gtk.TreeView) -> Gtk.VBox:
+        """Creates the button box as top panel of the rule editor."""
         sw = Gtk.ScrolledWindow()
         sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
-
-        tree_view = self.create_tree_view(
-            callback_key_pressed=event.handle_event_key_pressed,
-            callback_event_button_released=event.handle_event_button_released,
-            callback_selection_changed=event.handle_selection_changed,
-        )
 
         sw.add(tree_view)
         sw.set_size_request(0, 300)  # don't ask for so much height
 
         self.save_btn = self.create_save_button(lambda *_args: event.handle_save_yaml_file())
         self.discard_btn = self.create_discard_button(lambda *_args: event.handle_reload_yaml_file())
-
         button_box = Gtk.HBox(spacing=20)
         button_box.pack_start(self.save_btn, False, False, 0)
         button_box.pack_start(self.discard_btn, False, False, 0)
@@ -102,8 +105,7 @@ class RulesView:
         vbox = Gtk.VBox()
         vbox.pack_start(button_box, False, False, 0)
         vbox.pack_start(sw, True, True, 0)
-
-        return vbox, tree_view
+        return vbox
 
     def create_main_window(self) -> Gtk.Window:
         window = Gtk.Window()
@@ -146,10 +148,14 @@ class RulesView:
         discard_btn.connect("clicked", callback)
         return discard_btn
 
-    def set_save_discard_buttons_active(self, enable: bool):
+    def set_save_discard_buttons_sensitive(self, enable: bool):
         """Enable or disable the save and discard buttons."""
         self.save_btn.set_sensitive(enable)
         self.discard_btn.set_sensitive(enable)
+
+    def set_rule_edit_panel_sensitive(self, enable: bool):
+        """Enable or disable the rule edit panel."""
+        self.selected_rule_edit_panel.set_sensitive(enable)
 
     def create_selected_rule_edit_panel(self) -> Gtk.Grid:
         """Creates the edit Condition/Actions panel for a rule.
