@@ -261,7 +261,7 @@ class NewFnSwap(FnSwapVirtual):
 
 class Backlight(_Setting):
     name = "backlight-qualitative"
-    label = _("Backlight")
+    label = _("Backlight Timed")
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT
     choices_universe = _NamedInts(Off=0, Varying=2, VeryShort=5, Short=10, Medium=20, Long=60, VeryLong=180)
@@ -276,6 +276,7 @@ class Backlight2(_Setting):
     label = _("Backlight")
     description = _("Illumination level on keyboard.  Changes made are only applied in Manual mode.")
     feature = _F.BACKLIGHT2
+    choices_universe = _NamedInts(Disabled=0xFF, Enabled=0x00, Automatic=0x01, Manual=0x02)
     min_version = 0
 
     class rw_class:
@@ -400,7 +401,7 @@ class Backlight2DurationPowered(Backlight2Duration):
 
 class Backlight3(_Setting):
     name = "backlight-timed"
-    label = _("Backlight")
+    label = _("Backlight (Seconds)")
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT3
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": b"\x09"}
