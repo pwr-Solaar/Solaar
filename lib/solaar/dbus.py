@@ -39,9 +39,9 @@ _resume_callback = None
 
 
 def _suspend_or_resume(suspend):
-    if suspend is True and _suspend_callback:
+    if suspend and _suspend_callback:
         _suspend_callback()
-    if suspend is False and _resume_callback:
+    if not suspend and _resume_callback:
         _resume_callback()
 
 
