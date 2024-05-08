@@ -1,4 +1,19 @@
+# 1.1.13rc1
+
+* Fix bug in suspend and resume callback
+* Add choices universe for backlight setting
+* Add simplify diversion.py and add unit tests
+* Get and use current host number for K375sFnSwap because of bug in firmware of MX Keys S
+* Fix bug with logo in about window
+* Don't ping device just to get logging information
+* Optimize write for per-key lighting
+* Add and initialize per-key lighting to a special no-change value
+* Remove some Python 2 compatibility code
+* Update French translation
+* Refactor rule loading for testability
+
 # 1.1.12
+
 * Check for existence of keys file before opening
 * Perform translation for all translatable strings.
 * Add included hid_parser to packages installed
