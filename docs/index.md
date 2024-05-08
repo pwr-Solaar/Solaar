@@ -133,6 +133,8 @@ for the step-by-step procedure for manual installation.
 
 ## Known Issues
 
+- Solaar version 1.1.12 has a bug resulting in devices remaining in their default configuration after a system resume.  This is fixed in 1.1.13.
+
 - Bluez 5.73 does not remove Bluetooth devices when they disconnect.
   Solaar 1.1.12 processes the DBus disconnection and connection messages from Bluez and does re-initialize devices when they reconnect.
   The HID++ driver does not re-initialize devices, which causes problems with smooth scrolling.
@@ -156,9 +158,6 @@ for the step-by-step procedure for manual installation.
 - The driver sends messages to devices that do not conform with the Logitech HID++ specification
   resulting in responses being sent back that look like other messages.  For some devices this causes
   Solaar to report incorrect battery levels.
-
-- If the Python hid-parser package is not available, Solaar will not recognize some devices.
-  Use pip to install hid-parser.
 
 - Solaar normally uses icon names for its icons, which in some system tray implementations
   results in missing or wrong-sized icons.
