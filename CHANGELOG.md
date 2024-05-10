@@ -1,5 +1,6 @@
-# 1.1.13rc1
+# 1.1.13
 
+* Update Polish and Russian translations.
 * Fix bug in suspend and resume callback
 * Add choices universe for backlight setting
 * Add simplify diversion.py and add unit tests
