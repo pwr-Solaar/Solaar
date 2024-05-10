@@ -21,6 +21,7 @@ from collections import defaultdict
 from copy import copy
 from dataclasses import dataclass
 from dataclasses import field
+from enum import Enum
 from shlex import quote as shlex_quote
 from typing import Any
 from typing import Dict
@@ -932,6 +933,12 @@ class DeviceInfo:
     codename: str = ""
     settings: Dict[str, _Setting] = field(default_factory=dict)
 
+    def __post_init__(self):
+        if self.serial is None or self.serial == "?":
+            self.serial = ""
+        if self.unitId is None or self.unitId == "?":
+            self.unitId = ""
+
     @property
     def id(self):
         return self.serial or self.unitId or ""
@@ -944,12 +951,6 @@ class DeviceInfo:
     def display_name(self):
         return f"{self.codename} ({self.id})"
 
-    def __post_init__(self):
-        if self.serial is None or self.serial == "?":
-            self.serial = ""
-        if self.unitId is None or self.unitId == "?":
-            self.unitId = ""
-
     def matches(self, search):
         return search and search in (self.serial, self.unitId, self.display_name)
 
@@ -960,8 +961,10 @@ class DeviceInfo:
                 if v and v != "?":
                     setattr(self, k, copy(v) if k != "settings" else {s.name: s for s in v})
 
+
+class DeviceInfoFactory:
     @classmethod
-    def from_device(cls, device):
+    def create_device_info(cls, device) -> DeviceInfo:
         d = DeviceInfo()
         d.update(device)
         return d
@@ -992,7 +995,8 @@ class AllDevicesInfo:
                 existing = self[device.serial] or self[device.unitId]
                 if not existing:
                     updated = True
-                    self._devices.append(DeviceInfo.from_device(device))
+                    device_info = DeviceInfoFactory.create_device_info(device)
+                    self._devices.append(device_info)
                 elif not existing.settings and device.settings:
                     updated = True
                     existing.update(device)
@@ -1076,7 +1080,6 @@ class LaterUI(RuleComponentUI):
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
-        #        self.field.set_vexpand(True)
         self.field.connect("value-changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
@@ -1126,6 +1129,13 @@ def _from_named_ints(v, all_values):
     return v
 
 
+class SetValueControlKinds(Enum):
+    TOGGLE = "toggle"
+    RANGE = "range"
+    RANGE_WITH_KEY = "range_with_key"
+    CHOICE = "choice"
+
+
 class SetValueControl(Gtk.HBox):
     def __init__(self, on_change, *args, accept_toggle=True, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1156,17 +1166,17 @@ class SetValueControl(Gtk.HBox):
             self.pack_end(w, True, True, 0)
             w.hide()
         self.unsupp_value = None
-        self.current_kind = None
+        self.current_kind: Optional[SetValueControlKinds] = None
         self.sub_key_range_items = None
 
     def _changed(self, widget, *args):
         if widget.get_visible():
             value = self.get_value()
-            if self.current_kind == "choice":
+            if self.current_kind == SetValueControlKinds.CHOICE:
                 value = widget.get_value()
                 icon = "dialog-warning" if widget._allowed_values and (value not in widget._allowed_values) else ""
                 widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
-            elif self.current_kind == "range_with_key" and widget == self.sub_key_widget:
+            elif self.current_kind == SetValueControlKinds.RANGE_WITH_KEY and widget == self.sub_key_widget:
                 key = self.sub_key_widget.get_value()
                 selected_item = (
                     next((item for item in self.sub_key_range_items if key == item.id), None)
@@ -1182,27 +1192,27 @@ class SetValueControl(Gtk.HBox):
             w.hide()
 
     def get_value(self):
-        if self.current_kind == "toggle":
+        if self.current_kind == SetValueControlKinds.TOGGLE:
             return self.toggle_widget.get_value()
-        if self.current_kind == "range":
+        if self.current_kind == SetValueControlKinds.RANGE:
             return int(self.range_widget.get_value())
-        if self.current_kind == "range_with_key":
+        if self.current_kind == SetValueControlKinds.RANGE_WITH_KEY:
             return {self.sub_key_widget.get_value(): int(self.range_widget.get_value())}
-        if self.current_kind == "choice":
+        if self.current_kind == SetValueControlKinds.CHOICE:
             return self.choice_widget.get_value()
         return self.unsupp_value
 
     def set_value(self, value):
-        if self.current_kind == "toggle":
+        if self.current_kind == SetValueControlKinds.TOGGLE:
             self.toggle_widget.set_value(value if value is not None else "")
-        elif self.current_kind == "range":
+        elif self.current_kind == SetValueControlKinds.RANGE:
             minimum, maximum = self.range_widget.get_range()
             try:
                 v = round(float(value))
             except (ValueError, TypeError):
                 v = minimum
             self.range_widget.set_value(max(minimum, min(maximum, v)))
-        elif self.current_kind == "range_with_key":
+        elif self.current_kind == SetValueControlKinds.RANGE_WITH_KEY:
             if not (isinstance(value, dict) and len(value) == 1):
                 value = {None: None}
             key = next(iter(value.keys()))
@@ -1216,7 +1226,7 @@ class SetValueControl(Gtk.HBox):
                 v = minimum
             self.sub_key_widget.set_value(key or "")
             self.range_widget.set_value(max(minimum, min(maximum, v)))
-        elif self.current_kind == "choice":
+        elif self.current_kind == SetValueControlKinds.CHOICE:
             self.choice_widget.set_value(value)
         else:
             self.unsupp_value = value
@@ -1228,18 +1238,18 @@ class SetValueControl(Gtk.HBox):
             self.choice_widget.set_value("")
 
     def make_toggle(self):
-        self.current_kind = "toggle"
+        self.current_kind = SetValueControlKinds.TOGGLE
         self._hide_all()
         self.toggle_widget.show()
 
     def make_range(self, minimum, maximum):
-        self.current_kind = "range"
+        self.current_kind = SetValueControlKinds.RANGE
         self._hide_all()
         self.range_widget.set_range(minimum, maximum)
         self.range_widget.show()
 
     def make_range_with_key(self, items, labels=None):
-        self.current_kind = "range_with_key"
+        self.current_kind = SetValueControlKinds.RANGE_WITH_KEY
         self._hide_all()
         self.sub_key_range_items = items or None
         if not labels:
@@ -1252,7 +1262,7 @@ class SetValueControl(Gtk.HBox):
 
     def make_choice(self, values, extra=None):
         # if extra is not in values, it is ignored
-        self.current_kind = "choice"
+        self.current_kind = SetValueControlKinds.CHOICE
         self._hide_all()
         sort_key = int if all((v == extra or str(v).isdigit()) for v in values) else str
         if extra is not None and extra in values:

@@ -29,7 +29,6 @@ import warnings
 
 
 # the tuple object we'll expose when enumerating devices
-from collections import namedtuple
 from select import select
 from time import sleep
 from time import time
@@ -37,32 +36,14 @@ from time import time
 import gi
 import pyudev
 
+from hidapi.common import DeviceInfo
+
 gi.require_version("Gdk", "3.0")
 from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-native_implementation = "udev"
 fileopen = open
-
-DeviceInfo = namedtuple(
-    "DeviceInfo",
-    [
-        "path",
-        "bus_id",
-        "vendor_id",
-        "product_id",
-        "interface",
-        "driver",
-        "manufacturer",
-        "product",
-        "serial",
-        "release",
-        "isDevice",
-        "hidpp_short",
-        "hidpp_long",
-    ],
-)
 
 #
 # exposed API

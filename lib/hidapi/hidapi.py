@@ -28,38 +28,18 @@ import ctypes
 import logging
 import platform
 
-from collections import namedtuple
 from threading import Thread
 from time import sleep
 
 import gi
+
+from hidapi.common import DeviceInfo
 
 gi.require_version("Gdk", "3.0")
 from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
-native_implementation = "hidapi"
-
-# Device info as expected by Solaar
-DeviceInfo = namedtuple(
-    "DeviceInfo",
-    [
-        "path",
-        "bus_id",
-        "vendor_id",
-        "product_id",
-        "interface",
-        "driver",
-        "manufacturer",
-        "product",
-        "serial",
-        "release",
-        "isDevice",
-        "hidpp_short",
-        "hidpp_long",
-    ],
-)
 
 # Global handle to hidapi
 _hidapi = None
