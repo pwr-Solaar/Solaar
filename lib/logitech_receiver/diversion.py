@@ -26,6 +26,7 @@ import subprocess
 import sys as _sys
 import time as _time
 
+import dbus
 import gi
 import keysyms.keysymdef as _keysymdef
 import psutil
@@ -34,9 +35,7 @@ import psutil
 # it but other Solaar functionality is available.
 if _platform.system() in ("Darwin", "Windows"):
     evdev = None
-    dbus = None
 else:
-    import dbus
     import evdev
 
 from math import sqrt as _sqrt
