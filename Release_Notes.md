@@ -2,6 +2,8 @@
 
 ## Version 1.1.13
 
+* Solaar will drop support for Python 3.7 immediately after version 1.1.13.
+
 * Version 1.1.12 does not push settings to many devices after a resume resulting in the device reverting to its default behaviour.  This is fixed in 1.1.13.
 
 ## Version 1.1.12
