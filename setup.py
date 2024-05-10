@@ -87,7 +87,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "report-descriptor": ["hid-parser"],
         "desktop-notifications": ["Notify (>= 0.7)"],
         "git-commit": ["python-git-info"],
-        "test": ["pytest", "pytest-mock", "pytest-cov"],
+        "test": ["pytest", "pytest-mock", "pytest-cov", "typing_extensions"],
         "dev": ["ruff"],
     },
     package_dir={"": "lib"},
