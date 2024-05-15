@@ -298,6 +298,6 @@ Here is an example showing how to divert the Back Button on an MX Master 3 so th
 the button will initiate rule processing and a rule that triggers on this notification and
 switches the mouse to host 3 after popping up a simple notification.
 
-![Solaar-divert-back](Solaar-main-window-back-divert.png)
+![Solaar-divert-back](screenshots/Solaar-main-window-back-divert.png)
 
-![Solaar-rule-back-host](Solaar-rule-editor.png)
+![Solaar-rule-back-host](screenshots/Solaar-rule-editor.png)
