@@ -9,6 +9,36 @@ TODO:  improve the callback mechanism(s) to support the explicit calls of the UI
 
 Solaar has three main components: code mostly about receivers and devices, code for the command line interface, and code for the graphical user interface.
 
+The following graph shows the main components of Solaar and how they interact.
+```mermaid
+graph TD
+    subgraph User interface
+    U[UI]
+    C[CLI]
+    end
+
+    subgraph Core
+    U --> S{Solaar}
+    C --> S
+    S --> L[Logitech receiver]
+    L --> R[Receiver]
+    L --> D[Device]
+    S --> B[dbus]
+    end
+
+    subgraph Hardware interface
+    R --> A
+    D --> A
+    A[hidapi]--> P[hid parser]
+    end
+
+    subgraph Peripherals
+    P <-.-> M[Logitech mouse]
+    P <-.-> K[Logitech keyboard]
+    end
+```
+
+
 ## Receivers and Devices
 
 The code in `logitech_receiver` is responsible for creating and maintaining receiver (`receiver/Receiver`) and device (`device/Device`) objects for each device on the computer that uses the Logitech HID++ protocol.  These objects are discovered in Linux by interacting with the Linux `udev` system using code in `hidapi`.
