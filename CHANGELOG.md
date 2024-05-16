@@ -1,12 +1,33 @@
-# 1.1.12rc1
+# 1.1.13
 
+* Update Polish and Russian translations.
+* Fix bug in suspend and resume callback
+* Add choices universe for backlight setting
+* Add simplify diversion.py and add unit tests
+* Get and use current host number for K375sFnSwap because of bug in firmware of MX Keys S
+* Fix bug with logo in about window
+* Don't ping device just to get logging information
+* Optimize write for per-key lighting
+* Add and initialize per-key lighting to a special no-change value
+* Remove some Python 2 compatibility code
+* Update French translation
+* Refactor rule loading for testability
+
+# 1.1.12
+
+* Check for existence of keys file before opening
+* Perform translation for all translatable strings.
+* Add included hid_parser to packages installed
+* Improve label and description for LED zone settings
+* Add message about Onboard Profiles to LED Zone settings
+* Initialize device registers to empty list
 * Use bluez dbus signals to disconnect and connect bluetooth devices
 * Handle a different signal for onboard profiles directory in ROM
 * Introduce small delay in getting pairing information to let receiver settle after pairing
 * Improve testing for settings_templates, settings, hidpp20, and device and fix small bugs found
 * Add extended adjustable DPI setting
 * Improve and extend infrastructure for testing setting_templates
-* Update Greek translation
+* Update Greek, Polish, Russian, and Traditional Chinese translations
 * Implement and test per-key lighting
 * Refactor and test pair_window in GUI
 * Handle situation when read of a setting fails in GUI

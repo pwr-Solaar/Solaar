@@ -24,7 +24,7 @@
 # USB ids of Logitech wireless receivers.
 # Only receivers supporting the HID++ protocol can go in here.
 
-from .i18n import _
+from solaar.i18n import _
 
 # max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
 # may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False

@@ -22,10 +22,11 @@ See https://github.com/libusb/hidapi for how to obtain binaries.
 Parts of this code are adapted from https://github.com/apmorton/pyhidapi
 which is MIT licensed.
 """
+
 import atexit
 import ctypes
 import logging
-import platform as _platform
+import platform
 
 from collections import namedtuple
 from threading import Thread
@@ -172,7 +173,7 @@ atexit.register(_hidapi.hid_exit)
 # Solaar opens the same device more than once which will fail unless we
 # allow non-exclusive opening. On windows opening with shared access is
 # the default, for macOS we need to set it explicitly.
-if _platform.system() == "Darwin":
+if platform.system() == "Darwin":
     _hidapi.hid_darwin_set_open_exclusive.argtypes = [ctypes.c_int]
     _hidapi.hid_darwin_set_open_exclusive.restype = None
     _hidapi.hid_darwin_set_open_exclusive(0)

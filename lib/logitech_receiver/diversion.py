@@ -26,10 +26,14 @@ import subprocess
 import sys as _sys
 import time as _time
 
+from typing import Dict
+from typing import Tuple
+
 import dbus
 import gi
-import keysyms.keysymdef as _keysymdef
 import psutil
+
+from keysyms import keysymdef
 
 # There is no evdev on macOS or Windows. Diversion will not work without
 # it but other Solaar functionality is available.
@@ -84,7 +88,7 @@ logger = logging.getLogger(__name__)
 # Xtest extension to X11 - provides input simulation, partly works under Wayland
 # Wayland - provides input simulation
 
-XK_KEYS = _keysymdef.keysymdef
+XK_KEYS: Dict[str, int] = keysymdef.keysymdef
 
 # Event codes - can't use Xlib.X codes because Xlib might not be available
 _KEY_RELEASE = 0
@@ -113,11 +117,23 @@ try:
 except Exception:
     _x11 = False  # X11 is not available
 
+# Globals
 xtest_available = True  # Xtest might be available
 xdisplay = None
 Xkbdisplay = None  # xkb might be available
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
+
+udevice = None
+
+key_down = None
+key_up = None
+
+keys_down = []
+g_keys_down = 0
+m_keys_down = 0
+mr_key_down = False
+thumb_wheel_displacement = 0
 
 _dbus_interface = None
 
@@ -224,8 +240,6 @@ else:
     key_events = []
     devicecap = {}
 
-udevice = None
-
 
 def setup_uinput():
     global udevice
@@ -261,12 +275,8 @@ def modifier_code(keycode):
             return m
 
 
-key_down = None
-key_up = None
-
-
-def signed(bytes):
-    return int.from_bytes(bytes, "big", signed=True)
+def signed(bytes_: bytes) -> int:
+    return int.from_bytes(bytes_, "big", signed=True)
 
 
 def xy_direction(_x, _y):
@@ -432,7 +442,7 @@ def thumb_wheel_down(f, r, d, a):
         return False
 
 
-def charging(f, r, d, a):
+def charging(f, r, d, _a):
     if (
         (f == _F.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
         or (f == _F.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
@@ -909,7 +919,7 @@ def bit_test(start, end, bits):
 
 
 def range_test(start, end, min, max):
-    def range_test_helper(f, r, d):
+    def range_test_helper(_f, _r, d):
         value = int.from_bytes(d[start:end], byteorder="big", signed=True)
         return min <= value <= max and (value if value else True)
 
@@ -965,10 +975,8 @@ class TestBytes(Condition):
             isinstance(test, list)
             and 2 < len(test) <= 4
             and all(isinstance(t, int) for t in test)
-            and test[0] >= 0
-            and test[0] <= 16
-            and test[1] >= 0
-            and test[1] <= 16
+            and 0 <= test[0] <= 16
+            and 0 <= test[1] <= 16
             and test[0] < test[1]
         ):
             self.function = bit_test(*test) if len(test) == 3 else range_test(*test)
@@ -1113,6 +1121,32 @@ class Action(RuleComponent):
         return None
 
 
+def keysym_to_keycode(keysym, _modifiers) -> Tuple[int, int]:  # maybe should take shift into account
+    """Reverse the keycode to keysym mapping.
+
+    Warning:
+    This is an attempt to reverse the keycode to keysym mappping in XKB.
+    It may not be completely general.
+    """
+    group = kbdgroup() or 0
+    keycodes = gkeymap.get_entries_for_keyval(keysym)
+    (keycode, level) = (None, None)
+    for k in keycodes.keys:  # mappings that have the correct group
+        if group == k.group and k.keycode < 256 and (level is None or k.level < level):
+            keycode = k.keycode
+            level = k.level
+    if keycode or group == 0:
+        return keycode, level
+
+    for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
+        if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
+            (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
+            if a and all(mk.group == 0 for mk in m):
+                keycode = k.keycode
+                level = k.level
+    return keycode, level
+
+
 class KeyPress(Action):
     def __init__(self, args, warn=True):
         self.key_names, self.action = self.regularize_args(args)
@@ -1137,25 +1171,6 @@ class KeyPress(Action):
             action = args[1]
         return keys, action
 
-    # WARNING:  This is an attempt to reverse the keycode to keysym mappping in XKB.  It may not be completely general.
-    def keysym_to_keycode(self, keysym, modifiers):  # maybe should take shift into account
-        group = kbdgroup() or 0
-        keycodes = gkeymap.get_entries_for_keyval(keysym)
-        (keycode, level) = (None, None)
-        for k in keycodes.keys:  # mappings that have the correct group
-            if group == k.group and k.keycode < 256 and (level is None or k.level < level):
-                keycode = k.keycode
-                level = k.level
-        if keycode or group == 0:
-            return (keycode, level)
-        for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
-            if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
-                (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
-                if a and all(mk.group == 0 for mk in m):
-                    keycode = k.keycode
-                    level = k.level
-        return (keycode, level)
-
     def __str__(self):
         return "KeyPress: " + " ".join(self.key_names) + " " + self.action
 
@@ -1165,26 +1180,26 @@ class KeyPress(Action):
 
     def mods(self, level, modifiers, direction):
         if level == 2 or level == 3:
-            (sk, _) = self.keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
         if level == 1 or level == 3:
-            (sk, _) = self.keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
 
-    def keyDown(self, keysyms, modifiers):
-        for k in keysyms:
-            (keycode, level) = self.keysym_to_keycode(k, modifiers)
+    def keyDown(self, keysyms_, modifiers):
+        for k in keysyms_:
+            (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode is None:
                 logger.warning("rule KeyPress key symbol not currently available %s", self)
             elif self.action != CLICK or self.needed(keycode, modifiers):  # only check needed when clicking
                 self.mods(level, modifiers, _KEY_PRESS)
                 simulate_key(keycode, _KEY_PRESS)
 
-    def keyUp(self, keysyms, modifiers):
-        for k in keysyms:
-            (keycode, level) = self.keysym_to_keycode(k, modifiers)
+    def keyUp(self, keysyms_, modifiers):
+        for k in keysyms_:
+            (keycode, level) = keysym_to_keycode(k, modifiers)
             if keycode and (self.action != CLICK or self.needed(keycode, modifiers)):  # only check needed when clicking
                 simulate_key(keycode, _KEY_RELEASE)
                 self.mods(level, modifiers, _KEY_RELEASE)
@@ -1420,12 +1435,6 @@ if True:
         ]
     )
 
-keys_down = []
-g_keys_down = 0
-m_keys_down = 0
-mr_key_down = False
-thumb_wheel_displacement = 0
-
 
 def key_is_down(key):
     if key == _CONTROL.MR:
@@ -1547,23 +1556,29 @@ def _save_config_rule_file(file_name=_file_path):
     return True
 
 
-def _load_config_rule_file():
+def load_config_rule_file():
+    """Loads user configured rules."""
     global rules
-    loaded_rules = []
+
     if _path.isfile(_file_path):
-        try:
-            with open(_file_path) as config_file:
-                loaded_rules = []
-                for loaded_rule in _yaml_safe_load_all(config_file):
-                    rule = Rule(loaded_rule, source=_file_path)
-                    if logger.isEnabledFor(logging.DEBUG):
-                        logger.debug("load rule: %s", rule)
-                    loaded_rules.append(rule)
-                if logger.isEnabledFor(logging.INFO):
-                    logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
-        except Exception as e:
-            logger.error("failed to load from %s\n%s", _file_path, e)
-    rules = Rule([Rule(loaded_rules, source=_file_path), built_in_rules])
+        rules = _load_rule_config(_file_path)
 
 
-_load_config_rule_file()
+def _load_rule_config(file_path: str) -> Rule:
+    loaded_rules = []
+    try:
+        with open(file_path) as config_file:
+            loaded_rules = []
+            for loaded_rule in _yaml_safe_load_all(config_file):
+                rule = Rule(loaded_rule, source=file_path)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("load rule: %s", rule)
+                loaded_rules.append(rule)
+            if logger.isEnabledFor(logging.INFO):
+                logger.info("loaded %d rules from %s", len(loaded_rules), config_file.name)
+    except Exception as e:
+        logger.error("failed to load from %s\n%s", file_path, e)
+    return Rule([Rule(loaded_rules, source=file_path), built_in_rules])
+
+
+load_config_rule_file()

@@ -23,6 +23,8 @@ from struct import unpack as _unpack
 from time import time as _time
 from traceback import format_exc as _format_exc
 
+from solaar.i18n import _
+
 from . import descriptors as _descriptors
 from . import hidpp10_constants as _hidpp10_constants
 from . import hidpp20
@@ -35,7 +37,6 @@ from .common import NamedInts as _NamedInts
 from .common import bytes2int as _bytes2int
 from .common import int2bytes as _int2bytes
 from .diversion import process_notification as _process_notification
-from .i18n import _
 from .settings import KIND as _KIND
 from .settings import ActionSettingRW as _ActionSettingRW
 from .settings import BitFieldSetting as _BitFieldSetting
@@ -230,11 +231,24 @@ _descriptors.get_usbid(0xC066).settings = [_PerformanceMXDpi, RegisterSmoothScro
 
 
 # ignore the capabilities part of the feature - all devices should be able to swap Fn state
-# just use the current host (first byte = 0xFF) part of the feature to read and set the Fn state
+# can't just use the first byte = 0xFF (for current host) because of a bug in the firmware of the MX Keys S
 class K375sFnSwap(FnSwapVirtual):
     feature = _F.K375S_FN_INVERSION
-    rw_options = {"prefix": b"\xFF"}
     validator_options = {"true_value": b"\x01", "false_value": b"\x00", "read_skip_byte_count": 1}
+
+    class rw_class(_FeatureRW):
+        def find_current_host(self, device):
+            if not self.prefix:
+                response = device.feature_request(_F.HOSTS_INFO, 0x00)
+                self.prefix = response[3:4] if response else b"\xFF"
+
+        def read(self, device, data_bytes=b""):
+            self.find_current_host(device)
+            return super().read(device, data_bytes)
+
+        def write(self, device, data_bytes):
+            self.find_current_host(device)
+            return super().write(device, data_bytes)
 
 
 class FnSwap(FnSwapVirtual):
@@ -247,7 +261,7 @@ class NewFnSwap(FnSwapVirtual):
 
 class Backlight(_Setting):
     name = "backlight-qualitative"
-    label = _("Backlight")
+    label = _("Backlight Timed")
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT
     choices_universe = _NamedInts(Off=0, Varying=2, VeryShort=5, Short=10, Medium=20, Long=60, VeryLong=180)
@@ -262,6 +276,7 @@ class Backlight2(_Setting):
     label = _("Backlight")
     description = _("Illumination level on keyboard.  Changes made are only applied in Manual mode.")
     feature = _F.BACKLIGHT2
+    choices_universe = _NamedInts(Disabled=0xFF, Enabled=0x00, Automatic=0x01, Manual=0x02)
     min_version = 0
 
     class rw_class:
@@ -386,7 +401,7 @@ class Backlight2DurationPowered(Backlight2Duration):
 
 class Backlight3(_Setting):
     name = "backlight-timed"
-    label = _("Backlight")
+    label = _("Backlight (Seconds)")
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT3
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": b"\x09"}
@@ -1645,7 +1660,7 @@ class PerKeyLighting(_Settings):
     description = _("Control per-key lighting.")
     feature = _F.PER_KEY_LIGHTING_V2
     keys_universe = _special_keys.KEYCODES
-    choices_universe = _special_keys.COLORS
+    choices_universe = _special_keys.COLORSPLUS
 
     def read(self, cached=True):
         self._pre_read(cached)
@@ -1653,29 +1668,51 @@ class PerKeyLighting(_Settings):
             return self._value
         reply_map = {}
         for key in self._validator.choices:
-            reply_map[int(key)] = 0xFFFFFF  # can't read so fake a value of white
+            reply_map[int(key)] = _special_keys.COLORSPLUS["No change"]  # this signals no change
         self._value = reply_map
         return reply_map
 
     def write(self, map, save=True):
         if self._device.online:
             self.update(map, save)
-            data_bytes = b""
+            table = {}
             for key, value in map.items():
-                data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
-                if len(data_bytes) >= 16:  # up to four values are packed into a request
+                if value in table:
+                    table[value].append(key)  # keys will be in order from small to large
+                else:
+                    table[value] = [key]
+            if len(table) == 1:  # use range update
+                for value, keys in table.items():  # only one, of course
+                    if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change, so don't update at all
+                        data_bytes = keys[0].to_bytes(1, "big") + keys[-1].to_bytes(1, "big") + value.to_bytes(3, "big")
+                        self._device.feature_request(self.feature, 0x50, data_bytes)  # range update command to update all keys
+                        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+            else:
+                data_bytes = b""
+                for value, keys in table.items():  # only one, of course
+                    if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change, so ignore it
+                        while len(keys) > 3:  # use an optimized update command that can update up to 13 keys
+                            data = value.to_bytes(3, "big") + b"".join([key.to_bytes(1, "big") for key in keys[0:13]])
+                            self._device.feature_request(self.feature, 0x60, data)  # single-value multiple-keys update
+                            keys = keys[13:]
+                        for key in keys:
+                            data_bytes += key.to_bytes(1, "big") + value.to_bytes(3, "big")
+                            if len(data_bytes) >= 16:  # up to four values are packed into a regular update
+                                self._device.feature_request(self.feature, 0x10, data_bytes)
+                                data_bytes = b""
+                if len(data_bytes) > 0:  # update any remaining keys
                     self._device.feature_request(self.feature, 0x10, data_bytes)
-                    data_bytes = b""
-            if len(data_bytes) > 0:
-                self._device.feature_request(self.feature, 0x10, data_bytes)
-        self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
+                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the changes
         return map
 
     def write_key_value(self, key, value, save=True):
-        result = super().write_key_value(int(key), value, save)
-        if self._device.online:
-            self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
-        return result
+        if value != _special_keys.COLORSPLUS["No change"]:  # this signals no change
+            result = super().write_key_value(int(key), value, save)
+            if self._device.online:
+                self._device.feature_request(self.feature, 0x70, 0x00)  # signal device to make the change
+            return result
+        else:
+            return True
 
     class rw_class(_FeatureRWMap):
         pass

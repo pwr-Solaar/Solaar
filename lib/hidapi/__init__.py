@@ -15,9 +15,9 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """Generic Human Interface Device API."""
 
-import platform as _platform
+import platform
 
-if _platform.system() in ("Darwin", "Windows"):
+if platform.system() in ("Darwin", "Windows"):
     from hidapi.hidapi import close  # noqa: F401
     from hidapi.hidapi import enumerate  # noqa: F401
     from hidapi.hidapi import find_paired_node  # noqa: F401

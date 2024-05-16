@@ -1400,6 +1400,10 @@ COLORS = _UnsortedNamedInts(
     }
 )
 
+COLORSPLUS = _UnsortedNamedInts({"No change": -1})
+for i in COLORS:
+    COLORSPLUS[int(i)] = str(i)
+
 KEYCODES = _NamedInts(
     {
         "A": 1,
@@ -1525,13 +1529,14 @@ KEYCODES = _NamedInts(
 
 # load in override dictionary for KEYCODES
 try:
-    with open(_keys_file_path) as keys_file:
-        keys = _yaml.safe_load(keys_file)
-        if isinstance(keys, dict):
-            keys = _NamedInts(**keys)
-            for k in KEYCODES:
-                if int(k) not in keys and str(k) not in keys:
-                    keys[int(k)] = str(k)
-            KEYCODES = keys
+    if _os.path.isfile(_keys_file_path):
+        with open(_keys_file_path) as keys_file:
+            keys = _yaml.safe_load(keys_file)
+            if isinstance(keys, dict):
+                keys = _NamedInts(**keys)
+                for k in KEYCODES:
+                    if int(k) not in keys and str(k) not in keys:
+                        keys[int(k)] = str(k)
+                KEYCODES = keys
 except Exception as e:
     print(e)
