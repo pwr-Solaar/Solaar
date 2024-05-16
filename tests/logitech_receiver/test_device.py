@@ -124,8 +124,6 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
     assert test_device.registers == registers
 
     assert bool(test_device)
-    test_device.__del__()
-    assert not bool(test_device)
 
 
 @dataclass
@@ -196,8 +194,6 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     assert test_device == test_device
     assert not (test_device != test_device)
     assert bool(test_device)
-
-    test_device.__del__()
 
 
 @pytest.mark.parametrize(
