@@ -20,9 +20,9 @@ import logging
 import os as _os
 import threading
 
-import yaml as _yaml
+import yaml
 
-from logitech_receiver.common import NamedInt as _NamedInt
+from logitech_receiver.common import NamedInt
 
 from solaar import __version__
 
@@ -49,7 +49,7 @@ def _load():
         path = _yaml_file_path
         try:
             with open(_yaml_file_path) as config_file:
-                loaded_config = _yaml.safe_load(config_file)
+                loaded_config = yaml.safe_load(config_file)
         except Exception as e:
             logger.error("failed to load from %s: %s", _yaml_file_path, e)
     elif _os.path.isfile(_json_file_path):
@@ -153,7 +153,7 @@ def do_save():
             save_timer = None
         try:
             with open(_yaml_file_path, "w") as config_file:
-                _yaml.dump(_config, config_file, default_flow_style=None, width=150)
+                yaml.dump(_config, config_file, default_flow_style=None, width=150)
             if logger.isEnabledFor(logging.INFO):
                 logger.info("saved %s to %s", _config, _yaml_file_path)
         except Exception as e:
@@ -216,14 +216,14 @@ def device_representer(dumper, data):
     return dumper.represent_mapping("tag:yaml.org,2002:map", data)
 
 
-_yaml.add_representer(_DeviceEntry, device_representer)
+yaml.add_representer(_DeviceEntry, device_representer)
 
 
 def named_int_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:int", str(int(data)))
 
 
-_yaml.add_representer(_NamedInt, named_int_representer)
+yaml.add_representer(NamedInt, named_int_representer)
 
 
 # A device can be identified by a combination of WPID and serial number (for receiver-connected devices)

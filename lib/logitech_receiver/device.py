@@ -14,17 +14,17 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-import errno as _errno
+import errno
 import logging
-import threading as _threading
+import threading
 import time
 
 from typing import Callable
 from typing import Optional
 
-import hidapi as _hid
-import solaar.configuration as _configuration
+import hidapi
+
+from solaar import configuration
 
 from . import base
 from . import descriptors
@@ -34,9 +34,9 @@ from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
+from . import settings_templates
 from .common import Alert
 from .common import Battery
-from .settings_templates import check_feature_settings as _check_feature_settings
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class DeviceFactory:
                 return Device(None, None, None, handle=handle, device_info=device_info, setting_callback=setting_callback)
         except OSError as e:
             logger.exception("open %s", device_info)
-            if e.errno == _errno.EACCES:
+            if e.errno == errno.EACCES:
                 raise
         except Exception:
             logger.exception("open %s", device_info)
@@ -70,7 +70,16 @@ class Device:
     read_register: Callable = hidpp10.read_register
     write_register: Callable = hidpp10.write_register
 
-    def __init__(self, receiver, number, online, pairing_info=None, handle=None, device_info=None, setting_callback=None):
+    def __init__(
+        self,
+        receiver,
+        number,
+        online,
+        pairing_info=None,
+        handle=None,
+        device_info=None,
+        setting_callback=None,
+    ):
         assert receiver or device_info
         if receiver:
             assert 0 < number <= 15  # some receivers have devices past their max # of devices
@@ -110,14 +119,14 @@ class Device:
         self._active = None  # lags self.online - is used to help determine when to setup devices
 
         self._feature_settings_checked = False
-        self._gestures_lock = _threading.Lock()
-        self._settings_lock = _threading.Lock()
-        self._persister_lock = _threading.Lock()
+        self._gestures_lock = threading.Lock()
+        self._settings_lock = threading.Lock()
+        self._persister_lock = threading.Lock()
         self._notification_handlers = {}  # See `add_notification_handler`
         self.cleanups = []  # functions to run on the device when it is closed
 
         if not self.path:
-            self.path = _hid.find_paired_node(receiver.path, number, 1) if receiver else None
+            self.path = hidapi.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
                 self.handle = base.open_path(self.path) if self.path else None
@@ -302,9 +311,9 @@ class Device:
                 self._profiles = _hidpp20.get_profiles(self)
         return self._profiles
 
-    def set_configuration(self, configuration, no_reply=False):
+    def set_configuration(self, configuration_, no_reply=False):
         if self.online and self.protocol >= 2.0:
-            _hidpp20.config_change(self, configuration, no_reply=no_reply)
+            _hidpp20.config_change(self, configuration_, no_reply=no_reply)
 
     def reset(self, no_reply=False):
         self.set_configuration(0, no_reply)
@@ -314,7 +323,7 @@ class Device:
         if not self._persister:
             with self._persister_lock:
                 if not self._persister:
-                    self._persister = _configuration.persister(self)
+                    self._persister = configuration.persister(self)
         return self._persister
 
     @property
@@ -337,7 +346,7 @@ class Device:
         if not self._feature_settings_checked:
             with self._settings_lock:
                 if not self._feature_settings_checked:
-                    self._feature_settings_checked = _check_feature_settings(self, self._settings)
+                    self._feature_settings_checked = settings_templates.check_feature_settings(self, self._settings)
         return self._settings
 
     def battery(self):  # None  or  level, next, status, voltage

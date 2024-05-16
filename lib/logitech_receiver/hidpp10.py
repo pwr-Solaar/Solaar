@@ -21,13 +21,10 @@ from typing import Any
 
 from typing_extensions import Protocol
 
+from . import common
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
-from .common import FirmwareInfo as _FirmwareInfo
-from .common import bytes2int as _bytes2int
-from .common import int2bytes as _int2bytes
-from .common import strhex as _strhex
 from .hidpp10_constants import REGISTERS
 from .hidpp20_constants import FIRMWARE_KIND
 
@@ -123,26 +120,26 @@ class Hidpp10:
             # won't be able to read any of it now...
             return
 
-        fw_version = _strhex(reply[1:3])
+        fw_version = common.strhex(reply[1:3])
         fw_version = f"{fw_version[0:2]}.{fw_version[2:4]}"
         reply = read_register(device, REGISTERS.firmware, 0x02)
         if reply:
-            fw_version += ".B" + _strhex(reply[1:3])
-        fw = _FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
+            fw_version += ".B" + common.strhex(reply[1:3])
+        fw = common.FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
         firmware[0] = fw
 
         reply = read_register(device, REGISTERS.firmware, 0x04)
         if reply:
-            bl_version = _strhex(reply[1:3])
+            bl_version = common.strhex(reply[1:3])
             bl_version = f"{bl_version[0:2]}.{bl_version[2:4]}"
-            bl = _FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
+            bl = common.FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
             firmware[1] = bl
 
         reply = read_register(device, REGISTERS.firmware, 0x03)
         if reply:
-            o_version = _strhex(reply[1:3])
+            o_version = common.strhex(reply[1:3])
             o_version = f"{o_version[0:2]}.{o_version[2:4]}"
-            o = _FirmwareInfo(FIRMWARE_KIND.Other, "", o_version, None)
+            o = common.FirmwareInfo(FIRMWARE_KIND.Other, "", o_version, None)
             firmware[2] = o
 
         if any(firmware):
@@ -205,7 +202,7 @@ class Hidpp10:
 
         flag_bits = sum(int(b) for b in flag_bits)
         assert flag_bits & 0x00FFFFFF == flag_bits
-        result = write_register(device, REGISTERS.notifications, _int2bytes(flag_bits, 3))
+        result = write_register(device, REGISTERS.notifications, common.int2bytes(flag_bits, 3))
         return result is not None
 
     def get_device_features(self, device: Device):
@@ -224,7 +221,7 @@ class Hidpp10:
         flags = read_register(device, register)
         if flags is not None:
             assert len(flags) == 3
-            return _bytes2int(flags)
+            return common.bytes2int(flags)
 
 
 def parse_battery_status(register, reply) -> Battery | None:

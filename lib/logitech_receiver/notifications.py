@@ -18,31 +18,31 @@
 # Handles incoming events from the receiver/devices, updating the object as appropriate.
 
 import logging
-import threading as _threading
-
-from struct import unpack as _unpack
+import struct
+import threading
 
 from solaar.i18n import _
 
-from . import diversion as _diversion
+from . import base
+from . import common
+from . import diversion
 from . import hidpp10
-from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp10_constants
 from . import hidpp20
-from . import hidpp20_constants as _hidpp20_constants
-from . import settings_templates as _st
-from .base import DJ_MESSAGE_ID as _DJ_MESSAGE_ID
+from . import hidpp20_constants
+from . import settings_templates
 from .common import Alert
-from .common import Battery as _Battery
 from .common import BatteryStatus
-from .common import strhex as _strhex
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10_constants.REGISTERS
-_F = _hidpp20_constants.FEATURE
+_hidpp10 = hidpp10.Hidpp10()
+_hidpp20 = hidpp20.Hidpp20()
+_R = hidpp10_constants.REGISTERS
+_F = hidpp20_constants.FEATURE
 
 
-notification_lock = _threading.Lock()
+notification_lock = threading.Lock()
 
 
 def process(device, notification):
@@ -68,7 +68,7 @@ def _process_receiver_notification(receiver, n):
             receiver.pairing.new_device = None
         pair_error = ord(n.data[:1])
         if pair_error:
-            receiver.pairing.error = error_string = _hidpp10_constants.PAIRING_ERRORS[pair_error]
+            receiver.pairing.error = error_string = hidpp10_constants.PAIRING_ERRORS[pair_error]
             receiver.pairing.new_device = None
             logger.warning("pairing error %d: %s", pair_error, error_string)
         receiver.changed(reason=reason)
@@ -87,7 +87,7 @@ def _process_receiver_notification(receiver, n):
             receiver.pairing.device_passkey = None
             discover_error = ord(n.data[:1])
             if discover_error:
-                receiver.pairing.error = discover_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
+                receiver.pairing.error = discover_string = hidpp10_constants.BOLT_PAIRING_ERRORS[discover_error]
                 logger.warning("bolt discovering error %d: %s", discover_error, discover_string)
             receiver.changed(reason=reason)
             return True
@@ -126,7 +126,7 @@ def _process_receiver_notification(receiver, n):
             elif n.address == 0x02 and not pair_error:
                 receiver.pairing.new_device = receiver.register_new_device(n.data[7])
             if pair_error:
-                receiver.pairing.error = error_string = _hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
+                receiver.pairing.error = error_string = hidpp10_constants.BOLT_PAIRING_ERRORS[pair_error]
                 receiver.pairing.new_device = None
                 logger.warning("pairing error %d: %s", pair_error, error_string)
             receiver.changed(reason=reason)
@@ -157,7 +157,7 @@ def _process_device_notification(device, n):
 
     # 0x40 to 0x7F appear to be HID++ 1.0 or DJ notifications
     if n.sub_id >= 0x40:
-        if n.report_id == _DJ_MESSAGE_ID:
+        if n.report_id == base.DJ_MESSAGE_ID:
             return _process_dj_notification(device, n)
         else:
             return _process_hidpp10_notification(device, n)
@@ -239,11 +239,11 @@ def _process_hidpp10_notification(device, n):
     if n.sub_id == 0x41:  # device connection (and disconnection)
         flags = ord(n.data[:1]) & 0xF0
         if n.address == 0x02:  # very old 27 MHz protocol
-            wpid = "00" + _strhex(n.data[2:3])
+            wpid = "00" + common.strhex(n.data[2:3])
             link_established = True
             link_encrypted = bool(flags & 0x80)
         elif n.address > 0x00:  # all other protocols are supposed to be almost the same
-            wpid = _strhex(n.data[2:3] + n.data[1:2])
+            wpid = common.strhex(n.data[2:3] + n.data[1:2])
             link_established = not (flags & 0x40)
             link_encrypted = bool(flags & 0x20) or n.address == 0x10  # Bolt protocol always encrypted
         else:
@@ -288,7 +288,9 @@ def _process_hidpp10_notification(device, n):
 
 def _process_feature_notification(device, n, feature):
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("%s: notification for feature %s, report %s, data %s", device, feature, n.address >> 4, _strhex(n.data))
+        logger.debug(
+            "%s: notification for feature %s, report %s, data %s", device, feature, n.address >> 4, common.strhex(n.data)
+        )
 
     if feature == _F.BATTERY_STATUS:
         if n.address == 0x00:
@@ -323,16 +325,16 @@ def _process_feature_notification(device, n, feature):
 
     elif feature == _F.SOLAR_DASHBOARD:
         if n.data[5:9] == b"GOOD":
-            charge, lux, adc = _unpack("!BHH", n.data[:5])
+            charge, lux, adc = struct.unpack("!BHH", n.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
             status_text = BatteryStatus.DISCHARGING
             if n.address == 0x00:
-                device.set_battery_info(_Battery(charge, None, status_text, None))
+                device.set_battery_info(common.Battery(charge, None, status_text, None))
             elif n.address == 0x10:
                 if lux > 200:
                     status_text = BatteryStatus.RECHARGING
-                device.set_battery_info(_Battery(charge, None, status_text, None, lux))
+                device.set_battery_info(common.Battery(charge, None, status_text, None, lux))
             elif n.address == 0x20:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("%s: Light Check button pressed", device)
@@ -382,18 +384,18 @@ def _process_feature_notification(device, n, feature):
 
     elif feature == _F.BACKLIGHT2:
         if n.address == 0x00:
-            level = _unpack("!B", n.data[1:2])[0]
+            level = struct.unpack("!B", n.data[1:2])[0]
             if device.setting_callback:
-                device.setting_callback(device, _st.Backlight2Level, [level])
+                device.setting_callback(device, settings_templates.Backlight2Level, [level])
 
     elif feature == _F.REPROG_CONTROLS_V4:
         if n.address == 0x00:
             if logger.isEnabledFor(logging.DEBUG):
-                cid1, cid2, cid3, cid4 = _unpack("!HHHH", n.data[:8])
+                cid1, cid2, cid3, cid4 = struct.unpack("!HHHH", n.data[:8])
                 logger.debug("%s: diverted controls pressed: 0x%x, 0x%x, 0x%x, 0x%x", device, cid1, cid2, cid3, cid4)
         elif n.address == 0x10:
             if logger.isEnabledFor(logging.DEBUG):
-                dx, dy = _unpack("!hh", n.data[:4])
+                dx, dy = struct.unpack("!hh", n.data[:4])
                 logger.debug("%s: rawXY dx=%i dy=%i", device, dx, dy)
         elif n.address == 0x20:
             if logger.isEnabledFor(logging.DEBUG):
@@ -404,7 +406,7 @@ def _process_feature_notification(device, n, feature):
     elif feature == _F.HIRES_WHEEL:
         if n.address == 0x00:
             if logger.isEnabledFor(logging.INFO):
-                flags, delta_v = _unpack(">bh", n.data[:3])
+                flags, delta_v = struct.unpack(">bh", n.data[:3])
                 high_res = (flags & 0x10) != 0
                 periods = flags & 0x0F
                 logger.info("%s: WHEEL: res: %d periods: %d delta V:%-3d", device, high_res, periods, delta_v)
@@ -414,7 +416,7 @@ def _process_feature_notification(device, n, feature):
                 logger.info("%s: WHEEL: ratchet: %d", device, ratchet)
             if ratchet < 2:  # don't process messages with unusual ratchet values
                 if device.setting_callback:
-                    device.setting_callback(device, _st.ScrollRatchet, [2 if ratchet else 1])
+                    device.setting_callback(device, settings_templates.ScrollRatchet, [2 if ratchet else 1])
         else:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: unknown WHEEL %s", device, n)
@@ -425,16 +427,18 @@ def _process_feature_notification(device, n, feature):
                 logger.info("%s: unknown ONBOARD PROFILES %s", device, n)
         else:
             if n.address == 0x00:
-                profile_sector = _unpack("!H", n.data[:2])[0]
+                profile_sector = struct.unpack("!H", n.data[:2])[0]
                 if profile_sector:
-                    _st.profile_change(device, profile_sector)
+                    settings_templates.profile_change(device, profile_sector)
             elif n.address == 0x10:
-                resolution_index = _unpack("!B", n.data[:1])[0]
-                profile_sector = _unpack("!H", device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
+                resolution_index = struct.unpack("!B", n.data[:1])[0]
+                profile_sector = struct.unpack("!H", device.feature_request(_F.ONBOARD_PROFILES, 0x40)[:2])[0]
                 if device.setting_callback:
                     for profile in device.profiles.profiles.values() if device.profiles else []:
                         if profile.sector == profile_sector:
-                            device.setting_callback(device, _st.AdjustableDpi, [profile.resolutions[resolution_index]])
+                            device.setting_callback(
+                                device, settings_templates.AdjustableDpi, [profile.resolutions[resolution_index]]
+                            )
                             break
 
     elif feature == _F.BRIGHTNESS_CONTROL:
@@ -443,13 +447,13 @@ def _process_feature_notification(device, n, feature):
                 logger.info("%s: unknown BRIGHTNESS CONTROL %s", device, n)
         else:
             if n.address == 0x00:
-                brightness = _unpack("!H", n.data[:2])[0]
-                device.setting_callback(device, _st.BrightnessControl, [brightness])
+                brightness = struct.unpack("!H", n.data[:2])[0]
+                device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
             elif n.address == 0x10:
                 brightness = n.data[0] & 0x01
                 if brightness:
-                    brightness = _unpack("!H", device.feature_request(_F.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
-                device.setting_callback(device, _st.BrightnessControl, [brightness])
+                    brightness = struct.unpack("!H", device.feature_request(_F.BRIGHTNESS_CONTROL, 0x10)[:2])[0]
+                device.setting_callback(device, settings_templates.BrightnessControl, [brightness])
 
-    _diversion.process_notification(device, n, feature)
+    diversion.process_notification(device, n, feature)
     return True

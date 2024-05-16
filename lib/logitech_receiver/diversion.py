@@ -14,43 +14,37 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import ctypes as _ctypes
+import ctypes
 import logging
 import math
 import numbers
-import os as _os
-import os.path as _path
-import platform as _platform
+import os
+import platform
 import socket
+import struct
 import subprocess
-import sys as _sys
-import time as _time
+import sys
+import time
 
 from typing import Dict
 from typing import Tuple
 
 import gi
 import psutil
+import yaml
 
 from keysyms import keysymdef
 
 # There is no evdev on macOS or Windows. Diversion will not work without
 # it but other Solaar functionality is available.
-if _platform.system() in ("Darwin", "Windows"):
+if platform.system() in ("Darwin", "Windows"):
     evdev = None
 else:
     import evdev
 
-from math import sqrt as _sqrt
-from struct import unpack as _unpack
-
-from yaml import add_representer as _yaml_add_representer
-from yaml import dump_all as _yaml_dump_all
-from yaml import safe_load_all as _yaml_safe_load_all
-
 from .common import NamedInt
-from .hidpp20 import FEATURE as _F
-from .special_keys import CONTROL as _CONTROL
+from .hidpp20 import FEATURE
+from .special_keys import CONTROL
 
 gi.require_version("Gdk", "3.0")  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
@@ -102,7 +96,7 @@ gkeymap = Gdk.Keymap.get_for_display(gdisplay) if gdisplay else None
 if logger.isEnabledFor(logging.INFO):
     logger.info("GDK Keymap %sset up", "" if gkeymap else "not ")
 
-wayland = _os.getenv("WAYLAND_DISPLAY")  # is this Wayland?
+wayland = os.getenv("WAYLAND_DISPLAY")  # is this Wayland?
 if wayland:
     logger.warning(
         "rules cannot access modifier keys in Wayland, "
@@ -137,26 +131,26 @@ thumb_wheel_displacement = 0
 _dbus_interface = None
 
 
-class XkbDisplay(_ctypes.Structure):
+class XkbDisplay(ctypes.Structure):
     """opaque struct"""
 
 
-class XkbStateRec(_ctypes.Structure):
+class XkbStateRec(ctypes.Structure):
     _fields_ = [
-        ("group", _ctypes.c_ubyte),
-        ("locked_group", _ctypes.c_ubyte),
-        ("base_group", _ctypes.c_ushort),
-        ("latched_group", _ctypes.c_ushort),
-        ("mods", _ctypes.c_ubyte),
-        ("base_mods", _ctypes.c_ubyte),
-        ("latched_mods", _ctypes.c_ubyte),
-        ("locked_mods", _ctypes.c_ubyte),
-        ("compat_state", _ctypes.c_ubyte),
-        ("grab_mods", _ctypes.c_ubyte),
-        ("compat_grab_mods", _ctypes.c_ubyte),
-        ("lookup_mods", _ctypes.c_ubyte),
-        ("compat_lookup_mods", _ctypes.c_ubyte),
-        ("ptr_buttons", _ctypes.c_ushort),
+        ("group", ctypes.c_ubyte),
+        ("locked_group", ctypes.c_ubyte),
+        ("base_group", ctypes.c_ushort),
+        ("latched_group", ctypes.c_ushort),
+        ("mods", ctypes.c_ubyte),
+        ("base_mods", ctypes.c_ubyte),
+        ("latched_mods", ctypes.c_ubyte),
+        ("locked_mods", ctypes.c_ubyte),
+        ("compat_state", ctypes.c_ubyte),
+        ("grab_mods", ctypes.c_ubyte),
+        ("compat_grab_mods", ctypes.c_ubyte),
+        ("lookup_mods", ctypes.c_ubyte),
+        ("compat_lookup_mods", ctypes.c_ubyte),
+        ("ptr_buttons", ctypes.c_ushort),
     ]  # something strange is happening here but it is not being used
 
 
@@ -176,7 +170,7 @@ def x11_setup():
         if logger.isEnabledFor(logging.INFO):
             logger.info("X11 library loaded and display set up")
     except Exception:
-        logger.warning("X11 not available - some rule capabilities inoperable", exc_info=_sys.exc_info())
+        logger.warning("X11 not available - some rule capabilities inoperable", exc_info=sys.exc_info())
         _x11 = False
         xtest_available = False
     return _x11
@@ -193,7 +187,7 @@ def gnome_dbus_interface_setup():
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
     except dbus.exceptions.DBusException:
-        logger.warning("Solaar Gnome extension not installed - some rule capabilities inoperable", exc_info=_sys.exc_info())
+        logger.warning("Solaar Gnome extension not installed - some rule capabilities inoperable", exc_info=sys.exc_info())
         _dbus_interface = False
     return _dbus_interface
 
@@ -203,14 +197,14 @@ def xkb_setup():
     if Xkbdisplay is not None:
         return Xkbdisplay
     try:  # set up to get keyboard state using ctypes interface to libx11
-        X11Lib = _ctypes.cdll.LoadLibrary("libX11.so")
-        X11Lib.XOpenDisplay.restype = _ctypes.POINTER(XkbDisplay)
-        X11Lib.XkbGetState.argtypes = [_ctypes.POINTER(XkbDisplay), _ctypes.c_uint, _ctypes.POINTER(XkbStateRec)]
+        X11Lib = ctypes.cdll.LoadLibrary("libX11.so")
+        X11Lib.XOpenDisplay.restype = ctypes.POINTER(XkbDisplay)
+        X11Lib.XkbGetState.argtypes = [ctypes.POINTER(XkbDisplay), ctypes.c_uint, ctypes.POINTER(XkbStateRec)]
         Xkbdisplay = X11Lib.XOpenDisplay(None)
         if logger.isEnabledFor(logging.INFO):
             logger.info("XKB display set up")
     except Exception:
-        logger.warning("XKB display not available - rules cannot access keyboard group", exc_info=_sys.exc_info())
+        logger.warning("XKB display not available - rules cannot access keyboard group", exc_info=sys.exc_info())
         Xkbdisplay = False
     return Xkbdisplay
 
@@ -262,7 +256,7 @@ if wayland:  # Wayland can't use xtest so may as well set up uinput now
 def kbdgroup():
     if xkb_setup():
         state = XkbStateRec()
-        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, _ctypes.pointer(state))
+        X11Lib.XkbGetState(Xkbdisplay, XkbUseCoreKbd, ctypes.pointer(state))
         return state.group
     else:
         return None
@@ -282,7 +276,7 @@ def signed(bytes_: bytes) -> int:
 
 def xy_direction(_x, _y):
     # normalize x and y
-    m = _sqrt((_x * _x) + (_y * _y))
+    m = math.sqrt((_x * _x) + (_y * _y))
     if m == 0:
         return "noop"
     x = round(_x / m)
@@ -419,7 +413,7 @@ def simulate_scroll(dx, dy):
 
 def thumb_wheel_up(f, r, d, a):
     global thumb_wheel_displacement
-    if f != _F.THUMB_WHEEL or r != 0:
+    if f != FEATURE.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) < 0 and signed(d[0:2])
@@ -432,7 +426,7 @@ def thumb_wheel_up(f, r, d, a):
 
 def thumb_wheel_down(f, r, d, a):
     global thumb_wheel_displacement
-    if f != _F.THUMB_WHEEL or r != 0:
+    if f != FEATURE.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) > 0 and signed(d[0:2])
@@ -445,9 +439,9 @@ def thumb_wheel_down(f, r, d, a):
 
 def charging(f, r, d, _a):
     if (
-        (f == _F.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
-        or (f == _F.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
-        or (f == _F.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
+        (f == FEATURE.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
+        or (f == FEATURE.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
+        or (f == FEATURE.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
     ):
         return 1
     else:
@@ -455,20 +449,32 @@ def charging(f, r, d, _a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
-    "crown_tap": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
-    "crown_start_press": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
-    "crown_end_press": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == _F.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
+    "crown_right": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[1] < 128 and d[1], False],
+    "crown_left": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
+    "crown_right_ratchet": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[2] < 128 and d[2], False],
+    "crown_left_ratchet": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    "crown_tap": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
+    "crown_start_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
+    "crown_end_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
+    "crown_pressed": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
-    "lowres_wheel_up": [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]), False],
-    "lowres_wheel_down": [lambda f, r, d, a: f == _F.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]), False],
-    "hires_wheel_up": [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]), False],
-    "hires_wheel_down": [lambda f, r, d, a: f == _F.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]), False],
+    "lowres_wheel_up": [
+        lambda f, r, d, a: f == FEATURE.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
+        False,
+    ],
+    "lowres_wheel_down": [
+        lambda f, r, d, a: f == FEATURE.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
+        False,
+    ],
+    "hires_wheel_up": [
+        lambda f, r, d, a: f == FEATURE.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
+        False,
+    ],
+    "hires_wheel_down": [
+        lambda f, r, d, a: f == FEATURE.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
+        False,
+    ],
     "charging": [charging, False],
     "False": [lambda f, r, d, a: False, False],
     "True": [lambda f, r, d, a: True, False],
@@ -714,11 +720,11 @@ class MouseProcess(Condition):
 
 class Feature(Condition):
     def __init__(self, feature, warn=True):
-        if not (isinstance(feature, str) and feature in _F):
+        if not (isinstance(feature, str) and feature in FEATURE):
             if warn:
                 logger.warning("rule Feature argument not name of a feature: %s", feature)
             self.feature = None
-        self.feature = _F[feature]
+        self.feature = FEATURE[feature]
 
     def __str__(self):
         return "Feature: " + str(self.feature)
@@ -857,8 +863,8 @@ class Key(Condition):
             elif len(args) >= 2:
                 key, action = args[:2]
 
-        if isinstance(key, str) and key in _CONTROL:
-            self.key = _CONTROL[key]
+        if isinstance(key, str) and key in CONTROL:
+            self.key = CONTROL[key]
         else:
             if warn:
                 logger.warning(f"rule Key key name not name of a Logitech key: {key}")
@@ -896,8 +902,8 @@ class KeyIsDown(Condition):
         elif isinstance(args, str):
             key = args
 
-        if isinstance(key, str) and key in _CONTROL:
-            self.key = _CONTROL[key]
+        if isinstance(key, str) and key in CONTROL:
+            self.key = CONTROL[key]
         else:
             if warn:
                 logger.warning(f"rule Key key name not name of a Logitech key: {key}")
@@ -1013,7 +1019,7 @@ class MouseGesture(Condition):
         if isinstance(movements, str):
             movements = [movements]
         for x in movements:
-            if x not in self.MOVEMENTS and x not in _CONTROL:
+            if x not in self.MOVEMENTS and x not in CONTROL:
                 if warn:
                     logger.warning("rule Mouse Gesture argument not direction or name of a Logitech key: %s", x)
         self.movements = movements
@@ -1024,14 +1030,14 @@ class MouseGesture(Condition):
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        if feature == _F.MOUSE_GESTURE:
+        if feature == FEATURE.MOUSE_GESTURE:
             d = notification.data
-            data = _unpack("!" + (int(len(d) / 2) * "h"), d)
+            data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
             data_offset = 1
             movement_offset = 0
             if self.movements and self.movements[0] not in self.MOVEMENTS:  # matching against initiating key
                 movement_offset = 1
-                if self.movements[0] != str(_CONTROL[data[0]]):
+                if self.movements[0] != str(CONTROL[data[0]]):
                     return False
             for m in self.movements[movement_offset:]:
                 if data_offset >= len(data):
@@ -1042,7 +1048,7 @@ class MouseGesture(Condition):
                         return False
                     data_offset += 3
                 elif data[data_offset] == 1:
-                    if m != str(_CONTROL[data[data_offset + 1]]):
+                    if m != str(CONTROL[data[data_offset + 1]]):
                         return False
                     data_offset += 2
             return data_offset == len(data)
@@ -1214,7 +1220,7 @@ class KeyPress(Action):
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
                 self.keyUp(reversed(self.key_symbols), current)
-            _time.sleep(0.01)
+            time.sleep(0.01)
         else:
             logger.warning("no keymap so cannot determine which keycode to send")
         return None
@@ -1253,7 +1259,7 @@ class MouseScroll(Action):
             logger.info("MouseScroll action: %s %s %s", self.amounts, last_result, amounts)
         dx, dy = amounts
         simulate_scroll(dx, dy)
-        _time.sleep(0.01)
+        time.sleep(0.01)
         return None
 
     def data(self):
@@ -1289,7 +1295,7 @@ class MouseClick(Action):
             logger.info(f"MouseClick action: {int(self.count)} {self.button}")
         if self.button and self.count:
             click(buttons[self.button], self.count)
-        _time.sleep(0.01)
+        time.sleep(0.01)
         return None
 
     def data(self):
@@ -1438,12 +1444,12 @@ if True:
 
 
 def key_is_down(key):
-    if key == _CONTROL.MR:
+    if key == CONTROL.MR:
         return mr_key_down
-    elif _CONTROL.M1 <= key <= _CONTROL.M8:
-        return bool(m_keys_down & (0x01 << (key - _CONTROL.M1)))
-    elif _CONTROL.G1 <= key <= _CONTROL.G32:
-        return bool(g_keys_down & (0x01 << (key - _CONTROL.G1)))
+    elif CONTROL.M1 <= key <= CONTROL.M8:
+        return bool(m_keys_down & (0x01 << (key - CONTROL.M1)))
+    elif CONTROL.G1 <= key <= CONTROL.G32:
+        return bool(g_keys_down & (0x01 << (key - CONTROL.G1)))
     else:
         return key in keys_down
 
@@ -1459,8 +1465,8 @@ def process_notification(device, notification, feature):
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
-    if feature == _F.REPROG_CONTROLS_V4 and notification.address == 0x00:
-        new_keys_down = _unpack("!4H", notification.data[:8])
+    if feature == FEATURE.REPROG_CONTROLS_V4 and notification.address == 0x00:
+        new_keys_down = struct.unpack("!4H", notification.data[:8])
         for key in new_keys_down:
             if key and key not in keys_down:
                 key_down = key
@@ -1469,33 +1475,33 @@ def process_notification(device, notification, feature):
                 key_up = key
         keys_down = new_keys_down
     # and also G keys down
-    elif feature == _F.GKEY and notification.address == 0x00:
-        new_g_keys_down = _unpack("<I", notification.data[:4])[0]
+    elif feature == FEATURE.GKEY and notification.address == 0x00:
+        new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
         for i in range(32):
             if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
-                key_down = _CONTROL["G" + str(i + 1)]
+                key_down = CONTROL["G" + str(i + 1)]
             if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
-                key_up = _CONTROL["G" + str(i + 1)]
+                key_up = CONTROL["G" + str(i + 1)]
         g_keys_down = new_g_keys_down
     # and also M keys down
-    elif feature == _F.MKEYS and notification.address == 0x00:
-        new_m_keys_down = _unpack("!1B", notification.data[:1])[0]
+    elif feature == FEATURE.MKEYS and notification.address == 0x00:
+        new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
         for i in range(1, 9):
             if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
-                key_down = _CONTROL["M" + str(i)]
+                key_down = CONTROL["M" + str(i)]
             if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
-                key_up = _CONTROL["M" + str(i)]
+                key_up = CONTROL["M" + str(i)]
         m_keys_down = new_m_keys_down
     # and also MR key
-    elif feature == _F.MR and notification.address == 0x00:
-        new_mr_key_down = _unpack("!1B", notification.data[:1])[0]
+    elif feature == FEATURE.MR and notification.address == 0x00:
+        new_mr_key_down = struct.unpack("!1B", notification.data[:1])[0]
         if not mr_key_down and new_mr_key_down:
-            key_down = _CONTROL["MR"]
+            key_down = CONTROL["MR"]
         if mr_key_down and not new_mr_key_down:
-            key_up = _CONTROL["MR"]
+            key_up = CONTROL["MR"]
         mr_key_down = new_mr_key_down
     # keep track of thumb wheel movment
-    elif feature == _F.THUMB_WHEEL and notification.address == 0x00:
+    elif feature == FEATURE.THUMB_WHEEL and notification.address == 0x00:
         if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
             thumb_wheel_displacement = 0
         thumb_wheel_displacement += signed(notification.data[0:2])
@@ -1503,8 +1509,8 @@ def process_notification(device, notification, feature):
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _path.expanduser(_path.join("~", ".config"))
-_file_path = _path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
+_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
+_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 
 rules = built_in_rules
 
@@ -1517,7 +1523,7 @@ def _save_config_rule_file(file_name=_file_path):
     def blockseq_rep(dumper, data):
         return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
-    _yaml_add_representer(inline_list, blockseq_rep)
+    yaml.add_representer(inline_list, blockseq_rep)
 
     def convert(elem):
         if isinstance(elem, list):
@@ -1550,7 +1556,7 @@ def _save_config_rule_file(file_name=_file_path):
             with open(file_name, "w") as f:
                 if rules_to_save:
                     f.write("%YAML 1.3\n")  # Write version manually
-                _yaml_dump_all(convert([r["Rule"] for r in rules_to_save]), f, **dump_settings)
+                yaml.dump_all(convert([r["Rule"] for r in rules_to_save]), f, **dump_settings)
         except Exception as e:
             logger.error("failed to save to %s\n%s", file_name, e)
             return False
@@ -1561,7 +1567,7 @@ def load_config_rule_file():
     """Loads user configured rules."""
     global rules
 
-    if _path.isfile(_file_path):
+    if os.path.isfile(_file_path):
         rules = _load_rule_config(_file_path)
 
 
@@ -1570,7 +1576,7 @@ def _load_rule_config(file_path: str) -> Rule:
     try:
         with open(file_path) as config_file:
             loaded_rules = []
-            for loaded_rule in _yaml_safe_load_all(config_file):
+            for loaded_rule in yaml.safe_load_all(config_file):
                 rule = Rule(loaded_rule, source=file_path)
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug("load rule: %s", rule)

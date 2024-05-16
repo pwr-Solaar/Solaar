@@ -15,7 +15,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import errno as _errno
+import errno
 import logging
 import time
 
@@ -23,12 +23,12 @@ from dataclasses import dataclass
 from typing import Callable
 from typing import Optional
 
-import hidapi as _hid
+import hidapi
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import base as _base
+from . import base
 from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
@@ -108,7 +108,7 @@ class Receiver:
             if d:
                 d.close()
         self._devices.clear()
-        return handle and _base.close(handle)
+        return handle and base.close(handle)
 
     def __del__(self):
         self.close()
@@ -253,7 +253,7 @@ class Receiver:
 
     def request(self, request_id, *params):
         if bool(self):
-            return _base.request(self.handle, 0xFF, request_id, *params)
+            return base.request(self.handle, 0xFF, request_id, *params)
 
     def reset_pairing(self):
         self.pairing = Pairing()
@@ -451,7 +451,7 @@ class Ex100Receiver(Receiver):
         return online, encrypted, wpid, kind
 
     def device_pairing_information(self, number: int) -> dict:
-        wpid = _hid.find_paired_node_wpid(self.path, number)  # extract WPID from udev path
+        wpid = hidapi.find_paired_node_wpid(self.path, number)  # extract WPID from udev path
         if not wpid:
             logger.error("Unable to get wpid from udev for device %d of %s", number, self)
             raise exceptions.NoSuchDevice(number=number, receiver=self, error="Not present 27Mhz device")
@@ -491,9 +491,9 @@ class ReceiverFactory:
         """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
 
         try:
-            handle = _base.open_path(device_info.path)
+            handle = base.open_path(device_info.path)
             if handle:
-                product_info = _base.product_information(device_info.product_id)
+                product_info = base.product_information(device_info.product_id)
                 if not product_info:
                     logger.warning("Unknown receiver type: %s", device_info.product_id)
                     product_info = {}
@@ -502,7 +502,7 @@ class ReceiverFactory:
                 return rclass(kind, product_info, handle, device_info.path, device_info.product_id, setting_callback)
         except OSError as e:
             logger.exception("open %s", device_info)
-            if e.errno == _errno.EACCES:
+            if e.errno == errno.EACCES:
                 raise
         except Exception:
             logger.exception("open %s", device_info)

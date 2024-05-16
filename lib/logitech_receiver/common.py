@@ -14,16 +14,16 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
 
-# Some common functions and types.
+import binascii
+import dataclasses
 
-from binascii import hexlify as _hexlify
-from dataclasses import dataclass
 from enum import IntEnum
 from typing import Optional
 from typing import Union
 
-import yaml as _yaml
+import yaml
 
 from solaar.i18n import _
 
@@ -348,8 +348,8 @@ class NamedInt(int):
         return dumper.represent_mapping("!NamedInt", {"value": int(data), "name": data.name}, flow_style=True)
 
 
-_yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
-_yaml.add_representer(NamedInt, NamedInt.to_yaml)
+yaml.SafeLoader.add_constructor("!NamedInt", NamedInt.from_yaml)
+yaml.add_representer(NamedInt, NamedInt.to_yaml)
 
 
 class NamedInts:
@@ -512,7 +512,7 @@ class UnsortedNamedInts(NamedInts):
 def strhex(x):
     assert x is not None
     """Produce a hex-string representation of a sequence of bytes."""
-    return _hexlify(x).decode("ascii").upper()
+    return binascii.hexlify(x).decode("ascii").upper()
 
 
 def bytes2int(x, signed=False):
@@ -541,7 +541,7 @@ class KwException(Exception):
             return self.args[0].get(k)  # was self.args[0][k]
 
 
-@dataclass
+@dataclasses.dataclass
 class FirmwareInfo:
     kind: str
     name: str
@@ -567,7 +567,7 @@ class BatteryLevelApproximation(IntEnum):
     FULL = 90
 
 
-@dataclass
+@dataclasses.dataclass
 class Battery:
     """Information about the current state of a battery"""
 
