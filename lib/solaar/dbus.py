@@ -31,7 +31,7 @@ try:
 except Exception:
     # Either the dbus library is not available or the system dbus is not running
     logger.warning("failed to set up dbus")
-    pass
+    bus = None
 
 
 _suspend_callback = None
@@ -55,7 +55,7 @@ def watch_suspend_resume(on_resume_callback=None, on_suspend_callback=None):
     global _resume_callback, _suspend_callback
     _suspend_callback = on_suspend_callback
     _resume_callback = on_resume_callback
-    if on_resume_callback is not None or on_suspend_callback is not None:
+    if bus is not None and on_resume_callback is not None or on_suspend_callback is not None:
         bus.add_signal_receiver(_suspend_or_resume, "PrepareForSleep", dbus_interface=_LOGIND_INTERFACE, path=_LOGIND_PATH)
     if logger.isEnabledFor(logging.INFO):
         logger.info("connected to system dbus, watching for suspend/resume events")
@@ -71,7 +71,7 @@ def watch_bluez_connect(serial, callback=None):
     if _bluetooth_callbacks.get(serial):
         _bluetooth_callbacks.get(serial).remove()
     path = _BLUETOOTH_PATH_PREFIX + serial.replace(":", "_").upper()
-    if callback is not None:
+    if bus is not None and callback is not None:
         _bluetooth_callbacks[serial] = bus.add_signal_receiver(
             callback, "PropertiesChanged", path=path, dbus_interface=_BLUETOOTH_INTERFACE
         )
