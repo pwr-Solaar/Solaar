@@ -15,15 +15,15 @@ as well as many Logitech devices that connect via a USB cable or Bluetooth.
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../LICENSE.txt)
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-multiple.png" width="54%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-multiple.png" width="54%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-receiver.png" width="43%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-receiver.png" width="43%"/>
 </p>
 
 <p align="center">
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-main-window-back-divert.png" width="49%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-main-window-back-divert.png" width="49%"/>
   &#160;
-<img src="https://pwr-solaar.github.io/Solaar/Solaar-rule-editor.png" width="48%"/>
+<img src="https://pwr-solaar.github.io/Solaar/screenshots/Solaar-rule-editor.png" width="48%"/>
 </p>
 
 Solaar supports:
