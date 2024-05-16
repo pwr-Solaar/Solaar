@@ -84,7 +84,7 @@ for lib in _library_paths:
     except OSError:
         pass
 else:
-    raise ImportError(f"Unable to load hdiapi library, tried: {' '.join(_library_paths)}")
+    raise ImportError(f"Unable to load hidapi library, tried: {' '.join(_library_paths)}")
 
 
 # Retrieve version of hdiapi library
