@@ -15,20 +15,20 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Reprogrammable keys information
-# Mostly from Logitech documentation, but with some edits for better Lunix compatibility
+# Mostly from Logitech documentation, but with some edits for better Linux compatibility
 
-import os as _os
+import os
 
-import yaml as _yaml
+import yaml
 
-from .common import NamedInts as _NamedInts
-from .common import UnsortedNamedInts as _UnsortedNamedInts
+from .common import NamedInts
+from .common import UnsortedNamedInts
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _os.path.expanduser(_os.path.join("~", ".config"))
-_keys_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
+_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
+_keys_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "keys.yaml")
 
 # <controls.xml awk -F\" '/<Control /{sub(/^LD_FINFO_(CTRLID_)?/, "", $2);printf("\t%s=0x%04X,\n", $2, $4)}' | sort -t= -k2
-CONTROL = _NamedInts(
+CONTROL = NamedInts(
     {
         "Volume_Up": 0x0001,
         "Volume_Down": 0x0002,
@@ -322,7 +322,7 @@ CONTROL[0x1200] = "MR"  # add in MR key - this is not really a Logitech Control
 CONTROL._fallback = lambda x: f"unknown:{x:04X}"
 
 # <tasks.xml awk -F\" '/<Task /{gsub(/ /, "_", $6); printf("\t%s=0x%04X,\n", $6, $4)}'
-TASK = _NamedInts(
+TASK = NamedInts(
     Volume_Up=0x0001,
     Volume_Down=0x0002,
     Mute=0x0003,
@@ -573,7 +573,7 @@ TASK._fallback = lambda x: f"unknown:{x:04X}"
 # Capabilities and desired software handling for a control
 # Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
 # We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
-KEY_FLAG = _NamedInts(
+KEY_FLAG = NamedInts(
     analytics_key_events=0x400,
     force_raw_XY=0x200,
     raw_XY=0x100,
@@ -588,16 +588,16 @@ KEY_FLAG = _NamedInts(
 )
 # Flags describing the reporting method of a control
 # We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
-MAPPING_FLAG = _NamedInts(
+MAPPING_FLAG = NamedInts(
     analytics_key_events_reporting=0x100,
     force_raw_XY_diverted=0x40,
     raw_XY_diverted=0x10,
     persistently_diverted=0x04,
     diverted=0x01,
 )
-CID_GROUP_BIT = _NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
-CID_GROUP = _NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
-DISABLE = _NamedInts(
+CID_GROUP_BIT = NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
+CID_GROUP = NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
+DISABLE = NamedInts(
     Caps_Lock=0x01,
     Num_Lock=0x02,
     Scroll_Lock=0x04,
@@ -608,7 +608,7 @@ DISABLE._fallback = lambda x: f"unknown:{x:02X}"
 
 # HID USB Keycodes from https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf
 # Modified by information from Linux HID driver linux/drivers/hid/hid-input.c
-USB_HID_KEYCODES = _NamedInts(
+USB_HID_KEYCODES = NamedInts(
     A=0x04,
     B=0x05,
     C=0x06,
@@ -780,7 +780,7 @@ USB_HID_KEYCODES[0x26] = "9"
 USB_HID_KEYCODES[0x27] = "0"
 USB_HID_KEYCODES[0x64] = "102ND"
 
-HID_CONSUMERCODES = _NamedInts(
+HID_CONSUMERCODES = NamedInts(
     {
         #    Unassigned=0x00,
         #    Consumer_Control=0x01,
@@ -1167,9 +1167,9 @@ HID_CONSUMERCODES._fallback = lambda x: f"unknown:{x:04X}"
 
 ## Information for x1c00 Persistent from https://drive.google.com/drive/folders/0BxbRzx7vEV7eWmgwazJ3NUFfQ28
 
-KEYMOD = _NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
+KEYMOD = NamedInts(CTRL=0x01, SHIFT=0x02, ALT=0x04, META=0x08, RCTRL=0x10, RSHIFT=0x20, RALT=0x40, RMETA=0x80)
 
-ACTIONID = _NamedInts(
+ACTIONID = NamedInts(
     Empty=0x00,
     Key=0x01,
     Mouse=0x02,
@@ -1182,7 +1182,7 @@ ACTIONID = _NamedInts(
     Power=0x09,
 )
 
-MOUSE_BUTTONS = _NamedInts(
+MOUSE_BUTTONS = NamedInts(
     Mouse_Button_Left=0x0001,
     Mouse_Button_Right=0x0002,
     Mouse_Button_Middle=0x0004,
@@ -1202,14 +1202,14 @@ MOUSE_BUTTONS = _NamedInts(
 )
 MOUSE_BUTTONS._fallback = lambda x: f"unknown mouse button:{x:04X}"
 
-HORIZONTAL_SCROLL = _NamedInts(
+HORIZONTAL_SCROLL = NamedInts(
     Horizontal_Scroll_Left=0x4000,
     Horizontal_Scroll_Right=0x8000,
 )
 HORIZONTAL_SCROLL._fallback = lambda x: f"unknown horizontal scroll:{x:04X}"
 
 # Construct universe for Persistent Remappable Keys setting (only for supported values)
-KEYS = _UnsortedNamedInts()
+KEYS = UnsortedNamedInts()
 KEYS_Default = 0x7FFFFFFF  # Special value to reset key to default - has to be different from all others
 KEYS[KEYS_Default] = "Default"  # Value to reset to default
 KEYS[0] = "None"  # Value for no output
@@ -1247,7 +1247,7 @@ for code in HORIZONTAL_SCROLL:
 
 # Construct subsets for known devices
 def persistent_keys(action_ids):
-    keys = _UnsortedNamedInts()
+    keys = UnsortedNamedInts()
     keys[KEYS_Default] = "Default"  # Value to reset to default
     keys[0] = "No Output (only as default)"
     for key in KEYS:
@@ -1259,7 +1259,7 @@ def persistent_keys(action_ids):
 KEYS_KEYS_CONSUMER = persistent_keys([ACTIONID.Key, ACTIONID.Consumer])
 KEYS_KEYS_MOUSE_HSCROLL = persistent_keys([ACTIONID.Key, ACTIONID.Mouse, ACTIONID.Hscroll])
 
-COLORS = _UnsortedNamedInts(
+COLORS = UnsortedNamedInts(
     {
         # from Xorg rgb.txt,v 1.3 2000/08/17
         "red": 0xFF0000,
@@ -1400,11 +1400,11 @@ COLORS = _UnsortedNamedInts(
     }
 )
 
-COLORSPLUS = _UnsortedNamedInts({"No change": -1})
+COLORSPLUS = UnsortedNamedInts({"No change": -1})
 for i in COLORS:
     COLORSPLUS[int(i)] = str(i)
 
-KEYCODES = _NamedInts(
+KEYCODES = NamedInts(
     {
         "A": 1,
         "B": 2,
@@ -1529,11 +1529,11 @@ KEYCODES = _NamedInts(
 
 # load in override dictionary for KEYCODES
 try:
-    if _os.path.isfile(_keys_file_path):
+    if os.path.isfile(_keys_file_path):
         with open(_keys_file_path) as keys_file:
-            keys = _yaml.safe_load(keys_file)
+            keys = yaml.safe_load(keys_file)
             if isinstance(keys, dict):
-                keys = _NamedInts(**keys)
+                keys = NamedInts(**keys)
                 for k in KEYCODES:
                     if int(k) not in keys and str(k) not in keys:
                         keys[int(k)] = str(k)

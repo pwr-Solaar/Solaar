@@ -16,26 +16,21 @@
 
 import logging
 import math
-
-from struct import unpack as _unpack
-from time import sleep as _sleep
+import struct
+import time
 
 from solaar.i18n import _
 
-from . import hidpp20_constants as _hidpp20_constants
-from .common import NamedInt as _NamedInt
-from .common import NamedInts as _NamedInts
-from .common import bytes2int as _bytes2int
-from .common import int2bytes as _int2bytes
+from . import common
+from . import hidpp20_constants
+from .common import NamedInt
+from .common import NamedInts
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
 
 SENSITIVITY_IGNORE = "ignore"
-KIND = _NamedInts(
+KIND = NamedInts(
     toggle=0x01,
     choice=0x02,
     range=0x04,
@@ -613,7 +608,7 @@ class RangeFieldSetting(Setting):
 class RegisterRW:
     __slots__ = ("register",)
 
-    kind = _NamedInt(0x01, _("register"))
+    kind = NamedInt(0x01, _("register"))
 
     def __init__(self, register):
         assert isinstance(register, int)
@@ -627,12 +622,12 @@ class RegisterRW:
 
 
 class FeatureRW:
-    kind = _NamedInt(0x02, _("feature"))
+    kind = NamedInt(0x02, _("feature"))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
     def __init__(self, feature, read_fnid=0x00, write_fnid=0x10, prefix=b"", suffix=b"", read_prefix=b"", no_reply=False):
-        assert isinstance(feature, _NamedInt)
+        assert isinstance(feature, NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
@@ -653,7 +648,7 @@ class FeatureRW:
 
 
 class FeatureRWMap(FeatureRW):
-    kind = _NamedInt(0x02, _("feature"))
+    kind = NamedInt(0x02, _("feature"))
     default_read_fnid = 0x00
     default_write_fnid = 0x10
     default_key_byte_count = 1
@@ -666,7 +661,7 @@ class FeatureRWMap(FeatureRW):
         key_byte_count=default_key_byte_count,
         no_reply=False,
     ):
-        assert isinstance(feature, _NamedInt)
+        assert isinstance(feature, NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
         self.write_fnid = write_fnid
@@ -675,12 +670,12 @@ class FeatureRWMap(FeatureRW):
 
     def read(self, device, key):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_byte_count)
+        key_bytes = common.int2bytes(key, self.key_byte_count)
         return device.feature_request(self.feature, self.read_fnid, key_bytes)
 
     def write(self, device, key, data_bytes):
         assert self.feature is not None
-        key_bytes = _int2bytes(key, self.key_byte_count)
+        key_bytes = common.int2bytes(key, self.key_byte_count)
         reply = device.feature_request(self.feature, self.write_fnid, key_bytes, data_bytes, no_reply=self.no_reply)
         return reply if not self.no_reply else True
 
@@ -733,13 +728,13 @@ class BooleanValidator(Validator):
             else:
                 assert isinstance(false_value, bytes)
             if mask is None or mask == self.default_mask:
-                mask = b"\xFF" * len(true_value)
+                mask = b"\xff" * len(true_value)
             else:
                 assert isinstance(mask, bytes)
             assert len(mask) == len(true_value) == len(false_value)
-            tv = _bytes2int(true_value)
-            fv = _bytes2int(false_value)
-            mv = _bytes2int(mask)
+            tv = common.bytes2int(true_value)
+            fv = common.bytes2int(false_value)
+            mv = common.bytes2int(mask)
             assert tv != fv  # true and false might be something other than bit values
             assert tv & mv == tv
             assert fv & mv == fv
@@ -773,14 +768,14 @@ class BooleanValidator(Validator):
             return False
 
         count = len(self.mask)
-        mask = _bytes2int(self.mask)
-        reply_value = _bytes2int(reply_bytes[:count]) & mask
+        mask = common.bytes2int(self.mask)
+        reply_value = common.bytes2int(reply_bytes[:count]) & mask
 
-        true_value = _bytes2int(self.true_value)
+        true_value = common.bytes2int(self.true_value)
         if reply_value == true_value:
             return True
 
-        false_value = _bytes2int(self.false_value)
+        false_value = common.bytes2int(self.false_value)
         if reply_value == false_value:
             return False
 
@@ -852,7 +847,7 @@ class BitFieldValidator(Validator):
         return "{" + ", ".join([element_to_string(k, value[k]) for k in value]) + "}"
 
     def validate_read(self, reply_bytes):
-        r = _bytes2int(reply_bytes[: self.byte_count])
+        r = common.bytes2int(reply_bytes[: self.byte_count])
         value = {int(k): False for k in self.options}
         m = 1
         for _ignore in range(8 * self.byte_count):
@@ -867,7 +862,7 @@ class BitFieldValidator(Validator):
         for k, v in new_value.items():
             if v:
                 w |= int(k)
-        return _int2bytes(w, self.byte_count)
+        return common.int2bytes(w, self.byte_count)
 
     def get_options(self):
         return self.options
@@ -931,7 +926,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         for offset, mask in self._mask_from_offset.items():
             b = offset << (8 * (self.byte_count + 1))
             b |= (self.sep << (8 * self.byte_count)) | mask
-            r.append(_int2bytes(b, self.byte_count + 2))
+            r.append(common.int2bytes(b, self.byte_count + 2))
         return r
 
     def prepare_read_key(self, key):
@@ -941,14 +936,14 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
         offset, mask = option.om_method(option)
         b = offset << (8 * (self.byte_count + 1))
         b |= (self.sep << (8 * self.byte_count)) | mask
-        return _int2bytes(b, self.byte_count + 2)
+        return common.int2bytes(b, self.byte_count + 2)
 
     def validate_read(self, reply_bytes_dict):
         values = {int(k): False for k in self.options}
         for query, b in reply_bytes_dict.items():
-            offset = _bytes2int(query[0:1])
+            offset = common.bytes2int(query[0:1])
             b += (self.byte_count - len(b)) * b"\x00"
-            value = _bytes2int(b[: self.byte_count])
+            value = common.bytes2int(b[: self.byte_count])
             mask_to_opt = self._option_from_offset_mask.get(offset, {})
             m = 1
             for _ignore in range(8 * self.byte_count):
@@ -968,7 +963,7 @@ class BitFieldWithOffsetAndMaskValidator(Validator):
             if v:
                 w[offset] |= mask
         return [
-            _int2bytes(
+            common.int2bytes(
                 (offset << (8 * (2 * self.byte_count + 1)))
                 | (self.sep << (16 * self.byte_count))
                 | (self._mask_from_offset[offset] << (8 * self.byte_count))
@@ -1009,7 +1004,7 @@ class ChoicesValidator(Validator):
 
     def __init__(self, choices=None, byte_count=None, read_skip_byte_count=0, write_prefix_bytes=b""):
         assert choices is not None
-        assert isinstance(choices, _NamedInts)
+        assert isinstance(choices, NamedInts)
         assert len(choices) > 1
         self.choices = choices
         self.needs_current_value = False
@@ -1029,7 +1024,7 @@ class ChoicesValidator(Validator):
         return str(self.choices[value]) if isinstance(value, int) else str(value)
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[self._read_skip_byte_count : self._read_skip_byte_count + self._byte_count])
+        reply_value = common.bytes2int(reply_bytes[self._read_skip_byte_count : self._read_skip_byte_count + self._byte_count])
         valid_value = self.choices[reply_value]
         assert valid_value is not None, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         return valid_value
@@ -1041,7 +1036,7 @@ class ChoicesValidator(Validator):
             value = self.choice(new_value)
         if value is None:
             raise ValueError(f"invalid choice {new_value!r}")
-        assert isinstance(value, _NamedInt)
+        assert isinstance(value, NamedInt)
         return self._write_prefix_bytes + value.bytes(self._byte_count)
 
     def choice(self, value):
@@ -1083,11 +1078,11 @@ class ChoicesMapValidator(ChoicesValidator):
         max_key_bits = 0
         max_value_bits = 0
         for key, choices in choices_map.items():
-            assert isinstance(key, _NamedInt)
-            assert isinstance(choices, _NamedInts)
+            assert isinstance(key, NamedInt)
+            assert isinstance(choices, NamedInts)
             max_key_bits = max(max_key_bits, key.bit_length())
             for key_value in choices:
-                assert isinstance(key_value, _NamedInt)
+                assert isinstance(key_value, NamedInt)
                 max_value_bits = max(max_value_bits, key_value.bit_length())
         self._key_byte_count = (max_key_bits + 7) // 8
         if key_byte_count:
@@ -1119,7 +1114,7 @@ class ChoicesMapValidator(ChoicesValidator):
     def validate_read(self, reply_bytes, key):
         start = self._key_byte_count + self._read_skip_byte_count
         end = start + self._byte_count
-        reply_value = _bytes2int(reply_bytes[start:end]) & self.mask
+        reply_value = common.bytes2int(reply_bytes[start:end]) & self.mask
         # reprogrammable keys starts out as 0, which is not a choice, so don't use assert here
         if self.extra_default is not None and self.extra_default == reply_value:
             return int(self.choices[key][0])
@@ -1188,7 +1183,7 @@ class RangeValidator(Validator):
         assert self._byte_count < 8
 
     def validate_read(self, reply_bytes):
-        reply_value = _bytes2int(reply_bytes[: self._byte_count])
+        reply_value = common.bytes2int(reply_bytes[: self._byte_count])
         assert reply_value >= self.min_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         assert reply_value <= self.max_value, f"{self.__class__.__name__}: failed to validate read value {reply_value:02X}"
         return reply_value
@@ -1197,7 +1192,7 @@ class RangeValidator(Validator):
         if new_value < self.min_value or new_value > self.max_value:
             raise ValueError(f"invalid choice {new_value!r}")
         current_value = self.validate_read(current_value) if current_value is not None else None
-        to_write = _int2bytes(new_value, self._byte_count)
+        to_write = common.int2bytes(new_value, self._byte_count)
         # current value is known and same as value to be written return None to signal not to write it
         return None if current_value is not None and current_value == new_value else to_write
 
@@ -1270,7 +1265,7 @@ class PackedRangeValidator(Validator):
 
     def validate_read(self, reply_bytes):
         rvs = {
-            n: _bytes2int(reply_bytes[self.rsbc + n * self.bc : self.rsbc + (n + 1) * self.bc], signed=True)
+            n: common.bytes2int(reply_bytes[self.rsbc + n * self.bc : self.rsbc + (n + 1) * self.bc], signed=True)
             for n in range(self.count)
         }
         for n in range(self.count):
@@ -1284,7 +1279,9 @@ class PackedRangeValidator(Validator):
         for new_value in new_values.values():
             if new_value < self.min_value or new_value > self.max_value:
                 raise ValueError(f"invalid value {new_value!r}")
-        bytes = self.write_prefix_bytes + b"".join(_int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count))
+        bytes = self.write_prefix_bytes + b"".join(
+            common.int2bytes(new_values[n], self.bc, signed=True) for n in range(self.count)
+        )
         return bytes
 
     def acceptable(self, args, current):
@@ -1305,12 +1302,12 @@ class MultipleRangeValidator(Validator):
         assert isinstance(sub_items, dict)
         # sub_items: items -> class with .minimum, .maximum, .length (in bytes), .id (a string) and .widget (e.g. 'Scale')
         self.items = items
-        self.keys = _NamedInts(**{str(item): int(item) for item in items})
+        self.keys = NamedInts(**{str(item): int(item) for item in items})
         self._item_from_id = {int(k): k for k in items}
         self.sub_items = sub_items
 
     def prepare_read_item(self, item):
-        return _int2bytes((self._item_from_id[int(item)].index << 1) | 0xFF, 2)
+        return common.int2bytes((self._item_from_id[int(item)].index << 1) | 0xFF, 2)
 
     def validate_read_item(self, reply_bytes, item):
         item = self._item_from_id[int(item)]
@@ -1320,7 +1317,7 @@ class MultipleRangeValidator(Validator):
             r = reply_bytes[start : start + sub_item.length]
             if len(r) < sub_item.length:
                 r += b"\x00" * (sub_item.length - len(value))
-            v = _bytes2int(r)
+            v = common.bytes2int(r)
             if not (sub_item.minimum < v < sub_item.maximum):
                 logger.warning(
                     f"{self.__class__.__name__}: failed to validate read value for {item}.{sub_item}: "
@@ -1335,7 +1332,7 @@ class MultipleRangeValidator(Validator):
         w = b""
         for item in value.keys():
             _item = self._item_from_id[int(item)]
-            b = _int2bytes(_item.index, 1)
+            b = common.int2bytes(_item.index, 1)
             for sub_item in self.sub_items[_item]:
                 try:
                     v = value[int(item)][str(sub_item)]
@@ -1345,17 +1342,17 @@ class MultipleRangeValidator(Validator):
                     raise ValueError(
                         f"invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]"
                     )
-                b += _int2bytes(v, sub_item.length)
+                b += common.int2bytes(v, sub_item.length)
             if len(w) + len(b) > 15:
-                seq.append(b + b"\xFF")
+                seq.append(b + b"\xff")
                 w = b""
             w += b
-        seq.append(w + b"\xFF")
+        seq.append(w + b"\xff")
         return seq
 
     def prepare_write_item(self, item, value):
         _item = self._item_from_id[int(item)]
-        w = _int2bytes(_item.index, 1)
+        w = common.int2bytes(_item.index, 1)
         for sub_item in self.sub_items[_item]:
             try:
                 v = value[str(sub_item)]
@@ -1363,8 +1360,8 @@ class MultipleRangeValidator(Validator):
                 return None
             if not (sub_item.minimum <= v <= sub_item.maximum):
                 raise ValueError(f"invalid choice for {item}.{sub_item}: {v} not in [{sub_item.minimum}..{sub_item.maximum}]")
-            w += _int2bytes(v, sub_item.length)
-        return w + b"\xFF"
+            w += common.int2bytes(v, sub_item.length)
+        return w + b"\xff"
 
     def acceptable(self, args, current):
         # just one item, with at least one sub-item
@@ -1418,13 +1415,13 @@ class ActionSettingRW:
         pass
 
     def read(self, device):  # need to return bytes, as if read from device
-        return _int2bytes(self.key.key, 2) if self.active and self.key else b"\x00\x00"
+        return common.int2bytes(self.key.key, 2) if self.active and self.key else b"\x00\x00"
 
     def write(self, device, data_bytes):
         def handler(device, n):  # Called on notification events from the device
-            if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
+            if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
                 if n.address == 0x00:
-                    cids = _unpack("!HHHH", n.data[:8])
+                    cids = struct.unpack("!HHHH", n.data[:8])
                     if not self.pressed and int(self.key.key) in cids:  # trigger key pressed
                         self.pressed = True
                         self.press_action()
@@ -1438,7 +1435,7 @@ class ActionSettingRW:
                                     self.key_action(key)
                 elif n.address == 0x10:
                     if self.pressed:
-                        dx, dy = _unpack("!hh", n.data[:4])
+                        dx, dy = struct.unpack("!hh", n.data[:4])
                         self.move_action(dx, dy)
 
         divertSetting = next(filter(lambda s: s.name == self.divert_setting_name, device.settings), None)
@@ -1446,7 +1443,7 @@ class ActionSettingRW:
             logger.warning("setting %s not found on %s", self.divert_setting_name, device.name)
             return None
         self.device = device
-        key = _bytes2int(data_bytes)
+        key = common.bytes2int(data_bytes)
         if key:  # Enable
             self.key = next((k for k in device.keys if k.key == key), None)
             if self.key:
@@ -1484,13 +1481,13 @@ class RawXYProcessing:
         self.keys = []  # the keys that can initiate processing
         self.initiating_key = None  # the key that did initiate processing
         self.active = False
-        self.feature_offset = device.features[_hidpp20_constants.FEATURE.REPROG_CONTROLS_V4]
+        self.feature_offset = device.features[hidpp20_constants.FEATURE.REPROG_CONTROLS_V4]
         assert self.feature_offset is not False
 
     def handler(self, device, n):  # Called on notification events from the device
-        if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == _hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
+        if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
             if n.address == 0x00:
-                cids = _unpack("!HHHH", n.data[:8])
+                cids = struct.unpack("!HHHH", n.data[:8])
                 ## generalize to list of keys
                 if not self.initiating_key:  # no initiating key pressed
                     for k in self.keys:
@@ -1508,7 +1505,7 @@ class RawXYProcessing:
                                 self.key_action(key)
             elif n.address == 0x10:
                 if self.initiating_key:
-                    dx, dy = _unpack("!hh", n.data[:4])
+                    dx, dy = struct.unpack("!hh", n.data[:4])
                     self.move_action(dx, dy)
 
     def start(self, key):
@@ -1556,8 +1553,8 @@ class RawXYProcessing:
 
 
 def apply_all_settings(device):
-    if device.features and _hidpp20_constants.FEATURE.HIRES_WHEEL in device.features:
-        _sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
+    if device.features and hidpp20_constants.FEATURE.HIRES_WHEEL in device.features:
+        time.sleep(0.2)  # delay to try to get out of race condition with Linux HID++ driver
     persister = getattr(device, "persister", None)
     sensitives = persister.get("_sensitive", {}) if persister else {}
     for s in device.settings:

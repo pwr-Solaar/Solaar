@@ -20,31 +20,27 @@
 from __future__ import annotations
 
 import logging
-import threading as _threading
+import struct
+import threading
 
 from collections import namedtuple
 from contextlib import contextmanager
-from random import getrandbits as _random_bits
-from struct import pack as _pack
-from time import time as _timestamp
+from random import getrandbits
+from time import time
 
-import hidapi as _hid
+import hidapi
 
+from . import base_usb
+from . import common
+from . import descriptors
 from . import exceptions
-from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp10_constants
 from . import hidpp20
-from . import hidpp20_constants as _hidpp20_constants
-from .base_usb import ALL as _RECEIVER_USB_IDS
-from .common import strhex as _strhex
-from .descriptors import DEVICES as _DEVICES
+from . import hidpp20_constants
 
 logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
-
-#
-#
-#
 
 
 def _wired_device(product_id, interface):
@@ -57,7 +53,7 @@ def _bt_device(product_id):
 
 DEVICE_IDS = []
 
-for _ignore, d in _DEVICES.items():
+for _ignore, d in descriptors.DEVICES.items():
     if d.usbid:
         DEVICE_IDS.append(_wired_device(d.usbid, d.interface if d.interface else 2))
     if d.btid:
@@ -81,7 +77,7 @@ def product_information(usb_id: int | str) -> dict:
     if isinstance(usb_id, str):
         usb_id = int(usb_id, 16)
 
-    for r in _RECEIVER_USB_IDS:
+    for r in base_usb.ALL:
         if usb_id == r.get("product_id"):
             return r
     return {}
@@ -131,7 +127,7 @@ def match(record, bus_id, vendor_id, product_id):
 
 def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
-    for record in _RECEIVER_USB_IDS:  # known receivers
+    for record in base_usb.ALL:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
     if vendor_id == 0x046D and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
@@ -140,7 +136,7 @@ def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_lon
 
 def receivers():
     """Enumerate all the receivers attached to the machine."""
-    yield from _hid.enumerate(filter_receivers)
+    yield from hidapi.enumerate(filter_receivers)
 
 
 def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
@@ -159,12 +155,12 @@ def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
 
 def receivers_and_devices():
     """Enumerate all the receivers and devices directly attached to the machine."""
-    yield from _hid.enumerate(filter)
+    yield from hidapi.enumerate(filter)
 
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    return _hid.monitor_glib(callback, filter)
+    return hidapi.monitor_glib(callback, filter)
 
 
 #
@@ -185,7 +181,7 @@ def open_path(path):
     :returns: an open receiver handle if this is the right Linux device, or
     ``None``.
     """
-    return _hid.open_path(path)
+    return hidapi.open_path(path)
 
 
 def open():
@@ -204,13 +200,11 @@ def close(handle):
     if handle:
         try:
             if isinstance(handle, int):
-                _hid.close(handle)
+                hidapi.close(handle)
             else:
                 handle.close()
-            # logger.info("closed receiver handle %r", handle)
             return True
         except Exception:
-            # logger.exception("closing receiver handle %r", handle)
             pass
 
     return False
@@ -234,14 +228,21 @@ def write(handle, devnumber, data, long_message=False):
     assert isinstance(data, bytes), (repr(data), type(data))
 
     if long_message or len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
-        wdata = _pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
+        wdata = struct.pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
-        wdata = _pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
+        wdata = struct.pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("(%s) <= w[%02X %02X %s %s]", handle, ord(wdata[:1]), devnumber, _strhex(wdata[2:4]), _strhex(wdata[4:]))
+        logger.debug(
+            "(%s) <= w[%02X %02X %s %s]",
+            handle,
+            ord(wdata[:1]),
+            devnumber,
+            common.strhex(wdata[2:4]),
+            common.strhex(wdata[4:]),
+        )
 
     try:
-        _hid.write(int(handle), wdata)
+        hidapi.write(int(handle), wdata)
     except Exception as reason:
         logger.error("write failed, assuming handle %r no longer available", handle)
         close(handle)
@@ -274,7 +275,7 @@ def check_message(data):
         if report_lengths.get(report_id) == len(data):
             return True
         else:
-            logger.warning(f"unexpected message size: report_id {report_id:02X} message {_strhex(data)}")
+            logger.warning(f"unexpected message size: report_id {report_id:02X} message {common.strhex(data)}")
     return False
 
 
@@ -290,7 +291,7 @@ def _read(handle, timeout):
     try:
         # convert timeout to milliseconds, the hidapi expects it
         timeout = int(timeout * 1000)
-        data = _hid.read(int(handle), _MAX_READ_SIZE, timeout)
+        data = hidapi.read(int(handle), _MAX_READ_SIZE, timeout)
     except Exception as reason:
         logger.warning("read failed, assuming handle %r no longer available", handle)
         close(handle)
@@ -303,7 +304,9 @@ def _read(handle, timeout):
         if logger.isEnabledFor(logging.DEBUG) and (
             report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10
         ):  # ignore DJ input messages
-            logger.debug("(%s) => r[%02X %02X %s %s]", handle, report_id, devnumber, _strhex(data[2:4]), _strhex(data[4:]))
+            logger.debug(
+                "(%s) => r[%02X %02X %s %s]", handle, report_id, devnumber, common.strhex(data[2:4]), common.strhex(data[4:])
+            )
 
         return report_id, devnumber, data[2:]
 
@@ -322,7 +325,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
     while True:
         try:
             # read whatever is already in the buffer, if any
-            data = _hid.read(ihandle, _MAX_READ_SIZE, 0)
+            data = hidapi.read(ihandle, _MAX_READ_SIZE, 0)
         except Exception as reason:
             logger.error("read failed, assuming receiver %s no longer available", handle)
             close(handle)
@@ -380,14 +383,10 @@ _HIDPP_Notification.__str__ = lambda self: "Notification(%02x,%d,%02X,%02X,%s)" 
     self.devnumber,
     self.sub_id,
     self.address,
-    _strhex(self.data),
+    common.strhex(self.data),
 )
 
-#
-#
-#
-
-request_lock = _threading.Lock()  # serialize all requests
+request_lock = threading.Lock()  # serialize all requests
 handles_lock = {}
 
 
@@ -396,7 +395,7 @@ def handle_lock(handle):
         if handles_lock.get(handle) is None:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("New lock %s", repr(handle))
-            handles_lock[handle] = _threading.Lock()  # Serialize requests on the handle
+            handles_lock[handle] = threading.Lock()  # Serialize requests on the handle
     return handles_lock[handle]
 
 
@@ -422,10 +421,6 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
     :param params: parameters for the feature call, 3 to 16 bytes.
     :returns: the reply data, or ``None`` if some error occurred. or no reply expected
     """
-
-    # import inspect as _inspect
-    # print ('\n  '.join(str(s) for s in _inspect.stack()))
-
     with acquire_timeout(handle_lock(handle), handle, 10.0):
         assert isinstance(request_id, int)
         if (devnumber != 0xFF or protocol >= 2.0) and request_id < 0x8000:
@@ -434,7 +429,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             # most significant bit (8) in SoftwareId, to make notifications easier
             # to distinguish from request replies.
             # This only applies to peripheral requests, ofc.
-            request_id = (request_id & 0xFFF0) | 0x08 | _random_bits(3)
+            request_id = (request_id & 0xFFF0) | 0x08 | getrandbits(3)
 
         timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
         # be extra patient on long register read
@@ -442,12 +437,10 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             timeout *= 2
 
         if params:
-            params = b"".join(_pack("B", p) if isinstance(p, int) else p for p in params)
+            params = b"".join(struct.pack("B", p) if isinstance(p, int) else p for p in params)
         else:
             params = b""
-        # if logger.isEnabledFor(logging.DEBUG):
-        #     logger.debug("(%s) device %d request_id {%04X} params [%s]", handle, devnumber, request_id, _strhex(params))
-        request_data = _pack("!H", request_id) + params
+        request_data = struct.pack("!H", request_id) + params
 
         ihandle = int(handle)
         notifications_hook = getattr(handle, "notifications_hook", None)
@@ -462,7 +455,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             return None
 
         # we consider timeout from this point
-        request_started = _timestamp()
+        request_started = time()
         delta = 0
 
         while delta < timeout:
@@ -473,7 +466,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                 if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xFF:  # BT device returning 0x00
                     if (
                         report_id == HIDPP_SHORT_MESSAGE_ID
-                        and reply_data[:1] == b"\x8F"
+                        and reply_data[:1] == b"\x8f"
                         and reply_data[1:3] == request_data[:2]
                     ):
                         error = ord(reply_data[3:4])
@@ -485,10 +478,10 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                                 devnumber,
                                 request_id,
                                 error,
-                                _hidpp10_constants.ERROR[error],
+                                hidpp10_constants.ERROR[error],
                             )
-                        return _hidpp10_constants.ERROR[error] if return_error else None
-                    if reply_data[:1] == b"\xFF" and reply_data[1:3] == request_data[:2]:
+                        return hidpp10_constants.ERROR[error] if return_error else None
+                    if reply_data[:1] == b"\xff" and reply_data[1:3] == request_data[:2]:
                         # a HID++ 2.0 feature call returned with an error
                         error = ord(reply_data[3:4])
                         logger.error(
@@ -497,7 +490,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                             devnumber,
                             request_id,
                             error,
-                            _hidpp20_constants.ERROR[error],
+                            hidpp20_constants.ERROR[error],
                         )
                         raise exceptions.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
 
@@ -517,20 +510,13 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
                 else:
                     # a reply was received, but did not match our request in any way
                     # reset the timeout starting point
-                    request_started = _timestamp()
+                    request_started = time()
 
                 if notifications_hook:
                     n = make_notification(report_id, reply_devnumber, reply_data)
                     if n:
                         notifications_hook(n)
-                    # elif logger.isEnabledFor(logging.DEBUG):
-                    #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
-                # elif logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
-
-            delta = _timestamp() - request_started
-            # if logger.isEnabledFor(logging.DEBUG):
-            #     logger.debug("(%s) still waiting for reply, delta %f", handle, delta)
+            delta = time() - request_started
 
         logger.warning(
             "timeout (%0.2f/%0.2f) on device %d request {%04X} params [%s]",
@@ -538,7 +524,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             timeout,
             devnumber,
             request_id,
-            _strhex(params),
+            common.strhex(params),
         )
         # raise DeviceUnreachable(number=devnumber, request=request_id)
 
@@ -560,11 +546,11 @@ def ping(handle, devnumber, long_message=False):
         # randomize the SoftwareId and mark byte to be able to identify the ping
         # reply, and set most significant (0x8) bit in SoftwareId so that the reply
         # is always distinguishable from notifications
-        request_id = 0x0018 | _random_bits(3)
-        request_data = _pack("!HBBB", request_id, 0, 0, _random_bits(8))
+        request_id = 0x0018 | getrandbits(3)
+        request_data = struct.pack("!HBBB", request_id, 0, 0, getrandbits(8))
         write(int(handle), devnumber, request_data, long_message)
 
-        request_started = _timestamp()  # we consider timeout from this point
+        request_started = time()  # we consider timeout from this point
         delta = 0
         while delta < _PING_TIMEOUT:
             reply = _read(handle, _PING_TIMEOUT)
@@ -577,18 +563,18 @@ def ping(handle, devnumber, long_message=False):
 
                     if (
                         report_id == HIDPP_SHORT_MESSAGE_ID
-                        and reply_data[:1] == b"\x8F"
+                        and reply_data[:1] == b"\x8f"
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == _hidpp10_constants.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
+                        if error == hidpp10_constants.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
                             return 1.0
                         if (
-                            error == _hidpp10_constants.ERROR.resource_error
-                            or error == _hidpp10_constants.ERROR.connection_request_failed
+                            error == hidpp10_constants.ERROR.resource_error
+                            or error == hidpp10_constants.ERROR.connection_request_failed
                         ):
                             return  # device unreachable
-                        if error == _hidpp10_constants.ERROR.unknown_device:  # no paired device with that number
+                        if error == hidpp10_constants.ERROR.unknown_device:  # no paired device with that number
                             logger.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
                             raise exceptions.NoSuchDevice(number=devnumber, request=request_id)
 
@@ -596,9 +582,7 @@ def ping(handle, devnumber, long_message=False):
                     n = make_notification(report_id, reply_devnumber, reply_data)
                     if n:
                         notifications_hook(n)
-                    # elif logger.isEnabledFor(logging.DEBUG):
-                    #     logger.debug("(%s) ignoring reply %02X [%s]", handle, reply_devnumber, _strhex(reply_data))
 
-            delta = _timestamp() - request_started
+            delta = time() - request_started
 
         logger.warning("(%s) timeout (%0.2f/%0.2f) on device %d ping", handle, delta, _PING_TIMEOUT, devnumber)

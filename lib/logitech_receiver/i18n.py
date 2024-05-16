@@ -16,10 +16,10 @@
 
 # Translation support for the Logitech receivers library
 
-import gettext as _gettext
+import gettext
 
-_ = _gettext.gettext
-ngettext = _gettext.ngettext
+_ = gettext.gettext
+ngettext = gettext.ngettext
 
 # A few common strings, not always accessible as such in the code.
 

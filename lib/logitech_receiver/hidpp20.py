@@ -17,33 +17,27 @@
 
 import logging
 import socket
-import threading as _threading
+import struct
+import threading
 
-from struct import pack as _pack
-from struct import unpack as _unpack
 from typing import Any
 from typing import List
 from typing import Optional
 from typing import Tuple
 
-import yaml as _yaml
+import yaml
 
 from solaar.i18n import _
 from typing_extensions import Protocol
 
+from . import common
 from . import exceptions
-from . import hidpp10_constants as _hidpp10_constants
+from . import hidpp10_constants
 from . import special_keys
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
-from .common import FirmwareInfo as _FirmwareInfo
-from .common import NamedInt as _NamedInt
-from .common import NamedInts as _NamedInts
-from .common import UnsortedNamedInts as _UnsortedNamedInts
-from .common import bytes2int as _bytes2int
-from .common import crc16 as _crc16
-from .common import int2bytes as _int2bytes
+from .common import NamedInt
 from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import CHARGE_TYPE
@@ -57,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 FixedBytes5 = bytes
 
-KIND_MAP = {kind: _hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KIND}
+KIND_MAP = {kind: hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KIND}
 
 
 class Device(Protocol):
@@ -103,7 +97,7 @@ class FeaturesArray(dict):
             return False
         if self.count > 0:
             return True
-        reply = self.device.request(0x0000, _pack("!H", FEATURE.FEATURE_SET))
+        reply = self.device.request(0x0000, struct.pack("!H", FEATURE.FEATURE_SET))
         if reply is not None:
             fs_index = reply[0]
             if fs_index:
@@ -120,7 +114,7 @@ class FeaturesArray(dict):
                 self.supported = False
         return False
 
-    def get_feature(self, index: int) -> Optional[_NamedInt]:
+    def get_feature(self, index: int) -> Optional[NamedInt]:
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
@@ -130,7 +124,7 @@ class FeaturesArray(dict):
                 return feature
             response = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
             if response:
-                feature = FEATURE[_unpack("!H", response[:2])[0]]
+                feature = FEATURE[struct.unpack("!H", response[:2])[0]]
                 self[feature] = index
                 self.version[feature] = response[3]
                 return feature
@@ -141,15 +135,15 @@ class FeaturesArray(dict):
                 feature = self.get_feature(index)
                 yield feature, index
 
-    def get_feature_version(self, feature: _NamedInt) -> Optional[int]:
+    def get_feature_version(self, feature: NamedInt) -> Optional[int]:
         if self[feature]:
             return self.version.get(feature, 0)
 
-    def __contains__(self, feature: _NamedInt) -> bool:
+    def __contains__(self, feature: NamedInt) -> bool:
         index = self.__getitem__(feature)
         return index is not None and index is not False
 
-    def __getitem__(self, feature: _NamedInt) -> Optional[int]:
+    def __getitem__(self, feature: NamedInt) -> Optional[int]:
         index = super().get(feature)
         if index is not None:
             return index
@@ -157,7 +151,7 @@ class FeaturesArray(dict):
             index = super().get(feature)
             if index is not None:
                 return index
-            response = self.device.request(0x0000, _pack("!H", feature))
+            response = self.device.request(0x0000, struct.pack("!H", feature))
             if response:
                 index = response[0]
                 self[feature] = index if index else False
@@ -185,8 +179,8 @@ class ReprogrammableKey:
     Ref: https://drive.google.com/file/d/0BxbRzx7vEV7eU3VfMnRuRXktZ3M/view
     Read-only properties:
     - index {int} -- index in the control ID table
-    - key {_NamedInt} -- the name of this control
-    - default_task {_NamedInt} -- the native function of this control
+    - key {NamedInt} -- the name of this control
+    - default_task {NamedInt} -- the native function of this control
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
 
@@ -198,17 +192,17 @@ class ReprogrammableKey:
         self._flags = flags
 
     @property
-    def key(self) -> _NamedInt:
+    def key(self) -> NamedInt:
         return special_keys.CONTROL[self._cid]
 
     @property
-    def default_task(self) -> _NamedInt:
+    def default_task(self) -> NamedInt:
         """NOTE: This NamedInt is a bit mixed up, because its value is the Control ID
         while the name is the Control ID's native task. But this makes more sense
         than presenting details of controls vs tasks in the interface. The same
         convention applies to `mapped_to`, `remappable_to`, `remap` in `ReprogrammableKeyV4`."""
         task = str(special_keys.TASK[self._tid])
-        return _NamedInt(self._cid, task)
+        return NamedInt(self._cid, task)
 
     @property
     def flags(self) -> List[str]:
@@ -227,8 +221,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     - group {int} -- the group this control belongs to; other controls with this group in their
     `group_mask` can be remapped to this control
     - group_mask {List[str]} -- this control can be remapped to any control ID in these groups
-    - mapped_to {_NamedInt} -- which action this control is mapped to; usually itself
-    - remappable_to {List[_NamedInt]} -- list of actions which this control can be remapped to
+    - mapped_to {NamedInt} -- which action this control is mapped to; usually itself
+    - remappable_to {List[NamedInt]} -- list of actions which this control can be remapped to
     - mapping_flags {List[str]} -- mapping flags set on the control
     """
 
@@ -245,24 +239,24 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         return special_keys.CID_GROUP_BIT.flag_names(self._gmask)
 
     @property
-    def mapped_to(self) -> _NamedInt:
+    def mapped_to(self) -> NamedInt:
         if self._mapped_to is None:
             self._getCidReporting()
         self._device.keys._ensure_all_keys_queried()
         task = str(special_keys.TASK[self._device.keys.cid_to_tid[self._mapped_to]])
-        return _NamedInt(self._mapped_to, task)
+        return NamedInt(self._mapped_to, task)
 
     @property
-    def remappable_to(self) -> _NamedInts:
+    def remappable_to(self) -> common.NamedInts:
         self._device.keys._ensure_all_keys_queried()
-        ret = _UnsortedNamedInts()
+        ret = common.UnsortedNamedInts()
         if self.group_mask != []:  # only keys with a non-zero gmask are remappable
             ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
                 g = special_keys.CID_GROUP[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
                     tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
-                    tgt_task = _NamedInt(tgt_cid, tgt_task)
+                    tgt_task = NamedInt(tgt_cid, tgt_task)
                     if tgt_task != self.default_task:  # don't put itself in twice
                         ret[tgt_task] = tgt_task
         return ret
@@ -288,15 +282,15 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         flags = {special_keys.MAPPING_FLAG.raw_XY_diverted: value}
         self._setCidReporting(flags=flags)
 
-    def remap(self, to: _NamedInt):
+    def remap(self, to: NamedInt):
         """Temporarily remaps this control to another action."""
         self._setCidReporting(remap=int(to))
 
     def _getCidReporting(self):
         try:
-            mapped_data = self._device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(_pack("!H", self._cid)))
+            mapped_data = self._device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(struct.pack("!H", self._cid)))
             if mapped_data:
-                cid, mapping_flags_1, mapped_to = _unpack("!HBH", mapped_data[:5])
+                cid, mapping_flags_1, mapped_to = struct.unpack("!HBH", mapped_data[:5])
                 if cid != self._cid and logger.isEnabledFor(logging.WARNING):
                     logger.warning(
                         f"REPROG_CONTROLS_V4 endpoint getCidReporting on device {self._device} replied "
@@ -304,7 +298,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
                     )
                 self._mapped_to = mapped_to if mapped_to != 0 else self._cid
                 if len(mapped_data) > 5:
-                    (mapping_flags_2,) = _unpack("!B", mapped_data[5:6])
+                    (mapping_flags_2,) = struct.unpack("!B", mapped_data[5:6])
                 else:
                     mapping_flags_2 = 0
                 self._mapping_flags = mapping_flags_1 | (mapping_flags_2 << 8)
@@ -322,7 +316,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     def _setCidReporting(self, flags=None, remap=0):
         """Sends a `setCidReporting` request with the given parameters. Raises an exception if the parameters are invalid.
         Parameters:
-        - flags {Dict[_NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
+        - flags {Dict[NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
         - remap {int} -- which control ID to remap to; or 0 to keep current mapping
         """
         flags = flags if flags else {}  # See flake8 B006
@@ -365,11 +359,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if remap != 0:  # update mapping if changing (even if not already read)
             self._mapped_to = remap
 
-        pkt = tuple(_pack("!HBH", self._cid, bfield & 0xFF, remap))
+        pkt = tuple(struct.pack("!HBH", self._cid, bfield & 0xFF, remap))
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
         ret = self._device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
-        if ret is None or _unpack("!BBBBB", ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
+        if ret is None or struct.unpack("!BBBBB", ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
 
@@ -384,11 +378,11 @@ class PersistentRemappableAction:
         self.cidStatus = cidStatus
 
     @property
-    def key(self) -> _NamedInt:
+    def key(self) -> NamedInt:
         return special_keys.CONTROL[self._cid]
 
     @property
-    def actionType(self) -> _NamedInt:
+    def actionType(self) -> NamedInt:
         return special_keys.ACTIONID[self.actionId]
 
     @property
@@ -422,16 +416,18 @@ class PersistentRemappableAction:
 
     @property
     def data_bytes(self):
-        return _int2bytes(self.actionId, 1) + _int2bytes(self.remapped, 2) + _int2bytes(self._modifierMask, 1)
+        return (
+            common.int2bytes(self.actionId, 1) + common.int2bytes(self.remapped, 2) + common.int2bytes(self._modifierMask, 1)
+        )
 
     def remap(self, data_bytes):
-        cid = _int2bytes(self._cid, 2)
-        if _bytes2int(data_bytes) == special_keys.KEYS_Default:  # map back to default
+        cid = common.int2bytes(self._cid, 2)
+        if common.bytes2int(data_bytes) == special_keys.KEYS_Default:  # map back to default
             self._device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x50, cid, 0xFF)
             self._device.remap_keys._query_key(self.index)
             return self._device.remap_keys.keys[self.index].data_bytes
         else:
-            self.actionId, self.remapped, self._modifierMask = _unpack("!BHB", data_bytes)
+            self.actionId, self.remapped, self._modifierMask = struct.unpack("!BHB", data_bytes)
             self.cidStatus = 0x01
             self._device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
             return True
@@ -443,7 +439,7 @@ class KeysArray:
     def __init__(self, device, count, version):
         assert device is not None
         self.device = device
-        self.lock = _threading.Lock()
+        self.lock = threading.Lock()
         if FEATURE.REPROG_CONTROLS_V4 in self.device.features:
             self.keyversion = FEATURE.REPROG_CONTROLS_V4
         elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
@@ -510,7 +506,7 @@ class KeysArrayV2(KeysArray):
             raise IndexError(index)
         keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS, 0x10, index)
         if keydata:
-            cid, tid, flags = _unpack("!HHB", keydata[:5])
+            cid, tid, flags = struct.unpack("!HHB", keydata[:5])
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
             self.cid_to_tid[cid] = tid
         elif logger.isEnabledFor(logging.WARNING):
@@ -526,7 +522,7 @@ class KeysArrayV4(KeysArrayV2):
             raise IndexError(index)
         keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x10, index)
         if keydata:
-            cid, tid, flags1, pos, group, gmask, flags2 = _unpack("!HHBBBBB", keydata[:9])
+            cid, tid, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
             self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
             self.cid_to_tid[cid] = tid
@@ -547,7 +543,7 @@ class KeysArrayPersistent(KeysArray):
         if self._capabilities is None and self.device.online:
             capabilities = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x00)
             assert capabilities, "Oops, persistent remappable key capabilities cannot be retrieved!"
-            self._capabilities = _unpack("!H", capabilities[:2])[0]  # flags saying what the mappings are possible
+            self._capabilities = struct.unpack("!H", capabilities[:2])[0]  # flags saying what the mappings are possible
         return self._capabilities
 
     def _query_key(self, index: int):
@@ -555,10 +551,10 @@ class KeysArrayPersistent(KeysArray):
             raise IndexError(index)
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
-            key = _unpack("!H", keydata[:2])[0]
+            key = struct.unpack("!H", keydata[:2])[0]
             mapped_data = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key >> 8, key & 0xFF, 0xFF)
             if mapped_data:
-                _ignore, _ignore, actionId, remapped, modifiers, status = _unpack("!HBBHBB", mapped_data[:8])
+                _ignore, _ignore, actionId, remapped, modifiers, status = struct.unpack("!HBBHBB", mapped_data[:8])
             else:
                 actionId = remapped = modifiers = status = 0
             actionId = special_keys.ACTIONID[actionId]
@@ -578,7 +574,7 @@ class KeysArrayPersistent(KeysArray):
 
 
 # Param Ids for feature GESTURE_2
-PARAM = _NamedInts(
+PARAM = common.NamedInts(
     ExtraCapabilities=1,  # not suitable for use
     PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
     RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
@@ -622,7 +618,7 @@ SUB_PARAM = {  # (byte count, minimum, maximum)
 }
 
 # Spec Ids for feature GESTURE_2
-SPEC = _NamedInts(
+SPEC = common.NamedInts(
     DVI_field_width=1,
     field_widths=2,
     period_unit=3,
@@ -637,7 +633,7 @@ SPEC = _NamedInts(
 SPEC._fallback = lambda x: f"unknown:{x:04X}"
 
 # Action Ids for feature GESTURE_2
-ACTION_ID = _NamedInts(
+ACTION_ID = common.NamedInts(
     MovePointer=1,
     ScrollHorizontal=2,
     WheelScrolling=3,
@@ -750,7 +746,7 @@ class Param:
     def read(self):  # returns the bytes for the parameter
         result = self._device.feature_request(FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
         if result:
-            self._value = _bytes2int(result[: self.size])
+            self._value = common.bytes2int(result[: self.size])
             return self._value
 
     @property
@@ -762,7 +758,7 @@ class Param:
     def _read_default(self):
         result = self._device.feature_request(FEATURE.GESTURE_2, 0x60, self.index, 0xFF)
         if result:
-            self._default_value = _bytes2int(result[: self.size])
+            self._default_value = common.bytes2int(result[: self.size])
             return self._default_value
 
     def write(self, bytes):
@@ -799,7 +795,7 @@ class Spec:
                     f"Feature Call Error reading Gesture Spec on device {self._device} for spec {self.id} - use None"
                 )
             return None
-        return _bytes2int(value[: self.byte_count])
+        return common.bytes2int(value[: self.byte_count])
 
     def __repr__(self):
         return f"[{self.spec}={self.value}]"
@@ -883,7 +879,7 @@ class Backlight:
         if not response:
             raise exceptions.FeatureCallError(msg="No reply from device.")
         self.device = device
-        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = _unpack(
+        self.enabled, self.options, supported, effects, self.level, self.dho, self.dhi, self.dpow = struct.unpack(
             "<BBBHBHHH", response[:12]
         )
         self.auto_supported = supported & 0x08
@@ -894,7 +890,7 @@ class Backlight:
     def write(self):
         self.options = (self.options & 0x07) | (self.mode << 3)
         level = self.level if self.mode == 0x3 else 0
-        data_bytes = _pack("<BBBBHHH", self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
+        data_bytes = struct.pack("<BBBBHHH", self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
         return self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
 
 
@@ -908,8 +904,8 @@ class LEDParam:
     saturation = "saturation"
 
 
-LEDRampChoices = _NamedInts(default=0, yes=1, no=2)
-LEDFormChoices = _NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
+LEDRampChoices = common.NamedInts(default=0, yes=1, no=2)
+LEDFormChoices = common.NamedInts(default=0, sine=1, square=2, triangle=3, sawtooth=4, sharkfin=5, exponential=6)
 LEDParamSize = {
     LEDParam.color: 3,
     LEDParam.speed: 1,
@@ -922,18 +918,18 @@ LEDParamSize = {
 # not implemented from x8070 Wave=4, Stars=5, Press=6, Audio=7
 # not implemented from x8071 Custom=12, Kitt=13, HSVPulsing=20, WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
 LEDEffects = {
-    0x00: [_NamedInt(0x00, _("Disabled")), {}],
-    0x01: [_NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
-    0x02: [_NamedInt(0x02, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
-    0x03: [_NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x08: [_NamedInt(0x08, _("Boot")), {}],
-    0x09: [_NamedInt(0x09, _("Demo")), {}],
-    0x0A: [_NamedInt(0x0A, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
-    0x0B: [_NamedInt(0x0B, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
-    0x0E: [_NamedInt(0x0E, _("Decomposition")), {LEDParam.period: 6, LEDParam.intensity: 8}],
-    0x0F: [_NamedInt(0x0F, _("Signature1")), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x10: [_NamedInt(0x10, _("Signature2")), {LEDParam.period: 5, LEDParam.intensity: 7}],
-    0x15: [_NamedInt(0x15, _("CycleS")), {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8}],
+    0x00: [NamedInt(0x00, _("Disabled")), {}],
+    0x01: [NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
+    0x02: [NamedInt(0x02, _("Pulse")), {LEDParam.color: 0, LEDParam.speed: 3}],
+    0x03: [NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x08: [NamedInt(0x08, _("Boot")), {}],
+    0x09: [NamedInt(0x09, _("Demo")), {}],
+    0x0A: [NamedInt(0x0A, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
+    0x0B: [NamedInt(0x0B, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
+    0x0E: [NamedInt(0x0E, _("Decomposition")), {LEDParam.period: 6, LEDParam.intensity: 8}],
+    0x0F: [NamedInt(0x0F, _("Signature1")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x10: [NamedInt(0x10, _("Signature2")), {LEDParam.period: 5, LEDParam.intensity: 7}],
+    0x15: [NamedInt(0x15, _("CycleS")), {LEDParam.saturation: 1, LEDParam.period: 6, LEDParam.intensity: 8}],
 }
 
 
@@ -950,7 +946,7 @@ class LEDEffectSetting:  # an effect plus its parameters
         args = {"ID": effect[0] if effect else None}
         if effect:
             for p, b in effect[1].items():
-                args[str(p)] = _bytes2int(bytes[1 + b : 1 + b + LEDParamSize[p]])
+                args[str(p)] = common.bytes2int(bytes[1 + b : 1 + b + LEDParamSize[p]])
         else:
             args["bytes"] = bytes
         return cls(**args)
@@ -962,10 +958,10 @@ class LEDEffectSetting:  # an effect plus its parameters
         else:
             bs = [0] * 10
             for p, b in LEDEffects[ID][1].items():
-                bs[b : b + LEDParamSize[p]] = _int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
+                bs[b : b + LEDParamSize[p]] = common.int2bytes(getattr(self, str(p), 0), LEDParamSize[p])
             if options is not None:
                 ID = next((ze.index for ze in options if ze.ID == ID), None)
-            result = _int2bytes(ID, 1) + bytes(bs)
+            result = common.int2bytes(ID, 1) + bytes(bs)
             return result
 
     @classmethod
@@ -980,23 +976,23 @@ class LEDEffectSetting:  # an effect plus its parameters
         return type(self) == type(other) and self.to_bytes() == other.to_bytes()
 
     def __str__(self):
-        return _yaml.dump(self, width=float("inf")).rstrip("\n")
+        return yaml.dump(self, width=float("inf")).rstrip("\n")
 
 
-_yaml.SafeLoader.add_constructor("!LEDEffectSetting", LEDEffectSetting.from_yaml)
-_yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
+yaml.SafeLoader.add_constructor("!LEDEffectSetting", LEDEffectSetting.from_yaml)
+yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
 
 
 class LEDEffectInfo:  # an effect that a zone can do
     def __init__(self, feature, function, device, zindex, eindex):
         info = device.feature_request(feature, function, zindex, eindex, 0x00)
-        self.zindex, self.index, self.ID, self.capabilities, self.period = _unpack("!BBHHH", info[0:8])
+        self.zindex, self.index, self.ID, self.capabilities, self.period = struct.unpack("!BBHHH", info[0:8])
 
     def __str__(self):
         return f"LEDEffectInfo({self.zindex}, {self.index}, {self.ID}, {self.capabilities: x}, {self.period})"
 
 
-LEDZoneLocations = _NamedInts()
+LEDZoneLocations = common.NamedInts()
 LEDZoneLocations[0x00] = _("Unknown Location")
 LEDZoneLocations[0x01] = _("Primary")
 LEDZoneLocations[0x02] = _("Logo")
@@ -1014,7 +1010,7 @@ LEDZoneLocations[0x0B] = _("Primary 6")
 class LEDZoneInfo:  # effects that a zone can do
     def __init__(self, feature, function, offset, effect_function, device, index):
         info = device.feature_request(feature, function, index, 0xFF, 0x00)
-        self.location, self.count = _unpack("!HB", info[1 + offset : 4 + offset])
+        self.location, self.count = struct.unpack("!HB", info[1 + offset : 4 + offset])
         self.index = index
         self.location = LEDZoneLocations[self.location] if LEDZoneLocations[self.location] else self.location
         self.effects = []
@@ -1025,7 +1021,7 @@ class LEDZoneInfo:  # effects that a zone can do
         for i in range(0, len(self.effects)):
             e = self.effects[i]
             if e.ID == setting.ID:
-                return _int2bytes(self.index, 1) + _int2bytes(i, 1) + setting.to_bytes()[1:]
+                return common.int2bytes(self.index, 1) + common.int2bytes(i, 1) + setting.to_bytes()[1:]
         return None
 
     def __str__(self):
@@ -1036,7 +1032,7 @@ class LEDEffectsInfo:  # effects that the LEDs can do, using COLOR_LED_EFFECTS
     def __init__(self, device):
         self.device = device
         info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
-        self.count, _, capabilities = _unpack("!BHH", info[0:5])
+        self.count, _, capabilities = struct.unpack("!BHH", info[0:5])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
@@ -1054,16 +1050,16 @@ class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_
     def __init__(self, device):
         self.device = device
         info = device.feature_request(FEATURE.RGB_EFFECTS, 0x00, 0xFF, 0xFF, 0x00)
-        _, _, self.count, _, capabilities = _unpack("!BBBHH", info[0:7])
+        _, _, self.count, _, capabilities = struct.unpack("!BBBHH", info[0:7])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
             self.zones.append(LEDZoneInfo(FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
 
 
-ButtonBehaviors = _NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
-ButtonMappingTypes = _NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
-ButtonFunctions = _NamedInts(
+ButtonBehaviors = common.NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
+ButtonMappingTypes = common.NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
+ButtonFunctions = common.NamedInts(
     No_Action=0x0,
     Tilt_Left=0x1,
     Tilt_Right=0x2,
@@ -1136,22 +1132,22 @@ class Button:
         return result
 
     def to_bytes(self):
-        bytes = _int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
+        bytes = common.int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
         if self.behavior == ButtonBehaviors.MacroExecute or self.behavior == ButtonBehaviors.MacroStop:
-            bytes = _int2bytes((self.behavior << 12) + self.sector, 2) + _int2bytes(self.address, 2)
+            bytes = common.int2bytes((self.behavior << 12) + self.sector, 2) + common.int2bytes(self.address, 2)
         elif self.behavior == ButtonBehaviors.Send:
-            bytes += _int2bytes(self.type, 1)
+            bytes += common.int2bytes(self.type, 1)
             if self.type == ButtonMappingTypes.Button:
-                bytes += _int2bytes(self.value, 2)
+                bytes += common.int2bytes(self.value, 2)
             elif self.type == ButtonMappingTypes.Modifier_And_Key:
-                bytes += _int2bytes(self.modifiers, 1)
-                bytes += _int2bytes(self.value, 1)
+                bytes += common.int2bytes(self.modifiers, 1)
+                bytes += common.int2bytes(self.value, 1)
             elif self.type == ButtonMappingTypes.Consumer_Key:
-                bytes += _int2bytes(self.value, 2)
+                bytes += common.int2bytes(self.value, 2)
             elif self.type == ButtonMappingTypes.No_Action:
                 bytes += b"\xff\xff"
         elif self.behavior == ButtonBehaviors.Function:
-            bytes += _int2bytes(self.value, 1) + b"\xff" + (_int2bytes(self.data, 1) if self.data else b"\x00")
+            bytes += common.int2bytes(self.value, 1) + b"\xff" + (common.int2bytes(self.data, 1) if self.data else b"\x00")
         else:
             bytes = self.bytes if self.bytes else b"\xff\xff\xff\xff"
         return bytes
@@ -1163,8 +1159,8 @@ class Button:
         )
 
 
-_yaml.SafeLoader.add_constructor("!Button", Button.from_yaml)
-_yaml.add_representer(Button, Button.to_yaml)
+yaml.SafeLoader.add_constructor("!Button", Button.from_yaml)
+yaml.add_representer(Button, Button.to_yaml)
 
 
 class OnboardProfile:
@@ -1191,19 +1187,19 @@ class OnboardProfile:
             report_rate=bytes[0],
             resolution_default_index=bytes[1],
             resolution_shift_index=bytes[2],
-            resolutions=[_unpack("<H", bytes[i * 2 + 3 : i * 2 + 5])[0] for i in range(0, 5)],
+            resolutions=[struct.unpack("<H", bytes[i * 2 + 3 : i * 2 + 5])[0] for i in range(0, 5)],
             red=bytes[13],
             green=bytes[14],
             blue=bytes[15],
             power_mode=bytes[16],
             angle_snap=bytes[17],
-            write_count=_unpack("<H", bytes[18:20])[0],
+            write_count=struct.unpack("<H", bytes[18:20])[0],
             reserved=bytes[20:28],
-            ps_timeout=_unpack("<H", bytes[28:30])[0],
-            po_timeout=_unpack("<H", bytes[30:32])[0],
+            ps_timeout=struct.unpack("<H", bytes[28:30])[0],
+            po_timeout=struct.unpack("<H", bytes[30:32])[0],
             buttons=[Button.from_bytes(bytes[32 + i * 4 : 32 + i * 4 + 4]) for i in range(0, buttons)],
             gbuttons=[Button.from_bytes(bytes[96 + i * 4 : 96 + i * 4 + 4]) for i in range(0, gbuttons)],
-            name=bytes[160:208].decode("utf-16le").rstrip("\x00").rstrip("\uFFFF"),
+            name=bytes[160:208].decode("utf-16le").rstrip("\x00").rstrip("\uffff"),
             lighting=[LEDEffectSetting.from_bytes(bytes[208 + i * 11 : 219 + i * 11]) for i in range(0, 4)],
         )
 
@@ -1213,11 +1209,11 @@ class OnboardProfile:
         return cls.from_bytes(sector, enabled, buttons, gbuttons, bytes)
 
     def to_bytes(self, length):
-        bytes = _int2bytes(self.report_rate, 1)
-        bytes += _int2bytes(self.resolution_default_index, 1) + _int2bytes(self.resolution_shift_index, 1)
+        bytes = common.int2bytes(self.report_rate, 1)
+        bytes += common.int2bytes(self.resolution_default_index, 1) + common.int2bytes(self.resolution_shift_index, 1)
         bytes += b"".join([self.resolutions[i].to_bytes(2, "little") for i in range(0, 5)])
-        bytes += _int2bytes(self.red, 1) + _int2bytes(self.green, 1) + _int2bytes(self.blue, 1)
-        bytes += _int2bytes(self.power_mode, 1) + _int2bytes(self.angle_snap, 1)
+        bytes += common.int2bytes(self.red, 1) + common.int2bytes(self.green, 1) + common.int2bytes(self.blue, 1)
+        bytes += common.int2bytes(self.power_mode, 1) + common.int2bytes(self.angle_snap, 1)
         bytes += self.write_count.to_bytes(2, "little") + self.reserved
         bytes += self.ps_timeout.to_bytes(2, "little") + self.po_timeout.to_bytes(2, "little")
         for i in range(0, 16):
@@ -1232,7 +1228,7 @@ class OnboardProfile:
             bytes += self.lighting[i].to_bytes()
         while len(bytes) < length - 2:
             bytes += b"\xff"
-        bytes += _int2bytes(_crc16(bytes), 2)
+        bytes += common.int2bytes(common.crc16(bytes), 2)
         return bytes
 
     def dump(self):
@@ -1250,8 +1246,8 @@ class OnboardProfile:
                 print("       G-BUTTON", i + 1, self.gbuttons[i])
 
 
-_yaml.SafeLoader.add_constructor("!OnboardProfile", OnboardProfile.from_yaml)
-_yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
+yaml.SafeLoader.add_constructor("!OnboardProfile", OnboardProfile.from_yaml)
+yaml.add_representer(OnboardProfile, OnboardProfile.to_yaml)
 
 OnboardProfilesVersion = 3
 
@@ -1279,11 +1275,11 @@ class OnboardProfiles:
         headers = []
         chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
-        if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xFF\xFF\xFF\xFF":  # look in ROM instead
+        if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xff\xff\xff\xff":  # look in ROM instead
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
             s = 0x01
         while chunk[0:2] != b"\xff\xff":
-            sector, enabled = _unpack("!HB", chunk[0:3])
+            sector, enabled = struct.unpack("!HB", chunk[0:3])
             headers.append((sector, enabled))
             i += 1
             chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
@@ -1294,10 +1290,10 @@ class OnboardProfiles:
         if not device.online:  # wake the device up if necessary
             device.ping()
         response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
-        memory, profile, _macro = _unpack("!BBB", response[0:3])
+        memory, profile, _macro = struct.unpack("!BBB", response[0:3])
         if memory != 0x01 or profile > 0x04:
             return
-        count, oob, buttons, sectors, size, shift = _unpack("!BBBBHB", response[3:10])
+        count, oob, buttons, sectors, size, shift = struct.unpack("!BBBBHB", response[3:10])
         gbuttons = buttons if (shift & 0x3 == 0x2) else 0
         headers = OnboardProfiles.get_profile_headers(device)
         profiles = {}
@@ -1319,11 +1315,11 @@ class OnboardProfiles:
     def to_bytes(self):
         bytes = b""
         for i in range(1, len(self.profiles) + 1):
-            bytes += _int2bytes(self.profiles[i].sector, 2) + _int2bytes(self.profiles[i].enabled, 1) + b"\x00"
+            bytes += common.int2bytes(self.profiles[i].sector, 2) + common.int2bytes(self.profiles[i].enabled, 1) + b"\x00"
         bytes += b"\xff\xff\x00\x00"  # marker after last profile
         while len(bytes) < self.size - 2:  # leave room for CRC
             bytes += b"\xff"
-        bytes += _int2bytes(_crc16(bytes), 2)
+        bytes += common.int2bytes(common.crc16(bytes), 2)
         return bytes
 
     @classmethod
@@ -1368,11 +1364,11 @@ class OnboardProfiles:
         return written
 
     def show(self):
-        print(_yaml.dump(self))
+        print(yaml.dump(self))
 
 
-_yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
-_yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
+yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
+yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 
 
 def feature_request(device, feature, function=0x00, *params, no_reply=False):
@@ -1417,20 +1413,18 @@ class Hidpp20:
                 if fw_info:
                     level = ord(fw_info[:1]) & 0x0F
                     if level == 0 or level == 1:
-                        name, version_major, version_minor, build = _unpack("!3sBBH", fw_info[1:8])
+                        name, version_major, version_minor, build = struct.unpack("!3sBBH", fw_info[1:8])
                         version = f"{version_major:02X}.{version_minor:02X}"
                         if build:
                             version += f".B{build:04X}"
                         extras = fw_info[9:].rstrip(b"\x00") or None
-                        fw_info = _FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
+                        fw_info = common.FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
                     elif level == FIRMWARE_KIND.Hardware:
-                        fw_info = _FirmwareInfo(FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
+                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
                     else:
-                        fw_info = _FirmwareInfo(FIRMWARE_KIND.Other, "", "", None)
+                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Other, "", "", None)
 
                     fw.append(fw_info)
-                    # if logger.isEnabledFor(logging.DEBUG):
-                    #     logger.debug("device %d firmware %s", devnumber, fw_info)
             return tuple(fw)
 
     def get_ids(self, device):
@@ -1458,8 +1452,6 @@ class Hidpp20:
         kind = device.feature_request(FEATURE.DEVICE_NAME, 0x20)
         if kind:
             kind = ord(kind[:1])
-            # if logger.isEnabledFor(logging.DEBUG):
-            #     logger.debug("device %d type %d = %s", devnumber, kind, DEVICE_KIND[kind])
             return KIND_MAP[DEVICE_KIND[kind]]
 
     def get_name(self, device: Device):
@@ -1581,7 +1573,7 @@ class Hidpp20:
     def get_mouse_pointer_info(self, device: Device):
         pointer_info = device.feature_request(FEATURE.MOUSE_POINTER)
         if pointer_info:
-            dpi, flags = _unpack("!HB", pointer_info[:3])
+            dpi, flags = struct.unpack("!HB", pointer_info[:3])
             acceleration = ("none", "low", "med", "high")[flags & 0x3]
             suggest_os_ballistics = (flags & 0x04) != 0
             suggest_vertical_orientation = (flags & 0x08) != 0
@@ -1595,7 +1587,7 @@ class Hidpp20:
     def get_vertical_scrolling_info(self, device: Device):
         vertical_scrolling_info = device.feature_request(FEATURE.VERTICAL_SCROLLING)
         if vertical_scrolling_info:
-            roller, ratchet, lines = _unpack("!BBB", vertical_scrolling_info[:3])
+            roller, ratchet, lines = struct.unpack("!BBB", vertical_scrolling_info[:3])
             roller_type = (
                 "reserved",
                 "standard",
@@ -1611,13 +1603,13 @@ class Hidpp20:
     def get_hi_res_scrolling_info(self, device: Device):
         hi_res_scrolling_info = device.feature_request(FEATURE.HI_RES_SCROLLING)
         if hi_res_scrolling_info:
-            mode, resolution = _unpack("!BB", hi_res_scrolling_info[:2])
+            mode, resolution = struct.unpack("!BB", hi_res_scrolling_info[:2])
             return mode, resolution
 
     def get_pointer_speed_info(self, device: Device):
         pointer_speed_info = device.feature_request(FEATURE.POINTER_SPEED)
         if pointer_speed_info:
-            pointer_speed_hi, pointer_speed_lo = _unpack("!BB", pointer_speed_info[:2])
+            pointer_speed_hi, pointer_speed_lo = struct.unpack("!BB", pointer_speed_info[:2])
             # if pointer_speed_lo > 0:
             #     pointer_speed_lo = pointer_speed_lo
             return pointer_speed_hi + pointer_speed_lo / 256
@@ -1625,7 +1617,7 @@ class Hidpp20:
     def get_lowres_wheel_status(self, device: Device):
         lowres_wheel_status = device.feature_request(FEATURE.LOWRES_WHEEL)
         if lowres_wheel_status:
-            wheel_flag = _unpack("!B", lowres_wheel_status[:1])[0]
+            wheel_flag = struct.unpack("!B", lowres_wheel_status[:1])[0]
             wheel_reporting = ("HID", "HID++")[wheel_flag & 0x01]
             return wheel_reporting
 
@@ -1636,20 +1628,20 @@ class Hidpp20:
 
         if caps and mode and ratchet:
             # Parse caps
-            multi, flags = _unpack("!BB", caps[:2])
+            multi, flags = struct.unpack("!BB", caps[:2])
 
             has_invert = (flags & 0x08) != 0
             has_ratchet = (flags & 0x04) != 0
 
             # Parse mode
-            wheel_mode, reserved = _unpack("!BB", mode[:2])
+            wheel_mode, reserved = struct.unpack("!BB", mode[:2])
 
             target = (wheel_mode & 0x01) != 0
             res = (wheel_mode & 0x02) != 0
             inv = (wheel_mode & 0x04) != 0
 
             # Parse Ratchet switch
-            ratchet_mode, reserved = _unpack("!BB", ratchet[:2])
+            ratchet_mode, reserved = struct.unpack("!BB", ratchet[:2])
 
             ratchet = (ratchet_mode & 0x01) != 0
 
@@ -1658,7 +1650,7 @@ class Hidpp20:
     def get_new_fn_inversion(self, device: Device):
         state = device.feature_request(FEATURE.NEW_FN_INVERSION, 0x00)
         if state:
-            inverted, default_inverted = _unpack("!BB", state[:2])
+            inverted, default_inverted = struct.unpack("!BB", state[:2])
             inverted = (inverted & 0x01) != 0
             default_inverted = (default_inverted & 0x01) != 0
             return inverted, default_inverted
@@ -1667,11 +1659,11 @@ class Hidpp20:
         state = device.feature_request(FEATURE.HOSTS_INFO, 0x00)
         host_names = {}
         if state:
-            capability_flags, _ignore, numHosts, currentHost = _unpack("!BBBB", state[:4])
+            capability_flags, _ignore, numHosts, currentHost = struct.unpack("!BBBB", state[:4])
             if capability_flags & 0x01:  # device can get host names
                 for host in range(0, numHosts):
                     hostinfo = device.feature_request(FEATURE.HOSTS_INFO, 0x10, host)
-                    _ignore, status, _ignore, _ignore, nameLen, _ignore = _unpack("!BBBBBB", hostinfo[:6])
+                    _ignore, status, _ignore, _ignore, nameLen, _ignore = struct.unpack("!BBBBBB", hostinfo[:6])
                     name = ""
                     remaining = nameLen
                     while remaining > 0:
@@ -1696,10 +1688,10 @@ class Hidpp20:
             logger.info("Setting host name to %s", name)
         state = device.feature_request(FEATURE.HOSTS_INFO, 0x00)
         if state:
-            flags, _ignore, _ignore, currentHost = _unpack("!BBBB", state[:4])
+            flags, _ignore, _ignore, currentHost = struct.unpack("!BBBB", state[:4])
             if flags & 0x02:
                 hostinfo = device.feature_request(FEATURE.HOSTS_INFO, 0x10, currentHost)
-                _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = _unpack("!BBBBBB", hostinfo[:6])
+                _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = struct.unpack("!BBBBBB", hostinfo[:6])
                 if name[:maxNameLen] == currentName[:maxNameLen] and False:
                     return True
                 length = min(maxNameLen, len(name))
@@ -1715,7 +1707,7 @@ class Hidpp20:
         state = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x20)
 
         if state:
-            mode = _unpack("!B", state[:1])[0]
+            mode = struct.unpack("!B", state[:1])[0]
             return mode
 
     def set_onboard_mode(self, device: Device, mode):
@@ -1725,19 +1717,19 @@ class Hidpp20:
     def get_polling_rate(self, device: Device):
         state = device.feature_request(FEATURE.REPORT_RATE, 0x10)
         if state:
-            rate = _unpack("!B", state[:1])[0]
+            rate = struct.unpack("!B", state[:1])[0]
             return str(rate) + "ms"
         else:
             rates = ["8ms", "4ms", "2ms", "1ms", "500us", "250us", "125us"]
             state = device.feature_request(FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
             if state:
-                rate = _unpack("!B", state[:1])[0]
+                rate = struct.unpack("!B", state[:1])[0]
                 return rates[rate]
 
     def get_remaining_pairing(self, device: Device):
         result = device.feature_request(FEATURE.REMAINING_PAIRING, 0x0)
         if result:
-            result = _unpack("!B", result[:1])[0]
+            result = struct.unpack("!B", result[:1])[0]
             FEATURE._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
@@ -1754,7 +1746,7 @@ battery_functions = {
 
 
 def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
-    battery_discharge_level, battery_discharge_next_level, battery_status = _unpack("!BBB", report[:3])
+    battery_discharge_level, battery_discharge_next_level, battery_status = struct.unpack("!BBB", report[:3])
     if battery_discharge_level == 0:
         battery_discharge_level = None
     try:
@@ -1770,7 +1762,7 @@ def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
 
 
 def decipher_battery_voltage(report):
-    voltage, flags = _unpack(">HB", report[:3])
+    voltage, flags = struct.unpack(">HB", report[:3])
     status = BatteryStatus.DISCHARGING
     charge_sts = ERROR.unknown
     charge_lvl = CHARGE_LEVEL.average
@@ -1808,7 +1800,7 @@ def decipher_battery_voltage(report):
 
 
 def decipher_battery_unified(report):
-    discharge, level, status_byte, _ignore = _unpack("!BBBB", report[:4])
+    discharge, level, status_byte, _ignore = struct.unpack("!BBBB", report[:4])
     try:
         status = BatteryStatus(status_byte)
     except ValueError:
@@ -1833,7 +1825,7 @@ def decipher_battery_unified(report):
 
 def decipher_adc_measurement(report):
     # partial implementation - needs mapping to levels
-    adc, flags = _unpack("!HB", report[:3])
+    adc, flags = struct.unpack("!HB", report[:3])
     for level in battery_voltage_remaining:
         if level[0] < adc:
             charge_level = level[1]
