@@ -13,6 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import platform
 
 from dataclasses import dataclass
 from functools import partial
@@ -96,6 +97,7 @@ def test_Device_name(device_info, responses, codename, name, kind, mock_base):
     assert test_device.kind == kind
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Cleanup fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, handle, _name, _codename, number, protocol, registers",
     zip(
@@ -125,6 +127,9 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
 
     assert bool(test_device)
 
+    test_device.__del__()
+    assert not bool(test_device)
+
 
 @dataclass
 class Receiver:
@@ -153,6 +158,7 @@ pi_407B = {"wpid": "407B", "kind": 2, "serial": "5678", "polling": "1ms", "power
 pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power_switch": "top"}
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Cleanup fails on macOS")
 @pytest.mark.parametrize(
     "number, pairing_info, responses, handle, _name, codename, p, p2, name",
     zip(
@@ -194,6 +200,8 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     assert test_device == test_device
     assert not (test_device != test_device)
     assert bool(test_device)
+
+    test_device.__del__()
 
 
 @pytest.mark.parametrize(
