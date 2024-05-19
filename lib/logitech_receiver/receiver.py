@@ -22,6 +22,8 @@ import time
 from dataclasses import dataclass
 from typing import Callable
 from typing import Optional
+from typing import Protocol
+from typing import cast
 
 import hidapi
 
@@ -40,6 +42,23 @@ logger = logging.getLogger(__name__)
 _hidpp10 = hidpp10.Hidpp10()
 _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
+
+
+class LowLevelInterface(Protocol):
+    def open_path(self, path):
+        ...
+
+    def ping(self, handle, number, long_message=False):
+        ...
+
+    def request(self, handle, devnumber, request_id, *params, **kwargs):
+        ...
+
+    def close(self, handle):
+        ...
+
+
+low_level_interface = cast(LowLevelInterface, base)
 
 
 @dataclass
@@ -228,7 +247,7 @@ class Receiver:
                     logger.warning("mismatch on device kind %s %s", info["kind"], nkind)
             else:
                 online = True
-            dev = Device(self, number, online, pairing_info=info, setting_callback=self.setting_callback)
+            dev = Device(low_level_interface, self, number, online, pairing_info=info, setting_callback=self.setting_callback)
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: found new device %d (%s)", self, number, dev.wpid)
             self._devices[number] = dev

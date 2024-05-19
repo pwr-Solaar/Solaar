@@ -21,6 +21,8 @@ import time
 
 from typing import Callable
 from typing import Optional
+from typing import Protocol
+from typing import cast
 
 import hidapi
 
@@ -46,23 +48,49 @@ _R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
+class LowLevelInterface(Protocol):
+    def open_path(self, path):
+        ...
+
+    def ping(self, handle, number, long_message: bool):
+        ...
+
+    def request(self, handle, devnumber, request_id, *params, **kwargs):
+        ...
+
+    def close(self, handle, *args, **kwargs) -> bool:
+        ...
+
+
+low_level_interface = cast(LowLevelInterface, base)
+
+
 class DeviceFactory:
     @staticmethod
-    def create_device(device_info, setting_callback=None):
+    def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
         """Opens a Logitech Device found attached to the machine, by Linux device path.
         :returns: An open file handle for the found receiver, or None.
         """
         try:
-            handle = base.open_path(device_info.path)
+            handle = low_level.open_path(device_info.path)
             if handle:
                 # a direct connected device might not be online (as reported by user)
-                return Device(None, None, None, handle=handle, device_info=device_info, setting_callback=setting_callback)
+                return Device(
+                    low_level,
+                    None,
+                    None,
+                    None,
+                    handle=handle,
+                    device_info=device_info,
+                    setting_callback=setting_callback,
+                )
         except OSError as e:
             logger.exception("open %s", device_info)
             if e.errno == errno.EACCES:
                 raise
         except Exception:
             logger.exception("open %s", device_info)
+            raise
 
 
 class Device:
@@ -72,6 +100,7 @@ class Device:
 
     def __init__(
         self,
+        low_level: LowLevelInterface,
         receiver,
         number,
         online,
@@ -83,6 +112,7 @@ class Device:
         assert receiver or device_info
         if receiver:
             assert 0 < number <= 15  # some receivers have devices past their max # of devices
+        self.low_level = low_level
         self.number = number  # will be None at this point for directly connected devices
         self.online = online  # is the device online? - gates many atempts to contact the device
         self.descriptor = None
@@ -129,11 +159,11 @@ class Device:
             self.path = hidapi.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
-                self.handle = base.open_path(self.path) if self.path else None
+                self.handle = self.low_level.open_path(self.path) if self.path else None
             except Exception:  # maybe the device wasn't set up
                 try:
                     time.sleep(1)
-                    self.handle = base.open_path(self.path) if self.path else None
+                    self.handle = self.low_level.open_path(self.path) if self.path else None
                 except Exception:  # give up
                     self.handle = None  # should this give up completely?
 
@@ -484,7 +514,7 @@ class Device:
             long = self.hidpp_long is True or (
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
             )
-            return base.request(
+            return self.low_level.request(
                 self.handle or self.receiver.handle,
                 self.number,
                 request_id,
@@ -503,7 +533,8 @@ class Device:
         long = self.hidpp_long is True or (
             self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
         )
-        protocol = base.ping(self.handle or self.receiver.handle, self.number, long_message=long)
+        handle = self.handle or self.receiver.handle
+        protocol = self.low_level.ping(handle, self.number, long_message=long)
         self.online = protocol is not None
         if protocol:
             self._protocol = protocol
@@ -519,7 +550,7 @@ class Device:
         if hasattr(self, "cleanups"):
             for cleanup in self.cleanups:
                 cleanup(self)
-        return handle and base.close(handle)
+        return handle and self.low_level.close(handle)
 
     def __index__(self):
         return self.number

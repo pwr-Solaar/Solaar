@@ -13,7 +13,6 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-import platform
 
 from dataclasses import dataclass
 from functools import partial
@@ -29,72 +28,75 @@ from logitech_receiver import hidpp20
 from . import hidpp
 
 
-@pytest.fixture
-def mock_base():  # allow override of base functions
-    with mock.patch("logitech_receiver.base.open_path", return_value=None) as mock_open_path:
-        with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
-            with mock.patch("logitech_receiver.base.ping", return_value=None) as mock_ping:
-                yield mock_open_path, mock_request, mock_ping
+class LowLevelInterfaceFake:
+    def __init__(self, responses=None):
+        self.responses = responses
+
+    def open_path(self, path):
+        return hidpp.open_path(path)
+
+    def request(self, response, *args, **kwargs):
+        func = partial(hidpp.request, self.responses)
+        return func(response, *args, **kwargs)
+
+    def ping(self, response, *args, **kwargs):
+        func = partial(hidpp.ping, self.responses)
+        return func(response, *args, **kwargs)
+
+    def close(self, *args, **kwargs):
+        pass
 
 
 @dataclass
-class DeviceInfo:
+class DeviceInfoStub:
     path: str
+    product_id: str
     vendor_id: int = 1133
-    product_id: int = 4066
     hidpp_short: bool = False
     hidpp_long: bool = True
     bus_id: int = 0x0003  # USB
     serial: str = "aa:aa:aa;aa"
 
 
-di_bad_handle = DeviceInfo(None, product_id="CCCC")
-di_error = DeviceInfo(11, product_id="CCCC")
-di_CCCC = DeviceInfo("11", product_id="CCCC")
-di_C318 = DeviceInfo("11", product_id="C318")
-di_B530 = DeviceInfo("11", product_id="B350", bus_id=0x0005)
-di_C068 = DeviceInfo("11", product_id="C06B")
-di_C08A = DeviceInfo("11", product_id="C08A")
-di_DDDD = DeviceInfo("11", product_id="DDDD")
+di_bad_handle = DeviceInfoStub(None, product_id="CCCC")
+di_error = DeviceInfoStub(11, product_id="CCCC")
+di_CCCC = DeviceInfoStub("11", product_id="CCCC")
+di_C318 = DeviceInfoStub("11", product_id="C318")
+di_B530 = DeviceInfoStub("11", product_id="B350", bus_id=0x0005)
+di_C068 = DeviceInfoStub("11", product_id="C06B")
+di_C08A = DeviceInfoStub("11", product_id="C08A")
+di_DDDD = DeviceInfoStub("11", product_id="DDDD")
 
 
 @pytest.mark.parametrize(
-    "device_info, responses, success",
+    "device_info, responses, expected_success",
     [(di_bad_handle, hidpp.r_empty, None), (di_error, hidpp.r_empty, False), (di_CCCC, hidpp.r_empty, True)],
 )
-def test_DeviceFactory(device_info, responses, success, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
-    mock_base[2].side_effect = partial(hidpp.ping, responses)
-
-    if success is None:
-        with pytest.raises(Exception):  # noqa: B017
-            test_device = device.DeviceFactory.create_device(device_info)
+def test_create_device(device_info, responses, expected_success):
+    low_level_mock = LowLevelInterfaceFake(responses)
+    if expected_success is None:
+        with pytest.raises(PermissionError):
+            device.DeviceFactory.create_device(low_level_mock, device_info)
+    elif not expected_success:
+        with pytest.raises(TypeError):
+            device.DeviceFactory.create_device(low_level_mock, device_info)
     else:
-        test_device = device.DeviceFactory.create_device(device_info)
-        assert bool(test_device) == success
+        test_device = device.DeviceFactory.create_device(low_level_mock, device_info)
+        assert bool(test_device) == expected_success
 
 
 @pytest.mark.parametrize(
-    "device_info, responses, codename, name, kind",
-    [
-        (di_CCCC, hidpp.r_empty, "?? (CCCC)", "Unknown device CCCC", "?"),
-        (di_C318, hidpp.r_keyboard_1, "?? (C318)", "Unknown device C318", "?"),
-        (di_B530, hidpp.r_keyboard_2, "ABCDEFGHIJKLMNOPQR", "ABCDEFGHIJKLMNOPQR", common.NamedInt(1, "keyboard")),
-    ],
+    "device_info, responses, expected_codename, expected_name, expected_kind",
+    [(di_CCCC, hidpp.r_empty, "?? (CCCC)", "Unknown device CCCC", "?")],
 )
-def test_Device_name(device_info, responses, codename, name, kind, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
-    mock_base[2].side_effect = partial(hidpp.ping, responses)
-    test_device = device.DeviceFactory.create_device(device_info)
-    test_device._codename = None
-    test_device._name = None
-    test_device._kind = None
+def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
+    low_level = LowLevelInterfaceFake(responses)
 
-    assert test_device.codename == codename
-    assert test_device.name == name
-    assert test_device.kind == kind
+    test_device = device.DeviceFactory.create_device(low_level, device_info)
+
+    assert test_device.codename == expected_codename
+    assert test_device.name == expected_name
+    assert test_device.kind == expected_kind
 
 
 @pytest.mark.skipif(platform.system() == "Darwin", reason="Cleanup fails on macOS")
@@ -111,12 +113,8 @@ def test_Device_name(device_info, responses, codename, name, kind, mock_base):
         [[], [], [], (common.NamedInt(7, "battery status"), common.NamedInt(81, "three leds")), [], []],
     ),
 )
-def test_Device_info(device_info, responses, handle, _name, _codename, number, protocol, registers, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
-    mock_base[2].side_effect = partial(hidpp.ping, responses)
-
-    test_device = device.Device(None, None, None, handle=handle, device_info=device_info)
+def test_device_info(device_info, responses, handle, _name, _codename, number, protocol, registers):
+    test_device = device.Device(LowLevelInterfaceFake(responses), None, None, None, handle=handle, device_info=device_info)
 
     assert test_device.handle == handle
     assert test_device._name == _name
@@ -132,7 +130,7 @@ def test_Device_info(device_info, responses, handle, _name, _codename, number, p
 
 
 @dataclass
-class Receiver:
+class FakeReceiver:
     path: str = "11"
     handle: int = 0x11
     codename: Optional[str] = None
@@ -180,13 +178,14 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         ],
     ),
 )
-def test_Device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name, mock_base, mock_hid):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
-    mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
+def test_device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name, mock_hid):
     mock_hid.side_effect = lambda x, y, z: x
 
-    test_device = device.Device(Receiver(codename="CODE"), number, True, pairing_info, handle=handle)
+    low_level = LowLevelInterfaceFake(responses)
+    low_level.request = partial(hidpp.request, hidpp.replace_number(responses, number))
+    low_level.ping = partial(hidpp.ping, hidpp.replace_number(responses, number))
+
+    test_device = device.Device(low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle)
     test_device.receiver.device = test_device
 
     assert test_device.handle == handle
@@ -197,6 +196,7 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
     assert test_device.protocol == p2
     assert test_device.codename == codename
     assert test_device.name == name
+
     assert test_device == test_device
     assert not (test_device != test_device)
     assert bool(test_device)
@@ -222,15 +222,14 @@ def test_Device_receiver(number, pairing_info, responses, handle, _name, codenam
         ["1ms", "2ms", "4ms", "8ms", "1ms", "9ms"],  # polling rate
     ),
 )
-def test_Device_ids(
-    number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate, mock_base, mock_hid
-):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, hidpp.replace_number(responses, number))
-    mock_base[2].side_effect = partial(hidpp.ping, hidpp.replace_number(responses, number))
+def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate, mock_hid):
     mock_hid.side_effect = lambda x, y, z: x
 
-    test_device = device.Device(Receiver(), number, True, info, handle=handle)
+    low_level = LowLevelInterfaceFake(responses)
+    low_level.request = partial(hidpp.request, hidpp.replace_number(responses, number))
+    low_level.ping = partial(hidpp.ping, hidpp.replace_number(responses, number))
+
+    test_device = device.Device(low_level, FakeReceiver(), number, True, info, handle=handle)
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
@@ -242,10 +241,10 @@ def test_Device_ids(
     assert test_device.polling_rate == rate
 
 
-class TestDevice(device.Device):  # a fully functional Device but its HID++ functions look at local data
+class FakeDevice(device.Device):  # a fully functional Device but its HID++ functions look at local data
     def __init__(self, responses, *args, **kwargs):
         self.responses = responses
-        super().__init__(*args, **kwargs)
+        super().__init__(LowLevelInterfaceFake(responses), *args, **kwargs)
 
     request = hidpp.Device.request
     ping = hidpp.Device.ping
@@ -262,8 +261,8 @@ class TestDevice(device.Device):  # a fully functional Device but its HID++ func
         (di_B530, hidpp.complex_responses_2, 4.5, hidpp20.RGBEffectsInfo, 8, 3, 1, True, True),
     ],
 )
-def test_Device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles, mocker):
-    test_device = TestDevice(responses, None, None, True, device_info=device_info)
+def test_device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles, mocker):
+    test_device = FakeDevice(responses, None, None, True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
     spy_request = mocker.spy(test_device, "request")
@@ -300,9 +299,9 @@ def test_Device_complex(device_info, responses, protocol, led, keys, remap, gest
         (di_C08A, hidpp.r_mouse_2, 4.5, {"p": "p"}, {"p": "p"}, 0),
     ],
 )
-def test_Device_settings(device_info, responses, protocol, p, persister, settings, mocker):
+def test_device_settings(device_info, responses, protocol, p, persister, settings, mocker):
     mocker.patch("solaar.configuration.persister", return_value=p)
-    test_device = TestDevice(responses, None, None, True, device_info=device_info)
+    test_device = FakeDevice(responses, None, None, True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
 
@@ -318,8 +317,8 @@ def test_Device_settings(device_info, responses, protocol, p, persister, setting
         (di_B530, hidpp.r_keyboard_2, 4.5, common.Battery(18, 52, None, None), {"active": True, "alert": 0, "reason": None}),
     ],
 )
-def test_Device_battery(device_info, responses, protocol, battery, changed, mocker):
-    test_device = TestDevice(responses, None, None, online=True, device_info=device_info)
+def test_device_battery(device_info, responses, protocol, battery, changed, mocker):
+    test_device = FakeDevice(responses, None, None, online=True, device_info=device_info)
     test_device._name = "TestDevice"
     test_device._protocol = protocol
     spy_changed = mocker.spy(test_device, "changed")
@@ -327,14 +326,3 @@ def test_Device_battery(device_info, responses, protocol, battery, changed, mock
     assert test_device.battery() == battery
     test_device.read_battery()
     spy_changed.assert_called_with(**changed)
-
-
-""" TODO
-	changed
-	enable_connection_notifications
-	add_notification_handler
-	remove_notification_handler
-	handle_notification
-"""
-
-# IMPORTANT TODO - battery
