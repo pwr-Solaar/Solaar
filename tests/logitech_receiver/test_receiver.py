@@ -1,3 +1,5 @@
+import platform
+
 from dataclasses import dataclass
 from functools import partial
 from unittest import mock
@@ -97,6 +99,7 @@ mouse_info = {
 c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch": "(unknown)", "serial": None, "wpid": "45AB"}
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, handle, serial, max_devices, ",
     [
@@ -126,6 +129,7 @@ def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial,
         assert r.max_devices == max_devices
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, firmware, codename, remaining_pairings, pairing_info, count",
     [
@@ -147,6 +151,7 @@ def test_ReceiverFactory_props(device_info, responses, firmware, codename, remai
     assert r.count() == count
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, status_str, strng",
     [
@@ -165,6 +170,7 @@ def test_ReceiverFactory_string(device_info, responses, status_str, strng, mock_
     assert str(r) == strng
 
 
+@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses",
     [

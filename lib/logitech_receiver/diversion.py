@@ -29,7 +29,6 @@ import time as _time
 from typing import Dict
 from typing import Tuple
 
-import dbus
 import gi
 import psutil
 
@@ -188,6 +187,8 @@ def gnome_dbus_interface_setup():
     if _dbus_interface is not None:
         return _dbus_interface
     try:
+        import dbus
+
         bus = dbus.SessionBus()
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
