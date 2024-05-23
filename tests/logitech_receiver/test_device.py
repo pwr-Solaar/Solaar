@@ -99,7 +99,6 @@ def test_device_name(device_info, responses, expected_codename, expected_name, e
     assert test_device.kind == expected_kind
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Cleanup fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, handle, _name, _codename, number, protocol, registers",
     zip(
@@ -156,7 +155,6 @@ pi_407B = {"wpid": "407B", "kind": 2, "serial": "5678", "polling": "1ms", "power
 pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power_switch": "top"}
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Cleanup fails on macOS")
 @pytest.mark.parametrize(
     "number, pairing_info, responses, handle, _name, codename, p, p2, name",
     zip(
