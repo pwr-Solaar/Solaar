@@ -48,14 +48,14 @@ class DeviceInfo:
     serial: str = "aa:aa:aa;aa"
 
 
-di_bad_handle = DeviceInfo(None, product_id=0xCCCC)
-di_error = DeviceInfo(11, product_id=0xCCCC)
-di_CCCC = DeviceInfo("11", product_id=0xCCCC)
-di_C318 = DeviceInfo("11", product_id=0xC318)
-di_B530 = DeviceInfo("11", product_id=0xB350, bus_id=0x0005)
-di_C068 = DeviceInfo("11", product_id=0xC06B)
-di_C08A = DeviceInfo("11", product_id=0xC08A)
-di_DDDD = DeviceInfo("11", product_id=0xDDDD)
+di_bad_handle = DeviceInfo(None, product_id="CCCC")
+di_error = DeviceInfo(11, product_id="CCCC")
+di_CCCC = DeviceInfo("11", product_id="CCCC")
+di_C318 = DeviceInfo("11", product_id="C318")
+di_B530 = DeviceInfo("11", product_id="B350", bus_id=0x0005)
+di_C068 = DeviceInfo("11", product_id="C06B")
+di_C08A = DeviceInfo("11", product_id="C08A")
+di_DDDD = DeviceInfo("11", product_id="DDDD")
 
 
 @pytest.mark.parametrize(
