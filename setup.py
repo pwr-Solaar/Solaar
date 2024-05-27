@@ -4,6 +4,8 @@ import subprocess
 from glob import glob as _glob
 from os.path import dirname as _dirname
 
+from setuptools import find_packages
+
 try:
     from setuptools import setup
 except ImportError:
@@ -91,7 +93,7 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "dev": ["ruff"],
     },
     package_dir={"": "lib"},
-    packages=["keysyms", "hidapi", "hid_parser", "logitech_receiver", "solaar", "solaar.ui", "solaar.cli"],
+    packages=find_packages(where="lib"),
     data_files=list(_data_files()),
     include_package_data=True,
     scripts=_glob("bin/*"),
