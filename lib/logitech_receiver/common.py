@@ -619,3 +619,13 @@ class Alert(IntEnum):
     SHOW_WINDOW = 0x02
     ATTENTION = 0x04
     ALL = 0xFF
+
+
+class Notification(IntEnum):
+    NO_OPERATION = 0x00
+    CONNECT_DISCONNECT = 0x40
+    DJ_PAIRING = 0x41
+    CONNECTED = 0x42
+    RAW_INPUT = 0x49
+    PAIRING_LOCK = 0x4A
+    POWER = 0x4B

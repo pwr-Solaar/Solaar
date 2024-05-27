@@ -35,6 +35,7 @@ from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from .common import Alert
+from .common import Notification
 from .device import Device
 from .hidpp10_constants import Registers
 
@@ -230,7 +231,7 @@ class Receiver:
             raise IndexError(f"{self}: device number {int(number)} already registered")
 
         assert notification is None or notification.devnumber == number
-        assert notification is None or notification.sub_id == 0x41
+        assert notification is None or notification.sub_id == Notification.DJ_PAIRING
 
         try:
             time.sleep(0.05)  # let receiver settle
