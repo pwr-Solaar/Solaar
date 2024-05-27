@@ -19,11 +19,11 @@
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import struct
 import threading
 
-from collections import namedtuple
 from contextlib import contextmanager
 from random import getrandbits
 from time import time
@@ -41,6 +41,19 @@ from . import hidpp20_constants
 logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
+
+
+@dataclasses.dataclass
+class HIDPPNotification:
+    report_id: int
+    devnumber: int
+    sub_id: int
+    address: int
+    data: bytes
+
+    def __str__(self):
+        text_as_hex = common.strhex(self.data)
+        return f"Notification({self.report_id:02x},{self.devnumber},{self.sub_id:02X},{self.address:02X},{text_as_hex})"
 
 
 def _wired_device(product_id, interface):
@@ -325,7 +338,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             return
 
 
-def make_notification(report_id, devnumber, data):
+def make_notification(report_id, devnumber, data) -> HIDPPNotification | None:
     """Guess if this is a notification (and not just a request reply), and
     return a Notification tuple if it is."""
 
@@ -356,17 +369,8 @@ def make_notification(report_id, devnumber, data):
         # HID++ 2.0 feature notifications have the SoftwareID 0
         (address & 0x0F == 0x00)
     ):  # noqa: E129
-        return _HIDPP_Notification(report_id, devnumber, sub_id, address, data[2:])
+        return HIDPPNotification(report_id, devnumber, sub_id, address, data[2:])
 
-
-_HIDPP_Notification = namedtuple("_HIDPP_Notification", ("report_id", "devnumber", "sub_id", "address", "data"))
-_HIDPP_Notification.__str__ = lambda self: "Notification(%02x,%d,%02X,%02X,%s)" % (
-    self.report_id,
-    self.devnumber,
-    self.sub_id,
-    self.address,
-    common.strhex(self.data),
-)
 
 request_lock = threading.Lock()  # serialize all requests
 handles_lock = {}
