@@ -25,8 +25,7 @@ from traceback import format_exc
 import logitech_receiver.device as _device
 import logitech_receiver.receiver as _receiver
 
-from logitech_receiver.base import receivers
-from logitech_receiver.base import receivers_and_devices
+from logitech_receiver import base
 
 from solaar import NAME
 
@@ -108,7 +107,7 @@ print_help = _cli_parser.print_help
 
 
 def _receivers(dev_path=None):
-    for dev_info in receivers():
+    for dev_info in base.receivers():
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
@@ -123,12 +122,12 @@ def _receivers(dev_path=None):
 
 
 def _receivers_and_devices(dev_path=None):
-    for dev_info in receivers_and_devices():
+    for dev_info in base.receivers_and_devices():
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
             if dev_info.isDevice:
-                d = _device.DeviceFactory.create_device(dev_info)
+                d = _device.DeviceFactory.create_device(base, dev_info)
             else:
                 d = _receiver.ReceiverFactory.create_receiver(dev_info)
 

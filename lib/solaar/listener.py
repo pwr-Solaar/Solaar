@@ -258,7 +258,7 @@ def _start(device_info):
     if not isDevice:
         receiver = _receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
-        receiver = _device.DeviceFactory.create_device(device_info, _setting_callback)
+        receiver = _device.DeviceFactory.create_device(_base, device_info, _setting_callback)
         if receiver:
             configuration.attach_to(receiver)
             if receiver.bluetooth and receiver.hid_serial:
