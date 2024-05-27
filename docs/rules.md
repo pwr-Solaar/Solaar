@@ -3,6 +3,7 @@ title: Rule Processing of HID++ Notifications
 layout: page
 ---
 
+# Rule Processing of HID++ Notifications
 Creating and editing most rules can be done in the Solaar GUI, by pressing the 'Rule Editor' button in the
 Solaar main window.
 
@@ -22,8 +23,8 @@ You may have to reboot your system for the write permission to be set up.
 Another way to get write access to /dev/uinput is to run `sudo setfacl -m u:${USER}:rw /dev/uinput`
 but this needs to be done every time the system is rebooted.
 
-## Diversion
-Logitech devices that use HID++ version 2.0 or greater produce feature-based
+## HID++ notifications and diversion
+Logitech devices that use HID++ version 2.0 or greater, produce feature-based
 notifications that Solaar can process using a simple rule language. For
 example, using rules Solaar can emulate an `XF86_MonBrightnessDown` key tap
 in response to the pressing of the `Brightness Down` key on Craft keyboards,
@@ -33,7 +34,7 @@ Windows mode.
 Solaar's rules only trigger on HID++ notifications so device actions that
 normally produce HID output have to be first be set (diverted) to
 produce HID++ notifications instead of their normal behavior.
-Currently Solaar can divert some mouse scroll wheels, some
+Currently, Solaar can divert some mouse scroll wheels, some
 mouse thumb wheels, the crown of Craft keyboards, and some keys and buttons.
 If the scroll wheel, thumb wheel, crown, key, or button is
 not diverted by setting the appropriate setting then no HID++ notification is
@@ -41,6 +42,7 @@ generated and rules will not be triggered by manipulating the wheel, crown, key,
 Look for `HID++` or `Diversion` settings to see what
 diversion can be done with your devices.
 
+### Show notifications
 Running Solaar with the `-ddd`
 option will show information about notifications, including their feature
 name, report number, and data.
@@ -56,44 +58,44 @@ processed for the notification.
 
 Rules are evaluated by evaluating each of their components in order. The
 evaluation of a rule is terminated early if a condition component evaluates
-to false or the last evaluated sub-component of a component is an action. A
-rule is false if its last evaluated component evaluates to a false value.
+to false or the last evaluated subcomponent of a component is an action. A
+rule is false if its last evaluated component evaluates to false.
 
-# Conditions
+## Conditions
 
-## Not
+### Not
 `Not` conditions take a single component and are true if their component
 evaluates to a false value.
 
-## Or
+### Or
 `Or` conditions take a sequence of components and are evaluated by
 evaluating each of their components in order.
 An Or condition is terminated early if a component evaluates to true or the
-last evaluated sub-component of a component is an action.
+last evaluated subcomponent of a component is an action.
 A Or condition is true if its last evaluated component evaluates to a true
 value. `And` conditions take a sequence of components which are evaluated the same
 as rules.
 
-## Feature
+### Feature
 `Feature` conditions are true if the name of the feature of the current
 notification is their string argument.
 `Report` conditions are true if the report number in the current
 notification is their integer argument.
 
-## Key
+### Key
 `Key` conditions are true if the Logitech name of the current **diverted** key or button being pressed is their
 string argument. Alternatively, if the argument is a list `[name, action]` where `action`
 is either `'pressed'` or `'released'`, the key down or key up events of `name` argument are
 matched, respectively. Logitech key and button names are shown in the `Key/Button Diversion`
-setting. These names are also shown in the output of `solaar show` in the 'reprogrammable keys'
-section. Only keys or buttons that have 'divertable' in their report can be diverted.
-Some keyboards have Gn, Mn, or MR keys, which are diverted using the 'Divert G Keys' setting.
+setting. These names are also shown in the output of `solaar show` in the 'Reprogrammable keys'
+section. Only keys or buttons that have 'Divertable' in their report can be diverted.
+Some keyboards have 'Gn', 'Mn', or 'MR' keys, which are diverted using the 'Divert G Keys' setting.
 
-## Key is down
+### Key is down
 `KeyIsDown` conditions are true if the **diverted** key or button that is their string argument is currently down.
 Note that this only works for **diverted** keys or buttons, including diverted Gn, Mn, and MR keys.
 
-## Key and button diversion
+### Key and button diversion
 Solaar can also create special notifications in response to mouse movements on some mice.
 Setting `Key/Button Diversion` for a key or button to Mouse Gestures causes the key or button to create a `Mouse Gesture`
 notification for the period that the key or button is depressed.
@@ -103,7 +105,7 @@ Pressing a diverted key creates a key event.
 When the key is released the sequence of events is sent as a synthetic notification
 that can be matched with `Mouse Gesture` conditions.
 
-## Mouse gestures
+### Mouse gestures
 `Mouse Gesture` conditions are true if the actions (mouse movements and diverted key presses) taken while a mouse gestures button is held down match the arguments of the condition.
 Mouse gestures buttons can be set using the 'Key/Button Diversion' setting, by changing the value to `Mouse Gestures`.
 The arguments of a Mouse Gesture condition can be a direction, i.e., `Mouse Up`, `Mouse Down`, `Mouse Left`, `Mouse Right`, `Mouse Up-Left`, `Mouse Up-Right`, `Mouse Down-Left`, or `Mouse Down-Right`, or the Logitech name of a key.
@@ -113,29 +115,31 @@ The condition `Smart Shift` -> `Mouse Down` -> `Back Button` would match pressin
 Directions and buttons can be mixed and chained together however you like.
 It's possible to create a `No-op` gesture by clicking 'Delete' on the initial Action when you first create the rule. This gesture will trigger when you simply click a Mouse Gestures button.
 
-## Modifier
+### Key modifiers
 `Modifiers` conditions take either a string or a sequence of strings, which
 can only be `Shift`, `Control`, `Alt`, and `Super`.
 Modifiers conditions are true if their argument is the current keyboard
 modifiers.
 
-## Process
+### Process focused
 `Process` conditions are true if the process for the focused input window
 or the window's Window manager class or instance name starts with their string argument.
+
+### Window under cursor
 `MouseProcess` conditions are true if the process for the window under the mouse
 or the window's Window manager class or instance name starts with their string argument.
 
-## Device and active
+### Device notification and device active
 `Device` conditions are true if a particular device originated the notification.
 `Active` conditions are true if a particular device is active.
 `Device` and `Active` conditions take one argument, which is the serial number or unit ID of a device,
 as shown in Solaar's detail pane.
 Some older devices do not have a useful serial number or unit ID and so cannot be tested for by these conditions.
 
-## Host
-`Host' conditions are true if the computers hostname starts with the condition's argument.
+### Host
+`Host` conditions are true if the computers hostname starts with the condition's argument.
 
-## Setting
+### Solaar device setting
 `Setting` conditions check the value of a Solaar setting on a device.
 `Setting` conditions take three or four arguments, depending on the setting:
 the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
@@ -161,7 +165,7 @@ For settings that use gestures as an argument the internal name of the gesture i
 which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
 For boolean settings '~' can be used to toggle the setting.
 
-## Test and TestBytes
+### Test and TestBytes
 `Test` and `TestBytes` conditions are true if their test evaluates to true on the feature,
 report and data of the current notification.
 `TestBytes` conditions can return a number instead of a boolean.
@@ -169,9 +173,9 @@ report and data of the current notification.
 `TestBytes` conditions consist of a sequence of three or four integers and use the first
 two to select bytes of the notification data.
 Writing this kind of test condition is not trivial.
-Three-element `TestBytes` conditions are true if the selected bytes bit-wise anded
+Three-element `TestBytes` conditions are true if the selected bytes bit-wise AND
 with its third element is non-zero.
-The value of these test conditions is the result of the and.
+The value of these test conditions is the result of the AND.
 Four-element `TestBytes` conditions are true if the selected bytes form a signed
 integer between the third and fourth elements.
 The value of these conditions is the signed value of the selected bytes
@@ -199,13 +203,13 @@ This displacement is reset when the thumb wheel is inactive.
 With a parameter the test is only true if the current thumb wheel displacement is greater than the parameter.
 The displacement is then lessened by the amount of the parameter.
 
-# Actions
+## Actions
 
-## Keypress
+### Key press
 A `KeyPress` action takes either the name of an X11 key symbol, such as "a",
-a list of X11 key symbols, such as "a" or "Control+a",
+a list of X11 key symbols, such as "a" or "CTRL + A",
 or a two-element list with the first element as above
-and the second element one of 'click', 'depress', or 'release'
+and the second element one of `'click'`, `'depress'`, or `'release'`
 and executes key actions on a simulated keyboard to produce these symbols.
 Use separate `KeyPress` actions for multiple characters,
 i.e., don't use a single `KeyPress` like 'a+b'.
@@ -233,35 +237,35 @@ simulate inputting a key symbol.
 Unfortunately, this determination can go wrong in several ways and is more likely
 to go wrong under Wayland than under X11.
 
-## Mouse scroll
+### Mouse scroll
 A `MouseScroll` action takes a sequence of two numbers and simulates a horizontal and vertical mouse scroll of these amounts.
 If the previous condition in the parent rule returns a number the scroll amounts are multiplied by this number.
 
-## Mouse click
+### Mouse click
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number or 'click', 'depress', or 'release'.
 The action simulates that number of clicks of the specified button or just one click, depress, or release of the button.
 A `MouseClick` action takes a mouse button name (`left`, `middle` or `right`) and a positive number, and simulates that number of clicks of the specified button.
 An `Execute` action takes a program and arguments and executes it asynchronously.
 
-## Set setting
+### Set setting
 A `Set` action changes a Solaar setting for a device, provided that the device is on-line.
 `Set` actions take three or four arguments, depending on the setting.
 The first two are the Serial number or Unit ID of a device, as shown in Solaar's detail pane,
 or null for the device that initiated rule processing; and
-the internal name of a setting (which can be found from solaar config \<device\>).
+the internal name of a setting (which can be found from `solaar config <device>`).
 Simple settings take one extra argument, the value to set the setting to.
-For boolean settings '~' can be used to toggle the setting.
+For boolean settings `~` can be used to toggle the setting.
 Other simple settings take two extra arguments, a key indicating which sub-setting to set and the value to set it to.
 For settings that use gestures as an argument the internal name of the gesture is used,
-which can be found in the GESTURE2_GESTURES_LABELS structure in lib/logitech_receiver/settings_templates.
+which can be found in the GESTURE2_GESTURES_LABELS structure in `lib/logitech_receiver/settings_templates`.
 All settings are supported.
 
-## Later
+### Later
 A `Later` action executes rule components later.
 `Later` actions take an integer delay in seconds between 1 and 100 followed by zero or more rule components that will be executed later.
 Processing of the rest of the rule continues immediately.
 
-## Built-in rules
+### Built-in rules
 Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
 One rule turns
 `Brightness Down` key press notifications into `XF86_MonBrightnessDown` key taps
@@ -318,7 +322,7 @@ Here is a file with six rules:
 ...
 ```
 
-# Button diversion example
+## Button diversion example
 Here is an example showing how to divert the Back Button on an MX Master 3 so that pressing
 the button will initiate rule processing and a rule that triggers on this notification and
 switches the mouse to host 3 after popping up a simple notification.
