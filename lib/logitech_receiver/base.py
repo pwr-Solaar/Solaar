@@ -38,6 +38,7 @@ from . import exceptions
 from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
+from .common import LOGITECH_VENDOR_ID
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class HIDPPNotification:
 
 def _usb_device(product_id: int, usb_interface: int) -> dict[str, Any]:
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "bus_id": 3,
         "usb_interface": usb_interface,
@@ -68,7 +69,7 @@ def _usb_device(product_id: int, usb_interface: int) -> dict[str, Any]:
 
 
 def _bluetooth_device(product_id: int) -> dict[str, Any]:
-    return {"vendor_id": 1133, "product_id": product_id, "bus_id": 5, "isDevice": True}
+    return {"vendor_id": LOGITECH_VENDOR_ID, "product_id": product_id, "bus_id": 5, "isDevice": True}
 
 
 KNOWN_DEVICE_IDS = []
@@ -84,7 +85,7 @@ for _ignore, d in descriptors.DEVICES.items():
 def other_device_check(bus_id: int, vendor_id: int, product_id: int):
     """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
     This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
-    if vendor_id != 0x46D:  # Logitech
+    if vendor_id != LOGITECH_VENDOR_ID:
         return
     if bus_id == 0x3:  # USB
         if product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344:
@@ -143,7 +144,7 @@ def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_lon
     for record in base_usb.ALL:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
-    if vendor_id == 0x046D and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
+    if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": False}
 
 

@@ -26,6 +26,8 @@
 
 from solaar.i18n import _
 
+from logitech_receiver.common import LOGITECH_VENDOR_ID
+
 # max_devices is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03, default
 # to 1.
 # may_unpair is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03,
@@ -33,13 +35,11 @@ from solaar.i18n import _
 # unpair is for receivers that do support reading from Registers.RECEIVER_INFO offset 0x03, no default.
 ## should this last be changed so that may_unpair is used for all receivers? writing to Registers.RECEIVER_PAIRING
 ## doesn't seem right
-# re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
-## currently only one receiver is so marked - should there be more?
 
 
 def _bolt_receiver(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 2,
         "name": _("Bolt Receiver"),
@@ -51,7 +51,7 @@ def _bolt_receiver(product_id):
 
 def _unifying_receiver(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 2,
         "name": _("Unifying Receiver"),
@@ -62,7 +62,7 @@ def _unifying_receiver(product_id):
 
 def _nano_receiver(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 1,
         "name": _("Nano Receiver"),
@@ -74,7 +74,7 @@ def _nano_receiver(product_id):
 
 def _nano_receiver_no_unpair(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 1,
         "name": _("Nano Receiver"),
@@ -87,7 +87,7 @@ def _nano_receiver_no_unpair(product_id):
 
 def _nano_receiver_max2(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 1,
         "name": _("Nano Receiver"),
@@ -100,7 +100,7 @@ def _nano_receiver_max2(product_id):
 
 def _nano_receiver_maxn(product_id, max):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 1,
         "name": _("Nano Receiver"),
@@ -124,7 +124,7 @@ def _lenovo_receiver(product_id):
 
 def _lightspeed_receiver(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 2,
         "receiver_kind": "lightspeed",
@@ -135,7 +135,7 @@ def _lightspeed_receiver(product_id):
 
 def _ex100_receiver(product_id):
     return {
-        "vendor_id": 1133,
+        "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
         "usb_interface": 1,
         "name": _("EX100 Receiver 27 Mhz"),
