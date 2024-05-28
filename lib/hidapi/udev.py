@@ -111,7 +111,7 @@ def _match(action, device, filterfn):
     filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:
         return
-    hid_driver = filter.get("hid_driver")
+    hid_driver = ("hid-generic", "generic-usb", "logitech-djreceiver")
     interface_number = filter.get("usb_interface")
     isDevice = filter.get("isDevice")
 

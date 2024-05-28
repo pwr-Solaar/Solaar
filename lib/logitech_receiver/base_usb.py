@@ -36,15 +36,12 @@ from solaar.i18n import _
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
 
-DRIVER = ("hid-generic", "generic-usb", "logitech-djreceiver")
-
 
 def _bolt_receiver(product_id):
     return {
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 2,
-        "hid_driver": DRIVER,
         "name": _("Bolt Receiver"),
         "receiver_kind": "bolt",
         "max_devices": 6,
@@ -57,7 +54,6 @@ def _unifying_receiver(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 2,
-        "hid_driver": DRIVER,
         "name": _("Unifying Receiver"),
         "receiver_kind": "unifying",
         "may_unpair": True,
@@ -69,7 +65,6 @@ def _nano_receiver(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("Nano Receiver"),
         "receiver_kind": "nano",
         "may_unpair": False,
@@ -82,7 +77,6 @@ def _nano_receiver_no_unpair(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("Nano Receiver"),
         "receiver_kind": "nano",
         "may_unpair": False,
@@ -96,7 +90,6 @@ def _nano_receiver_max2(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("Nano Receiver"),
         "receiver_kind": "nano",
         "max_devices": 2,
@@ -110,7 +103,6 @@ def _nano_receiver_maxn(product_id, max):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("Nano Receiver"),
         "receiver_kind": "nano",
         "max_devices": max,
@@ -124,7 +116,6 @@ def _lenovo_receiver(product_id):
         "vendor_id": 6127,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("Nano Receiver"),
         "receiver_kind": "nano",
         "may_unpair": False,
@@ -136,7 +127,6 @@ def _lightspeed_receiver(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 2,
-        "hid_driver": DRIVER,
         "receiver_kind": "lightspeed",
         "name": _("Lightspeed Receiver"),
         "may_unpair": False,
@@ -148,7 +138,6 @@ def _ex100_receiver(product_id):
         "vendor_id": 1133,
         "product_id": product_id,
         "usb_interface": 1,
-        "hid_driver": DRIVER,
         "name": _("EX100 Receiver 27 Mhz"),
         "receiver_kind": "27Mhz",
         "max_devices": 4,
