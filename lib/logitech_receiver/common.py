@@ -27,6 +27,8 @@ import yaml
 
 from solaar.i18n import _
 
+LOGITECH_VENDOR_ID = 0x046D
+
 
 def crc16(data: bytes):
     """
