@@ -631,3 +631,8 @@ class Notification(IntEnum):
     RAW_INPUT = 0x49
     PAIRING_LOCK = 0x4A
     POWER = 0x4B
+
+
+class BusID(IntEnum):
+    USB = 0x03
+    BLUETOOTH = 0x05

@@ -39,6 +39,7 @@ from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from .common import LOGITECH_VENDOR_ID
+from .common import BusID
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +63,14 @@ def _usb_device(product_id: int, usb_interface: int) -> dict[str, Any]:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
-        "bus_id": 3,
+        "bus_id": BusID.USB,
         "usb_interface": usb_interface,
         "isDevice": True,
     }
 
 
 def _bluetooth_device(product_id: int) -> dict[str, Any]:
-    return {"vendor_id": LOGITECH_VENDOR_ID, "product_id": product_id, "bus_id": 5, "isDevice": True}
+    return {"vendor_id": LOGITECH_VENDOR_ID, "product_id": product_id, "bus_id": BusID.BLUETOOTH, "isDevice": True}
 
 
 KNOWN_DEVICE_IDS = []
@@ -87,10 +88,11 @@ def other_device_check(bus_id: int, vendor_id: int, product_id: int):
     This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
     if vendor_id != LOGITECH_VENDOR_ID:
         return
-    if bus_id == 0x3:  # USB
+
+    if bus_id == BusID.USB:
         if product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344:
             return _usb_device(product_id, 2)
-    elif bus_id == 0x5:  # Bluetooth
+    elif bus_id == BusID.BLUETOOTH:
         if product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF:
             return _bluetooth_device(product_id)
 
