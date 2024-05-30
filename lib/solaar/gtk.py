@@ -19,6 +19,7 @@
 import argparse
 import faulthandler
 import importlib
+import locale
 import logging
 import os.path
 import platform
@@ -31,7 +32,6 @@ from traceback import format_exc
 import solaar.cli as _cli
 import solaar.configuration as _configuration
 import solaar.dbus as _dbus
-import solaar.i18n as _i18n
 import solaar.listener as _listener
 import solaar.ui as _ui
 import solaar.ui.common as _common
@@ -122,7 +122,8 @@ def _parse_arguments():
 
     if not args.action:
         if logger.isEnabledFor(logging.INFO):
-            logger.info("version %s, language %s (%s)", __version__, _i18n.language, _i18n.encoding)
+            language, encoding = locale.getlocale()
+            logger.info("version %s, language %s (%s)", __version__, language, encoding)
 
     return args
 
