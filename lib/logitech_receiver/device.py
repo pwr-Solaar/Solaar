@@ -44,8 +44,6 @@ logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_R = hidpp10_constants.REGISTERS
-_IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
 class LowLevelInterface(Protocol):

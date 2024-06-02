@@ -32,6 +32,7 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import listener as _listener
 from logitech_receiver import notifications as _notifications
+from logitech_receiver.hidpp10_constants import Registers
 
 from . import configuration
 from . import dbus
@@ -42,7 +43,6 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
 
-_R = _hidpp10_constants.REGISTERS
 _IR = _hidpp10_constants.INFO_SUBREGISTERS
 
 
@@ -183,7 +183,7 @@ class SolaarListener(_listener.EventsListener):
             if not already_known:
                 if n.address == 0x0A and not self.receiver.receiver_kind == "bolt":
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
-                    if self.receiver.read_register(_R.receiver_info, _IR.pairing_information + n.devnumber - 1) is None:
+                    if self.receiver.read_register(Registers.RECEIVER_INFO, _IR.pairing_information + n.devnumber - 1) is None:
                         return
                 dev = self.receiver.register_new_device(n.devnumber, n)
             elif self.receiver.pairing.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
