@@ -14,13 +14,15 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-#
-# Devices (not receivers) known to Solaar.
-# Solaar can handle many recent devices without having any entry here.
-# An entry should only be added to fix problems, such as
-# - the device's device ID or WPID falls outside the range that Solaar searches
-# - the device uses a USB interface other than 2
-# - the name or codename should be different from what the device reports
+
+"""Devices (not receivers) known to Solaar.
+
+Solaar can handle many recent devices without having any entry here.
+An entry should only be added to fix problems, such as
+- the device's device ID or WPID falls outside the range that Solaar searches
+- the device uses a USB interface other than 2
+- the name or codename should be different from what the device reports
+"""
 
 from .hidpp10_constants import DEVICE_KIND
 from .hidpp10_constants import REGISTERS as REG

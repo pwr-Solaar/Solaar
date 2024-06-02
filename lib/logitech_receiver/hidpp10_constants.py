@@ -17,10 +17,11 @@
 
 from .common import NamedInts
 
-#
-# Constants - most of them as defined by the official Logitech HID++ 1.0
-# documentation, some of them guessed.
-#
+"""HID constants for HID++ 1.0.
+
+Most of them as defined by the official Logitech HID++ 1.0
+documentation, some of them guessed.
+"""
 
 DEVICE_KIND = NamedInts(
     unknown=0x00,
