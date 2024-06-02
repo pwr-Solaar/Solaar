@@ -33,12 +33,12 @@ from . import hidpp20_constants
 from . import settings_templates
 from .common import Alert
 from .common import BatteryStatus
+from .hidpp10_constants import Registers
 
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_R = hidpp10_constants.REGISTERS
 _F = hidpp20_constants.FEATURE
 
 
@@ -74,7 +74,7 @@ def _process_receiver_notification(receiver, n):
         receiver.changed(reason=reason)
         return True
 
-    elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
+    elif n.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.discovering = n.address == 0x00
             reason = _("discovery lock is open") if receiver.pairing.discovering else _("discovery lock is closed")
@@ -92,7 +92,7 @@ def _process_receiver_notification(receiver, n):
             receiver.changed(reason=reason)
             return True
 
-    elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
+    elif n.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             counter = n.address + n.data[0] * 256  # notification counter
             if receiver.pairing.counter is None:
@@ -108,7 +108,7 @@ def _process_receiver_notification(receiver, n):
                 receiver.pairing.device_name = n.data[3 : 3 + n.data[2]].decode("utf-8")
             return True
 
-    elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PAIRING_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.device_passkey = None
             receiver.pairing.lock_open = n.address == 0x00
@@ -132,12 +132,12 @@ def _process_receiver_notification(receiver, n):
             receiver.changed(reason=reason)
             return True
 
-    elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PASSKEY_REQUEST_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.device_passkey = n.data[0:6].decode("utf-8")
             return True
 
-    elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PASSKEY_PRESSED_NOTIFICATION:  # Bolt pairing
         return True
 
     logger.warning("%s: unhandled notification %s", receiver, n)
@@ -214,7 +214,7 @@ def _process_hidpp10_custom_notification(device, n):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s (%s) custom notification %s", device, device.protocol, n)
 
-    if n.sub_id in (_R.battery_status, _R.battery_charge):
+    if n.sub_id in (Registers.BATTERY_STATUS, Registers.BATTERY_CHARGE):
         assert n.data[-1:] == b"\x00"
         data = chr(n.address).encode() + n.data
         device.set_battery_info(hidpp10.parse_battery_status(n.sub_id, data))

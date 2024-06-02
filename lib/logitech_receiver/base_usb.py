@@ -26,10 +26,13 @@
 
 from solaar.i18n import _
 
-# max_devices is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to 1
-# may_unpair is only used for receivers that do not support reading from _R.receiver_info offset 0x03, default to False
-# unpair is for receivers that do support reading from _R.receiver_info offset 0x03, no default
-## should this last be changed so that may_unpair is used for all receivers? writing to _R.receiver_pairing doesn't seem right
+# max_devices is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03, default
+# to 1.
+# may_unpair is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03,
+# default to False.
+# unpair is for receivers that do support reading from Registers.RECEIVER_INFO offset 0x03, no default.
+## should this last be changed so that may_unpair is used for all receivers? writing to Registers.RECEIVER_PAIRING
+## doesn't seem right
 # re_pairs determines whether a receiver pairs by replacing existing pairings, default to False
 ## currently only one receiver is so marked - should there be more?
 

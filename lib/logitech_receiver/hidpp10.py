@@ -25,7 +25,7 @@ from . import common
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
-from .hidpp10_constants import REGISTERS
+from .hidpp10_constants import Registers
 from .hidpp20_constants import FIRMWARE_KIND
 
 logger = logging.getLogger(__name__)
@@ -68,14 +68,14 @@ def write_register(device: Device, register_number, *value):
 
 def get_configuration_pending_flags(receiver):
     assert not receiver.isDevice
-    result = read_register(receiver, REGISTERS.devices_configuration)
+    result = read_register(receiver, Registers.DEVICES_CONFIGURATION)
     if result is not None:
         return ord(result[:1])
 
 
 def set_configuration_pending_flags(receiver, devices):
     assert not receiver.isDevice
-    result = write_register(receiver, REGISTERS.devices_configuration, devices)
+    result = write_register(receiver, Registers.DEVICES_CONFIGURATION, devices)
     return result is not None
 
 
@@ -90,7 +90,7 @@ class Hidpp10:
             # let's just assume HID++ 2.0 devices do not provide the battery info in a register
             return
 
-        for r in (REGISTERS.battery_status, REGISTERS.battery_charge):
+        for r in (Registers.BATTERY_STATUS, Registers.BATTERY_CHARGE):
             if r in device.registers:
                 reply = read_register(device, r)
                 if reply:
@@ -98,44 +98,44 @@ class Hidpp10:
                 return
 
         # the descriptor does not tell us which register this device has, try them both
-        reply = read_register(device, REGISTERS.battery_charge)
+        reply = read_register(device, Registers.BATTERY_CHARGE)
         if reply:
             # remember this for the next time
-            device.registers.append(REGISTERS.battery_charge)
-            return parse_battery_status(REGISTERS.battery_charge, reply)
+            device.registers.append(Registers.BATTERY_CHARGE)
+            return parse_battery_status(Registers.BATTERY_CHARGE, reply)
 
-        reply = read_register(device, REGISTERS.battery_status)
+        reply = read_register(device, Registers.BATTERY_STATUS)
         if reply:
             # remember this for the next time
-            device.registers.append(REGISTERS.battery_status)
-            return parse_battery_status(REGISTERS.battery_status, reply)
+            device.registers.append(Registers.BATTERY_STATUS)
+            return parse_battery_status(Registers.BATTERY_STATUS, reply)
 
     def get_firmware(self, device: Device):
         assert device is not None
 
         firmware = [None, None, None]
 
-        reply = read_register(device, REGISTERS.firmware, 0x01)
+        reply = read_register(device, Registers.FIRMWARE, 0x01)
         if not reply:
             # won't be able to read any of it now...
             return
 
         fw_version = common.strhex(reply[1:3])
         fw_version = f"{fw_version[0:2]}.{fw_version[2:4]}"
-        reply = read_register(device, REGISTERS.firmware, 0x02)
+        reply = read_register(device, Registers.FIRMWARE, 0x02)
         if reply:
             fw_version += ".B" + common.strhex(reply[1:3])
         fw = common.FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
         firmware[0] = fw
 
-        reply = read_register(device, REGISTERS.firmware, 0x04)
+        reply = read_register(device, Registers.FIRMWARE, 0x04)
         if reply:
             bl_version = common.strhex(reply[1:3])
             bl_version = f"{bl_version[0:2]}.{bl_version[2:4]}"
             bl = common.FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
             firmware[1] = bl
 
-        reply = read_register(device, REGISTERS.firmware, 0x03)
+        reply = read_register(device, Registers.FIRMWARE, 0x03)
         if reply:
             o_version = common.strhex(reply[1:3])
             o_version = f"{o_version[0:2]}.{o_version[2:4]}"
@@ -151,7 +151,7 @@ class Hidpp10:
         if not device.online:
             return
 
-        if REGISTERS.three_leds not in device.registers:
+        if Registers.THREE_LEDS not in device.registers:
             return
 
         if battery_level is not None:
@@ -185,10 +185,10 @@ class Hidpp10:
             # turn off all leds
             v1, v2 = 0x11, 0x11
 
-        write_register(device, REGISTERS.three_leds, v1, v2)
+        write_register(device, Registers.THREE_LEDS, v1, v2)
 
     def get_notification_flags(self, device: Device):
-        return self._get_register(device, REGISTERS.notifications)
+        return self._get_register(device, Registers.NOTIFICATIONS)
 
     def set_notification_flags(self, device: Device, *flag_bits):
         assert device is not None
@@ -202,11 +202,11 @@ class Hidpp10:
 
         flag_bits = sum(int(b) for b in flag_bits)
         assert flag_bits & 0x00FFFFFF == flag_bits
-        result = write_register(device, REGISTERS.notifications, common.int2bytes(flag_bits, 3))
+        result = write_register(device, Registers.NOTIFICATIONS, common.int2bytes(flag_bits, 3))
         return result is not None
 
     def get_device_features(self, device: Device):
-        return self._get_register(device, REGISTERS.mouse_button_flags)
+        return self._get_register(device, Registers.MOUSE_BUTTON_FLAGS)
 
     def _get_register(self, device: Device, register):
         assert device is not None
@@ -262,14 +262,14 @@ def parse_battery_status(register, reply) -> Battery | None:
             status_text_ = None
         return status_text_
 
-    if register == REGISTERS.battery_charge:
+    if register == Registers.BATTERY_CHARGE:
         charge = ord(reply[:1])
         status_byte = ord(reply[2:3]) & 0xF0
 
         battery_status = status_byte_to_battery_status(status_byte)
         return Battery(charge, None, battery_status, None)
 
-    if register == REGISTERS.battery_status:
+    if register == Registers.BATTERY_STATUS:
         status_byte = ord(reply[:1])
         charging_byte = ord(reply[1:2])
 

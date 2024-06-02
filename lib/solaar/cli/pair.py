@@ -22,7 +22,6 @@ from logitech_receiver import hidpp10_constants as _hidpp10_constants
 from logitech_receiver import notifications as _notifications
 
 _hidpp10 = hidpp10.Hidpp10()
-_R = _hidpp10_constants.REGISTERS
 
 
 def run(receivers, args, find_receiver, _ignore):
