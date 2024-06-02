@@ -52,17 +52,17 @@ class Device(Protocol):
         ...
 
 
-def read_register(device: Device, register_number, *params):
-    assert device is not None, f"tried to read register {register_number:02X} from invalid device {device}"
+def read_register(device: Device, register: Registers | int, *params) -> Any:
+    assert device is not None, f"tried to read register {register:02X} from invalid device {device}"
     # support long registers by adding a 2 in front of the register number
-    request_id = 0x8100 | (int(register_number) & 0x2FF)
+    request_id = 0x8100 | (int(register) & 0x2FF)
     return device.request(request_id, *params)
 
 
-def write_register(device: Device, register_number, *value):
-    assert device is not None, f"tried to write register {register_number:02X} to invalid device {device}"
+def write_register(device: Device, register: Registers | int, *value) -> Any:
+    assert device is not None, f"tried to write register {register:02X} to invalid device {device}"
     # support long registers by adding a 2 in front of the register number
-    request_id = 0x8000 | (int(register_number) & 0x2FF)
+    request_id = 0x8000 | (int(register) & 0x2FF)
     return device.request(request_id, *value)
 
 
@@ -208,7 +208,7 @@ class Hidpp10:
     def get_device_features(self, device: Device):
         return self._get_register(device, Registers.MOUSE_BUTTON_FLAGS)
 
-    def _get_register(self, device: Device, register):
+    def _get_register(self, device: Device, register: Registers | int):
         assert device is not None
 
         # Avoid a call if the device is not online,
@@ -224,7 +224,7 @@ class Hidpp10:
             return common.bytes2int(flags)
 
 
-def parse_battery_status(register, reply) -> Battery | None:
+def parse_battery_status(register: Registers | int, reply) -> Battery | None:
     def status_byte_to_charge(status_byte_: int) -> BatteryLevelApproximation:
         if status_byte_ == 7:
             charge_ = BatteryLevelApproximation.FULL
