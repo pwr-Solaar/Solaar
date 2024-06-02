@@ -1775,10 +1775,6 @@ SETTINGS = [
     ADCPower,
 ]
 
-#
-#
-#
-
 
 def check_feature(device, sclass):
     if sclass.feature not in device.features:

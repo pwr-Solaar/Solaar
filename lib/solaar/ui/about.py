@@ -23,10 +23,6 @@ from solaar import NAME
 from solaar import __version__
 from solaar.i18n import _
 
-#
-#
-#
-
 _dialog = None
 
 

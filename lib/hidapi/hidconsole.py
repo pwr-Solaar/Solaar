@@ -38,10 +38,6 @@ def strhex(d):
     return hexlify(d).decode("ascii").upper()
 
 
-#
-#
-#
-
 print_lock = Lock()
 
 
@@ -162,11 +158,6 @@ def _open(args):
             print(".. Logitech receiver detected, HID++ validation enabled.")
 
     return handle
-
-
-#
-#
-#
 
 
 def _parse_arguments():

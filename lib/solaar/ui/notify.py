@@ -25,9 +25,6 @@ from . import icons as _icons
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
 
 try:
     import gi

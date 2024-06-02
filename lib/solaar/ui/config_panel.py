@@ -598,10 +598,6 @@ class HeteroKeyControl(Gtk.HBox, Control):
             _write_async(self.sbox.setting, new_state, self.sbox)
 
 
-#
-#
-#
-
 _allowables_icons = {True: "changes-allow", False: "changes-prevent", _SENSITIVITY_IGNORE: "dialog-error"}
 _allowables_tooltips = {
     True: _("Changes allowed"),
