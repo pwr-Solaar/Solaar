@@ -17,9 +17,7 @@
 
 from .common import KwException
 
-#
-# Exceptions that may be raised by this API.
-#
+"""Exceptions that may be raised by this API."""
 
 
 class NoReceiver(KwException):
