@@ -27,10 +27,6 @@ try:
 except ImportError:
     from queue import Queue as _Queue
 
-#
-#
-#
-
 
 class TaskRunner(_Thread):
     def __init__(self, name):

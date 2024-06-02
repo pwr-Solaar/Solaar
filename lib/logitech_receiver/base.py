@@ -83,10 +83,6 @@ def product_information(usb_id: int | str) -> dict:
     return {}
 
 
-#
-#
-#
-
 _SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
 _MEDIUM_MESSAGE_SIZE = 15
@@ -111,10 +107,6 @@ _RECEIVER_REQUEST_TIMEOUT = 0.9
 _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient (no longer)
 _PING_TIMEOUT = DEFAULT_TIMEOUT
-
-#
-#
-#
 
 
 def match(record, bus_id, vendor_id, product_id):
@@ -161,11 +153,6 @@ def receivers_and_devices():
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
     return hidapi.monitor_glib(callback, filter)
-
-
-#
-#
-#
 
 
 def open_path(path):
@@ -309,11 +296,6 @@ def _read(handle, timeout):
             )
 
         return report_id, devnumber, data[2:]
-
-
-#
-#
-#
 
 
 def _skip_incoming(handle, ihandle, notifications_hook):

@@ -41,10 +41,6 @@ from solaar import __version__
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 
 def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
     try:

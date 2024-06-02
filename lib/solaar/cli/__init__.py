@@ -31,10 +31,6 @@ from solaar import NAME
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
-
 
 def _create_parser():
     parser = _argparse.ArgumentParser(

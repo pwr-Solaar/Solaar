@@ -69,10 +69,6 @@ def error_dialog(reason, object):
     GLib.idle_add(_error_dialog, reason, object)
 
 
-#
-#
-#
-
 _task_runner = None
 
 
