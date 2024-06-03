@@ -604,10 +604,10 @@ class Battery:
     def to_str(self) -> str:
         if isinstance(self.level, BatteryLevelApproximation):
             level = self.level.name.lower()
-            status = self.status.name.lower().replace("_", " ")
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(level)s (%(status)s)") % {"level": _(level), "status": _(status)}
         elif isinstance(self.level, int):
-            status = self.status.name.lower().replace("_", " ")
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
         else:
             return ""
