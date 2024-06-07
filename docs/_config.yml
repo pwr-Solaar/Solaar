@@ -6,4 +6,21 @@ owner_url: https://github.com/pwr-Solaar
 repository: pwr-Solaar/Solaar
 show_downloads: false
 encoding: utf-8
-theme: jekyll-theme-slate
+theme: just-the-docs
+
+url: https://matthag.github.io
+baseurl: /Solaar
+logo: "/assets/solaar.svg"
+favicon_ico: "/assets/favicon.png"
+color_scheme: solaar
+
+search:
+    focus_shortcut_key: 'k'
+
+aux_links:
+  View on GitHub: https://github.com/pwr-Solaar/Solaar
+
+mermaid:
+  # Version of mermaid library
+  # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
+  version: "10.9.1"
