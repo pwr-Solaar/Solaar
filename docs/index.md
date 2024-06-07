@@ -1,9 +1,12 @@
 ---
 title: Solaar
-layout: default
+layout: page
+nav_order: 1
 ---
 
-**Solaar** is a Linux manager for many Logitech keyboards, mice, and trackpads
+# Solaar
+
+Solaar is a Linux manager for many Logitech keyboards, mice, and trackpads
 that connect wirelessly to a USB [Unifying][unifying], Bolt, Lightspeed, or Nano receiver;
 connect directly via a USB cable; or connect via Bluetooth.
 Solaar does not work with peripherals from other companies.
