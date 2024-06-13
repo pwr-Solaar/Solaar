@@ -111,20 +111,11 @@ def _match(action, device, filterfn):
     filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:
         return
-    hid_driver = ("hid-generic", "generic-usb", "logitech-djreceiver")
     interface_number = filter.get("usb_interface")
     isDevice = filter.get("isDevice")
 
     if action == "add":
         hid_driver_name = hid_device.properties.get("DRIVER")
-        # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
-        if hid_driver:
-            if isinstance(hid_driver, tuple):
-                if hid_driver_name not in hid_driver:
-                    return
-            elif hid_driver_name != hid_driver:
-                return
-
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
