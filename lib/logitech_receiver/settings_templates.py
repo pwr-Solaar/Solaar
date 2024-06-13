@@ -816,7 +816,7 @@ class MouseGesturesXY(settings.RawXYProcessing):
             if logger.isEnabledFor(logging.INFO):
                 logger.info("mouse gesture notification %s", self.data)
             payload = struct.pack("!" + (len(self.data) * "h"), *self.data)
-            notification = base._HIDPP_Notification(0, 0, 0, 0, payload)
+            notification = base.HIDPPNotification(0, 0, 0, 0, payload)
             diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
             self.fsmState = "idle"
 
