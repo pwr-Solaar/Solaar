@@ -1,4 +1,9 @@
 site_name: Solaar Documentation
+site_description: Linux Device Manager for Logitech Unifying Receivers and Devices.
+site_author: pwr-Solaar
+repo_url: https://github.com/pwr-Solaar/Solaar
+repo_name: Solaar
+logo: img/favicon.png
 theme:
   name: readthedocs
 docs_dir: docs
