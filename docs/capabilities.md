@@ -80,7 +80,7 @@ that they were bought with.
 ## Device Settings
 
 Solaar can display quite a few changeable settings of receivers and devices.
-For a list of HID++ features and their support see [the features page](features).
+For a list of HID++ features and their support see [the features page](features.md).
 
 Solaar does not do much beyond using the HID++ protocol to change the
 behavior of receivers and devices via changing their settings.
