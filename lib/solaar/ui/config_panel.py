@@ -22,9 +22,8 @@ from threading import Timer as _Timer
 
 import gi
 
-from logitech_receiver.hidpp20 import LEDEffectSetting as _LEDEffectSetting
-from logitech_receiver.settings import KIND as _SETTING_KIND
-from logitech_receiver.settings import SENSITIVITY_IGNORE as _SENSITIVITY_IGNORE
+from logitech_receiver import hidpp20
+from logitech_receiver import settings
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
@@ -105,7 +104,7 @@ class Control:
     def layout(self, sbox, label, change, spinner, failed):
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
-        fill = sbox.setting.kind == _SETTING_KIND.range or sbox.setting.kind == _SETTING_KIND.hetero
+        fill = sbox.setting.kind == settings.KIND.range or sbox.setting.kind == settings.KIND.hetero
         sbox.pack_end(self, fill, fill, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
@@ -537,14 +536,14 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_lblbox.set_visible(False)
             else:
                 item_lblbox = None
-            if item["kind"] == _SETTING_KIND.choice:
+            if item["kind"] == settings.KIND.choice:
                 item_box = ComboBoxText()
                 for entry in item["choices"]:
                     item_box.append(str(int(entry)), str(entry))
                 item_box.set_active(0)
                 item_box.connect("changed", self.changed)
                 self.pack_start(item_box, False, False, 0)
-            elif item["kind"] == _SETTING_KIND.range:
+            elif item["kind"] == settings.KIND.range:
                 item_box = Scale()
                 item_box.set_range(item["min"], item["max"])
                 item_box.set_round_digits(0)
@@ -559,7 +558,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
         result = {}
         for k, (_lblbox, box) in self._items.items():
             result[str(k)] = box.get_value()
-        result = _LEDEffectSetting(**result)
+        result = hidpp20.LEDEffectSetting(**result)
         return result
 
     def set_value(self, value):
@@ -598,13 +597,13 @@ class HeteroKeyControl(Gtk.HBox, Control):
             _write_async(self.sbox.setting, new_state, self.sbox)
 
 
-_allowables_icons = {True: "changes-allow", False: "changes-prevent", _SENSITIVITY_IGNORE: "dialog-error"}
+_allowables_icons = {True: "changes-allow", False: "changes-prevent", settings.SENSITIVITY_IGNORE: "dialog-error"}
 _allowables_tooltips = {
     True: _("Changes allowed"),
     False: _("No changes allowed"),
-    _SENSITIVITY_IGNORE: _("Ignore this setting"),
+    settings.SENSITIVITY_IGNORE: _("Ignore this setting"),
 }
-_next_allowable = {True: False, False: _SENSITIVITY_IGNORE, _SENSITIVITY_IGNORE: True}
+_next_allowable = {True: False, False: settings.SENSITIVITY_IGNORE, settings.SENSITIVITY_IGNORE: True}
 _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 
 
@@ -618,7 +617,7 @@ def _change_click(button, sbox):
     _change_icon(new_allowed, icon)
     if sbox.setting._device.persister:  # remember the new setting sensitivity
         sbox.setting._device.persister.set_sensitivity(sbox.setting.name, new_allowed)
-    if allowed == _SENSITIVITY_IGNORE:  # update setting if it was being ignored
+    if allowed == settings.SENSITIVITY_IGNORE:  # update setting if it was being ignored
         setting = next((s for s in sbox.setting._device.settings if s.name == sbox.setting.name), None)
         if setting:
             persisted = sbox.setting._device.persister.get(setting.name) if sbox.setting._device.persister else None
@@ -660,21 +659,21 @@ def _create_sbox(s, device):
     change.set_sensitive(True)
     change.connect("clicked", _change_click, sbox)
 
-    if s.kind == _SETTING_KIND.toggle:
+    if s.kind == settings.KIND.toggle:
         control = ToggleControl(sbox)
-    elif s.kind == _SETTING_KIND.range:
+    elif s.kind == settings.KIND.range:
         control = SliderControl(sbox)
-    elif s.kind == _SETTING_KIND.choice:
+    elif s.kind == settings.KIND.choice:
         control = _create_choice_control(sbox)
-    elif s.kind == _SETTING_KIND.map_choice:
+    elif s.kind == settings.KIND.map_choice:
         control = MapChoiceControl(sbox)
-    elif s.kind == _SETTING_KIND.multiple_toggle:
+    elif s.kind == settings.KIND.multiple_toggle:
         control = MultipleToggleControl(sbox, change)
-    elif s.kind == _SETTING_KIND.multiple_range:
+    elif s.kind == settings.KIND.multiple_range:
         control = MultipleRangeControl(sbox, change)
-    elif s.kind == _SETTING_KIND.packed_range:
+    elif s.kind == settings.KIND.packed_range:
         control = PackedRangeControl(sbox, change)
-    elif s.kind == _SETTING_KIND.hetero:
+    elif s.kind == settings.KIND.hetero:
         control = HeteroKeyControl(sbox, change)
     else:
         if logger.isEnabledFor(logging.WARNING):
