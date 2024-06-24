@@ -21,6 +21,7 @@ import gi
 
 from gi.repository.GObject import TYPE_PYOBJECT
 from logitech_receiver import hidpp10_constants
+from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import NamedInts
 
@@ -502,7 +503,7 @@ def _update_details(button):
 
             yield (_("Path"), device.path)
             if device.kind is None:
-                yield (_("USB ID"), "046d:" + device.product_id)
+                yield (_("USB ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
 
                 if read_all:
                     yield (_("Serial"), device.serial)
@@ -515,7 +516,7 @@ def _update_details(button):
                 if device.wpid:
                     yield (_("Wireless PID"), device.wpid)
                 if device.product_id:
-                    yield (_("Product ID"), "046d:" + device.product_id)
+                    yield (_("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
                 hid_version = device.protocol
                 yield (_("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown"))
                 if read_all and device.polling_rate:

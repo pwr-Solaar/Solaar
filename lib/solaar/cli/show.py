@@ -21,6 +21,7 @@ from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import receiver
 from logitech_receiver import settings_templates
+from logitech_receiver.common import LOGITECH_VENDOR_ID
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import strhex
 
@@ -36,7 +37,7 @@ def _print_receiver(receiver):
 
     print(receiver.name)
     print("  Device path  :", receiver.path)
-    print(f"  USB id       : 046d:{receiver.product_id}")
+    print(f"  USB id       : {LOGITECH_VENDOR_ID:04x}:{receiver.product_id}")
     print("  Serial       :", receiver.serial)
     pending = hidpp10.get_configuration_pending_flags(receiver)
     if pending:
@@ -103,7 +104,7 @@ def _print_device(dev, num=None):
     if dev.wpid:
         print(f"     WPID         : {dev.wpid}")
     if dev.product_id:
-        print(f"     USB id       : 046d:{dev.product_id}")
+        print(f"     USB id       : {LOGITECH_VENDOR_ID:04x}:{dev.product_id}")
     print("     Codename     :", dev.codename)
     print("     Kind         :", dev.kind)
     if dev.protocol:
