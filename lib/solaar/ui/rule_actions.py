@@ -107,7 +107,6 @@ class KeyPressUI(ActionUI):
             self._create_field()
             self._create_del_btn()
 
-        #        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
         self.widgets[self.add_btn] = (n, 1, 1, 1)
         super().show(component, editable)
         for i in range(n):

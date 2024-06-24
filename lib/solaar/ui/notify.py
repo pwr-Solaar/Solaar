@@ -66,14 +66,6 @@ if available:
             _notifications.clear()
             Notify.uninit()
 
-    # def toggle(action):
-    #     if action.get_active():
-    #         init()
-    #     else:
-    #         uninit()
-    #     action.set_sensitive(available)
-    #     return action.get_active()
-
     def alert(reason, icon=None):
         assert reason
 
@@ -91,8 +83,6 @@ if available:
             n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
 
             try:
-                # if logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
                 logger.exception("showing %s", n)
@@ -113,12 +103,6 @@ if available:
                 message = reason
             else:
                 message = _("unspecified reason")
-            # elif dev.status is None:
-            #     message = _("unpaired")
-            # elif bool(dev.status):
-            #     message = dev.status_string() or _("connected")
-            # else:
-            #     message = _("offline")
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
@@ -131,8 +115,6 @@ if available:
                 n.set_hint("value", GLib.Variant("i", progress))
 
             try:
-                # if logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
                 logger.exception("showing %s", n)

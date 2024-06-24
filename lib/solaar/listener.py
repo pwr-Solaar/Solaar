@@ -137,8 +137,6 @@ class SolaarListener(listener.EventsListener):
 
     def _notifications_handler(self, n):
         assert self.receiver
-        # if logger.isEnabledFor(logging.DEBUG):
-        #     logger.debug("%s: handling %s", self.receiver, n)
         if n.devnumber == 0xFF:
             # a receiver notification
             notifications.process(self.receiver, n)

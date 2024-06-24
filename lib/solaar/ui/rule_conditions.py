@@ -118,7 +118,6 @@ class FeatureUI(ConditionUI):
         for feature in self.FEATURES_WITH_DIVERSION:
             self.field.append(feature, feature)
         self.field.set_valign(Gtk.Align.CENTER)
-        #        self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
         self.field.connect("changed", self._on_update)
         all_features = [str(f) for f in FEATURE]
@@ -164,7 +163,6 @@ class ReportUI(ConditionUI):
         self.field.set_halign(Gtk.Align.CENTER)
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_hexpand(True)
-        #        self.field.set_vexpand(True)
         self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 

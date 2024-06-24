@@ -184,9 +184,6 @@ def _find_device(receivers, name):
                 break
 
 
-#    raise Exception("no device found matching '%s'" % name)
-
-
 def run(cli_args=None, hidraw_path=None):
     if cli_args:
         action = cli_args[0]

@@ -35,8 +35,6 @@ from . import diversion_rules
 from . import icons
 from .common import ui_async
 
-# from solaar import __version__ as VERSION
-
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402
@@ -233,7 +231,6 @@ def _create_tree(model):
     tree.set_headers_visible(False)
     tree.set_show_expanders(False)
     tree.set_level_indentation(20)
-    # tree.set_fixed_height_mode(True)
     tree.set_enable_tree_lines(True)
     tree.set_reorderable(False)
     tree.set_enable_search(False)
@@ -315,11 +312,6 @@ def _create_window_layout():
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
 
-    # solaar_version = Gtk.Label()
-    # solaar_version.set_markup('<small>' + NAME + ' v' + VERSION + '</small>')
-    # bottom_buttons_box.add(solaar_version)
-    # bottom_buttons_box.set_child_secondary(solaar_version, True)
-
     vbox = Gtk.Box.new(Gtk.Orientation.VERTICAL, 8)
     vbox.set_border_width(8)
     vbox.pack_start(panel, True, True, 0)
@@ -335,10 +327,6 @@ def _create(delete_action):
     window = Gtk.Window()
     window.set_title(NAME)
     window.set_role("status-window")
-
-    # window.set_type_hint(Gdk.WindowTypeHint.UTILITY)
-    # window.set_skip_taskbar_hint(True)
-    # window.set_skip_pager_hint(True)
     window.connect("delete-event", delete_action)
 
     vbox = _create_window_layout()
@@ -373,8 +361,6 @@ def _find_selected_device_id():
 def _device_selected(selection):
     model, item = selection.get_selected()
     device = model.get_value(item, _COLUMN.DEVICE) if item else None
-    # if logger.isEnabledFor(logging.DEBUG):
-    #     logger.debug("window tree selected device %s", device)
     if device:
         _update_info_panel(device, full=True)
     else:
@@ -516,7 +502,6 @@ def _update_details(button):
 
             yield (_("Path"), device.path)
             if device.kind is None:
-                # 046d is the Logitech vendor id
                 yield (_("USB ID"), "046d:" + device.product_id)
 
                 if read_all:

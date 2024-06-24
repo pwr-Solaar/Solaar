@@ -159,7 +159,6 @@ def run(receivers, args, find_receiver, find_device):
         if not dev.settings:
             raise Exception(f"no settings for {dev.name}")
         configuration.attach_to(dev)
-        #        settings.apply_all_settings(dev)
         print(dev.name, f"({dev.codename}) [{dev.wpid}:{dev.serial}]")
         for s in dev.settings:
             print("")
@@ -179,7 +178,6 @@ def run(receivers, args, find_receiver, find_device):
         raise Exception(f"no setting '{args.setting}' for {dev.name}")
 
     if args.value_key is None:
-        #        setting.apply()
         _print_setting(setting)
         return
 

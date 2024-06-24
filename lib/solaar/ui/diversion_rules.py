@@ -1326,7 +1326,6 @@ class _DeviceUI:
         self.device_field.set_value("")
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
-        #        self.device_field.connect('changed', self._changed_device)
         self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
