@@ -20,20 +20,20 @@ import logging
 import gi
 
 from gi.repository.GObject import TYPE_PYOBJECT
-from logitech_receiver import hidpp10_constants as _hidpp10_constants
-from logitech_receiver.common import NamedInt as _NamedInt
-from logitech_receiver.common import NamedInts as _NamedInts
+from logitech_receiver import hidpp10_constants
+from logitech_receiver.common import NamedInt
+from logitech_receiver.common import NamedInts
 
 from solaar import NAME
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import action as _action
-from . import config_panel as _config_panel
-from . import icons as _icons
-from .about import show_window as _show_about_window
-from .common import ui_async as _ui_async
-from .diversion_rules import show_window as _show_diversion_window
+from . import about
+from . import action
+from . import config_panel
+from . import diversion_rules
+from . import icons
+from .common import ui_async
 
 # from solaar import __version__ as VERSION
 
@@ -56,7 +56,7 @@ except (ValueError, AttributeError):
     _CAN_SET_ROW_NONE = ""
 
 # tree model columns
-_COLUMN = _NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
+_COLUMN = NamedInts(PATH=0, NUMBER=1, ACTIVE=2, NAME=3, ICON=4, STATUS_TEXT=5, STATUS_ICON=6, DEVICE=7)
 _COLUMN_TYPES = (str, int, bool, str, str, str, str, TYPE_PYOBJECT)
 _TREE_SEPATATOR = (None, 0, False, None, None, None, None, None)
 assert len(_TREE_SEPATATOR) == len(_COLUMN_TYPES)
@@ -131,7 +131,7 @@ def _create_device_panel():
 
     p.pack_start(Gtk.Separator.new(Gtk.Orientation.HORIZONTAL), False, False, 0)  # spacer
 
-    p._config = _config_panel.create()
+    p._config = config_panel.create()
     p.pack_end(p._config, True, True, 4)
 
     return p
@@ -174,7 +174,7 @@ def _create_buttons_box():
         assert receiver is not None
         assert bool(receiver)
         assert receiver.kind is None
-        _action.pair(_window, receiver)
+        action.pair(_window, receiver)
 
     bb._pair = _new_button(_("Pair new device"), "list-add", clicked=_pair_new_device)
     bb.add(bb._pair)
@@ -184,7 +184,7 @@ def _create_buttons_box():
         device = _find_selected_device()
         assert device is not None
         assert device.kind is not None
-        _action.unpair(_window, device)
+        action.unpair(_window, device)
 
     bb._unpair = _new_button(_("Unpair"), "edit-delete", clicked=_unpair_current_device)
     bb.add(bb._unpair)
@@ -307,10 +307,10 @@ def _create_window_layout():
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=_show_about_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show_window)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
-        _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: _show_diversion_window(_model)
+        _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: diversion_rules.show_window(_model)
     )
     bottom_buttons_box.add(diversion_button)
     bottom_buttons_box.set_child_secondary(diversion_button, True)
@@ -399,7 +399,7 @@ def _receiver_row(receiver_path, receiver=None):
         item = _model.iter_next(item)
 
     if not item and receiver:
-        icon_name = _icons.device_icon_name(receiver.name)
+        icon_name = icons.device_icon_name(receiver.name)
         status_text = None
         status_icon = None
         row_data = (receiver_path, 0, True, receiver.name, icon_name, status_text, status_icon, receiver)
@@ -444,7 +444,7 @@ def _device_row(receiver_path, device_number, device=None):
             item = _model.iter_next(item)
 
     if not item and device:
-        icon_name = _icons.device_icon_name(device.name, device.kind)
+        icon_name = icons.device_icon_name(device.name, device.kind)
         status_text = None
         status_icon = None
         row_data = (
@@ -553,7 +553,7 @@ def _update_details(button):
             flag_bits = device.notification_flags
             if flag_bits is not None:
                 flag_names = (
-                    (f"({_('none')})",) if flag_bits == 0 else _hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
+                    (f"({_('none')})",) if flag_bits == 0 else hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
                 )
                 yield (_("Notifications"), (f"\n{' ':15}").join(flag_names))
 
@@ -588,7 +588,7 @@ def _update_details(button):
         if read_all:
             _details._current_device = None
         else:
-            _ui_async(_read_slow, selected_device)
+            ui_async(_read_slow, selected_device)
 
     _details.set_visible(visible)
 
@@ -670,7 +670,7 @@ def _update_device_panel(device, panel, buttons, full=False):
         panel._battery.set_visible(True)
         battery_next_level = device.battery_info.next_level
         charging = device.battery_info.charging() if device.battery_info is not None else None
-        icon_name = _icons.battery(battery_level, charging)
+        icon_name = icons.battery(battery_level, charging)
         panel._battery._icon.set_from_icon_name(icon_name, _INFO_ICON_SIZE)
         panel._battery._icon.set_sensitive(True)
         panel._battery._text.set_sensitive(is_online)
@@ -686,9 +686,9 @@ def _update_device_panel(device, panel, buttons, full=False):
         if battery_voltage is not None and battery_level is not None:
             text += ", "
         if battery_level is not None:
-            text += _(str(battery_level)) if isinstance(battery_level, _NamedInt) else f"{int(battery_level)}%"
+            text += _(str(battery_level)) if isinstance(battery_level, NamedInt) else f"{int(battery_level)}%"
         if battery_next_level is not None and not charging:
-            if isinstance(battery_next_level, _NamedInt):
+            if isinstance(battery_next_level, NamedInt):
                 text += "<small> (" + _("next reported ") + _(str(battery_next_level)) + ")</small>"
             else:
                 text += "<small> (" + _("next reported ") + f"{int(battery_next_level)}%" + ")</small>"
@@ -731,7 +731,7 @@ def _update_device_panel(device, panel, buttons, full=False):
         if light_level is None:
             panel._lux.set_visible(False)
         else:
-            panel._lux._icon.set_from_icon_name(_icons.lux(light_level), _INFO_ICON_SIZE)
+            panel._lux._icon.set_from_icon_name(icons.lux(light_level), _INFO_ICON_SIZE)
             panel._lux._text.set_text(_("%(light_level)d lux") % {"light_level": light_level})
             panel._lux.set_visible(True)
     else:
@@ -744,7 +744,7 @@ def _update_device_panel(device, panel, buttons, full=False):
     panel.set_visible(True)
 
     if full:
-        _config_panel.update(device, is_online)
+        config_panel.update(device, is_online)
 
 
 def _update_info_panel(device, full=False):
@@ -760,7 +760,7 @@ def _update_info_panel(device, full=False):
     assert device
 
     _info._title.set_markup(f"<b>{device.name}</b>")
-    icon_name = _icons.device_icon_name(device.name, device.kind)
+    icon_name = icons.device_icon_name(device.name, device.kind)
     _info._icon.set_from_icon_name(icon_name, _DEVICE_ICON_SIZE)
 
     if device.kind is None:
@@ -821,7 +821,7 @@ def destroy(_ignore1=None, _ignore2=None):
     w, _window = _window, None
     w.destroy()
     w = None
-    _config_panel.destroy()
+    config_panel.destroy()
 
     _empty = None
     _info = None
@@ -871,7 +871,7 @@ def update(device, need_popup=False, refresh=False):
             update_device(device, item, selected_device_id, need_popup, full=refresh)
         elif item:
             _model.remove(item)
-            _config_panel.clean(device)
+            config_panel.clean(device)
 
     # make sure all rows are visible
     _tree.expand_all()
@@ -890,14 +890,14 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
     else:
         if battery_voltage is not None and False:  # Use levels instead of voltage here
             status_text = f"{int(battery_voltage)}mV"
-        elif isinstance(battery_level, _NamedInt):
+        elif isinstance(battery_level, NamedInt):
             status_text = _(str(battery_level))
         else:
             status_text = f"{int(battery_level)}%"
         _model.set_value(item, _COLUMN.STATUS_TEXT, status_text)
 
         charging = device.battery_info.charging() if device.battery_info is not None else None
-        icon_name = _icons.battery(battery_level, charging)
+        icon_name = icons.battery(battery_level, charging)
         _model.set_value(item, _COLUMN.STATUS_ICON, icon_name)
 
     _model.set_value(item, _COLUMN.NAME, device.codename)
