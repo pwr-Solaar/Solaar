@@ -15,7 +15,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import errno as _errno
+import errno
 import logging
 import subprocess
 import time
@@ -24,15 +24,13 @@ from collections import namedtuple
 from functools import partial
 
 import gi
-import logitech_receiver.device as _device
-import logitech_receiver.receiver as _receiver
+import logitech_receiver
 
-from logitech_receiver import base as _base
+from logitech_receiver import base
 from logitech_receiver import exceptions
-from logitech_receiver import hidpp10_constants as _hidpp10_constants
-from logitech_receiver import listener as _listener
-from logitech_receiver import notifications as _notifications
-from logitech_receiver.hidpp10_constants import Registers
+from logitech_receiver import hidpp10_constants
+from logitech_receiver import listener
+from logitech_receiver import notifications
 
 from . import configuration
 from . import dbus
@@ -43,9 +41,6 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
 
-_IR = _hidpp10_constants.INFO_SUBREGISTERS
-
-
 _GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
@@ -55,7 +50,7 @@ def _ghost(device):
     return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False)
 
 
-class SolaarListener(_listener.EventsListener):
+class SolaarListener(listener.EventsListener):
     """Keeps the status of a Receiver or Device (member name is receiver but it can also be a device)."""
 
     def __init__(self, receiver, status_changed_callback):
@@ -69,7 +64,7 @@ class SolaarListener(_listener.EventsListener):
             logger.info("%s: notifications listener has started (%s)", self.receiver, self.receiver.handle)
         nfs = self.receiver.enable_connection_notifications()
         if logger.isEnabledFor(logging.WARNING):
-            if not self.receiver.isDevice and not ((nfs if nfs else 0) & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
+            if not self.receiver.isDevice and not ((nfs if nfs else 0) & hidpp10_constants.NOTIFICATION_FLAG.wireless):
                 logger.warning(
                     "Receiver on %s might not support connection notifications, GUI might not show its devices",
                     self.receiver.path,
@@ -146,7 +141,7 @@ class SolaarListener(_listener.EventsListener):
         #     logger.debug("%s: handling %s", self.receiver, n)
         if n.devnumber == 0xFF:
             # a receiver notification
-            _notifications.process(self.receiver, n)
+            notifications.process(self.receiver, n)
             return
 
         # a notification that came in to the device listener - strange, but nothing needs to be done here
@@ -156,7 +151,7 @@ class SolaarListener(_listener.EventsListener):
             return
 
         # DJ pairing notification - ignore - hid++ 1.0 pairing notification is all that is needed
-        if n.sub_id == 0x41 and n.report_id == _base.DJ_MESSAGE_ID:
+        if n.sub_id == 0x41 and n.report_id == base.DJ_MESSAGE_ID:
             if logger.isEnabledFor(logging.INFO):
                 logger.info("ignoring DJ pairing notification %s", n)
             return
@@ -170,7 +165,7 @@ class SolaarListener(_listener.EventsListener):
 
         # FIXME: hacky fix for kernel/hardware race condition
         # If the device was just turned on or woken up from sleep, it may not be ready to receive commands.
-        # The "payload" bit of the wireless tatus notification seems to tell us this. If this is the case, we
+        # The "payload" bit of the wireless status notification seems to tell us this. If this is the case, we
         # must wait a short amount of time to avoid causing a broken pipe error.
         device_ready = not bool(ord(n.data[0:1]) & 0x80) or n.sub_id != 0x41
         if not device_ready:
@@ -183,7 +178,13 @@ class SolaarListener(_listener.EventsListener):
             if not already_known:
                 if n.address == 0x0A and not self.receiver.receiver_kind == "bolt":
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
-                    if self.receiver.read_register(Registers.RECEIVER_INFO, _IR.pairing_information + n.devnumber - 1) is None:
+                    if (
+                        self.receiver.read_register(
+                            hidpp10_constants.Registers.RECEIVER_INFO,
+                            hidpp10_constants.INFO_SUBREGISTERS.pairing_information + n.devnumber - 1,
+                        )
+                        is None
+                    ):
                         return
                 dev = self.receiver.register_new_device(n.devnumber, n)
             elif self.receiver.pairing.lock_open and self.receiver.re_pairs and not ord(n.data[0:1]) & 0x40:
@@ -212,7 +213,7 @@ class SolaarListener(_listener.EventsListener):
             # the receiver changed status as well
             self._status_changed(self.receiver)
 
-        _notifications.process(dev, n)
+        notifications.process(dev, n)
 
         if self.receiver.pairing.lock_open and not already_known:
             # this should be the first notification after a device was paired
@@ -256,17 +257,17 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver = _receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
+        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
-        receiver = _device.DeviceFactory.create_device(_base, device_info, _setting_callback)
-        if receiver:
-            configuration.attach_to(receiver)
-            if receiver.bluetooth and receiver.hid_serial:
-                dbus.watch_bluez_connect(receiver.hid_serial, partial(_process_bluez_dbus, receiver))
-                receiver.cleanups.append(_cleanup_bluez_dbus)
+        receiver_ = logitech_receiver.device.DeviceFactory.create_device(base, device_info, _setting_callback)
+        if receiver_:
+            configuration.attach_to(receiver_)
+            if receiver_.bluetooth and receiver_.hid_serial:
+                dbus.watch_bluez_connect(receiver_.hid_serial, partial(_process_bluez_dbus, receiver_))
+                receiver_.cleanups.append(_cleanup_bluez_dbus)
 
-    if receiver:
-        rl = SolaarListener(receiver, _status_callback)
+    if receiver_:
+        rl = SolaarListener(receiver_, _status_callback)
         rl.start()
         _all_listeners[device_info.path] = rl
         return rl
@@ -278,7 +279,7 @@ def start_all():
     stop_all()  # just in case this it called twice in a row...
     if logger.isEnabledFor(logging.INFO):
         logger.info("starting receiver listening threads")
-    for device_info in _base.receivers_and_devices():
+    for device_info in base.receivers_and_devices():
         _process_receiver_event("add", device_info)
 
 
@@ -333,14 +334,14 @@ def setup_scanner(status_changed_callback, setting_changed_callback, error_callb
     _status_callback = status_changed_callback
     _setting_callback = setting_changed_callback
     _error_callback = error_callback
-    _base.notify_on_receivers_glib(_process_receiver_event)
+    base.notify_on_receivers_glib(_process_receiver_event)
 
 
 def _process_add(device_info, retry):
     try:
         _start(device_info)
     except OSError as e:
-        if e.errno == _errno.EACCES:
+        if e.errno == errno.EACCES:
             try:
                 output = subprocess.check_output(["/usr/bin/getfacl", "-p", device_info.path], text=True)
                 if logger.isEnabledFor(logging.WARNING):
