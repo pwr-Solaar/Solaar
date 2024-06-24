@@ -21,7 +21,7 @@ import logging
 from solaar import NAME
 from solaar.i18n import _
 
-from . import icons as _icons
+from . import icons
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ if available:
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.icon_file(NAME.lower()) if icon is None else _icons.icon_file(icon)
+            icon_file = icons.icon_file(NAME.lower()) if icon is None else icons.icon_file(icon)
 
             n.update(NAME.lower(), reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
@@ -122,7 +122,7 @@ if available:
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None else _icons.icon_file(icon)
+            icon_file = icons.device_icon_file(dev.name, dev.kind) if icon is None else icons.icon_file(icon)
 
             n.update(summary, message, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)

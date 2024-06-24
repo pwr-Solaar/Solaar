@@ -18,7 +18,7 @@
 import logging
 import traceback
 
-from threading import Timer as _Timer
+from threading import Timer
 
 import gi
 
@@ -28,7 +28,7 @@ from logitech_receiver import settings
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from .common import ui_async as _ui_async
+from .common import ui_async
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gdk  # NOQA: E402
@@ -48,7 +48,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
                 logger.warning("%s: error reading so use None (%s): %s", s.name, s._device, repr(e))
         GLib.idle_add(_update_setting_item, sb, v, online, sensitive, True, priority=99)
 
-    _ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
+    ui_async(_do_read, setting, force_read, sbox, device_is_online, sensitive)
 
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
@@ -70,7 +70,7 @@ def _write_async(setting, value, sbox, sensitive=True, key=None):
         sbox._failed.set_visible(False)
         sbox._spinner.set_visible(True)
         sbox._spinner.start()
-    _ui_async(_do_write, setting, value, sbox, key)
+    ui_async(_do_write, setting, value, sbox, key)
 
 
 class ComboBoxText(Gtk.ComboBoxText):
@@ -143,7 +143,7 @@ class SliderControl(Gtk.Scale, Control):
         if self.get_sensitive():
             if self.timer:
                 self.timer.cancel()
-            self.timer = _Timer(0.5, lambda: GLib.idle_add(self.do_change))
+            self.timer = Timer(0.5, lambda: GLib.idle_add(self.do_change))
             self.timer.start()
 
     def do_change(self):
@@ -434,7 +434,7 @@ class MultipleRangeControl(MultipleControl):
         if control.get_sensitive():
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.5, lambda: GLib.idle_add(self._write, control, item, sub_item))
+            control._timer = Timer(0.5, lambda: GLib.idle_add(self._write, control, item, sub_item))
             control._timer.start()
 
     def _write(self, control, item, sub_item):
@@ -494,7 +494,7 @@ class PackedRangeControl(MultipleRangeControl):
         if control.get_sensitive():
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
+            control._timer = Timer(0.5, lambda: GLib.idle_add(self._write, control, item))
             control._timer.start()
 
     def _write(self, control, item):
@@ -586,7 +586,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 self.setup_visibles(int(self._items["ID"][1].get_value()))
             if hasattr(control, "_timer"):
                 control._timer.cancel()
-            control._timer = _Timer(0.3, lambda: GLib.idle_add(self._write, control))
+            control._timer = Timer(0.3, lambda: GLib.idle_add(self._write, control))
             control._timer.start()
 
     def _write(self, control):

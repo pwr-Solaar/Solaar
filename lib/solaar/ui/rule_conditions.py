@@ -16,10 +16,10 @@
 from dataclasses import dataclass
 
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
-from logitech_receiver.diversion import Key as _Key
-from logitech_receiver.hidpp20 import FEATURE as _ALL_FEATURES
-from logitech_receiver.special_keys import CONTROL as _CONTROL
+from logitech_receiver import diversion
+from logitech_receiver.diversion import Key
+from logitech_receiver.hidpp20 import FEATURE
+from logitech_receiver.special_keys import CONTROL
 
 from solaar.i18n import _
 from solaar.ui.rule_base import CompletionEntry
@@ -27,7 +27,7 @@ from solaar.ui.rule_base import RuleComponentUI
 
 
 class ConditionUI(RuleComponentUI):
-    CLASS = _DIV.Condition
+    CLASS = diversion.Condition
 
     @classmethod
     def icon_name(cls):
@@ -35,7 +35,7 @@ class ConditionUI(RuleComponentUI):
 
 
 class ProcessUI(ConditionUI):
-    CLASS = _DIV.Process
+    CLASS = diversion.Process
 
     def create_widgets(self):
         self.widgets = {}
@@ -65,7 +65,7 @@ class ProcessUI(ConditionUI):
 
 
 class MouseProcessUI(ConditionUI):
-    CLASS = _DIV.MouseProcess
+    CLASS = diversion.MouseProcess
 
     def create_widgets(self):
         self.widgets = {}
@@ -95,17 +95,17 @@ class MouseProcessUI(ConditionUI):
 
 
 class FeatureUI(ConditionUI):
-    CLASS = _DIV.Feature
+    CLASS = diversion.Feature
     FEATURES_WITH_DIVERSION = [
-        str(_ALL_FEATURES.CROWN),
-        str(_ALL_FEATURES.THUMB_WHEEL),
-        str(_ALL_FEATURES.LOWRES_WHEEL),
-        str(_ALL_FEATURES.HIRES_WHEEL),
-        str(_ALL_FEATURES.GESTURE_2),
-        str(_ALL_FEATURES.REPROG_CONTROLS_V4),
-        str(_ALL_FEATURES.GKEY),
-        str(_ALL_FEATURES.MKEYS),
-        str(_ALL_FEATURES.MR),
+        str(FEATURE.CROWN),
+        str(FEATURE.THUMB_WHEEL),
+        str(FEATURE.LOWRES_WHEEL),
+        str(FEATURE.HIRES_WHEEL),
+        str(FEATURE.GESTURE_2),
+        str(FEATURE.REPROG_CONTROLS_V4),
+        str(FEATURE.GKEY),
+        str(FEATURE.MKEYS),
+        str(FEATURE.MR),
     ]
 
     def create_widgets(self):
@@ -121,7 +121,7 @@ class FeatureUI(ConditionUI):
         #        self.field.set_vexpand(True)
         self.field.set_size_request(600, 0)
         self.field.connect("changed", self._on_update)
-        all_features = [str(f) for f in _ALL_FEATURES]
+        all_features = [str(f) for f in FEATURE]
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 1, 1, 1)
 
@@ -151,7 +151,7 @@ class FeatureUI(ConditionUI):
 
 
 class ReportUI(ConditionUI):
-    CLASS = _DIV.Report
+    CLASS = diversion.Report
     MIN_VALUE = -1  # for invalid values
     MAX_VALUE = 15
 
@@ -186,7 +186,7 @@ class ReportUI(ConditionUI):
 
 
 class ModifiersUI(ConditionUI):
-    CLASS = _DIV.Modifiers
+    CLASS = diversion.Modifiers
 
     def create_widgets(self):
         self.widgets = {}
@@ -195,7 +195,7 @@ class ModifiersUI(ConditionUI):
         self.widgets[self.label] = (0, 0, 5, 1)
         self.labels = {}
         self.switches = {}
-        for i, m in enumerate(_DIV.MODIFIERS):
+        for i, m in enumerate(diversion.MODIFIERS):
             switch = Gtk.Switch(halign=Gtk.Align.CENTER, valign=Gtk.Align.START, hexpand=True)
             label = Gtk.Label(label=m, halign=Gtk.Align.CENTER, valign=Gtk.Align.END, hexpand=True)
             self.widgets[label] = (i, 1, 1, 1)
@@ -207,7 +207,7 @@ class ModifiersUI(ConditionUI):
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
-            for m in _DIV.MODIFIERS:
+            for m in diversion.MODIFIERS:
                 self.switches[m].set_active(m in component.modifiers)
 
     def collect_value(self):
@@ -223,8 +223,8 @@ class ModifiersUI(ConditionUI):
 
 
 class KeyUI(ConditionUI):
-    CLASS = _DIV.Key
-    KEY_NAMES = map(str, _CONTROL)
+    CLASS = diversion.Key
+    KEY_NAMES = map(str, CONTROL)
 
     def create_widgets(self):
         self.widgets = {}
@@ -241,23 +241,23 @@ class KeyUI(ConditionUI):
         self.key_field.connect("changed", self._on_update)
         self.widgets[self.key_field] = (0, 1, 2, 1)
         self.action_pressed_radio = Gtk.RadioButton.new_with_label_from_widget(None, _("Key down"))
-        self.action_pressed_radio.connect("toggled", self._on_update, _Key.DOWN)
+        self.action_pressed_radio.connect("toggled", self._on_update, Key.DOWN)
         self.widgets[self.action_pressed_radio] = (2, 1, 1, 1)
         self.action_released_radio = Gtk.RadioButton.new_with_label_from_widget(self.action_pressed_radio, _("Key up"))
-        self.action_released_radio.connect("toggled", self._on_update, _Key.UP)
+        self.action_released_radio.connect("toggled", self._on_update, Key.UP)
         self.widgets[self.action_released_radio] = (3, 1, 1, 1)
 
     def show(self, component, editable):
         super().show(component, editable)
         with self.ignore_changes():
             self.key_field.set_text(str(component.key) if self.component.key else "")
-            if not component.action or component.action == _Key.DOWN:
+            if not component.action or component.action == Key.DOWN:
                 self.action_pressed_radio.set_active(True)
             else:
                 self.action_released_radio.set_active(True)
 
     def collect_value(self):
-        action = _Key.UP if self.action_released_radio.get_active() else _Key.DOWN
+        action = Key.UP if self.action_released_radio.get_active() else Key.DOWN
         return [self.key_field.get_text(), action]
 
     def _on_update(self, *args):
@@ -275,8 +275,8 @@ class KeyUI(ConditionUI):
 
 
 class KeyIsDownUI(ConditionUI):
-    CLASS = _DIV.KeyIsDown
-    KEY_NAMES = map(str, _CONTROL)
+    CLASS = diversion.KeyIsDown
+    KEY_NAMES = map(str, CONTROL)
 
     def create_widgets(self):
         self.widgets = {}
@@ -316,7 +316,7 @@ class KeyIsDownUI(ConditionUI):
 
 
 class TestUI(ConditionUI):
-    CLASS = _DIV.Test
+    CLASS = diversion.Test
 
     def create_widgets(self):
         self.widgets = {}
@@ -330,13 +330,13 @@ class TestUI(ConditionUI):
 
         self.test = Gtk.ComboBoxText.new_with_entry()
         self.test.append("", "")
-        for t in _DIV.TESTS:
+        for t in diversion.TESTS:
             self.test.append(t, t)
         self.test.set_halign(Gtk.Align.END)
         self.test.set_valign(Gtk.Align.CENTER)
         self.test.set_hexpand(False)
         self.test.set_size_request(300, 0)
-        CompletionEntry.add_completion_to_entry(self.test.get_child(), _DIV.TESTS)
+        CompletionEntry.add_completion_to_entry(self.test.get_child(), diversion.TESTS)
         self.test.connect("changed", self._on_update)
         self.widgets[self.test] = (1, 1, 1, 1)
 
@@ -350,7 +350,7 @@ class TestUI(ConditionUI):
         with self.ignore_changes():
             self.test.set_active_id(component.test)
             self.parameter.set_text(str(component.parameter) if component.parameter is not None else "")
-            if component.test not in _DIV.TESTS:
+            if component.test not in diversion.TESTS:
                 self.test.get_child().set_text(component.test)
                 self._change_status_icon()
 
@@ -367,7 +367,7 @@ class TestUI(ConditionUI):
         self._change_status_icon()
 
     def _change_status_icon(self):
-        icon = "dialog-warning" if (self.test.get_active_text() or "").strip() not in _DIV.TESTS else ""
+        icon = "dialog-warning" if (self.test.get_active_text() or "").strip() not in diversion.TESTS else ""
         self.test.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
     @classmethod
@@ -395,7 +395,7 @@ class TestBytesMode:
 
 
 class TestBytesUI(ConditionUI):
-    CLASS = _DIV.TestBytes
+    CLASS = diversion.TestBytes
 
     _common_elements = [
         TestBytesElement("begin", _("begin (inclusive)"), 0, 16),
@@ -508,7 +508,7 @@ class TestBytesUI(ConditionUI):
 
 
 class MouseGestureUI(ConditionUI):
-    CLASS = _DIV.MouseGesture
+    CLASS = diversion.MouseGesture
     MOUSE_GESTURE_NAMES = [
         "Mouse Up",
         "Mouse Down",
@@ -519,7 +519,7 @@ class MouseGestureUI(ConditionUI):
         "Mouse Down-left",
         "Mouse Down-right",
     ]
-    MOVE_NAMES = list(map(str, _CONTROL)) + MOUSE_GESTURE_NAMES
+    MOVE_NAMES = list(map(str, CONTROL)) + MOUSE_GESTURE_NAMES
 
     def create_widgets(self):
         self.widgets = {}

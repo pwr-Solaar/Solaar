@@ -34,8 +34,7 @@ from solaar.i18n import _
 from . import about
 from . import action
 from . import icons
-from .window import popup as _window_popup
-from .window import toggle as _window_toggle
+from . import window
 
 logger = logging.getLogger(__name__)
 
@@ -214,7 +213,7 @@ except ImportError:
         icon.set_name(NAME.lower())
         icon.set_title(NAME)
         icon.set_tooltip_text(NAME)
-        icon.connect("activate", _window_toggle)
+        icon.connect("activate", window.toggle)
         icon.connect("scroll-event", _scroll)
         icon.connect("popup-menu", lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
 
@@ -337,7 +336,7 @@ def _add_device(device):
     _devices_info.insert(index, new_device_info)
 
     label = ("   " if device.number else "") + device.name
-    new_menu_item = action.make_image_menu_item(label, None, _window_popup, receiver_path, device.number)
+    new_menu_item = action.make_image_menu_item(label, None, window.popup, receiver_path, device.number)
     _menu.insert(new_menu_item, index)
 
     return index
@@ -361,7 +360,7 @@ def _add_receiver(receiver):
     new_receiver_info = (receiver.path, None, receiver.name, None)
     _devices_info.insert(index, new_receiver_info)
     icon_name = icons.device_icon_name(receiver.name, receiver.kind)
-    new_menu_item = action.make_image_menu_item(receiver.name, icon_name, _window_popup, receiver.path)
+    new_menu_item = action.make_image_menu_item(receiver.name, icon_name, window.popup, receiver.path)
     _menu.insert(new_menu_item, index)
     return 0
 
