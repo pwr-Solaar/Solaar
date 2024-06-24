@@ -16,10 +16,10 @@
 
 from time import time as _timestamp
 
-from logitech_receiver import base as _base
+from logitech_receiver import base
 from logitech_receiver import hidpp10
-from logitech_receiver import hidpp10_constants as _hidpp10_constants
-from logitech_receiver import notifications as _notifications
+from logitech_receiver import hidpp10_constants
+from logitech_receiver import notifications
 
 _hidpp10 = hidpp10.Hidpp10()
 
@@ -39,8 +39,8 @@ def run(receivers, args, find_receiver, _ignore):
 
     # check if it's necessary to set the notification flags
     old_notification_flags = _hidpp10.get_notification_flags(receiver) or 0
-    if not (old_notification_flags & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
-        _hidpp10.set_notification_flags(receiver, old_notification_flags | _hidpp10_constants.NOTIFICATION_FLAG.wireless)
+    if not (old_notification_flags & hidpp10_constants.NOTIFICATION_FLAG.wireless):
+        _hidpp10.set_notification_flags(receiver, old_notification_flags | hidpp10_constants.NOTIFICATION_FLAG.wireless)
 
     # get all current devices
     known_devices = [dev.number for dev in receiver]
@@ -50,8 +50,8 @@ def run(receivers, args, find_receiver, _ignore):
             nonlocal known_devices
             assert n
             if n.devnumber == 0xFF:
-                _notifications.process(receiver, n)
-            elif n.sub_id == 0x41 and len(n.data) == _base._SHORT_MESSAGE_SIZE - 4:
+                notifications.process(receiver, n)
+            elif n.sub_id == 0x41 and len(n.data) == base._SHORT_MESSAGE_SIZE - 4:
                 kd, known_devices = known_devices, None  # only process one connection notification
                 if kd is not None:
                     if n.devnumber not in kd:
@@ -71,8 +71,8 @@ def run(receivers, args, find_receiver, _ignore):
         while receiver.pairing.discovering or _timestamp() - pairing_start < patience:
             if receiver.pairing.device_address and receiver.pairing.device_authentication and receiver.pairing.device_name:
                 break
-            n = _base.read(receiver.handle)
-            n = _base.make_notification(*n) if n else None
+            n = base.read(receiver.handle)
+            n = base.make_notification(*n) if n else None
             if n:
                 receiver.handle.notifications_hook(n)
         address = receiver.pairing.device_address
@@ -83,15 +83,15 @@ def run(receivers, args, find_receiver, _ignore):
         receiver.pair_device(
             address=address,
             authentication=authentication,
-            entropy=20 if kind == _hidpp10_constants.DEVICE_KIND.keyboard else 10,
+            entropy=20 if kind == hidpp10_constants.DEVICE_KIND.keyboard else 10,
         )
         pairing_start = _timestamp()
         patience = 5  # the discovering notification may come slightly later, so be patient
         while receiver.pairing.lock_open or _timestamp() - pairing_start < patience:
             if receiver.pairing.device_passkey:
                 break
-            n = _base.read(receiver.handle)
-            n = _base.make_notification(*n) if n else None
+            n = base.read(receiver.handle)
+            n = base.make_notification(*n) if n else None
             if n:
                 receiver.handle.notifications_hook(n)
         if authentication & 0x01:
@@ -102,8 +102,8 @@ def run(receivers, args, find_receiver, _ignore):
             print(f"Bolt Pairing: press {passkey}")
             print("and then press left and right buttons simultaneously")
         while receiver.pairing.lock_open:
-            n = _base.read(receiver.handle)
-            n = _base.make_notification(*n) if n else None
+            n = base.read(receiver.handle)
+            n = base.make_notification(*n) if n else None
             if n:
                 receiver.handle.notifications_hook(n)
 
@@ -113,13 +113,13 @@ def run(receivers, args, find_receiver, _ignore):
         pairing_start = _timestamp()
         patience = 5  # the lock-open notification may come slightly later, wait for it a bit
         while receiver.pairing.lock_open or _timestamp() - pairing_start < patience:
-            n = _base.read(receiver.handle)
+            n = base.read(receiver.handle)
             if n:
-                n = _base.make_notification(*n)
+                n = base.make_notification(*n)
                 if n:
                     receiver.handle.notifications_hook(n)
 
-    if not (old_notification_flags & _hidpp10_constants.NOTIFICATION_FLAG.wireless):
+    if not (old_notification_flags & hidpp10_constants.NOTIFICATION_FLAG.wireless):
         # only clear the flags if they weren't set before, otherwise a
         # concurrently running Solaar app might stop working properly
         _hidpp10.set_notification_flags(receiver, old_notification_flags)
