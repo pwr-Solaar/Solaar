@@ -14,7 +14,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from time import time as _timestamp
+from time import time
 
 from logitech_receiver import base
 from logitech_receiver import hidpp10
@@ -66,9 +66,9 @@ def run(receivers, args, find_receiver, _ignore):
     if receiver.receiver_kind == "bolt":  # Bolt receivers require authentication to pair a device
         receiver.discover(timeout=timeout)
         print("Bolt Pairing: long-press the pairing key or button on your device (timing out in", timeout, "seconds).")
-        pairing_start = _timestamp()
+        pairing_start = time()
         patience = 5  # the discovering notification may come slightly later, so be patient
-        while receiver.pairing.discovering or _timestamp() - pairing_start < patience:
+        while receiver.pairing.discovering or time() - pairing_start < patience:
             if receiver.pairing.device_address and receiver.pairing.device_authentication and receiver.pairing.device_name:
                 break
             n = base.read(receiver.handle)
@@ -85,9 +85,9 @@ def run(receivers, args, find_receiver, _ignore):
             authentication=authentication,
             entropy=20 if kind == hidpp10_constants.DEVICE_KIND.keyboard else 10,
         )
-        pairing_start = _timestamp()
+        pairing_start = time()
         patience = 5  # the discovering notification may come slightly later, so be patient
-        while receiver.pairing.lock_open or _timestamp() - pairing_start < patience:
+        while receiver.pairing.lock_open or time() - pairing_start < patience:
             if receiver.pairing.device_passkey:
                 break
             n = base.read(receiver.handle)
@@ -110,9 +110,9 @@ def run(receivers, args, find_receiver, _ignore):
     else:
         receiver.set_lock(False, timeout=timeout)
         print("Pairing: turn your new device on (timing out in", timeout, "seconds).")
-        pairing_start = _timestamp()
+        pairing_start = time()
         patience = 5  # the lock-open notification may come slightly later, wait for it a bit
-        while receiver.pairing.lock_open or _timestamp() - pairing_start < patience:
+        while receiver.pairing.lock_open or time() - pairing_start < patience:
             n = base.read(receiver.handle)
             if n:
                 n = base.make_notification(*n)
