@@ -18,7 +18,7 @@
 import logging
 
 import gi
-import yaml as _yaml
+import yaml
 
 from logitech_receiver.common import Alert
 
@@ -65,7 +65,7 @@ def _activate(app):
 
 def _command_line(app, command_line):
     args = command_line.get_arguments()
-    args = _yaml.safe_load("".join(args)) if args else args
+    args = yaml.safe_load("".join(args)) if args else args
     if not args:
         _activate(app)
     elif args[0] == "config":  # config call from remote instance

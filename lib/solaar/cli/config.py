@@ -14,13 +14,13 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import yaml as _yaml
+import yaml
 
-from logitech_receiver import settings as _settings
-from logitech_receiver import settings_templates as _settings_templates
-from logitech_receiver.common import NamedInts as _NamedInts
+from logitech_receiver import settings
+from logitech_receiver import settings_templates
+from logitech_receiver.common import NamedInts
 
-from solaar import configuration as _configuration
+from solaar import configuration
 
 
 def _print_setting(s, verbose=True):
@@ -28,9 +28,9 @@ def _print_setting(s, verbose=True):
     if verbose:
         if s.description:
             print("#", s.description.replace("\n", " "))
-        if s.kind == _settings.KIND.toggle:
+        if s.kind == settings.KIND.toggle:
             print("#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle/~")
-        elif s.kind == _settings.KIND.choice:
+        elif s.kind == settings.KIND.choice:
             print(
                 "#   possible values: one of [",
                 ", ".join(str(v) for v in s.choices),
@@ -51,7 +51,7 @@ def _print_setting_keyed(s, key, verbose=True):
     if verbose:
         if s.description:
             print("#", s.description.replace("\n", " "))
-        if s.kind == _settings.KIND.multiple_toggle:
+        if s.kind == settings.KIND.multiple_toggle:
             k = next((k for k in s._labels if key == k), None)
             if k is None:
                 print(s.name, "=? (key not found)")
@@ -62,7 +62,7 @@ def _print_setting_keyed(s, key, verbose=True):
                     print(s.name, "= ? (failed to read from device)")
                 else:
                     print(s.name, s.val_to_string({k: value[str(int(k))]}))
-        elif s.kind == _settings.KIND.map_choice:
+        elif s.kind == settings.KIND.map_choice:
             k = next((k for k in s.choices.keys() if key == k), None)
             if k is None:
                 print(s.name, "=? (key not found)")
@@ -158,8 +158,7 @@ def run(receivers, args, find_receiver, find_device):
     if not args.setting:  # print all settings, so first set them all up
         if not dev.settings:
             raise Exception(f"no settings for {dev.name}")
-        _configuration.attach_to(dev)
-        #        _settings.apply_all_settings(dev)
+        configuration.attach_to(dev)
         print(dev.name, f"({dev.codename}) [{dev.wpid}:{dev.serial}]")
         for s in dev.settings:
             print("")
@@ -167,7 +166,7 @@ def run(receivers, args, find_receiver, find_device):
         return
 
     setting_name = args.setting.lower()
-    setting = _settings_templates.check_feature_setting(dev, setting_name)
+    setting = settings_templates.check_feature_setting(dev, setting_name)
     if not setting and dev.descriptor and dev.descriptor.settings:
         for sclass in dev.descriptor.settings:
             if sclass.register and sclass.name == setting_name:
@@ -179,7 +178,6 @@ def run(receivers, args, find_receiver, find_device):
         raise Exception(f"no setting '{args.setting}' for {dev.name}")
 
     if args.value_key is None:
-        #        setting.apply()
         _print_setting(setting)
         return
 
@@ -210,32 +208,32 @@ def run(receivers, args, find_receiver, find_device):
     if remote:
         argl = ["config", dev.serial or dev.unitId, setting.name]
         argl.extend([a for a in [args.value_key, args.extra_subkey, args.extra2] if a is not None])
-        application.run(_yaml.safe_dump(argl))
+        application.run(yaml.safe_dump(argl))
     else:
         if dev.persister and setting.persist:
             dev.persister[setting.name] = setting._value
 
 
 def set(dev, setting, args, save):
-    if setting.kind == _settings.KIND.toggle:
+    if setting.kind == settings.KIND.toggle:
         value = select_toggle(args.value_key, setting)
         args.value_key = value
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == _settings.KIND.range:
+    elif setting.kind == settings.KIND.range:
         value = select_range(args.value_key, setting)
         args.value_key = value
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == _settings.KIND.choice:
+    elif setting.kind == settings.KIND.choice:
         value = select_choice(args.value_key, setting.choices, setting, None)
         args.value_key = int(value)
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == _settings.KIND.map_choice:
+    elif setting.kind == settings.KIND.map_choice:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
             return (None, None, None)
@@ -253,13 +251,13 @@ def set(dev, setting, args, save):
         message = f"Setting {setting.name} of {dev.name} key {k!r} to {value!r}"
         result = setting.write_key_value(int(k), value, save=save)
 
-    elif setting.kind == _settings.KIND.multiple_toggle:
+    elif setting.kind == settings.KIND.multiple_toggle:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
             return (None, None, None)
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
-        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
+        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, NamedInts) else to_int(key)
         k = next((k for k in setting._labels if key == k), None)
         if k is None and ikey is not None:
             k = next((k for k in setting._labels if ikey == k), None)
@@ -272,12 +270,12 @@ def set(dev, setting, args, save):
         message = f"Setting {setting.name} key {k!r} to {value!r}"
         result = setting.write_key_value(str(int(k)), value, save=save)
 
-    elif setting.kind == _settings.KIND.multiple_range:
+    elif setting.kind == settings.KIND.multiple_range:
         if args.extra_subkey is None:
             raise Exception(f"{setting.name}: setting needs both key and value to set")
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
-        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, _NamedInts) else to_int(key)
+        ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, NamedInts) else to_int(key)
         if args.extra2 is None or to_int(args.extra2) is None:
             raise Exception(f"{setting.name}: setting needs an integer value, not {args.extra2}")
         if not setting._value:  # ensure that there are values to look through

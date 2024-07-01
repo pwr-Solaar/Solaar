@@ -17,7 +17,7 @@
 from contextlib import contextmanager as contextlib_contextmanager
 
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
+from logitech_receiver import diversion
 
 
 def norm(s):
@@ -47,7 +47,7 @@ class CompletionEntry(Gtk.Entry):
 
 
 class RuleComponentUI:
-    CLASS = _DIV.RuleComponent
+    CLASS = diversion.RuleComponent
 
     def __init__(self, panel, on_update=None):
         self.panel = panel

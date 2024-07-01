@@ -29,15 +29,13 @@ import tempfile
 
 from traceback import format_exc
 
-import solaar.cli as _cli
-import solaar.configuration as _configuration
-import solaar.dbus as _dbus
-import solaar.listener as _listener
-import solaar.ui as _ui
-import solaar.ui.common as _common
-
 from solaar import NAME
 from solaar import __version__
+from solaar import cli
+from solaar import configuration
+from solaar import dbus
+from solaar import listener
+from solaar import ui
 
 logger = logging.getLogger(__name__)
 
@@ -87,12 +85,12 @@ def _parse_arguments():
     arg_parser.add_argument("--tray-icon-size", type=int, help="explicit size for tray icons")
     arg_parser.add_argument("-V", "--version", action="version", version="%(prog)s " + __version__)
     arg_parser.add_argument("--help-actions", action="store_true", help="print help for the optional actions")
-    arg_parser.add_argument("action", nargs=argparse.REMAINDER, choices=_cli.actions, help="optional actions to perform")
+    arg_parser.add_argument("action", nargs=argparse.REMAINDER, choices=cli.actions, help="optional actions to perform")
 
     args = arg_parser.parse_args()
 
     if args.help_actions:
-        _cli.print_help()
+        cli.print_help()
         return
 
     if args.window is None:
@@ -146,7 +144,7 @@ def main():
         return
     if args.action:
         # if any argument, run comandline and exit
-        return _cli.run(args.action, args.hidraw_path)
+        return cli.run(args.action, args.hidraw_path)
 
     gi = _require("gi", "python3-gi (in Ubuntu) or python3-gobject (in Fedora)")
     _require("gi.repository.Gtk", "gir1.2-gtk-3.0", gi, "Gtk", "3.0")
@@ -166,17 +164,17 @@ def main():
         logger.warning("Solaar udev file not found in expected location")
         logger.warning("See https://pwr-solaar.github.io/Solaar/installation for more information")
     try:
-        _listener.setup_scanner(_ui.status_changed, _ui.setting_changed, _common.error_dialog)
+        listener.setup_scanner(ui.status_changed, ui.setting_changed, ui.common.error_dialog)
 
         if args.restart_on_wake_up:
-            _dbus.watch_suspend_resume(_listener.start_all, _listener.stop_all)
+            dbus.watch_suspend_resume(listener.start_all, listener.stop_all)
         else:
-            _dbus.watch_suspend_resume(lambda: _listener.ping_all(True))
+            dbus.watch_suspend_resume(lambda: listener.ping_all(True))
 
-        _configuration.defer_saves = True  # allow configuration saves to be deferred
+        configuration.defer_saves = True  # allow configuration saves to be deferred
 
         # main UI event loop
-        _ui.run_loop(_listener.start_all, _listener.stop_all, args.window != "only", args.window != "hide")
+        ui.run_loop(listener.start_all, listener.stop_all, args.window != "only", args.window != "hide")
     except Exception:
         sys.exit(f"{NAME.lower()}: error: {format_exc()}")
 

@@ -21,10 +21,9 @@
 
 def init_paths():
     """Make the app work in the source tree."""
-    import os.path as _path
+    import os.path
     import sys
 
-    # Python 2 need conversion from utf-8 filenames
     # Python 3 might have problems converting back to UTF-8 in case of Unicode surrogates
     try:
         decoded_path = sys.path[0]
@@ -33,18 +32,17 @@ def init_paths():
     except UnicodeError:
         sys.stderr.write(
             "ERROR: Solaar cannot recognize encoding of filesystem path, "
-            "this may happen because non UTF-8 characters in the pathname.\n"
+            "this may happen due to non UTF-8 characters in the pathname.\n"
         )
         sys.exit(1)
 
-    prefix = _path.normpath(_path.join(_path.realpath(decoded_path), ".."))
-    src_lib = _path.join(prefix, "lib")
-    share_lib = _path.join(prefix, "share", "solaar", "lib")
+    root = os.path.join(os.path.realpath(decoded_path), "..")
+    prefix = os.path.normpath(root)
+    src_lib = os.path.join(prefix, "lib")
+    share_lib = os.path.join(prefix, "share", "solaar", "lib")
     for location in src_lib, share_lib:
-        init_py = _path.join(location, "solaar", "__init__.py")
-        # print ("sys.path[0]: checking", init_py)
-        if _path.exists(init_py):
-            # print ("sys.path[0]: found", location, "replacing", sys.path[0])
+        init_py = os.path.join(location, "solaar", "__init__.py")
+        if os.path.exists(init_py):
             sys.path[0] = location
             break
 

@@ -19,12 +19,12 @@ import logging
 
 from gi.repository import GLib
 from gi.repository import Gtk
-from logitech_receiver import hidpp10_constants as _hidpp10_constants
+from logitech_receiver import hidpp10_constants
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import icons as _icons
+from . import icons
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def _check_lock_state(assistant, receiver, count):
         return True
     elif receiver.pairing.discovering and receiver.pairing.device_address and receiver.pairing.device_name:
         add = receiver.pairing.device_address
-        ent = 20 if receiver.pairing.device_kind == _hidpp10_constants.DEVICE_KIND.keyboard else 10
+        ent = 20 if receiver.pairing.device_kind == hidpp10_constants.DEVICE_KIND.keyboard else 10
         if receiver.pair_device(address=add, authentication=receiver.pairing.device_authentication, entropy=ent):
             return True
         else:
@@ -200,8 +200,8 @@ def _create_success_page(assistant, device):
     header = Gtk.Label(label=_("Found a new device:"))
     page.pack_start(header, False, False, 0)
     device_icon = Gtk.Image()
-    icon_name = _icons.device_icon_name(device.name, device.kind)
-    device_icon.set_from_icon_name(icon_name, _icons.LARGE_SIZE)
+    icon_name = icons.device_icon_name(device.name, device.kind)
+    device_icon.set_from_icon_name(icon_name, icons.LARGE_SIZE)
     page.pack_start(device_icon, True, True, 0)
     device_label = Gtk.Label()
     device_label.set_markup(f"<b>{device.name}</b>")
