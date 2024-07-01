@@ -3,8 +3,6 @@ title: Solaar Implementation
 layout: page
 ---
 
-TODO:  improve the callback mechanism(s) to support the explicit calls of the UI
-
 # Solaar Implementation
 
 Solaar has three main components: code mostly about receivers and devices, code for the command line interface, and code for the graphical user interface.
@@ -88,8 +86,6 @@ The module `descriptors` sets up information on device models for which Solaar n
 
 The module `base_usb` sets up information for most of the receiver models that Solaar supports, including USB id, USB interface used for HID++ messages, what kind of receiver model it is, and some capabilities of the receiver model.  Solaar can now support other receivers as long as they are not too unusual.  The module lso sets up lists of device models by USB ID and Bluetooth ID and provides a function to determine whether a USB ID or Bluetooth ID is an HID++ device model
 
-TODO?  Move some information down to descriptors?
-
 The module `base` provides functions that call discovery to enumerate all current receivers and devices and to set up a callback for when new receivers or devices are discovered.  It provides functions to open and close I/O channels to receivers and devices, write HID++ messages to receivers and devices, and read HID++ messages from receivers and devices.  It provides a function to turn an HID++ message into a notification.
 
 The module provides a function to send an HID++ message to a receiver or device, constructing the message from parameters to the function, and optionally waiting for and returning a response.  The function checks messages from the receiver or device, only terminating at timeout or when a message that appears to be the response is seen.  Other messages are turned into notifications if appropriate and ignoreed otherwise.  A separate function sends a ping message and waits for a reply to the ping.
@@ -108,8 +104,6 @@ The module contains code that determines the meaning of a notification based on 
 After this processing HID++ 2.0 notifications are sent to the `diversion` module where they initiate Solaar rule processing.
 
 The `status` module provides the `DeviceStatus` class to record the battery status of a device.  It also provides an interface to signal changes to the connection status of the device that can invoke a callback.  This callback is used to update the Solaar user interface when the status changes.
-
-TODO:  check why solaar/listener.py sets the callback multiple times
 
 
 ### Settings
@@ -153,10 +147,6 @@ The Solaar GUI takes these settings and constructs an interface for displaying a
 
 This setup allows for very quick implementation of simple settings but it bypasses the data stored in a device object.
 
-TODO:  Refactor settings so that they always use data stored in device objects.  Set up code to create a device data as easily as simple settings are creates.  Set up code to use this to create a setting object for the Solaar GUI.  Use callbacks to control GUI redisplay whenever the device data changes.
-
-
-
 
 ### Solaar Rules
 
@@ -172,8 +162,6 @@ The module `common.py` provides utility functions, structures, and classes.
 `NamedInt`, `NamedInts`, and `UnsortedNamedInts` provide integers and sets of integers with attached names.
 `FirmwareInfo` provides information about device firmware.
 `BATTERY_APPROX` provides named integers used for approximate battery levels of devices.
-
-TODO: Move a couple of things from hidpp20 to here.
 
 `i18n.py` provides a few strings that need translations and might not otherwise be visible to translation software.
 
@@ -191,8 +179,6 @@ The code now also identifies HID ++ devices that are directly connected via eith
 Device and receiver discovery is performed when Solaar starts.  While the Solaar GUI is running the `udev` code also listens for connections of new hardware using facilities from `GLib`.
 
 This code is also responsible for actual writing data to devices and receivers and reading data from them.
-
-TOD:  Is this actually the case?
 
 
 ## Solaar
