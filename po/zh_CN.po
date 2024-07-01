@@ -1856,7 +1856,7 @@ msgstr "增加移动轨迹"
 
 #: lib/solaar/ui/tray.py:50
 msgid "No supported device found"
-msgstr "发现不支持的设备"
+msgstr "未发现支持的设备"
 
 #: lib/solaar/ui/tray.py:55 lib/solaar/ui/window.py:310
 #, python-format
