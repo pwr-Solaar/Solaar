@@ -1,4 +1,4 @@
-# <img src="https://pwr-solaar.github.io/Solaar/assets/solaar.svg" width="60px"/> Solaar
+# <img src="https://pwr-solaar.github.io/Solaar/img/solaar.svg" width="60px"/> Solaar
 
 Solaar is a Linux manager for many Logitech keyboards, mice, and other devices
 that connect wirelessly to a Unifying, Bolt, Lightspeed or Nano receiver
