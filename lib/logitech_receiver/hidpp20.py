@@ -1452,7 +1452,10 @@ class Hidpp20:
         kind = device.feature_request(FEATURE.DEVICE_NAME, 0x20)
         if kind:
             kind = ord(kind[:1])
-            return KIND_MAP[DEVICE_KIND[kind]]
+            try:
+                return KIND_MAP[DEVICE_KIND[kind]]
+            except Exception:
+                return None
 
     def get_name(self, device: Device):
         """Reads a device's name.
