@@ -622,8 +622,8 @@ key_tests = [
         hidpp.Response("0220000000", 0x0400),
         hidpp.Response("0000800100000000000000", 0x0410, "00"),
         hidpp.Response("E010", 0x0420, "00"),
-        hidpp.Response("E010", 0x0430, "02E010"),
-        hidpp.Response("E018", 0x0430, "02E018"),
+        hidpp.Response("E010", 0x0430, "01E010"),
+        hidpp.Response("E018", 0x0430, "01E018"),
     ),
     Setup(
         FeatureTest(settings_templates.PerKeyLighting, {1: -1, 2: -1, 9: -1, 10: -1, 113: -1}, {2: 0xFF0000}, 4, 4, 0, 1),

@@ -1499,7 +1499,7 @@ class Equalizer(settings.RangeFieldSetting):
                     if g * 7 + b >= count:
                         break
                     map[g * 7 + b] = str(int.from_bytes(freqs[2 * b + 1 : 2 * b + 3], "big")) + _("Hz")
-            return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b"\x02")
+            return cls(map, min_value=dbMin, max_value=dbMax, count=count, write_prefix_bytes=b"\x01")
 
 
 class ADCPower(settings.Setting):
