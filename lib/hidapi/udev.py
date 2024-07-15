@@ -153,8 +153,6 @@ def _match(action, device, filterfn):
         return d_info
 
     elif action == "remove":
-        # print (dict(device), dict(usb_device))
-
         d_info = DeviceInfo(
             path=device.device_node,
             bus_id=None,
@@ -217,16 +215,6 @@ def find_paired_node_wpid(receiver_path, index):
 
 def monitor_glib(callback, filterfn):
     c = pyudev.Context()
-
-    # already existing devices
-    # for device in c.list_devices(subsystem='hidraw'):
-    #     # print (device, dict(device), dict(device.attributes))
-    #     for filter in device_filters:
-    #         d_info = _match('add', device, *filter)
-    #         if d_info:
-    #             GLib.idle_add(callback, 'add', d_info)
-    #             break
-
     m = pyudev.Monitor.from_netlink(c)
     m.filter_by(subsystem="hidraw")
 
@@ -248,15 +236,12 @@ def monitor_glib(callback, filterfn):
     try:
         # io_add_watch_full may not be available...
         GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-        # print ("did io_add_watch_full")
     except AttributeError:
         try:
             # and the priority parameter appeared later in the API
             GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch with priority")
         except Exception:
             GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch")
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Starting dbus monitoring")

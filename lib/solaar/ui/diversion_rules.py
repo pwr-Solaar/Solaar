@@ -35,8 +35,8 @@ from logitech_receiver.common import NamedInt
 from logitech_receiver.common import NamedInts
 from logitech_receiver.common import UnsortedNamedInts
 from logitech_receiver.settings import KIND as _SKIND
-from logitech_receiver.settings import Setting as _Setting
-from logitech_receiver.settings_templates import SETTINGS as _SETTINGS
+from logitech_receiver.settings import Setting
+from logitech_receiver.settings_templates import SETTINGS
 
 from solaar.i18n import _
 from solaar.ui import rule_actions
@@ -931,7 +931,7 @@ class DeviceInfo:
     serial: str = ""
     unitId: str = ""
     codename: str = ""
-    settings: Dict[str, _Setting] = field(default_factory=dict)
+    settings: Dict[str, Setting] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.serial is None or self.serial == "?":
@@ -1281,7 +1281,7 @@ class SetValueControl(Gtk.HBox):
 
 def _all_settings():
     settings = {}
-    for s in sorted(_SETTINGS, key=lambda setting: setting.label):
+    for s in sorted(SETTINGS, key=lambda setting: setting.label):
         if s.name not in settings:
             settings[s.name] = [s]
         else:
@@ -1326,7 +1326,6 @@ class _DeviceUI:
         self.device_field.set_value("")
         self.device_field.set_valign(Gtk.Align.CENTER)
         self.device_field.set_size_request(400, 0)
-        #        self.device_field.connect('changed', self._changed_device)
         self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
@@ -1477,9 +1476,9 @@ class _SettingWithValueUI:
         (including the extra value if it exists) and the second element is the extra value to be pinned to
         the start of the list (or `None` if there is no extra value).
         """
-        if isinstance(setting, _Setting):
+        if isinstance(setting, Setting):
             setting = type(setting)
-        if isinstance(setting, type) and issubclass(setting, _Setting):
+        if isinstance(setting, type) and issubclass(setting, Setting):
             choices = UnsortedNamedInts()
             universe = getattr(setting, "choices_universe", None)
             if universe:

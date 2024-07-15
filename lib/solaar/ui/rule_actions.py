@@ -17,12 +17,12 @@
 from shlex import quote as shlex_quote
 
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
+from logitech_receiver import diversion
 from logitech_receiver.diversion import CLICK
 from logitech_receiver.diversion import DEPRESS
 from logitech_receiver.diversion import RELEASE
-from logitech_receiver.diversion import XK_KEYS as _XK_KEYS
-from logitech_receiver.diversion import buttons as _buttons
+from logitech_receiver.diversion import XK_KEYS
+from logitech_receiver.diversion import buttons
 
 from solaar.i18n import _
 from solaar.ui.rule_base import CompletionEntry
@@ -30,7 +30,7 @@ from solaar.ui.rule_base import RuleComponentUI
 
 
 class ActionUI(RuleComponentUI):
-    CLASS = _DIV.Action
+    CLASS = diversion.Action
 
     @classmethod
     def icon_name(cls):
@@ -38,8 +38,8 @@ class ActionUI(RuleComponentUI):
 
 
 class KeyPressUI(ActionUI):
-    CLASS = _DIV.KeyPress
-    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in _XK_KEYS.items() if isinstance(v, int)]
+    CLASS = diversion.KeyPress
+    KEY_NAMES = [k[3:] if k.startswith("XK_") else k for k, v in XK_KEYS.items() if isinstance(v, int)]
 
     def create_widgets(self):
         self.widgets = {}
@@ -107,7 +107,6 @@ class KeyPressUI(ActionUI):
             self._create_field()
             self._create_del_btn()
 
-        #        self.widgets[self.add_btn] = (n + 1, 0, 1, 1)
         self.widgets[self.add_btn] = (n, 1, 1, 1)
         super().show(component, editable)
         for i in range(n):
@@ -137,7 +136,7 @@ class KeyPressUI(ActionUI):
 
 
 class MouseScrollUI(ActionUI):
-    CLASS = _DIV.MouseScroll
+    CLASS = diversion.MouseScroll
     MIN_VALUE = -2000
     MAX_VALUE = 2000
 
@@ -191,10 +190,10 @@ class MouseScrollUI(ActionUI):
 
 
 class MouseClickUI(ActionUI):
-    CLASS = _DIV.MouseClick
+    CLASS = diversion.MouseClick
     MIN_VALUE = 1
     MAX_VALUE = 9
-    BUTTONS = list(_buttons.keys())
+    BUTTONS = list(buttons.keys())
     ACTIONS = [CLICK, DEPRESS, RELEASE]
 
     def create_widgets(self):
@@ -249,7 +248,7 @@ class MouseClickUI(ActionUI):
 
 
 class ExecuteUI(ActionUI):
-    CLASS = _DIV.Execute
+    CLASS = diversion.Execute
 
     def create_widgets(self):
         self.widgets = {}
