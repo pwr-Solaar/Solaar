@@ -7,6 +7,9 @@ Comment[ru]=Управление приёмником Logitech Unifying Receiver
 Comment[de]=Logitech Unifying Empfänger Geräteverwaltung
 Comment[es]=Administrador de periféricos de Logitech Receptor Unifying
 Comment[pl]=Menedżer urządzeń peryferyjnych odbiornika Logitech Unifying
+Comment[zh_CN]=罗技优联设备管理器
+Comment[zh_TW]=羅技Unifying 裝置管理器
+Comment[zh_HK]=羅技Unifying 裝置管理器
 Exec=solaar --window=hide
 Icon=solaar
 StartupNotify=true
