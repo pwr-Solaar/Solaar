@@ -1,3 +1,47 @@
+# 1.1.14rc1
+
+* Add type hints
+* Improve about dialog
+* Reduce dependencies
+* Refactor code
+* Improve testing
+* Allow unknown keys in Key rule conditions
+* Improve documentation for cli actions
+* Cycle sw_id to better guard against duplication of messages
+* Handle error return on root feature
+* Clean up documentation
+* Improve github interactions
+* Add information about Onboard Profiles overriding some settings
+* Add wording to README.md that Solaar is not a device driver
+* Clean up imports
+* Handle unknown device kinds
+* Fix broken links to Solaar logo
+* Use mkdocs for public documentation
+* Clean up setup.py
+* Remove Dead links in the AppStream file
+* Update about.py
+* Remove check on driver
+* Improve base module
+* Remove unnecessary receiver info 'hid_driver'
+* Convert HIDPPNotification to dataclass
+* Be defensive when converting battery status to string
+* Automatically detect packages in /lib
+* Clean up locale code
+* Improve rules documentation
+* Refactor creation of devices
+* Add headings to structure rules.md
+* Unify imports in logitech package
+* Don't ping device when getting name or codename
+* Use dataclasses and enums where useful
+* Introduce Device protocol and type hints
+* Add typing_extensions dependency
+* Move hidpp10 independent functions to module level
+* Fix macOS compatibility and reenable CI tests
+* Unify imports in hidapi package
+* Move screenshots into dedicated folder and add high-level graph of components
+* Update French and Chinese translations
+* Drop support for end-of-life Python 3.7
+
 # 1.1.13
 
 * Update Polish and Russian translations.
