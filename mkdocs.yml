@@ -19,8 +19,6 @@ nav:
   - Rules: rules.md
   - Usage: usage.md
 
-  - Developer Documentation: reference/developer_documentation.md
-
 plugins:
   - search
   - mkdocstrings:
