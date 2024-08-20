@@ -15,11 +15,14 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import logging
 import socket
 import struct
 import threading
 
+from enum import IntEnum
 from typing import Any
 from typing import List
 from typing import Optional
@@ -55,10 +58,10 @@ KIND_MAP = {kind: hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KI
 
 
 class Device(Protocol):
-    def feature_request(self, feature: FEATURE) -> Any:
+    def feature_request(self, feature, function, *params, no_reply=False) -> Any:
         ...
 
-    def request(self) -> Any:
+    def request(self, **kwargs) -> Any:
         ...
 
     @property
@@ -651,7 +654,7 @@ ACTION_ID._fallback = lambda x: f"unknown:{x:04X}"
 
 
 class Gesture:
-    def __init__(self, device, low, high, next_index, next_diversion_index):
+    def __init__(self, device: Device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
         self.gesture = GESTURE[low]
@@ -725,7 +728,7 @@ class Gesture:
 
 
 class Param:
-    def __init__(self, device, low, high, next_param_index):
+    def __init__(self, device: Device, low, high, next_param_index):
         self._device = device
         self.id = low
         self.param = PARAM[low]
@@ -773,7 +776,7 @@ class Param:
 
 
 class Spec:
-    def __init__(self, device, low, high):
+    def __init__(self, device: Device, low, high):
         self._device = device
         self.id = low
         self.spec = SPEC[low]
@@ -984,7 +987,7 @@ yaml.add_representer(LEDEffectSetting, LEDEffectSetting.to_yaml)
 
 
 class LEDEffectInfo:  # an effect that a zone can do
-    def __init__(self, feature, function, device, zindex, eindex):
+    def __init__(self, feature, function, device: Device, zindex, eindex):
         info = device.feature_request(feature, function, zindex, eindex, 0x00)
         self.zindex, self.index, self.ID, self.capabilities, self.period = struct.unpack("!BBHHH", info[0:8])
 
@@ -1008,7 +1011,7 @@ LEDZoneLocations[0x0B] = _("Primary 6")
 
 
 class LEDZoneInfo:  # effects that a zone can do
-    def __init__(self, feature, function, offset, effect_function, device, index):
+    def __init__(self, feature, function, offset, effect_function, device: Device, index):
         info = device.feature_request(feature, function, index, 0xFF, 0x00)
         self.location, self.count = struct.unpack("!HB", info[1 + offset : 4 + offset])
         self.index = index
@@ -1057,28 +1060,42 @@ class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_
             self.zones.append(LEDZoneInfo(FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
 
 
-ButtonBehaviors = common.NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
-ButtonMappingTypes = common.NamedInts(No_Action=0x0, Button=0x1, Modifier_And_Key=0x2, Consumer_Key=0x3)
-ButtonFunctions = common.NamedInts(
-    No_Action=0x0,
-    Tilt_Left=0x1,
-    Tilt_Right=0x2,
-    Next_DPI=0x3,
-    Previous_DPI=0x4,
-    Cycle_DPI=0x5,
-    Default_DPI=0x6,
-    Shift_DPI=0x7,
-    Next_Profile=0x8,
-    Previous_Profile=0x9,
-    Cycle_Profile=0xA,
-    G_Shift=0xB,
-    Battery_Status=0xC,
-    Profile_Select=0xD,
-    Mode_Switch=0xE,
-    Host_Button=0xF,
-    Scroll_Down=0x10,
-    Scroll_Up=0x11,
-)
+class ButtonBehavior(IntEnum):
+    MACRO_EXECUTE = 0x0
+    MACRO_STOP = 0x1
+    MACRO_STOP_ALL = 0x2
+    SEND = 0x8
+    FUNCTION = 0x9
+
+
+class ButtonMappingType(IntEnum):
+    NO_ACTION = 0x0
+    BUTTON = 0x1
+    MODIFIER_AND_KEY = 0x2
+    CONSUMER_KEY = 0x3
+
+
+class ButtonFunctions(IntEnum):
+    NO_ACTION = 0x0
+    TILT_LEFT = 0x1
+    TILT_RIGHT = 0x2
+    NEXT_DPI = 0x3
+    PREVIOUS_DPI = 0x4
+    CYCLE_DPI = 0x5
+    DEFAULT_DPI = 0x6
+    SHIFT_DPI = 0x7
+    NEXT_PROFILE = 0x8
+    PREVIOUS_PROFILE = 0x9
+    CYCLE_PROFILE = 0xA
+    G_SHIFT = 0xB
+    BATTERY_STATUS = 0xC
+    PROFILE_SELECT = 0xD
+    MODE_SWITCH = 0xE
+    HOST_BUTTON = 0xF
+    SCROLL_DOWN = 0x10
+    SCROLL_UP = 0x11
+
+
 ButtonButtons = special_keys.MOUSE_BUTTONS
 ButtonModifiers = special_keys.modifiers
 ButtonKeys = special_keys.USB_HID_KEYCODES
@@ -1088,8 +1105,8 @@ ButtonConsumerKeys = special_keys.HID_CONSUMERCODES
 class Button:
     """A button mapping"""
 
-    def __init__(self, **kwargs):
-        self.behavior = None
+    def __init__(self, behavior: int, **kwargs):
+        self.behavior = behavior
         for key, val in kwargs.items():
             setattr(self, key, val)
 
@@ -1103,54 +1120,61 @@ class Button:
         return dumper.represent_mapping("!Button", data.__dict__, flow_style=True)
 
     @classmethod
-    def from_bytes(cls, bytes):
-        behavior = ButtonBehaviors[bytes[0] >> 4]
-        if behavior == ButtonBehaviors.MacroExecute or behavior == ButtonBehaviors.MacroStop:
-            sector = ((bytes[0] & 0x0F) << 8) + bytes[1]
-            address = (bytes[2] << 8) + bytes[3]
-            result = cls(behavior=behavior, sector=sector, address=address)
-        elif behavior == ButtonBehaviors.Send:
-            mapping_type = ButtonMappingTypes[bytes[1]]
-            if mapping_type == ButtonMappingTypes.Button:
-                value = ButtonButtons[(bytes[2] << 8) + bytes[3]]
-                result = cls(behavior=behavior, type=mapping_type, value=value)
-            elif mapping_type == ButtonMappingTypes.Modifier_And_Key:
-                modifiers = bytes[2]
-                value = ButtonKeys[bytes[3]]
-                result = cls(behavior=behavior, type=mapping_type, modifiers=modifiers, value=value)
-            elif mapping_type == ButtonMappingTypes.Consumer_Key:
-                value = ButtonConsumerKeys[(bytes[2] << 8) + bytes[3]]
-                result = cls(behavior=behavior, type=mapping_type, value=value)
-            elif mapping_type == ButtonMappingTypes.No_Action:
-                result = cls(behavior=behavior, type=mapping_type)
-        elif behavior == ButtonBehaviors.Function:
-            value = ButtonFunctions[bytes[1]] if ButtonFunctions[bytes[1]] is not None else bytes[1]
-            data = bytes[3]
-            result = cls(behavior=behavior, value=value, data=data)
+    def from_bytes(cls, bytes_) -> Button:
+        result = None
+        try:
+            behavior = ButtonBehavior(bytes_[0] >> 4)
+        except ValueError:
+            behavior = None
+
+        if behavior == ButtonBehavior.MACRO_EXECUTE or behavior == ButtonBehavior.MACRO_STOP:
+            sector = ((bytes_[0] & 0x0F) << 8) + bytes_[1]
+            address = (bytes_[2] << 8) + bytes_[3]
+            result = cls(behavior=behavior.value, sector=sector, address=address)
+        elif behavior == ButtonBehavior.SEND:
+            mapping_type = ButtonMappingType(bytes_[1])
+            if mapping_type == ButtonMappingType.BUTTON:
+                value = ButtonButtons[(bytes_[2] << 8) + bytes_[3]]
+                result = cls(behavior=behavior.value, type=mapping_type.value, value=value)
+            elif mapping_type == ButtonMappingType.MODIFIER_AND_KEY:
+                modifiers = bytes_[2]
+                value = ButtonKeys[bytes_[3]]
+                result = cls(behavior=behavior.value, type=mapping_type.value, modifiers=modifiers, value=value)
+            elif mapping_type == ButtonMappingType.CONSUMER_KEY:
+                value = ButtonConsumerKeys[(bytes_[2] << 8) + bytes_[3]]
+                result = cls(behavior=behavior.value, type=mapping_type.value, value=value)
+            elif mapping_type == ButtonMappingType.NO_ACTION:
+                result = cls(behavior=behavior.value, type=mapping_type.value)
+            else:
+                raise ValueError("Unsupported ButtonMapping")
+        elif behavior == ButtonBehavior.FUNCTION:
+            value = ButtonFunctions(bytes_[1]).value if ButtonFunctions(bytes_[1]) is not None else bytes_[1]
+            data = bytes_[3]
+            result = cls(behavior=behavior.value, value=value, data=data)
         else:
-            result = cls(behavior=bytes[0] >> 4, bytes=bytes)
+            result = cls(behavior=bytes_[0] >> 4, bytes=bytes_)
         return result
 
     def to_bytes(self):
-        bytes = common.int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
-        if self.behavior == ButtonBehaviors.MacroExecute or self.behavior == ButtonBehaviors.MacroStop:
-            bytes = common.int2bytes((self.behavior << 12) + self.sector, 2) + common.int2bytes(self.address, 2)
-        elif self.behavior == ButtonBehaviors.Send:
-            bytes += common.int2bytes(self.type, 1)
-            if self.type == ButtonMappingTypes.Button:
-                bytes += common.int2bytes(self.value, 2)
-            elif self.type == ButtonMappingTypes.Modifier_And_Key:
-                bytes += common.int2bytes(self.modifiers, 1)
-                bytes += common.int2bytes(self.value, 1)
-            elif self.type == ButtonMappingTypes.Consumer_Key:
-                bytes += common.int2bytes(self.value, 2)
-            elif self.type == ButtonMappingTypes.No_Action:
-                bytes += b"\xff\xff"
-        elif self.behavior == ButtonBehaviors.Function:
-            bytes += common.int2bytes(self.value, 1) + b"\xff" + (common.int2bytes(self.data, 1) if self.data else b"\x00")
+        bytes_ = common.int2bytes(self.behavior << 4, 1) if self.behavior is not None else None
+        if self.behavior == ButtonBehavior.MACRO_EXECUTE or self.behavior == ButtonBehavior.MACRO_STOP:
+            bytes_ = common.int2bytes((self.behavior << 12) + self.sector, 2) + common.int2bytes(self.address, 2)
+        elif self.behavior == ButtonBehavior.SEND:
+            bytes_ += common.int2bytes(self.type, 1)
+            if self.type == ButtonMappingType.BUTTON:
+                bytes_ += common.int2bytes(self.value, 2)
+            elif self.type == ButtonMappingType.MODIFIER_AND_KEY:
+                bytes_ += common.int2bytes(self.modifiers, 1)
+                bytes_ += common.int2bytes(self.value, 1)
+            elif self.type == ButtonMappingType.CONSUMER_KEY:
+                bytes_ += common.int2bytes(self.value, 2)
+            elif self.type == ButtonMappingType.NO_ACTION:
+                bytes_ += b"\xff\xff"
+        elif self.behavior == ButtonBehavior.FUNCTION:
+            bytes_ += common.int2bytes(self.value, 1) + b"\xff" + (common.int2bytes(self.data, 1) if self.data else b"\x00")
         else:
-            bytes = self.bytes if self.bytes else b"\xff\xff\xff\xff"
-        return bytes
+            bytes_ = self.bytes if self.bytes else b"\xff\xff\xff\xff"
+        return bytes_
 
     def __repr__(self):
         return "%s{%s}" % (
@@ -1371,7 +1395,7 @@ yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
 yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 
 
-def feature_request(device, feature, function=0x00, *params, no_reply=False):
+def feature_request(device: Device, feature, function=0x00, *params, no_reply=False):
     if device.online and device.features:
         if feature in device.features:
             feature_index = device.features[feature]
@@ -1427,7 +1451,7 @@ class Hidpp20:
                     fw.append(fw_info)
             return tuple(fw)
 
-    def get_ids(self, device):
+    def get_ids(self, device: Device):
         """Reads a device's ids (unit and model numbers)"""
         ids = device.feature_request(FEATURE.DEVICE_FW_VERSION)
         if ids:
