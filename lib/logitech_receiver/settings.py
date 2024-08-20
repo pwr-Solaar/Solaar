@@ -108,7 +108,7 @@ class Setting:
         assert hasattr(self, "_device")
 
         if self._validator.kind == KIND.range:
-            return (self._validator.min_value, self._validator.max_value)
+            return self._validator.min_value, self._validator.max_value
 
     def _pre_read(self, cached, key=None):
         if self.persist and self._value is None and getattr(self._device, "persister", None):
@@ -626,7 +626,16 @@ class FeatureRW:
     default_read_fnid = 0x00
     default_write_fnid = 0x10
 
-    def __init__(self, feature, read_fnid=0x00, write_fnid=0x10, prefix=b"", suffix=b"", read_prefix=b"", no_reply=False):
+    def __init__(
+        self,
+        feature,
+        read_fnid=default_read_fnid,
+        write_fnid=default_write_fnid,
+        prefix=b"",
+        suffix=b"",
+        read_prefix=b"",
+        no_reply=False,
+    ):
         assert isinstance(feature, NamedInt)
         self.feature = feature
         self.read_fnid = read_fnid
@@ -1488,7 +1497,7 @@ class RawXYProcessing:
         if n.sub_id < 0x40 and device.features.get_feature(n.sub_id) == hidpp20_constants.FEATURE.REPROG_CONTROLS_V4:
             if n.address == 0x00:
                 cids = struct.unpack("!HHHH", n.data[:8])
-                ## generalize to list of keys
+                # generalize to list of keys
                 if not self.initiating_key:  # no initiating key pressed
                     for k in self.keys:
                         if int(k.key) in cids:  # initiating key that was pressed
