@@ -44,6 +44,9 @@ from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
+ACTION_ADD = "add"
+ACTION_REMOVE = "remove"
+
 fileopen = open
 
 #
@@ -73,12 +76,13 @@ def exit():
 # The filterfn is used to determine whether this is a device of interest to Solaar.
 # It is given the bus id, vendor id, and product id and returns a dictionary
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
-def _match(action, device, filterfn):
+def _match(action: str, device, filterfn):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f"Dbus event {action} {device}")
     hid_device = device.find_parent("hid")
     if hid_device is None:  # only HID devices are of interest to Solaar
         return
+
     hid_id = hid_device.properties.get("HID_ID")
     if not hid_id:
         return  # there are reports that sometimes the id isn't set up right so be defensive
@@ -114,7 +118,7 @@ def _match(action, device, filterfn):
     interface_number = filter.get("usb_interface")
     isDevice = filter.get("isDevice")
 
-    if action == "add":
+    if action == ACTION_ADD:
         hid_driver_name = hid_device.properties.get("DRIVER")
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
@@ -152,7 +156,7 @@ def _match(action, device, filterfn):
         )
         return d_info
 
-    elif action == "remove":
+    elif action == ACTION_REMOVE:
         d_info = DeviceInfo(
             path=device.device_node,
             bus_id=None,
@@ -224,11 +228,11 @@ def monitor_glib(callback, filterfn):
             if event:
                 action, device = event
                 # print ("***", action, device)
-                if action == "add":
+                if action == ACTION_ADD:
                     d_info = _match(action, device, filterfn)
                     if d_info:
                         GLib.idle_add(cb, action, d_info)
-                elif action == "remove":
+                elif action == ACTION_REMOVE:
                     # the GLib notification does _not_ match!
                     pass
         return True
