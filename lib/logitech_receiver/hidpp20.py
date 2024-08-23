@@ -140,8 +140,11 @@ class FeaturesArray(dict):
             return self.version.get(feature, 0)
 
     def __contains__(self, feature: NamedInt) -> bool:
-        index = self.__getitem__(feature)
-        return index is not None and index is not False
+        try:
+            index = self.__getitem__(feature)
+            return index is not None and index is not False
+        except exceptions.FeatureCallError:
+            return False
 
     def __getitem__(self, feature: NamedInt) -> Optional[int]:
         index = super().get(feature)
