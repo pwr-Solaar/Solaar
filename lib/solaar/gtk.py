@@ -84,8 +84,13 @@ def _parse_arguments():
     )
     arg_parser.add_argument("--tray-icon-size", type=int, help="explicit size for tray icons")
     arg_parser.add_argument("-V", "--version", action="version", version="%(prog)s " + __version__)
-    arg_parser.add_argument("--help-actions", action="store_true", help="print help for the optional actions")
-    arg_parser.add_argument("action", nargs=argparse.REMAINDER, choices=cli.actions, help="optional actions to perform")
+    arg_parser.add_argument("--help-actions", action="store_true", help="describe the command-line actions")
+    arg_parser.add_argument(
+        "action",
+        nargs=argparse.REMAINDER,
+        choices=cli.actions,
+        help="command-line action to perform (optional); append ' --help' to show args",
+    )
 
     args = arg_parser.parse_args()
 

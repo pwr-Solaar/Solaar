@@ -35,7 +35,7 @@ def _create_parser():
     parser = argparse.ArgumentParser(
         prog=NAME.lower(), add_help=False, epilog=f"For details on individual actions, run `{NAME.lower()} <action> --help`."
     )
-    subparsers = parser.add_subparsers(title="actions", help="optional action to perform")
+    subparsers = parser.add_subparsers(title="actions", help="command-line action to perform")
 
     sp = subparsers.add_parser("show", help="show information about devices")
     sp.add_argument(
