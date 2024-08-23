@@ -409,8 +409,13 @@ def acquire_timeout(lock, handle, timeout):
             lock.release()
 
 
+# cycle the HID++ 2.0 software ID from x2 to xF, inclusive, to separate results from each other, notifications, and driver
+sw_id = 0xF
+
+
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
 def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+    global sw_id
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -426,7 +431,8 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             # most significant bit (8) in SoftwareId, to make notifications easier
             # to distinguish from request replies.
             # This only applies to peripheral requests, ofc.
-            request_id = (request_id & 0xFFF0) | 0x08 | getrandbits(3)
+            sw_id = sw_id + 1 if sw_id < 0xF else 2
+            request_id = (request_id & 0xFFF0) | sw_id  # was 0x08 | getrandbits(3)
 
         timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
         # be extra patient on long register read
@@ -530,6 +536,7 @@ def ping(handle, devnumber, long_message=False):
     """Check if a device is connected to the receiver.
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
+    global sw_id
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("(%s) pinging device %d", handle, devnumber)
     with acquire_timeout(handle_lock(handle), handle, 10.0):
@@ -540,10 +547,10 @@ def ping(handle, devnumber, long_message=False):
             logger.warning("device or receiver disconnected")
             return
 
-        # randomize the SoftwareId and mark byte to be able to identify the ping
-        # reply, and set most significant (0x8) bit in SoftwareId so that the reply
-        # is always distinguishable from notifications
-        request_id = 0x0018 | getrandbits(3)
+        # randomize the mark byte to be able to identify the ping reply
+        # cycle the sw_id byte from 2 to 15 (see above)
+        sw_id = sw_id + 1 if sw_id < 0xF else 2
+        request_id = 0x0010 | sw_id  # was 0x0018 | getrandbits(3)
         request_data = struct.pack("!HBBB", request_id, 0, 0, getrandbits(8))
         write(int(handle), devnumber, request_data, long_message)
 
