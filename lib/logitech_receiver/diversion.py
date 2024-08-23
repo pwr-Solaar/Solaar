@@ -865,6 +865,9 @@ class Key(Condition):
 
         if isinstance(key, str) and key in CONTROL:
             self.key = CONTROL[key]
+        elif isinstance(key, str) and key.startswith("unknown:"):
+            logger.info(f"rule Key key name currently unknown: {key}")
+            self.key = CONTROL[int(key[-4:], 16)]
         else:
             if warn:
                 logger.warning(f"rule Key key name not name of a Logitech key: {key}")
