@@ -136,9 +136,9 @@ It is possible to end up with an unusable system, for example by having no
 way to do a mouse left click, so exercise caution when remapping keys or
 buttons that are needed to operate your system.
 
-## Solaar command line interface
+## Solaar command-line interface
 
-Solaar also has a command line interface that can do most of what can be
+Solaar also has a command-line interface that can do most of what can be
 done using the main window. For more information on the
 command line interface, run `solaar --help` to see the commands and
 then `solaar <command> --help` to see the arguments to any of the commands.
