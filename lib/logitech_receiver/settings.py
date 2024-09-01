@@ -842,7 +842,7 @@ class BitFieldValidator(Validator):
     def to_string(self, value):
         def element_to_string(key, val):
             k = next((k for k in self.options if int(key) == k), None)
-            return str(k) + ":" + str(val) if k is not None else "?"
+            return f"{str(k)}:{str(val)}" if k is not None else "?"
 
         return "{" + ", ".join([element_to_string(k, value[k]) for k in value]) + "}"
 
@@ -1107,7 +1107,7 @@ class ChoicesMapValidator(ChoicesValidator):
     def to_string(self, value):
         def element_to_string(key, val):
             k, c = next(((k, c) for k, c in self.choices.items() if int(key) == k), (None, None))
-            return str(k) + ":" + str(c[val]) if k is not None else "?"
+            return f"{str(k)}:{str(c[val])}" if k is not None else "?"
 
         return "{" + ", ".join([element_to_string(k, value[k]) for k in sorted(value)]) + "}"
 

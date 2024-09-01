@@ -45,29 +45,29 @@ def run(receivers, args, find_receiver, _ignore):
     print("")
     print("  Register Dump")
     rgst = receiver.read_register(Registers.NOTIFICATIONS)
-    print("    Notifications         %#04x: %s" % (Registers.NOTIFICATIONS % 0x100, "0x" + strhex(rgst) if rgst else "None"))
+    print("    Notifications         %#04x: %s" % (Registers.NOTIFICATIONS % 0x100, f"0x{strhex(rgst)}" if rgst else "None"))
     rgst = receiver.read_register(Registers.RECEIVER_CONNECTION)
     print(
         "    Connection State      %#04x: %s"
-        % (Registers.RECEIVER_CONNECTION % 0x100, "0x" + strhex(rgst) if rgst else "None")
+        % (Registers.RECEIVER_CONNECTION % 0x100, f"0x{strhex(rgst)}" if rgst else "None")
     )
     rgst = receiver.read_register(Registers.DEVICES_ACTIVITY)
     print(
-        "    Device Activity       %#04x: %s" % (Registers.DEVICES_ACTIVITY % 0x100, "0x" + strhex(rgst) if rgst else "None")
+        "    Device Activity       %#04x: %s" % (Registers.DEVICES_ACTIVITY % 0x100, f"0x{strhex(rgst)}" if rgst else "None")
     )
 
     for sub_reg in range(0, 16):
         rgst = receiver.read_register(Registers.RECEIVER_INFO, sub_reg)
         print(
             "    Pairing Register %#04x %#04x: %s"
-            % (Registers.RECEIVER_INFO % 0x100, sub_reg, "0x" + strhex(rgst) if rgst else "None")
+            % (Registers.RECEIVER_INFO % 0x100, sub_reg, f"0x{strhex(rgst)}" if rgst else "None")
         )
     for device in range(0, 7):
         for sub_reg in [0x10, 0x20, 0x30, 0x50]:
             rgst = receiver.read_register(Registers.RECEIVER_INFO, sub_reg + device)
             print(
                 "    Pairing Register %#04x %#04x: %s"
-                % (Registers.RECEIVER_INFO % 0x100, sub_reg + device, "0x" + strhex(rgst) if rgst else "None")
+                % (Registers.RECEIVER_INFO % 0x100, sub_reg + device, f"0x{strhex(rgst)}" if rgst else "None")
             )
         rgst = receiver.read_register(Registers.RECEIVER_INFO, 0x40 + device)
         print(
@@ -90,7 +90,7 @@ def run(receivers, args, find_receiver, _ignore):
         rgst = receiver.read_register(Registers.FIRMWARE, sub_reg)
         print(
             "    Firmware         %#04x %#04x: %s"
-            % (Registers.FIRMWARE % 0x100, sub_reg, "0x" + strhex(rgst) if rgst is not None else "None")
+            % (Registers.FIRMWARE % 0x100, sub_reg, f"0x{strhex(rgst)}" if rgst is not None else "None")
         )
 
     print("")
@@ -106,7 +106,7 @@ def run(receivers, args, find_receiver, _ignore):
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         "    Register Short   %#04x %#04x: %s"
-                        % (reg, sub, "0x" + strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
+                        % (reg, sub, f"0x{strhex(rgst)}" if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst
         last = None
@@ -120,6 +120,6 @@ def run(receivers, args, find_receiver, _ignore):
                 if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
                     print(
                         "    Register Long    %#04x %#04x: %s"
-                        % (reg, sub, "0x" + strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
+                        % (reg, sub, f"0x{strhex(rgst)}" if isinstance(rgst, bytes) else str(rgst))
                     )
             last = rgst

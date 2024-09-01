@@ -393,23 +393,23 @@ class PersistentRemappableAction:
         if self.actionId == special_keys.ACTIONID.Empty:
             return None
         elif self.actionId == special_keys.ACTIONID.Key:
-            return "Key: " + str(self.modifiers) + str(self.remapped)
+            return f"Key: {str(self.modifiers)}{str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Mouse:
-            return "Mouse Button: " + str(self.remapped)
+            return f"Mouse Button: {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Xdisp:
-            return "X Displacement " + str(self.remapped)
+            return f"X Displacement {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Ydisp:
-            return "Y Displacement " + str(self.remapped)
+            return f"Y Displacement {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Vscroll:
-            return "Vertical Scroll " + str(self.remapped)
+            return f"Vertical Scroll {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Hscroll:
-            return "Horizontal Scroll: " + str(self.remapped)
+            return f"Horizontal Scroll: {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Consumer:
-            return "Consumer: " + str(self.remapped)
+            return f"Consumer: {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return "Internal Action " + str(self.remapped)
+            return f"Internal Action {str(self.remapped)}"
         elif self.actionId == special_keys.ACTIONID.Internal:
-            return "Power " + str(self.remapped)
+            return f"Power {str(self.remapped)}"
         else:
             return "Unknown"
 
@@ -1158,7 +1158,7 @@ class Button:
     def __repr__(self):
         return "%s{%s}" % (
             self.__class__.__name__,
-            ", ".join([str(key) + ":" + str(val) for key, val in self.__dict__.items()]),
+            ", ".join([f"{str(key)}:{str(val)}" for key, val in self.__dict__.items()]),
         )
 
 
@@ -1724,7 +1724,7 @@ class Hidpp20:
         state = device.feature_request(FEATURE.REPORT_RATE, 0x10)
         if state:
             rate = struct.unpack("!B", state[:1])[0]
-            return str(rate) + "ms"
+            return f"{str(rate)}ms"
         else:
             rates = ["8ms", "4ms", "2ms", "1ms", "500us", "250us", "125us"]
             state = device.feature_request(FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)

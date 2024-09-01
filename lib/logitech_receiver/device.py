@@ -225,14 +225,14 @@ class Device:
                     self._codename = codename
                 elif self.protocol < 2.0:
                     self._codename = "? (%s)" % (self.wpid or self.product_id)
-        return self._codename or "?? (%s)" % (self.wpid or self.product_id)
+        return self._codename or f"?? ({self.wpid or self.product_id})"
 
     @property
     def name(self):
         if not self._name:
             if self.online and self.protocol >= 2.0:
                 self._name = _hidpp20.get_name(self)
-        return self._name or self._codename or "Unknown device %s" % (self.wpid or self.product_id)
+        return self._name or self._codename or f"Unknown device {self.wpid or self.product_id}"
 
     def get_ids(self):
         ids = _hidpp20.get_ids(self)

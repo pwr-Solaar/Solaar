@@ -30,9 +30,9 @@ def main():
         for name, sym, uni in findall(xf86pattern, text):
             sym = int(sym, 16)
             uni = int(uni, 16) if uni else None
-            if keysymdef.get("XF86_" + name, None):
-                print("KEY DUP", "XF86_" + name)
-            keysymdef["XF86_" + name] = sym
+            if keysymdef.get(f"XF86_{name}", None):
+                print("KEY DUP", f"XF86_{name}")
+            keysymdef[f"XF86_{name}"] = sym
 
     with open("keysymdef.py", "w") as f:
         f.write("# flake8: noqa\nkeysymdef = \\\n")

@@ -124,7 +124,7 @@ class Hidpp10:
         fw_version = f"{fw_version[0:2]}.{fw_version[2:4]}"
         reply = read_register(device, Registers.FIRMWARE, 0x02)
         if reply:
-            fw_version += ".B" + common.strhex(reply[1:3])
+            fw_version += f".B{common.strhex(reply[1:3])}"
         fw = common.FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
         firmware[0] = fw
 

@@ -503,7 +503,7 @@ def _update_details(button):
 
             yield (_("Path"), device.path)
             if device.kind is None:
-                yield (_("USB ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
+                yield (_("USB ID"), f"{LOGITECH_VENDOR_ID:04x}:{device.product_id}")
 
                 if read_all:
                     yield (_("Serial"), device.serial)
@@ -516,7 +516,7 @@ def _update_details(button):
                 if device.wpid:
                     yield (_("Wireless PID"), device.wpid)
                 if device.product_id:
-                    yield (_("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
+                    yield (_("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:{device.product_id}")
                 hid_version = device.protocol
                 yield (_("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown"))
                 if read_all and device.polling_rate:
@@ -532,7 +532,7 @@ def _update_details(button):
             if read_all:
                 if device.firmware:
                     for fw in list(device.firmware):
-                        yield ("  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip())
+                        yield (f"  {_(str(fw.kind))}", f"{fw.name} {fw.version}".strip())
             elif device.kind is None or device.online:
                 yield (f"  {_('Firmware')}", "...")
 
@@ -548,7 +548,7 @@ def _update_details(button):
 
         def _make_text(items):
             text = "\n".join("%-13s: %s" % (name, value) for name, value in items)
-            return "<small><tt>" + text + "</tt></small>"
+            return f"<small><tt>{text}</tt></small>"
 
         def _displayable_items(items):
             for name, value in items:
@@ -850,7 +850,7 @@ def update(device, need_popup=False, refresh=False):
 
     else:
         path = device.receiver.path if device.receiver is not None else device.path
-        assert device.number is not None and device.number >= 0, "invalid device number" + str(device.number)
+        assert device.number is not None and device.number >= 0, f"invalid device number{str(device.number)}"
         item = _device_row(path, device.number, device if bool(device) else None)
 
         if bool(device) and item:

@@ -91,7 +91,7 @@ if available:
                     icon_list += ("input-mouse",)
                 elif str(kind) == "headset":
                     icon_list += ("audio-headphones", "audio-headset")
-                icon_list += ("input-" + str(kind),)
+                icon_list += (f"input-{str(kind)}",)
             _ICON_LISTS[name] = icon_list
         return icon_list
 
