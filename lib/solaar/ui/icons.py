@@ -105,7 +105,7 @@ def device_icon_set(name="_", kind=None):
                 icon_set += ("input-mouse",)
             elif str(kind) == "headset":
                 icon_set += ("audio-headphones", "audio-headset")
-            icon_set += (f"input-{str(kind)}", )
+            icon_set += (f"input-{str(kind)}",)
         # icon_set += (name.replace(' ', '-'),)
         _ICON_SETS[name] = icon_set
     return icon_set
