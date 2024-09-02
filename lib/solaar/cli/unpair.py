@@ -26,7 +26,8 @@ def run(receivers, args, find_receiver, find_device):
 
     if not dev.receiver.may_unpair:
         print(
-            f"Receiver with USB id {dev.receiver.product_id} for {dev.name} [{dev.wpid}:{dev.serial}] does not unpair, but attempting anyway."
+            "Receiver with USB id %s for %s [%s:%s] does not unpair, but attempting anyway."
+            % (dev.receiver.product_id, dev.name, dev.wpid, dev.serial)
         )
     try:
         # query these now, it's last chance to get them
