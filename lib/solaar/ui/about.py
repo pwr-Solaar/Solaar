@@ -23,10 +23,6 @@ from solaar import NAME
 from solaar import __version__
 from solaar.i18n import _
 
-#
-#
-#
-
 _dialog = None
 
 
@@ -39,7 +35,7 @@ def _create():
     about.set_icon_name(NAME.lower())
     about.set_logo_icon_name(NAME.lower())
 
-    about.set_copyright("© 2012-2023 Daniel Pavel and contributors to the Solaar project")
+    about.set_copyright("© 2012-2024 Daniel Pavel and contributors to the Solaar project")
     about.set_license_type(Gtk.License.GPL_2_0)
 
     about.set_authors(("Daniel Pavel http://github.com/pwr",))

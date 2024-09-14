@@ -33,12 +33,12 @@ from . import hidpp20_constants
 from . import notify
 from . import settings
 from . import special_keys
+from .hidpp10_constants import Registers
 
 logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
 _DK = hidpp10_constants.DEVICE_KIND
-_R = hidpp10_constants.REGISTERS
 _F = hidpp20_constants.FEATURE
 
 _GG = hidpp20_constants.GESTURE
@@ -137,7 +137,7 @@ class RegisterHandDetection(settings.Setting):
     name = "hand-detection"
     label = _("Hand Detection")
     description = _("Turn on illumination when the hands hover over the keyboard.")
-    register = _R.keyboard_hand_detection
+    register = Registers.KEYBOARD_HAND_DETECTION
     validator_options = {"true_value": b"\x00\x00\x00", "false_value": b"\x00\x00\x30", "mask": b"\x00\x00\xff"}
 
 
@@ -145,7 +145,7 @@ class RegisterSmoothScroll(settings.Setting):
     name = "smooth-scroll"
     label = _("Scroll Wheel Smooth Scrolling")
     description = _("High-sensitivity mode for vertical scroll with the wheel.")
-    register = _R.mouse_button_flags
+    register = Registers.MOUSE_BUTTON_FLAGS
     validator_options = {"true_value": 0x40, "mask": 0x40}
 
 
@@ -156,7 +156,7 @@ class RegisterSideScroll(settings.Setting):
         "When disabled, pushing the wheel sideways sends custom button events\n"
         "instead of the standard side-scrolling events."
     )
-    register = _R.mouse_button_flags
+    register = Registers.MOUSE_BUTTON_FLAGS
     validator_options = {"true_value": 0x02, "mask": 0x02}
 
 
@@ -165,14 +165,14 @@ class RegisterDpi(settings.Setting):
     name = "dpi-old"
     label = _("Sensitivity (DPI - older mice)")
     description = _("Mouse movement sensitivity")
-    register = _R.mouse_dpi
+    register = Registers.MOUSE_DPI
     choices_universe = common.NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
     validator_class = settings.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
 class RegisterFnSwap(FnSwapVirtual):
-    register = _R.keyboard_fn_swap
+    register = Registers.KEYBOARD_FN_SWAP
     validator_options = {"true_value": b"\x00\x01", "mask": b"\x00\x01"}
 
 
@@ -816,7 +816,7 @@ class MouseGesturesXY(settings.RawXYProcessing):
             if logger.isEnabledFor(logging.INFO):
                 logger.info("mouse gesture notification %s", self.data)
             payload = struct.pack("!" + (len(self.data) * "h"), *self.data)
-            notification = base._HIDPP_Notification(0, 0, 0, 0, payload)
+            notification = base.HIDPPNotification(0, 0, 0, 0, payload)
             diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
             self.fsmState = "idle"
 
@@ -1774,10 +1774,6 @@ SETTINGS = [
     Equalizer,
     ADCPower,
 ]
-
-#
-#
-#
 
 
 def check_feature(device, sclass):

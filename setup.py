@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
 import subprocess
+import textwrap
 
-from glob import glob as _glob
-from os.path import dirname as _dirname
+from glob import glob
+from os.path import dirname
+
+from setuptools import find_packages
 
 try:
     from setuptools import setup
@@ -33,11 +35,11 @@ except Exception:  # get commit from Ubuntu dpkg-parsechangelog
 
 
 def _data_files():
-    yield "share/icons/hicolor/scalable/apps", _glob("share/solaar/icons/solaar*.svg")
-    yield "share/icons/hicolor/32x32/apps", _glob("share/solaar/icons/solaar-light_*.png")
+    yield "share/icons/hicolor/scalable/apps", glob("share/solaar/icons/solaar*.svg")
+    yield "share/icons/hicolor/32x32/apps", glob("share/solaar/icons/solaar-light_*.png")
 
-    for mo in _glob("share/locale/*/LC_MESSAGES/solaar.mo"):
-        yield _dirname(mo), [mo]
+    for mo in glob("share/locale/*/LC_MESSAGES/solaar.mo"):
+        yield dirname(mo), [mo]
 
     yield "share/applications", ["share/applications/solaar.desktop"]
     yield "lib/udev/rules.d", ["rules.d/42-logitech-unify-permissions.rules"]
@@ -48,12 +50,14 @@ setup(
     name=NAME.lower(),
     version=version,
     description="Linux device manager for Logitech receivers, keyboards, mice, and tablets.",
-    long_description="""
-Solaar is a Linux device manager for many Logitech peripherals that connect through
-Unifying and other receivers or via USB or Bluetooth.
-Solaar is able to pair/unpair devices with receivers and show and modify some of the
-modifiable features of devices.
-For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/installation""".strip(),
+    long_description=textwrap.dedent(
+        """
+        Solaar is a Linux device manager for many Logitech peripherals that connect through
+        Unifying and other receivers or via USB or Bluetooth.
+        Solaar is able to pair/unpair devices with receivers and show and modify some of the
+        modifiable features of devices.
+        For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/installation"""
+    ),
     author="Daniel Pavel",
     license="GPLv2",
     url="http://pwr-solaar.github.io/Solaar/",
@@ -70,9 +74,6 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "Topic :: Utilities",
     ],
     platforms=["linux"],
-    # sudo apt install python-gi python3-gi \
-    #        gir1.2-gtk-3.0 gir1.2-notify-0.7 gir1.2-ayatanaappindicator3-0.1
-    # os_requires=['gi.repository.GObject (>= 2.0)', 'gi.repository.Gtk (>= 3.0)'],
     python_requires=">=3.8",
     install_requires=[
         'evdev (>= 1.1.2) ; platform_system=="Linux"',
@@ -91,8 +92,8 @@ For instructions on installing Solaar see https://pwr-solaar.github.io/Solaar/in
         "dev": ["ruff"],
     },
     package_dir={"": "lib"},
-    packages=["keysyms", "hidapi", "hid_parser", "logitech_receiver", "solaar", "solaar.ui", "solaar.ui.rules", "solaar.cli"],
+    packages=find_packages(where="lib"),
     data_files=list(_data_files()),
     include_package_data=True,
-    scripts=_glob("bin/*"),
+    scripts=glob("bin/*"),
 )

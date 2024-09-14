@@ -140,8 +140,11 @@ class FeaturesArray(dict):
             return self.version.get(feature, 0)
 
     def __contains__(self, feature: NamedInt) -> bool:
-        index = self.__getitem__(feature)
-        return index is not None and index is not False
+        try:
+            index = self.__getitem__(feature)
+            return index is not None and index is not False
+        except exceptions.FeatureCallError:
+            return False
 
     def __getitem__(self, feature: NamedInt) -> Optional[int]:
         index = super().get(feature)
@@ -1452,7 +1455,10 @@ class Hidpp20:
         kind = device.feature_request(FEATURE.DEVICE_NAME, 0x20)
         if kind:
             kind = ord(kind[:1])
-            return KIND_MAP[DEVICE_KIND[kind]]
+            try:
+                return KIND_MAP[DEVICE_KIND[kind]]
+            except Exception:
+                return None
 
     def get_name(self, device: Device):
         """Reads a device's name.

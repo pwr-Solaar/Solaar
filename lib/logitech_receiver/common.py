@@ -27,6 +27,8 @@ import yaml
 
 from solaar.i18n import _
 
+LOGITECH_VENDOR_ID = 0x046D
+
 
 def crc16(data: bytes):
     """
@@ -604,10 +606,10 @@ class Battery:
     def to_str(self) -> str:
         if isinstance(self.level, BatteryLevelApproximation):
             level = self.level.name.lower()
-            status = self.status.name.lower().replace("_", " ")
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(level)s (%(status)s)") % {"level": _(level), "status": _(status)}
         elif isinstance(self.level, int):
-            status = self.status.name.lower().replace("_", " ")
+            status = self.status.name.lower().replace("_", " ") if self.status is not None else "Unknown"
             return _("Battery: %(percent)d%% (%(status)s)") % {"percent": self.level, "status": _(status)}
         else:
             return ""
@@ -619,3 +621,18 @@ class Alert(IntEnum):
     SHOW_WINDOW = 0x02
     ATTENTION = 0x04
     ALL = 0xFF
+
+
+class Notification(IntEnum):
+    NO_OPERATION = 0x00
+    CONNECT_DISCONNECT = 0x40
+    DJ_PAIRING = 0x41
+    CONNECTED = 0x42
+    RAW_INPUT = 0x49
+    PAIRING_LOCK = 0x4A
+    POWER = 0x4B
+
+
+class BusID(IntEnum):
+    USB = 0x03
+    BLUETOOTH = 0x05

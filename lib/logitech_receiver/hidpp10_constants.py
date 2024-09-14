@@ -14,13 +14,15 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from enum import IntEnum
 
 from .common import NamedInts
 
-#
-# Constants - most of them as defined by the official Logitech HID++ 1.0
-# documentation, some of them guessed.
-#
+"""HID constants for HID++ 1.0.
+
+Most of them as defined by the official Logitech HID++ 1.0
+documentation, some of them guessed.
+"""
 
 DEVICE_KIND = NamedInts(
     unknown=0x00,
@@ -102,38 +104,47 @@ ERROR = NamedInts(
 
 PAIRING_ERRORS = NamedInts(device_timeout=0x01, device_not_supported=0x02, too_many_devices=0x03, sequence_timeout=0x06)
 BOLT_PAIRING_ERRORS = NamedInts(device_timeout=0x01, failed=0x02)
-"""Known registers.
-Devices usually have a (small) sub-set of these. Some registers are only
-applicable to certain device kinds (e.g. smooth_scroll only applies to mice."""
-REGISTERS = NamedInts(
+
+
+class Registers(IntEnum):
+    """Known HID registers.
+
+    Devices usually have a (small) sub-set of these. Some registers are only
+    applicable to certain device kinds (e.g. smooth_scroll only applies to mice).
+    """
+
+    # Generally applicable
+    NOTIFICATIONS = 0x00
+    FIRMWARE = 0xF1
+
     # only apply to receivers
-    receiver_connection=0x02,
-    receiver_pairing=0xB2,
-    devices_activity=0x2B3,
-    receiver_info=0x2B5,
-    bolt_device_discovery=0xC0,
-    bolt_pairing=0x2C1,
-    bolt_uniqueId=0x02FB,
+    RECEIVER_CONNECTION = 0x02
+    RECEIVER_PAIRING = 0xB2
+    DEVICES_ACTIVITY = 0x2B3
+    RECEIVER_INFO = 0x2B5
+    BOLT_DEVICE_DISCOVERY = 0xC0
+    BOLT_PAIRING = 0x2C1
+    BOLT_UNIQUE_ID = 0x02FB
+
     # only apply to devices
-    mouse_button_flags=0x01,
-    keyboard_hand_detection=0x01,
-    devices_configuration=0x03,
-    battery_status=0x07,
-    keyboard_fn_swap=0x09,
-    battery_charge=0x0D,
-    keyboard_illumination=0x17,
-    three_leds=0x51,
-    mouse_dpi=0x63,
-    # apply to both
-    notifications=0x00,
-    firmware=0xF1,
+    MOUSE_BUTTON_FLAGS = 0x01
+    KEYBOARD_HAND_DETECTION = 0x01
+    DEVICES_CONFIGURATION = 0x03
+    BATTERY_STATUS = 0x07
+    KEYBOARD_FN_SWAP = 0x09
+    BATTERY_CHARGE = 0x0D
+    KEYBOARD_ILLUMINATION = 0x17
+    THREE_LEDS = 0x51
+    MOUSE_DPI = 0x63
+
     # notifications
-    passkey_request_notification=0x4D,
-    passkey_pressed_notification=0x4E,
-    device_discovery_notification=0x4F,
-    discovery_status_notification=0x53,
-    pairing_status_notification=0x54,
-)
+    PASSKEY_REQUEST_NOTIFICATION = 0x4D
+    PASSKEY_PRESSED_NOTIFICATION = 0x4E
+    DEVICE_DISCOVERY_NOTIFICATION = 0x4F
+    DISCOVERY_STATUS_NOTIFICATION = 0x53
+    PAIRING_STATUS_NOTIFICATION = 0x54
+
+
 # Subregisters for receiver_info register
 INFO_SUBREGISTERS = NamedInts(
     serial_number=0x01,  # not found on many receivers

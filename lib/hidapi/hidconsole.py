@@ -29,6 +29,8 @@ from threading import Thread
 
 import hidapi
 
+LOGITECH_VENDOR_ID = 0x046D
+
 interactive = os.isatty(0)
 prompt = "?? Input: " if interactive else ""
 start_time = time.time()
@@ -37,10 +39,6 @@ start_time = time.time()
 def strhex(d):
     return hexlify(d).decode("ascii").upper()
 
-
-#
-#
-#
 
 print_lock = Lock()
 
@@ -130,8 +128,8 @@ def _validate_input(line, hidpp=False):
 
 def _open(args):
     def matchfn(bid, vid, pid, _a, _b):
-        if vid == 0x046D:
-            return {"vid": 0x046D}
+        if vid == LOGITECH_VENDOR_ID:
+            return {"vid": vid}
 
     device = args.device
     if args.hidpp and not device:
@@ -162,11 +160,6 @@ def _open(args):
             print(".. Logitech receiver detected, HID++ validation enabled.")
 
     return handle
-
-
-#
-#
-#
 
 
 def _parse_arguments():

@@ -21,13 +21,10 @@ import logging
 from solaar import NAME
 from solaar.i18n import _
 
-from . import icons as _icons
+from . import icons
 
 logger = logging.getLogger(__name__)
 
-#
-#
-#
 
 try:
     import gi
@@ -69,14 +66,6 @@ if available:
             _notifications.clear()
             Notify.uninit()
 
-    # def toggle(action):
-    #     if action.get_active():
-    #         init()
-    #     else:
-    #         uninit()
-    #     action.set_sensitive(available)
-    #     return action.get_active()
-
     def alert(reason, icon=None):
         assert reason
 
@@ -87,15 +76,13 @@ if available:
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.icon_file(NAME.lower()) if icon is None else _icons.icon_file(icon)
+            icon_file = icons.icon_file(NAME.lower()) if icon is None else icons.icon_file(icon)
 
             n.update(NAME.lower(), reason, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
             n.set_hint("desktop-entry", GLib.Variant("s", NAME.lower()))
 
             try:
-                # if logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
                 logger.exception("showing %s", n)
@@ -116,16 +103,10 @@ if available:
                 message = reason
             else:
                 message = _("unspecified reason")
-            # elif dev.status is None:
-            #     message = _("unpaired")
-            # elif bool(dev.status):
-            #     message = dev.status_string() or _("connected")
-            # else:
-            #     message = _("offline")
 
             # we need to use the filename here because the notifications daemon
             # is an external application that does not know about our icon sets
-            icon_file = _icons.device_icon_file(dev.name, dev.kind) if icon is None else _icons.icon_file(icon)
+            icon_file = icons.device_icon_file(dev.name, dev.kind) if icon is None else icons.icon_file(icon)
 
             n.update(summary, message, icon_file)
             n.set_urgency(Notify.Urgency.NORMAL)
@@ -134,8 +115,6 @@ if available:
                 n.set_hint("value", GLib.Variant("i", progress))
 
             try:
-                # if logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
                 logger.exception("showing %s", n)

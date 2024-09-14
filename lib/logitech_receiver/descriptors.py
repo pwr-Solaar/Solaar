@@ -14,16 +14,18 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-#
-# Devices (not receivers) known to Solaar.
-# Solaar can handle many recent devices without having any entry here.
-# An entry should only be added to fix problems, such as
-# - the device's device ID or WPID falls outside the range that Solaar searches
-# - the device uses a USB interface other than 2
-# - the name or codename should be different from what the device reports
+
+"""Devices (not receivers) known to Solaar.
+
+Solaar can handle many recent devices without having any entry here.
+An entry should only be added to fix problems, such as
+- the device's device ID or WPID falls outside the range that Solaar searches
+- the device uses a USB interface other than 2
+- the name or codename should be different from what the device reports
+"""
 
 from .hidpp10_constants import DEVICE_KIND
-from .hidpp10_constants import REGISTERS as REG
+from .hidpp10_constants import Registers as Reg
 
 
 class _DeviceDescriptor:
@@ -191,24 +193,24 @@ def get_btid(btid):
 
 # Keyboards
 
-_D("Wireless Keyboard EX110", codename="EX110", protocol=1.0, wpid="0055", registers=(REG.battery_status,))
-_D("Wireless Keyboard S510", codename="S510", protocol=1.0, wpid="0056", registers=(REG.battery_status,))
-_D("Wireless Wave Keyboard K550", codename="K550", protocol=1.0, wpid="0060", registers=(REG.battery_status,))
-_D("Wireless Keyboard EX100", codename="EX100", protocol=1.0, wpid="0065", registers=(REG.battery_status,))
-_D("Wireless Keyboard MK300", codename="MK300", protocol=1.0, wpid="0068", registers=(REG.battery_status,))
-_D("Number Pad N545", codename="N545", protocol=1.0, wpid="2006", registers=(REG.battery_status,))
-_D("Wireless Compact Keyboard K340", codename="K340", protocol=1.0, wpid="2007", registers=(REG.battery_status,))
-_D("Wireless Keyboard MK700", codename="MK700", protocol=1.0, wpid="2008", registers=(REG.battery_status,))
-_D("Wireless Wave Keyboard K350", codename="K350", protocol=1.0, wpid="200A", registers=(REG.battery_status,))
-_D("Wireless Keyboard MK320", codename="MK320", protocol=1.0, wpid="200F", registers=(REG.battery_status,))
+_D("Wireless Keyboard EX110", codename="EX110", protocol=1.0, wpid="0055", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Keyboard S510", codename="S510", protocol=1.0, wpid="0056", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Wave Keyboard K550", codename="K550", protocol=1.0, wpid="0060", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Keyboard EX100", codename="EX100", protocol=1.0, wpid="0065", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Keyboard MK300", codename="MK300", protocol=1.0, wpid="0068", registers=(Reg.BATTERY_STATUS,))
+_D("Number Pad N545", codename="N545", protocol=1.0, wpid="2006", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Compact Keyboard K340", codename="K340", protocol=1.0, wpid="2007", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Keyboard MK700", codename="MK700", protocol=1.0, wpid="2008", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Wave Keyboard K350", codename="K350", protocol=1.0, wpid="200A", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Keyboard MK320", codename="MK320", protocol=1.0, wpid="200F", registers=(Reg.BATTERY_STATUS,))
 _D(
     "Wireless Illuminated Keyboard K800",
     codename="K800",
     protocol=1.0,
     wpid="2010",
-    registers=(REG.battery_status, REG.three_leds),
+    registers=(Reg.BATTERY_STATUS, Reg.THREE_LEDS),
 )
-_D("Wireless Keyboard K520", codename="K520", protocol=1.0, wpid="2011", registers=(REG.battery_status,))
+_D("Wireless Keyboard K520", codename="K520", protocol=1.0, wpid="2011", registers=(Reg.BATTERY_STATUS,))
 _D("Wireless Solar Keyboard K750", codename="K750", protocol=2.0, wpid="4002")
 _D("Wireless Keyboard K270 (unifying)", codename="K270", protocol=2.0, wpid="4003")
 _D("Wireless Keyboard K360", codename="K360", protocol=2.0, wpid="4004")
@@ -233,57 +235,57 @@ _D("K845 Mechanical Keyboard", codename="K845", usbid=0xC341, interface=3)
 
 # Mice
 
-_D("LX5 Cordless Mouse", codename="LX5", protocol=1.0, wpid="0036", registers=(REG.battery_status,))
-_D("LX7 Cordless Laser Mouse", codename="LX7", protocol=1.0, wpid="0039", registers=(REG.battery_status,))
-_D("Wireless Wave Mouse M550", codename="M550", protocol=1.0, wpid="003C", registers=(REG.battery_status,))
-_D("Wireless Mouse EX100", codename="EX100m", protocol=1.0, wpid="003F", registers=(REG.battery_status,))
-_D("Wireless Mouse M30", codename="M30", protocol=1.0, wpid="0085", registers=(REG.battery_status,))
-_D("MX610 Laser Cordless Mouse", codename="MX610", protocol=1.0, wpid="1001", registers=(REG.battery_status,))
-_D("G7 Cordless Laser Mouse", codename="G7", protocol=1.0, wpid="1002", registers=(REG.battery_status,))
-_D("V400 Laser Cordless Mouse", codename="V400", protocol=1.0, wpid="1003", registers=(REG.battery_status,))
-_D("MX610 Left-Handled Mouse", codename="MX610L", protocol=1.0, wpid="1004", registers=(REG.battery_status,))
-_D("V450 Laser Cordless Mouse", codename="V450", protocol=1.0, wpid="1005", registers=(REG.battery_status,))
+_D("LX5 Cordless Mouse", codename="LX5", protocol=1.0, wpid="0036", registers=(Reg.BATTERY_STATUS,))
+_D("LX7 Cordless Laser Mouse", codename="LX7", protocol=1.0, wpid="0039", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Wave Mouse M550", codename="M550", protocol=1.0, wpid="003C", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Mouse EX100", codename="EX100m", protocol=1.0, wpid="003F", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Mouse M30", codename="M30", protocol=1.0, wpid="0085", registers=(Reg.BATTERY_STATUS,))
+_D("MX610 Laser Cordless Mouse", codename="MX610", protocol=1.0, wpid="1001", registers=(Reg.BATTERY_STATUS,))
+_D("G7 Cordless Laser Mouse", codename="G7", protocol=1.0, wpid="1002", registers=(Reg.BATTERY_STATUS,))
+_D("V400 Laser Cordless Mouse", codename="V400", protocol=1.0, wpid="1003", registers=(Reg.BATTERY_STATUS,))
+_D("MX610 Left-Handled Mouse", codename="MX610L", protocol=1.0, wpid="1004", registers=(Reg.BATTERY_STATUS,))
+_D("V450 Laser Cordless Mouse", codename="V450", protocol=1.0, wpid="1005", registers=(Reg.BATTERY_STATUS,))
 _D(
     "VX Revolution",
     codename="VX Revolution",
     kind=DEVICE_KIND.mouse,
     protocol=1.0,
     wpid=("1006", "100D", "0612"),
-    registers=(REG.battery_charge,),
+    registers=(Reg.BATTERY_CHARGE,),
 )
-_D("MX Air", codename="MX Air", protocol=1.0, kind=DEVICE_KIND.mouse, wpid=("1007", "100E"), registers=(REG.battery_charge,))
+_D("MX Air", codename="MX Air", protocol=1.0, kind=DEVICE_KIND.mouse, wpid=("1007", "100E"), registers=(Reg.BATTERY_CHARGE))
 _D(
     "MX Revolution",
     codename="MX Revolution",
     protocol=1.0,
     kind=DEVICE_KIND.mouse,
     wpid=("1008", "100C"),
-    registers=(REG.battery_charge,),
+    registers=(Reg.BATTERY_CHARGE,),
 )
-_D("MX620 Laser Cordless Mouse", codename="MX620", protocol=1.0, wpid=("100A", "1016"), registers=(REG.battery_charge,))
-_D("VX Nano Cordless Laser Mouse", codename="VX Nano", protocol=1.0, wpid=("100B", "100F"), registers=(REG.battery_charge,))
-_D("V450 Nano Cordless Laser Mouse", codename="V450 Nano", protocol=1.0, wpid="1011", registers=(REG.battery_charge,))
-_D("V550 Nano Cordless Laser Mouse", codename="V550 Nano", protocol=1.0, wpid="1013", registers=(REG.battery_charge,))
+_D("MX620 Laser Cordless Mouse", codename="MX620", protocol=1.0, wpid=("100A", "1016"), registers=(Reg.BATTERY_CHARGE,))
+_D("VX Nano Cordless Laser Mouse", codename="VX Nano", protocol=1.0, wpid=("100B", "100F"), registers=(Reg.BATTERY_CHARGE,))
+_D("V450 Nano Cordless Laser Mouse", codename="V450 Nano", protocol=1.0, wpid="1011", registers=(Reg.BATTERY_CHARGE,))
+_D("V550 Nano Cordless Laser Mouse", codename="V550 Nano", protocol=1.0, wpid="1013", registers=(Reg.BATTERY_CHARGE,))
 _D(
     "MX 1100 Cordless Laser Mouse",
     codename="MX 1100",
     protocol=1.0,
     kind=DEVICE_KIND.mouse,
     wpid="1014",
-    registers=(REG.battery_charge,),
+    registers=(Reg.BATTERY_CHARGE,),
 )
-_D("Anywhere Mouse MX", codename="Anywhere MX", protocol=1.0, wpid="1017", registers=(REG.battery_charge,))
+_D("Anywhere Mouse MX", codename="Anywhere MX", protocol=1.0, wpid="1017", registers=(Reg.BATTERY_CHARGE,))
 _D(
     "Performance Mouse MX",
     codename="Performance MX",
     protocol=1.0,
     wpid="101A",
-    registers=(REG.battery_status, REG.three_leds),
+    registers=(Reg.BATTERY_STATUS, Reg.THREE_LEDS),
 )
-_D("Marathon Mouse M705 (M-R0009)", codename="M705 (M-R0009)", protocol=1.0, wpid="101B", registers=(REG.battery_charge,))
-_D("Wireless Mouse M350", codename="M350", protocol=1.0, wpid="101C", registers=(REG.battery_charge,))
-_D("Wireless Mouse M505", codename="M505/B605", protocol=1.0, wpid="101D", registers=(REG.battery_charge,))
-_D("Wireless Mouse M305", codename="M305", protocol=1.0, wpid="101F", registers=(REG.battery_status,))
+_D("Marathon Mouse M705 (M-R0009)", codename="M705 (M-R0009)", protocol=1.0, wpid="101B", registers=(Reg.BATTERY_CHARGE,))
+_D("Wireless Mouse M350", codename="M350", protocol=1.0, wpid="101C", registers=(Reg.BATTERY_CHARGE,))
+_D("Wireless Mouse M505", codename="M505/B605", protocol=1.0, wpid="101D", registers=(Reg.BATTERY_CHARGE,))
+_D("Wireless Mouse M305", codename="M305", protocol=1.0, wpid="101F", registers=(Reg.BATTERY_STATUS,))
 _D("Wireless Mouse M215", codename="M215", protocol=1.0, wpid="1020")
 _D(
     "G700 Gaming Mouse",
@@ -293,12 +295,12 @@ _D(
     usbid=0xC06B,
     interface=1,
     registers=(
-        REG.battery_status,
-        REG.three_leds,
+        Reg.BATTERY_STATUS,
+        Reg.THREE_LEDS,
     ),
 )
-_D("Wireless Mouse M310", codename="M310", protocol=1.0, wpid="1024", registers=(REG.battery_status,))
-_D("Wireless Mouse M510", codename="M510", protocol=1.0, wpid="1025", registers=(REG.battery_status,))
+_D("Wireless Mouse M310", codename="M310", protocol=1.0, wpid="1024", registers=(Reg.BATTERY_STATUS,))
+_D("Wireless Mouse M510", codename="M510", protocol=1.0, wpid="1025", registers=(Reg.BATTERY_STATUS,))
 _D("Fujitsu Sonic Mouse", codename="Sonic", protocol=1.0, wpid="1029")
 _D(
     "G700s Gaming Mouse",
@@ -308,8 +310,8 @@ _D(
     usbid=0xC07C,
     interface=1,
     registers=(
-        REG.battery_status,
-        REG.three_leds,
+        Reg.BATTERY_STATUS,
+        Reg.THREE_LEDS,
     ),
 )
 _D("Couch Mouse M515", codename="M515", protocol=2.0, wpid="4007")

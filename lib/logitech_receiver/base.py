@@ -19,14 +19,15 @@
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import struct
 import threading
 
-from collections import namedtuple
 from contextlib import contextmanager
 from random import getrandbits
 from time import time
+from typing import Any
 
 import hidapi
 
@@ -37,40 +38,63 @@ from . import exceptions
 from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
+from .common import LOGITECH_VENDOR_ID
+from .common import BusID
 
 logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
 
 
-def _wired_device(product_id, interface):
-    return {"vendor_id": 1133, "product_id": product_id, "bus_id": 3, "usb_interface": interface, "isDevice": True}
+@dataclasses.dataclass
+class HIDPPNotification:
+    report_id: int
+    devnumber: int
+    sub_id: int
+    address: int
+    data: bytes
+
+    def __str__(self):
+        text_as_hex = common.strhex(self.data)
+        return f"Notification({self.report_id:02x},{self.devnumber},{self.sub_id:02X},{self.address:02X},{text_as_hex})"
 
 
-def _bt_device(product_id):
-    return {"vendor_id": 1133, "product_id": product_id, "bus_id": 5, "isDevice": True}
+def _usb_device(product_id: int, usb_interface: int) -> dict[str, Any]:
+    return {
+        "vendor_id": LOGITECH_VENDOR_ID,
+        "product_id": product_id,
+        "bus_id": BusID.USB,
+        "usb_interface": usb_interface,
+        "isDevice": True,
+    }
 
 
-DEVICE_IDS = []
+def _bluetooth_device(product_id: int) -> dict[str, Any]:
+    return {"vendor_id": LOGITECH_VENDOR_ID, "product_id": product_id, "bus_id": BusID.BLUETOOTH, "isDevice": True}
+
+
+KNOWN_DEVICE_IDS = []
 
 for _ignore, d in descriptors.DEVICES.items():
     if d.usbid:
-        DEVICE_IDS.append(_wired_device(d.usbid, d.interface if d.interface else 2))
+        usb_interface = d.interface if d.interface else 2
+        KNOWN_DEVICE_IDS.append(_usb_device(d.usbid, usb_interface))
     if d.btid:
-        DEVICE_IDS.append(_bt_device(d.btid))
+        KNOWN_DEVICE_IDS.append(_bluetooth_device(d.btid))
 
 
-def other_device_check(bus_id, vendor_id, product_id):
+def other_device_check(bus_id: int, vendor_id: int, product_id: int):
     """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
     This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
-    if vendor_id != 0x46D:  # Logitech
+    if vendor_id != LOGITECH_VENDOR_ID:
         return
-    if bus_id == 0x3:  # USB
+
+    if bus_id == BusID.USB:
         if product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344:
-            return _wired_device(product_id, 2)
-    elif bus_id == 0x5:  # Bluetooth
+            return _usb_device(product_id, 2)
+    elif bus_id == BusID.BLUETOOTH:
         if product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF:
-            return _bt_device(product_id)
+            return _bluetooth_device(product_id)
 
 
 def product_information(usb_id: int | str) -> dict:
@@ -82,10 +106,6 @@ def product_information(usb_id: int | str) -> dict:
             return r
     return {}
 
-
-#
-#
-#
 
 _SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
@@ -112,10 +132,6 @@ _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 # when pinging, be extra patient (no longer)
 _PING_TIMEOUT = DEFAULT_TIMEOUT
 
-#
-#
-#
-
 
 def match(record, bus_id, vendor_id, product_id):
     return (
@@ -130,7 +146,7 @@ def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_lon
     for record in base_usb.ALL:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
-    if vendor_id == 0x046D and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
+    if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": False}
 
 
@@ -144,7 +160,7 @@ def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
     record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
     if record:  # known or unknown receiver
         return record
-    for record in DEVICE_IDS:  # known devices
+    for record in KNOWN_DEVICE_IDS:
         if match(record, bus_id, vendor_id, product_id):
             return record
     if hidpp_short or hidpp_long:  # unknown devices that use HID++
@@ -161,11 +177,6 @@ def receivers_and_devices():
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
     return hidapi.monitor_glib(callback, filter)
-
-
-#
-#
-#
 
 
 def open_path(path):
@@ -311,11 +322,6 @@ def _read(handle, timeout):
         return report_id, devnumber, data[2:]
 
 
-#
-#
-#
-
-
 def _skip_incoming(handle, ihandle, notifications_hook):
     """Read anything already in the input buffer.
 
@@ -343,9 +349,9 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             return
 
 
-def make_notification(report_id, devnumber, data):
+def make_notification(report_id, devnumber, data) -> HIDPPNotification | None:
     """Guess if this is a notification (and not just a request reply), and
-    return a Notification tuple if it is."""
+    return a Notification if it is."""
 
     sub_id = ord(data[:1])
     if sub_id & 0x80 == 0x80:
@@ -374,17 +380,8 @@ def make_notification(report_id, devnumber, data):
         # HID++ 2.0 feature notifications have the SoftwareID 0
         (address & 0x0F == 0x00)
     ):  # noqa: E129
-        return _HIDPP_Notification(report_id, devnumber, sub_id, address, data[2:])
+        return HIDPPNotification(report_id, devnumber, sub_id, address, data[2:])
 
-
-_HIDPP_Notification = namedtuple("_HIDPP_Notification", ("report_id", "devnumber", "sub_id", "address", "data"))
-_HIDPP_Notification.__str__ = lambda self: "Notification(%02x,%d,%02X,%02X,%s)" % (
-    self.report_id,
-    self.devnumber,
-    self.sub_id,
-    self.address,
-    common.strhex(self.data),
-)
 
 request_lock = threading.Lock()  # serialize all requests
 handles_lock = {}
@@ -412,8 +409,13 @@ def acquire_timeout(lock, handle, timeout):
             lock.release()
 
 
+# cycle the HID++ 2.0 software ID from x2 to xF, inclusive, to separate results from each other, notifications, and driver
+sw_id = 0xF
+
+
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
 def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+    global sw_id
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -429,7 +431,8 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
             # most significant bit (8) in SoftwareId, to make notifications easier
             # to distinguish from request replies.
             # This only applies to peripheral requests, ofc.
-            request_id = (request_id & 0xFFF0) | 0x08 | getrandbits(3)
+            sw_id = sw_id + 1 if sw_id < 0xF else 2
+            request_id = (request_id & 0xFFF0) | sw_id  # was 0x08 | getrandbits(3)
 
         timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
         # be extra patient on long register read
@@ -533,6 +536,7 @@ def ping(handle, devnumber, long_message=False):
     """Check if a device is connected to the receiver.
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
+    global sw_id
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("(%s) pinging device %d", handle, devnumber)
     with acquire_timeout(handle_lock(handle), handle, 10.0):
@@ -543,10 +547,10 @@ def ping(handle, devnumber, long_message=False):
             logger.warning("device or receiver disconnected")
             return
 
-        # randomize the SoftwareId and mark byte to be able to identify the ping
-        # reply, and set most significant (0x8) bit in SoftwareId so that the reply
-        # is always distinguishable from notifications
-        request_id = 0x0018 | getrandbits(3)
+        # randomize the mark byte to be able to identify the ping reply
+        # cycle the sw_id byte from 2 to 15 (see above)
+        sw_id = sw_id + 1 if sw_id < 0xF else 2
+        request_id = 0x0010 | sw_id  # was 0x0018 | getrandbits(3)
         request_data = struct.pack("!HBBB", request_id, 0, 0, getrandbits(8))
         write(int(handle), devnumber, request_data, long_message)
 

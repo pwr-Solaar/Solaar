@@ -610,7 +610,7 @@ class RegisterRW:
 
     kind = NamedInt(0x01, _("register"))
 
-    def __init__(self, register):
+    def __init__(self, register: int):
         assert isinstance(register, int)
         self.register = register
 

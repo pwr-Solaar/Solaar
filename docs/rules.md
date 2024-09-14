@@ -265,16 +265,14 @@ A `Later` action executes rule components later.
 `Later` actions take an integer delay in seconds between 1 and 100 followed by zero or more rule components that will be executed later.
 Processing of the rest of the rule continues immediately.
 
-### Built-in rules
-Solaar has several built-in rules, which are run after user-created rules and so can be overridden by user-created rules.
-One rule turns
+## Built-in Rules
+
+Solaar has a built-in rule, which is run after user-created rules and so can be overridden by user-created rules.
+This rule turns
 `Brightness Down` key press notifications into `XF86_MonBrightnessDown` key taps
 and `Brightness Up` key press notifications into `XF86_MonBrightnessUp` key taps.
-Another rule makes Craft crown ratchet movements move between tabs when the crown is pressed
-and up and down otherwise.
-A third rule turns Craft crown ratchet movements into `XF86_AudioNext` or `XF86_AudioPrev` key taps when the crown is pressed and `XF86_AudioRaiseVolume` or `XF86_AudioLowerVolume` otherwise.
-A fourth rule doubles the speed of `THUMB WHEEL` movements unless the `Control` modifier is on.
-All of these rules are only active if the key or feature is diverted, of course.
+
+## Example Solaar Rule File
 
 Solaar reads rules from a YAML configuration file (normally `~/.config/solaar/rules.yaml`).
 This file contains zero or more documents, each a rule.

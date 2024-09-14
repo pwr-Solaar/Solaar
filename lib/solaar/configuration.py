@@ -15,9 +15,9 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json as _json
+import json
 import logging
-import os as _os
+import os
 import threading
 
 import yaml
@@ -28,9 +28,9 @@ from solaar import __version__
 
 logger = logging.getLogger(__name__)
 
-_XDG_CONFIG_HOME = _os.environ.get("XDG_CONFIG_HOME") or _os.path.expanduser(_os.path.join("~", ".config"))
-_yaml_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "config.yaml")
-_json_file_path = _os.path.join(_XDG_CONFIG_HOME, "solaar", "config.json")
+_XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser(os.path.join("~", ".config"))
+_yaml_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "config.yaml")
+_json_file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "config.json")
 
 _KEY_VERSION = "_version"
 _KEY_NAME = "_NAME"
@@ -45,18 +45,18 @@ _config = []
 
 def _load():
     loaded_config = []
-    if _os.path.isfile(_yaml_file_path):
+    if os.path.isfile(_yaml_file_path):
         path = _yaml_file_path
         try:
             with open(_yaml_file_path) as config_file:
                 loaded_config = yaml.safe_load(config_file)
         except Exception as e:
             logger.error("failed to load from %s: %s", _yaml_file_path, e)
-    elif _os.path.isfile(_json_file_path):
+    elif os.path.isfile(_json_file_path):
         path = _json_file_path
         try:
             with open(_json_file_path) as config_file:
-                loaded_config = _json.load(config_file)
+                loaded_config = json.load(config_file)
         except Exception as e:
             logger.error("failed to load from %s: %s", _json_file_path, e)
         loaded_config = _convert_json(loaded_config)
@@ -129,10 +129,10 @@ def save(defer=False):
     global save_timer
     if not _config:
         return
-    dirname = _os.path.dirname(_yaml_file_path)
-    if not _os.path.isdir(dirname):
+    dirname = os.path.dirname(_yaml_file_path)
+    if not os.path.isdir(dirname):
         try:
-            _os.makedirs(dirname)
+            os.makedirs(dirname)
         except Exception:
             logger.error("failed to create %s", dirname)
             return

@@ -33,12 +33,13 @@ from . import hidpp20_constants
 from . import settings_templates
 from .common import Alert
 from .common import BatteryStatus
+from .common import Notification
+from .hidpp10_constants import Registers
 
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_R = hidpp10_constants.REGISTERS
 _F = hidpp20_constants.FEATURE
 
 
@@ -58,7 +59,7 @@ def _process_receiver_notification(receiver, n):
     # supposedly only 0x4x notifications arrive for the receiver
     assert n.sub_id & 0x40 == 0x40
 
-    if n.sub_id == 0x4A:  # pairing lock notification
+    if n.sub_id == Notification.PAIRING_LOCK:
         receiver.pairing.lock_open = bool(n.address & 0x01)
         reason = _("pairing lock is open") if receiver.pairing.lock_open else _("pairing lock is closed")
         if logger.isEnabledFor(logging.INFO):
@@ -74,7 +75,7 @@ def _process_receiver_notification(receiver, n):
         receiver.changed(reason=reason)
         return True
 
-    elif n.sub_id == _R.discovery_status_notification:  # Bolt pairing
+    elif n.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.discovering = n.address == 0x00
             reason = _("discovery lock is open") if receiver.pairing.discovering else _("discovery lock is closed")
@@ -92,7 +93,7 @@ def _process_receiver_notification(receiver, n):
             receiver.changed(reason=reason)
             return True
 
-    elif n.sub_id == _R.device_discovery_notification:  # Bolt pairing
+    elif n.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             counter = n.address + n.data[0] * 256  # notification counter
             if receiver.pairing.counter is None:
@@ -108,7 +109,7 @@ def _process_receiver_notification(receiver, n):
                 receiver.pairing.device_name = n.data[3 : 3 + n.data[2]].decode("utf-8")
             return True
 
-    elif n.sub_id == _R.pairing_status_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PAIRING_STATUS_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.device_passkey = None
             receiver.pairing.lock_open = n.address == 0x00
@@ -117,9 +118,10 @@ def _process_receiver_notification(receiver, n):
                 logger.info("%s: %s", receiver, reason)
             receiver.pairing.error = None
             if not receiver.pairing.lock_open:
-                receiver.pairing.counter = (
-                    receiver.pairing.device_address
-                ) = receiver.pairing.device_authentication = receiver.pairing.device_name = None
+                receiver.pairing.counter = None
+                receiver.pairing.device_address = None
+                receiver.pairing.device_authentication = None
+                receiver.pairing.device_name = None
             pair_error = n.data[0]
             if receiver.pairing.lock_open:
                 receiver.pairing.new_device = None
@@ -132,12 +134,12 @@ def _process_receiver_notification(receiver, n):
             receiver.changed(reason=reason)
             return True
 
-    elif n.sub_id == _R.passkey_request_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PASSKEY_REQUEST_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             receiver.pairing.device_passkey = n.data[0:6].decode("utf-8")
             return True
 
-    elif n.sub_id == _R.passkey_pressed_notification:  # Bolt pairing
+    elif n.sub_id == Registers.PASSKEY_PRESSED_NOTIFICATION:  # Bolt pairing
         return True
 
     logger.warning("%s: unhandled notification %s", receiver, n)
@@ -147,7 +149,8 @@ def _process_device_notification(device, n):
     # incoming packets with SubId >= 0x80 are supposedly replies from HID++ 1.0 requests, should never get here
     assert n.sub_id & 0x80 == 0
 
-    if n.sub_id == 00:  # no-op feature notification, dispose of it quickly
+    if n.sub_id == Notification.NO_OPERATION:
+        # dispose it
         return False
 
     # Allow the device object to handle the notification using custom per-device state.
@@ -188,19 +191,19 @@ def _process_dj_notification(device, n):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s (%s) DJ %s", device, device.protocol, n)
 
-    if n.sub_id == 0x40:
+    if n.sub_id == Notification.CONNECT_DISCONNECT:
         # do all DJ paired notifications also show up as HID++ 1.0 notifications?
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: ignoring DJ unpaired: %s", device, n)
         return True
 
-    if n.sub_id == 0x41:
+    if n.sub_id == Notification.DJ_PAIRING:
         # do all DJ paired notifications also show up as HID++ 1.0 notifications?
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: ignoring DJ paired: %s", device, n)
         return True
 
-    if n.sub_id == 0x42:
+    if n.sub_id == Notification.CONNECTED:
         connected = not n.address & 0x01
         if logger.isEnabledFor(logging.INFO):
             logger.info("%s: DJ connection: %s %s", device, connected, n)
@@ -214,7 +217,7 @@ def _process_hidpp10_custom_notification(device, n):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("%s (%s) custom notification %s", device, device.protocol, n)
 
-    if n.sub_id in (_R.battery_status, _R.battery_charge):
+    if n.sub_id in (Registers.BATTERY_STATUS, Registers.BATTERY_CHARGE):
         assert n.data[-1:] == b"\x00"
         data = chr(n.address).encode() + n.data
         device.set_battery_info(hidpp10.parse_battery_status(n.sub_id, data))
@@ -224,7 +227,7 @@ def _process_hidpp10_custom_notification(device, n):
 
 
 def _process_hidpp10_notification(device, n):
-    if n.sub_id == 0x40:  # device unpairing
+    if n.sub_id == Notification.CONNECT_DISCONNECT:  # device unpairing
         if n.address == 0x02:
             # device un-paired
             device.wpid = None
@@ -236,7 +239,7 @@ def _process_hidpp10_notification(device, n):
             logger.warning("%s: disconnection with unknown type %02X: %s", device, n.address, n)
         return True
 
-    if n.sub_id == 0x41:  # device connection (and disconnection)
+    if n.sub_id == Notification.DJ_PAIRING:  # device connection (and disconnection)
         flags = ord(n.data[:1]) & 0xF0
         if n.address == 0x02:  # very old 27 MHz protocol
             wpid = "00" + common.strhex(n.data[2:3])
@@ -267,13 +270,13 @@ def _process_hidpp10_notification(device, n):
         device.changed(active=link_established)
         return True
 
-    if n.sub_id == 0x49:
+    if n.sub_id == Notification.RAW_INPUT:
         # raw input event? just ignore it
         # if n.address == 0x01, no idea what it is, but they keep on coming
         # if n.address == 0x03, appears to be an actual input event, because they only come when input happents
         return True
 
-    if n.sub_id == 0x4B:  # power notification
+    if n.sub_id == Notification.POWER:
         if n.address == 0x01:
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("%s: device powered on", device)

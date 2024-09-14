@@ -13,6 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 """Generic Human Interface Device API.
 
 It is currently a partial pure-Python implementation of the native HID API
@@ -110,20 +111,11 @@ def _match(action, device, filterfn):
     filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
     if not filter:
         return
-    hid_driver = filter.get("hid_driver")
     interface_number = filter.get("usb_interface")
     isDevice = filter.get("isDevice")
 
     if action == "add":
         hid_driver_name = hid_device.properties.get("DRIVER")
-        # print ("** found hid", action, device, "hid:", hid_device, hid_driver_name)
-        if hid_driver:
-            if isinstance(hid_driver, tuple):
-                if hid_driver_name not in hid_driver:
-                    return
-            elif hid_driver_name != hid_driver:
-                return
-
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
         # print('*** usb interface', action, device, 'usb_interface:', intf_device, usb_interface, interface_number)
@@ -161,8 +153,6 @@ def _match(action, device, filterfn):
         return d_info
 
     elif action == "remove":
-        # print (dict(device), dict(usb_device))
-
         d_info = DeviceInfo(
             path=device.device_node,
             bus_id=None,
@@ -225,16 +215,6 @@ def find_paired_node_wpid(receiver_path, index):
 
 def monitor_glib(callback, filterfn):
     c = pyudev.Context()
-
-    # already existing devices
-    # for device in c.list_devices(subsystem='hidraw'):
-    #     # print (device, dict(device), dict(device.attributes))
-    #     for filter in device_filters:
-    #         d_info = _match('add', device, *filter)
-    #         if d_info:
-    #             GLib.idle_add(callback, 'add', d_info)
-    #             break
-
     m = pyudev.Monitor.from_netlink(c)
     m.filter_by(subsystem="hidraw")
 
@@ -256,15 +236,12 @@ def monitor_glib(callback, filterfn):
     try:
         # io_add_watch_full may not be available...
         GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-        # print ("did io_add_watch_full")
     except AttributeError:
         try:
             # and the priority parameter appeared later in the API
             GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch with priority")
         except Exception:
             GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, filterfn)
-            # print ("did io_add_watch")
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Starting dbus monitoring")

@@ -35,12 +35,13 @@ from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from .common import Alert
+from .common import Notification
 from .device import Device
+from .hidpp10_constants import Registers
 
 logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
-_R = hidpp10_constants.REGISTERS
 _IR = hidpp10_constants.INFO_SUBREGISTERS
 
 
@@ -111,7 +112,7 @@ class Receiver:
 
     def initialize(self, product_info: dict):
         # read the receiver information subregister, so we can find out max_devices
-        serial_reply = self.read_register(_R.receiver_info, _IR.receiver_information)
+        serial_reply = self.read_register(Registers.RECEIVER_INFO, _IR.receiver_information)
         if serial_reply:
             self.serial = serial_reply[1:5].hex().upper()
             self.max_devices = serial_reply[6]
@@ -146,7 +147,7 @@ class Receiver:
     # how many pairings remain (None for unknown, -1 for unlimited)
     def remaining_pairings(self, cache=True):
         if self._remaining_pairings is None or not cache:
-            ps = self.read_register(_R.receiver_connection)
+            ps = self.read_register(Registers.RECEIVER_CONNECTION)
             if ps is not None:
                 ps = ord(ps[2:3])
                 self._remaining_pairings = ps - 5 if ps >= 5 else -1
@@ -174,7 +175,7 @@ class Receiver:
         return flag_bits
 
     def device_codename(self, n):
-        codename = self.read_register(_R.receiver_info, _IR.device_name + n - 1)
+        codename = self.read_register(Registers.RECEIVER_INFO, _IR.device_name + n - 1)
         if codename:
             codename = codename[2 : 2 + ord(codename[1:2])]
             return codename.decode("ascii")
@@ -182,7 +183,7 @@ class Receiver:
     def notify_devices(self):
         """Scan all devices."""
         if self.handle:
-            if not self.write_register(_R.receiver_connection, 0x02):
+            if not self.write_register(Registers.RECEIVER_CONNECTION, 0x02):
                 logger.warning("%s: failed to trigger device link notifications", self)
 
     def notification_information(self, number, notification):
@@ -199,13 +200,13 @@ class Receiver:
         polling_rate = ""
         serial = None
         power_switch = "(unknown)"
-        pair_info = self.read_register(_R.receiver_info, _IR.pairing_information + n - 1)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.pairing_information + n - 1)
         if pair_info:  # a receiver that uses Unifying-style pairing registers
             wpid = pair_info[3:5].hex().upper()
             kind = hidpp10_constants.DEVICE_KIND[pair_info[7] & 0x0F]
             polling_rate = str(pair_info[2]) + "ms"
         elif not self.receiver_kind == "unifying":  # may be an old Nano receiver
-            device_info = self.read_register(_R.receiver_info, 0x04)  # undocumented
+            device_info = self.read_register(Registers.RECEIVER_INFO, 0x04)  # undocumented
             if device_info:
                 logger.warning("using undocumented register for device wpid")
                 wpid = device_info[3:5].hex().upper()
@@ -214,7 +215,7 @@ class Receiver:
                 raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information - non-unifying")
         else:
             raise exceptions.NoSuchDevice(number=n, receiver=self, error="read pairing information")
-        pair_info = self.read_register(_R.receiver_info, _IR.extended_pairing_information + n - 1)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.extended_pairing_information + n - 1)
         if pair_info:
             power_switch = hidpp10_constants.POWER_SWITCH_LOCATION[pair_info[9] & 0x0F]
             serial = pair_info[1:5].hex().upper()
@@ -230,7 +231,7 @@ class Receiver:
             raise IndexError(f"{self}: device number {int(number)} already registered")
 
         assert notification is None or notification.devnumber == number
-        assert notification is None or notification.sub_id == 0x41
+        assert notification is None or notification.sub_id == Notification.DJ_PAIRING
 
         try:
             time.sleep(0.05)  # let receiver settle
@@ -261,13 +262,13 @@ class Receiver:
     def set_lock(self, lock_closed=True, device=0, timeout=0):
         if self.handle:
             action = 0x02 if lock_closed else 0x01
-            reply = self.write_register(_R.receiver_pairing, action, device, timeout)
+            reply = self.write_register(Registers.RECEIVER_PAIRING, action, device, timeout)
             if reply:
                 return True
             logger.warning("%s: failed to %s the receiver lock", self, "close" if lock_closed else "open")
 
     def count(self):
-        count = self.read_register(_R.receiver_connection)
+        count = self.read_register(Registers.RECEIVER_CONNECTION)
         return 0 if count is None else ord(count[1:2])
 
     def request(self, request_id, *params):
@@ -344,7 +345,7 @@ class Receiver:
 
     def _unpair_device_per_receiver(self, key):
         """Receiver specific unpairing."""
-        return self.write_register(_R.receiver_pairing, 0x03, key)
+        return self.write_register(Registers.RECEIVER_PAIRING, 0x03, key)
 
     def __len__(self):
         return len([d for d in self._devices.values() if d is not None])
@@ -392,18 +393,18 @@ class BoltReceiver(Receiver):
         super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
-        serial_reply = self.read_register(_R.bolt_uniqueId)
+        serial_reply = self.read_register(Registers.BOLT_UNIQUE_ID)
         self.serial = serial_reply.hex().upper()
         self.max_devices = product_info.get("max_devices", 1)
 
     def device_codename(self, n):
-        codename = self.read_register(_R.receiver_info, _IR.bolt_device_name + n, 0x01)
+        codename = self.read_register(Registers.RECEIVER_INFO, _IR.bolt_device_name + n, 0x01)
         if codename:
             codename = codename[3 : 3 + min(14, ord(codename[2:3]))]
             return codename.decode("ascii")
 
     def device_pairing_information(self, n: int) -> dict:
-        pair_info = self.read_register(_R.receiver_info, _IR.bolt_pairing_information + n)
+        pair_info = self.read_register(Registers.RECEIVER_INFO, _IR.bolt_pairing_information + n)
         if pair_info:
             wpid = (pair_info[3:4] + pair_info[2:3]).hex().upper()
             kind = hidpp10_constants.DEVICE_KIND[pair_info[1] & 0x0F]
@@ -416,7 +417,7 @@ class BoltReceiver(Receiver):
         """Discover Logitech Bolt devices."""
         if self.handle:
             action = 0x02 if cancel else 0x01
-            reply = self.write_register(_R.bolt_device_discovery, timeout, action)
+            reply = self.write_register(Registers.BOLT_DEVICE_DISCOVERY, timeout, action)
             if reply:
                 return True
             logger.warning("%s: failed to %s device discovery", self, "cancel" if cancel else "start")
@@ -425,14 +426,14 @@ class BoltReceiver(Receiver):
         """Pair a Bolt device."""
         if self.handle:
             action = 0x01 if pair is True else 0x03 if pair is False else 0x02
-            reply = self.write_register(_R.bolt_pairing, action, slot, address, authentication, entropy)
+            reply = self.write_register(Registers.BOLT_PAIRING, action, slot, address, authentication, entropy)
             if reply:
                 return True
             logger.warning("%s: failed to %s device %s", self, "pair" if pair else "unpair", address)
 
     def _unpair_device_per_receiver(self, key):
         """Receiver specific unpairing."""
-        return self.write_register(_R.bolt_pairing, 0x03, key)
+        return self.write_register(Registers.BOLT_PAIRING, 0x03, key)
 
 
 class UnifyingReceiver(Receiver):

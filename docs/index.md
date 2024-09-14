@@ -95,7 +95,7 @@ which is done using the usual Bluetooth mechanisms.
 For a partial list of supported devices
 and their features, see [the devices page](https://pwr-solaar.github.io/Solaar/devices).
 
-[logo]: https://pwr-solaar.github.io/Solaar/assets/solaar.svg
+[logo]: https://pwr-solaar.github.io/Solaar/img/solaar.svg
 
 ## Prebuilt packages
 
@@ -132,6 +132,8 @@ See [the installation page](https://pwr-solaar.github.io/Solaar/installation)
 for the step-by-step procedure for manual installation.
 
 ## Known Issues
+
+- Onboard Profiles, when active, can prevent changes to other settings, such as Polling Rate, DPI, and various LED settings. Which settings are affected depends on the device.  To make changes to affected settings, disable Onboard Profiles.  If Onboard Profiles are later enabled the affected settings may change to the value in the profile.
 
 - Solaar version 1.1.12 has a bug resulting in devices remaining in their default configuration after a system resume.  This is fixed in 1.1.13.
 
