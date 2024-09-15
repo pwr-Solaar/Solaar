@@ -17,6 +17,8 @@
 
 import logging
 
+from typing import Callable
+
 import gi
 import yaml
 
@@ -41,6 +43,9 @@ from gi.repository import Gtk  # NOQA: E402
 logger = logging.getLogger(__name__)
 
 assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
+
+
+APP_ID = "io.github.pwr_solaar.solaar"
 
 
 def _startup(app, startup_hook, use_tray, show_window):
@@ -88,12 +93,21 @@ def _shutdown(app, shutdown_hook):
     desktop_notifications.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
+def run_loop(
+    startup_hook: Callable[[], None],
+    shutdown_hook: Callable[[], None],
+    use_tray: bool,
+    show_window: bool,
+):
     assert use_tray or show_window, "need either tray or visible window"
-    APP_ID = "io.github.pwr_solaar.solaar"
+
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
-    application.connect("startup", lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
+    application.connect(
+        "startup",
+        lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window),
+        startup_hook,
+    )
     application.connect("command-line", _command_line)
     application.connect("activate", _activate)
     application.connect("shutdown", _shutdown, shutdown_hook)
