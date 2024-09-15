@@ -326,7 +326,7 @@ class NamedInt(int):
             return self.name.lower() == other.lower()
         # this should catch comparisons with bytes in Py3
         if other is not None:
-            raise TypeError("Unsupported type " + str(type(other)))
+            raise TypeError(f"Unsupported type {str(type(other))}")
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -460,7 +460,7 @@ class NamedInts:
     def __setitem__(self, index, name):
         assert isinstance(index, int), type(index)
         if isinstance(name, NamedInt):
-            assert int(index) == int(name), repr(index) + " " + repr(name)
+            assert int(index) == int(name), f"{repr(index)} {repr(name)}"
             value = name
         elif isinstance(name, str):
             value = NamedInt(index, name)

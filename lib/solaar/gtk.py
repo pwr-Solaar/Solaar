@@ -162,9 +162,9 @@ def main():
     udev_file = "42-logitech-unify-permissions.rules"
     if (
         logger.isEnabledFor(logging.WARNING)
-        and not os.path.isfile("/etc/udev/rules.d/" + udev_file)
-        and not os.path.isfile("/usr/lib/udev/rules.d/" + udev_file)
-        and not os.path.isfile("/usr/local/lib/udev/rules.d/" + udev_file)
+        and not os.path.isfile(f"/etc/udev/rules.d/{udev_file}")
+        and not os.path.isfile(f"/usr/lib/udev/rules.d/{udev_file}")
+        and not os.path.isfile(f"/usr/local/lib/udev/rules.d/{udev_file}")
     ):
         logger.warning("Solaar udev file not found in expected location")
         logger.warning("See https://pwr-solaar.github.io/Solaar/installation for more information")

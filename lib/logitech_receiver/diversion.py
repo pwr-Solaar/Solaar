@@ -509,7 +509,7 @@ class Rule(RuleComponent):
         self.source = source
 
     def __str__(self):
-        source = "(" + self.source + ")" if self.source else ""
+        source = f"({self.source})" if self.source else ""
         return f"Rule{source}[{', '.join([c.__str__() for c in self.components])}]"
 
     def evaluate(self, feature, notification, device, last_result):
@@ -553,7 +553,7 @@ class Not(Condition):
         self.component = self.compile(op)
 
     def __str__(self):
-        return "Not: " + str(self.component)
+        return f"Not: {str(self.component)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -672,7 +672,7 @@ class Process(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return "Process: " + str(self.process)
+        return f"Process: {str(self.process)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -703,7 +703,7 @@ class MouseProcess(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return "MouseProcess: " + str(self.process)
+        return f"MouseProcess: {str(self.process)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -727,7 +727,7 @@ class Feature(Condition):
         self.feature = FEATURE[feature]
 
     def __str__(self):
-        return "Feature: " + str(self.feature)
+        return f"Feature: {str(self.feature)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -748,7 +748,7 @@ class Report(Condition):
             self.report = report
 
     def __str__(self):
-        return "Report: " + str(self.report)
+        return f"Report: {str(self.report)}"
 
     def evaluate(self, report, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -821,7 +821,7 @@ class Modifiers(Condition):
                     logger.warning("unknown rule Modifier value: %s", k)
 
     def __str__(self):
-        return "Modifiers: " + str(self.desired)
+        return f"Modifiers: {str(self.desired)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -967,7 +967,7 @@ class Test(Condition):
                 logger.warning("rule Test argument not valid %s", test)
 
     def __str__(self):
-        return "Test: " + str(self.test)
+        return f"Test: {str(self.test)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -995,7 +995,7 @@ class TestBytes(Condition):
                 logger.warning("rule TestBytes argument not valid %s", test)
 
     def __str__(self):
-        return "TestBytes: " + str(self.test)
+        return f"TestBytes: {str(self.test)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1070,7 +1070,7 @@ class Active(Condition):
         self.devID = devID
 
     def __str__(self):
-        return "Active: " + str(self.devID)
+        return f"Active: {str(self.devID)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1091,7 +1091,7 @@ class Device(Condition):
         self.devID = devID
 
     def __str__(self):
-        return "Device: " + str(self.devID)
+        return f"Device: {str(self.devID)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1111,7 +1111,7 @@ class Host(Condition):
         self.host = host
 
     def __str__(self):
-        return "Host: " + str(self.host)
+        return f"Host: {str(self.host)}"
 
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1389,7 +1389,7 @@ class Later(Action):
             self.components = self.rule.components
 
     def __str__(self):
-        return "Later: [" + str(self.delay) + ", " + ", ".join(str(c) for c in self.components) + "]"
+        return f"Later: [{str(self.delay)}, " + ", ".join(str(c) for c in self.components) + "]"
 
     def evaluate(self, feature, notification, device, last_result):
         if self.delay and self.rule:
@@ -1482,18 +1482,18 @@ def process_notification(device, notification, feature):
         new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
         for i in range(32):
             if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
-                key_down = CONTROL["G" + str(i + 1)]
+                key_down = CONTROL[f"G{str(i + 1)}"]
             if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
-                key_up = CONTROL["G" + str(i + 1)]
+                key_up = CONTROL[f"G{str(i + 1)}"]
         g_keys_down = new_g_keys_down
     # and also M keys down
     elif feature == FEATURE.MKEYS and notification.address == 0x00:
         new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
         for i in range(1, 9):
             if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
-                key_down = CONTROL["M" + str(i)]
+                key_down = CONTROL[f"M{str(i)}"]
             if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
-                key_up = CONTROL["M" + str(i)]
+                key_up = CONTROL[f"M{str(i)}"]
         m_keys_down = new_m_keys_down
     # and also MR key
     elif feature == FEATURE.MR and notification.address == 0x00:

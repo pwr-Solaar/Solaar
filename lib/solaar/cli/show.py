@@ -80,8 +80,8 @@ def _battery_line(dev):
         level, nextLevel, status, voltage = battery.level, battery.next_level, battery.status, battery.voltage
         text = _battery_text(level)
         if voltage is not None:
-            text = text + f" {voltage}mV "
-        nextText = "" if nextLevel is None else ", next level " + _battery_text(nextLevel)
+            text = f"{text} {voltage}mV "
+        nextText = "" if nextLevel is None else f", next level {_battery_text(nextLevel)}"
         print(f"     Battery: {text}, {status}{nextText}.")
     else:
         print("     Battery status unavailable.")

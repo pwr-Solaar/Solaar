@@ -288,9 +288,9 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
 )
 def test_RemappableAction(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
     if int(remap, 16) == special_keys.KEYS_Default:
-        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x450, f"{cid:04X}" + "FF")]
+        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x450, f"{cid:04X}FF")]
     else:
-        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x440, f"{cid:04X}" + "FF" + remap)]
+        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x440, f"{cid:04X}FF{remap}")]
     device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
     key = hidpp20.PersistentRemappableAction(device, index, cid, actionId, remapped, mask, status)
     spy_request = mocker.spy(device, "request")

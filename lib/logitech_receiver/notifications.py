@@ -242,7 +242,7 @@ def _process_hidpp10_notification(device, n):
     if n.sub_id == Notification.DJ_PAIRING:  # device connection (and disconnection)
         flags = ord(n.data[:1]) & 0xF0
         if n.address == 0x02:  # very old 27 MHz protocol
-            wpid = "00" + common.strhex(n.data[2:3])
+            wpid = f"00{common.strhex(n.data[2:3])}"
             link_established = True
             link_encrypted = bool(flags & 0x80)
         elif n.address > 0x00:  # all other protocols are supposed to be almost the same
