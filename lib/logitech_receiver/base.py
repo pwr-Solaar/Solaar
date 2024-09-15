@@ -103,14 +103,12 @@ def other_device_check(bus_id: int, vendor_id: int, product_id: int):
             return _bluetooth_device(product_id)
 
 
-def product_information(usb_id: int | str) -> dict:
-    if isinstance(usb_id, str):
-        usb_id = int(usb_id, 16)
-
-    for r in base_usb.ALL:
-        if usb_id == r.get("product_id"):
-            return r
-    return {}
+def product_information(usb_id: int) -> dict[str, Any]:
+    """Returns hardcoded information from USB receiver."""
+    for receiver in base_usb.KNOWN_RECEIVER:
+        if usb_id == receiver.get("product_id"):
+            return receiver
+    raise ValueError(f"Unknown receiver type: 0x{usb_id:02X}")
 
 
 _SHORT_MESSAGE_SIZE = 7
@@ -147,9 +145,12 @@ def match(record, bus_id, vendor_id, product_id):
     )
 
 
-def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
-    """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
-    for record in base_usb.ALL:  # known receivers
+def filter_receivers(bus_id: int, vendor_id: int, product_id: int, hidpp_short=False, hidpp_long=False):
+    """Check that this product is a Logitech receiver
+
+    If so return the receiver record for further checking.
+    """
+    for record in base_usb.KNOWN_RECEIVER:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
     if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
