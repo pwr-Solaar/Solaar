@@ -29,6 +29,7 @@ from random import getrandbits
 from time import time
 from typing import Any
 
+import gi
 import hidapi
 
 from . import base_usb
@@ -40,6 +41,9 @@ from . import hidpp20
 from . import hidpp20_constants
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
+
+gi.require_version("Gdk", "3.0")
+from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +180,7 @@ def receivers_and_devices():
 
 def notify_on_receivers_glib(callback):
     """Watch for matching devices and notifies the callback on the GLib thread."""
-    return hidapi.monitor_glib(callback, filter)
+    return hidapi.monitor_glib(GLib, callback, filter)
 
 
 def open_path(path):

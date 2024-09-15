@@ -23,9 +23,12 @@ The docstrings are mostly copied from the hidapi API header, with changes where
 necessary.
 """
 
+from __future__ import annotations
+
 import errno
 import logging
 import os
+import typing
 import warnings
 
 
@@ -39,8 +42,9 @@ import pyudev
 
 from hidapi.common import DeviceInfo
 
-gi.require_version("Gdk", "3.0")
-from gi.repository import GLib  # NOQA: E402
+if typing.TYPE_CHECKING:
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -213,13 +217,20 @@ def find_paired_node_wpid(receiver_path, index):
     return None
 
 
-def monitor_glib(callback, filterfn):
+def monitor_glib(glib: GLib, callback, filterfn):
+    """Monitor GLib.
+
+    Parameters
+    ----------
+    glib
+        GLib instance.
+    """
     c = pyudev.Context()
     m = pyudev.Monitor.from_netlink(c)
     m.filter_by(subsystem="hidraw")
 
     def _process_udev_event(monitor, condition, cb, filterfn):
-        if condition == GLib.IO_IN:
+        if condition == glib.IO_IN:
             event = monitor.receive_device()
             if event:
                 action, device = event
@@ -227,7 +238,7 @@ def monitor_glib(callback, filterfn):
                 if action == "add":
                     d_info = _match(action, device, filterfn)
                     if d_info:
-                        GLib.idle_add(cb, action, d_info)
+                        glib.idle_add(cb, action, d_info)
                 elif action == "remove":
                     # the GLib notification does _not_ match!
                     pass
@@ -235,13 +246,13 @@ def monitor_glib(callback, filterfn):
 
     try:
         # io_add_watch_full may not be available...
-        GLib.io_add_watch_full(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
+        glib.io_add_watch_full(m, glib.PRIORITY_LOW, glib.IO_IN, _process_udev_event, callback, filterfn)
     except AttributeError:
         try:
             # and the priority parameter appeared later in the API
-            GLib.io_add_watch(m, GLib.PRIORITY_LOW, GLib.IO_IN, _process_udev_event, callback, filterfn)
+            glib.io_add_watch(m, glib.PRIORITY_LOW, glib.IO_IN, _process_udev_event, callback, filterfn)
         except Exception:
-            GLib.io_add_watch(m, GLib.IO_IN, _process_udev_event, callback, filterfn)
+            glib.io_add_watch(m, glib.IO_IN, _process_udev_event, callback, filterfn)
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Starting dbus monitoring")
