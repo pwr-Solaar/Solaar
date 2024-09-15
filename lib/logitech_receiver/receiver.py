@@ -513,9 +513,12 @@ class ReceiverFactory:
         try:
             handle = base.open_path(device_info.path)
             if handle:
-                product_info = base.product_information(device_info.product_id)
-                if not product_info:
-                    logger.warning("Unknown receiver type: %s", device_info.product_id)
+                usb_id = device_info.product_id
+                if isinstance(usb_id, str):
+                    usb_id = int(usb_id, 16)
+                try:
+                    product_info = base.product_information(usb_id)
+                except ValueError:
                     product_info = {}
                 kind = product_info.get("receiver_kind", "unknown")
                 rclass = receiver_class_mapping.get(kind, Receiver)
