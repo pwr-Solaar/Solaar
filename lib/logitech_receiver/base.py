@@ -23,6 +23,7 @@ import dataclasses
 import logging
 import struct
 import threading
+import typing
 
 from contextlib import contextmanager
 from random import getrandbits
@@ -42,8 +43,9 @@ from . import hidpp20_constants
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 
-gi.require_version("Gdk", "3.0")
-from gi.repository import GLib  # NOQA: E402
+if typing.TYPE_CHECKING:
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -178,9 +180,15 @@ def receivers_and_devices():
     yield from hidapi.enumerate(filter)
 
 
-def notify_on_receivers_glib(callback):
-    """Watch for matching devices and notifies the callback on the GLib thread."""
-    return hidapi.monitor_glib(GLib, callback, filter)
+def notify_on_receivers_glib(glib: GLib, callback):
+    """Watch for matching devices and notifies the callback on the GLib thread.
+
+    Parameters
+    ----------
+    glib
+        GLib instance.
+    """
+    return hidapi.monitor_glib(glib, callback, filter)
 
 
 def open_path(path):
