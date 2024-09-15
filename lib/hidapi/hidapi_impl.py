@@ -23,10 +23,13 @@ Parts of this code are adapted from https://github.com/apmorton/pyhidapi
 which is MIT licensed.
 """
 
+from __future__ import annotations
+
 import atexit
 import ctypes
 import logging
 import platform
+import typing
 
 from threading import Thread
 from time import sleep
@@ -35,8 +38,9 @@ import gi
 
 from hidapi.common import DeviceInfo
 
-gi.require_version("Gdk", "3.0")
-from gi.repository import GLib  # NOQA: E402
+if typing.TYPE_CHECKING:
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import GLib  # NOQA: E402
 
 logger = logging.getLogger(__name__)
 
@@ -311,13 +315,21 @@ def find_paired_node_wpid(receiver_path, index):
     return None
 
 
-def monitor_glib(callback, filterfn):
+def monitor_glib(glib: GLib, callback, filterfn):
+    """Monitor GLib.
+
+    Parameters
+    ----------
+    glib
+        GLib instance.
+    """
+
     def device_callback(action, device):
         # print(f"device_callback({action}): {device}")
         if action == "add":
             d_info = _match(action, device, filterfn)
             if d_info:
-                GLib.idle_add(callback, action, d_info)
+                glib.idle_add(callback, action, d_info)
         elif action == "remove":
             # Removed devices will be detected by Solaar directly
             pass
