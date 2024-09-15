@@ -22,3 +22,11 @@ def test_product_information(usb_id, expected_name, expected_receiver_kind):
 
     if expected_receiver_kind:
         assert res["receiver_kind"] == expected_receiver_kind
+
+
+def test_get_next_sw_id():
+    res1 = base._get_next_sw_id()
+    res2 = base._get_next_sw_id()
+
+    assert res1 == 2
+    assert res2 == 3
