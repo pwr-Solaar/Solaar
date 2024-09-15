@@ -25,7 +25,7 @@ from logitech_receiver import common
 from logitech_receiver import device
 from logitech_receiver import hidpp20
 
-from . import hidpp
+from . import fake_hidpp
 
 
 class LowLevelInterfaceFake:
@@ -33,14 +33,14 @@ class LowLevelInterfaceFake:
         self.responses = responses
 
     def open_path(self, path):
-        return hidpp.open_path(path)
+        return fake_hidpp.open_path(path)
 
     def request(self, response, *args, **kwargs):
-        func = partial(hidpp.request, self.responses)
+        func = partial(fake_hidpp.request, self.responses)
         return func(response, *args, **kwargs)
 
     def ping(self, response, *args, **kwargs):
-        func = partial(hidpp.ping, self.responses)
+        func = partial(fake_hidpp.ping, self.responses)
         return func(response, *args, **kwargs)
 
     def close(self, *args, **kwargs):
@@ -70,7 +70,11 @@ di_DDDD = DeviceInfoStub("11", product_id="DDDD")
 
 @pytest.mark.parametrize(
     "device_info, responses, expected_success",
-    [(di_bad_handle, hidpp.r_empty, None), (di_error, hidpp.r_empty, False), (di_CCCC, hidpp.r_empty, True)],
+    [
+        (di_bad_handle, fake_hidpp.r_empty, None),
+        (di_error, fake_hidpp.r_empty, False),
+        (di_CCCC, fake_hidpp.r_empty, True),
+    ],
 )
 def test_create_device(device_info, responses, expected_success):
     low_level_mock = LowLevelInterfaceFake(responses)
@@ -87,7 +91,7 @@ def test_create_device(device_info, responses, expected_success):
 
 @pytest.mark.parametrize(
     "device_info, responses, expected_codename, expected_name, expected_kind",
-    [(di_CCCC, hidpp.r_empty, "?? (CCCC)", "Unknown device CCCC", "?")],
+    [(di_CCCC, fake_hidpp.r_empty, "?? (CCCC)", "Unknown device CCCC", "?")],
 )
 def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
     low_level = LowLevelInterfaceFake(responses)
@@ -103,7 +107,14 @@ def test_device_name(device_info, responses, expected_codename, expected_name, e
     "device_info, responses, handle, _name, _codename, number, protocol, registers",
     zip(
         [di_CCCC, di_C318, di_B530, di_C068, di_C08A, di_DDDD],
-        [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
+        [
+            fake_hidpp.r_empty,
+            fake_hidpp.r_keyboard_1,
+            fake_hidpp.r_keyboard_2,
+            fake_hidpp.r_mouse_1,
+            fake_hidpp.r_mouse_2,
+            fake_hidpp.r_mouse_3,
+        ],
         [0x11, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, "Illuminated Keyboard", "Craft Advanced Keyboard", "G700 Gaming Mouse", "MX Vertical Wireless Mouse", None],
         [None, "Illuminated", "Craft", "G700", "MX Vertical", None],
@@ -160,7 +171,14 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
-        [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
+        [
+            fake_hidpp.r_empty,
+            fake_hidpp.r_keyboard_1,
+            fake_hidpp.r_keyboard_2,
+            fake_hidpp.r_mouse_1,
+            fake_hidpp.r_mouse_2,
+            fake_hidpp.r_mouse_3,
+        ],
         [0x11, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, "Wireless Keyboard K520", "Craft Advanced Keyboard", "MX Air", "MX Vertical Wireless Mouse", None],
         ["CODE", "K520", "Craft", "MX Air", "MX Vertical", "CODE"],
@@ -180,8 +198,8 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
     mock_hid.side_effect = lambda x, y, z: x
 
     low_level = LowLevelInterfaceFake(responses)
-    low_level.request = partial(hidpp.request, hidpp.replace_number(responses, number))
-    low_level.ping = partial(hidpp.ping, hidpp.replace_number(responses, number))
+    low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
+    low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
     test_device = device.Device(low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle)
     test_device.receiver.device = test_device
@@ -207,7 +225,14 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
     zip(
         range(1, 7),
         [pi_CCCC, pi_2011, pi_4066, pi_1007, pi_407B, pi_DDDD],
-        [hidpp.r_empty, hidpp.r_keyboard_1, hidpp.r_keyboard_2, hidpp.r_mouse_1, hidpp.r_mouse_2, hidpp.r_mouse_3],
+        [
+            fake_hidpp.r_empty,
+            fake_hidpp.r_keyboard_1,
+            fake_hidpp.r_keyboard_2,
+            fake_hidpp.r_mouse_1,
+            fake_hidpp.r_mouse_2,
+            fake_hidpp.r_mouse_3,
+        ],
         [None, 0x11, 0x11, 0x11, 0x11, 0x11],
         [None, None, "12345678", None, None, "12345679"],  # unitId
         [None, None, "1234567890AB", None, None, "123456780000"],  # modelId
@@ -224,8 +249,8 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
     mock_hid.side_effect = lambda x, y, z: x
 
     low_level = LowLevelInterfaceFake(responses)
-    low_level.request = partial(hidpp.request, hidpp.replace_number(responses, number))
-    low_level.ping = partial(hidpp.ping, hidpp.replace_number(responses, number))
+    low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
+    low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
     test_device = device.Device(low_level, FakeReceiver(), number, True, info, handle=handle)
 
@@ -244,19 +269,19 @@ class FakeDevice(device.Device):  # a fully functional Device but its HID++ func
         self.responses = responses
         super().__init__(LowLevelInterfaceFake(responses), *args, **kwargs)
 
-    request = hidpp.Device.request
-    ping = hidpp.Device.ping
+    request = fake_hidpp.Device.request
+    ping = fake_hidpp.Device.ping
 
 
 @pytest.mark.parametrize(
     "device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles",
     [
-        (di_CCCC, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
-        (di_C318, hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
-        (di_B530, hidpp.r_keyboard_1, 1.0, type(None), None, None, None, None, None),
-        (di_B530, hidpp.r_keyboard_2, 2.0, type(None), 4, 0, 0, None, None),
-        (di_B530, hidpp.complex_responses_1, 4.5, hidpp20.LEDEffectsInfo, 0, 0, 0, None, None),
-        (di_B530, hidpp.complex_responses_2, 4.5, hidpp20.RGBEffectsInfo, 8, 3, 1, True, True),
+        (di_CCCC, fake_hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
+        (di_C318, fake_hidpp.r_empty, 1.0, type(None), None, None, None, None, None),
+        (di_B530, fake_hidpp.r_keyboard_1, 1.0, type(None), None, None, None, None, None),
+        (di_B530, fake_hidpp.r_keyboard_2, 2.0, type(None), 4, 0, 0, None, None),
+        (di_B530, fake_hidpp.complex_responses_1, 4.5, hidpp20.LEDEffectsInfo, 0, 0, 0, None, None),
+        (di_B530, fake_hidpp.complex_responses_2, 4.5, hidpp20.RGBEffectsInfo, 8, 3, 1, True, True),
     ],
 )
 def test_device_complex(device_info, responses, protocol, led, keys, remap, gestures, backlight, profiles, mocker):
@@ -289,12 +314,12 @@ def test_device_complex(device_info, responses, protocol, led, keys, remap, gest
 @pytest.mark.parametrize(
     "device_info, responses, protocol, p, persister, settings",
     [
-        (di_CCCC, hidpp.r_empty, 1.0, None, None, 0),
-        (di_C318, hidpp.r_empty, 1.0, {}, {}, 0),
-        (di_C318, hidpp.r_keyboard_1, 1.0, {"n": "n"}, {"n": "n"}, 1),
-        (di_B530, hidpp.r_keyboard_2, 4.5, {"m": "m"}, {"m": "m"}, 1),
-        (di_C068, hidpp.r_mouse_1, 1.0, {"o": "o"}, {"o": "o"}, 2),
-        (di_C08A, hidpp.r_mouse_2, 4.5, {"p": "p"}, {"p": "p"}, 0),
+        (di_CCCC, fake_hidpp.r_empty, 1.0, None, None, 0),
+        (di_C318, fake_hidpp.r_empty, 1.0, {}, {}, 0),
+        (di_C318, fake_hidpp.r_keyboard_1, 1.0, {"n": "n"}, {"n": "n"}, 1),
+        (di_B530, fake_hidpp.r_keyboard_2, 4.5, {"m": "m"}, {"m": "m"}, 1),
+        (di_C068, fake_hidpp.r_mouse_1, 1.0, {"o": "o"}, {"o": "o"}, 2),
+        (di_C08A, fake_hidpp.r_mouse_2, 4.5, {"p": "p"}, {"p": "p"}, 0),
     ],
 )
 def test_device_settings(device_info, responses, protocol, p, persister, settings, mocker):
@@ -310,9 +335,21 @@ def test_device_settings(device_info, responses, protocol, p, persister, setting
 @pytest.mark.parametrize(
     "device_info, responses, protocol, battery, changed",
     [
-        (di_C318, hidpp.r_empty, 1.0, None, {"active": True, "alert": 0, "reason": None}),
-        (di_C318, hidpp.r_keyboard_1, 1.0, common.Battery(50, None, 0, None), {"active": True, "alert": 0, "reason": None}),
-        (di_B530, hidpp.r_keyboard_2, 4.5, common.Battery(18, 52, None, None), {"active": True, "alert": 0, "reason": None}),
+        (di_C318, fake_hidpp.r_empty, 1.0, None, {"active": True, "alert": 0, "reason": None}),
+        (
+            di_C318,
+            fake_hidpp.r_keyboard_1,
+            1.0,
+            common.Battery(50, None, 0, None),
+            {"active": True, "alert": 0, "reason": None},
+        ),
+        (
+            di_B530,
+            fake_hidpp.r_keyboard_2,
+            4.5,
+            common.Battery(18, 52, None, None),
+            {"active": True, "alert": 0, "reason": None},
+        ),
     ],
 )
 def test_device_battery(device_info, responses, protocol, battery, changed, mocker):

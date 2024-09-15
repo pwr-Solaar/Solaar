@@ -10,7 +10,7 @@ from logitech_receiver import common
 from logitech_receiver import exceptions
 from logitech_receiver import receiver
 
-from . import hidpp
+from . import fake_hidpp
 
 
 @pytest.mark.parametrize(
@@ -55,38 +55,38 @@ def mock_base():
 
 
 responses_unifying = [
-    hidpp.Response("000000", 0x8003, "FF"),
-    hidpp.Response("000300", 0x8102),
-    hidpp.Response("0316CC9CB40506220000000000000000", 0x83B5, "03"),
-    hidpp.Response("20200840820402020700000000000000", 0x83B5, "20"),
-    hidpp.Response("21211420110400010D1A000000000000", 0x83B5, "21"),
-    hidpp.Response("22220840660402010700000000020000", 0x83B5, "22"),
-    hidpp.Response("30198E3EB80600000001000000000000", 0x83B5, "30"),
-    hidpp.Response("31811119511A40000002000000000000", 0x83B5, "31"),
-    hidpp.Response("32112C46EA1E40000003000000000000", 0x83B5, "32"),
-    hidpp.Response("400B4D58204D61737465722033000000", 0x83B5, "40"),
-    hidpp.Response("41044B35323020202020202020202020", 0x83B5, "41"),
-    hidpp.Response("42054372616674000000000000000000", 0x83B5, "42"),
-    hidpp.Response("012411", 0x81F1, "01"),
-    hidpp.Response("020036", 0x81F1, "02"),
-    hidpp.Response("03AAAC", 0x81F1, "03"),
-    hidpp.Response("040209", 0x81F1, "04"),
+    fake_hidpp.Response("000000", 0x8003, "FF"),
+    fake_hidpp.Response("000300", 0x8102),
+    fake_hidpp.Response("0316CC9CB40506220000000000000000", 0x83B5, "03"),
+    fake_hidpp.Response("20200840820402020700000000000000", 0x83B5, "20"),
+    fake_hidpp.Response("21211420110400010D1A000000000000", 0x83B5, "21"),
+    fake_hidpp.Response("22220840660402010700000000020000", 0x83B5, "22"),
+    fake_hidpp.Response("30198E3EB80600000001000000000000", 0x83B5, "30"),
+    fake_hidpp.Response("31811119511A40000002000000000000", 0x83B5, "31"),
+    fake_hidpp.Response("32112C46EA1E40000003000000000000", 0x83B5, "32"),
+    fake_hidpp.Response("400B4D58204D61737465722033000000", 0x83B5, "40"),
+    fake_hidpp.Response("41044B35323020202020202020202020", 0x83B5, "41"),
+    fake_hidpp.Response("42054372616674000000000000000000", 0x83B5, "42"),
+    fake_hidpp.Response("012411", 0x81F1, "01"),
+    fake_hidpp.Response("020036", 0x81F1, "02"),
+    fake_hidpp.Response("03AAAC", 0x81F1, "03"),
+    fake_hidpp.Response("040209", 0x81F1, "04"),
 ]
 responses_c534 = [
-    hidpp.Response("000000", 0x8003, "FF", handle=0x12),
-    hidpp.Response("000209", 0x8102, handle=0x12),
-    hidpp.Response("0316CC9CB40502220000000000000000", 0x83B5, "03", handle=0x12),
-    hidpp.Response("00000445AB", 0x83B5, "04", handle=0x12),
+    fake_hidpp.Response("000000", 0x8003, "FF", handle=0x12),
+    fake_hidpp.Response("000209", 0x8102, handle=0x12),
+    fake_hidpp.Response("0316CC9CB40502220000000000000000", 0x83B5, "03", handle=0x12),
+    fake_hidpp.Response("00000445AB", 0x83B5, "04", handle=0x12),
 ]
 responses_unusual = [
-    hidpp.Response("000000", 0x8003, "FF", handle=0x13),
-    hidpp.Response("000300", 0x8102, handle=0x13),
-    hidpp.Response("00000445AB", 0x83B5, "04", handle=0x13),
-    hidpp.Response("0326CC9CB40508220000000000000000", 0x83B5, "03", handle=0x13),
+    fake_hidpp.Response("000000", 0x8003, "FF", handle=0x13),
+    fake_hidpp.Response("000300", 0x8102, handle=0x13),
+    fake_hidpp.Response("00000445AB", 0x83B5, "04", handle=0x13),
+    fake_hidpp.Response("0326CC9CB40508220000000000000000", 0x83B5, "03", handle=0x13),
 ]
 responses_lacking = [
-    hidpp.Response("000000", 0x8003, "FF", handle=0x14),
-    hidpp.Response("000300", 0x8102, handle=0x14),
+    fake_hidpp.Response("000000", 0x8003, "FF", handle=0x14),
+    fake_hidpp.Response("000300", 0x8102, handle=0x14),
 ]
 
 mouse_info = {
@@ -113,8 +113,8 @@ c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch
     ],
 )
 def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial, max_devices, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[0].side_effect = fake_hidpp.open_path
+    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
     if handle is False:
         with pytest.raises(Exception):  # noqa: B017
@@ -139,8 +139,8 @@ def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial,
     ],
 )
 def test_ReceiverFactory_props(device_info, responses, firmware, codename, remaining_pairings, pairing_info, count, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[0].side_effect = fake_hidpp.open_path
+    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
     r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 
@@ -161,8 +161,8 @@ def test_ReceiverFactory_props(device_info, responses, firmware, codename, remai
     ],
 )
 def test_ReceiverFactory_string(device_info, responses, status_str, strng, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[0].side_effect = fake_hidpp.open_path
+    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
     r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 
@@ -179,8 +179,8 @@ def test_ReceiverFactory_string(device_info, responses, status_str, strng, mock_
     ],
 )
 def test_ReceiverFactory_nodevice(device_info, responses, mock_base):
-    mock_base[0].side_effect = hidpp.open_path
-    mock_base[1].side_effect = partial(hidpp.request, responses)
+    mock_base[0].side_effect = fake_hidpp.open_path
+    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
     r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 

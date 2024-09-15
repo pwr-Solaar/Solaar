@@ -23,16 +23,18 @@ from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
 
-from . import hidpp
+from . import fake_hidpp
 
 _hidpp20 = hidpp20.Hidpp20()
 
-device_offline = hidpp.Device("REGISTERS", False)
-device_registers = hidpp.Device("OFFLINE", True, 1.0)
-device_nofeatures = hidpp.Device("NOFEATURES", True, 4.5)
-device_zerofeatures = hidpp.Device("ZEROFEATURES", True, 4.5, [hidpp.Response("0000", 0x0000, "0001")])
-device_broken = hidpp.Device("BROKEN", True, 4.5, [hidpp.Response("0500", 0x0000, "0001"), hidpp.Response(None, 0x0100)])
-device_standard = hidpp.Device("STANDARD", True, 4.5, hidpp.r_keyboard_2)
+device_offline = fake_hidpp.Device("REGISTERS", False)
+device_registers = fake_hidpp.Device("OFFLINE", True, 1.0)
+device_nofeatures = fake_hidpp.Device("NOFEATURES", True, 4.5)
+device_zerofeatures = fake_hidpp.Device("ZEROFEATURES", True, 4.5, [fake_hidpp.Response("0000", 0x0000, "0001")])
+device_broken = fake_hidpp.Device(
+    "BROKEN", True, 4.5, [fake_hidpp.Response("0500", 0x0000, "0001"), fake_hidpp.Response(None, 0x0100)]
+)
+device_standard = fake_hidpp.Device("STANDARD", True, 4.5, fake_hidpp.r_keyboard_2)
 
 
 @pytest.mark.parametrize(
@@ -210,15 +212,15 @@ def test_ReprogrammableKeyV4_key(device, index, cid, tid, flags, pos, group, gma
 @pytest.mark.parametrize(
     "responses, index, mapped_to, remappable_to, mapping_flags",
     [
-        (hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), []),
-        (hidpp.responses_key, 2, "Left Click", None, ["diverted"]),
-        (hidpp.responses_key, 3, "Mouse Back Button", None, ["diverted", "persistently diverted"]),
-        (hidpp.responses_key, 4, "Mouse Forward Button", None, ["diverted", "raw XY diverted"]),
+        (fake_hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), []),
+        (fake_hidpp.responses_key, 2, "Left Click", None, ["diverted"]),
+        (fake_hidpp.responses_key, 3, "Mouse Back Button", None, ["diverted", "persistently diverted"]),
+        (fake_hidpp.responses_key, 4, "Mouse Forward Button", None, ["diverted", "raw XY diverted"]),
     ],
 )
 # these fields need access all the key data, so start by setting up a device and its key data
 def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, mapping_flags):
-    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+    device = fake_hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
     device._keys = _hidpp20.get_keys(device)
 
     key = device.keys[index]
@@ -231,15 +233,15 @@ def test_ReprogrammableKeyV4_query(responses, index, mapped_to, remappable_to, m
 @pytest.mark.parametrize(
     "responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets",
     [
-        (hidpp.responses_key, 1, True, False, True, 0x52, ["0051080000"]),
-        (hidpp.responses_key, 2, False, True, False, 0x51, ["0052020000", "0052200000", "0052000051"]),
-        (hidpp.responses_key, 3, False, True, True, 0x50, ["0053020000", "00530C0000", "0053300000", "0053000050"]),
-        (hidpp.responses_key, 4, False, False, False, 0x50, ["0056020000", "0056080000", "0056200000", "0056000050"]),
+        (fake_hidpp.responses_key, 1, True, False, True, 0x52, ["0051080000"]),
+        (fake_hidpp.responses_key, 2, False, True, False, 0x51, ["0052020000", "0052200000", "0052000051"]),
+        (fake_hidpp.responses_key, 3, False, True, True, 0x50, ["0053020000", "00530C0000", "0053300000", "0053000050"]),
+        (fake_hidpp.responses_key, 4, False, False, False, 0x50, ["0056020000", "0056080000", "0056200000", "0056000050"]),
     ],
 )
 def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_diverted, rawXY_reporting, remap, sets, mocker):
-    responses += [hidpp.Response(r, 0x530, r) for r in sets]
-    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+    responses += [fake_hidpp.Response(r, 0x530, r) for r in sets]
+    device = fake_hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
     device._keys = _hidpp20.get_keys(device)
     device._keys._ensure_all_keys_queried()  # do this now so that the last requests are sets
     spy_request = mocker.spy(device, "request")
@@ -275,23 +277,26 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
             key.remap(remap)
     assert (key.mapped_to == remap) or (remap not in key.remappable_to and remap != 0)
 
-    hidpp.match_requests(len(sets), responses, spy_request.call_args_list)
+    fake_hidpp.match_requests(len(sets), responses, spy_request.call_args_list)
 
 
 @pytest.mark.parametrize(
     "r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap",
     [
-        (hidpp.responses_key, 1, 0x0051, 0x02, 0x0002, 0x01, 0, "Mouse Button: 2", "Cntrl+", "02000201", "01000400"),
-        (hidpp.responses_key, 2, 0x0052, 0x01, 0x0001, 0x00, 1, "Key: 1", "", "01000100", "02005004"),
-        (hidpp.responses_key, 3, 0x0053, 0x02, 0x0001, 0x00, 1, "Mouse Button: 1", "", "02000100", "7FFFFFFF"),
+        (fake_hidpp.responses_key, 1, 0x0051, 0x02, 0x0002, 0x01, 0, "Mouse Button: 2", "Cntrl+", "02000201", "01000400"),
+        (fake_hidpp.responses_key, 2, 0x0052, 0x01, 0x0001, 0x00, 1, "Key: 1", "", "01000100", "02005004"),
+        (fake_hidpp.responses_key, 3, 0x0053, 0x02, 0x0001, 0x00, 1, "Mouse Button: 1", "", "02000100", "7FFFFFFF"),
     ],
 )
 def test_RemappableAction(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
     if int(remap, 16) == special_keys.KEYS_Default:
-        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x450, f"{cid:04X}" + "FF")]
+        responses = r + [fake_hidpp.Response("040000", 0x0000, "1C00"), fake_hidpp.Response("00", 0x450, f"{cid:04X}" + "FF")]
     else:
-        responses = r + [hidpp.Response("040000", 0x0000, "1C00"), hidpp.Response("00", 0x440, f"{cid:04X}" + "FF" + remap)]
-    device = hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+        responses = r + [
+            fake_hidpp.Response("040000", 0x0000, "1C00"),
+            fake_hidpp.Response("00", 0x440, f"{cid:04X}" + "FF" + remap),
+        ]
+    device = fake_hidpp.Device("KEY", responses=responses, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
     key = hidpp20.PersistentRemappableAction(device, index, cid, actionId, remapped, mask, status)
     spy_request = mocker.spy(device, "request")
 
@@ -312,7 +317,7 @@ def test_RemappableAction(r, index, cid, actionId, remapped, mask, status, actio
     assert key.data_bytes.hex().upper() == (byts if int(remap, 16) == special_keys.KEYS_Default else remap)
 
     if int(remap, 16) != special_keys.KEYS_Default:
-        hidpp.match_requests(1, responses, spy_request.call_args_list)
+        fake_hidpp.match_requests(1, responses, spy_request.call_args_list)
 
 
 # KeysArray methods tested in KeysArrayV4
@@ -378,7 +383,9 @@ def test_KeysArrayV4_index(key, index):
     assert result == index
 
 
-device_key = hidpp.Device("KEY", responses=hidpp.responses_key, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5)
+device_key = fake_hidpp.Device(
+    "KEY", responses=fake_hidpp.responses_key, feature=hidpp20_constants.FEATURE.REPROG_CONTROLS_V4, offset=5
+)
 
 
 @pytest.mark.parametrize(
@@ -434,13 +441,13 @@ def test_KeysArrayPersistent_index_error(device, index):
 @pytest.mark.parametrize(
     "responses, key, index, mapped_to, capabilities",
     [
-        (hidpp.responses_remap, special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
-        (hidpp.responses_remap, special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
-        (hidpp.responses_remap, special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN"), 0x41),
+        (fake_hidpp.responses_remap, special_keys.CONTROL.Left_Button, 0, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (fake_hidpp.responses_remap, special_keys.CONTROL.Right_Button, 1, common.NamedInt(0x01, "Mouse Button Left"), 0x41),
+        (fake_hidpp.responses_remap, special_keys.CONTROL.Middle_Button, 2, common.NamedInt(0x51, "DOWN"), 0x41),
     ],
 )
 def test_KeysArrayPersistent_key(responses, key, index, mapped_to, capabilities):
-    device = hidpp.Device("REMAP", responses=responses, feature=hidpp20_constants.FEATURE.PERSISTENT_REMAPPABLE_ACTION)
+    device = fake_hidpp.Device("REMAP", responses=responses, feature=hidpp20_constants.FEATURE.PERSISTENT_REMAPPABLE_ACTION)
     device._remap_keys = _hidpp20.get_remap_keys(device)
     device._remap_keys._ensure_all_keys_queried()
 
@@ -494,13 +501,13 @@ def test_Gesture(device, low, high, next_index, next_diversion_index, name, cbe,
 @pytest.mark.parametrize(
     "responses, gest, enabled, diverted, set_result, unset_result, divert_result, undivert_result",
     [
-        (hidpp.responses_gestures, 20, None, None, None, None, None, None),
-        (hidpp.responses_gestures, 1, True, False, "01", "00", "01", "00"),
-        (hidpp.responses_gestures, 45, False, None, "01", "00", None, None),
+        (fake_hidpp.responses_gestures, 20, None, None, None, None, None, None),
+        (fake_hidpp.responses_gestures, 1, True, False, "01", "00", "01", "00"),
+        (fake_hidpp.responses_gestures, 45, False, None, "01", "00", None, None),
     ],
 )
 def test_Gesture_set(responses, gest, enabled, diverted, set_result, unset_result, divert_result, undivert_result):
-    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
     gesture = gestures.gesture(gest)
@@ -516,11 +523,11 @@ def test_Gesture_set(responses, gest, enabled, diverted, set_result, unset_resul
 @pytest.mark.parametrize(
     "responses, prm, id, index, size, value, default_value, write1, write2",
     [
-        (hidpp.responses_gestures, 4, common.NamedInt(4, "ScaleFactor"), 0, 2, 256, 256, "0080", "0180"),
+        (fake_hidpp.responses_gestures, 4, common.NamedInt(4, "ScaleFactor"), 0, 2, 256, 256, "0080", "0180"),
     ],
 )
 def test_Param(responses, prm, id, index, size, value, default_value, write1, write2):
-    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
     param = gestures.param(prm)
@@ -539,13 +546,13 @@ def test_Param(responses, prm, id, index, size, value, default_value, write1, wr
 @pytest.mark.parametrize(
     "responses, id, s, byte_count, value, string",
     [
-        (hidpp.responses_gestures, 1, "DVI field width", 1, 8, "[DVI field width=8]"),
-        (hidpp.responses_gestures, 2, "field widths", 1, 8, "[field widths=8]"),
-        (hidpp.responses_gestures, 3, "period unit", 2, 2048, "[period unit=2048]"),
+        (fake_hidpp.responses_gestures, 1, "DVI field width", 1, 8, "[DVI field width=8]"),
+        (fake_hidpp.responses_gestures, 2, "field widths", 1, 8, "[field widths=8]"),
+        (fake_hidpp.responses_gestures, 3, "period unit", 2, 2048, "[period unit=2048]"),
     ],
 )
 def test_Spec(responses, id, s, byte_count, value, string):
-    device = hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.FEATURE.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
     spec = gestures.specs[id]
@@ -558,7 +565,9 @@ def test_Spec(responses, id, s, byte_count, value, string):
 
 
 def test_Gestures():
-    device = hidpp.Device("GESTURES", responses=hidpp.responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2)
+    device = fake_hidpp.Device(
+        "GESTURES", responses=fake_hidpp.responses_gestures, feature=hidpp20_constants.FEATURE.GESTURE_2
+    )
     gestures = _hidpp20.get_gestures(device)
 
     assert gestures
@@ -584,11 +593,11 @@ def test_Gestures():
 
 
 responses_backlight = [
-    hidpp.Response("010118000001020003000400", 0x0400),
-    hidpp.Response("0101FF00020003000400", 0x0410, "0101FF00020003000400"),
+    fake_hidpp.Response("010118000001020003000400", 0x0400),
+    fake_hidpp.Response("0101FF00020003000400", 0x0410, "0101FF00020003000400"),
 ]
 
-device_backlight = hidpp.Device("BACKLIGHT", responses=responses_backlight, feature=hidpp20_constants.FEATURE.BACKLIGHT2)
+device_backlight = fake_hidpp.Device("BACKLIGHT", responses=responses_backlight, feature=hidpp20_constants.FEATURE.BACKLIGHT2)
 
 
 def test_Backlight():
@@ -642,12 +651,26 @@ def test_LEDEffectSetting(hex, ID, color, speed, period, intensity, ramp, form):
 @pytest.mark.parametrize(
     "feature, function, response, ID, capabilities, period",
     [
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x20, hidpp.Response("0102000300040005", 0x0420, "010200"), 3, 4, 5],
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x20, hidpp.Response("0102000700080009", 0x0420, "010200"), 7, 8, 9],
+        [
+            hidpp20_constants.FEATURE.COLOR_LED_EFFECTS,
+            0x20,
+            fake_hidpp.Response("0102000300040005", 0x0420, "010200"),
+            3,
+            4,
+            5,
+        ],
+        [
+            hidpp20_constants.FEATURE.COLOR_LED_EFFECTS,
+            0x20,
+            fake_hidpp.Response("0102000700080009", 0x0420, "010200"),
+            7,
+            8,
+            9,
+        ],
     ],
 )
 def test_LEDEffectInfo(feature, function, response, ID, capabilities, period):
-    device = hidpp.Device(feature=feature, responses=[response])
+    device = fake_hidpp.Device(feature=feature, responses=[response])
 
     info = hidpp20.LEDEffectInfo(feature, function, device, 1, 2)
 
@@ -661,12 +684,12 @@ def test_LEDEffectInfo(feature, function, response, ID, capabilities, period):
 @pytest.mark.parametrize(
     "feature, function, offset, effect_function, responses, index, location, count, id_1",
     [
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, hidpp.zone_responses_1, 0, 1, 2, 0xB],
-        [hidpp20_constants.FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, hidpp.zone_responses_2, 0, 1, 2, 2],
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, fake_hidpp.zone_responses_1, 0, 1, 2, 0xB],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, fake_hidpp.zone_responses_2, 0, 1, 2, 2],
     ],
 )
 def test_LEDZoneInfo(feature, function, offset, effect_function, responses, index, location, count, id_1):
-    device = hidpp.Device(feature=feature, responses=responses, offset=0x07)
+    device = fake_hidpp.Device(feature=feature, responses=responses, offset=0x07)
 
     zone = hidpp20.LEDZoneInfo(feature, function, offset, effect_function, device, index)
 
@@ -680,13 +703,17 @@ def test_LEDZoneInfo(feature, function, offset, effect_function, responses, inde
 @pytest.mark.parametrize(
     "responses, setting, expected_command",
     [
-        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=0), None],
-        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50), "000000000000000020500000"],
-        [hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20), "000180808000002000000000"],
+        [fake_hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=0), None],
+        [fake_hidpp.zone_responses_1, hidpp20.LEDEffectSetting(ID=3, period=0x20, intensity=0x50), "000000000000000020500000"],
+        [
+            fake_hidpp.zone_responses_1,
+            hidpp20.LEDEffectSetting(ID=0xB, color=0x808080, period=0x20),
+            "000180808000002000000000",
+        ],
     ],
 )
 def test_LEDZoneInfo_to_command(responses, setting, expected_command):
-    device = hidpp.Device(feature=hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, responses=responses, offset=0x07)
+    device = fake_hidpp.Device(feature=hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, responses=responses, offset=0x07)
     zone = hidpp20.LEDZoneInfo(hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, 0)
 
     command = zone.to_command(setting)
@@ -697,12 +724,12 @@ def test_LEDZoneInfo_to_command(responses, setting, expected_command):
 @pytest.mark.parametrize(
     "feature, cls, responses, readable, count, count_0",
     [
-        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, hidpp20.LEDEffectsInfo, hidpp.effects_responses_1, 1, 1, 2],
-        [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, hidpp.effects_responses_2, 1, 1, 2],
+        [hidpp20_constants.FEATURE.COLOR_LED_EFFECTS, hidpp20.LEDEffectsInfo, fake_hidpp.effects_responses_1, 1, 1, 2],
+        [hidpp20_constants.FEATURE.RGB_EFFECTS, hidpp20.RGBEffectsInfo, fake_hidpp.effects_responses_2, 1, 1, 2],
     ],
 )
 def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
-    device = hidpp.Device(feature=feature, responses=responses, offset=0x07)
+    device = fake_hidpp.Device(feature=feature, responses=responses, offset=0x07)
 
     effects = cls(device)
 
@@ -721,7 +748,7 @@ def test_LED_RGB_EffectsInfo(feature, cls, responses, readable, count, count_0):
         ("80020454", 0x8, None, None, 0x02, 0x54, 0x04, None, None),
         ("80030454", 0x8, None, None, 0x03, 0x0454, None, None, None),
         ("900AFF01", 0x9, None, None, None, 0x0A, None, 0x01, None),
-        ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xA0"),
+        ("709090A0", 0x7, None, None, None, None, None, None, b"\x70\x90\x90\xa0"),
     ],
 )
 def test_button_bytes(hex, behavior, sector, address, typ, val, modifiers, data, byt):
@@ -820,13 +847,15 @@ def test_OnboardProfile_bytes(hex, name, sector, enabled, buttons, gbuttons, res
 @pytest.mark.parametrize(
     "responses, name, count, buttons, gbuttons, sectors, size",
     [
-        (hidpp.responses_profiles, "ONB", 1, 2, 2, 1, 254),
-        (hidpp.responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
-        (hidpp.responses_profiles_rom_2, "ONB", 1, 2, 2, 1, 254),
+        (fake_hidpp.responses_profiles, "ONB", 1, 2, 2, 1, 254),
+        (fake_hidpp.responses_profiles_rom, "ONB", 1, 2, 2, 1, 254),
+        (fake_hidpp.responses_profiles_rom_2, "ONB", 1, 2, 2, 1, 254),
     ],
 )
 def test_OnboardProfiles_device(responses, name, count, buttons, gbuttons, sectors, size):
-    device = hidpp.Device(name, True, 4.5, responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES, offset=0x9)
+    device = fake_hidpp.Device(
+        name, True, 4.5, responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES, offset=0x9
+    )
     device._profiles = None
     profiles = _hidpp20.get_profiles(device)
 
