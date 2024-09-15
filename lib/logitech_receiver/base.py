@@ -439,7 +439,16 @@ def _get_next_sw_id() -> int:
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+def request(
+    handle,
+    devnumber,
+    request_id: int,
+    *params,
+    no_reply: bool = False,
+    return_error: bool = False,
+    long_message: bool = False,
+    protocol: float = 1.0,
+):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -554,7 +563,7 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
         # raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
-def ping(handle, devnumber, long_message=False):
+def ping(handle, devnumber, long_message: bool = False):
     """Check if a device is connected to the receiver.
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
