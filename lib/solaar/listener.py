@@ -332,7 +332,7 @@ def setup_scanner(status_changed_callback, setting_changed_callback, error_callb
     _status_callback = status_changed_callback
     _setting_callback = setting_changed_callback
     _error_callback = error_callback
-    base.notify_on_receivers_glib(_process_receiver_event)
+    base.notify_on_receivers_glib(GLib, _process_receiver_event)
 
 
 def _process_add(device_info, retry):
