@@ -26,11 +26,11 @@ from solaar.i18n import _
 from . import base
 from . import common
 from . import descriptors
+from . import desktop_notifications
 from . import diversion
 from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
-from . import notify
 from . import settings
 from . import special_keys
 from .hidpp10_constants import Registers
@@ -745,12 +745,12 @@ class DpiSlidingXY(settings.RawXYProcessing):
             self.device.setting_callback(self.device, type(self.dpiSetting), [newDpi])
 
     def displayNewDpi(self, newDpiIdx):
-        if notify.available:
+        if desktop_notifications.available:
             selected_dpi = self.dpiChoices[newDpiIdx]
             min_dpi = self.dpiChoices[0]
             max_dpi = self.dpiChoices[-1]
             reason = f"DPI {selected_dpi} [min {min_dpi}, max {max_dpi}]"
-            notify.show(self.device, reason)
+            desktop_notifications.show(self.device, reason)
 
     def press_action(self, key):  # start tracking
         self.starting = True
