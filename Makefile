@@ -66,4 +66,4 @@ lint:
 
 test:
 	@echo "Running Solaar tests"
-	pytest --cov=lib/ tests/
+	pytest --cov
