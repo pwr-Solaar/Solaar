@@ -14,29 +14,46 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+"""Implements the desktop notification service."""
+
+import importlib
 import logging
 
 logger = logging.getLogger(__name__)
 
-try:
-    import gi
 
-    gi.require_version("Notify", "0.7")
-    gi.require_version("Gtk", "3.0")
-    from gi.repository import GLib  # this import is allowed to fail making the entire feature unavailable
-    from gi.repository import Gtk  # this import is allowed to fail making the entire feature unavailable
-    from gi.repository import Notify  # this import is allowed to fail making the entire feature unavailable
+def notifications_available():
+    """Checks if notification service is available."""
+    notifications_supported = False
+    try:
+        import gi
 
-    available = True
-except (ValueError, ImportError):
-    available = False
+        gi.require_version("Notify", "0.7")
+        gi.require_version("Gtk", "3.0")
+
+        importlib.util.find_spec("gi.repository.GLib")
+        importlib.util.find_spec("gi.repository.Gtk")
+        importlib.util.find_spec("gi.repository.Notify")
+
+        notifications_supported = True
+    except ValueError as e:
+        logger.warning(f"Notification service is not available: {e}")
+    return notifications_supported
+
+
+available = notifications_available()
 
 if available:
+    from gi.repository import GLib
+    from gi.repository import Gtk
+    from gi.repository import Notify
+
     # cache references to shown notifications here to allow reuse
     _notifications = {}
+    _ICON_LISTS = {}
 
     def init():
-        """Init the notifications system."""
+        """Initialize desktop notifications."""
         global available
         if available:
             if not Notify.is_initted():
@@ -50,13 +67,14 @@ if available:
         return available and Notify.is_initted()
 
     def uninit():
+        """Stop desktop notifications."""
         if available and Notify.is_initted():
             if logger.isEnabledFor(logging.INFO):
                 logger.info("stopping desktop notifications")
             _notifications.clear()
             Notify.uninit()
 
-    def show(dev, message, icon=None):
+    def show(dev, message: str, icon=None):
         """Show a notification with title and text."""
         if available and (Notify.is_initted() or init()):
             summary = dev.name
@@ -68,13 +86,9 @@ if available:
             n.set_urgency(Notify.Urgency.NORMAL)
             n.set_hint("desktop-entry", GLib.Variant("s", "solaar"))  # replace with better name late
             try:
-                # if logger.isEnabledFor(logging.DEBUG):
-                #     logger.debug("showing %s", n)
                 n.show()
             except Exception:
-                logger.exception("showing %s", n)
-
-    _ICON_LISTS = {}
+                logger.exception(f"showing {n}")
 
     def device_icon_list(name="_", kind=None):
         icon_list = _ICON_LISTS.get(name)
@@ -82,16 +96,17 @@ if available:
             # names of possible icons, in reverse order of likelihood
             # the theme will hopefully pick up the most appropriate
             icon_list = ["preferences-desktop-peripherals"]
+            kind = str(kind)
             if kind:
-                if str(kind) == "numpad":
+                if kind == "numpad":
                     icon_list += ("input-keyboard", "input-dialpad")
-                elif str(kind) == "touchpad":
+                elif kind == "touchpad":
                     icon_list += ("input-mouse", "input-tablet")
-                elif str(kind) == "trackball":
+                elif kind == "trackball":
                     icon_list += ("input-mouse",)
-                elif str(kind) == "headset":
+                elif kind == "headset":
                     icon_list += ("audio-headphones", "audio-headset")
-                icon_list += ("input-" + str(kind),)
+                icon_list += (f"input-{kind}",)
             _ICON_LISTS[name] = icon_list
         return icon_list
 
