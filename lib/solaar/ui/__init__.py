@@ -28,8 +28,8 @@ from solaar.ui.config_panel import record_setting
 from solaar.ui.window import find_device
 
 from . import common
+from . import desktop_notifications
 from . import diversion_rules
-from . import notify
 from . import tray
 from . import window
 
@@ -47,7 +47,7 @@ def _startup(app, startup_hook, use_tray, show_window):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
     common.start_async()
-    notify.init()
+    desktop_notifications.init()
     if use_tray:
         tray.init(lambda _ignore: window.destroy())
     window.init(show_window, use_tray)
@@ -85,7 +85,7 @@ def _shutdown(app, shutdown_hook):
     shutdown_hook()
     common.stop_async()
     tray.destroy()
-    notify.uninit()
+    desktop_notifications.uninit()
 
 
 def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
@@ -120,7 +120,7 @@ def _status_changed(device, alert, reason, refresh=False):
     diversion_rules.update_devices()
 
     if alert & (Alert.NOTIFICATION | Alert.ATTENTION):
-        notify.show(device, reason)
+        desktop_notifications.show(device, reason)
 
 
 def status_changed(device, alert=Alert.NONE, reason=None, refresh=False):
