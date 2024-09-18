@@ -13,9 +13,9 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import importlib
 
 # Optional desktop notifications.
-
 import logging
 
 from solaar import NAME
@@ -26,27 +26,35 @@ from . import icons
 logger = logging.getLogger(__name__)
 
 
-try:
-    import gi
+def notifications_available():
+    """Checks if notification service is available."""
+    notifications_supported = False
+    try:
+        import gi
 
-    gi.require_version("Notify", "0.7")
-    # this import is allowed to fail, in which case the entire feature is unavailable
+        gi.require_version("Notify", "0.7")
+
+        importlib.util.find_spec("gi.repository.GLib")
+        importlib.util.find_spec("gi.repository.Notify")
+
+        notifications_supported = True
+    except ValueError as e:
+        logger.warning(f"Notification service is not available: {e}")
+    return notifications_supported
+
+
+available = notifications_available()
+
+if available:
     from gi.repository import GLib
     from gi.repository import Notify
 
-    # assumed to be working since the import succeeded
-    available = True
-
-except (ValueError, ImportError):
-    available = False
-
-if available:
     # cache references to shown notifications here, so if another status comes
     # while its notification is still visible we don't create another one
     _notifications = {}
 
     def init():
-        """Init the notifications system."""
+        """Initialize desktop notifications."""
         global available
         if available:
             if not Notify.is_initted():
@@ -60,6 +68,7 @@ if available:
         return available and Notify.is_initted()
 
     def uninit():
+        """Stop desktop notifications."""
         if available and Notify.is_initted():
             if logger.isEnabledFor(logging.INFO):
                 logger.info("stopping desktop notifications")
@@ -117,7 +126,7 @@ if available:
             try:
                 n.show()
             except Exception:
-                logger.exception("showing %s", n)
+                logger.exception(f"showing {n}")
 
 else:
 
