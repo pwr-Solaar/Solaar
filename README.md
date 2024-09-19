@@ -13,6 +13,7 @@ that are otherwise ignored by the Linux input system.
 <a href="https://pwr-solaar.github.io/Solaar/installation">Manual Installation</a>
 
 
+[![codecov](https://codecov.io/gh/pwr-Solaar/Solaar/graph/badge.svg?token=D7YWFEWID6)](https://codecov.io/gh/pwr-Solaar/Solaar)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](../LICENSE.txt)
 
 <p align="center">
