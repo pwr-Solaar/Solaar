@@ -4,7 +4,7 @@ branch = True
 source =
     hid_parser
     hidapi
-    keysms
+    keysyms
     logitech_receiver
     solaar
 
