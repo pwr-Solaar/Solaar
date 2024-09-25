@@ -32,6 +32,7 @@ jobs:
         make test
 
     - name: Upload coverage to Codecov
+      if: github.ref == 'refs/heads/master'
       uses: codecov/codecov-action@v4.5.0
       with:
         directory: ./coverage/reports/
@@ -67,6 +68,7 @@ jobs:
       run: |
         export DYLD_LIBRARY_PATH=$(brew --prefix hidapi)/lib:$DYLD_LIBRARY_PATH && pytest --cov --cov-report=xml
     - name: Upload coverage to Codecov
+      if: github.ref == 'refs/heads/master'
       uses: codecov/codecov-action@v4.5.0
       with:
         directory: ./coverage/reports/
