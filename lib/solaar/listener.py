@@ -24,6 +24,7 @@ from collections import namedtuple
 from functools import partial
 
 import gi
+import hidapi
 import logitech_receiver
 
 from logitech_receiver import base
@@ -257,7 +258,9 @@ def _start(device_info):
     if not isDevice:
         receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
-        receiver_ = logitech_receiver.device.DeviceFactory.create_device(base, device_info, _setting_callback)
+        receiver_ = logitech_receiver.device.DeviceFactory.create_device(
+            hidapi.find_paired_node, base, device_info, _setting_callback
+        )
         if receiver_:
             configuration.attach_to(receiver_)
             if receiver_.bluetooth and receiver_.hid_serial:

@@ -80,12 +80,12 @@ def test_create_device(device_info, responses, expected_success):
     low_level_mock = LowLevelInterfaceFake(responses)
     if expected_success is None:
         with pytest.raises(PermissionError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
     elif not expected_success:
         with pytest.raises(TypeError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
     else:
-        test_device = device.DeviceFactory.create_device(low_level_mock, device_info)
+        test_device = device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
         assert bool(test_device) == expected_success
 
 
@@ -96,7 +96,7 @@ def test_create_device(device_info, responses, expected_success):
 def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
     low_level = LowLevelInterfaceFake(responses)
 
-    test_device = device.DeviceFactory.create_device(low_level, device_info)
+    test_device = device.DeviceFactory.create_device(mock.Mock(), low_level, device_info)
 
     assert test_device.codename == expected_codename
     assert test_device.name == expected_name
@@ -124,7 +124,9 @@ def test_device_name(device_info, responses, expected_codename, expected_name, e
     ),
 )
 def test_device_info(device_info, responses, handle, _name, _codename, number, protocol, registers):
-    test_device = device.Device(LowLevelInterfaceFake(responses), None, None, None, handle=handle, device_info=device_info)
+    test_device = device.Device(
+        mock.Mock(), LowLevelInterfaceFake(responses), None, None, None, handle=handle, device_info=device_info
+    )
 
     assert test_device.handle == handle
     assert test_device._name == _name
@@ -150,12 +152,6 @@ class FakeReceiver:
 
     def __contains__(self, dev):
         return True
-
-
-@pytest.fixture
-def mock_hid():
-    with mock.patch("hidapi.find_paired_node", return_value=None) as find_paired_node:
-        yield find_paired_node
 
 
 pi_CCCC = {"wpid": "CCCC", "kind": 0, "serial": None, "polling": "1ms", "power_switch": "top"}
@@ -194,14 +190,14 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         ],
     ),
 )
-def test_device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name, mock_hid):
-    mock_hid.side_effect = lambda x, y, z: x
-
+def test_device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
-    test_device = device.Device(low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle)
+    test_device = device.Device(
+        mock.Mock(), low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle
+    )
     test_device.receiver.device = test_device
 
     assert test_device.handle == handle
@@ -245,14 +241,12 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
         ["1ms", "2ms", "4ms", "8ms", "1ms", "9ms"],  # polling rate
     ),
 )
-def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate, mock_hid):
-    mock_hid.side_effect = lambda x, y, z: x
-
+def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
-    test_device = device.Device(low_level, FakeReceiver(), number, True, info, handle=handle)
+    test_device = device.Device(mock.Mock(), low_level, FakeReceiver(), number, True, info, handle=handle)
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
@@ -267,7 +261,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
 class FakeDevice(device.Device):  # a fully functional Device but its HID++ functions look at local data
     def __init__(self, responses, *args, **kwargs):
         self.responses = responses
-        super().__init__(LowLevelInterfaceFake(responses), *args, **kwargs)
+        super().__init__(mock.Mock(), LowLevelInterfaceFake(responses), *args, **kwargs)
 
     request = fake_hidpp.Device.request
     ping = fake_hidpp.Device.ping
