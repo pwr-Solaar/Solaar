@@ -81,7 +81,7 @@ logger = logging.getLogger(__name__)
 # Xtest extension to X11 - provides input simulation, partly works under Wayland
 # Wayland - provides input simulation
 
-XK_KEYS: Dict[str, int] = keysymdef.keysymdef
+XK_KEYS: Dict[str, int] = keysymdef.key_symbols
 
 # Event codes - can't use Xlib.X codes because Xlib might not be available
 _KEY_RELEASE = 0
