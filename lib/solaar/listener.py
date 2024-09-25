@@ -256,7 +256,9 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
+        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(
+            hidapi.find_paired_node_wpid, device_info, _setting_callback
+        )
     else:
         receiver_ = logitech_receiver.device.DeviceFactory.create_device(
             hidapi.find_paired_node, base, device_info, _setting_callback
