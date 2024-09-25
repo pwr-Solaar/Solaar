@@ -34,11 +34,11 @@ import typing
 from threading import Thread
 from time import sleep
 
-import gi
-
 from hidapi.common import DeviceInfo
 
 if typing.TYPE_CHECKING:
+    import gi
+
     gi.require_version("Gdk", "3.0")
     from gi.repository import GLib  # NOQA: E402
 

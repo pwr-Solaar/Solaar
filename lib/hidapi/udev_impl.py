@@ -37,12 +37,13 @@ from select import select
 from time import sleep
 from time import time
 
-import gi
 import pyudev
 
 from hidapi.common import DeviceInfo
 
 if typing.TYPE_CHECKING:
+    import gi
+
     gi.require_version("Gdk", "3.0")
     from gi.repository import GLib  # NOQA: E402
 

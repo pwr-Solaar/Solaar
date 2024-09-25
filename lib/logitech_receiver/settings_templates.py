@@ -20,17 +20,18 @@ import struct
 import traceback
 
 from time import time
+from typing import Callable
 
 from solaar.i18n import _
 
 from . import base
 from . import common
 from . import descriptors
+from . import desktop_notifications
 from . import diversion
 from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
-from . import notify
 from . import settings
 from . import special_keys
 from .hidpp10_constants import Registers
@@ -728,6 +729,15 @@ class ReprogrammableKeys(settings.Settings):
 
 
 class DpiSlidingXY(settings.RawXYProcessing):
+    def __init__(
+        self,
+        *args,
+        show_notification: Callable[[str, str], bool],
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self._show_notification = show_notification
+
     def activate_action(self):
         self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
         self.dpiChoices = list(self.dpiSetting.choices)
@@ -745,12 +755,11 @@ class DpiSlidingXY(settings.RawXYProcessing):
             self.device.setting_callback(self.device, type(self.dpiSetting), [newDpi])
 
     def displayNewDpi(self, newDpiIdx):
-        if notify.available:
-            selected_dpi = self.dpiChoices[newDpiIdx]
-            min_dpi = self.dpiChoices[0]
-            max_dpi = self.dpiChoices[-1]
-            reason = f"DPI {selected_dpi} [min {min_dpi}, max {max_dpi}]"
-            notify.show(self.device, reason)
+        selected_dpi = self.dpiChoices[newDpiIdx]
+        min_dpi = self.dpiChoices[0]
+        max_dpi = self.dpiChoices[-1]
+        reason = f"DPI {selected_dpi} [min {min_dpi}, max {max_dpi}]"
+        self._show_notification(self.device, reason)
 
     def press_action(self, key):  # start tracking
         self.starting = True
@@ -912,7 +921,9 @@ class DivertKeys(settings.Settings):
                             if _F.ADJUSTABLE_DPI in device.features:
                                 choices[k.key] = setting_class.choices_universe
                                 if sliding is None:
-                                    sliding = DpiSlidingXY(device, name="DpiSlding")
+                                    sliding = DpiSlidingXY(
+                                        device, name="DpiSliding", show_notification=desktop_notifications.show
+                                    )
                         else:
                             choices[k.key] = setting_class.choices_divert
             if not choices:

@@ -103,14 +103,12 @@ def other_device_check(bus_id: int, vendor_id: int, product_id: int):
             return _bluetooth_device(product_id)
 
 
-def product_information(usb_id: int | str) -> dict:
-    if isinstance(usb_id, str):
-        usb_id = int(usb_id, 16)
-
-    for r in base_usb.ALL:
-        if usb_id == r.get("product_id"):
-            return r
-    return {}
+def product_information(usb_id: int) -> dict[str, Any]:
+    """Returns hardcoded information from USB receiver."""
+    for receiver in base_usb.KNOWN_RECEIVER:
+        if usb_id == receiver.get("product_id"):
+            return receiver
+    raise ValueError(f"Unknown receiver type: 0x{usb_id:02X}")
 
 
 _SHORT_MESSAGE_SIZE = 7
@@ -147,9 +145,12 @@ def match(record, bus_id, vendor_id, product_id):
     )
 
 
-def filter_receivers(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
-    """Check that this product is a Logitech receiver and if so return the receiver record for further checking"""
-    for record in base_usb.ALL:  # known receivers
+def filter_receivers(bus_id: int, vendor_id: int, product_id: int, hidpp_short=False, hidpp_long=False):
+    """Check that this product is a Logitech receiver
+
+    If so return the receiver record for further checking.
+    """
+    for record in base_usb.KNOWN_RECEIVER:  # known receivers
         if match(record, bus_id, vendor_id, product_id):
             return record
     if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
@@ -421,13 +422,33 @@ def acquire_timeout(lock, handle, timeout):
             lock.release()
 
 
-# cycle the HID++ 2.0 software ID from x2 to xF, inclusive, to separate results from each other, notifications, and driver
-sw_id = 0xF
+def _get_next_sw_id() -> int:
+    """Returns 'random' software ID to separate replies from different devices.
+
+    Cycle the HID++ 2.0 software ID from 0x2 to 0xF to separate
+    results and notifications.
+    """
+    if not hasattr(_get_next_sw_id, "software_id"):
+        _get_next_sw_id.software_id = 0xF
+
+    if _get_next_sw_id.software_id < 0xF:
+        _get_next_sw_id.software_id += 1
+    else:
+        _get_next_sw_id.software_id = 2
+    return _get_next_sw_id.software_id
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
-def request(handle, devnumber, request_id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
-    global sw_id
+def request(
+    handle,
+    devnumber,
+    request_id: int,
+    *params,
+    no_reply: bool = False,
+    return_error: bool = False,
+    long_message: bool = False,
+    protocol: float = 1.0,
+):
     """Makes a feature call to a device and waits for a matching reply.
     :param handle: an open UR handle.
     :param devnumber: attached device number.
@@ -438,12 +459,10 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
     with acquire_timeout(handle_lock(handle), handle, 10.0):
         assert isinstance(request_id, int)
         if (devnumber != 0xFF or protocol >= 2.0) and request_id < 0x8000:
-            # For HID++ 2.0 feature requests, randomize the SoftwareId to make it
-            # easier to recognize the reply for this request. also, always set the
-            # most significant bit (8) in SoftwareId, to make notifications easier
-            # to distinguish from request replies.
+            # Always set the most significant bit (8) in SoftwareId,
+            # to make notifications easier to distinguish from request replies.
             # This only applies to peripheral requests, ofc.
-            sw_id = sw_id + 1 if sw_id < 0xF else 2
+            sw_id = _get_next_sw_id()
             request_id = (request_id & 0xFFF0) | sw_id  # was 0x08 | getrandbits(3)
 
         timeout = _RECEIVER_REQUEST_TIMEOUT if devnumber == 0xFF else _DEVICE_REQUEST_TIMEOUT
@@ -544,11 +563,10 @@ def request(handle, devnumber, request_id, *params, no_reply=False, return_error
         # raise DeviceUnreachable(number=devnumber, request=request_id)
 
 
-def ping(handle, devnumber, long_message=False):
+def ping(handle, devnumber, long_message: bool = False):
     """Check if a device is connected to the receiver.
     :returns: The HID protocol supported by the device, as a floating point number, if the device is active.
     """
-    global sw_id
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("(%s) pinging device %d", handle, devnumber)
     with acquire_timeout(handle_lock(handle), handle, 10.0):
@@ -560,8 +578,7 @@ def ping(handle, devnumber, long_message=False):
             return
 
         # randomize the mark byte to be able to identify the ping reply
-        # cycle the sw_id byte from 2 to 15 (see above)
-        sw_id = sw_id + 1 if sw_id < 0xF else 2
+        sw_id = _get_next_sw_id()
         request_id = 0x0010 | sw_id  # was 0x0018 | getrandbits(3)
         request_data = struct.pack("!HBBB", request_id, 0, 0, getrandbits(8))
         write(int(handle), devnumber, request_data, long_message)
