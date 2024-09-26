@@ -17,6 +17,7 @@
 
 import errno
 import logging
+import platform
 import subprocess
 import time
 
@@ -24,7 +25,6 @@ from collections import namedtuple
 from functools import partial
 
 import gi
-import hidapi
 import logitech_receiver
 
 from logitech_receiver import base
@@ -39,6 +39,11 @@ from . import i18n
 
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
+
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
 
 logger = logging.getLogger(__name__)
 

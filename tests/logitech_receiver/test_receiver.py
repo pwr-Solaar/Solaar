@@ -13,6 +13,11 @@ from logitech_receiver import receiver
 
 from . import fake_hidpp
 
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
+
 
 @pytest.mark.parametrize(
     "index, expected_kind",
@@ -113,7 +118,7 @@ c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch
         (DeviceInfo("14"), responses_lacking, 0x14, None, 1),
     ],
 )
-def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial, max_devices, mock_base):
+def test_receiver_factory_create_receiver(device_info, responses, handle, serial, max_devices, mock_base):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
     find_paired_node_wpid_func = hidapi.find_paired_node_wpid
@@ -140,7 +145,9 @@ def test_ReceiverFactory_create_receiver(device_info, responses, handle, serial,
         (DeviceInfo("13", product_id=0xCCCC), responses_unusual, None, None, -1, c534_info, 3),
     ],
 )
-def test_ReceiverFactory_props(device_info, responses, firmware, codename, remaining_pairings, pairing_info, count, mock_base):
+def test_receiver_factory_props(
+    device_info, responses, firmware, codename, remaining_pairings, pairing_info, count, mock_base
+):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
@@ -162,7 +169,7 @@ def test_ReceiverFactory_props(device_info, responses, firmware, codename, remai
         (DeviceInfo("13", product_id=0xCCCC), responses_unusual, "No paired devices.", "<Receiver(13,19)>"),
     ],
 )
-def test_ReceiverFactory_string(device_info, responses, status_str, strng, mock_base):
+def test_receiver_factory_string(device_info, responses, status_str, strng, mock_base):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
@@ -180,7 +187,7 @@ def test_ReceiverFactory_string(device_info, responses, status_str, strng, mock_
         (DeviceInfo("14", product_id="C534"), responses_lacking),
     ],
 )
-def test_ReceiverFactory_nodevice(device_info, responses, mock_base):
+def test_receiver_factory_nodevice(device_info, responses, mock_base):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 

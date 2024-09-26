@@ -17,6 +17,7 @@
 import argparse
 import os
 import os.path
+import platform
 import readline
 import sys
 import time
@@ -27,7 +28,10 @@ from select import select
 from threading import Lock
 from threading import Thread
 
-import hidapi
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
 
 LOGITECH_VENDOR_ID = 0x046D
 
