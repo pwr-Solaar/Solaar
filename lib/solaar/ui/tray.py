@@ -51,7 +51,7 @@ def _create_menu(quit_handler):
     menu.append(no_receiver)
     menu.append(Gtk.SeparatorMenuItem.new())
 
-    menu.append(action.make_image_menu_item(_("About %s") % NAME, "help-about", about.show_window))
+    menu.append(action.make_image_menu_item(_("About %s") % NAME, "help-about", about.show))
     menu.append(action.make_image_menu_item(_("Quit %s") % NAME, "application-exit", quit_handler))
 
     menu.show_all()
