@@ -16,6 +16,7 @@
 
 import argparse
 import logging
+import platform
 import sys
 
 from importlib import import_module
@@ -27,6 +28,11 @@ from logitech_receiver import device
 from logitech_receiver import receiver
 
 from solaar import NAME
+
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +112,7 @@ def _receivers(dev_path=None):
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            r = receiver.ReceiverFactory.create_receiver(dev_info)
+            r = receiver.ReceiverFactory.create_receiver(hidapi.find_paired_node_wpid, dev_info)
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("[%s] => %s", dev_info.path, r)
             if r:
@@ -122,9 +128,9 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             if dev_info.isDevice:
-                d = device.DeviceFactory.create_device(base, dev_info)
+                d = device.DeviceFactory.create_device(hidapi.find_paired_node, base, dev_info)
             else:
-                d = receiver.ReceiverFactory.create_receiver(dev_info)
+                d = receiver.ReceiverFactory.create_receiver(hidapi.find_paired_node_wpid, dev_info)
 
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("[%s] => %s", dev_info.path, d)
