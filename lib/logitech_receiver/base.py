@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+import platform
 import struct
 import threading
 import typing
@@ -31,7 +32,6 @@ from time import time
 from typing import Any
 
 import gi
-import hidapi
 
 from . import base_usb
 from . import common
@@ -46,6 +46,11 @@ from .common import BusID
 if typing.TYPE_CHECKING:
     gi.require_version("Gdk", "3.0")
     from gi.repository import GLib  # NOQA: E402
+
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
 
 logger = logging.getLogger(__name__)
 
