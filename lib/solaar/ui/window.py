@@ -305,7 +305,7 @@ def _create_window_layout():
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
         _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: diversion_rules.show_window(_model)
