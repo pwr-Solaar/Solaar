@@ -29,11 +29,11 @@ from solaar import NAME
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import about
 from . import action
 from . import config_panel
 from . import diversion_rules
 from . import icons
+from .about import about
 from .common import ui_async
 
 gi.require_version("Gdk", "3.0")
