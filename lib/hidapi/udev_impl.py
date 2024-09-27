@@ -78,7 +78,7 @@ def exit():
 # The filterfn is used to determine whether this is a device of interest to Solaar.
 # It is given the bus id, vendor id, and product id and returns a dictionary
 # with the required hid_driver and usb_interface and whether this is a receiver or device.
-def _match(action, device, filterfn):
+def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bool], dict[str, typing.Any]]):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f"Dbus event {action} {device}")
     hid_device = device.find_parent("hid")
@@ -113,11 +113,11 @@ def _match(action, device, filterfn):
             "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s", device.device_node, bid, vid, pid, e
         )
 
-    filter = filterfn(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
-    if not filter:
+    filtered_result = filter_func(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
+    if not filtered_result:
         return
-    interface_number = filter.get("usb_interface")
-    isDevice = filter.get("isDevice")
+    interface_number = filtered_result.get("usb_interface")
+    isDevice = filtered_result.get("isDevice")
 
     if action == "add":
         hid_driver_name = hid_device.properties.get("DRIVER")
@@ -260,7 +260,7 @@ def monitor_glib(glib: GLib, callback, filterfn):
     m.start()
 
 
-def enumerate(filterfn):
+def enumerate(filter_func: typing.Callable[[int, int, int, bool, bool], dict[str, typing.Any]]):
     """Enumerate the HID Devices.
 
     List all the HID devices attached to the system, optionally filtering by
@@ -272,7 +272,7 @@ def enumerate(filterfn):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Starting dbus enumeration")
     for dev in pyudev.Context().list_devices(subsystem="hidraw"):
-        dev_info = _match("add", dev, filterfn)
+        dev_info = _match("add", dev, filter_func)
         if dev_info:
             yield dev_info
 
