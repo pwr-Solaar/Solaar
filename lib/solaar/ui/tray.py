@@ -31,10 +31,10 @@ import solaar.gtk as gtk
 from solaar import NAME
 from solaar.i18n import _
 
-from . import about
 from . import action
 from . import icons
 from . import window
+from .about import about
 
 logger = logging.getLogger(__name__)
 
