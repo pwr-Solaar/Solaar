@@ -19,7 +19,7 @@ from solaar.ui.about.presenter import Presenter
 from solaar.ui.about.view import AboutView
 
 
-def show(model=None, view=None):
+def show(_=None, model=None, view=None):
     """Opens the About dialog."""
     if model is None:
         model = AboutModel()
@@ -32,5 +32,5 @@ def show(model=None, view=None):
 if __name__ == "__main__":
     from gi.repository import Gtk
 
-    show()
+    show(None)
     Gtk.main()
