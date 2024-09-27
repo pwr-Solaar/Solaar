@@ -14,19 +14,20 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-## According to Logitech, they use the following product IDs (as of September 2020)
-## USB product IDs for receivers: 0xC526 - 0xC5xx
-## Wireless PIDs for hidpp10 devices: 0x2006 - 0x2019
-## Wireless PIDs for hidpp20 devices: 0x4002 - 0x4097, 0x4101 - 0x4102
-## USB product IDs for hidpp20 devices: 0xC07D - 0xC094, 0xC32B - 0xC344
-## Bluetooth product IDs (for hidpp20 devices): 0xB012 - 0xB0xx, 0xB32A - 0xB3xx
+"""Collection of known Logitech product IDs.
 
-# USB ids of Logitech wireless receivers.
-# Only receivers supporting the HID++ protocol can go in here.
+According to Logitech, they use the following product IDs (as of September 2020)
+USB product IDs for receivers: 0xC526 - 0xC5xx
+Wireless PIDs for hidpp10 devices: 0x2006 - 0x2019
+Wireless PIDs for hidpp20 devices: 0x4002 - 0x4097, 0x4101 - 0x4102
+USB product IDs for hidpp20 devices: 0xC07D - 0xC094, 0xC32B - 0xC344
+Bluetooth product IDs (for hidpp20 devices): 0xB012 - 0xB0xx, 0xB32A - 0xB3xx
+
+USB ids of Logitech wireless receivers.
+Only receivers supporting the HID++ protocol can go in here.
+"""
 
 from solaar.i18n import _
-
-from logitech_receiver.common import LOGITECH_VENDOR_ID
 
 # max_devices is only used for receivers that do not support reading from Registers.RECEIVER_INFO offset 0x03, default
 # to 1.
@@ -36,8 +37,10 @@ from logitech_receiver.common import LOGITECH_VENDOR_ID
 ## should this last be changed so that may_unpair is used for all receivers? writing to Registers.RECEIVER_PAIRING
 ## doesn't seem right
 
+LOGITECH_VENDOR_ID = 0x046D
 
-def _bolt_receiver(product_id):
+
+def _bolt_receiver(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -49,7 +52,7 @@ def _bolt_receiver(product_id):
     }
 
 
-def _unifying_receiver(product_id):
+def _unifying_receiver(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -60,7 +63,7 @@ def _unifying_receiver(product_id):
     }
 
 
-def _nano_receiver(product_id):
+def _nano_receiver(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -72,7 +75,7 @@ def _nano_receiver(product_id):
     }
 
 
-def _nano_receiver_no_unpair(product_id):
+def _nano_receiver_no_unpair(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -85,7 +88,7 @@ def _nano_receiver_no_unpair(product_id):
     }
 
 
-def _nano_receiver_max2(product_id):
+def _nano_receiver_max2(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -98,20 +101,7 @@ def _nano_receiver_max2(product_id):
     }
 
 
-def _nano_receiver_maxn(product_id, max):
-    return {
-        "vendor_id": LOGITECH_VENDOR_ID,
-        "product_id": product_id,
-        "usb_interface": 1,
-        "name": _("Nano Receiver"),
-        "receiver_kind": "nano",
-        "max_devices": max,
-        "may_unpair": False,
-        "re_pairs": True,
-    }
-
-
-def _lenovo_receiver(product_id):
+def _lenovo_receiver(product_id: int) -> dict:
     return {
         "vendor_id": 6127,
         "product_id": product_id,
@@ -122,7 +112,7 @@ def _lenovo_receiver(product_id):
     }
 
 
-def _lightspeed_receiver(product_id):
+def _lightspeed_receiver(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -133,7 +123,7 @@ def _lightspeed_receiver(product_id):
     }
 
 
-def _ex100_receiver(product_id):
+def _ex100_receiver(product_id: int) -> dict:
     return {
         "vendor_id": LOGITECH_VENDOR_ID,
         "product_id": product_id,
@@ -147,7 +137,7 @@ def _ex100_receiver(product_id):
 
 
 # Receivers added here should also be listed in
-# share/solaar/io.github.pwr_solaar.solaar.metainfo.xml
+# share/solaar/io.github.pwr_solaar.solaar.meta-info.xml
 # Look in https://github.com/torvalds/linux/blob/master/drivers/hid/hid-ids.h
 
 # Bolt receivers (marked with the yellow lightning bolt logo)
@@ -184,7 +174,7 @@ LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xC547)
 # EX100 old style receiver pre-unifying protocol
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xC517)
 
-KNOWN_RECEIVER = (
+KNOWN_RECEIVERS = (
     BOLT_RECEIVER_C548,
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
@@ -210,3 +200,23 @@ KNOWN_RECEIVER = (
     LIGHTSPEED_RECEIVER_C547,
     EX100_27MHZ_RECEIVER_C517,
 )
+
+
+def get_receiver_info(product_id: int) -> dict:
+    """Returns hardcoded information about Logitech receiver.
+
+    Parameters
+    ----------
+    product_id
+        Product ID of receiver e.g. 0xC548 for a Logitech Bolt receiver.
+
+    Returns
+    -------
+    dict
+        Product info with mandatory vendor_id, product_id,
+        usb_interface, name, receiver_kind
+    """
+    for receiver in KNOWN_RECEIVERS:
+        if product_id == receiver.get("product_id"):
+            return receiver
+    raise ValueError(f"Unknown product ID '0x{product_id:02X}")

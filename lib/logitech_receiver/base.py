@@ -94,26 +94,23 @@ for _ignore, d in descriptors.DEVICES.items():
         KNOWN_DEVICE_IDS.append(_bluetooth_device(d.btid))
 
 
-def other_device_check(bus_id: int, vendor_id: int, product_id: int):
+def other_device_check(bus_id: int, vendor_id: int, product_id: int) -> dict[str, Any] | None:
     """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
     This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
     if vendor_id != LOGITECH_VENDOR_ID:
         return
 
-    if bus_id == BusID.USB:
-        if product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344:
-            return _usb_device(product_id, 2)
-    elif bus_id == BusID.BLUETOOTH:
-        if product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF:
-            return _bluetooth_device(product_id)
+    device_info = None
+    if bus_id == BusID.USB and (0xC07D <= product_id <= 0xC094 or 0xC32B <= product_id <= 0xC344):
+        device_info = _usb_device(product_id, 2)
+    elif bus_id == BusID.BLUETOOTH and (0xB012 <= product_id <= 0xB0FF or 0xB317 <= product_id <= 0xB3FF):
+        device_info = _bluetooth_device(product_id)
+    return device_info
 
 
 def product_information(usb_id: int) -> dict[str, Any]:
     """Returns hardcoded information from USB receiver."""
-    for receiver in base_usb.KNOWN_RECEIVER:
-        if usb_id == receiver.get("product_id"):
-            return receiver
-    raise ValueError(f"Unknown receiver type: 0x{usb_id:02X}")
+    return base_usb.get_receiver_info(usb_id)
 
 
 _SHORT_MESSAGE_SIZE = 7
@@ -142,7 +139,7 @@ _DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
 _PING_TIMEOUT = DEFAULT_TIMEOUT
 
 
-def match(record, bus_id, vendor_id, product_id):
+def _match(record: dict[str, Any], bus_id: int, vendor_id: int, product_id: int):
     return (
         (record.get("bus_id") is None or record.get("bus_id") == bus_id)
         and (record.get("vendor_id") is None or record.get("vendor_id") == vendor_id)
@@ -150,14 +147,22 @@ def match(record, bus_id, vendor_id, product_id):
     )
 
 
-def filter_receivers(bus_id: int, vendor_id: int, product_id: int, hidpp_short=False, hidpp_long=False):
-    """Check that this product is a Logitech receiver
+def filter_receivers(
+    bus_id: int, vendor_id: int, product_id: int, hidpp_short: bool = False, hidpp_long: bool = False
+) -> dict[str, Any]:
+    """Check that this product is a Logitech receiver.
+
+    Filters based on bus_id, vendor_id and product_id.
 
     If so return the receiver record for further checking.
     """
-    for record in base_usb.KNOWN_RECEIVER:  # known receivers
-        if match(record, bus_id, vendor_id, product_id):
+    try:
+        record = base_usb.get_receiver_info(product_id)
+        if _match(record, bus_id, vendor_id, product_id):
             return record
+    except ValueError:
+        pass
+
     if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": False}
 
@@ -167,13 +172,14 @@ def receivers():
     yield from hidapi.enumerate(filter_receivers)
 
 
-def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
+def filter(bus_id: int, vendor_id: int, product_id: int, hidpp_short: bool = False, hidpp_long: bool = False):
     """Check that this product is of interest and if so return the device record for further checking"""
     record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
     if record:  # known or unknown receiver
         return record
+
     for record in KNOWN_DEVICE_IDS:
-        if match(record, bus_id, vendor_id, product_id):
+        if _match(record, bus_id, vendor_id, product_id):
             return record
     if hidpp_short or hidpp_long:  # unknown devices that use HID++
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": True}
