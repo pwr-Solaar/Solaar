@@ -23,11 +23,9 @@ from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import Protocol
-from typing import cast
 
 from solaar import configuration
 
-from . import base
 from . import descriptors
 from . import exceptions
 from . import hidpp10
@@ -60,9 +58,6 @@ class LowLevelInterface(Protocol):
 
     def close(self, handle, *args, **kwargs) -> bool:
         ...
-
-
-low_level_interface = cast(LowLevelInterface, base)
 
 
 class DeviceFactory:
