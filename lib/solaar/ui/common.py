@@ -16,6 +16,8 @@
 
 import logging
 
+from typing import Tuple
+
 import gi
 
 from solaar.i18n import _
@@ -28,35 +30,36 @@ from gi.repository import Gtk  # NOQA: E402
 logger = logging.getLogger(__name__)
 
 
-def _error_dialog(reason, object):
-    logger.error("error: %s %s", reason, object)
-
+def _create_error_text(reason: str, object_) -> Tuple[str, str]:
     if reason == "permissions":
         title = _("Permissions error")
         text = (
-            _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object
+            _("Found a Logitech receiver or device (%s), but did not have permission to open it.") % object_
             + "\n\n"
             + _("If you've just installed Solaar, try disconnecting the receiver or device and then reconnecting it.")
         )
     elif reason == "nodevice":
         title = _("Cannot connect to device error")
         text = (
-            _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object
+            _("Found a Logitech receiver or device at %s, but encountered an error connecting to it.") % object_
             + "\n\n"
             + _("Try disconnecting the device and then reconnecting it or turning it off and then on.")
         )
     elif reason == "unpair":
         title = _("Unpairing failed")
         text = (
-            _("Failed to unpair %{device} from %{receiver}.").format(device=object.name, receiver=object.receiver.name)
+            _("Failed to unpair %{device} from %{receiver}.").format(device=object_.name, receiver=object_.receiver.name)
             + "\n\n"
             + _("The receiver returned an error, with no further details.")
         )
     else:
-        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object)
+        raise Exception("ui.error_dialog: don't know how to handle (%s, %s)", reason, object_)
+    return title, text
 
-    assert title
-    assert text
+
+def _error_dialog(reason: str, object_):
+    logger.error("error: %s %s", reason, object_)
+    title, text = _create_error_text(reason, object_)
 
     m = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, text)
     m.set_title(title)
@@ -64,9 +67,9 @@ def _error_dialog(reason, object):
     m.destroy()
 
 
-def error_dialog(reason, object):
+def error_dialog(reason, object_):
     assert reason is not None
-    GLib.idle_add(_error_dialog, reason, object)
+    GLib.idle_add(_error_dialog, reason, object_)
 
 
 _task_runner = None
