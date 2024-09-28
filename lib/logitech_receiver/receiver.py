@@ -511,35 +511,33 @@ receiver_class_mapping = {
 }
 
 
-class ReceiverFactory:
-    @staticmethod
-    def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=None) -> Optional[Receiver]:
-        """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
+def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=None) -> Optional[Receiver]:
+    """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
 
-        try:
-            handle = low_level.open_path(device_info.path)
-            if handle:
-                usb_id = device_info.product_id
-                if isinstance(usb_id, str):
-                    usb_id = int(usb_id, 16)
-                try:
-                    product_info = low_level.product_information(usb_id)
-                except ValueError:
-                    product_info = {}
-                kind = product_info.get("receiver_kind", "unknown")
-                rclass = receiver_class_mapping.get(kind, Receiver)
-                return rclass(
-                    low_level,
-                    kind,
-                    product_info,
-                    handle,
-                    device_info.path,
-                    device_info.product_id,
-                    setting_callback,
-                )
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)
+    try:
+        handle = low_level.open_path(device_info.path)
+        if handle:
+            usb_id = device_info.product_id
+            if isinstance(usb_id, str):
+                usb_id = int(usb_id, 16)
+            try:
+                product_info = low_level.product_information(usb_id)
+            except ValueError:
+                product_info = {}
+            kind = product_info.get("receiver_kind", "unknown")
+            rclass = receiver_class_mapping.get(kind, Receiver)
+            return rclass(
+                low_level,
+                kind,
+                product_info,
+                handle,
+                device_info.path,
+                device_info.product_id,
+                setting_callback,
+            )
+    except OSError as e:
+        logger.exception("open %s", device_info)
+        if e.errno == errno.EACCES:
+            raise
+    except Exception:
+        logger.exception("open %s", device_info)

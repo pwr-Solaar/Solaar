@@ -82,12 +82,12 @@ def test_create_device(device_info, responses, expected_success):
     low_level_mock = LowLevelInterfaceFake(responses)
     if expected_success is None:
         with pytest.raises(PermissionError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.create_device(low_level_mock, device_info)
     elif not expected_success:
         with pytest.raises(TypeError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.create_device(low_level_mock, device_info)
     else:
-        test_device = device.DeviceFactory.create_device(low_level_mock, device_info)
+        test_device = device.create_device(low_level_mock, device_info)
         assert bool(test_device) == expected_success
 
 
@@ -98,7 +98,7 @@ def test_create_device(device_info, responses, expected_success):
 def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
     low_level = LowLevelInterfaceFake(responses)
 
-    test_device = device.DeviceFactory.create_device(low_level, device_info)
+    test_device = device.create_device(low_level, device_info)
 
     assert test_device.codename == expected_codename
     assert test_device.name == expected_name
