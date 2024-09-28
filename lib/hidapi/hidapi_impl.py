@@ -263,10 +263,10 @@ def _match(action, device, filterfn):
     if not device["hidpp_short"] and not device["hidpp_long"]:
         return None
 
-    filter = filterfn(bus_id, vid, pid, device["hidpp_short"], device["hidpp_long"])
-    if not filter:
+    filter_func = filterfn(bus_id, vid, pid, device["hidpp_short"], device["hidpp_long"])
+    if not filter_func:
         return
-    isDevice = filter.get("isDevice")
+    isDevice = filter_func.get("isDevice")
 
     if action == "add":
         d_info = DeviceInfo(
@@ -305,12 +305,12 @@ def _match(action, device, filterfn):
         return d_info
 
 
-def find_paired_node(receiver_path, index, timeout):
+def find_paired_node(receiver_path: str, index: int, timeout: int):
     """Find the node of a device paired with a receiver"""
     return None
 
 
-def find_paired_node_wpid(receiver_path, index):
+def find_paired_node_wpid(receiver_path: str, index: int):
     """Find the node of a device paired with a receiver, get wpid from udev"""
     return None
 
