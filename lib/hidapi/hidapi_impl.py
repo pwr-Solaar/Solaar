@@ -44,6 +44,8 @@ if typing.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+ACTION_ADD = "add"
+ACTION_REMOVE = "remove"
 
 # Global handle to hidapi
 _hidapi = None
@@ -213,10 +215,10 @@ class _DeviceMonitor(Thread):
             current_devices = {tuple(dev.items()): dev for dev in _enumerate_devices()}
             for key, device in self.prev_devices.items():
                 if key not in current_devices:
-                    self.device_callback("remove", device)
+                    self.device_callback(ACTION_REMOVE, device)
             for key, device in current_devices.items():
                 if key not in self.prev_devices:
-                    self.device_callback("add", device)
+                    self.device_callback(ACTION_ADD, device)
             self.prev_devices = current_devices
             sleep(self.polling_delay)
 
@@ -268,7 +270,7 @@ def _match(action, device, filterfn):
         return
     isDevice = filter_func.get("isDevice")
 
-    if action == "add":
+    if action == ACTION_ADD:
         d_info = DeviceInfo(
             path=device["path"].decode(),
             bus_id=bus_id,
@@ -286,7 +288,7 @@ def _match(action, device, filterfn):
         )
         return d_info
 
-    elif action == "remove":
+    elif action == ACTION_REMOVE:
         d_info = DeviceInfo(
             path=device["path"].decode(),
             bus_id=None,
@@ -326,11 +328,11 @@ def monitor_glib(glib: GLib, callback, filterfn):
 
     def device_callback(action, device):
         # print(f"device_callback({action}): {device}")
-        if action == "add":
+        if action == ACTION_ADD:
             d_info = _match(action, device, filterfn)
             if d_info:
                 glib.idle_add(callback, action, d_info)
-        elif action == "remove":
+        elif action == ACTION_REMOVE:
             # Removed devices will be detected by Solaar directly
             pass
 
@@ -347,7 +349,7 @@ def enumerate(filterfn):
     :returns: a list of matching ``DeviceInfo`` tuples.
     """
     for device in _enumerate_devices():
-        d_info = _match("add", device, filterfn)
+        d_info = _match(ACTION_ADD, device, filterfn)
         if d_info:
             yield d_info
 

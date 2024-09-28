@@ -41,6 +41,8 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
 
+ACTION_ADD = "add"
+
 _GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
@@ -278,7 +280,7 @@ def start_all():
     if logger.isEnabledFor(logging.INFO):
         logger.info("starting receiver listening threads")
     for device_info in base.receivers_and_devices():
-        _process_receiver_event("add", device_info)
+        _process_receiver_event(ACTION_ADD, device_info)
 
 
 def stop_all():
@@ -368,6 +370,6 @@ def _process_receiver_event(action, device_info):
     if listener_thread is not None:
         assert isinstance(listener_thread, SolaarListener)
         listener_thread.stop()
-    if action == "add":
+    if action == ACTION_ADD:
         _process_add(device_info, 3)
     return False
