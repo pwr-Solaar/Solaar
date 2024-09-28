@@ -133,12 +133,12 @@ def test_receiver_factory_create_receiver(device_info, responses, handle, serial
 
     if handle is False:
         with pytest.raises(Exception):  # noqa: B017
-            receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+            receiver.create_receiver(mock_low_level, device_info, lambda x: x)
     elif handle is None:
-        r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+        r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
         assert r is None
     else:
-        r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+        r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
         assert r.handle == handle
         assert r.serial == serial
         assert r.max_devices == max_devices
@@ -155,7 +155,7 @@ def test_receiver_factory_create_receiver(device_info, responses, handle, serial
 def test_receiver_factory_props(device_info, responses, firmware, codename, remaining_pairings, pairing_info, count):
     mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+    r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
 
     assert len(r.firmware) == firmware if firmware is not None else firmware is None
     assert r.device_codename(2) == codename
@@ -175,7 +175,7 @@ def test_receiver_factory_props(device_info, responses, firmware, codename, rema
 def test_receiver_factory_string(device_info, responses, status_str, strng):
     mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+    r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
 
     assert r.status_string() == status_str
     assert str(r) == strng
@@ -191,7 +191,7 @@ def test_receiver_factory_string(device_info, responses, status_str, strng):
 def test_receiver_factory_no_device(device_info, responses):
     mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
+    r = receiver.create_receiver(mock_low_level, device_info, lambda x: x)
 
     with pytest.raises(exceptions.NoSuchDevice):
         r.device_pairing_information(1)

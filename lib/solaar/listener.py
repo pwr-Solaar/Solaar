@@ -255,9 +255,9 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(base, device_info, _setting_callback)
+        receiver_ = logitech_receiver.receiver.create_receiver(base, device_info, _setting_callback)
     else:
-        receiver_ = logitech_receiver.device.DeviceFactory.create_device(base, device_info, _setting_callback)
+        receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
         if receiver_:
             configuration.attach_to(receiver_)
             if receiver_.bluetooth and receiver_.hid_serial:
