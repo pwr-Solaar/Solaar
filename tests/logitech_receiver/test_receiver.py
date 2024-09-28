@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import partial
 from unittest import mock
 
-import hidapi
 import pytest
 
 from logitech_receiver import common
@@ -12,11 +11,6 @@ from logitech_receiver import exceptions
 from logitech_receiver import receiver
 
 from . import fake_hidpp
-
-if platform.system() == "Linux":
-    import hidapi.udev_impl as hidapi
-else:
-    import hidapi.hidapi_impl as hidapi
 
 
 @pytest.mark.parametrize(
@@ -121,16 +115,15 @@ c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch
 def test_receiver_factory_create_receiver(device_info, responses, handle, serial, max_devices, mock_base):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
-    find_paired_node_wpid_func = hidapi.find_paired_node_wpid
 
     if handle is False:
         with pytest.raises(Exception):  # noqa: B017
-            receiver.ReceiverFactory.create_receiver(find_paired_node_wpid_func, device_info, lambda x: x)
+            receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
     elif handle is None:
-        r = receiver.ReceiverFactory.create_receiver(find_paired_node_wpid_func, device_info, lambda x: x)
+        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
         assert r is None
     else:
-        r = receiver.ReceiverFactory.create_receiver(find_paired_node_wpid_func, device_info, lambda x: x)
+        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
         assert r.handle == handle
         assert r.serial == serial
         assert r.max_devices == max_devices
@@ -151,7 +144,7 @@ def test_receiver_factory_props(
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock.Mock(), device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 
     assert len(r.firmware) == firmware if firmware is not None else firmware is None
     assert r.device_codename(2) == codename
@@ -173,7 +166,7 @@ def test_receiver_factory_string(device_info, responses, status_str, strng, mock
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock.Mock(), device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 
     assert r.status_string() == status_str
     assert str(r) == strng
@@ -191,7 +184,7 @@ def test_receiver_factory_nodevice(device_info, responses, mock_base):
     mock_base[0].side_effect = fake_hidpp.open_path
     mock_base[1].side_effect = partial(fake_hidpp.request, responses)
 
-    r = receiver.ReceiverFactory.create_receiver(mock.Mock(), device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
 
     with pytest.raises(exceptions.NoSuchDevice):
         r.device_pairing_information(1)

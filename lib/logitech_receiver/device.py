@@ -46,7 +46,10 @@ _hidpp20 = hidpp20.Hidpp20()
 
 
 class LowLevelInterface(Protocol):
-    def open_path(self, path):
+    def open_path(self, path) -> Any:
+        ...
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
         ...
 
     def ping(self, handle, number, long_message: bool):
@@ -64,9 +67,7 @@ low_level_interface = cast(LowLevelInterface, base)
 
 class DeviceFactory:
     @staticmethod
-    def create_device(
-        find_paired_node_func: Callable[[str, int, int], Any], low_level: LowLevelInterface, device_info, setting_callback=None
-    ):
+    def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
         """Opens a Logitech Device found attached to the machine, by Linux device path.
         :returns: An open file handle for the found receiver, or None.
         """
@@ -75,7 +76,6 @@ class DeviceFactory:
             if handle:
                 # a direct connected device might not be online (as reported by user)
                 return Device(
-                    find_paired_node_func,
                     low_level,
                     None,
                     None,
@@ -100,7 +100,6 @@ class Device:
 
     def __init__(
         self,
-        find_paired_node_func: Callable[[str, int, int], Any],
         low_level: LowLevelInterface,
         receiver,
         number,
@@ -157,7 +156,7 @@ class Device:
         self.cleanups = []  # functions to run on the device when it is closed
 
         if not self.path:
-            self.path = find_paired_node_func(receiver.path, number, 1) if receiver else None
+            self.path = self.low_level.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
                 self.handle = self.low_level.open_path(self.path) if self.path else None
