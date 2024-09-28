@@ -51,6 +51,9 @@ logger = logging.getLogger(__name__)
 
 fileopen = open
 
+ACTION_ADD = "add"
+ACTION_REMOVE = "remove"
+
 #
 # exposed API
 # docstrings mostly copied from hidapi.h
@@ -108,7 +111,8 @@ def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bo
         if not hidpp_short and not hidpp_long:
             return
     except Exception as e:  # if can't process report descriptor fall back to old scheme
-        hidpp_short = hidpp_long = None
+        hidpp_short = None
+        hidpp_long = None
         logger.info(
             "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s", device.device_node, bid, vid, pid, e
         )
@@ -119,7 +123,7 @@ def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bo
     interface_number = filtered_result.get("usb_interface")
     isDevice = filtered_result.get("isDevice")
 
-    if action == "add":
+    if action == ACTION_ADD:
         hid_driver_name = hid_device.properties.get("DRIVER")
         intf_device = device.find_parent("usb", "usb_interface")
         usb_interface = None if intf_device is None else intf_device.attributes.asint("bInterfaceNumber")
@@ -157,7 +161,7 @@ def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bo
         )
         return d_info
 
-    elif action == "remove":
+    elif action == ACTION_REMOVE:
         d_info = DeviceInfo(
             path=device.device_node,
             bus_id=None,
@@ -236,11 +240,11 @@ def monitor_glib(glib: GLib, callback, filterfn):
             if event:
                 action, device = event
                 # print ("***", action, device)
-                if action == "add":
+                if action == ACTION_ADD:
                     d_info = _match(action, device, filterfn)
                     if d_info:
                         glib.idle_add(cb, action, d_info)
-                elif action == "remove":
+                elif action == ACTION_REMOVE:
                     # the GLib notification does _not_ match!
                     pass
         return True
@@ -272,7 +276,7 @@ def enumerate(filter_func: typing.Callable[[int, int, int, bool, bool], dict[str
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Starting dbus enumeration")
     for dev in pyudev.Context().list_devices(subsystem="hidraw"):
-        dev_info = _match("add", dev, filter_func)
+        dev_info = _match(ACTION_ADD, dev, filter_func)
         if dev_info:
             yield dev_info
 
