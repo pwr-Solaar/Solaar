@@ -17,7 +17,6 @@
 
 import errno
 import logging
-import platform
 import subprocess
 import time
 
@@ -39,11 +38,6 @@ from . import i18n
 
 gi.require_version("Gtk", "3.0")  # NOQA: E402
 from gi.repository import GLib  # NOQA: E402 # isort:skip
-
-if platform.system() == "Linux":
-    import hidapi.udev_impl as hidapi
-else:
-    import hidapi.hidapi_impl as hidapi
 
 logger = logging.getLogger(__name__)
 
@@ -261,13 +255,9 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(
-            hidapi.find_paired_node_wpid, device_info, _setting_callback
-        )
+        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
     else:
-        receiver_ = logitech_receiver.device.DeviceFactory.create_device(
-            hidapi.find_paired_node, base, device_info, _setting_callback
-        )
+        receiver_ = logitech_receiver.device.DeviceFactory.create_device(base, device_info, _setting_callback)
         if receiver_:
             configuration.attach_to(receiver_)
             if receiver_.bluetooth and receiver_.hid_serial:
