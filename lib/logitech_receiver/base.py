@@ -14,8 +14,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Base low-level functions used by the API proper.
-# Unlikely to be used directly unless you're expanding the API.
+"""Base low-level functions as API for upper layers."""
 
 from __future__ import annotations
 
@@ -447,6 +446,19 @@ def _get_next_sw_id() -> int:
     else:
         _get_next_sw_id.software_id = 2
     return _get_next_sw_id.software_id
+
+
+def find_paired_node(receiver_path: str, index: int, timeout: int):
+    """Find the node of a device paired with a receiver."""
+    return hidapi.find_paired_node(receiver_path, index, timeout)
+
+
+def find_paired_node_wpid(receiver_path: str, index: int):
+    """Find the node of a device paired with a receiver.
+
+    Get wpid from udev.
+    """
+    return hidapi.find_paired_node_wpid(receiver_path, index)
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
