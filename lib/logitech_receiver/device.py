@@ -60,32 +60,30 @@ class LowLevelInterface(Protocol):
         ...
 
 
-class DeviceFactory:
-    @staticmethod
-    def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
-        """Opens a Logitech Device found attached to the machine, by Linux device path.
-        :returns: An open file handle for the found receiver, or None.
-        """
-        try:
-            handle = low_level.open_path(device_info.path)
-            if handle:
-                # a direct connected device might not be online (as reported by user)
-                return Device(
-                    low_level,
-                    None,
-                    None,
-                    None,
-                    handle=handle,
-                    device_info=device_info,
-                    setting_callback=setting_callback,
-                )
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)
+def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
+    """Opens a Logitech Device found attached to the machine, by Linux device path.
+    :returns: An open file handle for the found receiver, or None.
+    """
+    try:
+        handle = low_level.open_path(device_info.path)
+        if handle:
+            # a direct connected device might not be online (as reported by user)
+            return Device(
+                low_level,
+                None,
+                None,
+                None,
+                handle=handle,
+                device_info=device_info,
+                setting_callback=setting_callback,
+            )
+    except OSError as e:
+        logger.exception("open %s", device_info)
+        if e.errno == errno.EACCES:
             raise
+    except Exception:
+        logger.exception("open %s", device_info)
+        raise
 
 
 class Device:
