@@ -176,7 +176,7 @@ def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bo
         return d_info
 
 
-def find_paired_node(receiver_path, index, timeout):
+def find_paired_node(receiver_path: str, index: int, timeout: int):
     """Find the node of a device paired with a receiver"""
     context = pyudev.Context()
     receiver_phys = pyudev.Devices.from_device_file(context, receiver_path).find_parent("hid").get("HID_PHYS")
