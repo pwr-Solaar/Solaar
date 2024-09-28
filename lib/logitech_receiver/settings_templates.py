@@ -13,7 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
+import enum
 import logging
 import socket
 import struct
@@ -44,6 +44,13 @@ _F = hidpp20_constants.FEATURE
 
 _GG = hidpp20_constants.GESTURE
 _GP = hidpp20_constants.PARAM
+
+
+class State(enum.Enum):
+    IDLE = "idle"
+    PRESSED = "pressed"
+    MOVED = "moved"
+
 
 # Setting classes are used to control the settings that the Solaar GUI shows and manipulates.
 # Each setting class has to several class variables:
@@ -736,6 +743,7 @@ class DpiSlidingXY(settings.RawXYProcessing):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.fsmState = None
         self._show_notification = show_notification
 
     def activate_action(self):
@@ -744,7 +752,7 @@ class DpiSlidingXY(settings.RawXYProcessing):
         self.otherDpiIdx = self.device.persister.get("_dpi-sliding", -1) if self.device.persister else -1
         if not isinstance(self.otherDpiIdx, int) or self.otherDpiIdx < 0 or self.otherDpiIdx >= len(self.dpiChoices):
             self.otherDpiIdx = self.dpiChoices.index(self.dpiSetting.read())
-        self.fsmState = "idle"
+        self.fsmState = State.IDLE
         self.dx = 0.0
         self.movingDpiIdx = None
 
@@ -763,23 +771,23 @@ class DpiSlidingXY(settings.RawXYProcessing):
 
     def press_action(self, key):  # start tracking
         self.starting = True
-        if self.fsmState == "idle":
-            self.fsmState = "pressed"
+        if self.fsmState == State.IDLE:
+            self.fsmState = State.PRESSED
             self.dx = 0.0
             # While in 'moved' state, the index into 'dpiChoices' of the currently selected DPI setting
             self.movingDpiIdx = None
 
     def release_action(self):  # adjust DPI and stop tracking
-        if self.fsmState == "pressed":  # Swap with other DPI
+        if self.fsmState == State.PRESSED:  # Swap with other DPI
             thisIdx = self.dpiChoices.index(self.dpiSetting.read())
             newDpiIdx, self.otherDpiIdx = self.otherDpiIdx, thisIdx
             if self.device.persister:
                 self.device.persister["_dpi-sliding"] = self.otherDpiIdx
             self.setNewDpi(newDpiIdx)
             self.displayNewDpi(newDpiIdx)
-        elif self.fsmState == "moved":  # Set DPI according to displacement
+        elif self.fsmState == State.MOVED:  # Set DPI according to displacement
             self.setNewDpi(self.movingDpiIdx)
-        self.fsmState = "idle"
+        self.fsmState = State.IDLE
 
     def move_action(self, dx, dy):
         if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.starting:
@@ -787,11 +795,11 @@ class DpiSlidingXY(settings.RawXYProcessing):
             return
         currDpi = self.dpiSetting.read()
         self.dx += float(dx) / float(currDpi) * 15.0  # yields a more-or-less DPI-independent dx of about 5/cm
-        if self.fsmState == "pressed":
+        if self.fsmState == State.PRESSED:
             if abs(self.dx) >= 1.0:
-                self.fsmState = "moved"
+                self.fsmState = State.MOVED
                 self.movingDpiIdx = self.dpiChoices.index(currDpi)
-        elif self.fsmState == "moved":
+        elif self.fsmState == State.MOVED:
             currIdx = self.dpiChoices.index(self.dpiSetting.read())
             newMovingDpiIdx = min(max(currIdx + int(self.dx), 0), len(self.dpiChoices) - 1)
             if newMovingDpiIdx != self.movingDpiIdx:
@@ -802,7 +810,7 @@ class DpiSlidingXY(settings.RawXYProcessing):
 class MouseGesturesXY(settings.RawXYProcessing):
     def activate_action(self):
         self.dpiSetting = next(filter(lambda s: s.name == "dpi" or s.name == "dpi_extended", self.device.settings), None)
-        self.fsmState = "idle"
+        self.fsmState = State.IDLE
         self.initialize_data()
 
     def initialize_data(self):
@@ -813,13 +821,13 @@ class MouseGesturesXY(settings.RawXYProcessing):
 
     def press_action(self, key):
         self.starting = True
-        if self.fsmState == "idle":
-            self.fsmState = "pressed"
+        if self.fsmState == State.IDLE:
+            self.fsmState = State.PRESSED
             self.initialize_data()
             self.data = [key.key]
 
     def release_action(self):
-        if self.fsmState == "pressed":
+        if self.fsmState == State.PRESSED:
             # emit mouse gesture notification
             self.push_mouse_event()
             if logger.isEnabledFor(logging.INFO):
@@ -827,10 +835,10 @@ class MouseGesturesXY(settings.RawXYProcessing):
             payload = struct.pack("!" + (len(self.data) * "h"), *self.data)
             notification = base.HIDPPNotification(0, 0, 0, 0, payload)
             diversion.process_notification(self.device, notification, _F.MOUSE_GESTURE)
-            self.fsmState = "idle"
+            self.fsmState = State.IDLE
 
     def move_action(self, dx, dy):
-        if self.fsmState == "pressed":
+        if self.fsmState == State.PRESSED:
             now = time() * 1000  # time_ns() / 1e6
             if self.device.features.get_feature_version(_F.REPROG_CONTROLS_V4) >= 5 and self.starting:
                 self.starting = False  # hack to ignore strange first movement report from MX Master 3S
