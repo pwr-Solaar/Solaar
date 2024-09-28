@@ -1,16 +1,40 @@
-import platform
-
 from dataclasses import dataclass
 from functools import partial
 from unittest import mock
 
 import pytest
 
+from logitech_receiver import base
 from logitech_receiver import common
 from logitech_receiver import exceptions
 from logitech_receiver import receiver
 
 from . import fake_hidpp
+
+
+class LowLevelInterfaceFake:
+    def __init__(self, responses=None):
+        self.responses = responses
+
+    def open_path(self, path):
+        return fake_hidpp.open_path(path)
+
+    def product_information(self, usb_id: int) -> dict:
+        return base.product_information(usb_id)
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        return None
+
+    def request(self, response, *args, **kwargs):
+        func = partial(fake_hidpp.request, self.responses)
+        return func(response, *args, **kwargs)
+
+    def ping(self, response, *args, **kwargs):
+        func = partial(fake_hidpp.ping, self.responses)
+        return func(response, *args, **kwargs)
+
+    def close(self, *args, **kwargs):
+        pass
 
 
 @pytest.mark.parametrize(
@@ -45,13 +69,6 @@ class DeviceInfo:
 def mock_request():
     with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
         yield mock_request
-
-
-@pytest.fixture
-def mock_base():
-    with mock.patch("logitech_receiver.base.open_path", return_value=None) as mock_open_path:
-        with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
-            yield mock_open_path, mock_request
 
 
 responses_unifying = [
@@ -99,37 +116,34 @@ mouse_info = {
 c534_info = {"kind": common.NamedInt(0, "unknown"), "polling": "", "power_switch": "(unknown)", "serial": None, "wpid": "45AB"}
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, handle, serial, max_devices, ",
     [
-        (DeviceInfo(None), [], False, None, None),
-        (DeviceInfo(11), [], None, None, None),
-        (DeviceInfo("11"), responses_unifying, 0x11, "16CC9CB4", 6),
-        (DeviceInfo("12", product_id=0xC534), responses_c534, 0x12, "16CC9CB4", 2),
-        (DeviceInfo("12", product_id=0xC539), responses_c534, 0x12, "16CC9CB4", 2),
-        (DeviceInfo("13"), responses_unusual, 0x13, "26CC9CB4", 1),
-        (DeviceInfo("14"), responses_lacking, 0x14, None, 1),
+        (DeviceInfo(path=None), [], False, None, None),
+        (DeviceInfo(path=11), [], None, None, None),
+        (DeviceInfo(path="11"), responses_unifying, 0x11, "16CC9CB4", 6),
+        (DeviceInfo(path="12", product_id=0xC534), responses_c534, 0x12, "16CC9CB4", 2),
+        (DeviceInfo(path="12", product_id=0xC539), responses_c534, 0x12, "16CC9CB4", 2),
+        (DeviceInfo(path="13"), responses_unusual, 0x13, "26CC9CB4", 1),
+        (DeviceInfo(path="14"), responses_lacking, 0x14, None, 1),
     ],
 )
-def test_receiver_factory_create_receiver(device_info, responses, handle, serial, max_devices, mock_base):
-    mock_base[0].side_effect = fake_hidpp.open_path
-    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
+def test_receiver_factory_create_receiver(device_info, responses, handle, serial, max_devices):
+    mock_low_level = LowLevelInterfaceFake(responses)
 
     if handle is False:
         with pytest.raises(Exception):  # noqa: B017
-            receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+            receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
     elif handle is None:
-        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+        r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
         assert r is None
     else:
-        r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+        r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
         assert r.handle == handle
         assert r.serial == serial
         assert r.max_devices == max_devices
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, firmware, codename, remaining_pairings, pairing_info, count",
     [
@@ -138,13 +152,10 @@ def test_receiver_factory_create_receiver(device_info, responses, handle, serial
         (DeviceInfo("13", product_id=0xCCCC), responses_unusual, None, None, -1, c534_info, 3),
     ],
 )
-def test_receiver_factory_props(
-    device_info, responses, firmware, codename, remaining_pairings, pairing_info, count, mock_base
-):
-    mock_base[0].side_effect = fake_hidpp.open_path
-    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
+def test_receiver_factory_props(device_info, responses, firmware, codename, remaining_pairings, pairing_info, count):
+    mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
 
     assert len(r.firmware) == firmware if firmware is not None else firmware is None
     assert r.device_codename(2) == codename
@@ -153,7 +164,6 @@ def test_receiver_factory_props(
     assert r.count() == count
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses, status_str, strng",
     [
@@ -162,17 +172,15 @@ def test_receiver_factory_props(
         (DeviceInfo("13", product_id=0xCCCC), responses_unusual, "No paired devices.", "<Receiver(13,19)>"),
     ],
 )
-def test_receiver_factory_string(device_info, responses, status_str, strng, mock_base):
-    mock_base[0].side_effect = fake_hidpp.open_path
-    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
+def test_receiver_factory_string(device_info, responses, status_str, strng):
+    mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
 
     assert r.status_string() == status_str
     assert str(r) == strng
 
 
-@pytest.mark.skipif(platform.system() == "Darwin", reason="Fails on macOS")
 @pytest.mark.parametrize(
     "device_info, responses",
     [
@@ -180,11 +188,10 @@ def test_receiver_factory_string(device_info, responses, status_str, strng, mock
         (DeviceInfo("14", product_id="C534"), responses_lacking),
     ],
 )
-def test_receiver_factory_nodevice(device_info, responses, mock_base):
-    mock_base[0].side_effect = fake_hidpp.open_path
-    mock_base[1].side_effect = partial(fake_hidpp.request, responses)
+def test_receiver_factory_no_device(device_info, responses):
+    mock_low_level = LowLevelInterfaceFake(responses)
 
-    r = receiver.ReceiverFactory.create_receiver(device_info, lambda x: x)
+    r = receiver.ReceiverFactory.create_receiver(mock_low_level, device_info, lambda x: x)
 
     with pytest.raises(exceptions.NoSuchDevice):
         r.device_pairing_information(1)
