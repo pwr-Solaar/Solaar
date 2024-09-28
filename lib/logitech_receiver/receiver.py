@@ -23,12 +23,10 @@ from dataclasses import dataclass
 from typing import Callable
 from typing import Optional
 from typing import Protocol
-from typing import cast
 
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import base
 from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
@@ -60,9 +58,6 @@ class LowLevelInterface(Protocol):
         ...
 
 
-low_level_interface = cast(LowLevelInterface, base)
-
-
 @dataclass
 class Pairing:
     """Information about the current or most recent pairing"""
@@ -91,6 +86,7 @@ class Receiver:
 
     def __init__(
         self,
+        low_level: LowLevelInterface,
         receiver_kind,
         product_info,
         handle,
@@ -99,6 +95,7 @@ class Receiver:
         setting_callback=None,
     ):
         assert handle
+        self.low_level = low_level
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
@@ -137,7 +134,7 @@ class Receiver:
             if d:
                 d.close()
         self._devices.clear()
-        return handle and base.close(handle)
+        return handle and self.low_level.close(handle)
 
     def __del__(self):
         self.close()
@@ -257,7 +254,7 @@ class Receiver:
                     logger.warning("mismatch on device kind %s %s", info["kind"], nkind)
             else:
                 online = True
-            dev = Device(low_level_interface, self, number, online, pairing_info=info, setting_callback=self.setting_callback)
+            dev = Device(self.low_level, self, number, online, pairing_info=info, setting_callback=self.setting_callback)
             if logger.isEnabledFor(logging.INFO):
                 logger.info("%s: found new device %d (%s)", self, number, dev.wpid)
             self._devices[number] = dev
@@ -282,7 +279,7 @@ class Receiver:
 
     def request(self, request_id, *params):
         if bool(self):
-            return base.request(self.handle, 0xFF, request_id, *params)
+            return self.low_level.request(self.handle, 0xFF, request_id, *params)
 
     def reset_pairing(self):
         self.pairing = Pairing()
@@ -481,7 +478,7 @@ class Ex100Receiver(Receiver):
 
     def device_pairing_information(self, number: int) -> dict:
         # extract WPID from udev path
-        wpid = base.find_paired_node_wpid(self.path, number)
+        wpid = self.low_level.find_paired_node_wpid(self.path, number)
         if not wpid:
             logger.error("Unable to get wpid from udev for device %d of %s", number, self)
             raise exceptions.NoSuchDevice(number=number, receiver=self, error="Not present 27Mhz device")
@@ -517,22 +514,23 @@ receiver_class_mapping = {
 
 class ReceiverFactory:
     @staticmethod
-    def create_receiver(device_info, setting_callback=None) -> Optional[Receiver]:
+    def create_receiver(low_level: LowLevelInterface, device_info, setting_callback=None) -> Optional[Receiver]:
         """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
 
         try:
-            handle = base.open_path(device_info.path)
+            handle = low_level.open_path(device_info.path)
             if handle:
                 usb_id = device_info.product_id
                 if isinstance(usb_id, str):
                     usb_id = int(usb_id, 16)
                 try:
-                    product_info = base.product_information(usb_id)
+                    product_info = low_level.product_information(usb_id)
                 except ValueError:
                     product_info = {}
                 kind = product_info.get("receiver_kind", "unknown")
                 rclass = receiver_class_mapping.get(kind, Receiver)
                 return rclass(
+                    low_level,
                     kind,
                     product_info,
                     handle,
