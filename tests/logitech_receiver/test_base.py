@@ -46,6 +46,27 @@ def test_filter_receivers_unknown():
     assert receiver_info["product_id"] == product_id
 
 
+@pytest.mark.parametrize(
+    "hidpp_short, hidpp_long",
+    [(True, False), (False, True), (False, False)],
+)
+def test_filter_products_of_interest(hidpp_short, hidpp_long):
+    bus_id = 3
+    vendor_id = 0x046D
+    product_id = 0xC07E
+
+    receiver_info = base.filter_products_of_interest(
+        bus_id,
+        vendor_id,
+        product_id,
+        hidpp_short=hidpp_short,
+        hidpp_long=hidpp_long,
+    )
+
+    assert receiver_info["bus_id"] == bus_id
+    assert receiver_info["product_id"] == product_id
+
+
 def test_get_next_sw_id():
     res1 = base._get_next_sw_id()
     res2 = base._get_next_sw_id()
