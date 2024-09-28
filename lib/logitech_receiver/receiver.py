@@ -20,7 +20,6 @@ import logging
 import time
 
 from dataclasses import dataclass
-from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import Protocol
@@ -46,6 +45,9 @@ _IR = hidpp10_constants.INFO_SUBREGISTERS
 
 class LowLevelInterface(Protocol):
     def open_path(self, path):
+        ...
+
+    def find_paired_node_wpid(self, receiver_path: str, index: int):
         ...
 
     def ping(self, handle, number, long_message=False):
@@ -89,7 +91,6 @@ class Receiver:
 
     def __init__(
         self,
-        find_paired_node_wpid_func: Callable[[str, int], Any],
         receiver_kind,
         product_info,
         handle,
@@ -98,7 +99,6 @@ class Receiver:
         setting_callback=None,
     ):
         assert handle
-        self._find_paired_node_wpid_func = find_paired_node_wpid_func
         self.isDevice = False  # some devices act as receiver so we need a property to distinguish them
         self.handle = handle
         self.path = path
@@ -398,10 +398,8 @@ class Receiver:
 class BoltReceiver(Receiver):
     """Bolt receivers use a different pairing prototol and have different pairing registers"""
 
-    def __init__(
-        self, find_paired_node_wpid_func, receiver_kind, product_info, handle, path, product_id, setting_callback=None
-    ):
-        super().__init__(find_paired_node_wpid_func, receiver_kind, product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
         serial_reply = self.read_register(Registers.BOLT_UNIQUE_ID)
@@ -465,10 +463,8 @@ class LightSpeedReceiver(Receiver):
 class Ex100Receiver(Receiver):
     """A very old style receiver, somewhat different from newer receivers"""
 
-    def __init__(
-        self, find_paired_node_wpid_func, receiver_kind, product_info, handle, path, product_id, setting_callback=None
-    ):
-        super().__init__(find_paired_node_wpid_func, receiver_kind, product_info, handle, path, product_id, setting_callback)
+    def __init__(self, receiver_kind, product_info, handle, path, product_id, setting_callback=None):
+        super().__init__(receiver_kind, product_info, handle, path, product_id, setting_callback)
 
     def initialize(self, product_info: dict):
         self.serial = None
@@ -484,7 +480,8 @@ class Ex100Receiver(Receiver):
         return online, encrypted, wpid, kind
 
     def device_pairing_information(self, number: int) -> dict:
-        wpid = self._find_paired_node_wpid_func(self.path, number)  # extract WPID from udev path
+        # extract WPID from udev path
+        wpid = base.find_paired_node_wpid(self.path, number)
         if not wpid:
             logger.error("Unable to get wpid from udev for device %d of %s", number, self)
             raise exceptions.NoSuchDevice(number=number, receiver=self, error="Not present 27Mhz device")
@@ -520,9 +517,7 @@ receiver_class_mapping = {
 
 class ReceiverFactory:
     @staticmethod
-    def create_receiver(
-        find_paired_node_wpid_func: Callable[[str, int], Any], device_info, setting_callback=None
-    ) -> Optional[Receiver]:
+    def create_receiver(device_info, setting_callback=None) -> Optional[Receiver]:
         """Opens a Logitech Receiver found attached to the machine, by Linux device path."""
 
         try:
@@ -538,7 +533,6 @@ class ReceiverFactory:
                 kind = product_info.get("receiver_kind", "unknown")
                 rclass = receiver_class_mapping.get(kind, Receiver)
                 return rclass(
-                    find_paired_node_wpid_func,
                     kind,
                     product_info,
                     handle,

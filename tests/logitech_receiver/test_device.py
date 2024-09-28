@@ -17,7 +17,6 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
-from unittest import mock
 
 import pytest
 
@@ -34,6 +33,9 @@ class LowLevelInterfaceFake:
 
     def open_path(self, path):
         return fake_hidpp.open_path(path)
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        return None
 
     def request(self, response, *args, **kwargs):
         func = partial(fake_hidpp.request, self.responses)
@@ -80,12 +82,12 @@ def test_create_device(device_info, responses, expected_success):
     low_level_mock = LowLevelInterfaceFake(responses)
     if expected_success is None:
         with pytest.raises(PermissionError):
-            device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
+            device.DeviceFactory.create_device(low_level_mock, device_info)
     elif not expected_success:
         with pytest.raises(TypeError):
-            device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
+            device.DeviceFactory.create_device(low_level_mock, device_info)
     else:
-        test_device = device.DeviceFactory.create_device(mock.Mock(), low_level_mock, device_info)
+        test_device = device.DeviceFactory.create_device(low_level_mock, device_info)
         assert bool(test_device) == expected_success
 
 
@@ -96,7 +98,7 @@ def test_create_device(device_info, responses, expected_success):
 def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
     low_level = LowLevelInterfaceFake(responses)
 
-    test_device = device.DeviceFactory.create_device(mock.Mock(), low_level, device_info)
+    test_device = device.DeviceFactory.create_device(low_level, device_info)
 
     assert test_device.codename == expected_codename
     assert test_device.name == expected_name
@@ -124,9 +126,7 @@ def test_device_name(device_info, responses, expected_codename, expected_name, e
     ),
 )
 def test_device_info(device_info, responses, handle, _name, _codename, number, protocol, registers):
-    test_device = device.Device(
-        mock.Mock(), LowLevelInterfaceFake(responses), None, None, None, handle=handle, device_info=device_info
-    )
+    test_device = device.Device(LowLevelInterfaceFake(responses), None, None, None, handle=handle, device_info=device_info)
 
     assert test_device.handle == handle
     assert test_device._name == _name
@@ -195,9 +195,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
-    test_device = device.Device(
-        mock.Mock(), low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle
-    )
+    test_device = device.Device(low_level, FakeReceiver(codename="CODE"), number, True, pairing_info, handle=handle)
     test_device.receiver.device = test_device
 
     assert test_device.handle == handle
@@ -246,7 +244,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
 
-    test_device = device.Device(mock.Mock(), low_level, FakeReceiver(), number, True, info, handle=handle)
+    test_device = device.Device(low_level, FakeReceiver(), number, True, info, handle=handle)
 
     assert test_device.unitId == unitId
     assert test_device.modelId == modelId
@@ -261,7 +259,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind,
 class FakeDevice(device.Device):  # a fully functional Device but its HID++ functions look at local data
     def __init__(self, responses, *args, **kwargs):
         self.responses = responses
-        super().__init__(mock.Mock(), LowLevelInterfaceFake(responses), *args, **kwargs)
+        super().__init__(LowLevelInterfaceFake(responses), *args, **kwargs)
 
     request = fake_hidpp.Device.request
     ping = fake_hidpp.Device.ping
