@@ -29,6 +29,7 @@ from contextlib import contextmanager
 from random import getrandbits
 from time import time
 from typing import Any
+from typing import Callable
 
 import gi
 
@@ -53,7 +54,7 @@ else:
 logger = logging.getLogger(__name__)
 
 
-_SHORT_MESSAGE_SIZE = 7
+SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
 _MEDIUM_MESSAGE_SIZE = 15
 _MAX_READ_SIZE = 32
@@ -138,7 +139,7 @@ def _match(record: dict[str, Any], bus_id: int, vendor_id: int, product_id: int)
 
 
 def filter_receivers(
-    bus_id: int, vendor_id: int, product_id: int, hidpp_short: bool = False, hidpp_long: bool = False
+    bus_id: int, vendor_id: int, product_id: int, _hidpp_short: bool = False, _hidpp_long: bool = False
 ) -> dict[str, Any]:
     """Check that this product is a Logitech receiver.
 
@@ -184,7 +185,7 @@ def receivers_and_devices():
     yield from hidapi.enumerate(filter_products_of_interest)
 
 
-def notify_on_receivers_glib(glib: GLib, callback):
+def notify_on_receivers_glib(glib: GLib, callback: Callable):
     """Watch for matching devices and notifies the callback on the GLib thread.
 
     Parameters
@@ -254,7 +255,7 @@ def write(handle, devnumber, data, long_message=False):
     assert data is not None
     assert isinstance(data, bytes), (repr(data), type(data))
 
-    if long_message or len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
+    if long_message or len(data) > SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
         wdata = struct.pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
         wdata = struct.pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
@@ -303,7 +304,7 @@ def is_relevant_message(data: bytes) -> bool:
 
     # mapping from report_id to message length
     report_lengths = {
-        HIDPP_SHORT_MESSAGE_ID: _SHORT_MESSAGE_SIZE,
+        HIDPP_SHORT_MESSAGE_ID: SHORT_MESSAGE_SIZE,
         HIDPP_LONG_MESSAGE_ID: _LONG_MESSAGE_SIZE,
         DJ_MESSAGE_ID: _MEDIUM_MESSAGE_SIZE,
         0x21: _MAX_READ_SIZE,
@@ -344,7 +345,12 @@ def _read(handle, timeout):
             report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10
         ):  # ignore DJ input messages
             logger.debug(
-                "(%s) => r[%02X %02X %s %s]", handle, report_id, devnumber, common.strhex(data[2:4]), common.strhex(data[4:])
+                "(%s) => r[%02X %02X %s %s]",
+                handle,
+                report_id,
+                devnumber,
+                common.strhex(data[2:4]),
+                common.strhex(data[4:]),
             )
 
         return report_id, devnumber, data[2:]
@@ -554,7 +560,12 @@ def request(
                             error,
                             hidpp20_constants.ERROR[error],
                         )
-                        raise exceptions.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
+                        raise exceptions.FeatureCallError(
+                            number=devnumber,
+                            request=request_id,
+                            error=error,
+                            params=params,
+                        )
 
                     if reply_data[:2] == request_data[:2]:
                         if devnumber == 0xFF:
@@ -628,7 +639,7 @@ def ping(handle, devnumber, long_message: bool = False):
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == hidpp10_constants.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
+                        if error == hidpp10_constants.ERROR.invalid_SubID__command:  # valid reply from HID++ 1.0 device
                             return 1.0
                         if (
                             error == hidpp10_constants.ERROR.resource_error

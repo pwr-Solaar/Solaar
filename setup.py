@@ -6,11 +6,7 @@ from os.path import dirname
 from pathlib import Path
 
 from setuptools import find_packages
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 NAME = "Solaar"
 version = Path("lib/solaar/version").read_text().strip()

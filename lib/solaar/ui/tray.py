@@ -72,7 +72,8 @@ def _scroll(tray_icon, event, direction=None):
         # ignore all other directions
         return
 
-    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:  # don't bother even trying to scroll if less than two devices
+    # don't bother even trying to scroll if less than two devices
+    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:
         return
 
     # scroll events come way too fast (at least 5-6 at once) so take a little break between them
@@ -215,7 +216,10 @@ except ImportError:
         icon.set_tooltip_text(NAME)
         icon.connect("activate", window.toggle)
         icon.connect("scroll-event", _scroll)
-        icon.connect("popup-menu", lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time))
+        icon.connect(
+            "popup-menu",
+            lambda icon, button, time: menu.popup(None, None, icon.position_menu, icon, button, time),
+        )
 
         return icon
 

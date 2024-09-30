@@ -52,7 +52,7 @@ def _read_async(setting, force_read, sbox, device_is_online, sensitive):
 
 
 def _write_async(setting, value, sbox, sensitive=True, key=None):
-    def _do_write(s, v, sb, key):
+    def _do_write(_s, v, sb, key):
         try:
             if key is None:
                 v = setting.write(v)
@@ -87,8 +87,9 @@ class Scale(Gtk.Scale):
 
 
 class Control:
-    def __init__(**kwargs):
-        pass
+    def __init__(self, **kwargs):
+        self.sbox = None
+        self.delegate = None
 
     def init(self, sbox, delegate):
         self.sbox = sbox
@@ -227,12 +228,12 @@ class ChoiceControlBig(Gtk.Entry, Control):
         tooltip = _("Incomplete") if self.value is None else _("Complete - ENTER to change")
         self.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, tooltip)
 
-    def activate(self, *args):
+    def activate(self, *_args):
         if self.value is not None and self.get_sensitive():
             self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "")
             self.delegate.update()
 
-    def select(self, completion, model, iter):
+    def select(self, _completion, model, iter):
         self.set_value(model.get(iter, 0)[0])
         if self.value and self.get_sensitive():
             self.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "")
@@ -278,7 +279,7 @@ class MapChoiceControl(Gtk.HBox, Control):
         if current is not None:
             self.valueBox.set_value(current)
 
-    def map_value_notify_key(self, *args):
+    def map_value_notify_key(self, *_args):
         key_choice = int(self.keyBox.get_active_id())
         if self.keyBox.get_sensitive():
             self.map_populate_value_box(key_choice)
@@ -321,7 +322,7 @@ class MultipleControl(Gtk.ListBox, Control):
         sbox._button = self._button
         return True
 
-    def toggle_display(self, *args):
+    def toggle_display(self, *_args):
         self._showing = not self._showing
         if not self._showing:
             for c in self.get_children():
@@ -355,7 +356,7 @@ class MultipleToggleControl(MultipleControl):
             self.add(h)
             self._label_control_pairs.append((lbl, control))
 
-    def toggle_notify(self, switch, active):
+    def toggle_notify(self, switch, _active):
         if switch.get_sensitive():
             key = switch._setting_key
             new_state = switch.get_state()
@@ -410,7 +411,12 @@ class MultipleRangeControl(MultipleControl):
                 h.pack_start(sub_item_lbl, False, False, 0)
                 sub_item_lbl.set_margin_start(30)
                 if sub_item.widget == "Scale":
-                    control = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, sub_item.minimum, sub_item.maximum, 1)
+                    control = Gtk.Scale.new_with_range(
+                        Gtk.Orientation.HORIZONTAL,
+                        sub_item.minimum,
+                        sub_item.maximum,
+                        1,
+                    )
                     control.set_round_digits(0)
                     control.set_digits(0)
                     h.pack_end(control, True, True, 0)
@@ -474,7 +480,6 @@ class MultipleRangeControl(MultipleControl):
 class PackedRangeControl(MultipleRangeControl):
     def setup(self, setting):
         validator = setting._validator
-        self._items = []
         for item in range(validator.count):
             h = Gtk.HBox(homogeneous=False, spacing=0)
             lbl = Gtk.Label(label=str(validator.keys[item]))
@@ -536,8 +541,9 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_lblbox.set_visible(False)
             else:
                 item_lblbox = None
+
+            item_box = ComboBoxText()
             if item["kind"] == settings.KIND.choice:
-                item_box = ComboBoxText()
                 for entry in item["choices"]:
                     item_box.append(str(int(entry)), str(entry))
                 item_box.set_active(0)
@@ -572,8 +578,8 @@ class HeteroKeyControl(Gtk.HBox, Control):
             self.sbox._failed.set_visible(True)
         self.setup_visibles(value.ID if value is not None else 0)
 
-    def setup_visibles(self, ID):
-        fields = self.sbox.setting.fields_map[ID][1] if ID in self.sbox.setting.fields_map else {}
+    def setup_visibles(self, id_):
+        fields = self.sbox.setting.fields_map[id_][1] if id_ in self.sbox.setting.fields_map else {}
         for name, (lblbox, box) in self._items.items():
             visible = name in fields or name == "ID"
             if lblbox:
@@ -635,7 +641,7 @@ def _change_icon(allowed, icon):
         icon.set_tooltip_text(_allowables_tooltips[allowed])
 
 
-def _create_sbox(s, device):
+def _create_sbox(s, _device):
     sbox = Gtk.HBox(homogeneous=False, spacing=6)
     sbox.setting = s
     sbox.kind = s.kind
@@ -689,10 +695,10 @@ def _create_sbox(s, device):
     return sbox
 
 
-def _update_setting_item(sbox, value, is_online=True, sensitive=True, nullOK=False):
+def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=False):
     sbox._spinner.stop()
     sensitive = sbox._change_icon._allowed if sensitive is None else sensitive
-    if value is None and not nullOK:
+    if value is None and not null_okay:
         sbox._control.set_sensitive(sensitive is True)
         _change_icon(sensitive, sbox._change_icon)
         sbox._failed.set_visible(is_online)
@@ -807,7 +813,11 @@ def _record_setting(device, setting_class, values):
         logger.debug("on %s changing setting %s to %s", device, setting_class.name, values)
     setting = next((s for s in device.settings if s.name == setting_class.name), None)
     if setting is None and logger.isEnabledFor(logging.DEBUG):
-        logger.debug("No setting for %s found on %s when trying to record a change made elsewhere", setting_class.name, device)
+        logger.debug(
+            "No setting for %s found on %s when trying to record a change made elsewhere",
+            setting_class.name,
+            device,
+        )
     if setting:
         assert device == setting._device
         if len(values) > 1:

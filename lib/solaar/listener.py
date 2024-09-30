@@ -49,7 +49,13 @@ _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 
 
 def _ghost(device):
-    return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False)
+    return _GHOST_DEVICE(
+        receiver=device.receiver,
+        number=device.number,
+        name=device.name,
+        kind=device.kind,
+        online=False,
+    )
 
 
 class SolaarListener(listener.EventsListener):
@@ -230,7 +236,9 @@ class SolaarListener(listener.EventsListener):
 
 
 def _process_bluez_dbus(device, path, dictionary, signature):
-    """Process bluez dbus property changed signals for device status changes to discover disconnections and connections"""
+    """Process bluez dbus property changed signals for device status
+    changes to discover disconnections and connections.
+    """
     if device:
         if dictionary.get("Connected") is not None:
             connected = dictionary.get("Connected")

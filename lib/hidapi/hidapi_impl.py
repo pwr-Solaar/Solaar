@@ -33,6 +33,7 @@ import typing
 
 from threading import Thread
 from time import sleep
+from typing import Callable
 
 from hidapi.common import DeviceInfo
 
@@ -203,6 +204,7 @@ class _DeviceMonitor(Thread):
     def __init__(self, device_callback, polling_delay=5.0):
         self.device_callback = device_callback
         self.polling_delay = polling_delay
+        self.prev_devices = None
         # daemon threads are automatically killed when main thread exits
         super().__init__(daemon=True)
 
@@ -259,7 +261,12 @@ def _match(action, device, filterfn):
 
     if logger.isEnabledFor(logging.INFO):
         logger.info(
-            "Found device BID %s VID %04X PID %04X HID++ %s %s", bus_id, vid, pid, device["hidpp_short"], device["hidpp_long"]
+            "Found device BID %s VID %04X PID %04X HID++ %s %s",
+            bus_id,
+            vid,
+            pid,
+            device["hidpp_short"],
+            device["hidpp_long"],
         )
 
     if not device["hidpp_short"] and not device["hidpp_long"]:
@@ -317,7 +324,7 @@ def find_paired_node_wpid(receiver_path: str, index: int):
     return None
 
 
-def monitor_glib(glib: GLib, callback, filterfn):
+def monitor_glib(glib: GLib, callback: Callable, filterfn: Callable):
     """Monitor GLib.
 
     Parameters
@@ -452,7 +459,6 @@ def read(device_handle, bytes_count, timeout_ms=None):
 
     if bytes_read < 0:
         raise HIDError(_hidapi.hid_error(device_handle))
-        return None
 
     return data.raw[:bytes_read]
 

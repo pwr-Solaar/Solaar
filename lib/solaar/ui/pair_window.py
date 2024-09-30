@@ -166,13 +166,21 @@ def _show_passcode(assistant, receiver, passkey):
     page_text = _("Enter passcode on %(name)s.") % {"name": name}
     page_text += "\n"
     if authentication & 0x01:
-        page_text += _("Type %(passcode)s and then press the enter key.") % {"passcode": receiver.pairing.device_passkey}
+        page_text += _("Type %(passcode)s and then press the enter key.") % {
+            "passcode": receiver.pairing.device_passkey,
+        }
     else:
         passcode = ", ".join(
             [_("right") if bit == "1" else _("left") for bit in f"{int(receiver.pairing.device_passkey):010b}"]
         )
         page_text += _("Press %(code)s\nand then press left and right buttons simultaneously.") % {"code": passcode}
-    page = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, intro_text, "preferences-desktop-peripherals", page_text)
+    page = _create_page(
+        assistant,
+        Gtk.AssistantPageType.PROGRESS,
+        intro_text,
+        "preferences-desktop-peripherals",
+        page_text,
+    )
     assistant.set_page_complete(page, True)
     assistant.next_page()
 
@@ -185,7 +193,13 @@ def _create_assistant(receiver, ok, finish, title, text):
     assistant.set_resizable(False)
     assistant.set_role("pair-device")
     if ok:
-        page_intro = _create_page(assistant, Gtk.AssistantPageType.PROGRESS, title, "preferences-desktop-peripherals", text)
+        page_intro = _create_page(
+            assistant,
+            Gtk.AssistantPageType.PROGRESS,
+            title,
+            "preferences-desktop-peripherals",
+            text,
+        )
         spinner = Gtk.Spinner()
         spinner.set_visible(True)
         spinner.start()
@@ -227,7 +241,7 @@ def _create_success_page(assistant, device):
     assistant.commit()
 
 
-def _create_failure_page(assistant, error):
+def _create_failure_page(assistant, error) -> None:
     header = _("Pairing failed") + ": " + _(str(error)) + "."
     if "timeout" in str(error):
         text = _("Make sure your device is within range, and has a decent battery charge.")
@@ -242,7 +256,7 @@ def _create_failure_page(assistant, error):
     assistant.commit()
 
 
-def _create_page(assistant, kind, header=None, icon_name=None, text=None):
+def _create_page(assistant, kind, header=None, icon_name=None, text=None) -> Gtk.VBox:
     p = Gtk.VBox(homogeneous=False, spacing=8)
     assistant.append_page(p)
     assistant.set_page_type(p, kind)

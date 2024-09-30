@@ -560,7 +560,8 @@ class ArrayItem(MainItem):
                 )
                 continue
 
-            if usage in self._usages and all(usage_type not in self._INCOMPATIBLE_TYPES for usage_type in usage.usage_types):
+            not_incompatible_type = all(usage_type not in self._INCOMPATIBLE_TYPES for usage_type in usage.usage_types)
+            if usage in self._usages and not_incompatible_type:
                 usage_values[usage] = UsageValue(self, True)
 
         return usage_values
@@ -820,14 +821,28 @@ class ReportDescriptor:
                     if data is None:
                         raise InvalidReportDescriptor("Invalid output item")
                     self._append_items(
-                        offset_output, self._output, report_id, report_count, report_size, usages, data, {**glob, **local}
+                        offset_output,
+                        self._output,
+                        report_id,
+                        report_count,
+                        report_size,
+                        usages,
+                        data,
+                        {**glob, **local},
                     )
 
                 elif tag == TagMain.FEATURE:
                     if data is None:
                         raise InvalidReportDescriptor("Invalid feature item")
                     self._append_items(
-                        offset_feature, self._feature, report_id, report_count, report_size, usages, data, {**glob, **local}
+                        offset_feature,
+                        self._feature,
+                        report_id,
+                        report_count,
+                        report_size,
+                        usages,
+                        data,
+                        {**glob, **local},
                     )
 
                 # clear local

@@ -48,7 +48,10 @@ def _create_error_text(reason: str, object_) -> Tuple[str, str]:
     elif reason == "unpair":
         title = _("Unpairing failed")
         text = (
-            _("Failed to unpair %{device} from %{receiver}.").format(device=object_.name, receiver=object_.receiver.name)
+            _("Failed to unpair %{device} from %{receiver}.").format(
+                device=object_.name,
+                receiver=object_.receiver.name,
+            )
             + "\n\n"
             + _("The receiver returned an error, with no further details.")
         )

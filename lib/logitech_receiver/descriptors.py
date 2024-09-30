@@ -225,7 +225,13 @@ _D("Craft Advanced Keyboard", codename="Craft", protocol=4.5, wpid="4066", btid=
 _D("Wireless Illuminated Keyboard K800 new", codename="K800 new", protocol=4.5, wpid="406E")
 _D("Wireless Keyboard K470", codename="K470", protocol=4.5, wpid="4075")
 _D("MX Keys Keyboard", codename="MX Keys", protocol=4.5, wpid="408A", btid=0xB35B)
-_D("G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard", codename="G915 TKL", protocol=4.2, wpid="408E", usbid=0xC343)
+_D(
+    "G915 TKL LIGHTSPEED Wireless RGB Mechanical Gaming Keyboard",
+    codename="G915 TKL",
+    protocol=4.2,
+    wpid="408E",
+    usbid=0xC343,
+)
 _D("Illuminated Keyboard", codename="Illuminated", protocol=1.0, usbid=0xC318, interface=1)
 _D("G213 Prodigy Gaming Keyboard", codename="G213", usbid=0xC336, interface=1)
 _D("G512 RGB Mechanical Gaming Keyboard", codename="G512", usbid=0xC33C, interface=1)
@@ -253,7 +259,14 @@ _D(
     wpid=("1006", "100D", "0612"),
     registers=(Reg.BATTERY_CHARGE,),
 )
-_D("MX Air", codename="MX Air", protocol=1.0, kind=DEVICE_KIND.mouse, wpid=("1007", "100E"), registers=(Reg.BATTERY_CHARGE))
+_D(
+    "MX Air",
+    codename="MX Air",
+    protocol=1.0,
+    kind=DEVICE_KIND.mouse,
+    wpid=("1007", "100E"),
+    registers=Reg.BATTERY_CHARGE,
+)
 _D(
     "MX Revolution",
     codename="MX Revolution",
@@ -262,10 +275,34 @@ _D(
     wpid=("1008", "100C"),
     registers=(Reg.BATTERY_CHARGE,),
 )
-_D("MX620 Laser Cordless Mouse", codename="MX620", protocol=1.0, wpid=("100A", "1016"), registers=(Reg.BATTERY_CHARGE,))
-_D("VX Nano Cordless Laser Mouse", codename="VX Nano", protocol=1.0, wpid=("100B", "100F"), registers=(Reg.BATTERY_CHARGE,))
-_D("V450 Nano Cordless Laser Mouse", codename="V450 Nano", protocol=1.0, wpid="1011", registers=(Reg.BATTERY_CHARGE,))
-_D("V550 Nano Cordless Laser Mouse", codename="V550 Nano", protocol=1.0, wpid="1013", registers=(Reg.BATTERY_CHARGE,))
+_D(
+    "MX620 Laser Cordless Mouse",
+    codename="MX620",
+    protocol=1.0,
+    wpid=("100A", "1016"),
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "VX Nano Cordless Laser Mouse",
+    codename="VX Nano",
+    protocol=1.0,
+    wpid=("100B", "100F"),
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "V450 Nano Cordless Laser Mouse",
+    codename="V450 Nano",
+    protocol=1.0,
+    wpid="1011",
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "V550 Nano Cordless Laser Mouse",
+    codename="V550 Nano",
+    protocol=1.0,
+    wpid="1013",
+    registers=(Reg.BATTERY_CHARGE,),
+)
 _D(
     "MX 1100 Cordless Laser Mouse",
     codename="MX 1100",
@@ -282,11 +319,40 @@ _D(
     wpid="101A",
     registers=(Reg.BATTERY_STATUS, Reg.THREE_LEDS),
 )
-_D("Marathon Mouse M705 (M-R0009)", codename="M705 (M-R0009)", protocol=1.0, wpid="101B", registers=(Reg.BATTERY_CHARGE,))
-_D("Wireless Mouse M350", codename="M350", protocol=1.0, wpid="101C", registers=(Reg.BATTERY_CHARGE,))
-_D("Wireless Mouse M505", codename="M505/B605", protocol=1.0, wpid="101D", registers=(Reg.BATTERY_CHARGE,))
-_D("Wireless Mouse M305", codename="M305", protocol=1.0, wpid="101F", registers=(Reg.BATTERY_STATUS,))
-_D("Wireless Mouse M215", codename="M215", protocol=1.0, wpid="1020")
+_D(
+    "Marathon Mouse M705 (M-R0009)",
+    codename="M705 (M-R0009)",
+    protocol=1.0,
+    wpid="101B",
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "Wireless Mouse M350",
+    codename="M350",
+    protocol=1.0,
+    wpid="101C",
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "Wireless Mouse M505",
+    codename="M505/B605",
+    protocol=1.0,
+    wpid="101D",
+    registers=(Reg.BATTERY_CHARGE,),
+)
+_D(
+    "Wireless Mouse M305",
+    codename="M305",
+    protocol=1.0,
+    wpid="101F",
+    registers=(Reg.BATTERY_STATUS,),
+)
+_D(
+    "Wireless Mouse M215",
+    codename="M215",
+    protocol=1.0,
+    wpid="1020",
+)
 _D(
     "G700 Gaming Mouse",
     codename="G700",
@@ -382,5 +448,19 @@ _D("G533 Gaming Headset", codename="G533 Headset", protocol=2.0, interface=3, ki
 _D("G535 Gaming Headset", codename="G535 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0AC4)
 _D("G935 Gaming Headset", codename="G935 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0A87)
 _D("G733 Gaming Headset", codename="G733 Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0AB5)
-_D("G733 Gaming Headset", codename="G733 Headset New", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0AFE)
-_D("PRO X Wireless Gaming Headset", codename="PRO Headset", protocol=2.0, interface=3, kind=DEVICE_KIND.headset, usbid=0x0ABA)
+_D(
+    "G733 Gaming Headset",
+    codename="G733 Headset New",
+    protocol=2.0,
+    interface=3,
+    kind=DEVICE_KIND.headset,
+    usbid=0x0AFE,
+)
+_D(
+    "PRO X Wireless Gaming Headset",
+    codename="PRO Headset",
+    protocol=2.0,
+    interface=3,
+    kind=DEVICE_KIND.headset,
+    usbid=0x0ABA,
+)

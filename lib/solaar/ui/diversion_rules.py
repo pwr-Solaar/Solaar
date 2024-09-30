@@ -616,7 +616,8 @@ class DiversionDialog:
         if len(parent_c.components) == 0:  # placeholder
             _populate_model(m, parent_it, None, level=wrapped.level)
         m.remove(it)
-        self.view.get_selection().select_iter(m.iter_nth_child(parent_it, max(0, min(idx, len(parent_c.components) - 1))))
+        select = max(0, min(idx, len(parent_c.components) - 1))
+        self.view.get_selection().select_iter(m.iter_nth_child(parent_it, select))
         self.on_update()
         return c
 
@@ -1408,7 +1409,6 @@ class _SettingWithValueUI:
 
     def create_widgets(self):
         self.widgets = {}
-
         self.label = Gtk.Label(valign=Gtk.Align.CENTER, hexpand=True)
         self.label.set_text(self.label_text)
         self.widgets[self.label] = (0, 0, 5, 1)
@@ -1432,7 +1432,13 @@ class _SettingWithValueUI:
         self.device_field.connect("changed", self._on_update)
         self.widgets[self.device_field] = (1, 1, 1, 1)
 
-        lbl = Gtk.Label(label=_("Setting"), halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER, hexpand=True, vexpand=False)
+        lbl = Gtk.Label(
+            label=_("Setting"),
+            halign=Gtk.Align.CENTER,
+            valign=Gtk.Align.CENTER,
+            hexpand=True,
+            vexpand=False,
+        )
         self.widgets[lbl] = (0, 2, 1, 1)
         self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in self.ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
@@ -1569,7 +1575,11 @@ class _SettingWithValueUI:
 
         def item(k):
             lbl = labels.get(k, None)
-            return (k, lbl[0] if lbl and isinstance(lbl, tuple) and lbl[0] else str(k))
+            if lbl and isinstance(lbl, tuple) and lbl[0]:
+                label = lbl[0]
+            else:
+                label = str(k)
+            return k, label
 
         with self.ignore_changes():
             self.key_field.set_all_values(sorted(map(item, keys), key=lambda k: k[1]))
@@ -1688,6 +1698,7 @@ class _SettingWithValueUI:
         setting, val_class, kind, keys = cls._setting_attributes(setting_name, device)
         device_setting = (device.settings if device else {}).get(setting_name, None)
         disp = [setting.label or setting.name if setting else setting_name]
+        key = None
         if kind in cls.MULTIPLE:
             key = next(a, None)
             key = _from_named_ints(key, keys) if keys else key
