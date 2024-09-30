@@ -51,7 +51,7 @@ def run(receivers, args, find_receiver, _ignore):
             assert n
             if n.devnumber == 0xFF:
                 notifications.process(receiver, n)
-            elif n.sub_id == 0x41 and len(n.data) == base._SHORT_MESSAGE_SIZE - 4:
+            elif n.sub_id == 0x41 and len(n.data) == base.SHORT_MESSAGE_SIZE - 4:
                 kd, known_devices = known_devices, None  # only process one connection notification
                 if kd is not None:
                     if n.devnumber not in kd:

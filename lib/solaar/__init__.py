@@ -22,7 +22,17 @@ NAME = "Solaar"
 
 try:
     __version__ = (
-        subprocess.check_output(["git", "describe", "--always"], cwd=sys.path[0], stderr=subprocess.DEVNULL).strip().decode()
+        subprocess.check_output(
+            [
+                "git",
+                "describe",
+                "--always",
+            ],
+            cwd=sys.path[0],
+            stderr=subprocess.DEVNULL,
+        )
+        .strip()
+        .decode()
     )
 except Exception:
     try:

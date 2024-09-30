@@ -176,7 +176,11 @@ class Device:
                 descriptors.get_btid(self.product_id) if self.bluetooth else descriptors.get_usbid(self.product_id)
             )
             if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
-                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
+                if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0:
+                    number = 0x00
+                else:
+                    number = 0xFF
+                self.number = number
             self.ping()  # determine whether a direct-connected device is online
 
         if self.descriptor:

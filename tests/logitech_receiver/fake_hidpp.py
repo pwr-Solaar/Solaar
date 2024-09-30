@@ -16,6 +16,7 @@
 
 """HID++ data and functions common to several logitech_receiver test files"""
 
+from __future__ import annotations
 
 import errno
 import threading
@@ -43,7 +44,17 @@ def ping(responses, handle, devnumber, long_message=False):
             return r.response
 
 
-def request(responses, handle, devnumber, id, *params, no_reply=False, return_error=False, long_message=False, protocol=1.0):
+def request(
+    responses,
+    handle,
+    devnumber,
+    id,
+    *params,
+    no_reply=False,
+    return_error=False,
+    long_message=False,
+    protocol=1.0,
+):
     params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
     print("REQUEST ", hex(handle), hex(devnumber), hex(id), params.hex())
     for r in responses:
@@ -54,7 +65,7 @@ def request(responses, handle, devnumber, id, *params, no_reply=False, return_er
 
 @dataclass
 class Response:
-    response: Optional[str]
+    response: str | float
     id: int
     params: str = ""
     handle: int = 0x11

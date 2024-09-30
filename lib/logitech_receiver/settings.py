@@ -111,7 +111,7 @@ class Setting:
         assert hasattr(self, "_device")
 
         if self._validator.kind == KIND.range:
-            return (self._validator.min_value, self._validator.max_value)
+            return self._validator.min_value, self._validator.max_value
 
     def _pre_read(self, cached, key=None):
         if self.persist and self._value is None and getattr(self._device, "persister", None):
@@ -1208,7 +1208,7 @@ class RangeValidator(Validator):
         if len(args) == 1:
             return args[0] == current
         elif len(args) == 2:
-            return args[0] <= current and current <= args[1]
+            return args[0] <= current <= args[1]
         else:
             return False
 

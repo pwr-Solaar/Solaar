@@ -15,6 +15,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from contextlib import contextmanager as contextlib_contextmanager
+from typing import Callable
 
 from gi.repository import Gtk
 from logitech_receiver import diversion
@@ -49,7 +50,7 @@ class CompletionEntry(Gtk.Entry):
 class RuleComponentUI:
     CLASS = diversion.RuleComponent
 
-    def __init__(self, panel, on_update=None):
+    def __init__(self, panel, on_update: Callable = None):
         self.panel = panel
         self.widgets = {}  # widget -> coord. in grid
         self.component = None

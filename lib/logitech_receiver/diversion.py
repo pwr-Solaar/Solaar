@@ -26,6 +26,7 @@ import subprocess
 import sys
 import time
 
+from typing import Any
 from typing import Dict
 from typing import Tuple
 
@@ -113,9 +114,17 @@ except Exception:
 # Globals
 xtest_available = True  # Xtest might be available
 xdisplay = None
+
+
 Xkbdisplay = None  # xkb might be available
+X11Lib = None
+
 modifier_keycodes = []
 XkbUseCoreKbd = 0x100
+NET_ACTIVE_WINDOW = None
+NET_WM_PID = None
+WM_CLASS = None
+
 
 udevice = None
 
@@ -187,7 +196,10 @@ def gnome_dbus_interface_setup():
         remote_object = bus.get_object("org.gnome.Shell", "/io/github/pwr_solaar/solaar")
         _dbus_interface = dbus.Interface(remote_object, "io.github.pwr_solaar.solaar")
     except dbus.exceptions.DBusException:
-        logger.warning("Solaar Gnome extension not installed - some rule capabilities inoperable", exc_info=sys.exc_info())
+        logger.warning(
+            "Solaar Gnome extension not installed - some rule capabilities inoperable",
+            exc_info=sys.exc_info(),
+        )
         _dbus_interface = False
     return _dbus_interface
 
@@ -228,7 +240,10 @@ if evdev:
     for _, evcode in buttons.values():
         if evcode:
             key_events.append(evcode)
-    devicecap = {evdev.ecodes.EV_KEY: key_events, evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL]}
+    devicecap = {
+        evdev.ecodes.EV_KEY: key_events,
+        evdev.ecodes.EV_REL: [evdev.ecodes.REL_WHEEL, evdev.ecodes.REL_HWHEEL],
+    }
 else:
     # Just mock these since they won't be useful without evdev anyway
     buttons = {}
@@ -283,9 +298,9 @@ def xy_direction(_x, _y):
     y = round(_y / m)
     if x < 0 and y < 0:
         return "Mouse Up-left"
-    elif x > 0 and y < 0:
+    elif x > 0 > y:
         return "Mouse Up-right"
-    elif x < 0 and y > 0:
+    elif x < 0 < y:
         return "Mouse Down-left"
     elif x > 0 and y > 0:
         return "Mouse Down-right"
@@ -456,7 +471,7 @@ TESTS = {
     "crown_tap": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
     "crown_start_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
     "crown_end_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] >= 0x01 and d[6] <= 0x04 and d[6], False],
+    "crown_pressed": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
     "lowres_wheel_up": [
@@ -488,7 +503,7 @@ MOUSE_GESTURE_TESTS = {
     "mouse-noop": [],
 }
 
-COMPONENTS = {}
+# COMPONENTS = {}
 
 
 class RuleComponent:
@@ -503,6 +518,17 @@ class RuleComponent:
         return Condition()
 
 
+def _evaluate(components, feature, notification, device, result) -> Any:
+    res = True
+    for component in components:
+        res = component.evaluate(feature, notification, device, result)
+        if not isinstance(component, Action) and res is None:
+            return None
+        if isinstance(component, Condition) and not res:
+            return res
+    return res
+
+
 class Rule(RuleComponent):
     def __init__(self, args, source=None, warn=True):
         self.components = [self.compile(a) for a in args]
@@ -515,14 +541,7 @@ class Rule(RuleComponent):
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate rule: %s", self)
-        result = True
-        for component in self.components:
-            result = component.evaluate(feature, notification, device, result)
-            if not isinstance(component, Action) and result is None:
-                return None
-            if isinstance(component, Condition) and not result:
-                return result
-        return result
+        return _evaluate(self.components, feature, notification, device, True)
 
     def once(self, feature, notification, device, last_result):
         self.evaluate(feature, notification, device, last_result)
@@ -598,14 +617,7 @@ class And(Condition):
     def evaluate(self, feature, notification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        result = True
-        for component in self.components:
-            result = component.evaluate(feature, notification, device, last_result)
-            if not isinstance(component, Action) and result is None:
-                return None
-            if isinstance(component, Condition) and not result:
-                return result
-        return result
+        return _evaluate(self.components, feature, notification, device, last_result)
 
     def data(self):
         return {"And": [c.data() for c in self.components]}
@@ -663,7 +675,8 @@ class Process(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 logger.warning(
-                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s",
+                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome "
+                    "extension - %s",
                     self,
                 )
         if not isinstance(process, str):
@@ -1218,7 +1231,13 @@ class KeyPress(Action):
         if gkeymap:
             current = gkeymap.get_modifier_state()
             if logger.isEnabledFor(logging.INFO):
-                logger.info("KeyPress action: %s %s, group %s, modifiers %s", self.key_names, self.action, kbdgroup(), current)
+                logger.info(
+                    "KeyPress action: %s %s, group %s, modifiers %s",
+                    self.key_names,
+                    self.action,
+                    kbdgroup(),
+                    current,
+                )
             if self.action != RELEASE:
                 self.keyDown(self.key_symbols, current)
             if self.action != DEPRESS:
@@ -1287,7 +1306,10 @@ class MouseClick(Action):
             if count in [CLICK, DEPRESS, RELEASE]:
                 self.count = count
             elif warn:
-                logger.warning("rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE", count)
+                logger.warning(
+                    "rule MouseClick action: argument %s should be an integer or CLICK, PRESS, or RELEASE",
+                    count,
+                )
                 self.count = 1
 
     def __str__(self):
@@ -1332,7 +1354,12 @@ class Set(Action):
             return None
         args = setting.acceptable(self.args[2:], setting.read())
         if args is None:
-            logger.warning("Set Action: invalid args %s for setting %s of %s", self.args[2:], self.args[1], self.args[0])
+            logger.warning(
+                "Set Action: invalid args %s for setting %s of %s",
+                self.args[2:],
+                self.args[1],
+                self.args[0],
+            )
             return None
         if len(args) > 1:
             setting.write_key_value(args[0], args[1])
@@ -1432,18 +1459,17 @@ COMPONENTS = {
     "Later": Later,
 }
 
-built_in_rules = Rule([])
-if True:
-    built_in_rules = Rule(
-        [
-            {
-                "Rule": [  # Implement problematic keys for Craft and MX Master
-                    {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
-                    {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
-                ]
-            },
-        ]
-    )
+
+built_in_rules = Rule(
+    [
+        {
+            "Rule": [  # Implement problematic keys for Craft and MX Master
+                {"Rule": [{"Key": ["Brightness Down", "pressed"]}, {"KeyPress": "XF86_MonBrightnessDown"}]},
+                {"Rule": [{"Key": ["Brightness Up", "pressed"]}, {"KeyPress": "XF86_MonBrightnessUp"}]},
+            ]
+        },
+    ]
+)
 
 
 def key_is_down(key):

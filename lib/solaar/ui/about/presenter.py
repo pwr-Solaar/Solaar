@@ -31,7 +31,7 @@ class AboutViewProtocol(Protocol):
     def update_description(self, comments: str) -> None:
         ...
 
-    def update_copyright(self, copyright):
+    def update_copyright(self, copyright_text: str) -> None:
         ...
 
     def update_authors(self, authors: list[str]) -> None:
@@ -68,8 +68,8 @@ class Presenter:
         self.view.update_description(comments)
 
     def update_copyright(self) -> None:
-        copyright = self.model.get_copyright()
-        self.view.update_copyright(copyright)
+        copyright_text = self.model.get_copyright()
+        self.view.update_copyright(copyright_text)
 
     def update_authors(self) -> None:
         authors = self.model.get_authors()
