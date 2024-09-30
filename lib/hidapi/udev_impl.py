@@ -36,6 +36,7 @@ import warnings
 from select import select
 from time import sleep
 from time import time
+from typing import Callable
 
 import pyudev
 
@@ -114,7 +115,12 @@ def _match(action, device, filter_func: typing.Callable[[int, int, int, bool, bo
         hidpp_short = None
         hidpp_long = None
         logger.info(
-            "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s", device.device_node, bid, vid, pid, e
+            "Report Descriptor not processed for DEVICE %s BID %s VID %s PID %s: %s",
+            device.device_node,
+            bid,
+            vid,
+            pid,
+            e,
         )
 
     filtered_result = filter_func(int(bid, 16), int(vid, 16), int(pid, 16), hidpp_short, hidpp_long)
@@ -222,7 +228,7 @@ def find_paired_node_wpid(receiver_path, index):
     return None
 
 
-def monitor_glib(glib: GLib, callback, filterfn):
+def monitor_glib(glib: GLib, callback: Callable, filterfn: typing.Callable):
     """Monitor GLib.
 
     Parameters
@@ -453,7 +459,7 @@ def get_indexed_string(device_handle, index):
     assert device_handle
     stat = os.fstat(device_handle)
     try:
-        dev = pyudev.Device.from_device_number(pyudev.Context(), "char", stat.st_rdev)
+        dev = pyudev.Devices.from_device_number(pyudev.Context(), "char", stat.st_rdev)
     except (pyudev.DeviceNotFoundError, ValueError):
         return None
 

@@ -288,9 +288,12 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
         (fake_hidpp.responses_key, 3, 0x0053, 0x02, 0x0001, 0x00, 1, "Mouse Button: 1", "", "02000100", "7FFFFFFF"),
     ],
 )
-def test_RemappableAction(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
+def test_remappable_action(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
     if int(remap, 16) == special_keys.KEYS_Default:
-        responses = r + [fake_hidpp.Response("040000", 0x0000, "1C00"), fake_hidpp.Response("00", 0x450, f"{cid:04X}" + "FF")]
+        responses = r + [
+            fake_hidpp.Response("040000", 0x0000, "1C00"),
+            fake_hidpp.Response("00", 0x450, f"{cid:04X}" + "FF"),
+        ]
     else:
         responses = r + [
             fake_hidpp.Response("040000", 0x0000, "1C00"),

@@ -50,6 +50,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
 
 
 battery_icons_style = "regular"
+tray_icon_size = None
 temp = tempfile.NamedTemporaryFile(prefix="Solaar_", mode="w", delete=True)
 
 
@@ -72,9 +73,16 @@ def _parse_arguments():
         metavar="PATH",
         help="unifying receiver to use; the first detected receiver if unspecified. Example: /dev/hidraw2",
     )
-    arg_parser.add_argument("--restart-on-wake-up", action="store_true", help="restart Solaar on sleep wake-up (experimental)")
     arg_parser.add_argument(
-        "-w", "--window", choices=("show", "hide", "only"), help="start with window showing / hidden / only (no tray icon)"
+        "--restart-on-wake-up",
+        action="store_true",
+        help="restart Solaar on sleep wake-up (experimental)",
+    )
+    arg_parser.add_argument(
+        "-w",
+        "--window",
+        choices=("show", "hide", "only"),
+        help="start with window showing / hidden / only (no tray icon)",
     )
     arg_parser.add_argument(
         "-b",

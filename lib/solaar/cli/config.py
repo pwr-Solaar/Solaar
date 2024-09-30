@@ -22,6 +22,8 @@ from logitech_receiver.common import NamedInts
 
 from solaar import configuration
 
+APP_ID = "io.github.pwr_solaar.solaar"
+
 
 def _print_setting(s, verbose=True):
     print("#", s.label)
@@ -92,7 +94,7 @@ def select_choice(value, choices, setting, key):
             break
     if val is not None:
         value = val
-    elif ivalue is not None and ivalue >= 1 and ivalue <= len(choices):
+    elif ivalue is not None and 1 <= ivalue <= len(choices):
         value = choices[ivalue - 1]
     elif lvalue in ("higher", "lower"):
         old_value = setting.read() if key is None else setting.read_key(key)
@@ -134,13 +136,13 @@ def select_range(value, setting):
         value = int(value)
     except ValueError as exc:
         raise Exception(f"{setting.name}: can't interpret '{value}' as integer") from exc
-    min, max = setting.range
-    if value < min or value > max:
+    minimum, maximum = setting.range
+    if value < minimum or value > maximum:
         raise Exception(f"{setting.name}: value '{value}' out of bounds")
     return value
 
 
-def run(receivers, args, find_receiver, find_device):
+def run(receivers, args, _find_receiver, find_device):
     assert receivers
     assert args.device
 
@@ -190,7 +192,6 @@ def run(receivers, args, find_receiver, find_device):
         from gi.repository import Gtk
 
         if Gtk.init_check()[0]:  # can Gtk be initialized?
-            APP_ID = "io.github.pwr_solaar.solaar"
             application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
             application.register()
             remote = application.get_is_remote()
@@ -236,7 +237,7 @@ def set(dev, setting, args, save):
     elif setting.kind == settings.KIND.map_choice:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
-            return (None, None, None)
+            return None, None, None
         key = args.value_key
         ikey = to_int(key)
         k = next((k for k in setting.choices.keys() if key == k), None)
@@ -254,7 +255,7 @@ def set(dev, setting, args, save):
     elif setting.kind == settings.KIND.multiple_toggle:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
-            return (None, None, None)
+            return None, None, None
         key = args.value_key
         all_keys = getattr(setting, "choices_universe", None)
         ikey = all_keys[int(key) if key.isdigit() else key] if isinstance(all_keys, NamedInts) else to_int(key)

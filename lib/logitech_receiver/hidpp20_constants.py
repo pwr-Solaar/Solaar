@@ -150,7 +150,14 @@ FEATURE._fallback = lambda x: f"unknown:{x:04X}"
 FEATURE_FLAG = NamedInts(internal=0x20, hidden=0x40, obsolete=0x80)
 
 DEVICE_KIND = NamedInts(
-    keyboard=0x00, remote_control=0x01, numpad=0x02, mouse=0x03, touchpad=0x04, trackball=0x05, presenter=0x06, receiver=0x07
+    keyboard=0x00,
+    remote_control=0x01,
+    numpad=0x02,
+    mouse=0x03,
+    touchpad=0x04,
+    trackball=0x05,
+    presenter=0x06,
+    receiver=0x07,
 )
 
 FIRMWARE_KIND = NamedInts(Firmware=0x00, Bootloader=0x01, Hardware=0x02, Other=0x03)

@@ -370,12 +370,12 @@ class NamedInts:
 
     __slots__ = ("__dict__", "_values", "_indexed", "_fallback", "_is_sorted")
 
-    def __init__(self, dict=None, **kwargs):
+    def __init__(self, dict_=None, **kwargs):
         def _readable_name(n):
             return n.replace("__", "/").replace("_", " ")
 
         # print (repr(kwargs))
-        elements = dict if dict else kwargs
+        elements = dict_ if dict_ else kwargs
         values = {k: NamedInt(v, _readable_name(k)) for (k, v) in elements.items()}
         self.__dict__ = values
         self._is_sorted = False
@@ -499,7 +499,7 @@ class NamedInts:
         return NamedInts(**self.__dict__, **other.__dict__)
 
     def __eq__(self, other):
-        return type(self) == type(other) and self._values == other._values
+        return isinstance(other, self.__class__) and self._values == other._values
 
 
 class UnsortedNamedInts(NamedInts):
@@ -548,7 +548,7 @@ class FirmwareInfo:
     kind: str
     name: str
     version: str
-    extras: str
+    extras: str | None
 
 
 class BatteryStatus(IntEnum):
