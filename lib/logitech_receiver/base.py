@@ -43,6 +43,8 @@ from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 
 if typing.TYPE_CHECKING:
+    from hidapi.common import DeviceInfo
+
     gi.require_version("Gdk", "3.0")
     from gi.repository import GLib  # NOQA: E402
 
@@ -53,6 +55,30 @@ else:
 
 logger = logging.getLogger(__name__)
 
+
+class HIDAPI(typing.Protocol):
+    def find_paired_node_wpid(self, receiver_path: str, index: int): ...
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int): ...
+
+    def open(self, vendor_id, product_id, serial=None): ...
+
+    def open_path(self, path): ...
+
+    def enumerate(self, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]) -> DeviceInfo: ...
+
+    def monitor_glib(
+        self, glib: GLib, callback: Callable, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]
+    ) -> None: ...
+
+    def read(self, device_handle, bytes_count, timeout_ms): ...
+
+    def write(self, device_handle: int, data: bytes) -> int: ...
+
+    def close(self, device_handle) -> None: ...
+
+
+hidapi = typing.cast(HIDAPI, hidapi)
 
 SHORT_MESSAGE_SIZE = 7
 _LONG_MESSAGE_SIZE = 20
@@ -639,7 +665,8 @@ def ping(handle, devnumber, long_message: bool = False):
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == hidpp10_constants.ERROR.invalid_SubID__command:  # valid reply from HID++ 1.0 device
+                        if error == hidpp10_constants.ERROR.invalid_SubID__command:
+                            # a valid reply from a HID++ 1.0 device
                             return 1.0
                         if (
                             error == hidpp10_constants.ERROR.resource_error
