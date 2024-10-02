@@ -973,7 +973,7 @@ class DeviceInfoFactory:
 
 class AllDevicesInfo:
     def __init__(self):
-        self._devices = []
+        self._devices: list[DeviceInfo] = []
         self._lock = threading.Lock()
 
     def __iter__(self):
