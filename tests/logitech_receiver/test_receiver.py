@@ -65,12 +65,6 @@ class DeviceInfo:
     product_id: int = 0xC52B
 
 
-@pytest.fixture
-def mock_request():
-    with mock.patch("logitech_receiver.base.request", return_value=None) as mock_request:
-        yield mock_request
-
-
 responses_unifying = [
     fake_hidpp.Response("000000", 0x8003, "FF"),
     fake_hidpp.Response("000300", 0x8102),
