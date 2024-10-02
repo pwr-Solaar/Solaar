@@ -31,8 +31,6 @@ from time import time
 from typing import Any
 from typing import Callable
 
-import gi
-
 from . import base_usb
 from . import common
 from . import descriptors
@@ -43,6 +41,8 @@ from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 
 if typing.TYPE_CHECKING:
+    import gi
+
     from hidapi.common import DeviceInfo
 
     gi.require_version("Gdk", "3.0")
@@ -57,25 +57,34 @@ logger = logging.getLogger(__name__)
 
 
 class HIDAPI(typing.Protocol):
-    def find_paired_node_wpid(self, receiver_path: str, index: int): ...
+    def find_paired_node_wpid(self, receiver_path: str, index: int):
+        ...
 
-    def find_paired_node(self, receiver_path: str, index: int, timeout: int): ...
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        ...
 
-    def open(self, vendor_id, product_id, serial=None): ...
+    def open(self, vendor_id, product_id, serial=None):
+        ...
 
-    def open_path(self, path): ...
+    def open_path(self, path):
+        ...
 
-    def enumerate(self, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]) -> DeviceInfo: ...
+    def enumerate(self, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]) -> DeviceInfo:
+        ...
 
     def monitor_glib(
         self, glib: GLib, callback: Callable, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]
-    ) -> None: ...
+    ) -> None:
+        ...
 
-    def read(self, device_handle, bytes_count, timeout_ms): ...
+    def read(self, device_handle, bytes_count, timeout_ms):
+        ...
 
-    def write(self, device_handle: int, data: bytes) -> int: ...
+    def write(self, device_handle: int, data: bytes) -> int:
+        ...
 
-    def close(self, device_handle) -> None: ...
+    def close(self, device_handle) -> None:
+        ...
 
 
 hidapi = typing.cast(HIDAPI, hidapi)
