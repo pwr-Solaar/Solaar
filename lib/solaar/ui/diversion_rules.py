@@ -1,4 +1,4 @@
-## Copyright (C) 2020 Solaar
+## Copyright (C) Solaar Contributors
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import dataclasses
 import logging
 import string
 import threading
@@ -24,6 +26,7 @@ from dataclasses import field
 from enum import Enum
 from shlex import quote as shlex_quote
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Optional
 
@@ -44,7 +47,6 @@ from solaar.ui import rule_conditions
 from solaar.ui.rule_base import RuleComponentUI
 from solaar.ui.rule_base import norm
 from solaar.ui.rule_conditions import ConditionUI
-from solaar.ui.rule_conditions import FeatureUI
 
 logger = logging.getLogger(__name__)
 
@@ -123,14 +125,6 @@ def _create_selected_rule_edit_panel() -> Gtk.Grid:
     return grid
 
 
-def _menu_do_copy(_mitem: Gtk.MenuItem, m: Gtk.TreeStore, it: Gtk.TreeIter):
-    global _rule_component_clipboard
-
-    wrapped = m[it][0]
-    c = wrapped.component
-    _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
-
-
 def _populate_model(
     model: Gtk.TreeStore,
     it: Gtk.TreeIter,
@@ -161,8 +155,379 @@ def _populate_model(
         _populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
 
+@dataclasses.dataclass
+class AllowedActions:
+    c: Any
+    copy: bool
+    delete: bool
+    flatten: bool
+    insert: bool
+    insert_only_rule: bool
+    insert_root: bool
+    wrap: bool
+
+
+def allowed_actions(m: Gtk.TreeStore, it: Gtk.TreeIter) -> AllowedActions:
+    row = m[it]
+    wrapped = row[0]
+    c = wrapped.component
+    parent_it = m.iter_parent(it)
+    parent_c = m[parent_it][0].component if wrapped.level > 0 else None
+
+    can_wrap = wrapped.editable and wrapped.component is not None and wrapped.level >= 2
+    can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
+    can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
+    can_insert_only_rule = wrapped.editable and wrapped.level == 1
+    can_flatten = (
+        wrapped.editable
+        and not isinstance(parent_c, _DIV.Not)
+        and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
+        and wrapped.level >= 2
+        and len(c.components)
+    )
+    can_copy = wrapped.level >= 1
+    can_insert_root = wrapped.editable and wrapped.level == 0
+    return AllowedActions(
+        c,
+        can_copy,
+        can_delete,
+        can_flatten,
+        can_insert,
+        can_insert_only_rule,
+        can_insert_root,
+        can_wrap,
+    )
+
+
+class ActionMenu:
+    def __init__(
+        self,
+        window: Gtk.Window,
+        tree_view: Gtk.TreeView,
+        populate_model_func: Callable,
+        on_update: Callable,
+    ):
+        self.window = window
+        self.tree_view = tree_view
+        self._populate_model_func = populate_model_func
+        self._on_update = on_update
+
+    def create_menu_event_button_released(self, v, e):
+        if e.button == Gdk.BUTTON_SECONDARY:  # right click
+            menu = Gtk.Menu()
+            m, it = v.get_selection().get_selected()
+            enabled_actions = allowed_actions(m, it)
+            for item in self.get_insert_menus(m, it, enabled_actions):
+                menu.append(item)
+            if enabled_actions.flatten:
+                menu.append(self._menu_flatten(m, it))
+            if enabled_actions.wrap:
+                menu.append(self._menu_wrap(m, it))
+                menu.append(self._menu_negate(m, it))
+            if menu.get_children():
+                menu.append(Gtk.SeparatorMenuItem(visible=True))
+            if enabled_actions.delete:
+                menu.append(self._menu_cut(m, it))
+            if enabled_actions.copy and enabled_actions.c is not None:
+                menu.append(self._menu_copy(m, it))
+            if enabled_actions.insert and _rule_component_clipboard is not None:
+                p = self._menu_paste(m, it)
+                menu.append(p)
+                if enabled_actions.c is None:  # just a placeholder
+                    p.set_label(_("Paste here"))
+                else:
+                    p.set_label(_("Paste above"))
+                    p2 = self._menu_paste(m, it, below=True)
+                    p2.set_label(_("Paste below"))
+                    menu.append(p2)
+            elif enabled_actions.insert_only_rule and isinstance(_rule_component_clipboard, _DIV.Rule):
+                p = self._menu_paste(m, it)
+                menu.append(p)
+                if enabled_actions.c is None:
+                    p.set_label(_("Paste rule here"))
+                else:
+                    p.set_label(_("Paste rule above"))
+                    p2 = self._menu_paste(m, it, below=True)
+                    p2.set_label(_("Paste rule below"))
+                    menu.append(p2)
+            elif enabled_actions.insert_root and isinstance(_rule_component_clipboard, _DIV.Rule):
+                p = self._menu_paste(m, m.iter_nth_child(it, 0))
+                p.set_label(_("Paste rule"))
+                menu.append(p)
+            if menu.get_children() and enabled_actions.delete:
+                menu.append(Gtk.SeparatorMenuItem(visible=True))
+            if enabled_actions.delete:
+                menu.append(self._menu_delete(m, it))
+            if menu.get_children():
+                menu.popup_at_pointer(e)
+
+    def get_insert_menus(self, m, it, enabled_actions: AllowedActions):
+        items = []
+        if enabled_actions.insert:
+            ins = self._menu_insert(m, it)
+            items.append(ins)
+            if enabled_actions.c is None:  # just a placeholder
+                ins.set_label(_("Insert here"))
+            else:
+                ins.set_label(_("Insert above"))
+                ins2 = self._menu_insert(m, it, below=True)
+                ins2.set_label(_("Insert below"))
+                items.append(ins2)
+        elif enabled_actions.insert_only_rule:
+            ins = self._menu_create_rule(m, it)
+            items.append(ins)
+            if enabled_actions.c is None:
+                ins.set_label(_("Insert new rule here"))
+            else:
+                ins.set_label(_("Insert new rule above"))
+                ins2 = self._menu_create_rule(m, it, below=True)
+                ins2.set_label(_("Insert new rule below"))
+                items.append(ins2)
+        elif enabled_actions.insert_root:
+            ins = self._menu_create_rule(m, m.iter_nth_child(it, 0))
+            items.append(ins)
+        return items
+
+    def menu_do_flatten(self, _mitem, m, it):
+        wrapped = m[it][0]
+        c = wrapped.component
+        parent_it = m.iter_parent(it)
+        parent_c = m[parent_it][0].component
+        idx = parent_c.components.index(c)
+        if isinstance(c, _DIV.Not):
+            parent_c.components = [*parent_c.components[:idx], c.component, *parent_c.components[idx + 1 :]]
+            children = [next(m[it].iterchildren())[0].component]
+        else:
+            parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1 :]]
+            children = [child[0].component for child in m[it].iterchildren()]
+        m.remove(it)
+        self._populate_model_func(m, parent_it, children, level=wrapped.level, pos=idx)
+        new_iter = m.iter_nth_child(parent_it, idx)
+        self.tree_view.expand_row(m.get_path(parent_it), True)
+        self.tree_view.get_selection().select_iter(new_iter)
+        self._on_update()
+
+    def _menu_flatten(self, m, it):
+        menu_flatten = Gtk.MenuItem(_("Flatten"))
+        menu_flatten.connect("activate", self.menu_do_flatten, m, it)
+        menu_flatten.show()
+        return menu_flatten
+
+    def _menu_do_insert(self, _mitem, m, it, new_c, below=False):
+        wrapped = m[it][0]
+        c = wrapped.component
+        parent_it = m.iter_parent(it)
+        parent_c = m[parent_it][0].component
+        if len(parent_c.components) == 0:  # we had only a placeholder
+            idx = 0
+        else:
+            idx = parent_c.components.index(c)
+        if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
+            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
+        idx += int(below)
+        parent_c.components.insert(idx, new_c)
+        self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=idx)
+        self._on_update()
+        if len(parent_c.components) == 1:
+            m.remove(it)  # remove placeholder in the end
+        new_iter = m.iter_nth_child(parent_it, idx)
+        self.tree_view.get_selection().select_iter(new_iter)
+        if isinstance(new_c, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Not)):
+            self.tree_view.expand_row(m.get_path(new_iter), True)
+
+    def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
+        new_c = cls(initial_value, warn=False)
+        return self._menu_do_insert(_mitem, m, it, new_c, below=below)
+
+    def _menu_insert(self, m, it, below=False):
+        elements = [
+            _("Insert"),
+            [
+                (_("Sub-rule"), _DIV.Rule, []),
+                (_("Or"), _DIV.Or, []),
+                (_("And"), _DIV.And, []),
+                [
+                    _("Condition"),
+                    [
+                        (_("Feature"), _DIV.Feature, rule_conditions.FeatureUI.FEATURES_WITH_DIVERSION[0]),
+                        (_("Report"), _DIV.Report, 0),
+                        (_("Process"), _DIV.Process, ""),
+                        (_("Mouse process"), _DIV.MouseProcess, ""),
+                        (_("Modifiers"), _DIV.Modifiers, []),
+                        (_("Key"), _DIV.Key, ""),
+                        (_("KeyIsDown"), _DIV.KeyIsDown, ""),
+                        (_("Active"), _DIV.Active, ""),
+                        (_("Device"), _DIV.Device, ""),
+                        (_("Host"), _DIV.Host, ""),
+                        (_("Setting"), _DIV.Setting, [None, "", None]),
+                        (_("Test"), _DIV.Test, next(iter(_DIV.TESTS))),
+                        (_("Test bytes"), _DIV.TestBytes, [0, 1, 0]),
+                        (_("Mouse Gesture"), _DIV.MouseGesture, ""),
+                    ],
+                ],
+                [
+                    _("Action"),
+                    [
+                        (_("Key press"), _DIV.KeyPress, "space"),
+                        (_("Mouse scroll"), _DIV.MouseScroll, [0, 0]),
+                        (_("Mouse click"), _DIV.MouseClick, ["left", 1]),
+                        (_("Set"), _DIV.Set, [None, "", None]),
+                        (_("Execute"), _DIV.Execute, [""]),
+                        (_("Later"), _DIV.Later, [1]),
+                    ],
+                ],
+            ],
+        ]
+
+        def build(spec):
+            if isinstance(spec, list):  # has sub-menu
+                label, children = spec
+                item = Gtk.MenuItem(label)
+                submenu = Gtk.Menu()
+                item.set_submenu(submenu)
+                for child in children:
+                    submenu.append(build(child))
+                return item
+            elif isinstance(spec, tuple):  # has click action
+                label, feature, *args = spec
+                item = Gtk.MenuItem(label)
+                args = [a.copy() if isinstance(a, list) else a for a in args]
+                item.connect("activate", self._menu_do_insert_new, m, it, feature, *args, below)
+                return item
+            else:
+                return None
+
+        menu_insert = build(elements)
+        menu_insert.show_all()
+        return menu_insert
+
+    def _menu_create_rule(self, m, it, below=False) -> Gtk.MenuItem:
+        menu_create_rule = Gtk.MenuItem(_("Insert new rule"))
+        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, _DIV.Rule, [], below)
+        menu_create_rule.show()
+        return menu_create_rule
+
+    def menu_do_delete(self, _mitem, m, it):
+        wrapped = m[it][0]
+        c = wrapped.component
+        parent_it = m.iter_parent(it)
+        parent_c = m[parent_it][0].component
+        idx = parent_c.components.index(c)
+        parent_c.components.pop(idx)
+        if len(parent_c.components) == 0:  # placeholder
+            self._populate_model_func(m, parent_it, None, level=wrapped.level)
+        m.remove(it)
+        self.tree_view.get_selection().select_iter(m.iter_nth_child(parent_it, max(0, min(idx, len(parent_c.components) - 1))))
+        self._on_update()
+        return c
+
+    def _menu_delete(self, m, it) -> Gtk.MenuItem:
+        menu_delete = Gtk.MenuItem(_("Delete"))
+        menu_delete.connect("activate", self.menu_do_delete, m, it)
+        menu_delete.show()
+        return menu_delete
+
+    def menu_do_negate(self, _mitem, m, it):
+        wrapped = m[it][0]
+        c = wrapped.component
+        parent_it = m.iter_parent(it)
+        parent_c = m[parent_it][0].component
+        if isinstance(c, _DIV.Not):  # avoid double negation
+            self.menu_do_flatten(_mitem, m, it)
+            self.tree_view.expand_row(m.get_path(parent_it), True)
+        elif isinstance(parent_c, _DIV.Not):  # avoid double negation
+            self.menu_do_flatten(_mitem, m, parent_it)
+        else:
+            idx = parent_c.components.index(c)
+            self._menu_do_insert_new(_mitem, m, it, _DIV.Not, c, below=True)
+            self.menu_do_delete(_mitem, m, m.iter_nth_child(parent_it, idx))
+        self._on_update()
+
+    def _menu_negate(self, m, it) -> Gtk.MenuItem:
+        menu_negate = Gtk.MenuItem(_("Negate"))
+        menu_negate.connect("activate", self.menu_do_negate, m, it)
+        menu_negate.show()
+        return menu_negate
+
+    def menu_do_wrap(self, _mitem, m, it, cls):
+        wrapped = m[it][0]
+        c = wrapped.component
+        parent_it = m.iter_parent(it)
+        parent_c = m[parent_it][0].component
+        if isinstance(parent_c, _DIV.Not):
+            new_c = cls([c], warn=False)
+            parent_c.component = new_c
+            m.remove(it)
+            self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=0)
+            self.tree_view.expand_row(m.get_path(parent_it), True)
+            self.tree_view.get_selection().select_iter(m.iter_nth_child(parent_it, 0))
+        else:
+            idx = parent_c.components.index(c)
+            self._menu_do_insert_new(_mitem, m, it, cls, [c], below=True)
+            self.menu_do_delete(_mitem, m, m.iter_nth_child(parent_it, idx))
+        self._on_update()
+
+    def _menu_wrap(self, m, it) -> Gtk.MenuItem:
+        menu_wrap = Gtk.MenuItem(_("Wrap with"))
+        submenu_wrap = Gtk.Menu()
+        menu_sub_rule = Gtk.MenuItem(_("Sub-rule"))
+        menu_and = Gtk.MenuItem(_("And"))
+        menu_or = Gtk.MenuItem(_("Or"))
+        menu_sub_rule.connect("activate", self.menu_do_wrap, m, it, _DIV.Rule)
+        menu_and.connect("activate", self.menu_do_wrap, m, it, _DIV.And)
+        menu_or.connect("activate", self.menu_do_wrap, m, it, _DIV.Or)
+        submenu_wrap.append(menu_sub_rule)
+        submenu_wrap.append(menu_and)
+        submenu_wrap.append(menu_or)
+        menu_wrap.set_submenu(submenu_wrap)
+        menu_wrap.show_all()
+        return menu_wrap
+
+    def menu_do_copy(self, _mitem: Gtk.MenuItem, m: Gtk.TreeStore, it: Gtk.TreeIter):
+        global _rule_component_clipboard
+
+        wrapped = m[it][0]
+        c = wrapped.component
+        _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+
+    def menu_do_cut(self, _mitem, m, it):
+        global _rule_component_clipboard
+
+        c = self.menu_do_delete(_mitem, m, it)
+        self._on_update()
+        _rule_component_clipboard = c
+
+    def _menu_cut(self, m, it):
+        menu_cut = Gtk.MenuItem(_("Cut"))
+        menu_cut.connect("activate", self.menu_do_cut, m, it)
+        menu_cut.show()
+        return menu_cut
+
+    def menu_do_paste(self, _mitem, m, it, below=False):
+        global _rule_component_clipboard
+
+        c = _rule_component_clipboard
+        _rule_component_clipboard = None
+        if c:
+            _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+            self._menu_do_insert(_mitem, m, it, new_c=c, below=below)
+            self._on_update()
+
+    def _menu_paste(self, m, it, below=False):
+        menu_paste = Gtk.MenuItem(_("Paste"))
+        menu_paste.connect("activate", self.menu_do_paste, m, it, below)
+        menu_paste.show()
+        return menu_paste
+
+    def _menu_copy(self, m, it):
+        menu_copy = Gtk.MenuItem(_("Copy"))
+        menu_copy.connect("activate", self.menu_do_copy, m, it)
+        menu_copy.show()
+        return menu_copy
+
+
 class DiversionDialog:
-    def __init__(self):
+    def __init__(self, action_menu):
         window = Gtk.Window()
         window.set_title(_("Solaar Rule Editor"))
         window.connect("delete-event", self._closing)
@@ -172,6 +537,13 @@ class DiversionDialog:
         for col in self._create_view_columns():
             self.view.append_column(col)
         vbox.pack_start(self.top_panel, True, True, 0)
+
+        self._action_menu = action_menu(
+            window,
+            self.view,
+            populate_model_func=_populate_model,
+            on_update=self.on_update,
+        )
 
         self.dirty = False  # if dirty, there are pending changes to be saved
 
@@ -339,43 +711,42 @@ class DiversionDialog:
         """
         state = e.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK)
         m, it = v.get_selection().get_selected()
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component if wrapped.level > 0 else None
-        can_wrap = wrapped.editable and wrapped.component is not None and wrapped.level >= 2
-        can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
-        can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
-        can_insert_only_rule = wrapped.editable and wrapped.level == 1
-        can_flatten = (
-            wrapped.editable
-            and not isinstance(parent_c, _DIV.Not)
-            and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
-            and wrapped.level >= 2
-            and len(c.components)
-        )
-        can_copy = wrapped.level >= 1
-        can_insert_root = wrapped.editable and wrapped.level == 0
+        enabled_actions = allowed_actions(m, it)
         if state & Gdk.ModifierType.CONTROL_MASK:
-            if can_delete and e.keyval in [Gdk.KEY_x, Gdk.KEY_X]:
-                self._menu_do_cut(None, m, it)
-            elif can_copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and c is not None:
-                _menu_do_copy(None, m, it)
-            elif can_insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
-                self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
+            if enabled_actions.delete and e.keyval in [Gdk.KEY_x, Gdk.KEY_X]:
+                self._action_menu.menu_do_cut(None, m, it)
+            elif enabled_actions.copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and enabled_actions.c is not None:
+                self._action_menu.menu_do_copy(None, m, it)
+            elif enabled_actions.insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
+                self._action_menu.menu_do_paste(
+                    None, m, it, below=enabled_actions.c is not None and not (state & Gdk.ModifierType.SHIFT_MASK)
+                )
             elif (
-                can_insert_only_rule
+                enabled_actions.insert_only_rule
                 and isinstance(_rule_component_clipboard, _DIV.Rule)
                 and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
             ):
-                self._menu_do_paste(None, m, it, below=c is not None and not (state & Gdk.ModifierType.SHIFT_MASK))
-            elif can_insert_root and isinstance(_rule_component_clipboard, _DIV.Rule) and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
-                self._menu_do_paste(None, m, m.iter_nth_child(it, 0))
-            elif can_delete and e.keyval in [Gdk.KEY_KP_Delete, Gdk.KEY_Delete]:
-                self._menu_do_delete(None, m, it)
-            elif (can_insert or can_insert_only_rule or can_insert_root) and e.keyval in [Gdk.KEY_i, Gdk.KEY_I]:
+                self._action_menu.menu_do_paste(
+                    None, m, it, below=enabled_actions.c is not None and not (state & Gdk.ModifierType.SHIFT_MASK)
+                )
+            elif (
+                enabled_actions.insert_root
+                and isinstance(_rule_component_clipboard, _DIV.Rule)
+                and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
+            ):
+                self._action_menu.menu_do_paste(None, m, m.iter_nth_child(it, 0))
+            elif enabled_actions.delete and e.keyval in [Gdk.KEY_KP_Delete, Gdk.KEY_Delete]:
+                self._action_menu.menu_do_delete(None, m, it)
+            elif (enabled_actions.insert or enabled_actions.insert_only_rule or enabled_actions.insert_root) and e.keyval in [
+                Gdk.KEY_i,
+                Gdk.KEY_I,
+            ]:
                 menu = Gtk.Menu()
-                for item in self.__get_insert_menus(m, it, c, can_insert, can_insert_only_rule, can_insert_root):
+                for item in self._action_menu.get_insert_menus(
+                    m,
+                    it,
+                    enabled_actions,
+                ):
                     menu.append(item)
                 menu.show_all()
                 rect = self.view.get_cell_area(m.get_path(it), self.view.get_column(1))
@@ -383,338 +754,20 @@ class DiversionDialog:
             elif self.dirty and e.keyval in [Gdk.KEY_s, Gdk.KEY_S]:
                 self._save_yaml_file()
         else:
-            if can_wrap:
+            if enabled_actions.wrap:
                 if e.keyval == Gdk.KEY_exclam:
-                    self._menu_do_negate(None, m, it)
+                    self._action_menu.menu_do_negate(None, m, it)
                 elif e.keyval == Gdk.KEY_ampersand:
-                    self._menu_do_wrap(None, m, it, _DIV.And)
+                    self._action_menu.menu_do_wrap(None, m, it, _DIV.And)
                 elif e.keyval == Gdk.KEY_bar:
-                    self._menu_do_wrap(None, m, it, _DIV.Or)
+                    self._action_menu.menu_do_wrap(None, m, it, _DIV.Or)
                 elif e.keyval in [Gdk.KEY_r, Gdk.KEY_R] and (state & Gdk.ModifierType.SHIFT_MASK):
-                    self._menu_do_wrap(None, m, it, _DIV.Rule)
-            if can_flatten and e.keyval in [Gdk.KEY_asterisk, Gdk.KEY_KP_Multiply]:
-                self._menu_do_flatten(None, m, it)
-
-    def __get_insert_menus(self, m, it, c, can_insert, can_insert_only_rule, can_insert_root):
-        items = []
-        if can_insert:
-            ins = self._menu_insert(m, it)
-            items.append(ins)
-            if c is None:  # just a placeholder
-                ins.set_label(_("Insert here"))
-            else:
-                ins.set_label(_("Insert above"))
-                ins2 = self._menu_insert(m, it, below=True)
-                ins2.set_label(_("Insert below"))
-                items.append(ins2)
-        elif can_insert_only_rule:
-            ins = self._menu_create_rule(m, it)
-            items.append(ins)
-            if c is None:
-                ins.set_label(_("Insert new rule here"))
-            else:
-                ins.set_label(_("Insert new rule above"))
-                ins2 = self._menu_create_rule(m, it, below=True)
-                ins2.set_label(_("Insert new rule below"))
-                items.append(ins2)
-        elif can_insert_root:
-            ins = self._menu_create_rule(m, m.iter_nth_child(it, 0))
-            items.append(ins)
-        return items
+                    self._action_menu.menu_do_wrap(None, m, it, _DIV.Rule)
+            if enabled_actions.flatten and e.keyval in [Gdk.KEY_asterisk, Gdk.KEY_KP_Multiply]:
+                self._action_menu.menu_do_flatten(None, m, it)
 
     def _event_button_released(self, v, e):
-        if e.button == Gdk.BUTTON_SECONDARY:  # right click
-            m, it = v.get_selection().get_selected()
-            wrapped = m[it][0]
-            c = wrapped.component
-            parent_it = m.iter_parent(it)
-            parent_c = m[parent_it][0].component if wrapped.level > 0 else None
-            menu = Gtk.Menu()
-            can_wrap = wrapped.editable and wrapped.component is not None and wrapped.level >= 2
-            can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
-            can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
-            can_insert_only_rule = wrapped.editable and wrapped.level == 1
-            can_flatten = (
-                wrapped.editable
-                and not isinstance(parent_c, _DIV.Not)
-                and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
-                and wrapped.level >= 2
-                and len(c.components)
-            )
-            can_copy = wrapped.level >= 1
-            can_insert_root = wrapped.editable and wrapped.level == 0
-            for item in self.__get_insert_menus(m, it, c, can_insert, can_insert_only_rule, can_insert_root):
-                menu.append(item)
-            if can_flatten:
-                menu.append(self._menu_flatten(m, it))
-            if can_wrap:
-                menu.append(self._menu_wrap(m, it))
-                menu.append(self._menu_negate(m, it))
-            if menu.get_children():
-                menu.append(Gtk.SeparatorMenuItem(visible=True))
-            if can_delete:
-                menu.append(self._menu_cut(m, it))
-            if can_copy and c is not None:
-                menu.append(self._menu_copy(m, it))
-            if can_insert and _rule_component_clipboard is not None:
-                p = self._menu_paste(m, it)
-                menu.append(p)
-                if c is None:  # just a placeholder
-                    p.set_label(_("Paste here"))
-                else:
-                    p.set_label(_("Paste above"))
-                    p2 = self._menu_paste(m, it, below=True)
-                    p2.set_label(_("Paste below"))
-                    menu.append(p2)
-            elif can_insert_only_rule and isinstance(_rule_component_clipboard, _DIV.Rule):
-                p = self._menu_paste(m, it)
-                menu.append(p)
-                if c is None:
-                    p.set_label(_("Paste rule here"))
-                else:
-                    p.set_label(_("Paste rule above"))
-                    p2 = self._menu_paste(m, it, below=True)
-                    p2.set_label(_("Paste rule below"))
-                    menu.append(p2)
-            elif can_insert_root and isinstance(_rule_component_clipboard, _DIV.Rule):
-                p = self._menu_paste(m, m.iter_nth_child(it, 0))
-                p.set_label(_("Paste rule"))
-                menu.append(p)
-            if menu.get_children() and can_delete:
-                menu.append(Gtk.SeparatorMenuItem(visible=True))
-            if can_delete:
-                menu.append(self._menu_delete(m, it))
-            if menu.get_children():
-                menu.popup_at_pointer(e)
-
-    def _menu_do_flatten(self, _mitem, m, it):
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component
-        idx = parent_c.components.index(c)
-        if isinstance(c, _DIV.Not):
-            parent_c.components = [*parent_c.components[:idx], c.component, *parent_c.components[idx + 1 :]]
-            children = [next(m[it].iterchildren())[0].component]
-        else:
-            parent_c.components = [*parent_c.components[:idx], *c.components, *parent_c.components[idx + 1 :]]
-            children = [child[0].component for child in m[it].iterchildren()]
-        m.remove(it)
-        _populate_model(m, parent_it, children, level=wrapped.level, pos=idx)
-        new_iter = m.iter_nth_child(parent_it, idx)
-        self.view.expand_row(m.get_path(parent_it), True)
-        self.view.get_selection().select_iter(new_iter)
-        self.on_update()
-
-    def _menu_flatten(self, m, it):
-        menu_flatten = Gtk.MenuItem(_("Flatten"))
-        menu_flatten.connect("activate", self._menu_do_flatten, m, it)
-        menu_flatten.show()
-        return menu_flatten
-
-    def _menu_do_insert(self, _mitem, m, it, new_c, below=False):
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component
-        if len(parent_c.components) == 0:  # we had only a placeholder
-            idx = 0
-        else:
-            idx = parent_c.components.index(c)
-        if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
-        idx += int(below)
-        parent_c.components.insert(idx, new_c)
-        _populate_model(m, parent_it, new_c, level=wrapped.level, pos=idx)
-        self.on_update()
-        if len(parent_c.components) == 1:
-            m.remove(it)  # remove placeholder in the end
-        new_iter = m.iter_nth_child(parent_it, idx)
-        self.view.get_selection().select_iter(new_iter)
-        if isinstance(new_c, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Not)):
-            self.view.expand_row(m.get_path(new_iter), True)
-
-    def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
-        new_c = cls(initial_value, warn=False)
-        return self._menu_do_insert(_mitem, m, it, new_c, below=below)
-
-    def _menu_insert(self, m, it, below=False):
-        elements = [
-            _("Insert"),
-            [
-                (_("Sub-rule"), _DIV.Rule, []),
-                (_("Or"), _DIV.Or, []),
-                (_("And"), _DIV.And, []),
-                [
-                    _("Condition"),
-                    [
-                        (_("Feature"), _DIV.Feature, FeatureUI.FEATURES_WITH_DIVERSION[0]),
-                        (_("Report"), _DIV.Report, 0),
-                        (_("Process"), _DIV.Process, ""),
-                        (_("Mouse process"), _DIV.MouseProcess, ""),
-                        (_("Modifiers"), _DIV.Modifiers, []),
-                        (_("Key"), _DIV.Key, ""),
-                        (_("KeyIsDown"), _DIV.KeyIsDown, ""),
-                        (_("Active"), _DIV.Active, ""),
-                        (_("Device"), _DIV.Device, ""),
-                        (_("Host"), _DIV.Host, ""),
-                        (_("Setting"), _DIV.Setting, [None, "", None]),
-                        (_("Test"), _DIV.Test, next(iter(_DIV.TESTS))),
-                        (_("Test bytes"), _DIV.TestBytes, [0, 1, 0]),
-                        (_("Mouse Gesture"), _DIV.MouseGesture, ""),
-                    ],
-                ],
-                [
-                    _("Action"),
-                    [
-                        (_("Key press"), _DIV.KeyPress, "space"),
-                        (_("Mouse scroll"), _DIV.MouseScroll, [0, 0]),
-                        (_("Mouse click"), _DIV.MouseClick, ["left", 1]),
-                        (_("Set"), _DIV.Set, [None, "", None]),
-                        (_("Execute"), _DIV.Execute, [""]),
-                        (_("Later"), _DIV.Later, [1]),
-                    ],
-                ],
-            ],
-        ]
-
-        def build(spec):
-            if isinstance(spec, list):  # has sub-menu
-                label, children = spec
-                item = Gtk.MenuItem(label)
-                submenu = Gtk.Menu()
-                item.set_submenu(submenu)
-                for child in children:
-                    submenu.append(build(child))
-                return item
-            elif isinstance(spec, tuple):  # has click action
-                label, feature, *args = spec
-                item = Gtk.MenuItem(label)
-                args = [a.copy() if isinstance(a, list) else a for a in args]
-                item.connect("activate", self._menu_do_insert_new, m, it, feature, *args, below)
-                return item
-            else:
-                return None
-
-        menu_insert = build(elements)
-        menu_insert.show_all()
-        return menu_insert
-
-    def _menu_create_rule(self, m, it, below=False):
-        menu_create_rule = Gtk.MenuItem(_("Insert new rule"))
-        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, _DIV.Rule, [], below)
-        menu_create_rule.show()
-        return menu_create_rule
-
-    def _menu_do_delete(self, _mitem, m, it):
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component
-        idx = parent_c.components.index(c)
-        parent_c.components.pop(idx)
-        if len(parent_c.components) == 0:  # placeholder
-            _populate_model(m, parent_it, None, level=wrapped.level)
-        m.remove(it)
-        select = max(0, min(idx, len(parent_c.components) - 1))
-        self.view.get_selection().select_iter(m.iter_nth_child(parent_it, select))
-        self.on_update()
-        return c
-
-    def _menu_delete(self, m, it):
-        menu_delete = Gtk.MenuItem(_("Delete"))
-        menu_delete.connect("activate", self._menu_do_delete, m, it)
-        menu_delete.show()
-        return menu_delete
-
-    def _menu_do_negate(self, _mitem, m, it):
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component
-        if isinstance(c, _DIV.Not):  # avoid double negation
-            self._menu_do_flatten(_mitem, m, it)
-            self.view.expand_row(m.get_path(parent_it), True)
-        elif isinstance(parent_c, _DIV.Not):  # avoid double negation
-            self._menu_do_flatten(_mitem, m, parent_it)
-        else:
-            idx = parent_c.components.index(c)
-            self._menu_do_insert_new(_mitem, m, it, _DIV.Not, c, below=True)
-            self._menu_do_delete(_mitem, m, m.iter_nth_child(parent_it, idx))
-        self.on_update()
-
-    def _menu_negate(self, m, it):
-        menu_negate = Gtk.MenuItem(_("Negate"))
-        menu_negate.connect("activate", self._menu_do_negate, m, it)
-        menu_negate.show()
-        return menu_negate
-
-    def _menu_do_wrap(self, _mitem, m, it, cls):
-        wrapped = m[it][0]
-        c = wrapped.component
-        parent_it = m.iter_parent(it)
-        parent_c = m[parent_it][0].component
-        if isinstance(parent_c, _DIV.Not):
-            new_c = cls([c], warn=False)
-            parent_c.component = new_c
-            m.remove(it)
-            _populate_model(m, parent_it, new_c, level=wrapped.level, pos=0)
-            self.view.expand_row(m.get_path(parent_it), True)
-            self.view.get_selection().select_iter(m.iter_nth_child(parent_it, 0))
-        else:
-            idx = parent_c.components.index(c)
-            self._menu_do_insert_new(_mitem, m, it, cls, [c], below=True)
-            self._menu_do_delete(_mitem, m, m.iter_nth_child(parent_it, idx))
-        self.on_update()
-
-    def _menu_wrap(self, m, it):
-        menu_wrap = Gtk.MenuItem(_("Wrap with"))
-        submenu_wrap = Gtk.Menu()
-        menu_sub_rule = Gtk.MenuItem(_("Sub-rule"))
-        menu_and = Gtk.MenuItem(_("And"))
-        menu_or = Gtk.MenuItem(_("Or"))
-        menu_sub_rule.connect("activate", self._menu_do_wrap, m, it, _DIV.Rule)
-        menu_and.connect("activate", self._menu_do_wrap, m, it, _DIV.And)
-        menu_or.connect("activate", self._menu_do_wrap, m, it, _DIV.Or)
-        submenu_wrap.append(menu_sub_rule)
-        submenu_wrap.append(menu_and)
-        submenu_wrap.append(menu_or)
-        menu_wrap.set_submenu(submenu_wrap)
-        menu_wrap.show_all()
-        return menu_wrap
-
-    def _menu_do_cut(self, _mitem, m, it):
-        c = self._menu_do_delete(_mitem, m, it)
-        self.on_update()
-        global _rule_component_clipboard
-        _rule_component_clipboard = c
-
-    def _menu_cut(self, m, it):
-        menu_cut = Gtk.MenuItem(_("Cut"))
-        menu_cut.connect("activate", self._menu_do_cut, m, it)
-        menu_cut.show()
-        return menu_cut
-
-    def _menu_do_paste(self, _mitem, m, it, below=False):
-        global _rule_component_clipboard
-        c = _rule_component_clipboard
-        _rule_component_clipboard = None
-        if c:
-            _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
-            self._menu_do_insert(_mitem, m, it, new_c=c, below=below)
-            self.on_update()
-
-    def _menu_paste(self, m, it, below=False):
-        menu_paste = Gtk.MenuItem(_("Paste"))
-        menu_paste.connect("activate", self._menu_do_paste, m, it, below)
-        menu_paste.show()
-        return menu_paste
-
-    def _menu_copy(self, m, it):
-        menu_copy = Gtk.MenuItem(_("Copy"))
-        menu_copy.connect("activate", _menu_do_copy, m, it)
-        menu_copy.show()
-        return menu_copy
+        self._action_menu.create_menu_event_button_released(v, e)
 
     def update_devices(self):
         for rc in self.ui.values():
@@ -1400,9 +1453,7 @@ class HostUI(ConditionUI):
 
 class _SettingWithValueUI:
     ALL_SETTINGS = _all_settings()
-
     MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
-
     ACCEPT_TOGGLE = True
 
     label_text = ""
@@ -1809,6 +1860,6 @@ def show_window(model):
     global _dev_model
     _dev_model = model
     if _diversion_dialog is None:
-        _diversion_dialog = DiversionDialog()
+        _diversion_dialog = DiversionDialog(ActionMenu)
     update_devices()
     _diversion_dialog.window.present()
