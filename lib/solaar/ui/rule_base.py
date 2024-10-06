@@ -90,15 +90,15 @@ class RuleComponentUI:
             widget.show()
 
     @classmethod
-    def left_label(cls, component):
+    def left_label(cls, component) -> str:
         return type(component).__name__
 
     @classmethod
-    def right_label(cls, _component):
+    def right_label(cls, _component) -> str:
         return ""
 
     @classmethod
-    def icon_name(cls):
+    def icon_name(cls) -> str:
         return ""
 
     def _remove_panel_items(self):
