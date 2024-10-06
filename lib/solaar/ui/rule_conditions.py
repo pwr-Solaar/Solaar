@@ -47,7 +47,7 @@ class ProcessUI(ConditionUI):
         self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field.set_text(component.process)
@@ -77,7 +77,7 @@ class MouseProcessUI(ConditionUI):
         self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field.set_text(component.process)
@@ -124,7 +124,7 @@ class FeatureUI(ConditionUI):
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             f = str(component.feature) if component.feature else ""
@@ -166,7 +166,7 @@ class ReportUI(ConditionUI):
         self.field.connect("changed", self._on_update)
         self.widgets[self.field] = (0, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field.set_value(component.report)
@@ -202,7 +202,7 @@ class ModifiersUI(ConditionUI):
             self.switches[m] = switch
             switch.connect("notify::active", self._on_update)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             for m in diversion.MODIFIERS:
@@ -245,7 +245,7 @@ class KeyUI(ConditionUI):
         self.action_released_radio.connect("toggled", self._on_update, Key.UP)
         self.widgets[self.action_released_radio] = (3, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.key_field.set_text(str(component.key) if self.component.key else "")
@@ -291,7 +291,7 @@ class KeyIsDownUI(ConditionUI):
         self.key_field.connect("changed", self._on_update)
         self.widgets[self.key_field] = (0, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.key_field.set_text(str(component.key) if self.component.key else "")
@@ -343,7 +343,7 @@ class TestUI(ConditionUI):
         self.parameter.connect("changed", self._on_update)
         self.widgets[self.parameter] = (3, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.test.set_active_id(component.test)
@@ -454,7 +454,7 @@ class TestBytesUI(ConditionUI):
         self.mode_field.connect("changed", lambda cb: (self._on_update(), self._only_mode(cb.get_active_id())))
         self.mode_field.set_active_id("range")
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
 
         with self.ignore_changes():
@@ -572,7 +572,7 @@ class MouseGestureUI(ConditionUI):
                 )
                 f.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         n = len(component.movements)
         while len(self.fields) < n:
             self._create_field()
