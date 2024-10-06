@@ -14,6 +14,8 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import dataclasses
 import logging
 import string
@@ -994,21 +996,21 @@ class DeviceInfo:
             self.unitId = ""
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.serial or self.unitId or ""
 
     @property
-    def identifiers(self):
+    def identifiers(self) -> list[str]:
         return [id for id in (self.serial, self.unitId) if id]
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         return f"{self.codename} ({self.id})"
 
-    def matches(self, search):
+    def matches(self, search: str) -> bool:
         return search and search in (self.serial, self.unitId, self.display_name)
 
-    def update(self, device):
+    def update(self, device: DeviceInfo) -> None:
         for k in ("serial", "unitId", "codename", "settings"):
             if not getattr(self, k, None):
                 v = getattr(device, k, None)
@@ -1854,7 +1856,7 @@ def update_devices():
         _diversion_dialog.update_devices()
 
 
-def show_window(model):
+def show_window(model: Gtk.TreeStore):
     GObject.type_register(RuleComponentWrapper)
     global _diversion_dialog
     global _dev_model
