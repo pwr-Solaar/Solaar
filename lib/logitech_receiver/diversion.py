@@ -1550,7 +1550,7 @@ _file_path = os.path.join(_XDG_CONFIG_HOME, "solaar", "rules.yaml")
 rules = built_in_rules
 
 
-def _save_config_rule_file(file_name: str = _file_path, rule_list: list[Rule] = rules.components):
+def _save_config_rule_file(file_name: str = _file_path):
     # This is a trick to show str/float/int lists in-line (inspired by https://stackoverflow.com/a/14001707)
     class inline_list(list):
         pass
@@ -1583,7 +1583,7 @@ def _save_config_rule_file(file_name: str = _file_path, rule_list: list[Rule] = 
         # 'version': (1, 3),  # it would be printed for every rule
     }
     # Save only user-defined rules
-    rules_to_save = sum((r.data()["Rule"] for r in rule_list if r.source == file_name), [])
+    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == file_name), [])
     if logger.isEnabledFor(logging.INFO):
         logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
     try:
