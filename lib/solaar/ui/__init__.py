@@ -17,6 +17,8 @@
 
 import logging
 
+from typing import Callable
+
 import gi
 import yaml
 
@@ -28,8 +30,8 @@ from solaar.ui.config_panel import record_setting
 from solaar.ui.window import find_device
 
 from . import common
+from . import desktop_notifications
 from . import diversion_rules
-from . import notify
 from . import tray
 from . import window
 
@@ -43,11 +45,14 @@ logger = logging.getLogger(__name__)
 assert Gtk.get_major_version() > 2, "Solaar requires Gtk 3 python bindings"
 
 
+APP_ID = "io.github.pwr_solaar.solaar"
+
+
 def _startup(app, startup_hook, use_tray, show_window):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("startup registered=%s, remote=%s", app.get_is_registered(), app.get_is_remote())
     common.start_async()
-    notify.init()
+    desktop_notifications.init()
     if use_tray:
         tray.init(lambda _ignore: window.destroy())
     window.init(show_window, use_tray)
@@ -85,15 +90,24 @@ def _shutdown(app, shutdown_hook):
     shutdown_hook()
     common.stop_async()
     tray.destroy()
-    notify.uninit()
+    desktop_notifications.uninit()
 
 
-def run_loop(startup_hook, shutdown_hook, use_tray, show_window):
+def run_loop(
+    startup_hook: Callable[[], None],
+    shutdown_hook: Callable[[], None],
+    use_tray: bool,
+    show_window: bool,
+):
     assert use_tray or show_window, "need either tray or visible window"
-    APP_ID = "io.github.pwr_solaar.solaar"
+
     application = Gtk.Application.new(APP_ID, Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
 
-    application.connect("startup", lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window), startup_hook)
+    application.connect(
+        "startup",
+        lambda app, startup_hook: _startup(app, startup_hook, use_tray, show_window),
+        startup_hook,
+    )
     application.connect("command-line", _command_line)
     application.connect("activate", _activate)
     application.connect("shutdown", _shutdown, shutdown_hook)
@@ -120,7 +134,7 @@ def _status_changed(device, alert, reason, refresh=False):
     diversion_rules.update_devices()
 
     if alert & (Alert.NOTIFICATION | Alert.ATTENTION):
-        notify.show(device, reason)
+        desktop_notifications.show(device, reason)
 
 
 def status_changed(device, alert=Alert.NONE, reason=None, refresh=False):

@@ -14,8 +14,11 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
 
 import logging
+
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +52,22 @@ _LOGIND_PATH = "/org/freedesktop/login1"
 _LOGIND_INTERFACE = "org.freedesktop.login1.Manager"
 
 
-def watch_suspend_resume(on_resume_callback=None, on_suspend_callback=None):
+def watch_suspend_resume(
+    on_resume_callback: Callable[[], None] | None = None,
+    on_suspend_callback: Callable[[], None] | None = None,
+):
     """Register callback for suspend/resume events.
     They are called only if the system DBus is running, and the Login daemon is available."""
     global _resume_callback, _suspend_callback
     _suspend_callback = on_suspend_callback
     _resume_callback = on_resume_callback
     if bus is not None and on_resume_callback is not None or on_suspend_callback is not None:
-        bus.add_signal_receiver(_suspend_or_resume, "PrepareForSleep", dbus_interface=_LOGIND_INTERFACE, path=_LOGIND_PATH)
+        bus.add_signal_receiver(
+            _suspend_or_resume,
+            "PrepareForSleep",
+            dbus_interface=_LOGIND_INTERFACE,
+            path=_LOGIND_PATH,
+        )
     if logger.isEnabledFor(logging.INFO):
         logger.info("connected to system dbus, watching for suspend/resume events")
 

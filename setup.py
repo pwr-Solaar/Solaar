@@ -3,6 +3,7 @@ import textwrap
 
 from glob import glob
 from os.path import dirname
+from pathlib import Path
 
 from setuptools import find_packages
 
@@ -12,14 +13,11 @@ except ImportError:
     from distutils.core import setup
 
 NAME = "Solaar"
-
-with open("lib/solaar/version", "r") as vfile:
-    version = vfile.read().strip()
+version = Path("lib/solaar/version").read_text().strip()
 
 try:  # get commit from git describe
     commit = subprocess.check_output(["git", "describe", "--always"], stderr=subprocess.DEVNULL).strip().decode()
-    with open("lib/solaar/commit", "w") as vfile:
-        vfile.write(f"{commit}\n")
+    Path("lib/solaar/commit").write_text(f"{commit}\n")
 except Exception:  # get commit from Ubuntu dpkg-parsechangelog
     try:
         commit = (
@@ -28,8 +26,7 @@ except Exception:  # get commit from Ubuntu dpkg-parsechangelog
             .decode()
         )
         commit = commit.split("~")
-        with open("lib/solaar/commit", "w") as vfile:
-            vfile.write(f"{commit[0]}\n")
+        Path("lib/solaar/commit").write_text(f"{commit[0]}\n")
     except Exception as e:
         print("Exception using dpkg-parsechangelog", e)
 

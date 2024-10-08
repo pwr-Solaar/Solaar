@@ -170,7 +170,6 @@ NANO_RECEIVER_C531 = _nano_receiver(0xC531)
 NANO_RECEIVER_C534 = _nano_receiver_max2(0xC534)
 NANO_RECEIVER_C535 = _nano_receiver(0xC535)  # branded as Dell
 NANO_RECEIVER_C537 = _nano_receiver(0xC537)
-# NANO_RECEIVER_C542 = _nano_receiver(0xc542) # does not use HID++
 NANO_RECEIVER_6042 = _lenovo_receiver(0x6042)
 
 # Lightspeed receivers (usually sold with gaming devices)
@@ -183,11 +182,9 @@ LIGHTSPEED_RECEIVER_C545 = _lightspeed_receiver(0xC545)
 LIGHTSPEED_RECEIVER_C547 = _lightspeed_receiver(0xC547)
 
 # EX100 old style receiver pre-unifying protocol
-# EX100_27MHZ_RECEIVER_C50C = _ex100_receiver(0xc50C)  # in hid/hid-ids.h
 EX100_27MHZ_RECEIVER_C517 = _ex100_receiver(0xC517)
-# EX100_27MHZ_RECEIVER_C51B = _ex100_receiver(0xc51B)  # in hid/hid-ids.h
 
-ALL = (
+KNOWN_RECEIVER = (
     BOLT_RECEIVER_C548,
     UNIFYING_RECEIVER_C52B,
     UNIFYING_RECEIVER_C532,
@@ -203,7 +200,6 @@ ALL = (
     NANO_RECEIVER_C534,
     NANO_RECEIVER_C535,
     NANO_RECEIVER_C537,
-    #    NANO_RECEIVER_C542,  # does not use HID++
     NANO_RECEIVER_6042,
     LIGHTSPEED_RECEIVER_C539,
     LIGHTSPEED_RECEIVER_C53A,
