@@ -109,7 +109,9 @@ def run(receivers, args, find_receiver, _ignore):
 
     else:
         receiver.set_lock(False, timeout=timeout)
-        print("Pairing: turn your new device on (timing out in", timeout, "seconds).")
+        print("Pairing: Turn your device on or press, hold, and release")
+        print("a channel button or the channel switch button.")
+        print("Timing out in", timeout, "seconds.")
         pairing_start = time()
         patience = 5  # the lock-open notification may come slightly later, wait for it a bit
         while receiver.pairing.lock_open or time() - pairing_start < patience:
