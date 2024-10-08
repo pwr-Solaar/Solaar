@@ -45,10 +45,20 @@ def create(receiver):
         else:
             text = _("Other receivers are only compatible with a few devices.")
         text += "\n\n"
-        text += _("Turn on the device you want to pair.")
+        text += _("For most devices, turn on the device you want to pair.")
+        text += _("If the device is already turned on, turn it off and on again.")
+        text += "\n"
         text += _("The device must not be paired with a nearby powered-on receiver.")
         text += "\n"
-        text += _("If the device is already turned on, turn it off and on again.")
+        text += _(
+            "For devices with multiple channels, "
+            "press, hold, and release the button for the channel you wish to pair"
+            "\n"
+            "or use the channel switch button to select a channel "
+            "and then press, hold, and release the channel switch button."
+        )
+        text += "\n"
+        text += _("The channel indicator light should be blinking rapidly.")
     if receiver.remaining_pairings() and receiver.remaining_pairings() >= 0:
         text += (
             ngettext(
