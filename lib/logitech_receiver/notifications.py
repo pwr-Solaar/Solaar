@@ -93,7 +93,7 @@ def _process_receiver_notification(receiver, n):
             receiver.changed(reason=reason)
             return True
 
-    elif n.sub_id == Registers.DISCOVERY_STATUS_NOTIFICATION:  # Bolt pairing
+    elif n.sub_id == Registers.DEVICE_DISCOVERY_NOTIFICATION:  # Bolt pairing
         with notification_lock:
             counter = n.address + n.data[0] * 256  # notification counter
             if receiver.pairing.counter is None:
