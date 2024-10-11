@@ -84,7 +84,7 @@ def _command_line(app, command_line):
     return 0
 
 
-def _shutdown(app, shutdown_hook):
+def _shutdown(_app, shutdown_hook):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("shutdown")
     shutdown_hook()

@@ -33,7 +33,9 @@ logger = logging.getLogger(__name__)
 
 def _create_parser():
     parser = argparse.ArgumentParser(
-        prog=NAME.lower(), add_help=False, epilog=f"For details on individual actions, run `{NAME.lower()} <action> --help`."
+        prog=NAME.lower(),
+        add_help=False,
+        epilog=f"For details on individual actions, run `{NAME.lower()} <action> --help`.",
     )
     subparsers = parser.add_subparsers(title="actions", help="command-line action to perform")
 
@@ -53,7 +55,11 @@ def _create_parser():
     )
     sp.set_defaults(action="probe")
 
-    sp = subparsers.add_parser("profiles", help="read or write onboard profiles", epilog="Only works on active devices.")
+    sp = subparsers.add_parser(
+        "profiles",
+        help="read or write onboard profiles",
+        epilog="Only works on active devices.",
+    )
     sp.add_argument(
         "device",
         help="device to read or write profiles of; may be a device number (1..6), a serial number, "
@@ -69,7 +75,10 @@ def _create_parser():
     )
     sp.add_argument(
         "device",
-        help="device to configure; may be a device number (1..6), a serial number, " "or a substring of a device's name",
+        help=(
+            "device to configure; may be a device number (1..6), a serial number, ",
+            "or a substring of a device's name",
+        ),
     )
     sp.add_argument("setting", nargs="?", help="device-specific setting; leave empty to list available settings")
     sp.add_argument("value_key", nargs="?", help="new value for the setting or key for keyed settings")
@@ -106,7 +115,7 @@ def _receivers(dev_path=None):
         if dev_path is not None and dev_path != dev_info.path:
             continue
         try:
-            r = receiver.ReceiverFactory.create_receiver(dev_info)
+            r = receiver.create_receiver(base, dev_info)
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("[%s] => %s", dev_info.path, r)
             if r:
@@ -122,9 +131,9 @@ def _receivers_and_devices(dev_path=None):
             continue
         try:
             if dev_info.isDevice:
-                d = device.DeviceFactory.create_device(base, dev_info)
+                d = device.create_device(base, dev_info)
             else:
-                d = receiver.ReceiverFactory.create_receiver(dev_info)
+                d = receiver.create_receiver(base, dev_info)
 
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug("[%s] => %s", dev_info.path, d)
@@ -206,7 +215,7 @@ def run(cli_args=None, hidraw_path=None):
             c = list(_receivers(hidraw_path))
         if not c:
             raise Exception(
-                'No supported device found.  Use "lsusb" and "bluetoothctl devices Connected" to list connected devices.'
+                'No supported device found. Use "lsusb" and "bluetoothctl devices Connected" to list connected devices.'
             )
         m = import_module("." + action, package=__name__)
         m.run(c, args, _find_receiver, _find_device)

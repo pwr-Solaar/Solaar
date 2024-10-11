@@ -13,6 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
 
 import logging
 import math
@@ -42,13 +43,15 @@ KIND = NamedInts(
 )
 
 
-def bool_or_toggle(current, new):
+def bool_or_toggle(current: bool | str, new: bool | str) -> bool:
     if isinstance(new, bool):
         return new
+
     try:
         return bool(int(new))
     except (TypeError, ValueError):
         new = str(new).lower()
+
     if new in ("true", "yes", "on", "t", "y"):
         return True
     if new in ("false", "no", "off", "f", "n"):
@@ -108,7 +111,7 @@ class Setting:
         assert hasattr(self, "_device")
 
         if self._validator.kind == KIND.range:
-            return (self._validator.min_value, self._validator.max_value)
+            return self._validator.min_value, self._validator.max_value
 
     def _pre_read(self, cached, key=None):
         if self.persist and self._value is None and getattr(self._device, "persister", None):
@@ -1205,7 +1208,7 @@ class RangeValidator(Validator):
         if len(args) == 1:
             return args[0] == current
         elif len(args) == 2:
-            return args[0] <= current and current <= args[1]
+            return args[0] <= current <= args[1]
         else:
             return False
 

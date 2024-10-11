@@ -1,4 +1,4 @@
-## Copyright (C) 2012-2013  Daniel Pavel
+## Copyright (C) Solaar Contributors
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -14,28 +14,23 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import pkgutil
-import subprocess
-import sys
+from solaar.ui.about.model import AboutModel
+from solaar.ui.about.presenter import Presenter
+from solaar.ui.about.view import AboutView
 
-NAME = "Solaar"
 
-try:
-    __version__ = (
-        subprocess.check_output(
-            [
-                "git",
-                "describe",
-                "--always",
-            ],
-            cwd=sys.path[0],
-            stderr=subprocess.DEVNULL,
-        )
-        .strip()
-        .decode()
-    )
-except Exception:
-    try:
-        __version__ = pkgutil.get_data("solaar", "commit").strip().decode()
-    except Exception:
-        __version__ = pkgutil.get_data("solaar", "version").strip().decode()
+def show(_=None, model=None, view=None):
+    """Opens the About dialog."""
+    if model is None:
+        model = AboutModel()
+    if view is None:
+        view = AboutView()
+    presenter = Presenter(model, view)
+    presenter.run()
+
+
+if __name__ == "__main__":
+    from gi.repository import Gtk
+
+    show(None)
+    Gtk.main()

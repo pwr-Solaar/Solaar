@@ -168,7 +168,7 @@ class MouseScrollUI(ActionUI):
         except (TypeError, ValueError):
             return 0
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field_x.set_value(self.__parse(component.amounts[0] if len(component.amounts) >= 1 else 0))
@@ -219,7 +219,7 @@ class MouseClickUI(ActionUI):
         self.widgets[self.field_c] = (3, 1, 1, 1)
         self.widgets[self.field_d] = (4, 1, 1, 1)
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         super().show(component, editable)
         with self.ignore_changes():
             self.field_b.set_text(component.button)
@@ -288,7 +288,7 @@ class ExecuteUI(ActionUI):
         self.show(self.component, editable=True)
         self._on_update_callback()
 
-    def show(self, component, editable):
+    def show(self, component, editable=True):
         n = len(component.args)
         while len(self.fields) < n:
             self._create_field()

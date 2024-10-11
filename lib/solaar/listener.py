@@ -41,13 +41,21 @@ from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 logger = logging.getLogger(__name__)
 
+ACTION_ADD = "add"
+
 _GHOST_DEVICE = namedtuple("_GHOST_DEVICE", ("receiver", "number", "name", "kind", "online"))
 _GHOST_DEVICE.__bool__ = lambda self: False
 _GHOST_DEVICE.__nonzero__ = _GHOST_DEVICE.__bool__
 
 
 def _ghost(device):
-    return _GHOST_DEVICE(receiver=device.receiver, number=device.number, name=device.name, kind=device.kind, online=False)
+    return _GHOST_DEVICE(
+        receiver=device.receiver,
+        number=device.number,
+        name=device.name,
+        kind=device.kind,
+        online=False,
+    )
 
 
 class SolaarListener(listener.EventsListener):
@@ -228,7 +236,9 @@ class SolaarListener(listener.EventsListener):
 
 
 def _process_bluez_dbus(device, path, dictionary, signature):
-    """Process bluez dbus property changed signals for device status changes to discover disconnections and connections"""
+    """Process bluez dbus property changed signals for device status
+    changes to discover disconnections and connections.
+    """
     if device:
         if dictionary.get("Connected") is not None:
             connected = dictionary.get("Connected")
@@ -255,9 +265,9 @@ def _start(device_info):
     assert _status_callback and _setting_callback
     isDevice = device_info.isDevice
     if not isDevice:
-        receiver_ = logitech_receiver.receiver.ReceiverFactory.create_receiver(device_info, _setting_callback)
+        receiver_ = logitech_receiver.receiver.create_receiver(base, device_info, _setting_callback)
     else:
-        receiver_ = logitech_receiver.device.DeviceFactory.create_device(base, device_info, _setting_callback)
+        receiver_ = logitech_receiver.device.create_device(base, device_info, _setting_callback)
         if receiver_:
             configuration.attach_to(receiver_)
             if receiver_.bluetooth and receiver_.hid_serial:
@@ -278,7 +288,7 @@ def start_all():
     if logger.isEnabledFor(logging.INFO):
         logger.info("starting receiver listening threads")
     for device_info in base.receivers_and_devices():
-        _process_receiver_event("add", device_info)
+        _process_receiver_event(ACTION_ADD, device_info)
 
 
 def stop_all():
@@ -368,6 +378,6 @@ def _process_receiver_event(action, device_info):
     if listener_thread is not None:
         assert isinstance(listener_thread, SolaarListener)
         listener_thread.stop()
-    if action == "add":
+    if action == ACTION_ADD:
         _process_add(device_info, 3)
     return False

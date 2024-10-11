@@ -225,7 +225,7 @@ def test_set_3leds(device, level, charging, warning, p1, p2, mocker):
     spy_request.assert_called_once_with(0x8000 | Registers.THREE_LEDS, p1, p2)
 
 
-@pytest.mark.parametrize("device", [(device_offline), (device_features)])
+@pytest.mark.parametrize("device", [device_offline, device_features])
 def test_set_3leds_missing(device, mocker):
     spy_request = mocker.spy(device, "request")
 

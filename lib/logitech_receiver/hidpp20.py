@@ -21,6 +21,7 @@ import struct
 import threading
 
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -55,10 +56,7 @@ KIND_MAP = {kind: hidpp10_constants.DEVICE_KIND[str(kind)] for kind in DEVICE_KI
 
 
 class Device(Protocol):
-    def feature_request(self, feature: FEATURE) -> Any:
-        ...
-
-    def request(self) -> Any:
+    def feature_request(self, feature, function=0x00, *params, no_reply=False) -> Any:
         ...
 
     @property
@@ -253,7 +251,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     def remappable_to(self) -> common.NamedInts:
         self._device.keys._ensure_all_keys_queried()
         ret = common.UnsortedNamedInts()
-        if self.group_mask != []:  # only keys with a non-zero gmask are remappable
+        if self.group_mask:  # only keys with a non-zero gmask are remappable
             ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
                 g = special_keys.CID_GROUP[str(g)]
@@ -291,7 +289,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
     def _getCidReporting(self):
         try:
-            mapped_data = self._device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x20, *tuple(struct.pack("!H", self._cid)))
+            mapped_data = self._device.feature_request(
+                FEATURE.REPROG_CONTROLS_V4,
+                0x20,
+                *tuple(struct.pack("!H", self._cid)),
+            )
             if mapped_data:
                 cid, mapping_flags_1, mapped_to = struct.unpack("!HBH", mapped_data[:5])
                 if cid != self._cid and logger.isEnabledFor(logging.WARNING):
@@ -316,11 +318,17 @@ class ReprogrammableKeyV4(ReprogrammableKey):
             self._mapping_flags = 0
             self._mapped_to = self._cid
 
-    def _setCidReporting(self, flags=None, remap=0):
-        """Sends a `setCidReporting` request with the given parameters. Raises an exception if the parameters are invalid.
-        Parameters:
-        - flags {Dict[NamedInt,bool]} -- a dictionary of which mapping flags to set/unset
-        - remap {int} -- which control ID to remap to; or 0 to keep current mapping
+    def _setCidReporting(self, flags: Dict[NamedInt, bool] = None, remap: int = 0):
+        """Sends a `setCidReporting` request with the given parameters.
+
+        Raises an exception if the parameters are invalid.
+
+        Parameters
+        ----------
+        flags
+            A dictionary of which mapping flags to set/unset.
+        remap
+            Which control ID to remap to; or 0 to keep current mapping.
         """
         flags = flags if flags else {}  # See flake8 B006
 
@@ -555,7 +563,13 @@ class KeysArrayPersistent(KeysArray):
         keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
             key = struct.unpack("!H", keydata[:2])[0]
-            mapped_data = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x30, key >> 8, key & 0xFF, 0xFF)
+            mapped_data = self.device.feature_request(
+                FEATURE.PERSISTENT_REMAPPABLE_ACTION,
+                0x30,
+                key >> 8,
+                key & 0xFF,
+                0xFF,
+            )
             if mapped_data:
                 _ignore, _ignore, actionId, remapped, modifiers, status = struct.unpack("!HBBHBB", mapped_data[:8])
             else:
@@ -571,7 +585,15 @@ class KeysArrayPersistent(KeysArray):
                 remapped = special_keys.HID_CONSUMERCODES[remapped]
             elif actionId == special_keys.ACTIONID.Empty:  # purge data from empty value
                 remapped = modifiers = 0
-            self.keys[index] = PersistentRemappableAction(self.device, index, key, actionId, remapped, modifiers, status)
+            self.keys[index] = PersistentRemappableAction(
+                self.device,
+                index,
+                key,
+                actionId,
+                remapped,
+                modifiers,
+                status,
+            )
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
@@ -673,15 +695,15 @@ class Gesture:
         if index is not None:
             offset = index >> 3  # 8 gestures per byte
             mask = 0x1 << (index % 8)
-            return (offset, mask)
+            return offset, mask
         else:
-            return (None, None)
+            return None, None
 
-    def enable_offset_mask(gesture):
-        return gesture._offset_mask(gesture.index)
+    def enable_offset_mask(self):
+        return self._offset_mask(self.index)
 
-    def diversion_offset_mask(gesture):
-        return gesture._offset_mask(gesture.diversion_index)
+    def diversion_offset_mask(self):
+        return self._offset_mask(self.diversion_index)
 
     def enabled(self):  # is the gesture enabled?
         if self._enabled is None and self.index is not None:
@@ -710,7 +732,14 @@ class Gesture:
             return None
         if self.diversion_index is not None:
             offset, mask = self.diversion_offset_mask()
-            reply = self._device.feature_request(FEATURE.GESTURE_2, 0x40, offset, 0x01, mask, mask if diverted else 0x00)
+            reply = self._device.feature_request(
+                FEATURE.GESTURE_2,
+                0x40,
+                offset,
+                0x01,
+                mask,
+                mask if diverted else 0x00,
+            )
             return reply
 
     def as_int(self):
@@ -919,7 +948,8 @@ LEDParamSize = {
     LEDParam.saturation: 1,
 }
 # not implemented from x8070 Wave=4, Stars=5, Press=6, Audio=7
-# not implemented from x8071 Custom=12, Kitt=13, HSVPulsing=20, WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
+# not implemented from x8071 Custom=12, Kitt=13, HSVPulsing=20,
+# WaveC=22, RippleC=23, SignatureActive=24, SignaturePassive=25
 LEDEffects = {
     0x00: [NamedInt(0x00, _("Disabled")), {}],
     0x01: [NamedInt(0x01, _("Static")), {LEDParam.color: 0, LEDParam.ramp: 3}],
@@ -927,7 +957,10 @@ LEDEffects = {
     0x03: [NamedInt(0x03, _("Cycle")), {LEDParam.period: 5, LEDParam.intensity: 7}],
     0x08: [NamedInt(0x08, _("Boot")), {}],
     0x09: [NamedInt(0x09, _("Demo")), {}],
-    0x0A: [NamedInt(0x0A, _("Breathe")), {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6}],
+    0x0A: [
+        NamedInt(0x0A, _("Breathe")),
+        {LEDParam.color: 0, LEDParam.period: 3, LEDParam.form: 5, LEDParam.intensity: 6},
+    ],
     0x0B: [NamedInt(0x0B, _("Ripple")), {LEDParam.color: 0, LEDParam.period: 4}],
     0x0E: [NamedInt(0x0E, _("Decomposition")), {LEDParam.period: 6, LEDParam.intensity: 8}],
     0x0F: [NamedInt(0x0F, _("Signature1")), {LEDParam.period: 5, LEDParam.intensity: 7}],
@@ -976,7 +1009,7 @@ class LEDEffectSetting:  # an effect plus its parameters
         return dumper.represent_mapping("!LEDEffectSetting", data.__dict__, flow_style=True)
 
     def __eq__(self, other):
-        return type(self) == type(other) and self.to_bytes() == other.to_bytes()
+        return isinstance(other, self.__class__) and self.to_bytes() == other.to_bytes()
 
     def __str__(self):
         return yaml.dump(self, width=float("inf")).rstrip("\n")
@@ -1150,7 +1183,8 @@ class Button:
             elif self.type == ButtonMappingTypes.No_Action:
                 bytes += b"\xff\xff"
         elif self.behavior == ButtonBehaviors.Function:
-            bytes += common.int2bytes(self.value, 1) + b"\xff" + (common.int2bytes(self.data, 1) if self.data else b"\x00")
+            data = common.int2bytes(self.data, 1) if self.data else b"\x00"
+            bytes += common.int2bytes(self.value, 1) + b"\xff" + data
         else:
             bytes = self.bytes if self.bytes else b"\xff\xff\xff\xff"
         return bytes
@@ -1318,7 +1352,9 @@ class OnboardProfiles:
     def to_bytes(self):
         bytes = b""
         for i in range(1, len(self.profiles) + 1):
-            bytes += common.int2bytes(self.profiles[i].sector, 2) + common.int2bytes(self.profiles[i].enabled, 1) + b"\x00"
+            profiles_sector = common.int2bytes(self.profiles[i].sector, 2)
+            profiles_enabled = common.int2bytes(self.profiles[i].enabled, 1)
+            bytes += profiles_sector + profiles_enabled + b"\x00"
         bytes += b"\xff\xff\x00\x00"  # marker after last profile
         while len(bytes) < self.size - 2:  # leave room for CRC
             bytes += b"\xff"
@@ -1333,7 +1369,14 @@ class OnboardProfiles:
             chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, o >> 8, o & 0xFF)
             bytes += chunk
             o += 16
-        chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, (s - 16) >> 8, (s - 16) & 0xFF)
+        chunk = dev.feature_request(
+            FEATURE.ONBOARD_PROFILES,
+            0x50,
+            sector >> 8,
+            sector & 0xFF,
+            (s - 16) >> 8,
+            (s - 16) & 0xFF,
+        )
         bytes += chunk[16 + o - s :]  # the last chunk has to be read in an awkward way
         return bytes
 
@@ -1443,7 +1486,7 @@ class Hidpp20:
                 if transport_bits & flag:
                     tid_map[transport] = modelId[offset : offset + 2].hex().upper()
                     offset = offset + 2
-            return (unitId.hex().upper(), modelId.hex().upper(), tid_map)
+            return unitId.hex().upper(), modelId.hex().upper(), tid_map
 
     def get_kind(self, device: Device):
         """Reads a device's type.
@@ -1831,6 +1874,7 @@ def decipher_battery_unified(report):
 
 def decipher_adc_measurement(report):
     # partial implementation - needs mapping to levels
+    charge_level = None
     adc, flags = struct.unpack("!HB", report[:3])
     for level in battery_voltage_remaining:
         if level[0] < adc:

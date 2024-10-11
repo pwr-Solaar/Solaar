@@ -14,13 +14,13 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Base low-level functions used by the API proper.
-# Unlikely to be used directly unless you're expanding the API.
+"""Base low-level functions as API for upper layers."""
 
 from __future__ import annotations
 
 import dataclasses
 import logging
+import platform
 import struct
 import threading
 import typing
@@ -29,27 +29,84 @@ from contextlib import contextmanager
 from random import getrandbits
 from time import time
 from typing import Any
-
-import gi
-import hidapi
+from typing import Callable
 
 from . import base_usb
 from . import common
 from . import descriptors
 from . import exceptions
 from . import hidpp10_constants
-from . import hidpp20
 from . import hidpp20_constants
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 
 if typing.TYPE_CHECKING:
+    import gi
+
+    from hidapi.common import DeviceInfo
+
     gi.require_version("Gdk", "3.0")
     from gi.repository import GLib  # NOQA: E402
 
+if platform.system() == "Linux":
+    import hidapi.udev_impl as hidapi
+else:
+    import hidapi.hidapi_impl as hidapi
+
 logger = logging.getLogger(__name__)
 
-_hidpp20 = hidpp20.Hidpp20()
+
+class HIDAPI(typing.Protocol):
+    def find_paired_node_wpid(self, receiver_path: str, index: int):
+        ...
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        ...
+
+    def open(self, vendor_id, product_id, serial=None):
+        ...
+
+    def open_path(self, path):
+        ...
+
+    def enumerate(self, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]) -> DeviceInfo:
+        ...
+
+    def monitor_glib(
+        self, glib: GLib, callback: Callable, filter_func: Callable[[int, int, int, bool, bool], dict[str, typing.Any]]
+    ) -> None:
+        ...
+
+    def read(self, device_handle, bytes_count, timeout_ms):
+        ...
+
+    def write(self, device_handle: int, data: bytes) -> int:
+        ...
+
+    def close(self, device_handle) -> None:
+        ...
+
+
+hidapi = typing.cast(HIDAPI, hidapi)
+
+SHORT_MESSAGE_SIZE = 7
+_LONG_MESSAGE_SIZE = 20
+_MEDIUM_MESSAGE_SIZE = 15
+_MAX_READ_SIZE = 32
+
+HIDPP_SHORT_MESSAGE_ID = 0x10
+HIDPP_LONG_MESSAGE_ID = 0x11
+DJ_MESSAGE_ID = 0x20
+
+
+"""Default timeout on read (in seconds)."""
+DEFAULT_TIMEOUT = 4
+# the receiver itself should reply very fast, within 500ms
+_RECEIVER_REQUEST_TIMEOUT = 0.9
+# devices may reply a lot slower, as the call has to go wireless to them and come back
+_DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
+# when pinging, be extra patient (no longer)
+_PING_TIMEOUT = DEFAULT_TIMEOUT
 
 
 @dataclasses.dataclass
@@ -89,55 +146,26 @@ for _ignore, d in descriptors.DEVICES.items():
         KNOWN_DEVICE_IDS.append(_bluetooth_device(d.btid))
 
 
-def other_device_check(bus_id: int, vendor_id: int, product_id: int):
+def _other_device_check(bus_id: int, vendor_id: int, product_id: int) -> dict[str, Any] | None:
     """Check whether product is a Logitech USB-connected or Bluetooth device based on bus, vendor, and product IDs
     This allows Solaar to support receiverless HID++ 2.0 devices that it knows nothing about"""
     if vendor_id != LOGITECH_VENDOR_ID:
         return
 
-    if bus_id == BusID.USB:
-        if product_id >= 0xC07D and product_id <= 0xC094 or product_id >= 0xC32B and product_id <= 0xC344:
-            return _usb_device(product_id, 2)
-    elif bus_id == BusID.BLUETOOTH:
-        if product_id >= 0xB012 and product_id <= 0xB0FF or product_id >= 0xB317 and product_id <= 0xB3FF:
-            return _bluetooth_device(product_id)
+    device_info = None
+    if bus_id == BusID.USB and (0xC07D <= product_id <= 0xC094 or 0xC32B <= product_id <= 0xC344):
+        device_info = _usb_device(product_id, 2)
+    elif bus_id == BusID.BLUETOOTH and (0xB012 <= product_id <= 0xB0FF or 0xB317 <= product_id <= 0xB3FF):
+        device_info = _bluetooth_device(product_id)
+    return device_info
 
 
 def product_information(usb_id: int) -> dict[str, Any]:
     """Returns hardcoded information from USB receiver."""
-    for receiver in base_usb.KNOWN_RECEIVER:
-        if usb_id == receiver.get("product_id"):
-            return receiver
-    raise ValueError(f"Unknown receiver type: 0x{usb_id:02X}")
+    return base_usb.get_receiver_info(usb_id)
 
 
-_SHORT_MESSAGE_SIZE = 7
-_LONG_MESSAGE_SIZE = 20
-_MEDIUM_MESSAGE_SIZE = 15
-_MAX_READ_SIZE = 32
-
-HIDPP_SHORT_MESSAGE_ID = 0x10
-HIDPP_LONG_MESSAGE_ID = 0x11
-DJ_MESSAGE_ID = 0x20
-
-# mapping from report_id to message length
-report_lengths = {
-    HIDPP_SHORT_MESSAGE_ID: _SHORT_MESSAGE_SIZE,
-    HIDPP_LONG_MESSAGE_ID: _LONG_MESSAGE_SIZE,
-    DJ_MESSAGE_ID: _MEDIUM_MESSAGE_SIZE,
-    0x21: _MAX_READ_SIZE,
-}
-"""Default timeout on read (in seconds)."""
-DEFAULT_TIMEOUT = 4
-# the receiver itself should reply very fast, within 500ms
-_RECEIVER_REQUEST_TIMEOUT = 0.9
-# devices may reply a lot slower, as the call has to go wireless to them and come back
-_DEVICE_REQUEST_TIMEOUT = DEFAULT_TIMEOUT
-# when pinging, be extra patient (no longer)
-_PING_TIMEOUT = DEFAULT_TIMEOUT
-
-
-def match(record, bus_id, vendor_id, product_id):
+def _match(record: dict[str, Any], bus_id: int, vendor_id: int, product_id: int):
     return (
         (record.get("bus_id") is None or record.get("bus_id") == bus_id)
         and (record.get("vendor_id") is None or record.get("vendor_id") == vendor_id)
@@ -145,43 +173,56 @@ def match(record, bus_id, vendor_id, product_id):
     )
 
 
-def filter_receivers(bus_id: int, vendor_id: int, product_id: int, hidpp_short=False, hidpp_long=False):
-    """Check that this product is a Logitech receiver
+def _filter_receivers(
+    bus_id: int, vendor_id: int, product_id: int, _hidpp_short: bool = False, _hidpp_long: bool = False
+) -> dict[str, Any]:
+    """Check that this product is a Logitech receiver and return it.
+
+    Filters based on bus_id, vendor_id and product_id.
 
     If so return the receiver record for further checking.
     """
-    for record in base_usb.KNOWN_RECEIVER:  # known receivers
-        if match(record, bus_id, vendor_id, product_id):
+    try:
+        record = base_usb.get_receiver_info(product_id)
+        if _match(record, bus_id, vendor_id, product_id):
             return record
+    except ValueError:
+        pass
+
     if vendor_id == LOGITECH_VENDOR_ID and 0xC500 <= product_id <= 0xC5FF:  # unknown receiver
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": False}
+    return None
 
 
 def receivers():
     """Enumerate all the receivers attached to the machine."""
-    yield from hidapi.enumerate(filter_receivers)
+    yield from hidapi.enumerate(_filter_receivers)
 
 
-def filter(bus_id, vendor_id, product_id, hidpp_short=False, hidpp_long=False):
+def _filter_products_of_interest(
+    bus_id: int, vendor_id: int, product_id: int, hidpp_short: bool = False, hidpp_long: bool = False
+) -> dict[str, Any] | None:
     """Check that this product is of interest and if so return the device record for further checking"""
-    record = filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
+    record = _filter_receivers(bus_id, vendor_id, product_id, hidpp_short, hidpp_long)
     if record:  # known or unknown receiver
         return record
+
     for record in KNOWN_DEVICE_IDS:
-        if match(record, bus_id, vendor_id, product_id):
+        if _match(record, bus_id, vendor_id, product_id):
             return record
     if hidpp_short or hidpp_long:  # unknown devices that use HID++
         return {"vendor_id": vendor_id, "product_id": product_id, "bus_id": bus_id, "isDevice": True}
     elif hidpp_short is None and hidpp_long is None:  # unknown devices in correct range of IDs
-        return other_device_check(bus_id, vendor_id, product_id)
+        return _other_device_check(bus_id, vendor_id, product_id)
+    return None
 
 
 def receivers_and_devices():
     """Enumerate all the receivers and devices directly attached to the machine."""
-    yield from hidapi.enumerate(filter)
+    yield from hidapi.enumerate(_filter_products_of_interest)
 
 
-def notify_on_receivers_glib(glib: GLib, callback):
+def notify_on_receivers_glib(glib: GLib, callback: Callable):
     """Watch for matching devices and notifies the callback on the GLib thread.
 
     Parameters
@@ -189,7 +230,7 @@ def notify_on_receivers_glib(glib: GLib, callback):
     glib
         GLib instance.
     """
-    return hidapi.monitor_glib(glib, callback, filter)
+    return hidapi.monitor_glib(glib, callback, _filter_products_of_interest)
 
 
 def open_path(path):
@@ -251,7 +292,7 @@ def write(handle, devnumber, data, long_message=False):
     assert data is not None
     assert isinstance(data, bytes), (repr(data), type(data))
 
-    if long_message or len(data) > _SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
+    if long_message or len(data) > SHORT_MESSAGE_SIZE - 2 or data[:1] == b"\x82":
         wdata = struct.pack("!BB18s", HIDPP_LONG_MESSAGE_ID, devnumber, data)
     else:
         wdata = struct.pack("!BB5s", HIDPP_SHORT_MESSAGE_ID, devnumber, data)
@@ -291,11 +332,23 @@ def read(handle, timeout=DEFAULT_TIMEOUT):
         return reply
 
 
-# sanity checks on  message report id and size
-def check_message(data):
+def _is_relevant_message(data: bytes) -> bool:
+    """Checks if given id is a HID++ or DJ message.
+
+    Applies sanity checks on message report ID and message size.
+    """
     assert isinstance(data, bytes), (repr(data), type(data))
+
+    # mapping from report_id to message length
+    report_lengths = {
+        HIDPP_SHORT_MESSAGE_ID: SHORT_MESSAGE_SIZE,
+        HIDPP_LONG_MESSAGE_ID: _LONG_MESSAGE_SIZE,
+        DJ_MESSAGE_ID: _MEDIUM_MESSAGE_SIZE,
+        0x21: _MAX_READ_SIZE,
+    }
+
     report_id = ord(data[:1])
-    if report_id in report_lengths:  # is this an HID++ or DJ message?
+    if report_id in report_lengths:
         if report_lengths.get(report_id) == len(data):
             return True
         else:
@@ -321,7 +374,7 @@ def _read(handle, timeout):
         close(handle)
         raise exceptions.NoReceiver(reason=reason) from reason
 
-    if data and check_message(data):  # ignore messages that fail check
+    if data and _is_relevant_message(data):  # ignore messages that fail check
         report_id = ord(data[:1])
         devnumber = ord(data[1:2])
 
@@ -329,7 +382,12 @@ def _read(handle, timeout):
             report_id != DJ_MESSAGE_ID or ord(data[2:3]) > 0x10
         ):  # ignore DJ input messages
             logger.debug(
-                "(%s) => r[%02X %02X %s %s]", handle, report_id, devnumber, common.strhex(data[2:4]), common.strhex(data[4:])
+                "(%s) => r[%02X %02X %s %s]",
+                handle,
+                report_id,
+                devnumber,
+                common.strhex(data[2:4]),
+                common.strhex(data[4:]),
             )
 
         return report_id, devnumber, data[2:]
@@ -351,7 +409,7 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             raise exceptions.NoReceiver(reason=reason) from reason
 
         if data:
-            if check_message(data):  # only process messages that pass check
+            if _is_relevant_message(data):  # only process messages that pass check
                 # report_id = ord(data[:1])
                 if notifications_hook:
                     n = make_notification(ord(data[:1]), ord(data[1:2]), data[2:])
@@ -362,23 +420,23 @@ def _skip_incoming(handle, ihandle, notifications_hook):
             return
 
 
-def make_notification(report_id, devnumber, data) -> HIDPPNotification | None:
+def make_notification(report_id: int, devnumber: int, data: bytes) -> HIDPPNotification | None:
     """Guess if this is a notification (and not just a request reply), and
     return a Notification if it is."""
 
     sub_id = ord(data[:1])
     if sub_id & 0x80 == 0x80:
         # this is either a HID++1.0 register r/w, or an error reply
-        return
+        return None
 
     # DJ input records are not notifications
     if report_id == DJ_MESSAGE_ID and (sub_id < 0x10):
-        return
+        return None
 
     address = ord(data[1:2])
     if sub_id == 0x00 and (address & 0x0F == 0x00):
         # this is a no-op notification - don't do anything with it
-        return
+        return None
 
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
@@ -394,6 +452,7 @@ def make_notification(report_id, devnumber, data) -> HIDPPNotification | None:
         (address & 0x0F == 0x00)
     ):  # noqa: E129
         return HIDPPNotification(report_id, devnumber, sub_id, address, data[2:])
+    return None
 
 
 request_lock = threading.Lock()  # serialize all requests
@@ -436,6 +495,19 @@ def _get_next_sw_id() -> int:
     else:
         _get_next_sw_id.software_id = 2
     return _get_next_sw_id.software_id
+
+
+def find_paired_node(receiver_path: str, index: int, timeout: int):
+    """Find the node of a device paired with a receiver."""
+    return hidapi.find_paired_node(receiver_path, index, timeout)
+
+
+def find_paired_node_wpid(receiver_path: str, index: int):
+    """Find the node of a device paired with a receiver.
+
+    Get wpid from udev.
+    """
+    return hidapi.find_paired_node_wpid(receiver_path, index)
 
 
 # a very few requests (e.g., host switching) do not expect a reply, but use no_reply=True with extreme caution
@@ -494,7 +566,6 @@ def request(
 
         while delta < timeout:
             reply = _read(handle, timeout)
-
             if reply:
                 report_id, reply_devnumber, reply_data = reply
                 if reply_devnumber == devnumber or reply_devnumber == devnumber ^ 0xFF:  # BT device returning 0x00
@@ -526,7 +597,12 @@ def request(
                             error,
                             hidpp20_constants.ERROR[error],
                         )
-                        raise exceptions.FeatureCallError(number=devnumber, request=request_id, error=error, params=params)
+                        raise exceptions.FeatureCallError(
+                            number=devnumber,
+                            request=request_id,
+                            error=error,
+                            params=params,
+                        )
 
                     if reply_data[:2] == request_data[:2]:
                         if devnumber == 0xFF:
@@ -600,7 +676,8 @@ def ping(handle, devnumber, long_message: bool = False):
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == hidpp10_constants.ERROR.invalid_SubID__command:  # a valid reply from a HID++ 1.0 device
+                        if error == hidpp10_constants.ERROR.invalid_SubID__command:
+                            # a valid reply from a HID++ 1.0 device
                             return 1.0
                         if (
                             error == hidpp10_constants.ERROR.resource_error

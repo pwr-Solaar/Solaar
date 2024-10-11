@@ -19,16 +19,13 @@ import logging
 import threading
 import time
 
+from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import Protocol
-from typing import cast
-
-import hidapi
 
 from solaar import configuration
 
-from . import base
 from . import descriptors
 from . import exceptions
 from . import hidpp10
@@ -47,7 +44,10 @@ _hidpp20 = hidpp20.Hidpp20()
 
 
 class LowLevelInterface(Protocol):
-    def open_path(self, path):
+    def open_path(self, path) -> Any:
+        ...
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
         ...
 
     def ping(self, handle, number, long_message: bool):
@@ -60,35 +60,30 @@ class LowLevelInterface(Protocol):
         ...
 
 
-low_level_interface = cast(LowLevelInterface, base)
-
-
-class DeviceFactory:
-    @staticmethod
-    def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
-        """Opens a Logitech Device found attached to the machine, by Linux device path.
-        :returns: An open file handle for the found receiver, or None.
-        """
-        try:
-            handle = low_level.open_path(device_info.path)
-            if handle:
-                # a direct connected device might not be online (as reported by user)
-                return Device(
-                    low_level,
-                    None,
-                    None,
-                    None,
-                    handle=handle,
-                    device_info=device_info,
-                    setting_callback=setting_callback,
-                )
-        except OSError as e:
-            logger.exception("open %s", device_info)
-            if e.errno == errno.EACCES:
-                raise
-        except Exception:
-            logger.exception("open %s", device_info)
+def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
+    """Opens a Logitech Device found attached to the machine, by Linux device path.
+    :returns: An open file handle for the found receiver, or None.
+    """
+    try:
+        handle = low_level.open_path(device_info.path)
+        if handle:
+            # a direct connected device might not be online (as reported by user)
+            return Device(
+                low_level,
+                None,
+                None,
+                None,
+                handle=handle,
+                device_info=device_info,
+                setting_callback=setting_callback,
+            )
+    except OSError as e:
+        logger.exception("open %s", device_info)
+        if e.errno == errno.EACCES:
             raise
+    except Exception:
+        logger.exception("open %s", device_info)
+        raise
 
 
 class Device:
@@ -154,7 +149,7 @@ class Device:
         self.cleanups = []  # functions to run on the device when it is closed
 
         if not self.path:
-            self.path = hidapi.find_paired_node(receiver.path, number, 1) if receiver else None
+            self.path = self.low_level.find_paired_node(receiver.path, number, 1) if receiver else None
         if not self.handle:
             try:
                 self.handle = self.low_level.open_path(self.path) if self.path else None
@@ -181,7 +176,11 @@ class Device:
                 descriptors.get_btid(self.product_id) if self.bluetooth else descriptors.get_usbid(self.product_id)
             )
             if self.number is None:  # for direct-connected devices get 'number' from descriptor protocol else use 0xFF
-                self.number = 0x00 if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0 else 0xFF
+                if self.descriptor and self.descriptor.protocol and self.descriptor.protocol < 2.0:
+                    number = 0x00
+                else:
+                    number = 0xFF
+                self.number = number
             self.ping()  # determine whether a direct-connected device is online
 
         if self.descriptor:

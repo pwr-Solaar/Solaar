@@ -29,11 +29,11 @@ from solaar import NAME
 from solaar.i18n import _
 from solaar.i18n import ngettext
 
-from . import about
 from . import action
 from . import config_panel
 from . import diversion_rules
 from . import icons
+from .about import about
 from .common import ui_async
 
 gi.require_version("Gdk", "3.0")
@@ -305,7 +305,7 @@ def _create_window_layout():
     bottom_buttons_box.set_spacing(20)
     quit_button = _new_button(_("Quit %s") % NAME, "application-exit", _SMALL_BUTTON_ICON_SIZE, clicked=destroy)
     bottom_buttons_box.add(quit_button)
-    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show_window)
+    about_button = _new_button(_("About %s") % NAME, "help-about", _SMALL_BUTTON_ICON_SIZE, clicked=about.show)
     bottom_buttons_box.add(about_button)
     diversion_button = _new_button(
         _("Rule Editor"), "", _SMALL_BUTTON_ICON_SIZE, clicked=lambda *_trigger: diversion_rules.show_window(_model)
@@ -501,47 +501,47 @@ def _update_details(button):
             # If read_all is False, only return stuff that is ~100% already
             # cached, and involves no HID++ calls.
 
-            yield (_("Path"), device.path)
+            yield _("Path"), device.path
             if device.kind is None:
-                yield (_("USB ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
+                yield _("USB ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id
 
                 if read_all:
-                    yield (_("Serial"), device.serial)
+                    yield _("Serial"), device.serial
                 else:
-                    yield (_("Serial"), "...")
+                    yield _("Serial"), "..."
 
             else:
                 # yield ('Codename', device.codename)
-                yield (_("Index"), device.number)
+                yield _("Index"), device.number
                 if device.wpid:
-                    yield (_("Wireless PID"), device.wpid)
+                    yield _("Wireless PID"), device.wpid
                 if device.product_id:
-                    yield (_("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id)
+                    yield _("Product ID"), f"{LOGITECH_VENDOR_ID:04x}:" + device.product_id
                 hid_version = device.protocol
-                yield (_("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown"))
+                yield _("Protocol"), f"HID++ {hid_version:1.1f}" if hid_version else _("Unknown")
                 if read_all and device.polling_rate:
-                    yield (_("Polling rate"), device.polling_rate)
+                    yield _("Polling rate"), device.polling_rate
 
                 if read_all or not device.online:
-                    yield (_("Serial"), device.serial)
+                    yield _("Serial"), device.serial
                 else:
-                    yield (_("Serial"), "...")
+                    yield _("Serial"), "..."
                 if read_all and device.unitId and device.unitId != device.serial:
-                    yield (_("Unit ID"), device.unitId)
+                    yield _("Unit ID"), device.unitId
 
             if read_all:
                 if device.firmware:
                     for fw in list(device.firmware):
-                        yield ("  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip())
+                        yield "  " + _(str(fw.kind)), (fw.name + " " + fw.version).strip()
             elif device.kind is None or device.online:
-                yield (f"  {_('Firmware')}", "...")
+                yield f"  {_('Firmware')}", "..."
 
             flag_bits = device.notification_flags
             if flag_bits is not None:
                 flag_names = (
                     (f"({_('none')})",) if flag_bits == 0 else hidpp10_constants.NOTIFICATION_FLAG.flag_names(flag_bits)
                 )
-                yield (_("Notifications"), (f"\n{' ':15}").join(flag_names))
+                yield _("Notifications"), f"\n{' ':15}".join(flag_names)
 
         def _set_details(text):
             _details._text.set_markup(text)

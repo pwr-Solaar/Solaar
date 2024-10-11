@@ -17,7 +17,6 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import Optional
-from unittest import mock
 
 import pytest
 
@@ -34,6 +33,9 @@ class LowLevelInterfaceFake:
 
     def open_path(self, path):
         return fake_hidpp.open_path(path)
+
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
+        return None
 
     def request(self, response, *args, **kwargs):
         func = partial(fake_hidpp.request, self.responses)
@@ -80,12 +82,12 @@ def test_create_device(device_info, responses, expected_success):
     low_level_mock = LowLevelInterfaceFake(responses)
     if expected_success is None:
         with pytest.raises(PermissionError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.create_device(low_level_mock, device_info)
     elif not expected_success:
         with pytest.raises(TypeError):
-            device.DeviceFactory.create_device(low_level_mock, device_info)
+            device.create_device(low_level_mock, device_info)
     else:
-        test_device = device.DeviceFactory.create_device(low_level_mock, device_info)
+        test_device = device.create_device(low_level_mock, device_info)
         assert bool(test_device) == expected_success
 
 
@@ -96,7 +98,7 @@ def test_create_device(device_info, responses, expected_success):
 def test_device_name(device_info, responses, expected_codename, expected_name, expected_kind):
     low_level = LowLevelInterfaceFake(responses)
 
-    test_device = device.DeviceFactory.create_device(low_level, device_info)
+    test_device = device.create_device(low_level, device_info)
 
     assert test_device.codename == expected_codename
     assert test_device.name == expected_name
@@ -152,12 +154,6 @@ class FakeReceiver:
         return True
 
 
-@pytest.fixture
-def mock_hid():
-    with mock.patch("hidapi.find_paired_node", return_value=None) as find_paired_node:
-        yield find_paired_node
-
-
 pi_CCCC = {"wpid": "CCCC", "kind": 0, "serial": None, "polling": "1ms", "power_switch": "top"}
 pi_2011 = {"wpid": "2011", "kind": 1, "serial": "1234", "polling": "2ms", "power_switch": "bottom"}
 pi_4066 = {"wpid": "4066", "kind": 1, "serial": "5678", "polling": "4ms", "power_switch": "left"}
@@ -194,9 +190,7 @@ pi_DDDD = {"wpid": "DDDD", "kind": 2, "serial": "1234", "polling": "2ms", "power
         ],
     ),
 )
-def test_device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name, mock_hid):
-    mock_hid.side_effect = lambda x, y, z: x
-
+def test_device_receiver(number, pairing_info, responses, handle, _name, codename, p, p2, name):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
@@ -245,9 +239,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
         ["1ms", "2ms", "4ms", "8ms", "1ms", "9ms"],  # polling rate
     ),
 )
-def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate, mock_hid):
-    mock_hid.side_effect = lambda x, y, z: x
-
+def test_device_ids(number, info, responses, handle, unitId, modelId, tid, kind, firmware, serial, id, psl, rate):
     low_level = LowLevelInterfaceFake(responses)
     low_level.request = partial(fake_hidpp.request, fake_hidpp.replace_number(responses, number))
     low_level.ping = partial(fake_hidpp.ping, fake_hidpp.replace_number(responses, number))
