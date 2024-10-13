@@ -22,6 +22,7 @@ import struct
 import threading
 import typing
 
+from typing import Optional
 from solaar.i18n import _
 
 from . import base
@@ -61,7 +62,7 @@ def process(device, notification):
     return _process_device_notification(device, notification)
 
 
-def _process_receiver_notification(receiver: "Receiver", hidpp_notification: "HIDPPNotification") -> bool | None:
+def _process_receiver_notification(receiver: "Receiver", hidpp_notification: "HIDPPNotification") -> Optional[bool]:
     # supposedly only 0x4x notifications arrive for the receiver
     assert hidpp_notification.sub_id in [
         Notification.CONNECT_DISCONNECT,
