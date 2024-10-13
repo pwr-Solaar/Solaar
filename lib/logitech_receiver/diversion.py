@@ -47,7 +47,7 @@ else:
     import evdev
 
 from .common import NamedInt
-from .hidpp20 import FEATURE
+from .hidpp20 import SupportedFeature
 from .special_keys import CONTROL
 
 gi.require_version("Gdk", "3.0")  # isort:skip
@@ -434,7 +434,7 @@ def simulate_scroll(dx, dy):
 
 def thumb_wheel_up(f, r, d, a):
     global thumb_wheel_displacement
-    if f != FEATURE.THUMB_WHEEL or r != 0:
+    if f != SupportedFeature.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) < 0 and signed(d[0:2])
@@ -447,7 +447,7 @@ def thumb_wheel_up(f, r, d, a):
 
 def thumb_wheel_down(f, r, d, a):
     global thumb_wheel_displacement
-    if f != FEATURE.THUMB_WHEEL or r != 0:
+    if f != SupportedFeature.THUMB_WHEEL or r != 0:
         return False
     if a is None:
         return signed(d[0:2]) > 0 and signed(d[0:2])
@@ -460,9 +460,9 @@ def thumb_wheel_down(f, r, d, a):
 
 def charging(f, r, d, _a):
     if (
-        (f == FEATURE.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
-        or (f == FEATURE.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
-        or (f == FEATURE.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
+        (f == SupportedFeature.BATTERY_STATUS and r == 0 and 1 <= d[2] <= 4)
+        or (f == SupportedFeature.BATTERY_VOLTAGE and r == 0 and d[2] & (1 << 7))
+        or (f == SupportedFeature.UNIFIED_BATTERY and r == 0 and 1 <= d[2] <= 3)
     ):
         return 1
     else:
@@ -470,30 +470,30 @@ def charging(f, r, d, _a):
 
 
 TESTS = {
-    "crown_right": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[1] < 128 and d[1], False],
-    "crown_left": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
-    "crown_right_ratchet": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[2] < 128 and d[2], False],
-    "crown_left_ratchet": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
-    "crown_tap": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
-    "crown_start_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
-    "crown_end_press": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
-    "crown_pressed": [lambda f, r, d, a: f == FEATURE.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
+    "crown_right": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] < 128 and d[1], False],
+    "crown_left": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[1] >= 128 and 256 - d[1], False],
+    "crown_right_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] < 128 and d[2], False],
+    "crown_left_ratchet": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[2] >= 128 and 256 - d[2], False],
+    "crown_tap": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[5] == 0x01 and d[5], False],
+    "crown_start_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x01 and d[6], False],
+    "crown_end_press": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and d[6] == 0x05 and d[6], False],
+    "crown_pressed": [lambda f, r, d, a: f == SupportedFeature.CROWN and r == 0 and 0x01 <= d[6] <= 0x04 and d[6], False],
     "thumb_wheel_up": [thumb_wheel_up, True],
     "thumb_wheel_down": [thumb_wheel_down, True],
     "lowres_wheel_up": [
-        lambda f, r, d, a: f == FEATURE.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
+        lambda f, r, d, a: f == SupportedFeature.LOWRES_WHEEL and r == 0 and signed(d[0:1]) > 0 and signed(d[0:1]),
         False,
     ],
     "lowres_wheel_down": [
-        lambda f, r, d, a: f == FEATURE.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
+        lambda f, r, d, a: f == SupportedFeature.LOWRES_WHEEL and r == 0 and signed(d[0:1]) < 0 and signed(d[0:1]),
         False,
     ],
     "hires_wheel_up": [
-        lambda f, r, d, a: f == FEATURE.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
+        lambda f, r, d, a: f == SupportedFeature.HIRES_WHEEL and r == 0 and signed(d[1:3]) > 0 and signed(d[1:3]),
         False,
     ],
     "hires_wheel_down": [
-        lambda f, r, d, a: f == FEATURE.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
+        lambda f, r, d, a: f == SupportedFeature.HIRES_WHEEL and r == 0 and signed(d[1:3]) < 0 and signed(d[1:3]),
         False,
     ],
     "charging": [charging, False],
@@ -738,12 +738,13 @@ class MouseProcess(Condition):
 
 
 class Feature(Condition):
-    def __init__(self, feature, warn=True):
-        if not (isinstance(feature, str) and feature in FEATURE):
+    def __init__(self, feature: str, warn: bool = True):
+        try:
+            self.feature = SupportedFeature[feature]
+        except KeyError:
+            self.feature = None
             if warn:
                 logger.warning("rule Feature argument not name of a feature: %s", feature)
-            self.feature = None
-        self.feature = FEATURE[feature]
 
     def __str__(self):
         return "Feature: " + str(self.feature)
@@ -1052,7 +1053,7 @@ class MouseGesture(Condition):
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("evaluate condition: %s", self)
-        if feature == FEATURE.MOUSE_GESTURE:
+        if feature == SupportedFeature.MOUSE_GESTURE:
             d = notification.data
             data = struct.unpack("!" + (int(len(d) / 2) * "h"), d)
             data_offset = 1
@@ -1501,7 +1502,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
     if notification.address == 0x00:
-        if feature == FEATURE.REPROG_CONTROLS_V4:
+        if feature == SupportedFeature.REPROG_CONTROLS_V4:
             new_keys_down = struct.unpack("!4H", notification.data[:8])
             for key in new_keys_down:
                 if key and key not in keys_down:
@@ -1511,7 +1512,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                     key_up = key
             keys_down = new_keys_down
         # and also G keys down
-        elif feature == FEATURE.GKEY:
+        elif feature == SupportedFeature.GKEY:
             new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
             for i in range(32):
                 if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
@@ -1520,7 +1521,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                     key_up = CONTROL["G" + str(i + 1)]
             g_keys_down = new_g_keys_down
         # and also M keys down
-        elif feature == FEATURE.MKEYS:
+        elif feature == SupportedFeature.MKEYS:
             new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
             for i in range(1, 9):
                 if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
@@ -1529,7 +1530,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                     key_up = CONTROL["M" + str(i)]
             m_keys_down = new_m_keys_down
         # and also MR key
-        elif feature == FEATURE.MR:
+        elif feature == SupportedFeature.MR:
             new_mr_key_down = struct.unpack("!1B", notification.data[:1])[0]
             if not mr_key_down and new_mr_key_down:
                 key_down = CONTROL["MR"]
@@ -1537,7 +1538,7 @@ def process_notification(device, notification: HIDPPNotification, feature) -> No
                 key_up = CONTROL["MR"]
             mr_key_down = new_mr_key_down
         # keep track of thumb wheel movement
-        elif feature == FEATURE.THUMB_WHEEL:
+        elif feature == SupportedFeature.THUMB_WHEEL:
             if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
                 thumb_wheel_displacement = 0
             thumb_wheel_displacement += signed(notification.data[0:2])

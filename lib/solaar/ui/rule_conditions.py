@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from gi.repository import Gtk
 from logitech_receiver import diversion
 from logitech_receiver.diversion import Key
-from logitech_receiver.hidpp20 import FEATURE
+from logitech_receiver.hidpp20 import SupportedFeature
 from logitech_receiver.special_keys import CONTROL
 
 from solaar.i18n import _
@@ -97,15 +97,15 @@ class MouseProcessUI(ConditionUI):
 class FeatureUI(ConditionUI):
     CLASS = diversion.Feature
     FEATURES_WITH_DIVERSION = [
-        str(FEATURE.CROWN),
-        str(FEATURE.THUMB_WHEEL),
-        str(FEATURE.LOWRES_WHEEL),
-        str(FEATURE.HIRES_WHEEL),
-        str(FEATURE.GESTURE_2),
-        str(FEATURE.REPROG_CONTROLS_V4),
-        str(FEATURE.GKEY),
-        str(FEATURE.MKEYS),
-        str(FEATURE.MR),
+        str(SupportedFeature.CROWN),
+        str(SupportedFeature.THUMB_WHEEL),
+        str(SupportedFeature.LOWRES_WHEEL),
+        str(SupportedFeature.HIRES_WHEEL),
+        str(SupportedFeature.GESTURE_2),
+        str(SupportedFeature.REPROG_CONTROLS_V4),
+        str(SupportedFeature.GKEY),
+        str(SupportedFeature.MKEYS),
+        str(SupportedFeature.MR),
     ]
 
     def create_widgets(self):
@@ -120,7 +120,7 @@ class FeatureUI(ConditionUI):
         self.field.set_valign(Gtk.Align.CENTER)
         self.field.set_size_request(600, 0)
         self.field.connect("changed", self._on_update)
-        all_features = [str(f) for f in FEATURE]
+        all_features = [str(f) for f in SupportedFeature]
         CompletionEntry.add_completion_to_entry(self.field.get_child(), all_features)
         self.widgets[self.field] = (0, 1, 1, 1)
 

@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 _hidpp10 = hidpp10.Hidpp10()
 _hidpp20 = hidpp20.Hidpp20()
-_F = hidpp20_constants.FEATURE
+_F = hidpp20_constants.SupportedFeature
 
 
 notification_lock = threading.Lock()

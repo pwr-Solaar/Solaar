@@ -795,7 +795,7 @@ def test_key_template(test, mocker):
     ],
 )
 def test_SpeedChange_action(responses, currentSpeed, newSpeed, mocker):
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.POINTER_SPEED)
+    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.SupportedFeature.POINTER_SPEED)
     spy_setting_callback = mocker.spy(device, "setting_callback")
     settings_templates.check_feature_settings(device, device.settings)  # need to set up all the settings
     device.persister = {"pointer_speed": currentSpeed, "_speed-change": newSpeed}
