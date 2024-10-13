@@ -1495,51 +1495,52 @@ def evaluate_rules(feature, notification: HIDPPNotification, device):
     rules.evaluate(feature, notification, device, True)
 
 
-# process a notification
-def process_notification(device, notification: HIDPPNotification, feature):
+def process_notification(device, notification: HIDPPNotification, feature) -> None:
+    """Processes HID++ notifications."""
     global keys_down, g_keys_down, m_keys_down, mr_key_down, key_down, key_up, thumb_wheel_displacement
     key_down, key_up = None, None
     # need to keep track of keys that are down to find a new key down
-    if feature == FEATURE.REPROG_CONTROLS_V4 and notification.address == 0x00:
-        new_keys_down = struct.unpack("!4H", notification.data[:8])
-        for key in new_keys_down:
-            if key and key not in keys_down:
-                key_down = key
-        for key in keys_down:
-            if key and key not in new_keys_down:
-                key_up = key
-        keys_down = new_keys_down
-    # and also G keys down
-    elif feature == FEATURE.GKEY and notification.address == 0x00:
-        new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
-        for i in range(32):
-            if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
-                key_down = CONTROL["G" + str(i + 1)]
-            if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
-                key_up = CONTROL["G" + str(i + 1)]
-        g_keys_down = new_g_keys_down
-    # and also M keys down
-    elif feature == FEATURE.MKEYS and notification.address == 0x00:
-        new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
-        for i in range(1, 9):
-            if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
-                key_down = CONTROL["M" + str(i)]
-            if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
-                key_up = CONTROL["M" + str(i)]
-        m_keys_down = new_m_keys_down
-    # and also MR key
-    elif feature == FEATURE.MR and notification.address == 0x00:
-        new_mr_key_down = struct.unpack("!1B", notification.data[:1])[0]
-        if not mr_key_down and new_mr_key_down:
-            key_down = CONTROL["MR"]
-        if mr_key_down and not new_mr_key_down:
-            key_up = CONTROL["MR"]
-        mr_key_down = new_mr_key_down
-    # keep track of thumb wheel movment
-    elif feature == FEATURE.THUMB_WHEEL and notification.address == 0x00:
-        if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
-            thumb_wheel_displacement = 0
-        thumb_wheel_displacement += signed(notification.data[0:2])
+    if notification.address == 0x00:
+        if feature == FEATURE.REPROG_CONTROLS_V4:
+            new_keys_down = struct.unpack("!4H", notification.data[:8])
+            for key in new_keys_down:
+                if key and key not in keys_down:
+                    key_down = key
+            for key in keys_down:
+                if key and key not in new_keys_down:
+                    key_up = key
+            keys_down = new_keys_down
+        # and also G keys down
+        elif feature == FEATURE.GKEY:
+            new_g_keys_down = struct.unpack("<I", notification.data[:4])[0]
+            for i in range(32):
+                if new_g_keys_down & (0x01 << i) and not g_keys_down & (0x01 << i):
+                    key_down = CONTROL["G" + str(i + 1)]
+                if g_keys_down & (0x01 << i) and not new_g_keys_down & (0x01 << i):
+                    key_up = CONTROL["G" + str(i + 1)]
+            g_keys_down = new_g_keys_down
+        # and also M keys down
+        elif feature == FEATURE.MKEYS:
+            new_m_keys_down = struct.unpack("!1B", notification.data[:1])[0]
+            for i in range(1, 9):
+                if new_m_keys_down & (0x01 << (i - 1)) and not m_keys_down & (0x01 << (i - 1)):
+                    key_down = CONTROL["M" + str(i)]
+                if m_keys_down & (0x01 << (i - 1)) and not new_m_keys_down & (0x01 << (i - 1)):
+                    key_up = CONTROL["M" + str(i)]
+            m_keys_down = new_m_keys_down
+        # and also MR key
+        elif feature == FEATURE.MR:
+            new_mr_key_down = struct.unpack("!1B", notification.data[:1])[0]
+            if not mr_key_down and new_mr_key_down:
+                key_down = CONTROL["MR"]
+            if mr_key_down and not new_mr_key_down:
+                key_up = CONTROL["MR"]
+            mr_key_down = new_mr_key_down
+        # keep track of thumb wheel movement
+        elif feature == FEATURE.THUMB_WHEEL:
+            if notification.data[4] <= 0x01:  # when wheel starts, zero out last movement
+                thumb_wheel_displacement = 0
+            thumb_wheel_displacement += signed(notification.data[0:2])
 
     GLib.idle_add(evaluate_rules, feature, notification, device)
 
