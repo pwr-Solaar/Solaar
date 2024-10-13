@@ -92,6 +92,14 @@ def test_key_is_down():
     assert result is False
 
 
+def test_feature():
+    expected_data = {"Feature": "CONFIG CHANGE"}
+
+    result = diversion.Feature("CONFIG_CHANGE")
+
+    assert result.data() == expected_data
+
+
 @pytest.mark.parametrize(
     "feature, data",
     [
