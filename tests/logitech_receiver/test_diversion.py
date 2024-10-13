@@ -6,6 +6,8 @@ from unittest.mock import mock_open
 import pytest
 
 from logitech_receiver import diversion
+from logitech_receiver.base import HIDPPNotification
+from logitech_receiver.hidpp20_constants import FEATURE
 
 
 @pytest.fixture
@@ -88,3 +90,30 @@ def test_key_is_down():
     result = diversion.key_is_down(key=diversion.CONTROL.G2)
 
     assert result is False
+
+
+@pytest.mark.parametrize(
+    "feature, data",
+    [
+        (
+            FEATURE.REPROG_CONTROLS_V4,
+            [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08],
+        ),
+        (FEATURE.GKEY, [0x01, 0x02, 0x03, 0x04]),
+        (FEATURE.MKEYS, [0x01, 0x02, 0x03, 0x04]),
+        (FEATURE.MR, [0x01, 0x02, 0x03, 0x04]),
+        (FEATURE.THUMB_WHEEL, [0x01, 0x02, 0x03, 0x04, 0x05]),
+        (FEATURE.DEVICE_UNIT_ID, [0x01, 0x02, 0x03, 0x04, 0x05]),
+    ],
+)
+def test_process_notification(feature, data):
+    device_mock = mock.Mock()
+    notification = HIDPPNotification(
+        report_id=0x01,
+        devnumber=1,
+        sub_id=0x13,
+        address=0x00,
+        data=bytes(data),
+    )
+
+    diversion.process_notification(device_mock, notification, feature)
