@@ -82,3 +82,9 @@ def test_diversion_rule():
         assert isinstance(key, diversion.Key)
         key = component.components[1]
         assert isinstance(key, diversion.KeyPress)
+
+
+def test_key_is_down():
+    result = diversion.key_is_down(key=diversion.CONTROL.G2)
+
+    assert result is False
