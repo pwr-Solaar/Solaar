@@ -20,6 +20,7 @@
 import logging
 import struct
 import threading
+import typing
 
 from solaar.i18n import _
 
@@ -36,7 +37,6 @@ from .common import BatteryStatus
 from .common import Notification
 from .hidpp10_constants import Registers
 
-import typing
 if typing.TYPE_CHECKING:
     from .base import HIDPPNotification
     from .receiver import Receiver
@@ -74,7 +74,7 @@ def _process_receiver_notification(receiver: "Receiver", hidpp_notification: "HI
         Registers.DISCOVERY_STATUS_NOTIFICATION,
         Registers.PAIRING_STATUS_NOTIFICATION,
         Registers.PASSKEY_PRESSED_NOTIFICATION,
-        Registers.PASSKEY_REQUEST_NOTIFICATION
+        Registers.PASSKEY_REQUEST_NOTIFICATION,
     ]
 
     if hidpp_notification.sub_id == Notification.PAIRING_LOCK:
@@ -124,7 +124,7 @@ def _process_receiver_notification(receiver: "Receiver", hidpp_notification: "HI
                 receiver.pairing.device_address = hidpp_notification.data[6:12]
                 receiver.pairing.device_authentication = hidpp_notification.data[14]
             elif hidpp_notification.data[1] == 1:
-                receiver.pairing.device_name = hidpp_notification.data[3: 3 + hidpp_notification.data[2]].decode("utf-8")
+                receiver.pairing.device_name = hidpp_notification.data[3 : 3 + hidpp_notification.data[2]].decode("utf-8")
             return True
 
     elif hidpp_notification.sub_id == Registers.PAIRING_STATUS_NOTIFICATION:  # Bolt pairing
