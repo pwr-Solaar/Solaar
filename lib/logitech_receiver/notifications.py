@@ -22,7 +22,7 @@ import struct
 import threading
 import typing
 
-from typing import
+from typing import Optional
 
 from solaar.i18n import _
 
