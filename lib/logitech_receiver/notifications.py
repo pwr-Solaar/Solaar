@@ -31,12 +31,16 @@ from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings_templates
-from .base import HIDPPNotification
 from .common import Alert
 from .common import BatteryStatus
 from .common import Notification
 from .hidpp10_constants import Registers
-from .receiver import Receiver
+
+import typing
+if typing.TYPE_CHECKING:
+    from .base import HIDPPNotification
+    from .receiver import Receiver
+
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +61,8 @@ def process(device, notification):
     return _process_device_notification(device, notification)
 
 
-def _process_receiver_notification(receiver: Receiver, hidpp_notification: HIDPPNotification):
-    # supposedly only 0x4x notifications arrive for the receiver:
-    # Explicitly specify the list
+def _process_receiver_notification(receiver: "Receiver", hidpp_notification: "HIDPPNotification") -> bool | None:
+    # supposedly only 0x4x notifications arrive for the receiver
     assert hidpp_notification.sub_id in [
         Notification.CONNECT_DISCONNECT,
         Notification.DJ_PAIRING,
