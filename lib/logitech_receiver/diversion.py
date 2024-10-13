@@ -1478,15 +1478,15 @@ built_in_rules = Rule(
 )
 
 
-def key_is_down(key):
+def key_is_down(key: NamedInt) -> bool:
+    """Checks if given key is pressed or not."""
     if key == CONTROL.MR:
         return mr_key_down
     elif CONTROL.M1 <= key <= CONTROL.M8:
         return bool(m_keys_down & (0x01 << (key - CONTROL.M1)))
     elif CONTROL.G1 <= key <= CONTROL.G32:
         return bool(g_keys_down & (0x01 << (key - CONTROL.G1)))
-    else:
-        return key in keys_down
+    return key in keys_down
 
 
 def evaluate_rules(feature, notification: HIDPPNotification, device):
