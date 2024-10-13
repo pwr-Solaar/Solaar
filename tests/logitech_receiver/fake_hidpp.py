@@ -407,8 +407,17 @@ class Device:
         self.settings = []
         if self.feature is not None:
             self.features = hidpp20.FeaturesArray(self)
-            self.responses = [Response("010001", 0x0000, "0001"), Response("20", 0x0100)] + self.responses
-            self.responses.append(Response(f"{self.offset:0>2X}00{self.version:0>2X}", 0x0000, f"{self.feature:0>4X}"))
+            self.responses = [
+                Response("010001", 0x0000, "0001"),
+                Response("20", 0x0100),
+            ] + self.responses
+            self.responses.append(
+                Response(
+                    f"{int(self.offset):0>2X}00{int(self.version):0>2X}",
+                    0x0000,
+                    f"{int(self.feature):0>4X}",
+                )
+            )
         if self.setting_callback is None:
             self.setting_callback = lambda x, y, z: None
         self.add_notification_handler = lambda x, y: None

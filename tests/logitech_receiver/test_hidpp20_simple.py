@@ -18,7 +18,7 @@ import pytest
 
 from logitech_receiver import common
 from logitech_receiver import hidpp20
-from logitech_receiver import hidpp20_constants
+from logitech_receiver.hidpp20_constants import SupportedFeature
 
 from . import fake_hidpp
 
@@ -31,7 +31,7 @@ def test_get_firmware():
         fake_hidpp.Response("01414243030401000101000102030405", 0x0410, "00"),
         fake_hidpp.Response("02414243030401000101000102030405", 0x0410, "01"),
     ]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.DEVICE_FW_VERSION)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_FW_VERSION)
 
     result = _hidpp20.get_firmware(device)
 
@@ -42,7 +42,7 @@ def test_get_firmware():
 
 def test_get_ids():
     responses = [fake_hidpp.Response("FF12345678000D123456789ABC", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.DEVICE_FW_VERSION)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_FW_VERSION)
 
     unitId, modelId, tid_map = _hidpp20.get_ids(device)
 
@@ -53,7 +53,7 @@ def test_get_ids():
 
 def test_get_kind():
     responses = [fake_hidpp.Response("00", 0x0420)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.DEVICE_NAME)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_NAME)
 
     result = _hidpp20.get_kind(device)
 
@@ -67,7 +67,7 @@ def test_get_name():
         fake_hidpp.Response("4142434445464748494A4B4C4D4E4F", 0x0410, "00"),
         fake_hidpp.Response("505152530000000000000000000000", 0x0410, "0F"),
     ]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.DEVICE_NAME)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_NAME)
 
     result = _hidpp20.get_name(device)
 
@@ -80,7 +80,7 @@ def test_get_friendly_name():
         fake_hidpp.Response("004142434445464748494A4B4C4D4E", 0x0410, "00"),
         fake_hidpp.Response("0E4F50515253000000000000000000", 0x0410, "0E"),
     ]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.DEVICE_FRIENDLY_NAME)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.DEVICE_FRIENDLY_NAME)
 
     result = _hidpp20.get_friendly_name(device)
 
@@ -89,11 +89,11 @@ def test_get_friendly_name():
 
 def test_get_battery_status():
     responses = [fake_hidpp.Response("502000FFFF", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.BATTERY_STATUS)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.BATTERY_STATUS)
 
     feature, battery = _hidpp20.get_battery_status(device)
 
-    assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
+    assert feature == SupportedFeature.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
     assert battery.status == common.BatteryStatus.DISCHARGING
@@ -101,11 +101,11 @@ def test_get_battery_status():
 
 def test_get_battery_voltage():
     responses = [fake_hidpp.Response("1000FFFFFF", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.BATTERY_VOLTAGE)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.BATTERY_VOLTAGE)
 
     feature, battery = _hidpp20.get_battery_voltage(device)
 
-    assert feature == hidpp20_constants.FEATURE.BATTERY_VOLTAGE
+    assert feature == SupportedFeature.BATTERY_VOLTAGE
     assert battery.level == 90
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
@@ -113,22 +113,22 @@ def test_get_battery_voltage():
 
 def test_get_battery_unified():
     responses = [fake_hidpp.Response("500100FFFF", 0x0410)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.UNIFIED_BATTERY)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.UNIFIED_BATTERY)
 
     feature, battery = _hidpp20.get_battery_unified(device)
 
-    assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
+    assert feature == SupportedFeature.UNIFIED_BATTERY
     assert battery.level == 80
     assert battery.status == common.BatteryStatus.DISCHARGING
 
 
 def test_get_adc_measurement():
     responses = [fake_hidpp.Response("100003", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.ADC_MEASUREMENT)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.ADC_MEASUREMENT)
 
     feature, battery = _hidpp20.get_adc_measurement(device)
 
-    assert feature == hidpp20_constants.FEATURE.ADC_MEASUREMENT
+    assert feature == SupportedFeature.ADC_MEASUREMENT
     assert battery.level == 90
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
@@ -136,11 +136,11 @@ def test_get_adc_measurement():
 
 def test_get_battery():
     responses = [fake_hidpp.Response("502000FFFF", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.BATTERY_STATUS)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.BATTERY_STATUS)
 
-    feature, battery = _hidpp20.get_battery(device, hidpp20_constants.FEATURE.BATTERY_STATUS)
+    feature, battery = _hidpp20.get_battery(device, SupportedFeature.BATTERY_STATUS)
 
-    assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
+    assert feature == SupportedFeature.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
     assert battery.status == common.BatteryStatus.DISCHARGING
@@ -148,15 +148,15 @@ def test_get_battery():
 
 def test_get_battery_none():
     responses = [
-        fake_hidpp.Response(None, 0x0000, f"{hidpp20_constants.FEATURE.BATTERY_STATUS:0>4X}"),
-        fake_hidpp.Response(None, 0x0000, f"{hidpp20_constants.FEATURE.BATTERY_VOLTAGE:0>4X}"),
+        fake_hidpp.Response(None, 0x0000, f"{int(SupportedFeature.BATTERY_STATUS):0>4X}"),
+        fake_hidpp.Response(None, 0x0000, f"{int(SupportedFeature.BATTERY_VOLTAGE):0>4X}"),
         fake_hidpp.Response("500100ffff", 0x0410),
     ]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.UNIFIED_BATTERY)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.UNIFIED_BATTERY)
 
     feature, battery = _hidpp20.get_battery(device, None)
 
-    assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
+    assert feature == SupportedFeature.UNIFIED_BATTERY
     assert battery.level == 80
     assert battery.status == common.BatteryStatus.DISCHARGING
 
@@ -170,7 +170,7 @@ def test_get_battery_none():
 
 def test_get_mouse_pointer_info():
     responses = [fake_hidpp.Response("01000A", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.MOUSE_POINTER)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.MOUSE_POINTER)
 
     result = _hidpp20.get_mouse_pointer_info(device)
 
@@ -184,7 +184,7 @@ def test_get_mouse_pointer_info():
 
 def test_get_vertical_scrolling_info():
     responses = [fake_hidpp.Response("01080C", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.VERTICAL_SCROLLING)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.VERTICAL_SCROLLING)
 
     result = _hidpp20.get_vertical_scrolling_info(device)
 
@@ -193,7 +193,7 @@ def test_get_vertical_scrolling_info():
 
 def test_get_hi_res_scrolling_info():
     responses = [fake_hidpp.Response("0102", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.HI_RES_SCROLLING)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HI_RES_SCROLLING)
 
     mode, resolution = _hidpp20.get_hi_res_scrolling_info(device)
 
@@ -203,7 +203,7 @@ def test_get_hi_res_scrolling_info():
 
 def test_get_pointer_speed_info():
     responses = [fake_hidpp.Response("0102", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.POINTER_SPEED)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.POINTER_SPEED)
 
     result = _hidpp20.get_pointer_speed_info(device)
 
@@ -212,7 +212,7 @@ def test_get_pointer_speed_info():
 
 def test_get_lowres_wheel_status():
     responses = [fake_hidpp.Response("01", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.LOWRES_WHEEL)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.LOWRES_WHEEL)
 
     result = _hidpp20.get_lowres_wheel_status(device)
 
@@ -225,7 +225,7 @@ def test_get_hires_wheel():
         fake_hidpp.Response("05FF", 0x0410),
         fake_hidpp.Response("03FF", 0x0430),
     ]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.HIRES_WHEEL)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HIRES_WHEEL)
 
     multi, has_invert, has_ratchet, inv, res, target, ratchet = _hidpp20.get_hires_wheel(device)
 
@@ -240,7 +240,7 @@ def test_get_hires_wheel():
 
 def test_get_new_fn_inversion():
     responses = [fake_hidpp.Response("0300", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.NEW_FN_INVERSION)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.NEW_FN_INVERSION)
 
     result = _hidpp20.get_new_fn_inversion(device)
 
@@ -273,7 +273,7 @@ def mock_gethostname(mocker):
     ],
 )
 def test_get_host_names(responses, expected_result, mock_gethostname):
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.HOSTS_INFO)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
 
     result = _hidpp20.get_host_names(device)
 
@@ -304,7 +304,7 @@ def test_get_host_names(responses, expected_result, mock_gethostname):
     ],
 )
 def test_set_host_name(responses, expected_result):
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.HOSTS_INFO)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.HOSTS_INFO)
 
     result = _hidpp20.set_host_name(device, "ABCDEFGHIJKLMNOPQRSTUVWX")
 
@@ -313,7 +313,7 @@ def test_set_host_name(responses, expected_result):
 
 def test_get_onboard_mode():
     responses = [fake_hidpp.Response("03FFFFFFFF", 0x0420)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.ONBOARD_PROFILES)
 
     result = _hidpp20.get_onboard_mode(device)
 
@@ -322,7 +322,7 @@ def test_get_onboard_mode():
 
 def test_set_onboard_mode():
     responses = [fake_hidpp.Response("03FFFFFFFF", 0x0410, "03")]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.ONBOARD_PROFILES)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.ONBOARD_PROFILES)
 
     res = _hidpp20.set_onboard_mode(device, 0x3)
 
@@ -335,7 +335,7 @@ def test_set_onboard_mode():
         ([fake_hidpp.Response("03FFFF", 0x0420)], "1ms"),
         (
             [
-                fake_hidpp.Response(None, 0x0000, f"{hidpp20_constants.FEATURE.REPORT_RATE:0>4X}"),
+                fake_hidpp.Response(None, 0x0000, f"{int(SupportedFeature.REPORT_RATE):04X}"),
                 fake_hidpp.Response("04FFFF", 0x0420),
             ],
             "500us",
@@ -346,7 +346,7 @@ def test_get_polling_rate(
     responses,
     expected_result,
 ):
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.EXTENDED_ADJUSTABLE_REPORT_RATE)
 
     result = _hidpp20.get_polling_rate(device)
 
@@ -355,7 +355,7 @@ def test_get_polling_rate(
 
 def test_get_remaining_pairing():
     responses = [fake_hidpp.Response("03FFFF", 0x0400)]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.REMAINING_PAIRING)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.REMAINING_PAIRING)
 
     result = _hidpp20.get_remaining_pairing(device)
 
@@ -364,7 +364,7 @@ def test_get_remaining_pairing():
 
 def test_config_change():
     responses = [fake_hidpp.Response("03FFFF", 0x0410, "02")]
-    device = fake_hidpp.Device(responses=responses, feature=hidpp20_constants.FEATURE.CONFIG_CHANGE)
+    device = fake_hidpp.Device(responses=responses, feature=SupportedFeature.CONFIG_CHANGE)
 
     result = _hidpp20.config_change(device, 0x2)
 
@@ -376,7 +376,7 @@ def test_decipher_battery_status():
 
     feature, battery = hidpp20.decipher_battery_status(report)
 
-    assert feature == hidpp20_constants.FEATURE.BATTERY_STATUS
+    assert feature == SupportedFeature.BATTERY_STATUS
     assert battery.level == 80
     assert battery.next_level == 32
     assert battery.status == common.BatteryStatus.DISCHARGING
@@ -387,7 +387,7 @@ def test_decipher_battery_voltage():
 
     feature, battery = hidpp20.decipher_battery_voltage(report)
 
-    assert feature == hidpp20_constants.FEATURE.BATTERY_VOLTAGE
+    assert feature == SupportedFeature.BATTERY_VOLTAGE
     assert battery.level == 90
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
@@ -398,7 +398,7 @@ def test_decipher_battery_unified():
 
     feature, battery = hidpp20.decipher_battery_unified(report)
 
-    assert feature == hidpp20_constants.FEATURE.UNIFIED_BATTERY
+    assert feature == SupportedFeature.UNIFIED_BATTERY
     assert battery.level == 80
     assert battery.status == common.BatteryStatus.DISCHARGING
 
@@ -408,7 +408,7 @@ def test_decipher_adc_measurement():
 
     feature, battery = hidpp20.decipher_adc_measurement(report)
 
-    assert feature == hidpp20_constants.FEATURE.ADC_MEASUREMENT
+    assert feature == SupportedFeature.ADC_MEASUREMENT
     assert battery.level == 90
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000

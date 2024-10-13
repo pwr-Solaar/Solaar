@@ -31,11 +31,11 @@ from . import exceptions
 from . import hidpp10
 from . import hidpp10_constants
 from . import hidpp20
-from . import hidpp20_constants
 from . import settings
 from . import settings_templates
 from .common import Alert
 from .common import Battery
+from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
 
@@ -295,9 +295,9 @@ class Device:
     @property
     def led_effects(self):
         if not self._led_effects and self.online and self.protocol >= 2.0:
-            if hidpp20_constants.FEATURE.COLOR_LED_EFFECTS in self.features:
+            if SupportedFeature.COLOR_LED_EFFECTS in self.features:
                 self._led_effects = hidpp20.LEDEffectsInfo(self)
-            elif hidpp20_constants.FEATURE.RGB_EFFECTS in self.features:
+            elif SupportedFeature.RGB_EFFECTS in self.features:
                 self._led_effects = hidpp20.RGBEffectsInfo(self)
         return self._led_effects
 
@@ -435,7 +435,7 @@ class Device:
                     was_active is None
                     or not was_active
                     or push
-                    and (not self.features or hidpp20_constants.FEATURE.WIRELESS_DEVICE_STATUS not in self.features)
+                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)

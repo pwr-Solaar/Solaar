@@ -7,7 +7,7 @@ import pytest
 
 from logitech_receiver import diversion
 from logitech_receiver.base import HIDPPNotification
-from logitech_receiver.hidpp20_constants import FEATURE
+from logitech_receiver.hidpp20_constants import SupportedFeature
 
 
 @pytest.fixture
@@ -104,14 +104,14 @@ def test_feature():
     "feature, data",
     [
         (
-            FEATURE.REPROG_CONTROLS_V4,
+            SupportedFeature.REPROG_CONTROLS_V4,
             [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08],
         ),
-        (FEATURE.GKEY, [0x01, 0x02, 0x03, 0x04]),
-        (FEATURE.MKEYS, [0x01, 0x02, 0x03, 0x04]),
-        (FEATURE.MR, [0x01, 0x02, 0x03, 0x04]),
-        (FEATURE.THUMB_WHEEL, [0x01, 0x02, 0x03, 0x04, 0x05]),
-        (FEATURE.DEVICE_UNIT_ID, [0x01, 0x02, 0x03, 0x04, 0x05]),
+        (SupportedFeature.GKEY, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.MKEYS, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.MR, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.THUMB_WHEEL, [0x01, 0x02, 0x03, 0x04, 0x05]),
+        (SupportedFeature.DEVICE_UNIT_ID, [0x01, 0x02, 0x03, 0x04, 0x05]),
     ],
 )
 def test_process_notification(feature, data):
