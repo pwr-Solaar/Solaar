@@ -5,7 +5,6 @@ import pytest
 from logitech_receiver import hidpp10_constants
 from logitech_receiver import notifications
 from logitech_receiver.base import HIDPPNotification
-
 from logitech_receiver.hidpp10_constants import Registers
 from logitech_receiver.receiver import LowLevelInterface
 from logitech_receiver.receiver import Receiver
