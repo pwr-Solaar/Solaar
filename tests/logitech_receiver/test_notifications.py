@@ -29,8 +29,8 @@ class MockLowLevelInterface:
 @pytest.mark.parametrize(
     "sub_id, notification_data, expected_error, expected_new_device",
     [
-        (Registers.DISCOVERY_STATUS_NOTIFICATION, b'\x01', "device_timeout", None),
-        (Registers.PAIRING_STATUS_NOTIFICATION, b'\x02', "failed", None),
+        (Registers.DISCOVERY_STATUS_NOTIFICATION, b"\x01", "device_timeout", None),
+        (Registers.PAIRING_STATUS_NOTIFICATION, b"\x02", "failed", None),
     ]
 )
 def test_process_receiver_notification_bolt_pairing_error(sub_id, notification_data, expected_error, expected_new_device):
