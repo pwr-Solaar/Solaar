@@ -6,6 +6,8 @@ from unittest.mock import mock_open
 import pytest
 
 from logitech_receiver import diversion
+from logitech_receiver.base import HIDPPNotification
+from logitech_receiver.hidpp20_constants import SupportedFeature
 
 
 @pytest.fixture
@@ -82,3 +84,44 @@ def test_diversion_rule():
         assert isinstance(key, diversion.Key)
         key = component.components[1]
         assert isinstance(key, diversion.KeyPress)
+
+
+def test_key_is_down():
+    result = diversion.key_is_down(key=diversion.CONTROL.G2)
+
+    assert result is False
+
+
+def test_feature():
+    expected_data = {"Feature": "CONFIG CHANGE"}
+
+    result = diversion.Feature("CONFIG_CHANGE")
+
+    assert result.data() == expected_data
+
+
+@pytest.mark.parametrize(
+    "feature, data",
+    [
+        (
+            SupportedFeature.REPROG_CONTROLS_V4,
+            [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08],
+        ),
+        (SupportedFeature.GKEY, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.MKEYS, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.MR, [0x01, 0x02, 0x03, 0x04]),
+        (SupportedFeature.THUMB_WHEEL, [0x01, 0x02, 0x03, 0x04, 0x05]),
+        (SupportedFeature.DEVICE_UNIT_ID, [0x01, 0x02, 0x03, 0x04, 0x05]),
+    ],
+)
+def test_process_notification(feature, data):
+    device_mock = mock.Mock()
+    notification = HIDPPNotification(
+        report_id=0x01,
+        devnumber=1,
+        sub_id=0x13,
+        address=0x00,
+        data=bytes(data),
+    )
+
+    diversion.process_notification(device_mock, notification, feature)

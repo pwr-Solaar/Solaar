@@ -13,6 +13,8 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
+
 import enum
 import logging
 import socket
@@ -20,6 +22,7 @@ import struct
 import traceback
 
 from time import time
+from typing import Any
 from typing import Callable
 
 from solaar.i18n import _
@@ -40,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 _hidpp20 = hidpp20.Hidpp20()
 _DK = hidpp10_constants.DEVICE_KIND
-_F = hidpp20_constants.FEATURE
+_F = hidpp20_constants.SupportedFeature
 
 _GG = hidpp20_constants.GESTURE
 _GP = hidpp20_constants.PARAM
@@ -593,7 +596,7 @@ class ExtendedReportRate(settings.Setting):
             assert reply, "Oops, report rate choices cannot be retrieved!"
             rate_list = []
             rate_flags = common.bytes2int(reply[0:2])
-            for i in range(0, 6):
+            for i in range(0, 7):
                 if rate_flags & (0x01 << i):
                     rate_list.append(setting_class.choices_universe[i])
             return cls(choices=common.NamedInts.list(rate_list), byte_count=1) if rate_list else None
@@ -1795,18 +1798,20 @@ SETTINGS = [
 ]
 
 
-def check_feature(device, sclass):
-    if sclass.feature not in device.features:
+def check_feature(device, settings_class: settings.Setting) -> None | bool | Any:
+    if settings_class.feature not in device.features:
         return
-    if sclass.min_version > device.features.get_feature_version(sclass.feature):
+    if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
         return
     try:
-        detected = sclass.build(device)
+        detected = settings_class.build(device)
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("check_feature %s [%s] detected %s", sclass.name, sclass.feature, detected)
+            logger.debug("check_feature %s [%s] detected %s", settings_class.name, settings_class.feature, detected)
         return detected
     except Exception as e:
-        logger.error("check_feature %s [%s] error %s\n%s", sclass.name, sclass.feature, e, traceback.format_exc())
+        logger.error(
+            "check_feature %s [%s] error %s\n%s", settings_class.name, settings_class.feature, e, traceback.format_exc()
+        )
         return False  # differentiate from an error-free determination that the setting is not supported
 
 

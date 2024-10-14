@@ -14,6 +14,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
 
 import logging
 import socket
@@ -44,9 +45,9 @@ from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ERROR
-from .hidpp20_constants import FEATURE
 from .hidpp20_constants import FIRMWARE_KIND
 from .hidpp20_constants import GESTURE
+from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class FeaturesArray(dict):
             return False
         if self.count > 0:
             return True
-        reply = self.device.request(0x0000, struct.pack("!H", FEATURE.FEATURE_SET))
+        reply = self.device.request(0x0000, struct.pack("!H", SupportedFeature.FEATURE_SET))
         if reply is not None:
             fs_index = reply[0]
             if fs_index:
@@ -105,14 +106,14 @@ class FeaturesArray(dict):
                     return False
                 else:
                     self.count = count[0] + 1  # ROOT feature not included in count
-                    self[FEATURE.ROOT] = 0
-                    self[FEATURE.FEATURE_SET] = fs_index
+                    self[SupportedFeature.ROOT] = 0
+                    self[SupportedFeature.FEATURE_SET] = fs_index
                     return True
             else:
                 self.supported = False
         return False
 
-    def get_feature(self, index: int) -> Optional[NamedInt]:
+    def get_feature(self, index: int) -> SupportedFeature | None:
         feature = self.inverse.get(index)
         if feature is not None:
             return feature
@@ -120,9 +121,13 @@ class FeaturesArray(dict):
             feature = self.inverse.get(index)
             if feature is not None:
                 return feature
-            response = self.device.feature_request(FEATURE.FEATURE_SET, 0x10, index)
+            response = self.device.feature_request(SupportedFeature.FEATURE_SET, 0x10, index)
             if response:
-                feature = FEATURE[struct.unpack("!H", response[:2])[0]]
+                data = struct.unpack("!H", response[:2])[0]
+                try:
+                    feature = SupportedFeature(data)
+                except ValueError:
+                    feature = f"unknown:{data:04X}"
                 self[feature] = index
                 self.version[feature] = response[3]
                 return feature
@@ -290,7 +295,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
     def _getCidReporting(self):
         try:
             mapped_data = self._device.feature_request(
-                FEATURE.REPROG_CONTROLS_V4,
+                SupportedFeature.REPROG_CONTROLS_V4,
                 0x20,
                 *tuple(struct.pack("!H", self._cid)),
             )
@@ -373,7 +378,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         pkt = tuple(struct.pack("!HBH", self._cid, bfield & 0xFF, remap))
         # TODO: to fully support version 4 of REPROG_CONTROLS_V4, append `(bfield >> 8) & 0xff` here.
         # But older devices might behave oddly given that byte, so we don't send it.
-        ret = self._device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x30, *pkt)
+        ret = self._device.feature_request(SupportedFeature.REPROG_CONTROLS_V4, 0x30, *pkt)
         if ret is None or struct.unpack("!BBBBB", ret[:5]) != pkt and logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"REPROG_CONTROLS_v4 setCidReporting on device {self._device} didn't echo request packet.")
 
@@ -434,13 +439,13 @@ class PersistentRemappableAction:
     def remap(self, data_bytes):
         cid = common.int2bytes(self._cid, 2)
         if common.bytes2int(data_bytes) == special_keys.KEYS_Default:  # map back to default
-            self._device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x50, cid, 0xFF)
+            self._device.feature_request(SupportedFeature.PERSISTENT_REMAPPABLE_ACTION, 0x50, cid, 0xFF)
             self._device.remap_keys._query_key(self.index)
             return self._device.remap_keys.keys[self.index].data_bytes
         else:
             self.actionId, self.remapped, self._modifierMask = struct.unpack("!BHB", data_bytes)
             self.cidStatus = 0x01
-            self._device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
+            self._device.feature_request(SupportedFeature.PERSISTENT_REMAPPABLE_ACTION, 0x40, cid, 0xFF, data_bytes)
             return True
 
 
@@ -451,10 +456,10 @@ class KeysArray:
         assert device is not None
         self.device = device
         self.lock = threading.Lock()
-        if FEATURE.REPROG_CONTROLS_V4 in self.device.features:
-            self.keyversion = FEATURE.REPROG_CONTROLS_V4
-        elif FEATURE.REPROG_CONTROLS_V2 in self.device.features:
-            self.keyversion = FEATURE.REPROG_CONTROLS_V2
+        if SupportedFeature.REPROG_CONTROLS_V4 in self.device.features:
+            self.keyversion = SupportedFeature.REPROG_CONTROLS_V4
+        elif SupportedFeature.REPROG_CONTROLS_V2 in self.device.features:
+            self.keyversion = SupportedFeature.REPROG_CONTROLS_V2
         else:
             if logger.isEnabledFor(logging.ERROR):
                 logger.error(f"Trying to read keys on device {device} which has no REPROG_CONTROLS(_VX) support.")
@@ -515,7 +520,7 @@ class KeysArrayV2(KeysArray):
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
-        keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS, 0x10, index)
+        keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS, 0x10, index)
         if keydata:
             cid, tid, flags = struct.unpack("!HHB", keydata[:5])
             self.keys[index] = ReprogrammableKey(self.device, index, cid, tid, flags)
@@ -531,7 +536,7 @@ class KeysArrayV4(KeysArrayV2):
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
-        keydata = self.device.feature_request(FEATURE.REPROG_CONTROLS_V4, 0x10, index)
+        keydata = self.device.feature_request(SupportedFeature.REPROG_CONTROLS_V4, 0x10, index)
         if keydata:
             cid, tid, flags1, pos, group, gmask, flags2 = struct.unpack("!HHBBBBB", keydata[:9])
             flags = flags1 | (flags2 << 8)
@@ -552,7 +557,7 @@ class KeysArrayPersistent(KeysArray):
     @property
     def capabilities(self):
         if self._capabilities is None and self.device.online:
-            capabilities = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x00)
+            capabilities = self.device.feature_request(SupportedFeature.PERSISTENT_REMAPPABLE_ACTION, 0x00)
             assert capabilities, "Oops, persistent remappable key capabilities cannot be retrieved!"
             self._capabilities = struct.unpack("!H", capabilities[:2])[0]  # flags saying what the mappings are possible
         return self._capabilities
@@ -560,11 +565,11 @@ class KeysArrayPersistent(KeysArray):
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
             raise IndexError(index)
-        keydata = self.device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
+        keydata = self.device.feature_request(SupportedFeature.PERSISTENT_REMAPPABLE_ACTION, 0x20, index, 0xFF)
         if keydata:
             key = struct.unpack("!H", keydata[:2])[0]
             mapped_data = self.device.feature_request(
-                FEATURE.PERSISTENT_REMAPPABLE_ACTION,
+                SupportedFeature.PERSISTENT_REMAPPABLE_ACTION,
                 0x30,
                 key >> 8,
                 key & 0xFF,
@@ -708,7 +713,7 @@ class Gesture:
     def enabled(self):  # is the gesture enabled?
         if self._enabled is None and self.index is not None:
             offset, mask = self.enable_offset_mask()
-            result = self._device.feature_request(FEATURE.GESTURE_2, 0x10, offset, 0x01, mask)
+            result = self._device.feature_request(SupportedFeature.GESTURE_2, 0x10, offset, 0x01, mask)
             self._enabled = bool(result[0] & mask) if result else None
         return self._enabled
 
@@ -717,13 +722,15 @@ class Gesture:
             return None
         if self.index is not None:
             offset, mask = self.enable_offset_mask()
-            reply = self._device.feature_request(FEATURE.GESTURE_2, 0x20, offset, 0x01, mask, mask if enable else 0x00)
+            reply = self._device.feature_request(
+                SupportedFeature.GESTURE_2, 0x20, offset, 0x01, mask, mask if enable else 0x00
+            )
             return reply
 
     def diverted(self):  # is the gesture diverted?
         if self._diverted is None and self.diversion_index is not None:
             offset, mask = self.diversion_offset_mask()
-            result = self._device.feature_request(FEATURE.GESTURE_2, 0x30, offset, 0x01, mask)
+            result = self._device.feature_request(SupportedFeature.GESTURE_2, 0x30, offset, 0x01, mask)
             self._diverted = bool(result[0] & mask) if result else None
         return self._diverted
 
@@ -733,7 +740,7 @@ class Gesture:
         if self.diversion_index is not None:
             offset, mask = self.diversion_offset_mask()
             reply = self._device.feature_request(
-                FEATURE.GESTURE_2,
+                SupportedFeature.GESTURE_2,
                 0x40,
                 offset,
                 0x01,
@@ -776,7 +783,7 @@ class Param:
         return self._value if self._value is not None else self.read()
 
     def read(self):  # returns the bytes for the parameter
-        result = self._device.feature_request(FEATURE.GESTURE_2, 0x70, self.index, 0xFF)
+        result = self._device.feature_request(SupportedFeature.GESTURE_2, 0x70, self.index, 0xFF)
         if result:
             self._value = common.bytes2int(result[: self.size])
             return self._value
@@ -788,14 +795,14 @@ class Param:
         return self._default_value
 
     def _read_default(self):
-        result = self._device.feature_request(FEATURE.GESTURE_2, 0x60, self.index, 0xFF)
+        result = self._device.feature_request(SupportedFeature.GESTURE_2, 0x60, self.index, 0xFF)
         if result:
             self._default_value = common.bytes2int(result[: self.size])
             return self._default_value
 
     def write(self, bytes):
         self._value = bytes
-        return self._device.feature_request(FEATURE.GESTURE_2, 0x80, self.index, bytes, 0xFF)
+        return self._device.feature_request(SupportedFeature.GESTURE_2, 0x80, self.index, bytes, 0xFF)
 
     def __str__(self):
         return str(self.param)
@@ -820,7 +827,7 @@ class Spec:
 
     def read(self):
         try:
-            value = self._device.feature_request(FEATURE.GESTURE_2, 0x50, self.id, 0xFF)
+            value = self._device.feature_request(SupportedFeature.GESTURE_2, 0x50, self.id, 0xFF)
         except exceptions.FeatureCallError:  # some calls produce an error (notably spec 5 multiplier on K400Plus)
             if logger.isEnabledFor(logging.WARNING):
                 logger.warning(
@@ -849,7 +856,7 @@ class Gestures:
         field_high = 0x00
         while field_high != 0x01:  # end of fields
             # retrieve the next eight fields
-            fields = device.feature_request(FEATURE.GESTURE_2, 0x00, index >> 8, index & 0xFF)
+            fields = device.feature_request(SupportedFeature.GESTURE_2, 0x00, index >> 8, index & 0xFF)
             if not fields:
                 break
             for offset in range(8):
@@ -907,7 +914,7 @@ class Backlight:
     """Information about the current settings of x1982 Backlight2 v3, but also works for previous versions"""
 
     def __init__(self, device):
-        response = device.feature_request(FEATURE.BACKLIGHT2, 0x00)
+        response = device.feature_request(SupportedFeature.BACKLIGHT2, 0x00)
         if not response:
             raise exceptions.FeatureCallError(msg="No reply from device.")
         self.device = device
@@ -923,7 +930,7 @@ class Backlight:
         self.options = (self.options & 0x07) | (self.mode << 3)
         level = self.level if self.mode == 0x3 else 0
         data_bytes = struct.pack("<BBBBHHH", self.enabled, self.options, 0xFF, level, self.dho, self.dhi, self.dpow)
-        return self.device.feature_request(FEATURE.BACKLIGHT2, 0x10, data_bytes)
+        return self.device.feature_request(SupportedFeature.BACKLIGHT2, 0x10, data_bytes)
 
 
 class LEDParam:
@@ -1067,12 +1074,12 @@ class LEDZoneInfo:  # effects that a zone can do
 class LEDEffectsInfo:  # effects that the LEDs can do, using COLOR_LED_EFFECTS
     def __init__(self, device):
         self.device = device
-        info = device.feature_request(FEATURE.COLOR_LED_EFFECTS, 0x00)
+        info = device.feature_request(SupportedFeature.COLOR_LED_EFFECTS, 0x00)
         self.count, _, capabilities = struct.unpack("!BHH", info[0:5])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
-            self.zones.append(LEDZoneInfo(FEATURE.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, i))
+            self.zones.append(LEDZoneInfo(SupportedFeature.COLOR_LED_EFFECTS, 0x10, 0, 0x20, device, i))
 
     def to_command(self, index, setting):
         return self.zones[index].to_command(setting)
@@ -1085,12 +1092,12 @@ class LEDEffectsInfo:  # effects that the LEDs can do, using COLOR_LED_EFFECTS
 class RGBEffectsInfo(LEDEffectsInfo):  # effects that the LEDs can do using RGB_EFFECTS
     def __init__(self, device):
         self.device = device
-        info = device.feature_request(FEATURE.RGB_EFFECTS, 0x00, 0xFF, 0xFF, 0x00)
+        info = device.feature_request(SupportedFeature.RGB_EFFECTS, 0x00, 0xFF, 0xFF, 0x00)
         _, _, self.count, _, capabilities = struct.unpack("!BBBHH", info[0:7])
         self.readable = capabilities & 0x1
         self.zones = []
         for i in range(0, self.count):
-            self.zones.append(LEDZoneInfo(FEATURE.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
+            self.zones.append(LEDZoneInfo(SupportedFeature.RGB_EFFECTS, 0x00, 1, 0x00, device, i))
 
 
 ButtonBehaviors = common.NamedInts(MacroExecute=0x0, MacroStop=0x1, MacroStopAll=0x2, Send=0x8, Function=0x9)
@@ -1310,23 +1317,23 @@ class OnboardProfiles:
     def get_profile_headers(cls, device):
         i = 0
         headers = []
-        chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
+        chunk = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x50, 0, 0, 0, i)
         s = 0x00
         if chunk[0:4] == b"\x00\x00\x00\x00" or chunk[0:4] == b"\xff\xff\xff\xff":  # look in ROM instead
-            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
+            chunk = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x50, 0x01, 0, 0, i)
             s = 0x01
         while chunk[0:2] != b"\xff\xff":
             sector, enabled = struct.unpack("!HB", chunk[0:3])
             headers.append((sector, enabled))
             i += 1
-            chunk = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
+            chunk = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x50, s, 0, 0, i * 4)
         return headers
 
     @classmethod
     def from_device(cls, device):
         if not device.online:  # wake the device up if necessary
             device.ping()
-        response = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x00)
+        response = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x00)
         memory, profile, _macro = struct.unpack("!BBB", response[0:3])
         if memory != 0x01 or profile > 0x04:
             return
@@ -1366,11 +1373,11 @@ class OnboardProfiles:
         bytes = b""
         o = 0
         while o < s - 15:
-            chunk = dev.feature_request(FEATURE.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, o >> 8, o & 0xFF)
+            chunk = dev.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x50, sector >> 8, sector & 0xFF, o >> 8, o & 0xFF)
             bytes += chunk
             o += 16
         chunk = dev.feature_request(
-            FEATURE.ONBOARD_PROFILES,
+            SupportedFeature.ONBOARD_PROFILES,
             0x50,
             sector >> 8,
             sector & 0xFF,
@@ -1385,12 +1392,12 @@ class OnboardProfiles:
         rbs = OnboardProfiles.read_sector(device, s, len(bs))
         if rbs[:-2] == bs[:-2]:
             return False
-        device.feature_request(FEATURE.ONBOARD_PROFILES, 0x60, s >> 8, s & 0xFF, 0, 0, len(bs) >> 8, len(bs) & 0xFF)
+        device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x60, s >> 8, s & 0xFF, 0, 0, len(bs) >> 8, len(bs) & 0xFF)
         o = 0
         while o < len(bs) - 1:
-            device.feature_request(FEATURE.ONBOARD_PROFILES, 0x70, bs[o : o + 16])
+            device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x70, bs[o : o + 16])
             o += 16
-        device.feature_request(FEATURE.ONBOARD_PROFILES, 0x80)
+        device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x80)
         return True
 
     def write(self, device):
@@ -1449,13 +1456,13 @@ class Hidpp20:
 
         :returns: a list of FirmwareInfo tuples, ordered by firmware layer.
         """
-        count = device.feature_request(FEATURE.DEVICE_FW_VERSION)
+        count = device.feature_request(SupportedFeature.DEVICE_FW_VERSION)
         if count:
             count = ord(count[:1])
 
             fw = []
             for index in range(0, count):
-                fw_info = device.feature_request(FEATURE.DEVICE_FW_VERSION, 0x10, index)
+                fw_info = device.feature_request(SupportedFeature.DEVICE_FW_VERSION, 0x10, index)
                 if fw_info:
                     level = ord(fw_info[:1]) & 0x0F
                     if level == 0 or level == 1:
@@ -1475,7 +1482,7 @@ class Hidpp20:
 
     def get_ids(self, device):
         """Reads a device's ids (unit and model numbers)"""
-        ids = device.feature_request(FEATURE.DEVICE_FW_VERSION)
+        ids = device.feature_request(SupportedFeature.DEVICE_FW_VERSION)
         if ids:
             unitId = ids[1:5]
             modelId = ids[7:13]
@@ -1495,7 +1502,7 @@ class Hidpp20:
         :returns: a string describing the device type, or ``None`` if the device is
         not available or does not support the ``DEVICE_NAME`` feature.
         """
-        kind = device.feature_request(FEATURE.DEVICE_NAME, 0x20)
+        kind = device.feature_request(SupportedFeature.DEVICE_NAME, 0x20)
         if kind:
             kind = ord(kind[:1])
             try:
@@ -1509,13 +1516,13 @@ class Hidpp20:
         :returns: a string with the device name, or ``None`` if the device is not
         available or does not support the ``DEVICE_NAME`` feature.
         """
-        name_length = device.feature_request(FEATURE.DEVICE_NAME)
+        name_length = device.feature_request(SupportedFeature.DEVICE_NAME)
         if name_length:
             name_length = ord(name_length[:1])
 
             name = b""
             while len(name) < name_length:
-                fragment = device.feature_request(FEATURE.DEVICE_NAME, 0x10, len(name))
+                fragment = device.feature_request(SupportedFeature.DEVICE_NAME, 0x10, len(name))
                 if fragment:
                     name += fragment[: name_length - len(name)]
                 else:
@@ -1530,13 +1537,13 @@ class Hidpp20:
         :returns: a string with the device name, or ``None`` if the device is not
         available or does not support the ``DEVICE_NAME`` feature.
         """
-        name_length = device.feature_request(FEATURE.DEVICE_FRIENDLY_NAME)
+        name_length = device.feature_request(SupportedFeature.DEVICE_FRIENDLY_NAME)
         if name_length:
             name_length = ord(name_length[:1])
 
             name = b""
             while len(name) < name_length:
-                fragment = device.feature_request(FEATURE.DEVICE_FRIENDLY_NAME, 0x10, len(name))
+                fragment = device.feature_request(SupportedFeature.DEVICE_FRIENDLY_NAME, 0x10, len(name))
                 if fragment:
                     name += fragment[1 : name_length - len(name) + 1]
                 else:
@@ -1546,27 +1553,27 @@ class Hidpp20:
             return name.decode("utf-8")
 
     def get_battery_status(self, device: Device):
-        report = device.feature_request(FEATURE.BATTERY_STATUS)
+        report = device.feature_request(SupportedFeature.BATTERY_STATUS)
         if report:
             return decipher_battery_status(report)
 
     def get_battery_unified(self, device: Device):
-        report = device.feature_request(FEATURE.UNIFIED_BATTERY, 0x10)
+        report = device.feature_request(SupportedFeature.UNIFIED_BATTERY, 0x10)
         if report is not None:
             return decipher_battery_unified(report)
 
     def get_battery_voltage(self, device: Device):
-        report = device.feature_request(FEATURE.BATTERY_VOLTAGE)
+        report = device.feature_request(SupportedFeature.BATTERY_VOLTAGE)
         if report is not None:
             return decipher_battery_voltage(report)
 
     def get_adc_measurement(self, device: Device):
         try:  # this feature call produces an error for headsets that are connected but inactive
-            report = device.feature_request(FEATURE.ADC_MEASUREMENT)
+            report = device.feature_request(SupportedFeature.ADC_MEASUREMENT)
             if report is not None:
                 return decipher_adc_measurement(report)
         except exceptions.FeatureCallError:
-            return FEATURE.ADC_MEASUREMENT if FEATURE.ADC_MEASUREMENT in device.features else None
+            return SupportedFeature.ADC_MEASUREMENT if SupportedFeature.ADC_MEASUREMENT in device.features else None
 
     def get_battery(self, device, feature):
         """Return battery information - feature, approximate level, next, charging, voltage
@@ -1588,39 +1595,39 @@ class Hidpp20:
     def get_keys(self, device: Device):
         # TODO: add here additional variants for other REPROG_CONTROLS
         count = None
-        if FEATURE.REPROG_CONTROLS_V2 in device.features:
-            count = device.feature_request(FEATURE.REPROG_CONTROLS_V2)
+        if SupportedFeature.REPROG_CONTROLS_V2 in device.features:
+            count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V2)
             return KeysArrayV2(device, ord(count[:1]))
-        elif FEATURE.REPROG_CONTROLS_V4 in device.features:
-            count = device.feature_request(FEATURE.REPROG_CONTROLS_V4)
+        elif SupportedFeature.REPROG_CONTROLS_V4 in device.features:
+            count = device.feature_request(SupportedFeature.REPROG_CONTROLS_V4)
             return KeysArrayV4(device, ord(count[:1]))
         return None
 
     def get_remap_keys(self, device: Device):
-        count = device.feature_request(FEATURE.PERSISTENT_REMAPPABLE_ACTION, 0x10)
+        count = device.feature_request(SupportedFeature.PERSISTENT_REMAPPABLE_ACTION, 0x10)
         if count:
             return KeysArrayPersistent(device, ord(count[:1]))
 
     def get_gestures(self, device: Device):
         if getattr(device, "_gestures", None) is not None:
             return device._gestures
-        if FEATURE.GESTURE_2 in device.features:
+        if SupportedFeature.GESTURE_2 in device.features:
             return Gestures(device)
 
     def get_backlight(self, device: Device):
         if getattr(device, "_backlight", None) is not None:
             return device._backlight
-        if FEATURE.BACKLIGHT2 in device.features:
+        if SupportedFeature.BACKLIGHT2 in device.features:
             return Backlight(device)
 
     def get_profiles(self, device: Device):
         if getattr(device, "_profiles", None) is not None:
             return device._profiles
-        if FEATURE.ONBOARD_PROFILES in device.features:
+        if SupportedFeature.ONBOARD_PROFILES in device.features:
             return OnboardProfiles.from_device(device)
 
     def get_mouse_pointer_info(self, device: Device):
-        pointer_info = device.feature_request(FEATURE.MOUSE_POINTER)
+        pointer_info = device.feature_request(SupportedFeature.MOUSE_POINTER)
         if pointer_info:
             dpi, flags = struct.unpack("!HB", pointer_info[:3])
             acceleration = ("none", "low", "med", "high")[flags & 0x3]
@@ -1634,7 +1641,7 @@ class Hidpp20:
             }
 
     def get_vertical_scrolling_info(self, device: Device):
-        vertical_scrolling_info = device.feature_request(FEATURE.VERTICAL_SCROLLING)
+        vertical_scrolling_info = device.feature_request(SupportedFeature.VERTICAL_SCROLLING)
         if vertical_scrolling_info:
             roller, ratchet, lines = struct.unpack("!BBB", vertical_scrolling_info[:3])
             roller_type = (
@@ -1650,13 +1657,13 @@ class Hidpp20:
             return {"roller": roller_type, "ratchet": ratchet, "lines": lines}
 
     def get_hi_res_scrolling_info(self, device: Device):
-        hi_res_scrolling_info = device.feature_request(FEATURE.HI_RES_SCROLLING)
+        hi_res_scrolling_info = device.feature_request(SupportedFeature.HI_RES_SCROLLING)
         if hi_res_scrolling_info:
             mode, resolution = struct.unpack("!BB", hi_res_scrolling_info[:2])
             return mode, resolution
 
     def get_pointer_speed_info(self, device: Device):
-        pointer_speed_info = device.feature_request(FEATURE.POINTER_SPEED)
+        pointer_speed_info = device.feature_request(SupportedFeature.POINTER_SPEED)
         if pointer_speed_info:
             pointer_speed_hi, pointer_speed_lo = struct.unpack("!BB", pointer_speed_info[:2])
             # if pointer_speed_lo > 0:
@@ -1664,16 +1671,16 @@ class Hidpp20:
             return pointer_speed_hi + pointer_speed_lo / 256
 
     def get_lowres_wheel_status(self, device: Device):
-        lowres_wheel_status = device.feature_request(FEATURE.LOWRES_WHEEL)
+        lowres_wheel_status = device.feature_request(SupportedFeature.LOWRES_WHEEL)
         if lowres_wheel_status:
             wheel_flag = struct.unpack("!B", lowres_wheel_status[:1])[0]
             wheel_reporting = ("HID", "HID++")[wheel_flag & 0x01]
             return wheel_reporting
 
     def get_hires_wheel(self, device: Device):
-        caps = device.feature_request(FEATURE.HIRES_WHEEL, 0x00)
-        mode = device.feature_request(FEATURE.HIRES_WHEEL, 0x10)
-        ratchet = device.feature_request(FEATURE.HIRES_WHEEL, 0x030)
+        caps = device.feature_request(SupportedFeature.HIRES_WHEEL, 0x00)
+        mode = device.feature_request(SupportedFeature.HIRES_WHEEL, 0x10)
+        ratchet = device.feature_request(SupportedFeature.HIRES_WHEEL, 0x030)
 
         if caps and mode and ratchet:
             # Parse caps
@@ -1697,7 +1704,7 @@ class Hidpp20:
             return multi, has_invert, has_ratchet, inv, res, target, ratchet
 
     def get_new_fn_inversion(self, device: Device):
-        state = device.feature_request(FEATURE.NEW_FN_INVERSION, 0x00)
+        state = device.feature_request(SupportedFeature.NEW_FN_INVERSION, 0x00)
         if state:
             inverted, default_inverted = struct.unpack("!BB", state[:2])
             inverted = (inverted & 0x01) != 0
@@ -1705,18 +1712,18 @@ class Hidpp20:
             return inverted, default_inverted
 
     def get_host_names(self, device: Device):
-        state = device.feature_request(FEATURE.HOSTS_INFO, 0x00)
+        state = device.feature_request(SupportedFeature.HOSTS_INFO, 0x00)
         host_names = {}
         if state:
             capability_flags, _ignore, numHosts, currentHost = struct.unpack("!BBBB", state[:4])
             if capability_flags & 0x01:  # device can get host names
                 for host in range(0, numHosts):
-                    hostinfo = device.feature_request(FEATURE.HOSTS_INFO, 0x10, host)
+                    hostinfo = device.feature_request(SupportedFeature.HOSTS_INFO, 0x10, host)
                     _ignore, status, _ignore, _ignore, nameLen, _ignore = struct.unpack("!BBBBBB", hostinfo[:6])
                     name = ""
                     remaining = nameLen
                     while remaining > 0:
-                        name_piece = device.feature_request(FEATURE.HOSTS_INFO, 0x30, host, nameLen - remaining)
+                        name_piece = device.feature_request(SupportedFeature.HOSTS_INFO, 0x30, host, nameLen - remaining)
                         if name_piece:
                             name += name_piece[2 : 2 + min(remaining, 14)].decode()
                             remaining = max(0, remaining - 14)
@@ -1735,62 +1742,64 @@ class Hidpp20:
         currentName = bytearray(currentName, "utf-8")
         if logger.isEnabledFor(logging.INFO):
             logger.info("Setting host name to %s", name)
-        state = device.feature_request(FEATURE.HOSTS_INFO, 0x00)
+        state = device.feature_request(SupportedFeature.HOSTS_INFO, 0x00)
         if state:
             flags, _ignore, _ignore, currentHost = struct.unpack("!BBBB", state[:4])
             if flags & 0x02:
-                hostinfo = device.feature_request(FEATURE.HOSTS_INFO, 0x10, currentHost)
+                hostinfo = device.feature_request(SupportedFeature.HOSTS_INFO, 0x10, currentHost)
                 _ignore, _ignore, _ignore, _ignore, _ignore, maxNameLen = struct.unpack("!BBBBBB", hostinfo[:6])
                 if name[:maxNameLen] == currentName[:maxNameLen] and False:
                     return True
                 length = min(maxNameLen, len(name))
                 chunk = 0
                 while chunk < length:
-                    response = device.feature_request(FEATURE.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk : chunk + 14])
+                    response = device.feature_request(
+                        SupportedFeature.HOSTS_INFO, 0x40, currentHost, chunk, name[chunk : chunk + 14]
+                    )
                     if not response:
                         return False
                     chunk += 14
             return True
 
     def get_onboard_mode(self, device: Device):
-        state = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x20)
+        state = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x20)
 
         if state:
             mode = struct.unpack("!B", state[:1])[0]
             return mode
 
     def set_onboard_mode(self, device: Device, mode):
-        state = device.feature_request(FEATURE.ONBOARD_PROFILES, 0x10, mode)
+        state = device.feature_request(SupportedFeature.ONBOARD_PROFILES, 0x10, mode)
         return state
 
     def get_polling_rate(self, device: Device):
-        state = device.feature_request(FEATURE.REPORT_RATE, 0x10)
+        state = device.feature_request(SupportedFeature.REPORT_RATE, 0x10)
         if state:
             rate = struct.unpack("!B", state[:1])[0]
             return str(rate) + "ms"
         else:
             rates = ["8ms", "4ms", "2ms", "1ms", "500us", "250us", "125us"]
-            state = device.feature_request(FEATURE.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
+            state = device.feature_request(SupportedFeature.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x20)
             if state:
                 rate = struct.unpack("!B", state[:1])[0]
                 return rates[rate]
 
     def get_remaining_pairing(self, device: Device):
-        result = device.feature_request(FEATURE.REMAINING_PAIRING, 0x0)
+        result = device.feature_request(SupportedFeature.REMAINING_PAIRING, 0x0)
         if result:
             result = struct.unpack("!B", result[:1])[0]
-            FEATURE._fallback = lambda x: f"unknown:{x:04X}"
+            SupportedFeature._fallback = lambda x: f"unknown:{x:04X}"
             return result
 
     def config_change(self, device: Device, configuration, no_reply=False):
-        return device.feature_request(FEATURE.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
+        return device.feature_request(SupportedFeature.CONFIG_CHANGE, 0x10, configuration, no_reply=no_reply)
 
 
 battery_functions = {
-    FEATURE.BATTERY_STATUS: Hidpp20.get_battery_status,
-    FEATURE.BATTERY_VOLTAGE: Hidpp20.get_battery_voltage,
-    FEATURE.UNIFIED_BATTERY: Hidpp20.get_battery_unified,
-    FEATURE.ADC_MEASUREMENT: Hidpp20.get_adc_measurement,
+    SupportedFeature.BATTERY_STATUS: Hidpp20.get_battery_status,
+    SupportedFeature.BATTERY_VOLTAGE: Hidpp20.get_battery_voltage,
+    SupportedFeature.UNIFIED_BATTERY: Hidpp20.get_battery_unified,
+    SupportedFeature.ADC_MEASUREMENT: Hidpp20.get_adc_measurement,
 }
 
 
@@ -1807,7 +1816,7 @@ def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
         logger.debug(
             "battery status %s%% charged, next %s%%, status %s", battery_discharge_level, battery_discharge_next_level, status
         )
-    return FEATURE.BATTERY_STATUS, Battery(battery_discharge_level, battery_discharge_next_level, status, None)
+    return SupportedFeature.BATTERY_STATUS, Battery(battery_discharge_level, battery_discharge_next_level, status, None)
 
 
 def decipher_battery_voltage(report):
@@ -1845,7 +1854,7 @@ def decipher_battery_voltage(report):
             charge_lvl,
             charge_type,
         )
-    return FEATURE.BATTERY_VOLTAGE, Battery(charge_lvl, None, status, voltage)
+    return SupportedFeature.BATTERY_VOLTAGE, Battery(charge_lvl, None, status, voltage)
 
 
 def decipher_battery_unified(report):
@@ -1869,7 +1878,7 @@ def decipher_battery_unified(report):
     else:
         level = BatteryLevelApproximation.EMPTY
 
-    return FEATURE.UNIFIED_BATTERY, Battery(discharge if discharge else level, None, status, None)
+    return SupportedFeature.UNIFIED_BATTERY, Battery(discharge if discharge else level, None, status, None)
 
 
 def decipher_adc_measurement(report):
@@ -1882,4 +1891,4 @@ def decipher_adc_measurement(report):
             break
     if flags & 0x01:
         status = BatteryStatus.RECHARGING if flags & 0x02 else BatteryStatus.DISCHARGING
-        return FEATURE.ADC_MEASUREMENT, Battery(charge_level, None, status, adc)
+        return SupportedFeature.ADC_MEASUREMENT, Battery(charge_level, None, status, adc)
