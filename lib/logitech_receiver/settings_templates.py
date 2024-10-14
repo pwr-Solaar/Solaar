@@ -593,7 +593,7 @@ class ExtendedReportRate(settings.Setting):
             assert reply, "Oops, report rate choices cannot be retrieved!"
             rate_list = []
             rate_flags = common.bytes2int(reply[0:2])
-            for i in range(0, 6):
+            for i in range(0, 7):
                 if rate_flags & (0x01 << i):
                     rate_list.append(setting_class.choices_universe[i])
             return cls(choices=common.NamedInts.list(rate_list), byte_count=1) if rate_list else None
