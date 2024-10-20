@@ -25,8 +25,8 @@ from . import common
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
+from .common import FirmwareKind
 from .hidpp10_constants import Registers
-from .hidpp20_constants import FIRMWARE_KIND
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ class Hidpp10:
             device.registers.append(Registers.BATTERY_STATUS)
             return parse_battery_status(Registers.BATTERY_STATUS, reply)
 
-    def get_firmware(self, device: Device):
+    def get_firmware(self, device: Device) -> tuple[common.FirmwareInfo] | None:
         assert device is not None
 
         firmware = [None, None, None]
@@ -125,21 +125,21 @@ class Hidpp10:
         reply = read_register(device, Registers.FIRMWARE, 0x02)
         if reply:
             fw_version += ".B" + common.strhex(reply[1:3])
-        fw = common.FirmwareInfo(FIRMWARE_KIND.Firmware, "", fw_version, None)
+        fw = common.FirmwareInfo(FirmwareKind.Firmware, "", fw_version, None)
         firmware[0] = fw
 
         reply = read_register(device, Registers.FIRMWARE, 0x04)
         if reply:
             bl_version = common.strhex(reply[1:3])
             bl_version = f"{bl_version[0:2]}.{bl_version[2:4]}"
-            bl = common.FirmwareInfo(FIRMWARE_KIND.Bootloader, "", bl_version, None)
+            bl = common.FirmwareInfo(FirmwareKind.Bootloader, "", bl_version, None)
             firmware[1] = bl
 
         reply = read_register(device, Registers.FIRMWARE, 0x03)
         if reply:
             o_version = common.strhex(reply[1:3])
             o_version = f"{o_version[0:2]}.{o_version[2:4]}"
-            o = common.FirmwareInfo(FIRMWARE_KIND.Other, "", o_version, None)
+            o = common.FirmwareInfo(FirmwareKind.Other, "", o_version, None)
             firmware[2] = o
 
         if any(firmware):

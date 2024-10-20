@@ -14,10 +14,14 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+from __future__ import annotations
+
 import errno
 import logging
 import threading
 import time
+import typing
 
 from typing import Any
 from typing import Callable
@@ -36,6 +40,9 @@ from . import settings_templates
 from .common import Alert
 from .common import Battery
 from .hidpp20_constants import SupportedFeature
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver import common
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +272,7 @@ class Device:
         return self._kind or "?"
 
     @property
-    def firmware(self):
+    def firmware(self) -> tuple[common.FirmwareInfo]:
         if self._firmware is None and self.online:
             if self.protocol >= 2.0:
                 self._firmware = _hidpp20.get_firmware(self)

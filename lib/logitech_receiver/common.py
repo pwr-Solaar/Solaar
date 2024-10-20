@@ -18,14 +18,20 @@ from __future__ import annotations
 
 import binascii
 import dataclasses
+import typing
 
 from enum import IntEnum
+from typing import Generator
+from typing import Iterable
 from typing import Optional
 from typing import Union
 
 import yaml
 
 from solaar.i18n import _
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver.hidpp20_constants import FirmwareKind
 
 LOGITECH_VENDOR_ID = 0x046D
 
@@ -502,6 +508,31 @@ class NamedInts:
         return isinstance(other, self.__class__) and self._values == other._values
 
 
+def flag_names(enum_class: Iterable, value: int) -> Generator[str]:
+    """Extracts single bit flags from a (binary) number.
+
+    Parameters
+    ----------
+    enum_class
+        Enum class to extract flags from.
+    value
+        Number to extract binary flags from.
+    """
+    indexed = {item.value: item.name for item in enum_class}
+
+    unknown_bits = value
+    for k in indexed:
+        # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+        assert bin(k).count("1") == 1
+        if k & value == k:
+            unknown_bits &= ~k
+            yield indexed[k].lower()
+
+    # Yield any remaining unknown bits
+    if unknown_bits != 0:
+        yield f"unknown:{unknown_bits:06X}"
+
+
 class UnsortedNamedInts(NamedInts):
     def _sort_values(self):
         pass
@@ -543,9 +574,16 @@ class KwException(Exception):
             return self.args[0].get(k)  # was self.args[0][k]
 
 
+class FirmwareKind(IntEnum):
+    Firmware = 0x00
+    Bootloader = 0x01
+    Hardware = 0x02
+    Other = 0x03
+
+
 @dataclasses.dataclass
 class FirmwareInfo:
-    kind: str
+    kind: FirmwareKind
     name: str
     version: str
     extras: str | None

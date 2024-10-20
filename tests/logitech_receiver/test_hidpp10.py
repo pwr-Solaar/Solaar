@@ -9,7 +9,6 @@ import pytest
 from logitech_receiver import common
 from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants
-from logitech_receiver import hidpp20_constants
 from logitech_receiver.hidpp10_constants import Registers
 
 _hidpp10 = hidpp10.Hidpp10()
@@ -190,18 +189,28 @@ def test_hidpp10_get_battery(device, expected_result, expected_register):
 
 
 @pytest.mark.parametrize(
-    "device, expected_length",
+    "device, expected_firmwares",
     [
-        (device_offline, 0),
-        (device_standard, 3),
+        (device_offline, []),
+        (
+            device_standard,
+            [
+                common.FirmwareKind.Firmware,
+                common.FirmwareKind.Bootloader,
+                common.FirmwareKind.Other,
+            ],
+        ),
     ],
 )
-def test_hidpp10_get_firmware(device, expected_length):
+def test_hidpp10_get_firmware(device, expected_firmwares):
     firmwares = _hidpp10.get_firmware(device)
 
-    assert len(firmwares) == expected_length if expected_length > 0 else firmwares is None
-    for firmware in firmwares if firmwares is not None else []:
-        assert firmware.kind in hidpp20_constants.FIRMWARE_KIND
+    if not expected_firmwares:
+        assert firmwares is None
+    else:
+        firmware_types = [firmware.kind for firmware in firmwares]
+        assert firmware_types == expected_firmwares
+        assert len(firmwares) == len(expected_firmwares)
 
 
 @pytest.mark.parametrize(

@@ -19,6 +19,8 @@
 
 import os
 
+from enum import IntEnum
+
 import yaml
 
 from .common import NamedInts
@@ -595,8 +597,30 @@ MAPPING_FLAG = NamedInts(
     persistently_diverted=0x04,
     diverted=0x01,
 )
-CID_GROUP_BIT = NamedInts(g8=0x80, g7=0x40, g6=0x20, g5=0x10, g4=0x08, g3=0x04, g2=0x02, g1=0x01)
-CID_GROUP = NamedInts(g8=8, g7=7, g6=6, g5=5, g4=4, g3=3, g2=2, g1=1)
+
+
+class CIDGroupBit(IntEnum):
+    g1 = 0x01
+    g2 = 0x02
+    g3 = 0x04
+    g4 = 0x08
+    g5 = 0x10
+    g6 = 0x20
+    g7 = 0x40
+    g8 = 0x80
+
+
+class CidGroup(IntEnum):
+    g1 = 1
+    g2 = 2
+    g3 = 3
+    g4 = 4
+    g5 = 5
+    g6 = 6
+    g7 = 7
+    g8 = 8
+
+
 DISABLE = NamedInts(
     Caps_Lock=0x01,
     Num_Lock=0x02,

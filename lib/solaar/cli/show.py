@@ -14,6 +14,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from logitech_receiver import common
 from logitech_receiver import exceptions
 from logitech_receiver import hidpp10
 from logitech_receiver import hidpp10_constants
@@ -149,7 +150,7 @@ def _print_device(dev, num=None):
         for feature, index in dev.features.enumerate():
             flags = dev.request(0x0000, feature.bytes(2))
             flags = 0 if flags is None else ord(flags[1:2])
-            flags = hidpp20_constants.FEATURE_FLAG.flag_names(flags)
+            flags = common.flag_names(hidpp20_constants.FeatureFlag, flags)
             version = dev.features.get_feature_version(int(feature))
             version = version if version else 0
             print("        %2d: %-22s {%04X} V%s    %s " % (index, feature, feature, version, ", ".join(flags)))

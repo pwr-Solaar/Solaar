@@ -18,6 +18,7 @@ import pytest
 
 from logitech_receiver import common
 from logitech_receiver import hidpp20
+from logitech_receiver import hidpp20_constants
 from logitech_receiver.hidpp20_constants import SupportedFeature
 
 from . import fake_hidpp
@@ -412,3 +413,28 @@ def test_decipher_adc_measurement():
     assert battery.level == 90
     assert battery.status == common.BatteryStatus.RECHARGING
     assert battery.voltage == 0x1000
+
+
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0x01, ["unknown:000001"]),
+        (0x0F, ["unknown:00000F"]),
+        (0xF0, ["internal", "hidden", "obsolete", "unknown:000010"]),
+        (0x20, ["internal"]),
+        (0x33, ["internal", "unknown:000013"]),
+        (0x3F, ["internal", "unknown:00001F"]),
+        (0x40, ["hidden"]),
+        (0x50, ["hidden", "unknown:000010"]),
+        (0x5F, ["hidden", "unknown:00001F"]),
+        (0x7F, ["internal", "hidden", "unknown:00001F"]),
+        (0x80, ["obsolete"]),
+        (0xA0, ["internal", "obsolete"]),
+        (0xE0, ["internal", "hidden", "obsolete"]),
+        (0xFF, ["internal", "hidden", "obsolete", "unknown:00001F"]),
+    ],
+)
+def test_feature_flag_names(code, expected_flags):
+    flags = common.flag_names(hidpp20_constants.FeatureFlag, code)
+
+    assert list(flags) == expected_flags
