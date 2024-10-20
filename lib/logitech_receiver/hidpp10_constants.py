@@ -102,15 +102,18 @@ ERROR = NamedInts(
     wrong_pin_code=0x0C,
 )
 
+
 class PairingError(IntEnum):
     DEVICE_TIMEOUT = 0x01
     DEVICE_NOT_SUPPORTED = 0x02
     TOO_MANY_DEVICES = 0x03
     SEQUENCE_TIMEOUT = 0x06
 
+
 class BoltPairingError(IntEnum):
     DEVICE_TIMEOUT = 0x01
     FAILED = 0x02
+
 
 class Registers(IntEnum):
     """Known HID registers.
