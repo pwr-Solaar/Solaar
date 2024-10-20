@@ -172,7 +172,6 @@ DEVICE_KIND = NamedInts(
     receiver=0x07,
 )
 
-FIRMWARE_KIND = NamedInts(Firmware=0x00, Bootloader=0x01, Hardware=0x02, Other=0x03)
 
 ONBOARD_MODES = NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
 
