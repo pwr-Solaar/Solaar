@@ -23,6 +23,7 @@ import threading
 
 from typing import Any
 from typing import Dict
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -241,8 +242,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         self._mapped_to = None
 
     @property
-    def group_mask(self):
-        return special_keys.CID_GROUP_BIT.flag_names(self._gmask)
+    def group_mask(self) -> Generator[str]:
+        return common.flag_names(special_keys.CIDGroupBit, self._gmask)
 
     @property
     def mapped_to(self) -> NamedInt:
@@ -259,7 +260,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self.group_mask:  # only keys with a non-zero gmask are remappable
             ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
-                g = special_keys.CID_GROUP[str(g)]
+                g = special_keys.CidGroup[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
                     tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
                     tgt_task = NamedInt(tgt_cid, tgt_task)
@@ -515,7 +516,7 @@ class KeysArrayV2(KeysArray):
         self.cid_to_tid = {}
         """The mapping from Control ID groups to Controls IDs that belong to it.
         A key k can only be remapped to targets in groups within k.group_mask."""
-        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
+        self.group_cids = {g: [] for g in special_keys.CidGroup}
 
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
@@ -543,7 +544,7 @@ class KeysArrayV4(KeysArrayV2):
             self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
             self.cid_to_tid[cid] = tid
             if group != 0:  # 0 = does not belong to a group
-                self.group_cids[special_keys.CID_GROUP[group]].append(cid)
+                self.group_cids[special_keys.CidGroup(group)].append(cid)
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
