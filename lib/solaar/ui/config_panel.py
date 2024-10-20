@@ -479,6 +479,7 @@ class MultipleRangeControl(MultipleControl):
 
 class PackedRangeControl(MultipleRangeControl):
     def setup(self, setting):
+        self._items = []
         validator = setting._validator
         for item in range(validator.count):
             h = Gtk.HBox(homogeneous=False, spacing=0)
