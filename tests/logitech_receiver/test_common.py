@@ -1,3 +1,5 @@
+from enum import IntFlag
+
 import pytest
 import yaml
 
@@ -136,6 +138,26 @@ def test_named_ints_flag_names(code, expected_flags):
     flags = list(named_ints_flag_bits.flag_names(code))
 
     assert flags == expected_flags
+
+
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0, []),
+        (0b0010, ["two"]),
+        (0b0101, ["one", "three"]),
+        (0b1001, ["one", "unknown:000008"]),
+    ],
+)
+def test_flag_names(code, expected_flags):
+    class ExampleFlag(IntFlag):
+        one = 0x1
+        two = 0x2
+        three = 0x4
+
+    flags = common.flag_names(ExampleFlag, code)
+
+    assert list(flags) == expected_flags
 
 
 def test_named_ints_setitem():

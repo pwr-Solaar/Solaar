@@ -20,6 +20,8 @@ import binascii
 import dataclasses
 
 from enum import IntEnum
+from typing import Generator
+from typing import Iterable
 from typing import Optional
 from typing import Union
 
@@ -500,6 +502,31 @@ class NamedInts:
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self._values == other._values
+
+
+def flag_names(enum_class: Iterable, value: int) -> Generator[str]:
+    """Extracts single bit flags from a (binary) number.
+
+    Parameters
+    ----------
+    enum_class
+        Enum class to extract flags from.
+    value
+        Number to extract binary flags from.
+    """
+    indexed = {item.value: item.name for item in enum_class}
+
+    unknown_bits = value
+    for k in indexed:
+        # Ensure that the key (flag value) is a power of 2 (a single bit flag)
+        assert bin(k).count("1") == 1
+        if k & value == k:
+            unknown_bits &= ~k
+            yield indexed[k].lower()
+
+    # Yield any remaining unknown bits
+    if unknown_bits != 0:
+        yield f"unknown:{unknown_bits:06X}"
 
 
 class UnsortedNamedInts(NamedInts):
