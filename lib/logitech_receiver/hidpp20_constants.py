@@ -15,6 +15,7 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from enum import IntEnum
+from enum import IntFlag
 
 from .common import NamedInts
 
@@ -152,7 +153,13 @@ class SupportedFeature(IntEnum):
         return self.name.replace("_", " ")
 
 
-FEATURE_FLAG = NamedInts(internal=0x20, hidden=0x40, obsolete=0x80)
+class FeatureFlag(IntFlag):
+    """Single bit flags."""
+
+    INTERNAL = 0x20
+    HIDDEN = 0x40
+    OBSOLETE = 0x80
+
 
 DEVICE_KIND = NamedInts(
     keyboard=0x00,
