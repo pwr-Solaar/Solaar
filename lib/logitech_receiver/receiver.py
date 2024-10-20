@@ -15,9 +15,12 @@
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 import errno
 import logging
 import time
+import typing
 
 from dataclasses import dataclass
 from typing import Callable
@@ -34,6 +37,9 @@ from .common import Alert
 from .common import Notification
 from .device import Device
 from .hidpp10_constants import Registers
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver import common
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +151,7 @@ class Receiver:
             self.status_callback(self, alert=alert, reason=reason)
 
     @property
-    def firmware(self):
+    def firmware(self) -> tuple[common.FirmwareInfo]:
         if self._firmware is None and self.handle:
             self._firmware = _hidpp10.get_firmware(self)
         return self._firmware

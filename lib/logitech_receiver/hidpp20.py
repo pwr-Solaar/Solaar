@@ -39,13 +39,13 @@ from . import special_keys
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
+from .common import FirmwareKind
 from .common import NamedInt
 from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ERROR
-from .hidpp20_constants import FIRMWARE_KIND
 from .hidpp20_constants import GESTURE
 from .hidpp20_constants import SupportedFeature
 
@@ -1451,7 +1451,7 @@ battery_voltage_remaining = (
 
 
 class Hidpp20:
-    def get_firmware(self, device):
+    def get_firmware(self, device) -> tuple[common.FirmwareInfo] | None:
         """Reads a device's firmware info.
 
         :returns: a list of FirmwareInfo tuples, ordered by firmware layer.
@@ -1471,11 +1471,11 @@ class Hidpp20:
                         if build:
                             version += f".B{build:04X}"
                         extras = fw_info[9:].rstrip(b"\x00") or None
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
-                    elif level == FIRMWARE_KIND.Hardware:
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
+                        fw_info = common.FirmwareInfo(FirmwareKind(level), name.decode("ascii"), version, extras)
+                    elif level == FirmwareKind.Hardware:
+                        fw_info = common.FirmwareInfo(FirmwareKind.Hardware, "", str(ord(fw_info[1:2])), None)
                     else:
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Other, "", "", None)
+                        fw_info = common.FirmwareInfo(FirmwareKind.Other, "", "", None)
 
                     fw.append(fw_info)
             return tuple(fw)

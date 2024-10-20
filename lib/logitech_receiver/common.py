@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import binascii
 import dataclasses
+import typing
 
 from enum import IntEnum
 from typing import Generator
@@ -28,6 +29,9 @@ from typing import Union
 import yaml
 
 from solaar.i18n import _
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver.hidpp20_constants import FirmwareKind
 
 LOGITECH_VENDOR_ID = 0x046D
 
@@ -570,9 +574,16 @@ class KwException(Exception):
             return self.args[0].get(k)  # was self.args[0][k]
 
 
+class FirmwareKind(IntEnum):
+    Firmware = 0x00
+    Bootloader = 0x01
+    Hardware = 0x02
+    Other = 0x03
+
+
 @dataclasses.dataclass
 class FirmwareInfo:
-    kind: str
+    kind: FirmwareKind
     name: str
     version: str
     extras: str | None
