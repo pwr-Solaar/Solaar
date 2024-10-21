@@ -1,6 +1,13 @@
+import struct
+
+from unittest import mock
+
 import pytest
 
 from logitech_receiver import base
+from logitech_receiver import exceptions
+from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
+from logitech_receiver.hidpp10_constants import ERROR
 
 
 @pytest.mark.parametrize(
@@ -111,3 +118,35 @@ def test_get_next_sw_id():
 
     assert res1 == 2
     assert res2 == 3
+
+
+@pytest.mark.parametrize(
+    "simulated_error, expected_result",
+    [
+        (ERROR.invalid_SubID__command, 1.0),
+        (ERROR.resource_error, None),
+        (ERROR.connection_request_failed, None),
+        (ERROR.unknown_device, exceptions.NoSuchDevice),
+    ],
+)
+def test_ping(simulated_error, expected_result):
+    handle = 1
+    device_number = 1
+
+    next_sw_id = 0x05
+    reply_data_sw_id = struct.pack("!H", 0x0010 | next_sw_id)
+
+    with mock.patch("logitech_receiver.base._read") as mock_read, mock.patch(
+        "logitech_receiver.base._get_next_sw_id", return_value=next_sw_id
+    ):
+        mock_read.return_value = (HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error]))
+
+        if isinstance(expected_result, type) and issubclass(expected_result, Exception):
+            with pytest.raises(expected_result) as context:
+                base.ping(handle=handle, devnumber=device_number)
+            assert context.value.number == device_number
+            assert context.value.request == struct.unpack("!H", reply_data_sw_id)[0]
+
+        else:
+            result = base.ping(handle=handle, devnumber=device_number)
+            assert result == expected_result
