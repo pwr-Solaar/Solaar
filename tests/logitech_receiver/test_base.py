@@ -137,15 +137,12 @@ def test_request_errors(prefix: bytes, error_code: ERROR, return_error: bool, ra
     next_sw_id = 0x02
     reply_data_sw_id = struct.pack("!H", 0x0000 | next_sw_id)
 
-    with (
-        mock.patch(
-            "logitech_receiver.base._read",
-            return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, prefix + reply_data_sw_id + struct.pack("B", error_code)),
-        ),
-        mock.patch("logitech_receiver.base._skip_incoming", return_value=None),
-        mock.patch("logitech_receiver.base.write", return_value=None),
-        mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id),
-    ):
+    with mock.patch(
+        "logitech_receiver.base._read",
+        return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, prefix + reply_data_sw_id + struct.pack("B", error_code)),
+    ), mock.patch("logitech_receiver.base._skip_incoming", return_value=None), mock.patch(
+        "logitech_receiver.base.write", return_value=None
+    ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if raise_exception:
             with pytest.raises(exceptions.FeatureCallError) as context:
                 request(handle, device_number, next_sw_id, return_error=return_error)
@@ -176,13 +173,10 @@ def test_ping_errors(simulated_error: ERROR, expected_result):
     next_sw_id = 0x05
     reply_data_sw_id = struct.pack("!H", 0x0010 | next_sw_id)
 
-    with (
-        mock.patch(
-            "logitech_receiver.base._read",
-            return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error])),
-        ),
-        mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id),
-    ):
+    with mock.patch(
+        "logitech_receiver.base._read",
+        return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error])),
+    ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
         if isinstance(expected_result, type) and issubclass(expected_result, Exception):
             with pytest.raises(expected_result) as context:
                 base.ping(handle=handle, devnumber=device_number)
