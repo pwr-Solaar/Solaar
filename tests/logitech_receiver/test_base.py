@@ -1,4 +1,5 @@
 import struct
+import sys
 
 from unittest import mock
 
@@ -158,6 +159,7 @@ def test_request_errors(prefix: bytes, error_code: ERROR, return_error: bool, ra
             assert result == (error_code if return_error else None)
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="Test only runs on Linux")
 @pytest.mark.parametrize(
     "simulated_error, expected_result",
     [
