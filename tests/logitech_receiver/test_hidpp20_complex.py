@@ -192,7 +192,7 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
         ),
     ],
 )
-def test_ReprogrammableKeyV4_key(device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names):
+def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, gmask, default_task, flag_names, group_names):
     key = hidpp20.ReprogrammableKeyV4(device, index, cid, tid, flags, pos, group, gmask)
 
     assert key._device == device

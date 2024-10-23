@@ -1,3 +1,5 @@
+from enum import IntFlag
+
 import pytest
 import yaml
 
@@ -121,18 +123,41 @@ def test_named_ints_range():
     assert 6 not in named_ints_range
 
 
-def test_named_ints_flag_names():
-    named_ints_flag_bits = common.NamedInts(one=1, two=2, three=4)
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0, []),
+        (0b0010, ["two"]),
+        (0b0101, ["one", "three"]),
+        (0b1001, ["one", "unknown:000008"]),
+    ],
+)
+def test_named_ints_flag_names(code, expected_flags):
+    named_ints_flag_bits = common.NamedInts(one=0b001, two=0b010, three=0b100)
 
-    flags0 = list(named_ints_flag_bits.flag_names(0))
-    flags2 = list(named_ints_flag_bits.flag_names(2))
-    flags5 = list(named_ints_flag_bits.flag_names(5))
-    flags9 = list(named_ints_flag_bits.flag_names(9))
+    flags = list(named_ints_flag_bits.flag_names(code))
 
-    assert flags0 == []
-    assert flags2 == ["two"]
-    assert flags5 == ["one", "three"]
-    assert flags9 == ["one", "unknown:000008"]
+    assert flags == expected_flags
+
+
+@pytest.mark.parametrize(
+    "code, expected_flags",
+    [
+        (0, []),
+        (0b0010, ["two"]),
+        (0b0101, ["one", "three"]),
+        (0b1001, ["one", "unknown:000008"]),
+    ],
+)
+def test_flag_names(code, expected_flags):
+    class ExampleFlag(IntFlag):
+        one = 0x1
+        two = 0x2
+        three = 0x4
+
+    flags = common.flag_names(ExampleFlag, code)
+
+    assert list(flags) == expected_flags
 
 
 def test_named_ints_setitem():

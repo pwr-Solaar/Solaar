@@ -23,6 +23,7 @@ import threading
 
 from typing import Any
 from typing import Dict
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -39,13 +40,13 @@ from . import special_keys
 from .common import Battery
 from .common import BatteryLevelApproximation
 from .common import BatteryStatus
+from .common import FirmwareKind
 from .common import NamedInt
 from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ERROR
-from .hidpp20_constants import FIRMWARE_KIND
 from .hidpp20_constants import GESTURE
 from .hidpp20_constants import SupportedFeature
 
@@ -241,8 +242,8 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         self._mapped_to = None
 
     @property
-    def group_mask(self):
-        return special_keys.CID_GROUP_BIT.flag_names(self._gmask)
+    def group_mask(self) -> Generator[str]:
+        return common.flag_names(special_keys.CIDGroupBit, self._gmask)
 
     @property
     def mapped_to(self) -> NamedInt:
@@ -259,7 +260,7 @@ class ReprogrammableKeyV4(ReprogrammableKey):
         if self.group_mask:  # only keys with a non-zero gmask are remappable
             ret[self.default_task] = self.default_task  # it should always be possible to map the key to itself
             for g in self.group_mask:
-                g = special_keys.CID_GROUP[str(g)]
+                g = special_keys.CidGroup[str(g)]
                 for tgt_cid in self._device.keys.group_cids[g]:
                     tgt_task = str(special_keys.TASK[self._device.keys.cid_to_tid[tgt_cid]])
                     tgt_task = NamedInt(tgt_cid, tgt_task)
@@ -515,7 +516,7 @@ class KeysArrayV2(KeysArray):
         self.cid_to_tid = {}
         """The mapping from Control ID groups to Controls IDs that belong to it.
         A key k can only be remapped to targets in groups within k.group_mask."""
-        self.group_cids = {g: [] for g in special_keys.CID_GROUP}
+        self.group_cids = {g: [] for g in special_keys.CidGroup}
 
     def _query_key(self, index: int):
         if index < 0 or index >= len(self.keys):
@@ -543,7 +544,7 @@ class KeysArrayV4(KeysArrayV2):
             self.keys[index] = ReprogrammableKeyV4(self.device, index, cid, tid, flags, pos, group, gmask)
             self.cid_to_tid[cid] = tid
             if group != 0:  # 0 = does not belong to a group
-                self.group_cids[special_keys.CID_GROUP[group]].append(cid)
+                self.group_cids[special_keys.CidGroup(group)].append(cid)
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
@@ -1451,7 +1452,7 @@ battery_voltage_remaining = (
 
 
 class Hidpp20:
-    def get_firmware(self, device):
+    def get_firmware(self, device) -> tuple[common.FirmwareInfo] | None:
         """Reads a device's firmware info.
 
         :returns: a list of FirmwareInfo tuples, ordered by firmware layer.
@@ -1471,11 +1472,11 @@ class Hidpp20:
                         if build:
                             version += f".B{build:04X}"
                         extras = fw_info[9:].rstrip(b"\x00") or None
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND[level], name.decode("ascii"), version, extras)
-                    elif level == FIRMWARE_KIND.Hardware:
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Hardware, "", str(ord(fw_info[1:2])), None)
+                        fw_info = common.FirmwareInfo(FirmwareKind(level), name.decode("ascii"), version, extras)
+                    elif level == FirmwareKind.Hardware:
+                        fw_info = common.FirmwareInfo(FirmwareKind.Hardware, "", str(ord(fw_info[1:2])), None)
                     else:
-                        fw_info = common.FirmwareInfo(FIRMWARE_KIND.Other, "", "", None)
+                        fw_info = common.FirmwareInfo(FirmwareKind.Other, "", "", None)
 
                     fw.append(fw_info)
             return tuple(fw)
