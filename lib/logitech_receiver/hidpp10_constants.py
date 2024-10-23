@@ -87,20 +87,20 @@ NOTIFICATION_FLAG = NamedInts(
     threed_gesture=0x000001,
 )
 
-ERROR = NamedInts(
-    invalid_SubID__command=0x01,
-    invalid_address=0x02,
-    invalid_value=0x03,
-    connection_request_failed=0x04,
-    too_many_devices=0x05,
-    already_exists=0x06,
-    busy=0x07,
-    unknown_device=0x08,
-    resource_error=0x09,
-    request_unavailable=0x0A,
-    unsupported_parameter_value=0x0B,
-    wrong_pin_code=0x0C,
-)
+
+class Error(IntEnum):
+    invalid_SubID__command = 0x01
+    invalid_address = 0x02
+    invalid_value = 0x03
+    connection_request_failed = 0x04
+    too_many_devices = 0x05
+    already_exists = 0x06
+    busy = 0x07
+    unknown_device = 0x08
+    resource_error = 0x09
+    request_unavailable = 0x0A
+    unsupported_parameter_value = 0x0B
+    wrong_pin_code = 0x0C
 
 
 class PairingError(IntEnum):
