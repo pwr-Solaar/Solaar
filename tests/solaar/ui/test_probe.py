@@ -1,6 +1,6 @@
 from unittest import mock
 
-from logitech_receiver import hidpp10_constants
+from logitech_receiver.hidpp10_constants import Error
 from logitech_receiver.hidpp10_constants import Registers
 from solaar.cli.probe import run
 
@@ -36,9 +36,9 @@ def test_run_register_errors():
     def mock_base_request(handle, devnumber, reg, sub, return_error=False):
         called_addresses.append((reg, sub))
         if sub == 0:
-            return hidpp10_constants.ERROR["invalid_value"]
+            return Error.invalid_value
         elif sub == 1:
-            return hidpp10_constants.ERROR["invalid_address"]
+            return Error.invalid_address
         return b"\x01\x02"
 
     with mock.patch("logitech_receiver.base.request", side_effect=mock_base_request), mock.patch(
