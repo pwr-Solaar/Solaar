@@ -1,6 +1,15 @@
+import struct
+import sys
+
+from unittest import mock
+
 import pytest
 
 from logitech_receiver import base
+from logitech_receiver import exceptions
+from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
+from logitech_receiver.base import request
+from logitech_receiver.hidpp10_constants import ERROR
 
 
 @pytest.mark.parametrize(
@@ -111,3 +120,69 @@ def test_get_next_sw_id():
 
     assert res1 == 2
     assert res2 == 3
+
+
+@pytest.mark.parametrize(
+    "prefix, error_code, return_error, raise_exception",
+    [
+        (b"\x8f", ERROR.invalid_SubID__command, False, False),
+        (b"\x8f", ERROR.invalid_SubID__command, True, False),
+        (b"\xff", ERROR.invalid_SubID__command, False, True),
+    ],
+)
+def test_request_errors(prefix: bytes, error_code: ERROR, return_error: bool, raise_exception: bool):
+    handle = 0
+    device_number = 66
+
+    next_sw_id = 0x02
+    reply_data_sw_id = struct.pack("!H", 0x0000 | next_sw_id)
+
+    with mock.patch(
+        "logitech_receiver.base._read",
+        return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, prefix + reply_data_sw_id + struct.pack("B", error_code)),
+    ), mock.patch("logitech_receiver.base._skip_incoming", return_value=None), mock.patch(
+        "logitech_receiver.base.write", return_value=None
+    ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
+        if raise_exception:
+            with pytest.raises(exceptions.FeatureCallError) as context:
+                request(handle, device_number, next_sw_id, return_error=return_error)
+            assert context.value.number == device_number
+            assert context.value.request == next_sw_id
+            assert context.value.error == error_code
+            assert context.value.params == b""
+
+        else:
+            result = request(handle, device_number, next_sw_id, return_error=return_error)
+            assert result == (error_code if return_error else None)
+
+
+@pytest.mark.skipif(sys.platform == "darwin", reason="Test only runs on Linux")
+@pytest.mark.parametrize(
+    "simulated_error, expected_result",
+    [
+        (ERROR.invalid_SubID__command, 1.0),
+        (ERROR.resource_error, None),
+        (ERROR.connection_request_failed, None),
+        (ERROR.unknown_device, exceptions.NoSuchDevice),
+    ],
+)
+def test_ping_errors(simulated_error: ERROR, expected_result):
+    handle = 1
+    device_number = 1
+
+    next_sw_id = 0x05
+    reply_data_sw_id = struct.pack("!H", 0x0010 | next_sw_id)
+
+    with mock.patch(
+        "logitech_receiver.base._read",
+        return_value=(HIDPP_SHORT_MESSAGE_ID, device_number, b"\x8f" + reply_data_sw_id + bytes([simulated_error])),
+    ), mock.patch("logitech_receiver.base._get_next_sw_id", return_value=next_sw_id):
+        if isinstance(expected_result, type) and issubclass(expected_result, Exception):
+            with pytest.raises(expected_result) as context:
+                base.ping(handle=handle, devnumber=device_number)
+            assert context.value.number == device_number
+            assert context.value.request == struct.unpack("!H", reply_data_sw_id)[0]
+
+        else:
+            result = base.ping(handle=handle, devnumber=device_number)
+            assert result == expected_result
