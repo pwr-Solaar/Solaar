@@ -95,31 +95,18 @@ def run(receivers, args, find_receiver, _ignore):
 
     print("")
     for reg in range(0, 0xFF):
-        last = None
-        for sub in range(0, 0xFF):
-            rgst = base.request(receiver.handle, 0xFF, 0x8100 | reg, sub, return_error=True)
-            if isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_address:
-                break
-            elif isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_value:
-                continue
-            else:
-                if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
-                    print(
-                        "    Register Short   %#04x %#04x: %s"
-                        % (reg, sub, "0x" + strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
-                    )
-            last = rgst
-        last = None
-        for sub in range(0, 0xFF):
-            rgst = base.request(receiver.handle, 0xFF, 0x8100 | (0x200 + reg), sub, return_error=True)
-            if isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_address:
-                break
-            elif isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_value:
-                continue
-            else:
-                if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
-                    print(
-                        "    Register Long    %#04x %#04x: %s"
-                        % (reg, sub, "0x" + strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
-                    )
-            last = rgst
+        for offset, reg_type in [(0x00, "Short"), (0x200, "Long")]:
+            last = None
+            for sub in range(0, 0xFF):
+                rgst = base.request(receiver.handle, 0xFF, 0x8100 | (offset + reg), sub, return_error=True)
+                if isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_address:
+                    break
+                elif isinstance(rgst, int) and rgst == hidpp10_constants.ERROR.invalid_value:
+                    continue
+                else:
+                    if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
+                        print(
+                            "    Register %s   %#04x %#04x: %s"
+                            % (reg_type, reg, sub, "0x" + strhex(rgst) if isinstance(rgst, bytes) else str(rgst))
+                        )
+                last = rgst
