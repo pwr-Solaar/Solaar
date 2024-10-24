@@ -9,7 +9,7 @@ from logitech_receiver import base
 from logitech_receiver import exceptions
 from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
 from logitech_receiver.base import request
-from logitech_receiver.hidpp10_constants import ERROR
+from logitech_receiver.hidpp10_constants import Error
 
 
 @pytest.mark.parametrize(
@@ -125,12 +125,12 @@ def test_get_next_sw_id():
 @pytest.mark.parametrize(
     "prefix, error_code, return_error, raise_exception",
     [
-        (b"\x8f", ERROR.invalid_SubID__command, False, False),
-        (b"\x8f", ERROR.invalid_SubID__command, True, False),
-        (b"\xff", ERROR.invalid_SubID__command, False, True),
+        (b"\x8f", Error.invalid_SubID__command, False, False),
+        (b"\x8f", Error.invalid_SubID__command, True, False),
+        (b"\xff", Error.invalid_SubID__command, False, True),
     ],
 )
-def test_request_errors(prefix: bytes, error_code: ERROR, return_error: bool, raise_exception: bool):
+def test_request_errors(prefix: bytes, error_code: Error, return_error: bool, raise_exception: bool):
     handle = 0
     device_number = 66
 
@@ -160,13 +160,13 @@ def test_request_errors(prefix: bytes, error_code: ERROR, return_error: bool, ra
 @pytest.mark.parametrize(
     "simulated_error, expected_result",
     [
-        (ERROR.invalid_SubID__command, 1.0),
-        (ERROR.resource_error, None),
-        (ERROR.connection_request_failed, None),
-        (ERROR.unknown_device, exceptions.NoSuchDevice),
+        (Error.invalid_SubID__command, 1.0),
+        (Error.resource_error, None),
+        (Error.connection_request_failed, None),
+        (Error.unknown_device, exceptions.NoSuchDevice),
     ],
 )
-def test_ping_errors(simulated_error: ERROR, expected_result):
+def test_ping_errors(simulated_error: Error, expected_result):
     handle = 1
     device_number = 1
 
