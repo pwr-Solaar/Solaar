@@ -526,7 +526,7 @@ def flag_names(enum_class: Iterable, value: int) -> Generator[str]:
         assert bin(k).count("1") == 1
         if k & value == k:
             unknown_bits &= ~k
-            yield indexed[k].lower()
+            yield indexed[k].lower().replace("_", " ")
 
     # Yield any remaining unknown bits
     if unknown_bits != 0:

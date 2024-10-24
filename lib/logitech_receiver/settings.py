@@ -19,6 +19,9 @@ import logging
 import math
 import struct
 import time
+import typing
+
+from typing import Any
 
 from solaar.i18n import _
 
@@ -26,6 +29,9 @@ from . import common
 from . import hidpp20_constants
 from .common import NamedInt
 from .common import NamedInts
+
+if typing.TYPE_CHECKING:
+    from .device import Device
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +86,7 @@ class Setting:
         self._value = None
 
     @classmethod
-    def build(cls, device):
+    def build(cls, device: Device) -> None | Any:
         assert cls.feature or cls.register, "Settings require either a feature or a register"
         rw_class = cls.rw_class if hasattr(cls, "rw_class") else FeatureRW if cls.feature else RegisterRW
         rw = rw_class(cls.feature if cls.feature else cls.register, **cls.rw_options)
@@ -89,11 +95,12 @@ class Setting:
             assert rw.kind == RegisterRW.kind
         elif p >= 2.0:  # HID++ 2.0 devices do not support registers
             assert rw.kind == FeatureRW.kind
-        validator_class = cls.validator_class
-        validator = validator_class.build(cls, device, **cls.validator_options)
-        if validator:
-            assert cls.kind is None or cls.kind & validator.kind != 0
-            return cls(device, rw, validator)
+        validator = cls.validator_class.build(cls, device, **cls.validator_options)
+        if not validator:
+            return None
+
+        assert cls.kind is None or cls.kind & validator.kind != 0
+        return cls(device, rw, validator)
 
     def val_to_string(self, value):
         return self._validator.to_string(value)

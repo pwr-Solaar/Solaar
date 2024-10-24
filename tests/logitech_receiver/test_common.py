@@ -129,11 +129,12 @@ def test_named_ints_range():
         (0, []),
         (0b0010, ["two"]),
         (0b0101, ["one", "three"]),
-        (0b1001, ["one", "unknown:000008"]),
+        (0b10001, ["one", "unknown:000010"]),
+        (0b1010, ["two", "split word"]),
     ],
 )
 def test_named_ints_flag_names(code, expected_flags):
-    named_ints_flag_bits = common.NamedInts(one=0b001, two=0b010, three=0b100)
+    named_ints_flag_bits = common.NamedInts(one=0b001, two=0b010, three=0b100, split_word=0b1000)
 
     flags = list(named_ints_flag_bits.flag_names(code))
 
@@ -146,7 +147,8 @@ def test_named_ints_flag_names(code, expected_flags):
         (0, []),
         (0b0010, ["two"]),
         (0b0101, ["one", "three"]),
-        (0b1001, ["one", "unknown:000008"]),
+        (0b10001, ["one", "unknown:000010"]),
+        (0b1010, ["two", "split word"]),
     ],
 )
 def test_flag_names(code, expected_flags):
@@ -154,6 +156,7 @@ def test_flag_names(code, expected_flags):
         one = 0x1
         two = 0x2
         three = 0x4
+        split_word = 0x8
 
     flags = common.flag_names(ExampleFlag, code)
 

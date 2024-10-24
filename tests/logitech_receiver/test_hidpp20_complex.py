@@ -159,7 +159,7 @@ def test_FeaturesArray_getitem(device, expected0, expected1, expected2, expected
         (device_standard, 1, 2, 2, 0x20, "Volume Down", ["divertable"]),
     ],
 )
-def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, flag_names):
+def test_reprogrammable_key_key(device, index, cid, tid, flags, default_task, flag_names):
     key = hidpp20.ReprogrammableKey(device, index, cid, tid, flags)
 
     assert key._device == device
@@ -169,7 +169,7 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
     assert key._flags == flags
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
+    assert sorted(list(key.flags)) == sorted(flag_names)
 
 
 @pytest.mark.parametrize(
@@ -187,7 +187,7 @@ def test_ReprogrammableKey_key(device, index, cid, tid, flags, default_task, fla
             2,
             7,
             "Mouse Back Button",
-            ["reprogrammable", "raw XY"],
+            ["raw xy", "reprogrammable"],
             ["g1", "g2", "g3"],
         ),
     ],
@@ -205,8 +205,8 @@ def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, g
     assert key._gmask == gmask
     assert key.key == special_keys.CONTROL[cid]
     assert key.default_task == common.NamedInt(cid, default_task)
-    assert list(key.flags) == flag_names
-    assert list(key.group_mask) == group_names
+    assert sorted(list(key.flags)) == flag_names
+    assert sorted(list(key.group_mask)) == group_names
 
 
 @pytest.mark.parametrize(
@@ -267,12 +267,12 @@ def test_ReprogrammableKeyV4_set(responses, index, diverted, persistently_divert
             key.set_persistently_diverted(persistently_diverted)
     assert ("persistently diverted" in key.mapping_flags) == (persistently_diverted and "persistently divertable" in key.flags)
 
-    if "raw XY" in key.flags or not rawXY_reporting:
+    if "raw xy" in key.flags or not rawXY_reporting:
         key.set_rawXY_reporting(rawXY_reporting)
     else:
         with pytest.raises(exceptions.FeatureNotSupported):
             key.set_rawXY_reporting(rawXY_reporting)
-    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw XY" in key.flags)
+    assert ("raw XY diverted" in list(key.mapping_flags)) == (rawXY_reporting and "raw xy" in key.flags)
 
     if remap in key.remappable_to or remap == 0:
         key.remap(remap)
