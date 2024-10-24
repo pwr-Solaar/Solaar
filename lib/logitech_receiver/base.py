@@ -35,10 +35,10 @@ from . import base_usb
 from . import common
 from . import descriptors
 from . import exceptions
-from . import hidpp20_constants
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
-from .hidpp10_constants import Error
+from .hidpp10_constants import Error as Hidpp10Error
+from .hidpp20_constants import ERROR as Hidpp20ERROR
 
 if typing.TYPE_CHECKING:
     import gi
@@ -583,9 +583,9 @@ def request(
                                 devnumber,
                                 request_id,
                                 error,
-                                Error(error),
+                                Hidpp10Error(error),
                             )
-                        return Error(error) if return_error else None
+                        return Hidpp10Error(error) if return_error else None
                     if reply_data[:1] == b"\xff" and reply_data[1:3] == request_data[:2]:
                         # a HID++ 2.0 feature call returned with an error
                         error = ord(reply_data[3:4])
@@ -595,7 +595,7 @@ def request(
                             devnumber,
                             request_id,
                             error,
-                            hidpp20_constants.ERROR[error],
+                            Hidpp20ERROR[error],
                         )
                         raise exceptions.FeatureCallError(
                             number=devnumber,
@@ -676,12 +676,12 @@ def ping(handle, devnumber, long_message: bool = False):
                         and reply_data[1:3] == request_data[:2]
                     ):  # error response
                         error = ord(reply_data[3:4])
-                        if error == Error.invalid_SubID__command:
+                        if error == Hidpp10Error.invalid_SubID__command:
                             # a valid reply from a HID++ 1.0 device
                             return 1.0
-                        if error == Error.resource_error or error == Error.connection_request_failed:
+                        if error == Hidpp10Error.resource_error or error == Hidpp10Error.connection_request_failed:
                             return  # device unreachable
-                        if error == Error.unknown_device:  # no paired device with that number
+                        if error == Hidpp10Error.unknown_device:  # no paired device with that number
                             logger.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
                             raise exceptions.NoSuchDevice(number=devnumber, request=request_id)
 
