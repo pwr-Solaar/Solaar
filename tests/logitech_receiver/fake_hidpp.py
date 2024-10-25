@@ -438,7 +438,7 @@ class Device:
 
 def match_requests(number, responses, call_args_list):
     for i in range(0 - number, 0):
-        param = b"".join(pack("B", p) if isinstance(p, int) else p for p in call_args_list[i][0][1:]).hex().upper()
-        print("MATCH", i, hex(call_args_list[i][0][0]), param, hex(responses[i].id), responses[i].params)
-        assert call_args_list[i][0][0] == responses[i].id
+        param = b"".join(pack("B", p) if isinstance(p, int) else p for p in call_args_list[i].args[1:]).hex().upper()
+        print("MATCH", i, hex(call_args_list[i].args[0]), param, hex(responses[i].id), responses[i].params)
+        assert call_args_list[i].args[0] == responses[i].id
         assert param == responses[i].params

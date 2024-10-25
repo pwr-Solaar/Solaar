@@ -572,22 +572,25 @@ TASK = NamedInts(
     Right_Cmd=0x00FC,
 )
 TASK._fallback = lambda x: f"unknown:{x:04X}"
+
+
 # Capabilities and desired software handling for a control
 # Ref: https://drive.google.com/file/d/10imcbmoxTJ1N510poGdsviEhoFfB_Ua4/view
 # We treat bytes 4 and 8 of `getCidInfo` as a single bitfield
-KEY_FLAG = NamedInts(
-    analytics_key_events=0x400,
-    force_raw_XY=0x200,
-    raw_XY=0x100,
-    virtual=0x80,
-    persistently_divertable=0x40,
-    divertable=0x20,
-    reprogrammable=0x10,
-    FN_sensitive=0x08,
-    nonstandard=0x04,
-    is_FN=0x02,
-    mse=0x01,
-)
+class KeyFlag(IntEnum):
+    ANALYTICS_KEY_EVENTS = 0x400
+    FORCE_RAW_XY = 0x200
+    RAW_XY = 0x100
+    VIRTUAL = 0x80
+    PERSISTENTLY_DIVERTABLE = 0x40
+    DIVERTABLE = 0x20
+    REPROGRAMMABLE = 0x10
+    FN_SENSITIVE = 0x08
+    NONSTANDARD = 0x04
+    IS_FN = 0x02
+    MSE = 0x01
+
+
 # Flags describing the reporting method of a control
 # We treat bytes 2 and 5 of `get/setCidReporting` as a single bitfield
 MAPPING_FLAG = NamedInts(

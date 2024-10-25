@@ -27,6 +27,8 @@ from typing import Callable
 
 from solaar.i18n import _
 
+from logitech_receiver.special_keys import KeyFlag
+
 from . import base
 from . import common
 from . import descriptors
@@ -924,8 +926,8 @@ class DivertKeys(settings.Settings):
             choices = {}
             if device.keys:
                 for k in device.keys:
-                    if "divertable" in k.flags and "virtual" not in k.flags:
-                        if "raw XY" in k.flags:
+                    if KeyFlag.DIVERTABLE in k.flags and KeyFlag.VIRTUAL not in k.flags:
+                        if KeyFlag.RAW_XY in k.flags:
                             choices[k.key] = setting_class.choices_gesture
                             if gestures is None:
                                 gestures = MouseGesturesXY(device, name="MouseGestures")
@@ -1108,7 +1110,7 @@ class SpeedChange(settings.Setting):
         def build(cls, setting_class, device):
             key_index = device.keys.index(special_keys.CONTROL.DPI_Change)
             key = device.keys[key_index] if key_index is not None else None
-            if key is not None and "divertable" in key.flags:
+            if key is not None and KeyFlag.DIVERTABLE in key.flags:
                 keys = [setting_class.choices_extra, key.key]
                 return cls(choices=common.NamedInts.list(keys), byte_count=2)
 

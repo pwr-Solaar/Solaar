@@ -191,7 +191,7 @@ class ReprogrammableKey:
     - flags {List[str]} -- capabilities and desired software handling of the control
     """
 
-    def __init__(self, device: Device, index, cid, tid, flags):
+    def __init__(self, device: Device, index, cid, tid, flags: list[special_keys.KeyFlag]):
         self._device = device
         self.index = index
         self._cid = cid
@@ -212,8 +212,8 @@ class ReprogrammableKey:
         return NamedInt(self._cid, task)
 
     @property
-    def flags(self) -> List[str]:
-        return special_keys.KEY_FLAG.flag_names(self._flags)
+    def flags(self) -> List[special_keys.KeyFlag]:
+        return self._flags
 
 
 class ReprogrammableKeyV4(ReprogrammableKey):
@@ -346,11 +346,11 @@ class ReprogrammableKeyV4(ReprogrammableKey):
 
         # The capability required to set a given reporting flag.
         FLAG_TO_CAPABILITY = {
-            special_keys.MAPPING_FLAG.diverted: special_keys.KEY_FLAG.divertable,
-            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KEY_FLAG.persistently_divertable,
-            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KEY_FLAG.analytics_key_events,
-            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KEY_FLAG.force_raw_XY,
-            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KEY_FLAG.raw_XY,
+            special_keys.MAPPING_FLAG.diverted: special_keys.KeyFlag.DIVERTABLE,
+            special_keys.MAPPING_FLAG.persistently_diverted: special_keys.KeyFlag.PERSISTENTLY_DIVERTABLE,
+            special_keys.MAPPING_FLAG.analytics_key_events_reporting: special_keys.KeyFlag.ANALYTICS_KEY_EVENTS,
+            special_keys.MAPPING_FLAG.force_raw_XY_diverted: special_keys.KeyFlag.FORCE_RAW_XY,
+            special_keys.MAPPING_FLAG.raw_XY_diverted: special_keys.KeyFlag.RAW_XY,
         }
 
         bfield = 0

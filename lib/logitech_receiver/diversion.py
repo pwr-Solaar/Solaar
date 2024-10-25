@@ -46,9 +46,10 @@ if platform.system() in ("Darwin", "Windows"):
 else:
     import evdev
 
+from logitech_receiver.special_keys import CONTROL
+
 from .common import NamedInt
 from .hidpp20 import SupportedFeature
-from .special_keys import CONTROL
 
 gi.require_version("Gdk", "3.0")  # isort:skip
 from gi.repository import Gdk, GLib  # NOQA: E402 # isort:skip
