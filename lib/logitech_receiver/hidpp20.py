@@ -48,6 +48,7 @@ from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ERROR
 from .hidpp20_constants import GESTURE
+from .hidpp20_constants import PARAM
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
@@ -602,16 +603,6 @@ class KeysArrayPersistent(KeysArray):
             )
         elif logger.isEnabledFor(logging.WARNING):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
-
-
-# Param Ids for feature GESTURE_2
-PARAM = common.NamedInts(
-    ExtraCapabilities=1,  # not suitable for use
-    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
-    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
-    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
-)
-PARAM._fallback = lambda x: f"unknown:{x:04X}"
 
 
 class SubParam:

@@ -1351,7 +1351,7 @@ class Gesture2Params(settings.LongSettings):
     description = _("Change numerical parameters of a mouse/touchpad.")
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = hidpp20.PARAM
+    choices_universe = hidpp20_constants.PARAM
     sub_items_universe = hidpp20.SUB_PARAM
     # item (NamedInt) -> list/tuple of objects that have the following attributes
     # .id (sub-item text), .length (in bytes), .minimum and .maximum
