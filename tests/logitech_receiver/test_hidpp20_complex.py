@@ -534,10 +534,10 @@ def test_Gesture_set(responses, gest, enabled, diverted, set_result, unset_resul
 @pytest.mark.parametrize(
     "responses, prm, id, index, size, value, default_value, write1, write2",
     [
-        (fake_hidpp.responses_gestures, 4, common.NamedInt(4, "ScaleFactor"), 0, 2, 256, 256, "0080", "0180"),
+        (fake_hidpp.responses_gestures, 4, hidpp20_constants.ParamId.SCALE_FACTOR, 0, 2, 256, 256, "0080", "0180"),
     ],
 )
-def test_Param(responses, prm, id, index, size, value, default_value, write1, write2):
+def test_param(responses, prm, id, index, size, value, default_value, write1, write2):
     device = fake_hidpp.Device("GESTURE", responses=responses, feature=hidpp20_constants.SupportedFeature.GESTURE_2)
     gestures = _hidpp20.get_gestures(device)
 
@@ -548,7 +548,7 @@ def test_Param(responses, prm, id, index, size, value, default_value, write1, wr
     assert param.size == size
     assert param.value == value
     assert param.default_value == default_value
-    assert str(param) == id
+    assert param.param == id
     assert int(param) == id
     assert param.write(bytes.fromhex(write1)).hex().upper() == f"{index:02X}" + write1 + "FF"
     assert param.write(bytes.fromhex(write2)).hex().upper() == f"{index:02X}" + write2 + "FF"
