@@ -48,7 +48,7 @@ from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
 from .hidpp20_constants import ERROR
 from .hidpp20_constants import GESTURE
-from .hidpp20_constants import PARAM
+from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
@@ -623,20 +623,20 @@ class SubParam:
 
 
 SUB_PARAM = {  # (byte count, minimum, maximum)
-    PARAM["ExtraCapabilities"]: None,  # ignore
-    PARAM["PixelZone"]: (  # TODO: replace min and max with the correct values
+    ParamId.EXTRA_CAPABILITIES: None,  # ignore
+    ParamId.PIXEL_ZONE: (  # TODO: replace min and max with the correct values
         SubParam("left", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("bottom", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("width", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("height", 2, 0x0000, 0xFFFF, "SpinButton"),
     ),
-    PARAM["RatioZone"]: (  # TODO: replace min and max with the correct values
+    ParamId.RATIO_ZONE: (  # TODO: replace min and max with the correct values
         SubParam("left", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("bottom", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("width", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("height", 1, 0x00, 0xFF, "SpinButton"),
     ),
-    PARAM["ScaleFactor"]: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
+    ParamId.SCALE_FACTOR: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
 }
 
 # Spec Ids for feature GESTURE_2
@@ -756,10 +756,10 @@ class Gesture:
 
 
 class Param:
-    def __init__(self, device, low, high, next_param_index):
+    def __init__(self, device, low: int, high, next_param_index):
         self._device = device
         self.id = low
-        self.param = PARAM[low]
+        self.param = ParamId(low)
         self.size = high & 0x0F
         self.show_in_ui = bool(high & 0x1F)
         self._value = None

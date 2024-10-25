@@ -38,6 +38,7 @@ from . import hidpp20_constants
 from . import settings
 from . import special_keys
 from .hidpp10_constants import Registers
+from .hidpp20_constants import ParamId
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,6 @@ _DK = hidpp10_constants.DEVICE_KIND
 _F = hidpp20_constants.SupportedFeature
 
 _GG = hidpp20_constants.GESTURE
-_GP = hidpp20_constants.PARAM
 
 
 class State(enum.Enum):
@@ -1296,10 +1296,10 @@ _GESTURE2_GESTURES_LABELS = {
 }
 
 _GESTURE2_PARAMS_LABELS = {
-    _GP["ExtraCapabilities"]: (None, None),  # not supported
-    _GP["PixelZone"]: (_("Pixel zone"), None),  # TO DO: replace None with a short description
-    _GP["RatioZone"]: (_("Ratio zone"), None),  # TO DO: replace None with a short description
-    _GP["ScaleFactor"]: (_("Scale factor"), _("Sets the cursor speed.")),
+    ParamId.EXTRA_CAPABILITIES: (None, None),  # not supported
+    ParamId.PIXEL_ZONE: (_("Pixel zone"), None),  # TO DO: replace None with a short description
+    ParamId.RATIO_ZONE: (_("Ratio zone"), None),  # TO DO: replace None with a short description
+    ParamId.SCALE_FACTOR: (_("Scale factor"), _("Sets the cursor speed.")),
 }
 
 _GESTURE2_PARAMS_LABELS_SUB = {
@@ -1351,7 +1351,7 @@ class Gesture2Params(settings.LongSettings):
     description = _("Change numerical parameters of a mouse/touchpad.")
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
-    choices_universe = hidpp20_constants.PARAM
+    choices_universe = hidpp20_constants.ParamId
     sub_items_universe = hidpp20.SUB_PARAM
     # item (NamedInt) -> list/tuple of objects that have the following attributes
     # .id (sub-item text), .length (in bytes), .minimum and .maximum

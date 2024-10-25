@@ -258,11 +258,11 @@ GESTURE = NamedInts(
 )
 GESTURE._fallback = lambda x: f"unknown:{x:04X}"
 
-# Param Ids for feature GESTURE_2
-PARAM = NamedInts(
-    ExtraCapabilities=1,  # not suitable for use
-    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
-    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
-    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
-)
-PARAM._fallback = lambda x: f"unknown:{x:04X}"
+
+class ParamId(IntEnum):
+    """Param Ids for feature GESTURE_2"""
+
+    EXTRA_CAPABILITIES = 1  # not suitable for use
+    PIXEL_ZONE = 2  # 4 2-byte integers, left, bottom, width, height; pixels
+    RATIO_ZONE = 3  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
+    SCALE_FACTOR = 4  # 2-byte integer, with 256 as normal scale
