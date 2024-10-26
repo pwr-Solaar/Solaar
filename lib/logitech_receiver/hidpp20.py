@@ -46,8 +46,8 @@ from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
-from .hidpp20_constants import ERROR
 from .hidpp20_constants import GESTURE
+from .hidpp20_constants import Error
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
@@ -1823,14 +1823,14 @@ def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
 def decipher_battery_voltage(report):
     voltage, flags = struct.unpack(">HB", report[:3])
     status = BatteryStatus.DISCHARGING
-    charge_sts = ERROR.unknown
+    charge_sts = Error.unknown
     charge_lvl = CHARGE_LEVEL.average
     charge_type = CHARGE_TYPE.standard
     if flags & (1 << 7):
         status = BatteryStatus.RECHARGING
         charge_sts = CHARGE_STATUS[flags & 0x03]
     if charge_sts is None:
-        charge_sts = ERROR.unknown
+        charge_sts = Error.unknown
     elif charge_sts == CHARGE_STATUS.full:
         charge_lvl = CHARGE_LEVEL.full
         status = BatteryStatus.FULL

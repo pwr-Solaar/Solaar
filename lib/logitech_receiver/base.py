@@ -38,7 +38,7 @@ from . import exceptions
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 from .hidpp10_constants import Error as Hidpp10Error
-from .hidpp20_constants import ERROR as Hidpp20ERROR
+from .hidpp20_constants import Error as Hidpp20Error
 
 if typing.TYPE_CHECKING:
     import gi
@@ -595,7 +595,7 @@ def request(
                             devnumber,
                             request_id,
                             error,
-                            Hidpp20ERROR[error],
+                            Hidpp20Error(error),
                         )
                         raise exceptions.FeatureCallError(
                             number=devnumber,

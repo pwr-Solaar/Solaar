@@ -181,17 +181,18 @@ CHARGE_LEVEL = NamedInts(average=50, full=90, critical=5)
 
 CHARGE_TYPE = NamedInts(standard=0x00, fast=0x01, slow=0x02)
 
-ERROR = NamedInts(
-    unknown=0x01,
-    invalid_argument=0x02,
-    out_of_range=0x03,
-    hardware_error=0x04,
-    logitech_internal=0x05,
-    invalid_feature_index=0x06,
-    invalid_function=0x07,
-    busy=0x08,
-    unsupported=0x09,
-)
+
+class Error(IntEnum):
+    unknown = (0x01,)
+    invalid_argument = (0x02,)
+    out_of_range = (0x03,)
+    hardware_error = (0x04,)
+    logitech_internal = (0x05,)
+    invalid_feature_index = (0x06,)
+    invalid_function = (0x07,)
+    busy = (0x08,)
+    unsupported = (0x09,)
+
 
 # Gesture Ids for feature GESTURE_2
 GESTURE = NamedInts(
