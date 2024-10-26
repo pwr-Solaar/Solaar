@@ -1,6 +1,7 @@
 import struct
 import sys
 
+from typing import Union
 from unittest import mock
 
 import pytest
@@ -131,7 +132,9 @@ def test_get_next_sw_id():
         (b"\xff", Hidpp20Error.unknown, False, True),
     ],
 )
-def test_request_errors(prefix: bytes, error_code: Hidpp10Error | Hidpp20Error, return_error: bool, raise_exception: bool):
+def test_request_errors(
+    prefix: bytes, error_code: Union[Hidpp10Error, Hidpp20Error], return_error: bool, raise_exception: bool
+):
     handle = 0
     device_number = 66
 
