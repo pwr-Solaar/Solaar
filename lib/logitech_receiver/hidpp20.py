@@ -42,12 +42,12 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
-from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
-from .hidpp20_constants import ERROR
 from .hidpp20_constants import GESTURE
+from .hidpp20_constants import ChargeLevel
+from .hidpp20_constants import ChargeType
+from .hidpp20_constants import ErrorCode
 from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
 
@@ -1811,27 +1811,27 @@ def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
     return SupportedFeature.BATTERY_STATUS, Battery(battery_discharge_level, battery_discharge_next_level, status, None)
 
 
-def decipher_battery_voltage(report):
+def decipher_battery_voltage(report: bytes):
     voltage, flags = struct.unpack(">HB", report[:3])
     status = BatteryStatus.DISCHARGING
-    charge_sts = ERROR.unknown
-    charge_lvl = CHARGE_LEVEL.average
-    charge_type = CHARGE_TYPE.standard
+    charge_sts = ErrorCode.UNKNOWN
+    charge_lvl = ChargeLevel.AVERAGE
+    charge_type = ChargeType.STANDARD
     if flags & (1 << 7):
         status = BatteryStatus.RECHARGING
         charge_sts = CHARGE_STATUS[flags & 0x03]
     if charge_sts is None:
-        charge_sts = ERROR.unknown
+        charge_sts = ErrorCode.UNKNOWN
     elif charge_sts == CHARGE_STATUS.full:
-        charge_lvl = CHARGE_LEVEL.full
+        charge_lvl = ChargeLevel.FULL
         status = BatteryStatus.FULL
     if flags & (1 << 3):
-        charge_type = CHARGE_TYPE.fast
+        charge_type = ChargeType.FAST
     elif flags & (1 << 4):
-        charge_type = CHARGE_TYPE.slow
+        charge_type = ChargeType.SLOW
         status = BatteryStatus.SLOW_RECHARGE
     elif flags & (1 << 5):
-        charge_lvl = CHARGE_LEVEL.critical
+        charge_lvl = ChargeLevel.CRITICAL
     for level in battery_voltage_remaining:
         if level[0] < voltage:
             charge_lvl = level[1]

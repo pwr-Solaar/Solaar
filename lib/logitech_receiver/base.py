@@ -595,7 +595,7 @@ def request(
                             devnumber,
                             request_id,
                             error,
-                            hidpp20_constants.ERROR[error],
+                            hidpp20_constants.ErrorCode(error),
                         )
                         raise exceptions.FeatureCallError(
                             number=devnumber,
