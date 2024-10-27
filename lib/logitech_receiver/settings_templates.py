@@ -38,6 +38,7 @@ from . import hidpp20_constants
 from . import settings
 from . import special_keys
 from .hidpp10_constants import Registers
+from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 
 logger = logging.getLogger(__name__)
@@ -45,8 +46,6 @@ logger = logging.getLogger(__name__)
 _hidpp20 = hidpp20.Hidpp20()
 _DK = hidpp10_constants.DEVICE_KIND
 _F = hidpp20_constants.SupportedFeature
-
-_GG = hidpp20_constants.GESTURE
 
 
 class State(enum.Enum):
@@ -1227,72 +1226,72 @@ class ChangeHost(settings.Setting):
 
 
 _GESTURE2_GESTURES_LABELS = {
-    _GG["Tap1Finger"]: (_("Single tap"), _("Performs a left click.")),
-    _GG["Tap2Finger"]: (_("Single tap with two fingers"), _("Performs a right click.")),
-    _GG["Tap3Finger"]: (_("Single tap with three fingers"), None),
-    _GG["Click1Finger"]: (None, None),
-    _GG["Click2Finger"]: (None, None),
-    _GG["Click3Finger"]: (None, None),
-    _GG["DoubleTap1Finger"]: (_("Double tap"), _("Performs a double click.")),
-    _GG["DoubleTap2Finger"]: (_("Double tap with two fingers"), None),
-    _GG["DoubleTap3Finger"]: (_("Double tap with three fingers"), None),
-    _GG["Track1Finger"]: (None, None),
-    _GG["TrackingAcceleration"]: (None, None),
-    _GG["TapDrag1Finger"]: (_("Tap and drag"), _("Drags items by dragging the finger after double tapping.")),
-    _GG["TapDrag2Finger"]: (
+    GestureId.TAP_1_FINGER: (_("Single tap"), _("Performs a left click.")),
+    GestureId.TAP_2_FINGER: (_("Single tap with two fingers"), _("Performs a right click.")),
+    GestureId.TAP_3_FINGER: (_("Single tap with three fingers"), None),
+    GestureId.CLICK_1_FINGER: (None, None),
+    GestureId.CLICK_2_FINGER: (None, None),
+    GestureId.CLICK_3_FINGER: (None, None),
+    GestureId.DOUBLE_TAP_1_FINGER: (_("Double tap"), _("Performs a double click.")),
+    GestureId.DOUBLE_TAP_2_FINGER: (_("Double tap with two fingers"), None),
+    GestureId.DOUBLE_TAP_3_FINGER: (_("Double tap with three fingers"), None),
+    GestureId.TRACK_1_FINGER: (None, None),
+    GestureId.TRACKING_ACCELERATION: (None, None),
+    GestureId.TAP_DRAG_1_FINGER: (_("Tap and drag"), _("Drags items by dragging the finger after double tapping.")),
+    GestureId.TAP_DRAG_2_FINGER: (
         _("Tap and drag with two fingers"),
         _("Drags items by dragging the fingers after double tapping."),
     ),
-    _GG["Drag3Finger"]: (_("Tap and drag with three fingers"), None),
-    _GG["TapGestures"]: (None, None),
-    _GG["FnClickGestureSuppression"]: (
+    GestureId.DRAG_3_FINGER: (_("Tap and drag with three fingers"), None),
+    GestureId.TAP_GESTURES: (None, None),
+    GestureId.FN_CLICK_GESTURE_SUPPRESSION: (
         _("Suppress tap and edge gestures"),
         _("Disables tap and edge gestures (equivalent to pressing Fn+LeftClick)."),
     ),
-    _GG["Scroll1Finger"]: (_("Scroll with one finger"), _("Scrolls.")),
-    _GG["Scroll2Finger"]: (_("Scroll with two fingers"), _("Scrolls.")),
-    _GG["Scroll2FingerHoriz"]: (_("Scroll horizontally with two fingers"), _("Scrolls horizontally.")),
-    _GG["Scroll2FingerVert"]: (_("Scroll vertically with two fingers"), _("Scrolls vertically.")),
-    _GG["Scroll2FingerStateless"]: (_("Scroll with two fingers"), _("Scrolls.")),
-    _GG["NaturalScrolling"]: (_("Natural scrolling"), _("Inverts the scrolling direction.")),
-    _GG["Thumbwheel"]: (_("Thumbwheel"), _("Enables the thumbwheel.")),
-    _GG["VScrollInertia"]: (None, None),
-    _GG["VScrollBallistics"]: (None, None),
-    _GG["Swipe2FingerHoriz"]: (None, None),
-    _GG["Swipe3FingerHoriz"]: (None, None),
-    _GG["Swipe4FingerHoriz"]: (None, None),
-    _GG["Swipe3FingerVert"]: (None, None),
-    _GG["Swipe4FingerVert"]: (None, None),
-    _GG["LeftEdgeSwipe1Finger"]: (None, None),
-    _GG["RightEdgeSwipe1Finger"]: (None, None),
-    _GG["BottomEdgeSwipe1Finger"]: (None, None),
-    _GG["TopEdgeSwipe1Finger"]: (_("Swipe from the top edge"), None),
-    _GG["LeftEdgeSwipe1Finger2"]: (_("Swipe from the left edge"), None),
-    _GG["RightEdgeSwipe1Finger2"]: (_("Swipe from the right edge"), None),
-    _GG["BottomEdgeSwipe1Finger2"]: (_("Swipe from the bottom edge"), None),
-    _GG["TopEdgeSwipe1Finger2"]: (_("Swipe from the top edge"), None),
-    _GG["LeftEdgeSwipe2Finger"]: (_("Swipe two fingers from the left edge"), None),
-    _GG["RightEdgeSwipe2Finger"]: (_("Swipe two fingers from the right edge"), None),
-    _GG["BottomEdgeSwipe2Finger"]: (_("Swipe two fingers from the bottom edge"), None),
-    _GG["TopEdgeSwipe2Finger"]: (_("Swipe two fingers from the top edge"), None),
-    _GG["Zoom2Finger"]: (_("Zoom with two fingers."), _("Pinch to zoom out; spread to zoom in.")),
-    _GG["Zoom2FingerPinch"]: (_("Pinch to zoom out."), _("Pinch to zoom out.")),
-    _GG["Zoom2FingerSpread"]: (_("Spread to zoom in."), _("Spread to zoom in.")),
-    _GG["Zoom3Finger"]: (_("Zoom with three fingers."), None),
-    _GG["Zoom2FingerStateless"]: (_("Zoom with two fingers"), _("Pinch to zoom out; spread to zoom in.")),
-    _GG["TwoFingersPresent"]: (None, None),
-    _GG["Rotate2Finger"]: (None, None),
-    _GG["Finger1"]: (None, None),
-    _GG["Finger2"]: (None, None),
-    _GG["Finger3"]: (None, None),
-    _GG["Finger4"]: (None, None),
-    _GG["Finger5"]: (None, None),
-    _GG["Finger6"]: (None, None),
-    _GG["Finger7"]: (None, None),
-    _GG["Finger8"]: (None, None),
-    _GG["Finger9"]: (None, None),
-    _GG["Finger10"]: (None, None),
-    _GG["DeviceSpecificRawData"]: (None, None),
+    GestureId.SCROLL_1_FINGER: (_("Scroll with one finger"), _("Scrolls.")),
+    GestureId.SCROLL_2_FINGER: (_("Scroll with two fingers"), _("Scrolls.")),
+    GestureId.SCROLL_2_FINGER_HORIZONTAL: (_("Scroll horizontally with two fingers"), _("Scrolls horizontally.")),
+    GestureId.SCROLL_2_FINGER_VERTICAL: (_("Scroll vertically with two fingers"), _("Scrolls vertically.")),
+    GestureId.SCROLL_2_FINGER_STATELESS: (_("Scroll with two fingers"), _("Scrolls.")),
+    GestureId.NATURAL_SCROLLING: (_("Natural scrolling"), _("Inverts the scrolling direction.")),
+    GestureId.THUMBWHEEL: (_("Thumbwheel"), _("Enables the thumbwheel.")),
+    GestureId.V_SCROLL_INTERTIA: (None, None),
+    GestureId.V_SCROLL_BALLISTICS: (None, None),
+    GestureId.SWIPE_2_FINGER_HORIZONTAL: (None, None),
+    GestureId.SWIPE_3_FINGER_HORIZONTAL: (None, None),
+    GestureId.SWIPE_4_FINGER_HORIZONTAL: (None, None),
+    GestureId.SWIPE_3_FINGER_VERTICAL: (None, None),
+    GestureId.SWIPE_4_FINGER_VERTICAL: (None, None),
+    GestureId.LEFT_EDGE_SWIPE_1_FINGER: (None, None),
+    GestureId.RIGHT_EDGE_SWIPE_1_FINGER: (None, None),
+    GestureId.BOTTOM_EDGE_SWIPE_1_FINGER: (None, None),
+    GestureId.TOP_EDGE_SWIPE_1_FINGER: (_("Swipe from the top edge"), None),
+    GestureId.LEFT_EDGE_SWIPE_1_FINGER_2: (_("Swipe from the left edge"), None),
+    GestureId.RIGHT_EDGE_SWIPE_1_FINGER_2: (_("Swipe from the right edge"), None),
+    GestureId.BOTTOM_EDGE_SWIPE_1_FINGER_2: (_("Swipe from the bottom edge"), None),
+    GestureId.TOP_EDGE_SWIPE_1_FINGER_2: (_("Swipe from the top edge"), None),
+    GestureId.LEFT_EDGE_SWIPE_2_FINGER: (_("Swipe two fingers from the left edge"), None),
+    GestureId.RIGHT_EDGE_SWIPE_2_FINGER: (_("Swipe two fingers from the right edge"), None),
+    GestureId.BOTTOM_EDGE_SWIPE_2_FINGER: (_("Swipe two fingers from the bottom edge"), None),
+    GestureId.TOP_EDGE_SWIPE_2_FINGER: (_("Swipe two fingers from the top edge"), None),
+    GestureId.ZOOM_2_FINGER: (_("Zoom with two fingers."), _("Pinch to zoom out; spread to zoom in.")),
+    GestureId.ZOOM_2_FINGER_PINCH: (_("Pinch to zoom out."), _("Pinch to zoom out.")),
+    GestureId.ZOOM_2_FINGER_SPREAD: (_("Spread to zoom in."), _("Spread to zoom in.")),
+    GestureId.ZOOM_3_FINGER: (_("Zoom with three fingers."), None),
+    GestureId.ZOOM_2_FINGER_STATELESS: (_("Zoom with two fingers"), _("Pinch to zoom out; spread to zoom in.")),
+    GestureId.TWO_FINGERS_PRESENT: (None, None),
+    GestureId.ROTATE_2_FINGER: (None, None),
+    GestureId.FINGER_1: (None, None),
+    GestureId.FINGER_2: (None, None),
+    GestureId.FINGER_3: (None, None),
+    GestureId.FINGER_4: (None, None),
+    GestureId.FINGER_5: (None, None),
+    GestureId.FINGER_6: (None, None),
+    GestureId.FINGER_7: (None, None),
+    GestureId.FINGER_8: (None, None),
+    GestureId.FINGER_9: (None, None),
+    GestureId.FINGER_10: (None, None),
+    GestureId.DEVICE_SPECIFIC_RAW_DATA: (None, None),
 }
 
 _GESTURE2_PARAMS_LABELS = {
@@ -1318,7 +1317,7 @@ class Gesture2Gestures(settings.BitFieldWithOffsetAndMaskSetting):
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_options = {"om_method": hidpp20.Gesture.enable_offset_mask}
-    choices_universe = hidpp20_constants.GESTURE
+    choices_universe = hidpp20_constants.GestureId
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(settings.BitFieldWithOffsetAndMaskValidator):
@@ -1335,7 +1334,7 @@ class Gesture2Divert(settings.BitFieldWithOffsetAndMaskSetting):
     feature = _F.GESTURE_2
     rw_options = {"read_fnid": 0x30, "write_fnid": 0x40}
     validator_options = {"om_method": hidpp20.Gesture.diversion_offset_mask}
-    choices_universe = hidpp20_constants.GESTURE
+    choices_universe = hidpp20_constants.GestureId
     _labels = _GESTURE2_GESTURES_LABELS
 
     class validator_class(settings.BitFieldWithOffsetAndMaskValidator):
