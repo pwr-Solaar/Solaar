@@ -44,10 +44,10 @@ from .common import FirmwareKind
 from .common import NamedInt
 from .hidpp20_constants import CHARGE_STATUS
 from .hidpp20_constants import DEVICE_KIND
-from .hidpp20_constants import GESTURE
 from .hidpp20_constants import ChargeLevel
 from .hidpp20_constants import ChargeType
 from .hidpp20_constants import ErrorCode
+from .hidpp20_constants import GestureId
 from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
 
@@ -676,7 +676,7 @@ class Gesture:
     def __init__(self, device, low, high, next_index, next_diversion_index):
         self._device = device
         self.id = low
-        self.gesture = GESTURE[low]
+        self.gesture = GestureId(low)
         self.can_be_enabled = high & 0x01
         self.can_be_diverted = high & 0x02
         self.show_in_ui = high & 0x04

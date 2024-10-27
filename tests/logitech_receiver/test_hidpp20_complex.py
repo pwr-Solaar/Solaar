@@ -22,6 +22,7 @@ from logitech_receiver import exceptions
 from logitech_receiver import hidpp20
 from logitech_receiver import hidpp20_constants
 from logitech_receiver import special_keys
+from logitech_receiver.hidpp20_constants import GestureId
 
 from . import fake_hidpp
 
@@ -489,11 +490,11 @@ def test_SubParam(id, length, minimum, maximum, widget, min, max, wid, string):
 @pytest.mark.parametrize(
     "device, low, high, next_index, next_diversion_index, name, cbe, si, sdi, eom, dom",
     [
-        (device_standard, 0x01, 0x01, 5, 10, "Tap1Finger", True, 5, None, (0, 0x20), (None, None)),
-        (device_standard, 0x03, 0x02, 6, 11, "Tap3Finger", False, None, 11, (None, None), (1, 0x08)),
+        (device_standard, 0x01, 0x01, 5, 10, GestureId.TAP_1_FINGER, True, 5, None, (0, 0x20), (None, None)),
+        (device_standard, 0x03, 0x02, 6, 11, GestureId.TAP_3_FINGER, False, None, 11, (None, None), (1, 0x08)),
     ],
 )
-def test_Gesture(device, low, high, next_index, next_diversion_index, name, cbe, si, sdi, eom, dom):
+def test_gesture(device, low, high, next_index, next_diversion_index, name, cbe, si, sdi, eom, dom):
     gesture = hidpp20.Gesture(device, low, high, next_index, next_diversion_index)
 
     assert gesture._device == device
