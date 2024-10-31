@@ -2,14 +2,14 @@
 # Copyright (C) 2020 THE solaar'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the solaar package.
 # Automatically generated, 2020.
-# John Erling Blad <jeblad@gmail.com>, 2022-2024.
+# John Erling Blad <jeblad@gmail.com>, 2020-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: solaar 1.0.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-10-24 03:15+0200\n"
-"PO-Revision-Date: 2024-10-26 05:21+0200\n"
+"PO-Revision-Date: 2024-10-31 02:21+0100\n"
 "Last-Translator: John Erling Blad <jeblad@gmail.com>\n"
 "Language-Team:  <gnome-no@gnome.org>\n"
 "Language: nb\n"
@@ -38,7 +38,7 @@ msgstr "Lightspeed mottaker"
 
 #: lib/logitech_receiver/base_usb.py:131
 msgid "EX100 Receiver 27 Mhz"
-msgstr "EX100 mottaker 27 Mhz"
+msgstr "EX100 mottaker 27 Mhz mottaker"
 
 #: lib/logitech_receiver/common.py:648
 #, python-format
@@ -81,11 +81,11 @@ msgstr "Pust"
 
 #: lib/logitech_receiver/hidpp20.py:972
 msgid "Ripple"
-msgstr "Ripple"
+msgstr "Krusning"
 
 #: lib/logitech_receiver/hidpp20.py:973
 msgid "Decomposition"
-msgstr "Decomposition"
+msgstr "Dekomponering"
 
 #: lib/logitech_receiver/hidpp20.py:974
 msgid "Signature1"
@@ -321,11 +321,11 @@ msgstr "Navigering med bevegelsesknapp"
 
 #: lib/logitech_receiver/i18n.py:75
 msgid "Mouse Scroll Left Button"
-msgstr "Rullvenstreknapp for mus"
+msgstr "Venstre rulleknapp for mus"
 
 #: lib/logitech_receiver/i18n.py:76
 msgid "Mouse Scroll Right Button"
-msgstr "Rullhøyreknapp for mus"
+msgstr "Høyre rulleknapp for mus"
 
 #: lib/logitech_receiver/i18n.py:78
 msgid "pressed"
@@ -440,7 +440,7 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:177
 msgid "Sensitivity (DPI - older mice)"
-msgstr "Følsomhet (DPI - eldre mus)"
+msgstr "Følsomhet (DPI – eldre mus)"
 
 #: lib/logitech_receiver/settings_templates.py:178
 #: lib/logitech_receiver/settings_templates.py:977
@@ -466,7 +466,7 @@ msgid ""
 "Illumination level on keyboard.  Changes made are only applied in Manual "
 "mode."
 msgstr ""
-"Lysnivå på tastaturet.  Endringer som er gjort, brukes kun i manuell modus."
+"Lysnivå på tastaturet. Endringer som er gjort, brukes kun i manuell modus."
 
 #: lib/logitech_receiver/settings_templates.py:296
 msgid "Automatic"
@@ -638,15 +638,15 @@ msgstr ""
 
 #: lib/logitech_receiver/settings_templates.py:616
 msgid "Crown smooth scroll"
-msgstr "Krone glatt rulling"
+msgstr "Glatt krone-rulling"
 
 #: lib/logitech_receiver/settings_templates.py:617
 msgid "Set crown smooth scroll"
-msgstr "Still inn krone til glatt rulling"
+msgstr "Still inn glatt krone-rulling"
 
 #: lib/logitech_receiver/settings_templates.py:625
 msgid "Divert G and M Keys"
-msgstr "Omdiriger G og M taster"
+msgstr "Omdiriger G- og M-taster"
 
 #: lib/logitech_receiver/settings_templates.py:626
 msgid ""
@@ -780,7 +780,7 @@ msgstr "Slår av %s-tasten."
 #: lib/logitech_receiver/settings_templates.py:1135
 #: lib/logitech_receiver/settings_templates.py:1192
 msgid "Set OS"
-msgstr "Still inn OS"
+msgstr "Still OS"
 
 #: lib/logitech_receiver/settings_templates.py:1136
 #: lib/logitech_receiver/settings_templates.py:1193
@@ -958,7 +958,7 @@ msgstr "Spre for å zoome inn."
 
 #: lib/logitech_receiver/settings_templates.py:1281
 msgid "Zoom with three fingers."
-msgstr "Zoom med tre fingre"
+msgstr "Zoom med tre fingre."
 
 #: lib/logitech_receiver/settings_templates.py:1282
 msgid "Zoom with two fingers"
@@ -1034,7 +1034,7 @@ msgstr "Omdirigering av bevegelser"
 
 #: lib/logitech_receiver/settings_templates.py:1334
 msgid "Divert mouse/touchpad gestures."
-msgstr "Omdiriger mus/berøringsflatebevegelser."
+msgstr "Omdiriger musens/berøringsflatens bevegelser."
 
 #: lib/logitech_receiver/settings_templates.py:1350
 msgid "Gesture params"
@@ -1157,7 +1157,7 @@ msgstr "Periode"
 
 #: lib/logitech_receiver/settings_templates.py:1607
 msgid "Intensity"
-msgstr "Intesitet"
+msgstr "Intensitet"
 
 #: lib/logitech_receiver/settings_templates.py:1608
 msgid "Ramp"
@@ -1173,7 +1173,7 @@ msgstr "Lys for hver tast"
 
 #: lib/logitech_receiver/settings_templates.py:1662
 msgid "Control per-key lighting."
-msgstr "Kontroller lys for hver tast"
+msgstr "Kontroller lys for hver tast."
 
 #: lib/solaar/ui/__init__.py:117
 msgid "Another Solaar process is already running so just expose its window"
@@ -1485,7 +1485,7 @@ msgstr "Tastetrykk"
 
 #: lib/solaar/ui/diversion_rules.py:374 lib/solaar/ui/rule_actions.py:182
 msgid "Mouse scroll"
-msgstr "Rull med mus"
+msgstr "Muserulling"
 
 #: lib/solaar/ui/diversion_rules.py:375 lib/solaar/ui/rule_actions.py:243
 msgid "Mouse click"
@@ -1514,11 +1514,11 @@ msgstr "Slett"
 
 #: lib/solaar/ui/diversion_rules.py:449
 msgid "Negate"
-msgstr "Neger"
+msgstr "Omvendt"
 
 #: lib/solaar/ui/diversion_rules.py:473
 msgid "Wrap with"
-msgstr "Pakk inn"
+msgstr "Pakk inn med"
 
 #: lib/solaar/ui/diversion_rules.py:503
 msgid "Cut"
@@ -1759,7 +1759,7 @@ msgstr "Legg til tast"
 
 #: lib/solaar/ui/rule_actions.py:56
 msgid "Click"
-msgstr "klikk"
+msgstr "Klikk"
 
 #: lib/solaar/ui/rule_actions.py:59
 msgid "Depress"
