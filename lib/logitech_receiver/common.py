@@ -533,15 +533,6 @@ def flag_names(enum_class: Iterable, value: int) -> Generator[str]:
         yield f"unknown:{unknown_bits:06X}"
 
 
-class UnsortedNamedInts(NamedInts):
-    def _sort_values(self):
-        pass
-
-    def __or__(self, other):
-        c = UnsortedNamedInts if isinstance(other, UnsortedNamedInts) else NamedInts
-        return c(**self.__dict__, **other.__dict__)
-
-
 def strhex(x):
     assert x is not None
     """Produce a hex-string representation of a sequence of bytes."""

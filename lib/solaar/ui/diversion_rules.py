@@ -38,7 +38,6 @@ from gi.repository import Gtk
 from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import NamedInts
-from logitech_receiver.common import UnsortedNamedInts
 from logitech_receiver.settings import KIND as _SKIND
 from logitech_receiver.settings import Setting
 from logitech_receiver.settings_templates import SETTINGS
@@ -1538,7 +1537,7 @@ class _SettingWithValueUI:
         if isinstance(setting, Setting):
             setting = type(setting)
         if isinstance(setting, type) and issubclass(setting, Setting):
-            choices = UnsortedNamedInts()
+            choices = NamedInts()
             universe = getattr(setting, "choices_universe", None)
             if universe:
                 choices |= universe
@@ -1547,7 +1546,7 @@ class _SettingWithValueUI:
                 choices |= NamedInts(**{str(extra): int(extra)})
             return choices, extra
         settings = cls.ALL_SETTINGS.get(setting, [])
-        choices = UnsortedNamedInts()
+        choices = NamedInts()
         extra = None
         for s in settings:
             ch, ext = cls._all_choices(s)
@@ -1567,7 +1566,7 @@ class _SettingWithValueUI:
         val_class = setting.validator_class if setting else None
         kind = val_class.kind if val_class else None
         if kind in cls.MULTIPLE:
-            keys = UnsortedNamedInts()
+            keys = NamedInts()
             for s in settings:
                 universe = getattr(s, "keys_universe" if kind == _SKIND.map_choice else "choices_universe", None)
                 if universe:

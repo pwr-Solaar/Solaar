@@ -189,19 +189,6 @@ def test_named_ints_other():
     assert list(union) == [common.NamedInt(0, "empty"), common.NamedInt(5, "critical"), common.NamedInt(50, "good")]
 
 
-def test_unsorted_named_ints():
-    named_ints = common.UnsortedNamedInts(critical=5, empty=0)
-    named_ints_2 = common.UnsortedNamedInts(good=50)
-
-    union = named_ints.__or__(named_ints_2)
-    unionr = named_ints_2.__or__(named_ints)
-
-    assert len(union) == 3
-    assert list(union) == [common.NamedInt(5, "critical"), common.NamedInt(0, "empty"), common.NamedInt(50, "good")]
-    assert len(unionr) == 3
-    assert list(unionr) == [common.NamedInt(50, "good"), common.NamedInt(5, "critical"), common.NamedInt(0, "empty")]
-
-
 @pytest.mark.parametrize(
     "bytes_input, expected_output",
     [

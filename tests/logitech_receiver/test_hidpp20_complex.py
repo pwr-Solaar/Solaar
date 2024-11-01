@@ -213,7 +213,7 @@ def test_reprogrammable_key_v4_key(device, index, cid, tid, flags, pos, group, g
 @pytest.mark.parametrize(
     "responses, index, mapped_to, remappable_to, mapping_flags",
     [
-        (fake_hidpp.responses_key, 1, "Right Click", common.UnsortedNamedInts(Right_Click=81, Left_Click=80), []),
+        (fake_hidpp.responses_key, 1, "Right Click", common.NamedInts(Right_Click=81, Left_Click=80), []),
         (fake_hidpp.responses_key, 2, "Left Click", None, ["diverted"]),
         (fake_hidpp.responses_key, 3, "Mouse Back Button", None, ["diverted", "persistently diverted"]),
         (fake_hidpp.responses_key, 4, "Mouse Forward Button", None, ["diverted", "raw XY diverted"]),
@@ -421,7 +421,7 @@ device_key = fake_hidpp.Device(
         (special_keys.CONTROL.Virtual_Gesture_Button, 7, common.NamedInt(0x51, "Right Click"), None),
     ],
 )
-def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
+def test_keys_array_v4_key(key, expected_index, expected_mapped_to, expected_remappable_to):
     device_key._keys = _hidpp20.get_keys(device_key)
     device_key._keys._ensure_all_keys_queried()
 
@@ -432,7 +432,7 @@ def test_KeysArrayV4_key(key, expected_index, expected_mapped_to, expected_remap
     assert index == expected_index
     assert mapped_to == expected_mapped_to
     if expected_remappable_to is not None:
-        assert list(remappable_to) == expected_remappable_to
+        assert list(sorted(remappable_to)) == sorted(expected_remappable_to)
 
 
 @pytest.mark.parametrize(
