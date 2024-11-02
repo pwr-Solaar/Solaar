@@ -129,7 +129,7 @@ def test_get_next_sw_id():
     [
         (b"\x8f", Hidpp10Error.INVALID_SUB_ID_COMMAND, False, False),
         (b"\x8f", Hidpp10Error.INVALID_SUB_ID_COMMAND, True, False),
-        (b"\xff", Hidpp20Error.unknown, False, True),
+        (b"\xff", Hidpp20Error.UNKNOWN, False, True),
     ],
 )
 def test_request_errors(
