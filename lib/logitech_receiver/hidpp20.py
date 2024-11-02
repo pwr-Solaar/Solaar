@@ -42,12 +42,13 @@ from .common import BatteryLevelApproximation
 from .common import BatteryStatus
 from .common import FirmwareKind
 from .common import NamedInt
-from .hidpp20_constants import CHARGE_LEVEL
 from .hidpp20_constants import CHARGE_STATUS
-from .hidpp20_constants import CHARGE_TYPE
 from .hidpp20_constants import DEVICE_KIND
-from .hidpp20_constants import ERROR
 from .hidpp20_constants import GESTURE
+from .hidpp20_constants import ChargeLevel
+from .hidpp20_constants import ChargeType
+from .hidpp20_constants import ErrorCode
+from .hidpp20_constants import ParamId
 from .hidpp20_constants import SupportedFeature
 
 logger = logging.getLogger(__name__)
@@ -604,16 +605,6 @@ class KeysArrayPersistent(KeysArray):
             logger.warning(f"Key with index {index} was expected to exist but device doesn't report it.")
 
 
-# Param Ids for feature GESTURE_2
-PARAM = common.NamedInts(
-    ExtraCapabilities=1,  # not suitable for use
-    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
-    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
-    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
-)
-PARAM._fallback = lambda x: f"unknown:{x:04X}"
-
-
 class SubParam:
     __slots__ = ("id", "length", "minimum", "maximum", "widget")
 
@@ -632,20 +623,20 @@ class SubParam:
 
 
 SUB_PARAM = {  # (byte count, minimum, maximum)
-    PARAM["ExtraCapabilities"]: None,  # ignore
-    PARAM["PixelZone"]: (  # TODO: replace min and max with the correct values
+    ParamId.EXTRA_CAPABILITIES: None,  # ignore
+    ParamId.PIXEL_ZONE: (  # TODO: replace min and max with the correct values
         SubParam("left", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("bottom", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("width", 2, 0x0000, 0xFFFF, "SpinButton"),
         SubParam("height", 2, 0x0000, 0xFFFF, "SpinButton"),
     ),
-    PARAM["RatioZone"]: (  # TODO: replace min and max with the correct values
+    ParamId.RATIO_ZONE: (  # TODO: replace min and max with the correct values
         SubParam("left", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("bottom", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("width", 1, 0x00, 0xFF, "SpinButton"),
         SubParam("height", 1, 0x00, 0xFF, "SpinButton"),
     ),
-    PARAM["ScaleFactor"]: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
+    ParamId.SCALE_FACTOR: (SubParam("scale", 2, 0x002E, 0x01FF, "Scale"),),
 }
 
 # Spec Ids for feature GESTURE_2
@@ -765,10 +756,10 @@ class Gesture:
 
 
 class Param:
-    def __init__(self, device, low, high, next_param_index):
+    def __init__(self, device, low: int, high, next_param_index):
         self._device = device
         self.id = low
-        self.param = PARAM[low]
+        self.param = ParamId(low)
         self.size = high & 0x0F
         self.show_in_ui = bool(high & 0x1F)
         self._value = None
@@ -1820,27 +1811,27 @@ def decipher_battery_status(report: FixedBytes5) -> Tuple[Any, Battery]:
     return SupportedFeature.BATTERY_STATUS, Battery(battery_discharge_level, battery_discharge_next_level, status, None)
 
 
-def decipher_battery_voltage(report):
+def decipher_battery_voltage(report: bytes):
     voltage, flags = struct.unpack(">HB", report[:3])
     status = BatteryStatus.DISCHARGING
-    charge_sts = ERROR.unknown
-    charge_lvl = CHARGE_LEVEL.average
-    charge_type = CHARGE_TYPE.standard
+    charge_sts = ErrorCode.UNKNOWN
+    charge_lvl = ChargeLevel.AVERAGE
+    charge_type = ChargeType.STANDARD
     if flags & (1 << 7):
         status = BatteryStatus.RECHARGING
         charge_sts = CHARGE_STATUS[flags & 0x03]
     if charge_sts is None:
-        charge_sts = ERROR.unknown
+        charge_sts = ErrorCode.UNKNOWN
     elif charge_sts == CHARGE_STATUS.full:
-        charge_lvl = CHARGE_LEVEL.full
+        charge_lvl = ChargeLevel.FULL
         status = BatteryStatus.FULL
     if flags & (1 << 3):
-        charge_type = CHARGE_TYPE.fast
+        charge_type = ChargeType.FAST
     elif flags & (1 << 4):
-        charge_type = CHARGE_TYPE.slow
+        charge_type = ChargeType.SLOW
         status = BatteryStatus.SLOW_RECHARGE
     elif flags & (1 << 5):
-        charge_lvl = CHARGE_LEVEL.critical
+        charge_lvl = ChargeLevel.CRITICAL
     for level in battery_voltage_remaining:
         if level[0] < voltage:
             charge_lvl = level[1]
