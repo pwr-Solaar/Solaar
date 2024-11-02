@@ -237,7 +237,7 @@ def _print_device(dev, num=None):
             elif feature == SupportedFeature.REMAINING_PAIRING:
                 print(f"            Remaining Pairings: {int(_hidpp20.get_remaining_pairing(dev))}")
             elif feature == SupportedFeature.ONBOARD_PROFILES:
-                if _hidpp20.get_onboard_mode(dev) == hidpp20_constants.ONBOARD_MODES.MODE_HOST:
+                if _hidpp20.get_onboard_mode(dev) == hidpp20_constants.OnboardMode.MODE_HOST:
                     mode = "Host"
                 else:
                     mode = "On-Board"

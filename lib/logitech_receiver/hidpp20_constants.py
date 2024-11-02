@@ -173,25 +173,44 @@ DEVICE_KIND = NamedInts(
 )
 
 
-ONBOARD_MODES = NamedInts(MODE_NO_CHANGE=0x00, MODE_ONBOARD=0x01, MODE_HOST=0x02)
+class OnboardMode(IntEnum):
+    MODE_NO_CHANGE = 0x00
+    MODE_ONBOARD = 0x01
+    MODE_HOST = 0x02
+
 
 CHARGE_STATUS = NamedInts(charging=0x00, full=0x01, not_charging=0x02, error=0x07)
 
-CHARGE_LEVEL = NamedInts(average=50, full=90, critical=5)
 
-CHARGE_TYPE = NamedInts(standard=0x00, fast=0x01, slow=0x02)
+class ChargeStatus(IntEnum):
+    CHARGING = 0x00
+    FULL = 0x01
+    NOT_CHARGING = 0x02
+    ERROR = 0x07
 
 
-class Error(IntEnum):
-    unknown = (0x01,)
-    invalid_argument = (0x02,)
-    out_of_range = (0x03,)
-    hardware_error = (0x04,)
-    logitech_internal = (0x05,)
-    invalid_feature_index = (0x06,)
-    invalid_function = (0x07,)
-    busy = (0x08,)
-    unsupported = (0x09,)
+class ChargeLevel(IntEnum):
+    AVERAGE = 50
+    FULL = 90
+    CRITICAL = 5
+
+
+class ChargeType(IntEnum):
+    STANDARD = 0x00
+    FAST = 0x01
+    SLOW = 0x02
+
+
+class ErrorCode(IntEnum):
+    UNKNOWN = 0x01
+    INVALID_ARGUMENT = 0x02
+    OUT_OF_RANGE = 0x03
+    HARDWARE_ERROR = 0x04
+    LOGITECH_ERROR = 0x05
+    INVALID_FEATURE_INDEX = 0x06
+    INVALID_FUNCTION = 0x07
+    BUSY = 0x08
+    UNSUPPORTED = 0x09
 
 
 # Gesture Ids for feature GESTURE_2
@@ -259,11 +278,11 @@ GESTURE = NamedInts(
 )
 GESTURE._fallback = lambda x: f"unknown:{x:04X}"
 
-# Param Ids for feature GESTURE_2
-PARAM = NamedInts(
-    ExtraCapabilities=1,  # not suitable for use
-    PixelZone=2,  # 4 2-byte integers, left, bottom, width, height; pixels
-    RatioZone=3,  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
-    ScaleFactor=4,  # 2-byte integer, with 256 as normal scale
-)
-PARAM._fallback = lambda x: f"unknown:{x:04X}"
+
+class ParamId(IntEnum):
+    """Param Ids for feature GESTURE_2"""
+
+    EXTRA_CAPABILITIES = 1  # not suitable for use
+    PIXEL_ZONE = 2  # 4 2-byte integers, left, bottom, width, height; pixels
+    RATIO_ZONE = 3  # 4 bytes, left, bottom, width, height; unit 1/240 pad size
+    SCALE_FACTOR = 4  # 2-byte integer, with 256 as normal scale

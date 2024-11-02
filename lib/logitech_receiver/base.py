@@ -38,7 +38,7 @@ from . import exceptions
 from .common import LOGITECH_VENDOR_ID
 from .common import BusID
 from .hidpp10_constants import ErrorCode as Hidpp10ErrorCode
-from .hidpp20_constants import Error as Hidpp20ErrorCode
+from .hidpp20_constants import ErrorCode as Hidpp20ErrorCode
 
 if typing.TYPE_CHECKING:
     import gi
@@ -679,7 +679,7 @@ def ping(handle, devnumber, long_message: bool = False):
                         if error == Hidpp10ErrorCode.INVALID_SUB_ID_COMMAND:
                             # a valid reply from a HID++ 1.0 device
                             return 1.0
-                        if error == Hidpp10ErrorCode.RESOURCE_ERROR or error == Hidpp10ErrorCode.CONNECTION_REQUEST_FAILED:
+                        if error in [Hidpp10ErrorCode.RESOURCE_ERROR, Hidpp10ErrorCode.CONNECTION_REQUEST_FAILED]:
                             return  # device unreachable
                         if error == Hidpp10ErrorCode.UNKNOWN_DEVICE:  # no paired device with that number
                             logger.error("(%s) device %d error on ping request: unknown device", handle, devnumber)
