@@ -88,19 +88,19 @@ NOTIFICATION_FLAG = NamedInts(
 )
 
 
-class Error(IntEnum):
-    invalid_SubID__command = 0x01
-    invalid_address = 0x02
-    invalid_value = 0x03
-    connection_request_failed = 0x04
-    too_many_devices = 0x05
-    already_exists = 0x06
-    busy = 0x07
-    unknown_device = 0x08
-    resource_error = 0x09
-    request_unavailable = 0x0A
-    unsupported_parameter_value = 0x0B
-    wrong_pin_code = 0x0C
+class ErrorCode(IntEnum):
+    INVALID_SUB_ID_COMMAND = 0x01
+    INVALID_ADDRESS = 0x02
+    INVALID_VALUE = 0x03
+    CONNECTION_REQUEST_FAILED = 0x04
+    TOO_MANY_DEVICES = 0x05
+    ALREADY_EXISTS = 0x06
+    BUSY = 0x07
+    UNKNOWN_DEVICE = 0x08
+    RESOURCE_ERROR = 0x09
+    REQUEST_UNAVAILABLE = 0x0A
+    UNSUPPORTED_PARAMETER_VALUE = 0x0B
+    WRONG_PIN_CODE = 0x0C
 
 
 class PairingError(IntEnum):
