@@ -11,7 +11,7 @@ from logitech_receiver import exceptions
 from logitech_receiver.base import HIDPP_SHORT_MESSAGE_ID
 from logitech_receiver.base import request
 from logitech_receiver.hidpp10_constants import ErrorCode as Hidpp10Error
-from logitech_receiver.hidpp20_constants import Error as Hidpp20Error
+from logitech_receiver.hidpp20_constants import ErrorCode as Hidpp20Error
 
 
 @pytest.mark.parametrize(
