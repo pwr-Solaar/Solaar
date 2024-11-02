@@ -16,7 +16,7 @@
 
 from logitech_receiver import base
 from logitech_receiver.common import strhex
-from logitech_receiver.hidpp10_constants import Error
+from logitech_receiver.hidpp10_constants import ErrorCode
 from logitech_receiver.hidpp10_constants import Registers
 
 from solaar.cli.show import _print_device
@@ -99,9 +99,9 @@ def run(receivers, args, find_receiver, _ignore):
             last = None
             for sub in range(0, 0xFF):
                 rgst = base.request(receiver.handle, 0xFF, 0x8100 | (offset + reg), sub, return_error=True)
-                if isinstance(rgst, int) and rgst == Error.invalid_address:
+                if isinstance(rgst, int) and rgst == ErrorCode.INVALID_ADDRESS:
                     break
-                elif isinstance(rgst, int) and rgst == Error.invalid_value:
+                elif isinstance(rgst, int) and rgst == ErrorCode.INVALID_VALUE:
                     continue
                 else:
                     if not isinstance(last, bytes) or not isinstance(rgst, bytes) or last != rgst:
