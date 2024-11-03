@@ -666,21 +666,21 @@ def _create_sbox(s, _device):
     change.set_sensitive(True)
     change.connect("clicked", _change_click, sbox)
 
-    if s.kind == settings.KIND.toggle:
+    if s.kind == settings.Kind.TOGGLE:
         control = ToggleControl(sbox)
-    elif s.kind == settings.KIND.range:
+    elif s.kind == settings.Kind.RANGE:
         control = SliderControl(sbox)
-    elif s.kind == settings.KIND.choice:
+    elif s.kind == settings.Kind.CHOICE:
         control = _create_choice_control(sbox)
-    elif s.kind == settings.KIND.map_choice:
+    elif s.kind == settings.Kind.MAP_CHOICE:
         control = MapChoiceControl(sbox)
-    elif s.kind == settings.KIND.multiple_toggle:
+    elif s.kind == settings.Kind.MULTIPLE_TOGGLE:
         control = MultipleToggleControl(sbox, change)
-    elif s.kind == settings.KIND.multiple_range:
+    elif s.kind == settings.Kind.MULTIPLE_RANGE:
         control = MultipleRangeControl(sbox, change)
-    elif s.kind == settings.KIND.packed_range:
+    elif s.kind == settings.Kind.PACKED_RANGE:
         control = PackedRangeControl(sbox, change)
-    elif s.kind == settings.KIND.hetero:
+    elif s.kind == settings.Kind.HETERO:
         control = HeteroKeyControl(sbox, change)
     else:
         if logger.isEnabledFor(logging.WARNING):

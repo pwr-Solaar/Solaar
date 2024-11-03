@@ -39,7 +39,7 @@ from logitech_receiver import diversion as _DIV
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import NamedInts
 from logitech_receiver.common import UnsortedNamedInts
-from logitech_receiver.settings import KIND as _SKIND
+from logitech_receiver.settings import Kind
 from logitech_receiver.settings import Setting
 from logitech_receiver.settings_templates import SETTINGS
 
@@ -1455,7 +1455,7 @@ class HostUI(ConditionUI):
 
 class _SettingWithValueUI:
     ALL_SETTINGS = _all_settings()
-    MULTIPLE = [_SKIND.multiple_toggle, _SKIND.map_choice, _SKIND.multiple_range]
+    MULTIPLE = [Kind.MULTIPLE_TOGGLE, Kind.MAP_CHOICE, Kind.MULTIPLE_RANGE]
     ACCEPT_TOGGLE = True
 
     label_text = ""
@@ -1569,7 +1569,7 @@ class _SettingWithValueUI:
         if kind in cls.MULTIPLE:
             keys = UnsortedNamedInts()
             for s in settings:
-                universe = getattr(s, "keys_universe" if kind == _SKIND.map_choice else "choices_universe", None)
+                universe = getattr(s, "keys_universe" if kind == Kind.MAP_CHOICE else "choices_universe", None)
                 if universe:
                     keys |= universe
             # only one key per number is used
@@ -1641,12 +1641,12 @@ class _SettingWithValueUI:
             supported_keys = None
             if device_setting:
                 val = device_setting._validator
-                if device_setting.kind == _SKIND.multiple_toggle:
+                if device_setting.kind == Kind.MULTIPLE_TOGGLE:
                     supported_keys = val.get_options() or None
-                elif device_setting.kind == _SKIND.map_choice:
+                elif device_setting.kind == Kind.MAP_CHOICE:
                     choices = val.choices or None
                     supported_keys = choices.keys() if choices else None
-                elif device_setting.kind == _SKIND.multiple_range:
+                elif device_setting.kind == Kind.MULTIPLE_RANGE:
                     supported_keys = val.keys
             self.key_field.show_only(supported_keys, include_new=True)
             self._update_validation()
@@ -1655,24 +1655,24 @@ class _SettingWithValueUI:
         setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
         ds = device.settings if device else {}
         device_setting = ds.get(setting_name, None)
-        if kind in (_SKIND.toggle, _SKIND.multiple_toggle):
+        if kind in (Kind.TOGGLE, Kind.MULTIPLE_TOGGLE):
             self.value_field.make_toggle()
-        elif kind in (_SKIND.choice, _SKIND.map_choice):
+        elif kind in (Kind.CHOICE, Kind.MAP_CHOICE):
             all_values, extra = self._all_choices(device_setting or setting_name)
             self.value_field.make_choice(all_values, extra)
             supported_values = None
             if device_setting:
                 val = device_setting._validator
                 choices = getattr(val, "choices", None) or None
-                if kind == _SKIND.choice:
+                if kind == Kind.CHOICE:
                     supported_values = choices
-                elif kind == _SKIND.map_choice and isinstance(choices, dict):
+                elif kind == Kind.MAP_CHOICE and isinstance(choices, dict):
                     supported_values = choices.get(key, None) or None
             self.value_field.choice_widget.show_only(supported_values, include_new=True)
             self._update_validation()
-        elif kind == _SKIND.range:
+        elif kind == Kind.RANGE:
             self.value_field.make_range(val_class.min_value, val_class.max_value)
-        elif kind == _SKIND.multiple_range:
+        elif kind == Kind.MULTIPLE_RANGE:
             self.value_field.make_range_with_key(
                 getattr(setting, "sub_items_universe", {}).get(key, {}) if setting else {},
                 getattr(setting, "_labels_sub", None) if setting else None,
@@ -1703,7 +1703,7 @@ class _SettingWithValueUI:
             key = self.key_field.get_value(invalid_as_str=False, accept_hidden=False)
             icon = "dialog-warning" if key is None else ""
             self.key_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
-        if kind in (_SKIND.choice, _SKIND.map_choice):
+        if kind in (Kind.CHOICE, Kind.MAP_CHOICE):
             value = self.value_field.choice_widget.get_value(invalid_as_str=False, accept_hidden=False)
             icon = "dialog-warning" if value is None else ""
             self.value_field.choice_widget.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
@@ -1758,26 +1758,26 @@ class _SettingWithValueUI:
             key_label = getattr(setting, "_labels", {}).get(key, [None])[0] if setting else None
             disp.append(key_label or key)
         value = next(a, None)
-        if setting and (kind in (_SKIND.choice, _SKIND.map_choice)):
+        if setting and (kind in (Kind.CHOICE, Kind.MAP_CHOICE)):
             all_values = cls._all_choices(setting or setting_name)[0]
             supported_values = None
             if device_setting:
                 val = device_setting._validator
                 choices = getattr(val, "choices", None) or None
-                if kind == _SKIND.choice:
+                if kind == Kind.CHOICE:
                     supported_values = choices
-                elif kind == _SKIND.map_choice and isinstance(choices, dict):
+                elif kind == Kind.MAP_CHOICE and isinstance(choices, dict):
                     supported_values = choices.get(key, None) or None
                 if supported_values and isinstance(supported_values, NamedInts):
                     value = supported_values[value]
             if not supported_values and all_values and isinstance(all_values, NamedInts):
                 value = all_values[value]
             disp.append(value)
-        elif kind == _SKIND.multiple_range and isinstance(value, dict) and len(value) == 1:
+        elif kind == Kind.MULTIPLE_RANGE and isinstance(value, dict) and len(value) == 1:
             k, v = next(iter(value.items()))
             k = (getattr(setting, "_labels_sub", {}).get(k, (None,))[0] if setting else None) or k
             disp.append(f"{k}={v}")
-        elif kind in (_SKIND.toggle, _SKIND.multiple_toggle):
+        elif kind in (Kind.TOGGLE, Kind.MULTIPLE_TOGGLE):
             disp.append(_(str(value)))
         else:
             disp.append(value)
