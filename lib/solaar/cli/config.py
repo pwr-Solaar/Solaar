@@ -13,6 +13,7 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+import typing
 
 import yaml
 
@@ -21,6 +22,9 @@ from logitech_receiver import settings_templates
 from logitech_receiver.common import NamedInts
 
 from solaar import configuration
+
+if typing.TYPE_CHECKING:
+    from logitech_receiver.settings_templates import SettingsProtocol
 
 APP_ID = "io.github.pwr_solaar.solaar"
 
@@ -215,7 +219,7 @@ def run(receivers, args, _find_receiver, find_device):
             dev.persister[setting.name] = setting._value
 
 
-def set(dev, setting: settings.Setting, args, save):
+def set(dev, setting: SettingsProtocol, args, save):
     if setting.kind == settings.Kind.TOGGLE:
         value = select_toggle(args.value_key, setting)
         args.value_key = value

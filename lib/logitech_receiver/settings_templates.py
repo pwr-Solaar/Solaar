@@ -24,6 +24,7 @@ import traceback
 from time import time
 from typing import Any
 from typing import Callable
+from typing import Protocol
 
 from solaar.i18n import _
 
@@ -1805,7 +1806,95 @@ SETTINGS: list[settings.Setting] = [
 ]
 
 
-def check_feature(device, settings_class: settings.Setting) -> None | bool | Any:
+class SettingsProtocol(Protocol):
+    @property
+    def name(self):
+        ...
+
+    @property
+    def label(self):
+        ...
+
+    @property
+    def description(self):
+        ...
+
+    @property
+    def feature(self):
+        ...
+
+    @property
+    def register(self):
+        ...
+
+    @property
+    def kind(self):
+        ...
+
+    @property
+    def min_version(self):
+        ...
+
+    @property
+    def persist(self):
+        ...
+
+    @property
+    def rw_options(self):
+        ...
+
+    @property
+    def validator_class(self):
+        ...
+
+    @property
+    def validator_options(self):
+        ...
+
+    @classmethod
+    def build(cls, device):
+        ...
+
+    def val_to_string(self, value):
+        ...
+
+    @property
+    def choices(self):
+        ...
+
+    @property
+    def range(self):
+        ...
+
+    def _pre_read(self, cached, key=None):
+        ...
+
+    def read(self, cached=True):
+        ...
+
+    def _pre_write(self, save=True):
+        ...
+
+    def update(self, value, save=True):
+        ...
+
+    def write(self, value, save=True):
+        ...
+
+    def acceptable(self, args, current):
+        ...
+
+    def compare(self, args, current):
+        ...
+
+    def apply(self):
+        ...
+
+    def __str__(self):
+        ...
+
+
+def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Any:
     if settings_class.feature not in device.features:
         return
     if settings_class.min_version > device.features.get_feature_version(settings_class.feature):
