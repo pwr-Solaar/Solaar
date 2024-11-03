@@ -27,22 +27,10 @@ from . import common
 from . import hidpp20_constants
 from . import settings_validator
 from .common import NamedInt
-from .common import NamedInts
 
 logger = logging.getLogger(__name__)
 
-
 SENSITIVITY_IGNORE = "ignore"
-KIND = NamedInts(
-    toggle=0x01,
-    choice=0x02,
-    range=0x04,
-    map_choice=0x0A,
-    multiple_toggle=0x10,
-    packed_range=0x20,
-    multiple_range=0x40,
-    hetero=0x80,
-)
 
 
 class Kind(IntEnum):

@@ -105,7 +105,7 @@ class Control:
     def layout(self, sbox, label, change, spinner, failed):
         sbox.pack_start(label, False, False, 0)
         sbox.pack_end(change, False, False, 0)
-        fill = sbox.setting.kind == settings.KIND.range or sbox.setting.kind == settings.KIND.hetero
+        fill = sbox.setting.kind == settings.Kind.RANGE or sbox.setting.kind == settings.Kind.HETERO
         sbox.pack_end(self, fill, fill, 0)
         sbox.pack_end(spinner, False, False, 0)
         sbox.pack_end(failed, False, False, 0)
@@ -544,13 +544,13 @@ class HeteroKeyControl(Gtk.HBox, Control):
                 item_lblbox = None
 
             item_box = ComboBoxText()
-            if item["kind"] == settings.KIND.choice:
+            if item["kind"] == settings.Kind.CHOICE:
                 for entry in item["choices"]:
                     item_box.append(str(int(entry)), str(entry))
                 item_box.set_active(0)
                 item_box.connect("changed", self.changed)
                 self.pack_start(item_box, False, False, 0)
-            elif item["kind"] == settings.KIND.range:
+            elif item["kind"] == settings.Kind.RANGE:
                 item_box = Scale()
                 item_box.set_range(item["min"], item["max"])
                 item_box.set_round_digits(0)
