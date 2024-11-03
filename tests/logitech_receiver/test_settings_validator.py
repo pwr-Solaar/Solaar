@@ -1,6 +1,6 @@
 import pytest
 
-from logitech_receiver import settings
+from logitech_receiver import settings_validator
 
 
 @pytest.mark.parametrize(
@@ -20,6 +20,6 @@ from logitech_receiver import settings
     ],
 )
 def test_bool_or_toggle(current, new, expected):
-    result = settings.bool_or_toggle(current=current, new=new)
+    result = settings_validator.bool_or_toggle(current=current, new=new)
 
     assert result == expected
