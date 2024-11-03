@@ -30,9 +30,9 @@ def _print_setting(s, verbose=True):
     if verbose:
         if s.description:
             print("#", s.description.replace("\n", " "))
-        if s.kind == settings.KIND.toggle:
+        if s.kind == settings.Kind.TOGGLE:
             print("#   possible values: on/true/t/yes/y/1 or off/false/f/no/n/0 or Toggle/~")
-        elif s.kind == settings.KIND.choice:
+        elif s.kind == settings.Kind.CHOICE:
             print(
                 "#   possible values: one of [",
                 ", ".join(str(v) for v in s.choices),
@@ -53,7 +53,7 @@ def _print_setting_keyed(s, key, verbose=True):
     if verbose:
         if s.description:
             print("#", s.description.replace("\n", " "))
-        if s.kind == settings.KIND.multiple_toggle:
+        if s.kind == settings.Kind.MULTIPLE_TOGGLE:
             k = next((k for k in s._labels if key == k), None)
             if k is None:
                 print(s.name, "=? (key not found)")
@@ -64,7 +64,7 @@ def _print_setting_keyed(s, key, verbose=True):
                     print(s.name, "= ? (failed to read from device)")
                 else:
                     print(s.name, s.val_to_string({k: value[str(int(k))]}))
-        elif s.kind == settings.KIND.map_choice:
+        elif s.kind == settings.Kind.MAP_CHOICE:
             k = next((k for k in s.choices.keys() if key == k), None)
             if k is None:
                 print(s.name, "=? (key not found)")
@@ -215,26 +215,26 @@ def run(receivers, args, _find_receiver, find_device):
             dev.persister[setting.name] = setting._value
 
 
-def set(dev, setting, args, save):
-    if setting.kind == settings.KIND.toggle:
+def set(dev, setting: settings.Setting, args, save):
+    if setting.kind == settings.Kind.TOGGLE:
         value = select_toggle(args.value_key, setting)
         args.value_key = value
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == settings.KIND.range:
+    elif setting.kind == settings.Kind.RANGE:
         value = select_range(args.value_key, setting)
         args.value_key = value
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == settings.KIND.choice:
+    elif setting.kind == settings.Kind.CHOICE:
         value = select_choice(args.value_key, setting.choices, setting, None)
         args.value_key = int(value)
         message = f"Setting {setting.name} of {dev.name} to {value}"
         result = setting.write(value, save=save)
 
-    elif setting.kind == settings.KIND.map_choice:
+    elif setting.kind == settings.Kind.MAP_CHOICE:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
             return None, None, None
@@ -252,7 +252,7 @@ def set(dev, setting, args, save):
         message = f"Setting {setting.name} of {dev.name} key {k!r} to {value!r}"
         result = setting.write_key_value(int(k), value, save=save)
 
-    elif setting.kind == settings.KIND.multiple_toggle:
+    elif setting.kind == settings.Kind.MULTIPLE_TOGGLE:
         if args.extra_subkey is None:
             _print_setting_keyed(setting, args.value_key)
             return None, None, None
@@ -271,7 +271,7 @@ def set(dev, setting, args, save):
         message = f"Setting {setting.name} key {k!r} to {value!r}"
         result = setting.write_key_value(str(int(k)), value, save=save)
 
-    elif setting.kind == settings.KIND.multiple_range:
+    elif setting.kind == settings.Kind.MULTIPLE_RANGE:
         if args.extra_subkey is None:
             raise Exception(f"{setting.name}: setting needs both key and value to set")
         key = args.value_key

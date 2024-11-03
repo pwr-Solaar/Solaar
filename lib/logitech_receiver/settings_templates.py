@@ -36,6 +36,7 @@ from . import hidpp10_constants
 from . import hidpp20
 from . import hidpp20_constants
 from . import settings
+from . import settings_validator
 from . import special_keys
 from .hidpp10_constants import Registers
 from .hidpp20_constants import GestureId
@@ -177,7 +178,7 @@ class RegisterDpi(settings.Setting):
     description = _("Mouse movement sensitivity")
     register = Registers.MOUSE_DPI
     choices_universe = common.NamedInts.range(0x81, 0x8F, lambda x: str((x - 0x80) * 100))
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
@@ -251,7 +252,7 @@ class Backlight(settings.Setting):
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT
     choices_universe = common.NamedInts(Off=0, Varying=2, VeryShort=5, Short=10, Medium=20, Long=60, VeryLong=180)
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
@@ -285,7 +286,7 @@ class Backlight2(settings.Setting):
             backlight.write()
             return True
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             backlight = device.backlight
@@ -322,7 +323,7 @@ class Backlight2Level(settings.Setting):
                 device.backlight.write()
             return True
 
-    class validator_class(settings.RangeValidator):
+    class validator_class(settings_validator.RangeValidator):
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.BACKLIGHT2, 0x20)
@@ -334,7 +335,7 @@ class Backlight2Level(settings.Setting):
 class Backlight2Duration(settings.Setting):
     feature = _F.BACKLIGHT2
     min_version = 3
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     min_value = 1
     max_value = 600  # 10 minutes - actual maximum is 2 hours
     validator_options = {"byte_count": 2}
@@ -363,7 +364,7 @@ class Backlight2DurationHandsOut(Backlight2Duration):
     label = _("Backlight Delay Hands Out")
     description = _("Delay in seconds until backlight fades out with hands away from keyboard.")
     feature = _F.BACKLIGHT2
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     rw_options = {"field": "dho"}
 
 
@@ -372,7 +373,7 @@ class Backlight2DurationHandsIn(Backlight2Duration):
     label = _("Backlight Delay Hands In")
     description = _("Delay in seconds until backlight fades out with hands near keyboard.")
     feature = _F.BACKLIGHT2
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     rw_options = {"field": "dhi"}
 
 
@@ -381,7 +382,7 @@ class Backlight2DurationPowered(Backlight2Duration):
     label = _("Backlight Delay Powered")
     description = _("Delay in seconds until backlight fades out with external power.")
     feature = _F.BACKLIGHT2
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     rw_options = {"field": "dpow"}
 
 
@@ -391,7 +392,7 @@ class Backlight3(settings.Setting):
     description = _("Set illumination time for keyboard.")
     feature = _F.BACKLIGHT3
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20, "suffix": b"\x09"}
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 1000
     validator_options = {"byte_count": 2}
@@ -455,7 +456,7 @@ class PointerSpeed(settings.Setting):
     label = _("Sensitivity (Pointer Speed)")
     description = _("Speed multiplier for mouse (256 is normal multiplier).")
     feature = _F.POINTER_SPEED
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     min_value = 0x002E
     max_value = 0x01FF
     validator_options = {"byte_count": 2}
@@ -502,7 +503,7 @@ class OnboardProfiles(settings.Setting):
     for i in range(1, 16):
         choices_universe[i] = f"Profile {i}"
         choices_universe[i + 0x100] = f"Read-Only Profile {i}"
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
 
     class rw_class:
         def __init__(self, feature):
@@ -526,7 +527,7 @@ class OnboardProfiles(settings.Setting):
                 profile_change(device, common.bytes2int(data_bytes))
             return result
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             headers = hidpp20.OnboardProfiles.get_profile_headers(device)
@@ -556,7 +557,7 @@ class ReportRate(settings.Setting):
     choices_universe[7] = "7ms"
     choices_universe[8] = "8ms"
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             # if device.wpid == '408E':
@@ -588,7 +589,7 @@ class ExtendedReportRate(settings.Setting):
     choices_universe[5] = "250us"
     choices_universe[6] = "125us"
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x10)
@@ -640,7 +641,7 @@ class ScrollRatchet(settings.Setting):
     description = _("Switch the mouse wheel between speed-controlled ratcheting and always freespin.")
     feature = _F.SMART_SHIFT
     choices_universe = common.NamedInts(**{_("Freespinning"): 1, _("Ratcheted"): 2})
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
@@ -683,7 +684,7 @@ class SmartShift(settings.Setting):
 
     min_value = rw_class.MIN_VALUE
     max_value = rw_class.MAX_VALUE
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
 
 
 class SmartShiftEnhanced(SmartShift):
@@ -730,7 +731,7 @@ class ReprogrammableKeys(settings.Settings):
             key_struct.remap(special_keys.CONTROL[common.bytes2int(data_bytes)])
             return True
 
-    class validator_class(settings.ChoicesMapValidator):
+    class validator_class(settings_validator.ChoicesMapValidator):
         @classmethod
         def build(cls, setting_class, device):
             choices = {}
@@ -907,7 +908,7 @@ class DivertKeys(settings.Settings):
             key_struct.set_diverted(common.bytes2int(data_bytes) != 0)  # not regular
             return True
 
-    class validator_class(settings.ChoicesMapValidator):
+    class validator_class(settings_validator.ChoicesMapValidator):
         def __init__(self, choices, key_byte_count=2, byte_count=1, mask=0x01):
             super().__init__(choices, key_byte_count, byte_count, mask)
 
@@ -983,7 +984,7 @@ class AdjustableDpi(settings.Setting):
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30}
     choices_universe = common.NamedInts.range(100, 4000, str, 50)
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             dpilist = produce_dpi_list(setting_class.feature, 0x10, 1, device, 0)
@@ -1024,7 +1025,7 @@ class ExtendedAdjustableDpi(settings.Setting):
         result = self.write(self._value, save)
         return result[key] if isinstance(result, dict) else result
 
-    class validator_class(settings.ChoicesMapValidator):
+    class validator_class(settings_validator.ChoicesMapValidator):
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(setting_class.feature, 0x10, 0x00)
@@ -1107,7 +1108,7 @@ class SpeedChange(settings.Setting):
             if self.device.persister:
                 self.device.persister["_speed-change"] = currentSpeed
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             key_index = device.keys.index(special_keys.CONTROL.DPI_Change)
@@ -1126,7 +1127,7 @@ class DisableKeyboardKeys(settings.BitFieldSetting):
     _labels = {k: (None, _("Disables the %s key.") % k) for k in special_keys.DISABLE}
     choices_universe = special_keys.DISABLE
 
-    class validator_class(settings.BitFieldValidator):
+    class validator_class(settings_validator.BitFieldValidator):
         @classmethod
         def build(cls, setting_class, device):
             mask = device.feature_request(_F.KEYBOARD_DISABLE_KEYS, 0x00)[0]
@@ -1158,7 +1159,7 @@ class Multiplatform(settings.Setting):
     # the problem here is how to construct the right values for the rules Set GUI,
     # as, for example, the integer value for 'Windows' can be different on different devices
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             def _str_os_versions(low, high):
@@ -1200,7 +1201,7 @@ class DualPlatform(settings.Setting):
     choices_universe[0x01] = "Android, Windows"
     feature = _F.DUALPLATFORM
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x20}
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
@@ -1213,7 +1214,7 @@ class ChangeHost(settings.Setting):
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10, "no_reply": True}
     choices_universe = common.NamedInts(**{"Host " + str(i + 1): i for i in range(3)})
 
-    class validator_class(settings.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):
         @classmethod
         def build(cls, setting_class, device):
             infos = device.feature_request(_F.CHANGE_HOST)
@@ -1325,7 +1326,7 @@ class Gesture2Gestures(settings.BitFieldWithOffsetAndMaskSetting):
     choices_universe = hidpp20_constants.GestureId
     _labels = _GESTURE2_GESTURES_LABELS
 
-    class validator_class(settings.BitFieldWithOffsetAndMaskValidator):
+    class validator_class(settings_validator.BitFieldWithOffsetAndMaskValidator):
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_enabled or g.default_enabled]
@@ -1342,7 +1343,7 @@ class Gesture2Divert(settings.BitFieldWithOffsetAndMaskSetting):
     choices_universe = hidpp20_constants.GestureId
     _labels = _GESTURE2_GESTURES_LABELS
 
-    class validator_class(settings.BitFieldWithOffsetAndMaskValidator):
+    class validator_class(settings_validator.BitFieldWithOffsetAndMaskValidator):
         @classmethod
         def build(cls, setting_class, device, om_method=None):
             options = [g for g in device.gestures.gestures.values() if g.can_be_diverted]
@@ -1363,7 +1364,7 @@ class Gesture2Params(settings.LongSettings):
     _labels = _GESTURE2_PARAMS_LABELS
     _labels_sub = _GESTURE2_PARAMS_LABELS_SUB
 
-    class validator_class(settings.MultipleRangeValidator):
+    class validator_class(settings_validator.MultipleRangeValidator):
         @classmethod
         def build(cls, setting_class, device):
             params = _hidpp20.get_gestures(device).params.values()
@@ -1397,7 +1398,7 @@ class MKeyLEDs(settings.BitFieldSetting):
         def read(self, device):  # no way to read, so just assume off
             return b"\x00"
 
-    class validator_class(settings.BitFieldValidator):
+    class validator_class(settings_validator.BitFieldValidator):
         @classmethod
         def build(cls, setting_class, device):
             number = device.feature_request(setting_class.feature, 0x00)[0]
@@ -1455,7 +1456,7 @@ class PersistentRemappableAction(settings.Settings):
             v = ks.remap(data_bytes)
             return v
 
-    class validator_class(settings.ChoicesMapValidator):
+    class validator_class(settings_validator.ChoicesMapValidator):
         @classmethod
         def build(cls, setting_class, device):
             remap_keys = device.remap_keys
@@ -1494,7 +1495,7 @@ class Sidetone(settings.Setting):
     label = _("Sidetone")
     description = _("Set sidetone level.")
     feature = _F.SIDETONE
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     min_value = 0
     max_value = 100
 
@@ -1507,7 +1508,7 @@ class Equalizer(settings.RangeFieldSetting):
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30, "read_prefix": b"\x00"}
     keys_universe = []
 
-    class validator_class(settings.PackedRangeValidator):
+    class validator_class(settings_validator.PackedRangeValidator):
         @classmethod
         def build(cls, setting_class, device):
             data = device.feature_request(_F.EQUALIZER, 0x00)
@@ -1534,7 +1535,7 @@ class ADCPower(settings.Setting):
     description = _("Power off in minutes (0 for never).")
     feature = _F.ADC_MEASUREMENT
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
     min_value = 0x00
     max_value = 0xFF
     validator_options = {"byte_count": 1}
@@ -1546,7 +1547,7 @@ class BrightnessControl(settings.Setting):
     description = _("Control overall brightness")
     feature = _F.BRIGHTNESS_CONTROL
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
-    validator_class = settings.RangeValidator
+    validator_class = settings_validator.RangeValidator
 
     def __init__(self, device, rw, validator):
         super().__init__(device, rw, validator)
@@ -1570,7 +1571,7 @@ class BrightnessControl(settings.Setting):
                     return reply
             return super().write(device, data_bytes)
 
-    class validator_class(settings.RangeValidator):
+    class validator_class(settings_validator.RangeValidator):
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.BRIGHTNESS_CONTROL)
@@ -1591,7 +1592,7 @@ class LEDControl(settings.Setting):
     feature = _F.COLOR_LED_EFFECTS
     rw_options = {"read_fnid": 0x70, "write_fnid": 0x80}
     choices_universe = common.NamedInts(Device=0, Solaar=1)
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe}
 
 
@@ -1605,12 +1606,13 @@ class LEDZoneSetting(settings.Setting):
     label = _("LED Zone Effects")
     description = _("Set effect for LED Zone") + "\n" + _("LED Control needs to be set to Solaar to be effective.")
     feature = _F.COLOR_LED_EFFECTS
-    color_field = {"name": _LEDP.color, "kind": settings.KIND.choice, "label": None, "choices": colors}
-    speed_field = {"name": _LEDP.speed, "kind": settings.KIND.range, "label": _("Speed"), "min": 0, "max": 255}
-    period_field = {"name": _LEDP.period, "kind": settings.KIND.range, "label": _("Period"), "min": 100, "max": 5000}
-    intensity_field = {"name": _LEDP.intensity, "kind": settings.KIND.range, "label": _("Intensity"), "min": 0, "max": 100}
-    ramp_field = {"name": _LEDP.ramp, "kind": settings.KIND.choice, "label": _("Ramp"), "choices": hidpp20.LEDRampChoices}
-    # form_field = {"name": _LEDP.form, "kind": settings.KIND.choice, "label": _("Form"), "choices": _hidpp20.LEDFormChoices}
+    color_field = {"name": _LEDP.color, "kind": settings.Kind.CHOICE, "label": None, "choices": colors}
+    speed_field = {"name": _LEDP.speed, "kind": settings.Kind.RANGE, "label": _("Speed"), "min": 0, "max": 255}
+    period_field = {"name": _LEDP.period, "kind": settings.Kind.RANGE, "label": _("Period"), "min": 100, "max": 5000}
+    intensity_field = {"name": _LEDP.intensity, "kind": settings.Kind.RANGE, "label": _("Intensity"), "min": 0, "max": 100}
+    ramp_field = {"name": _LEDP.ramp, "kind": settings.Kind.CHOICE, "label": _("Ramp"), "choices": hidpp20.LEDRampChoices}
+    # form_field = {"name": _LEDP.form, "kind": settings.Kind.CHOICE, "label": _("Form"), "choices":
+    # _hidpp20.LEDFormChoices}
     possible_fields = [color_field, speed_field, period_field, intensity_field, ramp_field]
 
     @classmethod
@@ -1620,14 +1622,14 @@ class LEDZoneSetting(settings.Setting):
         for zone in infos.zones:
             prefix = common.int2bytes(zone.index, 1)
             rw = settings.FeatureRW(cls.feature, read_fnid, write_fnid, prefix=prefix, suffix=suffix)
-            validator = settings.HeteroValidator(
+            validator = settings_validator.HeteroValidator(
                 data_class=hidpp20.LEDEffectSetting, options=zone.effects, readable=infos.readable
             )
             setting = cls(device, rw, validator)
             setting.name = cls.name + str(int(zone.location))
             setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
             choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
-            ID_field = {"name": "ID", "kind": settings.KIND.choice, "label": None, "choices": choices}
+            ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
             setting.possible_fields = [ID_field] + cls.possible_fields
             setting.fields_map = hidpp20.LEDEffects
             settings_.append(setting)
@@ -1645,7 +1647,7 @@ class RGBControl(settings.Setting):
     feature = _F.RGB_EFFECTS
     rw_options = {"read_fnid": 0x50, "write_fnid": 0x50}
     choices_universe = common.NamedInts(Device=0, Solaar=1)
-    validator_class = settings.ChoicesValidator
+    validator_class = settings_validator.ChoicesValidator
     validator_options = {"choices": choices_universe, "write_prefix_bytes": b"\x01", "read_skip_byte_count": 1}
 
 
@@ -1723,7 +1725,7 @@ class PerKeyLighting(settings.Settings):
     class rw_class(settings.FeatureRWMap):
         pass
 
-    class validator_class(settings.ChoicesMapValidator):
+    class validator_class(settings_validator.ChoicesMapValidator):
         @classmethod
         def build(cls, setting_class, device):
             choices_map = {}
@@ -1742,7 +1744,7 @@ class PerKeyLighting(settings.Settings):
             return result
 
 
-SETTINGS = [
+SETTINGS: list[settings.Setting] = [
     RegisterHandDetection,  # simple
     RegisterSmoothScroll,  # simple
     RegisterSideScroll,  # simple
