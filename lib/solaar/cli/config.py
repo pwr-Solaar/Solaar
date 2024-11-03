@@ -19,6 +19,7 @@ import yaml
 from logitech_receiver import settings
 from logitech_receiver import settings_templates
 from logitech_receiver.common import NamedInts
+from logitech_receiver.settings_templates import SettingsProtocol
 
 from solaar import configuration
 
@@ -215,7 +216,7 @@ def run(receivers, args, _find_receiver, find_device):
             dev.persister[setting.name] = setting._value
 
 
-def set(dev, setting: settings.Setting, args, save):
+def set(dev, setting: SettingsProtocol, args, save):
     if setting.kind == settings.Kind.TOGGLE:
         value = select_toggle(args.value_key, setting)
         args.value_key = value
