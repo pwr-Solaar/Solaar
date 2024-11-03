@@ -1818,7 +1818,7 @@ class SettingUI(_SettingWithValueUI, ConditionUI):
             _SettingWithValueUI._on_update(self, *_args)
 
 
-COMPONENT_UI = {
+COMPONENT_UI: dict[Any, RuleComponentUI] = {
     diversion.Rule: RuleUI,
     diversion.Not: NotUI,
     diversion.Or: OrUI,
@@ -1843,7 +1843,7 @@ COMPONENT_UI = {
     diversion.MouseClick: rule_actions.MouseClickUI,
     diversion.Execute: rule_actions.ExecuteUI,
     diversion.Set: SetUI,
-    type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
+    # type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
 }
 
 _all_devices = AllDevicesInfo()
