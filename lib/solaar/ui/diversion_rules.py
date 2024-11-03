@@ -35,7 +35,7 @@ from typing import Optional
 from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import Gtk
-from logitech_receiver import diversion as _DIV
+from logitech_receiver import diversion
 from logitech_receiver.common import NamedInt
 from logitech_receiver.common import NamedInts
 from logitech_receiver.common import UnsortedNamedInts
@@ -64,7 +64,7 @@ class RuleComponentWrapper(GObject.GObject):
         GObject.GObject.__init__(self)
 
     def display_left(self):
-        if isinstance(self.component, _DIV.Rule):
+        if isinstance(self.component, diversion.Rule):
             if self.level == 0:
                 return _("Built-in rules") if not self.editable else _("User-defined rules")
             if self.level == 1:
@@ -82,7 +82,7 @@ class RuleComponentWrapper(GObject.GObject):
     def display_icon(self):
         if self.component is None:
             return ""
-        if isinstance(self.component, _DIV.Rule) and self.level == 0:
+        if isinstance(self.component, diversion.Rule) and self.level == 0:
             return "emblem-system" if not self.editable else "avatar-default"
         return self.__component_ui().icon_name()
 
@@ -143,17 +143,17 @@ def _populate_model(
         return
     if editable is None:
         editable = model[it][0].editable if it is not None else False
-        if isinstance(rule_component, _DIV.Rule):
+        if isinstance(rule_component, diversion.Rule):
             editable = editable or (rule_component.source is not None)
     wrapped = RuleComponentWrapper(rule_component, level, editable=editable)
     piter = model.insert(it, pos, (wrapped,))
-    if isinstance(rule_component, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Later)):
+    if isinstance(rule_component, (diversion.Rule, diversion.And, diversion.Or, diversion.Later)):
         for c in rule_component.components:
-            ed = editable or (isinstance(c, _DIV.Rule) and c.source is not None)
+            ed = editable or (isinstance(c, diversion.Rule) and c.source is not None)
             _populate_model(model, piter, c, level + 1, editable=ed)
         if len(rule_component.components) == 0:
             _populate_model(model, piter, None, level + 1, editable=editable)
-    elif isinstance(rule_component, _DIV.Not):
+    elif isinstance(rule_component, diversion.Not):
         _populate_model(model, piter, rule_component.component, level + 1, editable=editable)
 
 
@@ -177,13 +177,13 @@ def allowed_actions(m: Gtk.TreeStore, it: Gtk.TreeIter) -> AllowedActions:
     parent_c = m[parent_it][0].component if wrapped.level > 0 else None
 
     can_wrap = wrapped.editable and wrapped.component is not None and wrapped.level >= 2
-    can_delete = wrapped.editable and not isinstance(parent_c, _DIV.Not) and c is not None and wrapped.level >= 1
-    can_insert = wrapped.editable and not isinstance(parent_c, _DIV.Not) and wrapped.level >= 2
+    can_delete = wrapped.editable and not isinstance(parent_c, diversion.Not) and c is not None and wrapped.level >= 1
+    can_insert = wrapped.editable and not isinstance(parent_c, diversion.Not) and wrapped.level >= 2
     can_insert_only_rule = wrapped.editable and wrapped.level == 1
     can_flatten = (
         wrapped.editable
-        and not isinstance(parent_c, _DIV.Not)
-        and isinstance(c, (_DIV.Rule, _DIV.And, _DIV.Or))
+        and not isinstance(parent_c, diversion.Not)
+        and isinstance(c, (diversion.Rule, diversion.And, diversion.Or))
         and wrapped.level >= 2
         and len(c.components)
     )
@@ -242,7 +242,7 @@ class ActionMenu:
                     p2 = self._menu_paste(m, it, below=True)
                     p2.set_label(_("Paste below"))
                     menu.append(p2)
-            elif enabled_actions.insert_only_rule and isinstance(_rule_component_clipboard, _DIV.Rule):
+            elif enabled_actions.insert_only_rule and isinstance(_rule_component_clipboard, diversion.Rule):
                 p = self._menu_paste(m, it)
                 menu.append(p)
                 if enabled_actions.c is None:
@@ -252,7 +252,7 @@ class ActionMenu:
                     p2 = self._menu_paste(m, it, below=True)
                     p2.set_label(_("Paste rule below"))
                     menu.append(p2)
-            elif enabled_actions.insert_root and isinstance(_rule_component_clipboard, _DIV.Rule):
+            elif enabled_actions.insert_root and isinstance(_rule_component_clipboard, diversion.Rule):
                 p = self._menu_paste(m, m.iter_nth_child(it, 0))
                 p.set_label(_("Paste rule"))
                 menu.append(p)
@@ -296,7 +296,7 @@ class ActionMenu:
         parent_it = m.iter_parent(it)
         parent_c = m[parent_it][0].component
         idx = parent_c.components.index(c)
-        if isinstance(c, _DIV.Not):
+        if isinstance(c, diversion.Not):
             parent_c.components = [*parent_c.components[:idx], c.component, *parent_c.components[idx + 1 :]]
             children = [next(m[it].iterchildren())[0].component]
         else:
@@ -324,8 +324,8 @@ class ActionMenu:
             idx = 0
         else:
             idx = parent_c.components.index(c)
-        if isinstance(new_c, _DIV.Rule) and wrapped.level == 1:
-            new_c.source = _DIV._file_path  # new rules will be saved to the YAML file
+        if isinstance(new_c, diversion.Rule) and wrapped.level == 1:
+            new_c.source = diversion._file_path  # new rules will be saved to the YAML file
         idx += int(below)
         parent_c.components.insert(idx, new_c)
         self._populate_model_func(m, parent_it, new_c, level=wrapped.level, pos=idx)
@@ -334,7 +334,7 @@ class ActionMenu:
             m.remove(it)  # remove placeholder in the end
         new_iter = m.iter_nth_child(parent_it, idx)
         self.tree_view.get_selection().select_iter(new_iter)
-        if isinstance(new_c, (_DIV.Rule, _DIV.And, _DIV.Or, _DIV.Not)):
+        if isinstance(new_c, (diversion.Rule, diversion.And, diversion.Or, diversion.Not)):
             self.tree_view.expand_row(m.get_path(new_iter), True)
 
     def _menu_do_insert_new(self, _mitem, m, it, cls, initial_value, below=False):
@@ -345,37 +345,37 @@ class ActionMenu:
         elements = [
             _("Insert"),
             [
-                (_("Sub-rule"), _DIV.Rule, []),
-                (_("Or"), _DIV.Or, []),
-                (_("And"), _DIV.And, []),
+                (_("Sub-rule"), diversion.Rule, []),
+                (_("Or"), diversion.Or, []),
+                (_("And"), diversion.And, []),
                 [
                     _("Condition"),
                     [
-                        (_("Feature"), _DIV.Feature, rule_conditions.FeatureUI.FEATURES_WITH_DIVERSION[0]),
-                        (_("Report"), _DIV.Report, 0),
-                        (_("Process"), _DIV.Process, ""),
-                        (_("Mouse process"), _DIV.MouseProcess, ""),
-                        (_("Modifiers"), _DIV.Modifiers, []),
-                        (_("Key"), _DIV.Key, ""),
-                        (_("KeyIsDown"), _DIV.KeyIsDown, ""),
-                        (_("Active"), _DIV.Active, ""),
-                        (_("Device"), _DIV.Device, ""),
-                        (_("Host"), _DIV.Host, ""),
-                        (_("Setting"), _DIV.Setting, [None, "", None]),
-                        (_("Test"), _DIV.Test, next(iter(_DIV.TESTS))),
-                        (_("Test bytes"), _DIV.TestBytes, [0, 1, 0]),
-                        (_("Mouse Gesture"), _DIV.MouseGesture, ""),
+                        (_("Feature"), diversion.Feature, rule_conditions.FeatureUI.FEATURES_WITH_DIVERSION[0]),
+                        (_("Report"), diversion.Report, 0),
+                        (_("Process"), diversion.Process, ""),
+                        (_("Mouse process"), diversion.MouseProcess, ""),
+                        (_("Modifiers"), diversion.Modifiers, []),
+                        (_("Key"), diversion.Key, ""),
+                        (_("KeyIsDown"), diversion.KeyIsDown, ""),
+                        (_("Active"), diversion.Active, ""),
+                        (_("Device"), diversion.Device, ""),
+                        (_("Host"), diversion.Host, ""),
+                        (_("Setting"), diversion.Setting, [None, "", None]),
+                        (_("Test"), diversion.Test, next(iter(diversion.TESTS))),
+                        (_("Test bytes"), diversion.TestBytes, [0, 1, 0]),
+                        (_("Mouse Gesture"), diversion.MouseGesture, ""),
                     ],
                 ],
                 [
                     _("Action"),
                     [
-                        (_("Key press"), _DIV.KeyPress, "space"),
-                        (_("Mouse scroll"), _DIV.MouseScroll, [0, 0]),
-                        (_("Mouse click"), _DIV.MouseClick, ["left", 1]),
-                        (_("Set"), _DIV.Set, [None, "", None]),
-                        (_("Execute"), _DIV.Execute, [""]),
-                        (_("Later"), _DIV.Later, [1]),
+                        (_("Key press"), diversion.KeyPress, "space"),
+                        (_("Mouse scroll"), diversion.MouseScroll, [0, 0]),
+                        (_("Mouse click"), diversion.MouseClick, ["left", 1]),
+                        (_("Set"), diversion.Set, [None, "", None]),
+                        (_("Execute"), diversion.Execute, [""]),
+                        (_("Later"), diversion.Later, [1]),
                     ],
                 ],
             ],
@@ -405,7 +405,7 @@ class ActionMenu:
 
     def _menu_create_rule(self, m, it, below=False) -> Gtk.MenuItem:
         menu_create_rule = Gtk.MenuItem(_("Insert new rule"))
-        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, _DIV.Rule, [], below)
+        menu_create_rule.connect("activate", self._menu_do_insert_new, m, it, diversion.Rule, [], below)
         menu_create_rule.show()
         return menu_create_rule
 
@@ -434,14 +434,14 @@ class ActionMenu:
         c = wrapped.component
         parent_it = m.iter_parent(it)
         parent_c = m[parent_it][0].component
-        if isinstance(c, _DIV.Not):  # avoid double negation
+        if isinstance(c, diversion.Not):  # avoid double negation
             self.menu_do_flatten(_mitem, m, it)
             self.tree_view.expand_row(m.get_path(parent_it), True)
-        elif isinstance(parent_c, _DIV.Not):  # avoid double negation
+        elif isinstance(parent_c, diversion.Not):  # avoid double negation
             self.menu_do_flatten(_mitem, m, parent_it)
         else:
             idx = parent_c.components.index(c)
-            self._menu_do_insert_new(_mitem, m, it, _DIV.Not, c, below=True)
+            self._menu_do_insert_new(_mitem, m, it, diversion.Not, c, below=True)
             self.menu_do_delete(_mitem, m, m.iter_nth_child(parent_it, idx))
         self._on_update()
 
@@ -456,7 +456,7 @@ class ActionMenu:
         c = wrapped.component
         parent_it = m.iter_parent(it)
         parent_c = m[parent_it][0].component
-        if isinstance(parent_c, _DIV.Not):
+        if isinstance(parent_c, diversion.Not):
             new_c = cls([c], warn=False)
             parent_c.component = new_c
             m.remove(it)
@@ -475,9 +475,9 @@ class ActionMenu:
         menu_sub_rule = Gtk.MenuItem(_("Sub-rule"))
         menu_and = Gtk.MenuItem(_("And"))
         menu_or = Gtk.MenuItem(_("Or"))
-        menu_sub_rule.connect("activate", self.menu_do_wrap, m, it, _DIV.Rule)
-        menu_and.connect("activate", self.menu_do_wrap, m, it, _DIV.And)
-        menu_or.connect("activate", self.menu_do_wrap, m, it, _DIV.Or)
+        menu_sub_rule.connect("activate", self.menu_do_wrap, m, it, diversion.Rule)
+        menu_and.connect("activate", self.menu_do_wrap, m, it, diversion.And)
+        menu_or.connect("activate", self.menu_do_wrap, m, it, diversion.Or)
         submenu_wrap.append(menu_sub_rule)
         submenu_wrap.append(menu_and)
         submenu_wrap.append(menu_or)
@@ -490,7 +490,7 @@ class ActionMenu:
 
         wrapped = m[it][0]
         c = wrapped.component
-        _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+        _rule_component_clipboard = diversion.RuleComponent().compile(c.data())
 
     def menu_do_cut(self, _mitem, m, it):
         global _rule_component_clipboard
@@ -511,7 +511,7 @@ class ActionMenu:
         c = _rule_component_clipboard
         _rule_component_clipboard = None
         if c:
-            _rule_component_clipboard = _DIV.RuleComponent().compile(c.data())
+            _rule_component_clipboard = diversion.RuleComponent().compile(c.data())
             self._menu_do_insert(_mitem, m, it, new_c=c, below=below)
             self._on_update()
 
@@ -604,13 +604,13 @@ class DiversionDialog:
         self.dirty = False
         for c in self.selected_rule_edit_panel.get_children():
             self.selected_rule_edit_panel.remove(c)
-        _DIV.load_config_rule_file()
+        diversion.load_config_rule_file()
         self.model = self._create_model()
         self.view.set_model(self.model)
         self.view.expand_all()
 
     def _save_yaml_file(self):
-        if _DIV._save_config_rule_file():
+        if diversion._save_config_rule_file():
             self.dirty = False
             self.save_btn.set_sensitive(False)
             self.discard_btn.set_sensitive(False)
@@ -656,10 +656,10 @@ class DiversionDialog:
 
     def _create_model(self):
         model = Gtk.TreeStore(RuleComponentWrapper)
-        if len(_DIV.rules.components) == 1:
+        if len(diversion.rules.components) == 1:
             # only built-in rules - add empty user rule list
-            _DIV.rules.components.insert(0, _DIV.Rule([], source=_DIV._file_path))
-        _populate_model(model, None, _DIV.rules.components)
+            diversion.rules.components.insert(0, diversion.Rule([], source=diversion._file_path))
+        _populate_model(model, None, diversion.rules.components)
         return model
 
     def _create_view_columns(self):
@@ -725,7 +725,7 @@ class DiversionDialog:
                 )
             elif (
                 enabled_actions.insert_only_rule
-                and isinstance(_rule_component_clipboard, _DIV.Rule)
+                and isinstance(_rule_component_clipboard, diversion.Rule)
                 and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
             ):
                 self._action_menu.menu_do_paste(
@@ -733,7 +733,7 @@ class DiversionDialog:
                 )
             elif (
                 enabled_actions.insert_root
-                and isinstance(_rule_component_clipboard, _DIV.Rule)
+                and isinstance(_rule_component_clipboard, diversion.Rule)
                 and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
             ):
                 self._action_menu.menu_do_paste(None, m, m.iter_nth_child(it, 0))
@@ -760,11 +760,11 @@ class DiversionDialog:
                 if e.keyval == Gdk.KEY_exclam:
                     self._action_menu.menu_do_negate(None, m, it)
                 elif e.keyval == Gdk.KEY_ampersand:
-                    self._action_menu.menu_do_wrap(None, m, it, _DIV.And)
+                    self._action_menu.menu_do_wrap(None, m, it, diversion.And)
                 elif e.keyval == Gdk.KEY_bar:
-                    self._action_menu.menu_do_wrap(None, m, it, _DIV.Or)
+                    self._action_menu.menu_do_wrap(None, m, it, diversion.Or)
                 elif e.keyval in [Gdk.KEY_r, Gdk.KEY_R] and (state & Gdk.ModifierType.SHIFT_MASK):
-                    self._action_menu.menu_do_wrap(None, m, it, _DIV.Rule)
+                    self._action_menu.menu_do_wrap(None, m, it, diversion.Rule)
             if enabled_actions.flatten and e.keyval in [Gdk.KEY_asterisk, Gdk.KEY_KP_Multiply]:
                 self._action_menu.menu_do_flatten(None, m, it)
 
@@ -1076,7 +1076,7 @@ class UnsupportedRuleComponentUI(RuleComponentUI):
 
 
 class RuleUI(RuleComponentUI):
-    CLASS = _DIV.Rule
+    CLASS = diversion.Rule
 
     def create_widgets(self):
         self.widgets = {}
@@ -1094,7 +1094,7 @@ class RuleUI(RuleComponentUI):
 
 
 class AndUI(RuleComponentUI):
-    CLASS = _DIV.And
+    CLASS = diversion.And
 
     def create_widgets(self):
         self.widgets = {}
@@ -1108,7 +1108,7 @@ class AndUI(RuleComponentUI):
 
 
 class OrUI(RuleComponentUI):
-    CLASS = _DIV.Or
+    CLASS = diversion.Or
 
     def create_widgets(self):
         self.widgets = {}
@@ -1122,7 +1122,7 @@ class OrUI(RuleComponentUI):
 
 
 class LaterUI(RuleComponentUI):
-    CLASS = _DIV.Later
+    CLASS = diversion.Later
     MIN_VALUE = 0.01
     MAX_VALUE = 100
 
@@ -1157,7 +1157,7 @@ class LaterUI(RuleComponentUI):
 
 
 class NotUI(RuleComponentUI):
-    CLASS = _DIV.Not
+    CLASS = diversion.Not
 
     def create_widgets(self):
         self.widgets = {}
@@ -1171,7 +1171,7 @@ class NotUI(RuleComponentUI):
 
 
 class ActionUI(RuleComponentUI):
-    CLASS = _DIV.Action
+    CLASS = diversion.Action
 
     @classmethod
     def icon_name(cls):
@@ -1335,9 +1335,9 @@ class SetValueControl(Gtk.HBox):
         self.unsupported_label.show()
 
 
-def _all_settings():
+def create_all_settings(all_settings: list[Setting]) -> dict[str, Setting]:
     settings = {}
-    for s in sorted(SETTINGS, key=lambda setting: setting.label):
+    for s in sorted(all_settings, key=lambda setting: setting.label):
         if s.name not in settings:
             settings[s.name] = [s]
         else:
@@ -1406,7 +1406,7 @@ class _DeviceUI:
 
 
 class ActiveUI(_DeviceUI, ConditionUI):
-    CLASS = _DIV.Active
+    CLASS = diversion.Active
     label_text = _("Device is active and its settings can be changed.")
 
     @classmethod
@@ -1415,7 +1415,7 @@ class ActiveUI(_DeviceUI, ConditionUI):
 
 
 class DeviceUI(_DeviceUI, ConditionUI):
-    CLASS = _DIV.Device
+    CLASS = diversion.Device
     label_text = _("Device that originated the current notification.")
 
     @classmethod
@@ -1424,7 +1424,7 @@ class DeviceUI(_DeviceUI, ConditionUI):
 
 
 class HostUI(ConditionUI):
-    CLASS = _DIV.Host
+    CLASS = diversion.Host
 
     def create_widgets(self):
         self.widgets = {}
@@ -1454,7 +1454,7 @@ class HostUI(ConditionUI):
 
 
 class _SettingWithValueUI:
-    ALL_SETTINGS = _all_settings()
+    ALL_SETTINGS = create_all_settings(SETTINGS)
     MULTIPLE = [Kind.MULTIPLE_TOGGLE, Kind.MAP_CHOICE, Kind.MULTIPLE_RANGE]
     ACCEPT_TOGGLE = True
 
@@ -1785,7 +1785,7 @@ class _SettingWithValueUI:
 
 
 class SetUI(_SettingWithValueUI, ActionUI):
-    CLASS = _DIV.Set
+    CLASS = diversion.Set
     ACCEPT_TOGGLE = True
 
     label_text = _("Change setting on device")
@@ -1801,7 +1801,7 @@ class SetUI(_SettingWithValueUI, ActionUI):
 
 
 class SettingUI(_SettingWithValueUI, ConditionUI):
-    CLASS = _DIV.Setting
+    CLASS = diversion.Setting
     ACCEPT_TOGGLE = False
 
     label_text = _("Setting on device")
@@ -1817,30 +1817,30 @@ class SettingUI(_SettingWithValueUI, ConditionUI):
 
 
 COMPONENT_UI = {
-    _DIV.Rule: RuleUI,
-    _DIV.Not: NotUI,
-    _DIV.Or: OrUI,
-    _DIV.And: AndUI,
-    _DIV.Later: LaterUI,
-    _DIV.Process: rule_conditions.ProcessUI,
-    _DIV.MouseProcess: rule_conditions.MouseProcessUI,
-    _DIV.Active: ActiveUI,
-    _DIV.Device: DeviceUI,
-    _DIV.Host: HostUI,
-    _DIV.Feature: rule_conditions.FeatureUI,
-    _DIV.Report: rule_conditions.ReportUI,
-    _DIV.Modifiers: rule_conditions.ModifiersUI,
-    _DIV.Key: rule_conditions.KeyUI,
-    _DIV.KeyIsDown: rule_conditions.KeyIsDownUI,
-    _DIV.Test: rule_conditions.TestUI,
-    _DIV.TestBytes: rule_conditions.TestBytesUI,
-    _DIV.Setting: SettingUI,
-    _DIV.MouseGesture: rule_conditions.MouseGestureUI,
-    _DIV.KeyPress: rule_actions.KeyPressUI,
-    _DIV.MouseScroll: rule_actions.MouseScrollUI,
-    _DIV.MouseClick: rule_actions.MouseClickUI,
-    _DIV.Execute: rule_actions.ExecuteUI,
-    _DIV.Set: SetUI,
+    diversion.Rule: RuleUI,
+    diversion.Not: NotUI,
+    diversion.Or: OrUI,
+    diversion.And: AndUI,
+    diversion.Later: LaterUI,
+    diversion.Process: rule_conditions.ProcessUI,
+    diversion.MouseProcess: rule_conditions.MouseProcessUI,
+    diversion.Active: ActiveUI,
+    diversion.Device: DeviceUI,
+    diversion.Host: HostUI,
+    diversion.Feature: rule_conditions.FeatureUI,
+    diversion.Report: rule_conditions.ReportUI,
+    diversion.Modifiers: rule_conditions.ModifiersUI,
+    diversion.Key: rule_conditions.KeyUI,
+    diversion.KeyIsDown: rule_conditions.KeyIsDownUI,
+    diversion.Test: rule_conditions.TestUI,
+    diversion.TestBytes: rule_conditions.TestBytesUI,
+    diversion.Setting: SettingUI,
+    diversion.MouseGesture: rule_conditions.MouseGestureUI,
+    diversion.KeyPress: rule_actions.KeyPressUI,
+    diversion.MouseScroll: rule_actions.MouseScrollUI,
+    diversion.MouseClick: rule_actions.MouseClickUI,
+    diversion.Execute: rule_actions.ExecuteUI,
+    diversion.Set: SetUI,
     type(None): RuleComponentUI,  # placeholders for empty rule/And/Or
 }
 
