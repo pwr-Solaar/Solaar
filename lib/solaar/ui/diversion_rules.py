@@ -56,6 +56,28 @@ _diversion_dialog = None
 _rule_component_clipboard = None
 
 
+def create_all_settings(all_settings: list[Setting]) -> dict[str, list[Setting]]:
+    settings = {}
+    for s in sorted(all_settings, key=lambda setting: setting.label):
+        if s.name not in settings:
+            settings[s.name] = [s]
+        else:
+            prev_setting = settings[s.name][0]
+            prev_kind = prev_setting.validator_class.kind
+            if prev_kind != s.validator_class.kind:
+                logger.warning(
+                    "ignoring setting {} - same name of {}, but different kind ({} != {})".format(
+                        s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
+                    )
+                )
+                continue
+            settings[s.name].append(s)
+    return settings
+
+
+ALL_SETTINGS = create_all_settings(SETTINGS)
+
+
 class RuleComponentWrapper(GObject.GObject):
     def __init__(self, component, level=0, editable=False):
         self.component = component
@@ -1335,25 +1357,6 @@ class SetValueControl(Gtk.HBox):
         self.unsupported_label.show()
 
 
-def create_all_settings(all_settings: list[Setting]) -> dict[str, Setting]:
-    settings = {}
-    for s in sorted(all_settings, key=lambda setting: setting.label):
-        if s.name not in settings:
-            settings[s.name] = [s]
-        else:
-            prev_setting = settings[s.name][0]
-            prev_kind = prev_setting.validator_class.kind
-            if prev_kind != s.validator_class.kind:
-                logger.warning(
-                    "ignoring setting {} - same name of {}, but different kind ({} != {})".format(
-                        s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
-                    )
-                )
-                continue
-            settings[s.name].append(s)
-    return settings
-
-
 class _DeviceUI:
     label_text = ""
 
@@ -1454,7 +1457,6 @@ class HostUI(ConditionUI):
 
 
 class _SettingWithValueUI:
-    ALL_SETTINGS = create_all_settings(SETTINGS)
     MULTIPLE = [Kind.MULTIPLE_TOGGLE, Kind.MAP_CHOICE, Kind.MULTIPLE_RANGE]
     ACCEPT_TOGGLE = True
 
@@ -1493,7 +1495,7 @@ class _SettingWithValueUI:
             vexpand=False,
         )
         self.widgets[lbl] = (0, 2, 1, 1)
-        self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in self.ALL_SETTINGS.values()])
+        self.setting_field = SmartComboBox([(s[0].name, s[0].label) for s in ALL_SETTINGS.values()])
         self.setting_field.set_valign(Gtk.Align.CENTER)
         self.setting_field.connect("changed", self._changed_setting)
         self.setting_field.connect("changed", self._on_update)
@@ -1546,7 +1548,7 @@ class _SettingWithValueUI:
             if extra is not None:
                 choices |= NamedInts(**{str(extra): int(extra)})
             return choices, extra
-        settings = cls.ALL_SETTINGS.get(setting, [])
+        settings = ALL_SETTINGS.get(setting, [])
         choices = UnsortedNamedInts()
         extra = None
         for s in settings:
@@ -1562,7 +1564,7 @@ class _SettingWithValueUI:
             setting = device.settings.get(setting_name, None)
             settings = [type(setting)] if setting else None
         else:
-            settings = cls.ALL_SETTINGS.get(setting_name, [None])
+            settings = ALL_SETTINGS.get(setting_name, [None])
             setting = settings[0]  # if settings have the same name, use the first one to get the basic data
         val_class = setting.validator_class if setting else None
         kind = val_class.kind if val_class else None
