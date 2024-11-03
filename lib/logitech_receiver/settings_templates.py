@@ -1911,15 +1911,20 @@ def check_feature(device, settings_class: SettingsProtocol) -> None | bool | Any
         return False  # differentiate from an error-free determination that the setting is not supported
 
 
-# Returns True if device was queried to find features, False otherwise
-def check_feature_settings(device, already_known):
-    """Auto-detect device settings by the HID++ 2.0 features they have."""
+def check_feature_settings(device, already_known) -> bool:
+    """Auto-detect device settings by the HID++ 2.0 features they have.
+
+    Returns
+    -------
+    bool
+        True, if device was queried to find features, False otherwise.
+    """
     if not device.features or not device.online:
         return False
     if device.protocol and device.protocol < 2.0:
         return False
     absent = device.persister.get("_absent", []) if device.persister else []
-    newAbsent = []
+    new_absent = []
     for sclass in SETTINGS:
         if sclass.feature:
             known_present = device.persister and sclass.name in device.persister
@@ -1928,22 +1933,22 @@ def check_feature_settings(device, already_known):
                 if isinstance(setting, list):
                     for s in setting:
                         already_known.append(s)
-                    if sclass.name in newAbsent:
-                        newAbsent.remove(sclass.name)
+                    if sclass.name in new_absent:
+                        new_absent.remove(sclass.name)
                 elif setting:
                     already_known.append(setting)
-                    if sclass.name in newAbsent:
-                        newAbsent.remove(sclass.name)
+                    if sclass.name in new_absent:
+                        new_absent.remove(sclass.name)
                 elif setting is None:
-                    if sclass.name not in newAbsent and sclass.name not in absent and sclass.name not in device.persister:
-                        newAbsent.append(sclass.name)
-    if device.persister and newAbsent:
-        absent.extend(newAbsent)
+                    if sclass.name not in new_absent and sclass.name not in absent and sclass.name not in device.persister:
+                        new_absent.append(sclass.name)
+    if device.persister and new_absent:
+        absent.extend(new_absent)
         device.persister["_absent"] = absent
     return True
 
 
-def check_feature_setting(device, setting_name):
+def check_feature_setting(device, setting_name) -> settings.Setting | None:
     for sclass in SETTINGS:
         if sclass.feature and sclass.name == setting_name and device.features:
             setting = check_feature(device, sclass)
